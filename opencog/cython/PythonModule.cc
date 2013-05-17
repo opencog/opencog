@@ -43,7 +43,6 @@ Request* PythonRequestFactory::create() const
 {
     logger().info() << "Creating python request " << pySrcModuleName << "." << pyClassName;
     PyRequest* pma = new PyRequest(pySrcModuleName, pyClassName);
-    pma->execute();
     return pma;
 }
 
@@ -60,6 +59,11 @@ PythonModule::~PythonModule()
     logger().info("[PythonModule] destructor");
     unregisterAgentsAndRequests();
     do_load_py_unregister();
+
+    // PyFinalize crashes unless we carefully restore stuff...
+    PyEval_AcquireLock();
+    PyThreadState_Swap(_mainstate);
+    PyErr_Clear();
     Py_Finalize();
     already_loaded = false;
 }
@@ -67,11 +71,11 @@ PythonModule::~PythonModule()
 bool PythonModule::unregisterAgentsAndRequests()
 {
     // Requires GIL
-    foreach (std::string s, agentNames) {
+    foreach (std::string s, _agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
         cogserver().unregisterAgent(s);
     }
-    foreach (std::string s, requestNames) {
+    foreach (std::string s, _requestNames) {
         DPRINTF("Unregistering requests of id %s\n", s.c_str());
         cogserver().unregisterRequest(s);
     }
@@ -88,10 +92,15 @@ void PythonModule::init()
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
-    if(!Py_IsInitialized())
+    if (!Py_IsInitialized())
         Py_InitializeEx(0);
-    if(!PyEval_ThreadsInitialized())
+    if (!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
+        // Without this, pyFinalize() crashes
+        _mainstate = PyThreadState_Get();
+        // Without this, pyshell hangs and does nothing.
+        PyEval_ReleaseLock();
+    }
 
     // Add our module directories to the Python interprator's path
     const char** config_paths = DEFAULT_PYTHON_MODULE_PATHS;
@@ -103,8 +112,6 @@ void PythonModule::init()
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath))
             PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-        //            applier.addSysPath(modulePath.string());
-
     }
 
     // Add custom paths for python modules from the config file if available
@@ -117,9 +124,8 @@ void PythonModule::init()
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
                 PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
-                //                applier.addSysPath(modulePath.string());
             } else {
-                logger().error("PythonEval::%s Could not find custom python extension directory: %s ",
+                logger().warn("PythonEval::%s Could not find custom python extension directory: %s ",
                                __FUNCTION__,
                                (*it).c_str()
                                );
@@ -127,16 +133,12 @@ void PythonModule::init()
         }
     }
 
-
     if (import_agent_finder() == -1) {
         PyErr_Print();
-        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
+        logger().error() << "[PythonModule] Failed to load helper python module";
+        return;
     }
-    // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
-
-
-    PythonEval& applier = PythonEval::instance();
 
     if (config().has("PYTHON_PRELOAD")) preloadModules();
     do_load_py_register();
@@ -159,26 +161,35 @@ bool PythonModule::preloadModules()
     return true;
 }
 
+/// do_load_py -- load python code, given a file name. (Implements the loadpy command)
+///
+/// It is expected that the file contains a python module. The module
+/// should implement either a mind-agent, or it should contain a 'request'
+/// (shell command, written in python). Mind agents must inherit from
+/// the python class opencog.cogserver.MindAgent, while requests/commnds
+/// must inherit from opencog.cogserver.Request
+//
 std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args)
 {
-    //AtomSpace *space = CogServer::getAtomSpace();
     if (args.size() == 0) return "Please specify Python module to load.";
-    requests_and_agents_t thingsInModule;
     std::string moduleName = args.front();
+
     std::ostringstream oss;
     if (moduleName.substr(moduleName.size()-3,3) == ".py") {
         oss << "Warning: Python module name should be "
             << "passed without .py extension" << std::endl;
         moduleName.replace(moduleName.size()-3,3,"");
     }
-    thingsInModule = load_module(moduleName);
+
+    requests_and_agents_t thingsInModule = load_module(moduleName);
     if (thingsInModule.err_string.size() > 0) {
         return thingsInModule.err_string;
     }
+
+    // If there are agents, load them.
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
-        DPRINTF("Python MindAgents found: ");
         foreach(std::string s, thingsInModule.agents) {
             if (!first) {
                 oss << ", ";
@@ -194,20 +205,18 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             cogserver().registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
 
             // save a list of Python agents that we've added to the CogServer
-            agentNames.push_back(dottedName);
+            _agentNames.push_back(dottedName);
             oss << s;
-            DPRINTF("%s ", s.c_str());
         }
         oss << "." << std::endl;
-        DPRINTF("\n");
     } else {
         oss << "No subclasses of opencog.cogserver.MindAgent found.\n";
-        DPRINTF("No subclasses of opencog.cogserver.MindAgent found.\n");
     }
+
+    // Now load the commands/requests, if any.
     if (thingsInModule.requests.size() > 0) {
         bool first = true;
         oss << "Python Requests found: ";
-        DPRINTF("Python Requests found: ");
         foreach(std::string s, thingsInModule.requests) {
             if (!first) {
                 oss << ", ";
@@ -219,17 +228,16 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // register the agent with a custom factory that knows how to
             cogserver().registerRequest(dottedName, new PythonRequestFactory(moduleName,s));
             // save a list of Python agents that we've added to the CogServer
-            requestNames.push_back(dottedName);
+            _requestNames.push_back(dottedName);
             oss << s;
-            DPRINTF("%s ", s.c_str());
         }
         oss << ".";
     } else {
         oss << "No subclasses of opencog.cogserver.Request found.\n";
-        DPRINTF("No subclasses of opencog.cogserver.Request found.\n");
     }
 
-    // return info on what requests and mindagents were found
+    // Return info on what requests and mindagents were found
+    // This gets printed out to the user at the shell prompt.
     return oss.str();
 }
 
