@@ -31,9 +31,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
 
-#include <opencog/server/Agent.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/server/Request.h>
 
 #include "PythonEval.h"
 #include "agent_finder_types.h"
