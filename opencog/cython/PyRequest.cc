@@ -37,7 +37,6 @@ PyRequest::~PyRequest()
     // decrement python object reference counter
     Py_DECREF(_pyrequest);
     PyGILState_Release(gstate); 
-    delete _cci;
 }
 
 bool PyRequest::execute()
