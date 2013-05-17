@@ -82,8 +82,22 @@ cdef api requests_and_agents_t load_req_agent_module(string& module_name) with g
         results.agents.push_back(string(a[0]))
     for r in request_classes:
         results.requests.push_back(string(r[0]))
-        results.req_summary.push_back(string("Replace with a short summary"))
-        results.req_description.push_back(string("Replace with a long description"))
+
+        # Every request should have a summary and a description of what it does.
+        summy = ""
+        try :
+            summy = r[1].summary
+        except Exception, e:
+            summy = "Command summary is missing in the python code!"
+        results.req_summary.push_back(string(summy))
+
+        desc = ""
+        try :
+            desc = r[1].description
+        except Exception, e:
+            desc = "Command description is missing in the python code!"
+        results.req_description.push_back(string(desc))
+
     return results
 
 from opencog.cogserver cimport MindAgent
