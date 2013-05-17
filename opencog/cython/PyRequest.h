@@ -40,20 +40,18 @@ class PyRequest : public Request
 {
 
 protected:
-    PyObject* pyrequest;
-    std::string moduleName;
-    std::string className;
-    std::string last_result;
-    RequestClassInfo* cci;
+    PyObject* _pyrequest;
+    std::string _moduleName;
+    std::string _className;
+    std::string _last_result;
+    RequestClassInfo* _cci;
 
 public:
 
-    const RequestClassInfo& info() const {
-        return *cci;
-    }
+    const RequestClassInfo& info() const { return *_cci; }
 
     /** Request's constructor */
-    PyRequest(const std::string& _moduleName, const std::string& _className);
+    PyRequest(const std::string& moduleName, const std::string& className);
 
     /** Request's desconstructor */
     virtual ~PyRequest();
@@ -61,7 +59,7 @@ public:
     /**  Returns 'true' if the command completed successfully and 'false' otherwise. */
     virtual bool execute(void);
 
-    /** Not a shell */
+    /** Not a shell Oh relly? IPython is a shell ...! XXX FIXME */
     virtual bool isShell(void) { return false; }
 
 };

@@ -48,13 +48,13 @@ cdef api string get_path_as_string() with gil:
     cdef bytes c_str = str(sys.path)
     return string(c_str)
 
-cdef api requests_and_agents_t load_module(string& module_name) with gil:
+cdef api requests_and_agents_t load_req_agent_module(string& module_name) with gil:
     """ Load module and return a vector of MindAgent names """
     cdef bytes c_str = module_name.c_str()
     # for return results
     cdef requests_and_agents_t results
     try:
-        filep,pathname,desc = imp.find_module(c_str)
+        filep, pathname, desc = imp.find_module(c_str)
     except Exception, e:
         s = "Exception while searching for module " + c_str + "\n"
         s = traceback.format_exc(10)
@@ -63,7 +63,7 @@ cdef api requests_and_agents_t load_module(string& module_name) with gil:
     agent_classes = []
     request_classes = []
     try:
-        the_module = imp.load_module(c_str,filep,pathname,desc)
+        the_module = imp.load_module(c_str, filep, pathname, desc)
         # now we need to scan the module for subclasses of MindAgent
         # each entry is a tuple with ("ClassName", <classobject>)
         agent_classes = find_subclasses(the_module,opencog.cogserver.MindAgent)
@@ -125,8 +125,8 @@ cdef api object instantiate_request(string module_name, string r_name, cRequest 
     cdef Request request = None
     try:
         # find and load the module
-        filep,pathname,desc = imp.find_module(module_str)
-        the_module = imp.load_module(module_str,filep,pathname,desc)
+        filep, pathname, desc = imp.find_module(module_str)
+        the_module = imp.load_module(module_str, filep, pathname, desc)
         # get the class object
         rClass = getattr(the_module, request_str) 
         # instantiate it
@@ -140,7 +140,7 @@ cdef api object instantiate_request(string module_name, string r_name, cRequest 
         if filep: filep.close()
     return request
 
-cdef api string run_request(object o,cpplist[string] args,cAtomSpace *c_atomspace) with gil:
+cdef api string run_request(object o, cpplist[string] args, cAtomSpace *c_atomspace) with gil:
     cdef string result
     cdef bytes tostring 
     cdef cpplist[string].iterator the_iter

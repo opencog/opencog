@@ -181,7 +181,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
         moduleName.replace(moduleName.size()-3,3,"");
     }
 
-    requests_and_agents_t thingsInModule = load_module(moduleName);
+    requests_and_agents_t thingsInModule = load_req_agent_module(moduleName);
     if (thingsInModule.err_string.size() > 0) {
         return thingsInModule.err_string;
     }
