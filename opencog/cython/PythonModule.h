@@ -28,47 +28,49 @@ class PythonAgentFactory : public AbstractFactory<Agent>
 {
     // Store the name of the python module and class so that we can instantiate
     // them
-    std::string pySrcModuleName;
-    std::string pyClassName;
-    ClassInfo* ci;
+    std::string _pySrcModuleName;
+    std::string _pyClassName;
+    ClassInfo* _ci;
 public:
-    explicit PythonAgentFactory(std::string& module, std::string& clazz) : AbstractFactory<Agent>() {
-        pySrcModuleName = module;
-        pyClassName = clazz;
-        ci = new ClassInfo("opencog::PyMindAgent(" + module + "." + clazz + ")");
+    explicit PythonAgentFactory(std::string& module, std::string& clazz)
+      : AbstractFactory<Agent>()
+    {
+        _pySrcModuleName = module;
+        _pyClassName = clazz;
+        _ci = new ClassInfo("opencog::PyMindAgent(" + module + "." + clazz + ")");
     }
-    virtual ~PythonAgentFactory() {
-        delete ci;
+    virtual ~PythonAgentFactory()
+    {
+        delete _ci;
     }
     virtual Agent* create() const;
-    virtual const ClassInfo& info() const { return *ci; }
+    virtual const ClassInfo& info() const { return *_ci; }
 };
 
 class PythonRequestFactory : public AbstractFactory<Request>
 {
     // Store the name of the python module and class so that we can instantiate
     // them
-    std::string pySrcModuleName;
-    std::string pyClassName;
-    RequestClassInfo* cci;
+    std::string _pySrcModuleName;
+    std::string _pyClassName;
+    RequestClassInfo* _cci;
 public:
-    const ClassInfo& info() const {
-        // TODO, allow this stuff to come from the Python file...
-        return *cci;
+    explicit PythonRequestFactory(std::string& module, const std::string& clazz, 
+                                  const std::string& short_desc, 
+                                  const std::string& long_desc)
+       : AbstractFactory<Request>()
+    {
+        _pySrcModuleName = module;
+        _pyClassName = clazz;
+        _cci = new RequestClassInfo(
+              _pySrcModuleName + _pyClassName, short_desc, long_desc);
     }
-    explicit PythonRequestFactory(std::string& module, std::string& clazz) : AbstractFactory<Request>() {
-        pySrcModuleName = module;
-        pyClassName = clazz;
-        cci = new RequestClassInfo(
-              pySrcModuleName + pyClassName,
-              "Replace this text with a short summary.",  // TODO see above.
-              "Please supply a long description including parameter types."
-        );
-    }
-    virtual ~PythonRequestFactory() {
-        delete cci;
+    virtual ~PythonRequestFactory()
+    {
+        delete _cci;
     }
     virtual Request* create() const;
+    virtual const ClassInfo& info() const { return *_cci; }
 };
 
 class PythonModule : public Module

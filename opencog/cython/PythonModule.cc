@@ -34,15 +34,15 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 
 Agent* PythonAgentFactory::create() const
 {
-    logger().info() << "Creating python agent " << pySrcModuleName << "." << pyClassName;
-    PyMindAgent* pma = new PyMindAgent(pySrcModuleName, pyClassName);
+    logger().info() << "Creating python agent " << _pySrcModuleName << "." << _pyClassName;
+    PyMindAgent* pma = new PyMindAgent(_pySrcModuleName, _pyClassName);
     return pma;
 }
 
 Request* PythonRequestFactory::create() const
 {
-    logger().info() << "Creating python request " << pySrcModuleName << "." << pyClassName;
-    PyRequest* pma = new PyRequest(pySrcModuleName, pyClassName);
+    logger().info() << "Creating python request " << _pySrcModuleName << "." << _pyClassName;
+    PyRequest* pma = new PyRequest(_pySrcModuleName, _pyClassName);
     return pma;
 }
 
@@ -222,11 +222,19 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
                 oss << ", ";
                 first = false;
             }
-            // CogServer requests in Python
+
+            // Short and long descriptions of the command
+            std::string short_desc = 
+                "Replace this text with a short summary.";
+            std::string long_desc = 
+                "Please supply a long description including parameter types.";
+
+            // CogServer commands in Python
             // Register request with cogserver using dotted name: module.RequestName
             std::string dottedName = moduleName + "." + s;
             // register the agent with a custom factory that knows how to
-            cogserver().registerRequest(dottedName, new PythonRequestFactory(moduleName,s));
+            cogserver().registerRequest(dottedName, 
+                new PythonRequestFactory(moduleName, s, short_desc, long_desc));
             // save a list of Python agents that we've added to the CogServer
             _requestNames.push_back(dottedName);
             oss << s;
