@@ -74,9 +74,14 @@ public:
 class PythonModule : public Module
 {
     DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py,
-       "Load requests and MindAgents from a python module",
-       "Usage: load_py module_name\n\n"
-       "Loads and registers all request classes and all MindAgents with the CogServer",
+       "Load commands and MindAgents from a python module",
+       "Usage: load_py file_name\n\n"
+       "Load commands and MindAgents, written in python, from a file."
+       "After loading, commands will appear in the list of available "
+       "commands (use 'h' to list).  Commands must be implemented as "
+       "python modules, inheritiing from the class opencog.cogserver.Request. "
+       "Likewise, mind agents must inherit from opencog.cogserver.MindAgent. "
+       "The loaded agents can be viewed with the 'agents-list' command.",
        false, false);
 
 private:

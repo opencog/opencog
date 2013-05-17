@@ -135,7 +135,6 @@ void PythonModule::init()
     // For debugging the python path:
     logger().debug("Python sys.path is: " + get_path_as_string());
 
-
     PythonEval& applier = PythonEval::instance();
 
     if (config().has("PYTHON_PRELOAD")) preloadModules();
@@ -159,26 +158,35 @@ bool PythonModule::preloadModules()
     return true;
 }
 
+/// do_load_py -- load python code, given a file name. (Implements the loadpy command)
+///
+/// It is expected that the file contains a python module. The module
+/// should implement either a mind-agent, or it should contain a 'request'
+/// (shell command, written in python). Mind agents must inherit from
+/// the python class opencog.cogserver.MindAgent, while requests/commnds
+/// must inherit from opencog.cogserver.Request
+//
 std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args)
 {
-    //AtomSpace *space = CogServer::getAtomSpace();
     if (args.size() == 0) return "Please specify Python module to load.";
-    requests_and_agents_t thingsInModule;
     std::string moduleName = args.front();
+
     std::ostringstream oss;
     if (moduleName.substr(moduleName.size()-3,3) == ".py") {
         oss << "Warning: Python module name should be "
             << "passed without .py extension" << std::endl;
         moduleName.replace(moduleName.size()-3,3,"");
     }
-    thingsInModule = load_module(moduleName);
+
+    requests_and_agents_t thingsInModule = load_module(moduleName);
     if (thingsInModule.err_string.size() > 0) {
         return thingsInModule.err_string;
     }
+
+    // If there are agents, load them.
     if (thingsInModule.agents.size() > 0) {
         bool first = true;
         oss << "Python MindAgents found: ";
-        DPRINTF("Python MindAgents found: ");
         foreach(std::string s, thingsInModule.agents) {
             if (!first) {
                 oss << ", ";
@@ -196,18 +204,16 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // save a list of Python agents that we've added to the CogServer
             agentNames.push_back(dottedName);
             oss << s;
-            DPRINTF("%s ", s.c_str());
         }
         oss << "." << std::endl;
-        DPRINTF("\n");
     } else {
         oss << "No subclasses of opencog.cogserver.MindAgent found.\n";
-        DPRINTF("No subclasses of opencog.cogserver.MindAgent found.\n");
     }
+
+    // Now load the commands/requests, if any.
     if (thingsInModule.requests.size() > 0) {
         bool first = true;
         oss << "Python Requests found: ";
-        DPRINTF("Python Requests found: ");
         foreach(std::string s, thingsInModule.requests) {
             if (!first) {
                 oss << ", ";
@@ -221,15 +227,14 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // save a list of Python agents that we've added to the CogServer
             requestNames.push_back(dottedName);
             oss << s;
-            DPRINTF("%s ", s.c_str());
         }
         oss << ".";
     } else {
         oss << "No subclasses of opencog.cogserver.Request found.\n";
-        DPRINTF("No subclasses of opencog.cogserver.Request found.\n");
     }
 
-    // return info on what requests and mindagents were found
+    // Return info on what requests and mindagents were found
+    // This gets printed out to the user at the shell prompt.
     return oss.str();
 }
 
