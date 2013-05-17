@@ -18,6 +18,7 @@ class shell(opencog.cogserver.Request):
         "accessed as 'space' or 'a'; thus, for example: \n\n" \
         "\th = a.add_node(t.ConceptNode, \"Hello, World!\")\n\tprint h\n\n" \
         "Use ctrl-D to exit the shell."
+    is_shell = True
 
     def run(self,args,atomspace):
         self.run_shell(atomspace)

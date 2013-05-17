@@ -7,14 +7,10 @@
 
 using namespace opencog;
 
-PyRequest::PyRequest(const std::string& moduleName, const std::string& className)
+PyRequest::PyRequest(const std::string& moduleName, const std::string& className,
+                    RequestClassInfo* cci)
 {
-    // XXX TODO FIXME -- obtain the request description from the python code.
-    _cci = new RequestClassInfo(
-          moduleName + className,
-          "Some request implemented in python. TODO provide short description.",
-          "TODO provide a long description including parameter types."
-    );
+    _cci = cci;
 
     PyGILState_STATE gstate = PyGILState_Ensure(); 
 

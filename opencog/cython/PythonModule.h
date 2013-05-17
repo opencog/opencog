@@ -57,13 +57,14 @@ class PythonRequestFactory : public AbstractFactory<Request>
 public:
     explicit PythonRequestFactory(std::string& module, const std::string& clazz, 
                                   const std::string& short_desc, 
-                                  const std::string& long_desc)
+                                  const std::string& long_desc,
+                                  bool is_shell)
        : AbstractFactory<Request>()
     {
         _pySrcModuleName = module;
         _pyClassName = clazz;
         _cci = new RequestClassInfo(
-              _pySrcModuleName + _pyClassName, short_desc, long_desc);
+              _pySrcModuleName + _pyClassName, short_desc, long_desc, is_shell);
     }
     virtual ~PythonRequestFactory()
     {

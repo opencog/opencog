@@ -39,6 +39,7 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[string] requests
         vector[string] req_summary
         vector[string] req_description
+        vector[bool] req_is_shell
         string err_string 
 
 cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
@@ -97,6 +98,13 @@ cdef api requests_and_agents_t load_req_agent_module(string& module_name) with g
         except Exception, e:
             desc = "Command description is missing in the python code!"
         results.req_description.push_back(string(desc))
+
+        is_shell = False
+        try :
+            is_shell = r[1].is_shell
+        except Exception, e:
+            is_shell = False
+        results.req_is_shell.push_back(is_shell)
 
     return results
 

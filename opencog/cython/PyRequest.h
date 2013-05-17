@@ -51,7 +51,8 @@ public:
     const RequestClassInfo& info() const { return *_cci; }
 
     /** Request's constructor */
-    PyRequest(const std::string& moduleName, const std::string& className);
+    PyRequest(const std::string& moduleName, const std::string& className,
+              RequestClassInfo*);
 
     /** Request's desconstructor */
     virtual ~PyRequest();
@@ -59,8 +60,7 @@ public:
     /**  Returns 'true' if the command completed successfully and 'false' otherwise. */
     virtual bool execute(void);
 
-    /** Not a shell Oh relly? IPython is a shell ...! XXX FIXME */
-    virtual bool isShell(void) { return false; }
+    virtual bool isShell(void) { return info().is_shell; }
 
 };
 
