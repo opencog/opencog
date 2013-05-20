@@ -74,8 +74,12 @@ void PythonEval::init(void)
     // Get a reference to the PyInterpreterState
     this->mainInterpreterState = this->mainThreadState->interp;
 
+
+    // Getting the __main__ module
     this->pyRootModule = PyImport_AddModule("__main__");
     PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
+
+    // Define the user function executer
     this->apply_script("from opencog.atomspace import Handle, Atom\n"
                        "import inspect\n"
                        "def execute_user_defined_function(func, handle_uuid):\n"
@@ -84,22 +88,29 @@ void PythonEval::init(void)
                        "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
                        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
                        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
-                       "        raise Exception('Number of arguments in the function (' + str(no_of_arguments_in_user_fn) + ') does not match that of the corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+                       "        raise Exception('Number of arguments in the function (' + "
+                                                   "str(no_of_arguments_in_user_fn) + ') does not match that of the "
+                                                   "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
                        "    atom = func(*args_list_link.out)\n"
                        "    if atom is None:\n"
                        "        return\n"
                        "    assert(type(atom) == Atom)\n"
                        "    return atom.h.value()\n\n");
+
+    // No idea what this one does but it's needed
     if (import_agent_finder() == -1) {
         PyErr_Print();
         throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
     }
 
+    // Add ATOMSPACE to __main__ module
     PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
 
+    // These are needed for calling Python/C API functions, definnes them once and for all
     pyGlobal = PyDict_New();
     pyLocal = PyDict_New();
 
+    // Getting sys.path and keeping the refrence, used in this->addSysPath()
     sys_path = PySys_GetObject((char*)"path");
 
     // Import pattern_match_functions which contains user defined functions
@@ -157,9 +168,10 @@ PythonEval::~PythonEval()
     delete pyGlobal;
 }
 
-
-// Use a singleton instance to avoid initializing python interpreter
-// twice.
+/**
+* Use a singleton instance to avoid initializing python interpreter
+* twice.
+*/
 PythonEval& PythonEval::instance(AtomSpace * atomspace)
 {
     if(!Py_IsInitialized()){
@@ -200,6 +212,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     PyObject *pError, *pyModule, *pFunc, *pExecFunc, *pArgs, *pUUID, *pValue = NULL;
     string moduleName;
     string funcName;
+
+    // Get the correct module and extract the function name
     int index = func.find_first_of('.');
     if(index < 0){
         pyModule = this->pyRootModule;
@@ -212,6 +226,9 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         funcName = func.substr(index+1);
     }
 
+
+//    PyGILState_STATE _state = PyGILState_Ensure();
+    // Get a refrence to the function
     pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyString_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
@@ -221,9 +238,11 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
         return Handle::UNDEFINED;
     }
 
+    // Get a refrence to our executer function
     pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("execute_user_defined_function"));
     OC_ASSERT(pExecFunc != NULL);
 
+    // Create the argument list
     pArgs = PyTuple_New(2);
     pUUID = PyLong_FromLong(varargs.value());
     OC_ASSERT(pUUID != NULL);
@@ -231,6 +250,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     PyTuple_SetItem(pArgs, 0, pFunc);
     PyTuple_SetItem(pArgs, 1, pUUID);
 
+    // Call the executer function and store its return value
     pValue = PyObject_CallObject(pExecFunc, pArgs);
     pError = PyErr_Occurred();
 
@@ -242,20 +262,22 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     UUID uuid = static_cast<unsigned long>(PyLong_AsLong(pValue));
 
+    // Cleaning up
     Py_DECREF(pArgs);
     Py_DECREF(pUUID);
     Py_DECREF(pFunc);
     Py_DECREF(pExecFunc);
+
+//    PyGILState_Release(_state);
 
     return Handle(uuid);
 }
 
 void PythonEval::apply_script(const std::string& script)
 {
-//    PyObject *pyLocal = PyModule_GetDict(pyRootModule);
-//    OC_ASSERT(pyLocal != NULL);
-
+//    PyGILState_STATE _state = PyGILState_Ensure();
     PyRun_SimpleString(script.c_str());
+//    PyGILState_Release(_state);
 }
 
 void PythonEval::addSysPath(std::string path)
@@ -263,6 +285,10 @@ void PythonEval::addSysPath(std::string path)
     PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
 }
 
+/**
+* Add all the .py files in the given directory as modules to __main__ and keeping the refrences
+* in a dictionary (this->modules)
+*/
 void PythonEval::add_module_directory(const boost::filesystem3::path &p)
 {
     vector<boost::filesystem3::path> files;
@@ -299,6 +325,10 @@ void PythonEval::add_module_directory(const boost::filesystem3::path &p)
     Py_DECREF(pyList);
 }
 
+/**
+* Add the .py file in the given path as a module to __main__ and keeping the refrences
+* in a dictionary (this->modules)
+*/
 void PythonEval::add_module_file(const boost::filesystem3::path &p)
 {
     this->addSysPath(p.parent_path().c_str());
@@ -325,6 +355,9 @@ void PythonEval::add_module_file(const boost::filesystem3::path &p)
     Py_DECREF(pyList);
 }
 
+/**
+* Get a path from the user and call the coresponding function for directories and files
+*/
 void PythonEval::addModuleFromPath(std::string path)
 {
     boost::filesystem3::path p(path);
