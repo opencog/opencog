@@ -155,7 +155,7 @@ public:
         cout << BOOST_CURRENT_FUNCTION << endl;
         string tr_str("$2");
         string data_file_path("-i" + MOSESUTest_dir + "precision.csv");
-        moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000", "-t1", "-lfine"}, {tr_str});
+        moses_test_combo({"-Hpre", data_file_path,  "-m100", "-q0.2", "-w0.5", "-Q1", "-z10000"}, {tr_str});
     }
     void test_negative_predictive_value() {
         cout << BOOST_CURRENT_FUNCTION << endl;
