@@ -48,6 +48,8 @@ string build_arguments(vector<string>& arguments)
 
 pair<score_t, combo_tree> parse_result(const string& tempfile)
 {
+    cout << "tempfile" << tempfile << endl;
+    
     // open file
     ifstream in(tempfile);
 
@@ -55,6 +57,7 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
     combo_tree hitr;
 
     // Results are printed in random order these days...
+    // WARNING: you must output only the score of the candidate!
     while (!in.eof()) {
        // parse result
        score_t score;

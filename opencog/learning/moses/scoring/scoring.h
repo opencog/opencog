@@ -546,8 +546,7 @@ struct precision_bscore : public bscore_base
                      float min_activation = 0.5f,
                      float max_activation = 1.0f,
                      bool positive = true,
-                     bool worst_norm = false,
-                     bool subtract_neg_target = false);
+                     bool worst_norm = false);
 
     penalized_bscore operator()(const combo_tree& tr) const;
 
@@ -603,7 +602,7 @@ protected:
                         // boolean). This is used to normalized the
                         // precision in case the output isn't boolean.
     score_t penalty;
-    bool positive, worst_norm, subtract_neg_target;
+    bool positive, worst_norm;
 
     // if enabled then each datapoint is an entry in the bscore (its
     // part contributing to the precision, and the activation penalty
