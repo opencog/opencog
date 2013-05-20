@@ -839,13 +839,12 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float min_activation_,
                                    float max_activation_,
                                    bool positive_,
-                                   bool worst_norm_,
-                                   bool subtract_neg_target_)
+                                   bool worst_norm_)
     : orig_ctable(_ctable), wrk_ctable(orig_ctable),
       ctable_usize(orig_ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
-      subtract_neg_target(subtract_neg_target_), precision_full_bscore(true)
+    precision_full_bscore(true)
 {
     output_type = wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
@@ -855,12 +854,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // 'F' is 'positive' is false.
         vertex target = bool_to_vertex(positive),
             neg_target = negate_vertex(target);
-        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)->score_t
+        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)
+            -> score_t
         {
-            score_t res = c.get(target);
-            if (subtract_neg_target)
-                res -= c.get(neg_target);
-            return res;
+            return (int)c.get(target) - (int)c.get(neg_target) / 2.0;
         };
     } else if (output_type == id::contin_type) {
         // For contin tables, we return the sum of the row values.
@@ -974,11 +971,22 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
 
         if (active > 0) {
             // normalize all components by active
-            score_t iac = 1.0/active; // inverse of activity to be faster
-            if (subtract_neg_target)  // we need to rescale by 1/2
-                iac /= 2;
-            boost::transform(pbs.first, pbs.first.begin(),
-                             [&](score_t e) { return e*iac; });
+            score_t iac = 1.0 / active; // inverse of activity to be faster
+            boost::transform(pbs.first, pbs.first.begin(), arg1 * iac);
+                             // [&](score_t e) { return e*iac; });
+
+            // By using (tp-fp)/2 the sum of all the per-row contributions
+            // is offset by -1/2 from the precision, as proved below
+            //
+            // 1/2 * (tp - fp) / (tp + fp)
+            // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
+            // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+            // = 1/2 * 2*tp / (tp + fp) - 1
+            // = precision - 1/2
+            //
+            // So before adding the recall penalty we add +1/2 to
+            // compensate that
+            pbs.first.push_back(0.5);
         }
 
     } else {
@@ -1094,7 +1102,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         score_t precision = (sao / active) / max_output,
             activation = active / (score_t)ctable_usize,
             activation_penalty = get_activation_penalty(activation),
-            sc = precision + activation_penalty - (subtract_neg_target ? 0.5 : 0);
+            sc = precision + activation_penalty;
 
         // update best score
         if (sc > best_sc) {
