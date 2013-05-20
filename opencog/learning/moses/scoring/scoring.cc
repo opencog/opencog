@@ -854,13 +854,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // 'F' is 'positive' is false.
         vertex target = bool_to_vertex(positive),
             neg_target = negate_vertex(target);
-        sum_outputs = [&](const CTable::counter_t& c)->score_t
+        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)
+            -> score_t
         {
-            logger().fine("c.get(target) = %u, c.get(neg_target) = %u",
-                          c.get(target), c.get(neg_target));
-            logger().fine("(c.get(target) - c.get(neg_target)) / score_t(2.0) = %g",
-                          (c.get(target) - c.get(neg_target)) / score_t(2.0));
-            return (c.get(target) - c.get(neg_target)) / score_t(2.0);
+            return (int)c.get(target) - (int)c.get(neg_target) / 2.0;
         };
     } else if (output_type == id::contin_type) {
         // For contin tables, we return the sum of the row values.
