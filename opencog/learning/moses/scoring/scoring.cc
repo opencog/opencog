@@ -839,14 +839,14 @@ precision_bscore::precision_bscore(const CTable& _ctable,
                                    float min_activation_,
                                    float max_activation_,
                                    bool positive_,
-                                   bool worst_norm_,
-                                   bool subtract_neg_target_)
-    : ctable(_ctable), ctable_usize(ctable.uncompressed_size()),
+                                   bool worst_norm_)
+    : orig_ctable(_ctable), wrk_ctable(orig_ctable),
+      ctable_usize(orig_ctable.uncompressed_size()),
       min_activation(min_activation_), max_activation(max_activation_),
       penalty(penalty_), positive(positive_), worst_norm(worst_norm_),
-      subtract_neg_target(subtract_neg_target_), precision_full_bscore(true)
+    precision_full_bscore(true)
 {
-    output_type = ctable.get_output_type();
+    output_type = wrk_ctable.get_output_type();
     if (output_type == id::boolean_type) {
         // For boolean tables, sum the total number of 'T' values
         // in the output.  Ths sum represents the best possible score
@@ -854,12 +854,10 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // 'F' is 'positive' is false.
         vertex target = bool_to_vertex(positive),
             neg_target = negate_vertex(target);
-        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)->score_t
+        sum_outputs = [this, target, neg_target](const CTable::counter_t& c)
+            -> score_t
         {
-            score_t res = c.get(target);
-            if (subtract_neg_target)
-                res -= c.get(neg_target);
-            return res;
+            return (int)c.get(target) - (int)c.get(neg_target) / 2.0;
         };
     } else if (output_type == id::contin_type) {
         // For contin tables, we return the sum of the row values.
@@ -895,7 +893,7 @@ precision_bscore::precision_bscore(const CTable& _ctable,
         // For contin tables, we search for the largest value in the table.
         // (or smallest, if positive == false)
         max_output = very_worst_score;
-        for (const auto& cr : ctable) {
+        for (const auto& cr : wrk_ctable) {
             const CTable::counter_t& c = cr.second;
             for (const auto& cv : c) {
                 score_t val = get_contin(cv.first);
@@ -960,7 +958,7 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
     auto interpret_tr = boost::apply_visitor(iv);
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : wrk_ctable) {
             const auto& ct = vct.second;
             double sumo = 0.0;
             if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
@@ -973,17 +971,28 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
 
         if (active > 0) {
             // normalize all components by active
-            score_t iac = 1.0/active; // inverse of activity to be faster
-            if (subtract_neg_target)  // we need to rescale by 1/2
-                iac /= 2;
-            boost::transform(pbs.first, pbs.first.begin(),
-                             [&](score_t e) { return e*iac; });
+            score_t iac = 1.0 / active; // inverse of activity to be faster
+            boost::transform(pbs.first, pbs.first.begin(), arg1 * iac);
+                             // [&](score_t e) { return e*iac; });
+
+            // By using (tp-fp)/2 the sum of all the per-row contributions
+            // is offset by -1/2 from the precision, as proved below
+            //
+            // 1/2 * (tp - fp) / (tp + fp)
+            // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
+            // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+            // = 1/2 * 2*tp / (tp + fp) - 1
+            // = precision - 1/2
+            //
+            // So before adding the recall penalty we add +1/2 to
+            // compensate that
+            pbs.first.push_back(0.5);
         }
 
     } else {
     
         // compute active and sum of all active outputs
-        for (const CTable::value_type& vct : ctable) {
+        for (const CTable::value_type& vct : wrk_ctable) {
             // vct.first = input vector
             // vct.second = counter of outputs
             if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
@@ -1064,8 +1073,8 @@ behavioral_score precision_bscore::best_possible_bscore() const
                                     unsigned> // total count
                           > max_precisions_t;
     max_precisions_t max_precisions;
-    for (CTable::const_iterator it = ctable.begin();
-         it != ctable.end(); ++it) {
+    for (CTable::const_iterator it = wrk_ctable.begin();
+         it != wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         double sumo = sum_outputs(c);
         unsigned total = c.total_count();
@@ -1093,7 +1102,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
         score_t precision = (sao / active) / max_output,
             activation = active / (score_t)ctable_usize,
             activation_penalty = get_activation_penalty(activation),
-            sc = precision + activation_penalty - (subtract_neg_target ? 0.5 : 0);
+            sc = precision + activation_penalty;
 
         // update best score
         if (sc > best_sc) {
@@ -1136,6 +1145,21 @@ score_t precision_bscore::min_improv() const
     return 1.0 / ctable_usize;
 }
 
+void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
+{
+    logger().debug("Compress CTable for optimization");
+
+    // Get permitted idxs.
+    auto irng = boost::irange(0, orig_ctable.get_arity());
+    std::set<arity_t> all_idxs(irng.begin(), irng.end());
+    std::set<arity_t> permitted_idxs = opencog::set_difference(all_idxs, idxs);
+
+    // Filter orig_table with permitted idxs.
+    wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
+
+    logger().debug("Original CTable size = %u", orig_ctable.size());
+    logger().debug("Working CTable size = %u", wrk_ctable.size());
+}
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
 {
@@ -1152,8 +1176,8 @@ combo_tree precision_bscore::gen_canonical_best_candidate() const
                                     unsigned> // total count
                           > precision_to_count_t;
     precision_to_count_t ptc;
-    for (CTable::const_iterator it = ctable.begin();
-         it != ctable.end(); ++it) {
+    for (CTable::const_iterator it = wrk_ctable.begin();
+         it != wrk_ctable.end(); ++it) {
         const CTable::counter_t& c = it->second;
         unsigned total = c.total_count();
         double precision = sum_outputs(c) / total;
@@ -1979,6 +2003,12 @@ score_t multibscore_based_bscore::min_improv() const
     for (const bscore_base& bs : _bscorers)
         res = min(res, bs.min_improv());
     return res;
+}
+
+void multibscore_based_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
+{
+    for (const bscore_base& bs : _bscorers)
+        bs.ignore_idxs(idxs);
 }
 
 } // ~namespace moses

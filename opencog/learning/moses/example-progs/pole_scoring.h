@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/moses/ann_scoring.h
+ * opencog/learning/moses/example-progs/pole_scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _ANN_SCORING_H
-#define _ANN_SCORING_H
+#ifndef _POLE_SCORING_H
+#define _POLE_SCORING_H
 
 #include <opencog/util/numeric.h>
 #include <opencog/util/mt19937ar.h>
@@ -205,45 +205,6 @@ struct AnnPoleFitnessFunction : public unary_function<combo_tree, double>
     }
 };
 
-struct AnnFitnessFunction : public unary_function<combo_tree, double>
-{
-    typedef combo_tree::iterator pre_it;
-    typedef combo_tree::sibling_iterator sib_it;
-
-    result_type operator()(argument_type tr) const
-    {
-        if (tr.empty())
-            return MIN_FITNESS;
-
-        tree_transform tt;
-
-        // binary xor_problem. The third input is always 1.0, this is
-        // "to potentially supply a constant 'bias' to influence the
-        // behavior of other neurons" (Joel Lehman)
-        double inputs[4][3] = { {0.0, 0.0, 1.0}, 
-                                  {0.0, 1.0, 1.0}, 
-                                  {1.0, 0.0, 1.0},
-                                  {1.0, 1.0, 1.0}};
-        double outputs[4] = {0.0, 1.0, 1.0, 0.0};
-
-        ann nn = tt.decodify_tree(tr);
-        int depth = nn.feedforward_depth();
-
-        double error = 0.0;
-        for (int pattern = 0;pattern < 4;++pattern) {
-            nn.load_inputs(inputs[pattern]);
-            dorepeat(depth)
-                nn.propagate();
-            double diff = outputs[pattern] - nn.outputs[0]->activation;
-            error += diff * diff;
-        }
-
-        return -error;
-    }
-
-};
-
-namespace opencog { namespace moses {
 
 // This is what the original zource had this as, but its not
 // obviously correct, to me.
@@ -330,37 +291,5 @@ struct ann_pole_bscore : public bscore_base
     }
 };
 
-struct ann_cscore  : public cscore_base
-{
-    ann_cscore() { }
-    composite_score operator()(const combo_tree& tr) const
-    {
-        complexity_t cpxy = tr.size();
-        // Note minus sign!
-        return composite_score(-aff.operator()(tr), cpxy, cpxy/CPXY_RATIO);
-    }
-
-    AnnFitnessFunction aff;
-};
-
-struct ann_bscore : public bscore_base
-{
-    penalized_bscore operator()(const combo_tree& tr) const
-    {
-        composite_score cs(ann_cscore()(tr));
-
-        penalized_bscore pbs;
-        pbs.first[0] = get_score(cs);
-        pbs.second = get_penalty(cs);
-        return pbs;
-    }
-    behavioral_score best_possible_bscore() const
-    {
-        return {0.0};
-    }
-};
-
-} // ~namespace moses
-} // ~namespace opencog
 
 #endif

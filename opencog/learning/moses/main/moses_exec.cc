@@ -532,7 +532,6 @@ int moses_exec(int argc, char** argv)
 
     // pre params
     bool pre_worst_norm;
-    bool pre_subtract_neg_target;
     bool gen_best_tree;
 
     // it params
@@ -1111,11 +1110,6 @@ int moses_exec(int argc, char** argv)
          value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
-        ("pre-subtract-neg-target",
-         value<bool>(&pre_subtract_neg_target)->default_value(false),
-         "If set to 1 then the negation of the target counts for -1 instead of 0. "
-         "[EXPERIMENTAL].\n")
-
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
@@ -1138,6 +1132,25 @@ int moses_exec(int argc, char** argv)
          "Feature count.  This option "
          "specifies the number of features to be selected out of "
          "the dataset.  A value of 0 disables feature selection.\n")
+
+        ("fs-exp-distrib",
+         value<bool>(&fs_params.exp_distrib)->default_value(false),
+         "Use a smoth exponential distribution, instead of hard "
+         "cuttoff, when selecting the highest-scoring features.  "
+         "Without this option, the highest-scoring count=N features "
+         "will be selected. That is, the distribution will be a hard "
+         "cutoff or cliff: after ranking all features by score, the "
+         "k'th highest-ranked feature will be selected with probability "
+         "1.0 if k<N  and with probability 0.0 if k>N.  With this option "
+         "enabled, a total of count=N features will still be selected, "
+         "and most of these will be the highest scoring ones, but a few "
+         "lower-ranked features will also be included.  Specifically, "
+         "the probability of choosing the k'th ranked feature will be "
+         "exp(-tk) with t choosen so that, on average, N features are "
+         "selected.  The initial random seed affects the generated list. "
+         "Currently, this option only applies to the -asimple algo, and "
+         "is ignored by the others (this needs to be fixed.)\n")
+
 
         ("fs-focus",
          value<string>(&fs_focus)->default_value(focus_incorrect),
@@ -1769,8 +1782,7 @@ int moses_exec(int argc, char** argv)
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
-                                           pre_worst_norm,
-                                           pre_subtract_neg_target);
+                                           pre_worst_norm);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                     if (gen_best_tree) {

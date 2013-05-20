@@ -48,7 +48,7 @@ protected:
             "LOG_FILE",              "opencog_server.log",
             "LOG_LEVEL",             "info",
             "ANSI_ENABLED",          "false",
-            "BACK_TRACE_LOG_LEVEL",  "warn",
+            "BACK_TRACE_LOG_LEVEL",  "error",   // C++ stack trace printing!
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
             "EXTERNAL_TICK_MODE",    "false",

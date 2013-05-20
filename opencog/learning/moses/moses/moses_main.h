@@ -176,7 +176,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              Printer& printer)
 {
     moses_statistics stats;
-    optimizer_base *optimizer = NULL;
+    optimizer_base* optimizer = nullptr;
 
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         optimizer = new hill_climbing(opt_params, hc_params);
