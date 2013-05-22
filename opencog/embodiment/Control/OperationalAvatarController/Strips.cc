@@ -965,4 +965,23 @@ void Rule::_preProcessRuleParameterIndexes()
             _addParameterIndex(e->opStateValue);
     }
 
+    // Check if all the cost calcuation states parameters grounded
+    vector<CostHeuristic>::iterator costIt;
+    for(costIt = CostHeuristics.begin(); costIt != CostHeuristics.end(); ++costIt)
+    {
+        State* s = ((CostHeuristic)(*costIt)).cost_cal_state;
+        vector<StateValue>::iterator ownerIt;
+        for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+        {
+            if (isParamValueUnGrounded(*ownerIt))
+                _addParameterIndex(*ownerIt);
+        }
+
+        // check the state value
+        if (isParameterUnGrounded( *(s->stateVariable)))
+                _addParameterIndex(s->stateVariable->getValue());
+
+    }
+
+
 }

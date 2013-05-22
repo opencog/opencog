@@ -301,7 +301,6 @@ class Inquery;
         // the actor who carry out this action, usually an Entity
         StateValue actor;
 
-
         // All the precondition required to perform this action
         vector<State*> preconditionList;
 

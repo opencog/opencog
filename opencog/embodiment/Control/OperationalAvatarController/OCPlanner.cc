@@ -419,6 +419,10 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
         }
     }
 
+    // The cost calculation states should in the same context of the main parts of the rule, so it should not contain other new ungrounded variables
+    // so we don't need to check the cost calculation states.
+
+
     // If there is no cost_cal_state in this rule, we need to borrow from the forward state node's foward rule node
     if (ruleNode->originalRule->CostHeuristics.size() == 0)
     {
@@ -434,7 +438,6 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
         {
 
         }
-
 
     }
 
