@@ -35,6 +35,7 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/ShutdownRequest.h>
 #include <opencog/server/UnloadModuleRequest.h>
+#include <opencog/server/ListModulesRequest.h>
 
 #include <opencog/util/Logger.h>
 #include <opencog/server/CogServer.h>
@@ -53,6 +54,7 @@ private:
     Factory<ShutdownRequest, Request>     shutdownFactory;
     Factory<LoadModuleRequest, Request>   loadmoduleFactory;
     Factory<UnloadModuleRequest, Request> unloadmoduleFactory;
+    Factory<ListModulesRequest, Request>  listmodulesFactory;
 
 DECLARE_CMD_REQUEST(BuiltinRequestsModule, "exit", do_exit,
        "Close the shell connection",

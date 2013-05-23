@@ -88,7 +88,7 @@ namespace opencog
  * DECLARE_MODULE(DerivedModule);
  *
  * To implement the module's functionality, you will probably want to
- * write a custom constructor and destructor and perhaps overrite the
+ * write a custom constructor and destructor and perhaps overwrite the
  * init() method (which is called by the cogserver) after the module's
  * initialization has finished and the meta-data properly set.
  */
