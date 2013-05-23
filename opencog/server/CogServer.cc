@@ -567,6 +567,31 @@ bool CogServer::loadModule(const std::string& filename)
     return true;
 }
 
+std::string CogServer::listModules()
+{
+    // Prepare a stream to collect the module information
+    std::ostringstream oss;
+
+    // Prepare iterators to process the ModuleMap
+    ModuleMap::iterator startIterator = modules.begin();
+    ModuleMap::iterator endIterator = modules.end();
+
+    // Loop through the ModuleMap
+    for(; startIterator != endIterator; ++startIterator)
+    {
+        // Get the module_id from the item
+        std::string module_id = startIterator->first;
+
+        // Only list the names, not the filenames.
+        if (module_id.find(".so", 0) == string::npos)
+            // Add the module_id to our stream
+            oss << module_id << std::endl;
+    }
+
+    // Return the contents of the stream
+    return oss.str();
+}
+
 bool CogServer::unloadModule(const std::string& moduleId)
 {
     // The module file identifier does NOT include the file path!
