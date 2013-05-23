@@ -582,8 +582,10 @@ std::string CogServer::listModules()
         // Get the module_id from the item
         std::string module_id = startIterator->first;
 
-        // Add the module_id to our stream
-        oss << module_id << std::endl;
+        // Only list the names, not the filenames.
+        if (module_id.find(".so", 0) == string::npos)
+            // Add the module_id to our stream
+            oss << module_id << std::endl;
     }
 
     // Return the contents of the stream
