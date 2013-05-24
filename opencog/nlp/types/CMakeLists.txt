@@ -14,7 +14,6 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (nlp-types SHARED
 	atom_types
 	NLPTypes
-	NLPTypesModule
 )
 
 # Without this, parallel make will race and crap up the generated files.
@@ -30,6 +29,5 @@ ENDIF (WIN32)
 
 INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
-#	NLPTypes.h
 	DESTINATION "include/${PROJECT_NAME}/nlp/types"
 )
