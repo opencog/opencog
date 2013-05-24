@@ -21,7 +21,6 @@ ADD_DEPENDENCIES(AtomSpaceExtensions spacetime_atom_types)
 ADD_DEPENDENCIES(AtomSpaceExtensions embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (AtomSpaceExtensions
-	query
 	spacetime
 	atomspace
 )

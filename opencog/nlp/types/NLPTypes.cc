@@ -6,6 +6,7 @@
  * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
  */
 
+#include <opencog/server/Module.h>
 #include "opencog/nlp/types/atom_types.definitions"
 
 using namespace opencog;
@@ -45,3 +46,6 @@ static __attribute__ ((destructor)) void nlp_fini(void)
 }
 
 #endif
+
+TRIVIAL_MODULE(NLPTypesModule)
+DECLARE_MODULE(NLPTypesModule)

@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/server/Module.h>
+
 #include "opencog/spacetime/atom_types.definitions"
 #include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
 
@@ -64,3 +66,6 @@ void fini(void)
 
 #endif
 
+using namespace opencog;
+TRIVIAL_MODULE(EmbodimentTypesModule)
+DECLARE_MODULE(EmbodimentTypesModule)
