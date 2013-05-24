@@ -1,8 +1,8 @@
 /*
  * opencog/CogServer/Module.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2008, 2011 OpenCog Foundation
+ * Copyright (C) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
