@@ -296,8 +296,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                 selectedStateNode = curStateNode;
 
-
-
             }
 
             break;
@@ -392,7 +390,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
     State* s;
 
     // Todo: Maybe need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
-    for(effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
+    for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
 
@@ -421,25 +419,118 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
     // The cost calculation states should in the same context of the main parts of the rule, so it should not contain other new ungrounded variables
     // so we don't need to check the cost calculation states.
+    if (ruleNode->originalRule->CostHeuristics.size() != 0)
+        return true;
 
+    // If there is no CostHeuristics in this rule, we need to borrow from the forward state node's foward rule node
+    // In fact, it only make sense for recursive rules do this kind of borrowing.
+    // Because the all the variables in foward rule CostHeuristics should have already been grounded, it doesn't make sense for a non-recursive rule to copy it.
+    if (! ruleNode->originalRule->IsRecursiveRule)
+        return true;
 
-    // If there is no cost_cal_state in this rule, we need to borrow from the forward state node's foward rule node
-    if (ruleNode->originalRule->CostHeuristics.size() == 0)
+    // Now begin to do the "borrowing" for Recursive Rules
+
+    // If the foward rule node doesn't have CostHeuristics, then we just leave the CostHeuristics empty.
+    // It usually makes no sense to borrow from the foward rule node of the forward rule node, because the context is changing.
+
+    // If this rule is the first rule in current planning, it doesn't have a forward rule to borrow from
+    if (! forwardStateNode->forwardRuleNode)
+        return true;
+
+    // If the foward rule node's originalRule has CostHeuristics, borrow them.
+    // Else if the forward rule node has CostHeuristics, borrow them.
+    // Note: here need to distinguish the CostHeuristics of the originalRule, and the CostHeuristics of a rule Node
+    // The CostHeuristics of the originalRule is the Cost Heuristics pre-defined by the orginal rule, which will not be changed during different planning processes.
+    // The CostHeuristics of a rule Node is when there is no pre-defined CostHeuristics in the originalRule,
+    //                                      it borrows from its forward rule node and put in the rule node, which usually change during different planning processes.
+    if (forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.size() != 0)
     {
-        if (forwardStateNode->forwardRuleNode)
-            return true;
+        // because a recursive rule has the same state in effect and preconditions
+        // we can copy the cost_state from forward Rule to every precondition of this recursive rule , and then add up them as the total cost heuristics of this rule node
+        // e.g.: the forward rule is Move(x,y), precondition is ExistAPath(x,y), costheuristics is Distance(x,y)
+        //       current recursive rule is if ExistAPath(x,m) & ExistAPath(m,y) then ExistAPath(x,y), has not costheuristics
+        //       so that we can borrow from the "Move" rule, the number of this recursive rule's preconditions is 2, so the coefficient for each is 1/2 = 0.5
+        //       so the total cost of this recursive rule = 0.5*Distance(x,m) + 0.5*(m,y)
 
-        if (forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.size() != 0)
+        float coefficient = 1.0f / (ruleNode->originalRule->preconditionList.size());
+
+        vector<State*>::iterator itpre;
+        for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
         {
 
+            vector<CostHeuristic>::iterator costIt;
+            for(costIt = forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.begin(); costIt != forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.end(); ++costIt)
+            {
+                State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
+                State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryFun);
+                vector<StateValue>::iterator ownerIt;
+                for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
+                {
+                    // if this state_owner is a const, not a variable, just copy it
+                    if (! Rule::isParamValueUnGrounded(*ownerIt))
+                        cost_state->addOwner(*ownerIt);
+                    else
+                    {
+                        // this state_owner is a variable, we need to change its variable name into the corresponding variable name in current rule
+                        // e.g.: the forward rule is: MoveTo(pos1,pos2), cost is :Distance(pos1,pos2).
+                        //       But the current rule variables are different: If ExistAPath(x,m) & ExistAPath(m,y), then ExistAPath(x,y)
+                        //       so we need to make the cost in current rule like: Distance(x,m)+ Distance(m,y), using the variables x,m,y, rather than pos1, pos2
+
+                        vector<StateValue>::iterator f_rule_ownerIt = forwardStateNode->forwardEffectState->stateOwnerList.begin();
+                        vector<StateValue>::iterator cur_ownerIt = ((State*)(*itpre))->stateOwnerList.begin();
+                        // This two state should be the same state just with possible different variable names
+                        // So the state owners in the same order of bot stateOwnerLists should suggest the same usage
+                        for ( ; f_rule_ownerIt != forwardStateNode->forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
+                        {
+                            // need to find the state owner of this cost heuristic in the forward effect state
+                            if ((*f_rule_ownerIt) == (*ownerIt))
+                            {
+                                // assign the state owner (variable name) in the same position of current rule precondition to the new cost_state we creat
+                                cost_state->addOwner(*cur_ownerIt);
+
+                                break;
+                            }
+                        }
+
+                        // If cannot find this state owner of this cost heuristic in the forward effect state, it means this owner doesn't affect the calculation of the cost in backward rule
+                        // So in this case, we just bind this state owner in the backward cost_cal_state as the binded value in the forward rule node
+                        if (f_rule_ownerIt == forwardStateNode->forwardEffectState->stateOwnerList.end())
+                        {
+                            // find the grounded value of this variable
+                            ParamGroundedMapInARule::iterator bindIt = forwardStateNode->forwardRuleNode->currentBindings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+                            OC_ASSERT(!(bindIt == forwardStateNode->forwardRuleNode->currentBindings.end()),
+                                      "OCPlanner::groundARuleNodeFromItsForwardState: Cannot find the binding of this variable:\n",
+                                      StateVariable::ParamValueToString((StateValue)(*ownerIt)).c_str());
+
+                            cost_state->addOwner(bindIt->second);
+
+                        }
+                    }
+
+                }
+
+                ruleNode->AddCostHeuristic(cost_state, ((CostHeuristic)(*costIt)).cost_coefficient * coefficient);
+
+            }
 
         }
-        else if (forwardStateNode->forwardRuleNode->costHeuristics.size() != 0)
-        {
 
-        }
 
     }
+    else if (forwardStateNode->forwardRuleNode->costHeuristics.size() != 0)
+    {
+        // The forward rule node has borrowed cost heuristics, it means the forward rule is also a recursive rule
+        // TODO: If the forward rule is different from the current rule, not need to borrow it,BUT ususally they should be the same rule
+
+        // So forward rule is the same rule with this current one, then just copy the CostHeuristics and do the matching of the variables.
+        // Need not to split the variables and do the adding up
+
+
+
+    }
+
+
 
     return true;
 

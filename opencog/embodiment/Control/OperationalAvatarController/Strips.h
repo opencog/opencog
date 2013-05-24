@@ -381,7 +381,6 @@ class Inquery;
         // Recursive rule is to break a problem into the same problems of smaller scales
         bool _isRecursiveRule();
 
-
     };
 
 

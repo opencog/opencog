@@ -72,6 +72,11 @@ public:
         costHeuristics.clear();
     }
 
+    void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
+    {
+        costHeuristics.push_back( CostHeuristic(cost_cal_state,cost_coefficient));
+    }
+
 };
 
 // the already tried variable bindings history for one rule for achieve one planning state
@@ -111,7 +116,8 @@ public:
     StateLayer* stateLayer; // the layer it belongs to
     RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
-    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0;}
+    State* forwardEffectState; // the corresponding state in the forward rule's effect list
+    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0;}
 
     // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
     // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
@@ -134,7 +140,7 @@ public:
 
     }
 
-    // check if this rule with this specific variables bindings has been applied to this state node
+    // check if this rule with this specific variables bindings has been applied to achieve this state node before
     bool checkIfBindingsHaveBeenApplied(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
     {
         map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
