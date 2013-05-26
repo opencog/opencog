@@ -205,7 +205,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             if (curStateNode->isAchieved == StateLayerNode::ACHIEVED)
                 continue;
 
-
             if ((curStateNode->isAchieved == StateLayerNode::UNKNOWN))
             {
                 if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
@@ -288,7 +287,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 // it suggests that the current state is impossible to achieve, so that we need to go back to last step
                 if (allRulesUnuseful)
                 {
-                    // we have to delete the current state layer and the forward rule layer
+                    // TODO: we have to delete the current state layer and the forward rule layer
 
 
                     curStateLayer = curStateLayer->preRuleLayer->preStateLayer;
@@ -523,14 +522,17 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
         // The forward rule node has borrowed cost heuristics, it means the forward rule is also a recursive rule
         // TODO: If the forward rule is different from the current rule, not need to borrow it,BUT ususally they should be the same rule
 
-        // So forward rule is the same rule with this current one, then just copy the CostHeuristics and do the matching of the variables.
+        // So forward rule is the same rule with this current one, then just copy the CostHeuristics.
         // Need not to split the variables and do the adding up
 
-
+        // Because they are the same rule, so they have the same variables names, so we even don't need to do the variable consistency processing
+        vector<CostHeuristic>::iterator costIt;
+        for(costIt = forwardStateNode->forwardRuleNode->costHeuristics.begin(); costIt != forwardStateNode->forwardRuleNode->costHeuristics.end(); ++costIt)
+        {
+            ruleNode->AddCostHeuristic((CostHeuristic)(*costIt));
+        }
 
     }
-
-
 
     return true;
 

@@ -77,6 +77,11 @@ public:
         costHeuristics.push_back( CostHeuristic(cost_cal_state,cost_coefficient));
     }
 
+    void AddCostHeuristic(CostHeuristic costHeuristic)
+    {
+        costHeuristics.push_back(costHeuristic);
+    }
+
 };
 
 // the already tried variable bindings history for one rule for achieve one planning state
@@ -295,7 +300,6 @@ protected:
      //    as hard  heuristics.
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
      bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
-
 
 };
 
