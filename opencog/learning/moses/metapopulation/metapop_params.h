@@ -86,8 +86,10 @@ struct diversity_parameters
     // The idea is that it should tend to pressure when the distance
     // tends to 0, and tends to 0 when the distance tends to its
     // maximum. Obviously the inverse is adequate when the maximum is
-    // infinity and the complement is adequate when it is 1.
-    enum dst2dp_enum_t { inverse, complement };
+    // infinity and the complement is adequate when it is 1.  The
+    // power is adequate when the diversity represent a probability
+    // and that probability will later be multiplied by the score.
+    enum dst2dp_enum_t { inverse, complement, power };
     void set_dst2dp(dst2dp_enum_t d2de);
     std::function<dp_t(dp_t)> dst2dp;
 };

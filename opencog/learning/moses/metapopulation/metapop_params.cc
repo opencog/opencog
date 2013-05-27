@@ -68,6 +68,8 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
     case complement:
         dst2dp = [&](dp_t dst) { return pressure * (1 - dst); };
         break;
+    case power:
+        dst2dp = [&](dp_t dst) { return power(dst, pressure); };
     default:
         OC_ASSERT(false);
     }
