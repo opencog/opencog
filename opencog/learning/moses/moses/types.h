@@ -91,8 +91,10 @@ struct composite_score:
                     score_t diversity_penalty_ = 0.0)
        : score(scor), complexity(cpxy),
          complexity_penalty(complexity_penalty_),
-         diversity_penalty(diversity_penalty_),
-         penalized_score(score - complexity_penalty - diversity_penalty) {}
+         diversity_penalty(diversity_penalty_)
+    {
+        update_penalized_score();
+    }
 
     composite_score();    // build the worst score
     composite_score& operator=(const composite_score &r);
