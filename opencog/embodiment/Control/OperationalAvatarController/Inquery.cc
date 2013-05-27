@@ -538,93 +538,23 @@ set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<StateVa
 }
 
 // find atoms by given condition, by patern mactcher.
-HandleSeq Inquery::findAllObjectsByGivenCondition(vector<State*> states)
+HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
 {
-/*
-    // Define the pattern to match against.
-    Handle hx = as->addNode(VARIABLE_NODE, "variable node x");
-    Handle hy = as->addNode(VARIABLE_NODE, "variable node y");
+    HandleSeq results;
 
-    Handle hlx = as->addLink(LIST_LINK, hconst, hx);
-    Handle hly = as->addLink(LIST_LINK, hconst, hy);
+    // create the predicate value node type according to the State Value type
+    // Or can just find the handle by name in the Atomspace
+    // entity_code: using object node,
+    // non-number code: using concept node
+    // number code: using number node
+    // vector code: using 3 number nodes
 
-    Handle han = as->addLink(AND_LINK, hlx, hly);
-
-    Handle hv = as->addLink(LIST_LINK, hx, hy);
-
-    std::vector<Handle> vars;
-    vars.push_back(hx);
-    vars.push_back(hy);
-
-    std::vector<Handle> preds;
-    preds.push_back(hlx);
-    preds.push_back(hly);
-
-    std::vector<Handle> negs;
-
-    PMCB pmcb(as);
-    pme.match(&pmcb, vars, preds, negs);
-
-    // Should find four solutions:
-    // var_x = soln_b and var_y = soln_b
-    // var_x = soln_b and var_y = soln_c
-    // var_x = soln_c and var_y = soln_b
-    // var_x = soln_c and var_y = soln_c
-    TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
-    // TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
-    // TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
-
-    // Test the non-std::vector interface also.
-    pmcb.found = 0;
-    pm.match(&pmcb, hv, han, Handle::UNDEFINED);
-    TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
+    // first search from EvaluationLinks
 
 
+    // if cannot find any result, search from InheritanceLink
+
+    return results;
 
 
-
-
-    // Create BindLink used by pattern matcher
-    HandleSeq predicateListLinkOutgoing,evalLinkOutgoing, implicationLinkOutgoings, bindLinkOutgoings;
-
-    Handle weightPredicateNode = atomSpace.getHandle(PREDICATE_NODE, AVATAR_WEIGHT);
-    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any"); // the weithgt value number node
-    predicateListLinkOutgoing.push_back(avatarNode);
-    predicateListLinkOutgoing.push_back(hVariableNode);
-
-    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
-    evalLinkOutgoing.push_back(weightPredicateNode);
-    evalLinkOutgoing.push_back(predicateListLink);
-    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
-
-    implicationLinkOutgoings.push_back(evalLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
-
-    bindLinkOutgoings.push_back(hVariableNode);
-    bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
-
-    // Run pattern matcher
-    PatternMatch pm;
-    pm.set_atomspace(&atomSpace);
-
-    Handle hResultListLink = pm.bindlink(hBindLink);
-
-    // Get result
-    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
-    //       may fail to remove the ReferenceLink when necessary.
-    //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here),
-    //       which would make cog-delete scheme function fail.
-    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
-    atomSpace.removeAtom(hResultListLink);
-
-    // Check and return the result
-    // currently, the weight of avatar is const, so there should be only one result
-    foreach(Handle hResult, resultSet)
-    {
-        std::string weightStr = atomSpace.getName(hResult);
-        return atof(weightStr.c_str()); // return the first one
-
-    }
-*/
 }

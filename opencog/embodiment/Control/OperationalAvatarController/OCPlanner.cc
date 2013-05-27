@@ -302,11 +302,16 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         }
 
         if (goalsAllAchieved)
+        {
+            // Todo: go throuth the whole planning network, create action plan
+
             return true;
+        }
 
         // Till now have select the an unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
-        // Creat a new rule layer backward trying to achieve the
+        // Creat a new rule layer backward trying to achieve the selectedStateNode
         // and also create a new state Layer which are the preconditions of this new rule layer
+
         RuleLayer* newRuleLayer = new RuleLayer();
         StateLayer* newStateLayer = new StateLayer();
 
@@ -320,7 +325,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         curStateLayer->preRuleLayer = newRuleLayer;
 
         // in every rule layer, there is always only one rule is applied
-        // so as, in every state layer, there is always only one non-satisfied state being deal with every time
+        // so as, in every state layer, there is always only one non-satisfied state being deal with
 
         // create a new RuleLayerNode to apply this selected rule
         RuleLayerNode* ruleNode = new RuleLayerNode(selectedRule);
@@ -339,18 +344,24 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         // So we need to select suitable variables to ground them.
         groundARuleNodeBySelectingValues(ruleNode);
 
-        // this rule has not been applied in this state yet, add this rule to the history of this state node
-        //if (curStateNode->getRuleAppliedTime(selectedRule) == 0)
-        //    curStateNode->addRuleRecordWithVariableBindingsToHistory();
+        // Todo: forwardEffectState
 
-        // Second for loop, for the rest states,create a do nothing rule node, to bring this state to the new state layer
+
+        // Todo: find if there are other forward states besides current selectedStateNode will be affected by this rule
+
+
+        // Todo: this rule has not been applied in this state yet, add this rule to the history of this state node
+//        if (curStateNode->getRuleAppliedTime(selectedRule) == 0)
+//            curStateNode->addRuleRecordWithVariableBindingsToHistory();
+
+        // In this loop, for the rest states,create a do nothing rule node, to bring this state to the new state layer
         // except the states have been affected by the rule applied in the first for loop
         for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
         {
 
             StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
             // check if this state has already been changed by a rule in this step during deal with other state
-            if (curStateNode->backwardRuleNode == 0)
+            if (curStateNode->backwardRuleNode != 0)
                 continue;
 
             // create a do nothing rule node, to bring this state to the new state layer
@@ -368,6 +379,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
             donothingRuleLayerNode->forwardLinks.insert(curStateNode);
+
+            // This is the this->DO_NOTHING_RULE , which doesn't change the states,
+            // so the corresponding forward EffectState in the current selected rule just remain null.
 
         }
 
@@ -433,7 +447,10 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
     // It usually makes no sense to borrow from the foward rule node of the forward rule node, because the context is changing.
 
     // If this rule is the first rule in current planning, it doesn't have a forward rule to borrow from
-    if (! forwardStateNode->forwardRuleNode)
+    // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
+    State* forwardEffectState;
+    RuleLayerNode* forwardRuleNode = findFirstRealForwardRuleNode(forwardStateNode, forwardEffectState);
+    if (! forwardRuleNode)
         return true;
 
     // If the foward rule node's originalRule has CostHeuristics, borrow them.
@@ -442,7 +459,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
     // The CostHeuristics of the originalRule is the Cost Heuristics pre-defined by the orginal rule, which will not be changed during different planning processes.
     // The CostHeuristics of a rule Node is when there is no pre-defined CostHeuristics in the originalRule,
     //                                      it borrows from its forward rule node and put in the rule node, which usually change during different planning processes.
-    if (forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.size() != 0)
+    if (forwardRuleNode->originalRule->CostHeuristics.size() != 0)
     {
         // because a recursive rule has the same state in effect and preconditions
         // we can copy the cost_state from forward Rule to every precondition of this recursive rule , and then add up them as the total cost heuristics of this rule node
@@ -458,7 +475,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
         {
 
             vector<CostHeuristic>::iterator costIt;
-            for(costIt = forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.begin(); costIt != forwardStateNode->forwardRuleNode->originalRule->CostHeuristics.end(); ++costIt)
+            for(costIt = forwardRuleNode->originalRule->CostHeuristics.begin(); costIt != forwardRuleNode->originalRule->CostHeuristics.end(); ++costIt)
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
@@ -476,11 +493,11 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
                         //       But the current rule variables are different: If ExistAPath(x,m) & ExistAPath(m,y), then ExistAPath(x,y)
                         //       so we need to make the cost in current rule like: Distance(x,m)+ Distance(m,y), using the variables x,m,y, rather than pos1, pos2
 
-                        vector<StateValue>::iterator f_rule_ownerIt = forwardStateNode->forwardEffectState->stateOwnerList.begin();
+                        vector<StateValue>::iterator f_rule_ownerIt = forwardEffectState->stateOwnerList.begin();
                         vector<StateValue>::iterator cur_ownerIt = ((State*)(*itpre))->stateOwnerList.begin();
                         // This two state should be the same state just with possible different variable names
                         // So the state owners in the same order of bot stateOwnerLists should suggest the same usage
-                        for ( ; f_rule_ownerIt != forwardStateNode->forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
+                        for ( ; f_rule_ownerIt != forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
                         {
                             // need to find the state owner of this cost heuristic in the forward effect state
                             if ((*f_rule_ownerIt) == (*ownerIt))
@@ -494,11 +511,11 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
                         // If cannot find this state owner of this cost heuristic in the forward effect state, it means this owner doesn't affect the calculation of the cost in backward rule
                         // So in this case, we just bind this state owner in the backward cost_cal_state as the binded value in the forward rule node
-                        if (f_rule_ownerIt == forwardStateNode->forwardEffectState->stateOwnerList.end())
+                        if (f_rule_ownerIt == forwardEffectState->stateOwnerList.end())
                         {
                             // find the grounded value of this variable
-                            ParamGroundedMapInARule::iterator bindIt = forwardStateNode->forwardRuleNode->currentBindings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
-                            OC_ASSERT(!(bindIt == forwardStateNode->forwardRuleNode->currentBindings.end()),
+                            ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+                            OC_ASSERT(!(bindIt == forwardRuleNode->currentBindings.end()),
                                       "OCPlanner::groundARuleNodeFromItsForwardState: Cannot find the binding of this variable:\n",
                                       StateVariable::ParamValueToString((StateValue)(*ownerIt)).c_str());
 
@@ -517,7 +534,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
 
     }
-    else if (forwardStateNode->forwardRuleNode->costHeuristics.size() != 0)
+    else if (forwardRuleNode->costHeuristics.size() != 0)
     {
         // The forward rule node has borrowed cost heuristics, it means the forward rule is also a recursive rule
         // TODO: If the forward rule is different from the current rule, not need to borrow it,BUT ususally they should be the same rule
@@ -527,7 +544,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
         // Because they are the same rule, so they have the same variables names, so we even don't need to do the variable consistency processing
         vector<CostHeuristic>::iterator costIt;
-        for(costIt = forwardStateNode->forwardRuleNode->costHeuristics.begin(); costIt != forwardStateNode->forwardRuleNode->costHeuristics.end(); ++costIt)
+        for(costIt = forwardRuleNode->costHeuristics.begin(); costIt != forwardRuleNode->costHeuristics.end(); ++costIt)
         {
             ruleNode->AddCostHeuristic((CostHeuristic)(*costIt));
         }
@@ -536,6 +553,28 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
     return true;
 
+}
+
+RuleLayerNode* OCPlanner::findFirstRealForwardRuleNode(StateLayerNode* stateNode, State* &forwardEffectState)
+{
+
+    OC_ASSERT ((stateNode != 0),
+              "OCPlanner::findFirstRealForwardRuleNode: the stateNode is invalid!");
+
+    StateLayerNode* curstateNode = stateNode;
+    while(true)
+    {
+        if (curstateNode->forwardRuleNode == 0)
+            return 0;
+
+        if (curstateNode->forwardRuleNode->originalRule != this->DO_NOTHING_RULE)
+        {
+            forwardEffectState = curstateNode->forwardEffectState;
+            return curstateNode->forwardRuleNode;
+        }
+        else
+            curstateNode = *(curstateNode->forwardRuleNode->forwardLinks.begin());
+    }
 }
 
 bool OCPlanner::groundARuleNodeBySelectingValues(RuleLayerNode *ruleNode)

@@ -301,6 +301,10 @@ protected:
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
      bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
 
+     // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
+     // Return the real forwardEffectState by the way
+     RuleLayerNode *findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState);
+
 };
 
 
