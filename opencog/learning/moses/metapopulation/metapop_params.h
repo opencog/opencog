@@ -81,7 +81,11 @@ struct diversity_parameters
     //
     // The complement
     //
-    // f-x) = pressure * (1-x)
+    // f(x) = pressure * (1-x)
+    //
+    // The pth-power
+    //
+    // f(x) = x^pressure
     //
     // The idea is that it should tend to pressure when the distance
     // tends to 0, and tends to 0 when the distance tends to its
@@ -89,7 +93,7 @@ struct diversity_parameters
     // infinity and the complement is adequate when it is 1.  The
     // power is adequate when the diversity represent a probability
     // and that probability will later be multiplied by the score.
-    enum dst2dp_enum_t { inverse, complement, power };
+    enum dst2dp_enum_t { inverse, complement, pthpower };
     void set_dst2dp(dst2dp_enum_t d2de);
     std::function<dp_t(dp_t)> dst2dp;
 };

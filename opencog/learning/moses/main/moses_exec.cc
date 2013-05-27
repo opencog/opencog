@@ -110,8 +110,9 @@ static const string angular = "angular";
         
 // diversity dst2dp types
 static const string auto_str = "auto";        
-static const string inverse = "inverse";
-static const string complement = "complement";
+static const string inverse_str = "inverse";
+static const string complement_str = "complement";
+static const string power_str = "power";
 
 // focus types (which data points feature selection within moses
 // should focus on)
@@ -251,8 +252,10 @@ void not_recognized_dst(const string& diversity_dst)
 void not_recognized_dst2dp(const string& diversity_dst2dp)
 {
     stringstream ss;
-    ss << diversity_dst2dp << " is not recognized. Valid distances to penalty are "
-       << auto_str << ", " << inverse << " and " << complement;
+    vector<string> valid_dsts = {auto_str, inverse_str, complement_str, power_str};
+    ostreamContainer(ss << diversity_dst2dp
+                     << " is not recognized. Valid distances to penalty are ",
+                     valid_dsts, ", ");
     log_output_error_exit(ss.str());
 }
 
@@ -1070,7 +1073,8 @@ int moses_exec(int argc, char** argv)
                     "When %1% is selected the function is selected depending "
                     "on the distance, if the distance is %5%, "
                     "then %2% is selected, otherwise %3% is selected.\n")
-             % auto_str % inverse % complement % power % p_norm).c_str())
+             % auto_str % inverse_str % complement_str
+             % power_str % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
@@ -1582,12 +1586,12 @@ int moses_exec(int argc, char** argv)
     if (diversity_dst2dp == auto_str)
         d2de = diversity_dst == p_norm ?
             diversity_parameters::inverse : diversity_parameters::complement;
-    else if (diversity_dst2dp == inverse)
+    else if (diversity_dst2dp == inverse_str)
         d2de = diversity_parameters::inverse;
-    else if (diversity_dst2dp == complement)
+    else if (diversity_dst2dp == complement_str)
         d2de = diversity_parameters::complement;
-    else if (diversity_dst2dp == power)
-        d2de = diversity_parameters::power;
+    else if (diversity_dst2dp == power_str)
+        d2de = diversity_parameters::pthpower;
     else {
         not_recognized_dst2dp(diversity_dst2dp);
         d2de = diversity_parameters::inverse; // silent compiler warning
