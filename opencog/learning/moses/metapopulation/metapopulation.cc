@@ -138,6 +138,8 @@ void metapopulation::set_diversity()
             }
 
             // update v.first
+            if (params.diversity.dst2dp_type == params.diversity.pthpower)
+                get_composite_score(bsct).multiply_diversity = true;
             get_composite_score(bsct).set_diversity_penalty(adp);
         }
     };
