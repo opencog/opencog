@@ -89,9 +89,9 @@ struct composite_score:
     composite_score(score_t scor, complexity_t cpxy,
                     score_t complexity_penalty_ = 0.0,
                     score_t diversity_penalty_ = 0.0)
-       : score(scor), complexity(cpxy),
-         complexity_penalty(complexity_penalty_),
-         diversity_penalty(diversity_penalty_)
+        : multiply_diversity(false), score(scor), complexity(cpxy),
+          complexity_penalty(complexity_penalty_),
+          diversity_penalty(diversity_penalty_)
     {
         update_penalized_score();
     }
@@ -132,6 +132,12 @@ struct composite_score:
     /// useful for testing (probably not in practice)
     bool operator==(const composite_score& r) const;
 
+    // EXPERIMENTAL: if multiply_diversity is set to true then the
+    // diversity_penalty is multiplied with the raw score instead
+    // being subtracted. This makes more sense if the diversity
+    // penalty represent a probability
+    bool multiply_diversity;
+
 protected:
     score_t score;
     complexity_t complexity;
@@ -142,7 +148,11 @@ protected:
     /// Update penalized_score, i.e. substract the complexity and
     /// diversity penalty from the raw score.
     void update_penalized_score() {
-        penalized_score = score - complexity_penalty - diversity_penalty;
+        penalized_score = score - complexity_penalty;
+        if (multiply_diversity)
+            penalized_score *= diversity_penalty;
+        else
+            penalized_score -= diversity_penalty;
     }
 };
 

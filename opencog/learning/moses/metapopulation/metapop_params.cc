@@ -61,6 +61,7 @@ void diversity_parameters::set_dst(diversity_parameters::dst_enum_t de,
 
 void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
 {
+    dst2dp_type = d2de;
     switch(d2de) {
     case inverse:
         dst2dp = [&](dp_t dst) { return pressure / (1 + dst); };
@@ -70,8 +71,12 @@ void diversity_parameters::set_dst2dp(diversity_parameters::dst2dp_enum_t d2de)
         break;
     case pthpower:
         dst2dp = [&](dp_t dst) { return pow(dst, pressure); };
-    default:
-        OC_ASSERT(false);
+        break;
+    default: {
+        stringstream ss;
+        ss << "diversity_parameters::set_dst2dp error: no case for " << d2de;
+        OC_ASSERT(false, ss.str());
+    }
     }
 }
 
