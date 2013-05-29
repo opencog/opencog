@@ -1098,7 +1098,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     reverse_foreach (const auto& mpv, max_precisions) {
         sao += mpv.second.first;
         active += mpv.second.second;
-        
+
         // By using (tp-fp)/2 the sum of all the per-row contributions
         // is offset by -1/2 from the precision, as proved below
         //
