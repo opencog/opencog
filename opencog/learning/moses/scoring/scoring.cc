@@ -1098,7 +1098,19 @@ behavioral_score precision_bscore::best_possible_bscore() const
     reverse_foreach (const auto& mpv, max_precisions) {
         sao += mpv.second.first;
         active += mpv.second.second;
-        score_t precision = (sao / active) / max_output,
+        
+        // By using (tp-fp)/2 the sum of all the per-row contributions
+        // is offset by -1/2 from the precision, as proved below
+        //
+        // 1/2 * (tp - fp) / (tp + fp)
+        // = 1/2 * (tp - tp + tp - fp) / (tp + fp)
+        // = 1/2 * (tp + tp) / (tp + fp) - (tp + fp) / (tp + fp)
+        // = 1/2 * 2*tp / (tp + fp) - 1
+        // = precision - 1/2
+        //
+        // So before adding the recall penalty we add 0.5 to
+        // compensate for that
+        score_t precision = (sao / active) / max_output + 0.5,
             activation = active / (score_t)ctable_usize,
             activation_penalty = get_activation_penalty(activation),
             sc = precision + activation_penalty;
