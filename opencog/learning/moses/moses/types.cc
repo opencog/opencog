@@ -33,7 +33,7 @@ using namespace std;
 demeID_t::demeID_t(unsigned expansion)
     : string(to_string(expansion)) {}
 demeID_t::demeID_t(unsigned expansion, unsigned breadth_first)
-    : string(to_string(expansion) + to_string(breadth_first)) {}
+    : string(to_string(expansion) + "." + to_string(breadth_first)) {}
 
 bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
                                             const pbscored_combo_tree& bs_tr2) const
