@@ -408,6 +408,9 @@ struct metapopulation : pbscored_combo_tree_ptr_set
         return res;
     }
 
+    // Trim down demes before merging based the scores
+    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
+    
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.
     void update_best_candidates(const pbscored_combo_tree_set& candidates);

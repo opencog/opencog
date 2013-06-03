@@ -13,6 +13,7 @@ ADD_LIBRARY (builtinreqs SHARED
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
+        ListModulesRequest
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
