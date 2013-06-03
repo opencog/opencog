@@ -79,3 +79,10 @@ TARGET_LINK_LIBRARIES(dynFeatSelUTest
 	cogutil
 )
 
+ADD_CXXTEST(scoringUTest)
+TARGET_LINK_LIBRARIES(scoringUTest
+	moses
+	comboreduct
+	cogutil
+)
+

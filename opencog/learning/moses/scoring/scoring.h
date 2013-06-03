@@ -614,6 +614,7 @@ protected:
 
 private:
     score_t get_activation_penalty(score_t activation) const;
+
     // function to calculate the total weight of the observations
     // associated to an input vector
     std::function<score_t(const CTable::counter_t&)> sum_outputs;
