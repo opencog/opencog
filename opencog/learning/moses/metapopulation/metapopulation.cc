@@ -117,8 +117,14 @@ void metapopulation::set_diversity()
 
             // compute diversity penalty between bs and the last
             // element of the pool
-            dp_t last_dst = this->_cached_dst(&bsct, last_ptr),
-            last_dp = params.diversity.dst2dp(last_dst),
+            dp_t last_dst = this->_cached_dst(&bsct, last_ptr);
+            OC_ASSERT(last_dst >= 0.0, "The distance cannot be negative."
+                      "There could be a bug or you are not using a true distance. "
+                      "For instance the Tanimoto distance may be negative "
+                      "when some of its components are negative. "
+                      "If that is the case you might want to switch to the angular "
+                      "distance.");
+            dp_t last_dp = params.diversity.dst2dp(last_dst),
             last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
 
             // // debug
@@ -141,6 +147,16 @@ void metapopulation::set_diversity()
             if (params.diversity.dst2dp_type == params.diversity.pthpower)
                 get_composite_score(bsct).multiply_diversity = true;
             get_composite_score(bsct).set_diversity_penalty(adp);
+
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Diversity for candidate: " << get_tree(bsct)
+                   << ", last_dst = " << last_dst
+                   << ", last_dp = " << last_dp
+                   << ", last_ddp = " << last_ddp
+                   << ", adp = " << adp;
+                logger().fine(ss.str());
+            }
         }
     };
 
