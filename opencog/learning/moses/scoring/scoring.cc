@@ -62,11 +62,9 @@ using namespace boost::accumulators;
 inline void log_candidate_pbscore(const combo_tree& tr,
                                   const penalized_bscore& pbs)
 {
-    if (!logger().isFineEnabled())
-        return;
-
-    logger().fine() << "Evaluate candidate: " << tr << "\n"
-                    << "\tBScored: " << pbs;
+    if (logger().isFineEnabled())
+        logger().fine() << "Evaluate candidate: " << tr << "\n"
+                        << "\tBScored: " << pbs;
 }
 
 void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
@@ -1035,7 +1033,7 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
     }
 
     if (0 < active)
-        precision = (sao / active) / max_output;
+        precision = (sao / active + 0.5) / max_output;
     
     // For boolean tables, activation sum of true and false positives
     // i.e. the sum of all positives.   For contin tables, the activation
