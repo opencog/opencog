@@ -394,6 +394,8 @@ public:
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
 
+    CTable() {}
+
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
@@ -474,7 +476,7 @@ public:
 
     /**
      * Like filtered but preserve the indices on the columns,
-     * techincally it replaces all input values filtered out by
+     * technically it replaces all input values filtered out by
      * id::null_vertex.
      */
     template<typename F>
@@ -495,8 +497,10 @@ public:
     }
 
     // return the output label + list of input labels
+    void set_labels(const string_seq& labels);
     string_seq get_labels() const;
     const string_seq& get_input_labels() const {return ilabels;}
+    void set_signature(const type_tree& tt) { tsig = tt; };
     const type_tree& get_signature() const {return tsig;}
     type_node get_output_type() const;
 

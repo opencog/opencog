@@ -33,6 +33,7 @@
 
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
+#include <opencog/util/comprehension.h>
 
 #include "table.h"
 #include "table_io.h"
@@ -729,6 +730,71 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
     return in;
 }
 
+// Parse a CTable row
+CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_str)
+{
+    // split the string between input and output
+    unsigned end_outputs_pos = row_str.find("}");
+    string outputs = row_str.substr(1, end_outputs_pos - 1),
+        inputs = row_str.substr(end_outputs_pos + 2); // +2 to go
+                                                      // passed the
+                                                      // following ,
+
+    // convert the inputs string into multi_type_seq
+    type_node_seq tns = vector_comp(get_signature_inputs(tt), get_type_node);
+    vector<string> input_seq = tokenizeRow<string>(inputs);
+    from_tokens_visitor ftv(tns);
+    multi_type_seq input_values = ftv(input_seq);
+
+    // convert the outputs string into CTable::counter_t
+    vector<string> output_pair_seq  = tokenizeRow<string>(outputs);
+    CTable::counter_t counter;
+    for (const string& pair_str : output_pair_seq) {
+        unsigned sep_pos = pair_str.find(":");
+        string key_str = pair_str.substr(0, sep_pos),
+            value_str = pair_str.substr(sep_pos + 1);
+        vertex v = token_to_vertex(get_type_node(get_signature_output(tt)),
+                                   key_str);
+        unsigned count = stoi(value_str);
+        counter[v] = count;
+    }
+    return CTable::value_type(input_values, counter);
+}
+
+// WARNING: this implementation only supports boolean ctable!!!!
+std::istream& istreamCTable(std::istream& in, CTable& ctable)
+{
+    ////////////////
+    // set header //
+    ////////////////
+    string header_line;
+    get_data_line(in, header_line);
+    auto labels = tokenizeRow<string>(header_line);
+    ctable.set_labels(labels);
+
+    ////////////////////////
+    // set type signature //
+    ////////////////////////
+    // HACK THIS PART TO MAKE IT SUPPORT OTHER TYPES THAN BOOLEAN
+    ctable.set_signature(gen_signature(id::boolean_type, ctable.get_arity()));
+
+    /////////////////
+    // set content //
+    /////////////////
+    std::vector<string> lines;
+    // read the entire file
+    {
+        string line;
+        while (get_data_line(in, line))
+            lines.push_back(line);
+    }
+    // parse each line and fill the ctable
+    for (const string& line : lines)
+        ctable.insert(parseCTableRow(ctable.get_signature(), line));
+
+    return in;
+}
+
 /**
  * istream. If the file name is not correct then an OC_ASSERT is
  * raised.
@@ -767,6 +833,15 @@ Table loadTable_optimized(const string& file_name,
     Table res;
     istreamTable_ignore_indices(in, res, target_feature, ignore_indices);
     return res;
+}
+
+CTable loadCTable(const string& file_name)
+{
+    CTable ctable;
+    OC_ASSERT(!file_name.empty(), "No filename specified!");
+    ifstream in(file_name.c_str());
+    istreamCTable(in, ctable);
+    return ctable;
 }
 
 // ===========================================================
