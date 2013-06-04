@@ -361,4 +361,17 @@ public:
         ostreamTable(ss, tt);
         TS_ASSERT_EQUALS(ss.str(), string("time,target,f2\n12-04-2012,1,0\n"));
     }
+
+    void test_loadCTable()
+    {
+        string input_file = tableUTest_dir + "dataset.ctable";
+        CTable ct = loadCTable(input_file);
+
+        stringstream ss;
+        ss << ct;
+
+        TS_ASSERT_EQUALS(ss.str(), string("target,f1,f2\n"
+                                          "{1:10,0:3},1,0\n"
+                                          "{1:4,0:5},0,1\n"));
+    }
 };
