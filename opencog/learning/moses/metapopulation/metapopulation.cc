@@ -435,6 +435,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
+        unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
 
         stringstream ss;
         if (demes.size() > 1)
@@ -464,7 +465,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         for (deme_cit deme_begin = demes[i].cbegin(),
                  deme_end = deme_begin + max_pot_cnd;
              deme_begin != demes[i].cend()
-                 && pot_candidates.size() < (i+1)*max_pot_cnd;)
+                 && pot_candidates.size() < total_max_pot_cnd;)
         {
             // logger().debug("ITERATING TILL TARGET REACHED (%u/%u) "
             //                "pot_candidates.size() = %u",
@@ -475,9 +476,9 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
             // update range
-            OC_ASSERT(pot_candidates.size() <= (i+1)*max_pot_cnd,
+            OC_ASSERT(pot_candidates.size() <= total_max_pot_cnd,
                       "there must be a bug");
-            unsigned delta = (i+1)*max_pot_cnd - pot_candidates.size();
+            unsigned delta = total_max_pot_cnd - pot_candidates.size();
             deme_begin = deme_end;
             deme_end = std::distance(deme_begin, demes[i].cend()) <= delta ?
                 demes[i].end() : deme_begin + delta;
