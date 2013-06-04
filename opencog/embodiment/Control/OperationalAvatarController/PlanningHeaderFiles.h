@@ -70,5 +70,7 @@ typedef opencog::pai::ParamValue StateValue;
      const pai::Vector vector_var[PARAMETER_NUM];
      const pai::Entity entity_var[PARAMETER_NUM];
 
+     bool isAVariableNumeric(std::string var);
+
 }}
 #endif

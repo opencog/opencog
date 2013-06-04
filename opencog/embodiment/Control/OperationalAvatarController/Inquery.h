@@ -33,7 +33,6 @@
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
 
-
 using namespace std;
 using namespace opencog;
 using namespace opencog::pai;
@@ -42,6 +41,9 @@ using namespace opencog::pai;
 // this class offer a series of inquery funciton according to different states
 
 namespace opencog { namespace oac {
+
+class State;
+class RuleLayerNode;
 
 class Inquery
 {
@@ -122,6 +124,13 @@ public:
     // to search for all the handles of the Entities meet the given condition from the Atomspace
     static HandleSeq findAllObjectsByGivenCondition(State* state);
 
+    // generate a node for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleLayerNode
+    // it can be a const node or a variable node
+    // this function is used by generatePMLinkFromAState()
+    static HandleSeq generatePMNodeFromeAStateValue(StateValue& stateValue, RuleLayerNode* ruleNode);
+
+    // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleLayerNode
+    static Handle generatePMLinkFromAState(State* state, RuleLayerNode* ruleNode);
 
 };
 

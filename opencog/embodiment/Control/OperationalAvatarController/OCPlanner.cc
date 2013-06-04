@@ -104,6 +104,7 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 }
 
+
 // basically, we only care about the satisfied degree of the numberic state
 bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  State* original_state)
 {
@@ -577,8 +578,110 @@ RuleLayerNode* OCPlanner::findFirstRealForwardRuleNode(StateLayerNode* stateNode
     }
 }
 
+void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode)
+{
+    if (ruleNode->curUngroundedVariables.size() != 0)
+        return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
+
+    map<string , vector<paramIndex> >::iterator paraIt = ruleNode->originalRule->paraIndexMap.begin();
+    ParamGroundedMapInARule::iterator bindIt = ruleNode->currentBindings.begin();
+    for( ; paraIt != ruleNode->originalRule->paraIndexMap.end(); ++ paraIt)
+    {
+        // try to find this variable name in the currentBindings
+        bindIt = ruleNode->currentBindings.find(paraIt->first);
+
+        // if cannot find it, it means this variable remains ungrounded, add it into the curUngroundedVariables
+        if (bindIt == ruleNode->currentBindings.end())
+        {
+            bool is_numeric_var = opencog::oac::isAVariableNumeric(paraIt->first);
+
+            vector<paramIndex>::iterator indexIt = (paraIt->second).begin();
+            for (; indexIt != (paraIt->second).end(); ++ indexIt)
+            {
+                list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
+                for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
+                {
+                    if (((UngroundedVariablesInAState&)(*uvIt)).state == ((paramIndex)(*indexIt)).first)
+                        break;
+                }
+
+                if (uvIt != ruleNode->curUngroundedVariables.end())
+                {
+                    ((UngroundedVariablesInAState&)(*uvIt)).vars.insert(paraIt->first);
+
+                    if (is_numeric_var)
+                        ((UngroundedVariablesInAState&)(*uvIt)).contain_numeric_var = true;
+
+                }
+                else
+                {
+                    ruleNode->curUngroundedVariables.push_back(UngroundedVariablesInAState(((paramIndex)(*indexIt)).first,paraIt->first));
+                }
+
+            }
+
+        }
+    }
+
+    // please see the operator < overloading function of UngroundedVariablesInAState for the sort rules
+    // the state need inquery is more difficult to ground, so it should gound later
+    // the numeric state should be grounded later
+    // the state with less ungrounded variables will be put in front of this list
+    ruleNode->curUngroundedVariables.sort();
+
+}
+
+//HandleSeq OCPlanner::findCandidatesByPatternMatching()
+//{
+
+//}
+
+
+// this function should be called after groundARuleNodeFromItsForwardState
 bool OCPlanner::groundARuleNodeBySelectingValues(RuleLayerNode *ruleNode)
 {
+    // First find all the ungrounded variables
+    findAllUngroundedVariablesInARuleNode(ruleNode);
+
+    // If there are multiple variables need to be grounded, the curUngroundedVariables list has already decided the order for grounding
+
+    // First, get all the non-need-real-time-inquery states as the conditions for mattern matching
+    // if cannot find any solution, then remove the last condition. Repeat this, till only have one condition left
+
+    // Because the curUngroundedVariables list has already been in order, so we just need to find out the first need-inquery one,
+    // and only select variables by pattern matching for the states before
+
+    // find the last state in the list curUngroundedVariables, which needs no real-time inquery state , and not numeric
+    int number_easy_state = -1;
+    list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
+    for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
+    {
+        number_easy_state ++;
+        if (((((UngroundedVariablesInAState&)(*uvIt)).state)->need_inquery )
+                || ((UngroundedVariablesInAState&)(*uvIt)).contain_numeric_var)
+            break;
+        else
+        {
+            // generate all the evaluationlink will be used to do pattern matching for each easy state
+            ((UngroundedVariablesInAState&)(*uvIt)).PMLink = Inquery::generatePMLinkFromAState((((UngroundedVariablesInAState&)(*uvIt)).state), ruleNode);
+        }
+    }
+
+    // TODO: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
+
+    // find all the canditates meet as many as possible preconditions
+    // first try all the combinations of  these in the
+    int tryTotalStateNum = number_easy_state;
+
+    while (tryTotalStateNum > 0)
+    {
+        for(int i = 0; i < number_easy_state; ++ i)
+        {
+
+        }
+        -- tryTotalStateNum;
+    }
+
 
 }
 

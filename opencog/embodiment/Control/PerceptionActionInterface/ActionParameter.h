@@ -277,6 +277,13 @@ public:
     bool isFuzzyIntervalIntValue() const;
     bool isFuzzyIntervalFloatValue() const;
 
+    static bool isStringValue(ParamValue value) ;
+    static bool isRotationValue(ParamValue value) ;
+    static bool isVectorValue(ParamValue value) ;
+    static bool isEntityValue(ParamValue value) ;
+    static bool isFuzzyIntervalIntValue(ParamValue value) ;
+    static bool isFuzzyIntervalFloatValue(ParamValue value) ;
+
     /**
      * Methods for getting the real value of the value attribute.
      * Before calling one of thes methods, the is<Type>Value() method
@@ -288,6 +295,13 @@ public:
     const Entity& getEntityValue() const;
     const FuzzyIntervalInt& getFuzzyIntervalIntValue() const;
     const FuzzyIntervalFloat& getFuzzyIntervalFloatValue() const;
+
+    static const string& getStringValue(ParamValue value) ;
+    static const Rotation& getRotationValue(ParamValue value) ;
+    static const Vector& getVectorValue(ParamValue value) ;
+    static const Entity& getEntityValue(ParamValue value) ;
+    static const FuzzyIntervalInt& getFuzzyIntervalIntValue(ParamValue value) ;
+    static const FuzzyIntervalFloat& getFuzzyIntervalFloatValue(ParamValue value) ;
 
     std::string stringRepresentation() const throw (opencog::RuntimeException, std::bad_exception);
     std::string static ParamValueToString(const ParamValue& paramVal);

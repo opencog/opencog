@@ -26,6 +26,7 @@
 #include <opencog/util/StringManipulator.h>
 #include <math.h>
 
+
 using namespace opencog::oac;
 
 const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
@@ -76,12 +77,13 @@ void State::assignValue(const StateValue& newValue)
     stateVariable->assignValue(newValue);
 }
 
-StateValue& State::getStateValue()
+StateValue State::getStateValue()
 {
     if (need_inquery)
-        stateVariable->assignValue(inqueryFun(stateOwnerList));
+        return inqueryFun(stateOwnerList);
+    else
+        return (Inquery::getStateValueFromAtomspace(*this));
 
-    return stateVariable->getValue();
 }
 
 // I am the goal, I want to check if this @param value is satisfied me
@@ -877,21 +879,21 @@ bool Rule::isRuleUnGrounded( Rule* rule)
 
 }
 
-void Rule::_addParameterIndex(StateValue& paramVal)
+void Rule::_addParameterIndex(State* s,StateValue& paramVal)
 {
     string paramToStr = ActionParameter::ParamValueToString(paramVal);
-    map<string , vector<StateValue*> >::iterator it;
+    map<string , vector<paramIndex> >::iterator it;
     it = paraIndexMap.find(paramToStr);
 
     if (it == paraIndexMap.end())
     {
-        vector<StateValue*> addresses;
-        addresses.push_back(&paramVal);
-        paraIndexMap.insert(std::pair<string , vector<StateValue*> >(paramToStr,addresses));
+        vector<paramIndex> addresses;
+        addresses.push_back(paramIndex(s,&paramVal));
+        paraIndexMap.insert(std::pair<string , vector<paramIndex> >(paramToStr,addresses));
     }
     else
     {
-        ((vector<StateValue*>)(it->second)).push_back(&paramVal);
+        ((vector<paramIndex>)(it->second)).push_back(paramIndex(s,&paramVal));
     }
 
 }
@@ -910,7 +912,7 @@ void Rule::_preProcessRuleParameterIndexes()
     // Check if the actor grounded
     if (isParamValueUnGrounded(actor))
     {
-        _addParameterIndex(actor);
+        _addParameterIndex(0,actor);
     }
 
     // check if all the preconditiion parameters grounded
@@ -924,12 +926,12 @@ void Rule::_preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                _addParameterIndex(*ownerIt);
+                _addParameterIndex(s,*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded(*(s->stateVariable)))
-                _addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s,s->stateVariable->getValue());
     }
 
     // Check if all the action parameters grounded
@@ -938,7 +940,7 @@ void Rule::_preProcessRuleParameterIndexes()
     for(it = parameters.begin(); it != parameters.end(); ++it)
     {
         if (isParameterUnGrounded(*it))
-            _addParameterIndex(((ActionParameter)(*it)).getValue());
+            _addParameterIndex(0,((ActionParameter)(*it)).getValue());
     }
 
     // Check if all the effect parameters grounded
@@ -953,16 +955,16 @@ void Rule::_preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                _addParameterIndex(*ownerIt);
+                _addParameterIndex(s,*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded( *(s->stateVariable)))
-                _addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s,s->stateVariable->getValue());
 
         // check the effect value
         if (isParamValueUnGrounded(e->opStateValue))
-            _addParameterIndex(e->opStateValue);
+            _addParameterIndex(s,e->opStateValue);
     }
 
     // Check if all the cost calcuation states parameters grounded
@@ -974,14 +976,13 @@ void Rule::_preProcessRuleParameterIndexes()
         for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
         {
             if (isParamValueUnGrounded(*ownerIt))
-                _addParameterIndex(*ownerIt);
+                _addParameterIndex(s,*ownerIt);
         }
 
         // check the state value
         if (isParameterUnGrounded( *(s->stateVariable)))
-                _addParameterIndex(s->stateVariable->getValue());
+                _addParameterIndex(s,s->stateVariable->getValue());
 
     }
-
 
 }

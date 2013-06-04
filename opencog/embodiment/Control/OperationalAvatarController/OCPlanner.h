@@ -27,13 +27,18 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <list>
+#include <string>
 #include <boost/variant.hpp>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/util/StringManipulator.h>
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
+
+
 
 using namespace std;
 using namespace opencog::pai;
@@ -48,6 +53,45 @@ class RuleLayer;
 class StateLayerNode;
 class StateLayer;
 
+
+struct UngroundedVariablesInAState
+{
+    State* state;
+    set<string> vars; // all the ungrounded variables in this state
+    bool contain_numeric_var;
+
+    // the evalutionlink for this state for using pattern matching
+    // default is undefined. only easy state that needs no real time inquery or contains no numeric variables will be generate such a link handle.
+    Handle PMLink;
+    UngroundedVariablesInAState(State* _state, string firstVar)
+    {
+        state = _state;
+        vars.insert(firstVar);
+        contain_numeric_var = opencog::oac::isAVariableNumeric(firstVar);
+        PMLink = Handle::UNDEFINED;
+    }
+
+    bool operator < (const UngroundedVariablesInAState& other) const
+    {
+        // the state need inquery is more difficult to ground, so it should gound later
+        if ( (! state->need_inquery) && (other.state->need_inquery))
+             return true;
+
+        if (( state->need_inquery) && (! other.state->need_inquery))
+            return false;
+
+        // the numeric state should be grounded later
+        if ( (! contain_numeric_var) && (other.contain_numeric_var))
+             return true;
+
+        if (( contain_numeric_var) && (! other.contain_numeric_var))
+            return false;
+
+
+        // if both states need inquery or do not need inquery, the states with less  ungrounded variables should be grounded first
+        return (vars.size() < other.vars.size());
+    }
+};
 
 // a rule node in a Rule Layer planning graph
 class RuleLayerNode
@@ -65,6 +109,11 @@ public:
     // these carry the heuristics information for the backward steps to select variable values
     // ungrounded, but the variable names should be consistent with its originalRule
     vector<CostHeuristic> costHeuristics;
+
+    // the variables remain ungrounded after groundARuleNodeFromItsForwardState
+    // should be in the order of grounding priority: who should be grounded frist, and who should be grounded secondly....
+    // the list of State* is all the States this variable appears in, and this State* list should also be in the order of the priority that which state should be satisfied first
+    list<UngroundedVariablesInAState> curUngroundedVariables;
 
     RuleLayerNode(Rule* _originalRule)
     {
@@ -232,10 +281,10 @@ public:
 
 };
 
+
 class OCPlanner
 {
 public:
-
      OCPlanner();
 
      // TODO:
@@ -248,6 +297,7 @@ public:
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
      bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
+
 
 public:
      Rule* DO_NOTHING_RULE;
@@ -289,6 +339,10 @@ protected:
      // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
 
+     // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
+     // Return the real forwardEffectState by the way
+     RuleLayerNode *findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState);
+
 
      // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
@@ -301,9 +355,14 @@ protected:
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
      bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
 
-     // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
-     // Return the real forwardEffectState by the way
-     RuleLayerNode *findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState);
+     // to create the curUngroundedVariables list in a rule node
+     // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
+     void findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode);
+
+
+//     void findCandidatesByPatternMatching(RuleLayerNode* ruleNode);
+
+     void findCandidateValuesByGA(RuleLayerNode* ruleNode);
 
 };
 
