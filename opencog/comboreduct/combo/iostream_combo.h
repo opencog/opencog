@@ -26,9 +26,9 @@
 #define _COMBO_IOSTREAM_PYTHON_H
 
 #include <iostream>
+#include <regex>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 
 #include "vertex.h"
 
@@ -114,8 +114,8 @@ void str_to_vertex(const std::string& str, vertex& v)
         // Any word character (alphanumeric characters plus the
         // underscore). If you find that too constraning feel free to
         // relax.
-        static const boost::regex e("[\\w-]+");
-        OC_ASSERT(boost::regex_match(str, e),
+        static const std::regex e("[\\w-]+");
+        OC_ASSERT(std::regex_match(str, e),
                   "Lexical error: '%s' cannot be a definite_object", str.c_str());
         v = str;
     }
