@@ -558,6 +558,13 @@ void Table::add_features_from_file(const string& input_file,
         
 // -------------------------------------------------------
 
+void CTable::set_labels(const vector<string>& labels)
+{
+    olabel = labels.front();
+    ilabels.clear();
+    ilabels.insert(ilabels.begin(), labels.begin() + 1, labels.end());
+}
+
 vector<string> CTable::get_labels() const
 {
     vector<string> labels = ilabels;
