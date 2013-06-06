@@ -238,16 +238,22 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
             // negative min_improv is interpreted as percentage of
             // improvement, if so then don't substract anything, since in that
             // scenario the absolute min improvent can be arbitrarily small
-            score_t actual_min_improv = std::max(_cscorer.min_improv(),
-                                                 (score_t)0);
-            deme_target_score -= actual_min_improv;
-            logger().info("Subtract %g (minimum significant improvement) "
-                          "from the target score to deal with float "
-                          "imprecision = %g",
-                          actual_min_improv, deme_target_score);
+            logger().info("It appears there is an algorithmic bug in "
+                          "precision_bscore::best_possible_bscore. "
+                          "Till not fixed we shall not rely on it to "
+                          "terminate deme search");
 
-            // update max score optimizer
-            _optimize.opt_params.terminate_if_gte = deme_target_score;
+            // TODO: re-enable that once best_possible_bscore is fixed
+            // score_t actual_min_improv = std::max(_cscorer.min_improv(),
+            //                                      (score_t)0);
+            // deme_target_score -= actual_min_improv;
+            // logger().info("Subtract %g (minimum significant improvement) "
+            //               "from the target score to deal with float "
+            //               "imprecision = %g",
+            //               actual_min_improv, deme_target_score);
+
+            // // update max score optimizer
+            // _optimize.opt_params.terminate_if_gte = deme_target_score;
         }
 
         // Optimize
