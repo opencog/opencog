@@ -419,7 +419,7 @@ behavioral_score discriminating_bscore::best_possible_bscore() const
     unsigned acc_cnt = 0;
     score_t acc_pos = 0.0,     // accumulation of positive
         acc_neg = 0.0,      // accumulation of negative
-        best_sc = 0.0,      // best score
+        best_sc = very_worst_score,      // best score
         best_vary = 0.0,    // best score varying component
         best_fixed = 0.0,   // the best score fixed component
         best_fixation_penalty = 0.0; // best score fixed component penalty
@@ -944,10 +944,6 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
 {
     penalized_bscore pbs;
 
-    // associate sum of worst outputs with number of observations for
-    // that sum
-    multimap<double, unsigned> worst_deciles;
-
     // Initial precision. No hits means perfect precision :)
     // Yes, zero hits is common, early on.
     score_t precision = 1.0;
@@ -989,7 +985,11 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
         }
 
     } else {
-    
+
+        // associate sum of worst outputs with number of observations for
+        // that sum
+        multimap<double, unsigned> worst_deciles;
+
         // compute active and sum of all active outputs
         for (const CTable::value_type& vct : wrk_ctable) {
             // vct.first = input vector
@@ -1090,7 +1090,7 @@ behavioral_score precision_bscore::best_possible_bscore() const
     // activation penalty at each step).
     unsigned active = 0;
     score_t sao = 0.0,
-        best_sc = 0.0,
+        best_sc = very_worst_score,
         best_precision = 0.0,
         best_activation = 0.0,
         best_activation_penalty = 0.0;
