@@ -117,8 +117,14 @@ void metapopulation::set_diversity()
 
             // compute diversity penalty between bs and the last
             // element of the pool
-            dp_t last_dst = this->_cached_dst(&bsct, last_ptr),
-            last_dp = params.diversity.dst2dp(last_dst),
+            dp_t last_dst = this->_cached_dst(&bsct, last_ptr);
+            OC_ASSERT(last_dst >= 0.0, "The distance cannot be negative."
+                      "There could be a bug or you are not using a true distance. "
+                      "For instance the Tanimoto distance may be negative "
+                      "when some of its components are negative. "
+                      "If that is the case you might want to switch to the angular "
+                      "distance.");
+            dp_t last_dp = params.diversity.dst2dp(last_dst),
             last_ddp = dp_max ? last_dp : pow(last_dp, params.diversity.exponent);
 
             // // debug
@@ -141,6 +147,16 @@ void metapopulation::set_diversity()
             if (params.diversity.dst2dp_type == params.diversity.pthpower)
                 get_composite_score(bsct).multiply_diversity = true;
             get_composite_score(bsct).set_diversity_penalty(adp);
+
+            if (logger().isFineEnabled()) {
+                stringstream ss;
+                ss << "Diversity for candidate: " << get_tree(bsct)
+                   << ", last_dst = " << last_dst
+                   << ", last_dp = " << last_dp
+                   << ", last_ddp = " << last_ddp
+                   << ", adp = " << adp;
+                logger().fine(ss.str());
+            }
         }
     };
 
@@ -419,6 +435,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         unsigned max_pot_cnd = std::min(evals_seq[i], (unsigned)demes[i].size());
         if (params.max_candidates >= 0)
             max_pot_cnd = std::min(max_pot_cnd, (unsigned)params.max_candidates);
+        unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
 
         stringstream ss;
         if (demes.size() > 1)
@@ -448,7 +465,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         for (deme_cit deme_begin = demes[i].cbegin(),
                  deme_end = deme_begin + max_pot_cnd;
              deme_begin != demes[i].cend()
-                 && pot_candidates.size() < (i+1)*max_pot_cnd;)
+                 && pot_candidates.size() < total_max_pot_cnd;)
         {
             // logger().debug("ITERATING TILL TARGET REACHED (%u/%u) "
             //                "pot_candidates.size() = %u",
@@ -459,9 +476,9 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
             OMP_ALGO::for_each(deme_begin, deme_end, select_candidates);
 
             // update range
-            OC_ASSERT(pot_candidates.size() <= (i+1)*max_pot_cnd,
+            OC_ASSERT(pot_candidates.size() <= total_max_pot_cnd,
                       "there must be a bug");
-            unsigned delta = (i+1)*max_pot_cnd - pot_candidates.size();
+            unsigned delta = total_max_pot_cnd - pot_candidates.size();
             deme_begin = deme_end;
             deme_end = std::distance(deme_begin, demes[i].cend()) <= delta ?
                 demes[i].end() : deme_begin + delta;

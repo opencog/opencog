@@ -450,6 +450,10 @@ Float p_norm_distance(const Vec& a, const Vec& b, Float p=1.0)
  * If a and b are binary vectors then this corresponds to the Jaccard
  * distance. Otherwise, anything goes, it's not even a true metric
  * anymore, but it could be useful anyway.
+ *
+ * Warning: if a and b have negative elements then the result could be
+ * negative. In that case you might prefer to use the angular
+ * distance.
  */
 template<typename Vec, typename Float>
 Float tanimoto_distance(const Vec& a, const Vec& b)

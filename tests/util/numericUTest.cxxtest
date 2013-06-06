@@ -111,7 +111,7 @@ public:
 
             float dst = tanimoto_distance<Vec, float>(a, b);
             TS_ASSERT_DELTA(dst, 0, 0.000001);
-        }        
+        }
     }
 
     void test_angular_distance() {
@@ -159,6 +159,6 @@ public:
 
                 float dst = angular_distance<Vec, float>(a, b, false);
             TS_ASSERT_EQUALS(dst, 0);
-        }        
+        }
     }
 };
