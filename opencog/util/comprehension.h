@@ -119,33 +119,48 @@ auto list_comp(const Container& c, const Function& func,
     return l;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Really weird for set_comp I'm getting the following error (gcc 4.7.3)                                                  //
+//                                                                                                                        //
+// [ 16%] Building CXX object opencog/comboreduct/CMakeFiles/comboreduct.dir/table/table_io.cc.o                          //
+// In file included from /home/nilg/OpenCog/opencog/opencog/comboreduct/table/table_io.cc:36:0:                           //
+// /home/nilg/OpenCog/opencog/opencog/util/comprehension.h:128:8: error: expected type-specifier                          //
+// /home/nilg/OpenCog/opencog/opencog/util/comprehension.h:128:8: error: expected initializer                             //
+// /home/nilg/OpenCog/opencog/opencog/util/comprehension.h:142:8: error: expected type-specifier                          //
+// /home/nilg/OpenCog/opencog/opencog/util/comprehension.h:142:8: error: expected initializer                             //
+//                                                                                                                        //
+// I might be is due to having table_io.cc use both boost and std namespace...                                            //
+//                                                                                                                        //
+// Anyway it's weird enough that I'd rather not even try to attempt fix that for now, I think it might well be a gcc bug. //
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 /**
  * set comprehension (STL functor version)
  */
-template<typename Container, typename Function, typename Filter = const_bool>
-auto set_comp(const Container& c, const Function& func,
-              const Filter& filter = default_filter)
-    -> std::set<typename Function::result_type>
-{
-    std::set<typename Function::result_type> v;
-    boost::transform(c | boost::adaptors::filtered(filter),
-                     std::inserter(v, v.end()), func);
-    return v;
-}
+// template<typename Container, typename Function, typename Filter = const_bool>
+// auto set_comp(const Container& c, const Function& func,
+//               const Filter& filter = default_filter)
+//     -> std::set<typename Function::result_type>
+// {
+//     std::set<typename Function::result_type> s;
+//     boost::transform(c | boost::adaptors::filtered(filter),
+//                      std::inserter(s, s.end()), func);
+//     return s;
+// }
 
 /**
  * set comprehension (lambda version)
  */
-template<typename Container, typename Function, typename Filter = const_bool>
-auto set_comp(const Container& c, const Function& func,
-              const Filter& filter = default_filter)
-    -> std::set<decltype(func(std::declval<typename Container::value_type>()))>
-{
-    std::set<decltype(func(std::declval<typename Container::value_type>()))> v;
-    boost::transform(c | boost::adaptors::filtered(filter),
-                     std::inserter(v, v.end()), func);
-    return v;
-}
+// template<typename Container, typename Function, typename Filter = const_bool>
+// auto set_comp(const Container& c, const Function& func,
+//               const Filter& filter = default_filter)
+//     -> std::set<decltype(func(std::declval<typename Container::value_type>()))>
+// {
+//     std::set<decltype(func(std::declval<typename Container::value_type>()))> v;
+//     boost::transform(c | boost::adaptors::filtered(filter),
+//                      std::inserter(v, v.end()), func);
+//     return v;
+// }
 
 }
 
