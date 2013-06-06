@@ -955,6 +955,12 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
     if (precision_full_bscore) {
         // compute active and sum of all active outputs
         for (const CTable::value_type& vct : wrk_ctable) {
+            // for debugging, keep that around till we fix best_possible_bscore
+            // {
+            //     stringstream ss;
+            //     ostreamCTableRow(ss, vct);
+            //     logger().fine(ss.str());
+            // }
             const auto& ct = vct.second;
             double sumo = 0.0;
             if (interpret_tr(vct.first.get_variant()) == id::logical_true) {
@@ -962,6 +968,10 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
                 sao += sumo;
                 active += ct.total_count();
             }
+            // for debugging, keep that around till we fix best_possible_bscore
+            // logger().fine("sumo = %g, sao = %g, active = %u, is_true = %d",
+            //               sumo, sao, active,
+            //               interpret_tr(vct.first.get_variant()) == id::logical_true);
             pbs.first.push_back(sumo);
         }
 
@@ -1078,6 +1088,11 @@ behavioral_score precision_bscore::best_possible_bscore() const
         double sumo = sum_outputs(c);
         unsigned total = c.total_count();
         double precision = sumo / total;
+
+        // for debugging, keep that around till we fix best_possible_bscore
+        // logger().fine("sumo = %g, total = %u, precision = %g",
+        //               sumo, total, precision);
+
         auto lmnt = std::make_pair(precision, std::make_pair(sumo, total));
         max_precisions.insert(lmnt);
     }
@@ -1122,6 +1137,10 @@ behavioral_score precision_bscore::best_possible_bscore() const
             best_activation = activation;
             best_activation_penalty = activation_penalty;
         }
+
+        // for debugging, keep that around till we fix best_possible_bscore
+        // logger().fine("sao = %g, active = %u, precision = %g, activation = %g, activation_penalty = %g, sc = %g, best_sc = %g, best_precision = %g, best_activation = %g, best_activation_penalty = %g", sao, active, precision, activation, activation_penalty, sc, best_sc, best_precision, best_activation, best_activation_penalty);
+
         // halt if min_activation is reached
         if (ctable_usize * min_activation <= active)
             break;
@@ -1158,7 +1177,13 @@ score_t precision_bscore::min_improv() const
 
 void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
 {
-    logger().debug("Compress CTable for optimization");
+    if (logger().isDebugEnabled())
+    {
+        stringstream ss;
+        ss << "Compress CTable for optimization by ignoring features: ";
+        ostreamContainer(ss, idxs, ",");
+        logger().debug(ss.str());
+    }
 
     // Get permitted idxs.
     auto irng = boost::irange(0, orig_ctable.get_arity());
@@ -1168,8 +1193,27 @@ void precision_bscore::ignore_idxs(const std::set<arity_t>& idxs) const
     // Filter orig_table with permitted idxs.
     wrk_ctable = orig_ctable.filtered_preverse_idxs(permitted_idxs);
 
+    // for debugging, keep that around till we fix best_possible_bscore
+    // fully_filtered_ctable = orig_ctable.filtered(permitted_idxs);
+
     logger().debug("Original CTable size = %u", orig_ctable.size());
     logger().debug("Working CTable size = %u", wrk_ctable.size());
+
+    if (logger().isFineEnabled()) {
+        {
+            stringstream ss;
+            ss << "wrk_ctable =" << endl;
+            ostreamCTable(ss, wrk_ctable);
+            logger().fine(ss.str());
+        }
+        // for debugging, keep that around till we fix best_possible_bscore
+        // {
+        //     stringstream ss;
+        //     ss << "fully_filtered_ctable =" << endl;
+        //     ostreamCTable(ss, fully_filtered_ctable);
+        //     logger().fine(ss.str());
+        // }
+    }
 }
 
 combo_tree precision_bscore::gen_canonical_best_candidate() const
