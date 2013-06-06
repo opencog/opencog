@@ -863,25 +863,30 @@ ostream& ostreamCTableHeader(ostream& out, const CTable& ct)
     return ostreamlnContainer(out, ct.get_labels(), ",");
 }
 
-ostream& ostreamCTable(ostream& out, const CTable& ct)
+ostream& ostreamCTableRow(ostream& out, const CTable::value_type& ctv)
 {
     to_strings_visitor tsv;
     auto ats = boost::apply_visitor(tsv);
+    // print map of outputs
+    out << "{";
+    for(auto it = ctv.second.begin(); it != ctv.second.end();) {
+        out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
+        if(++it != ctv.second.end())
+            out << ",";
+    }
+    out << "},";
+    // print inputs
+    return ostreamlnContainer(out, ats(ctv.first.get_variant()), ",");
+}
+
+ostream& ostreamCTable(ostream& out, const CTable& ct)
+{
     // print header
     ostreamCTableHeader(out, ct);
     // print data
-    for (const auto& v : ct) {
-        // print map of outputs
-        out << "{";
-        for(auto it = v.second.begin(); it != v.second.end();) {
-            out << table_fmt_vertex_to_str(it->first) << ":" << it->second;
-            if(++it != v.second.end())
-                out << ",";
-        }
-        out << "},";
-        // print inputs
-        ostreamlnContainer(out, ats(v.first.get_variant()), ",");
-    }
+    for (const auto& v : ct)
+        ostreamCTableRow(out, v);
+
     return out;
 }
 

@@ -310,6 +310,7 @@ Out& ostreamTable(Out& out, const Table& table)
 void saveTable(const std::string& file_name, const Table& table);
 
 /// output a compressed table in pseudo CSV format
+std::ostream& ostreamCTableRow(std::ostream& out, const CTable::value_type& ctv);
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
 
 /**
