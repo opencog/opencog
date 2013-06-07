@@ -754,3 +754,51 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleLayerNode* ruleNode)
 
 }
 
+
+HandleSeq Inquery::findCandidatesByPatternMatching(RuleLayerNode *ruleNode, vector<int> &stateIndexes)
+{
+    HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+
+    set<string> allVariables;
+    for(int i = 0; i < stateIndexes.size() ; ++ i)
+    {
+        int index = stateIndexes[i];
+        list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+        for(int x = 0; x <= index; ++x)
+             ++ it;
+
+        UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+        vector<string> tempVariables;
+        set_union(allVariables.begin(),allVariables.end(),record.vars.begin(),record.vars.end(),tempVariables.begin());
+        allVariables = set<string>(tempVariables.begin(),tempVariables.end());
+        andLinkOutgoings.push_back(record.PMLink);
+    }
+
+    set<string>::iterator itor = allVariables.begin();
+    for(;itor != allVariables.end(); ++ itor)
+        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
+
+    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
+    Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
+
+    implicationLinkOutgoings.push_back(hAndLink);
+    implicationLinkOutgoings.push_back(hVariablesListLink);
+    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(atomSpace);
+
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink
+    std::vector<Handle> resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
+
+
+}

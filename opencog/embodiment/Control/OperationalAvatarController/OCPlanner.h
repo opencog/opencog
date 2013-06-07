@@ -49,10 +49,7 @@ using namespace boost;
 
 namespace opencog { namespace oac {
 
-class RuleLayer;
 class StateLayerNode;
-class StateLayer;
-
 
 struct UngroundedVariablesInAState
 {
@@ -87,11 +84,11 @@ struct UngroundedVariablesInAState
         if (( contain_numeric_var) && (! other.contain_numeric_var))
             return false;
 
-
         // if both states need inquery or do not need inquery, the states with less  ungrounded variables should be grounded first
         return (vars.size() < other.vars.size());
     }
 };
+
 
 // a rule node in a Rule Layer planning graph
 class RuleLayerNode
@@ -101,7 +98,6 @@ public:
 
     ParamGroundedMapInARule currentBindings; // the current bindings of variables
 
-    RuleLayer* ruleLayer; // the layer it belongs to
     set<StateLayerNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
     set<StateLayerNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
@@ -115,10 +111,27 @@ public:
     // the list of State* is all the States this variable appears in, and this State* list should also be in the order of the priority that which state should be satisfied first
     list<UngroundedVariablesInAState> curUngroundedVariables;
 
+//    // to store the history of variables groundings
+//    vector<ParamGroundedMapInARule> ParamGroundedHistories;
+
+    // to store the candidates of variables groundings
+    vector<ParamGroundedMapInARule> ParamCandidates;
+
+    // How many times of this rule has been tried with different variable bindings in this rule node.
+    // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
+    int getAppliedTimes()
+    {
+        return ParamGroundedHistories.size();
+    }
+
+    // some times, we need to mark a rule as not useful anymore after trying it and fail.(e.g. have tried every variable binding and still fail)
+    bool still_useful;
+
     RuleLayerNode(Rule* _originalRule)
     {
         originalRule = _originalRule;
         costHeuristics.clear();
+        still_useful = true;
     }
 
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
@@ -133,28 +146,6 @@ public:
 
 };
 
-// the already tried variable bindings history for one rule for achieve one planning state
-struct OneRuleHistory
-{
-    vector<ParamGroundedMapInARule> ParamGroundedHistories;
-
-    // How many times of this rule has been tried with different variable binding.
-    // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
-    int appliedTimes;
-
-    // some times, we need to mark a rule as not useful anymore after try it and fail.(e.g. have tried every variable binding and still fail)
-    bool still_useful;
-
-    // the first time a new is tried , creat a history struct for it
-    OneRuleHistory(ParamGroundedMapInARule firstBindingRecord)
-    {
-        appliedTimes = 1;
-        still_useful = true;
-        ParamGroundedHistories.push_back(firstBindingRecord);
-    }
-};
-
-
 class StateLayerNode
 {
 public:
@@ -167,116 +158,21 @@ public:
 
     State* state;
     ACHIEVE_STATE isAchieved;
-    StateLayer* stateLayer; // the layer it belongs to
     RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0;}
+    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; triedTimes = 0;}
 
-    // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
-    // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
-    // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
-    // Rule* is pointing to one of the rules in the OCPlanner::AllRules
-    map<Rule*, OneRuleHistory> ruleHistory;
+    // candidate rules to achieve this state, in the order of the priority to try the rule
+    // the already be tried and failed rules will be removed from this vector
+    vector<Rule*> candidateRules;
 
-    void addRuleRecordWithVariableBindingsToHistory(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
+    // how many rules has been tried to achieve this state node
+    int triedTimes;
+
+    ~StateLayerNode()
     {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        // this rule has not been applied on me before, add a new record before
-        if (it == ruleHistory.end())
-        {
-            ruleHistory.insert(std::pair<Rule*, OneRuleHistory >(r, OneRuleHistory(paramGroundingMap)));
-        }
-        else
-        {
-            (((OneRuleHistory)(it->second)).ParamGroundedHistories).push_back(paramGroundingMap);
-        }
-
-    }
-
-    // check if this rule with this specific variables bindings has been applied to achieve this state node before
-    bool checkIfBindingsHaveBeenApplied(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
-    {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return false;
-
-        vector<ParamGroundedMapInARule> ParamGroundedHistories = (((OneRuleHistory)(it->second)).ParamGroundedHistories);
-        vector<ParamGroundedMapInARule>::iterator paramMapit = ParamGroundedHistories.begin();
-        for (;paramMapit != ParamGroundedHistories.end(); ++ paramMapit)
-        {
-            if (paramGroundingMap == (ParamGroundedMapInARule)(*paramMapit) )
-                return true;
-        }
-
-        return false;
-
-    }
-
-    int getRuleAppliedTime(Rule* r)
-    {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return 0;
-
-        return ((OneRuleHistory)(it->second)).appliedTimes;
-
-    }
-
-    bool IsRuleStillUsefule(Rule* r)
-    {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return true;
-
-        return ((OneRuleHistory)(it->second)).still_useful;
-    }
-
-};
-
-
-class StateLayer
-{
-public:
-    set<StateLayerNode*> nodes; // all the nodes in this layer currently
-
-    RuleLayer* preRuleLayer;
-    RuleLayer* nextRuleLayer;
-
-    StateLayer()
-    {
-        preRuleLayer = 0;
-        nextRuleLayer = 0;
-    }
-
-    StateLayer(const vector<State*>& _states)
-    {
-        vector<State*>::const_iterator it;
-        for (it = _states.begin(); it != _states.end(); ++ it)
-        {
-            StateLayerNode* newStateNode = new StateLayerNode(*it);
-            nodes.insert(newStateNode);
-            newStateNode->backwardRuleNode = 0;
-            newStateNode->forwardRuleNode = 0;
-        }
-
-        StateLayer();
-    }
-};
-
-
-
-class RuleLayer
-{
-public:
-    set<RuleLayerNode*> nodes; // all the nodes in this layer currently
-
-    StateLayer* preStateLayer;
-    StateLayer* nextStateLayer;
-    RuleLayer()
-    {
-        preStateLayer = 0;
-        nextStateLayer = 0;
+        delete state;
     }
 
 };
@@ -297,10 +193,6 @@ public:
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
      bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
-
-
-public:
-     Rule* DO_NOTHING_RULE;
 
 protected:
 
@@ -341,8 +233,7 @@ protected:
 
      // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
      // Return the real forwardEffectState by the way
-     RuleLayerNode *findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState);
-
+     RuleLayerNode* findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState, StateLayerNode* &mostForwardSameStateNode);
 
      // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
@@ -360,9 +251,21 @@ protected:
      void findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode);
 
 
-//     void findCandidatesByPatternMatching(RuleLayerNode* ruleNode);
-
      void findCandidateValuesByGA(RuleLayerNode* ruleNode);
+
+     // the same state node is possible to be copied for many times by adding DO_NOTHING rule nodes.
+     // find the last backword same state node
+     StateLayerNode* findTheLastBackwardSameStateNode(StateLayerNode* stateNode);
+
+     // replace the state from startStateNode in all the backward state nodes which are all created by DO_NOTHING rule nodes, with newState
+     // including this startStateNode
+     void replaceStateTillBackWardEnd(StateLayerNode* startStateNode, State* newState);
+
+     // create a branch all full of DO_NOTHING rule nodes to bring this startStateNode backward till the end of current planning layer
+     void createDO_NOTHINGBranchTillBackWardEnd(StateLayerNode* startStateNode);
+
+     // including the startStateNode
+     void deleteABackWardDO_NOTHINGBranch(StateLayerNode* startStateNode);
 
 };
 

@@ -902,7 +902,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace & atomSpa
 std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq &hNonFirstOutgoings)
 {
     // Create BindLink used by pattern matcher
-    std::vector<Handle> evaluationLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+    std::vector<Handle> implicationLinkOutgoings, bindLinkOutgoings;
 
     Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
 

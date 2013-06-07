@@ -361,7 +361,7 @@ namespace opencog { namespace oac {
         // in some planning step, need to ground some state to calculate the cost or others
         // return a new state which is the grounded version of s, by a parameter value map
         // if the "groundings" cannot ground all the variables in this state, return 0
-        State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
+       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
 
         bool static isRuleUnGrounded( Rule* rule);
 
