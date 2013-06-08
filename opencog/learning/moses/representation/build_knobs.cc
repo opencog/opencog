@@ -452,7 +452,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     }
 
     // Negative one correspnds to no pairs.
-    if (_perm_ratio < -1.0)
+    if (_perm_ratio <= -1.0)
         return;
 
     // Also create n random pairs op($i $j) out of the total number
@@ -497,8 +497,13 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         n_pairs = static_cast<size_t>(floor(ps + _perm_ratio * (max_pairs - ps)));
     else
         n_pairs = static_cast<size_t>(floor((1.0 + _perm_ratio) * ps));
+        if (ps < n_pairs) n_pairs = 0;  // Avoid accidental rounding to MAX_UINT
 
-    logger().debug() << "Logical knob pairs to create: "<< n_pairs;
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "perms.size: " << ps
+                         << " max_pairs: " << max_pairs
+                         << " logical knob pairs to create: "<< n_pairs;
+    }
 
     dorepeat (n_pairs) {
         size_t i = randpair();
