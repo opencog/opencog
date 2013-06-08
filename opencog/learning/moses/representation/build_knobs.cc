@@ -495,9 +495,10 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     size_t n_pairs = 0;
     if (0.0 < _perm_ratio)
         n_pairs = static_cast<size_t>(floor(ps + _perm_ratio * (max_pairs - ps)));
-    else
+    else {
         n_pairs = static_cast<size_t>(floor((1.0 + _perm_ratio) * ps));
         if (ps < n_pairs) n_pairs = 0;  // Avoid accidental rounding to MAX_UINT
+    }
 
     if (logger().isDebugEnabled()) {
         logger().debug() << "perms.size: " << ps
