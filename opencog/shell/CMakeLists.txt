@@ -1,3 +1,19 @@
+INCLUDE_DIRECTORIES(
+    ${PYTHON_INCLUDE_PATH}
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+ADD_LIBRARY (py-shell SHARED
+        GenericShell
+        PythonShellModule
+        PythonShell
+)
+
+TARGET_LINK_LIBRARIES(py-shell
+        PythonEval
+        server
+)
 
 ADD_LIBRARY (scheme-shell SHARED
 	GenericShell
