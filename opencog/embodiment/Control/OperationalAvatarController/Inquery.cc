@@ -635,7 +635,7 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
 
 
 
-HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleLayerNode* ruleNode)
+HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNode* ruleNode)
 {
     HandleSeq results;
 
@@ -720,7 +720,7 @@ HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleLa
 }
 
 // return an EvaluationLink with variableNodes for using Pattern Matching
-Handle Inquery::generatePMLinkFromAState(State* state, RuleLayerNode* ruleNode)
+Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
 {
 
     // Create evaluationlink used by pattern matcher
@@ -755,7 +755,7 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleLayerNode* ruleNode)
 }
 
 
-HandleSeq Inquery::findCandidatesByPatternMatching(RuleLayerNode *ruleNode, vector<int> &stateIndexes)
+HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes)
 {
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
 

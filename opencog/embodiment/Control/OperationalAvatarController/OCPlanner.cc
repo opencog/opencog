@@ -161,6 +161,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 {
     originalStatesCache.clear();
 
+    int ruleNodeCount = 0;
+
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
     SpaceServer::SpaceMap* clonedMap = spaceServer().cloneTheLatestSpaceMap();
@@ -173,278 +175,180 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
     // Because our embodiment game world is not a simple finite boolean-state world, we cannot use a full forward breadth-frist which will be too slowly
 
-    // Firstly, we construct the goal state node set
-    set<StateLayerNode*> goalStateNodes;
+    // Firstly, we construct the original unsatisfiedStateNodes and satisfiedStateNodes from the input goals
+    set<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
+    set<StateNode*> satisfiedStateNodes;// all the state nodes that have been satisfied during planning process
     vector<State*>::const_iterator it;
     for (it = goal.begin(); it != goal.end(); ++ it)
     {
-        StateLayerNode* newStateNode = new StateLayerNode(*it);
-        goalStateNodes.insert(newStateNode);
+        float satisfiedDegree;
+        StateNode* newStateNode = new StateNode(*it);
+
         newStateNode->backwardRuleNode = 0;
         newStateNode->forwardRuleNode = 0;
+
+        if (checkIsGoalAchieved(*(newStateNode->state), satisfiedDegree))
+        {
+            newStateNode->isAchieved = StateNode::ACHIEVED;
+            satisfiedStateNodes.insert(newStateNode);
+        }
+        else
+        {
+            newStateNode->isAchieved = StateNode::NOT_ACHIEVED;
+            unsatisfiedStateNodes.insert(newStateNode);
+        }
+
     }
 
-    // planning process: All the rules should be grounded during planning.
-
-    set<StateLayerNode*>::iterator stateLayerIter;
-    while(true)
+    while(unsatisfiedStateNodes.size() != 0)
     {
+        StateNode* selectedStateNode;
+        Rule* selectedRule = 0;
 
-        // first for loop, find a unsatisfied state
-        // todo: there should some function to decide the order that which state should be achieved frist
+        //  todo: there should be some way to decide which state should be chosed to achieved first
+        //  for (stateNodeIter = unsatisfiedStateNodes->nodes.begin(); stateNodeIter != unsatisfiedStateNodes->nodes.end();++stateNodeIter)
 
-        bool goalsAllAchieved = true;
-        float satisfiedDegree;
-        bool alreadyDealOneState = false;
+        StateNode* curStateNode = (StateNode*)(*stateNodeIter);
 
-        StateLayerNode* selectedStateNode;
-        Rule* selectedRule;
-
-        for (stateLayerIter = goalStateNodes->nodes.begin(); stateLayerIter != goalStateNodes->nodes.end();++stateLayerIter)
+        // if we have not tried to achieve this state node before, find all the candidate rules first
+        if (triedTimes == 0)
         {
-            StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
+            map<string,map<float,Rule*> >::iterator it;
+            it = ruleEffectIndexes.find(curStateNode->state->name());
 
-            // some state has been checked in last circle, so we only need to check the states remain unknown
-            if (curStateNode->isAchieved == StateLayerNode::ACHIEVED)
-                continue;
+            // Select a rule to apply
 
-            if ((curStateNode->isAchieved == StateLayerNode::UNKNOWN))
+            map<float,Rule*> rules = (map<float,Rule*>)(it->second);
+
+            if ( rules.size() == 1)
             {
-                if (checkIsGoalAchieved(*(curStateNode->state), satisfiedDegree))
+                // if there is one rule to achieve this goal, just select it
+                selectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
+            }
+            else
+            {
+
+                // if there are multiple rules,choose the most suitable one
+
+                // For non-numberic goals:
+                // 1. This rule has not been applied in this layer for this state before,
+                //    or it has been applied but has not been used up yet (it only has been tried some variables for this rule, still can try other variables)
+                // 2. todo: with the highest fitness for the current heuristics, currently we don't consider heuristics for non-numberic goals
+
+                // Generate a score for each rules based on above criterions:
+                // score = probability (35%) + lowest cost (35%)
+                // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
+
+                float highestScore = 0.0;
+                map<float,Rule*> ::iterator ruleIt;
+
+                for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {
-                    curStateNode->isAchieved = StateLayerNode::ACHIEVED;
-                    continue;
+                    Rule* r = ruleIt->second;
+
+                    // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
+                    // So here we just use the basic cost of every rule as the cost value.
+                    float curRuleScore = 0.3f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.35f* ruleIt->first + 0.35*(1.0f - r->getBasicCost());
+                    if (r->IsRecursiveRule)
+                        curRuleScore += 0.5f;
+
+                    if (curRuleScore > highestScore)
+                    {
+                        selectedRule = r;
+                        highestScore = curRuleScore;
+                    }
                 }
-                else
+
+                selectedStateNode = curStateNode;
+
+            }
+        }
+        else //  we have  tried to achieve this state node before,which suggests we have found all the candidate rules
+        {
+
+            // check if there is any rule left not been tried in the candidate rules
+            if (curStateNode->candidateRules.size() != 0)
+            {
+                selectedRule = curStateNode->candidateRules.front();
+                curStateNode->candidateRules.erase(curStateNode->candidateRules.begin());
+            }
+            else
+            {
+                // we have tried all the candidate rules, still cannot achieve this state, which means this state is impossible to be achieved here
+                // so go back to the its foward rule which produce this state to check if we can apply another bindings to the same rule or we shoud try another rule
+
+                RuleNode* forwardRuleNode = curStateNode->forwardRuleNode;
+
+                if (forwardRuleNode == 0)
                 {
-                    curStateNode->isAchieved = StateLayerNode::NOT_ACHIEVED;
-                    goalsAllAchieved = false;
+                    // oh, this state node is already the goal state node, and it's impossible to achieve, return planning fail
+                    return false;
+                }
+
+                // check which states of the effects of this forwardRuleNode have been sovled , which still remand unsloved.
+                set<StateNode*>::iterator effectItor;
+                set<StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
+                for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                {
+                    // skip the current state node
+                    if ((*effectItor) == curStateNode)
+                        continue;
+
+                    if ((*effectItor)->backwardRuleNode != 0)
+                    {
+                        // currently , this state node has already been tried a backward rule to solve it
+                        // so put it in the solvedStateNodes set
+                        solvedStateNodes.insert(*effectItor);
+                    }
+                }
+
+                // If all the effect states of this  forwardRuleNode remand unsolved,
+                // which suggests try another random group of candidate bindings will not affect the planning step that has been conducted
+                // so just try any other bindings for this rule node
+                if (solvedStateNodes.size() == 0)
+                {
+                    if (forwardRuleNode->ParamCandidates.size() == 0)
+                    {
+                        // we have tried all the Candidate bindings in previous steps,
+                        // so it means this rule doesn't work, we have to go back to its forward state node
+
+                        // Remove this rule from the candidate ruls of all its foward state nodes
+                        // and move all its foward state nodes from satisfiedStateNodes to unsatisfiedStateNodes
+                        set<StateNode*>::iterator forwardStateIt;
+                        for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
+                        {
+                            ((StateNode*)(*forwardStateIt))->candidateRules.erase(forwardRuleNode->originalRule);
+                            satisfiedStateNodes.erase(*forwardStateIt);
+                            unsatisfiedStateNodes.insert(*forwardStateIt);
+                        }
+
+                        deleteRuleNode(forwardRuleNode);
+
+                    }
+                    else // still have Candidate bindings to try
+                    {
+                       // TODO: just try a new binding to ground the effect states
+                    }
+                }
+                else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
+                {
+                    // try to find a group of bindings from the candidates, that won't affect the solved states
+
+                    // if cannot find any , try to find a group of candidate bindings will affect as few as possible solved states
+
+                    // have to delete the affected effect states' branches
+
                 }
 
             }
-
-            // if this state has been achieved , then it has been continue above.
-            // only a state has not been achieved will come to here
-            OC_ASSERT(curStateNode->isAchieved == StateLayerNode::NOT_ACHIEVED, "OCPLanner::doPlanning: The state " + curStateNode->state->name() + "is not not-achieved!/n");
-
-            // In every planning step, we only deal with one un_achieved state
-            if (alreadyDealOneState)
-                continue;           
-
-            alreadyDealOneState = true;
-
-            // if we have not tried to achieve this state node before, find all the candidate rules first
-            if (triedTimes == 0)
-            {
-                map<string,map<float,Rule*> >::iterator it;
-                it = ruleEffectIndexes.find(curStateNode->state->name());
-
-                // Select a rule to apply
-
-                map<float,Rule*> rules = (map<float,Rule*>)(it->second);
-
-                if ( rules.size() == 1)
-                {
-                    // if there is one rule to achieve this goal, just select it
-                    selectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
-
-                    // check in the rule using history for achieving this state, if found this rule bas been marked as not useful, then break
-
-                }
-                else
-                {
-
-                    // if there are multiple rules,choose the most suitable one
-
-                    // For non-numberic goals:
-                    // 1. This rule has not been applied in this layer for this state before,
-                    //    or it has been applied but has not been used up yet (it only has been tried some variables for this rule, still can try other variables)
-                    // 2. todo: with the highest fitness for the current heuristics, currently we don't consider heuristics for non-numberic goals
-
-
-                    // Generate a score for each rules based on above criterions:
-                    // score = probability (35%) + lowest cost (35%)
-                    // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
-
-                    float highestScore = 0.0;
-                    map<float,Rule*> ::iterator ruleIt;
-                    bool allRulesUnuseful = true;
-                    for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
-                    {
-                        Rule* r = ruleIt->second;
-
-                        // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
-                        // So here we just use the basic cost of every rule as the cost value.
-                        float curRuleScore = 0.3f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.35f* ruleIt->first + 0.35*(1.0f - r->getBasicCost());
-                        if (r->IsRecursiveRule)
-                            curRuleScore += 0.5f;
-
-                        if (curRuleScore > highestScore)
-                        {
-                            selectedRule = r;
-                            highestScore = curRuleScore;
-                        }
-                    }
-
-                    // if find all the possible rules are already useless for current state (all rules have been tried but failed)
-                    // it suggests that the current state is impossible to achieve, so that we need to go back to last step
-                    if (allRulesUnuseful)
-                    {
-                        // TODO: we have to delete the current state layer and the forward rule layer
-
-
-                        curStateLayer = curStateLayer->preRuleLayer->preStateLayer;
-                    }
-
-                    selectedStateNode = curStateNode;
-
-                }
-            }
-            else //  we have  tried to achieve this state node before,which suggests we have found all the candidate rules
-            {
-                // check if there is any rule left not been tried in the candidate rules
-                if (curStateNode->candidateRules.size() != 0)
-                {
-                    selectedRule = curStateNode->candidateRules.front();
-                    curStateNode->candidateRules.erase(curStateNode->candidateRules.begin());
-                }
-                else
-                {
-                    // we have tried all the candidate rules, still cannot achieve this state, which means this state is impossible to be achieved here
-                    // so delete this state node and state layer, go back to the its foward ancestor rule layer which produce this state
-                    // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
-                    State* forwardEffectState;
-                    StateLayerNode* mostForwardSameStateNode;
-
-                    RuleLayerNode* realForwardRuleNode = findFirstRealForwardRuleNode(curStateNode, forwardEffectState, mostForwardSameStateNode);
-
-                    // check which states of the effects of this realForwardRuleNode have been sovled , which still remand unsloved.
-                    set<StateLayerNode*>::iterator effectItor;
-                    set<StateLayerNode*> solvedStateNodes; // all the state nodes in realForwardRuleNode's effects that have been solved by previous planning steps
-                    for (effectItor = realForwardRuleNode->backwardLinks.begin(); effectItor != realForwardRuleNode->backwardLinks.end(); ++ effectItor)
-                    {
-                        // skip the current state node
-                        if ((*effectItor) == mostForwardSameStateNode)
-                            continue;
-
-                        StateLayerNode* lastSameStateNode = findTheLastBackwardSameStateNode(*effectItor);
-                        if (lastSameStateNode->backwardRuleNode != 0)
-                        {
-                            // currently , this state node has other rules that have solved it rather than DO_NOTHING rule to keep the state
-                            // so put it in the solvedStateNodes set
-                            solvedStateNodes.insert(*effectItor);
-                        }
-                    }
-
-                    // If all the effect states of this  realForwardRuleNode remand unsolved,
-                    // which suggests try another random group of candidate bindings will not affect the planning step that has been conducted
-                    // so just try any other bindings for this rule node
-                    if (solvedStateNodes.size() == 0)
-                    {
-                        if (realForwardRuleNode->ParamCandidates.size() == 0)
-                        {
-                            // we have tried all the Candidate bindings in previous steps,
-                            // so it means this rule doesn't work, we have to go back to its forward state node
-
-                            // remove this rule from the candidate ruls of all its foward state nodes
-                            set<StateLayerNode*>::iterator forwardStateIt;
-                            for (realForwardRuleNode->forwardLinks.begin(); forwardStateIt != realForwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
-                                ((StateLayerNode*)(*forwardStateIt))->candidateRules.erase(realForwardRuleNode->originalRule);
-
-                                // delete all the other DO_NOTHING branches, only keep the current DO_NOTHING branch
-                                for (effectItor = realForwardRuleNode->backwardLinks.begin(); effectItor != realForwardRuleNode->backwardLinks.end(); ++ effectItor)
-                                {
-                                    // skip the current state node branch
-                                    if ((*effectItor) == mostForwardSameStateNode)
-                                        continue;
-
-                                    deleteABackWardDO_NOTHINGBranch(*effectItor);
-                                }
-
-                                // change the realForwardRuleNode as a DO_NOTHING rule to bring the forward state node to current layer
-                                realForwardRuleNode->originalRule = this->DO_NOTHING_RULE;
-                                realForwardRuleNode->costHeuristics.clear();
-                                realForwardRuleNode->currentBindings.clear();
-                                realForwardRuleNode->curUngroundedVariables.clear();
-                                realForwardRuleNode->ParamCandidates.clear();
-
-                                // so that we bring this forward state node  till the end of current planning layer
-                                replaceStateTillBackWardEnd(curStateNode,realForwardRuleNode->forwardLinks.front());
-
-                                // if this realForwardRuleNode has more than one forward state nodes
-                                // create a DO_NOTHING branch for each state nodes to bring all of them to the end of current planning layer
-                                forwardStateIt = realForwardRuleNode->forwardLinks.begin();
-                                ++ forwardStateIt; // we have the forwardLinks.front(), so start from the second element
-                                for (; forwardStateIt != realForwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
-                                    createDO_NOTHINGBranchTillBackWardEnd(*forwardStateIt);
-
-                        }
-                        else // still have Candidate bindings to try
-                        {
-                            // so we can just replace all the states in all these DO_NOTHING branch with the new state created by new bindings
-                            // first, create a new state by using the the first group of bindings in the ParamCandidates
-                            State* newState = Rule::groundAStateByRuleParamMap(curStateNode->forwardEffectState ,(ParamGroundedMapInARule&)(realForwardRuleNode->ParamCandidates.front()));
-
-                            // replace all the states in this DO_NOTHING branch with the new state created by new bindings
-                            replaceStateTillBackWardEnd(curStateNode,newState);
-                        }
-                    }
-                    else // some of the effect states of this realForwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
-                    {
-                        // try to find a group of bindings from the candidates, that won't affect the solved states
-
-
-
-                    }
-
-
-                    // If some of the effect states of this realForwardRuleNode has been solved, try to find another group of bindings,
-                    // which has different variable bindings for this state, but same values for the solved states.
-                    // If cannot find such bindings, just have to try other bindings, and delete all the other branches affected by new bindings
-
-                    // If there is no any other bindings left for choice, we have to delete this rule node, and go back to its forward state layer
-
-                    // But if there are other states which are not created by this rule, have been solved in any backword layers,
-                    // we can't just delete all backward layers, we have to create a lot of DO_NOTHING nodes to keep the foward state node of this rule
-
-
-                }
-            }
-
-            break;
-
         }
 
-        if (goalsAllAchieved)
-        {
-            // Todo: go throuth the whole planning network, create action plan
-
-            return true;
-        }
 
         // Till now have select the an unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
-        // Creat a new rule layer backward trying to achieve the selectedStateNode
-        // and also create a new state Layer which are the preconditions of this new rule layer
 
-        RuleLayer* newRuleLayer = new RuleLayer();
-        StateLayer* newStateLayer = new StateLayer();
-
-        allRuleLayers.insert(newRuleLayer);
-        allStateLayers.insert(newStateLayer);
-
-        newRuleLayer->nextStateLayer = curStateLayer;
-        newRuleLayer->preStateLayer = newStateLayer;
-
-        newStateLayer->nextRuleLayer = newRuleLayer;
-        curStateLayer->preRuleLayer = newRuleLayer;
-
-        // in every rule layer, there is always only one rule is applied
-        // so as, in every state layer, there is always only one non-satisfied state being deal with
-
-        // create a new RuleLayerNode to apply this selected rule
-        RuleLayerNode* ruleNode = new RuleLayerNode(selectedRule);
-        newRuleLayer->nodes.insert(ruleNode);
-
+        // create a new RuleNode to apply this selected rule
+        RuleNode* ruleNode = new RuleNode(selectedRule);
+        ruleNode->number = ruleNodeCount ++;
         ruleNode->forwardLinks.insert(selectedStateNode);
         selectedStateNode->backwardRuleNode = ruleNode;
 
@@ -463,53 +367,30 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         // Todo: find if there are other forward states besides current selectedStateNode will be affected by this rule
 
+        // Todo: put all the new unsatisfied states into the current
 
-        // Todo: this rule has not been applied in this state yet, add this rule to the history of this state node
-//        if (curStateNode->getRuleAppliedTime(selectedRule) == 0)
-//            curStateNode->addRuleRecordWithVariableBindingsToHistory();
+        // Todo: to check which preconditions of this rule have been satisfied and which have not ; float satisfiedDegree;
 
-        // In this loop, for the rest states,create a do nothing rule node, to bring this state to the new state layer
-        // except the states have been affected by the rule applied in the first for loop
-        for (stateLayerIter = curStateLayer->nodes.begin(); stateLayerIter != curStateLayer->nodes.end();++stateLayerIter)
-        {
-
-            StateLayerNode* curStateNode = (StateLayerNode*)(*stateLayerIter);
-            // check if this state has already been changed by a rule in this step during deal with other state
-            if (curStateNode->backwardRuleNode != 0)
-                continue;
-
-            // create a do nothing rule node, to bring this state to the new state layer
-            RuleLayerNode* donothingRuleLayerNode = new RuleLayerNode(DO_NOTHING_RULE);
-            newRuleLayer->nodes.insert(donothingRuleLayerNode);
-            donothingRuleLayerNode->ruleLayer = newRuleLayer;
-
-            curStateNode->backwardRuleNode = donothingRuleLayerNode;
-
-            State* cloneState = (curStateNode->state)->clone();
-            StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
-            cloneStateNode->stateLayer = newStateLayer;
-            cloneStateNode->isAchieved = curStateNode->isAchieved;
-            cloneStateNode->forwardRuleNode = donothingRuleLayerNode;
-
-            donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
-            donothingRuleLayerNode->forwardLinks.insert(curStateNode);
-
-            // This is the this->DO_NOTHING_RULE , which doesn't change the states,
-            // so the corresponding forward EffectState in the current selected rule just remain null.
-
-        }
-
-        curStateLayer = newStateLayer;
+        // Todo: to execute the rules to change the imaginary SpaceMap if any
 
     }
+
+    // finished planning!
+    // todo: generate the action series according to the planning network we have constructed in this planning process
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
 
-    return false;
+    return true;
 }
 
-bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode)
+// delete a rule node and recursivly delete all its backward state nodes and rule nodes
+void OCPlanner::deleteRuleNode(RuleNode* ruleNode)
+{
+    // todo
+}
+
+bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
 {
     // first, find the state in the effect list of this rule which the same to this forward state
     vector<EffectPair>::iterator effectIt;
@@ -561,11 +442,9 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
     // It usually makes no sense to borrow from the foward rule node of the forward rule node, because the context is changing.
 
     // If this rule is the first rule in current planning, it doesn't have a forward rule to borrow from
-    // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
-    State* forwardEffectState;
-    StateLayerNode* mostForwardSameStateNode;
 
-    RuleLayerNode* forwardRuleNode = findFirstRealForwardRuleNode(forwardStateNode, forwardEffectState, mostForwardSameStateNode);
+    RuleNode* forwardRuleNode = forwardStateNode->forwardRuleNode;
+
     if (! forwardRuleNode)
         return true;
 
@@ -609,11 +488,11 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
                         //       But the current rule variables are different: If ExistAPath(x,m) & ExistAPath(m,y), then ExistAPath(x,y)
                         //       so we need to make the cost in current rule like: Distance(x,m)+ Distance(m,y), using the variables x,m,y, rather than pos1, pos2
 
-                        vector<StateValue>::iterator f_rule_ownerIt = forwardEffectState->stateOwnerList.begin();
+                        vector<StateValue>::iterator f_rule_ownerIt = forwardStateNode->forwardEffectState->stateOwnerList.begin();
                         vector<StateValue>::iterator cur_ownerIt = ((State*)(*itpre))->stateOwnerList.begin();
                         // This two state should be the same state just with possible different variable names
                         // So the state owners in the same order of bot stateOwnerLists should suggest the same usage
-                        for ( ; f_rule_ownerIt != forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
+                        for ( ; f_rule_ownerIt != forwardStateNode->forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
                         {
                             // need to find the state owner of this cost heuristic in the forward effect state
                             if ((*f_rule_ownerIt) == (*ownerIt))
@@ -627,7 +506,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
                         // If cannot find this state owner of this cost heuristic in the forward effect state, it means this owner doesn't affect the calculation of the cost in backward rule
                         // So in this case, we just bind this state owner in the backward cost_cal_state as the binded value in the forward rule node
-                        if (f_rule_ownerIt == forwardEffectState->stateOwnerList.end())
+                        if (f_rule_ownerIt == forwardStateNode->forwardEffectState->stateOwnerList.end())
                         {
                             // find the grounded value of this variable
                             ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
@@ -671,135 +550,8 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, Stat
 
 }
 
-RuleLayerNode* OCPlanner::findFirstRealForwardRuleNode(StateLayerNode* stateNode, State* &forwardEffectState, StateLayerNode* &mostForwardSameStateNode)
-{
 
-    OC_ASSERT ((stateNode != 0),
-              "OCPlanner::findFirstRealForwardRuleNode: the stateNode is invalid!");
-
-    StateLayerNode* curstateNode = stateNode;
-    while(true)
-    {
-        if (curstateNode->forwardRuleNode == 0)
-            return 0;
-
-        if (curstateNode->forwardRuleNode->originalRule != this->DO_NOTHING_RULE)
-        {
-            forwardEffectState = curstateNode->forwardEffectState;
-            mostForwardSameStateNode = curstateNode;
-            return curstateNode->forwardRuleNode;
-        }
-        else
-            curstateNode = *(curstateNode->forwardRuleNode->forwardLinks.begin());
-    }
-}
-
-StateLayerNode* OCPlanner::findTheLastBackwardSameStateNode(StateLayerNode* stateNode)
-{
-
-    OC_ASSERT ((stateNode != 0),
-              "OCPlanner::findTheLastBackwardSameStateNode: the stateNode is invalid!");
-    StateLayerNode* curstateNode = stateNode;
-    while(true)
-    {
-        if (curstateNode->backwardRuleNode == 0)
-            return curstateNode;
-
-        if (curstateNode->backwardRuleNode->originalRule != this->DO_NOTHING_RULE)
-        {
-            return curstateNode;
-        }
-        else
-            curstateNode = *(curstateNode->backwardRuleNode->backwardLinks.begin());
-    }
-
-}
-
-void OCPlanner::replaceStateTillBackWardEnd(StateLayerNode* startStateNode, State* newState)
-{
-    OC_ASSERT ((startStateNode != 0),
-              "OCPlanner::replaceStateTillBackWardEnd: the stateNode is invalid!");
-
-    StateLayerNode* curstateNode = startStateNode;
-
-    while(true)
-    {
-        State* cloneState = newState->clone();
-
-        delete curstateNode->state;
-        curstateNode->state = cloneState;
-
-        if (curstateNode->backwardRuleNode == 0)
-            return;
-        OC_ASSERT ((curstateNode->backwardRuleNode->originalRule == this->DO_NOTHING_RULE),
-                  "OCPlanner::replaceStateTillBackWardEnd: This branch contains a rule which is not DO_NOTHING_RULE!");
-        curstateNode =  *(curstateNode->backwardRuleNode->backwardLinks.begin());
-    }
-
-}
-
-void OCPlanner::createDO_NOTHINGBranchTillBackWardEnd(StateLayerNode* startStateNode)
-{
-    OC_ASSERT ((startStateNode != 0),
-              "OCPlanner::createDO_NOTHINGBranchTillBackWardEnd: the stateNode is invalid!");
-    StateLayerNode* curstateNode = startStateNode;
-
-    while(true)
-    {
-        RuleLayer* backWardRuleLayer = curstateNode->stateLayer->backWardRuleLayer;
-
-        if (! backWardRuleLayer) // no backward rule layers, it's the last planning layer.
-            return;
-
-        StateLayer* backWardStateLayer = curstateNode->stateLayer->backWardRuleLayer;
-
-        RuleLayerNode* donothingRuleLayerNode = new RuleLayerNode(DO_NOTHING_RULE);
-        backWardRuleLayer->nodes.insert(donothingRuleLayerNode);
-        donothingRuleLayerNode->ruleLayer = backWardRuleLayer;
-
-        curStateNode->backwardRuleNode = donothingRuleLayerNode;
-
-        State* cloneState = (curStateNode->state)->clone();
-        StateLayerNode* cloneStateNode = new StateLayerNode(cloneState);
-        cloneStateNode->stateLayer = backWardStateLayer;
-        cloneStateNode->isAchieved = curStateNode->isAchieved;
-        cloneStateNode->forwardRuleNode = donothingRuleLayerNode;
-
-        donothingRuleLayerNode->backwardLinks.insert(cloneStateNode);
-        donothingRuleLayerNode->forwardLinks.insert(curStateNode);
-
-        if (curstateNode->backwardRuleNode == 0)
-            return;
-
-        curstateNode =  cloneStateNode;
-    }
-}
-
-void OCPlanner::deleteABackWardDO_NOTHINGBranch(StateLayerNode* startStateNode)
-{
-    OC_ASSERT ((startStateNode != 0),
-              "OCPlanner::deleteABackWardDO_NOTHINGBranch: the stateNode is invalid!");
-
-    StateLayerNode* curstateNode = startStateNode;
-
-    while(true)
-    {
-        if (curstateNode->backwardRuleNode == 0)
-        {
-            delete curstateNode;
-            return;
-        }
-        OC_ASSERT ((curstateNode->backwardRuleNode->originalRule == this->DO_NOTHING_RULE),
-                  "OCPlanner::deleteABackWardDO_NOTHINGBranch: This branch contains a rule which is not DO_NOTHING_RULE!");
-        StateLayerNode* oldNode = curstateNode;
-        curstateNode =  *(curstateNode->backwardRuleNode->backwardLinks.begin());
-
-        delete oldNode->backwardRuleNode;
-        delete oldNode;
-    }
-}
-
-void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode)
+void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
 {
     if (ruleNode->curUngroundedVariables.size() != 0)
         return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
@@ -853,7 +605,7 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode)
 
 
 // this function should be called after groundARuleNodeFromItsForwardState
-bool OCPlanner::groundARuleNodeBySelectingValues(RuleLayerNode *ruleNode)
+bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 {
     // First find all the ungrounded variables
     findAllUngroundedVariablesInARuleNode(ruleNode);
@@ -897,7 +649,7 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleLayerNode *ruleNode)
 
 }
 
-bool OCPlanner::selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr)
+bool OCPlanner::selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr)
 {
 
 }

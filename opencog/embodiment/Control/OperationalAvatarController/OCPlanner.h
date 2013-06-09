@@ -49,7 +49,7 @@ using namespace boost;
 
 namespace opencog { namespace oac {
 
-class StateLayerNode;
+class StateNode;
 
 struct UngroundedVariablesInAState
 {
@@ -91,15 +91,17 @@ struct UngroundedVariablesInAState
 
 
 // a rule node in a Rule Layer planning graph
-class RuleLayerNode
+class RuleNode
 {
 public:
     Rule* originalRule; // the original rule (usually not grounded)
 
+    int number; // the order of this rule node that has been created during the whole planning process
+
     ParamGroundedMapInARule currentBindings; // the current bindings of variables
 
-    set<StateLayerNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
-    set<StateLayerNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
+    set<StateNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
+    set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
     // cost as soft heuristics inherited from its
     // these carry the heuristics information for the backward steps to select variable values
@@ -127,7 +129,7 @@ public:
     // some times, we need to mark a rule as not useful anymore after trying it and fail.(e.g. have tried every variable binding and still fail)
     bool still_useful;
 
-    RuleLayerNode(Rule* _originalRule)
+    RuleNode(Rule* _originalRule)
     {
         originalRule = _originalRule;
         costHeuristics.clear();
@@ -146,7 +148,7 @@ public:
 
 };
 
-class StateLayerNode
+class StateNode
 {
 public:
     enum ACHIEVE_STATE
@@ -158,10 +160,10 @@ public:
 
     State* state;
     ACHIEVE_STATE isAchieved;
-    RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
-    RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
+    RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
+    RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; triedTimes = 0;}
+    StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; triedTimes = 0;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this vector
@@ -170,7 +172,7 @@ public:
     // how many rules has been tried to achieve this state node
     int triedTimes;
 
-    ~StateLayerNode()
+    ~StateNode()
     {
         delete state;
     }
@@ -229,14 +231,14 @@ protected:
      // ground the variables according to its forward state node,
      // by finding the variables in this rule and its forward state node with the same semantic meaning,
      // and put the value of the variables of the froward state to the rule variables.
-     bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
+     bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
      // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
      // Return the real forwardEffectState by the way
-     RuleLayerNode* findFirstRealForwardRuleNode(StateLayerNode *stateNode, State *&forwardEffectState, StateLayerNode* &mostForwardSameStateNode);
+     RuleNode* findFirstRealForwardRuleNode(StateNode *stateNode, State *&forwardEffectState, StateNode* &mostForwardSameStateNode);
 
      // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
-     bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
+     bool groundARuleNodeBySelectingValues(RuleNode* ruleNode);
 
      // select the most suitable vaule to ground a variable
      // the value selection criterions are according to these two parts:
@@ -244,28 +246,17 @@ protected:
      // 2. if it's a recursive rule, borrow some hard constraints from the preconditions of its non-recursive rule which has the same effect with it,
      //    as hard  heuristics.
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
-     bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
+     bool selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
-     void findAllUngroundedVariablesInARuleNode(RuleLayerNode *ruleNode);
+     void findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode);
 
 
-     void findCandidateValuesByGA(RuleLayerNode* ruleNode);
+     void findCandidateValuesByGA(RuleNode* ruleNode);
 
-     // the same state node is possible to be copied for many times by adding DO_NOTHING rule nodes.
-     // find the last backword same state node
-     StateLayerNode* findTheLastBackwardSameStateNode(StateLayerNode* stateNode);
-
-     // replace the state from startStateNode in all the backward state nodes which are all created by DO_NOTHING rule nodes, with newState
-     // including this startStateNode
-     void replaceStateTillBackWardEnd(StateLayerNode* startStateNode, State* newState);
-
-     // create a branch all full of DO_NOTHING rule nodes to bring this startStateNode backward till the end of current planning layer
-     void createDO_NOTHINGBranchTillBackWardEnd(StateLayerNode* startStateNode);
-
-     // including the startStateNode
-     void deleteABackWardDO_NOTHINGBranch(StateLayerNode* startStateNode);
+     // delete a rule node and recursivly delete all its backward state nodes and rule nodes
+     void deleteRuleNode(RuleNode* ruleNode);
 
 };
 
