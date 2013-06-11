@@ -75,7 +75,7 @@ struct evalTableParameters
     vector<string> features;
     string features_file;
     bool display_inputs;
-    string output_file;
+    vector<string> output_files;
     bool split_output;
     string log_level;
     string log_file;
