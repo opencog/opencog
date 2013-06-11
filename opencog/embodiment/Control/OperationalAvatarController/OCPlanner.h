@@ -121,10 +121,7 @@ public:
 
     // How many times of this rule has been tried with different variable bindings in this rule node.
     // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
-    int getAppliedTimes()
-    {
-        return ParamGroundedHistories.size();
-    }
+    int appliedTimes;
 
     // some times, we need to mark a rule as not useful anymore after trying it and fail.(e.g. have tried every variable binding and still fail)
     bool still_useful;
@@ -163,14 +160,29 @@ public:
     RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; triedTimes = 0;}
+    int depth;
+    StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
-    // the already be tried and failed rules will be removed from this vector
-    vector<Rule*> candidateRules;
+    // the already be tried and failed rules will be removed from this list
+    // the float is the score of this rule, the rules with higher score are put front
+    list< pair<float,Rule*> > candidateRules;
 
-    // how many rules has been tried to achieve this state node
-    int triedTimes;
+    // the rules have been tried on this state node
+//    set<Rule*> ruleHistory;
+
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
+    // it its forward rule node has multiple forward state node, using the deepest one
+    void calculateNodeDepth();
+
+    // have tried to find candidateRules
+    bool hasFoundCandidateRules;
+
+    bool operator < (const StateNode& other) const
+    {
+        return ( depth < other.depth);
+    }
 
     ~StateNode()
     {

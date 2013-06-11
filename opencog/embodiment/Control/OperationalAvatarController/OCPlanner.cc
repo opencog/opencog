@@ -32,6 +32,27 @@
 
 using namespace opencog::oac;
 
+// this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+// the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
+// it its forward rule node has multiple forward state node, using the deepest one
+void StateNode::calculateNodeDepth()
+{
+    if (! this->forwardRuleNode)
+        return;
+
+    set<StateNode*>::iterator it;
+
+    int deepest = 0;
+    for ( it = this->forwardRuleNode->forwardLinks.begin(); it != this->forwardRuleNode->forwardLinks.end();  ++ it)
+    {
+        int d = ((StateNode*)(*it))->depth;
+        if (d > deepest)
+            deepest = d;
+    }
+
+    this->depth = deepest + 1;
+
+}
 
 OCPlanner::OCPlanner()
 {
@@ -176,7 +197,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     // Because our embodiment game world is not a simple finite boolean-state world, we cannot use a full forward breadth-frist which will be too slowly
 
     // Firstly, we construct the original unsatisfiedStateNodes and satisfiedStateNodes from the input goals
-    set<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
+    list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
     set<StateNode*> satisfiedStateNodes;// all the state nodes that have been satisfied during planning process
     vector<State*>::const_iterator it;
     for (it = goal.begin(); it != goal.end(); ++ it)
@@ -186,6 +207,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         newStateNode->backwardRuleNode = 0;
         newStateNode->forwardRuleNode = 0;
+        newStateNode->depth = 0;
 
         if (checkIsGoalAchieved(*(newStateNode->state), satisfiedDegree))
         {
@@ -195,23 +217,24 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         else
         {
             newStateNode->isAchieved = StateNode::NOT_ACHIEVED;
-            unsatisfiedStateNodes.insert(newStateNode);
+            unsatisfiedStateNodes.push_back(newStateNode);
         }
 
     }
 
     while(unsatisfiedStateNodes.size() != 0)
     {
-        StateNode* selectedStateNode;
         Rule* selectedRule = 0;
 
         //  todo: there should be some way to decide which state should be chosed to achieved first
         //  for (stateNodeIter = unsatisfiedStateNodes->nodes.begin(); stateNodeIter != unsatisfiedStateNodes->nodes.end();++stateNodeIter)
 
-        StateNode* curStateNode = (StateNode*)(*stateNodeIter);
+        unsatisfiedStateNodes.sort();
+
+        StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.front());
 
         // if we have not tried to achieve this state node before, find all the candidate rules first
-        if (triedTimes == 0)
+        if (! curStateNode->hasFoundCandidateRules)
         {
             map<string,map<float,Rule*> >::iterator it;
             it = ruleEffectIndexes.find(curStateNode->state->name());
@@ -227,7 +250,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             }
             else
             {
-
                 // if there are multiple rules,choose the most suitable one
 
                 // For non-numberic goals:
@@ -236,32 +258,52 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 // 2. todo: with the highest fitness for the current heuristics, currently we don't consider heuristics for non-numberic goals
 
                 // Generate a score for each rules based on above criterions:
-                // score = probability (35%) + lowest cost (35%)
+                // score = probability (50%) + lowest cost (50%)
                 // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
 
-                float highestScore = 0.0;
                 map<float,Rule*> ::iterator ruleIt;
 
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {
                     Rule* r = ruleIt->second;
 
+                    // TODO: check if this rule is positive or negative for the current state
+
                     // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
                     // So here we just use the basic cost of every rule as the cost value.
-                    float curRuleScore = 0.3f * (1.0f/(curStateNode->getRuleAppliedTime(r) +1)) + 0.35f* ruleIt->first + 0.35*(1.0f - r->getBasicCost());
+                    float curRuleScore = 0.5f* ruleIt->first + 0.5*(1.0f - r->getBasicCost());
                     if (r->IsRecursiveRule)
                         curRuleScore += 0.5f;
 
-                    if (curRuleScore > highestScore)
+                    // the rules with higher score are put in front
+                    list< pair<float,Rule*> >::iterator canIt;
+                    canIt = curStateNode->candidateRules.begin();
+
+                    while(true)
                     {
-                        selectedRule = r;
-                        highestScore = curRuleScore;
+                        if (canIt == curStateNode->candidateRules.end())
+                        {
+                            curStateNode->candidateRules.push_back( pair<float, Rule*>(curRuleScore,r));
+                            break;
+                        }
+
+                        if (curRuleScore > canIt->first)
+                        {
+                            curStateNode->candidateRules.insert(canIt,pair<float, Rule*>(curRuleScore,r));
+                            break;
+                        }
+
+                        canIt ++;
                     }
+
                 }
 
-                selectedStateNode = curStateNode;
+                selectedRule = (curStateNode->candidateRules.begin())->second;
+                curStateNode->candidateRules.pop_front();
 
             }
+
+            curStateNode->hasFoundCandidateRules = true;
         }
         else //  we have  tried to achieve this state node before,which suggests we have found all the candidate rules
         {
@@ -317,7 +359,21 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         set<StateNode*>::iterator forwardStateIt;
                         for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
                         {
-                            ((StateNode*)(*forwardStateIt))->candidateRules.erase(forwardRuleNode->originalRule);
+                            if (((StateNode*)(*forwardStateIt))->candidateRules.size() > 0)
+                            {
+                                list< pair<float,Rule*> >::iterator candiIt;
+                                for (candiIt = ((StateNode*)(*forwardStateIt))->candidateRules.begin(); candiIt != ((StateNode*)(*forwardStateIt))->candidateRules.end(); ++ candiIt)
+                                {
+                                    if (candiIt->second == forwardRuleNode->originalRule)
+                                    {
+                                        ((StateNode*)(*forwardStateIt))->candidateRules.erase(candiIt);
+                                        break;
+                                    }
+
+                                }
+
+                            }
+
                             satisfiedStateNodes.erase(*forwardStateIt);
                             unsatisfiedStateNodes.insert(*forwardStateIt);
                         }
@@ -327,7 +383,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     }
                     else // still have Candidate bindings to try
                     {
-                       // TODO: just try a new binding to ground the effect states
+                       // just try a new binding to ground the effect states
+                       // TODO:
+
                     }
                 }
                 else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
@@ -344,19 +402,19 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         }
 
 
-        // Till now have select the an unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
+        // Till now have select one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
 
         // create a new RuleNode to apply this selected rule
         RuleNode* ruleNode = new RuleNode(selectedRule);
         ruleNode->number = ruleNodeCount ++;
-        ruleNode->forwardLinks.insert(selectedStateNode);
-        selectedStateNode->backwardRuleNode = ruleNode;
+        ruleNode->forwardLinks.insert(curStateNode);
+        curStateNode->backwardRuleNode = ruleNode;
 
         // When apply a rule, we need to select proper variables to ground it.
         // A rule should be grounded during its rule layer.
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
-        groundARuleNodeFromItsForwardState(ruleNode, selectedStateNode);
+        groundARuleNodeFromItsForwardState(ruleNode, curStateNode);
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
@@ -365,7 +423,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         // Todo: forwardEffectState
 
 
-        // Todo: find if there are other forward states besides current selectedStateNode will be affected by this rule
+        // Todo: find if there are other forward states besides curStateNode will be affected by this rule
+        // add to the rule history
+        // curStateNode->ruleHistory.insert(selectedRule);
 
         // Todo: put all the new unsatisfied states into the current
 
