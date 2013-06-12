@@ -1,0 +1,5 @@
+uri	rel	start	end	context	weight	sources	id	dataset	text
+/a/[/r/IsA/,/c/en/america_beautiful/,/c/en/national_anthem/]	/r/IsA	/c/en/america_beautiful	/c/en/national_anthem	/ctx/all	0.5	/s/dbpedia/3.7	/e/914e6775fd79d660bacf22ec699568e6694da3e8	/d/dbpedia/en	None
+/a/[/r/PartOf/,/c/en/ankara/,/c/en/central_anatolia_region/]	/r/PartOf	/c/en/ankara	/c/en/central_anatolia_region	/ctx/all	0.5	/s/dbpedia/3.7	/e/a2c3ddf6b6237156dbeac84eea2801d35a9562d4	/d/dbpedia/en	None
+/a/[/r/AtLocation/,/c/en/apple_inc/,/c/en/unite_state/]	/r/AtLocation	/c/en/apple_inc	/c/en/unite_state	/ctx/all	0.5	/s/dbpedia/3.7	/e/ec1914bfb0606c36376fbbcd316e5666022e2469	/d/dbpedia/en	None
+/a/[/r/AtLocation/,/c/en/apple_inc/,/c/en/apple_campus/]	/r/AtLocation	/c/en/apple_inc	/c/en/apple_campus	/ctx/all	0.5	/s/dbpedia/3.7	/e/3fecbbf65e56b34968c37fe25af28155fa0404f0	/d/dbpedia/en	None
