@@ -83,7 +83,7 @@ combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
     return res;
 }
 
-bool deme_expander::create_demes(const combo_tree& exemplar)
+bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
 
@@ -199,9 +199,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     }
     if (_reps.empty()) return false;
 
-    // Create empty demes
-    for (const auto& rep : _reps)
-        _demes.push_back(new deme_t(rep.fields()));
+    // Create empty demes with their IDs
+    for (unsigned i = 0; i < _reps.size(); i++) {
+        demeID_t demeID;
+        _demes.push_back(new deme_t(_reps[i].fields(),
+                                    _reps.size() == 1 ?
+                                    demeID_t(n_expansions + 1)
+                                    : demeID_t(n_expansions + 1, i)));
+    }
 
     return true;
 }
@@ -214,11 +219,8 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
     {
         if (logger().isDebugEnabled()) {
             stringstream ss;
-            ss << "Optimize deme";
-            if (_demes.size() > 1)
-                ss << " (" << i + 1 << "/" << _demes.size() << ")";
-            ss << "; max evaluations allowed: "
-               << max_evals_per_deme;
+            ss << "Optimize deme " << _demes[i].getID() << "; "
+               << "max evaluations allowed: " << max_evals_per_deme;
             logger().debug(ss.str());
         }
 
