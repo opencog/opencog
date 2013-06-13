@@ -112,7 +112,7 @@ void eval_output_results(const evalTableParameters& pa,
         stringstream of_ss;
         if (pa.output_files.size() == 1) {
             of_ss << pa.output_files.front();
-            if (pa.split_output)
+            if (trs.size() > 1 && pa.split_output)
                 of_ss << setfill('0') << setw(npad) << i;
         }
         else if (pa.output_files.size() > 1)
