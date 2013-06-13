@@ -20,7 +20,15 @@ def map(cn_assertion, context,atomspace): # assertion is a list
 				], DEFAULT_TV)
 			],DEFAULT_TV)
 	else:
-		pass
+		atomspace.add_link('ContextLink',
+			[atomspace.add_node('ConceptNode',context, DEFAULT_TV2),
+			atomspace.add_link('EvaluationLink',
+				[atomspace.add_node('PredicateNode',cn_assertion[0][3:],DEFAULT_TV),
+				atomspace.add_link('ListLink',
+					[atomspace.add_node('ConceptNode', cn_assertion[1][6:], DEFAULT_TV2), atomspace.add_node('ConceptNode', cn_assertion[2][6:], DEFAULT_TV2)
+					])
+				],DEFAULT_TV)
+			],DEFAULT_TV)
 		
 def map_from_path(file_path,atomspace):
 	lists_of_assertions = reader.csv(file_path)
