@@ -327,75 +327,88 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     return false;
                 }
 
-                // check which states of the effects of this forwardRuleNode have been sovled , which still remand unsloved.
-                set<StateNode*>::iterator effectItor;
-                set<StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
-                for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                if (forwardRuleNode->ParamCandidates.size() == 0)
                 {
-                    // skip the current state node
-                    if ((*effectItor) == curStateNode)
-                        continue;
+                    // we have tried all the Candidate bindings in previous steps,
+                    // so it means this rule doesn't work, we have to go back to its forward state node
 
-                    if ((*effectItor)->backwardRuleNode != 0)
+                    // Remove this rule from the candidate ruls of all its foward state nodes
+                    // and move all its foward state nodes from satisfiedStateNodes to unsatisfiedStateNodes
+                    set<StateNode*>::iterator forwardStateIt;
+                    for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
                     {
-                        // currently , this state node has already been tried a backward rule to solve it
-                        // so put it in the solvedStateNodes set
-                        solvedStateNodes.insert(*effectItor);
-                    }
-                }
-
-                // If all the effect states of this  forwardRuleNode remand unsolved,
-                // which suggests try another random group of candidate bindings will not affect the planning step that has been conducted
-                // so just try any other bindings for this rule node
-                if (solvedStateNodes.size() == 0)
-                {
-                    if (forwardRuleNode->ParamCandidates.size() == 0)
-                    {
-                        // we have tried all the Candidate bindings in previous steps,
-                        // so it means this rule doesn't work, we have to go back to its forward state node
-
-                        // Remove this rule from the candidate ruls of all its foward state nodes
-                        // and move all its foward state nodes from satisfiedStateNodes to unsatisfiedStateNodes
-                        set<StateNode*>::iterator forwardStateIt;
-                        for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
+                        if (((StateNode*)(*forwardStateIt))->candidateRules.size() > 0)
                         {
-                            if (((StateNode*)(*forwardStateIt))->candidateRules.size() > 0)
+                            list< pair<float,Rule*> >::iterator candiIt;
+                            for (candiIt = ((StateNode*)(*forwardStateIt))->candidateRules.begin(); candiIt != ((StateNode*)(*forwardStateIt))->candidateRules.end(); ++ candiIt)
                             {
-                                list< pair<float,Rule*> >::iterator candiIt;
-                                for (candiIt = ((StateNode*)(*forwardStateIt))->candidateRules.begin(); candiIt != ((StateNode*)(*forwardStateIt))->candidateRules.end(); ++ candiIt)
+                                if (candiIt->second == forwardRuleNode->originalRule)
                                 {
-                                    if (candiIt->second == forwardRuleNode->originalRule)
-                                    {
-                                        ((StateNode*)(*forwardStateIt))->candidateRules.erase(candiIt);
-                                        break;
-                                    }
-
+                                    ((StateNode*)(*forwardStateIt))->candidateRules.erase(candiIt);
+                                    break;
                                 }
 
                             }
 
-                            satisfiedStateNodes.erase(*forwardStateIt);
-                            unsatisfiedStateNodes.insert(*forwardStateIt);
                         }
 
-                        deleteRuleNode(forwardRuleNode);
-
+                        satisfiedStateNodes.erase(*forwardStateIt);
+                        unsatisfiedStateNodes.insert(*forwardStateIt);
                     }
-                    else // still have Candidate bindings to try
+
+                    deleteRuleNode(forwardRuleNode);
+
+                }
+                else
+                {
+                    // check which states of the effects of this forwardRuleNode have been sovled , which still remand unsloved.
+                    set<StateNode*>::iterator effectItor;
+                    set<StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
+                    for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                    {
+                        // skip the current state node
+                        if ((*effectItor) == curStateNode)
+                            continue;
+
+                        if ((*effectItor)->backwardRuleNode != 0)
+                        {
+                            // currently , this state node has already been tried a backward rule to solve it
+                            // so put it in the solvedStateNodes set
+                            solvedStateNodes.insert(*effectItor);
+                        }
+                    }
+
+                    // If all the effect states of this  forwardRuleNode remand unsolved,
+                    // which suggests try another random group of candidate bindings will not affect the planning step that has been conducted
+                    // so just try any other bindings for this rule node
+                    if (solvedStateNodes.size() == 0)
                     {
                        // just try a new binding to ground the effect states
-                       // TODO:
+                        forwardRuleNode->currentBindingsViaSelecting =  forwardRuleNode->ParamCandidates.front();
+                        forwardRuleNode->ParamCandidates.erase(ParamCandidates.begin());
+
+                        std::set_union(forwardRuleNode->currentBindingsFromForwardState.begin(),forwardRuleNode->currentBindingsFromForwardState.end(),
+                                       forwardRuleNode->currentBindingsViaSelecting.begin(),forwardRuleNode->currentBindingsViaSelecting.end(),
+                                       inserter(forwardRuleNode->currentAllBindings,forwardRuleNode->currentAllBindings.begin()));
+
+
+                        // rebind all the effect state nodes in the forward rule
+                        for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                        {
+                            reBindStateNode((*effectItor),forwardRuleNode->currentAllBindings);
+                        }
+
+                        continue;
+                    }
+                    else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
+                    {
+                        // try to find a group of bindings from the candidates, that won't affect the solved states
+
+                        // if cannot find any , try to find a group of candidate bindings will affect as few as possible solved states
+
+                        // have to delete the affected effect states' branches
 
                     }
-                }
-                else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
-                {
-                    // try to find a group of bindings from the candidates, that won't affect the solved states
-
-                    // if cannot find any , try to find a group of candidate bindings will affect as few as possible solved states
-
-                    // have to delete the affected effect states' branches
-
                 }
 
             }
@@ -443,6 +456,12 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     return true;
 }
+void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings)
+{
+    State* newGroundedState = Rule::groundAStateByRuleParamMap(stateNode->state, newBindings);
+    delete stateNode->state;
+    stateNode->state = newGroundedState;
+}
 
 // delete a rule node and recursivly delete all its backward state nodes and rule nodes
 void OCPlanner::deleteRuleNode(RuleNode* ruleNode)
@@ -479,9 +498,9 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
         if (Rule::isParamValueUnGrounded(*r_ownerIt))
         {
             string variableName = StateVariable::ParamValueToString((StateValue)(*r_ownerIt));
-            map<string, StateValue>::iterator paraIt = ruleNode->currentBindings.find(variableName);
-            if (paraIt == ruleNode->currentBindings.end())
-                ruleNode->currentBindings.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
+            map<string, StateValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
+            if (paraIt == ruleNode->currentBindingsFromForwardState.end())
+                ruleNode->currentBindingsFromForwardState.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
         }
     }
 
@@ -569,8 +588,8 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
                         if (f_rule_ownerIt == forwardStateNode->forwardEffectState->stateOwnerList.end())
                         {
                             // find the grounded value of this variable
-                            ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindings.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
-                            OC_ASSERT(!(bindIt == forwardRuleNode->currentBindings.end()),
+                            ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindingsFromForwardState.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+                            OC_ASSERT(!(bindIt == forwardRuleNode->currentBindingsFromForwardState.end()),
                                       "OCPlanner::groundARuleNodeFromItsForwardState: Cannot find the binding of this variable:\n",
                                       StateVariable::ParamValueToString((StateValue)(*ownerIt)).c_str());
 
@@ -586,7 +605,6 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             }
 
         }
-
 
     }
     else if (forwardRuleNode->costHeuristics.size() != 0)
@@ -617,14 +635,14 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
         return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
 
     map<string , vector<paramIndex> >::iterator paraIt = ruleNode->originalRule->paraIndexMap.begin();
-    ParamGroundedMapInARule::iterator bindIt = ruleNode->currentBindings.begin();
+    ParamGroundedMapInARule::iterator bindIt = ruleNode->currentBindingsFromForwardState.begin();
     for( ; paraIt != ruleNode->originalRule->paraIndexMap.end(); ++ paraIt)
     {
         // try to find this variable name in the currentBindings
-        bindIt = ruleNode->currentBindings.find(paraIt->first);
+        bindIt = ruleNode->currentBindingsFromForwardState.find(paraIt->first);
 
         // if cannot find it, it means this variable remains ungrounded, add it into the curUngroundedVariables
-        if (bindIt == ruleNode->currentBindings.end())
+        if (bindIt == ruleNode->currentBindingsFromForwardState.end())
         {
             bool is_numeric_var = opencog::oac::isAVariableNumeric(paraIt->first);
 
