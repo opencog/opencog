@@ -363,7 +363,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 {
                     // check which states of the effects of this forwardRuleNode have been sovled , which still remand unsloved.
                     set<StateNode*>::iterator effectItor;
-                    set<StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
+                    map<State*,StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
                     for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
                     {
                         // skip the current state node
@@ -373,8 +373,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         if ((*effectItor)->backwardRuleNode != 0)
                         {
                             // currently , this state node has already been tried a backward rule to solve it
-                            // so put it in the solvedStateNodes set
-                            solvedStateNodes.insert(*effectItor);
+                            // so put it in the solvedStateNodes map
+                            StateNode* sn = (StateNode*)(*effectItor);
+                            solvedStateNodes.insert(pair<State*,StateNode*>(sn->forwardEffectState , sn ) );
                         }
                     }
 
@@ -403,10 +404,82 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
                     {
                         // try to find a group of bindings from the candidates, that won't affect the solved states
-
                         // if cannot find any , try to find a group of candidate bindings will affect as few as possible solved states
+                        // to record which solved states will be affected if use this candidate binding
+                        // a vector in the order of vector<ParamGroundedMapInARule> ParamCandidates
+                        // each element - vector<StateNode*>  is the list of all the state nodes that a ParamGroundedMapInARule in vector<ParamGroundedMapInARule> ParamCandidates
+                        vector< vector<StateNode*> >  willBeAffecteds;
+                        map<State*,StateNode*>::iterator solvedItor;
+                        vector<ParamGroundedMapInARule>::iterator candidateIt;
+                        vector<ParamGroundedMapInARule>::iterator bestBindingIt = forwardRuleNode->ParamCandidates.end(); // the best Binding with the least affect
+                        int affectLeastStateNum = 999999; // the least number of state nodes the candidate bindings will affect
+                        int index = -1; // The index of the candidate binding in ParamCandidates which causes the least affect on the solved state nodes
+                        int i = 0;
+                        for (candidateIt = forwardRuleNode->ParamCandidates.begin(); candidateIt != forwardRuleNode->ParamCandidates.end(); ++ candidateIt, ++i)
+                        {
+                            vector<StateNode*> oneAffectRecord;
+                            list<UngroundedVariablesInAState>::iterator ungroundVarIt;
+                            for (ungroundVarIt = forwardRuleNode->curUngroundedVariables.begin(); ungroundVarIt != forwardRuleNode->curUngroundedVariables.end(); ++ ungroundVarIt)
+                            {
+                                UngroundedVariablesInAState& ungroundVarInAState = (UngroundedVariablesInAState&)(*ungroundVarIt);
 
-                        // have to delete the affected effect states' branches
+                                // Try to find this state in the solvedStateNodes.
+                                solvedItor = solvedStateNodes.find(UngroundedVariablesInAState.state);
+                                if (solvedItor == solvedStateNodes.end())
+                                    continue;
+
+                                // Try to find the ungrounded variable names in this candidate binding
+                                ParamGroundedMapInARule& bindings = (ParamGroundedMapInARule&)(*candidateIt);
+                                ParamGroundedMapInARule::iterator bindIt;
+                                for (bindIt = bindings.begin(); bindIt !=  bindings.end(); ++ bindIt)
+                                {
+                                    string& varName = (string&)(bindIt->first);
+
+                                    // try to find this find this variable name in the ungrounded variable records
+                                    if (ungroundVarInAState.vars.find(varName) != ungroundVarInAState.vars.end())
+                                    {
+                                        oneAffectRecord.push_back((StateNode*)(solvedItor->second));
+                                    }
+
+                                }
+
+                            }
+
+                            willBeAffecteds.push_back(oneAffectRecord);
+
+                            if (oneAffectRecord.size() < affectLeastStateNum)
+                            {
+                                index = i;
+                                affectLeastStateNum = oneAffectRecord.size();
+                                bestBindingIt = candidateIt;
+                            }
+
+                        }
+
+                        OC_ASSERT( (index != -1),
+                                  "OCPlanner::doPlanning: Failed to find a group of variable bindings from the candidates with least affect to the solved state nodes!\n");
+
+                        // apply the new bindings of least affect to the solved states
+                        forwardRuleNode->currentBindingsViaSelecting =  *bestBindingIt;
+                        forwardRuleNode->ParamCandidates.erase(bestBindingIt);
+                        std::set_union(forwardRuleNode->currentBindingsFromForwardState.begin(),forwardRuleNode->currentBindingsFromForwardState.end(),
+                                       forwardRuleNode->currentBindingsViaSelecting.begin(),forwardRuleNode->currentBindingsViaSelecting.end(),
+                                       inserter(forwardRuleNode->currentAllBindings,forwardRuleNode->currentAllBindings.begin()));
+
+                        // have to rebind the affected state nodes and delete the affected effect states' branches
+                        vector<StateNode*>::iterator affectedStateNodeIt;
+                        for ( affectedStateNodeIt =  (willBeAffecteds[index]).begin(); affectedStateNodeIt !=  (willBeAffecteds[index]).end(); ++ affectedStateNodeIt)
+                        {
+                            StateNode* affectedStateNode = (StateNode* )(*affectedStateNodeIt);
+                            reBindStateNode(affectedStateNode,forwardRuleNode->currentAllBindings);
+
+                            satisfiedStateNodes.erase(affectedStateNode);
+                            unsatisfiedStateNodes.insert(affectedStateNode);
+
+                            deleteRuleNode(affectedStateNode->backwardRuleNode);
+                        }
+
+                        continue;
 
                     }
                 }
