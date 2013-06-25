@@ -697,9 +697,9 @@ TruthValue* IndefiniteSymmetricBayesFormula::simpleCompute(const TVSeq& TV, long
     int N = TV.size();
     assert(N == 3);
     assert(TV[0]); assert(TV[1]); assert(TV[2]);
-    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
-    IndefiniteTruthValuePtr TVc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
-    IndefiniteTruthValuePtr TVac = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[2]);
+    IndefiniteTruthValuePtr TVa = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVc = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVac = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[2]);
     IndefiniteTruthValue* result;
 
     RuleGenerator<BayesRule, IndefiniteTruthValuePtr> myCreator;
@@ -713,8 +713,8 @@ TruthValue* IndefiniteSymmetricImplicationBreakdownFormula::simpleCompute(const 
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValuePtr linkAB = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
-    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr linkAB = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
 
     RuleGenerator<ImplicationRule, IndefiniteTruthValuePtr> myCreator;
@@ -730,11 +730,11 @@ TruthValue* IndefiniteSymmetricDeductionFormula::simpleCompute(const TVSeq& TV,
     assert(N == 5);
     assert(TV[0]); assert(TV[1]);
     assert(TV[2]); assert(TV[3]);assert(TV[4]);
-    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
-    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
-    IndefiniteTruthValuePtr TVc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[2]);
-    IndefiniteTruthValuePtr TVab = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[3]);
-    IndefiniteTruthValuePtr TVbc = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[4]);
+    IndefiniteTruthValuePtr TVa = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVc = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[2]);
+    IndefiniteTruthValuePtr TVab = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[3]);
+    IndefiniteTruthValuePtr TVbc = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[4]);
     IndefiniteTruthValue* result;
 
     RuleGenerator<DeductionRule, IndefiniteTruthValuePtr> myCreator;
@@ -749,8 +749,8 @@ TruthValue* IndefiniteSymmetricRevisionFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
-    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVa = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
 
     RuleGenerator<RevisionRule, IndefiniteTruthValuePtr> myCreator;
@@ -765,8 +765,8 @@ TruthValue* IndefiniteSymmetricAndFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 2);
     assert(TV[0]); assert(TV[1]);
-    IndefiniteTruthValuePtr TVa = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
-    IndefiniteTruthValuePtr TVb = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[1]);
+    IndefiniteTruthValuePtr TVa = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVb = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[1]);
     IndefiniteTruthValue* result;
     RuleGenerator<ConjunctionRule, IndefiniteTruthValuePtr> myCreator;
     ConjunctionRule *a = myCreator.CreateRule(TVa, TVb);
@@ -780,7 +780,7 @@ TruthValue* IndefiniteMem2InhFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
-    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
     float width = TVA->getU() - TVA->getL();
     float center = TVA->getL() + width / 2;
     float L_ = center - ((width * IndefiniteMembershipToExtensionalInheritanceCountDiscountFactor) / 2);
@@ -798,7 +798,7 @@ TruthValue* IndefiniteInh2MemFormula::simpleCompute(const TVSeq& TV,
     int N = TV.size();
     assert(N == 1);
     assert(TV[0]);
-    IndefiniteTruthValuePtr TVA = boost::shared_dynamic_cast<IndefiniteTruthValue>(TV[0]);
+    IndefiniteTruthValuePtr TVA = boost::dynamic_pointer_cast<IndefiniteTruthValue>(TV[0]);
     float width = TVA->getU() - TVA->getL();
     float center = TVA->getL() + width / 2;
     float L_ = center - ((width * 1.2f) / 2);
