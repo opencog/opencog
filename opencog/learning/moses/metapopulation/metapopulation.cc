@@ -353,8 +353,7 @@ void metapopulation::merge_candidates(pbscored_combo_tree_set& candidates)
 
 bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                                  const boost::ptr_vector<representation>& reps,
-                                 const vector<unsigned>& evals_seq,
-                                 const vector<demeID_t>& demeIDs)
+                                 const vector<unsigned>& evals_seq)
 {
     // Note that univariate reports far more evals than the deme size;
     // this is because univariate over-write deme entries.
@@ -421,7 +420,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                 penalized_bscore pbs; // empty bscore till
                                       // it gets computed
                 composite_penalized_bscore cbsc(pbs, inst_csc);
-                cpbscore_demeID cbs_demeID(cbsc, demeIDs[i]);
+                cpbscore_demeID cbs_demeID(cbsc, demes[i].getID());
 
                 unique_lock lock(pot_cnd_mutex);
                 pot_candidates[tr] = cbs_demeID;
@@ -438,12 +437,8 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
         unsigned total_max_pot_cnd = pot_candidates.size() + max_pot_cnd;
 
         stringstream ss;
-        if (demes.size() > 1)
-            logger().debug() << "From deme (" << i+1 << "/" << demes.size() << ")";
-
-        ss << "Select candidates to merge amongst " << max_pot_cnd;
-        if (demes.size() > 1)
-            ss << " (deme " << i+1 << "/" << demes.size() << ")";
+        ss << "Select candidates from deme " << demes[i].getID()
+           << " to merge amongst " << max_pot_cnd;
         logger().debug(ss.str());
 
         // select_candidates() can be very time consuming; it currently
@@ -881,10 +876,8 @@ void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const {
         if (logger().isDebugEnabled())
         {
             stringstream ss;
-            ss << "Trim down deme ";
-            if (demes.size() > 1)
-                ss << "(" << ++i << "/" << demes.size() << ") ";
-            ss << " size: " << deme.size();
+            ss << "Trim down deme " << deme.getID()
+               << " of size: " << deme.size();
             logger().debug(ss.str());
         }
 
