@@ -870,7 +870,6 @@ void metapopulation::trim_down_demes(boost::ptr_vector<deme_t>& demes) const {
     // However, trimming too much is bad: it can happen that none
     // of the best-scoring instances lead to a solution. So keep
     // around a reasonable pool. Wild choice ot 250 seems reasonable.
-    unsigned i = 0;
     for (deme_t& deme : demes) {
 
         if (logger().isDebugEnabled())
