@@ -81,8 +81,8 @@ class PythonEval
 	private:
 
         void init(void);
-        void add_module_directory(const boost::filesystem3::path &p);
-        void add_module_file(const boost::filesystem3::path &p);
+        void add_module_directory(const boost::filesystem::path &p);
+        void add_module_file(const boost::filesystem::path &p);
 
 		// Make constructor, destructor private; force everyone to use the
         // singleton instance
