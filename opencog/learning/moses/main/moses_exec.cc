@@ -1638,7 +1638,7 @@ int moses_exec(int argc, char** argv)
         size_t num_rows = 0;
         for (const string& idf : input_data_files) {
             logger().info("Read data file %s", idf.c_str());
-            Table table = loadTable(idf, target_feature, ignore_features_str);
+            Table table = loadTable_NEW(idf, target_feature, ignore_features_str);
             num_rows += table.size();
             // possible subsample the table
             if (nsamples > 0)
