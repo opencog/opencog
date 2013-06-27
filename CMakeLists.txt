@@ -133,7 +133,8 @@ SET(Boost_USE_MULTITHREADED ON)
 # Required boost packages
 # hypertable requires boost iostreams
 # boost-1.49 no longer has a libboost_iostreams
-FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
+# 1.46 is minimum for required filesystem support
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
@@ -144,8 +145,8 @@ MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
 # Arghhh. Except cmake is treating these as required, not optional. #$%**&
-FIND_PACKAGE(Boost 1.45 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.45 COMPONENTS math_c99 QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")

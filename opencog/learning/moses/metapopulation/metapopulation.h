@@ -285,8 +285,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      */
     bool merge_demes(boost::ptr_vector<deme_t>& demes,
                      const boost::ptr_vector<representation>& reps,
-                     const std::vector<unsigned>& evals_seq,
-                     const std::vector<demeID_t>& demeIDs);
+                     const std::vector<unsigned>& evals_seq);
 
     /**
      * Weed out excessively bad scores. The select_exemplar() routine
