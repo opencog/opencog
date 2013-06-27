@@ -260,15 +260,15 @@ void PythonEval::addSysPath(std::string path)
     PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
 }
 
-void PythonEval::add_module_directory(const boost::filesystem3::path &p)
+void PythonEval::add_module_directory(const boost::filesystem::path &p)
 {
-    vector<boost::filesystem3::path> files;
-    vector<boost::filesystem3::path> pyFiles;
+    vector<boost::filesystem::path> files;
+    vector<boost::filesystem::path> pyFiles;
 
-    copy(boost::filesystem3::directory_iterator(p), boost::filesystem3::directory_iterator(), back_inserter(files));
+    copy(boost::filesystem::directory_iterator(p), boost::filesystem::directory_iterator(), back_inserter(files));
 
-    for(vector<boost::filesystem3::path>::const_iterator it(files.begin()); it != files.end(); ++it){
-        if(it->extension() == boost::filesystem3::path(".py"))
+    for(vector<boost::filesystem::path>::const_iterator it(files.begin()); it != files.end(); ++it){
+        if(it->extension() == boost::filesystem::path(".py"))
             pyFiles.push_back(*it);
     }
 
@@ -277,7 +277,7 @@ void PythonEval::add_module_directory(const boost::filesystem3::path &p)
     string name;
     PyObject* mod;
     PyObject* pyList = PyList_New(0);
-    for(vector<boost::filesystem3::path>::const_iterator it(pyFiles.begin()); it != pyFiles.end(); ++it){
+    for(vector<boost::filesystem::path>::const_iterator it(pyFiles.begin()); it != pyFiles.end(); ++it){
         name = it->filename().c_str();
         name = name.substr(0, name.length()-3);
         mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
@@ -296,7 +296,7 @@ void PythonEval::add_module_directory(const boost::filesystem3::path &p)
     Py_DECREF(pyList);
 }
 
-void PythonEval::add_module_file(const boost::filesystem3::path &p)
+void PythonEval::add_module_file(const boost::filesystem::path &p)
 {
     this->addSysPath(p.parent_path().c_str());
 
@@ -324,10 +324,10 @@ void PythonEval::add_module_file(const boost::filesystem3::path &p)
 
 void PythonEval::addModuleFromPath(std::string path)
 {
-    boost::filesystem3::path p(path);
+    boost::filesystem::path p(path);
 
-    if(boost::filesystem3::exists(p)){
-        if(boost::filesystem3::is_directory(p))
+    if(boost::filesystem::exists(p)){
+        if(boost::filesystem::is_directory(p))
             this->add_module_directory(p);
         else
             this->add_module_file(p);
