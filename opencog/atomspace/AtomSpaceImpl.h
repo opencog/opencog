@@ -1088,9 +1088,6 @@ public:
      */
     AtomSpaceImpl& operator=(const AtomSpaceImpl&);
     AtomSpaceImpl(const AtomSpaceImpl&);
-
-    bool saveToXML(const std::string& filename) const;
-
 };
 
 } // namespace opencog
