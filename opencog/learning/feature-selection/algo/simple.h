@@ -57,13 +57,13 @@ struct ScoredFeatureSetGreater
         if (x.first < y.first) return false;
 
         // The scored feature sets are *always* singletons! 
-        // for (auto ix : x.second) ox = (ox >> 1) ^ ((-ox) & (ix ^ seed));
-        uint ix = *x.second.begin();
-        uint ox = ix ^ seed;
+        // viz FeatureSet will always be std::set<arity_t> with
+        // only one element in the set. So no loop required!
+        arity_t ix = *x.second.begin();
+        arity_t ox = ix ^ seed;
 
-        uint iy = *y.second.begin();
-        uint oy = iy ^ seed;
-
+        arity_t iy = *y.second.begin();
+        arity_t oy = iy ^ seed;
         return ox > oy;
     }
 
@@ -71,7 +71,7 @@ struct ScoredFeatureSetGreater
     typedef ScoredFeatureSet second_argument_type;
     typedef bool result_type;
 private:
-    uint seed;
+    arity_t seed;
 };
 
 /**
