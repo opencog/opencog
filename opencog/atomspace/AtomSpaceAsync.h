@@ -716,13 +716,6 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 
-    inline BoolRequest saveToXML(const std::string& filename) {
-        BoolRequest r(new SaveToXMLASR(&atomspace,filename));
-        requestQueue.push(r);
-        return r;
-    }
-
-
 };
 
 } // namespace opencog

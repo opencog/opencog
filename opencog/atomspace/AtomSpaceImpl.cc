@@ -585,44 +585,6 @@ size_t AtomSpaceImpl::Links(VersionHandle vh) const
     return hs.size();
 }
 
-bool AtomSpaceImpl::saveToXML(const std::string& filename) const {
-    // Saving to XML is messed up so it always fails for now
-    return false;
-#if 0
-    // This should possible be moved out of the AtomSpace and made into
-    // generalised saving interface. This code was moved from
-    // SaveRequest because it uses the AtomTable and it'd be (even more)
-    // inefficient to make a HandleEntry *and* HandleSeq of all atom handles.
-
-    // This blocks the (planned) atomspace event loop until
-    // save is completed.
-    pthread_mutex_lock(&atomSpaceLock);
-
-    // XXX/FIXME This is an insanely inefficient way to export the 
-    // atomspace! For anything containing a million or more handles,
-    // this is just mind-bogglingly bad, as it will results in a vast
-    // amount of mallocs & frees, and blow out RAM usage.  Strongly
-    // suggest redesign using appropriate iterators.  Anyway, should
-    // probably be exporting to scheme, not XML, anyway ... since XML
-    // is slow in general.
-    HandleEntry *handles = getAtomTable().getHandleSet(ATOM, true);
-    NMXmlExporter exporter(this);
-    std::fstream file(filename.c_str(), std::fstream::out);
-    bool rc = true;
-    try {
-        file << exporter.toXML(handles);
-        rc = true;
-    } catch (StandardException &e) {
-        logger().error("AtomSpace::saveToXML exception (%s)", e.getMessage());
-        rc = false;
-    }
-    pthread_mutex_unlock(&atomSpaceLock);
-    file.flush();
-    file.close();
-    delete handles;
-    return rc;
-#endif
-}
 
 void AtomSpaceImpl::clear()
 {

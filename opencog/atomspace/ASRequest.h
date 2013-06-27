@@ -646,17 +646,6 @@ public:
     
 };
 
-class SaveToXMLASR : public OneParamASR<bool,std::string> {
-public:
-    SaveToXMLASR(AtomSpaceImpl *a, const std::string& filename) :
-        OneParamASR<bool,std::string>(a,filename) {}
-    
-    virtual void do_work() {
-        set_result(atomspace->saveToXML(p1));
-    }
-    
-};
-
 
 // -----------------
 // Search requests
