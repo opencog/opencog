@@ -1000,7 +1000,9 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     //////////////////////////////////
     else
     {
-        OC_ASSERT(0, "Unsupported type for mutual information");
+        std::stringstream ss;
+        ss << "Type " << otype << " is not supported for mutual information";
+        OC_ASSERT(0, ss.str());
         return 0.0;
     }
 }
