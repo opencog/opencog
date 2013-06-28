@@ -697,9 +697,6 @@ istream& istreamTable(istream& in, Table& tab,
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
 
-    // Record the table signature.
-    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
-
     return in;
 }
 
@@ -730,9 +727,6 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
 
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
-
-    // Record the table signature.
-    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
 
     return in;
 }

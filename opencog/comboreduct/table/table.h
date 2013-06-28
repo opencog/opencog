@@ -709,19 +709,26 @@ struct Table
 
     Table();
 
-    Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_);
+    Table(const OTable& otable_, const ITable& itable_);
 
     template<typename Func>
     Table(const Func& func, arity_t a, int nsamples = -1) :
-        tt(gen_signature(type_node_of<bool>(),
-                         type_node_of<bool>(), a)),
-        itable(tt), otable(func, itable) {}
+        itable(gen_signature(type_node_of<bool>(),
+                             type_node_of<bool>(), a)),
+        otable(func, itable) {}
 
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
     size_t size() const { return itable.size(); }
     arity_t get_arity() const { return itable.get_arity(); }
-    const type_tree& get_signature() const { return tt; }
+    type_tree get_signature() const {
+        type_tree tt(id::lambda_type);
+        auto root = tt.begin();
+        for (type_node tn : itable.get_types())
+            tt.append_child(root, tn);
+        tt.append_child(root, otable.get_type());
+        return tt;
+    }
 
     // return a string with the io labels, the output label comes first
     string_seq get_labels() const;
@@ -739,12 +746,6 @@ struct Table
 
         // set output table
         res.otable = otable;
-
-        // set type tree
-        type_tree::iterator head = res.tt.set_head(id::lambda_type);
-        for (type_node tn : res.itable.get_types())
-            res.tt.append_child(head, tn);
-        res.tt.append_child(head, otable.get_type());
 
         // update target_pos
         if (target_pos > 0) {
@@ -768,7 +769,6 @@ struct Table
     void add_features_from_file(const std::string& input_file,
                                 std::vector<std::string> features);
 
-    type_tree tt;
     ITable itable;
     OTable otable;
     int target_pos;             // position of the target, useful for

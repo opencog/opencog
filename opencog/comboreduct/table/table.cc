@@ -416,12 +416,12 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 
 Table::Table() : target_pos(0) {}
 
-Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
-    : tt(tt_), itable(itable_), otable(otable_), target_pos(0) {}
+Table::Table(const OTable& otable_, const ITable& itable_)
+    : itable(itable_), otable(otable_), target_pos(0) {}
 
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
-    tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
+    itable(infer_type_tree(tr), nsamples, min_contin, max_contin),
     otable(tr, itable), target_pos(0) {}
 
 vector<string> Table::get_labels() const
@@ -439,7 +439,7 @@ CTable Table::compressed() const
     logger().debug("Compress the dataset, current size is %d", itable.size());
     // ~Logger
 
-    CTable res(otable.get_label(), itable.get_labels(), tt);
+    CTable res(otable.get_label(), itable.get_labels(), get_signature());
 
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();
