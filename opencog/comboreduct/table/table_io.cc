@@ -111,7 +111,7 @@ istream &get_data_line(istream& is, string& line)
 }
 
 // -------------------------------------------------------
-
+static const char *sparse_delim = " : ";
 pair<string, string> parse_key_val(string chunk) {
     pair<string, string> res;
     size_t pos = chunk.find(sparse_delim);

@@ -48,19 +48,6 @@ using namespace opencog;
 
 PythonEval * PythonEval::singletonInstance = 0;
 
-static const char* DEFAULT_PYTHON_MODULE_PATHS[] = 
-{
-    PROJECT_BINARY_DIR"/opencog/cython", // bindings
-    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
-    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
-    DATADIR"/python",                    // install directory
-#ifndef WIN32
-    "/usr/local/share/opencog/python",
-    "/usr/share/opencog/python",
-#endif // !WIN32
-    NULL
-};
-
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);

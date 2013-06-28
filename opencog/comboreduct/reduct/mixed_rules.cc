@@ -82,7 +82,6 @@ void reduce_gt_zero_pair_power::operator()(combo_tree& tr,combo_tree::iterator i
     typedef std::map<pre_it, bool,
                      opencog::lexicographic_subtree_order<vertex> > subtree_parity;
     typedef subtree_parity::iterator subtree_parity_it;
-    typedef subtree_parity::const_iterator subtree_parity_const_it;
     if(*it==id::greater_than_zero) {
         OC_ASSERT(it.has_one_child(),
                   "combo_tree node should have exactly one child (reduce_gt_zero_pair_power).");
@@ -450,7 +449,6 @@ void reduce_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
 void reduce_op_contin_if::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
     typedef std::set<pre_it, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
-    typedef subtree_quotient::iterator subtree_quotient_it;
     typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::div) {
         OC_ASSERT(tr.number_of_children(it)==2, 
@@ -520,7 +518,6 @@ void reduce_contin_if_inner_op::operator()(combo_tree& tr,combo_tree::iterator i
 {
     typedef std::multiset<pre_it, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
-    typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::contin_if) {
         OC_ASSERT(tr.number_of_children(it)==3,
                   "combo_tree node should have exactly three children (reduce_contin_if_inner_op).");
@@ -646,7 +643,6 @@ void reduce_junction_gt_zero_sum_constant::operator()(combo_tree& tr,
     // the second argument, contin_t, is c
     typedef std::map<pre_it, contin_t, opencog::lexicographic_subtree_order<vertex> > subtree_quotient;
     typedef subtree_quotient::iterator subtree_quotient_it;
-    typedef subtree_quotient::const_iterator subtree_quotient_const_it;
     if(*it==id::logical_and || *it==id::logical_or) {
         subtree_quotient sq;
         for(sib_it sib = it.begin(); sib != it.end();) {

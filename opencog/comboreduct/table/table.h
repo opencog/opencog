@@ -482,8 +482,6 @@ public:
     template<typename F>
     CTable filtered_preverse_idxs(const F& filter) const
     {
-        typedef type_tree::iterator pre_it;
-        typedef type_tree::sibling_iterator sib_it;
 
         // Set new CTable
         CTable res(olabel, ilabels, tsig);
