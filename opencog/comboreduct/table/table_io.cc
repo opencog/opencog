@@ -1083,6 +1083,11 @@ ostream& operator<<(ostream& out, const OTable& ot)
     return out;
 }
 
+ostream& operator<<(ostream& out, const Table& table)
+{
+    return ostreamTable(out, table);
+}
+
 ostream& operator<<(ostream& out, const complete_truth_table& tt)
 {
     return ostreamContainer(out, tt);
