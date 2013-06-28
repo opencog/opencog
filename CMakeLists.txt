@@ -134,7 +134,12 @@ SET(Boost_USE_MULTITHREADED ON)
 # hypertable requires boost iostreams
 # boost-1.49 no longer has a libboost_iostreams
 # 1.46 is minimum for required filesystem support
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
+# program_options needed by some combo utilities
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+
+IF(NOT Boost_FOUND)
+    MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+ENDIF(NOT Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
