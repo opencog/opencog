@@ -1,3 +1,6 @@
+
+#include <opencog/atomspace/AtomSpace.h>
+
 namespace opencog
 {
 
