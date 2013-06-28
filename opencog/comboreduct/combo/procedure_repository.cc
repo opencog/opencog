@@ -267,7 +267,6 @@ bool procedure_repository::infer_types_repo() {
 
     typedef std::map<procedure_call, type_tree> proc_type;
     typedef proc_type::iterator proc_type_it;
-    typedef proc_type::const_iterator proc_type_const_it;
     typedef std::map<procedure_call, type_tree_seq> proc_arg_type;
 
     generate_and_order_strongly_connected_components();

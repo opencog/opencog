@@ -37,7 +37,6 @@ diversity_parameters::diversity_parameters(bool _include_dominated)
 void diversity_parameters::set_dst(diversity_parameters::dst_enum_t de,
                                    diversity_parameters::dp_t p)
 {
-    typedef behavioral_score bs_t;
     switch(de) {
     case p_norm:
         dst = [p](const behavioral_score& a, const behavioral_score& b) {

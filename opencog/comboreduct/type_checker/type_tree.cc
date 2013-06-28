@@ -1209,7 +1209,6 @@ bool is_well_formed(const type_tree& tt)
 bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n)
 {
     typedef combo_tree::leaf_iterator leaf_it;
-    typedef combo_tree::iterator pre_it;
     OC_ASSERT(!tr.empty(),
                       "cannot infer arg types on an empty combo_tree");
     OC_ASSERT(n >= 0, "Must be positive or null");

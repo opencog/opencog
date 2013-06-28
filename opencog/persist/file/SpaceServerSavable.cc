@@ -116,7 +116,6 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
 
     unsigned int mapSize;
-    int rc = fread(&mapSize, sizeof(unsigned int), 1, fp);
     for (unsigned int i = 0; i < mapSize; i++) {
         Handle mapHandle;
         fread(&mapHandle, sizeof(Handle), 1, fp);
