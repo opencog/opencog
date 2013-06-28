@@ -3014,8 +3014,6 @@ template<typename treeT1,typename src_iterator,
          typename treeT2,typename dst_iterator>
 void subtree_copy(const treeT1& src,src_iterator src_it,
                   treeT2& dst,dst_iterator dst_it) {
-    typedef typename treeT1::value_type T1;
-    typedef typename treeT2::value_type T2;
 
     dst_it=dst.replace(dst_it,(*src_it));
     dst.erase_children(dst_it);
@@ -3026,7 +3024,6 @@ void subtree_copy(const treeT1& src,src_iterator src_it,
 
 template<typename treeT1,typename treeT2>
 void tree_copy(const treeT1& src,treeT2& dst) {
-    typedef typename treeT1::value_type T1;
     typedef typename treeT2::value_type T2;
 
     dst=treeT2(T2());
@@ -3046,7 +3043,6 @@ template<typename treeT1,typename src_iterator,
 void subtree_convert(const treeT1& src, src_iterator src_it,
                      treeT2& dst,dst_iterator dst_it)
 {
-    typedef typename treeT1::value_type T1;
     typedef typename treeT2::value_type T2;
 
     dst_it=dst.replace(dst_it,boost::lexical_cast<T2>(*src_it));
@@ -3059,7 +3055,6 @@ void subtree_convert(const treeT1& src, src_iterator src_it,
 template<typename treeT1,typename treeT2>
 void tree_convert(const treeT1& src, treeT2& dst)
 {
-    typedef typename treeT1::value_type T1;
     typedef typename treeT2::value_type T2;
 
     dst=treeT2(T2());
