@@ -41,13 +41,12 @@
 
 #include "PyIncludeWrapper.h"
 
-#include <opencog/atomspace/Handle.h>
-
-#include <boost/filesystem/operations.hpp>
-
 #include <string>
 #include <vector>
 #include <map>
+#include <boost/filesystem/operations.hpp>
+
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 

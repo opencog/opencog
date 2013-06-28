@@ -1,11 +1,11 @@
-#include "PythonModule.h"
-#include "agent_finder_api.h"
-
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/foreach.h>
+
+#include "agent_finder_api.h"
+#include "PythonModule.h"
 
 using std::vector;
 using std::string;
