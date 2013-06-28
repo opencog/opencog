@@ -288,7 +288,7 @@ std::istream& inferTableAttributes(std::istream& in,
 std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::string& target_feature,
                                 const std::vector<std::string>& ignore_features,
-                                type_tree tt, bool has_header);
+                                const type_tree& tt, bool has_header);
 
 std::istream& istreamDenseTable_noHeader(std::istream& in, Table& tab,
                                          unsigned target_idx,

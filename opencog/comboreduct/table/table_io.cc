@@ -780,7 +780,7 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
 istream& istreamDenseTable(istream& in, Table& tab,
                            const string& target_feature,
                            const vector<string>& ignore_features,
-                           type_tree tt, bool has_header)
+                           const type_tree& tt, bool has_header)
 {
     OC_ASSERT(has_header
               || (!target_feature.empty() && !ignore_features.empty()),
@@ -801,7 +801,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
         ignore_idxs = get_indices(ignore_features, header);
 
         // get input and output labels from the header
-        auto iolabels = tokenizeRowIO<string>(line);
+        auto iolabels = tokenizeRowIO<string>(line, ignore_idxs, target_idx);
         tab.itable.set_labels(iolabels.first);
         tab.otable.set_label(iolabels.second);
     }
@@ -828,6 +828,10 @@ istream& istreamDenseTable_noHeader(istream& in, Table& tab,
         vector_comp(get_signature_inputs(tt), get_type_node);
     type_node otype = get_type_node(get_signature_output(tt));
 
+    // Assign the io type to the table
+    tab.itable.set_types(itypes);
+    tab.otable.set_type(otype);
+
     // Instantiate type convertion for inputs
     from_tokens_visitor ftv(itypes);
 
@@ -842,9 +846,6 @@ istream& istreamDenseTable_noHeader(istream& in, Table& tab,
     auto ir = boost::irange((size_t)0, lines.size());
     vector<size_t> row_idxs(ir.begin(), ir.end());
     OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
-
-    // Assign the type
-    tab.tt = tt;
 
     // Assign the target position relative to the ignored indices
     // (useful for writing that file back)
