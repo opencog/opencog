@@ -143,7 +143,6 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
     // and also allow they have different value types (Int, float, fuzzy values and so on)
     // So their will be a big number of combinations, currently only finish some common combinations.
     // TODO: finish all the combinations
-    float ori,cur;
 
     switch (goal.stateType)
     {

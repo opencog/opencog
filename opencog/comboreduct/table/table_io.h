@@ -123,7 +123,6 @@ struct from_tokens_visitor : public boost::static_visitor<multi_type_seq> {
  * If no such delimiter is found then it return a pair with empty key
  * and empty val.
  */
-static const char *sparse_delim = " : ";
 std::pair<std::string, std::string> parse_key_val(std::string chunk);
 
 /**
