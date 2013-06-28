@@ -137,9 +137,11 @@ SET(Boost_USE_MULTITHREADED ON)
 # program_options needed by some combo utilities
 FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
 
-IF(NOT Boost_FOUND)
-    MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
-ENDIF(NOT Boost_FOUND)
+IF(Boost_FOUND)
+	SET(Boost_FOUND_SAVE 1)
+ELSE(Boost_FOUND)
+	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
@@ -149,9 +151,13 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-# Arghhh. Except cmake is treating these as required, not optional. #$%**&
 FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
 FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+
+# Arghhh. Except cmake is treating above as required, not optional. #$%**&
+IF(Boost_FOUND_SAVE)
+	SET(Boost_FOUND 1)
+ENDIF(Boost_FOUND_SAVE)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
