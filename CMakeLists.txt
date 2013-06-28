@@ -183,8 +183,11 @@ ENDIF (EXPAT_FOUND)
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
 IF (GSL_FOUND)
+	MESSAGE(STATUS "GSL found.")
 	ADD_DEFINITIONS(-DHAVE_GSL)
 	SET(HAVE_GSL 1)
+ELSE (GSL_FOUND)
+	MESSAGE(STATUS "GSL missing: needed for the AtomSpace.")
 ENDIF (GSL_FOUND)
 
 # This is required for Guile
