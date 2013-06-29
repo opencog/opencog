@@ -31,8 +31,6 @@
 #include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
 
-class PythonModuleUTest;
-
 namespace opencog
 {
 

@@ -26,9 +26,15 @@
 #include <opencog/util/Config.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/foreach.h>
+#include <opencog/atomspace/AtomSpace.h>
 
-#include "agent_finder_api.h"
+#include "PyMindAgent.h"
+#include "PyRequest.h"
+#include "PythonEval.h"
 #include "PythonModule.h"
+
+#include "agent_finder_types.h"
+#include "agent_finder_api.h"
 
 using std::vector;
 using std::string;
