@@ -306,7 +306,9 @@ void mpi_moses_worker(metapopulation& mp,
         mompi.recv_exemplar(exemplar);
         logger().info() << "Allowed " << max_evals 
                         << " evals for recvd exemplar " << exemplar;
-        if (!mp._dex.create_demes(exemplar)) {
+        if (!mp._dex.create_demes(exemplar, 0 /* TODO replace with the
+                                                 right expansion
+                                                 count */)) {
             // XXX replace this with appropriate message back to root!
             OC_ASSERT(false, "Exemplar failed to expand!\n");
         }
@@ -315,13 +317,7 @@ void mpi_moses_worker(metapopulation& mp,
         time_t max_time = INT_MAX;
         vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
 
-        // XXX TODO demeID not needed here because it overwritten by
-        // recv_deme. It's not clear that should be the case, instead
-        // the expansion index should be send to the worker, which
-        // would generate the rught demeID for each candidates and
-        // then this should be parsed back by the dispatcher
-        vector<demeID_t> demeIDs(mp._dex._demes.size());
-        mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals, demeIDs);
+        mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals);
         mp._dex.free_demes();
 
         // logger().info() << "Sending " << mp.size() << " results";

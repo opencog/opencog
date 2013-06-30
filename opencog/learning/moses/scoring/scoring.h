@@ -595,6 +595,9 @@ protected:
     // we want to be able to change it to ignore some features (it may
     // speed-up evaluation)
     mutable CTable wrk_ctable;
+
+    // for debugging, keep that around till we fix best_possible_bscore
+    // mutable CTable fully_filtered_ctable;
     
     size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
@@ -614,6 +617,7 @@ protected:
 
 private:
     score_t get_activation_penalty(score_t activation) const;
+
     // function to calculate the total weight of the observations
     // associated to an input vector
     std::function<score_t(const CTable::counter_t&)> sum_outputs;

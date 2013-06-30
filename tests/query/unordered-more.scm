@@ -19,7 +19,7 @@
 (SimilarityLink (stv 1.0 1.0)
 	(NumberNode "0.24")
 	(ExecutionOutputLink (stv 1.0 1.0)
-		(HumanoidNode "We are legion; we are Anonymous")
+		(SemeNode "We are legion; we are Anonymous")
 		(ListLink)
 	)
 )

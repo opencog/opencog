@@ -80,6 +80,11 @@ enum type_node {
 }
 typedef id::type_node type_node;
 
+// list of type_node
+typedef std::vector<type_node> type_node_seq;
+typedef type_node_seq::iterator type_node_seq_it;
+typedef type_node_seq::const_iterator type_node_seq_cit;
+
 //structure that codes the type of a tree
 typedef opencog::tree<type_node> type_tree;
 

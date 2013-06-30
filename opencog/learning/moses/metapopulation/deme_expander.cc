@@ -83,7 +83,7 @@ combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
     return res;
 }
 
-bool deme_expander::create_demes(const combo_tree& exemplar)
+bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
 
@@ -199,9 +199,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     }
     if (_reps.empty()) return false;
 
-    // Create empty demes
-    for (const auto& rep : _reps)
-        _demes.push_back(new deme_t(rep.fields()));
+    // Create empty demes with their IDs
+    for (unsigned i = 0; i < _reps.size(); i++) {
+        demeID_t demeID;
+        _demes.push_back(new deme_t(_reps[i].fields(),
+                                    _reps.size() == 1 ?
+                                    demeID_t(n_expansions + 1)
+                                    : demeID_t(n_expansions + 1, i)));
+    }
 
     return true;
 }
@@ -214,11 +219,8 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
     {
         if (logger().isDebugEnabled()) {
             stringstream ss;
-            ss << "Optimize deme";
-            if (_demes.size() > 1)
-                ss << " (" << i + 1 << "/" << _demes.size() << ")";
-            ss << "; max evaluations allowed: "
-               << max_evals_per_deme;
+            ss << "Optimize deme " << _demes[i].getID() << "; "
+               << "max evaluations allowed: " << max_evals_per_deme;
             logger().debug(ss.str());
         }
 
@@ -238,16 +240,22 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
             // negative min_improv is interpreted as percentage of
             // improvement, if so then don't substract anything, since in that
             // scenario the absolute min improvent can be arbitrarily small
-            score_t actual_min_improv = std::max(_cscorer.min_improv(),
-                                                 (score_t)0);
-            deme_target_score -= actual_min_improv;
-            logger().info("Subtract %g (minimum significant improvement) "
-                          "from the target score to deal with float "
-                          "imprecision = %g",
-                          actual_min_improv, deme_target_score);
+            logger().info("It appears there is an algorithmic bug in "
+                          "precision_bscore::best_possible_bscore. "
+                          "Till not fixed we shall not rely on it to "
+                          "terminate deme search");
 
-            // update max score optimizer
-            _optimize.opt_params.terminate_if_gte = deme_target_score;
+            // TODO: re-enable that once best_possible_bscore is fixed
+            // score_t actual_min_improv = std::max(_cscorer.min_improv(),
+            //                                      (score_t)0);
+            // deme_target_score -= actual_min_improv;
+            // logger().info("Subtract %g (minimum significant improvement) "
+            //               "from the target score to deal with float "
+            //               "imprecision = %g",
+            //               actual_min_improv, deme_target_score);
+
+            // // update max score optimizer
+            // _optimize.opt_params.terminate_if_gte = deme_target_score;
         }
 
         // Optimize

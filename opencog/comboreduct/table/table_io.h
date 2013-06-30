@@ -70,6 +70,11 @@ static const std::vector<unsigned> empty_unsigned_vec =
 static const std::vector<std::string> empty_string_vec =
     std::vector<std::string>();
 
+/**
+ * Visitor to parse a list of strings (buried in a multi_type_seq)
+ * into a multi_type_seq containing the typed values given the input
+ * type signature.
+ */
 builtin token_to_boolean(const std::string& token);
 contin_t token_to_contin(const std::string& token);
 vertex token_to_vertex(const type_node &tipe, const std::string& token);
@@ -118,7 +123,6 @@ struct from_tokens_visitor : public boost::static_visitor<multi_type_seq> {
  * If no such delimiter is found then it return a pair with empty key
  * and empty val.
  */
-static const char *sparse_delim = " : ";
 std::pair<std::string, std::string> parse_key_val(std::string chunk);
 
 /**
@@ -182,8 +186,7 @@ struct from_sparse_tokens_visitor : public from_tokens_visitor {
 
 /**
  * Take a line and return a vector containing the elements parsed.
- * Used by istreamTable. This will modify the line to remove leading
- * non-ASCII characters, as well as stripping of any carriage-returns.
+ * Used by istreamTable.
  */
 template<typename T>
 std::vector<T> tokenizeRow(const std::string& line,
@@ -218,6 +221,9 @@ std::istream& istreamTable(std::istream& in, Table& tab,
                            const std::string& target_feature,
                            const std::vector<std::string>& ignore_features);
 
+// WARNING: this implementation only supports boolean ctable!!!!
+std::istream& istreamCTable(std::istream& in, CTable& ctable);
+
 /**
  * Load a OTable givent the file name. Only works for dense DSV data.
  */
@@ -241,6 +247,9 @@ Table loadTable_optimized(const std::string& file_name,
                           const std::string& target_feature,
                           const std::vector<std::string>& ignore_features
                           = empty_string_vec);
+
+// WARNING: this implementation only supports boolean ctable!!!!
+CTable loadCTable(const std::string& file_name);
 
 //////////////////
 // ostreamTable //
@@ -300,6 +309,7 @@ Out& ostreamTable(Out& out, const Table& table)
 void saveTable(const std::string& file_name, const Table& table);
 
 /// output a compressed table in pseudo CSV format
+std::ostream& ostreamCTableRow(std::ostream& out, const CTable::value_type& ctv);
 std::ostream& ostreamCTable(std::ostream& out, const CTable& ct);
 
 /**

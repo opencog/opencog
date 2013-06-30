@@ -154,8 +154,6 @@ bool has_empty_intersection(It1 from1, It1 to1,
 
 template<typename Set>
 bool has_empty_intersection(const Set& ls, const Set& rs) {
-    typedef typename Set::const_iterator const_iterator;
-    typedef typename Set::key_compare key_compare;
     return has_empty_intersection(ls.begin(), ls.end(),
                                   rs.begin(), rs.end(),
                                   ls.key_comp());

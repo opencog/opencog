@@ -4,8 +4,6 @@
 #ifndef _OPENCOG_PYTHON_MODULE_H
 #define _OPENCOG_PYTHON_MODULE_H
 
-#include "PyIncludeWrapper.h"
-
 #include <string>
 
 #include <opencog/server/Agent.h>
@@ -13,16 +11,9 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/cython/PythonEval.h>
-
-#include "PyMindAgent.h"
-#include "PyRequest.h"
-#include "agent_finder_types.h"
 
 namespace opencog
 {
-
-class CogServer;
 
 class PythonAgentFactory : public AbstractFactory<Agent>
 {

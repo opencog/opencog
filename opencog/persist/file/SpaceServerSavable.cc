@@ -117,6 +117,7 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
 
     unsigned int mapSize;
     int rc = fread(&mapSize, sizeof(unsigned int), 1, fp);
+    OC_ASSERT(0 < rc, "SpaceServerSavable - Failed read of mapSize.");
     for (unsigned int i = 0; i < mapSize; i++) {
         Handle mapHandle;
         fread(&mapHandle, sizeof(Handle), 1, fp);

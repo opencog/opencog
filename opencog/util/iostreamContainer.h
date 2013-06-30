@@ -228,7 +228,7 @@ namespace opencog {
      * For instance 
      * std::stringstream ss("[1 2 3 4] 5");
      * std::vector<int> nums;
-     * istreamContainer(ss, back_inserter(nums), [", "]");
+     * istreamContainer(ss, back_inserter(nums), "[", "]");
      * inserts 1 to 4 in nums.
      * @note it is assumed the delimiter is a white-space
      * @todo upgrade that function to work with any delimiter
