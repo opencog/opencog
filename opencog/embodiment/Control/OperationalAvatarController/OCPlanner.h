@@ -154,19 +154,13 @@ public:
 class StateNode
 {
 public:
-    enum ACHIEVE_STATE
-    {
-        ACHIEVED,
-        NOT_ACHIEVED,
-        UNKNOWN
-    };
 
     State* state;
-    ACHIEVE_STATE isAchieved;
     RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    int depth;
+    int depth; // depth = -1 means no rule node need this state node as a precondition
+
     StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
@@ -175,7 +169,7 @@ public:
     list< pair<float,Rule*> > candidateRules;
 
     // the rules have been tried on this state node
-//    set<Rule*> ruleHistory;
+    list< pair<float,Rule*> > ruleHistory;
 
     // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
     // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
@@ -233,9 +227,9 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
-     // to store the orginal state values, avoid inquery in every planning step
-     // this vector should be clear every time begin a new plan
-     vector<State> originalStatesCache;
+//     // to store the intermediate states which may be produced during planning stepps
+//     // this vector should be clear every time begin a new plan
+//     vector<State*> globalStatesCache;
 
      // check if a given single goal has been achieved now
      // @ curLayerStates is a state layer in the planning graph

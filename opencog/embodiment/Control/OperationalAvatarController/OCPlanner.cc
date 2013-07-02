@@ -136,17 +136,17 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
         return 1.0f;
     }
 
-    // First search this state in the originalStatesCache
-    vector<State>::const_iterator vit = originalStatesCache.begin();
-    for (;vit != originalStatesCache.end(); vit ++)
-    {
-        State vState = (State)(*vit);
-        if (vState.isSameState(oneGoal))
-            return vState.isSatisfied(oneGoal,satisfiedDegree,original_state);
+//    // First search this state in the globalStatesCache
+//    vector<State*>::const_iterator vit = globalStatesCache.begin();
+//    for (;vit != globalStatesCache.end(); vit ++)
+//    {
+//        State* vState = (State*)(*vit);
+//        if (vState->isSameState(oneGoal))
+//            return vState->isSatisfied(oneGoal,satisfiedDegree,original_state);
 
-    }
+//    }
 
-    // has not been found in the originalStatesCache,
+    // has not been found in the globalStatesCache,
     // then we should inquery this state from the run time environment
     if (oneGoal.need_inquery)
     {
@@ -180,7 +180,7 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
 
 bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 {
-    originalStatesCache.clear();
+//    globalStatesCache.clear();
 
     int ruleNodeCount = 0;
 
@@ -198,7 +198,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     // Firstly, we construct the original unsatisfiedStateNodes and satisfiedStateNodes from the input goals
     list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
-    set<StateNode*> satisfiedStateNodes;// all the state nodes that have been satisfied during planning process
+    list<StateNode*> satisfiedStateNodes;// all the state nodes that have been satisfied during planning process
     vector<State*>::const_iterator it;
     for (it = goal.begin(); it != goal.end(); ++ it)
     {
@@ -211,12 +211,10 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         if (checkIsGoalAchieved(*(newStateNode->state), satisfiedDegree))
         {
-            newStateNode->isAchieved = StateNode::ACHIEVED;
-            satisfiedStateNodes.insert(newStateNode);
+            satisfiedStateNodes.push_back(newStateNode);
         }
         else
         {
-            newStateNode->isAchieved = StateNode::NOT_ACHIEVED;
             unsatisfiedStateNodes.push_back(newStateNode);
         }
 
@@ -226,12 +224,21 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     {
         Rule* selectedRule = 0;
 
-        //  todo: there should be some way to decide which state should be chosed to achieved first
-        //  for (stateNodeIter = unsatisfiedStateNodes->nodes.begin(); stateNodeIter != unsatisfiedStateNodes->nodes.end();++stateNodeIter)
+        // decide which state should be chosed to achieved first
+        list<StateNode*>::iterator stateNodeIter;
+        for (stateNodeIter = unsatisfiedStateNodes->nodes.begin(); stateNodeIter != unsatisfiedStateNodes->nodes.end();++stateNodeIter)
+        {
+            (StateNode*)(*stateNodeIter)->calculateNodeDepth();
+        }
 
         unsatisfiedStateNodes.sort();
 
-        StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.front());
+        // the state node with deeper depth will be solved first
+        StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
+
+        // if the deepest state node has a depth of -1, it means all the required states have been satisfied
+        if (curStateNode->depth == -1)
+            break;
 
         // if we have not tried to achieve this state node before, find all the candidate rules first
         if (! curStateNode->hasFoundCandidateRules)
@@ -299,7 +306,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 }
 
                 selectedRule = (curStateNode->candidateRules.begin())->second;
+                curStateNode->ruleHistory.push_back(curStateNode->candidateRules.front());
                 curStateNode->candidateRules.pop_front();
+
 
             }
 
@@ -312,6 +321,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             if (curStateNode->candidateRules.size() != 0)
             {
                 selectedRule = curStateNode->candidateRules.front();
+                curStateNode->ruleHistory.push_back(curStateNode->candidateRules.front());
                 curStateNode->candidateRules.erase(curStateNode->candidateRules.begin());
             }
             else
@@ -332,7 +342,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     // we have tried all the Candidate bindings in previous steps,
                     // so it means this rule doesn't work, we have to go back to its forward state node
 
-                    // Remove this rule from the candidate ruls of all its foward state nodes
+                    // Remove this rule from the candidate rules of all its foward state nodes
                     // and move all its foward state nodes from satisfiedStateNodes to unsatisfiedStateNodes
                     set<StateNode*>::iterator forwardStateIt;
                     for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
@@ -488,7 +498,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         }
 
 
-        // Till now have select one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
+        // Till now have selected one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
 
         // create a new RuleNode to apply this selected rule
         RuleNode* ruleNode = new RuleNode(selectedRule);
@@ -497,19 +507,113 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         curStateNode->backwardRuleNode = ruleNode;
 
         // When apply a rule, we need to select proper variables to ground it.
-        // A rule should be grounded during its rule layer.
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
+        // ToBeImproved:  need to groundARuleNodeFromItsForwardState when choose which rule to apply, to avoid the rules that will cause a lot of effect on the already solved states
         groundARuleNodeFromItsForwardState(ruleNode, curStateNode);
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
         groundARuleNodeBySelectingValues(ruleNode);
 
-        // Todo: forwardEffectState
+        std::set_union(ruleNode->currentBindingsFromForwardState.begin(),ruleNode->currentBindingsFromForwardState.end(),
+                       ruleNode->currentBindingsViaSelecting.begin(),ruleNode->currentBindingsViaSelecting.end(),
+                       inserter(ruleNode->currentAllBindings,ruleNode->currentAllBindings.begin()));
 
+        //  find if there are other forward states besides curStateNode will be affected by this rule
+        set<StateNode*>::iterator effectItor;
 
-        // Todo: find if there are other forward states besides curStateNode will be affected by this rule
+        bool found = false;
+
+        for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+        {
+            // skip the current state node
+            if ((*effectItor) == curStateNode)
+                continue;
+
+            State* effState =  Rule::groundAStateByRuleParamMap(((StateNode*)(*effectItor))->state, ruleNode->currentAllBindings);
+
+            list<StateNode*>::iterator unsait;
+            set<StateNode*>::iterator sait;
+
+            for (unsait = unsatisfiedStateNodes.begin(); unsait != unsatisfiedStateNodes.end(); )
+            {
+                if (effState->isSameState( ((StateNode*)(*unsait))->state ))
+                {
+                    // check if this effect can satisfy this unsatisfiedState
+                    float satDegree;
+                    StateNode* unsatStateNode = (StateNode*)(*unsait);
+                    if (effState->isSatisfied(*(unsatStateNode->state ),satDegree))
+                    {
+                        ruleNode->forwardLinks.insert(unsatStateNode);
+                        unsatisfiedStateNodes.erase(unsait);
+                        satisfiedStateNodes.push_back(unsatStateNode);
+
+                        // so don't need to creat a new effect state node for it, just connect this rule node to this unsatisfied StateNode
+                        unsatStateNode->backwardRuleNode = ruleNode;
+
+                    }
+                    else
+                        ++ unsait;
+
+                    found = true;
+                }
+                else
+                    ++ unsait;
+
+            }
+
+            for (sait = satisfiedStateNodes.begin(); sait != satisfiedStateNodes.end(); ++ sait)
+            {
+                if (effState->isSameState( ((StateNode*)(*sait))->state ))
+                {
+                    // check if this effect will change this already satified state and make it unsatisfied again
+                    float satDegree;
+                    StateNode* affectStateNode = (StateNode*)(*unsait);
+                    if (! effState->isSatisfied((*((StateNode*)(*sait))->state ),satDegree))
+                    {
+                        ruleNode->forwardLinks.insert(affectStateNode);
+                        satisfiedStateNodes.erase(sait);
+                        unsatisfiedStateNodes.push_back(affectStateNode);
+
+                        // this affected state node has been turnt into unsatisfied by this rule node,
+                        // ToBeImproved: if its backward branch doesn't have any overlap with current rule branch,
+                        //       it suggests that we just need to switch the order of this two branch,
+                        //       execute the current rule branch actions before the affected state node's backward rule branch
+                        // so we have to delete this state node's backward branch
+                        affectStateNode->candidateRules.push_front(affectStateNode->ruleHistory.back());
+                        affectStateNode->ruleHistory.pop_back();
+                        deleteRuleNode(affectStateNode->backwardRuleNode);
+                    }
+                    else
+                        ++ sait;
+                }
+                else
+                     ++ sait;
+
+                found = true;
+            }
+
+            if (! found)
+            {
+                // this effct is a new state that has not been mentioned by all the satisfied or unsatisfied states before
+                // create a new state node for it
+                StateNode* newStateNode = new StateNode(effState);
+                newStateNode->backwardRuleNode = ruleNode;
+                newStateNode->forwardRuleNode = 0;
+                newStateNode->forwardEffectState = 0;
+
+                satisfiedStateNodes.push_back(newStateNode);
+
+            }
+
+        }
+
+        // move the current state node from unsatisfied to satisfied list
+        satisfiedStateNodes.push_back(curStateNode);
+        unsatisfiedStateNodes.pop_back();
+
+        // TOdo: ground all the precondition state nodes and add the forwardEffectStates
         // add to the rule history
         // curStateNode->ruleHistory.insert(selectedRule);
 
@@ -786,17 +890,15 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     }
 
     // TODO: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
-
+    // currentBindingsViaSelecting
     // find all the canditates meet as many as possible preconditions
     // first try all the combinations of  these in the
     int tryTotalStateNum = number_easy_state;
 
     while (tryTotalStateNum > 0)
     {
-
         -- tryTotalStateNum;
     }
-
 
 }
 
