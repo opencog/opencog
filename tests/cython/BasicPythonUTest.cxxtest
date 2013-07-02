@@ -1,0 +1,103 @@
+/*
+ * tests/scm/BasicSCMUTest.cxxtest
+ *
+ * Most basic, simplest sniff test, verifies that atoms can be created.
+ * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <math.h>
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/TLB.h>
+
+#include <opencog/cython/PythonEval.h>
+
+#include <opencog/nlp/types/atom_types.h>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/Config.h>
+
+using namespace opencog;
+using namespace std;
+
+class BasicPythonUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		PythonEval *eval;
+
+	public:
+
+	BasicSCMUTest(void)
+	{
+		try
+		{
+			config().load("opencog-test.conf");
+		}
+		catch (RuntimeException &e)
+		{
+			std::cerr << e.getMessage() << std::endl;
+		}
+		logger().setFilename(config()["LOG_FILE"]);
+		logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+		logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+	}
+
+	~BasicSCMUTest()
+	{
+		// erase the log file if no assertions failed
+		if (!CxxTest::TestTracker::tracker().suiteFailed())
+			std::remove(logger().getFilename().c_str());
+	}
+
+	void setUp(void);
+
+	void tearDown(void) { }
+
+	void check_simple_python_function();
+};
+
+/*
+ * This is called once before each test, for each test (!!)
+ */
+void BasicPythonUTest::setUp(void)
+{
+	server(CogServer::createInstance);
+	as = &cogserver().getAtomSpace();
+	eval = &PythonEval::instance(as);
+
+	eval->clear_pending();
+}
+
+void BasicPythonUTest::test_simple_python_function()
+{
+	eval->apply_script("from opencog.atomspace import types as t\n"
+			   "def test_python_function():\n"
+    			   "	return ATOMSPACE.add_node(t.ConceptNode, 'TestNode')\n"
+			   "print test_python_function()\n");
+}
+

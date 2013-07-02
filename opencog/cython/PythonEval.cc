@@ -1,10 +1,10 @@
 /*
  * @file opencog/cython/PythonEval.cc
+ * @author Zhenhua Cai <czhedu@gmail.com> Ramin Barati <rekino@gmail.com>
+ *         Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
+ * @date 2011-09-20
  *
- * @author Ramin Barati <rekino@gmail.com> Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
- * @date   2013-05-16
- *
- * Reference: 
+ * Reference:
  *   http://www.linuxjournal.com/article/3641?page=0,2
  *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
  *
@@ -48,9 +48,23 @@ using namespace opencog;
 
 PythonEval * PythonEval::singletonInstance = 0;
 
+static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
+{
+    PROJECT_BINARY_DIR"/opencog/cython", // bindings
+    PROJECT_SOURCE_DIR"/opencog/python", // opencog modules written in python
+    PROJECT_SOURCE_DIR"/tests/cython",   // for testing
+    DATADIR"/python",                    // install directory
+    #ifndef WIN32
+    "/usr/local/share/opencog/python",
+    "/usr/share/opencog/python",
+    #endif // !WIN32
+    NULL
+};
+
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
+    this->pending = false;
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -63,8 +77,13 @@ void PythonEval::init(void)
     this->pyRootModule = PyImport_AddModule("__main__");
     PyModule_AddStringConstant(this->pyRootModule, "__file__", "");
 
+    PyRun_SimpleString(
+                "import sys\n"
+                "import StringIO\n"
+                );
+
     // Define the user function executer
-    this->apply_script("from opencog.atomspace import Handle, Atom\n"
+    PyRun_SimpleString("from opencog.atomspace import Handle, Atom\n"
                        "import inspect\n"
                        "def execute_user_defined_function(func, handle_uuid):\n"
                        "    handle = Handle(handle_uuid)\n"
@@ -73,8 +92,8 @@ void PythonEval::init(void)
                        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
                        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
                        "        raise Exception('Number of arguments in the function (' + "
-                                                   "str(no_of_arguments_in_user_fn) + ') does not match that of the "
-                                                   "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+                       "str(no_of_arguments_in_user_fn) + ') does not match that of the "
+                       "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
                        "    atom = func(*args_list_link.out)\n"
                        "    if atom is None:\n"
                        "        return\n"
@@ -95,7 +114,7 @@ void PythonEval::init(void)
     pyLocal = PyDict_New();
 
     // Getting sys.path and keeping the refrence, used in this->addSysPath()
-    sys_path = PySys_GetObject((char*)"path");
+    sys_path = PySys_GetObject("path");
 
     // Import pattern_match_functions which contains user defined functions
     this->addModuleFromPath(PROJECT_SOURCE_DIR"/opencog/python/pattern_match_functions");
@@ -104,40 +123,40 @@ void PythonEval::init(void)
 }
 
 PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
-    PyObject * pAtomSpace; 
+    PyObject * pAtomSpace;
 
     if (atomspace)
         pAtomSpace = py_atomspace(atomspace);
     else
-        pAtomSpace = py_atomspace(this->atomspace); 
+        pAtomSpace = py_atomspace(this->atomspace);
 
     if (pAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
                        __FUNCTION__
-                      ); 
+                       );
     else {
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace wrapped with python object", 
+        logger().error("PythonEval::%s Failed to get atomspace wrapped with python object",
                        __FUNCTION__
-                      ); 
+                       );
     }
 
-    return pAtomSpace; 
+    return pAtomSpace;
 }
 
-void PythonEval::printDict(PyObject* obj) {  
-    if (!PyDict_Check(obj))  
-        return;  
+void PythonEval::printDict(PyObject* obj) {
+    if (!PyDict_Check(obj))
+        return;
 
-    PyObject *k, *keys;  
-    keys = PyDict_Keys(obj);  
-    for (int i = 0; i < PyList_GET_SIZE(keys); i++) {  
-        k = PyList_GET_ITEM(keys, i);  
-        char* c_name = PyString_AsString(k);  
+    PyObject *k, *keys;
+    keys = PyDict_Keys(obj);
+    for (int i = 0; i < PyList_GET_SIZE(keys); i++) {
+        k = PyList_GET_ITEM(keys, i);
+        char* c_name = PyString_AsString(k);
         printf("%s\n", c_name);
-    }  
+    }
 }
 
 PythonEval::~PythonEval()
@@ -178,7 +197,7 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         singletonInstance = new PythonEval(atomspace);
     }
     else if (atomspace and singletonInstance->atomspace->atomSpaceAsync !=
-               atomspace->atomSpaceAsync)
+             atomspace->atomSpaceAsync)
     {
         // Someone is trying to initialize the Python
         // interpreter
@@ -186,9 +205,9 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         // design
         // there is no easy way to support this...
         throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-              " python interpreter with different AtomSpaceAsync ptr!");
-   }
-   return *singletonInstance;
+                               " python interpreter with different AtomSpaceAsync ptr!");
+    }
+    return *singletonInstance;
 }
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
@@ -211,7 +230,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
 
 
-//    PyGILState_STATE _state = PyGILState_Ensure();
+    //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
     pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyString_FromString(funcName.c_str()));
 
@@ -252,21 +271,50 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     Py_DECREF(pFunc);
     Py_DECREF(pExecFunc);
 
-//    PyGILState_Release(_state);
+    //    PyGILState_Release(_state);
 
     return Handle(uuid);
 }
 
-void PythonEval::apply_script(const std::string& script)
+std::string PythonEval::apply_script(const std::string& script)
 {
-//    PyGILState_STATE _state = PyGILState_Ensure();
+    std::string result;
+//    PyObject* pError;
+    //    PyGILState_STATE _state = PyGILState_Ensure();
+    PyRun_SimpleString("_opencog_output_stream = StringIO.StringIO()\n"
+                       "_python_output_stream = sys.stdout\n"
+                       "sys.stdout = _opencog_output_stream\n"
+                       "sys.stderr = _opencog_output_stream\n");
+
     PyRun_SimpleString(script.c_str());
-//    PyGILState_Release(_state);
+
+
+    PyObject *catcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
+    PyObject *output = PyObject_CallMethod(catcher, "getvalue", NULL);
+
+//    pError = PyErr_Occurred();
+
+//    if(pError){
+//        logger().error() << PyString_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+//        result = PyString_AsString(PyObject_GetAttrString(pError, "message"));
+//    }
+//    else
+//    {
+        result = PyString_AsString(output);
+//    }
+
+    PyRun_SimpleString("sys.stdout = _python_output_stream\n"
+                       "sys.stderr = _python_output_stream\n"
+                       "_opencog_output_stream.close()\n");
+    //    PyGILState_Release(_state);
+
+    return result;
 }
 
 void PythonEval::addSysPath(std::string path)
 {
     PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
+    //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
 /**
@@ -358,3 +406,30 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
+std::string PythonEval::eval(std::string expr)
+{
+    std::string result = "";
+    if(expr == "\n")
+    {
+        this->pending = false;
+        result = this->apply_script(this->expr);
+        this->expr = "";
+    }
+    else
+    {
+        size_t size = expr.size();
+        size_t colun = expr.find_last_of(':');
+        if(size-2 == colun)
+            pending = true;
+
+        this->expr += expr;
+
+        if(!pending)
+        {
+            result = this->apply_script(this->expr);
+            this->expr = "";
+        }
+    }
+    return result;
+
+}

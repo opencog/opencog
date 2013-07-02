@@ -2,7 +2,17 @@
  * PythonShellModule.h
  *
  * Module for starting up python shell
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ *
+ * @author Ramin Barati <rekino@gmail.com>
+ * @date   2013-07-02
+ *
+ * @Note
+ *   This code is almost identical to Linas' SchemeShellModule, so most of the credits
+ *   goes to him.
+ *
+ * Reference:
+ *   http://www.linuxjournal.com/article/3641?page=0,2
+ *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

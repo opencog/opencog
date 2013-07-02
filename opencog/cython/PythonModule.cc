@@ -125,9 +125,9 @@ void PythonModule::init()
         Py_InitializeEx(0);
     if (!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
-        // Without this, pyFinalize() crashes
+//        // Without this, pyFinalize() crashes
         _mainstate = PyThreadState_Get();
-        // Without this, pyshell hangs and does nothing.
+//        // Without this, pyshell hangs and does nothing.
         PyEval_ReleaseLock();
     }
 
@@ -161,6 +161,8 @@ void PythonModule::init()
             }
         }
     }
+
+    PythonEval::instance();
 
     if (import_agent_finder() == -1) {
         PyErr_Print();

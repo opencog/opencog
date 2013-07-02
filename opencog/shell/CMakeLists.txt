@@ -6,13 +6,17 @@ INCLUDE_DIRECTORIES(
 
 ADD_LIBRARY (py-shell SHARED
         GenericShell
-        PythonShellModule
         PythonShell
+        PythonShellModule
 )
 
 TARGET_LINK_LIBRARIES(py-shell
-        PythonEval
+        smob
         server
+        atomspace
+        cogutil
+        ${Boost_SYSTEM_LIBRARY}
+        ${PYTHON_LIBRARIES}
 )
 
 ADD_LIBRARY (scheme-shell SHARED

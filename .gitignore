@@ -2,6 +2,9 @@
 opencog.log
 opencog-python.log
 
+#Qt creator
+*.user
+
 # misc binaries
 bin
 bin-debug
