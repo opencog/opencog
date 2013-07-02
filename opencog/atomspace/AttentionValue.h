@@ -41,6 +41,8 @@ namespace opencog
 class Atom;
 class AtomSpaceImpl;
 class AttentionBank;
+class ImportanceIndex;
+
 
 struct AttentionValue {
 #ifdef ZMQ_EXPERIMENT
@@ -158,6 +160,7 @@ class AttentionValueHolder
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;
+    friend class ImportanceIndex; // needs access attentionValue to directly change it.
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
