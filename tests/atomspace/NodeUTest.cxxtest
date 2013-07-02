@@ -21,10 +21,11 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <opencog/util/platform.h>
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
-#include <opencog/util/platform.h>
+#include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;
 
