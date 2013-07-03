@@ -161,7 +161,7 @@ public:
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
     int depth; // depth = -1 means no rule node need this state node as a precondition
 
-    StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
+    StateNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1; stateNodeSatisfiedMe = 0;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
