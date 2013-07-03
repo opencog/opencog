@@ -162,6 +162,8 @@ void PythonModule::init()
         }
     }
 
+    PythonEval::instance();
+
     if (import_agent_finder() == -1) {
         PyErr_Print();
         logger().error() << "[PythonModule] Failed to load helper python module";
