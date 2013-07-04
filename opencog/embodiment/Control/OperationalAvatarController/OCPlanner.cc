@@ -603,7 +603,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         temporaryStateNodes.push_front(curStateNode);
         unsatisfiedStateNodes.pop_back();
 
-        // ground all the precondition state nodes and add the forwardEffectStates
+        // ground all the precondition state and create new nodes for each and add the forwardEffectStates
+        // and then check each precondition if it has already been satisfied, put it the unsatisfied one to the
         vector<State*>::iterator itpre;
         float satisfiedDegree;
         for (itpre = preconditionList.begin(); itpre != preconditionList.end(); ++ itpre)
@@ -615,9 +616,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             StateNode* newStateNode = new StateNode(groundPs);
             newStateNode->forwardRuleNode = ruleNode;
             newStateNode->backwardRuleNode = 0;
-            newStateNode->forwardEffectState = ?;
+            newStateNode->forwardEffectState = ps;
 
-            // check if this state has beed satisfied by the previous state nodes
+            // first check if this state has beed satisfied by the previous state nodes
             list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
             bool found = false;
             for (;vit != temporaryStateNodes.end(); vit ++)
@@ -631,10 +632,14 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                      {
                          // the current state satisfied this precondition,
                          // connect this precondition to the backward rule node of the state which satisfied this precondition
-                         ((StateNode*)(*vit))->backwardRuleNode->forwardLinks.insert(newStateNode);
-                         newStateNode->backwardRuleNode =  ((StateNode*)(*vit))->backwardRuleNode;
-
                          found = true;
+
+                         ruleNode* backwardRuleNode = ((StateNode*)(*vit))->backwardRuleNode;
+                         if (backwardRuleNode)
+                         {
+                             ((StateNode*)(*vit))->backwardRuleNode->forwardLinks.insert(newStateNode);
+                             newStateNode->backwardRuleNode =  ((StateNode*)(*vit))->backwardRuleNode;
+                         }
 
                          // not need to add it in the temporaryStateNodes list, because it has beed satisfied by the previous steps
                      }
@@ -643,20 +648,19 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             }
 
+            // cannot find this state in the temporaryStateNodes list, need to check it in real time
             if (! found)
             {
                 // check real time
+                if (! checkIsGoalAchieved(groundPs,satisfiedDegree))
+                {
+                    // add it to unsatisfied list
+                    unsatisfiedStateNodes.push_front(newStateNode);
+                }
 
-                // to do add in unsatisfied list
             }
 
         }
-
-
-
-
-        // Todo: put all the new unsatisfied states into the current
-
 
         // Todo: to execute the rules to change the imaginary SpaceMap if any
 
