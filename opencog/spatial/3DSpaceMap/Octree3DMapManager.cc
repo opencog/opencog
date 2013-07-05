@@ -117,7 +117,7 @@ Octree3DMapManager* Octree3DMapManager::clone()
 {
 
     Octree3DMapManager* cloneMap = new Octree3DMapManager(mTotalDepthOfOctree,mMapName, mRootOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,mMapBoundingBox,selfAgentEntity,
-                                    mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,mPosToNoneBlockEntityMap);
+                                    mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,mPosToNoneBlockEntityMap,nonBlockEntitieshistoryLocations);
     return cloneMap;
 }
 
@@ -151,7 +151,7 @@ BlockEntity* Octree3DMapManager::findBlockEntityByHandle(const Handle entityNode
 
 // currently we consider all the none block entities has no collision, agents can get through them
 void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass,bool isSelfObject,bool is_obstacle)
+                                            int _width, int _lenght, int _height, double yaw, std::string _entityName, std::string _entityClass,bool isSelfObject,unsigned long timestamp,bool is_obstacle)
 {
     map<Handle, Entity3D*>::iterator it;
     multimap<BlockVector, Entity3D*>::iterator biter;
@@ -172,9 +172,70 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
     }
     else
     {
+
+        biter = mPosToNoneBlockEntityMap.lower_bound(((Entity3D*)(it->second))->getCenterPosition());
+        eiter = mPosToNoneBlockEntityMap.upper_bound(((Entity3D*)(it->second))->getCenterPosition());
+        while(biter != eiter)
+        {
+            if (biter->second == it->second)
+            {
+                mPosToNoneBlockEntityMap.erase(biter);
+                break;
+            }
+            ++ biter;
+        }
         ((Entity3D*)(it->second))->updateNonBlockEntitySpaceInfo(_centerPosition,_width,_lenght,_height,yaw,is_obstacle);
-        biter = mPosToNoneBlockEntityMap.lower_bound(_centerPosition);
-        eiter = mPosToNoneBlockEntityMap.upper_bound(_centerPosition);
+        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
+    }
+
+}
+void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
+{
+    map< Handle, vector< pair<unsigned long,BlockVector> > >::iterator it = nonBlockEntitieshistoryLocations.find(entityHandle);
+    if (it == nonBlockEntitieshistoryLocations.end())
+    {
+        vector< pair<unsigned long,BlockVector> > newVector;
+        newVector.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
+        nonBlockEntitieshistoryLocations.insert(map< Handle, vector< pair<unsigned long,BlockVector> > >::value_type(entityHandle,newVector));
+    }
+    else
+    {
+        vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
+        if (newLocation == (oneEntityHistories.back())->second)
+            return; // no location changed
+        else
+            oneEntityHistories.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
+    }
+
+}
+
+BlockVector& Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
+{
+    map< Handle, vector< pair<unsigned long,BlockVector> > >::iterator it = nonBlockEntitieshistoryLocations.find(entityHandle);
+    if (it == nonBlockEntitieshistoryLocations.end())
+        return BlockVector::ZERO;
+    else
+    {
+        vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
+        if (oneEntityHistories.size() == 0)
+            return BlockVector::ZERO;
+        else
+            return (oneEntityHistories.back())->second;
+    }
+
+}
+
+void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos)
+{
+    map<Handle, Entity3D*>::iterator it = mAllNoneBlockEntities.find(entityNode);
+    multimap<BlockVector, Entity3D*>::iterator biter;
+    multimap<BlockVector, Entity3D*>::iterator eiter;
+
+    if (it != mAllNoneBlockEntities.end())
+    {
+
+        biter = mPosToNoneBlockEntityMap.lower_bound(((Entity3D*)(it->second))->getCenterPosition());
+        eiter = mPosToNoneBlockEntityMap.upper_bound(((Entity3D*)(it->second))->getCenterPosition());
         while(biter != eiter)
         {
             if (biter->second == it->second)
@@ -185,10 +246,12 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
             ++ biter;
         }
 
-        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
-    }
+        ((Entity3D*)(it->second))->updateNonBlockEntityLocation(_newpos);
 
+        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_newpos,(Entity3D*)(it->second)));
+    }
 }
+
 
 // currently we consider all the none block entities has no collision, agents can get through them
 void Octree3DMapManager::removeNoneBlockEntity(const Handle &entityNode)
@@ -230,8 +293,12 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
 
     block = new Block3D(1, _pos, _materialType, _color);
     mRootOctree->addSolidBlock(block);
-    mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
-    mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
+
+    if (_unitBlockAtom != Handle::UNDEFINED)
+    {
+        mAllUnitAtomsToBlocksMap.insert(map<Handle, BlockVector>::value_type(_unitBlockAtom, _pos));
+        mAllUnitBlocksToAtomsMap.insert(map<BlockVector,Handle>::value_type(_pos, _unitBlockAtom));
+    }
     mTotalUnitBlockNum ++;
 
     // when there is not the first time percept the world,
@@ -260,7 +327,6 @@ void Octree3DMapManager:: addSolidUnitBlock(BlockVector _pos, const Handle &_uni
     }
     else
     {
-
         // there are existing more than 1 BlockEntities will combine with this new block
         // this new block join two or more existing entities together,
         // we remove these old entities, and add all their blocks to this new big one
@@ -1170,9 +1236,11 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
 
 
  // this constructor is only used for clone
- Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,int _TotalUnitBlockNum,
-                    AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap, map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,
-                    map<int,BlockEntity*>& _BlockEntityList,map<Handle,Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap):
+ Octree3DMapManager::Octree3DMapManager  Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
+                  int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
+                  map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
+                  Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
+                  map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations):
                 mTotalDepthOfOctree(_TotalDepthOfOctree), mMapName(_MapName),mFloorHeight(_FloorHeight),mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum),
                 mMapBoundingBox(_MapBoundingBox), selfAgentEntity(_selfAgentEntity)
 
@@ -1198,5 +1266,6 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
     // copy all the NoneBlockEntities
     mAllNoneBlockEntities = _AllNoneBlockEntities;
     mPosToNoneBlockEntityMap = _PosToNoneBlockEntityMap;
+    nonBlockEntitieshistoryLocations = _nonBlockEntitieshistoryLocations;
 
  }
