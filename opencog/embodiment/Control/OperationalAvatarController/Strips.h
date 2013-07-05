@@ -214,7 +214,7 @@ namespace opencog { namespace oac {
     {
     public:
         // the specific state this effect will take effect on
-        State* state;
+        State* state; // it recoards the orginal value of this state which has not been changed by this effect
 
         //e.g. when this effect is to add the old stateValue by 5,
         //then effectOp = OP_ADD, opStateValue = 5
