@@ -274,16 +274,27 @@ Table loadTable_optimized(const std::string& file_name,
                           const std::vector<std::string>& ignore_features
                           = empty_string_vec);
 
+/**
+ * If target_feature is empty then, in case there is no header, it is
+ * assumed to be the first feature.
+ */
 Table loadTable_NEW(const std::string& file_name,
-                    const std::string& target_feature,
+                    const std::string& target_feature = std::string(),
                     const std::vector<std::string>& ignore_features
                     = empty_string_vec);
 
+type_node infer_type_from_token2(type_node curr_guess, const std::string& token);
+
+/**
+ * maxline is the maximum number of lines to read to infer the
+ * attributes. A negative number means reading all lines.
+ */
 std::istream& inferTableAttributes(std::istream& in,
                                    const std::string& target_feature,
                                    const std::vector<std::string>& ignore_features,
                                    type_tree& tt,
-                                   bool& has_header, bool& is_sparse);
+                                   bool& has_header, bool& is_sparse,
+                                   int maxline = 20);
 
 std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::string& target_feature,

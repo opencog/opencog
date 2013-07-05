@@ -209,7 +209,7 @@ type_node infer_type_from_token(const string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-type_node infer_type_from_token(type_node curr_guess, const string& token)
+type_node infer_type_from_token2(type_node curr_guess, const string& token)
 {
     type_node tokt = infer_type_from_token(token);
 
@@ -333,7 +333,7 @@ istream& istreamRawITable(istream& in, ITable& tab,
     arity_t arity = fl.size();
 
     atomic<int> arity_fail_row(-1);
-    auto parse_line = [&](int i)
+    auto parse_line = [&](size_t i)
     {
         // tokenize the line and fill the table with
         tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
@@ -443,7 +443,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
         // Infer the types of the fixed features.
         size_t off = 0;
         for (; off < fixed_arity; off++, pit++) 
-            types[off] = infer_type_from_token(types[off], *pit);
+            types[off] = infer_type_from_token2(types[off], *pit);
 
         for (; pit != chunks.end(); pit++) {
             // Rip out the key-value pairs
@@ -452,7 +452,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
                 break;
             // Store the key, uniquely.  Store best guess as the type.
             feats.insert(key_val.first);
-            feat_type = infer_type_from_token(feat_type, key_val.second);
+            feat_type = infer_type_from_token2(feat_type, key_val.second);
         }
     }
     logger().info() << "Sparse file unique features count=" << feats.size();
@@ -512,7 +512,7 @@ vector<type_node> infer_column_types(const ITable& tab)
     {
         const string_seq& tokens = rowit->get_seq<string>();
         for (arity_t i=0; i<arity; i++)
-            types[i] = infer_type_from_token(types[i], tokens[i]);
+            types[i] = infer_type_from_token2(types[i], tokens[i]);
     }
     return types;
 }
@@ -530,7 +530,22 @@ bool has_header(ITable& tab, vector<type_node> col_types)
     arity_t arity = row.size();
 
     for (arity_t i=0; i<arity; i++) {
-        type_node flt = infer_type_from_token(col_types[i], row[i]);
+        type_node flt = infer_type_from_token2(col_types[i], row[i]);
+        if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
+            return true;
+    }
+    return false;
+}
+
+/**
+ * Infer the column types of a line and compare it to the given column
+ * types.  If there is a mis-match, then it must be a header, i.e. a
+ * set of ascii column labels.
+ */
+bool is_header(const vector<string>& tokens, const vector<type_node>& col_types)
+{
+    for (size_t i = 0; i < tokens.size(); i++) {
+        type_node flt = infer_type_from_token2(col_types[i], tokens[i]);
         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
             return true;
     }
@@ -764,16 +779,83 @@ istream& istreamTable_NEW(istream& in, Table& tab,
 
 istream& inferTableAttributes(istream& in, const string& target_feature,
                               const vector<string>& ignore_features,
-                              type_tree& tt, bool& has_header, bool& is_sparse)
+                              type_tree& tt, bool& has_header, bool& is_sparse,
+                              int maxline)
 {
-    /* Mock version */
-    has_header = true;
-    is_sparse = false;
-    string line;
-    get_data_line(in, line);
-    vector<string> header = tokenizeRow<string>(line);
-    tt = gen_signature(id::boolean_type,
-                       header.size() - ignore_features.size() - 1);
+    streampos beg = in.tellg();
+
+    // Get a portion of the dataset into memory (cleaning weird stuff)
+    std::vector<string> lines;
+    {
+        string line;
+        while (get_data_line(in, line) && maxline-- > 0)
+            lines.push_back(line);
+    }
+
+    is_sparse = false; // TODO
+
+    // ASSUME IT'S DENSE!!!
+
+    // parse what could be a header
+    vector<string> maybe_header = tokenizeRow<string>(lines.front());
+
+    // determine arity
+    arity_t arity = maybe_header.size();
+    atomic<int> arity_fail_row(-1);
+
+    // determine initial type
+    vector<type_node> types(arity, id::unknown_type);
+
+    // parse the rest, determine its type and whether the arity is
+    // consistent
+    for (size_t i = 1; i < lines.size(); ++i) {
+        // Parse line
+        const string_seq& tokens = tokenizeRow<string>(lines[i]);
+
+        // Check arity
+        if (arity != (arity_t)tokens.size()) {
+            arity_fail_row = i + 1;
+            in.seekg(beg);
+            in.clear();         // in case it has reached the eof
+            OC_ASSERT(false,
+                      "ERROR: Input file inconsistent: the %uth row has a "
+                      "different number of columns than the rest of the file.  "
+                      "All rows should have the same number of columns.\n",
+                      arity_fail_row.load());
+        }
+
+        // Infer type
+        boost::transform(types, tokens, types.begin(),
+                         infer_type_from_token2);
+    }
+
+    // Determine has_header
+    has_header = is_header(maybe_header, types);
+
+    // Determine type signature
+    if (has_header) {
+        auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
+                                   target_feature);
+        OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
+                  target_feature.c_str());
+        unsigned target_idx = std::distance(maybe_header.begin(), target_it);
+        vector<unsigned> ignore_idxs =
+            get_indices(ignore_features, maybe_header);
+        type_node otype = types[target_idx];
+        vector<type_node> itypes;
+        for (unsigned i = 0; i < types.size(); ++i)
+            if (!boost::binary_search(ignore_idxs, i) && i != target_idx)
+            itypes.push_back(types[i]);
+        tt = gen_signature(itypes, otype);
+    } else {
+        // No header, the target is the first column
+        type_node otype = types[0];
+        types.erase(types.begin());
+        tt = gen_signature(types, otype);
+    }
+
+    in.seekg(beg);
+    in.clear();         // in case it has reached the eof
     return in;
 }
 
@@ -783,7 +865,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
                            const type_tree& tt, bool has_header)
 {
     OC_ASSERT(has_header
-              || (!target_feature.empty() && !ignore_features.empty()),
+              || (target_feature.empty() && ignore_features.empty()),
               "If the data file has no header, "
               "then a target feature or ignore features cannot be specified");
 
