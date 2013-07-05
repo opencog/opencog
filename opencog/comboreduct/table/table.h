@@ -532,7 +532,8 @@ public:
     typedef std::vector<std::string> string_seq;
     typedef std::vector<type_node> type_seq;
     ITable();
-    ITable(const super& mat, string_seq il = string_seq());
+    ITable(const type_seq& ts, const string_seq& il = string_seq());
+    ITable(const super& mat, const string_seq& il = string_seq());
     /**
      * generate an input table according to the signature tt.
      *
@@ -619,8 +620,8 @@ public:
     int get_column_offset(const std::string& col_name) const;
 
 protected:
-    mutable string_seq labels; // list of input labels
     mutable type_seq types;    // list of types of the columns
+    mutable string_seq labels; // list of input labels
 
 private:
     string_seq get_default_labels() const;

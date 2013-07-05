@@ -70,7 +70,10 @@ string table_fmt_vertex_to_str(const vertex& v)
 
 ITable::ITable() {}
 
-ITable::ITable(const ITable::super& mat, vector<string> il)
+ITable::ITable(const vector<type_node>& ts, const vector<string>& il)
+    : types(ts), labels(il) {}
+
+ITable::ITable(const ITable::super& mat, const vector<string>& il)
     : super(mat), labels(il) {}
 
 ITable::ITable(const type_tree& tt, int nsamples,
