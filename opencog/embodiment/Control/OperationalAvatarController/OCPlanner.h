@@ -125,6 +125,8 @@ public:
     // to store the candidates of variables groundings. This is only for the curUngroundedVariables, excluding the varibales in currentBindingsFromForwardState
     vector<ParamGroundedMapInARule> ParamCandidates;
 
+    vector<StateValue> orginalGroundedStateValues; //to record the orginal state values in the effect before they takes effects, the order is the same in the effect list
+
     // How many times of this rule has been tried with different variable bindings in this rule node.
     // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
     int appliedTimes;
@@ -268,6 +270,8 @@ protected:
 
 
      void findCandidateValuesByGA(RuleNode* ruleNode);
+
+     void recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes
      void deleteRuleNode(RuleNode* ruleNode);

@@ -82,7 +82,12 @@ StateValue State::getStateValue()
     if (need_inquery)
         return inqueryFun(stateOwnerList);
     else
-        return (Inquery::getStateValueFromAtomspace(*this));
+    {
+        if (Rule::isParameterUnGrounded(this->stateVariable))
+            return (Inquery::getStateValueFromAtomspace(*this));
+        else
+            return this->stateVariable->getValue();
+    }
 
 }
 
@@ -780,7 +785,6 @@ bool Rule::isParamValueUnGrounded( StateValue& paramVal)
 
 // in some planning step, need to ground some state to calculate the cost or others
 // return a new state which is the grounded version of s, by a parameter value map
-// if the "groundings" cannot ground all the variables in this state, return 0
 State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
 {
     State* groundedState = s->clone();
@@ -806,12 +810,11 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
     {
         // look for the value of this variable in the parameter map
         paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
-        if (paramMapIt == groundings.end())
-            return 0;
-        else
+        if (paramMapIt != groundings.end())
             groundedState->stateVariable->assignValue(paramMapIt->second);
+        else
+            groundedState->getStateValue();
     }
-
 
     return groundedState;
 

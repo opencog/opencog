@@ -138,7 +138,7 @@ namespace opencog
             void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
                                     int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,unsigned long timestamp,bool is_obstacle = false);
 
-            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos);
+            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp);
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
@@ -311,7 +311,7 @@ namespace opencog
             // map <EntityHandle, vector< pair < timestamp, location> >
             map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
 
-            // get the location this nonBlockEntity appeared
+            // get the last location this nonBlockEntity appeared
             BlockVector& getLastAppearedLocation(Handle entityHandle);
 
         protected:
@@ -347,7 +347,7 @@ namespace opencog
 
             bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
 
-            void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp = 0);
+            void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
             Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,

@@ -189,6 +189,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     int ruleNodeCount = 0;
 
+    unsigned long iTimeStamp = 1000;
+
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
     SpaceServer::SpaceMap* clonedMap = spaceServer().cloneTheLatestSpaceMap();
@@ -236,6 +238,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     while(unsatisfiedStateNodes.size() != 0)
     {
         Rule* selectedRule = 0;
+
+        iTimeStamp ++;
 
         // decide which state should be chosed to achieved first
         list<StateNode*>::iterator stateNodeIter;
@@ -524,7 +528,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
         // ToBeImproved:  need to groundARuleNodeFromItsForwardState when choose which rule to apply, to avoid the rules that will cause a lot of effect on the already solved states
-        // toto: need to grounded its old state values in the effects so as to store the state value history
         groundARuleNodeFromItsForwardState(ruleNode, curStateNode);
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
@@ -535,6 +538,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                        ruleNode->currentBindingsViaSelecting.begin(),ruleNode->currentBindingsViaSelecting.end(),
                        inserter(ruleNode->currentAllBindings,ruleNode->currentAllBindings.begin()));
 
+        recordOrginalStateValuesAfterGroundARule(ruleNode);
+
         //  find if there are other forward states besides curStateNode will be affected by this rule
         set<StateNode*>::iterator effectItor;
 
@@ -543,7 +548,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             // skip the current state node
             if ((*effectItor) == curStateNode)
                 continue;
-
 
             State* effState =  Rule::groundAStateByRuleParamMap(((StateNode*)(*effectItor))->state, ruleNode->currentAllBindings);
 
@@ -750,7 +754,9 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
         string foodVarName = ActionParameter::ParamValueToString(actionParams.front());
         Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
         Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-        iSpaceMap->removeNoneBlockEntity(foodH);
+        // get the location last time it appeared
+        spatial::BlockVector& lastPos = iSpaceMap->getLastAppearedLocation(foodH);
+        iSpaceMap->addNoneBlockEntity(foodH,lastPos,1,1,1,0.0,foodEntity.id,entity.type,false);
 
         break;
 
@@ -1066,6 +1072,25 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 bool OCPlanner::selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr)
 {
 
+}
+
+// this function should be called after completely finished grounding a rule
+void OCPlanner::recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode)
+{
+    vector<EffectPair>::iterator effectIt;
+    Effect* e;
+    State* s;
+
+    ruleNode->orginalGroundedStateValues.clear();
+
+    for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
+    {
+        e = effectIt->second;
+        s = e->state;
+        State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
+        ruleNode->orginalGroundedStateValues.push_back(groundedState->getStateValue());
+
+    }
 }
 
 // hard constraints as heuristics for recursive rule, borrowed from the non-recursive rule has the same effect with it.

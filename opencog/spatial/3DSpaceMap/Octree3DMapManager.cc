@@ -188,6 +188,8 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_centerPosition,(Entity3D*)(it->second)));
     }
 
+    _addNonBlockEntityHistoryLocation(entityNode,_centerPosition,timestamp);
+
 }
 void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, BlockVector newLocation, unsigned long timestamp)
 {
@@ -225,7 +227,8 @@ BlockVector& Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
 
 }
 
-void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos)
+
+void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp)
 {
     map<Handle, Entity3D*>::iterator it = mAllNoneBlockEntities.find(entityNode);
     multimap<BlockVector, Entity3D*>::iterator biter;
@@ -250,6 +253,8 @@ void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode,
 
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_newpos,(Entity3D*)(it->second)));
     }
+
+    _addNonBlockEntityHistoryLocation(entityNode,_centerPosition,timestamp);
 }
 
 
