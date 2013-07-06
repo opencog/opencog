@@ -83,7 +83,7 @@ StateValue State::getStateValue()
         return inqueryFun(stateOwnerList);
     else
     {
-        if (Rule::isParameterUnGrounded(this->stateVariable))
+        if (Rule::isParameterUnGrounded(*(this->stateVariable)))
             return (Inquery::getStateValueFromAtomspace(*this));
         else
             return this->stateVariable->getValue();

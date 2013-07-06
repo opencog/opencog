@@ -102,7 +102,7 @@ void Entity3D::updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _w
 void Entity3D::updateNonBlockEntityLocation(BlockVector _centerPosition)
 {
     mCenterPosition = _centerPosition;
-    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x - _width / 2;
-    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y - _lenght / 2;
-    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - _height / 2;
+    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x - mBoundingBox.size_x / 2;
+    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y - mBoundingBox.size_y / 2;
+    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - mBoundingBox.size_z / 2;
 }

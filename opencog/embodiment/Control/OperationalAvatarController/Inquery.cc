@@ -651,8 +651,8 @@ HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNo
         // this stateOwner is a variable
         // look for the value of this variable in the current grounding parameter map
 
-        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindings.find(StateVariable::ParamValueToString(stateValue));
-        if (paramMapIt != ruleNode->currentBindings.end())
+        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(StateVariable::ParamValueToString(stateValue));
+        if (paramMapIt != ruleNode->currentBindingsFromForwardState.end())
         {
             // found it in the current groundings, so just add it as a const
             realValue = &(paramMapIt->second);

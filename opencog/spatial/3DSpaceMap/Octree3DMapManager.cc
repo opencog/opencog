@@ -203,7 +203,7 @@ void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, 
     else
     {
         vector< pair<unsigned long,BlockVector> >& oneEntityHistories = it->second;
-        if (newLocation == (oneEntityHistories.back())->second)
+        if (newLocation == (oneEntityHistories.back()).second)
             return; // no location changed
         else
             oneEntityHistories.push_back(pair<unsigned long,BlockVector>(timestamp,newLocation));
@@ -211,7 +211,7 @@ void Octree3DMapManager::_addNonBlockEntityHistoryLocation(Handle entityHandle, 
 
 }
 
-BlockVector& Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
+BlockVector Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
 {
     map< Handle, vector< pair<unsigned long,BlockVector> > >::iterator it = nonBlockEntitieshistoryLocations.find(entityHandle);
     if (it == nonBlockEntitieshistoryLocations.end())
@@ -222,7 +222,7 @@ BlockVector& Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
         if (oneEntityHistories.size() == 0)
             return BlockVector::ZERO;
         else
-            return (oneEntityHistories.back())->second;
+            return (oneEntityHistories.back()).second;
     }
 
 }
@@ -254,7 +254,7 @@ void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode,
         mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_newpos,(Entity3D*)(it->second)));
     }
 
-    _addNonBlockEntityHistoryLocation(entityNode,_centerPosition,timestamp);
+    _addNonBlockEntityHistoryLocation(entityNode,_newpos,timestamp);
 }
 
 
@@ -1241,11 +1241,11 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
 
 
  // this constructor is only used for clone
- Octree3DMapManager::Octree3DMapManager  Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
-                  int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
-                  map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                  Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
-                  map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations):
+Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
+                 int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
+                 map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
+                 Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
+                 map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations):
                 mTotalDepthOfOctree(_TotalDepthOfOctree), mMapName(_MapName),mFloorHeight(_FloorHeight),mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum),
                 mMapBoundingBox(_MapBoundingBox), selfAgentEntity(_selfAgentEntity)
 

@@ -312,7 +312,7 @@ namespace opencog
             map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
 
             // get the last location this nonBlockEntity appeared
-            BlockVector& getLastAppearedLocation(Handle entityHandle);
+            BlockVector getLastAppearedLocation(Handle entityHandle);
 
         protected:
 
