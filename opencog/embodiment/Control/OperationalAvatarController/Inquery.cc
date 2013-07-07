@@ -43,7 +43,6 @@
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-#include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 
 #include "Inquery.h"
