@@ -422,7 +422,7 @@
 
 ; goal updater is responsible for updating the truth value of ungrounded goal. 
 (define (add_goal_updater gpn_handle . arguments)
-    (add_goal gpn_handle . arguments) 
+    (add_goal gpn_handle arguments) 
 )
 
 ;||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||

@@ -23,20 +23,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "WebModule.h"
-#include "BaseURLHandler.h"
+#include <sstream>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/function.hpp>
+#include <boost/mem_fn.hpp>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 
-#include <sstream>
-#include <boost/bind.hpp>
-#include <boost/mem_fn.hpp>
-#include <boost/function.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <boost/filesystem.hpp>
+#include "BaseURLHandler.h"
+#include "WebModule.h"
 
 using namespace opencog;
 

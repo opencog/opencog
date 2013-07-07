@@ -199,6 +199,10 @@ public:
      * the documentation in the Module.h file for more details. */
     virtual bool unloadModule(const std::string& id);
 
+
+    /** Lists the modules that are currently loaded. */
+    virtual std::string listModules();
+
     /** Retrieves the module's meta-data (id, filename, load/unload function
      * pointers, etc). Takes the module's id */
     virtual ModuleData getModuleData(const std::string& id);

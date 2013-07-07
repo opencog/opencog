@@ -60,11 +60,23 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
     // the best possible score is reached. If not overloaded it will
     // return best_score (constant defined under
     // opencog/learning/moses/moses/types.h)
-    score_t best_possible_score() { return very_best_score; }
+    virtual score_t best_possible_score() const { return very_best_score; }
 
     // Return the minimum value considered for improvement (by
     // default return 0)
-    score_t min_improv() { return 0.0; }
+    virtual score_t min_improv() const { return 0.0; }
+
+    // In case the fitness function can be sped-up when certain
+    // features are ignored. The features are indicated as set of
+    // indices (from 0). The method provided by default does nothing
+    // (no speed-up).
+    //
+    // There is also another case. When a new deme is spawn if some
+    // features are ignored then the best_possible_score might be
+    // lower, it's good to compute it in order to stop deme search. If
+    // ignore_idxs is set then best_possible_score() can be recalled
+    // to get thta new ma score value.
+    virtual void ignore_idxs(const set<arity_t>&) const {}
 
     virtual ~cscore_base(){}
 };
@@ -87,6 +99,12 @@ struct bscore_base : public unary_function<combo_tree, penalized_bscore>
     // return 0)
     virtual score_t min_improv() const { return 0.0; }
 
+    // In case the fitness function can be sped-up when certain
+    // features are ignored. The features are indicated as set of
+    // indices (from 0). The method provided by default does nothing
+    // (no speed-up).
+    virtual void ignore_idxs(const set<arity_t>&) const {}
+
     virtual void set_complexity_coef(score_t complexity_ratio);
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
@@ -102,7 +120,7 @@ protected:
  *      score = sum_f BScore(f) + penalty
  *
  * This is a "minor" helper class, and exists for two reasons:
- * 1)  avoids some redundancy of having the summation in many places
+ * 1) avoids some redundancy of having the summation in many places
  * 2) Helps with keeping the score-caching code cleaner.
  *
  * TODO: could be detemplatized, it's only instantiated with
@@ -168,6 +186,14 @@ struct bscore_based_cscore : public cscore_base
         return _pbscorer.min_improv();
     }
 
+    // In case the fitness function can be sped-up when certain
+    // features are ignored. The features are indicated as set of
+    // indices (from 0).
+    void ignore_idxs(const set<arity_t>& idxs) const
+    {
+        _pbscorer.ignore_idxs(idxs);
+    }
+
     const PBScorer& _pbscorer;
 };
 
@@ -191,6 +217,11 @@ struct multibscore_based_bscore : public bscore_base
 
     // return the min of all min_improv
     score_t min_improv() const;
+
+    // In case the fitness function can be sped-up when certain
+    // features are ignored. The features are indicated as set of
+    // indices (from 0).
+    void ignore_idxs(const set<arity_t>&) const;
 
 protected:
     const BScorerSeq& _bscorers;
@@ -515,8 +546,7 @@ struct precision_bscore : public bscore_base
                      float min_activation = 0.5f,
                      float max_activation = 1.0f,
                      bool positive = true,
-                     bool worst_norm = false,
-                     bool subtract_neg_target = false);
+                     bool worst_norm = false);
 
     penalized_bscore operator()(const combo_tree& tr) const;
 
@@ -525,6 +555,12 @@ struct precision_bscore : public bscore_base
     behavioral_score best_possible_bscore() const;
 
     score_t min_improv() const;
+
+    /**
+     * Filter the table with all permitted idxs (the complementary
+     * with [0..arity).
+     */
+    void ignore_idxs(const set<arity_t>&) const;
 
     void set_complexity_coef(score_t complexity_ratio);
     void set_complexity_coef(unsigned alphabet_size, float stddev);
@@ -553,7 +589,15 @@ struct precision_bscore : public bscore_base
     combo_tree gen_canonical_best_candidate() const;
 
 protected:
-    const CTable& ctable;  // ref to the original table
+    const CTable& orig_ctable;  // ref to the original table
+
+    // table actually used for the evaluation. It is mutable because
+    // we want to be able to change it to ignore some features (it may
+    // speed-up evaluation)
+    mutable CTable wrk_ctable;
+
+    // for debugging, keep that around till we fix best_possible_bscore
+    // mutable CTable fully_filtered_ctable;
     
     size_t ctable_usize;   // uncompressed size of ctable
     score_t min_activation, max_activation;
@@ -561,7 +605,7 @@ protected:
                         // boolean). This is used to normalized the
                         // precision in case the output isn't boolean.
     score_t penalty;
-    bool positive, worst_norm, subtract_neg_target;
+    bool positive, worst_norm;
 
     // if enabled then each datapoint is an entry in the bscore (its
     // part contributing to the precision, and the activation penalty
@@ -573,6 +617,7 @@ protected:
 
 private:
     score_t get_activation_penalty(score_t activation) const;
+
     // function to calculate the total weight of the observations
     // associated to an input vector
     std::function<score_t(const CTable::counter_t&)> sum_outputs;

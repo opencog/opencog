@@ -106,7 +106,8 @@ void feature_selector::preprocess_params(const combo::combo_tree& xmplr)
     }
 }
 
-CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
+CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
+{
     // set labels and signature
     auto labels = _ctable.get_labels();
     auto sig = _ctable.get_signature();
@@ -144,7 +145,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
             // may be useful the prediction bscore is used because
             // positive answers indicates where the exemplar focus
             // is.
-            consider_row = predicted_out == combo::id::logical_true;
+            consider_row = (predicted_out == combo::id::logical_true);
         }
         if (consider_row && params.restrict_incorrect) {
             // Use only rows where the model is just plain wrong.  The
@@ -153,11 +154,16 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const {
             // is that these will be used to build a more accurate
             // models.
             //
-            // Nil: it's not exactly "plain wrong", plain wrong is
-            // more like the least frequent answer has count zero and
-            // the model predicts that. One could relax that
-            // constraint by specifying to which degree the model
-            // should be wrong so that the row is considered.
+            // For compressed tables, it can happen that sometimes the
+            // same row has multiple different outcomes (different
+            // values for the output feature -- i.e. the uncompressed
+            // table had multiple rows with the same input features).
+            // In this case, "plain wrong" is a shade of grey.  Below,
+            // we use most_frequent() to determine wrongness, but this
+            // could be relaxed.
+            //
+            // But why bother? isn't it extremely rare that tables
+            // ever actually compress, anyway?
             Counter<vertex, unsigned> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             consider_row = predicted_out != actual_out;
@@ -219,6 +225,13 @@ feature_set_pop feature_selector::select_top_feature_sets(const feature_set_pop&
 
 void feature_selector::log_stats_top_feature_sets(const feature_set_pop& top_fs) const
 {
+    logger().info() << "Number of demes selected: " << top_fs.size();
+
+    // There aren't any stats, if there's just one feature set!
+    // (which is the case when diversity is turned off).
+    if (1 == top_fs.size())
+        return;
+
     // Accumulator to gather statistics about mutual information
     // between feature set candidates
     typedef accumulator_set<float, stats<tag::count,
@@ -286,7 +299,7 @@ feature_set_pop feature_selector::operator()(const combo::combo_tree& xmplr)
     feature_set_pop sf_pop = select_feature_sets(fs_ctable, params.fs_params);
 
     // Cap, retain best feature sets
-    if (params.diversity_cap > 0)
+    if (0 < params.diversity_cap and params.diversity_cap < sf_pop.size())
         sf_pop.erase(std::next(sf_pop.begin(), params.diversity_cap), sf_pop.end());
 
     // Select the top params.n_demes feature sets

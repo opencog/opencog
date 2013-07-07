@@ -45,6 +45,8 @@ void Request::setRequestResult(RequestResult* rr)
     if (NULL == _requestResult) {
         _requestResult = rr;
         _mimeType = _requestResult->mimeType();
+    } else if (NULL == rr) {
+        _requestResult = NULL;  // used by exit/quit commands to not send any result.
     } else
         throw RuntimeException(TRACE_INFO,
             "Bad idea to try to set the RequestResult more than once.");

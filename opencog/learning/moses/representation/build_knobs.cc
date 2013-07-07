@@ -24,17 +24,17 @@
  */
 #include <future>
 
-#include "build_knobs.h"
-#include <opencog/comboreduct/reduct/meta_rules.h>
-#include <opencog/comboreduct/reduct/general_rules.h>
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
 
-#include <opencog/learning/moses/scoring/scoring.h>
-#include <opencog/learning/moses/moses/ann_scoring.h>
+#include <opencog/comboreduct/combo/convert_ann_combo.h>
+#include <opencog/comboreduct/reduct/meta_rules.h>
+#include <opencog/comboreduct/reduct/general_rules.h>
+
+#include "build_knobs.h"
 
 namespace opencog { namespace moses {
 
@@ -107,13 +107,13 @@ build_knobs::build_knobs(combo_tree& exemplar,
         logical_cleanup();
     }
     else if (output_type == id::action_result_type) {
-        // Petbrain
+        // Petbrain  XXX does this call code that actually works??
         action_canonize(_exemplar.begin());
         build_action(_exemplar.begin());
         action_cleanup();
     }
     else if (output_type == id::ann_type) {
-        // ANN
+        // ANN  XXX This is calling unfinished, broken code, below.
         ann_canonize(_exemplar.begin());
         build_contin(_exemplar.begin());
     }
@@ -240,7 +240,7 @@ build_knobs::logical_probe_rec(pre_it subtree,
 
         // asynchronous recursive call for [from, mid)
         std::future<ptr_vector<logical_subtree_knob>> f_async =
-            async(launch::async,
+            async(std::launch::async,
                   [&]() {return this->logical_probe_rec(subtree, exemplr, it,
                                                         from, mid,
                                                         add_if_in_exemplar,
@@ -450,42 +450,32 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
         }
         arg_type++;
     }
-    unsigned ps = perms.size(); // the actual number of arguments to consider
+
+    // Negative one correspnds to no pairs.
+    if (_perm_ratio <= -1.0)
+        return;
 
     // Also create n random pairs op($i $j) out of the total number
     // 2 * choose(n,2) == n * (n-1) of possible pairs.
 
     // Generate all permitted permutations of 2 arguments. This code
-    // is very expensive when the number of permitted arguments is
-    // large (hundreds) but when that is the case (no feature
+    // is expensive when the number of permitted arguments is large
+    // (thousands), but when that is the case (no dynamic feature
     // selection is used) representation building is insanely
     // expensive anyway.
     type_tree_sib_it arg_types = _signature.begin(_signature.begin());  // first
                                                                         // child
-    vector<combo_tree> permitted_perms;
+    vector<pair<arity_t, arity_t>> permitted_perms;
     for (arity_t a = 0; a < _arity; a++) {
         // Get the argument a and its type
         argument arg_a(a + 1);
-        type_tree_sib_it type_a = std::next(arg_types, a);
         if (permitted_op(arg_a)) {
             for (arity_t b = 0; b < _arity; b++) {
                 // Get the argument b and its type
                 argument arg_b(b + 1);
-                type_tree_sib_it type_b = std::next(arg_types, b);
                 if (permitted_op(arg_b) and a != b) {
                     // Permitted permutation
-                    combo_tree perm(swap_and_or(*it));
-                    if (b < a) {
-                        insert_typed_arg(perm, type_b, arg_b);
-                        insert_typed_arg(perm, type_a, arg_a);
-                    } else {
-                        // As above, but negate arg_a first. So we just
-                        // inline-expand insert_typed_arg and put a logical
-                        // not in front of it.
-                        insert_typed_arg(perm, type_a, arg_a, true /* negate */);
-                        insert_typed_arg(perm, type_b, arg_b);
-                    }
-                    permitted_perms.push_back(perm);
+                    permitted_perms.push_back({a, b});
                 }
             }
         }
@@ -501,11 +491,48 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     lazy_random_selector randpair(max_pairs);
 
     // Actual number of pairs to create ...
-    unsigned n_pairs =
-        ps + static_cast<unsigned int>(_perm_ratio * (max_pairs - ps));
+    unsigned ps = perms.size(); // the actual number of arguments to consider
+    size_t n_pairs = 0;
+    if (0.0 < _perm_ratio)
+        n_pairs = static_cast<size_t>(floor(ps + _perm_ratio * (max_pairs - ps)));
+    else {
+        n_pairs = static_cast<size_t>(floor((1.0 + _perm_ratio) * ps));
+        if (ps < n_pairs) n_pairs = 0;  // Avoid accidental rounding to MAX_UINT
+    }
+
+    if (logger().isDebugEnabled()) {
+        logger().debug() << "perms.size: " << ps
+                         << " max_pairs: " << max_pairs
+                         << " logical knob pairs to create: "<< n_pairs;
+    }
+
     dorepeat (n_pairs) {
-        unsigned i = randpair();
-        perms.push_back(permitted_perms[i]);
+        size_t i = randpair();
+
+        const pair<arity_t, arity_t>& ppr = permitted_perms[i];
+        arity_t a = ppr.first;
+        arity_t b = ppr.second;
+
+        // Get the argument a and its type
+        argument arg_a(a + 1);
+        argument arg_b(b + 1);
+        type_tree_sib_it type_a = std::next(arg_types, a);
+        type_tree_sib_it type_b = std::next(arg_types, b);
+
+        // Build the tree ...
+        combo_tree perm(swap_and_or(*it));
+        if (b < a) {
+            insert_typed_arg(perm, type_b, arg_b);
+            insert_typed_arg(perm, type_a, arg_a);
+        } else {
+            // As above, but negate arg_a first. So we just
+            // inline-expand insert_typed_arg and put a logical
+            // not in front of it.
+            insert_typed_arg(perm, type_a, arg_a, true /* negate */);
+            insert_typed_arg(perm, type_b, arg_b);
+        }
+
+        perms.push_back(perm);
     }
 
     if (logger().isFineEnabled())
@@ -531,10 +558,10 @@ void build_knobs::add_logical_knobs(pre_it subtree,
         logger().debug() << "Adding logical knobs to subtree of size="
                          << combo_tree(subtree).size()
                          << " at location of size=" << combo_tree(it).size();
-    }
-    if (logger().isFineEnabled()) {
-        logger().fine() << "subtree = " << combo_tree(subtree);
-        logger().fine() << "it = " << combo_tree(it);
+        if (logger().isFineEnabled()) {
+            logger().fine() << "subtree = " << combo_tree(subtree);
+            logger().fine() << "it = " << combo_tree(it);
+        }
     }
     vector<combo_tree> perms;
     sample_logical_perms(it, perms);
@@ -708,7 +735,7 @@ void build_knobs::contin_canonize(pre_it it)
         _exemplar.move_after(it, pre_it(it.last_child()));
         // Handle any divs.
         for (sib_it div = _exemplar.partition(it.begin(), it.end(),
-                                              bind(not_equal_to<vertex>(), _1,
+                                              bind(std::not_equal_to<vertex>(), _1,
                                                    id::div));
              div != it.end();)
             canonize_div(_exemplar.move_after(it, pre_it(div++)));
@@ -1254,9 +1281,11 @@ static void enumerate_nodes(sib_it it, vector<ann_type>& nodes)
     }
 }
 
+// XXX TODO this below is clearly unfinished, broken, etc.
+// and can't possibly work ... 
 void build_knobs::ann_canonize(pre_it it)
 {
-    tree_transform trans;
+    combo::tree_transform trans;
     cout << _exemplar << endl << endl;
     ann net = trans.decodify_tree(_exemplar);
     cout << &net << endl;

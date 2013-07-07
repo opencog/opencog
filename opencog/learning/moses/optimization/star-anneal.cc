@@ -30,6 +30,7 @@
 #include <opencog/util/oc_omp.h>
 
 #include "../moses/neighborhood_sampling.h"
+#include "../eda/scoring.h"
 
 #include "star-anneal.h"
 
@@ -76,8 +77,8 @@ unsigned simulated_annealing::operator()(deme_t& deme,
 
     // Score the initial instance
     instance center_instance(init_inst);
-    deme_inst_t scored_center_inst =
-        score_instance(center_instance, iscorer);
+    deme_inst_t scored_center_inst(center_instance, iscorer(center_instance));
+    
     energy_t center_instance_energy = energy(scored_center_inst);
     double current_temp = sa_params.init_temp;
 

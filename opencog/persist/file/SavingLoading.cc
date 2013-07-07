@@ -373,8 +373,11 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
     // reads each node from the file
     for (int i = 0; i < numNodes; i++) {
         
-        Type oldType;
-        size_t rc = fread(&oldType, sizeof(Type), 1, f);        
+        Type oldType;     
+        size_t rc = fread(&oldType, sizeof(Type), 1, f); 
+        if (rc < 0)
+            throw InconsistenceException(TRACE_INFO,
+                                         "SavingLoading - Failed read.");
         if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
                                          "SavingLoading - Type inconsistence clash '%d'.", oldType );

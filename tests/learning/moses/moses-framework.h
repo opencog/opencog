@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <unistd.h>
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -46,6 +48,8 @@ string build_arguments(vector<string>& arguments)
 
 pair<score_t, combo_tree> parse_result(const string& tempfile)
 {
+    cout << "tempfile" << tempfile << endl;
+    
     // open file
     ifstream in(tempfile);
 
@@ -53,6 +57,7 @@ pair<score_t, combo_tree> parse_result(const string& tempfile)
     combo_tree hitr;
 
     // Results are printed in random order these days...
+    // WARNING: you must output only the score of the candidate!
     while (!in.eof()) {
        // parse result
        score_t score;
@@ -110,6 +115,10 @@ void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
     TS_ASSERT_LESS_THAN(fabs(result.first - expected_sc), 1.0e-8);
     auto t2 = microsec_clock::local_time();
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
+
+    // Unlink only if test passed.
+    if (fabs(result.first - expected_sc) < 1.0e-8)
+         unlink(tempfile.c_str());
 }
 
 // test that the first candidate is one of the expected combo tree
@@ -132,6 +141,10 @@ void moses_test_combo(vector<string> arguments,
     TS_ASSERT(f_it != expected_tr_strs.end());
     auto t2 = microsec_clock::local_time();
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
+
+    // Unlink only if test passed.
+    if (f_it != expected_tr_strs.end())
+         unlink(tempfile.c_str());
 }
 // like above but uses cheap_parse_result instead of parse_result
 void cheap_moses_test_combo(vector<string> arguments,
@@ -150,4 +163,8 @@ void cheap_moses_test_combo(vector<string> arguments,
     TS_ASSERT(f_it != expected_tr_strs.end());
     auto t2 = microsec_clock::local_time();
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
+
+    // Unlink only if test passed.
+    if (f_it != expected_tr_strs.end())
+         unlink(tempfile.c_str());
 }

@@ -30,9 +30,7 @@
 #include <string>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/exceptions.h>
@@ -56,7 +54,6 @@ class AtomTable;
 class Atom : public AttentionValueHolder
 {
     friend class CommitAtomASR;   // needs access to clone
-    friend class ImportanceIndex; // needs access attentionValue to directly change it.
     friend class SavingLoading;   // needs to set flags diectly
     friend class AtomTable;
     friend class TLB;

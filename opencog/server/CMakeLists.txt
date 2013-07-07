@@ -5,27 +5,18 @@ INCLUDE_DIRECTORIES (
 ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
 	Request
-	DataRequest
-	ExitRequest
 	SleepRequest
-	HelpRequest
-	LoadRequest
-	SaveRequest
 	LoadModuleRequest
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
+	ListModulesRequest
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	atomspace
 	cogutil
 )
-
-IF (HAVE_EXPAT)
-	TARGET_LINK_LIBRARIES(builtinreqs xml)
-ENDIF (HAVE_EXPAT)
-
 
 ADD_LIBRARY (server SHARED
 	Agent
@@ -45,10 +36,6 @@ TARGET_LINK_LIBRARIES(server
 	${Boost_THREAD_LIBRARY}
 	dl
 )
-
-IF (HAVE_EXPAT)
-	TARGET_LINK_LIBRARIES(server xml)
-ENDIF (HAVE_EXPAT)
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(server smob)
@@ -111,16 +98,11 @@ INSTALL (FILES
 	BuiltinRequestsModule.h
 	CogServer.h
 	ConsoleSocket.h
-	DataRequest.h
-	ExitRequest.h
 	Factory.h
-	HelpRequest.h
 	IHasMimeType.h
 	IRequestComplete.h
 	ListRequest.h
 	LoadModuleRequest.h
-	LoadRequest.h
-	SaveRequest.h
 	Module.h
 	NetworkServer.h
 	SocketListener.h

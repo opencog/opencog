@@ -35,7 +35,22 @@ namespace moses {
 /**
  * Parameters of feature selector
 */
-struct feature_selector_parameters {
+struct feature_selector_parameters
+{
+    feature_selector_parameters() :
+        increase_target_size(true),
+        ignore_xmplr_features(true),
+        restrict_incorrect(true),
+        restrict_true(false),
+        init_xmplr_features(false),
+        xmplr_as_feature(false),
+        subsampling_pbty(0.0),
+        n_demes(1),
+        diversity_pressure(0.0),
+        diversity_cap(0),
+        diversity_interaction(0)
+    {}
+
     feature_selection_parameters fs_params;
 
     /**
@@ -111,9 +126,9 @@ struct feature_selector_parameters {
     /**
      * Set a cap regarding the population of feature sets. Right have
      * feature selection optimization, only diversity_cap found
-     * feature sets are kept, or all if diversity_cap <= 0
+     * feature sets are kept, or all if diversity_cap == 0.
      */
-    int diversity_cap;
+    size_t diversity_cap;
 
     /**
      * Number of interactions to consider when computing mi. A

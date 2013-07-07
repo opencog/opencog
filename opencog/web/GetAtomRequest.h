@@ -49,9 +49,9 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "get-atom",
+            "json-get-atom",
             "Get details for a particular atom referred by handle",
-            "Usage: get-atom handle=<handle>\n\n"
+            "Usage: json-get-atom handle=<handle>\n\n"
             "Get details for a particular atom referred by handle\n"
             "   <handle>: list the atom identified by the specified handle\n",
             false, true // not shell, is hidden

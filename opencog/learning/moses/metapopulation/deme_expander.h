@@ -56,7 +56,7 @@ struct deme_expander
      * @return return true if it creates demes successfully, otherwise false.
      */
     // bool create_deme(pbscored_combo_tree_set::const_iterator exemplar)
-    bool create_demes(const combo_tree& exemplar);
+    bool create_demes(const combo_tree& exemplar, int n_expansions = 0);
 
     /**
      * Do some optimization according to the scoring function.
@@ -106,6 +106,12 @@ protected:
     const reduct::rule& simplify_candidate; // to simplify candidates
     const reduct::rule& simplify_knob_building; // during knob building
     const cscore_base& _cscorer; // composite score
+
+    // This is used to keep track of the ignored indices for
+    // optimizing evaluation (in case of feature selection) and
+    // calculate max score per deme
+    std::vector<std::set<arity_t>> _ignore_idxs_seq;
+
     metapop_parameters _params;
 };
 

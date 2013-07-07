@@ -110,8 +110,9 @@ static const string angular = "angular";
         
 // diversity dst2dp types
 static const string auto_str = "auto";        
-static const string inverse = "inverse";
-static const string complement = "complement";
+static const string inverse_str = "inverse";
+static const string complement_str = "complement";
+static const string power_str = "power";
 
 // focus types (which data points feature selection within moses
 // should focus on)
@@ -251,8 +252,10 @@ void not_recognized_dst(const string& diversity_dst)
 void not_recognized_dst2dp(const string& diversity_dst2dp)
 {
     stringstream ss;
-    ss << diversity_dst2dp << " is not recognized. Valid distances to penalty are "
-       << auto_str << ", " << inverse << " and " << complement;
+    vector<string> valid_dsts = {auto_str, inverse_str, complement_str, power_str};
+    ostreamContainer(ss << diversity_dst2dp
+                     << " is not recognized. Valid distances to penalty are ",
+                     valid_dsts, ", ");
     log_output_error_exit(ss.str());
 }
 
@@ -532,7 +535,6 @@ int moses_exec(int argc, char** argv)
 
     // pre params
     bool pre_worst_norm;
-    bool pre_subtract_neg_target;
     bool gen_best_tree;
 
     // it params
@@ -1067,11 +1069,12 @@ int moses_exec(int argc, char** argv)
         ("diversity-dst2dp",
          value<string>(&diversity_dst2dp)->default_value(auto_str),
          str(format("Set the type of function to convert distance into penalty. "
-                    "3 options are available: %1%, %2% and %3%. "
+                    "4 options are available: %1%, %2%, %3% and %4%. "
                     "When %1% is selected the function is selected depending "
-                    "on the distance, if the distance is %4%, "
+                    "on the distance, if the distance is %5%, "
                     "then %2% is selected, otherwise %3% is selected.\n")
-             % auto_str % inverse % complement % p_norm).c_str())
+             % auto_str % inverse_str % complement_str
+             % power_str % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
@@ -1111,11 +1114,6 @@ int moses_exec(int argc, char** argv)
          value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
-        ("pre-subtract-neg-target",
-         value<bool>(&pre_subtract_neg_target)->default_value(false),
-         "If set to 1 then the negation of the target counts for -1 instead of 0. "
-         "[EXPERIMENTAL].\n")
-
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
@@ -1139,6 +1137,25 @@ int moses_exec(int argc, char** argv)
          "specifies the number of features to be selected out of "
          "the dataset.  A value of 0 disables feature selection.\n")
 
+        ("fs-exp-distrib",
+         value<bool>(&fs_params.exp_distrib)->default_value(false),
+         "Use a smoth exponential distribution, instead of hard "
+         "cuttoff, when selecting the highest-scoring features.  "
+         "Without this option, the highest-scoring count=N features "
+         "will be selected. That is, the distribution will be a hard "
+         "cutoff or cliff: after ranking all features by score, the "
+         "k'th highest-ranked feature will be selected with probability "
+         "1.0 if k<N  and with probability 0.0 if k>N.  With this option "
+         "enabled, a total of count=N features will still be selected, "
+         "and most of these will be the highest scoring ones, but a few "
+         "lower-ranked features will also be included.  Specifically, "
+         "the probability of choosing the k'th ranked feature will be "
+         "exp(-tk) with t choosen so that, on average, N features are "
+         "selected.  The initial random seed affects the generated list. "
+         "Currently, this option only applies to the -asimple algo, and "
+         "is ignored by the others (this needs to be fixed.)\n")
+
+
         ("fs-focus",
          value<string>(&fs_focus)->default_value(focus_incorrect),
          str(boost::format("Focus of feature selection (which data points "
@@ -1146,7 +1163,7 @@ int moses_exec(int argc, char** argv)
                            "%s, all data points are considered\n\n"
                            "%s, only active data points are considered\n\n"
                            "%s, only incorrect answers are considered\n\n"
-                           "%s, only active data points that incorrectly "
+                           "%s, only active data points that are incorrectly "
                            "answered are considered.\n")
              % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
 
@@ -1155,29 +1172,29 @@ int moses_exec(int argc, char** argv)
          str(boost::format("Seed type (how to use the features of the "
                            "exemplar to seed feature selection):\n\n"
 
-                           "%s, empty initial feature set, however the "
-                           "features of the exemplar are simply removed "
+                           "%s, empty initial feature set.  The "
+                           "features used in the exemplar are removed "
                            "from the dataset before feature selection occurs. "
-                           "This is to prevent that new selected features "
-                           "are ones from the exemplar.\n\n"
+                           "This prevents newly selected features from "
+                           "being those already in the exemplar.\n\n"
 
-                           "%s, empty initial feature set, the features "
-                           "of the exemplar are not removed from the dataset "
-                           "but the number of features of the exemplar "
-                           "is added to the number of features to select. "
-                           "That is (for that particular expansion):\n"
-                           "fs_target_size += number of features in exemplar\n\n"
+                           "%s, empty initial feature set. The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected. "
+                           "This guarentees that at least fs_target_size "
+                           "features are not from the exemplar itself.\n\n"
 
                            "%s, the features of the exemplar are used as "
-                           "initial guess for feature selection, also the "
-                           "number of features to select is also added to "
-                           "the number of features of the exemplar, as for add.\n\n"
+                           "an initial guess for feature selection. "
+                           "The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected.\n\n"
 
-                           "%s, the \"exemplar feature\" us used as initial "
+                           "%s, the \"exemplar feature\" is used as initial "
                            "guess. The exemplar feature is the output of the "
                            "exemplar. The number of features to select is "
                            "incremented by 1 (to account for the exemplar "
-                           "feature). that is the number of feature to select "
+                           "feature). That is, the number of feature to select "
                            "is fs_target_size + 1\n")
              % seed_none % seed_add % seed_init % seed_xmplr).c_str())
 
@@ -1230,9 +1247,9 @@ int moses_exec(int argc, char** argv)
          "(itself being in [0,1]).\n")
 
         ("fs-diversity-cap",
-         value<int>(&festor_params.diversity_cap)->default_value(100),
+         value<size_t>(&festor_params.diversity_cap)->default_value(100),
          "Place a cap on the maximum number of feature set to consider. "
-         "If negative, no cap is used (warning could be very slow)"
+         "If zero, no cap is used (Warning: could be very slow). "
          "Use this to speed up diversity computation on feature sets.\n")
 
         ("fs-diversity-interaction",
@@ -1569,10 +1586,12 @@ int moses_exec(int argc, char** argv)
     if (diversity_dst2dp == auto_str)
         d2de = diversity_dst == p_norm ?
             diversity_parameters::inverse : diversity_parameters::complement;
-    else if (diversity_dst2dp == inverse)
+    else if (diversity_dst2dp == inverse_str)
         d2de = diversity_parameters::inverse;
-    else if (diversity_dst2dp == complement)
+    else if (diversity_dst2dp == complement_str)
         d2de = diversity_parameters::complement;
+    else if (diversity_dst2dp == power_str)
+        d2de = diversity_parameters::pthpower;
     else {
         not_recognized_dst2dp(diversity_dst2dp);
         d2de = diversity_parameters::inverse; // silent compiler warning
@@ -1769,8 +1788,7 @@ int moses_exec(int argc, char** argv)
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
-                                           pre_worst_norm,
-                                           pre_subtract_neg_target);
+                                           pre_worst_norm);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                     if (gen_best_tree) {

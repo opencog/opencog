@@ -73,7 +73,7 @@ struct diversity_parameters
     std::function<dp_t(const behavioral_score&, const behavioral_score&)> dst;
 
     // Function to convert the distance into diversity penalty. There
-    // are 2 possible functions
+    // are 3 possible functions
     //
     // The inserve (offset by 1)
     //
@@ -81,13 +81,21 @@ struct diversity_parameters
     //
     // The complement
     //
-    // f-x) = pressure * (1-x)
+    // f(x) = pressure * (1-x)
+    //
+    // The pth-power
+    //
+    // f(x) = x^pressure
     //
     // The idea is that it should tend to pressure when the distance
     // tends to 0, and tends to 0 when the distance tends to its
     // maximum. Obviously the inverse is adequate when the maximum is
-    // infinity and the complement is adequate when it is 1.
-    enum dst2dp_enum_t { inverse, complement };
+    // infinity and the complement is adequate when it is 1.  The
+    // power is adequate when the diversity represent a probability
+    // and that probability will later be multiplied by the score.
+    enum dst2dp_enum_t { inverse, complement, pthpower };
+    dst2dp_enum_t dst2dp_type;
+
     void set_dst2dp(dst2dp_enum_t d2de);
     std::function<dp_t(dp_t)> dst2dp;
 };

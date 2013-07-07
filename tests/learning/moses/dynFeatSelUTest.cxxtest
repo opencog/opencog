@@ -1,0 +1,108 @@
+/** dynFeatSelTest.cxxtest ---
+ *
+ * Copyright (C) 2012 OpenCog Foundation
+ * Copyright (C) 2013 Linas Vepstas
+ *
+ * Author: Linas Vepstas <linasveptas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include <opencog/util/mt19937ar.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string test_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test operation of the dynamic feature selector.
+ */
+class dynamicFeatsUTest : public CxxTest::TestSuite
+{
+public:
+    dynamicFeatsUTest()
+    {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
+    // single-threaded test.
+    // Expected score results:
+    // -m12000 -r0 get score of -42 run-time  8 secs
+    // -m12000 -r1 get score of -29 run-time 13 secs
+    // -m12000 -r2 get score of -41 run-time 18 secs
+    // -m12000 -r3 get score of -42 run-time  9 secs
+    // -m12000 -r4 get score of -34 run-time 13 secs
+  
+    // XXX Except that the actual score will change as algorithm
+    // changes are made, because algo changes change the random number
+    // seq which changes the final results.  So ... err ... not sure
+    // what to do about this ... Anyway, the threaded and non-threaded
+    // versions should return exactly the same results.
+    void test_dyn_feat_score()
+    {
+        // Reset the seed, so that this, and the next test, give exactly the same result.
+        opencog::randGen().seed(1);
+        vector<string> ans;
+        ans.push_back("and(or(and(or(and(or($16 $124 !$168 $200) !$23 !$284 !$287 !$288) and($16 $284) $184) !$22 !$273 !$282) $27) !$13)");
+
+        string data_file_path("-i" + test_dir + "feat-sel.csv");
+        // moses_test_score({"-Hit", 
+        moses_test_combo({"-Hit", 
+              "-uchange_predict",
+              "-B0",     // knob-building effort of zero -- no effort at all.
+              "-m12000", 
+              "-Z1",     // enable cross-over
+              "-j1",
+              "--hc-max-nn-evals=5000",
+              "--enable-fs=1",   // use run-time dynamic feat sel.
+              "--fs-target-size=12",   // pick 12 dynamical out of 300
+              "-r1",
+              data_file_path,
+              },
+              // -45);
+              ans);
+    }
+
+    // Same as above, but threaded. Should return the same result as above.
+    void test_dyn_feat_score_threaded()
+    {
+        // Reset the seed, so that this, and the previou test, give exactly the same result.
+        opencog::randGen().seed(1);
+
+        vector<string> ans;
+        ans.push_back("and(or(and(or(and(or($16 $124 !$168 $200) !$23 !$284 !$287 !$288) and($16 $284) $184) !$22 !$273 !$282) $27) !$13)");
+
+        string data_file_path("-i" + test_dir + "feat-sel.csv");
+        // moses_test_score({"-Hit", 
+        moses_test_combo({"-Hit", 
+              "-uchange_predict",
+              "-B0",     // knob-building effort of zero -- no effort at all.
+              "-m12000", 
+              "-Z1",     // enable cross-over
+              "-j8",
+              "--hc-max-nn-evals=5000",
+              "--enable-fs=1",   // use run-time dynamic feat sel.
+              "--fs-target-size=12",   // pick 12 dynamical out of 300
+              "-r1",
+              data_file_path,
+              },
+              // -45);
+              ans);
+    }
+};

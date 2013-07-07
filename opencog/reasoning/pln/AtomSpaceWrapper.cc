@@ -386,7 +386,7 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     pHandleSeq result(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
     TruthValuePtr tv(atomspace->getTV(h));
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
         foreach(VersionHandle vh, ctv->vh_range()) { 
             if (dummyContexts.find(vh) != dummyContexts.end()) {
                 // if dummyContext contains a VersionHandle for h
@@ -515,7 +515,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // (need to clone, because we want to remove any invalid TVs before using)
     TruthValuePtr tv(atomspace->getTV(h));
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
         // The below removal should probably become a utility mindagent
         // that checks for invalid versioned TVs...
         // Remove any invalid version TVs
@@ -1139,7 +1139,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
         // given atom
         TruthValuePtr tv = atomspace->getTV(h);
         if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-            CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+            CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
             bool found = false;
             do {
                 found = false;

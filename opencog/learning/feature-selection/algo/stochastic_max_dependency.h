@@ -97,7 +97,6 @@ feature_set_pop stochastic_max_dependency_selection(const feature_set& features,
     typedef typename feature_set::value_type feature_id;
     typedef feature_set_pop ranks_t;
     typedef boost::shared_mutex shared_mutex;
-    typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 

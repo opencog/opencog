@@ -1,21 +1,28 @@
 /*
  * @file opencog/cython/PythonEval.h
  *
- * Simple python expression evaluator. 
+ * Simple python expression evaluator.
  *
- * @author Zhenhua Cai <czhedu@gmail.com>
+ * @author Zhenhua Cai <czhedu@gmail.com> Ramin Barati <rekino@gmail.com>
+ *         Keyvan Mir Mohammad Sadeghi <keyvan@opencog.org>
  * @date   2011-09-20
  *
  * @Note
- *   Many code are copied directly from original /opencog/cython/PythonModule.h|cc 
- *   by Joel. I also borrowed some ideas from SchemeEval.h|cc 
+ *   Zhenhua: Many code are copied directly from original /opencog/cython/PythonModule.h|cc
+ *            by Joel. I also borrowed some ideas from SchemeEval.h|cc
+ *
+ *   Ramin: This class is completely revised by me and Keyvan. The new code is inspired
+ *          by Linas' SchemeEval and borrowed some ideas from Joel's PythonModule
  *
  *  @todo
- *   PythonEval can not work together with PythonModule. That is you should 
- *   disable PythonModule ('MODULES' in config file) before enabling C++ Fishgram
- *   mind agent. 
+ *   Zhenhua: PythonEval can not work together with PythonModule. That is you should
+ *            disable PythonModule ('MODULES' in config file) before enabling C++ Fishgram
+ *            mind agent.
  *
- * Reference: 
+ *   Ramin: PythonEval is fully functional as of the date of this writing (2 July 2013).
+ *          It also NEEDs the PythonModule to function, so don't disable it.
+ *
+ * Reference:
  *   http://www.linuxjournal.com/article/3641?page=0,2
  *   http://www.codeproject.com/KB/cpp/embedpython_1.aspx
  *
@@ -39,20 +46,27 @@
 #define OPENCOG_PYTHON_EVAL_H
 #ifdef HAVE_CYTHON
 
-#include <string>
 #include "PyIncludeWrapper.h"
+
+#include <opencog/atomspace/Handle.h>
+
+#include <boost/filesystem/operations.hpp>
+
+#include <string>
+#include <vector>
+#include <map>
 
 namespace opencog {
 
 class AtomSpace;
-class CogServer; 
+class CogServer;
 
 /**
  * Each call of the embedded python code could be easily locked by object of this class
  */
 class PythonThreadLocker
 {
-    private: 
+    private:
         PyGILState_STATE state;
 
     public:
@@ -62,59 +76,86 @@ class PythonThreadLocker
         ~PythonThreadLocker() {
             PyGILState_Release(state);
         }
-}; 
+};
 
 /**
- * Singleton class used to initialize python interpreter in the main thread. 
- * It also provides some handy functions, such as getPyAtomspace. These helper 
- * functions may need python GIL and you should do this manually. 
+ * Singleton class used to initialize python interpreter in the main thread.
+ * It also provides some handy functions, such as getPyAtomspace. These helper
+ * functions may need python GIL and you should do this manually.
  */
 class PythonEval
 {
-	private:
+    private:
 
-		void init(void);
+        void init(void);
+        void add_module_directory(const boost::filesystem::path &p);
+        void add_module_file(const boost::filesystem::path &p);
 
-		// Make constructor, destructor private; force everyone to use the
+        // Make constructor, destructor private; force everyone to use the
         // singleton instance
-		PythonEval(AtomSpace * atomspace) {
-            this->atomspace = atomspace; 
-            this->init(); 
+        PythonEval(AtomSpace * atomspace) {
+            this->atomspace = atomspace;
+            this->init();
         }
 
-		~PythonEval();
+        ~PythonEval();
 
-		static PythonEval * singletonInstance;
+        static PythonEval * singletonInstance;
 
-		AtomSpace *atomspace;
+        AtomSpace *atomspace;
 
         PyThreadState * mainThreadState;
         PyInterpreterState * mainInterpreterState;
 
-	public:
+        PyObject* pyGlobal;
+        PyObject* pyLocal;
+        PyObject* pyRootModule;
+
+        PyObject* sys_path;
+
+        std::map <std::string, PyObject*> modules;
+        std::string expr;
+        bool pending;
+
+    public:
+        void addModuleFromPath(std::string path);
+        void addSysPath(std::string path);
+
+        std::string eval(std::string);
+        bool input_pending()
+        {
+            return this->pending;
+        }
+        void clear_pending(){this->pending=false;}
 
         PyThreadState * getMainThreadState() {
-            return this->mainThreadState; 
+            return this->mainThreadState;
         }
 
         PyInterpreterState * getMainInterpreterState() {
-            return this->mainInterpreterState;  
+            return this->mainInterpreterState;
         }
 
         /**
-         * Return a new reference of python AtomSpace, which holds c++ pointer 
+         * Return a new reference of python AtomSpace, which holds c++ pointer
          * of the given c++ AtomSpace. Then you can pass this python AtomSpace
-         * to python functions within c++. 
+         * to python functions within c++.
          */
         PyObject * getPyAtomspace(AtomSpace * atomspace = NULL);
 
         /**
-         * Display python dict in c++. 
+         * Display python dict in c++.
          */
-        void printDict(PyObject* obj); 
+        void printDict(PyObject* obj);
 
-		// Use a singleton instance to avoid initializing python interpreter twice. 
-		static PythonEval & instance(AtomSpace * atomspace = NULL);
+        // Use a singleton instance to avoid initializing python interpreter twice.
+        static PythonEval & instance(AtomSpace * atomspace = NULL);
+
+        std::string apply_script(const std::string& script);
+        Handle apply(const std::string& func, Handle varargs);
+
+
+
 };
 
 } /* namespace opencog */

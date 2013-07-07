@@ -397,7 +397,6 @@ type_tree     get_signature_output(const type_tree& ty);
 /// filled directly with T.
 type_tree_seq get_signature_inputs(const type_tree& ty);
 
-
 /// Given the types of the inputs and the output, create
 /// a corresponding function signature, that is, a lambda type tree 
 /// with that signature.  So, for example:

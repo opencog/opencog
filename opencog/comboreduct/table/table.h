@@ -317,6 +317,9 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     void erase_at(size_t pos) {
         boost::apply_visitor(erase_at_visitor(pos), _variant);
     }
+    void init_at(size_t pos) {
+        boost::apply_visitor(init_at_visitor(pos), _variant);
+    }
     template<typename T> T get_at(size_t pos) const {
         return boost::apply_visitor(get_at_visitor<T>(pos), _variant);
     }
@@ -391,6 +394,8 @@ public:
     typedef typename super::value_type value_type;
     typedef std::vector<std::string> string_seq;
 
+    CTable() {}
+
     // Definition is delayed until after Table, as it uses Table.
     template<typename Func>
     CTable(const Func& func, arity_t arity, int nsamples = -1);
@@ -450,24 +455,50 @@ public:
         return res;
     }
 
-    template<typename F, typename Seq>
-    Seq filtered_preverse_idxs(const F& filter, const Seq& seq) const
+    template<typename F>
+    multi_type_seq filtered_preverse_idxs(const F& filter,
+                                          const multi_type_seq& seq) const
     {
-        Seq res;
+        multi_type_seq res;
         auto it = filter.cbegin();
         for (unsigned i = 0; i < seq.size(); ++i) {
             if (it != filter.cend() && (typename F::value_type)i == *it) {
-                res.push_back(seq[i]);
+                // XXX TODO WARNING ERROR: builtin hardcoded shit!!!
+                res.push_back(seq.get_at<builtin>(i));
                 ++it;
-            } else
+            } else {
+                // XXX TODO WARNING ERROR: builtin hardcoded shit!!!
                 res.push_back(id::null_vertex);
+            }
         }
-        return seq;
+        return res;
+    }
+
+    /**
+     * Like filtered but preserve the indices on the columns,
+     * technically it replaces all input values filtered out by
+     * id::null_vertex.
+     */
+    template<typename F>
+    CTable filtered_preverse_idxs(const F& filter) const
+    {
+
+        // Set new CTable
+        CTable res(olabel, ilabels, tsig);
+
+        // Filter the rows (replace filtered out values by id::null_vertex)
+        for (const CTable::value_type v : *this)
+            res[filtered_preverse_idxs(filter, v.first)] += v.second;
+
+        // return the filtered CTable
+        return res;
     }
 
     // return the output label + list of input labels
+    void set_labels(const string_seq& labels);
     string_seq get_labels() const;
     const string_seq& get_input_labels() const {return ilabels;}
+    void set_signature(const type_tree& tt) { tsig = tt; };
     const type_tree& get_signature() const {return tsig;}
     type_node get_output_type() const;
 

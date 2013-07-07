@@ -56,9 +56,9 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "get-list",
+            "json-get-list",
             "Get details for a particular atom referred by handle",
-            "Usage: get-list handle=<handle> name=<name> type=<type>\n\n"
+            "Usage: json-get-list handle=<handle> name=<name> type=<type>\n\n"
             "Get details for a particular atom referred by handle\n"
             "   <handle>: list the atom referred by handle (multi-use)\n"
             "   <name>:   name of atom\n"

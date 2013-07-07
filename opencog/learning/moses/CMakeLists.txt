@@ -1,7 +1,7 @@
 # MOSES' version, must be updated manually
 SET (MOSES_VERSION_MAJOR 3)
 SET (MOSES_VERSION_MINOR 6)
-SET (MOSES_VERSION_PATCH 1)
+SET (MOSES_VERSION_PATCH 8)
 
 ADD_DEFINITIONS(-DMOSES_VERSION_MAJOR="${MOSES_VERSION_MAJOR}")
 ADD_DEFINITIONS(-DMOSES_VERSION_MINOR="${MOSES_VERSION_MINOR}")
@@ -35,7 +35,6 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/mpi_moses
 	moses/neighborhood_sampling
 	moses/partial
-	moses/pole_balancing
 	moses/types
 	moses/using
 
@@ -43,7 +42,7 @@ ADD_LIBRARY (moses SHARED STATIC
 
 	metapopulation/metapopulation
 	metapopulation/metapop_params
-    metapopulation/deme_expander
+	metapopulation/deme_expander
 	metapopulation/feature_selector
 
 	optimization/hill-climbing

@@ -26,6 +26,7 @@
 
 #include "field_set.h"
 #include "../eda/scoring.h"
+#include "../moses/types.h"
 
 namespace opencog {
 namespace moses {
@@ -59,7 +60,8 @@ struct instance_set : public vector<scored_instance<ScoreT> >
     instance_set(unsigned int n, const instance& inst, const field_set& fs)
         : super(n, inst), _fields(fs) { }
     // Create an empty deme.
-    instance_set(const field_set& fs) : _fields(fs) { }
+    instance_set(const field_set& fs, const demeID_t& id = demeID_t())
+        : _fields(fs), _id(id) { }
 
     // Insert or erase instances so that the size becomes n.
     // In case of insertions, it will insert null instances.
@@ -89,8 +91,12 @@ struct instance_set : public vector<scored_instance<ScoreT> >
     const_instance_iterator end_instances() const {
         return const_instance_iterator(this->end());
     }
+
+    void setID(const demeID_t& id) { _id = id; }
+    demeID_t getID() const { return _id; }
 protected:
     const field_set& _fields;
+    demeID_t _id;
 };
 
 } // ~namespace moses

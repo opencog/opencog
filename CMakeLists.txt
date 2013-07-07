@@ -40,6 +40,8 @@ IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Release)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
+MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
@@ -131,7 +133,15 @@ SET(Boost_USE_MULTITHREADED ON)
 # Required boost packages
 # hypertable requires boost iostreams
 # boost-1.49 no longer has a libboost_iostreams
-FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
+# 1.46 is minimum for required filesystem support
+# program_options needed by some combo utilities
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+
+IF(Boost_FOUND)
+	SET(Boost_FOUND_SAVE 1)
+ELSE(Boost_FOUND)
+	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
@@ -141,9 +151,13 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-# Arghhh. Except cmake is treating these as required, not optional. #$%**&
-FIND_PACKAGE(Boost 1.45 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.45 COMPONENTS math_c99 QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+
+# Arghhh. Except cmake is treating above as required, not optional. #$%**&
+IF(Boost_FOUND_SAVE)
+	SET(Boost_FOUND 1)
+ENDIF(Boost_FOUND_SAVE)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
@@ -175,8 +189,11 @@ ENDIF (EXPAT_FOUND)
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
 IF (GSL_FOUND)
+	MESSAGE(STATUS "GSL found.")
 	ADD_DEFINITIONS(-DHAVE_GSL)
 	SET(HAVE_GSL 1)
+ELSE (GSL_FOUND)
+	MESSAGE(STATUS "GSL missing: needed for the AtomSpace.")
 ENDIF (GSL_FOUND)
 
 # This is required for Guile

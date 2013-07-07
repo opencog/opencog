@@ -38,15 +38,21 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
                                               const string_seq& ilabels) const {
     unsigned sfps = sf_pop.size(), i = 1;
+    logger().info() << "Feature-selection deme population size = " << sfps; 
+
     for (const auto& sf : sf_pop) {
         logger().info() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
         logger().info() << "Selected " << sf.second.size()
-                        << " features for representation";
+                        << " features for representation building";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
         auto new_sf = set_difference(sf.second, xmplr_features);
-        ostreamContainer(logger().info() << "From which were in the exemplar: ",
+        logger().info() << "Of these, " << xmplr_sf.size()
+                        << " are already in the exemplar, and " << new_sf.size()
+                        << " are new.";
+ 
+        ostreamContainer(logger().info() << "Selected features which are in the exemplar: ",
                          fs_to_names(xmplr_sf, ilabels), ",");
-        ostreamContainer(logger().info() << "From which are new: ",
+        ostreamContainer(logger().info() << "Selected features which are new: ",
                          fs_to_names(new_sf, ilabels), ",");
     }
 }
@@ -77,10 +83,11 @@ combo_tree deme_expander::prune_xmplr(const combo_tree& xmplr,
     return res;
 }
 
-bool deme_expander::create_demes(const combo_tree& exemplar)
+bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 {
     using namespace reduct;
 
+    OC_ASSERT(_ignore_idxs_seq.empty());
     OC_ASSERT(_reps.empty());
     OC_ASSERT(_demes.empty());
 
@@ -137,14 +144,19 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
 
             // add the complement of the selected features to ignore_ops
             unsigned arity = festor._ctable.get_arity();
+            set<arity_t> ignore_idxs;
             vertex_set ignore_ops, considered_args;
             for (unsigned i = 0; i < arity; i++) {
                 argument arg(i + 1);
-                if (sf.second.find(i) == sf.second.end())
+                if (sf.second.find(i) == sf.second.end()) {
+                    ignore_idxs.insert(i);
                     ignore_ops.insert(arg);
-                else
+                }
+                else {
                     considered_args.insert(arg);
+                }
             }
+            _ignore_idxs_seq.push_back(ignore_idxs);
             ignore_ops_seq.push_back(ignore_ops);
             considered_args_seq.push_back(considered_args);
 
@@ -187,9 +199,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar)
     }
     if (_reps.empty()) return false;
 
-    // Create empty demes
-    for (const auto& rep : _reps)
-        _demes.push_back(new deme_t(rep.fields()));
+    // Create empty demes with their IDs
+    for (unsigned i = 0; i < _reps.size(); i++) {
+        demeID_t demeID;
+        _demes.push_back(new deme_t(_reps[i].fields(),
+                                    _reps.size() == 1 ?
+                                    demeID_t(n_expansions + 1)
+                                    : demeID_t(n_expansions + 1, i)));
+    }
 
     return true;
 }
@@ -201,22 +218,66 @@ vector<unsigned> deme_expander::optimize_demes(int max_evals, time_t max_time)
     for (unsigned i = 0; i < _demes.size(); i++)
     {
         if (logger().isDebugEnabled()) {
-            logger().debug()
-                << "Optimize deme; max evaluations allowed: "
-                << max_evals_per_deme;
+            stringstream ss;
+            ss << "Optimize deme " << _demes[i].getID() << "; "
+               << "max evaluations allowed: " << max_evals_per_deme;
+            logger().debug(ss.str());
         }
+
+        if (_params.fstor) {
+            // Attempt to compress the CTable further (to optimize and
+            // update max score)
+            _cscorer.ignore_idxs(_ignore_idxs_seq[i]);
         
+            // compute the max target for that deme (if features have been
+            // selected is might be less that the global target)
+            //
+            // TODO: DO NOT CHANGE THE MAX SCORE IF USER SET IT: BUT THAT
+            // OPTION ISN'T GLOBAL WHAT TO DO?
+            score_t deme_target_score = _cscorer.best_possible_score();
+            logger().info("Inferred target score for that deme = %g",
+                          deme_target_score);
+            // negative min_improv is interpreted as percentage of
+            // improvement, if so then don't substract anything, since in that
+            // scenario the absolute min improvent can be arbitrarily small
+            logger().info("It appears there is an algorithmic bug in "
+                          "precision_bscore::best_possible_bscore. "
+                          "Till not fixed we shall not rely on it to "
+                          "terminate deme search");
+
+            // TODO: re-enable that once best_possible_bscore is fixed
+            // score_t actual_min_improv = std::max(_cscorer.min_improv(),
+            //                                      (score_t)0);
+            // deme_target_score -= actual_min_improv;
+            // logger().info("Subtract %g (minimum significant improvement) "
+            //               "from the target score to deal with float "
+            //               "imprecision = %g",
+            //               actual_min_improv, deme_target_score);
+
+            // // update max score optimizer
+            // _optimize.opt_params.terminate_if_gte = deme_target_score;
+        }
+
+        // Optimize
         complexity_based_scorer cpx_scorer =
             complexity_based_scorer(_cscorer, _reps[i], _params.reduce_all);
-
         actl_evals.push_back(_optimize(_demes[i], cpx_scorer,
                                        max_evals_per_deme, max_time));
     }
+
+    if (_params.fstor) {
+        // reset scorer to use all variables (important so that
+        // behavioral score is consistent across generations
+        set<arity_t> empty_idxs;
+        _cscorer.ignore_idxs(empty_idxs);
+    }
+
     return actl_evals;
 }
 
 void deme_expander::free_demes()
 {
+    _ignore_idxs_seq.clear();
     _demes.clear();
     _reps.clear();
 }

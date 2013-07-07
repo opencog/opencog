@@ -20,6 +20,7 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <opencog/cython/PyIncludeWrapper.h>
 
 #include <opencog/util/Logger.h>
 
@@ -28,7 +29,7 @@
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
-#include <opencog/cython/PyIncludeWrapper.h>
+
 
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
@@ -39,7 +40,7 @@ using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
-	atom_space = NULL;
+    atom_space = NULL;
 }
 
 /* ================================================================= */
@@ -222,20 +223,19 @@ Handle Instantiator::execution_link()
 #endif /* HAVE_GUILE */
 	}
 
-	if (0 == schema.compare(0, 3,"py:", 3))
+    if (0 == schema.compare(0, 3,"py:", 3))
 	{
 #ifdef HAVE_CYTHON
 		// Be freindly, and strip leading white-space, if any.
 		size_t pos = 3;
-		while (' ' == schema[pos]) pos++;
+        while (' ' == schema[pos]) pos++;
 
-		// PythonEval::instance();
-		// XXX TODO figure out how to pass a list of handles to python...
-		// Currently, this just core dumps. I don't know why.
-		PyRun_SimpleString(schema.substr(pos).c_str());
-		// XXX TODO figure out how to get handle from python...
-		// return h;
-		return Handle::UNDEFINED;
+        PythonEval &applier = PythonEval::instance();
+
+        Handle h = applier.apply(schema.substr(pos), oset[1]);
+
+        // Return the handle
+        return h;
 #else
 		return Handle::UNDEFINED;
 #endif /* HAVE_CYTHON */

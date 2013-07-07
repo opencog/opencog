@@ -3,9 +3,10 @@
  *
  * Link Grammar Atom Types used during Viterbi parsing.
  *
- * Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (c) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  */
 
+#include <opencog/server/Module.h>
 #include "opencog/viterbi/atom_types.definitions"
 
 using namespace opencog;
@@ -45,3 +46,7 @@ static __attribute__ ((destructor)) void viterbi_fini(void)
 }
 
 #endif
+
+TRIVIAL_MODULE(ViterbiTypesModule)
+DECLARE_MODULE(ViterbiTypesModule)
+

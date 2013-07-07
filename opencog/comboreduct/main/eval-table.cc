@@ -102,6 +102,7 @@ void eval_output_results(const evalTableParameters& pa,
                          const Table& table, const vector<combo_tree>& trs)
 {
     unsigned npad = ndigits(trs.size());
+    OC_ASSERT(pa.output_files.size() == trs.size() || pa.output_files.size() <= 1);
     for (unsigned i = 0; i < trs.size(); i++) {
         // evaluated tr over input table
         OTable ot_tr(trs[i], table.itable);
@@ -109,9 +110,13 @@ void eval_output_results(const evalTableParameters& pa,
             ot_tr.set_label(pa.target_feature_str);
         // determine output file name
         stringstream of_ss;
-        of_ss << pa.output_file;
-        if (!pa.output_file.empty() && pa.split_output)
-            of_ss << setfill('0') << setw(npad) << i;
+        if (pa.output_files.size() == 1) {
+            of_ss << pa.output_files.front();
+            if (trs.size() > 1 && pa.split_output)
+                of_ss << setfill('0') << setw(npad) << i;
+        }
+        else if (pa.output_files.size() > 1)
+            of_ss << pa.output_files[i];
         // print results
         output_results(pa, table, ot_tr, of_ss.str());
     }
@@ -233,9 +238,12 @@ int main(int argc,char** argv) {
          "file contains the labels as first row. "
          "TODO could be detected automatically.\n")
         
-        (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
+        (opt_desc_str(output_file_opt).c_str(),
+         value<vector<string>>(&pa.output_files),
          "File where to save the results. If empty then it outputs on "
-         "the stdout.\n")
+         "the stdout. Can be used multiple times for multiple combo. "
+         "In this case it overwrites --split-output and the number of "
+         " output files must be identical to the number of combos.\n")
 
         ("split-output", value<bool>(&pa.split_output)->default_value(true),
          "If enabled, then if there are several combo programs the output file "

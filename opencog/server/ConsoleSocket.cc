@@ -100,7 +100,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     if (_request == NULL) {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
-        logger().error(msg);
+        logger().warn(msg);
         Send(msg);
 
         // try to send "help" command response
@@ -121,6 +121,7 @@ void ConsoleSocket::OnLine(const std::string& line)
         cogserver.pushRequest(_request);
 
         if (_request->isShell()) {
+            logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
             // Force a drain of this request, because we *must* enter shell mode
             // before handling any additional input from the socket (since the
             // next input is almost surely intended for the new shell, not for

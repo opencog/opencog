@@ -285,8 +285,7 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      */
     bool merge_demes(boost::ptr_vector<deme_t>& demes,
                      const boost::ptr_vector<representation>& reps,
-                     const std::vector<unsigned>& evals_seq,
-                     const std::vector<demeID_t>& demeIDs);
+                     const std::vector<unsigned>& evals_seq);
 
     /**
      * Weed out excessively bad scores. The select_exemplar() routine
@@ -408,6 +407,9 @@ struct metapopulation : pbscored_combo_tree_ptr_set
         return res;
     }
 
+    // Trim down demes before merging based the scores
+    void trim_down_demes(boost::ptr_vector<deme_t>& demes) const;
+    
     /// Update the record of the best score seen, and the associated tree.
     /// Safe to call in a multi-threaded context.
     void update_best_candidates(const pbscored_combo_tree_set& candidates);
@@ -510,12 +512,6 @@ struct metapopulation : pbscored_combo_tree_ptr_set
      * (if n is negative then all candidates are included)
      */
     diversity_stats gather_diversity_stats(int n) {
-        using namespace boost::accumulators;
-        typedef accumulator_set<float, stats<tag::count,
-                                     tag::mean,
-                                     tag::variance,
-                                     tag::min,
-                                     tag::max>> accumulator_t;
         if (n < 0)
             return _cached_dst.gather_stats();
         else {

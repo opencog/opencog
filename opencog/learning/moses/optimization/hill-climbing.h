@@ -177,7 +177,7 @@ struct hill_climbing : optimizer_base
 {
     hill_climbing(const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
-        : opt_params(op), hc_params(hc), _total_RAM_bytes(getTotalRAM())
+        : optimizer_base(op), hc_params(hc), _total_RAM_bytes(getTotalRAM())
     {}
 
 protected:
@@ -287,7 +287,6 @@ public:
     }
 
 protected:
-    const optim_parameters opt_params;
     const hc_parameters hc_params;
     const uint64_t _total_RAM_bytes;
     size_t _instance_bytes;
