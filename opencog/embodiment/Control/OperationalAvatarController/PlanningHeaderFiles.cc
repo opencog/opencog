@@ -44,11 +44,36 @@ const StateValue SV_FALSE = "false";
     opencog::pai::Vector(999999.06000,999999.06000,999999.06000) };
 
  const  opencog::pai::Entity entity_var[] = {
-   opencog::pai::Entity("&entity_var0", "undefined"),
-   opencog::pai::Entity("&entity_var1", "undefined"),
-   opencog::pai::Entity("&entity_var2", "undefined"),
-   opencog::pai::Entity("&entity_var3", "undefined"),
-   opencog::pai::Entity("&entity_var4", "undefined"),
-   opencog::pai::Entity("&entity_var5", "undefined"),
-   opencog::pai::Entity("&entity_var6", "undefined"),
+   opencog::pai::Entity("$entity_var0", "undefined"),
+   opencog::pai::Entity("$entity_var1", "undefined"),
+   opencog::pai::Entity("$entity_var2", "undefined"),
+   opencog::pai::Entity("$entity_var3", "undefined"),
+   opencog::pai::Entity("$entity_var4", "undefined"),
+   opencog::pai::Entity("$entity_var5", "undefined"),
+   opencog::pai::Entity("$entity_var6", "undefined"),
    };
+
+ bool opencog::oac::isAVariableNumeric(std::string var)
+ {
+     int pos = var.find("$int_var");
+     if (pos != std::string::npos)
+         return true;
+
+     pos = var.find("$float_var");
+     if (pos != std::string::npos)
+         return true;
+
+     pos = var.find('(');
+     if (pos != std::string::npos)
+     {
+         pos = var.find("$entity_var");
+         if (pos == std::string::npos)
+             return true;
+         else
+             return false;
+     }
+
+     return false;
+
+ }
+

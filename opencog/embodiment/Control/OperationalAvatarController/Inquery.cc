@@ -39,8 +39,15 @@
 #include <opencog/server/BaseServer.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/query/PatternMatchEngine.h>
+#include <opencog/util/StringManipulator.h>
+
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 
 #include "Inquery.h"
+#include "OCPlanner.h"
 
 using namespace opencog::oac;
 using namespace opencog::pai;
@@ -538,93 +545,260 @@ set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<StateVa
 }
 
 // find atoms by given condition, by patern mactcher.
-HandleSeq Inquery::findAllObjectsByGivenCondition(vector<State*> states)
+HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
 {
-/*
-    // Define the pattern to match against.
-    Handle hx = as->addNode(VARIABLE_NODE, "variable node x");
-    Handle hy = as->addNode(VARIABLE_NODE, "variable node y");
+    HandleSeq results;
 
-    Handle hlx = as->addLink(LIST_LINK, hconst, hx);
-    Handle hly = as->addLink(LIST_LINK, hconst, hy);
+    Handle inhSecondOutgoing;
+    HandleSeq evalNonFirstOutgoings;
 
-    Handle han = as->addLink(AND_LINK, hlx, hly);
+    switch (state->getStateValuleType().getCode())
+    {
+        case ENTITY_CODE:
+        {
+            const Entity& entity = state->stateVariable->getEntityValue();
+            inhSecondOutgoing = AtomSpaceUtil::getEntityHandle(*atomSpace,entity.id);
+            if (inhSecondOutgoing == Handle::UNDEFINED)
+            {
+                logger().warn("Inquery::findAllObjectsByGivenCondition : There is no Entity Node for this state value: "
+                         + state->name());
+                return results; // return empty result
+            }
+            evalNonFirstOutgoings.push_back(inhSecondOutgoing);
+            break;
+        }
+        case INT_CODE:
+        case FLOAT_CODE:
+        {
+            const string& value = state->stateVariable->getStringValue();
+            inhSecondOutgoing = AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE,value.c_str());
+            evalNonFirstOutgoings.push_back(inhSecondOutgoing);
+            break;
+        }
+        case STRING_CODE:
+        {
+            const string& value = state->stateVariable->getStringValue();
+            inhSecondOutgoing = AtomSpaceUtil::addNode(*atomSpace,CONCEPT_NODE,value.c_str());
+            evalNonFirstOutgoings.push_back(inhSecondOutgoing);
+            break;
+        }
+        case VECTOR_CODE:
+        {
+            const Vector& vector = state->stateVariable->getVectorValue();
+            // for vector and rotation, the inheritancelink do not apply
+            // so only for evaluationlink
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE,opencog::toString(vector.x).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE,opencog::toString(vector.y).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE,opencog::toString(vector.z).c_str()));
+            break;
+        }
+        case ROTATION_CODE:
+        {
+            const Rotation & value= state->stateVariable->getRotationValue();
+            // for vector, rotation and fuzzy values, the inheritancelink do not apply
+            // so only for evaluationlink
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.pitch).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.roll).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.yaw).c_str()));
+            break;
+        }
+        case FUZZY_INTERVAL_INT_CODE:
+        {
+            const FuzzyIntervalInt& value = state->stateVariable->getFuzzyIntervalIntValue();
+            // for vector, rotation and fuzzy values, the inheritancelink do not apply
+            // so only for evaluationlink
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.bound_low).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.bound_high).c_str()));
+            break;
+        }
+        case FUZZY_INTERVAL_FLOAT_CODE:
+        {
+            const FuzzyIntervalFloat& value = state->stateVariable->getFuzzyIntervalFloatValue();
+            // for vector, rotation and fuzzy values, the inheritancelink do not apply
+            // so only for evaluationlink
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.bound_low).c_str()));
+            evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.bound_high).c_str()));
+            break;
+        }
+    }
 
-    Handle hv = as->addLink(LIST_LINK, hx, hy);
+    // first search from EvaluationLinks
+    if (evalNonFirstOutgoings.size() > 0)
+        results = AtomSpaceUtil::getNodesByEvaluationLink(*atomSpace,state->name(),evalNonFirstOutgoings);
 
-    std::vector<Handle> vars;
-    vars.push_back(hx);
-    vars.push_back(hy);
+    // if cannot find any result, search from InheritanceLink
+    if ((results.size() == 0) && (inhSecondOutgoing != Handle::UNDEFINED))
+        results = AtomSpaceUtil::getNodesByInheritanceLink(*atomSpace, inhSecondOutgoing);
 
-    std::vector<Handle> preds;
-    preds.push_back(hlx);
-    preds.push_back(hly);
-
-    std::vector<Handle> negs;
-
-    PMCB pmcb(as);
-    pme.match(&pmcb, vars, preds, negs);
-
-    // Should find four solutions:
-    // var_x = soln_b and var_y = soln_b
-    // var_x = soln_b and var_y = soln_c
-    // var_x = soln_c and var_y = soln_b
-    // var_x = soln_c and var_y = soln_c
-    TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
-    // TSM_ASSERT("incorrect solution", hsoln_b == pmcb.vars[hx]);
-    // TSM_ASSERT("incorrect predicate", hpred_b == pmcb.preds[hlx]);
-
-    // Test the non-std::vector interface also.
-    pmcb.found = 0;
-    pm.match(&pmcb, hv, han, Handle::UNDEFINED);
-    TSM_ASSERT_EQUALS("wrong number of solutions", pmcb.found, 4);
+    return results;
+}
 
 
 
+HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNode* ruleNode)
+{
+    HandleSeq results;
+
+    StateValue* realValue;
+
+    if (! Rule::isParamValueUnGrounded(stateValue))
+    {
+        // this stateOwner is const, just add it
+        realValue = &stateValue;
+    }
+    else
+    {
+        // this stateOwner is a variable
+        // look for the value of this variable in the current grounding parameter map
+
+        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(StateVariable::ParamValueToString(stateValue));
+        if (paramMapIt != ruleNode->currentBindingsFromForwardState.end())
+        {
+            // found it in the current groundings, so just add it as a const
+            realValue = &(paramMapIt->second);
+        }
+        else
+        {
+            // it has not been grounded, so add it as a variable node
+            results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(stateValue)).c_str()));
+        }
+    }
+
+    string* str = boost::get<string>(realValue);
+    Entity* entity ;
+    Vector* vector;
+    Rotation* rot;
+    FuzzyIntervalInt* fuzzyInt;
+    FuzzyIntervalFloat* fuzzyFloat;
+
+    if( str)
+    {
+
+        if (StringManipulator::isNumber(*str))
+        {
+            results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, str->c_str()));
+        }
+        else
+        {
+            results.push_back(AtomSpaceUtil::addNode(*atomSpace,CONCEPT_NODE, str->c_str()));
+        }
+
+    }
+    else if ( entity = boost::get<Entity>(realValue))
+    {
+        Handle entityHandle = AtomSpaceUtil::getEntityHandle(*atomSpace,entity->id);
+        OC_ASSERT((entityHandle != Handle::UNDEFINED),
+                  "OCPlanner::generatePMNodeFromeAStateValue: cannot find the handle for this entity : %s is invalid.\n",
+                  ActionParameter::ParamValueToString(*realValue).c_str());
+        results.push_back(entityHandle);
+    }
+    else if (vector = boost::get<Vector>(realValue))
+    {
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->x).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->y).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->z).c_str()));
+    }
+    else if (rot = boost::get<Rotation>(realValue))
+    {
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->pitch).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->roll).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->yaw).c_str()));
+    }
+    else if (fuzzyInt = boost::get<FuzzyIntervalInt>(realValue))
+    {
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyInt->bound_low).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyInt->bound_high).c_str()));
+    }
+    else if (fuzzyFloat = boost::get<FuzzyIntervalFloat>(realValue))
+    {
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_low).c_str()));
+        results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_high).c_str()));
+    }
+
+    return results;
+
+}
+
+// return an EvaluationLink with variableNodes for using Pattern Matching
+Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
+{
+
+    // Create evaluationlink used by pattern matcher
+    Handle predicateNode = AtomSpaceUtil::addNode(*atomSpace,PREDICATE_NODE, state->name().c_str());
+
+    HandleSeq predicateListLinkOutgoings;
+
+    // add all the stateOwners
+    for (vector<StateValue>::iterator ownerIt = state->stateOwnerList.begin(); ownerIt != state->stateOwnerList.end(); ++ ownerIt)
+    {
+        HandleSeq handles = generatePMNodeFromeAStateValue(*ownerIt,ruleNode);
+        OC_ASSERT((handles.size() != 0),
+                  "OCPlanner::generatePMLinkFromAState: cannot generate handle for this state owner value for state: %s is invalid.\n",
+                  state->name().c_str());
+        predicateListLinkOutgoings.insert(predicateListLinkOutgoings.end(), handles.begin(),handles.end());
+
+    }
+
+    // add the state value
+    HandleSeq handles = generatePMNodeFromeAStateValue(state->stateVariable->getValue(),ruleNode);
+    predicateListLinkOutgoings.insert(predicateListLinkOutgoings.end(), handles.begin(),handles.end());
+
+    Handle predicateListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK, predicateListLinkOutgoings);
+
+    HandleSeq evalLinkOutgoings;
+    evalLinkOutgoings.push_back(predicateNode);
+    evalLinkOutgoings.push_back(predicateListLink);
+    Handle hEvalLink = AtomSpaceUtil::addLink(*atomSpace,EVALUATION_LINK, evalLinkOutgoings);
+
+    return hEvalLink;
+
+}
 
 
+HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes)
+{
+    HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
 
-    // Create BindLink used by pattern matcher
-    HandleSeq predicateListLinkOutgoing,evalLinkOutgoing, implicationLinkOutgoings, bindLinkOutgoings;
+    set<string> allVariables;
+    for(int i = 0; i < stateIndexes.size() ; ++ i)
+    {
+        int index = stateIndexes[i];
+        list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+        for(int x = 0; x <= index; ++x)
+             ++ it;
 
-    Handle weightPredicateNode = atomSpace.getHandle(PREDICATE_NODE, AVATAR_WEIGHT);
-    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any"); // the weithgt value number node
-    predicateListLinkOutgoing.push_back(avatarNode);
-    predicateListLinkOutgoing.push_back(hVariableNode);
+        UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+        vector<string> tempVariables;
+        set_union(allVariables.begin(),allVariables.end(),record.vars.begin(),record.vars.end(),tempVariables.begin());
+        allVariables = set<string>(tempVariables.begin(),tempVariables.end());
+        andLinkOutgoings.push_back(record.PMLink);
+    }
 
-    Handle predicateListLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, predicateListLinkOutgoing);
-    evalLinkOutgoing.push_back(weightPredicateNode);
-    evalLinkOutgoing.push_back(predicateListLink);
-    Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
+    set<string>::iterator itor = allVariables.begin();
+    for(;itor != allVariables.end(); ++ itor)
+        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
 
-    implicationLinkOutgoings.push_back(evalLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
+    Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
 
-    bindLinkOutgoings.push_back(hVariableNode);
+    implicationLinkOutgoings.push_back(hAndLink);
+    implicationLinkOutgoings.push_back(hVariablesListLink);
+    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
     // Run pattern matcher
     PatternMatch pm;
-    pm.set_atomspace(&atomSpace);
+    pm.set_atomspace(atomSpace);
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
     // Get result
-    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
-    //       may fail to remove the ReferenceLink when necessary.
-    //       Because the ReferenceLink would have an incoming (i.e. hResultListLink here),
-    //       which would make cog-delete scheme function fail.
-    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
-    atomSpace.removeAtom(hResultListLink);
+    // Note: Don't forget remove the hResultListLink
+    std::vector<Handle> resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
 
-    // Check and return the result
-    // currently, the weight of avatar is const, so there should be only one result
-    foreach(Handle hResult, resultSet)
-    {
-        std::string weightStr = atomSpace.getName(hResult);
-        return atof(weightStr.c_str()); // return the first one
 
-    }
-*/
 }

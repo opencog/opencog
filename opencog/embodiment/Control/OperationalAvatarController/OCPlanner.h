@@ -27,13 +27,18 @@
 #include <vector>
 #include <set>
 #include <map>
+#include <list>
+#include <string>
 #include <boost/variant.hpp>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/util/StringManipulator.h>
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
+
+
 
 using namespace std;
 using namespace opencog::pai;
@@ -44,188 +49,158 @@ using namespace boost;
 
 namespace opencog { namespace oac {
 
-class RuleLayer;
-class StateLayerNode;
-class StateLayer;
+class StateNode;
+
+struct UngroundedVariablesInAState
+{
+    State* state;
+    set<string> vars; // all the ungrounded variables in this state
+    bool contain_numeric_var;
+
+    // the evalutionlink for this state for using pattern matching
+    // default is undefined. only easy state that needs no real time inquery or contains no numeric variables will be generate such a link handle.
+    Handle PMLink;
+    UngroundedVariablesInAState(State* _state, string firstVar)
+    {
+        state = _state;
+        vars.insert(firstVar);
+        contain_numeric_var = opencog::oac::isAVariableNumeric(firstVar);
+        PMLink = Handle::UNDEFINED;
+    }
+
+    bool operator < (const UngroundedVariablesInAState& other) const
+    {
+        // the state need inquery is more difficult to ground, so it should gound later
+        if ( (! state->need_inquery) && (other.state->need_inquery))
+             return true;
+
+        if (( state->need_inquery) && (! other.state->need_inquery))
+            return false;
+
+        // the numeric state should be grounded later
+        if ( (! contain_numeric_var) && (other.contain_numeric_var))
+             return true;
+
+        if (( contain_numeric_var) && (! other.contain_numeric_var))
+            return false;
+
+        // if both states need inquery or do not need inquery, the states with less  ungrounded variables should be grounded first
+        return (vars.size() < other.vars.size());
+    }
+};
 
 
 // a rule node in a Rule Layer planning graph
-class RuleLayerNode
+class RuleNode
 {
 public:
     Rule* originalRule; // the original rule (usually not grounded)
 
-    ParamGroundedMapInARule currentBindings; // the current bindings of variables
+    int number; // the order of this rule node that has been created during the whole planning process
 
-    RuleLayer* ruleLayer; // the layer it belongs to
-    set<StateLayerNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
-    set<StateLayerNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
+    ParamGroundedMapInARule currentBindingsFromForwardState; // the current bindings of variables grounded from its forward state
+
+    // the current bindings of variables grounded from selecting variables from Atomspace or others
+    // because after grounded from its forward state, tnere is possible some varibales ungrounded, so need to be grounded by selecting values
+    ParamGroundedMapInARule currentBindingsViaSelecting;
+
+    ParamGroundedMapInARule currentAllBindings; // currentBindingsFromForwardState + currentBindingsViaSelecting
+
+    set<StateNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
+    set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
     // cost as soft heuristics inherited from its
     // these carry the heuristics information for the backward steps to select variable values
     // ungrounded, but the variable names should be consistent with its originalRule
     vector<CostHeuristic> costHeuristics;
 
-    RuleLayerNode(Rule* _originalRule)
-    {
-        originalRule = _originalRule;
-        costHeuristics.clear();
-    }
+    // the variables remain ungrounded after groundARuleNodeFromItsForwardState
+    // should be in the order of grounding priority: who should be grounded frist, and who should be grounded secondly....
+    // the list of State* is all the States this variable appears in, and this State* list should also be in the order of the priority that which state should be satisfied first
+    list<UngroundedVariablesInAState> curUngroundedVariables;
 
-};
+//    // to store the history of variables groundings
+//    vector<ParamGroundedMapInARule> ParamGroundedHistories;
 
-// the already tried variable bindings history for one rule for achieve one planning state
-struct OneRuleHistory
-{
-    vector<ParamGroundedMapInARule> ParamGroundedHistories;
+    // to store the candidates of variables groundings. This is only for the curUngroundedVariables, excluding the varibales in currentBindingsFromForwardState
+    vector<ParamGroundedMapInARule> ParamCandidates;
 
-    // How many times of this rule has been tried with different variable binding.
+    vector<StateValue> orginalGroundedStateValues; //to record the orginal state values in the effect before they takes effects, the order is the same in the effect list
+
+    // How many times of this rule has been tried with different variable bindings in this rule node.
     // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
     int appliedTimes;
 
-    // some times, we need to mark a rule as not useful anymore after try it and fail.(e.g. have tried every variable binding and still fail)
+    // some times, we need to mark a rule as not useful anymore after trying it and fail.(e.g. have tried every variable binding and still fail)
     bool still_useful;
 
-    // the first time a new is tried , creat a history struct for it
-    OneRuleHistory(ParamGroundedMapInARule firstBindingRecord)
+    RuleNode(Rule* _originalRule)
     {
-        appliedTimes = 1;
+        originalRule = _originalRule;
+        costHeuristics.clear();
         still_useful = true;
-        ParamGroundedHistories.push_back(firstBindingRecord);
     }
+
+    void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
+    {
+        costHeuristics.push_back( CostHeuristic(cost_cal_state,cost_coefficient));
+    }
+
+    void AddCostHeuristic(CostHeuristic costHeuristic)
+    {
+        costHeuristics.push_back(costHeuristic);
+    }
+
+    // after rebinding , add currentBindingsFromForwardState and currentBindingsViaSelecting together to CurrentAllBindings
+    void updateCurrentAllBindings();
+
 };
 
-
-class StateLayerNode
+class StateNode
 {
 public:
-    enum ACHIEVE_STATE
-    {
-        ACHIEVED,
-        NOT_ACHIEVED,
-        UNKNOWN
-    };
 
     State* state;
-    ACHIEVE_STATE isAchieved;
-    StateLayer* stateLayer; // the layer it belongs to
-    RuleLayerNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
-    RuleLayerNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
-    StateLayerNode(State * _state){state = _state;isAchieved = UNKNOWN;forwardRuleNode = 0;}
+    RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
+    RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
+    State* forwardEffectState; // the corresponding state in the forward rule's effect list
+    int depth; // depth = -1 means no rule node need this state node as a precondition
 
-    // history of all the rules with grounded parameters used to be applied in this layer (to generate the backward RuleLayerNode)
-    // this is to prevent repeatedly applying the same set of rules with the same gournded parameter values.
-    // map to save all the paramGroundedMapInARule for all the rules we applied in one rule layer at one time point
-    // Rule* is pointing to one of the rules in the OCPlanner::AllRules
-    map<Rule*, OneRuleHistory> ruleHistory;
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
 
-    void addRuleRecordWithVariableBindingsToHistory(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
+    // candidate rules to achieve this state, in the order of the priority to try the rule
+    // the already be tried and failed rules will be removed from this list
+    // the float is the score of this rule, the rules with higher score are put front
+    list< pair<float,Rule*> > candidateRules;
+
+    // the rules have been tried on this state node
+    list< Rule*> ruleHistory;
+
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
+    // it its forward rule node has multiple forward state node, using the deepest one
+    void calculateNodeDepth();
+
+    // have tried to find candidateRules
+    bool hasFoundCandidateRules;
+
+    bool operator < (const StateNode& other) const
     {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        // this rule has not been applied on me before, add a new record before
-        if (it == ruleHistory.end())
-        {
-            ruleHistory.insert(std::pair<Rule*, OneRuleHistory >(r, OneRuleHistory(paramGroundingMap)));
-        }
-        else
-        {
-            (((OneRuleHistory)(it->second)).ParamGroundedHistories).push_back(paramGroundingMap);
-        }
-
+        return ( depth < other.depth);
     }
 
-    // check if this rule with this specific variables bindings has been applied to this state node
-    bool checkIfBindingsHaveBeenApplied(Rule* r,ParamGroundedMapInARule& paramGroundingMap)
+    ~StateNode()
     {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return false;
-
-        vector<ParamGroundedMapInARule> ParamGroundedHistories = (((OneRuleHistory)(it->second)).ParamGroundedHistories);
-        vector<ParamGroundedMapInARule>::iterator paramMapit = ParamGroundedHistories.begin();
-        for (;paramMapit != ParamGroundedHistories.end(); ++ paramMapit)
-        {
-            if (paramGroundingMap == (ParamGroundedMapInARule)(*paramMapit) )
-                return true;
-        }
-
-        return false;
-
-    }
-
-    int getRuleAppliedTime(Rule* r)
-    {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return 0;
-
-        return ((OneRuleHistory)(it->second)).appliedTimes;
-
-    }
-
-    bool IsRuleStillUsefule(Rule* r)
-    {
-        map<Rule*, OneRuleHistory>::iterator it = ruleHistory.find(r);
-        if (it == ruleHistory.end())
-            return true;
-
-        return ((OneRuleHistory)(it->second)).still_useful;
+        delete state;
     }
 
 };
 
-
-class StateLayer
-{
-public:
-    set<StateLayerNode*> nodes; // all the nodes in this layer currently
-
-    RuleLayer* preRuleLayer;
-    RuleLayer* nextRuleLayer;
-
-    StateLayer()
-    {
-        preRuleLayer = 0;
-        nextRuleLayer = 0;
-    }
-
-    StateLayer(const vector<State*>& _states)
-    {
-        vector<State*>::const_iterator it;
-        for (it = _states.begin(); it != _states.end(); ++ it)
-        {
-            StateLayerNode* newStateNode = new StateLayerNode(*it);
-            nodes.insert(newStateNode);
-            newStateNode->backwardRuleNode = 0;
-            newStateNode->forwardRuleNode = 0;
-        }
-
-        StateLayer();
-    }
-};
-
-
-
-class RuleLayer
-{
-public:
-    set<RuleLayerNode*> nodes; // all the nodes in this layer currently
-
-    StateLayer* preStateLayer;
-    StateLayer* nextStateLayer;
-    RuleLayer()
-    {
-        preStateLayer = 0;
-        nextStateLayer = 0;
-    }
-
-};
 
 class OCPlanner
 {
 public:
-
-     OCPlanner();
+     OCPlanner(AtomSpace* _atomspace,OAC* _oac);
 
      // TODO:
      // add a new rule from a implicationLink in the Atomspace
@@ -238,13 +213,16 @@ public:
      // if failed in generating a plan to achieve the goal, return false.
      bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
 
-public:
-     Rule* DO_NOTHING_RULE;
-
 protected:
 
      // to store all the rules can be used in reasoning
      vector<Rule*> AllRules;
+
+     AtomSpace* atomSpace;
+
+     OAC* oac;
+
+     unsigned long curtimeStamp;
 
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
@@ -260,9 +238,9 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
-     // to store the orginal state values, avoid inquery in every planning step
-     // this vector should be clear every time begin a new plan
-     vector<State> originalStatesCache;
+//     // to store the intermediate states which may be produced during planning stepps
+//     // this vector should be clear every time begin a new plan
+//     vector<State*> globalStatesCache;
 
      // check if a given single goal has been achieved now
      // @ curLayerStates is a state layer in the planning graph
@@ -276,11 +254,14 @@ protected:
      // ground the variables according to its forward state node,
      // by finding the variables in this rule and its forward state node with the same semantic meaning,
      // and put the value of the variables of the froward state to the rule variables.
-     bool groundARuleNodeFromItsForwardState(RuleLayerNode* ruleNode, StateLayerNode* forwardStateNode);
+     bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
+     // Because it is possible to have multiple "this->DO_NOTHING_RULE" in the forward rule layers, so we need to find the first non-DO_NOTHING_RULE foward
+     // Return the real forwardEffectState by the way
+     RuleNode* findFirstRealForwardRuleNode(StateNode *stateNode, State *&forwardEffectState, StateNode* &mostForwardSameStateNode);
 
      // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
-     bool groundARuleNodeBySelectingValues(RuleLayerNode* ruleNode);
+     bool groundARuleNodeBySelectingValues(RuleNode* ruleNode);
 
      // select the most suitable vaule to ground a variable
      // the value selection criterions are according to these two parts:
@@ -288,8 +269,29 @@ protected:
      // 2. if it's a recursive rule, borrow some hard constraints from the preconditions of its non-recursive rule which has the same effect with it,
      //    as hard  heuristics.
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
-     bool selectValueForAVariableToGroundARule(RuleLayerNode* ruleNode, string variableStr);
+     bool selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr);
 
+     // to create the curUngroundedVariables list in a rule node
+     // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
+     void findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode);
+
+
+     void findCandidateValuesByGA(RuleNode* ruleNode);
+
+     void recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode);
+
+     // delete a rule node and recursivly delete all its backward state nodes and rule nodes
+     void deleteRuleNode(RuleNode* ruleNode);
+
+     // rebind a state node, replace the old state in this node with the new state generated by new bindings
+     void reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings);
+
+     // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
+     void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+
+     void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+
+     void deleteStateNodeInHistory(StateNode* stateNode,list<StateNode*>& historyStateNodes);
 
 };
 

@@ -33,7 +33,6 @@
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
 
-
 using namespace std;
 using namespace opencog;
 using namespace opencog::pai;
@@ -42,6 +41,9 @@ using namespace opencog::pai;
 // this class offer a series of inquery funciton according to different states
 
 namespace opencog { namespace oac {
+
+class State;
+class RuleNode;
 
 class Inquery
 {
@@ -119,10 +121,19 @@ public:
     // relations for 3 objects
     static StateValue inqueryIsBetween(const vector<StateValue>& stateOwnerList);
 
+    // to search for all the handles of the Entities meet the given condition from the Atomspace
+    static HandleSeq findAllObjectsByGivenCondition(State* state);
 
-    // When want to ground a rule, when there is exist state precondition,
-    // Call this funciton to search for all the handles of the Entities meet the given condition from the Atomspace
-    static HandleSeq findAllObjectsByGivenCondition(vector<State*> states);
+    // generate a node for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
+    // it can be a const node or a variable node
+    // this function is used by generatePMLinkFromAState()
+    static HandleSeq generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNode* ruleNode);
+
+    // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
+    static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
+
+    // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node that will be used as conditions of patttern matching query in this function
+    static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes);
 
 };
 

@@ -235,6 +235,12 @@ public:
     static Handle getMostRecentEvaluationLink(const AtomSpace& atomSpace,
             const std::string& predicateNodeName );
 
+    // get all the nodes from InheritanceLinks, given the SecondOutgoing
+    static std::vector<Handle> getNodesByInheritanceLink(AtomSpace &atomSpace, Handle &hSecondOutgoing);
+
+    // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
+    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace & atomSpace, string predicate, HandleSeq& hNonFirstOutgoings);
+
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate
      * node. Optionally it's possible to specify temporal and search criterion on
