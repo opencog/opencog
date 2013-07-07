@@ -30,6 +30,7 @@
 #include <iterator>
 #include <list>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/spacetime/atom_types.h>
 
 using namespace opencog::oac;
 
@@ -55,10 +56,17 @@ void StateNode::calculateNodeDepth()
 
 }
 
-OCPlanner::OCPlanner(AtomSpace *_atomspace)
+void RuleNode::updateCurrentAllBindings()
+{
+    currentAllBindings = currentBindingsFromForwardState;
+    currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
+}
+
+OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
 {
 
-    atomspace = _atomspace;
+    atomSpace = _atomspace;
+    oac = _oac;
 
     loadAllRulesFromAtomSpace();
 
@@ -189,7 +197,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     int ruleNodeCount = 0;
 
-    unsigned long iTimeStamp = 1000;
+    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp(); ;
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
@@ -239,7 +247,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     {
         Rule* selectedRule = 0;
 
-        iTimeStamp ++;
+        curtimeStamp ++;
 
         // decide which state should be chosed to achieved first
         list<StateNode*>::iterator stateNodeIter;
@@ -380,7 +388,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                         }
 
-//                        historyStateNodes.erase(forwardStateIt);
+                        deleteStateNodeInHistory((StateNode*)(*forwardStateIt), historyStateNodes);
                         unsatisfiedStateNodes.push_front(*forwardStateIt);
                     }
 
@@ -416,9 +424,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         forwardRuleNode->currentBindingsViaSelecting =  forwardRuleNode->ParamCandidates.front();
                         forwardRuleNode->ParamCandidates.erase(forwardRuleNode->ParamCandidates.begin());
 
-                        std::set_union(forwardRuleNode->currentBindingsFromForwardState.begin(),forwardRuleNode->currentBindingsFromForwardState.end(),
-                                       forwardRuleNode->currentBindingsViaSelecting.begin(),forwardRuleNode->currentBindingsViaSelecting.end(),
-                                       inserter(forwardRuleNode->currentAllBindings,forwardRuleNode->currentAllBindings.begin()));
+                        forwardRuleNode->updateCurrentAllBindings();
 
 
                         // rebind all the effect state nodes in the forward rule
@@ -490,9 +496,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         // apply the new bindings of least affect to the solved states
                         forwardRuleNode->currentBindingsViaSelecting =  *bestBindingIt;
                         forwardRuleNode->ParamCandidates.erase(bestBindingIt);
-                        std::set_union(forwardRuleNode->currentBindingsFromForwardState.begin(),forwardRuleNode->currentBindingsFromForwardState.end(),
-                                       forwardRuleNode->currentBindingsViaSelecting.begin(),forwardRuleNode->currentBindingsViaSelecting.end(),
-                                       inserter(forwardRuleNode->currentAllBindings,forwardRuleNode->currentAllBindings.begin()));
+                        forwardRuleNode->updateCurrentAllBindings();
 
                         // have to rebind the affected state nodes and delete the affected effect states' branches
                         vector<StateNode*>::iterator affectedStateNodeIt;
@@ -501,7 +505,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                             StateNode* affectedStateNode = (StateNode* )(*affectedStateNodeIt);
                             reBindStateNode(affectedStateNode,forwardRuleNode->currentAllBindings);
 
-//                            historyStateNodes.erase(affectedStateNode);
+                            deleteStateNodeInHistory(affectedStateNode, historyStateNodes);
                             unsatisfiedStateNodes.push_front(affectedStateNode);
 
                             deleteRuleNode(affectedStateNode->backwardRuleNode);
@@ -534,9 +538,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         // So we need to select suitable variables to ground them.
         groundARuleNodeBySelectingValues(ruleNode);
 
-        std::set_union(ruleNode->currentBindingsFromForwardState.begin(),ruleNode->currentBindingsFromForwardState.end(),
-                       ruleNode->currentBindingsViaSelecting.begin(),ruleNode->currentBindingsViaSelecting.end(),
-                       inserter(ruleNode->currentAllBindings,ruleNode->currentAllBindings.begin()));
+        ruleNode->updateCurrentAllBindings();
 
         recordOrginalStateValuesAfterGroundARule(ruleNode);
 
@@ -545,11 +547,13 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor)
         {
-            // skip the current state node
-            if ((*effectItor)->second == curStateNode)
-                continue;
+            Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-            State* effState =  Rule::groundAStateByRuleParamMap(((StateNode*)(*effectItor))->state, ruleNode->currentAllBindings);
+            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings);
+
+            // skip the current state node
+            if (curStateNode->state->isSameState(*effState) )
+                continue;
 
             // create a new state node for it
             StateNode* newStateNode = new StateNode(effState);
@@ -562,7 +566,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             for (unsait = unsatisfiedStateNodes.begin(); unsait != unsatisfiedStateNodes.end(); )
             {
-                if (effState->isSameState( ((StateNode*)(*unsait))->state ))
+                if (effState->isSameState( *((StateNode*)(*unsait))->state ))
                 {
                     // check if this effect can satisfy this unsatisfiedState
                     float satDegree;
@@ -588,11 +592,11 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             for (goIt = goalStateNodes.begin(); goIt != goalStateNodes.end();)
             {
                 StateNode* goalNode = (StateNode*)(*goIt);
-                if (effState->isSameState( goalNode->state ))
+                if (effState->isSameState( *(goalNode->state) ))
                 {
                     float satDegree;
 
-                    if (! effState->isSatisfied(goalNode->state ,satDegree))
+                    if (! effState->isSatisfied(*(goalNode->state) ,satDegree))
                     {
                         // This effect dissatisfied this goal, put this goal into the unsatisfied state node list and remove it from goal list
                         unsatisfiedStateNodes.push_front(goalNode);
@@ -615,7 +619,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         // and then check each precondition if it has already been satisfied, put it the unsatisfied one to the
         vector<State*>::iterator itpre;
         float satisfiedDegree;
-        for (itpre = preconditionList.begin(); itpre != preconditionList.end(); ++ itpre)
+        for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
         {
             State* ps = *itpre;
             State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -634,15 +638,15 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 // there are possible mutiple same state nodes describe this same state in historyStateNodes,
                 // but the latest one is put in the front, so we can just check the first one we find
                 State* vState = ((StateNode*)(*vit))->state;
-                if (vState->isSameState(groundPs))
+                if (vState->isSameState(*groundPs))
                 {
-                     if (vState->isSatisfied(groundPs,satisfiedDegree))
+                     if (vState->isSatisfied(*groundPs,satisfiedDegree))
                      {
                          // the current state satisfied this precondition,
                          // connect this precondition to the backward rule node of the state which satisfied this precondition
                          found = true;
 
-                         ruleNode* backwardRuleNode = ((StateNode*)(*vit))->backwardRuleNode;
+                         RuleNode* backwardRuleNode = ((StateNode*)(*vit))->backwardRuleNode;
                          if (backwardRuleNode)
                          {
                              ((StateNode*)(*vit))->backwardRuleNode->forwardLinks.insert(newStateNode);
@@ -660,7 +664,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             if (! found)
             {
                 // check real time
-                if (! checkIsGoalAchieved(groundPs,satisfiedDegree))
+                if (! checkIsGoalAchieved(*groundPs,satisfiedDegree))
                 {
                     // add it to unsatisfied list
                     unsatisfiedStateNodes.push_front(newStateNode);
@@ -672,7 +676,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
 
         // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
-        executeActionInImaginarySpaceMap(ruleNode);
+        executeActionInImaginarySpaceMap(ruleNode,clonedMap);
 
     }
 
@@ -685,6 +689,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     return true;
 }
 
+// ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
 {
     static int imaginaryBlockNum = 1;
@@ -692,55 +697,59 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer:
     // currently we just cheat to enable the following actions
     // ToBeImproved: the right way is to add a callback function for each action to auto execute
 
-    switch (ruleNode->originalRule->action.getType().getCode())
+    switch (ruleNode->originalRule->action->getType().getCode())
     {
-    case pai::EAT_CODE:
-        // get the handle of the food to eat
-        string foodVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
-        Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-        iSpaceMap->removeNoneBlockEntity(foodH);
+        case pai::EAT_CODE:
+        {
+            // get the handle of the food to eat
+            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
+            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
+            iSpaceMap->removeNoneBlockEntity(foodH);
+            break;
+        }
+        case pai::MOVE_TO_OBJ_CODE:
+        {
+            // get the actor entity handle
+            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
+            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
 
-        break;
+            // get the object want to move to
+            string targetVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
+            Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
+            // get new location it moves tol
+            spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
+            break;
+        }
+        case pai::WALK_CODE:
+        {
+            // get the actor entity handle
+            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
+            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
 
-    case pai::MOVE_TO_OBJ_CODE:
-        // get the actor entity handle
-        string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-        Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
-        Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
+            // get the new location it moves to
+            string newPosVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
+            spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
 
-        // get the object want to move to
-        string targetVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
-        Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
-        // get new location it moves tol
-        spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
-        iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation);
+            break;
+        }
+        case pai::BUILD_BLOCK_CODE:
+        {
+            // get the  location of block
+            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
+            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
+            Handle iBlockH = AtomSpaceUtil::addNode(*atomSpace, IMAGINARY_STRUCTURE_NODE,"Imaginary_Block_" + imaginaryBlockNum++);
+            iSpaceMap->addSolidUnitBlock(buildPos,iBlockH);
+            break;
+        }
 
-        break;
-
-    case pai::WALK_CODE:
-        // get the actor entity handle
-        string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-        Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
-        Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
-
-        // get the new location it moves to
-        string newPosVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
-        spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
-        iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos);
-
-        break;
-
-    case pai::BUILD_BLOCK_CODE:
-        // get the  location of block
-        string blockBuildPposVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
-        spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
-        Handle iBlockH = AtomSpaceUtil::addNode(*atomspace, IMAGINARY_STRUCTURE_NODE,"Imaginary_Block_" + imaginaryBlockNum++);
-        iSpaceMap->addSolidUnitBlock(buildPos,iBlockH);
-        break;
     }
 
 }
@@ -750,53 +759,60 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
     // currently we just cheat to enable the following actions
     // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 
-    switch (ruleNode->originalRule->action.getType().getCode())
+    switch (ruleNode->originalRule->action->getType().getCode())
     {
-    case pai::EAT_CODE:
-        // get the handle of the food to eat
-        string foodVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
-        Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-        // get the location last time it appeared
-        spatial::BlockVector& lastPos = iSpaceMap->getLastAppearedLocation(foodH);
-        iSpaceMap->addNoneBlockEntity(foodH,lastPos,1,1,1,0.0,foodEntity.id,entity.type,false);
+        case pai::EAT_CODE:
+        {
+            // get the handle of the food to eat
+            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
+            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
+            // get the location last time it appeared
+            iSpaceMap->addNoneBlockEntity(foodH,iSpaceMap->getLastAppearedLocation(foodH),1,1,1,0.0,foodEntity.id,foodEntity.type,false,curtimeStamp);
 
-        break;
+            break;
+        }
 
-    case pai::MOVE_TO_OBJ_CODE:
-        // get the actor entity handle
-        string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-        Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
-        Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
+        case pai::MOVE_TO_OBJ_CODE:
+        {
+            // get the actor entity handle
+            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
+            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
 
-        // get old location from the record before execute this effect
-        Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
-        spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
-        iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0);
+            // get old location from the record before execute this effect
+            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
+            spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp);
 
-        break;
+            break;
+        }
 
-    case pai::WALK_CODE:
-        // get the actor entity handle
-        string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-        Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
-        Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
+        case pai::WALK_CODE:
+        {
+            // get the actor entity handle
+            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
+            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
 
-        // get old location from the record before execute this effect
-        Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
-        spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
-        iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation);
+            // get old location from the record before execute this effect
+            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
+            spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp);
 
-        break;
+            break;
+        }
 
-    case pai::BUILD_BLOCK_CODE:
-        // get the  location the new block is to be build at
-        string blockBuildPposVarName = ActionParameter::ParamValueToString(actionParams.front());
-        Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
-        spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
+        case pai::BUILD_BLOCK_CODE:
+        {
+            // get the  location the new block is to be build at
+            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
+            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
 
-        iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
-        break;
+            iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
+            break;
+        }
     }
 }
 
@@ -812,6 +828,19 @@ void OCPlanner::deleteRuleNode(RuleNode* ruleNode)
 {
     // todo
     // historyStateNodes
+}
+
+void OCPlanner::deleteStateNodeInHistory(StateNode* stateNode, list<StateNode*> &historyStateNodes)
+{
+    list<StateNode*>::iterator it;
+    for (it = historyStateNodes.begin(); it != historyStateNodes.end(); ++it)
+    {
+        if ((*it) == stateNode)
+        {
+            historyStateNodes.erase(it);
+            break;
+        }
+    }
 }
 
 bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)

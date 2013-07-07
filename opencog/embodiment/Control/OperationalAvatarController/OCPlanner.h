@@ -151,6 +151,9 @@ public:
         costHeuristics.push_back(costHeuristic);
     }
 
+    // after rebinding , add currentBindingsFromForwardState and currentBindingsViaSelecting together to CurrentAllBindings
+    void updateCurrentAllBindings();
+
 };
 
 class StateNode
@@ -197,7 +200,7 @@ public:
 class OCPlanner
 {
 public:
-     OCPlanner(AtomSpace* _atomspace);
+     OCPlanner(AtomSpace* _atomspace,OAC* _oac);
 
      // TODO:
      // add a new rule from a implicationLink in the Atomspace
@@ -215,7 +218,11 @@ protected:
      // to store all the rules can be used in reasoning
      vector<Rule*> AllRules;
 
-     AtomSpace* atomspace;
+     AtomSpace* atomSpace;
+
+     OAC* oac;
+
+     unsigned long curtimeStamp;
 
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
@@ -283,6 +290,8 @@ protected:
      void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
      void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+
+     void deleteStateNodeInHistory(StateNode* stateNode,list<StateNode*>& historyStateNodes);
 
 };
 
