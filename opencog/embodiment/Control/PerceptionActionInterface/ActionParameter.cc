@@ -219,6 +219,37 @@ bool ActionParameter::isFuzzyIntervalFloatValue() const
     return boost::get<FuzzyIntervalFloat>(&value);
 }
 
+bool ActionParameter::isStringValue(ParamValue value)
+{
+    return boost::get<string>(&value);
+}
+
+bool ActionParameter::isRotationValue(ParamValue value)
+{
+    return boost::get<Rotation>(&value);
+}
+
+bool ActionParameter::isVectorValue(ParamValue value)
+{
+    return boost::get<Vector>(&value);
+}
+
+bool ActionParameter::isEntityValue(ParamValue value)
+{
+    return boost::get<Entity>(&value);
+}
+
+bool ActionParameter::isFuzzyIntervalIntValue(ParamValue value)
+{
+    return boost::get<FuzzyIntervalInt>(&value);
+}
+
+bool ActionParameter::isFuzzyIntervalFloatValue(ParamValue value)
+{
+    return boost::get<FuzzyIntervalFloat>(&value);
+}
+
+
 const string& ActionParameter::getStringValue() const
 {
     return get<string>(value);
@@ -248,6 +279,38 @@ const FuzzyIntervalFloat& ActionParameter::getFuzzyIntervalFloatValue() const
 {
     return get<FuzzyIntervalFloat>(value);
 }
+
+
+const string& ActionParameter::getStringValue(ParamValue value)
+{
+    return get<string>(value);
+}
+
+const Rotation& ActionParameter::getRotationValue(ParamValue value)
+{
+    return get<Rotation>(value);
+}
+
+const Vector& ActionParameter::getVectorValue(ParamValue value)
+{
+    return get<Vector>(value);
+}
+
+const Entity& ActionParameter::getEntityValue(ParamValue value)
+{
+    return get<Entity>(value);
+}
+
+const FuzzyIntervalInt& ActionParameter::getFuzzyIntervalIntValue(ParamValue value)
+{
+    return get<FuzzyIntervalInt>(value);
+}
+
+const FuzzyIntervalFloat& ActionParameter::getFuzzyIntervalFloatValue(ParamValue value)
+{
+    return get<FuzzyIntervalFloat>(value);
+}
+
 
 bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2)
 {
@@ -333,7 +396,7 @@ std::string ActionParameter::ParamValueToString(const ParamValue& paramVal)
 {
     std::string answer ="";
 
-    if(boost::get<Entity>(&(paramVal)))
+    if(boost::get<std::string>(&(paramVal)))
     {
         answer = boost::get<std::string>(paramVal);
 

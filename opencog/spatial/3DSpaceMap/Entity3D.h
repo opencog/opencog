@@ -85,6 +85,8 @@ namespace opencog
             // Note: only apply to non-block entities - pls do not apply in a blockEntity
             void updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, bool _is_obstacle);
 
+            void updateNonBlockEntityLocation(BlockVector _centerPosition);
+
         protected:
             Entity3D(){};
             int mID;

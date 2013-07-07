@@ -32,6 +32,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 #include "PlanningHeaderFiles.h"
+#include "Inquery.h"
 
 using namespace std;
 using namespace opencog::pai;
@@ -43,7 +44,7 @@ using namespace opencog::pai;
 
 namespace opencog { namespace oac {
 
-class Inquery;
+
 
     enum EFFECT_OPERATOR_TYPE
     {
@@ -122,11 +123,11 @@ class Inquery;
 
         // If this state doesn't need real time inquery, this fuction will return the direct value of the variable.
         // If it need real time inquery, it will do inquery and return the value.
-        StateValue& getStateValue();
+        StateValue getStateValue();
 
         StateValuleType getStateValuleType()  {return stateVariable->getType();}
 
-        map<string , vector<StateValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
+        //map<string , vector<StateValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
         State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
               vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
@@ -213,7 +214,7 @@ class Inquery;
     {
     public:
         // the specific state this effect will take effect on
-        State* state;
+        State* state; // it recoards the orginal value of this state which has not been changed by this effect
 
         //e.g. when this effect is to add the old stateValue by 5,
         //then effectOp = OP_ADD, opStateValue = 5
@@ -255,6 +256,9 @@ class Inquery;
     //       <$Vector0,Vector(45,82,29)>
     //       <$Entity1,Battery83483>
     typedef map<string, StateValue> ParamGroundedMapInARule;
+
+    // pair<the state this varaible belongs to, one address of this variable>
+    typedef pair<State*,StateValue*> paramIndex;
 
     // the rule to define the preconditions of an action and what effects it would cause
     // A rule will be represented in the Atomspace by ImplicationLink
@@ -301,7 +305,6 @@ class Inquery;
         // the actor who carry out this action, usually an Entity
         StateValue actor;
 
-
         // All the precondition required to perform this action
         vector<State*> preconditionList;
 
@@ -323,7 +326,7 @@ class Inquery;
         // the string is the string representation of an orginal ungrounded parameter,
         // such like: OCPlanner::vector_var[3].stringRepresentation(), see ActionParameter::stringRepresentation()
         // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
-        map<string , vector<StateValue*> > paraIndexMap;
+        map<string , vector<paramIndex> > paraIndexMap;
 
         Rule(PetAction* _action, StateValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
             action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList){}
@@ -358,7 +361,7 @@ class Inquery;
         // in some planning step, need to ground some state to calculate the cost or others
         // return a new state which is the grounded version of s, by a parameter value map
         // if the "groundings" cannot ground all the variables in this state, return 0
-        State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
+       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
 
         bool static isRuleUnGrounded( Rule* rule);
 
@@ -376,12 +379,11 @@ class Inquery;
         void _preProcessRuleParameterIndexes();
 
         // Add one parameter to index
-        void _addParameterIndex(StateValue &paramVal);
+        void _addParameterIndex(State *s, StateValue &paramVal);
 
         // check if this rule is a recursive rule
         // Recursive rule is to break a problem into the same problems of smaller scales
         bool _isRecursiveRule();
-
 
     };
 
