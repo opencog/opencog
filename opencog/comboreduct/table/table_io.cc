@@ -843,18 +843,21 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
 
     // Determine type signature
     if (has_header) {
-        auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
-                                   target_feature);
-        OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
-                  target_feature.c_str());
-        unsigned target_idx = std::distance(maybe_header.begin(), target_it);
+        unsigned target_idx = 0;
+        if (!target_feature.empty()) {
+            auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
+                                       target_feature);
+            OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
+                      target_feature.c_str());
+            target_idx = std::distance(maybe_header.begin(), target_it);
+        }
         vector<unsigned> ignore_idxs =
             get_indices(ignore_features, maybe_header);
         type_node otype = types[target_idx];
         vector<type_node> itypes;
         for (unsigned i = 0; i < types.size(); ++i)
             if (!boost::binary_search(ignore_idxs, i) && i != target_idx)
-            itypes.push_back(types[i]);
+                itypes.push_back(types[i]);
         tt = gen_signature(itypes, otype);
     } else {
         // No header, the target is the first column
@@ -885,10 +888,13 @@ istream& istreamDenseTable(istream& in, Table& tab,
         string line;
         get_data_line(in, line);
         vector<string> header = tokenizeRow<string>(line);
-        auto target_it = std::find(header.begin(), header.end(), target_feature);
-        OC_ASSERT(target_it != header.end(), "Target %s not found",
-                  target_feature.c_str());
-        target_idx = std::distance(header.begin(), target_it);
+        if (!target_feature.empty()) {
+            auto target_it = std::find(header.begin(), header.end(),
+                                       target_feature);
+            OC_ASSERT(target_it != header.end(), "Target %s not found",
+                      target_feature.c_str());
+            target_idx = std::distance(header.begin(), target_it);
+        }
         ignore_idxs = get_indices(ignore_features, header);
 
         // get input and output labels from the header
