@@ -106,7 +106,12 @@ public:
 
     ParamGroundedMapInARule currentAllBindings; // currentBindingsFromForwardState + currentBindingsViaSelecting
 
-    set<StateNode*> forwardLinks; // all state nodes in next layer connected to this nodes according to the currently applying rule: the effect state nodes of this rule
+    // all state nodes connected to this nodes that have been satisfied by this rulenode according to the currently applying rule: the effect state nodes of this rule
+    set<StateNode*> forwardLinks;
+
+    // all state nodes connected to this nodes that are negatived by this rule node according to the currently applying rule: the effect state nodes of this rule
+    set<StateNode*> negativeForwardLinks;
+
     set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
     // cost as soft heuristics inherited from its
