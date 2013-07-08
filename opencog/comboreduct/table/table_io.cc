@@ -769,8 +769,9 @@ istream& istreamTable_NEW(istream& in, Table& tab,
     in.seekg(beg);
 
     if (is_sparse) {
-        // TODO
-        return in;
+        // fallback on the old loader
+        // TODO:  this could be definitely be optimized
+        return istreamTable(in, tab, target_feature, ignore_features);
     } else {
         return istreamDenseTable(in, tab, target_feature, ignore_features,
                                  tt, has_header);
@@ -788,13 +789,21 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
     std::vector<string> lines;
     {
         string line;
-        while (get_data_line(in, line) && maxline-- > 0)
+        is_sparse = false;
+        while (get_data_line(in, line) && maxline-- > 0) {
+            // It is sparse
+            is_sparse = is_sparse || string::npos != line.find(sparse_delim);
+            if (is_sparse) { // just get out
+                // TODO could be simplified, optimized, etc
+                in.seekg(beg);
+                in.clear();         // in case it has reached the eof
+                return in;
+            }
+
+            // put the line in a buffer
             lines.push_back(line);
+        }
     }
-
-    is_sparse = false; // TODO
-
-    // ASSUME IT'S DENSE!!!
 
     // parse what could be a header
     vector<string> maybe_header = tokenizeRow<string>(lines.front());
