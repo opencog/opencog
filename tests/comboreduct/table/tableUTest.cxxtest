@@ -256,21 +256,21 @@ public:
                          tt.itable, tt.otable, true);
     }
 
-    // void test_sparseFile2()
-    // {
-    //     std::cout << "\n----------------------------" << std::endl;
-    //     string target_feature = "target2";
-    //     vector<string> ignore_features = {"a", "b", "c", "target1"};
-    //     Table tt = loadTable_NEW(tableUTest_dir + "sparse.data",
-    //                              target_feature, ignore_features);
+    void test_sparseFile2()
+    {
+        std::cout << "\n----------------------------" << std::endl;
+        string target_feature = "target2";
+        vector<string> ignore_features = {"a", "b", "c", "target1"};
+        Table tt = loadTable_NEW(tableUTest_dir + "sparse.data",
+                                 target_feature, ignore_features);
 
-    //     testIStreamTable("target2,d,e,f,g,x,y,z\n"
-    //                      "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-    //                      "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-    //                      "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-    //                      "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-    //                      tt.itable, tt.otable, true);
-    // }
+        testIStreamTable("target2,d,e,f,g,x,y,z\n"
+                         "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
+                         "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
+                         "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
+                         "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+                         tt.itable, tt.otable, true);
+    }
 
     void test_mutualInformation()
     {
