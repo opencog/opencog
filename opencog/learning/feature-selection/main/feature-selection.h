@@ -54,7 +54,8 @@ static const string pre="pre";  // Precision (see
 struct feature_selection_parameters
 {
     // avoid utter insanity by providing some reasonable values.
-    feature_selection_parameters() : algorithm(simple), scorer(mi),
+    feature_selection_parameters() :
+        algorithm(simple), scorer(mi),
         target_size(1), exp_distrib(false), threshold(0.0),
         jobs(1),
         inc_target_size_epsilon(1.0e-10),
@@ -66,6 +67,8 @@ struct feature_selection_parameters
         hc_max_score(1.0e50),
         hc_cache_size(1000),
         hc_fraction_of_remaining(1.0),
+        hc_crossover(true),
+        hc_crossover_pop_size(300),
         mi_confi(50.0)
     {}
 
