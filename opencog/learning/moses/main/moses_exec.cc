@@ -695,11 +695,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_score_opt).c_str(),
          value<score_t>(&max_score)->default_value(very_best_score),
-         "The max score to reach, once reached MOSES halts. MOSES is"
-         " sometimes able to calculate the max score that can be reached"
-         " for a particular problem, in such case the max_score is"
-         " automatically reset of the minimum between MOSES's calculation"
-         " and the user's option.\n")
+         "The max score to reach, once reached MOSES halts. If the largest "
+         "floating point number is used and MOSES is able to calculate the "
+         "max score that can be reached for that particular problem, "
+         "it will overwrite it. "
+         "Otherwise, for any other value, the user's defined max-score will "
+         "be used.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
