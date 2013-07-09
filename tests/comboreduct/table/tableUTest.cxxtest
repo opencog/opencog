@@ -245,8 +245,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target1";
         vector<string> ignore_features = {"a", "b", "c", "target2"};
-        Table tt = loadTable_NEW(tableUTest_dir + "sparse.data",
-                                 target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "sparse.data",
+                             target_feature, ignore_features);
 
         testIStreamTable("target1,d,e,f,g,x,y,z\n"
                          "thing,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
@@ -261,8 +261,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target2";
         vector<string> ignore_features = {"a", "b", "c", "target1"};
-        Table tt = loadTable_NEW(tableUTest_dir + "sparse.data",
-                                 target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "sparse.data",
+                             target_feature, ignore_features);
 
         testIStreamTable("target2,d,e,f,g,x,y,z\n"
                          "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
@@ -277,8 +277,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         vector<string> ignore_features;
-        Table tt = loadTable_NEW(tableUTest_dir + "dataset.csv",
-                                 target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "dataset.csv",
+                             target_feature, ignore_features);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
@@ -291,7 +291,7 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         vector<string> ignore_features;
-        Table tt = loadTable_NEW(tableUTest_dir + "dataset.csv");
+        Table tt = loadTable(tableUTest_dir + "dataset.csv");
 
         std::cout << "tt = " << tt << std::endl;
         set<arity_t> fs1{0};
@@ -334,7 +334,7 @@ public:
         string target_feature = "target";
         vector<string> ignore_features = {"time", "f1"};
         string input_file = tableUTest_dir + "dataset_force_feature.csv";
-        Table tt = loadTable_NEW(input_file, target_feature, ignore_features);
+        Table tt = loadTable(input_file, target_feature, ignore_features);
 
         ostreamTable(cout << "before" << endl, tt);
         
