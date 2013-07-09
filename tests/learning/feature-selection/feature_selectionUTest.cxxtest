@@ -66,13 +66,16 @@ public:
         big_table = loadTable(big_table_path, target_feature, ignore_features);
 
         // load small table
-        small_table = loadTable(small_table_path, target_feature, ignore_features);
+        small_table = loadTable(small_table_path, target_feature,
+                                ignore_features);
 
         // load small table with f2 and f3 swapped
-        small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path, target_feature, ignore_features);
+        small_table_swap_f2_f3 = loadTable(small_table_swap_f2_f3_path,
+                                           target_feature, ignore_features);
 
         // load contin table
-        sparse_table = loadTable(sparse_table_path, target_feature, ignore_features);
+        sparse_table = loadTable(sparse_table_path,
+                                 target_feature, ignore_features);
 
         // load ignore_enfore_target table
         ignore_features.push_back("timestamp");
