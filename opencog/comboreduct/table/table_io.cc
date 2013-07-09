@@ -1018,23 +1018,6 @@ std::istream& istreamCTable(std::istream& in, CTable& ctable)
 }
 
 /**
- * istream. If the file name is not correct then an OC_ASSERT is
- * raised.
- */
-Table loadTable(const string& file_name,
-                const string& target_feature,
-                const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    Table res;
-    istreamTable(in, res, target_feature, ignore_features);
-    return res;
-}
-
-/**
  * Like loadTable but ignore the features head on instead of loading
  * then removing them.
  *
@@ -1057,9 +1040,9 @@ Table loadTable_optimized(const string& file_name,
     return res;
 }
 
-Table loadTable_NEW(const std::string& file_name,
-                    const std::string& target_feature,
-                    const std::vector<std::string>& ignore_features)
+Table loadTable(const std::string& file_name,
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());

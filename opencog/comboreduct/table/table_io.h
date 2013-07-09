@@ -278,10 +278,10 @@ Table loadTable_optimized(const std::string& file_name,
  * If target_feature is empty then, in case there is no header, it is
  * assumed to be the first feature.
  */
-Table loadTable_NEW(const std::string& file_name,
-                    const std::string& target_feature = std::string(),
-                    const std::vector<std::string>& ignore_features
-                    = empty_string_vec);
+Table loadTable(const std::string& file_name,
+                const std::string& target_feature = std::string(),
+                const std::vector<std::string>& ignore_features
+                = empty_string_vec);
 
 type_node infer_type_from_token2(type_node curr_guess, const std::string& token);
 
