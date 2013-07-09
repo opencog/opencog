@@ -62,6 +62,18 @@ void RuleNode::updateCurrentAllBindings()
     currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
 }
 
+bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
+{
+    list<StateNode*>::iterator it;
+    for (it = stateNodeList.begin(); it != stateNodeList.end(); ++ it)
+    {
+        if (state == (*it))
+            return true;
+    }
+
+    return false;
+}
+
 OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
 {
 
@@ -335,7 +347,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.begin())->second);
                 curStateNode->candidateRules.pop_front();
 
-
             }
 
             curStateNode->hasFoundCandidateRules = true;
@@ -388,8 +399,11 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                         }
 
-                        deleteStateNodeInHistory((StateNode*)(*forwardStateIt), temporaryStateNodes);
-                        unsatisfiedStateNodes.push_front(*forwardStateIt);
+                        deleteStateNodeInTemporaryList((StateNode*)(*forwardStateIt), temporaryStateNodes);
+
+                        // only when there is any rule node need this state node as a prediction, put it to the unsatisfed list
+                        if ((StateNode*)(*forwardStateIt)->forwardRuleNode != 0)
+                            unsatisfiedStateNodes.push_front(*forwardStateIt);
                     }
 
                     deleteRuleNode(forwardRuleNode);
@@ -406,9 +420,10 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         if ((*effectItor) == curStateNode)
                             continue;
 
-                        if ((*effectItor)->backwardRuleNode != 0)
+                        // when this state node has already been tried a backward rule to solve it, or this state node is not in the unsatisfiedStateNodes
+                        // it means it's solved
+                        if (((*effectItor)->backwardRuleNode != 0) || (! findInStateNodeList(unsatisfiedStateNodes,*effectItor)))
                         {
-                            // currently , this state node has already been tried a backward rule to solve it
                             // so put it in the solvedStateNodes map
                             StateNode* sn = (StateNode*)(*effectItor);
                             solvedStateNodes.insert(pair<State*,StateNode*>(sn->forwardEffectState , sn ) );
@@ -425,6 +440,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         forwardRuleNode->ParamCandidates.erase(forwardRuleNode->ParamCandidates.begin());
 
                         forwardRuleNode->updateCurrentAllBindings();
+                        recordOrginalStateValuesAfterGroundARule(forwardRuleNode);
 
 
                         // rebind all the effect state nodes in the forward rule
@@ -497,6 +513,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         forwardRuleNode->currentBindingsViaSelecting =  *bestBindingIt;
                         forwardRuleNode->ParamCandidates.erase(bestBindingIt);
                         forwardRuleNode->updateCurrentAllBindings();
+                        recordOrginalStateValuesAfterGroundARule(forwardRuleNode);
 
                         // have to rebind the affected state nodes and delete the affected effect states' branches
                         vector<StateNode*>::iterator affectedStateNodeIt;
@@ -505,7 +522,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                             StateNode* affectedStateNode = (StateNode* )(*affectedStateNodeIt);
                             reBindStateNode(affectedStateNode,forwardRuleNode->currentAllBindings);
 
-                            deleteStateNodeInHistory(affectedStateNode, temporaryStateNodes);
+                            deleteStateNodeInTemporaryList(affectedStateNode, temporaryStateNodes);
                             unsatisfiedStateNodes.push_front(affectedStateNode);
 
                             deleteRuleNode(affectedStateNode->backwardRuleNode);
@@ -564,6 +581,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             list<StateNode*>::iterator unsait;
 
+            // check if there are any unsatisfied nodes in previous steps will be satisfied by this effect
             for (unsait = unsatisfiedStateNodes.begin(); unsait != unsatisfiedStateNodes.end(); )
             {
                 if (effState->isSameState( *((StateNode*)(*unsait))->state ))
@@ -627,8 +645,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     ++ sait;
 
             }
-            // check if any other rulenode depends on this state node,if no, then we don't need to put it in the unsatisfiedStateNodes
-
 
             // need to check in the goal state node list, if this effect change the already satisfied states in the goal list
             vector<StateNode*>::iterator goIt;
@@ -696,6 +712,12 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                              newStateNode->backwardRuleNode =  ((StateNode*)(*vit))->backwardRuleNode;
                          }
 
+                         // TODO: Need to check if there is any dependency loop,
+                         // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
+                         // it means two branches depend on each other. How to deal with this case?
+
+                         break;
+
                          // not need to add it in the temporaryStateNodes list, because it has beed satisfied by the previous steps
                      }
 
@@ -717,7 +739,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         }
 
-
         // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
         executeActionInImaginarySpaceMap(ruleNode,clonedMap);
 
@@ -731,6 +752,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     return true;
 }
+
 
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
@@ -871,9 +893,10 @@ void OCPlanner::deleteRuleNode(RuleNode* ruleNode)
 {
     // todo
     // temporaryStateNodes
+
 }
 
-void OCPlanner::deleteStateNodeInHistory(StateNode* stateNode, list<StateNode*> &temporaryStateNodes)
+void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode, list<StateNode*> &temporaryStateNodes)
 {
     list<StateNode*>::iterator it;
     for (it = temporaryStateNodes.begin(); it != temporaryStateNodes.end(); ++it)
@@ -893,7 +916,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
     Effect* e;
     State* s;
 
-    // Todo: Maybe need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
+    // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
