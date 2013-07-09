@@ -26,12 +26,17 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/range/algorithm/find.hpp>
+#include <boost/range/algorithm/count_if.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/irange.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
 
+#include <boost/spirit/include/phoenix_core.hpp>
+#include <boost/spirit/include/phoenix_operator.hpp>
+
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/iostreamContainer.h>
 #include <opencog/util/oc_omp.h>
 #include <opencog/util/comprehension.h>
 
@@ -42,6 +47,8 @@ namespace opencog { namespace combo {
 
 using namespace std;
 using namespace boost;
+using namespace boost::phoenix;
+using boost::phoenix::arg_names::arg1;
 
 // -------------------------------------------------------
 
@@ -202,7 +209,7 @@ type_node infer_type_from_token(const string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-type_node infer_type_from_token(type_node curr_guess, const string& token)
+type_node infer_type_from_token2(type_node curr_guess, const string& token)
 {
     type_node tokt = infer_type_from_token(token);
 
@@ -326,7 +333,7 @@ istream& istreamRawITable(istream& in, ITable& tab,
     arity_t arity = fl.size();
 
     atomic<int> arity_fail_row(-1);
-    auto parse_line = [&](int i)
+    auto parse_line = [&](size_t i)
     {
         // tokenize the line and fill the table with
         tab[i] = tokenizeRow<string>(lines[i], ignored_indices);
@@ -436,7 +443,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
         // Infer the types of the fixed features.
         size_t off = 0;
         for (; off < fixed_arity; off++, pit++) 
-            types[off] = infer_type_from_token(types[off], *pit);
+            types[off] = infer_type_from_token2(types[off], *pit);
 
         for (; pit != chunks.end(); pit++) {
             // Rip out the key-value pairs
@@ -445,7 +452,7 @@ istream& istreamSparseITable(istream& in, ITable& tab)
                 break;
             // Store the key, uniquely.  Store best guess as the type.
             feats.insert(key_val.first);
-            feat_type = infer_type_from_token(feat_type, key_val.second);
+            feat_type = infer_type_from_token2(feat_type, key_val.second);
         }
     }
     logger().info() << "Sparse file unique features count=" << feats.size();
@@ -505,7 +512,7 @@ vector<type_node> infer_column_types(const ITable& tab)
     {
         const string_seq& tokens = rowit->get_seq<string>();
         for (arity_t i=0; i<arity; i++)
-            types[i] = infer_type_from_token(types[i], tokens[i]);
+            types[i] = infer_type_from_token2(types[i], tokens[i]);
     }
     return types;
 }
@@ -523,7 +530,22 @@ bool has_header(ITable& tab, vector<type_node> col_types)
     arity_t arity = row.size();
 
     for (arity_t i=0; i<arity; i++) {
-        type_node flt = infer_type_from_token(col_types[i], row[i]);
+        type_node flt = infer_type_from_token2(col_types[i], row[i]);
+        if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
+            return true;
+    }
+    return false;
+}
+
+/**
+ * Infer the column types of a line and compare it to the given column
+ * types.  If there is a mis-match, then it must be a header, i.e. a
+ * set of ascii column labels.
+ */
+bool is_header(const vector<string>& tokens, const vector<type_node>& col_types)
+{
+    for (size_t i = 0; i < tokens.size(); i++) {
+        type_node flt = infer_type_from_token2(col_types[i], tokens[i]);
         if ((id::enum_type == flt) && (id::enum_type != col_types[i]))
             return true;
     }
@@ -690,9 +712,6 @@ istream& istreamTable(istream& in, Table& tab,
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
 
-    // Record the table signature.
-    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
-
     return in;
 }
 
@@ -724,8 +743,211 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
     tab.otable.set_label(targ_feat);
     tab.otable.set_type(targ_type);
 
-    // Record the table signature.
-    tab.tt = gen_signature(tab.itable.get_types(), targ_type);
+    return in;
+}
+
+/**
+ * Perform 2 passes:
+ *
+ * 1) Infer
+ * 1.1) its type
+ * 1.2) whether it has a header
+ * 1.3) whether it is dense or sparse
+ *
+ * 2) Load the actual data
+ */
+istream& istreamTable_NEW(istream& in, Table& tab,
+                          const string& target_feature,
+                          const vector<string>& ignore_features)
+{
+    // Infer the properties of the table without loading its content
+    type_tree tt;
+    bool has_header, is_sparse;
+    streampos beg = in.tellg();
+    inferTableAttributes(in, target_feature, ignore_features,
+                         tt, has_header, is_sparse);
+    in.seekg(beg);
+
+    if (is_sparse) {
+        // fallback on the old loader
+        // TODO:  this could be definitely be optimized
+        return istreamTable(in, tab, target_feature, ignore_features);
+    } else {
+        return istreamDenseTable(in, tab, target_feature, ignore_features,
+                                 tt, has_header);
+    }
+}
+
+istream& inferTableAttributes(istream& in, const string& target_feature,
+                              const vector<string>& ignore_features,
+                              type_tree& tt, bool& has_header, bool& is_sparse,
+                              int maxline)
+{
+    streampos beg = in.tellg();
+
+    // Get a portion of the dataset into memory (cleaning weird stuff)
+    std::vector<string> lines;
+    {
+        string line;
+        is_sparse = false;
+        while (get_data_line(in, line) && maxline-- > 0) {
+            // It is sparse
+            is_sparse = is_sparse || string::npos != line.find(sparse_delim);
+            if (is_sparse) { // just get out
+                // TODO could be simplified, optimized, etc
+                in.seekg(beg);
+                in.clear();         // in case it has reached the eof
+                return in;
+            }
+
+            // put the line in a buffer
+            lines.push_back(line);
+        }
+    }
+
+    // parse what could be a header
+    vector<string> maybe_header = tokenizeRow<string>(lines.front());
+
+    // determine arity
+    arity_t arity = maybe_header.size();
+    atomic<int> arity_fail_row(-1);
+
+    // determine initial type
+    vector<type_node> types(arity, id::unknown_type);
+
+    // parse the rest, determine its type and whether the arity is
+    // consistent
+    for (size_t i = 1; i < lines.size(); ++i) {
+        // Parse line
+        const string_seq& tokens = tokenizeRow<string>(lines[i]);
+
+        // Check arity
+        if (arity != (arity_t)tokens.size()) {
+            arity_fail_row = i + 1;
+            in.seekg(beg);
+            in.clear();         // in case it has reached the eof
+            OC_ASSERT(false,
+                      "ERROR: Input file inconsistent: the %uth row has a "
+                      "different number of columns than the rest of the file.  "
+                      "All rows should have the same number of columns.\n",
+                      arity_fail_row.load());
+        }
+
+        // Infer type
+        boost::transform(types, tokens, types.begin(),
+                         infer_type_from_token2);
+    }
+
+    // Determine has_header
+    has_header = is_header(maybe_header, types);
+
+    // Determine type signature
+    if (has_header) {
+        unsigned target_idx = 0;
+        if (!target_feature.empty()) {
+            auto target_it = std::find(maybe_header.begin(), maybe_header.end(),
+                                       target_feature);
+            OC_ASSERT(target_it != maybe_header.end(), "Target %s not found",
+                      target_feature.c_str());
+            target_idx = std::distance(maybe_header.begin(), target_it);
+        }
+        vector<unsigned> ignore_idxs =
+            get_indices(ignore_features, maybe_header);
+        type_node otype = types[target_idx];
+        vector<type_node> itypes;
+        for (unsigned i = 0; i < types.size(); ++i)
+            if (!boost::binary_search(ignore_idxs, i) && i != target_idx)
+                itypes.push_back(types[i]);
+        tt = gen_signature(itypes, otype);
+    } else {
+        // No header, the target is the first column
+        type_node otype = types[0];
+        types.erase(types.begin());
+        tt = gen_signature(types, otype);
+    }
+
+    in.seekg(beg);
+    in.clear();         // in case it has reached the eof
+    return in;
+}
+
+istream& istreamDenseTable(istream& in, Table& tab,
+                           const string& target_feature,
+                           const vector<string>& ignore_features,
+                           const type_tree& tt, bool has_header)
+{
+    OC_ASSERT(has_header
+              || (target_feature.empty() && ignore_features.empty()),
+              "If the data file has no header, "
+              "then a target feature or ignore features cannot be specified");
+
+    // determine target index and ignore feature indexes
+    unsigned target_idx = 0;
+    vector<unsigned> ignore_idxs;
+    if (has_header) {
+        string line;
+        get_data_line(in, line);
+        vector<string> header = tokenizeRow<string>(line);
+        if (!target_feature.empty()) {
+            auto target_it = std::find(header.begin(), header.end(),
+                                       target_feature);
+            OC_ASSERT(target_it != header.end(), "Target %s not found",
+                      target_feature.c_str());
+            target_idx = std::distance(header.begin(), target_it);
+        }
+        ignore_idxs = get_indices(ignore_features, header);
+
+        // get input and output labels from the header
+        auto iolabels = tokenizeRowIO<string>(line, ignore_idxs, target_idx);
+        tab.itable.set_labels(iolabels.first);
+        tab.otable.set_label(iolabels.second);
+    }
+
+    return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt);
+}
+
+istream& istreamDenseTable_noHeader(istream& in, Table& tab,
+                                    unsigned target_idx,
+                                    const vector<unsigned>& ignore_idxs,
+                                    const type_tree& tt) {
+    // Get the entire dataset into memory (cleaning weird stuff)
+    string line;
+    std::vector<string> lines;
+    while (get_data_line(in, line))
+        lines.push_back(line);
+
+    // Allocate all rows in the itable and otable
+    tab.itable.resize(lines.size());
+    tab.otable.resize(lines.size());
+
+    // Get the elementary io types
+    vector<type_node> itypes =
+        vector_comp(get_signature_inputs(tt), get_type_node);
+    type_node otype = get_type_node(get_signature_output(tt));
+
+    // Assign the io type to the table
+    tab.itable.set_types(itypes);
+    tab.otable.set_type(otype);
+
+    // Instantiate type convertion for inputs
+    from_tokens_visitor ftv(itypes);
+
+    // Function to parse each line (to be called in parallel)
+    auto parse_line = [&](unsigned i) {
+        auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
+        tab.itable[i] = ftv(tokenIO.first);
+        tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+    };
+
+    // Call it for each line in parallel
+    auto ir = boost::irange((size_t)0, lines.size());
+    vector<size_t> row_idxs(ir.begin(), ir.end());
+    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
+
+    // Assign the target position relative to the ignored indices
+    // (useful for writing that file back)
+    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
+                                                  arg1 < target_idx);
 
     return in;
 }
@@ -795,43 +1017,16 @@ std::istream& istreamCTable(std::istream& in, CTable& ctable)
     return in;
 }
 
-/**
- * istream. If the file name is not correct then an OC_ASSERT is
- * raised.
- */
-Table loadTable(const string& file_name,
-                const string& target_feature,
-                const vector<string>& ignore_features)
+Table loadTable(const std::string& file_name,
+                const std::string& target_feature,
+                const std::vector<std::string>& ignore_features)
 {
     OC_ASSERT(!file_name.empty(), "the file name is empty");
     ifstream in(file_name.c_str());
     OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
 
     Table res;
-    istreamTable(in, res, target_feature, ignore_features);
-    return res;
-}
-
-/**
- * Like loadTable but ignore the features head on instead of loading
- * then removing them.
- *
- * Warning: only works on dense datasets with header.
- */
-Table loadTable_optimized(const string& file_name,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    // determined ignore_indices
-    vector<unsigned> ignore_indices = get_indices(ignore_features,
-                                                  get_header(file_name));
-
-    Table res;
-    istreamTable_ignore_indices(in, res, target_feature, ignore_indices);
+    istreamTable_NEW(in, res, target_feature, ignore_features);
     return res;
 }
 
@@ -944,6 +1139,11 @@ ostream& operator<<(ostream& out, const OTable& ot)
     for (const vertex& v : ot)
         out << table_fmt_vertex_to_str(v) << endl;
     return out;
+}
+
+ostream& operator<<(ostream& out, const Table& table)
+{
+    return ostreamTable(out, table);
 }
 
 ostream& operator<<(ostream& out, const complete_truth_table& tt)

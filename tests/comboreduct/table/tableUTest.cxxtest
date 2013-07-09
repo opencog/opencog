@@ -35,17 +35,11 @@ class tableUTest : public CxxTest::TestSuite
 {
 private:
     void testIStreamTable(const string& ts, ITable& it, OTable& ot,
-                          bool has_header, const type_tree& tt,
+                          bool has_header,
                           const string& target_feature = string(),
                           const vector<string>& ignore_features = vector<string>())
     {
         std::cout << "\n----------------------------" << std::endl;
-
-        // table compare will fail if the types don't match up.
-        ot.set_type(get_type_node(get_signature_output(tt)));
-        vector<type_node> isig;
-        boost::transform(get_signature_inputs(tt), back_inserter(isig), get_type_node);
-        it.set_types(isig);
 
         stringstream ss(ts);
         Table tab;
@@ -76,31 +70,29 @@ public:
     {
         vertex_seq o{id::logical_true, id::logical_false};
         OTable ot(o);
-        ITable it;
+        ITable it(vector<type_node>(2, id::boolean_type));
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
         testIStreamTable("1,1,0\n"
-                         "0,0,1\n", it, ot, false,
-                         gen_signature(id::boolean_type, 2));
+                         "0,0,1\n", it, ot, false);
     }
 
     void test_ContinTable()
     {
         vertex_seq o{10.1, 6.5};
         OTable ot(o);
-        ITable it;
+        ITable it(vector<type_node>(2, id::contin_type));
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
         testIStreamTable("10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, false,
-                         gen_signature(id::contin_type, 2));
+                         "6.5,9.5,4.2\n", it, ot, false);
     }
 
     void test_ContinTable_type_inference()
     {
         vertex_seq o{0, 1, 10.1, 6.5};
         OTable ot(o);
-        ITable it;
+        ITable it(vector<type_node>(2, id::contin_type));
         it.push_back({1.0, 1.0});
         it.push_back({0.0, 1.0});
         it.push_back({0.4, 244.2});
@@ -108,15 +100,14 @@ public:
         testIStreamTable("0,1,1\n"
                          "1,0,1\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, false,
-                         gen_signature(id::contin_type, 2));
+                         "6.5,9.5,4.2\n", it, ot, false);
     }
 
     void test_ContinTableLabels()
     {
         vertex_seq o{0, 10.1, 6.5};
         OTable ot(o, olabel);
-        ITable it;
+        ITable it(vector<type_node>(2, id::contin_type));
         it.push_back({1.0, 1.0});
         it.push_back({0.4, 244.2});
         it.push_back({9.5, 4.2});
@@ -125,36 +116,32 @@ public:
         testIStreamTable("happiness,price,temperature\n"
                          "0,1,1\n"
                          "10.1,0.4,244.2\n"
-                         "6.5,9.5,4.2\n", it, ot, true,
-                         gen_signature(id::contin_type, 2));
+                         "6.5,9.5,4.2\n", it, ot, true);
     }
 
     void test_EnumTableLabels()
     {
         vertex_seq o{enum_t("sad"), enum_t("bored"), enum_t("super-happy")};
         OTable ot(o, olabel);
-        ITable it;
+        vector<type_node> itypes({id::contin_type, id::contin_type, id::boolean_type});
+        vector<string> il{label1, label2, "truth"};
+        ITable it(itypes, il);
         it.push_back(vertex_seq({1, 1, id::logical_false}));
         it.push_back(vertex_seq({0.44, 244.2, id::logical_true}));
         it.push_back(vertex_seq({9.5, 4.2, id::logical_false}));
-        vector<string> il{label1, label2, "truth"};
-        it.set_labels(il);
-        vector<type_node> itypes({id::contin_type, id::contin_type, id::boolean_type});
         testIStreamTable("happiness,price,temperature,truth\n"
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
-                         "super-happy,9.5,4.2,F\n", it, ot, true,
-                         gen_signature(itypes, id::enum_type));
+                         "super-happy,9.5,4.2,F\n", it, ot, true);
     }
 
     void test_filterITable()
     {
         std::cout << "\n----------------------------" << std::endl;
-        ITable it;
+        vector<string> lbs{"truc" ,"trac"};
+        ITable it(vector<type_node>(2, id::boolean_type), lbs);
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
-        vector<string> lbs{"truc" ,"trac"};
-        it.set_labels(lbs);
         vertex_seq o{id::logical_true, id::logical_false,};
         // ignore second argument trac
         vector<arity_t> args{0};
@@ -177,14 +164,14 @@ public:
     void test_filterCTable()
     {
         std::cout << "\n----------------------------" << std::endl;
-        ITable it;
+        vector<type_node> ts(2, id::boolean_type);
+        vector<string> lbs{"truc" ,"trac"};
+        ITable it(ts, lbs);
         it.push_back({id::logical_true, id::logical_false});
         it.push_back({id::logical_false, id::logical_true});
-        vector<string> lbs{"truc" ,"trac"};
-        it.set_labels(lbs);
         vertex_seq o{id::logical_true, id::logical_false,};
         OTable ot(o, "troc");
-        Table table(ot, it, gen_signature(id::boolean_type, 2));
+        Table table(ot, it);
         // Generate CTable
         CTable ctable = table.compressed();
         // ignore second argument trac
@@ -205,16 +192,14 @@ public:
     {
         vertex_seq o{0.4, 9.5}; // price column
         OTable ot(o, label1);
-        ITable it;
+        vector<string> il{olabel};
+        ITable it(vector<type_node>({id::contin_type}), il);
         it.push_back({10.1});
         it.push_back({6.5});
-        vector<string> il{olabel};
-        it.set_labels(il);
 
         testIStreamTable("happiness,price,temperature\n"
                          "10.1,0.4,244.2\n"
                          "6.5,9.5,4.2\n", it, ot, true,
-                         gen_signature(id::contin_type, 1),
                          "price", {"temperature"});
     }
 
@@ -222,18 +207,16 @@ public:
     {
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
-        ITable it;
+        vector<string> il{olabel, "truth"};
+        vector<type_node> itypes({id::enum_type, id::boolean_type});
+        ITable it(itypes, il);
         it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
         it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
         it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
-        vector<string> il{olabel, "truth"};
-        it.set_labels(il);
-        vector<type_node> itypes({id::enum_type, id::boolean_type});
         testIStreamTable("happiness,price,temperature,truth\n"
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
                          "super-happy,9.5,4.2,F\n", it, ot, true,
-                         gen_signature(itypes, id::contin_type),
                          "price", {"temperature"});
     }
 
@@ -241,18 +224,16 @@ public:
     {
         vertex_seq o{1, 0.44, 9.5}; // price column
         OTable ot(o, label1);
-        ITable it;
+        vector<type_node> itypes({id::enum_type, id::boolean_type});
+        vector<string> il{olabel, "truth"};
+        ITable it(itypes, il);
         it.push_back(vertex_seq({enum_t("sad"), id::logical_false}));
         it.push_back(vertex_seq({enum_t("bored"), id::logical_true}));
         it.push_back(vertex_seq({enum_t("super-happy"), id::logical_false}));
-        vector<string> il{olabel, "truth"};
-        it.set_labels(il);
-        vector<type_node> itypes({id::enum_type, id::boolean_type});
         testIStreamTable("happiness,price,temperature,truth\n"
                          "sad,1,1,0\n"
                          "bored,0.44,244.2,T\n"
                          "super-happy,9.5,4.2,F\n", it, ot, true,
-                         gen_signature(itypes, id::contin_type),
                          // numeric values for these columns; the left-most is column 1
                          // so price is column 2...
                          // "price", {"temperature"});
@@ -264,14 +245,15 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target1";
         vector<string> ignore_features = {"a", "b", "c", "target2"};
-        Table tt = loadTable(tableUTest_dir + "sparse.data", target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "sparse.data",
+                             target_feature, ignore_features);
 
         testIStreamTable("target1,d,e,f,g,x,y,z\n"
                          "thing,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
                          "some,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
                          "other,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
                          "last,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-                         tt.itable, tt.otable, true, tt.tt);
+                         tt.itable, tt.otable, true);
     }
 
     void test_sparseFile2()
@@ -279,14 +261,15 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature = "target2";
         vector<string> ignore_features = {"a", "b", "c", "target1"};
-        Table tt = loadTable(tableUTest_dir + "sparse.data", target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "sparse.data",
+                             target_feature, ignore_features);
 
         testIStreamTable("target2,d,e,f,g,x,y,z\n"
                          "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
                          "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
                          "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
                          "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
-                         tt.itable, tt.otable, true, tt.tt);
+                         tt.itable, tt.otable, true);
     }
 
     void test_mutualInformation()
@@ -294,7 +277,8 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         vector<string> ignore_features;
-        Table tt = loadTable(tableUTest_dir + "dataset.csv", target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "dataset.csv",
+                             target_feature, ignore_features);
         set<arity_t> fs{0, 1};
         CTable ctt = tt.compressed();
         double mi = mutualInformation(ctt, fs);
@@ -307,7 +291,9 @@ public:
         std::cout << "\n----------------------------" << std::endl;
         string target_feature;
         vector<string> ignore_features;
-        Table tt = loadTable(tableUTest_dir + "dataset.csv", target_feature, ignore_features);
+        Table tt = loadTable(tableUTest_dir + "dataset.csv");
+
+        std::cout << "tt = " << tt << std::endl;
         set<arity_t> fs1{0};
         set<arity_t> fs2{1};
         CTable ctt = tt.compressed();

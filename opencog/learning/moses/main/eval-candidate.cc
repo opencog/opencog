@@ -400,8 +400,7 @@ int main(int argc, char** argv) {
     if (ecp.target_feature_str.empty())
         table.itable = loadITable_optimized(ecp.input_file);
     else {
-        table = loadTable_optimized(ecp.input_file,
-                                    ecp.target_feature_str);
+        table = loadTable(ecp.input_file, ecp.target_feature_str);
     }
 
     ITable& it = table.itable;

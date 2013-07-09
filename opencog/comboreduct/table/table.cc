@@ -70,7 +70,10 @@ string table_fmt_vertex_to_str(const vertex& v)
 
 ITable::ITable() {}
 
-ITable::ITable(const ITable::super& mat, vector<string> il)
+ITable::ITable(const vector<type_node>& ts, const vector<string>& il)
+    : types(ts), labels(il) {}
+
+ITable::ITable(const ITable::super& mat, const vector<string>& il)
     : super(mat), labels(il) {}
 
 ITable::ITable(const type_tree& tt, int nsamples,
@@ -416,12 +419,12 @@ contin_t OTable::root_mean_square_error(const OTable& ot) const
 
 Table::Table() : target_pos(0) {}
 
-Table::Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_)
-    : tt(tt_), itable(itable_), otable(otable_), target_pos(0) {}
+Table::Table(const OTable& otable_, const ITable& itable_)
+    : itable(itable_), otable(otable_), target_pos(0) {}
 
 Table::Table(const combo_tree& tr, int nsamples,
              contin_t min_contin, contin_t max_contin) :
-    tt(infer_type_tree(tr)), itable(tt, nsamples, min_contin, max_contin),
+    itable(infer_type_tree(tr), nsamples, min_contin, max_contin),
     otable(tr, itable), target_pos(0) {}
 
 vector<string> Table::get_labels() const
@@ -439,7 +442,7 @@ CTable Table::compressed() const
     logger().debug("Compress the dataset, current size is %d", itable.size());
     // ~Logger
 
-    CTable res(otable.get_label(), itable.get_labels(), tt);
+    CTable res(otable.get_label(), itable.get_labels(), get_signature());
 
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();
@@ -497,8 +500,6 @@ void Table::add_features_from_file(const string& input_file,
         vector<unsigned> features_pos = get_indices(features, full_header);
         // target position relative to full_header
         int full_target_pos = get_index(otable.get_label(), full_header);
-        if (full_target_pos == (int)full_header.size() - 1)
-            full_target_pos = -1; // the last one is denoted -1
 
         // Get the complement of features_pos
         vector<unsigned> features_pos_comp;
@@ -550,8 +551,8 @@ void Table::add_features_from_file(const string& input_file,
                         return l < full_target_pos && full_target_pos < r; });
                 target_pos = distance(new_header_pos.begin(), ++it);
             }
-        } else                  // target_pos is already at the 2
-                                // extremes no need to change it
+        } else                  // target_pos is already at the 0 or
+                                // -1 no need to change it
             OC_ASSERT(full_target_pos == target_pos, "smells a bug");
     }
 }

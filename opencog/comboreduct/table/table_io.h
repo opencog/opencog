@@ -201,7 +201,32 @@ std::vector<T> tokenizeRow(const std::string& line,
             res.push_back(boost::lexical_cast<T>(t));
     return res;
 }
-        
+
+/**
+ * Take a line and return a pair with vector containing the input
+ * elements and then output element.
+ */
+template<typename T>
+std::pair<std::vector<T>, T> tokenizeRowIO(const std::string& line,
+                                           const std::vector<unsigned>& ignored_indices = empty_unsigned_vec,
+                                           unsigned target_idx = 0)
+{
+    std::pair<std::vector<T>, T> res;
+    table_tokenizer tok = get_row_tokenizer(line);
+    unsigned i = 0;
+    for (const std::string& t : tok) {
+        if (!boost::binary_search(ignored_indices, i)) {
+            T el = boost::lexical_cast<T>(t);
+            if (target_idx == i)
+                res.second = el;
+            else
+                res.first.push_back(el);
+        }
+        i++;
+    }
+    return res;
+}
+
 //////////////////
 // istreamTable //
 //////////////////
@@ -229,24 +254,48 @@ std::istream& istreamCTable(std::istream& in, CTable& ctable);
  */
 OTable loadOTable(const std::string& file_name,
                   const std::string& target_feature);
-        
+
+// TODO: reimplement loadITable with the same model of loadTable and
+// remove loadITable_optimized
 ITable loadITable(const std::string& file_name,
                   const std::vector<std::string>& ignore_features
                   = empty_string_vec);
-
-Table loadTable(const std::string& file_name,
-                const std::string& target_feature,
-                const std::vector<std::string>& ignore_features
-                = empty_string_vec);
 
 ITable loadITable_optimized(const std::string& file_name,
                             const std::vector<std::string>& ignore_features
                             = empty_string_vec);
 
-Table loadTable_optimized(const std::string& file_name,
-                          const std::string& target_feature,
-                          const std::vector<std::string>& ignore_features
-                          = empty_string_vec);
+/**
+ * If target_feature is empty then, in case there is no header, it is
+ * assumed to be the first feature.
+ */
+Table loadTable(const std::string& file_name,
+                const std::string& target_feature = std::string(),
+                const std::vector<std::string>& ignore_features
+                = empty_string_vec);
+
+type_node infer_type_from_token2(type_node curr_guess, const std::string& token);
+
+/**
+ * maxline is the maximum number of lines to read to infer the
+ * attributes. A negative number means reading all lines.
+ */
+std::istream& inferTableAttributes(std::istream& in,
+                                   const std::string& target_feature,
+                                   const std::vector<std::string>& ignore_features,
+                                   type_tree& tt,
+                                   bool& has_header, bool& is_sparse,
+                                   int maxline = 20);
+
+std::istream& istreamDenseTable(std::istream& in, Table& tab,
+                                const std::string& target_feature,
+                                const std::vector<std::string>& ignore_features,
+                                const type_tree& tt, bool has_header);
+
+std::istream& istreamDenseTable_noHeader(std::istream& in, Table& tab,
+                                         unsigned target_idx,
+                                         const std::vector<unsigned>& ignore_idxs,
+                                         const type_tree& tt);
 
 // WARNING: this implementation only supports boolean ctable!!!!
 CTable loadCTable(const std::string& file_name);
@@ -331,6 +380,8 @@ void subsampleTable(ITable& it, unsigned nsamples);
 std::ostream& operator<<(std::ostream& out, const ITable& it);
 
 std::ostream& operator<<(std::ostream& out, const OTable& ot);
+
+std::ostream& operator<<(std::ostream& out, const Table& table);
 
 std::ostream& operator<<(std::ostream& out, const CTable& ct);
 
