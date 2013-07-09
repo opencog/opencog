@@ -157,8 +157,8 @@ void read_eval_output_results(evalTableParameters& pa)
     if (pa.target_feature_str.empty())
         table.itable = loadITable_optimized(pa.input_table_file, ignore_variables);
     else {
-        table = loadTable_optimized(pa.input_table_file, pa.target_feature_str,
-                                    ignore_variables);
+        table = loadTable(pa.input_table_file, pa.target_feature_str,
+                          ignore_variables);
     }
 
     ITable& it = table.itable;
