@@ -752,7 +752,10 @@ struct Table
         if (target_pos > 0) {
             auto it = boost::adjacent_find(f, [&](int l, int r) {
                     return l < target_pos && target_pos < r; });
-            res.target_pos = distance(f.begin(), ++it);
+            if (it == f.end())  // it is at the end
+                res.target_pos = f.size();
+            else                // it is in between f
+                res.target_pos = distance(f.begin(), ++it);
         } else
             res.target_pos = target_pos;
 

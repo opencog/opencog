@@ -500,8 +500,6 @@ void Table::add_features_from_file(const string& input_file,
         vector<unsigned> features_pos = get_indices(features, full_header);
         // target position relative to full_header
         int full_target_pos = get_index(otable.get_label(), full_header);
-        if (full_target_pos == (int)full_header.size() - 1)
-            full_target_pos = -1; // the last one is denoted -1
 
         // Get the complement of features_pos
         vector<unsigned> features_pos_comp;
@@ -553,8 +551,8 @@ void Table::add_features_from_file(const string& input_file,
                         return l < full_target_pos && full_target_pos < r; });
                 target_pos = distance(new_header_pos.begin(), ++it);
             }
-        } else                  // target_pos is already at the 2
-                                // extremes no need to change it
+        } else                  // target_pos is already at the 0 or
+                                // -1 no need to change it
             OC_ASSERT(full_target_pos == target_pos, "smells a bug");
     }
 }
