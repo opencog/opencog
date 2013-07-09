@@ -1017,29 +1017,6 @@ std::istream& istreamCTable(std::istream& in, CTable& ctable)
     return in;
 }
 
-/**
- * Like loadTable but ignore the features head on instead of loading
- * then removing them.
- *
- * Warning: only works on dense datasets with header.
- */
-Table loadTable_optimized(const string& file_name,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
-{
-    OC_ASSERT(!file_name.empty(), "the file name is empty");
-    ifstream in(file_name.c_str());
-    OC_ASSERT(in.is_open(), "Could not open %s", file_name.c_str());
-
-    // determined ignore_indices
-    vector<unsigned> ignore_indices = get_indices(ignore_features,
-                                                  get_header(file_name));
-
-    Table res;
-    istreamTable_ignore_indices(in, res, target_feature, ignore_indices);
-    return res;
-}
-
 Table loadTable(const std::string& file_name,
                 const std::string& target_feature,
                 const std::vector<std::string>& ignore_features)
