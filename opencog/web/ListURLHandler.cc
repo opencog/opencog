@@ -51,7 +51,7 @@ void ListURLHandler::handleRequest( struct mg_connection *conn,
 {
     std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
     CogServer& cogserver = static_cast<CogServer&>(server());
-    Request* request = cogserver.createRequest("get-list");
+    Request* request = cogserver.createRequest("json-get-list");
     if (request == NULL) {
         WebModule::return500( conn, std::string("unknown request"));
         return;
