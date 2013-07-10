@@ -738,11 +738,16 @@ int moses_exec(int argc, char** argv)
 
         ("logical-perm-ratio",
          value<float>(&perm_ratio)->default_value(0.0),
-         "Defines how many pairs of literals constituting subtrees "
-         "op(L1 L2) are considered while creating the prototype of an "
-         "exemplar with boolean domain. It ranges from 0 to 1, 0 means "
-         "arity positive literals and arity pairs of literals, 1 means arity "
-         "positive literals and arity*(arity-1) pairs of literals.\n")
+         "When decorating boolean exemplars with knobs, this option "
+         "controls how many pairs of literals of the form op(L1 L2) are "
+         "created.  That is, such pairs are used to decorate the exemplar "
+         "tree. By default, N such pairs are created, where N is the "
+         "arity of the problem. Valid values for this option are in the "
+         "range of -1.0 to +1.0.  For negative values, the number of pairs "
+         "created are (1.0+r)*N where r is the value given in this option.  "
+         "For positive values, the number of pairs created is "
+         "(N + r*N*(N-2)). A larger number of pairs can lead to faster "
+         "solutions but can also result in over-training.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),

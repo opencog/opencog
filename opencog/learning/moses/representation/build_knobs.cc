@@ -488,8 +488,6 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
     if (max_pairs == 0)
         return;
 
-    lazy_random_selector randpair(max_pairs);
-
     // Actual number of pairs to create ...
     unsigned ps = perms.size(); // the actual number of arguments to consider
     size_t n_pairs = 0;
@@ -506,6 +504,7 @@ void build_knobs::sample_logical_perms(pre_it it, vector<combo_tree>& perms)
                          << " logical knob pairs to create: "<< n_pairs;
     }
 
+    lazy_random_selector randpair(max_pairs);
     dorepeat (n_pairs) {
         size_t i = randpair();
 
