@@ -718,9 +718,18 @@ struct Table
 
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
+
     size_t size() const { return itable.size(); }
+
     arity_t get_arity() const { return itable.get_arity(); }
-    type_tree get_signature() const {
+
+    // Return the types of the columns in the table.
+    // The type is returned as a lambda(input col types) -> output col type.
+    // This is computed on the fly each time, instead ov being
+    // stored with the object, so that RAM isn't wasted holding this 
+    // infrequently-needed info.
+    type_tree get_signature() const
+    {
         type_tree tt(id::lambda_type);
         auto root = tt.begin();
         for (type_node tn : itable.get_types())
