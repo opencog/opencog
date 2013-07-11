@@ -685,70 +685,73 @@ void reduce_plus_times_one_child::operator()(combo_tree& tr,combo_tree::iterator
 //there would be a conflict with the rule log(c/x) -> -log((1/c)*x)
 void reduce_sum_log::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
-    if(*it==id::plus) {
-        sib_it first_log = it.find_child(id::log);
-        if(first_log != it.end()) {
-            OC_ASSERT(first_log.has_one_child(),
-                      "combo_tree node should have exactly one child.");
-            pre_it num = first_log.begin(); //sibling at the numerator of div
-            pre_it denom = tr.end(); //sibling at the denominator of div
-            pre_it num_times = tr.end(); //times at the numerator
-            pre_it denom_times = tr.end(); //times at the denominator
-            for(sib_it sib=it.begin(); sib!=it.end();) {
-                //detect log(x) to add to log(prod x_i)
-                if(*sib == id::log && sib != first_log) {
-                    OC_ASSERT(sib.has_one_child(), 
-                              "combo_tree sibiling node should have exactly one child.");
-                    if(num_times == tr.end())
-                        num_times = tr.wrap(num, id::times);
-                    tr.move_after(num, pre_it(sib.begin()));
+    if (*it != id::plus)
+        return;
+
+    sib_it first_log = it.find_child(id::log);
+    if (first_log == it.end())
+        return;
+
+    OC_ASSERT(first_log.has_one_child(),
+              "combo_tree node should have exactly one child.");
+    pre_it num = first_log.begin(); // sibling at the numerator of div
+    pre_it denom = tr.end(); // sibling at the denominator of div
+    pre_it num_times = tr.end(); // times at the numerator
+    pre_it denom_times = tr.end(); // times at the denominator
+    for (sib_it sib = it.begin(); sib != it.end();) {
+        // detect log(x) to add to log(prod x_i)
+        if (*sib == id::log && sib != first_log) {
+            OC_ASSERT(sib.has_one_child(), 
+                      "combo_tree sibiling node should have exactly one child.");
+            if (num_times == tr.end())
+                num_times = tr.wrap(num, id::times);
+            tr.move_after(num, pre_it(sib.begin()));
+            sib = tr.erase(sib);
+        }
+        else if (*sib==id::times && sib.number_of_children()==2) {
+            // check if there is -1*log
+            sib_it minus1 = sib.end();
+            sib_it log = sib.end();
+            bool is_minus_log = (minus1 != sib.end() && log != sib.end());//false
+            for (sib_it times_child = sib.begin();
+                times_child != sib.end() && !is_minus_log; ++times_child) {
+                if (minus1 == sib.end())
+                    if (is_contin(*times_child) && get_contin(*times_child) == -1.0)
+                        minus1 = times_child;
+                if (log == sib.end())
+                    if (*times_child == id::log)
+                        log = times_child;
+                is_minus_log = (minus1 != sib.end() && log != sib.end());
+            }
+            if (is_minus_log) { // there is -1*log
+                if (denom == tr.end()) {
+                    OC_ASSERT(first_log.has_one_child(),
+                              "combo_tree node should have exactly one child");
+                    pre_it tmp_child_log = first_log.begin();
+                    pre_it div_node = tr.wrap(tmp_child_log, id::div);
+                    OC_ASSERT(div_node.has_one_child(),
+                              "combo_tree sibiling node should have exactly one child");
+                    // below cannot be replaced by move_before because it has
+                    // to be the second argument of div, i.e. the denominator
+                    denom = tr.move_after(div_node.begin(), log.begin());
                     sib = tr.erase(sib);
                 }
-                else if(*sib==id::times && sib.number_of_children()==2) {
-                    //check if there is -1*log
-                    sib_it minus1 = sib.end();
-                    sib_it log = sib.end();
-                    bool is_minus_log = (minus1 != sib.end() && log != sib.end());//false
-                    for(sib_it times_child=sib.begin();
-                        times_child!=sib.end() && !is_minus_log; ++times_child) {
-                        if(minus1 == sib.end())
-                            if(is_contin(*times_child) && get_contin(*times_child)==-1.0)
-                                minus1 = times_child;
-                        if(log == sib.end())
-                            if(*times_child==id::log)
-                                log = times_child;
-                        is_minus_log = (minus1 != sib.end() && log != sib.end());
+                else {
+                    if (denom_times == tr.end()) {
+                        denom_times = tr.wrap(denom, id::times);
                     }
-                    if(is_minus_log) { //there is -1*log
-                        if(denom == tr.end()) {
-                            OC_ASSERT(first_log.has_one_child(),
-                                      "combo_tree node should have exactly one child");
-                            pre_it tmp_child_log = first_log.begin();
-                            pre_it div_node = tr.wrap(tmp_child_log, id::div);
-                            OC_ASSERT(div_node.has_one_child(),
-                                      "combo_tree sibiling node should have exactly one child");
-                            //below cannot be replace by move_before because it has
-                            //to be the second argument of div, i.e. the denominator
-                            denom = tr.move_after(div_node.begin(), log.begin());
-                            sib = tr.erase(sib);
-                        }
-                        else {
-                            if(denom_times == tr.end()) {
-                                denom_times = tr.wrap(denom, id::times);
-                            }
-                            OC_ASSERT(log.has_one_child(),
-                                      "combo_tree node (log) should have exactly one child");
-                            tr.move_after(denom, pre_it(log.begin()));
-                            sib = tr.erase(sib);
-                        }
-                    }
-                    else ++sib;
+                    OC_ASSERT(log.has_one_child(),
+                              "combo_tree node (log) should have exactly one child");
+                    tr.move_after(denom, pre_it(log.begin()));
+                    sib = tr.erase(sib);
                 }
-                else ++sib;
             }
+            else ++sib;
         }
+        else ++sib;
     }
 }
+
   
 //log(c/x) -> -log(c^1*x)
 //and also
