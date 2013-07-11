@@ -945,9 +945,9 @@ void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const
 }
 #endif
   
-//sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
-//or more generally
-//sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
+// sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
+// or more generally
+// sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
 void reduce_sin::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::sin)
@@ -977,13 +977,17 @@ void reduce_sin::operator()(combo_tree& tr, combo_tree::iterator it) const
     else if (is_contin(*sin_child))
         c_it = sin_child;
 
+    // Put the constant term into the range (-PI, PI]
     if (c_it != tr.end()) {
         OC_ASSERT(is_contin(*c_it),
                   "sin_child isn't of type contin (reduce_sin).");
         contin_t c = get_contin(*c_it);
-        OC_ASSERT(isfinite(c),
-                  "contin isn't finite (reduce_sin).");
-        if (c <= PI || c > PI)
+        if (not isfinite(c)) {
+            tr.erase_children(it);
+            *it = FP_NAN;
+            return;
+        }
+        if (c <= -PI || c > PI)
             *c_it = fmod((c+PI), 2.0*PI) - PI;
     }
 }
