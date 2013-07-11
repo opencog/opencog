@@ -47,10 +47,6 @@ IF (CXXTEST_FOUND)
 			ADD_SUBDIRECTORY (viterbi)
 		ENDIF (HAVE_VITERBI)
 
-		IF (HAVE_PLN)
-			ADD_SUBDIRECTORY (reasoning)
-		ENDIF (HAVE_PLN)
-
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)
@@ -72,6 +68,7 @@ IF (CXXTEST_FOUND)
 
 	# learning requires a working comboreduct.
 	ADD_SUBDIRECTORY (learning)
+	ADD_SUBDIRECTORY (reasoning)
 
 	# Embodiment requires that learning, reasoning, spatial, etc.
 	# all works fine. So run this last.

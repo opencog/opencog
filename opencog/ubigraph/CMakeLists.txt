@@ -1,9 +1,15 @@
 SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 
+IF (HAVE_PLN)
+	SET(BITUBI BITUbigrapher)
+ENDIF (HAVE_PLN)
+
+
 ADD_LIBRARY (ubigraph SHARED
     UbigraphModule
     Ubigrapher
     client
+	${BITUBI}
 )
 
 INCLUDE_DIRECTORIES (
