@@ -2,6 +2,7 @@
  * opencog/comboreduct/reduct/contin_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2013 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Nil Geisweiller
@@ -31,15 +32,25 @@ namespace opencog { namespace reduct {
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
 
-//x+0 -> x
-void reduce_plus_zero::operator()(combo_tree& tr,combo_tree::iterator it) const
+// x+0 -> x
+// x*NAN -> NAN
+void reduce_plus_zero::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::plus)
         return;
 
     for (sib_it sib = it.begin(); sib != it.end();) {
-        if (is_contin(*sib) && get_contin(*sib) == 0.0) {
-            sib = tr.erase(sib);
+        if (is_contin(*sib)) {
+            contin_t c = get_contin(*sib);
+            if (0.0 == c) {
+                sib = tr.erase(sib);
+            }
+            else if (not isfinite(c)) {
+                tr.erase_children(it);
+                *it = FP_NAN;
+                return;
+            }
+            else ++sib;
         }
         else ++sib;
     }
@@ -50,7 +61,7 @@ void reduce_plus_zero::operator()(combo_tree& tr,combo_tree::iterator it) const
 // x*1 -> x
 // x*0 -> 0
 // x*NAN -> NAN
-void reduce_times_one_zero::operator()(combo_tree& tr,combo_tree::iterator it) const
+void reduce_times_one_zero::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::times)
         return;
