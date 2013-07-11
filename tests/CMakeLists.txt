@@ -47,6 +47,10 @@ IF (CXXTEST_FOUND)
 			ADD_SUBDIRECTORY (viterbi)
 		ENDIF (HAVE_VITERBI)
 
+		IF (HAVE_PLN)
+			ADD_SUBDIRECTORY (reasoning)
+		ENDIF (HAVE_PLN)
+
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)
@@ -62,11 +66,6 @@ IF (CXXTEST_FOUND)
 	IF (HAVE_ATTENTION)
 		ADD_SUBDIRECTORY (dynamics)
 	ENDIF (HAVE_ATTENTION)
-
-#	# currently, does not depend on atomspace...
-#	IF (HAVE_PLN)
-#		ADD_SUBDIRECTORY (reasoning)
-#	ENDIF (HAVE_PLN)
 
 	# currently, does not depend on atomspace...
 	ADD_SUBDIRECTORY (comboreduct)
