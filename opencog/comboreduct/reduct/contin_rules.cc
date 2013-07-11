@@ -885,40 +885,43 @@ void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
 //sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
 //or more generally
 //sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
-void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::sin) {
-        OC_ASSERT(it.has_one_child(),
-                  "combo_tree node id::sin should have exactly one child (reduce_sin).");
-        pre_it c_it = tr.end();
-        pre_it sin_child = it.begin();
-        if(*sin_child==id::plus) {
-            OC_ASSERT(!sin_child.is_childless(), 
-                      "combo_tree node id::plus should no be childless (reduce_sin).");
-            for(sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
-                if(is_contin(*sib)) {
-                    if(c_it == tr.end()) {
-                        c_it = sib;
-                        ++sib;
-                    }
-                    else {
-                        *c_it = get_contin(*c_it) + get_contin(*sib);
-                        sib = tr.erase(sib);
-                    }
+void reduce_sin::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it != id::sin)
+        return;
+
+    OC_ASSERT(it.has_one_child(),
+              "combo_tree node id::sin should have exactly one child (reduce_sin).");
+    pre_it c_it = tr.end();
+    pre_it sin_child = it.begin();
+    if (*sin_child == id::plus) {
+        OC_ASSERT(!sin_child.is_childless(), 
+                  "combo_tree node id::plus should not be childless (reduce_sin).");
+        for (sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
+            if (is_contin(*sib)) {
+                if (c_it == tr.end()) {
+                    c_it = sib;
+                    ++sib;
                 }
-                else ++sib;
+                else {
+                    *c_it = get_contin(*c_it) + get_contin(*sib);
+                    sib = tr.erase(sib);
+                }
             }
+            else ++sib;
         }
-        else if(is_contin(*sin_child))
-            c_it = sin_child;
-        if(c_it!=tr.end()) {
-            OC_ASSERT(is_contin(*c_it),
-                      "sin_child isn't of type contin (reduce_sin).");
-            contin_t c = get_contin(*c_it);
-            OC_ASSERT(isfinite(c),
-                      "contin isn't finite (reduce_sin).");
-            if(c <= PI || c > PI)
-                *c_it = fmod((c+PI), 2.0*PI) - PI;
-        }
+    }
+    else if (is_contin(*sin_child))
+        c_it = sin_child;
+
+    if (c_it != tr.end()) {
+        OC_ASSERT(is_contin(*c_it),
+                  "sin_child isn't of type contin (reduce_sin).");
+        contin_t c = get_contin(*c_it);
+        OC_ASSERT(isfinite(c),
+                  "contin isn't finite (reduce_sin).");
+        if (c <= PI || c > PI)
+            *c_it = fmod((c+PI), 2.0*PI) - PI;
     }
 }
 
