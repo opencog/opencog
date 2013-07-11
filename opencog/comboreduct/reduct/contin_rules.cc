@@ -959,6 +959,9 @@ void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const
 // sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
 // or more generally
 // sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
+//
+// TODO:  sin(*(-1 x)) -> -sin(x)
+// The above is frequently seen in real-life ...
 void reduce_sin::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     if (*it != id::sin)
