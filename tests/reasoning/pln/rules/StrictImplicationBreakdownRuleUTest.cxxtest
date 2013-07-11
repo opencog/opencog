@@ -28,6 +28,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/foreach.h>
+#include <opencog/util/numeric.h>
 
 #include <boost/assign/list_of.hpp>
 

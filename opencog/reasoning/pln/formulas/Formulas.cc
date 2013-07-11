@@ -18,14 +18,16 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <assert.h>
+#include <memory>
+#include <algorithm>
+
+#include <opencog/util/numeric.h>
 
 #include "../PLN.h"
 #include "FormulasIndefinite.h"
 #include "Formulas.h"
 #include "../PLNUtils.h"
-#include <assert.h>
-#include <memory>
-#include <algorithm>
 
 using namespace std;
 

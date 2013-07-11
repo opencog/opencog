@@ -11,6 +11,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
+
+#include <opencog/cython/PyIncludeWrapper.h>
 #include <opencog/cython/logic_wrapper_api.h>
 
 #include <boost/filesystem.hpp>
@@ -184,7 +186,7 @@ bool runSCMTargets(string testDir, bool test_bc) {
               dir != end; ++dir) {
             // ignore directories and hidden files beginning with "."
             if (!is_directory(dir->status()) &&
-                    dir->path().filename()[0] != '.') {
+                    dir->path().filename().string()[0] != '.') {
                 string filename(dir->path().string());
                 Btr<PLNTest> _test = setupSCMTarget(filename.c_str(), test_bc);
                 if (_test) {
@@ -250,7 +252,7 @@ Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc) {
         //! @todo sigh. why doesn't this work?
         //if (equivalent(dir->path(), conf_filename))
         if (dir->path().filename() == conf_filename.filename())
-            conf_file = dir->path().file_string();
+            conf_file = dir->path().filename().string();
     }
 
     //! @todo
@@ -272,10 +274,10 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
     import_logic_wrapper();
     //python_pln_fc(cogserver().getAtomSpace());
     //python_pln_fc();
-    Handle eh = python_pln_bc(cogserver().getAtomSpace(), t->target_handle);
+    Handle eh = python_pln_bc(&cogserver().getAtomSpace(), t->target_handle);
     PyGILState_Release(gstate); 
 
-    TruthValuePtr etv = cogserver().getAtomSpace()->getTV(eh, NULL_VERSION_HANDLE);
+    TruthValuePtr etv = cogserver().getAtomSpace().getTV(eh, NULL_VERSION_HANDLE);
 
     if (*etv != TruthValue::NULL_TV()) {
         /* Print resulting truth value compared to test requirements */

@@ -19,12 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include  <boost/foreach.hpp>
 
 #include "AtomSpaceWrapper.h"
 
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/XMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
@@ -34,7 +36,6 @@
 #include <opencog/util/tree.h>
 #include <opencog/util/algorithm.h>
 
-#include  <boost/foreach.hpp>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -1430,7 +1431,7 @@ bool AtomSpaceWrapper::isType(const pHandle h) const
 
 const TimeServer& AtomSpaceWrapper::getTimeServer() const
 {
-    return atomspace->getTimeServer();
+    return timeServer();
 }
 
 int AtomSpaceWrapper::getArity(pHandle h) const
