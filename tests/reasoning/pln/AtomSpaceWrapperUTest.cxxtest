@@ -48,7 +48,7 @@ public:
 
         // This is also necessary to make sure that the ASW is initialized
         // at the right time.
-        asw = ASW(cogserver.getAtomSpace());
+        asw = ASW(&cogserver.getAtomSpace());
     }
 
     void setUp()
@@ -125,8 +125,8 @@ public:
         vhpair rl1 = asw->fakeToRealHandle(l1);
 
         CogServer& cogserver = static_cast<CogServer&>(server());
-        HandleSeq realIncoming_h1 = cogserver.getAtomSpace()->getIncoming(rh1.first);
-        HandleSeq realOutgoing_l1 = cogserver.getAtomSpace()->getOutgoing(rl1.first);
+        HandleSeq realIncoming_h1 = cogserver.getAtomSpace().getIncoming(rh1.first);
+        HandleSeq realOutgoing_l1 = cogserver.getAtomSpace().getOutgoing(rl1.first);
 
         pHandleSeq plnIn_h1 = asw->getIncoming(h1);
         pHandleSeq plnOut_l1 = asw->getOutgoing(l1);
