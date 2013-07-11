@@ -22,10 +22,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/reasoning/pln/rules/auxiliary/IntensionalInheritanceRule.h>
 
 #include <algorithm>
 #include <boost/assign/list_of.hpp>
+#include <opencog/util/numeric.h>
+#include <opencog/reasoning/pln/rules/auxiliary/IntensionalInheritanceRule.h>
 
 using namespace opencog;
 using namespace pln;

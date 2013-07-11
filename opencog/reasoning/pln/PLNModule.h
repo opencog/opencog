@@ -47,7 +47,7 @@ private:
     static const char* usageInfo;
 
     DECLARE_CMD_REQUEST(PLNModule, "pln", do_pln, 
-        "Run a PLN command",usageInfo, false); 
+        "Run a PLN command", usageInfo, false, false); 
 
     Factory<BackChainingAgent, Agent> backChainingFactory;
     Factory<ForwardChainingAgent, Agent> forwardChainingFactory;
