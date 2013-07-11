@@ -882,19 +882,21 @@ void reduce_exp_div::operator()(combo_tree& tr,combo_tree::iterator it) const
     OC_ASSERT(it.number_of_children() == 2,
               "combo_tree node should have exactly two childrem (reduce_exp_div).");
     pre_it denom = it.last_child();
-    if (*denom == id::exp) {
-        *it = id::times;
-        OC_ASSERT(denom.has_one_child(),
-                  "combo_tree node should have exactly one child (reduce_exp_times - demon).");
-        pre_it y = denom.begin();
-        if(*y == id::times) {
-            OC_ASSERT(!y.is_childless(),
-                      "combo_tree sibling node should have exactly one child (reduce_exp_times - y).");
-            y = y.begin();
-        }
-        else tr.insert_above(y, id::times);
-        tr.insert_after(y, -1.0);
+    if (*denom != id::exp)
+        return;
+
+    *it = id::times;
+    OC_ASSERT(denom.has_one_child(),
+              "combo_tree node should have exactly one child (reduce_exp_times - demon).");
+    pre_it y = denom.begin();
+    if (*y == id::times) {
+        OC_ASSERT(!y.is_childless(),
+                  "combo_tree sibling node should have exactly one child (reduce_exp_times - y).");
+        y = y.begin();
     }
+    else tr.insert_above(y, id::times);
+
+    tr.insert_after(y, -1.0);
 }
 
   
