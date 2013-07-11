@@ -56,6 +56,7 @@
 // This is a 3rd party tree template library
 #include <opencog/util/tree.h>
 
+#include <opencog/reasoning/pln/atom_types.h>
 #include "PLN.h"
 #include "FitnessEvaluator.h"
 

@@ -45,7 +45,7 @@
 #include "TestTargets.h"
 #include "ForwardChainer.h"
 
-#include <opencog/adaptors/tulip/TulipWriter.h>
+#include <opencog/persist/tulip/TulipWriter.h>
 
 using namespace opencog;
 using namespace opencog::pln;
@@ -150,7 +150,7 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
     
     // Make sure that the ASW is initialized on module load
-    AtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+    AtomSpaceWrapper* asw = ASW(&server().getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  

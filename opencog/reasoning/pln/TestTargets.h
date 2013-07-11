@@ -1,3 +1,6 @@
+
+#include <opencog/nlp/types/atom_types.h> // for WORD_NODE
+
 std::map<int, Btr<vtree > > tests;
 
 void initTests()
