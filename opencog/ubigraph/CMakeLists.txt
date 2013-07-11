@@ -1,9 +1,12 @@
 SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 
-IF (HAVE_PLN)
-	SET(BITUBI BITUbigrapher)
-	SET(PLN_LIB pln)
-ENDIF (HAVE_PLN)
+# Arghhh this results in a circular dependency between pln and ubigraph.
+# The solution is to move BITUbigrapher out of this directory, and over
+# to the PLN directory.
+#IF (HAVE_PLN)
+#	SET(BITUBI BITUbigrapher)
+#	SET(PLN_LIB pln)
+#ENDIF (HAVE_PLN)
 
 
 ADD_LIBRARY (ubigraph SHARED
