@@ -25,6 +25,9 @@
 #include <iostream>
 #include <cstdio>
 #include <string>
+
+#include <boost/shared_ptr.hpp>
+
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
@@ -41,6 +44,9 @@ using namespace opencog;
 
 namespace opencog {
 namespace pln {
+
+typedef boost::shared_ptr<TruthValue> TruthValuePtr;
+typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 typedef std::vector<TruthValuePtr> TVSeq;
 
