@@ -165,7 +165,7 @@ struct fs_scorer : public unary_function<FeatureSet, double>
         } else if (fs_params.scorer == pre) { // precision (see
             // opencog/learning/moses/scoring/scoring.h)
             _ptr_pre_scorer =
-                new pre_scorer<FeatureSet>(ctable,
+                new pre_scorer<FeatureSet>(ctable, fs_params.mi_confi,
                                            fs_params.pre_penalty,
                                            fs_params.pre_min_activation,
                                            fs_params.pre_max_activation,
