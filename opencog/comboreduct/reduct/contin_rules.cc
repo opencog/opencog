@@ -47,8 +47,9 @@ void reduce_plus_zero::operator()(combo_tree& tr,combo_tree::iterator it) const
         *it = 0.0;
 }
 
-//x*1 -> x
-//x*0 -> 0
+// x*1 -> x
+// x*0 -> 0
+// x*NAN -> NAN
 void reduce_times_one_zero::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
     if (*it != id::times)
@@ -440,7 +441,8 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const
     }
 }
     
-void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it == id::times && it.number_of_children() >= 2) {
         sib_it plus_it = std::find(it.begin(), it.end(), vertex(id::plus));
         if(plus_it != it.end()) {
@@ -477,9 +479,10 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
     }
 }
 
-//x/c -> 1/c * x
-//x/(c*y) -> 1/c *x/y
-//0/x -> 0
+// x/c -> 1/c * x
+// x/(c*y) -> 1/c *x/y
+// 0/x -> 0
+// x/0 -> NAN
 void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) const
 {
     if (*it != id::div) 
@@ -488,21 +491,27 @@ void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) 
     OC_ASSERT(it.number_of_children() == 2, 
               "combo_tree node should have exactly two children (reduce_invert_constant)." );
     sib_it sib = it.begin();
-    if (is_contin(*sib) && get_contin(*sib) == 0.0) { //0/x -> 0
+    if (is_contin(*sib) && get_contin(*sib) == 0.0) { // 0/x -> 0
         tr.erase_children(it);
         *it = 0.0;
         return;
     }
 
     ++sib;
-    if (is_contin(*sib)) { //x/c -> 1/c * x
+    if (is_contin(*sib)) { // x/c -> 1/c * x
         contin_t divisor = get_contin(*sib);
         if (divisor != 0.0) {
             *sib = 1.0 / divisor;
             *it = id::times;
+        } else {
+            // Divide by zero
+            tr.erase_children(it);
+            *it = FP_INFINITE;
         }
+        return;
     }
-    else if (*sib == id::times) { //x/(c*y) -> 1/c * x/y
+
+    if (*sib == id::times) { //x/(c*y) -> 1/c * x/y
         contin_t divisor = 1.0;
         for (sib_it mul_sib = sib.begin(); mul_sib != sib.end();) {
             if (is_contin(*mul_sib)) {
@@ -525,9 +534,14 @@ void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) 
                     tr.append_child(it, 1.0 / divisor);
                 }
             }
-            else tr.append_child(sib, divisor); //divisor is put back Ehhh!? its divide by zero!
+            else {
+                // Divide by zero
+                // tr.append_child(sib, divisor); //divisor is put back
+                tr.erase_children(it);
+                *it = FP_INFINITE;
+            }
         }
-        else if(sib.is_childless())
+        else if (sib.is_childless())
             *sib = 1.0;
     }
 }
