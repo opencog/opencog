@@ -432,7 +432,11 @@ unsigned hill_climbing::operator()(deme_t& deme,
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (!already_xover && !hc_params.widen_search) {
+                if (!already_xover
+                    // in the case we can widen the search check that
+                    // the max distance has been reached, otherwise,
+                    // it's not really a last_change
+                    && (!hc_params.widen_search || max_distance < distance)) {
                     last_chance = true;
                     continue;
                 }
