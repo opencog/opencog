@@ -475,9 +475,21 @@ size_t hill_climbing::estimate_neighborhood(size_t distance,
         return 1;
     
     const size_t nn_estimate = information_theoretic_bits(fields);
+
+    if (nn_estimate < distance) {
+        logger().warn("hill_climbing::estimate_neighborhood : "
+                      "the distance %u is greater than the "
+                      "theoretic bit field size %u. This could be a bug "
+                      "(but not necessarily due to corner cases "
+                      "and the fact that it's an approximation of the actual "
+                      "field size)", distance, nn_estimate);
+        distance = nn_estimate;
+    }
+
     if (distance == 1)
         return 2*nn_estimate; // be large given nn_estimate is only... an estimate
     else {  // more than one
+
         // Distances greater than 1 occurs only when the -L1 or
         // -T1 flags are used.  This puts this algo into a very
         // different mode of operation, in an attempt to overcome
