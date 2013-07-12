@@ -99,7 +99,7 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 
     // Define the demeIDs of the demes to be spawned
     vector<demeID_t> demeIDs;
-    if (_params.fstor->params.n_demes > 1) {
+    if (_params.fstor && _params.fstor->params.n_demes > 1) {
         for (unsigned i = 0; i < _params.fstor->params.n_demes; i++)
             demeIDs.emplace_back(n_expansions + 1, i);
     } else
