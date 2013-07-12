@@ -432,7 +432,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (!already_xover) {
+                if (!already_xover && !hc_params.widen_search) {
                     last_chance = true;
                     continue;
                 }
