@@ -204,8 +204,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
         prev_center = center_inst;
 
         auto deme_from = next(deme.begin(), current_number_of_instances);
-        auto deme_inst_from = next(deme.begin_instances(), current_number_of_instances);
-        auto deme_score_from = next(deme.begin_scores(), current_number_of_instances);
+        auto deme_inst_from = next(deme.begin_instances(),
+                                   current_number_of_instances);
+        auto deme_score_from = next(deme.begin_scores(),
+                                    current_number_of_instances);
 
         // log neighborhood distance
         if (logger().isDebugEnabled()) {
@@ -215,12 +217,14 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 // compute the min and max hamming distances between the
                 // center instance and the crossed-over instances
                 vector<int> dst_seq;
-                transform(deme_inst_from, deme.end_instances(), back_inserter(dst_seq),
-                          [&](const instance& inst) {
-                              return deme.fields().hamming_distance(inst, center_inst);
+                transform(deme_inst_from, deme.end_instances(),
+                          back_inserter(dst_seq), [&](const instance& inst) {
+                              return deme.fields().hamming_distance(inst,
+                                                                    center_inst);
                           });
                 auto pmm = boost::minmax_element(dst_seq.begin(), dst_seq.end());
-                nbh_dst << "from distance " << *pmm.first << " to " << *pmm.second;
+                nbh_dst << "from distance " << *pmm.first
+                        << " to " << *pmm.second;
             }
             else nbh_dst << "at distance " << distance;
 
