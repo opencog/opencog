@@ -1212,7 +1212,7 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     // so we just need to find out the first need-inquery one,
     // and only select variables by pattern matching for the states before
 
-    // find the last state in the list curUngroundedVariables, which needs no real-time inquery state , and not numeric
+    // find the last state in the list ParamCandidates, which needs no real-time inquery state , and not numeric
     int number_easy_state = 0;
     list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
     for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
@@ -1231,12 +1231,14 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 
     // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
 
-    // find all the canditates meet as many as possible preconditions, and put all the candidates in currentBindingsViaSelecting
+    // find all the canditates meet as many as possible preconditions, and put all the candidates in ParamCandidates
     // first, find from the easy state via selecting values from the Atomspace
 
     int n_max = number_easy_state;
     bool indexes[n_max];
 
+    // ToBeImproved: in fact we don't need to generate all the possible groups of candidates,
+    //               we can just allow it generateNextCandidates every time one group failed in a planning step
     // we generate the candidates by trying full combination calculation
     for (int n_gram = 1; n_gram <= n_max; n_gram ++)
     {
@@ -1250,6 +1252,8 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
         for (int i = n_gram; i <n_max; ++ i)
             indexes[i] = false;
 
+        vector<ParamGroundedMapInARule> tmpcandidates;
+
         while (true)
         {
             // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node
@@ -1262,24 +1266,25 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
                     indexesVector.push_back(x);
             }
             vector<string> varNames;
-            HandleSeq candidates = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
-            if (candidates.size() != 0)
+            HandleSeq candidateHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+
+            if (candidateHandles.size() != 0)
             {
-                // put each group of candidates in currentBindingsViaSelecting
-                // map<string, StateValue> ParamGroundedMapInARule
-                ParamGroundedMapInARule oneGroupCandidate;
+
                 int x = 0;
-                foreach (Handle h, candidates)
+                ParamGroundedMapInARule oneGroupCandidate;
+
+                foreach (Handle h, candidateHandles)
                 {
                     StateValue v = getStateValueFromHandle(varNames[x],h);
-                    oneGroupCandidate.insert(std::pair<string, StateValue>());
+                    oneGroupCandidate.insert(std::pair<string, StateValue>(varNames[x],v));
 
                     x ++;
                 }
 
+                tmpcandidates.push_back(oneGroupCandidate);
+
             }
-
-
 
             if (isLastNElementsAllTrue(indexes, n_max, n_gram))
                 break;
@@ -1288,7 +1293,19 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 
         }
 
+        // Finished n states grounding.
+        // Check all the need_real_time_inquery state with the already grounded values to sort the ParamCandidates.
+        // The more need_real_time_inquery states one group of candidates meets, the more front it is to be put in ParamCandidates
+
+        vector<ParamGroundedMapInARule>::iterator canit;
+        for (canit = tmpcandidates.begin(); canit != tmpcandidates.end(); ++ canit)
+        ruleNode->ParamCandidates.push_back(oneGroupCandidate);
+
+
     }
+
+    // Till now, all the easy states have been dealed with, now we need to
+
 
 }
 
