@@ -1171,15 +1171,16 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     // First, get all the non-need-real-time-inquery states as the conditions for mattern matching
     // if cannot find any solution, then remove the last condition. Repeat this, till only have one condition left
 
-    // Because the curUngroundedVariables list has already been in order, so we just need to find out the first need-inquery one,
+    // Because the curUngroundedVariables list has already been in the order easiness of grounding,
+    // so we just need to find out the first need-inquery one,
     // and only select variables by pattern matching for the states before
 
     // find the last state in the list curUngroundedVariables, which needs no real-time inquery state , and not numeric
-    int number_easy_state = -1;
+    int number_easy_state = 0;
     list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
     for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
     {
-        number_easy_state ++;
+
         if (((((UngroundedVariablesInAState&)(*uvIt)).state)->need_inquery )
                 || ((UngroundedVariablesInAState&)(*uvIt)).contain_numeric_var)
             break;
@@ -1187,10 +1188,11 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
         {
             // generate all the evaluationlink will be used to do pattern matching for each easy state
             ((UngroundedVariablesInAState&)(*uvIt)).PMLink = Inquery::generatePMLinkFromAState((((UngroundedVariablesInAState&)(*uvIt)).state), ruleNode);
+            number_easy_state ++;
         }
     }
 
-    // TODO: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
+    // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
     // currentBindingsViaSelecting
     // find all the canditates meet as many as possible preconditions
     // first try all the combinations of  these in the
@@ -1198,6 +1200,14 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 
     while (tryTotalStateNum > 0)
     {
+        // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node
+        // that will be used as conditions of patttern matching query in this function
+        vector<int> indexes;
+        for (int i = 0; i < 0; ++ i)
+            indexes.push_back(i);
+
+        HandleSeq candidates = Inquery::findCandidatesByPatternMatching(ruleNode);
+
         -- tryTotalStateNum;
     }
 

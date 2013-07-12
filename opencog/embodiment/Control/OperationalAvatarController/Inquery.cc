@@ -722,7 +722,6 @@ HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNo
 // return an EvaluationLink with variableNodes for using Pattern Matching
 Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
 {
-
     // Create evaluationlink used by pattern matcher
     Handle predicateNode = AtomSpaceUtil::addNode(*atomSpace,PREDICATE_NODE, state->name().c_str());
 
@@ -753,7 +752,6 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     return hEvalLink;
 
 }
-
 
 HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes)
 {
@@ -797,8 +795,10 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
     // Get result
     // Note: Don't forget remove the hResultListLink
-    std::vector<Handle> resultSet = atomSpace->getOutgoing(hResultListLink);
+    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
     atomSpace->removeAtom(hResultListLink);
+
+    return resultSet;
 
 
 }
