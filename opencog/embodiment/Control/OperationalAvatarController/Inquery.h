@@ -133,7 +133,9 @@ public:
     static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
 
     // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node that will be used as conditions of patttern matching query in this function
-    static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes);
+    static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
+
+    static StateValue getStateValueFromHandle(string var, Handle& valueH);
 
 };
 

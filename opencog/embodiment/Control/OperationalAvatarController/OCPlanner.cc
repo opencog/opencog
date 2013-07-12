@@ -1160,6 +1160,43 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
 }
 
 
+void generateNextCombination(bool *&indexes, int n_max)
+{
+    int trueCount = -1;
+    int i = 0;
+    for (; i < n_max - 1; ++ i)
+    {
+        if (indexes[i]   )
+        {
+            ++ trueCount;
+
+            if (! indexes[i+1])
+                break;
+        }
+    }
+
+    indexes[i] = false;
+    indexes[i+1] = true;
+
+    for (int j = 0; j < trueCount; ++ j)
+        indexes[j] = true;
+
+    for (int j = trueCount; j < i; ++ j)
+        indexes[j] = false;
+
+}
+
+bool isLastNElementsAllTrue(bool* array, int size, int n)
+{
+    for (int i = size - 1; i >= size - n; i --)
+    {
+        if (! array[i])
+            return false;
+    }
+
+    return true;
+}
+
 // this function should be called after groundARuleNodeFromItsForwardState
 bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 {
@@ -1193,22 +1230,64 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     }
 
     // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
-    // currentBindingsViaSelecting
-    // find all the canditates meet as many as possible preconditions
-    // first try all the combinations of  these in the
-    int tryTotalStateNum = number_easy_state;
 
-    while (tryTotalStateNum > 0)
+    // find all the canditates meet as many as possible preconditions, and put all the candidates in currentBindingsViaSelecting
+    // first, find from the easy state via selecting values from the Atomspace
+
+    int n_max = number_easy_state;
+    bool indexes[n_max];
+
+    // we generate the candidates by trying full combination calculation
+    for (int n_gram = 1; n_gram <= n_max; n_gram ++)
     {
-        // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node
-        // that will be used as conditions of patttern matching query in this function
-        vector<int> indexes;
-        for (int i = 0; i < 0; ++ i)
-            indexes.push_back(i);
 
-        HandleSeq candidates = Inquery::findCandidatesByPatternMatching(ruleNode);
+        // Use the binary method to generate all combinations:
 
-        -- tryTotalStateNum;
+        // generate the first combination
+        for (int i = 0; i < n_gram; ++ i)
+            indexes[i] = true;
+
+        for (int i = n_gram; i <n_max; ++ i)
+            indexes[i] = false;
+
+        while (true)
+        {
+            // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node
+            // that will be used as conditions of patttern matching query in this function
+            vector<int> indexesVector;
+
+            for (int x = 0; x < n_max; ++ x)
+            {
+                if (indexes[x])
+                    indexesVector.push_back(x);
+            }
+            vector<string> varNames;
+            HandleSeq candidates = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+            if (candidates.size() != 0)
+            {
+                // put each group of candidates in currentBindingsViaSelecting
+                // map<string, StateValue> ParamGroundedMapInARule
+                ParamGroundedMapInARule oneGroupCandidate;
+                int x = 0;
+                foreach (Handle h, candidates)
+                {
+                    StateValue v = getStateValueFromHandle(varNames[x],h);
+                    oneGroupCandidate.insert(std::pair<string, StateValue>());
+
+                    x ++;
+                }
+
+            }
+
+
+
+            if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+                break;
+
+            generateNextCombination(indexes, n_max);
+
+        }
+
     }
 
 }

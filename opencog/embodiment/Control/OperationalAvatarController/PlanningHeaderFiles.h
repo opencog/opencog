@@ -72,5 +72,7 @@ typedef opencog::pai::ParamValue StateValue;
 
      bool isAVariableNumeric(std::string var);
 
+     opencog::pai::ActionParamTypeCode GetVariableType(std::string var);
+
 }}
 #endif

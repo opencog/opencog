@@ -77,3 +77,36 @@ const StateValue SV_FALSE = "false";
 
  }
 
+ opencog::pai::ActionParamTypeCode GetVariableType(std::string var)
+ {
+     int pos = var.find("$int_var");
+     if (pos != std::string::npos)
+         return opencog::pai::INT_CODE;
+
+     pos = var.find("$float_var");
+     if (pos != std::string::npos)
+         return opencog::pai::FLOAT_CODE;
+
+     pos = var.find("$bool_var");
+     if (pos != std::string::npos)
+         return opencog::pai::BOOLEAN_CODE;
+
+     pos = var.find("$str_var");
+     if (pos != std::string::npos)
+         return opencog::pai::STRING_CODE;
+
+     pos = var.find('(');
+     if (pos != std::string::npos)
+     {
+         pos = var.find("$entity_var");
+         if (pos != std::string::npos)
+             return opencog::pai::ENTITY_CODE;
+         else
+             return opencog::pai::VECTOR_CODE;
+
+         // todo:currently we don't really try fuzzy_int, fuzzy_float and Rotation
+     }
+
+     return false;
+ }
+
