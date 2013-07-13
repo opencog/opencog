@@ -201,6 +201,20 @@ public:
 
 };
 
+struct TmpParamCandidate
+{
+   int satNum;
+   ParamGroundedMapInARule aGroupOfParmCandidate;
+   TmpParamCandidate(int _satNum, ParamGroundedMapInARule _aGroupOfParmCandidate):satNum(_satNum),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
+
+   bool operator < (const TmpParamCandidate& other) const
+   {
+       if (satNum < other.satNum)
+           return true;
+       else
+           return false;
+   }
+};
 
 class OCPlanner
 {
@@ -228,6 +242,9 @@ protected:
      OAC* oac;
 
      unsigned long curtimeStamp;
+
+     // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
+     HandleSeq imaginaryHandles;
 
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
@@ -287,6 +304,10 @@ protected:
      void findCandidateValuesByGA(RuleNode* ruleNode);
 
      void recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode);
+
+     // @ bool &found: return if this same state is found in temporaryStateNodes
+     // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
+     bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
      void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);

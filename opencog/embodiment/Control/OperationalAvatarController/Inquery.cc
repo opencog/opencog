@@ -267,41 +267,51 @@ OAC* Inquery::oac = 0;
 
 }
 
-static Inquery::StateValue getStateValueFromHandle(string var, Handle& valueH)
+StateValue Inquery::getStateValueFromHandle(string var, Handle& valueH)
 {
     switch (opencog::oac::GetVariableType(var))
     {
-    case ENTITY_CODE:
-        return Entity(atomSpace->getName(valueH) ,PAI::getObjectTypeFromHandle(*atomSpace, valueH));
-    case BOOLEAN_CODE:
-        string strVar = atomSpace->getName(valueH);
-        if ((strVar == "true")||(strVar == "True"))
-            return opencog::oac::SV_TRUE;
-        else
-            return opencog::oac::SV_FALSE;
-    case INT_CODE:
-    case FLOAT_CODE:
-    case STRING_CODE:
-        return (atomSpace->getName(valueH));
-    case VECTOR_CODE:
-        Handle valueHandle1 = atomSpace->getOutgoing(valueH, 0);// the ownerSize is just the index of the value node
-        Handle valueHandle2 = atomSpace->getOutgoing(valueH, 1);
-        Handle valueHandle3 = atomSpace->getOutgoing(valueH, 2);
-
-        if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
+        case ENTITY_CODE:
         {
-            logger().error("Inquery::getStateValueFromHandle :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink ");
+            return Entity(atomSpace->getName(valueH) ,PAI::getObjectTypeFromHandle(*atomSpace, valueH));
+        }
+        case BOOLEAN_CODE:
+        {
+            string strVar = atomSpace->getName(valueH);
+            if ((strVar == "true")||(strVar == "True"))
+                return opencog::oac::SV_TRUE;
+            else
+                return opencog::oac::SV_FALSE;
+        }
+        case INT_CODE:
+        case FLOAT_CODE:
+        case STRING_CODE:
+        {
+            return (atomSpace->getName(valueH));
+        }
+        case VECTOR_CODE:
+        {
+            Handle valueHandle1 = atomSpace->getOutgoing(valueH, 0);// the ownerSize is just the index of the value node
+            Handle valueHandle2 = atomSpace->getOutgoing(valueH, 1);
+            Handle valueHandle3 = atomSpace->getOutgoing(valueH, 2);
 
+            if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
+            {
+                logger().error("Inquery::getStateValueFromHandle :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink ");
+
+                return UNDEFINED_VALUE;
+            }
+
+            double x = atof(atomSpace->getName(valueHandle1).c_str());
+            double y = atof(atomSpace->getName(valueHandle2).c_str());
+            double z = atof(atomSpace->getName(valueHandle3).c_str());
+
+            return Vector(x,y,z);
+        }
+        default:
+        {
             return UNDEFINED_VALUE;
         }
-
-        double x = atof(atomSpace->getName(valueHandle1).c_str());
-        double y = atof(atomSpace->getName(valueHandle2).c_str());
-        double z = atof(atomSpace->getName(valueHandle3).c_str());
-
-        return Vector(x,y,z);
-    default:
-        return UNDEFINED_VALUE;
     }
 }
 
@@ -840,6 +850,5 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     atomSpace->removeAtom(hResultListLink);
 
     return resultSet;
-
 
 }

@@ -77,7 +77,7 @@ const StateValue SV_FALSE = "false";
 
  }
 
- opencog::pai::ActionParamTypeCode GetVariableType(std::string var)
+ opencog::pai::ActionParamTypeCode opencog::oac::GetVariableType(std::string var)
  {
      int pos = var.find("$int_var");
      if (pos != std::string::npos)
@@ -107,6 +107,6 @@ const StateValue SV_FALSE = "false";
          // todo:currently we don't really try fuzzy_int, fuzzy_float and Rotation
      }
 
-     return false;
+     return opencog::pai::NUMBER_OF_ACTION_PARAM_TYPES;
  }
 

@@ -32,7 +32,14 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
 
+#include <map>
+#include <math.h>
+#include <stdio.h>
+#include <sstream>
+
 using namespace opencog::oac;
+using namespace std;
+
 
 // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
 // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
@@ -70,6 +77,45 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
         if (state == (*it))
             return true;
     }
+
+    return false;
+}
+
+
+// @ bool &found: return if this same state is found in temporaryStateNodes
+// @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
+bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode)
+{
+    //  check if this state has beed satisfied by the previous state nodes
+    list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
+    float satisfiedDegree;
+
+    for (;vit != temporaryStateNodes.end(); vit ++)
+    {
+        // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
+        // but the latest one is put in the front, so we can just check the first one we find
+        State* vState = ((StateNode*)(*vit))->state;
+        if (vState->isSameState(goalState))
+        {
+            found = true;
+            satstateNode = ((StateNode*)(*vit));
+
+             if (vState->isSatisfied(goalState,satisfiedDegree))
+             {
+                 return true;
+             }
+             else
+             {
+                 return false;
+             }
+
+        }
+
+    }
+
+    // cannot find this state in temporaryStateNodes
+    found = false;
+    satstateNode = 0;
 
     return false;
 }
@@ -219,6 +265,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     unsatisfiedStateNodes.clear();
     temporaryStateNodes.clear();
+    imaginaryHandles.clear(); // TODO: Create imaginary atoms
 
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
@@ -694,49 +741,52 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             newStateNode->forwardEffectState = ps;
 
             // first check if this state has beed satisfied by the previous state nodes
-            list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
             bool found = false;
-            for (;vit != temporaryStateNodes.end(); vit ++)
+            StateNode* satStateNode;
+
+            bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode);
+
+            // if it's found in the temporaryStateNodes
+            if (found)
             {
-                // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
-                // but the latest one is put in the front, so we can just check the first one we find
-                State* vState = ((StateNode*)(*vit))->state;
-                if (vState->isSameState(*groundPs))
+                if (satByTemp)
                 {
-                     if (vState->isSatisfied(*groundPs,satisfiedDegree))
-                     {
-                         // the current state satisfied this precondition,
-                         // connect this precondition to the backward rule node of the state which satisfied this precondition
-                         found = true;
 
-                         RuleNode* backwardRuleNode = ((StateNode*)(*vit))->backwardRuleNode;
-                         if (backwardRuleNode)
-                         {
-                             ((StateNode*)(*vit))->backwardRuleNode->forwardLinks.insert(newStateNode);
-                             newStateNode->backwardRuleNode =  ((StateNode*)(*vit))->backwardRuleNode;
-                         }
+                    // the current state satisfied this precondition,
+                    // connect this precondition to the backward rule node of the state which satisfied this precondition
 
-                         // TODO: Need to check if there is any dependency loop,
-                         // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
-                         // it means two branches depend on each other. How to deal with this case?
+                    RuleNode* backwardRuleNode = satStateNode->backwardRuleNode;
+                    if (backwardRuleNode)
+                    {
+                        satStateNode->backwardRuleNode->forwardLinks.insert(newStateNode);
+                        newStateNode->backwardRuleNode =  satStateNode->backwardRuleNode;
+                    }
 
-                         break;
+                    // TODO: Need to check if there is any dependency loop,
+                    // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
+                    // it means two branches depend on each other. How to deal with this case?
 
-                         // not need to add it in the temporaryStateNodes list, because it has beed satisfied by the previous steps
-                     }
+                    // not need to add it in the temporaryStateNodes list, because it has beed satisfied by the previous steps
 
                 }
+                else
+                {
+                    // add it to unsatisfied list
+                    unsatisfiedStateNodes.push_front(newStateNode);
+                    if (newStateNode->backwardRuleNode)
+                        newStateNode->backwardRuleNode->negativeForwardLinks.insert(newStateNode);
 
+                }
             }
-
-            // cannot find this state in the temporaryStateNodes list, need to check it in real time
-            if (! found)
+            else
             {
+                // cannot find this state in the temporaryStateNodes list, need to check it in real time
                 // check real time
                 if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
                 {
                     // add it to unsatisfied list
                     unsatisfiedStateNodes.push_front(newStateNode);
+
                 }
 
             }
@@ -753,6 +803,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
+
+    // todo: remove all the imaginary atoms in imaginaryHandles
 
     return true;
 }
@@ -1160,7 +1212,7 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
 }
 
 
-void generateNextCombination(bool *&indexes, int n_max)
+void generateNextCombinationGroup(bool* &indexes, int n_max)
 {
     int trueCount = -1;
     int i = 0;
@@ -1196,6 +1248,7 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
 
     return true;
 }
+
 
 // this function should be called after groundARuleNodeFromItsForwardState
 bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
@@ -1235,14 +1288,13 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     // first, find from the easy state via selecting values from the Atomspace
 
     int n_max = number_easy_state;
-    bool indexes[n_max];
+    bool* indexes = new bool[n_max];
 
-    // ToBeImproved: in fact we don't need to generate all the possible groups of candidates,
+    // ToBeImproved: in fact we don't need to generate all the possible groups of candidates at this moment,
     //               we can just allow it generateNextCandidates every time one group failed in a planning step
     // we generate the candidates by trying full combination calculation
-    for (int n_gram = 1; n_gram <= n_max; n_gram ++)
+    for (int n_gram = n_max; n_gram >= 1; -- n_gram)
     {
-
         // Use the binary method to generate all combinations:
 
         // generate the first combination
@@ -1252,7 +1304,8 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
         for (int i = n_gram; i <n_max; ++ i)
             indexes[i] = false;
 
-        vector<ParamGroundedMapInARule> tmpcandidates;
+        // the int in the pair is how many other real-time-inquery states this group of candicates meets
+        list< TmpParamCandidate > tmpcandidates;
 
         while (true)
         {
@@ -1266,45 +1319,91 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
                     indexesVector.push_back(x);
             }
             vector<string> varNames;
-            HandleSeq candidateHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+            HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
 
-            if (candidateHandles.size() != 0)
+            if (candidateListHandles.size() != 0)
             {
-
-                int x = 0;
-                ParamGroundedMapInARule oneGroupCandidate;
-
-                foreach (Handle h, candidateHandles)
+                foreach (Handle listH, candidateListHandles)
                 {
-                    StateValue v = getStateValueFromHandle(varNames[x],h);
-                    oneGroupCandidate.insert(std::pair<string, StateValue>(varNames[x],v));
+                    HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
+                    ParamGroundedMapInARule oneGroupCandidate;
+                    int index = 0;
 
-                    x ++;
+                    foreach (Handle h, candidateHandlesInOneGroup)
+                    {
+                        StateValue v = Inquery::getStateValueFromHandle(varNames[index],h);
+                        oneGroupCandidate.insert(std::pair<string, StateValue>(varNames[index],v));
+
+                        // Check if this group of candidates is able to ground some other need_real_time_inquery states
+                        // and how many of these need_real_time_inquery state can be satisifed by this group of candidates
+                        int numOfSat = 0;
+                        list<UngroundedVariablesInAState>::iterator nrtiIt= uvIt;
+                        for (; nrtiIt != ruleNode->curUngroundedVariables.end(); ++ nrtiIt)
+                        {
+                            if (((UngroundedVariablesInAState&)(*nrtiIt)).contain_numeric_var)
+                                break;
+
+                            if (! ((UngroundedVariablesInAState&)(*nrtiIt)).state->need_inquery)
+                                break;
+
+                            ParamGroundedMapInARule tryBindings = ruleNode->currentBindingsFromForwardState;
+                            tryBindings.insert(oneGroupCandidate.begin(),oneGroupCandidate.end());
+                            State* groundedState = Rule::groundAStateByRuleParamMap(((UngroundedVariablesInAState&)(*nrtiIt)).state, tryBindings);
+                            if (groundedState != 0)
+                            {
+                                bool found;
+                                StateNode* satStateNode;
+                                if (checkIfThisGoalIsSatisfiedByTempStates(*groundedState,found,satStateNode))
+                                    numOfSat ++;
+                                else if (found)
+                                    continue; // found in temp state list, but is not satisfied
+                                else
+                                {
+                                    // cannot find it in temp state list, check it in real time
+                                    float satDegree;
+                                    if (checkIsGoalAchievedInRealTime(*groundedState,satDegree ))
+                                        numOfSat ++;
+                                    else
+                                        continue;
+                                }
+
+                            }
+
+                        }
+
+                        tmpcandidates.push_back(TmpParamCandidate(numOfSat, oneGroupCandidate));
+
+                        index ++;
+                    }
+
+
                 }
-
-                tmpcandidates.push_back(oneGroupCandidate);
 
             }
 
             if (isLastNElementsAllTrue(indexes, n_max, n_gram))
                 break;
 
-            generateNextCombination(indexes, n_max);
+            generateNextCombinationGroup(indexes, n_max);
 
         }
 
-        // Finished n states grounding.
-        // Check all the need_real_time_inquery state with the already grounded values to sort the ParamCandidates.
-        // The more need_real_time_inquery states one group of candidates meets, the more front it is to be put in ParamCandidates
+        // Finished n-gram candidates generation
+        // sort the groups of candidates for this n-gram, in the order of meeting as many as possible other need_real_time_inquery states
+        // pls reference to above function:
+        // bool operator < (const pair<int,ParamGroundedMapInARule>& pair1, const pair<int,ParamGroundedMapInARule>& pair2)
+        tmpcandidates.sort();
 
-        vector<ParamGroundedMapInARule>::iterator canit;
-        for (canit = tmpcandidates.begin(); canit != tmpcandidates.end(); ++ canit)
-        ruleNode->ParamCandidates.push_back(oneGroupCandidate);
-
+        // now, it's in the right order, copy it to candidates
+        list< TmpParamCandidate >::iterator tmpIt;
+        for(tmpIt = tmpcandidates.begin(); tmpIt != tmpcandidates.end(); ++ tmpIt)
+            ruleNode->ParamCandidates.push_back(((TmpParamCandidate&)(*tmpIt)).aGroupOfParmCandidate);
 
     }
 
-    // Till now, all the easy states have been dealed with, now we need to
+    delete indexes;
+
+    // Till now, all the easy states have been dealed with, now we need to deal with numberic states if any
 
 
 }
