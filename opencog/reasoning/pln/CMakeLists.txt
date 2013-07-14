@@ -83,6 +83,7 @@ ADD_LIBRARY (pln SHARED
 
 ADD_DEPENDENCIES(pln opencog_atom_types)
 ADD_DEPENDENCIES(pln pln_atom_types)
+ADD_DEPENDENCIES(pln cython)
 
 INCLUDE_DIRECTORIES (
 	# For the Python PLN binding

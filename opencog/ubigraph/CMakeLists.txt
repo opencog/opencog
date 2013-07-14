@@ -16,6 +16,8 @@ ADD_LIBRARY (ubigraph SHARED
 	${BITUBI}
 )
 
+ADD_DEPENDENCIES(ubigraph opencog_atom_types)
+
 INCLUDE_DIRECTORIES (
 	${ODBC_INCLUDE_DIRS}
 )
