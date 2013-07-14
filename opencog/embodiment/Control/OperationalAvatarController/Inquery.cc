@@ -438,10 +438,42 @@ StateValue Inquery::inqueryExistPath(const vector<StateValue>& stateOwnerList)
     }
 
     vector<spatial::BlockVector> path;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path))
+    spatial::BlockVector nearestPos;
+    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
         return "true";
     else
         return "false";
+}
+
+StateValue Inquery::inqueryNearestAccessablePosition(const vector<StateValue>& stateOwnerList)
+{
+    StateValue var1 = stateOwnerList.front();
+    StateValue var2 = stateOwnerList.back();
+    spatial::BlockVector pos1,pos2;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+    if (entity1)
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    else
+    {
+        Vector* v1 = boost::get<Vector>(&var1);
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+    }
+
+    Entity* entity2 = boost::get<Entity>(&var2);
+    if (entity2)
+        pos2 = spaceMap->getObjectLocation(entity2->id);
+    else
+    {
+        Vector* v2 = boost::get<Vector>(&var2);
+        pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
+    }
+
+    spatial::BlockVector nearestPos;
+    vector<spatial::BlockVector> path;
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos);
+
+    return Vector(nearestPos.x,nearestPos.y,nearestPos.z);
 }
 
 StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)

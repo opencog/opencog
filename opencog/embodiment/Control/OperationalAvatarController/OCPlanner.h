@@ -285,21 +285,21 @@ protected:
      // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
-     // To ground all the variables  which has not been grounded by "groundARuleNodeFromItsForwardState"
-     bool groundARuleNodeBySelectingValues(RuleNode* ruleNode);
+     // To ground the non Numeric variables in this rule,  which has not been grounded by "groundARuleNodeFromItsForwardState"
+     bool groundARuleNodeBySelectingNonNumericValues(RuleNode* ruleNode);
 
-     // select the most suitable vaule to ground a variable
+     // select the most suitable vaule to ground a numeric variable
+     // this function should be called after groundARuleNodeBySelectingNonNumericValues and also when one group of candidates bindings for
      // the value selection criterions are according to these two parts:
      // 1. soft heuristics: the cost heuristics inherited from its parents
      // 2. if it's a recursive rule, borrow some hard constraints from the preconditions of its non-recursive rule which has the same effect with it,
      //    as hard  heuristics.
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
-     bool selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr);
+     bool selectValueForGroundingNumericState(RuleNode* ruleNode);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
      void findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode);
-
 
      void findCandidateValuesByGA(RuleNode* ruleNode);
 

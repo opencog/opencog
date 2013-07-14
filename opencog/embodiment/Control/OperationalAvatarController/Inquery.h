@@ -80,6 +80,8 @@ public:
     static StateValue inqueryIsStandable(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryExistPath(const vector<StateValue>& stateOwnerList);
 
+    static StateValue inqueryNearestAccessablePosition(const vector<StateValue>& stateOwnerList);
+
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h
     /*enum SPATIAL_RELATION
@@ -136,6 +138,7 @@ public:
     static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
 
     static StateValue getStateValueFromHandle(string var, Handle& valueH);
+
 
 };
 

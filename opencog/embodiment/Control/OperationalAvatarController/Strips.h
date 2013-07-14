@@ -163,7 +163,6 @@ namespace opencog { namespace oac {
         bool isSatisfiedMe( StateValue& value, float& satisfiedDegree,  State *original_state = 0);
         bool isSatisfied( State& goal, float &satisfiedDegree,  State *original_state = 0) ;
 
-
         // To get int,float value or fuzzy int or float value from a state
         // For convenience, we will also consider int value as float value
         // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
@@ -260,6 +259,12 @@ namespace opencog { namespace oac {
     // pair<the state this varaible belongs to, one address of this variable>
     typedef pair<State*,StateValue*> paramIndex;
 
+    struct BestNumericVariableInqueryStruct
+    {
+        State* goalState;
+        InqueryFun bestNumericVariableInqueryFun;
+    };
+
     // the rule to define the preconditions of an action and what effects it would cause
     // A rule will be represented in the Atomspace by ImplicationLink
    /*     ImplicationLink
@@ -320,6 +325,10 @@ namespace opencog { namespace oac {
         // return if this rule is recursive. A recursive rule means its precondition and effect are the same state
         //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
         bool IsRecursiveRule;
+
+        // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
+        // which is the most closed to the a grounded numeric goal
+        map<string,BestNumericVariableInqueryStruct> bestNumericVariableInqueryFuns;
 
         // ungrounded parameter indexes
         // map<string , vector<StateValue&> >

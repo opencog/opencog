@@ -604,9 +604,12 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
-        groundARuleNodeBySelectingValues(ruleNode);
+        groundARuleNodeBySelectingNonNumericValues(ruleNode);
 
         ruleNode->updateCurrentAllBindings();
+
+        // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
+        selectValueForGroundingNumericState(ruleNode);
 
         recordOrginalStateValuesAfterGroundARule(ruleNode);
 
@@ -1250,8 +1253,9 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
 }
 
 
-// this function should be called after groundARuleNodeFromItsForwardState
-bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
+// this function should be called after groundARuleNodeFromItsForwardState.
+// this function only ground non-numeric states
+bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 {
     // First find all the ungrounded variables
     findAllUngroundedVariablesInARuleNode(ruleNode);
@@ -1403,13 +1407,52 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
 
     delete indexes;
 
-    // Till now, all the easy states have been dealed with, now we need to deal with numberic states if any
-
+    // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
+    // we won't ground the numeric states here, because it's too time-consuming,
+    // we won't give all the possible combinations of numeric values and non-numeric values for candidates
 
 }
 
-bool OCPlanner::selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr)
+// this should be called only after the currentAllBindings has been chosen
+// ToBeImproved: currently it can only solve that kind of rules with only one ungrounded Numeric variable
+bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
 {
+    // todo: need to implement the general way of numeric selection without pre-defined or learnt heuristic functions
+
+    // if this rule variable has pre-defined or learnt heuristic functions to inquery a best value which is most closed to this numeric goal
+    // in fact all such variable with pre-defined inquery functions, can also be grounded by general way, but general way is slower,
+    // so pre-defined inquery functions can make it more efficient, which may be a bit cheating, not AGI enough, but still make sense
+
+    // only deal with the numeric states, assuming that all the other non-numeric variables should have been grounded
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = ruleNode->originalRule->bestNumericVariableInqueryFuns.begin();
+    for (; beIt != ruleNode->originalRule->bestNumericVariableInqueryFuns.end(); ++ beIt)
+    {
+        // find in the currentAllBindings to check if this variable has been grounded or not
+        if (ruleNode->currentAllBindings.find(beIt->first) != ruleNode->currentAllBindings.end())
+            continue;
+
+        // this variable has not been grouned , call its BestNumericVariableInquery to ground it
+
+        // first, ground the state required by bestNumericVariableInqueryFun
+        BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
+        State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,ruleNode->currentAllBindings);
+        if (groundedState == 0)
+        {
+            // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
+            logger().error("OCPlanner::selectValueForGroundingNumericState :the goal state needed in BestNumericVariableInquery cannot be grouned in previous grouding steps. State name is:,"
+                           +  bs.goalState->name() );
+            continue;
+        }
+
+        StateValue v = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
+        ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(beIt->first,v));
+
+        // todo: for recursive rule
+
+    }
+
+
+
 
 }
 
@@ -1770,7 +1813,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // effect: it's possible to access from var_pos_from to var_pos_to
     vector<StateValue> existPathStateOwnerList6;
     existPathStateOwnerList6.push_back(var_pos_1);
-    existPathStateOwnerList6.push_back(var_pos_2);
+    existPathStateOwnerList6.push_back(var_pos_3);
     State* existPathState6 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
     Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true");
 
@@ -1779,11 +1822,16 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
     pathTransmitRule->addPrecondition(existPathState5);
 
+    BestNumericVariableInqueryStruct bs;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessablePosition;
+    bs.goalState = existPathState6;
+    pathTransmitRule->bestNumericVariableInqueryFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
+
     pathTransmitRule->addEffect(EffectPair(1.0f,becomeExistPathEffect2));
 
     this->AllRules.push_back(pathTransmitRule);
 
-    //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
+    //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
 
 
 }

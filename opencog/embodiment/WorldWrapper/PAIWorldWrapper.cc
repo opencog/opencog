@@ -601,15 +601,16 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
 void PAIWorldWrapper::get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint,
         const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm )
 {
-    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions))
+    SpaceServer::SpaceMapPoint nearestPos;
+    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos))
     {
         printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
     }
     else
     {
-        printf("Pathfinding failed! From (%d,%d,%d) to (%d, %d, %d)",
-               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
+        printf("Pathfinding failed! From (%d,%d,%d) to (%d, %d, %d), the nearest accessable postion is (%d,%d,%d)",
+               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z,nearestPos.x,nearestPos.y,nearestPos.z);
     }
 
 }
