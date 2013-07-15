@@ -87,11 +87,11 @@ $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
 $pdh/opencog/scm/debug.scm \
-$pdh/build/opencog/atomspace/core_types.scm \
-$pdh/build/opencog/nlp/types/nlp_types.scm \
-$pdh/build/opencog/spacetime/spacetime_types.scm \
-$pdh/build/opencog/dynamics/attention/attention_types.scm \
-$pdh/build/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
+$binDirH/opencog/atomspace/core_types.scm \
+$binDirH/opencog/nlp/types/nlp_types.scm \
+$binDirH/opencog/spacetime/spacetime_types.scm \
+$binDirH/opencog/dynamics/attention/attention_types.scm \
+$binDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
 ]
 
 set schemeEmbodimentFiles [list \
