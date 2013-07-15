@@ -445,7 +445,7 @@ StateValue Inquery::inqueryExistPath(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryNearestAccessablePosition(const vector<StateValue>& stateOwnerList)
+StateValue Inquery::inqueryNearestAccessiblePosition(const vector<StateValue>& stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
     StateValue var2 = stateOwnerList.back();
@@ -473,7 +473,10 @@ StateValue Inquery::inqueryNearestAccessablePosition(const vector<StateValue>& s
     vector<spatial::BlockVector> path;
     spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos);
 
-    return Vector(nearestPos.x,nearestPos.y,nearestPos.z);
+    if (nearestPos == pos1)
+        return UNDEFINED_VALUE; // cannot find the place closer to the target than the start place
+    else
+        return Vector(nearestPos.x,nearestPos.y,nearestPos.z);
 }
 
 StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)

@@ -1445,9 +1445,20 @@ bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
         }
 
         StateValue v = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
-        ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(beIt->first,v));
 
-        // todo: for recursive rule
+        if (v == UNDEFINED_VALUE)
+        {
+            // cannot find a good value by this pre-defined inquery functions
+            // todo: for recursive rule
+
+
+
+        }
+        else
+        {
+            ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(beIt->first,v));
+        }
+
 
     }
 
@@ -1823,7 +1834,7 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState5);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessablePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
     bs.goalState = existPathState6;
     pathTransmitRule->bestNumericVariableInqueryFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
 
