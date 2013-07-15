@@ -139,11 +139,17 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
             if (festor.params.prune_xmplr) {
                 auto xmplr_nsf = set_difference(xmplr_features,
                                                 sf.second);
-                ostreamContainer(logger().debug() <<
-                                 "Prune the exemplar from non-selected features "
-                                 << "for deme " << demeIDs[sfi] << " : ",
-                                 fs_to_names(xmplr_nsf, ilabels));
-                xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
+                if (xmplr_features.empty())
+                    logger().debug() << "No feature to prune in the "
+                                     << "exemplar for deme " << demeIDs[sfi];
+                else {
+                    ostreamContainer(logger().debug() <<
+                                     "Prune the exemplar from non-selected "
+                                     "features for deme " << demeIDs[sfi]
+                                     << ": ",
+                                     fs_to_names(xmplr_nsf, ilabels));
+                    xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
+                }
             }
             else {
                 logger().debug() << "Do not prune the exemplar from "
