@@ -582,11 +582,11 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
 }
 
 size_t hill_climbing::cross_top_one(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     OC_ASSERT (sample_size > 0, "Cross-over sample size must be positive");
     if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
@@ -616,11 +616,11 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
 
 /** two-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_two(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     // sample_size choose two.
     unsigned max = sample_size * (sample_size-1) / 2;
@@ -657,11 +657,11 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
 /** three-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_three(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                      size_t deme_size,
+                                      size_t num_to_make,
+                                      size_t sample_start,
+                                      size_t sample_size,
+                                      const instance& base)
 {
     // sample_size choose three.
     unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
