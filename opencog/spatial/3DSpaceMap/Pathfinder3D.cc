@@ -35,7 +35,8 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
     map<BlockVector,double> costMap;
     map<BlockVector,double>::const_iterator itercost;
     int searchTimes = 0;
-    float nearestDis = 999999999;
+    float nearestDis = begin - target;
+    nearestPos = begin;
 
     while(true)
     {
