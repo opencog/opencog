@@ -148,8 +148,8 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
                                      "features for deme " << demeIDs[sfi]
                                      << ": ",
                                      fs_to_names(xmplr_nsf, ilabels));
-                    xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
                 }
+                xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
             }
             else {
                 logger().debug() << "Do not prune the exemplar from "
