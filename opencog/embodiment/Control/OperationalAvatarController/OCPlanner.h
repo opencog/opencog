@@ -289,18 +289,14 @@ protected:
      bool groundARuleNodeBySelectingNonNumericValues(RuleNode* ruleNode);
 
      // select the most suitable vaule to ground a numeric variable
-     // this function should be called after groundARuleNodeBySelectingNonNumericValues and also when one group of candidates bindings for
-     // the value selection criterions are according to these two parts:
-     // 1. soft heuristics: the cost heuristics inherited from its parents
-     // 2. if it's a recursive rule, borrow some hard constraints from the preconditions of its non-recursive rule which has the same effect with it,
-     //    as hard  heuristics.
-     // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
-     bool selectValueForGroundingNumericState(RuleNode* ruleNode);
+     // this function should be called after groundARuleNodeBySelectingNonNumericValues
+     // the currentbindings will be added new binding pairs if this function find good values for ungrounded variables
+     bool selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode *ruleNod = 0);
 
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
-     // @ value: the candidate values
+     // @ values: the candidate values
      // @ varName: the variable name
-     StateValue selectBestNumericValueFromCandidates(RuleNode* ruleNode, string varName, vector<StateValue> &values);
+     StateValue selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<StateValue>& values);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)

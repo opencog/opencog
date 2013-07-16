@@ -271,7 +271,7 @@ namespace opencog { namespace oac {
     struct BestNumericVariableInqueryStruct
     {
         State* goalState;
-        InqueryStateFun BestNumericVariableInqueryStruct;
+        InqueryVariableFun bestNumericVariableInqueryFun;
     };
 
     // the rule to define the preconditions of an action and what effects it would cause
