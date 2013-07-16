@@ -20,7 +20,7 @@
 (define (AskForFood)
     (update_utterance_node "utterance_sentences"  
         (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: I'm so hungry.")
-        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: Could you give me some battery?")
+        (SentenceNode "IS_NEW: TRUE, TO:  , RESPONSER: AskForFood, CONTENT: Can you please give me a battery?")
     )
 )
 
