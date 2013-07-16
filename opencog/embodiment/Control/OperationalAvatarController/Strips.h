@@ -79,7 +79,11 @@ namespace opencog { namespace oac {
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
-    typedef StateValue (*InqueryFun)(const vector<StateValue>&);
+    typedef StateValue (*InqueryStateFun)(const vector<StateValue>&);
+
+    // return a vector of all the possible values for grounding a variable in a rule
+    // if cannot find proper value, return a empty vector
+    typedef vector<StateValue> (*InqueryVariableFun)(const vector<StateValue>&);
 
     // A state is an environment variable representing some feature of the system in a certain time point
     // like the foodState of the egg(id_5904) is now RAW
@@ -115,7 +119,7 @@ namespace opencog { namespace oac {
         bool need_inquery;
 
         // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
-        InqueryFun inqueryFun;
+        InqueryStateFun InqueryStateFun;
 
         string name() const {return stateVariable->getName();}
 
@@ -130,10 +134,10 @@ namespace opencog { namespace oac {
         //map<string , vector<StateValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
         State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _InqueryStateFun = 0);
 
         State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-               bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+               bool _need_inquery = false, InqueryStateFun _InqueryStateFun = 0);
 
         State(){}
 
@@ -259,10 +263,15 @@ namespace opencog { namespace oac {
     // pair<the state this varaible belongs to, one address of this variable>
     typedef pair<State*,StateValue*> paramIndex;
 
+    // ToBeImproved, in fact,there should rules for selecting values as well,
+    // so that the variable grounding process can be also consided as the same reasoning process as the main planning process.
+    // But currently, we don't have enough time to implement this, so we add such predefined BestNumericVariableInqueryStruct for selecting grounding values
+    // e.g., for a rule to select a Adjacent location of a given location x, currently we would just assign a function to return its possible 26 neighbours,
+    // but the right way, we should define 26 rules to tell the planner what is "Adjacent location"
     struct BestNumericVariableInqueryStruct
     {
         State* goalState;
-        InqueryFun bestNumericVariableInqueryFun;
+        InqueryStateFun BestNumericVariableInqueryStruct;
     };
 
     // the rule to define the preconditions of an action and what effects it would cause
@@ -328,7 +337,7 @@ namespace opencog { namespace oac {
 
         // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
         // which is the most closed to the a grounded numeric goal
-        map<string,BestNumericVariableInqueryStruct> bestNumericVariableInqueryFuns;
+        map<string,BestNumericVariableInqueryStruct> bestNumericVariableInqueryStateFuns;
 
         // ungrounded parameter indexes
         // map<string , vector<StateValue&> >
@@ -346,7 +355,7 @@ namespace opencog { namespace oac {
         float getBasicCost();
 
         // the cost calculation is : basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
-        float getCost(ParamGroundedMapInARule& groudings);
+        static float getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings);
 
         void addEffect(EffectPair effect)
         {

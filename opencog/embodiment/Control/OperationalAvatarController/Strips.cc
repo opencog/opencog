@@ -43,15 +43,15 @@ const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
 };
 
 State::State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-             vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryFun _inqueryFun)
-    : stateOwnerList(_stateOwnerList),need_inquery(_need_inquery),inqueryFun(_inqueryFun)
+             vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _InqueryStateFun)
+    : stateOwnerList(_stateOwnerList),need_inquery(_need_inquery),InqueryStateFun(_InqueryStateFun)
 {
     State(_stateName, _valuetype,_stateType,  _stateValue);
 }
 
 State::State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-             bool _need_inquery, InqueryFun _inqueryFun)
-    : stateType(_stateType),need_inquery(_need_inquery),inqueryFun(_inqueryFun)
+             bool _need_inquery, InqueryStateFun _InqueryStateFun)
+    : stateType(_stateType),need_inquery(_need_inquery),InqueryStateFun(_InqueryStateFun)
 {
     stateVariable = new StateVariable(_stateName,_valuetype,_stateValue);
 }
@@ -68,7 +68,7 @@ State* State::clone()
     cloneState->stateType = this->stateType;
     cloneState->stateOwnerList = this->stateOwnerList;
     cloneState->need_inquery = this->need_inquery;
-    cloneState->inqueryFun = this->inqueryFun;
+    cloneState->InqueryStateFun = this->InqueryStateFun;
     return cloneState;
 }
 
@@ -80,7 +80,7 @@ void State::assignValue(const StateValue& newValue)
 StateValue State::getStateValue()
 {
     if (need_inquery)
-        return inqueryFun(stateOwnerList);
+        return InqueryStateFun(stateOwnerList);
     else
     {
         if (Rule::isParameterUnGrounded(*(this->stateVariable)))
@@ -650,9 +650,10 @@ float Rule::getBasicCost()
     return basic_cost;
 }
 
-float Rule::getCost(ParamGroundedMapInARule& groudings)
+
+float Rule::getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings)
 {
-    // the cost calculation is : basic_cost + cost_cal_state.value * cost_coefficient
+    // the cost calculation is : basic_cost + cost_cal_state.value1 * cost_coefficient1 + cost_cal_state.value2 * cost_coefficient2 + ...
     // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
     if (CostHeuristics.size() == 0)
         return basic_cost;
@@ -668,18 +669,19 @@ float Rule::getCost(ParamGroundedMapInARule& groudings)
             if (! cost_cal_state->isNumbericState())
             {
                 logger().error("Planner::Rule::getCost : The relatied state is not numberic state: " + cost_cal_state->name() );
-                return 0.0f;
+                return -1.0f;
             }
 
             State* groundedState = groundAStateByRuleParamMap(cost_cal_state, groudings);
             if (groundedState == 0)
             {
                 logger().error("Planner::Rule::getCost : This state cannot be grounded: " + cost_cal_state->name() );
-                return 0.0f;
+                return -1.0f;
             }
             totalcost += groundedState->getFloatValueFromNumbericState() * ((CostHeuristic)(*costIt)).cost_coefficient;
         }
 
+        return totalcost;
     }
 }
 

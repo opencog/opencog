@@ -297,6 +297,11 @@ protected:
      // @ variableStr: the ungrounded variable's string representation (StateVariable::ParamValueToString)
      bool selectValueForGroundingNumericState(RuleNode* ruleNode);
 
+     // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
+     // @ value: the candidate values
+     // @ varName: the variable name
+     StateValue selectBestNumericValueFromCandidates(RuleNode* ruleNode, string varName, vector<StateValue> &values);
+
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
      void findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode);

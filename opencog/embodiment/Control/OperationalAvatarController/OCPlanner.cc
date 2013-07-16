@@ -221,7 +221,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     if (oneGoal.need_inquery)
     {
         // call its inquery funciton
-        InqueryFun f = oneGoal.inqueryFun;
+        InqueryStateFun f = oneGoal.InqueryStateFun;
         StateValue inqueryValue = f(oneGoal.stateOwnerList);
         OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
                   "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
@@ -1086,7 +1086,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
-                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryFun);
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->InqueryStateFun);
                 vector<StateValue>::iterator ownerIt;
                 for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
                 {
@@ -1424,8 +1424,8 @@ bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
     // so pre-defined inquery functions can make it more efficient, which may be a bit cheating, not AGI enough, but still make sense
 
     // only deal with the numeric states, assuming that all the other non-numeric variables should have been grounded
-    map<string,BestNumericVariableInqueryStruct>::iterator beIt = ruleNode->originalRule->bestNumericVariableInqueryFuns.begin();
-    for (; beIt != ruleNode->originalRule->bestNumericVariableInqueryFuns.end(); ++ beIt)
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = ruleNode->originalRule->bestNumericVariableInqueryStateFuns.begin();
+    for (; beIt != ruleNode->originalRule->bestNumericVariableInqueryStateFuns.end(); ++ beIt)
     {
         // find in the currentAllBindings to check if this variable has been grounded or not
         if (ruleNode->currentAllBindings.find(beIt->first) != ruleNode->currentAllBindings.end())
@@ -1433,7 +1433,7 @@ bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
 
         // this variable has not been grouned , call its BestNumericVariableInquery to ground it
 
-        // first, ground the state required by bestNumericVariableInqueryFun
+        // first, ground the state required by bestNumericVariableInqueryStateFun
         BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
         State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,ruleNode->currentAllBindings);
         if (groundedState == 0)
@@ -1444,9 +1444,9 @@ bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
             continue;
         }
 
-        StateValue v = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
+        vector<StateValue>& values = bs.bestNumericVariableInqueryStateFun(groundedState->stateOwnerList);
 
-        if (v == UNDEFINED_VALUE)
+        if (values.size() == 0)
         {
             // cannot find a good value by this pre-defined inquery functions
             // todo: for recursive rule
@@ -1454,17 +1454,78 @@ bool OCPlanner::selectValueForGroundingNumericState(RuleNode* ruleNode)
 
 
         }
-        else
+
+        //  select the best one in this vector<StateValue> that get the highest score according to the heuristics cost calculations
+        StateValue bestValue = selectBestNumericValueFromCandidates(ruleNode,beIt->first,values);
+        if (bestValue == UNDEFINED_VALUE)
         {
-            ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(beIt->first,v));
+            logger().error("OCPlanner::selectValueForGroundingNumericState: failed to find the best value for grounding numeric state!" );
+            return false;
         }
+
+        //  ground the rule fully first
+        ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(beIt->first,bestValue));
+        return true;
+
+
+
 
 
     }
 
+}
 
 
+StateValue OCPlanner::selectBestNumericValueFromCandidates(RuleNode* ruleNode, string varName, vector<StateValue>& values)
+{
 
+    vector<StateValue>::iterator vit;
+    float lowestcost = 999999.9;
+    StateValue bestValue = UNDEFINED_VALUE;
+
+    float basic_cost;
+    vector<CostHeuristic>& costHeuristics;
+
+    if (ruleNode->originalRule->CostHeuristics.size() != 0)
+    {
+        basic_cost = ruleNode->originalRule->basic_cost;
+        costHeuristics = ruleNode->originalRule->CostHeuristics;
+    }
+    else if (ruleNode->costHeuristics.size()!= 0)
+    {
+        basic_cost = 0.0f;
+        costHeuristics = ruleNode->costHeuristics;
+    }
+    else
+    {
+        logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule doesn't have any costHeuristics for calculation!" );
+        return UNDEFINED_VALUE;
+    }
+
+
+    for (vit = values.begin(); vit != values.end(); ++ vit)
+    {
+        // try to ground the rule fully first
+        ruleNode->currentAllBindings.insert(std::pair<string, StateValue>(varName,*vit));
+
+        float cost = Rule::getCost(basic_cost, costHeuristics, currentAllBindings);
+
+        if (cost < -0.00001f)
+        {
+            logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
+            return UNDEFINED_VALUE;
+        }
+
+        ruleNode->currentAllBindings.erase(varName);
+
+        if (cost < lowestcost)
+        {
+            lowestcost = cost;
+            bestValue = *vit;
+        }
+    }
+
+    return bestValue;
 }
 
 // this function should be called after completely finished grounding a rule
@@ -1834,9 +1895,9 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState5);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.bestNumericVariableInqueryStateFun = &Inquery::inqueryNearestAccessiblePosition;
     bs.goalState = existPathState6;
-    pathTransmitRule->bestNumericVariableInqueryFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
+    pathTransmitRule->bestNumericVariableInqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
 
     pathTransmitRule->addEffect(EffectPair(1.0f,becomeExistPathEffect2));
 

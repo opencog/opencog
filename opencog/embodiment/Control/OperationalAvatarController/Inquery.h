@@ -80,7 +80,9 @@ public:
     static StateValue inqueryIsStandable(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryExistPath(const vector<StateValue>& stateOwnerList);
 
-    static StateValue inqueryNearestAccessiblePosition(const vector<StateValue>& stateOwnerList);
+    // return a vector of all the possible values for grounding a variable in a rule
+    // if cannot find proper value, return a empty vector
+    static vector<StateValue> inqueryNearestAccessiblePosition(const vector<StateValue>& stateOwnerList);
 
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h
