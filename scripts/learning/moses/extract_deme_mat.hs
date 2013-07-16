@@ -2,8 +2,8 @@
 import Data.List
 import Data.List.Split
 
--- My first Haskell program. Parse MOSES log file and generate a CSV
--- file gather some statistics from it
+-- Parse MOSES log file and generate a CSV file describing for each
+-- deme expansion the selected features.
 
 -- Main function
 main :: IO ()
