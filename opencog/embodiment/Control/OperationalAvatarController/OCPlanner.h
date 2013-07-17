@@ -323,6 +323,12 @@ protected:
 
      void deleteStateNodeInTemporaryList(StateNode* stateNode);
 
+     // different rules usually have different variable names to describe a same variable, some times we need to unify these variables names
+     // change the variable names in toBeUnifiedRule according to forwardState, return the unified rule
+     // the forwardState can be a ungrounded state from other rule
+     // if cannot unify it , return 0
+     Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
+
 };
 
 

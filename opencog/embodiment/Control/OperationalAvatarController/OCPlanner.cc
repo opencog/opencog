@@ -250,11 +250,10 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 
 bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 {
-//    globalStatesCache.clear();
 
     int ruleNodeCount = 0;
 
-    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp(); ;
+    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
@@ -765,7 +764,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         newStateNode->backwardRuleNode =  satStateNode->backwardRuleNode;
                     }
 
-                    // TODO: Need to check if there is any dependency loop,
+                    // ToBeImproved: Need to check if there is any dependency loop,
                     // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
                     // it means two branches depend on each other. How to deal with this case?
 
@@ -1002,6 +1001,122 @@ void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
     }
 }
 
+// the forwardState can be a ungrounded state from other rule
+// if cannot unify it , return 0
+Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState )
+{
+    // first, find the state in the effect list of this rule which the same to this forward state
+    vector<EffectPair>::iterator effectIt;
+    Effect* e;
+    State* s;
+
+    // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
+    for (effectIt = toBeUnifiedRule->effectList.begin(); effectIt != toBeUnifiedRule->effectList.end(); ++ effectIt)
+    {
+        e = effectIt->second;
+
+        s = e->state;
+        if (s->name() ==  forwardStateNode->state->name())
+            break;
+    }
+
+    if (effectIt == toBeUnifiedRule->effectList.end())
+        return false;
+
+    // check if all the stateOwner parameters grounded
+    vector<StateValue>::iterator f_ownerIt = forwardState->stateOwnerList.begin(); // state owner list in forward state
+    vector<StateValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
+
+    map<string, StateValue> currentBindingsFromForwardState;
+
+    for ( ; r_ownerIt != s->stateOwnerList.end(); ++ f_ownerIt, ++r_ownerIt)
+    {
+        if (Rule::isParamValueUnGrounded(*r_ownerIt))
+        {
+            string variableName = StateVariable::ParamValueToString((StateValue)(*r_ownerIt));
+            map<string, StateValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+            if (paraIt == currentBindingsFromForwardState.end())
+                currentBindingsFromForwardState.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
+        }
+    }
+
+    // unify actor
+    StateValue& actor;
+    if (Rule::isParamValueUnGrounded(toBeUnifiedRule->actor))
+    {
+        string variableName = StateVariable::ParamValueToString(toBeUnifiedRule->actor);
+        map<string, StateValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+        if (paraIt == currentBindingsFromForwardState.end())
+            actor = toBeUnifiedRule->actor;
+        else
+            actor = paraIt->second;
+    }
+
+    Rule* unifiedRule = new Rule(toBeUnifiedRule->action,actor,toBeUnifiedRule->basic_cost);
+
+    // unify preconditionList
+    vector<State*>::iterator itpre = toBeUnifiedRule->preconditionList.begin();
+    for (; itpre != toBeUnifiedRule->preconditionList.end(); ++ itpre)
+    {
+        State* unifiedState = Rule::groundAStateByRuleParamMap(*itpre,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+        unifiedRule->addPrecondition(unifiedState);
+    }
+
+    // unify effect
+    for (effectIt = toBeUnifiedRule->effectList.begin(); effectIt != toBeUnifiedRule->effectList.end(); ++ effectIt)
+    {
+        e = effectIt->second;
+        s = e->state;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(s,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        unifiedRule->addEffect(EffectPair(effectIt->first,unifiedState));
+
+    }
+
+    // unify BestNumericVariableInqueryFun
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = toBeUnifiedRule->bestNumericVariableInqueryStateFuns.begin();
+    for (; beIt != toBeUnifiedRule->bestNumericVariableInqueryStateFuns.end(); ++ beIt)
+    {
+        BestNumericVariableInqueryStruct& bs = beIt->second;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(bs.goalState,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        BestNumericVariableInqueryStruct unifiedBS;
+        unifiedBS.bestNumericVariableInqueryFun = bs.bestNumericVariableInqueryFun;
+        unifiedBS.goalState = unifiedState;
+
+        string varName;
+        map<string, StateValue>::iterator paraIt = currentBindingsFromForwardState.find(beIt->first);
+        if (paraIt == currentBindingsFromForwardState.end())
+            varName = beIt->first;
+        else
+            varName = StateVariable::ParamValueToString(paraIt->second);
+
+        unifiedRule->bestNumericVariableInqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(varName, unifiedBS));
+    }
+
+    // unify heuristics
+    vector<CostHeuristic>::iterator costIt;
+    for(costIt = toBeUnifiedRule->CostHeuristics.begin(); costIt != toBeUnifiedRule->CostHeuristics.end(); ++costIt)
+    {
+        State* cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(cost_state,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        unifiedRule->addCostHeuristic(CostHeuristic(unifiedState,((CostHeuristic)(*costIt)).cost_coefficient));
+    }
+
+    unifiedRule->IsRecursiveRule = toBeUnifiedRule->IsRecursiveRule;
+
+    return unifiedRule;
+
+}
 
 bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
 {
@@ -1381,7 +1496,6 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                         index ++;
                     }
 
-
                 }
 
             }
@@ -1463,8 +1577,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 
             StateNode* effectStateNode = ruleNode->forwardLinks.front();
 
-
             // find the first unrecursive rule
+            // you can also find it by ruleEffectIndexes
             // ToBeImproved: currently we only borrow from the first unrecursive rule found
             list< pair<float,Rule*> >::iterator canIt;
             Rule* unrecursiveRule = 0;
@@ -1482,7 +1596,25 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
             if (unrecursiveRule == 0)
                 return false; // cannot find a unrecursiveRule to borrow from
 
+            // ground this unrecursiveRule by the effectStateNode
+            Effect* e = rule->effectList.begin()->second;
 
+            Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, e->state);
+            if (borrowRule == 0)
+                return false; // cannot unify the borrowed rule
+
+            // call this function recursively
+            // because we have unified the rules, so the borrowed rule can use the same grounding map with
+            if (! selectValueForGroundingNumericState(borrowedRule,currentbindings))
+                 return false; // cannot find a proper value from the borrowed rule
+
+            // to here, get the value found by selectValueForGroundingNumericState from the borrowed rule
+
+
+            // todo: for general way:
+            // if there are more than two preconditions in this rule, borrow the one without any other backward rule to satisfy it, as hard restrics for selecting values.
+            // because others preconditions can be achieved by other rules.
+            // so that we can select values at least satisfied one condition.
 
         }
 
@@ -1572,8 +1704,6 @@ void OCPlanner::recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode)
     }
 }
 
-// hard constraints as heuristics for recursive rule, borrowed from the non-recursive rule has the same effect with it.
-// only applied for recursive rules.
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
