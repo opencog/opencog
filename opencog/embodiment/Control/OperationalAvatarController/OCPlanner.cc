@@ -801,7 +801,9 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     }
 
     // finished planning!
-    // todo: generate the action series according to the planning network we have constructed in this planning process
+    // generate the action series according to the planning network we have constructed in this planning process
+    planID = oac->getPAI().createActionPlan();
+
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
@@ -1542,6 +1544,8 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
 }
 
+
+
 // this should be called only after the currentAllBindings has been chosen
 // ToBeImproved: currently it can only solve that kind of rules with only one ungrounded Numeric variable
 bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode* ruleNode)
@@ -1619,7 +1623,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         // ground this unrecursiveRule by the effectStateNode
         Effect* e = rule->effectList.begin()->second;
 
-        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, e->state);
+        // ToBeImproved: currently only apply the borrowed rule in the first precondition of recursiveRule
+        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList.front());
         if (borrowedRule == 0)
             return false; // cannot unify the borrowed rule
 
@@ -2034,6 +2039,12 @@ void OCPlanner::loadTestRulesFromCodes()
     accessAdjacentRule->addPrecondition(adjacentState);
 
     accessAdjacentRule->addEffect(EffectPair(0.7f,becomeExistPathEffect));
+
+    BestNumericVariableInqueryStruct bs0;
+    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs0.goalState = existPathState3;
+    accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_from), bs0));
+
 
     this->AllRules.push_back(accessAdjacentRule);
     //----------------------------End Rule: if a position is standable and adjacent(neighbour) then there is possible existing a path from here to this adjacent postion-----------------------------
