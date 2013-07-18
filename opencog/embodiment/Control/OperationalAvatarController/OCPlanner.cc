@@ -221,7 +221,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     if (oneGoal.need_inquery)
     {
         // call its inquery funciton
-        InqueryStateFun f = oneGoal.InqueryStateFun;
+        InqueryStateFun f = oneGoal.inqueryStateFun;
         StateValue inqueryValue = f(oneGoal.stateOwnerList);
         OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
                   "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
@@ -608,7 +608,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         ruleNode->updateCurrentAllBindings();
 
         // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
-        selectValueForGroundingNumericState(ruleNode);
+        selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
 
         recordOrginalStateValuesAfterGroundARule(ruleNode);
 
@@ -1016,7 +1016,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
         e = effectIt->second;
 
         s = e->state;
-        if (s->name() ==  forwardStateNode->state->name())
+        if (s->name() ==  forwardState->name())
             break;
     }
 
@@ -1041,7 +1041,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
     }
 
     // unify actor
-    StateValue& actor;
+    StateValue actor;
     if (Rule::isParamValueUnGrounded(toBeUnifiedRule->actor))
     {
         string variableName = StateVariable::ParamValueToString(toBeUnifiedRule->actor);
@@ -1073,13 +1073,27 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
         if (unifiedState == 0)
             return 0;
 
-        unifiedRule->addEffect(EffectPair(effectIt->first,unifiedState));
+        // unify effect operator value
+        StateValue opValue;
+        if (Rule::isParamValueUnGrounded(e->opStateValue))
+        {
+            string variableName = StateVariable::ParamValueToString(toBeUnifiedRule->actor);
+            map<string, StateValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+            if (paraIt == currentBindingsFromForwardState.end())
+                opValue = e->opStateValue;
+            else
+                opValue = paraIt->second;
+        }
+
+        Effect* unifiedEffect = new Effect(unifiedState, e->effectOp, opValue);
+
+        unifiedRule->addEffect(EffectPair(effectIt->first,unifiedEffect));
 
     }
 
     // unify BestNumericVariableInqueryFun
-    map<string,BestNumericVariableInqueryStruct>::iterator beIt = toBeUnifiedRule->bestNumericVariableInqueryStateFuns.begin();
-    for (; beIt != toBeUnifiedRule->bestNumericVariableInqueryStateFuns.end(); ++ beIt)
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = toBeUnifiedRule->bestNumericVariableinqueryStateFuns.begin();
+    for (; beIt != toBeUnifiedRule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
     {
         BestNumericVariableInqueryStruct& bs = beIt->second;
         State* unifiedState = Rule::groundAStateByRuleParamMap(bs.goalState,currentBindingsFromForwardState);
@@ -1097,7 +1111,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
         else
             varName = StateVariable::ParamValueToString(paraIt->second);
 
-        unifiedRule->bestNumericVariableInqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(varName, unifiedBS));
+        unifiedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(varName, unifiedBS));
     }
 
     // unify heuristics
@@ -1202,7 +1216,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
-                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->InqueryStateFun);
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun);
                 vector<StateValue>::iterator ownerIt;
                 for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
                 {
@@ -1539,116 +1553,121 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     // so pre-defined inquery functions can make it more efficient, which may be a bit cheating, not AGI enough, but still make sense
 
     // only deal with the numeric states, assuming that all the other non-numeric variables should have been grounded
-    map<string,BestNumericVariableInqueryStruct>::iterator beIt = rule->bestNumericVariableInqueryStateFuns.begin();
-    for (; beIt != rule->bestNumericVariableInqueryStateFuns.end(); ++ beIt)
+    // ToBeImproved: currently we are only able to deal with the numeric rule that only has one numeric ungrounded
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = rule->bestNumericVariableinqueryStateFuns.begin();
+    for (; beIt != rule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
     {
         // find in the currentAllBindings to check if this variable has been grounded or not
         if (currentbindings.find(beIt->first) != currentbindings.end())
             continue;
 
-        // this variable has not been grouned , call its BestNumericVariableInquery to ground it
-
-        // first, ground the state required by bestNumericVariableInqueryStateFun
-        BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
-        State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings);
-        if (groundedState == 0)
-        {
-            // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
-            logger().error("OCPlanner::selectValueForGroundingNumericState :the goal state needed in BestNumericVariableInquery cannot be grouned in previous grouding steps. State name is:,"
-                           +  bs.goalState->name() );
-            continue;
-        }
-
-        vector<StateValue>& values = bs.bestNumericVariableInquery(groundedState->stateOwnerList);
-
-        if (values.size() == 0)
-        {
-            // cannot find a good value by this pre-defined inquery functions
-
-            // if this is not a recursive rule, currently our framework cannot give out any soluction, just return failed
-            if (! rule->IsRecursiveRule)
-                return false;
-
-            // for recursive rule, we borrow the preconditions from the unrecursive rule which has the same effect of this rule
-            // ToBeImproved: now recursive rule only has one effect
-
-            if (ruleNode == 0)
-                return false;
-
-            StateNode* effectStateNode = ruleNode->forwardLinks.front();
-
-            // find the first unrecursive rule
-            // you can also find it by ruleEffectIndexes
-            // ToBeImproved: currently we only borrow from the first unrecursive rule found
-            list< pair<float,Rule*> >::iterator canIt;
-            Rule* unrecursiveRule = 0;
-
-            for (canIt = effectStateNode->candidateRules; canIt != effectStateNode->candidateRules.end(); ++ canIt)
-            {
-                Rule* r = canIt->second;
-                if (! r->IsRecursiveRule)
-                {
-                    unrecursiveRule = r;
-                    break;
-                }
-            }
-
-            if (unrecursiveRule == 0)
-                return false; // cannot find a unrecursiveRule to borrow from
-
-            // ground this unrecursiveRule by the effectStateNode
-            Effect* e = rule->effectList.begin()->second;
-
-            Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, e->state);
-            if (borrowRule == 0)
-                return false; // cannot unify the borrowed rule
-
-            // call this function recursively
-            // because we have unified the rules, so the borrowed rule can use the same grounding map with
-            if (! selectValueForGroundingNumericState(borrowedRule,currentbindings))
-                 return false; // cannot find a proper value from the borrowed rule
-
-            // to here, get the value found by selectValueForGroundingNumericState from the borrowed rule
-
-
-            // todo: for general way:
-            // if there are more than two preconditions in this rule, borrow the one without any other backward rule to satisfy it, as hard restrics for selecting values.
-            // because others preconditions can be achieved by other rules.
-            // so that we can select values at least satisfied one condition.
-
-        }
-
-        //  select the best one in this vector<StateValue> that get the highest score according to the heuristics cost calculations
-        float basic_cost;
-        vector<CostHeuristic>& costHeuristics;
-
-        if (rule->CostHeuristics.size() != 0)
-        {
-            basic_cost = rule->basic_cost;
-            costHeuristics = rule->CostHeuristics;
-        }
-        else if (ruleNode && (ruleNode->costHeuristics.size()!= 0) )
-        {
-            basic_cost = 0.0f;
-            costHeuristics = ruleNode->costHeuristics;
-        }
-        else
-        {
-            logger().error("OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation!" );
-            return false;
-        }
-
-        StateValue bestValue = selectBestNumericValueFromCandidates(basic_cost, costHeuristics,currentbindings, beIt->first,values);
-        if (bestValue == UNDEFINED_VALUE)
-        {
-            logger().error("OCPlanner::selectValueForGroundingNumericState: failed to find the best value for grounding numeric state!" );
-            return false;
-        }
-
-        //  ground the rule fully first
-        currentbindings.insert(std::pair<string, StateValue>(beIt->first,bestValue));
-        return true;
+        break;
     }
+
+    if (beIt == rule->bestNumericVariableinqueryStateFuns.end())
+        return false;
+
+    // this variable has not been grouned , call its BestNumericVariableInquery to ground it
+    // first, ground the state required by bestNumericVariableinqueryStateFun
+    BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
+    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings);
+    if (groundedState == 0)
+    {
+        // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
+        logger().error("OCPlanner::selectValueForGroundingNumericState :the goal state needed in BestNumericVariableInquery cannot be grouned in previous grouding steps. State name is:,"
+                       +  bs.goalState->name() );
+        return false;
+    }
+
+    vector<StateValue> values = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
+
+    if (values.size() == 0)
+    {
+        // cannot find a good value by this pre-defined inquery functions
+
+        // if this is not a recursive rule, currently our framework cannot give out any soluction, just return failed
+        if (! rule->IsRecursiveRule)
+            return false;
+
+        // for recursive rule, we borrow the preconditions from the unrecursive rule which has the same effect of this rule
+        // ToBeImproved: now recursive rule only has one effect
+
+        if (ruleNode == 0)
+            return false;
+
+        StateNode* effectStateNode = *(ruleNode->forwardLinks.begin());
+
+        // find the first unrecursive rule
+        // you can also find it by ruleEffectIndexes
+        // ToBeImproved: currently we only borrow from the first unrecursive rule found
+        list< pair<float,Rule*> >::iterator canIt;
+        Rule* unrecursiveRule = 0;
+
+        for (canIt = effectStateNode->candidateRules.begin(); canIt != effectStateNode->candidateRules.end(); ++ canIt)
+        {
+            Rule* r = canIt->second;
+            if (! r->IsRecursiveRule)
+            {
+                unrecursiveRule = r;
+                break;
+            }
+        }
+
+        if (unrecursiveRule == 0)
+            return false; // cannot find a unrecursiveRule to borrow from
+
+        // ground this unrecursiveRule by the effectStateNode
+        Effect* e = rule->effectList.begin()->second;
+
+        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, e->state);
+        if (borrowedRule == 0)
+            return false; // cannot unify the borrowed rule
+
+        // because we have unified the rules, so the borrowed rule can use the same grounding map with
+        if (! selectValueForGroundingNumericState(borrowedRule,currentbindings))
+             return false; // cannot find a proper value from the borrowed rule
+
+        //  check if this variable has been grounded by selectValueForGroundingNumericState from the borrowed rule
+        if (currentbindings.find(beIt->first) != currentbindings.end())
+            return true;
+        else
+            return false;
+
+        // todo: for general way:
+        // if there are more than two preconditions in this rule, borrow the one without any other backward rule to satisfy it, as hard restrics for selecting values.
+        // because others preconditions can be achieved by other rules.
+        // so that we can select values at least satisfied one condition.
+
+    }
+
+    //  select the best one in this vector<StateValue> that get the highest score according to the heuristics cost calculations
+    StateValue bestValue;
+
+    if (rule->CostHeuristics.size() != 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+    }
+    else if (ruleNode && (ruleNode->costHeuristics.size()!= 0) )
+    {
+        bestValue = selectBestNumericValueFromCandidates(0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values);
+    }
+    else
+    {
+        logger().error("OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation!" );
+        return false;
+    }
+
+
+    if (bestValue == UNDEFINED_VALUE)
+    {
+        logger().error("OCPlanner::selectValueForGroundingNumericState: failed to find the best value for grounding numeric state!" );
+        return false;
+    }
+
+    //  ground the rule fully first
+    currentbindings.insert(std::pair<string, StateValue>(beIt->first,bestValue));
+    return true;
+
 
 }
 
@@ -2050,9 +2069,9 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState5);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryStateFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
     bs.goalState = existPathState6;
-    pathTransmitRule->bestNumericVariableInqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
+    pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(var_pos_2), bs));
 
     pathTransmitRule->addEffect(EffectPair(1.0f,becomeExistPathEffect2));
 

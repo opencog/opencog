@@ -119,7 +119,7 @@ namespace opencog { namespace oac {
         bool need_inquery;
 
         // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
-        InqueryStateFun InqueryStateFun;
+        InqueryStateFun inqueryStateFun;
 
         string name() const {return stateVariable->getName();}
 
@@ -134,10 +134,10 @@ namespace opencog { namespace oac {
         //map<string , vector<StateValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
         State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _InqueryStateFun = 0);
+              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
 
         State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-               bool _need_inquery = false, InqueryStateFun _InqueryStateFun = 0);
+               bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
 
         State(){}
 
@@ -337,7 +337,7 @@ namespace opencog { namespace oac {
 
         // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
         // which is the most closed to the a grounded numeric goal
-        map<string,BestNumericVariableInqueryStruct> bestNumericVariableInqueryStateFuns;
+        map<string,BestNumericVariableInqueryStruct> bestNumericVariableinqueryStateFuns;
 
         // ungrounded parameter indexes
         // map<string , vector<StateValue&> >

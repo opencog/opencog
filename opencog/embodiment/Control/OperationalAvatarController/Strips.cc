@@ -43,15 +43,15 @@ const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
 };
 
 State::State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-             vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _InqueryStateFun)
-    : stateOwnerList(_stateOwnerList),need_inquery(_need_inquery),InqueryStateFun(_InqueryStateFun)
+             vector<StateValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
+    : stateOwnerList(_stateOwnerList),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
 {
     State(_stateName, _valuetype,_stateType,  _stateValue);
 }
 
 State::State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-             bool _need_inquery, InqueryStateFun _InqueryStateFun)
-    : stateType(_stateType),need_inquery(_need_inquery),InqueryStateFun(_InqueryStateFun)
+             bool _need_inquery, InqueryStateFun _inqueryStateFun)
+    : stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
 {
     stateVariable = new StateVariable(_stateName,_valuetype,_stateValue);
 }
@@ -68,7 +68,7 @@ State* State::clone()
     cloneState->stateType = this->stateType;
     cloneState->stateOwnerList = this->stateOwnerList;
     cloneState->need_inquery = this->need_inquery;
-    cloneState->InqueryStateFun = this->InqueryStateFun;
+    cloneState->inqueryStateFun = this->inqueryStateFun;
     return cloneState;
 }
 
@@ -80,7 +80,7 @@ void State::assignValue(const StateValue& newValue)
 StateValue State::getStateValue()
 {
     if (need_inquery)
-        return InqueryStateFun(stateOwnerList);
+        return inqueryStateFun(stateOwnerList);
     else
     {
         if (Rule::isParameterUnGrounded(*(this->stateVariable)))

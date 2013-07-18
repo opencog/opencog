@@ -477,7 +477,7 @@ vector<StateValue> Inquery::inqueryNearestAccessiblePosition(const vector<StateV
     if (nearestPos != pos1)
     {
         values.push_back(Vector(nearestPos.x,nearestPos.y,nearestPos.z));
-        return ;
+
     }
 
     return values;
