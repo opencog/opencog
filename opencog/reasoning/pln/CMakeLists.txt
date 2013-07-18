@@ -22,6 +22,7 @@ ADD_LIBRARY (pln-types SHARED
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(pln-types pln_atom_types)
+ADD_DEPENDENCIES(pln-types cython)
 
 ADD_LIBRARY (pln SHARED
 	PLNModule.cc
@@ -83,7 +84,8 @@ ADD_LIBRARY (pln SHARED
 
 ADD_DEPENDENCIES(pln opencog_atom_types)
 ADD_DEPENDENCIES(pln pln_atom_types)
-ADD_DEPENDENCIES(pln cython)
+ADD_DEPENDENCIES(pln logic_wrapper)
+
 
 INCLUDE_DIRECTORIES (
 	# For the Python PLN binding
