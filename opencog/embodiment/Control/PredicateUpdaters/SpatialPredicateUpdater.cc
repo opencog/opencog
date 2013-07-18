@@ -109,7 +109,7 @@ void SpatialPredicateUpdater::update(std::vector<Handle> & objects,
 
     if (! hasDoneFirstTimeUPdate)
     {
-        printf("End the spatial predicate update! %f seconds costed!\n",(endTime - beginTime)/1000.0f);
+        printf("Spatial predicate update complete! Total time: %f seconds.\n",(endTime - beginTime)/1000.0f);
         hasDoneFirstTimeUPdate = true;
     }
     /*
