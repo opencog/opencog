@@ -603,7 +603,7 @@ void PAIWorldWrapper::get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoi
 {
     if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions))
     {
-        printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
+        printf("Pathfinding successful! From (%d,%d,%d) to (%d, %d, %d)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
     }
     else

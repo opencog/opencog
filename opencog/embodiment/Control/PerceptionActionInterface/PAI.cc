@@ -3433,7 +3433,7 @@ void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
     {
         isFirstPerceptTerrian = true;
         perceptTerrianBeginTime = time(NULL);
-        printf("Begin the first time percept the terrain! Begin time: %d. Wait...\n",perceptTerrianBeginTime);
+        printf("Starting initial perception of the terrain! Begin time: %d. Please wait...\n",perceptTerrianBeginTime);
         addSpaceMap(element,timestamp);
         blockNum = 0;
     }
@@ -4219,7 +4219,7 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
     // if it's the first time percept this world, then we should find out all the possible existing block-entities
     if (isFirstPerceptTerrian)
     {
-        printf("Finished the first time percept the terrain - %d blocks in total!\n Now finding all the BlockEntities in the world...! \n", blockNum);
+        printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
         spaceServer().findAllBlockEntitiesOnTheMap();
 
@@ -4235,7 +4235,7 @@ void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, Hand
         spaceServer().markCurMapPerceptedForFirstTime();
 
         isFirstPerceptTerrian = false;
-        printf("FirstPerceptWorld finished! Finish time: %d. Costed %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
+        printf("Initial perception of the non-terrain entities is complete! Finish time: %d. Total time: %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
     }
 
 }
