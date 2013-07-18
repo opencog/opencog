@@ -483,6 +483,37 @@ vector<StateValue> Inquery::inqueryNearestAccessiblePosition(const vector<StateV
     return values;
 }
 
+vector<StateValue> Inquery::inqueryAdjacentPosition(const vector<StateValue>& stateOwnerList)
+{
+    StateValue var1 = stateOwnerList.front();
+
+    spatial::BlockVector pos1;
+    vector<StateValue> values;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+    if (entity1)
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    else
+    {
+        Vector* v1 = boost::get<Vector>(&var1);
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+    }
+
+    // return 24 adjacent neighbour locations (26 neighbours except the pos above and below)
+    int x,y,z;
+    for (x = -1; x <= 1; x ++)
+        for (y = -1; x <= 1; x ++)
+            for (z = -1; z <= 1; z ++)
+            {
+                if ( (x == 0) && (y == 0))
+                    continue;
+
+                values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
+            }
+
+    return values;
+}
+
 StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
