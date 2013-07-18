@@ -81,9 +81,10 @@ ADD_LIBRARY (pln SHARED
 	ASSOC
 )
 
+# logic_wrapper is in the cython directory
+ADD_DEPENDENCIES(pln logic_wrapper)
 ADD_DEPENDENCIES(pln opencog_atom_types)
 ADD_DEPENDENCIES(pln pln_atom_types)
-ADD_DEPENDENCIES(pln cython)
 
 INCLUDE_DIRECTORIES (
 	# For the Python PLN binding
