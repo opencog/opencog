@@ -237,7 +237,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
                                             const Procedure::ProcedureRepository & procedureRepository, 
                                             Handle hActionExecutionLink)
 {
-std::cout<<"Current executing Action: "<<atomSpace.atomAsString(this->current_action)<<std::endl<<std::endl;  
+std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_action)<<std::endl<<std::endl;
 
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
@@ -583,7 +583,7 @@ std::cout<<std::endl<<"Action " <<atomSpace.atomAsString(this->current_action)
                               this->cycleCount
                             );
 
-std::cout<<"action state: success"<<std::endl<<std::endl; 
+std::cout<<"Action state: success"<<std::endl<<std::endl;
                // TODO: record the success and update the weight of corresponding rule
 
             }
@@ -680,7 +680,7 @@ std::cout<<"action status: timeout"<<std::endl;
                             this->currentSchemaId, this->cycleCount
                           );
 
-std::cout<<"current action is still running [SchemaId = "
+std::cout<<"Current action is still running [SchemaId = "
          <<this->currentSchemaId<<", cycle = "<<this->cycleCount<<"] ... "
          <<std::endl; 
 
