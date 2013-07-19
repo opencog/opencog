@@ -31,6 +31,7 @@
 #include <list>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
 
 #include <map>
 #include <math.h>
@@ -801,9 +802,11 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     }
 
     // finished planning!
+
     // generate the action series according to the planning network we have constructed in this planning process
     planID = oac->getPAI().createActionPlan();
 
+    //sendPlan();
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
@@ -813,6 +816,84 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     return true;
 }
 
+void OCPlanner::sendPlan(RuleNode* ruleNode)
+{
+    // generate the action series according to the planning network we have constructed in this planning process
+    PetAction* originalAction = ruleNode->originalRule->action;
+    if (originalAction->getType().getCode() == DO_NOTHING_CODE)
+        return;
+
+    // ground the parameter according to the current bindings
+    PetAction action(originalAction->getType());
+    list<ActionParameter>::const_iterator paraIt;
+    const list<ActionParameter>& params = originalAction->getParameters();
+
+    // for navigation actions, need to call path finder to create every step of it
+    if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
+    {
+        spatial::BlockVector targetPos;
+
+        ActionParameter oparam = (ActionParameter)params.front();
+
+        ParamValue value;
+
+        if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+        {
+            ParamGroundedMapInARule::iterator bindIt = ruleNode->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+            OC_ASSERT( (bindIt != ruleNode->currentAllBindings.end()),
+                      "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                       originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+            value = bindIt->second;
+
+        }
+        else
+            value =  oparam.getValue();
+
+        if ((originalAction->getType().getCode() == WALK_CODE))
+        {
+            Vector v1 = boost::get<Vector>(value);
+            targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+        }
+        else
+        {
+            Entity entity1 = boost::get<Entity>(value);
+            // TODO: Get the right location
+//            if (entity1)
+//                targetPos = ->getObjectLocation(entity1->id);
+
+        }
+
+        // opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(), *atomSpace,);
+
+    }
+    else
+    {
+        for (paraIt = params.begin(); paraIt != params.end(); ++ paraIt)
+        {
+            ActionParameter oparam = (ActionParameter)(*paraIt);
+            if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+            {
+                ParamGroundedMapInARule::iterator bindIt = ruleNode->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+                OC_ASSERT( (bindIt != ruleNode->currentAllBindings.end()),
+                          "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                           originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+
+                action.addParameter(ActionParameter(oparam.getName(),
+                                                    oparam.getType(),
+                                                    bindIt->second) );
+            }
+            else
+                action.addParameter(ActionParameter(oparam.getName(),
+                                                    oparam.getType(),
+                                                    oparam.getValue() ));
+
+            oac->getPAI().addAction(planID, action);
+
+        }
+    }
+
+}
 
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
@@ -1544,8 +1625,6 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
 }
 
-
-
 // this should be called only after the currentAllBindings has been chosen
 // ToBeImproved: currently it can only solve that kind of rules with only one ungrounded Numeric variable
 bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode* ruleNode)
@@ -1724,7 +1803,6 @@ void OCPlanner::recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode)
         s = e->state;
         State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
         ruleNode->orginalGroundedStateValues.push_back(groundedState->getStateValue());
-
     }
 }
 
@@ -1905,7 +1983,7 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(movetoObjRule);
     //----------------------------End Rule: Move_to an object to get closed to it-------------------------------------------
 
-    //----------------------------Begin Rule: walk to a position to get closed to it-----------------------------------------
+    //----------------------------Begin Rule: walk to a position to get closed to it  and stand on it-----------------------------------------
 
     // precondition 1:There exists a path from the agent to object
     vector<StateValue> existPathStateOwnerList2;
@@ -1942,7 +2020,66 @@ void OCPlanner::loadTestRulesFromCodes()
     walkRule->addCostHeuristic(CostHeuristic(closedState3, 0.01f));
 
     this->AllRules.push_back(walkRule);
-    //----------------------------End Rule: walk to a position to get closed to it-----------------------------------------
+    //----------------------------End Rule: walk to a position to get closed to it and stand on it-----------------------------------------
+
+    //----------------------------Begin Rule: walk closed a position to get closed to it, but not to stand on it-----------------------------------------
+
+    // precondition 1:There exists a path from the agent to a position closed to the target postion
+    StateValue nearby_pos = vector_var[0];
+    StateValue target_pos = vector_var[2];
+
+    vector<StateValue> existPathStateOwnerList7;
+    existPathStateOwnerList7.push_back(var_avatar);
+    existPathStateOwnerList7.push_back(nearby_pos);
+    State* existPathState7 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList7, true, &Inquery::inqueryExistPath);
+
+    // precondition 2: nearby_pos is adjacent to target_pos
+    vector<StateValue> adjacentStateOwnerList0;
+    adjacentStateOwnerList0.push_back(target_pos);
+    adjacentStateOwnerList0.push_back(nearby_pos);
+    State* adjacentState0 = new State("is_adjacent",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , "true", adjacentStateOwnerList0, true, &Inquery::inqueryIsAdjacent);
+
+    // action: walk to the nearby_pos
+    PetAction* walkAction0 = new PetAction(ActionType::WALK());
+    walkAction0->addParameter(ActionParameter("target",
+                                            ActionParamType::VECTOR(),
+                                            nearby_pos));
+
+    // effect1: get closed to the position
+    vector<StateValue> closedStateOwnerList7;
+    closedStateOwnerList7.push_back(var_avatar);
+    closedStateOwnerList7.push_back(target_pos);
+    State* closedState7 = new State("Distance",StateValuleType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList7, true, &Inquery::inqueryDistance);
+    Effect* getClosedEffect7 = new Effect(closedState7, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
+
+    // effect2: position changed
+    vector<StateValue> atLocationStateOwnerList7;
+    atLocationStateOwnerList7.push_back(var_avatar);
+    State* atLocationState7 = new State("AtLocation",StateValuleType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList7, true, &Inquery::inqueryAtLocation);
+    Effect* changedLocationEffect7 = new Effect(atLocationState7, OP_ASSIGN, nearby_pos);
+
+    // rule:   Move_to an object to get closed to it
+    Rule* walkclosedRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
+    walkclosedRule->addPrecondition(existPathState7);
+    walkclosedRule->addPrecondition(adjacentState0);
+
+    walkclosedRule->addEffect(EffectPair(0.9f,getClosedEffect7));
+    walkclosedRule->addEffect(EffectPair(0.9f,changedLocationEffect7));
+
+    vector<StateValue> closedStateOwnerList8;
+    closedStateOwnerList8.push_back(var_avatar);
+    closedStateOwnerList8.push_back(nearby_pos);
+    State* closedState8 = new State("Distance",StateValuleType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList8, true, &Inquery::inqueryDistance);
+
+    walkclosedRule->addCostHeuristic(CostHeuristic(closedState8, 0.01f));
+
+    BestNumericVariableInqueryStruct bs2;
+    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryStandableNearbyAccessablePosition;
+    bs2.goalState = closedState7;
+    walkclosedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(StateVariable::ParamValueToString(nearby_pos), bs2));
+
+    this->AllRules.push_back(walkclosedRule);
+    //----------------------------End Rule: walk to a position to get closed to it, but not stand on it-----------------------------------------
 
     //----------------------------Begin Rule: build a block in a position to make it possible to stand on it-----------------------------------------
     // define variables:
@@ -2008,6 +2145,8 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(buildBlockRule);
 
     //----------------------------End Rule: build a block in a position to make it possible to stand on it-----------------------------------------
+
+
 
     //----------------------------Begin Rule: if a position is standable and adjacent(neighbour) then there is possible existing a path from here to this adjacent postion------------------
     // define variables:

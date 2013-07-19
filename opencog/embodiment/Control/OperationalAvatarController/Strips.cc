@@ -769,7 +769,7 @@ bool Rule::isParameterUnGrounded( ActionParameter& param)
     }
 }
 
-bool Rule::isParamValueUnGrounded( StateValue& paramVal)
+bool Rule::isParamValueUnGrounded(StateValue& paramVal)
 {
     if(boost::get<Entity>(&paramVal))
         return isUnGroundedEntity(boost::get<Entity>(paramVal));

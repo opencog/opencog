@@ -268,6 +268,9 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
+     // send action plan to PAI
+     void sendPlan(RuleNode* ruleNode);
+
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
 //     vector<State*> globalStatesCache;

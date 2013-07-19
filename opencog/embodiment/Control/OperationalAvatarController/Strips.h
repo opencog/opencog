@@ -386,7 +386,7 @@ namespace opencog { namespace oac {
         // Check if a parameter is an ungrounded parameter
         // Compared to the bool_var[PARAMETER_NUM],str_var[PARAMETER_NUM]...in PlanningHeaderFiles.h
         bool static isParameterUnGrounded(ActionParameter &param);
-        bool static isParamValueUnGrounded( StateValue& paramVal);
+        bool static isParamValueUnGrounded( StateValue &paramVal);
         bool static isUnGroundedString( string& s);
         bool static isUnGroundedVector( Vector& v);
         bool static isUnGroundedEntity( Entity& e);
