@@ -514,6 +514,60 @@ vector<StateValue> Inquery::inqueryAdjacentPosition(const vector<StateValue>& st
     return values;
 }
 
+vector<StateValue> Inquery::inqueryStandableNearbyAccessablePosition(const vector<StateValue>& stateOwnerList)
+{
+    StateValue var1 = stateOwnerList.front();
+    StateValue var2 = stateOwnerList[1];
+
+    spatial::BlockVector pos1, pos2;
+    vector<StateValue> values;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+
+    pos1 = spaceMap->getObjectLocation(entity1->id);
+
+
+    Vector* v1 = boost::get<Vector>(&var2);
+    pos2 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+
+
+    // return 24 adjacent neighbour locations (26 neighbours except the pos above and below)
+    int x,y,z;
+    for (x = -1; x <= 1; x ++)
+        for (y = -1; x <= 1; x ++)
+            for (z = -1; z <= 1; z ++)
+            {
+                if ( (x == 0) && (y == 0))
+                {
+                    continue;
+
+                    SpaceServer::SpaceMapPoint curPos(pos2.x + x,pos2.y + y,pos2.z + z);
+
+                    // check if it's standable
+                    if (! spaceMap->checkStandable(curPos))
+                        continue;
+                    // check if there is a path from the avatar to this position
+                    if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
+                    {
+                        if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
+                        {
+                            values.push_back(Vector(curPos.x,curPos.y,curPos.z));
+                        }
+
+                        continue;
+                    }
+
+                    vector<spatial::BlockVector> path;
+                    spatial::BlockVector nearestPos;
+                    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+                        values.push_back(Vector(curPos.x,curPos.y,curPos.z));
+
+                }
+            }
+
+    return values;
+}
+
 StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)
 {
     StateValue var1 = stateOwnerList.front();
