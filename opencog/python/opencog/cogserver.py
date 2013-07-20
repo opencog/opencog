@@ -1,9 +1,21 @@
 __author__ = 'Keyvan'
 
-class MindAgent(object):
 
+class MindAgent(object):
     def run(self, atomspace):
         pass
+
+
+class Request(object):
+    def __init__(self):
+        pass
+
+    def run(self, args=[], atomspace=None):
+        self.send("This is the default python request.")
+
+    def send(self, msg):
+        print str(msg)
+
 
 class Server(object):
     def __init__(self):
