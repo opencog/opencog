@@ -249,7 +249,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 }
 
 
-bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
+bool OCPlanner::doPlanning(const vector<State*>& goal)
 {
 
     int ruleNodeCount = 0;
@@ -831,7 +831,7 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
     // for navigation actions, need to call path finder to create every step of it
     if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
     {
-        spatial::BlockVector targetPos;
+        spatial::BlockVector startPos,targetPos;
 
         ActionParameter oparam = (ActionParameter)params.front();
 
@@ -858,13 +858,16 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
         else
         {
             Entity entity1 = boost::get<Entity>(value);
-            // TODO: Get the right location
-//            if (entity1)
-//                targetPos = ->getObjectLocation(entity1->id);
-
+            targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
         }
 
-        // opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(), *atomSpace,);
+        // Get the right location of it at current step, from the orginalGroundedStateValues, it's the starting position before it moves
+
+        // For any moving action, it's the second element in the effect list, as well as in the  orginalGroundedStateValues
+        Vector v1 = boost::get<Vector>( ruleNode->orginalGroundedStateValues[1]);
+        startPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+        opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),spaceServer().getLatestMap(),startPos,targetPos,planID);
 
     }
     else
@@ -1788,7 +1791,7 @@ StateValue OCPlanner::selectBestNumericValueFromCandidates(float basic_cost, vec
     return bestValue;
 }
 
-// this function should be called after completely finished grounding a rule
+// this function should be called after completely finished grounding a rule.but it is before the effect taking place.
 void OCPlanner::recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode)
 {
     vector<EffectPair>::iterator effectIt;

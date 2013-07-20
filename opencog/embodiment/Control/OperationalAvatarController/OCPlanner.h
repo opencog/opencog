@@ -230,7 +230,7 @@ public:
 
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
-     bool doPlanning(const vector<State*> &goal, vector<PetAction>& plan);
+     bool doPlanning(const vector<State*> &goal);
 
 protected:
 
