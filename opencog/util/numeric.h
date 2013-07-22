@@ -35,7 +35,7 @@
 #include <set>
 #include <map>
 
-#include <boost/math/special_functions.hpp>
+//#include <boost/math/special_functions.hpp>
 #include <boost/range/numeric.hpp>
 
 #include "exceptions.h"
