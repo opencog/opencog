@@ -17,6 +17,26 @@ class Request(object):
         print str(msg)
 
 
+class MindAgent:
+    # TODO add a pointer to the Agent C++ object so that calls to stimulate atoms
+    # can be made (among other things)
+
+    def __init__(self):
+        self.frequency = 0
+        pass
+
+# These methods are not available until we have support for MindAgents running
+# continuously in their own threads
+#    def start(self, AtomSpace atomspace):
+#        pass
+
+#    def end(self):
+#        pass
+
+    def run(self, atomspace):
+        print "Implement me in your MindAgent subclass: " + atomspace
+
+
 class Server(object):
     def __init__(self):
         self.mind_agents = set()

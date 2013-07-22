@@ -1,46 +1,26 @@
 __author__ = 'ramin'
 
-from opencog.atomspace import AtomSpace,types
-import formulas
+from Rules import Rule
 
 
 class ForwardChainer(object):
-    def __init__(self, atomspace = AtomSpace()):
+    def __init__(self, atomspace=None):
         self.atomspace = atomspace
+        self.rules = []
 
     def run(self, node):
         result = []
         links = node.incoming
 
-        for link in links:
-            if self._is_deductable(link):
-                result += self.deduct(node, link)
+        for rule in self.rules:
+            for link in links:
+                if rule.can_use(link):
+                    result += rule.run(node, link)
 
         return result
 
+    def add_rule(self, rule):
+        assert isinstance(rule, Rule)
+        assert type(rule) != Rule
 
-    def _is_deductable(self, link):
-        allowed_types = [types.InheritanceLink, types.IntensionalInheritanceLink, types.SubsetLink, types.ImplicationLink, types.ExtensionalImplicationLink, types.IntensionalImplicationLink]
-        return link.gettype() in allowed_types
-
-    def deduct(self, node, link):
-        result = []
-        nodes = list(link.out)
-        nodes.remove(node)
-        for n in nodes:
-            out_links = list(n.incoming)
-            out_links.remove(link)
-            for l in out_links:
-                if l.gettype() == link.gettype():
-                    a = node
-                    b = n
-                    c = list(l.out)
-                    c.remove(n)
-                    c = c[0]
-                    ab = link
-                    bc = l
-
-                    tv = formulas.deduce(a.tv, b.tv, c.tv, ab.tv, bc.tv)
-                    result.append(self.atomspace.add_link(link.type, [a, c], tv))
-
-        return result
+        self.rules.append(rule)

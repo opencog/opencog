@@ -1,7 +1,7 @@
 __author__ = 'ramin'
 
 from opencog.atomspace import AtomSpace, types, TruthValue
-from logic import ForwardChainer
+from agents import SimpleForwardInferenceAgent
 
 
 atomspace = AtomSpace()
@@ -13,6 +13,8 @@ c = atomspace.add_node(types.ConceptNode, "ashkan", TruthValue(1, 1))
 ab = atomspace.add_link(types.InheritanceLink, [a, b], TruthValue(1, 1))
 ac = atomspace.add_link(types.InheritanceLink, [b, c], TruthValue(1, 1))
 
-fc = ForwardChainer(atomspace)
+agent = SimpleForwardInferenceAgent()
+agent.run(atomspace)
 
-print fc.run(a)
+atomspace.print_list()
+
