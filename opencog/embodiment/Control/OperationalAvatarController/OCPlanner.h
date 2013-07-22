@@ -159,6 +159,14 @@ public:
     // after rebinding , add currentBindingsFromForwardState and currentBindingsViaSelecting together to CurrentAllBindings
     void updateCurrentAllBindings();
 
+    static int getDepthOfRuleNode(const RuleNode* r);
+
+    bool operator < (const RuleNode& other) const
+    {
+        // so , the deeper rule node will be put front
+        return ( RuleNode::getDepthOfRuleNode(this) > RuleNode::getDepthOfRuleNode(&other));
+    }
+
 };
 
 class StateNode
@@ -259,6 +267,11 @@ protected:
      // all the new elements should be put_front , so the latest update of the same state will already put in front of the older history
      list<StateNode*> temporaryStateNodes;
 
+     // to store all the rule node in current plan. it should be clear everytime begin new planning.
+     // every new rule node will be insurt into this list, and it will be removed from the set if it's deleted
+     // this list will be sorted after a planning finised according to the order of dependency relations
+     list<RuleNode*> allRuleNodeInThisPlan;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -326,6 +339,8 @@ protected:
      void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
      void deleteStateNodeInTemporaryList(StateNode* stateNode);
+
+     void deleteRuleNodeInAllRuleNodeList(RuleNode *ruleNode);
 
      // different rules usually have different variable names to describe a same variable, some times we need to unify these variables names
      // change the variable names in toBeUnifiedRule according to forwardState, return the unified rule

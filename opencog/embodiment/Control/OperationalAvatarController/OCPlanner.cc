@@ -48,7 +48,10 @@ using namespace std;
 void StateNode::calculateNodeDepth()
 {
     if (! this->forwardRuleNode)
+    {
+        this->depth = -1;
         return;
+    }
 
     set<StateNode*>::iterator it;
 
@@ -119,6 +122,22 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
     satstateNode = 0;
 
     return false;
+}
+
+int RuleNode::getDepthOfRuleNode(const RuleNode* r)
+{
+     // check the depth of the effect state nodes of this rule, get the deepest state node.
+    set<StateNode*>::iterator it;
+
+    int deepest = 0;
+    for ( it = r->forwardLinks.begin(); it != r->forwardLinks.end();  ++ it)
+    {
+        int d = ((StateNode*)(*it))->depth;
+        if (d > deepest)
+            deepest = d;
+    }
+
+    return deepest;
 }
 
 OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
@@ -263,6 +282,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
     // Set this cloned spaceMap for Inquery
     Inquery::setSpaceMap(clonedMap);
 
+    allRuleNodeInThisPlan.clear();
     unsatisfiedStateNodes.clear();
     temporaryStateNodes.clear();
     imaginaryHandles.clear(); // TODO: Create imaginary atoms
@@ -596,6 +616,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
         ruleNode->forwardLinks.insert(curStateNode);
         curStateNode->backwardRuleNode = ruleNode;
 
+        allRuleNodeInThisPlan.push_front(ruleNode);
+
         // When apply a rule, we need to select proper variables to ground it.
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
@@ -806,7 +828,15 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
     // generate the action series according to the planning network we have constructed in this planning process
     planID = oac->getPAI().createActionPlan();
 
-    //sendPlan();
+    // sort the list of rule node
+    allRuleNodeInThisPlan.end();
+
+    // and then encapsule the action plac for each step and send to PAI
+    list<RuleNode*>::iterator planRuleNodeIt;
+    for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
+    {
+        sendPlan(*planRuleNodeIt);
+    }
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
@@ -1072,6 +1102,9 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
     }
 
+    deleteRuleNodeInAllRuleNodeList(ruleNode);
+    delete ruleNode;
+
 }
 
 void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
@@ -1082,6 +1115,19 @@ void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
         if ((*it) == stateNode)
         {
             temporaryStateNodes.erase(it);
+            break;
+        }
+    }
+}
+
+void OCPlanner::deleteRuleNodeInAllRuleNodeList(RuleNode *ruleNode)
+{
+    list<RuleNode*>::iterator it;
+    for (it = allRuleNodeInThisPlan.begin(); it != allRuleNodeInThisPlan.end(); ++it)
+    {
+        if ((*it) == ruleNode)
+        {
+            allRuleNodeInThisPlan.erase(it);
             break;
         }
     }
