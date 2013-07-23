@@ -378,7 +378,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
 
                     // TODO: check if this rule is positive or negative for the current state
 
-                    // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
+                    // Because grounding every rule fully is time consuming, but some cost of rule requires the calculation of grounded variables.
                     // So here we just use the basic cost of every rule as the cost value.
                     float curRuleScore = 0.5f* ruleIt->first + 0.5*(1.0f - r->getBasicCost());
                     if (r->IsRecursiveRule)
@@ -387,6 +387,10 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
                     // the rules with higher score are put in front
                     list< pair<float,Rule*> >::iterator canIt;
                     canIt = curStateNode->candidateRules.begin();
+
+                    // ground it only by this current state node,  to check if its other effects negative some of the other temporaryStateNodes
+                    int negativeNum = checkNegativeStateNumBythisRule(r,curStateNode);
+                    curRuleScore -= negativeNum;
 
                     while(true)
                     {
@@ -928,6 +932,65 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
 
 }
 
+// return how many states in the temporaryStateNodes will be Negatived by this rule
+int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState)
+{
+
+    RuleNode* tmpRuleNode = new RuleNode(rule);
+
+    groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
+
+    int num = 0;
+
+    // check all the effects:
+    vector<EffectPair>::iterator effectItor;
+
+    for (effectItor = rule->effectList.begin(); effectItor != rule->effectList.end(); ++ effectItor)
+    {
+        Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
+
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentAllBindings);
+
+        if (! effState)
+            continue;
+
+        list<StateNode*>::iterator sait;
+
+        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); )
+        {
+            // only check the state nodes without backward rule node,
+            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+            if (((StateNode*)(*sait))->backwardRuleNode == 0)
+            {
+                 ++ sait;
+                continue;
+            }
+
+            if (effState->isSameState( *((StateNode*)(*sait))->state ))
+            {
+                // check if this effect unsatisfy this state
+                float satDegree;
+                StateNode* satStateNode = (StateNode*)(*sait);
+                if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
+                {
+                    num ++;
+
+                }
+                else
+                    ++ sait;
+            }
+            else
+                ++ sait;
+
+        }
+    }
+
+    delete tmpRuleNode;
+
+    return num;
+
+}
+
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
 {
@@ -1264,7 +1327,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
 
 }
 
-bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
+bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
 {
     // first, find the state in the effect list of this rule which the same to this forward state
     vector<EffectPair>::iterator effectIt;
@@ -1284,7 +1347,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
     if (effectIt == ruleNode->originalRule->effectList.end())
         return false;
 
-    // check if all the stateOwner parameters grounded
+    // ground stateOwner parameters
     vector<StateValue>::iterator f_ownerIt = forwardStateNode->state->stateOwnerList.begin(); // state owner list in forward state
     vector<StateValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
 
@@ -1298,6 +1361,16 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
                 ruleNode->currentBindingsFromForwardState.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
         }
     }
+
+    return true;
+}
+
+bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
+{
+
+    // First ground all the parameters
+    if (! groundARuleNodeParametersFromItsForwardState (ruleNode,forwardStateNode))
+        return false;
 
     // The cost calculation states should in the same context of the main parts of the rule, so it should not contain other new ungrounded variables
     // so we don't need to check the cost calculation states.

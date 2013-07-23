@@ -297,6 +297,11 @@ protected:
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
+     // return how many states in the temporaryStateNodes will be Negatived by this rule
+     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState);
+
+     bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
+
      // ground the variables according to its forward state node,
      // by finding the variables in this rule and its forward state node with the same semantic meaning,
      // and put the value of the variables of the froward state to the rule variables.
