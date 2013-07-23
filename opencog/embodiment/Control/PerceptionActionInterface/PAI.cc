@@ -3730,6 +3730,11 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
+    if (isEdible)
+    {
+        printf("Something edible was reported!!\n\n\n");
+    }
+
     bool isVisible = isObjectVisible(properties);
 
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
