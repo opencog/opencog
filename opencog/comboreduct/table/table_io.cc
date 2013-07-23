@@ -332,7 +332,7 @@ istream& istreamRawITable(istream& in, ITable& tab,
     vector<string> fl = tokenizeRow<string>(lines[0], ignored_indices);
     arity_t arity = fl.size();
 
-    atomic<int> arity_fail_row(-1);
+    std::atomic<int> arity_fail_row(-1);
     auto parse_line = [&](size_t i)
     {
         // tokenize the line and fill the table with
@@ -810,7 +810,7 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
 
     // determine arity
     arity_t arity = maybe_header.size();
-    atomic<int> arity_fail_row(-1);
+    std::atomic<int> arity_fail_row(-1);
 
     // determine initial type
     vector<type_node> types(arity, id::unknown_type);

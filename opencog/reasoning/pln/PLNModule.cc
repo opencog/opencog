@@ -293,7 +293,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     // result to be overwriten
     vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE);
 
-    OC_ASSERT(rule, "Apparently the rule %s is undefined", ruleName.c_str());
+    OC_ASSERT(rule.get(), "Apparently the rule %s is undefined", ruleName.c_str());
 
     pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
     if(rule->isComposer()) {
