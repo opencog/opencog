@@ -1,6 +1,7 @@
 #!/usr/bin/runhaskell
 import Data.List
 import Data.List.Split
+import Data.String.Utils
 
 -- Parse MOSES log file and generate a CSV file describing for each
 -- deme expansion the selected features.
@@ -9,27 +10,28 @@ import Data.List.Split
 main :: IO ()
 main = do
   -- Write header
-  putStrLn "parent_demeID,xmplr_rank,visit,xmplr_features,new_features,prune_features,spawn_demeID"
+  putStrLn "parent_demeID,xmplr_rank,visit,new_demeID,xmplr_features,new_features"
   -- Then parse the file
-  parseLines
+  parseLines []
 
 -- Parse each line, turning the content into some portion of the CSV
 -- row, it's all order properly with the order of the information in
 -- the log file so that it does generate the CSV rows properly
-parseLines :: IO ()
-parseLines = do
+parseLines :: [String] -> IO ()
+parseLines l = do
   line <- getLine
   case line of
     [] -> return()
-    _ | hasDemeParentID line  -> putStr (parseDemeParentID line ++ ","
-                                         ++ (parseXmplrRank line) ++ ","
-                                         ++ (parseVisit line) ++ ",")
-      | hasXmplrFeatures line -> putStr (unwords (parseXmplrFeatures line) ++ ",")
-      | hasNewFeatures line   -> putStr (unwords (parseNewFeatures line) ++ ",")
-      | hasPruneFeatures line -> putStr (unwords (parsePruneFeatures line) ++ ",")
-      | hasDemeID line        -> putStrLn (parseDemeID line)
-      | otherwise             -> parseLines -- parse next lines
-  parseLines
+    _ | hasDemeParentID line  -> parseLines [parseDemeParentID line,
+                                             parseXmplrRank line,
+                                             parseVisit line]
+      | hasDemeID line        -> parseLines (l ++ [parseDemeID line])
+      | hasXmplrFeatures line -> parseLines (l ++ [join " " (parseXmplrFeatures line)])
+      | hasNewFeatures line   -> let content = l ++ [join " " (parseNewFeatures line)]
+                                 in do putStrLn (join "," content)
+                                       parseLines (take 3 l)
+      | otherwise             -> return ()
+  parseLines l
 
 -- Extract the deme's parent ID of the given log line
 hasDemeParentID :: String -> Bool
@@ -41,7 +43,7 @@ parseVisit :: String -> String
 parseVisit l = mc 2 init (words l !! 12)
 -- From same line extract the exemplar rank
 parseXmplrRank :: String -> String
-parseXmplrRank l = words l !! 5
+parseXmplrRank l = mc 2 init (words l !! 5)
 
 -- Assume the (n+1)th word is a comma separated list and return that
 -- list
@@ -53,26 +55,21 @@ csl i l = let wl = words l in
 
 -- Turn a log line containing the exemplar features into list of features
 hasXmplrFeatures :: String -> Bool
-hasXmplrFeatures = isInfixOf "From which were in the exemplar"
+hasXmplrFeatures = isInfixOf "Selected features which are in the exemplar:"
 parseXmplrFeatures :: String -> [String]
-parseXmplrFeatures = csl 9
+parseXmplrFeatures = csl 10
 
 -- Turn a log line containing the new features into list of features
 hasNewFeatures :: String -> Bool
-hasNewFeatures = isInfixOf "From which are new"
+hasNewFeatures = isInfixOf "Selected features which are new:"
 parseNewFeatures :: String -> [String]
-parseNewFeatures = csl 7
-
-hasPruneFeatures :: String -> Bool
-hasPruneFeatures = isInfixOf "Prune the exemplar from non-selected features"
-parsePruneFeatures :: String -> [String]
-parsePruneFeatures = csl 9
+parseNewFeatures = csl 8
 
 -- Extract the deme ID of the given log line
 hasDemeID :: String -> Bool
-hasDemeID = isInfixOf "Expansion"
+hasDemeID = isInfixOf "Breadth-first expansion for deme"
 parseDemeID :: String -> String
-parseDemeID l = words l !! 4
+parseDemeID l = words l !! 8
 
 -- multiple composition, for example mc 3 f = f . (f . f)
 mc :: Int -> (a -> a) -> (a -> a)
