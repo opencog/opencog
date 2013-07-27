@@ -268,7 +268,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 }
 
 
-bool OCPlanner::doPlanning(const vector<State*>& goal)
+ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
 {
 
     int ruleNodeCount = 0;
@@ -439,7 +439,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
                 if (forwardRuleNode == 0)
                 {
                     // oh, this state node is already the goal state node, and it's impossible to achieve, return planning fail
-                    return false;
+                    return "";
                 }
 
                 if (forwardRuleNode->ParamCandidates.size() == 0)
@@ -847,7 +847,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal)
 
     // todo: remove all the imaginary atoms in imaginaryHandles
 
-    return true;
+    return planID;
 }
 
 void OCPlanner::sendPlan(RuleNode* ruleNode)

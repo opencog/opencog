@@ -26,6 +26,7 @@ ADD_LIBRARY (oac SHARED
     Strips
     OCPlanner
     Inquery
+    OCPlanningAgent
 )
 
 INCLUDE_DIRECTORIES (
