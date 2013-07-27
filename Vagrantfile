@@ -1,6 +1,8 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Documentation: http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant
+
 Vagrant.configure("2") do |config|
   # All Vagrant configuration is done here. For a complete reference of
   # available configuration options, please see the online documentation
@@ -56,7 +58,7 @@ Vagrant.configure("2") do |config|
                    "--memory", "1550",
                    "--name", "opencog-dev-vm",
                    # When the VM isn't running, you can change the "1" below to the number of host cores you want to assign to VM:
-                   "--cpus", "2"
+                   "--cpus", "1"
                    ]
   end
 end

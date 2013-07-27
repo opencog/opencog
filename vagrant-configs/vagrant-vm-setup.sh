@@ -4,6 +4,8 @@
 # TODO: 
 # 1. Automatically detect if user's computer has 32-bit or 64-bit OS
 #    installed. And boot Ubuntu precise32 or precise64 accordingly.
+#
+# Documentation: http://wiki.opencog.org/w/Setup_OpenCog_development_environment_VM_using_Vagrant
 
 echo "==========================================================="
 echo "[vagrant-vm-setup.sh] Setting up vagrant VM, please wait..."
