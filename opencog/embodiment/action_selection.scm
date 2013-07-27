@@ -722,6 +722,16 @@
     )
 )
 
+;execute updating the "plan_selected_demand_goal"
+(define (update_selected_demand_goal)
+    (let ( (selected_demand_goal (list) ))
+    (set! selected_demand_goal (get_most_critical_demand_goal) )
+    (update_reference_link
+        (ConceptNode "plan_selected_demand_goal")
+        selected_demand_goal
+    )
+)
+
 ; Do the planning, this function is called by PsiActionSelectionAgent::doPlanning
 ; TODO: take advantage of modulators later
 (define (do_planning)
