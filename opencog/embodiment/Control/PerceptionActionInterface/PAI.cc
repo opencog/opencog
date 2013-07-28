@@ -503,6 +503,24 @@ ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (ope
     return result;
 }
 
+HandleSeq PAI::getActionSeqFromPlan(ActionPlanID planId)
+{
+    HandleSeq actionHandles;
+    PlanToActionIdsMap::iterator planIt = planToActionIdsMaps.find(planId);
+    if (planIt == planToActionIdsMaps.end())
+        return actionHandles;
+
+    ActionIdMap::iterator actionIt ;
+
+
+    for (actionIt = planToActionIdsMaps[planId].begin(); actionIt != planToActionIdsMaps[planId].end(); ++ actionIt)
+    {
+        actionHandles.push_back(actionIt->second);
+    }
+
+    return actionHandles;
+}
+
 bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
 {
     ActionPlanMap::iterator it = inProgressActionPlans.find(planId);

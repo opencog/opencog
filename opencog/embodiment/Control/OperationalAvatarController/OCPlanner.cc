@@ -832,14 +832,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
     // generate the action series according to the planning network we have constructed in this planning process
     planID = oac->getPAI().createActionPlan();
 
+    std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
+
     // sort the list of rule node
     allRuleNodeInThisPlan.end();
 
     // and then encapsule the action plac for each step and send to PAI
     list<RuleNode*>::iterator planRuleNodeIt;
+    int stepNum = 1;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
-        sendPlan(*planRuleNodeIt);
+        addActionToPlan(*planRuleNodeIt, stepNum);
+        stepNum ++;
     }
 
     // Reset the spaceMap for inquery back to the real spaceMap
@@ -850,7 +854,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
     return planID;
 }
 
-void OCPlanner::sendPlan(RuleNode* ruleNode)
+void OCPlanner::addActionToPlan(RuleNode* ruleNode, int stepNUm)
 {
     // generate the action series according to the planning network we have constructed in this planning process
     PetAction* originalAction = ruleNode->originalRule->action;
@@ -861,6 +865,8 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
     PetAction action(originalAction->getType());
     list<ActionParameter>::const_iterator paraIt;
     const list<ActionParameter>& params = originalAction->getParameters();
+
+    std::cout<<std::endl<<"Step No."<< stepNUm << originalAction->getName();
 
     // for navigation actions, need to call path finder to create every step of it
     if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
@@ -888,11 +894,14 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
             Vector v1 = boost::get<Vector>(value);
             targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
 
+            std::cout<< ActionParameter::ParamValueToString(v1)<<std::endl;
         }
         else
         {
             Entity entity1 = boost::get<Entity>(value);
             targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
+
+            std::cout<< entity1.stringRepresentation()<<std::endl;
         }
 
         // Get the right location of it at current step, from the orginalGroundedStateValues, it's the starting position before it moves
@@ -919,15 +928,20 @@ void OCPlanner::sendPlan(RuleNode* ruleNode)
                 action.addParameter(ActionParameter(oparam.getName(),
                                                     oparam.getType(),
                                                     bindIt->second) );
+                std::cout<< ActionParameter::ParamValueToString(bindIt->second);
             }
             else
+            {
                 action.addParameter(ActionParameter(oparam.getName(),
                                                     oparam.getType(),
                                                     oparam.getValue() ));
-
-            oac->getPAI().addAction(planID, action);
+                std::cout<< oparam.stringRepresentation();
+            }
 
         }
+
+        oac->getPAI().addAction(planID, action);
+
     }
 
 }

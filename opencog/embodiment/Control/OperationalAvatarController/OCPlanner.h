@@ -282,7 +282,7 @@ protected:
      void loadTestRulesFromCodes();
 
      // send action plan to PAI
-     void sendPlan(RuleNode* ruleNode);
+     void addActionToPlan(RuleNode* ruleNode, int stepNUm);
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan

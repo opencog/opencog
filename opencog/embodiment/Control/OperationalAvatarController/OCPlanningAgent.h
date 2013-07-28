@@ -50,15 +50,29 @@ protected:
 
     OAC* oac;
 
-    AtomSpace& atomSpace;
+    HandleSeq current_actions;
+
+    Handle current_action;
+
+    bool use_ocplanner;
+
+    // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
+    long procedureExecutionTimeout;
+
+    time_t timeStartCurrentAction; // When the current action was executed
+
 
     void getCurrentDemand();
 
     void runOCPlanner();
 
+    void printPlan();
+
 public:
 
     OCPlanningAgent();
+    void init(opencog::CogServer * server);
+
     virtual ~OCPlanningAgent();
 
     virtual const ClassInfo& classinfo() const {
