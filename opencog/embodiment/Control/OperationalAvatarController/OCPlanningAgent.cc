@@ -39,6 +39,11 @@ OCPlanningAgent::OCPlanningAgent()
     this->forceInitNextCycle();
 }
 
+OCPlanningAgent::~OCPlanningAgent()
+{
+    delete ocplanner;
+}
+
 void OCPlanningAgent::init(opencog::CogServer * server)
 {
     logger().debug( "OCPlanningAgent::%s - Initializing the Agent [cycle = %d]",
@@ -143,94 +148,84 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                      this->cycleCount
                   );
 
-    if (this->currentOCPlanID != "")
+    if (this->currentOCPlanID != "") // Currently , there is one plan being executed
     {
-        if (! oac->getPAI().isPlanFinished(currentOCPlanID))
+        // check if current action failed
+        if ( oac->getPAI().isActionFailed(this->current_action, oac->getPAI().getLatestSimWorldTimestamp()))
         {
-            // the plan is still being execting
+            std::cout<<"Current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
+                     << " failed! [PlanId = "
+                     <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
+        }
+        else if ( oac->getPAI().isActionDone( this->current_action, oac->getPAI().getLatestSimWorldTimestamp()) )
+        {
+            // the current action has been done successfully!
+            std::cout<<"OCPlanningAgent::Action execution success! "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
+                    << " [PlanId = " <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
 
-            // check if current action failed
-            if (! oac->getPAI().isActionDone( this->current_action, oac->getPAI().getLatestSimWorldTimestamp()) )
+            // get next action in this plan
+            if (this->current_actions.empty())
             {
+                // the current action is already the last action in this plan. so this plan is exectued successfully!
+                std::cout<<std::endl<<"OCPlanningAgent::Action plan is executed successfully! Plan ID = "<< this->currentOCPlanID
+                         <<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
+                         <<std::endl<<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal)<<std::endl;
 
-                // check if current action timeout
-                if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout )
-                {
-                    std::cout<<"current action timeout [PlanId = "
-                            <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... "
-                            <<std::endl;
+                // reset all the planning variables
+                this->currentOCPlanID = "";
+                this->current_action = Handle::UNDEFINED;
+                this->current_actions.clear();
+            }
+            else
+            {
+                // get the next action to execute it
+                this->current_action = this->current_actions.front();
+                this->current_actions.erase(current_actions.begin());
+                this->timeStartCurrentAction = time(NULL);
+            }
+
+        }
+        else
+        {
+            // the current action is still being executing...
+
+            // check if current action timeout
+            if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout )
+            {
+                std::cout<<"current action timeout [PlanId = "
+                        <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... "
+                        <<std::endl;
 
 
-                    // add 'actionFailed' predicates for timeout actions
-                    oac->getPAI().setPendingActionPlansFailed();
+                // add 'actionFailed' predicates for timeout actions
+                oac->getPAI().setPendingActionPlansFailed();
 
 //                    // Stop the time out Action
 //                    procedureInterpreter.stopProcedure(this->currentPlanId);
 
-                    std::cout<<"Action status: timeout"<<std::endl;
+                std::cout<<"Action status: timeout"<<std::endl;
 
-                    // Now that this action failed, the following action sequence
-                    // should be dropped.
-                    this->current_actions.clear();
+                // Now that this action failed, the following action sequence
+                // should be dropped.
+                this->current_actions.clear();
 
-                  }
-                   // If the Action is still running and is not time out, simply returns
-                  else
-                  {
-
-
-                        std::cout<<"current action is still running [PlanId = "
-                                <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... "
-                                <<std::endl;
-                  }
-            }
-
-//            if()
-//            {
-//                // Get next action from current plan
-//                if ( !this->current_plan_actions.empty() ) {
-//                    this->current_action = this->current_actions.back();
-//                    this->current_plan_actions.pop_back();
-//                }
-//                else if ( !this->temp_action_list.empty() ) {
-//                    this->getActions(oac->getAtomSpace(), this->temp_action_list.back(), this->current_plan_actions);
-//                    this->temp_action_list.pop_back();
-
-//                    this->current_action = this->current_actions.back();
-//                    this->current_actions.pop_back();
-//                }
-//                else {
-//                    logger().debug("PsiActionSelectionAgent::%s - "
-//                                   "Failed to get any actions from the planner. Try planning next cycle [cycle = %d]",
-//                                    __FUNCTION__, this->cycleCount
-//                                  );
-//                    return;
-//                }
-//            }
-
-//              return;
-
-//        }
-
-//        if(oac->getPAI().hasPlanFailed(currentOCPlanID))
-//        {
-//            std::cout<<std::endl<<"OCPlanningAgent::Action execution failed! Plan ID = "<< this->currentOCPlanID
-//                     <<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
-//                     <<std::endl<<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal)<<std::endl;
-
-//        }
-//        else
-//        {
-//            std::cout<<std::endl<<"OCPlanningAgent::Action execution success! Plan ID = "<< this->currentOCPlanID
-//                     <<std::endl<<"Selected Demand Goal [cycle = "<<this->cycleCount<<"]:"
-//                     <<std::endl<<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal)<<std::endl;
-//        }
-
-//        this->currentOCPlanID = "";
-
-     }
+              }
+               // If the Action is still running and is not time out, simply returns
+              else
+              {
+                std::cout<<"current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
+                         << " is still running [PlanId = "
+                         <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
+                return;
+              }
+        }
     }
+    else
+    {
+        // currently, there is not any plan being executed.
+        // run the planner to generate a new plan
 
-    runOCPlanner();
+        runOCPlanner();
+    }
 
 }
