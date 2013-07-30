@@ -30,6 +30,7 @@
 #include "PsiRuleUtil.h"
 
 using namespace opencog::oac;
+using namespace std;
 
 OCPlanningAgent::OCPlanningAgent()
 {
@@ -68,6 +69,10 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     }
 
     this->currentOCPlanID = "";
+
+    this->current_actions.clear();
+    this->current_action = Handle::UNDEFINED;
+    this->current_step = -1;
 
     this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
 }
@@ -133,10 +138,21 @@ void OCPlanningAgent::runOCPlanner()
 
         oac->getPAI().sendActionPlan(currentOCPlanID);
 
-        this->current_action = current_actions.front();
-        this->current_actions.erase(current_actions.begin());
+        this->current_step = 1;
+        this->current_action = current_actions[current_step - 1];
         this->timeStartCurrentAction = time(NULL);
     }
+}
+
+bool OCPlanningAgent::isMoveAction(int stepNum)
+{
+    string s = oac->getAtomSpace().atomAsString(current_actions[stepNum-1]);
+    int pos1 = s.find("walk");
+    int pos2 = s.find("jump_toward");
+    if ( (pos1 != std::string::npos) || (pos2 != std::string::npos))
+        return true;
+    else
+        return false;
 }
 
 void OCPlanningAgent::run(opencog::CogServer * server)
@@ -164,7 +180,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                     << " [PlanId = " <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
 
             // get next action in this plan
-            if (this->current_actions.empty())
+            if (this->current_actions.size() == this->current_step)
             {
                 // the current action is already the last action in this plan. so this plan is exectued successfully!
                 std::cout<<std::endl<<"OCPlanningAgent::Action plan is executed successfully! Plan ID = "<< this->currentOCPlanID
@@ -175,12 +191,13 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                 this->currentOCPlanID = "";
                 this->current_action = Handle::UNDEFINED;
                 this->current_actions.clear();
+                this->current_step = -1;
             }
             else
             {
                 // get the next action to execute it
-                this->current_action = this->current_actions.front();
-                this->current_actions.erase(current_actions.begin());
+                this->current_step ++;
+                this->current_action = this->current_actions[this->current_step-1];
                 this->timeStartCurrentAction = time(NULL);
             }
 
@@ -200,22 +217,31 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                 // add 'actionFailed' predicates for timeout actions
                 oac->getPAI().setPendingActionPlansFailed();
 
-//                    // Stop the time out Action
-//                    procedureInterpreter.stopProcedure(this->currentPlanId);
-
-                std::cout<<"Action status: timeout"<<std::endl;
-
                 // Now that this action failed, the following action sequence
                 // should be dropped.
                 this->current_actions.clear();
+                this->current_action = Handle::UNDEFINED;
+                this->currentOCPlanID = "";
+                this->current_step = -1;
 
               }
                // If the Action is still running and is not time out, simply returns
               else
               {
+                // check if current step , its previous step and its next step are all move to location, don't need to print out the message
+
+                if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
+                {
+                    if (isMoveAction(this->current_step) && isMoveAction(this->current_step - 1) && isMoveAction(this->current_step + 1))
+                    {
+                        return;
+                    }
+                }
+
                 std::cout<<"current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
                          << " is still running [PlanId = "
                          <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
+
                 return;
               }
         }

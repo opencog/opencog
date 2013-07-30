@@ -54,6 +54,8 @@ protected:
 
     Handle current_action;
 
+    int current_step; // the undergoing step number in the current plan
+
     bool use_ocplanner;
 
     // Time out for executing Action (combo script) defined by PROCEDURE_EXECUTION_TIMEOUT
@@ -67,6 +69,8 @@ protected:
     void runOCPlanner();
 
     void printPlan();
+
+    bool isMoveAction(int stepNum);
 
 public:
 
