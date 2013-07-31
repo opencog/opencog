@@ -4,6 +4,8 @@ from opencog.atomspace import AtomSpace, types, TruthValue
 from agents import SimpleForwardInferenceAgent
 
 
+
+
 atomspace = AtomSpace()
 
 a = atomspace.add_node(types.ConceptNode, "ramin", TruthValue(1, 1))

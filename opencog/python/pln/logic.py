@@ -1,6 +1,6 @@
 __author__ = 'ramin'
 
-from Rules import Rule
+from rules import Rule
 
 
 class ForwardChainer(object):

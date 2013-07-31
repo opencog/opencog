@@ -37,7 +37,7 @@ class DeductionRule(Rule):
                     ab = link
                     bc = l
 
-                    tv = formulas.deduce(a.tv, b.tv, c.tv, ab.tv, bc.tv)
+                    tv = formulas.deduction(a.tv, b.tv, c.tv, ab.tv, bc.tv)
                     # TODO should check if the link exists or not, revise the tv accordingly
                     result.append(self.atomspace.add_link(link.type, [a, c], tv))
 
