@@ -32,6 +32,7 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/Pet.h>
 
 #include <map>
 #include <math.h>
@@ -146,6 +147,8 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
     atomSpace = _atomspace;
     oac = _oac;
 
+    selfEntityStateValue = Entity(oac->getPet().getPetId(),oac->getPet().getType());
+
     loadAllRulesFromAtomSpace();
 
     // currently, for experiment, we dirctly add the rules by C++ codes
@@ -165,6 +168,12 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
         addRuleEffectIndex(r);
 
     }
+}
+
+OCPlanner::~OCPlanner()
+{
+    // todo: delete everything
+
 }
 
 void OCPlanner::addRuleEffectIndex(Rule* r)
@@ -267,6 +276,20 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 
 }
 
+ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle)
+{
+    // need to translate the psi demanding goal Handle into vector<State*>
+    vector<State*> goal;
+
+    State* goalState = new State(this->atomSpace->getName(goalHandle),StateValuleType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
+
+    goalState->addOwner(this->selfEntityStateValue);
+
+    goal.push_back(goalState);
+
+    return doPlanning(goal);
+
+}
 
 ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
 {

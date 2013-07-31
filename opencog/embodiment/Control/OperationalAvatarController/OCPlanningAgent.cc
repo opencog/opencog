@@ -117,7 +117,12 @@ void OCPlanningAgent::runOCPlanner()
                     this->cycleCount
                   );
 
-    // todo currentOCPlanID = ocplanner->doPlanning();
+    std::cout<<"OCPlanner is doing planning for :"
+             <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+             <<std::endl;
+
+    // the demand goal is something like "EnergyDemandGoal"
+    currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal);
 
     // if planning failed
     if (currentOCPlanID == "")
@@ -200,7 +205,6 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                 this->current_action = this->current_actions[this->current_step-1];
                 this->timeStartCurrentAction = time(NULL);
             }
-
         }
         else
         {
@@ -209,40 +213,39 @@ void OCPlanningAgent::run(opencog::CogServer * server)
             // check if current action timeout
             if ( time(NULL) - this->timeStartCurrentAction >  this->procedureExecutionTimeout )
             {
-                std::cout<<"current action timeout [PlanId = "
-                        <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... "
-                        <<std::endl;
+                    std::cout<<"current action timeout [PlanId = "
+                            <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... "
+                            <<std::endl;
 
+                    // add 'actionFailed' predicates for timeout actions
+                    oac->getPAI().setPendingActionPlansFailed();
 
-                // add 'actionFailed' predicates for timeout actions
-                oac->getPAI().setPendingActionPlansFailed();
-
-                // Now that this action failed, the following action sequence
-                // should be dropped.
-                this->current_actions.clear();
-                this->current_action = Handle::UNDEFINED;
-                this->currentOCPlanID = "";
-                this->current_step = -1;
+                    // Now that this action failed, the following action sequence
+                    // should be dropped.
+                    this->current_actions.clear();
+                    this->current_action = Handle::UNDEFINED;
+                    this->currentOCPlanID = "";
+                    this->current_step = -1;
 
               }
                // If the Action is still running and is not time out, simply returns
               else
               {
-                // check if current step , its previous step and its next step are all move to location, don't need to print out the message
+                    // check if current step , its previous step and its next step are all move to location, don't need to print out the message
 
-                if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
-                {
-                    if (isMoveAction(this->current_step) && isMoveAction(this->current_step - 1) && isMoveAction(this->current_step + 1))
+                    if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
                     {
-                        return;
+                        if (isMoveAction(this->current_step) && isMoveAction(this->current_step - 1) && isMoveAction(this->current_step + 1))
+                        {
+                            return;
+                        }
                     }
-                }
 
-                std::cout<<"current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
-                         << " is still running [PlanId = "
-                         <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
+                    std::cout<<"current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
+                             << " is still running [PlanId = "
+                             <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
 
-                return;
+                    return;
               }
         }
     }

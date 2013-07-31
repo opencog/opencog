@@ -229,6 +229,8 @@ class OCPlanner
 public:
      OCPlanner(AtomSpace* _atomspace,OAC* _oac);
 
+     ~OCPlanner();
+
      // TODO:
      // add a new rule from a implicationLink in the Atomspace
      void addNewRuleByHandle(Handle implicationLinkHandle);
@@ -240,6 +242,8 @@ public:
      // if failed in generating a plan to achieve the goal, return false.
      ActionPlanID doPlanning(const vector<State*> &goal);
 
+     ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle);
+
 protected:
 
      // to store all the rules can be used in reasoning
@@ -248,6 +252,8 @@ protected:
      AtomSpace* atomSpace;
 
      OAC* oac;
+
+     StateValue selfEntityStateValue;
 
      ActionPlanID planID;
 
