@@ -28,8 +28,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
-
-#include "OAC.h"
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
 
@@ -50,14 +48,13 @@ class Inquery
 
 protected:
 
-    static OAC* oac;
     static AtomSpace* atomSpace;
     static SpaceServer::SpaceMap* spaceMap;
     static set<spatial::SPATIAL_RELATION> getSpatialRelations(const vector<StateValue>& stateOwnerList);
 
 public:
 
-    static void init(OAC* _oac,AtomSpace* _atomSpace);
+    static void init(AtomSpace* _atomSpace);
 
     // when we are doing planning, we usually don't use the real spaceMap.
     // Instead, we use a clone of the real spaceMap, which is kinda imaginary spaceMap
@@ -74,7 +71,6 @@ public:
 
     static StateValue inqueryDistance(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryExist(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryEnergy(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryAtLocation(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryIsSolid(const vector<StateValue>& stateOwnerList);
     static StateValue inqueryIsStandable(const vector<StateValue>& stateOwnerList);

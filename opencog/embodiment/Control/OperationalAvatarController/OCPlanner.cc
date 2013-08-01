@@ -32,12 +32,14 @@
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/Pet.h>
+
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include <map>
 #include <math.h>
 #include <stdio.h>
 #include <sstream>
+#include "OAC.h"
 
 using namespace opencog::oac;
 using namespace std;
@@ -141,13 +143,12 @@ int RuleNode::getDepthOfRuleNode(const RuleNode* r)
     return deepest;
 }
 
-OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
+OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
 {
 
     atomSpace = _atomspace;
-    oac = _oac;
 
-    selfEntityStateValue = Entity(oac->getPet().getPetId(),oac->getPet().getType());
+    selfEntityStateValue = Entity(_selfID,_selfType);
 
     loadAllRulesFromAtomSpace();
 
@@ -276,7 +277,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 
 }
 
-ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle)
+ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog::CogServer * server)
 {
     // need to translate the psi demanding goal Handle into vector<State*>
     vector<State*> goal;
@@ -287,12 +288,16 @@ ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle)
 
     goal.push_back(goalState);
 
-    return doPlanning(goal);
+    return doPlanning(goal,server);
 
 }
 
-ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
+ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,opencog::CogServer * server)
 {
+
+    // Get OAC
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "OCPlanner::doPlanning: Did not get an OAC server!");
 
     int ruleNodeCount = 0;
 
@@ -865,7 +870,95 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
     int stepNum = 1;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
-        addActionToPlan(*planRuleNodeIt, stepNum);
+        RuleNode* r = (RuleNode*)(*planRuleNodeIt);
+
+        // generate the action series according to the planning network we have constructed in this planning process
+        PetAction* originalAction = r->originalRule->action;
+        if (originalAction->getType().getCode() == DO_NOTHING_CODE)
+            continue;
+
+        // ground the parameter according to the current bindings
+        PetAction action(originalAction->getType());
+        list<ActionParameter>::const_iterator paraIt;
+        const list<ActionParameter>& params = originalAction->getParameters();
+
+        std::cout<<std::endl<<"Step No."<< stepNum << originalAction->getName();
+
+        // for navigation actions, need to call path finder to create every step of it
+        if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
+        {
+            spatial::BlockVector startPos,targetPos;
+
+            ActionParameter oparam = (ActionParameter)params.front();
+
+            ParamValue value;
+
+            if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+            {
+                ParamGroundedMapInARule::iterator bindIt = r->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+                OC_ASSERT( (bindIt != r->currentAllBindings.end()),
+                          "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                           originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+                value = bindIt->second;
+
+            }
+            else
+                value =  oparam.getValue();
+
+            if ((originalAction->getType().getCode() == WALK_CODE))
+            {
+                Vector v1 = boost::get<Vector>(value);
+                targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+                std::cout<< ActionParameter::ParamValueToString(v1)<<std::endl;
+            }
+            else
+            {
+                Entity entity1 = boost::get<Entity>(value);
+                targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
+
+                std::cout<< entity1.stringRepresentation()<<std::endl;
+            }
+
+            // Get the right location of it at current step, from the orginalGroundedStateValues, it's the starting position before it moves
+
+            // For any moving action, it's the second element in the effect list, as well as in the  orginalGroundedStateValues
+            Vector v1 = boost::get<Vector>( r->orginalGroundedStateValues[1]);
+            startPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),spaceServer().getLatestMap(),startPos,targetPos,planID);
+
+        }
+        else
+        {
+            for (paraIt = params.begin(); paraIt != params.end(); ++ paraIt)
+            {
+                ActionParameter oparam = (ActionParameter)(*paraIt);
+                if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+                {
+                    ParamGroundedMapInARule::iterator bindIt = r->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+                    OC_ASSERT( (bindIt != r->currentAllBindings.end()),
+                              "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                               originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+
+                    action.addParameter(ActionParameter(oparam.getName(),
+                                                        oparam.getType(),
+                                                        bindIt->second) );
+                    std::cout<< ActionParameter::ParamValueToString(bindIt->second);
+                }
+                else
+                {
+                    action.addParameter(ActionParameter(oparam.getName(),
+                                                        oparam.getType(),
+                                                        oparam.getValue() ));
+                    std::cout<< oparam.stringRepresentation();
+                }
+
+            }
+
+            oac->getPAI().addAction(planID, action);
+
+        }
         stepNum ++;
     }
 
@@ -877,97 +970,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal)
     return planID;
 }
 
-void OCPlanner::addActionToPlan(RuleNode* ruleNode, int stepNUm)
-{
-    // generate the action series according to the planning network we have constructed in this planning process
-    PetAction* originalAction = ruleNode->originalRule->action;
-    if (originalAction->getType().getCode() == DO_NOTHING_CODE)
-        return;
-
-    // ground the parameter according to the current bindings
-    PetAction action(originalAction->getType());
-    list<ActionParameter>::const_iterator paraIt;
-    const list<ActionParameter>& params = originalAction->getParameters();
-
-    std::cout<<std::endl<<"Step No."<< stepNUm << originalAction->getName();
-
-    // for navigation actions, need to call path finder to create every step of it
-    if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
-    {
-        spatial::BlockVector startPos,targetPos;
-
-        ActionParameter oparam = (ActionParameter)params.front();
-
-        ParamValue value;
-
-        if  (Rule::isParamValueUnGrounded(oparam.getValue()))
-        {
-            ParamGroundedMapInARule::iterator bindIt = ruleNode->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
-            OC_ASSERT( (bindIt != ruleNode->currentAllBindings.end()),
-                      "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
-                       originalAction->getType().getName().c_str() ,oparam.getName().c_str());
-            value = bindIt->second;
-
-        }
-        else
-            value =  oparam.getValue();
-
-        if ((originalAction->getType().getCode() == WALK_CODE))
-        {
-            Vector v1 = boost::get<Vector>(value);
-            targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
-
-            std::cout<< ActionParameter::ParamValueToString(v1)<<std::endl;
-        }
-        else
-        {
-            Entity entity1 = boost::get<Entity>(value);
-            targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
-
-            std::cout<< entity1.stringRepresentation()<<std::endl;
-        }
-
-        // Get the right location of it at current step, from the orginalGroundedStateValues, it's the starting position before it moves
-
-        // For any moving action, it's the second element in the effect list, as well as in the  orginalGroundedStateValues
-        Vector v1 = boost::get<Vector>( ruleNode->orginalGroundedStateValues[1]);
-        startPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
-
-        opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),spaceServer().getLatestMap(),startPos,targetPos,planID);
-
-    }
-    else
-    {
-        for (paraIt = params.begin(); paraIt != params.end(); ++ paraIt)
-        {
-            ActionParameter oparam = (ActionParameter)(*paraIt);
-            if  (Rule::isParamValueUnGrounded(oparam.getValue()))
-            {
-                ParamGroundedMapInARule::iterator bindIt = ruleNode->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
-                OC_ASSERT( (bindIt != ruleNode->currentAllBindings.end()),
-                          "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
-                           originalAction->getType().getName().c_str() ,oparam.getName().c_str());
-
-                action.addParameter(ActionParameter(oparam.getName(),
-                                                    oparam.getType(),
-                                                    bindIt->second) );
-                std::cout<< ActionParameter::ParamValueToString(bindIt->second);
-            }
-            else
-            {
-                action.addParameter(ActionParameter(oparam.getName(),
-                                                    oparam.getType(),
-                                                    oparam.getValue() ));
-                std::cout<< oparam.stringRepresentation();
-            }
-
-        }
-
-        oac->getPAI().addAction(planID, action);
-
-    }
-
-}
 
 // return how many states in the temporaryStateNodes will be Negatived by this rule
 int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState)
@@ -1973,31 +1975,32 @@ void OCPlanner::loadTestRulesFromCodes()
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
 
     //----------------------------Begin Rule: if energy value is high enough, the energy goal is achieved-------------------------------------------
-    StateValue var_avatar = entity_var[1];
-    StateValue var_achieve_energy_goal = bool_var[1];
+//    StateValue var_avatar = entity_var[1];
+//    StateValue var_achieve_energy_goal = bool_var[1];
 
-    // precondition 1:
-    vector<StateValue> energyStateOwnerList0;
-    energyStateOwnerList0.push_back(var_avatar);
-    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,StateValue("0.8"), energyStateOwnerList0, true, Inquery::inqueryEnergy);
-    // effect1: energy increases
-    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
+//    // precondition 1:
+//    vector<StateValue> energyStateOwnerList0;
+//    energyStateOwnerList0.push_back(var_avatar);
+//    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,StateValue("0.8"), energyStateOwnerList0);
+//    // effect1: energy increases
+//    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
 
-    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
+//    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
 
-    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
-    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
+//    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
+//    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
 
-    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
+//    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
 
-    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
+//    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
 
     //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
 
-    //----------------------------Begin Rule: eat food to increase energy-------------------------------------------
+    //----------------------------Begin Rule: eat food to achieve energy demanding goal -------------------------------------------
     // define variables:
     StateValue var_food = entity_var[0];
-    StateValue var_energy = float_var[0];
+    StateValue var_achieve_energy_goal = bool_var[1];
+    StateValue var_avatar = entity_var[1];
 
     // Add rule: increasing energy by eat an edible object held in hand
 
@@ -2027,13 +2030,14 @@ void OCPlanner::loadTestRulesFromCodes()
     // energy state:
     vector<StateValue> energyStateOwnerList;
     energyStateOwnerList.push_back(var_avatar);
-    State* energyState = new State("Energy",StateValuleType::FLOAT(),STATE_EQUAL_TO ,var_energy, energyStateOwnerList, true, Inquery::inqueryEnergy);
+    State* energyGoalState = new State("EnergyDemandGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList);
 
-    // effect1: energy increases
-    Effect* energyIncreaseEffect = new Effect(energyState, OP_ADD, StateValue("0.55"));
+
+    // effect1: energy Goal Achieved
+    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
 
     // effect2: the food disappear
-    Effect* foodDisappearEffect = new Effect(existState, OP_ASSIGN, "false");
+    Effect* foodDisappearEffect = new Effect(existState, OP_ASSIGN, SV_FALSE);
 
     // effect3: no one holds the food any more
     Effect* nonHolderEffect = new Effect(holderState, OP_ASSIGN, Entity::NON_Entity);
@@ -2044,7 +2048,7 @@ void OCPlanner::loadTestRulesFromCodes()
     eatRule->addPrecondition(edibleState);
     eatRule->addPrecondition(holderState);
 
-    eatRule->addEffect(EffectPair(1.0f,energyIncreaseEffect));
+    eatRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
     eatRule->addEffect(EffectPair(1.0f,nonHolderEffect));
     eatRule->addEffect(EffectPair(1.0f,foodDisappearEffect));
 

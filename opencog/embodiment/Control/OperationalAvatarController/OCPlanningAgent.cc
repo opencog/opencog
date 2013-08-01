@@ -53,7 +53,7 @@ void OCPlanningAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    this->oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(server);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Avoid initialize during next cycle
@@ -64,7 +64,7 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     // if use ocplanner , create a ocplanner
     if (use_ocplanner)
     {
-        ocplanner = new OCPlanner(&(oac->getAtomSpace()) ,oac);
+        ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getName(),oac->getPet().getType());
         logger().debug("OCPlanningAgent::init - using OCPlanner! ");
     }
 
@@ -77,81 +77,9 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
 }
 
-void OCPlanningAgent::getCurrentDemand()
+
+bool OCPlanningAgent::isMoveAction(string s)
 {
-    // Select the most important demand for now, by scm
-    SchemeEval & evaluator = SchemeEval::instance();
-    std::string scheme_expression,scheme_return_value;
-
-    scheme_expression = "( update_selected_demand_goal )";
-
-    // Run the Procedure that do planning
-    scheme_return_value = evaluator.eval(scheme_expression);
-
-    if ( evaluator.eval_error() )
-    {
-        logger().error( "OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
-                         __FUNCTION__,
-                         scheme_expression.c_str()
-                      );
-
-        hSelectedDemandGoal = Handle::UNDEFINED;
-    }
-
-    hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
-                                    oac->getAtomSpace().getHandle(CONCEPT_NODE,
-                                                        "plan_selected_demand_goal"));
-
-    // Update the pet's previously/ currently Demand Goal
-    PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(), this->hSelectedDemandGoal);
-
-}
-
-void OCPlanningAgent::runOCPlanner()
-{
-    getCurrentDemand();
-
-    logger().debug( "OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
-                    __FUNCTION__,
-                    oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
-                    this->cycleCount
-                  );
-
-    std::cout<<"OCPlanner is doing planning for :"
-             <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
-             <<std::endl;
-
-    // the demand goal is something like "EnergyDemandGoal"
-    currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal);
-
-    // if planning failed
-    if (currentOCPlanID == "")
-    {
-        std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
-                 <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
-                 <<std::endl;
-    }
-    else
-    {
-        std::cout<<"OCPlanner found a plan: "<< currentOCPlanID << " for the selected demand goal:"
-                 <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
-                 <<std::endl;
-
-        // get all the current plan action sequence, contain the actionId of each action.
-        // ActionId is the handle of this action in the oac->getAtomSpace(), see PAI.
-        this->current_actions = oac->getPAI().getActionSeqFromPlan(currentOCPlanID);
-
-        oac->getPAI().sendActionPlan(currentOCPlanID);
-
-        this->current_step = 1;
-        this->current_action = current_actions[current_step - 1];
-        this->timeStartCurrentAction = time(NULL);
-    }
-}
-
-bool OCPlanningAgent::isMoveAction(int stepNum)
-{
-    string s = oac->getAtomSpace().atomAsString(current_actions[stepNum-1]);
     int pos1 = s.find("walk");
     int pos2 = s.find("jump_toward");
     if ( (pos1 != std::string::npos) || (pos2 != std::string::npos))
@@ -163,6 +91,10 @@ bool OCPlanningAgent::isMoveAction(int stepNum)
 void OCPlanningAgent::run(opencog::CogServer * server)
 {
     this->cycleCount = server->getCycleCount();
+
+    // Get OAC
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "Did not get an OAC server");
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__,
@@ -235,7 +167,10 @@ void OCPlanningAgent::run(opencog::CogServer * server)
 
                     if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
                     {
-                        if (isMoveAction(this->current_step) && isMoveAction(this->current_step - 1) && isMoveAction(this->current_step + 1))
+                        string cur_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-1]);
+                        string pre_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-2]);
+                        string next_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step]);
+                        if (isMoveAction(cur_s) && isMoveAction(pre_s) && isMoveAction(next_s))
                         {
                             return;
                         }
@@ -254,7 +189,69 @@ void OCPlanningAgent::run(opencog::CogServer * server)
         // currently, there is not any plan being executed.
         // run the planner to generate a new plan
 
-        runOCPlanner();
+        // Select the most important demand for now, by scm
+        SchemeEval & evaluator = SchemeEval::instance();
+        std::string scheme_expression,scheme_return_value;
+
+        scheme_expression = "( update_selected_demand_goal )";
+
+        // Run the Procedure that do planning
+        scheme_return_value = evaluator.eval(scheme_expression);
+
+        if ( evaluator.eval_error() )
+        {
+            logger().error( "OCPlanningAgent::%s -getCurrentDemand() failed '%s'",
+                             __FUNCTION__,
+                             scheme_expression.c_str()
+                          );
+
+            hSelectedDemandGoal = Handle::UNDEFINED;
+        }
+
+        hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
+                                        oac->getAtomSpace().getHandle(CONCEPT_NODE,
+                                                            "plan_selected_demand_goal"));
+
+        // Update the pet's previously/ currently Demand Goal
+        PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(), this->hSelectedDemandGoal);
+
+
+        logger().debug( "OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
+                        __FUNCTION__,
+                        oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str(),
+                        this->cycleCount
+                      );
+
+        std::cout<<"OCPlanner is doing planning for :"
+                 <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+                 <<std::endl;
+
+        // the demand goal is something like "EnergyDemandGoal"
+        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal,server);
+
+        // if planning failed
+        if (currentOCPlanID == "")
+        {
+            std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
+                     <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+                     <<std::endl;
+        }
+        else
+        {
+            std::cout<<"OCPlanner found a plan: "<< currentOCPlanID << " for the selected demand goal:"
+                     <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
+                     <<std::endl;
+
+            // get all the current plan action sequence, contain the actionId of each action.
+            // ActionId is the handle of this action in the oac->getAtomSpace(), see PAI.
+            this->current_actions = oac->getPAI().getActionSeqFromPlan(currentOCPlanID);
+
+            oac->getPAI().sendActionPlan(currentOCPlanID);
+
+            this->current_step = 1;
+            this->current_action = current_actions[current_step - 1];
+            this->timeStartCurrentAction = time(NULL);
+        }
     }
 
 }

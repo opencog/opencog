@@ -37,8 +37,8 @@
 #include <opencog/util/StringManipulator.h>
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
-
-
+#include <opencog/embodiment/Control/PerceptionActionInterface/ActionPlan.h>
+#include <opencog/server/CogServer.h>
 
 using namespace std;
 using namespace opencog::pai;
@@ -227,7 +227,7 @@ struct TmpParamCandidate
 class OCPlanner
 {
 public:
-     OCPlanner(AtomSpace* _atomspace,OAC* _oac);
+     OCPlanner(AtomSpace* _atomspace,string _selfID, string _selfType);
 
      ~OCPlanner();
 
@@ -240,9 +240,9 @@ public:
 
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
-     ActionPlanID doPlanning(const vector<State*> &goal);
+     ActionPlanID doPlanning(const vector<State*> &goal, opencog::CogServer *server);
 
-     ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle);
+     ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle, opencog::CogServer *server);
 
 protected:
 
@@ -250,8 +250,6 @@ protected:
      vector<Rule*> AllRules;
 
      AtomSpace* atomSpace;
-
-     OAC* oac;
 
      StateValue selfEntityStateValue;
 
@@ -287,8 +285,6 @@ protected:
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
 
-     // send action plan to PAI
-     void addActionToPlan(RuleNode* ruleNode, int stepNUm);
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan

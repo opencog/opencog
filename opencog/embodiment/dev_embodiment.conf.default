@@ -159,6 +159,10 @@ PSI_RELATION_UPDATER_CYCLE_PERIOD =    13
 PSI_FEELING_UPDATER_ENABLED =          true
 PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 
+# if use OCPlanningAgent, please turn off PSI_ACTION_SELECTION agent
+OCPLANNING_AGENT_ENABLED = false
+OCPLANNING_AGENT_CYCLE_PERIOD =    1
+
 MONITOR_CHANGES_ENABLED = true
 MONITOR_CHANGES_CYCLE_PERIOD = 5
 
@@ -509,9 +513,5 @@ UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR = true
 
 # consider all kind of objects: options: all_objects, block_entity_and_non_block_entity, only_non_block_entity
 UPDATE_SPATIAL_PREDICATES_FOR = only_non_block_entity
-
-# if use the new planner OCPlanner
-USE_OCPLANNDER = false
-
 
 

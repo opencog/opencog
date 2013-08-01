@@ -45,6 +45,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
 #include "Inquery.h"
 #include "OCPlanner.h"
@@ -54,12 +55,10 @@ using namespace opencog::pai;
 
 AtomSpace* Inquery::atomSpace= 0;
 SpaceServer::SpaceMap* Inquery::spaceMap = 0;
-OAC* Inquery::oac = 0;
 
 
- void Inquery::init(OAC* _oac,AtomSpace* _atomSpace)
+ void Inquery::init(AtomSpace* _atomSpace)
  {
-    oac = _oac;
     atomSpace = _atomSpace;
     spaceMap = &(spaceServer().getLatestMap());
  }
@@ -343,18 +342,6 @@ StateValue Inquery::inqueryExist(const vector<StateValue>& stateOwnerList)
     //    return "false";
     bool is_exist = spaceMap->containsObject(entity.id);
     return (opencog::toString(is_exist));
-}
-
-StateValue Inquery::inqueryEnergy(const vector<StateValue>& stateOwnerList)
-{
-/*
-    Entity entity = boost::get<Entity>(stateOwnerList.front());
-    if (! entity)
-       return (opencog::toString(0.0));
-*/
-    double energyValue = oac->getPsiDemandUpdaterAgent()->getDemandValue("Energy");
-    return (opencog::toString(energyValue));
-
 }
 
 StateValue Inquery::inqueryAtLocation(const vector<StateValue>& stateOwnerList)

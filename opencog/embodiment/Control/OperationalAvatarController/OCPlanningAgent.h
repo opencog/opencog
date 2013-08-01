@@ -27,7 +27,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include "OCPlanner.h"
 
-
 namespace opencog { namespace oac {
 
 class OCPlanningAgent : public opencog::Agent
@@ -48,8 +47,6 @@ protected:
 
     Handle hSelectedDemandGoal;
 
-    OAC* oac;
-
     HandleSeq current_actions;
 
     Handle current_action;
@@ -64,13 +61,7 @@ protected:
     time_t timeStartCurrentAction; // When the current action was executed
 
 
-    void getCurrentDemand();
-
-    void runOCPlanner();
-
-    void printPlan();
-
-    bool isMoveAction(int stepNum);
+    bool isMoveAction(string s);
 
 public:
 
