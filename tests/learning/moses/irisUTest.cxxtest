@@ -40,6 +40,21 @@ public:
         // to control the log level use option -l
     }
 
+    // A simple mixed-learning problem, requiring the learning
+    // of a two-way (boolean) classifier based on contin inputs.
+    void test_iris_simple()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "IrisSetosa.data");
+        // We expect a score of zero, no matter what.
+        moses_test_score({"-Hit", 
+                          "-uCLASS",
+                          "-ndiv", "-nsin", "-nexp", "-nlog",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
+                          "-Z1",   // much much faster w/this flag...
+                          data_file_path,
+                          });
+    }
 
     // A more difficult mixed-learning problem, requiring the learning
     // of a three-way classifier based on contin inputs.
@@ -56,7 +71,6 @@ public:
                           data_file_path,
                           },
                           -4.5);
-
     }
 
     // Exactly same as above, but with two threads.  This tests
