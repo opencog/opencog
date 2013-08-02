@@ -129,24 +129,24 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 
         // Continuous operators
         case id::plus : {
-            // if plus does not have any argument, return plus operator
+            // If plus does not have any argument, return plus operator
             if (it.is_childless()) // For correct foldr behaviour
                 return *b;
 
             contin_t res = 0;
-            //assumption : plus can have 1 or more arguments
+            // Assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 res += contin_eval(sib);
             return res;
         }
 
         case id::times : {
-            //if times does not have any argument, return times operator
+            // If times does not have any argument, return times operator
             if (it.is_childless())  // For correct foldr behaviour
                 return *b;
 
             contin_t res = 1;
-            //assumption : times can have 1 or more arguments
+            // Assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 res *= contin_eval(sib);
                 if (0.0 == res) return res;  // avoid pointless evals
@@ -181,7 +181,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 
         case id::exp : {
             contin_t res = exp(contin_eval(it.begin()));
-            // this may happen in case the argument is too high, then
+            // This may happen when the argument is too large, then
             // exp will be infty
             if (isinf(res)) throw EvalException(vertex(res));
             return res;
