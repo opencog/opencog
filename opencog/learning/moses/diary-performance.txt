@@ -3974,5 +3974,5 @@ Appearently, its hard for moses...
      10K     18      -4
      40K     90      -3
     160K    570      -3
-    640K
+    640K   5682      -3
 
