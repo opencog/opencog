@@ -1013,7 +1013,8 @@ void reduce_impulse_arg::operator()(combo_tree& tr, combo_tree::iterator it) con
         return;
 
     OC_ASSERT(it.has_one_child(),
-              "impulse should have exactly one child (reduce_impulse_arg).");
+              "impulse should have exactly one child (reduce_impulse_arg).\n%s\n",
+             ({std::stringstream ss; ss<<tr; ss.str().c_str(); }));
     pre_it it_child = it.begin();
     logical_reduce(reduct_effort, tr, it_child, ignore_ops);
 }
