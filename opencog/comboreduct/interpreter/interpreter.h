@@ -93,6 +93,7 @@ struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
     virtual vertex mixed_eval(combo_tree::iterator it) const;
 
 protected:
+    bool _use_contin_inputs;
     const std::vector<vertex>& mixed_inputs;
 };            
 

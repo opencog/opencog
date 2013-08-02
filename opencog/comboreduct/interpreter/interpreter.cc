@@ -225,15 +225,17 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 ///////////////////////
 
 mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs)
-    : mixed_inputs(inputs) {}
+    : _use_contin_inputs(false), mixed_inputs(inputs) {}
 
 mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs)
-    : contin_interpreter(inputs), mixed_inputs(empty_mixed_inputs) {}
+    : contin_interpreter(inputs), _use_contin_inputs(true), mixed_inputs(empty_mixed_inputs) {}
 
-vertex mixed_interpreter::operator()(const combo_tree& tr) const {
+vertex mixed_interpreter::operator()(const combo_tree& tr) const
+{
     return mixed_eval(tr.begin());
 }
-vertex mixed_interpreter::operator()(const combo_tree::iterator it) const {
+vertex mixed_interpreter::operator()(const combo_tree::iterator it) const
+{
     return mixed_eval(it);
 }
 
@@ -262,8 +264,10 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
         // XXX FIXME, we should also handle the cases
         // ->(bool ... bool contin) and ->(bool ... bool enum)
         // which would have an empty contin and an empty mixed ...
-        if (0 == mixed_inputs.size())
+        if (_use_contin_inputs)
             return contin_inputs[idx - 1];
+
+        // A negative index means boolean-negate. 
         return idx > 0 ? mixed_inputs[idx - 1]
             : negate_vertex(mixed_inputs[-idx - 1]);
     }
