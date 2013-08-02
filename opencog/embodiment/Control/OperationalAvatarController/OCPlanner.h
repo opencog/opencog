@@ -130,7 +130,7 @@ public:
     // to store the candidates of variables groundings. This is only for the curUngroundedVariables, excluding the varibales in currentBindingsFromForwardState
     vector<ParamGroundedMapInARule> ParamCandidates;
 
-    vector<StateValue> orginalGroundedStateValues; //to record the orginal state values in the effect before they takes effects, the order is the same in the effect list
+    vector<ParamValue> orginalGroundedParamValues; //to record the orginal state values in the effect before they takes effects, the order is the same in the effect list
 
     // How many times of this rule has been tried with different variable bindings in this rule node.
     // This is for make a decision that if this rule has been tried and failed too many times, so that it would has a lower chance to be seleced
@@ -251,7 +251,7 @@ protected:
 
      AtomSpace* atomSpace;
 
-     StateValue selfEntityStateValue;
+     ParamValue selfEntityParamValue;
 
      ActionPlanID planID;
 
@@ -320,7 +320,7 @@ protected:
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
      // @ values: the candidate values
      // @ varName: the variable name
-     StateValue selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<StateValue>& values);
+     ParamValue selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
@@ -328,7 +328,7 @@ protected:
 
      void findCandidateValuesByGA(RuleNode* ruleNode);
 
-     void recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode);
+     void recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode);
 
      // @ bool &found: return if this same state is found in temporaryStateNodes
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal

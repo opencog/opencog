@@ -261,7 +261,7 @@ public:
     /**
      * Basic getters
      */
-    const string& getName() const;
+    string getName() const;
     const ActionParamType& getType() const;
     ParamValue &getValue();
 

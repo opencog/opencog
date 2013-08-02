@@ -353,6 +353,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->ocPlanningAgent->setFrequency(
                     config().get_int( "OCPLANNING_AGENT_CYCLE_PERIOD" ) );
         this->startAgent(ocPlanningAgent);
+
     }
     else if (config().get_bool("PSI_ACTION_SELECTION_ENABLED")) {
         this->psiActionSelectionAgent->setFrequency(

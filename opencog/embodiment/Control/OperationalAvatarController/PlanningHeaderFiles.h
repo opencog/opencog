@@ -35,6 +35,7 @@
 #define PARAMETER_NUM 7
 
 using namespace std;
+using namespace opencog::pai;
 
 namespace opencog {
 
@@ -42,12 +43,12 @@ extern opencog::pai::ParamValue opencog::pai::UNDEFINED_VALUE;
 
 namespace oac {
 
-typedef opencog::pai::ActionParameter StateVariable;
-typedef opencog::pai::ActionParamType StateValuleType;
-typedef opencog::pai::ParamValue StateValue;
+//typedef opencog::pai::ActionParameter ActionParameter;
+//typedef opencog::pai::ActionParamType ActionParamType;
+//typedef opencog::pai::ParamValue ParamValue;
 
      // define the variables for rules
-     // we have 6 kinds of typedef variant<string, Rotation, Vector, Entity, fuzzyInterval, fuzzyIntFloatInterval > StateValue
+     // we have 6 kinds of typedef variant<string, Rotation, Vector, Entity, fuzzyInterval, fuzzyIntFloatInterval > ParamValue
      /*
      BOOLEAN_CODE,
      INT_CODE,
@@ -59,9 +60,9 @@ typedef opencog::pai::ParamValue StateValue;
      FUZZY_INTERVAL_INT_CODE,
      FUZZY_INTERVAL_FLOAT_CODE,*/
 
-     const StateValue access_distance;
-     const StateValue SV_TRUE;
-     const StateValue SV_FALSE;
+     const ParamValue access_distance;
+     const ParamValue SV_TRUE;
+     const ParamValue SV_FALSE;
 
      const string bool_var[PARAMETER_NUM];
      const string str_var[PARAMETER_NUM];
@@ -69,6 +70,7 @@ typedef opencog::pai::ParamValue StateValue;
      const string float_var[PARAMETER_NUM];
      const pai::Vector vector_var[PARAMETER_NUM];
      const pai::Entity entity_var[PARAMETER_NUM];
+     const pai::Entity entity_vartest;
 
      bool isAVariableNumeric(std::string var);
 

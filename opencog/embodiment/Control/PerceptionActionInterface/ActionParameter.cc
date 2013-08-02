@@ -36,7 +36,7 @@ using namespace opencog::pai;
 
 ParamValue opencog::pai::UNDEFINED_VALUE = "UNDEFINED_VALUE";
 
-Entity Entity::NON_Entity = Entity("","");
+Entity Entity::NON_Entity = Entity("none","none");
 
 ActionParameter::ActionParameter() : type(ActionParamType::STRING())
 {
@@ -87,7 +87,7 @@ void ActionParameter::assignValue(const ParamValue& newValue)
     value = newValue;
 }
 
-const string& ActionParameter::getName() const
+string ActionParameter::getName() const
 {
     return name;
 }

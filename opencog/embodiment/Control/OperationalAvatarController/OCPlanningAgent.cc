@@ -47,6 +47,8 @@ OCPlanningAgent::~OCPlanningAgent()
 
 void OCPlanningAgent::init(opencog::CogServer * server)
 {
+    std::cout<<"OCPlanningAgent begins init..."<<std::endl;
+
     logger().debug( "OCPlanningAgent::%s - Initializing the Agent [cycle = %d]",
                     __FUNCTION__,
                     this->cycleCount
@@ -59,14 +61,8 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     // Avoid initialize during next cycle
     this->bInitialized = true;
 
-    this->use_ocplanner = config().get_long("USE_OCPLANNDER");
-
-    // if use ocplanner , create a ocplanner
-    if (use_ocplanner)
-    {
-        ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getName(),oac->getPet().getType());
-        logger().debug("OCPlanningAgent::init - using OCPlanner! ");
-    }
+    ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getName(),oac->getPet().getType());
+    logger().debug("OCPlanningAgent::init - using OCPlanner! ");
 
     this->currentOCPlanID = "";
 
@@ -75,6 +71,8 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     this->current_step = -1;
 
     this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
+
+    std::cout<<"OCPlanningAgent finished init..."<<std::endl;
 }
 
 
@@ -95,6 +93,9 @@ void OCPlanningAgent::run(opencog::CogServer * server)
     // Get OAC
     OAC* oac = dynamic_cast<OAC*>(server);
     OC_ASSERT(oac, "Did not get an OAC server");
+
+    if ( !this->bInitialized )
+        this->init(server);
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__,

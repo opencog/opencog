@@ -73,9 +73,9 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      spaceMap = &(spaceServer().getLatestMap());
  }
 
- StateValue Inquery::getStateValueFromAtomspace( State& state)
+ ParamValue Inquery::getParamValueFromAtomspace( State& state)
  {
-     vector<StateValue> stateOwnerList = state.stateOwnerList;
+     vector<ParamValue> stateOwnerList = state.stateOwnerList;
      Entity entity1, entity2, entity3;
      Handle a, b, c = Handle::UNDEFINED;
 
@@ -96,7 +96,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c);
      if (evalLink == Handle::UNDEFINED)
      {
-         logger().error("Inquery::getStateValueFromAtomspace : There is no evaluation link for predicate: "
+         logger().error("Inquery::getParamValueFromAtomspace : There is no evaluation link for predicate: "
                   + state.name() );
          return UNDEFINED_VALUE;
      }
@@ -105,7 +105,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
      if (listLink== Handle::UNDEFINED)
      {
-         logger().error("Inquery::getStateValueFromAtomspace : There is no list link for the Evaluation Link: "
+         logger().error("Inquery::getParamValueFromAtomspace : There is no list link for the Evaluation Link: "
                   + state.name());
          return UNDEFINED_VALUE;
      }
@@ -131,9 +131,9 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
         )
         */
          // then the state value type should be boolean
-         if (state.getStateValuleType().getCode() != BOOLEAN_CODE)
+         if (state.getActionParamType().getCode() != BOOLEAN_CODE)
          {
-             logger().error("Inquery::getStateValueFromAtomspace : There is no value node for this Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace : There is no value node for this Evaluation Link: "
                       + state.name());
              return UNDEFINED_VALUE;
          }
@@ -157,12 +157,12 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
          if ( valueHandle == Handle::UNDEFINED )
          {
-             logger().error("Inquery::getStateValueFromAtomspace : There is no list link for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace : There is no list link for the Evaluation Link: "
                       + state.name());
              return UNDEFINED_VALUE;
          }
          // this kind of state value can only be bool,int,float,string or entity
-         switch (state.getStateValuleType().getCode())
+         switch (state.getActionParamType().getCode())
          {
          case BOOLEAN_CODE:
          case INT_CODE:
@@ -175,7 +175,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
              return Entity(atomSpace->getName(valueHandle) ,PAI::getObjectTypeFromHandle(*atomSpace, valueHandle));
 
          default:
-             logger().error("Inquery::getStateValueFromAtomspace : There is more than one value node for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace : There is more than one value node for the Evaluation Link: "
                       + state.name());
              return UNDEFINED_VALUE;
 
@@ -190,12 +190,12 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
          if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) )
          {
-             logger().error("Inquery::getStateValueFromAtomspace :Type error: The value type is fuzzy interval, but there are not 2 number nodes in its listlink , for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace :Type error: The value type is fuzzy interval, but there are not 2 number nodes in its listlink , for the Evaluation Link: "
                             + state.name() );
              return UNDEFINED_VALUE;
          }
 
-         switch (state.getStateValuleType().getCode())
+         switch (state.getActionParamType().getCode())
          {
          case FUZZY_INTERVAL_INT_CODE:
          {
@@ -212,7 +212,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          }
 
          default:
-             logger().error("Inquery::getStateValueFromAtomspace : Type error: There is 2 number nodes for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace : Type error: There is 2 number nodes for the Evaluation Link: "
                             + state.name() + ". But it is neighter a fuzzyIntervalInt nor a fuzzyIntervalFLoat");
              return UNDEFINED_VALUE;
          }
@@ -235,7 +235,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
          if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
          {
-             logger().error("Inquery::getStateValueFromAtomspace :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink , for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink , for the Evaluation Link: "
                             + state.name() );
              return UNDEFINED_VALUE;
          }
@@ -244,7 +244,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          double y = atof(atomSpace->getName(valueHandle2).c_str());
          double z = atof(atomSpace->getName(valueHandle3).c_str());
 
-         switch (state.getStateValuleType().getCode())
+         switch (state.getActionParamType().getCode())
          {
          case VECTOR_CODE:
              return Vector(x,y,z);
@@ -252,21 +252,21 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          case ROTATION_CODE:
              return Rotation(x,y,z);
          default:
-             logger().error("Inquery::getStateValueFromAtomspace : Type error: There is 3 number nodes for the Evaluation Link: "
+             logger().error("Inquery::getParamValueFromAtomspace : Type error: There is 3 number nodes for the Evaluation Link: "
                             + state.name() + ". But it is neighter a Vector nor a Rotation");
              return UNDEFINED_VALUE;
          }
      }
      else
      {
-         logger().error("Inquery::getStateValueFromAtomspace :the number of value nodes is invalid for the Evaluation Link: "
+         logger().error("Inquery::getParamValueFromAtomspace :the number of value nodes is invalid for the Evaluation Link: "
                         + state.name() );
          return UNDEFINED_VALUE;
      }
 
 }
 
-StateValue Inquery::getStateValueFromHandle(string var, Handle& valueH)
+ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
 {
     switch (opencog::oac::GetVariableType(var))
     {
@@ -296,7 +296,7 @@ StateValue Inquery::getStateValueFromHandle(string var, Handle& valueH)
 
             if ( (valueHandle1 == Handle::UNDEFINED) || (valueHandle2 == Handle::UNDEFINED) || (valueHandle3 == Handle::UNDEFINED) )
             {
-                logger().error("Inquery::getStateValueFromHandle :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink ");
+                logger().error("Inquery::getParamValueFromHandle :Type error: The value type is vector or rotation,but there are not 3 number nodes in its listlink ");
 
                 return UNDEFINED_VALUE;
             }
@@ -314,11 +314,11 @@ StateValue Inquery::getStateValueFromHandle(string var, Handle& valueH)
     }
 }
 
-StateValue Inquery::inqueryDistance(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
 {
     double d = DOUBLE_MAX;
-    StateValue var1 = stateOwnerList.front();
-    StateValue var2 = stateOwnerList.back();
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
 
     Entity* entity1 = boost::get<Entity>(&var1);
     Entity* entity2 = boost::get<Entity>(&var2);
@@ -335,7 +335,7 @@ StateValue Inquery::inqueryDistance(const vector<StateValue>& stateOwnerList)
     return (opencog::toString(d));
 }
 
-StateValue Inquery::inqueryExist(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryExist(const vector<ParamValue>& stateOwnerList)
 {
     Entity entity = boost::get<Entity>(stateOwnerList.front());
     // if (! entity)
@@ -344,9 +344,9 @@ StateValue Inquery::inqueryExist(const vector<StateValue>& stateOwnerList)
     return (opencog::toString(is_exist));
 }
 
-StateValue Inquery::inqueryAtLocation(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryAtLocation(const vector<ParamValue>& stateOwnerList)
 {
-     StateValue obj = stateOwnerList.front();
+     ParamValue obj = stateOwnerList.front();
 
      Entity* entity = boost::get<Entity>(&obj);
 
@@ -366,9 +366,9 @@ StateValue Inquery::inqueryAtLocation(const vector<StateValue>& stateOwnerList)
         return Vector(pos.x,pos.y,pos.z);
 }
 
-StateValue Inquery::inqueryIsSolid(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsSolid(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var = stateOwnerList.back();
+    ParamValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
     if (! pos)
         return "false";
@@ -379,9 +379,9 @@ StateValue Inquery::inqueryIsSolid(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsStandable(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsStandable(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var = stateOwnerList.back();
+    ParamValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
     if (! pos)
         return "false";
@@ -392,10 +392,10 @@ StateValue Inquery::inqueryIsStandable(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryExistPath(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var1 = stateOwnerList.front();
-    StateValue var2 = stateOwnerList.back();
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
     spatial::BlockVector pos1,pos2;
 
     Entity* entity1 = boost::get<Entity>(&var1);
@@ -432,12 +432,12 @@ StateValue Inquery::inqueryExistPath(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-vector<StateValue> Inquery::inqueryNearestAccessiblePosition(const vector<StateValue>& stateOwnerList)
+vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var1 = stateOwnerList.front();
-    StateValue var2 = stateOwnerList.back();
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
     spatial::BlockVector pos1,pos2;
-    vector<StateValue> values;
+    vector<ParamValue> values;
 
     Entity* entity1 = boost::get<Entity>(&var1);
     if (entity1)
@@ -470,12 +470,12 @@ vector<StateValue> Inquery::inqueryNearestAccessiblePosition(const vector<StateV
     return values;
 }
 
-vector<StateValue> Inquery::inqueryAdjacentPosition(const vector<StateValue>& stateOwnerList)
+vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var1 = stateOwnerList.front();
+    ParamValue var1 = stateOwnerList.front();
 
     spatial::BlockVector pos1;
-    vector<StateValue> values;
+    vector<ParamValue> values;
 
     Entity* entity1 = boost::get<Entity>(&var1);
     if (entity1)
@@ -501,13 +501,13 @@ vector<StateValue> Inquery::inqueryAdjacentPosition(const vector<StateValue>& st
     return values;
 }
 
-vector<StateValue> Inquery::inqueryStandableNearbyAccessablePosition(const vector<StateValue>& stateOwnerList)
+vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var1 = stateOwnerList.front();
-    StateValue var2 = stateOwnerList[1];
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList[1];
 
     spatial::BlockVector pos1, pos2;
-    vector<StateValue> values;
+    vector<ParamValue> values;
 
     Entity* entity1 = boost::get<Entity>(&var1);
 
@@ -555,10 +555,10 @@ vector<StateValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
     return values;
 }
 
-StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsAdjacent(const vector<ParamValue>& stateOwnerList)
 {
-    StateValue var1 = stateOwnerList.front();
-    StateValue var2 = stateOwnerList.back();
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
     Vector* v1 = boost::get<Vector>(&var1);
     Vector* v2 = boost::get<Vector>(&var2);
 
@@ -575,7 +575,7 @@ StateValue Inquery::inqueryIsAdjacent(const vector<StateValue>& stateOwnerList)
 
 }
 
-StateValue Inquery::inqueryIsAbove(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsAbove(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::ABOVE) != relations.end())
@@ -584,7 +584,7 @@ StateValue Inquery::inqueryIsAbove(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBeside(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsBeside(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BESIDE) != relations.end())
@@ -592,7 +592,7 @@ StateValue Inquery::inqueryIsBeside(const vector<StateValue>& stateOwnerList)
     else
         return "false";
 }
-StateValue Inquery::inqueryIsNear(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsNear(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::NEAR) != relations.end())
@@ -601,7 +601,7 @@ StateValue Inquery::inqueryIsNear(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsFar(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsFar(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::FAR_) != relations.end())
@@ -610,7 +610,7 @@ StateValue Inquery::inqueryIsFar(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsTouching(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsTouching(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::TOUCHING) != relations.end())
@@ -619,7 +619,7 @@ StateValue Inquery::inqueryIsTouching(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInside(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsInside(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::INSIDE) != relations.end())
@@ -628,7 +628,7 @@ StateValue Inquery::inqueryIsInside(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsOutside(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsOutside(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::OUTSIDE) != relations.end())
@@ -637,7 +637,7 @@ StateValue Inquery::inqueryIsOutside(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBelow(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsBelow(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BELOW) != relations.end())
@@ -646,7 +646,7 @@ StateValue Inquery::inqueryIsBelow(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsLeftOf(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsLeftOf(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::LEFT_OF) != relations.end())
@@ -655,7 +655,7 @@ StateValue Inquery::inqueryIsLeftOf(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsRightOf(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsRightOf(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::RIGHT_OF) != relations.end())
@@ -664,7 +664,7 @@ StateValue Inquery::inqueryIsRightOf(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsBehind(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsBehind(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::BEHIND) != relations.end())
@@ -673,7 +673,7 @@ StateValue Inquery::inqueryIsBehind(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-StateValue Inquery::inqueryIsInFrontOf(const vector<StateValue>& stateOwnerList)
+ParamValue Inquery::inqueryIsInFrontOf(const vector<ParamValue>& stateOwnerList)
 {
     set<spatial::SPATIAL_RELATION> relations = getSpatialRelations(stateOwnerList);
     if (relations.find(spatial::IN_FRONT_OF) != relations.end())
@@ -682,7 +682,7 @@ StateValue Inquery::inqueryIsInFrontOf(const vector<StateValue>& stateOwnerList)
         return "false";
 }
 
-set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<StateValue>& stateOwnerList)
+set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<ParamValue>& stateOwnerList)
 {
 //    set<spatial::SPATIAL_RELATION> empty;
     Entity entity1 = boost::get<Entity>( stateOwnerList.front());
@@ -711,7 +711,7 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
     Handle inhSecondOutgoing;
     HandleSeq evalNonFirstOutgoings;
 
-    switch (state->getStateValuleType().getCode())
+    switch (state->getActionParamType().getCode())
     {
         case ENTITY_CODE:
         {
@@ -720,7 +720,7 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
             if (inhSecondOutgoing == Handle::UNDEFINED)
             {
                 logger().warn("Inquery::findAllObjectsByGivenCondition : There is no Entity Node for this state value: "
-                         + state->name());
+                              + state->name());
                 return results; // return empty result
             }
             evalNonFirstOutgoings.push_back(inhSecondOutgoing);
@@ -794,23 +794,23 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
 
 
 
-HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNode* ruleNode)
+HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNode* ruleNode)
 {
     HandleSeq results;
 
-    StateValue* realValue;
+    ParamValue* realValue;
 
-    if (! Rule::isParamValueUnGrounded(stateValue))
+    if (! Rule::isParamValueUnGrounded(paramValue))
     {
         // this stateOwner is const, just add it
-        realValue = &stateValue;
+        realValue = &paramValue;
     }
     else
     {
         // this stateOwner is a variable
         // look for the value of this variable in the current grounding parameter map
 
-        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(StateVariable::ParamValueToString(stateValue));
+        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(ActionParameter::ParamValueToString(paramValue));
         if (paramMapIt != ruleNode->currentBindingsFromForwardState.end())
         {
             // found it in the current groundings, so just add it as a const
@@ -819,7 +819,7 @@ HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNo
         else
         {
             // it has not been grounded, so add it as a variable node
-            results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(stateValue)).c_str()));
+            results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(paramValue)).c_str()));
         }
     }
 
@@ -847,7 +847,7 @@ HandleSeq Inquery::generatePMNodeFromeAStateValue(StateValue& stateValue, RuleNo
     {
         Handle entityHandle = AtomSpaceUtil::getEntityHandle(*atomSpace,entity->id);
         OC_ASSERT((entityHandle != Handle::UNDEFINED),
-                  "OCPlanner::generatePMNodeFromeAStateValue: cannot find the handle for this entity : %s is invalid.\n",
+                  "OCPlanner::generatePMNodeFromeAParamValue: cannot find the handle for this entity : %s is invalid.\n",
                   ActionParameter::ParamValueToString(*realValue).c_str());
         results.push_back(entityHandle);
     }
@@ -887,9 +887,9 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     HandleSeq predicateListLinkOutgoings;
 
     // add all the stateOwners
-    for (vector<StateValue>::iterator ownerIt = state->stateOwnerList.begin(); ownerIt != state->stateOwnerList.end(); ++ ownerIt)
+    for (vector<ParamValue>::iterator ownerIt = state->stateOwnerList.begin(); ownerIt != state->stateOwnerList.end(); ++ ownerIt)
     {
-        HandleSeq handles = generatePMNodeFromeAStateValue(*ownerIt,ruleNode);
+        HandleSeq handles = generatePMNodeFromeAParamValue(*ownerIt,ruleNode);
         OC_ASSERT((handles.size() != 0),
                   "OCPlanner::generatePMLinkFromAState: cannot generate handle for this state owner value for state: %s is invalid.\n",
                   state->name().c_str());
@@ -898,7 +898,7 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     }
 
     // add the state value
-    HandleSeq handles = generatePMNodeFromeAStateValue(state->stateVariable->getValue(),ruleNode);
+    HandleSeq handles = generatePMNodeFromeAParamValue(state->stateVariable->getValue(),ruleNode);
     predicateListLinkOutgoings.insert(predicateListLinkOutgoings.end(), handles.begin(),handles.end());
 
     Handle predicateListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK, predicateListLinkOutgoings);
