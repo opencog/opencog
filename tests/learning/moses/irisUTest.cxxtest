@@ -47,13 +47,15 @@ public:
     {
         string data_file_path("-i" + mixedUTest_dir + "iris.data");
         // We expect a score of zero, no matter what.
-        moses_test_score({"-Hit", 
+        moses_test_good_enough_score({"-Hit", 
                           "-uclass",
                           "-ndiv", "-nsin", "-nexp", "-nlog",
-                          "-m150000",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
-                          });
+                          },
+                          -4.5);
 
     }
 
@@ -65,13 +67,15 @@ public:
     {
         string data_file_path("-i" + mixedUTest_dir + "iris.data");
         // We expect a score of zero, no matter what.
-        moses_test_score({"-Hit", 
+        moses_test_good_enough_score({"-Hit", 
                           "-uclass",
                           "-ndiv", "-nsin", "-nexp", "-nlog",
-                          "-m150000",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
                           "-j2",   // two threads
                           "-Z1",   // much much faster w/this flag...
                           data_file_path,
-                          });
+                          },
+                          -4.5);
     }
 };
