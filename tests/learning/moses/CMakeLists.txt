@@ -71,6 +71,14 @@ TARGET_LINK_LIBRARIES(mixedUTest
 	cogutil		
 )
 
+ADD_CXXTEST(irisUTest)
+TARGET_LINK_LIBRARIES(irisUTest
+	moses_exec
+	moses
+	comboreduct
+	cogutil		
+)
+
 ADD_CXXTEST(dynFeatSelUTest)
 TARGET_LINK_LIBRARIES(dynFeatSelUTest
 	moses_exec
