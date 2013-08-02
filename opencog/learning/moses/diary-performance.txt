@@ -3958,4 +3958,19 @@ speed up.  
  160K            -235  15048
 
 
+==================================================================
+
+August 2013
+-----------
+Take the IrisVirginica.txt data file from the wiki page... this is
+the one that attempts to separate the two hard-to-separate classifications.
+
+It should be possible to over-fit this dataset. How hard can this be?
+
+            -j1            
+     -m    time    score  
+    ----   ----    ----- 
+     10K     18      -4
+     40K     90      -3
+    160K  crash
 
