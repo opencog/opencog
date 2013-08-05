@@ -20,6 +20,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/tokenizer.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+
+#include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/util/platform.h>
@@ -71,6 +76,48 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     this->current_step = -1;
 
     this->procedureExecutionTimeout = config().get_long("PROCEDURE_EXECUTION_TIMEOUT");
+
+    // init the demanding goal list
+
+    psi_demand_goal_list.clear();
+
+    // Get demand names from the configuration file
+    std::string demandNames = config()["PSI_DEMANDS"];
+
+    // Process Demands one by one
+    boost::tokenizer<> demandNamesTok (demandNames);
+
+    std::string demandPredicateName;
+    std::vector<Handle> outgoings;
+
+    outgoings.clear();
+
+    for ( boost::tokenizer<>::iterator iDemandName = demandNamesTok.begin();
+          iDemandName != demandNamesTok.end();
+          ++ iDemandName ) {
+
+        demandPredicateName = (*iDemandName) + "DemandGoal";
+
+        // Get EvaluationLink to the demand goal
+        outgoings.clear();
+        outgoings.push_back( oac->getAtomSpace().addNode(PREDICATE_NODE, demandPredicateName) );
+
+        this->psi_demand_goal_list.push_back( oac->getAtomSpace().addLink(EVALUATION_LINK, outgoings) );
+
+    }// for
+
+    // Create an ReferenceLink holding all the demand goals (EvaluationLink)
+    outgoings.clear();
+    outgoings.push_back(oac->getAtomSpace().addNode(CONCEPT_NODE, "psi_demand_goal_list") );
+    outgoings.push_back(oac->getAtomSpace().addLink(LIST_LINK, this->psi_demand_goal_list) );
+    Handle referenceLink = AtomSpaceUtil::addLink(oac->getAtomSpace(), REFERENCE_LINK, outgoings, true);
+
+    logger().debug("PsiActionSelectionAgent::%s - "
+                   "Add the list of demand goals to AtomSpace: %s [cycle = %d]",
+                   __FUNCTION__,
+                   oac->getAtomSpace().atomAsString(referenceLink).c_str(), this->cycleCount
+                  );
+
 
     std::cout<<"OCPlanningAgent finished init..."<<std::endl;
 }
@@ -192,12 +239,14 @@ void OCPlanningAgent::run(opencog::CogServer * server)
 
         // Select the most important demand for now, by scm
         SchemeEval & evaluator = SchemeEval::instance();
-        std::string scheme_expression,scheme_return_value;
+        std::string scheme_expression;
 
         scheme_expression = "( update_selected_demand_goal )";
 
+        //scheme_expression = "( get_most_critical_demand_goal )";
+
         // Run the Procedure that do planning
-        scheme_return_value = evaluator.eval(scheme_expression);
+         evaluator.eval(scheme_expression);
 
         if ( evaluator.eval_error() )
         {
@@ -209,13 +258,13 @@ void OCPlanningAgent::run(opencog::CogServer * server)
             hSelectedDemandGoal = Handle::UNDEFINED;
         }
 
+
         hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
                                         oac->getAtomSpace().getHandle(CONCEPT_NODE,
                                                             "plan_selected_demand_goal"));
 
         // Update the pet's previously/ currently Demand Goal
         PsiRuleUtil::setCurrentDemandGoal(oac->getAtomSpace(), this->hSelectedDemandGoal);
-
 
         logger().debug( "OCPlanningAgent::%s - do planning for the Demand Goal: %s [cycle = %d]",
                         __FUNCTION__,

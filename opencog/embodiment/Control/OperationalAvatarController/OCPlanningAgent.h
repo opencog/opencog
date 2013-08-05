@@ -45,6 +45,8 @@ protected:
 
     ActionPlanID currentOCPlanID; // only be used by ocplanner
 
+    std::vector<Handle> psi_demand_goal_list; // Handles to all the demand goals (EvaluationLink)
+
     Handle hSelectedDemandGoal;
 
     HandleSeq current_actions;
