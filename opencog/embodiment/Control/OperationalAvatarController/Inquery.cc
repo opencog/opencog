@@ -82,12 +82,12 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      entity1 = boost::get<Entity>(stateOwnerList[0]);
      a = AtomSpaceUtil::getEntityHandle(*atomSpace,entity1.id);
 
-     if(stateOwnerList.size() > 0)
+     if(stateOwnerList.size() > 1)
      {
          entity2 = boost::get<Entity>(stateOwnerList[1]);
          b = AtomSpaceUtil::getEntityHandle(*atomSpace,entity2.id);
      }
-     if(stateOwnerList.size() > 1)
+     if(stateOwnerList.size() > 2)
      {
          entity3 = boost::get<Entity>(stateOwnerList[2]);
          c = AtomSpaceUtil::getEntityHandle(*atomSpace,entity3.id);

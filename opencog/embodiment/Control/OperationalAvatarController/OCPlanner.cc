@@ -280,19 +280,30 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
 ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog::CogServer * server)
 {
     // need to translate the psi demanding goal Handle into vector<State*>
-    vector<State*> goal;
+    vector<State*> goal,knownStates;
 
-    State* goalState = new State(this->atomSpace->getName(goalHandle),ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
+    // the goal handle is like: [EvaluationLink <EnergyDemandGoal> 0.999857 0.00124844]
+    Handle goal_predicate = this->atomSpace->getOutgoing(goalHandle,0);
+    OC_ASSERT( (goal_predicate != Handle::UNDEFINED), "OCPlanner::doPlanningForPsiDemandingGoal: The current goal is Handle::UNDEFINED!");
 
+    string goalname = this->atomSpace->getName(goal_predicate);
+    std::cout<< "OCPLANNER_DEBUG:Goalgame: "<< goalname.c_str() << std::endl;
+
+    State* goalState = new State(goalname,ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
     goalState->addOwner(this->selfEntityParamValue);
+
+    State* knownState = new State(goalname,ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_FALSE);
+    knownState->addOwner(this->selfEntityParamValue);
 
     goal.push_back(goalState);
 
-    return doPlanning(goal,server);
+    knownStates.push_back(knownState);
+
+    return doPlanning(goal,knownStates,server);
 
 }
 
-ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,opencog::CogServer * server)
+ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State*>& knownStates,opencog::CogServer * server)
 {
 
     // Get OAC
@@ -320,7 +331,21 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,opencog::CogServer
     // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
     // Because our embodiment game world is not a simple finite boolean-state world, we cannot use a full forward breadth-frist which will be too slowly
 
-    // Firstly, we construct the original unsatisfiedStateNodes and temporaryStateNodes from the input goals
+    // Firstlyt, we construct the knownStates as the original temporaryStateNodes from input :
+    vector<State*>::const_iterator itknown;
+    for (itknown = knownStates.begin(); itknown != knownStates.end(); ++ itknown)
+    {
+        StateNode* newStateNode = new StateNode(*itknown);
+
+        newStateNode->backwardRuleNode = 0;
+        newStateNode->forwardRuleNode = 0;
+        newStateNode->depth = 0;
+
+        temporaryStateNodes.push_front(newStateNode);
+
+    }
+
+    // And then, we construct the original unsatisfiedStateNodes and temporaryStateNodes from the input goals
 
     // this is to store the already satisfied goal states before beginning planning, in case some planning steps  will change them into unsatisfied
     // Everytime it's changed into unsatisfied, it should be put into the unsatisfiedStateNodes list and removed from goalStateNodes list
@@ -335,7 +360,20 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,opencog::CogServer
         newStateNode->forwardRuleNode = 0;
         newStateNode->depth = 0;
 
-        if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
+        bool found;
+        StateNode* knownStateNode;
+
+        if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode))
+        {
+            goalStateNodes.push_back(newStateNode);
+            temporaryStateNodes.push_front(newStateNode);
+        }
+
+        if (found)
+        {
+            unsatisfiedStateNodes.push_front(newStateNode);
+        }
+        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
         {
             goalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
@@ -2011,7 +2049,7 @@ void OCPlanner::loadTestRulesFromCodes()
     string statename = "exist";
     State* existState = new State(statename,ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, existStateOwnerList, true, &opencog::oac::Inquery::inqueryExist);
 
-    std::cout<<"State "<< existState->name().c_str()<< " Added! " <<std::endl;
+//    std::cout<<"State "<< existState->name().c_str()<< " Added! " <<std::endl;
 
     // precondition 2: The agent hold an object
     vector<ParamValue> holderStateOwnerList;

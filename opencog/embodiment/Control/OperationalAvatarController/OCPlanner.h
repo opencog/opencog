@@ -240,7 +240,7 @@ public:
 
      // the output plan:vector<PetAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
-     ActionPlanID doPlanning(const vector<State*> &goal, opencog::CogServer *server);
+     ActionPlanID doPlanning(const vector<State*> &goal, const vector<State *> &knownStates, CogServer *server);
 
      ActionPlanID doPlanningForPsiDemandingGoal(Handle& goalHandle, opencog::CogServer *server);
 
