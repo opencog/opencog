@@ -36,12 +36,15 @@ string_seq deme_expander::fs_to_names(const set<arity_t>& fs,
 
 void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                                               const feature_set& xmplr_features,
-                                              const string_seq& ilabels) const {
-    unsigned sfps = sf_pop.size(), i = 1;
-    logger().info() << "Feature-selection deme population size = " << sfps; 
+                                              const string_seq& ilabels,
+                                              const vector<demeID_t>& demeIDs) const
+{
+    unsigned sfps = sf_pop.size(), sfi = 0;
 
+    OC_ASSERT(sfps == demeIDs.size(), "The code is probably not robust enough");
     for (const auto& sf : sf_pop) {
-        logger().info() << "Breadth-first deme expansion : " << i++ << "/" << sfps;
+        logger().info() << "Breadth-first expansion for deme : "
+                        << demeIDs[sfi];
         logger().info() << "Selected " << sf.second.size()
                         << " features for representation building";
         auto xmplr_sf = set_intersection(sf.second, xmplr_features);
@@ -54,6 +57,7 @@ void deme_expander::log_selected_feature_sets(const feature_set_pop& sf_pop,
                          fs_to_names(xmplr_sf, ilabels), ",");
         ostreamContainer(logger().info() << "Selected features which are new: ",
                          fs_to_names(new_sf, ilabels), ",");
+        sfi++;
     }
 }
 
@@ -93,6 +97,14 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
 
     combo_tree xmplr = exemplar;
 
+    // Define the demeIDs of the demes to be spawned
+    vector<demeID_t> demeIDs;
+    if (_params.fstor && _params.fstor->params.n_demes > 1) {
+        for (unsigned i = 0; i < _params.fstor->params.n_demes; i++)
+            demeIDs.emplace_back(n_expansions + 1, i);
+    } else
+        demeIDs.emplace_back(n_expansions + 1);
+
     // [HIGHLY EXPERIMENTAL]. Limit the number of features used to
     // build the exemplar to a more manageable number.  Basically,
     // this is 'on-the-fly' feature selection.  This differs from an
@@ -116,27 +128,33 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
         const auto& ilabels = festor._ctable.get_input_labels();
 
         if (festor.params.n_demes > 1)
-            logger().info() << "Breadth-first deme expansion (same exemplar, multiple feature sets): " << festor.params.n_demes;
+            logger().info() << "Breadth-first deme expansion (same exemplar, multiple feature sets): " << festor.params.n_demes << " demes";
 
-        log_selected_feature_sets(sf_pop, xmplr_features, ilabels);
+        log_selected_feature_sets(sf_pop, xmplr_features, ilabels, demeIDs);
 
-        unsigned sfi = 1;
+        unsigned sfi = 0;
         for (auto& sf : sf_pop) {
             // Either prune the exemplar, or add all exemplars
             // features to the feature sets
             if (festor.params.prune_xmplr) {
                 auto xmplr_nsf = set_difference(xmplr_features,
                                                 sf.second);
-                ostreamContainer(logger().debug() <<
-                                 "Prune the exemplar from non-selected features "
-                                 << "(" << sfi << "/" << sf_pop.size() << ")",
-                                 fs_to_names(xmplr_nsf, ilabels));
+                if (xmplr_features.empty())
+                    logger().debug() << "No feature to prune in the "
+                                     << "exemplar for deme " << demeIDs[sfi];
+                else {
+                    ostreamContainer(logger().debug() <<
+                                     "Prune the exemplar from non-selected "
+                                     "features for deme " << demeIDs[sfi]
+                                     << ": ",
+                                     fs_to_names(xmplr_nsf, ilabels));
+                }
                 xmplr_seq.push_back(prune_xmplr(exemplar, sf.second));
             }
             else {
                 logger().debug() << "Do not prune the exemplar from "
                                  << "non-selected features "
-                                 << "(" << sfi << "/" << sf_pop.size() << ")";
+                                 << "for deme " << demeIDs[sfi];
                 // Insert exemplar features as they are not pruned
                 sf.second.insert(xmplr_features.begin(), xmplr_features.end());
                 xmplr_seq.push_back(exemplar);
@@ -171,8 +189,8 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     for (unsigned i = 0; i < xmplr_seq.size(); i++) {
         if (logger().isDebugEnabled()) {
             logger().debug() << "Attempt to build rep from exemplar "
-                             << "(" << i+1 << "/" << xmplr_seq.size() << ")"
-                             << ": " << xmplr_seq[i];
+                             << "for deme " << demeIDs[i]
+                             << " : " << xmplr_seq[i];
             if (!considered_args_seq.empty())
                 ostreamContainer(logger().debug() << "Using arguments: ",
                                  considered_args_seq[i]);
@@ -200,13 +218,8 @@ bool deme_expander::create_demes(const combo_tree& exemplar, int n_expansions)
     if (_reps.empty()) return false;
 
     // Create empty demes with their IDs
-    for (unsigned i = 0; i < _reps.size(); i++) {
-        demeID_t demeID;
-        _demes.push_back(new deme_t(_reps[i].fields(),
-                                    _reps.size() == 1 ?
-                                    demeID_t(n_expansions + 1)
-                                    : demeID_t(n_expansions + 1, i)));
-    }
+    for (unsigned i = 0; i < _reps.size(); i++)
+        _demes.push_back(new deme_t(_reps[i].fields(), demeIDs[i]));
 
     return true;
 }
