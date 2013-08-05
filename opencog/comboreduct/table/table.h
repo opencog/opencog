@@ -238,21 +238,25 @@ struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
     }    
     size_t _pos;
 };
+
 /**
- * Interpreter visitor, depending on the type of the row choose which
- * interpreter to use. Note that returning the same type (here vertex)
- * is not the right long term solution, it should return the type
- * returned by the interpreter, however given the way Tables are
- * implemented it makes sense for now.
+ * Interpreter visitor.
+ * Chooses the interpreter type, based on the types of the input columns.
+ * Note that the choice of the correct interpreter also depends on the
+ * output type, which is currently not handled here. XXX FIXME.
  */
-struct interpreter_visitor : public boost::static_visitor<vertex> {
+struct interpreter_visitor : public boost::static_visitor<vertex>
+{
     interpreter_visitor(const combo_tree& tr) : _it(tr.begin()) {}
     interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
     vertex operator()(const std::vector<builtin>& inputs) {
         return boolean_interpreter(inputs)(_it);
     }    
     vertex operator()(const std::vector<contin_t>& inputs) {
-        return contin_interpreter(inputs)(_it);
+        // Can't use contin, since the output might be non-contin,
+        // e.g. a boolean, or an enum.  
+        // return contin_interpreter(inputs)(_it);
+        return mixed_interpreter(inputs)(_it);
     }    
     vertex operator()(const std::vector<vertex>& inputs) {
         return mixed_interpreter(inputs)(_it);

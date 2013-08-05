@@ -44,7 +44,8 @@ namespace opencog { namespace combo {
  * encoded as builtins id::logical_true id::logical_false.
  */
 static const std::vector<builtin> empty_builtin_inputs;
-struct boolean_interpreter {
+struct boolean_interpreter
+{
     // ctor
     boolean_interpreter(const std::vector<builtin>& inputs = empty_builtin_inputs);
 
@@ -63,7 +64,8 @@ protected:
  * We use contin as inputs and output
  */
 static const std::vector<contin_t> empty_contin_inputs;
-struct contin_interpreter {
+struct contin_interpreter
+{
     // ctor
     contin_interpreter(const std::vector<contin_t>& inputs = empty_contin_inputs);
 
@@ -76,9 +78,12 @@ protected:
     const std::vector<contin_t>& contin_inputs;
 };
 
-struct mixed_interpreter : public boolean_interpreter, public contin_interpreter {
+static const std::vector<vertex> empty_mixed_inputs;
+struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
+{
     // ctor
-    mixed_interpreter(const std::vector<vertex>& inputs);
+    mixed_interpreter(const std::vector<vertex>& inputs = empty_mixed_inputs);
+    mixed_interpreter(const std::vector<contin_t>& inputs);
 
     // interpreters
     vertex operator()(const combo_tree& tr) const;
@@ -88,6 +93,7 @@ struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
     virtual vertex mixed_eval(combo_tree::iterator it) const;
 
 protected:
+    bool _use_contin_inputs;
     const std::vector<vertex>& mixed_inputs;
 };            
 
