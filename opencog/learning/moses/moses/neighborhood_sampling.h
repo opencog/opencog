@@ -787,7 +787,7 @@ sample_new_instances(size_t total_number_of_neighbours,
     if (2 * number_of_new_instances > total_number_of_neighbours) {
         total_number_of_neighbours =
                 count_neighborhood_size(deme.fields(), center_inst, dist,
-                                      number_of_new_instances);
+                                        number_of_new_instances);
     }
 
     if (number_of_new_instances < total_number_of_neighbours) {

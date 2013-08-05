@@ -204,8 +204,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
         prev_center = center_inst;
 
         auto deme_from = next(deme.begin(), current_number_of_instances);
-        auto deme_inst_from = next(deme.begin_instances(), current_number_of_instances);
-        auto deme_score_from = next(deme.begin_scores(), current_number_of_instances);
+        auto deme_inst_from = next(deme.begin_instances(),
+                                   current_number_of_instances);
+        auto deme_score_from = next(deme.begin_scores(),
+                                    current_number_of_instances);
 
         // log neighborhood distance
         if (logger().isDebugEnabled()) {
@@ -215,12 +217,14 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 // compute the min and max hamming distances between the
                 // center instance and the crossed-over instances
                 vector<int> dst_seq;
-                transform(deme_inst_from, deme.end_instances(), back_inserter(dst_seq),
-                          [&](const instance& inst) {
-                              return deme.fields().hamming_distance(inst, center_inst);
+                transform(deme_inst_from, deme.end_instances(),
+                          back_inserter(dst_seq), [&](const instance& inst) {
+                              return deme.fields().hamming_distance(inst,
+                                                                    center_inst);
                           });
                 auto pmm = boost::minmax_element(dst_seq.begin(), dst_seq.end());
-                nbh_dst << "from distance " << *pmm.first << " to " << *pmm.second;
+                nbh_dst << "from distance " << *pmm.first
+                        << " to " << *pmm.second;
             }
             else nbh_dst << "at distance " << distance;
 
@@ -428,7 +432,11 @@ unsigned hill_climbing::operator()(deme_t& deme,
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (!already_xover) {
+                if (!already_xover
+                    // in the case we can widen the search check that
+                    // the max distance has been reached, otherwise,
+                    // it's not really a last_change
+                    && (!hc_params.widen_search || max_distance < distance)) {
                     last_chance = true;
                     continue;
                 }
@@ -471,9 +479,21 @@ size_t hill_climbing::estimate_neighborhood(size_t distance,
         return 1;
     
     const size_t nn_estimate = information_theoretic_bits(fields);
+
+    if (nn_estimate < distance) {
+        logger().warn("hill_climbing::estimate_neighborhood : "
+                      "the distance %u is greater than the "
+                      "theoretic bit field size %u. This could be a bug "
+                      "(but not necessarily due to corner cases "
+                      "and the fact that it's an approximation of the actual "
+                      "field size)", distance, nn_estimate);
+        distance = nn_estimate;
+    }
+
     if (distance == 1)
         return 2*nn_estimate; // be large given nn_estimate is only... an estimate
     else {  // more than one
+
         // Distances greater than 1 occurs only when the -L1 or
         // -T1 flags are used.  This puts this algo into a very
         // different mode of operation, in an attempt to overcome
@@ -562,11 +582,11 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
 }
 
 size_t hill_climbing::cross_top_one(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     OC_ASSERT (sample_size > 0, "Cross-over sample size must be positive");
     if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
@@ -596,11 +616,11 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
 
 /** two-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_two(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     // sample_size choose two.
     unsigned max = sample_size * (sample_size-1) / 2;
@@ -637,11 +657,11 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
 /** three-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_three(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                      size_t deme_size,
+                                      size_t num_to_make,
+                                      size_t sample_start,
+                                      size_t sample_size,
+                                      const instance& base)
 {
     // sample_size choose three.
     unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
