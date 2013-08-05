@@ -43,11 +43,10 @@ namespace opencog { namespace combo {
  * We use builtin as inputs and output because boolean contants are
  * encoded as builtins id::logical_true id::logical_false.
  */
-static const std::vector<builtin> empty_builtin_inputs;
 struct boolean_interpreter
 {
     // ctor
-    boolean_interpreter(const std::vector<builtin>& inputs = empty_builtin_inputs);
+    boolean_interpreter(const std::vector<builtin>& inputs = std::vector<builtin>());
 
     // interpreters
     builtin operator()(const combo_tree& tr) const;
@@ -63,11 +62,10 @@ protected:
  *
  * We use contin as inputs and output
  */
-static const std::vector<contin_t> empty_contin_inputs;
 struct contin_interpreter
 {
     // ctor
-    contin_interpreter(const std::vector<contin_t>& inputs = empty_contin_inputs);
+    contin_interpreter(const std::vector<contin_t>& inputs = std::vector<contin_t>());
 
     // interpreters
     contin_t operator()(const combo_tree& tr) const;
@@ -78,11 +76,10 @@ protected:
     const std::vector<contin_t>& contin_inputs;
 };
 
-static const std::vector<vertex> empty_mixed_inputs;
 struct mixed_interpreter : public boolean_interpreter, public contin_interpreter
 {
     // ctor
-    mixed_interpreter(const std::vector<vertex>& inputs = empty_mixed_inputs);
+    mixed_interpreter(const std::vector<vertex>& inputs = std::vector<vertex>());
     mixed_interpreter(const std::vector<contin_t>& inputs);
 
     // interpreters
