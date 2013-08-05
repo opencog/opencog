@@ -48,46 +48,44 @@ using namespace std;
 
 int main(int argc,char** argv) 
 {
-  int max_evals,rand_seed;
-  try {
-    if (argc!=3)
-      throw "foo";
-    rand_seed=lexical_cast<int>(argv[1]);
-    randGen().seed(rand_seed);
-    max_evals=atoi(argv[2]);
-  } catch (...) {
-    cerr << "usage: " << argv[0] << " seed maxevals" << endl;
-    exit(1);
-  }
+    int max_evals,rand_seed;
+    if (argc == 3) {
+        rand_seed=lexical_cast<int>(argv[1]);
+        randGen().seed(rand_seed);
+        max_evals=atoi(argv[2]);
+    } else {
+        cerr << "usage: " << argv[0] << " seed maxevals" << endl;
+        exit(1);
+    }
 
-  type_tree tt(id::lambda_type);
-  tt.append_children(tt.begin(),id::action_result_type,1);
+    type_tree tt(id::lambda_type);
+    tt.append_children(tt.begin(),id::action_result_type,1);
 
-  ant_score scorer;
-  ant_bscore bscorer;
+    ant_score scorer;
+    ant_bscore bscorer;
 
-  combo_tree_ns_set perceptions;
-  combo_tree_ns_set actions;
+    combo_tree_ns_set perceptions;
+    combo_tree_ns_set actions;
 
-  actions.insert(combo_tree(get_instance(id::turn_left)));
-  actions.insert(combo_tree(get_instance(id::turn_right)));
-  actions.insert(combo_tree(get_instance(id::move_forward)));
+    actions.insert(combo_tree(get_instance(id::turn_left)));
+    actions.insert(combo_tree(get_instance(id::turn_right)));
+    actions.insert(combo_tree(get_instance(id::move_forward)));
 
-  perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
+    perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
 
-  metapop_parameters metaparms;
-  metaparms.perceptions = &perceptions;
-  metaparms.actions = &actions;
+    metapop_parameters metaparms;
+    metaparms.perceptions = &perceptions;
+    metaparms.actions = &actions;
 
-  hill_climbing hc;
-  metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-              scorer, bscorer, hc, metaparms);
+    hill_climbing hc;
+    metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
+                           scorer, bscorer, hc, metaparms);
   
-  boost::program_options::variables_map vm;
-  jobs_t jobs;
+    boost::program_options::variables_map vm;
+    jobs_t jobs;
 
-  moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
-  moses_statistics st;
-  run_moses(metapop, moses_param, st);
+    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
+    moses_statistics st;
+    run_moses(metapop, moses_param, st);
 }
 
