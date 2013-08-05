@@ -26,6 +26,7 @@
 
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/util/platform.h>
 
@@ -148,6 +149,11 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                      __FUNCTION__,
                      this->cycleCount
                   );
+
+    // if the space map has not been set up yet, won't run the planner.
+    if (! spaceServer().isLatestMapValid())
+        return;
+
 
     if (this->currentOCPlanID != "") // Currently , there is one plan being executed
     {

@@ -89,6 +89,8 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
     updateBlockEntityList.clear();
     updateSuperBlockEntityList.clear();
 
+    nonBlockEntitieshistoryLocations.clear();
+
 #ifdef HAVE_ZMQ
     // set up the zmq socket to communicate with the learning server
     this->zmqLSContext = new zmq::context_t(1);
