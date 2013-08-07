@@ -2,4 +2,12 @@
                       OpenCog AtomSpace Visualizer
                       ----------------------------
 
-This is a standalone program written in C++ with GTK and boost. 
+Visualizes the contents of the opecog atomspace.
+
+
+How to use this:
+-- start a cogserver
+-- load a bunch of atoms into it
+-- start OpenCogAtomSpaceVisualizer
+--  ??  I dunno, doesn't work for me, I get a "connection refused"
+
