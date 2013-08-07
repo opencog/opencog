@@ -1,0 +1,12 @@
+
+                    Graphics and Visualization Tools
+                    --------------------------------
+
+dotty      -- build a dotty graph of the entire atomspace
+gtk-vistualizer -- use gtk3 to visualize
+tulip      -- dump the AtomSpace to the Tulip tlp graph format
+ubigraph   -- use ubigraph to visualize
+
+XXX TODO: someone who understands this stuff, please expand the above
+descriptions!
+

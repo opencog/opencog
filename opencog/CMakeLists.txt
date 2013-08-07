@@ -61,9 +61,4 @@ IF (HAVE_EMBODIMENT)
 ENDIF (HAVE_EMBODIMENT)
 
 # Graphics and visualization subsystems
-IF (HAVE_SERVER)
-   ADD_SUBDIRECTORY (dotty)
-   IF (HAVE_UBIGRAPH)
-      ADD_SUBDIRECTORY (ubigraph)
-   ENDIF (HAVE_UBIGRAPH)
-ENDIF (HAVE_SERVER)
+ADD_SUBDIRECTORY (visualization)
