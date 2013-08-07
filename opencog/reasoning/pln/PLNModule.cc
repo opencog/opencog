@@ -45,8 +45,6 @@
 #include "TestTargets.h"
 #include "ForwardChainer.h"
 
-#include <opencog/persist/tulip/TulipWriter.h>
-
 using namespace opencog;
 using namespace opencog::pln;
 using namespace test;
