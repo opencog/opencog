@@ -2,4 +2,4 @@
                       OpenCog AtomSpace Visualizer
                       ----------------------------
 
-This is a standalone program written in C++ with GTK and boost. You can compile the program in Eclipse with CDT or use the makefile in the Debug folder. 
+This is a standalone program written in C++ with GTK and boost. 
