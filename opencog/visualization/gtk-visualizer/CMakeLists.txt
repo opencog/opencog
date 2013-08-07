@@ -1,6 +1,6 @@
 
 # This requires GTK3 in order to build. Do nothing if not found.
-IF(HAVE_GTK3)
+IF(HAVE_GTK)
 	ADD_EXECUTABLE(OpenCogAtomSpaceVisualizer
 		AtomSpaceInterface
 		AtomTypes
@@ -19,5 +19,5 @@ IF(HAVE_GTK3)
 		${GTK3_LIBRARIES}
 		${Boost_SYSTEM_LIBRARY}
 	)
-ENDIF(HAVE_GTK3)
+ENDIF(HAVE_GTK)
 
