@@ -11,3 +11,9 @@ How to use this:
 -- start OpenCogAtomSpaceVisualizer
 --  ??  I dunno, doesn't work for me, I get a "connection refused"
 
+
+Known Bugs:
+-----------
+* broken atom_types.script handling. There are at least 5, or more,
+  atom_types.sciript files in use; all should be loaded.  Better yet,
+  don't use them at all; ask the atomspace about what types it knows.
