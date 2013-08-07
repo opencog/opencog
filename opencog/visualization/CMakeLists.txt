@@ -1,6 +1,7 @@
 
 IF (HAVE_SERVER)
    ADD_SUBDIRECTORY (dotty)
+   ADD_SUBDIRECTORY (gtk-visualizer)
    ADD_SUBDIRECTORY (tulip)
    IF (HAVE_UBIGRAPH)
       ADD_SUBDIRECTORY (ubigraph)
