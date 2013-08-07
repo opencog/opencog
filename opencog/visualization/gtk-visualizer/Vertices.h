@@ -25,8 +25,10 @@
 #ifndef VERTICES_H
 #define VERTICES_H
 
-#include "../include/Vertex.h"
 #include <vector>
+
+#include "Vertex.h"
+
 using namespace std;
 
 class Vertices

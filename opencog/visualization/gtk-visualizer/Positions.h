@@ -25,9 +25,10 @@
 #ifndef POSITIONS_H
 #define POSITIONS_H
 
-#include "../include/Vertex.h"
 #include <exception>
 #include <stdexcept>
+
+#include "Vertex.h"
 
 class Vertex;
 

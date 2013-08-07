@@ -25,12 +25,9 @@
 #ifndef ATOMSPACEINTERFACE_H
 #define ATOMSPACEINTERFACE_H
 
-#include "../include/AtomTypes.h"
-#include "../include/Vertex.h"
-
-#include <stdlib.h>
 #include <limits>
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include <istream>
 #include <ostream>
@@ -40,6 +37,10 @@
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
 #include <stdexcept>
+
+#include "AtomTypes.h"
+#include "Vertex.h"
+
 
 using namespace std;
 using boost::asio::ip::tcp;

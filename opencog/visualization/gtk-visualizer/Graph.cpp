@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../include/Graph.h"
+#include "Graph.h"
 
 Graph::Graph(AtomSpaceInterface* atomSpaceInterface1)
 {

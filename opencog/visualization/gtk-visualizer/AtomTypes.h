@@ -25,7 +25,6 @@
 #ifndef ATOMTYPES_H
 #define ATOMTYPES_H
 
-#include "../include/Vertex.h"
 
 #include <vector>
 #include <set>
@@ -37,6 +36,9 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdexcept>
+
+#include "Vertex.h"
+
 using namespace std;
 
 class AtomTypes

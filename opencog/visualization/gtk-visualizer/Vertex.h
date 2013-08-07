@@ -25,10 +25,12 @@
 #ifndef VERTEX_H
 #define VERTEX_H
 
-#include "../include/Positions.h"
 #include <string>
 #include <vector>
 #include <limits>
+
+#include "Positions.h"
+
 using namespace std;
 
 class Positions;

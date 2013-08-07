@@ -25,14 +25,16 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
-#include "../include/Vertex.h"
-#include "../include/Vertices.h"
-#include "../include/Positions.h"
-#include "../include/AtomSpaceInterface.h"
 #include <vector>
 #include <string>
 #include <ctime>
 #include <math.h>
+
+#include "Vertex.h"
+#include "Vertices.h"
+#include "Positions.h"
+#include "AtomSpaceInterface.h"
+
 using namespace std;
 
 class Graph
