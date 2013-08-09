@@ -459,7 +459,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
         return combo_tree::iterator();
     }
 
-        field_set::disc_spec spec() const {
+    field_set::disc_spec spec() const {
         return field_set::disc_spec(multiplicity());
     }
 
@@ -520,6 +520,7 @@ struct simple_action_subtree_knob : public discrete_knob<2>
                                    combo_tree::iterator& parent_dst,
                                    int idx) const
     {
+        std::cout << "Mother fucker!" << std::endl;
         OC_ASSERT(false, "Not implemented yet");
         return combo_tree::iterator();
     }
