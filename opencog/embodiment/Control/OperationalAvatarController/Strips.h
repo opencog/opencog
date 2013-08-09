@@ -110,7 +110,9 @@ namespace opencog { namespace oac {
         // the owner can be any type
         vector<ParamValue> stateOwnerList;
 
-        string name() const {return stateVariable->getName();}
+        string stateName;
+
+        string name() const {return stateName;}
 
         // see the enum StateType
         StateType stateType;
@@ -387,9 +389,9 @@ namespace opencog { namespace oac {
         // Compared to the bool_var[PARAMETER_NUM],str_var[PARAMETER_NUM]...in PlanningHeaderFiles.h
         bool static isParameterUnGrounded(ActionParameter &param);
         bool static isParamValueUnGrounded( ParamValue &paramVal);
-        bool static isUnGroundedString( string& s);
-        bool static isUnGroundedVector( Vector& v);
-        bool static isUnGroundedEntity( Entity& e);
+        bool static isUnGroundedString( string &s);
+        bool static isUnGroundedVector(Vector& v);
+        bool static isUnGroundedEntity( Entity &e);
 
     protected:
 

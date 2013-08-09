@@ -46,6 +46,7 @@ State::State(string _stateName, ActionParamType _valuetype,StateType _stateType,
              vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
     : stateOwnerList(_stateOwnerList),stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
 {
+    this->stateName = _stateName;
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
 }
 
@@ -55,6 +56,7 @@ State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType
 {
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
     stateOwnerList.clear();
+    this->stateName = _stateName;
 }
 
 State::~State()
@@ -65,8 +67,9 @@ State::~State()
 State* State::clone()
 {
     State* cloneState = new State();
-    cloneState->name() = this->name();
-    cloneState->stateVariable = new ActionParameter(this->name(),this->getActionParamType(), this->getParamValue());
+
+    cloneState->stateName = this->stateName;
+    cloneState->stateVariable = new ActionParameter(this->stateName,this->getActionParamType(), this->stateVariable->getValue());
     cloneState->stateType = this->stateType;
     cloneState->stateOwnerList = this->stateOwnerList;
     cloneState->need_inquery = this->need_inquery;
@@ -715,6 +718,43 @@ bool Rule::_isRecursiveRule()
     return true;
 }
 
+//bool Rule::isUnGroundedString( string& s)
+//{
+//    for (int i = 0; i < PARAMETER_NUM; ++i)
+//    {
+//        if ( (s == bool_var[i]) ||
+//             (s == str_var[i]) ||
+//             (s == int_var[i]) ||
+//             (s == float_var[i]) )
+//            return true;
+//    }
+
+//    return false;
+//}
+
+//bool Rule::isUnGroundedVector( Vector& v)
+//{
+//    for (int i = 0; i < PARAMETER_NUM; ++i)
+//    {
+//        if (v == vector_var[i])
+//            return true;
+//    }
+
+//    return false;
+//}
+
+//bool Rule::isUnGroundedEntity( Entity& e)
+//{
+//    for (int i = 0; i < PARAMETER_NUM; ++i)
+//    {
+//        if (e == entity_var[i])
+//            return true;
+//    }
+
+//    return false;
+//}
+
+
 bool Rule::isUnGroundedString( string& s)
 {
     for (int i = 0; i < PARAMETER_NUM; ++i)
@@ -729,7 +769,7 @@ bool Rule::isUnGroundedString( string& s)
     return false;
 }
 
-bool Rule::isUnGroundedVector( Vector& v)
+bool Rule::isUnGroundedVector( Vector &v)
 {
     for (int i = 0; i < PARAMETER_NUM; ++i)
     {
@@ -740,7 +780,7 @@ bool Rule::isUnGroundedVector( Vector& v)
     return false;
 }
 
-bool Rule::isUnGroundedEntity( Entity& e)
+bool Rule::isUnGroundedEntity(Entity& e)
 {
     for (int i = 0; i < PARAMETER_NUM; ++i)
     {
@@ -771,6 +811,26 @@ bool Rule::isParameterUnGrounded( ActionParameter& param)
     }
 }
 
+//bool Rule::isParameterUnGrounded( ActionParameter& param)
+//{
+//    switch(param.getType().getCode())
+//    {
+//    case ENTITY_CODE:
+//        return isUnGroundedEntity(param.getValue());
+
+//    case VECTOR_CODE:
+//        return isUnGroundedVector(param.getValue());
+
+//    case STRING_CODE:
+//    case INT_CODE:
+//    case FLOAT_CODE:
+//    case BOOLEAN_CODE:
+//        return isUnGroundedString(param.getValue());
+//    default:
+//        return false;
+//    }
+//}
+
 bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 {
     if(boost::get<Entity>(&paramVal))
@@ -785,6 +845,21 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
     return false;
 
 }
+
+//bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
+//{
+//    if(boost::get<Entity>(&paramVal))
+//        return isUnGroundedEntity(paramVal);
+
+//    if(boost::get<Vector>(&paramVal))
+//        return isUnGroundedVector(paramVal);
+
+//    if(boost::get<string>(&paramVal))
+//        return isUnGroundedString(paramVal);
+
+//    return false;
+
+//}
 
 // in some planning step, need to ground some state to calculate the cost or others
 // return a new state which is the grounded version of s, by a parameter value map

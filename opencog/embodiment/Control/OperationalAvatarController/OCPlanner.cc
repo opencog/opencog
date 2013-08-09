@@ -50,7 +50,11 @@ using namespace std;
 // it its forward rule node has multiple forward state node, using the deepest one
 void StateNode::calculateNodeDepth()
 {
-    if (! this->forwardRuleNode)
+    if (this->depth == 0)
+    {
+        return; // it's the goal state nodes
+    }
+    else if (! this->forwardRuleNode)
     {
         this->depth = -1;
         return;
@@ -383,6 +387,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             unsatisfiedStateNodes.push_front(newStateNode);
         }
 
+    }
+
+
+    if (unsatisfiedStateNodes.size() == 0)
+    {
+        std::cout << "The goal is already satisfied! There is no need to do planning!" << std::endl;
+        return 0;
     }
 
     while(unsatisfiedStateNodes.size() != 0)
@@ -2038,7 +2049,9 @@ void OCPlanner::loadTestRulesFromCodes()
     // define variables:
     ParamValue var_food = entity_var[0];
     ParamValue var_achieve_energy_goal = bool_var[1];
-    ParamValue var_avatar = entity_var[1];
+    ParamValue var_avatar =  entity_var[1];
+
+    std::cout<<"holder: "<< ActionParameter::ParamValueToString(var_avatar).c_str()<< std::endl;
 
     // Add rule: increasing energy by eat an edible object held in hand
 
@@ -2049,11 +2062,10 @@ void OCPlanner::loadTestRulesFromCodes()
     string statename = "exist";
     State* existState = new State(statename,ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, existStateOwnerList, true, &opencog::oac::Inquery::inqueryExist);
 
-//    std::cout<<"State "<< existState->name().c_str()<< " Added! " <<std::endl;
-
     // precondition 2: The agent hold an object
     vector<ParamValue> holderStateOwnerList;
     holderStateOwnerList.push_back(var_food);
+
 
     State* holderState = new State("holder",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_avatar, holderStateOwnerList);
 
@@ -2099,7 +2111,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: pick up an object to hold it if closed enough-------------------------------
     // define variables:
-    ParamValue varAvatar = entity_vartest;
+    ParamValue varAvatar = entity_var[0];
     ParamValue varFood = entity_var[1];
     ParamValue var_holder = entity_var[2];
 

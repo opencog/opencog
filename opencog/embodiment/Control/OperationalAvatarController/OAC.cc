@@ -220,6 +220,8 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                          false
                                                        )
                                                                        );
+
+        psiActionSelectionAgent = 0;
     }
     else
     {
@@ -231,6 +233,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                          false
                                                        )
                                                                        );
+        ocPlanningAgent = 0;
     }
 
     this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);

@@ -403,6 +403,7 @@ std::string ActionParameter::ParamValueToString(const ParamValue& paramVal)
     }
     else if(boost::get<Entity>(&(paramVal)))
     {
+        Entity e = boost::get<Entity>(paramVal);
         answer = "(";
         answer.append(opencog::toString(boost::get<Entity>(paramVal).id));
         answer.append(",");
