@@ -100,10 +100,16 @@ if ! [ -z $GITROOT ]; then
 		mkdir -p bin/opencog/query
 		mkdir -p bin/opencog/shell
 		mkdir -p bin/opencog/web
-		mkdir -p bin/opencog/ubigraph
+		mkdir -p bin/opencog/visualization/ubigraph
 		mkdir -p bin/opencog/learning/dimensionalembedding
 		mkdir -p bin/opencog/cython
 		mkdir -p bin/opencog/embodiment/AtomSpaceExtensions/
+		mkdir -p bin/opencog/util
+		mkdir -p bin/opencog/nlp/types
+#		mkdir -p bin/opencog/viterbi
+		mkdir -p bin/opencog/dynamics/attention
+		mkdir -p bin/opencog/atomspace
+		mkdir -p bin/opencog/spacetime
 
 		echo "Folder creation complete!"
 
@@ -124,17 +130,35 @@ if ! [ -z $GITROOT ]; then
 		#echo "BUILDROOT=$BUILDROOT"			
 
 		echo "Creating symbolic links..."
+		ln -s $BUILDROOT/opencog/spacetime/spacetime_types.scm bin/opencog/spacetime/spacetime_types.scm
+
+		ln -s $BUILDROOT/opencog/atomspace/core_types.scm bin/opencog/atomspace/core_types.scm
 
 		ln -s $BUILDROOT/opencog/server/cogserver bin/opencog/server/cogserver
 		ln -s $BUILDROOT/opencog/server/libbuiltinreqs.so bin/opencog/server/libbuiltinreqs.so
 		ln -s $BUILDROOT/opencog/persist/sql/libpersist.so bin/opencog/persist/sql/libpersist.so
 		ln -s $BUILDROOT/opencog/query/libquery.so bin/opencog/query/libquery.so
 		ln -s $BUILDROOT/opencog/shell/libscheme-shell.so bin/opencog/shell/libscheme-shell.so
+		ln -s $BUILDROOT/opencog/shell/libpy-shell.so bin/opencog/shell/libpy-shell.so
 		ln -s $BUILDROOT/opencog/web/libocweb.so bin/opencog/web/libocweb.so
-		ln -s $BUILDROOT/opencog/ubigraph/libubigraph.so bin/opencog/ubigraph/libubigraph.so
+
+		ln -s $BUILDROOT/opencog/visualization/ubigraph/libubigraph.so bin/opencog/visualization/ubigraph/libubigraph.so
+
 		ln -s $BUILDROOT/opencog/learning/dimensionalembedding/libdimensionalembedding.so bin/opencog/learning/dimensionalembedding/libdimensionalembedding.so
+
 		ln -s $BUILDROOT/opencog/cython/libPythonModule.so bin/opencog/cython/libPythonModule.so
+
 		ln -s $BUILDROOT/opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so bin/opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so
+		ln -s $BUILDROOT/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm bin/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm
+		ln -s $BUILDROOT/opencog/util/libcogutil.so bin/opencog/util/libcogutil.so
+
+		ln -s $BUILDROOT/opencog/nlp/types/libnlp-types.so bin/opencog/nlp/types/libnlp-types.so
+		ln -s $BUILDROOT/opencog/nlp/types/nlp_types.scm bin/opencog/nlp/types/nlp_types.scm
+
+#		ln -s $BUILDROOT/opencog/viterbi/libviterbi.so bin/opencog/viterbi/libviterbi.so
+		ln -s $BUILDROOT/opencog/dynamics/attention/libattention.so bin/opencog/dynamics/attention/libattention.so
+		ln -s $BUILDROOT/opencog/dynamics/attention/attention_types.scm bin/opencog/dynamics/attention/attention_types.scm
+#		ln -s $BUILDROOT/opencog/ubigraph/libubigraph.so bin/opencog/ubigraph/libubigraph.so
 
 		echo "Symbolic link creation complete!"
 	fi
