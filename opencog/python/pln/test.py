@@ -1,22 +1,24 @@
 __author__ = 'ramin'
 
-from opencog.atomspace import AtomSpace, types, TruthValue
-from agents import SimpleForwardInferenceAgent
+from opencog.atomspace import AtomSpace
+from agents import SimpleForwardInferenceAgent, AtomspacePopulatorAgent
 
 
 
 
 atomspace = AtomSpace()
 
-a = atomspace.add_node(types.ConceptNode, "ramin", TruthValue(1, 1))
-b = atomspace.add_node(types.ConceptNode, "keyvan", TruthValue(1, 1))
-c = atomspace.add_node(types.ConceptNode, "ashkan", TruthValue(1, 1))
+fia_agent = SimpleForwardInferenceAgent()
+apa_agent = AtomspacePopulatorAgent()
 
-ab = atomspace.add_link(types.InheritanceLink, [a, b], TruthValue(1, 1))
-ac = atomspace.add_link(types.InheritanceLink, [b, c], TruthValue(1, 1))
+for i in range(1, 100):
+    apa_atom = apa_agent.run(atomspace)
+    if apa_atom is not None:
+        print 'apa:', apa_atom
+    fia_atom = fia_agent.run(atomspace)
+    if fia_atom is not None:
+        print 'fia:', fia_atom
 
-agent = SimpleForwardInferenceAgent()
-agent.run(atomspace)
-
+print "----------------------------------------"
 atomspace.print_list()
 
