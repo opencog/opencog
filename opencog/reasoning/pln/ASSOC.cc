@@ -56,6 +56,8 @@ pHandle CreateConceptASSOC(AtomSpaceWrapper* asw, pHandle c_h) {
         pHandle subset_h = boost::get<pHandle>(tgci->GetValue());
         pHandle sub_h = asw->getOutgoing(subset_h, 0);
         if (sub_h == c_h) {
+
+        
             pHandle super_h = asw->getOutgoing(subset_h, 1);
             pHandle subset_not_c_h = asw->getHandle(SUBSET_LINK,
                                                     not_c_h, super_h);

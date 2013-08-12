@@ -33,10 +33,10 @@ def add_tree_to_atomspace(a, tree, root):
         try:
             if is_a(fakeatom.type, types.Node):
                 # a node
-                return a.add_node(fakeatom.type, fakeatom.name, fakeatom.tv).h
+                return a.add_node(fakeatom.type, fakeatom.name, fakeatom.tv)
             else:
                 # empty link
-                return a.add_link(fakeatom.type, [], fakeatom.tv).h
+                return a.add_link(fakeatom.type, [], fakeatom.tv)
         except Exception, e:
             log.error(" **** error occurs when adding to atomspace ****" )
             log.error(str(e))
@@ -54,7 +54,7 @@ def add_tree_to_atomspace(a, tree, root):
         out.append(add_tree_to_atomspace(a, tree, child))
         ## construct the link
     #print "adding %s + "%root + str(out)
-    return a.add_link(fakeatom.type, out, fakeatom.tv).h
+    return a.add_link(fakeatom.type, out, fakeatom.tv)
 
 def load_scm_file(a, filename):
     log.info("loading...")
