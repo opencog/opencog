@@ -7,6 +7,9 @@
 #
 # If you have valgrind installed in a non-standard place, you can define
 # VALGRIND_PREFIX to tell cmake where it is.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 message(STATUS "Valgrind Prefix: ${VALGRIND_PREFIX}")
 
