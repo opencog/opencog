@@ -29,3 +29,7 @@
 (MemberLink (stv 0.6 dc) e8 super)
 (MemberLink (stv 0.0 dc) e9 super)
 
+;(EvaluationLink (stv 0.0 dc) super
+;    (ListLink e9)
+;)
+

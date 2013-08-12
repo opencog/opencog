@@ -54,57 +54,60 @@ def rules(a, deduction_types):
 
     #path_rules(a)
 
-    # PLN is able to do pathfinding (experimental). In the Minecraft world, there is a 3D grid
-    # similar to that used by A*. This Rule determines the grid squares (or rather grid cubes)
-    # that are next to a specified grid cube (i.e. the neighborhood, in the A* sense).
-    # You can represent the grid as a network of OpenCog links, which is more suitable for PLN
-    # than having an array (and more versatile in general).
-    # This version of the Rule calculates the neighborhood dynamically. The function path_rules()
-    # uses the simpler but much slower approach of adding thousands of links to the AtomSpace in advance.
-    r = Rule(T('EvaluationLink',
-                a.add(t.PredicateNode,'neighbor'),
-                T('ListLink',
-                    Var(1), # a ConceptNode representing the coordinates in a tacky format
-                    Var(2)
-                )),
-             [],
-             name='Neighbors',
-             match=match_neighbors)
-    rules.append(r)
-    #r = Rule(T('ImplicationLink',
-    #            Var(1),
-    #            Var(2)
-    #            ),
-    #         [],
-    #         name='Neighbors',
-    #         match=match_neighbors)
-    #rules.append(r)
+#    # PLN is able to do pathfinding (experimental). In the Minecraft world, there is a 3D grid
+#    # similar to that used by A*. This Rule determines the grid squares (or rather grid cubes)
+#    # that are next to a specified grid cube (i.e. the neighborhood, in the A* sense).
+#    # You can represent the grid as a network of OpenCog links, which is more suitable for PLN
+#    # than having an array (and more versatile in general).
+#    # This version of the Rule calculates the neighborhood dynamically. The function path_rules()
+#    # uses the simpler but much slower approach of adding thousands of links to the AtomSpace in advance.
+#    r = Rule(T('EvaluationLink',
+#                a.add(t.PredicateNode,'neighbor'),
+#                T('ListLink',
+#                    Var(1), # a ConceptNode representing the coordinates in a tacky format
+#                    Var(2)
+#                )),
+#             [],
+#             name='Neighbors',
+#             match=match_neighbors)
+#    rules.append(r)
+#    #r = Rule(T('ImplicationLink',
+#    #            Var(1),
+#    #            Var(2)
+#    #            ),
+#    #         [],
+#    #         name='Neighbors',
+#    #         match=match_neighbors)
+#    #rules.append(r)
 
     # You can add a separate Rule for every axiom (i.e. every Atom which has a TruthValue when PLN starts).
     # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
     # the Proof DAG. It's simple to have a separate Rule for each axiom, but it's slow because the chainer
     # will try to unify a target against every axiom Rule.
-    #for obj in a.get_atoms_by_type(t.Atom):
-    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-    #    if obj.tv.count > 0 and obj.tv.mean > 0:
-    #        tr = tree_from_atom(obj)
-    #        # A variable with a TV could just prove anything; that's evil!
-    #        if not tr.is_variable():
-    #            
-    #            # tacky filter
-    #            if 'CHUNK' in str(tr):
-    #                continue
-    #            
-    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
-    #            rules.append(r)
+    rule_for_every_atom = True
+    if rule_for_every_atom:
 
-    # Just lookup the rule rather than having separate rules. Would be faster
-    # with a large number of atoms (i.e. more scalable). Some examples will break if
-    # you use it due to bugs in the backward chainer.
-    r = Rule(Var(123),[],
-                      name='Lookup',
-                      match=match_axiom)
-    rules.append(r)
+        for obj in a.get_atoms_by_type(t.Atom):
+            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+            #if obj.tv.count > 0 and obj.tv.mean > 0:
+            tr = tree_from_atom(obj)
+            # A variable with a TV could just prove anything; that's evil!
+            if not tr.is_variable():
+
+                # tacky filter
+                if 'CHUNK' in str(tr):
+                    continue
+
+                r = Rule(tr, [], '[axiom]', tv = obj.tv)
+                rules.append(r)
+    else:
+        # Just lookup the rule rather than having separate rules. Would be faster
+        # with a large number of atoms (i.e. more scalable). Some examples will break if
+        # you use it due to bugs in the backward chainer.
+        r = Rule(Var(123),[],
+                          name='Lookup',
+                          match=match_axiom)
+        rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
     # any Python function to decide one of the Atoms. This one does the plus calculation.
@@ -121,36 +124,6 @@ def rules(a, deduction_types):
              name='PredicateEvaluation',
              match=match_predicate)
     rules.append(r)
-
-    # The three main logical rules in PLN. The code creates different versions of the Rule
-    # for different kinds of Links.
-    # The classic Modus Ponens rule, used (and over-emphasized) in classical logic everywhere.
-    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
-        rules.append(Rule(Var(2), 
-                                     [T(ty, 1, 2),
-                                      Var(1) ], 
-                                      name='ModusPonens '+ty,
-                                      formula = formulas.modusPonensFormula))
-    
-    # The PLN DeductionRule. Not to be confused with ModusPonens.
-    for type in deduction_types:
-        rules.append(Rule(T(type, 1,3), 
-                                     [T(type, 1, 2),
-                                      T(type, 2, 3), 
-                                      Var(1),
-                                      Var(2), 
-                                      Var(3)],
-                                    name='Deduction', 
-                                    formula = formulas.deductionSimpleFormula))
-    
-    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
-    for type in deduction_types:
-        rules.append(Rule( T(type, 2, 1), 
-                                     [T(type, 1, 2),
-                                      Var(1),
-                                      Var(2)], 
-                                     name='Inversion', 
-                                     formula = formulas.inversionFormula))
 
     # Calculating logical And/Or/Not. These have probabilities attached,
     # but they work similarly to the Boolean versions.
@@ -176,44 +149,44 @@ def rules(a, deduction_types):
                        name = 'Not', 
                        formula = formulas.notFormula))
 
-    for type in ['AndLink', 'SimultaneousAndLink']:
-        # A rule to create an AndLink from two AndLinks.
-        # There's no point in using size 2 because the premises wouldn't be in AndLinks
-        for totalsize in xrange(4,11):
-            for size_a in xrange(2, totalsize-1):
-                size_b = totalsize - size_a
-
-                vars = [new_var() for x in xrange(totalsize)]
-                and_result = T(type, vars)
-
-                and_a = T(type, vars[0:size_a])
-                and_b = T(type, vars[size_a:totalsize])
-
-                r = Rule(and_result,
-                         [and_a,
-                          and_b],
-                         name = type[:-4]+'Partition %s/%s' % (size_a, size_b),
-                         formula = formulas.andPartitionFormula
-                         )
-                rules.append(r)
-
-        # A rule to create an AndLink from an AndLink and a single premise
-        for totalsize in xrange(3,11):
-            size_b = totalsize-1
-
-            vars = [new_var() for x in xrange(totalsize)]
-            and_result = T(type, vars)
-
-            thing_a = vars[0]
-            and_b = T(type, vars[1:totalsize])
-
-            r = Rule(and_result,
-                [thing_a,
-                 and_b],
-                name = type[:-4]+'AndBuilding %s' % (size_b,),
-                formula = formulas.andPartitionFormula
-            )
-            rules.append(r)
+#    for type in ['AndLink', 'SimultaneousAndLink']:
+#        # A rule to create an AndLink from two AndLinks.
+#        # There's no point in using size 2 because the premises wouldn't be in AndLinks
+#        for totalsize in xrange(4,11):
+#            for size_a in xrange(2, totalsize-1):
+#                size_b = totalsize - size_a
+#
+#                vars = [new_var() for x in xrange(totalsize)]
+#                and_result = T(type, vars)
+#
+#                and_a = T(type, vars[0:size_a])
+#                and_b = T(type, vars[size_a:totalsize])
+#
+#                r = Rule(and_result,
+#                         [and_a,
+#                          and_b],
+#                         name = type[:-4]+'Partition %s/%s' % (size_a, size_b),
+#                         formula = formulas.andPartitionFormula
+#                         )
+#                rules.append(r)
+#
+#        # A rule to create an AndLink from an AndLink and a single premise
+#        for totalsize in xrange(3,11):
+#            size_b = totalsize-1
+#
+#            vars = [new_var() for x in xrange(totalsize)]
+#            and_result = T(type, vars)
+#
+#            thing_a = vars[0]
+#            and_b = T(type, vars[1:totalsize])
+#
+#            r = Rule(and_result,
+#                [thing_a,
+#                 and_b],
+#                name = type[:-4]+'AndBuilding %s' % (size_b,),
+#                formula = formulas.andPartitionFormula
+#            )
+#            rules.append(r)
 
     # PLN's heuristic Rules to convert one kind of link to another. There are other
     # variations on this Rule defined in the PLN book, but not implemented yet.
@@ -221,6 +194,12 @@ def rules(a, deduction_types):
                        [ T('SubsetLink', 1, 2) ],
                        name = 'SubsetLink=>InheritanceLink', 
                        formula = formulas.ext2InhFormula))
+
+    rules.append(Rule(T('SimilarityLink', 1, 2),
+        [ T('InheritanceLink', 1, 2),
+          T('InheritanceLink', 2, 1)],
+        name = 'Inheritance=>Similarity',
+        formula = formulas.inheritance2SimilarityFormula))
 
 #        # Producing ForAll/Bind/AverageLinks.
 #        for type in ['ForAllLink', 'BindLink', 'AverageLink']:
@@ -241,28 +220,106 @@ def rules(a, deduction_types):
 #        r.tv = True
 #        rules.append(r)
 
+    rules += logical_rules(a, deduction_types)
+
+    #rules += quantifier_rules(a)
+
+    #rules += temporal_rules(a)
+    
+    #rules += planning_rules(a)
+
+    rules += subset_rules(a)
+
+    # Return every Rule specified above.
+    return rules
+
+def logical_rules(atomspace, deduction_types):
+    rules = []
+
+    # The three main logical rules in PLN. The code creates different versions of the Rule
+    # for different kinds of Links.
+    # The classic Modus Ponens rule, used (and over-emphasized) in classical logic everywhere.
+    for ty in ['ImplicationLink', 'PredictiveImplicationLink']:
+        rules.append(Rule(Var(2),
+            [T(ty, 1, 2),
+             Var(1) ],
+            name='ModusPonens '+ty,
+            formula = formulas.modusPonensFormula))
+
+    # The PLN DeductionRule. Not to be confused with ModusPonens.
+    for type in deduction_types:
+        rules.append(Rule(T(type, 1,3),
+            [T(type, 1, 2),
+             T(type, 2, 3),
+             Var(1),
+             Var(2),
+             Var(3)],
+            name='Deduction',
+            formula = formulas.deductionSimpleFormula))
+
+    # PLN InversionRule, which reverses an ImplicationLink. It's based on Bayes' Theorem.
+    for type in deduction_types:
+        rules.append(Rule( T(type, 2, 1),
+            [T(type, 1, 2),
+             Var(1),
+             Var(2)],
+            name='Inversion',
+            formula = formulas.inversionFormula))
+
+    return rules
+
+def quantifier_rules(atomspace):
+    rules = []
+
     # If an Atom is available in an Average/ForAll quantifier, you want to be
     # able to produce the Atom itself and send it through the other steps of the
     # inference.
-    for atom in a.get_atoms_by_type(t.AverageLink):
+    for atom in atomspace.get_atoms_by_type(t.AverageLink):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
         r = Rule(tr, [], name='Average')
         r.tv = atom.tv
         rules.append(r)
 
-    for atom in a.get_atoms_by_type(t.ForAllLink):
+    for atom in atomspace.get_atoms_by_type(t.ForAllLink):
         # out[0] is the ListLink of VariableNodes, out[1] is the expression
         tr = tree_from_atom(atom.out[1])
         r = Rule(tr, [], name='ForAll')
         r.tv = atom.tv
         rules.append(r)
 
-    rules += temporal_rules(a)
-    
-    rules += planning_rules(a)
+    return rules
 
-    # Return every Rule specified above.
+def subset_rules(atomspace):
+    rules = []
+
+    r = Rule(
+        T('SubsetLink', new_var(), new_var()),
+        [],
+        name = 'SubsetEvaluation',
+        match = match_subset
+    )
+    rules.append(r)
+
+    r = Rule(
+        T('IntensionalInheritanceLink', new_var(), new_var()),
+        [],
+        name = 'IntensionalInheritanceEvaluation',
+        match = match_intensional_inheritance
+    )
+    rules.append(r)
+
+    a,b = new_var(), new_var()
+    rules.append(
+        Rule(
+            T('InheritanceLink', a, b),
+            [T('SubsetLink', a, b),
+             T('IntensionalInheritanceLink', a, b)],
+            name = 'InheritanceEvaluation',
+            formula = formulas.inheritanceFormula
+        )
+    )
+
     return rules
 
 def planning_rules(atomspace):
@@ -503,6 +560,19 @@ def create_temporal_matching_function(formula):
 
 # See how they are used in rules() above.
 
+def match_wrapper(space, target, match):
+    candidate_heads_tvs = match(space, target)
+
+    heads_tvs = []
+    for (h, tv) in candidate_heads_tvs:
+        s = unify(h, target, {})
+        if s != None:
+            heads_tvs.append( (h,tv) )
+
+    assert not (heads_tvs is None)
+    return heads_tvs
+
+
 def match_axiom_slow(space,target,candidates = None):
     if isinstance(target.op, Atom):
         candidates = [target.op]
@@ -518,9 +588,10 @@ def match_axiom_slow(space,target,candidates = None):
 
 def match_axiom(space,target):
     if isinstance(target.op, Atom):
-        candidates = [target.op]
+        smallest_set = [target.op]
     else:
         # The nodes in the target, as Atoms
+        # TODO This may break if target is a Link with no Nodes underneath it!
         nodes = [tr.op for tr in target.flatten() if isinstance(tr.op, Atom) and tr.op.is_node()]
 
         links_of_type = space.get_atoms_by_type(target.get_type())
@@ -534,8 +605,8 @@ def match_axiom(space,target):
         #print target, len(smallest_set)
 
     # Then the chainer will try to unify against every candidate
-    candidate_trees = (tree_from_atom(atom) for atom in candidates)
-    candidate_tvs = (c.tv for c in candidates)
+    candidate_trees = (tree_from_atom(atom) for atom in smallest_set)
+    candidate_tvs = (c.tv for c in smallest_set)
     
     return zip(candidate_trees, candidate_tvs)
 
@@ -609,6 +680,179 @@ def match_predicate(space,target):
             candidates.append((c, None))
     
     return candidates
+
+def match_subset(space,target):
+
+    A, B = target.args
+    #compatible = ((A.get_type() == t.ConceptNode and B.get_type() == t.ConceptNode) or
+    #             (A.get_type() == t.PredicateNode and B.get_type() == t.PredicateNode))
+    #if not compatible:
+    #    return []
+    if A.is_variable() or B.is_variable():
+        return []
+
+    print A, B
+
+    def members(concept):
+        '''For each member of concept, return the node and the strength of membership'''
+        template = T('MemberLink', new_var(), concept)
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = [(tr.args[0], tv.mean) for (tr, tv) in trees_tvs]
+        assert not (mems is None)
+        return mems
+
+    def all_member_links():
+        '''Find all ObjectNodes (or other nodes) that are members of any concept.
+        Returns a set of nodes (each node is wrapped in the Tree class)'''
+        template = T('MemberLink', new_var(), new_var())
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = set(tr.args[0] for (tr, tv) in trees_tvs)
+        return mems
+
+    def non_members(concept):
+        # Find the members of Not(A).
+        # For example if A is 'the set of cats', then Not(A) is 'the set of things that aren't cats'.
+        # So for every entity E in the world, (MemberLink E Not(cat)).tv.mean == 1 - (MemberLink E cat).tv.mean.
+        # If the latter is not recorded in the AtomSpace, just assume it is 0.
+
+        # Find all objects/etc that are members of anything
+        # type: set(Tree)
+        everything = all_member_links()
+
+        # the type of members_of_concept is [(concept,frequency)]
+        members_of_concept = members(concept)
+        membershipStrengths = {member:strength for (member, strength) in members_of_concept}
+
+        result = []
+        for object in everything:
+            membershipStrength = 0
+            if object in membershipStrengths:
+                membershipStrength = membershipStrengths[object]
+            nonMembershipStrength = 1 - membershipStrength
+            result.append( (object,nonMembershipStrength) )
+
+        return result
+
+    def evals(concept):
+        template = T(
+            'EvaluationLink',
+                concept,
+                T('ListLink', new_var())
+        )
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        mems = [(tr.args[1].args[0], tv.mean) for (tr, tv) in trees_tvs]
+        return mems
+
+    # Find the members of each concept
+    # For single-argument predicates, this is the same as EvaluationLinks.
+    # TODO: can't handle negated predicates in EvaluationLinks...
+    # This means PredicateNodes can't be in IntensionalInheritanceLinks
+    if A.get_type() == t.NotLink:
+        # Members of Not(A)
+        assert B.get_type() == t.ConceptNode
+        memA = non_members(A)
+        memB = members(B)
+    else:
+        # Members of A
+        memA = members(A) + evals(A)
+        memB = members(B) + evals(B)
+#    memA = evals(A)
+#    memB = evals(B)
+
+    print memA
+    print
+    print memB
+
+    # calculate P(x in B | x in A) = P(A^B) / P(A)
+    # based on the fuzzy-weighted average
+    #nodes_in_B = [m for (m,s) in memB]
+    assert not (memB is None)
+    nodesB = {member:strength for (member,strength) in memB}
+
+    N_AB = 0
+    for (mA, sA) in memA:
+        if mA in nodesB:
+            sB = nodesB[mA]
+
+            # min is the definition of fuzzy-AND
+            N_AB += min(sA,sB)
+    
+    #N_AB = sum(s for (m, s) in memA if m in nodes_in_B)
+    N_A = sum(s for (m, s) in memA)
+    if N_A > 0:
+        P = N_AB*1.0 / N_A
+        tv = TruthValue(P, confidence_to_count(1.0))
+    else:
+        # If there are no items in A then conditional probability is not defined, so give a zero confidence
+        tv = TruthValue(0,0)
+
+    return [(target, tv)]
+
+def match_intensional_inheritance(space, target):
+    A, B = target.args
+    if A.get_type() != t.ConceptNode or B.get_type() != t.ConceptNode:
+        return []
+
+    def create_ASSOC(concept):
+        # ASSOC(x, concept) = [Subset x concept - Subset(Not x, concept)]+
+
+        assoc_name = 'ASSOC(%s)' % (concept.op.name,)
+        assoc_node = space.add_node(t.ConceptNode, assoc_name)
+
+        template = T('SubsetLink', new_var(), concept)
+        trees_tvs = match_wrapper(space, template, match_axiom)
+
+        # for each x that is a subset of concept
+        has_any_members = False
+        for (tr, tv) in trees_tvs:
+            #print tr, tv
+            x = tr.args[0]
+            if x.get_type() != t.ConceptNode:
+                continue
+            # Now find Subset(Not x, concept)
+            template_not = T('SubsetLink',
+                T('NotLink', x),
+                concept
+            )
+            not_candidates = match_wrapper(space, template_not, match_axiom)
+            #print not_candidates
+            assert len(not_candidates) < 2
+            if len(not_candidates) == 0:
+                print 'missing link',template_not
+                continue
+
+            (_, tv_not) = not_candidates[0]
+            assoc_strength = tv.mean - tv_not.mean
+
+            # TODO obviously we're fudging the confidence values here
+            if assoc_strength > 0:
+                mem_tr = T('MemberLink',
+                    x,
+                    assoc_node
+                )
+                mem_link = atom_from_tree(mem_tr, space)
+                mem_link.tv = TruthValue(assoc_strength, confidence_to_count(1.0))
+                print mem_link
+                has_any_members = True
+
+        #assert has_any_members
+
+        return T(assoc_node)
+
+    ASSOC_A = create_ASSOC(A)
+    ASSOC_B = create_ASSOC(B)
+
+    # IntInh A B = Subset ASSOC(A) ASSOC(B)
+    subset_target = T('SubsetLink', ASSOC_A, ASSOC_B)
+    # There should always be one result
+    subset_result = match_subset(space, subset_target)
+    [(_, tv)] = subset_result
+
+    int_inh = T('IntensionalInheritanceLink', A, B)
+    return [(int_inh, tv)]
 
 ## @} 
 class Rule :
