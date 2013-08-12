@@ -67,7 +67,7 @@ void OCPlanningAgent::init(opencog::CogServer * server)
     // Avoid initialize during next cycle
     this->bInitialized = true;
 
-    ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getName(),oac->getPet().getType());
+    ocplanner = new OCPlanner(&(oac->getAtomSpace()),oac->getPet().getPetId(),oac->getPet().getType());
     logger().debug("OCPlanningAgent::init - using OCPlanner! ");
 
     this->currentOCPlanID = "";

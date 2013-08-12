@@ -974,7 +974,14 @@ void Rule::_addParameterIndex(State* s,ParamValue& paramVal)
     }
     else
     {
-        ((vector<paramIndex>)(it->second)).push_back(paramIndex(s,&paramVal));
+        vector<paramIndex>::iterator indexIt;
+        for (indexIt = ((vector<paramIndex>&)(it->second)).begin(); indexIt != ((vector<paramIndex>&)(it->second)).end(); ++ indexIt)
+        {
+            if ( indexIt->first == s)
+                return;
+        }
+
+        ((vector<paramIndex>&)(it->second)).push_back(paramIndex(s,&paramVal));
     }
 
 }

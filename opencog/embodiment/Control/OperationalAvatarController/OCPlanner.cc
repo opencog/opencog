@@ -154,6 +154,8 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
 
     selfEntityParamValue = Entity(_selfID,_selfType);
 
+    std::cout << "Debug: OCPlanner init: selfID = " << _selfID << ", slef type = " << _selfType << std::endl;
+
     loadAllRulesFromAtomSpace();
 
     // currently, for experiment, we dirctly add the rules by C++ codes
@@ -1446,7 +1448,24 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
             string variableName = ActionParameter::ParamValueToString((ParamValue)(*r_ownerIt));
             map<string, ParamValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
             if (paraIt == ruleNode->currentBindingsFromForwardState.end())
+            {
+                std::cout << "Debug: Add currentBindingsFromForwardState pair: variableName = "<< variableName
+                          << ", value = "<< ActionParameter::ParamValueToString(*f_ownerIt) << std::endl;
                 ruleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,*f_ownerIt));
+            }
+        }
+    }
+
+    // ground the state value
+    if (Rule::isParamValueUnGrounded(s->stateVariable->getValue()))
+    {
+        string variableName = ActionParameter::ParamValueToString(s->stateVariable->getValue());
+        map<string, ParamValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
+        if (paraIt == ruleNode->currentBindingsFromForwardState.end())
+        {
+            std::cout << "Debug: Add currentBindingsFromForwardState pair: variableName = "<< variableName
+                      << ", value = "<< ActionParameter::ParamValueToString(forwardStateNode->state->getParamValue()) << std::endl;
+            ruleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,forwardStateNode->state->getParamValue()));
         }
     }
 
@@ -1591,12 +1610,12 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
         return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
 
     map<string , vector<paramIndex> >::iterator paraIt = ruleNode->originalRule->paraIndexMap.begin();
-    ParamGroundedMapInARule::iterator bindIt = ruleNode->currentBindingsFromForwardState.begin();
+    ParamGroundedMapInARule::iterator bindIt ;
     for( ; paraIt != ruleNode->originalRule->paraIndexMap.end(); ++ paraIt)
     {
-        // try to find this variable name() in the currentBindings
         bindIt = ruleNode->currentBindingsFromForwardState.find(paraIt->first);
 
+        // try to find this variable name() in the currentBindings
         // if cannot find it, it means this variable remains ungrounded, add it into the curUngroundedVariables
         if (bindIt == ruleNode->currentBindingsFromForwardState.end())
         {
@@ -1623,6 +1642,9 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
                 else
                 {
                     ruleNode->curUngroundedVariables.push_back(UngroundedVariablesInAState(((paramIndex)(*indexIt)).first,paraIt->first));
+
+                    std::cout<< "Debug: find ungrounded variable : " << paraIt->first << std::endl;
+
                 }
 
             }
