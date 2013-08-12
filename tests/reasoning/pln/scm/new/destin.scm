@@ -1,0 +1,25 @@
+; 0.001248 is the confidence corresponding to a count of 1.
+; the strength is arbitrary.
+(define node-tv (stv .01 0.001248))
+(define link-tv (stv 1 0.001248))
+
+(InheritanceLink (ConceptNode "Image4" node-tv) (ConceptNode "hasTree0" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image6" node-tv) (ConceptNode "hasTree0" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image1" node-tv) (ConceptNode "hasTree1" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image2" node-tv) (ConceptNode "hasTree1" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image3" node-tv) (ConceptNode "hasTree2" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image5" node-tv) (ConceptNode "hasTree2" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image0" node-tv) (ConceptNode "hasTree3" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image1" node-tv) (ConceptNode "hasTree3" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image2" node-tv) (ConceptNode "hasTree3" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image4" node-tv) (ConceptNode "hasTree3" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image3" node-tv) (ConceptNode "hasTree4" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image5" node-tv) (ConceptNode "hasTree4" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image4" node-tv) (ConceptNode "hasTree5" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image5" node-tv) (ConceptNode "hasTree5" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image1" node-tv) (ConceptNode "hasTree6" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image2" node-tv) (ConceptNode "hasTree6" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image0" node-tv) (ConceptNode "hasTree7" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image3" node-tv) (ConceptNode "hasTree7" node-tv) link-tv)
+(InheritanceLink (ConceptNode "Image4" node-tv) (ConceptNode "hasTree7" node-tv) link-tv)
+

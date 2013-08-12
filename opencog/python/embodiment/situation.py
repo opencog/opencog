@@ -170,7 +170,7 @@ def test(atomspace):
         atomspace.add(t.PredicateNode, 'contains-block-of-color'),
         new_var()
     )
-    chainer.bc(target);
+    chainer.bc(target, nsteps=5000, nresults=20)
 
     import pdb; pdb.set_trace()
 
@@ -180,7 +180,7 @@ def test(atomspace):
     fishAndChips = Fishgram(atomspace)
     notice_changes(atomspace)
     fishAndChips.forest.extractForest()
-    fishAndChips.run()
+    layers = fishAndChips.run()
 
     print 'concept nodes'
     fishAndChips.outputConceptNodes(layers)

@@ -2,8 +2,11 @@
 ;
 ; LionTigerKB.scm - contains Subset links between concept Lion (resp. Tiger)
 ; and properties like Mammal, Carnivor, Striped, Predator, FacingExtincion
-; as well as NOT Lion (resp. NOT Tiger) and the same properties.
+; as well as the negated versions of those properties.
 ; It is used to test IntensionalInhertianceRule
+; "mammal" is a distinctive property of "Lion" if:
+;   x being a mammal makes it more likely x is a lion.
+;   i.e. P(x is a lion | x is a mammal) > P(x is a lion | x is not a mammal)
 ;
 ; define concepts. Note that PLN ignores atoms with (0,0) truth values.
 (define lion (ConceptNode "Lion" (stv 0.5 0.999)))
@@ -16,29 +19,29 @@
 (define facingExtincion (ConceptNode "FacingExtincion"))
 ; define default confidence
 (define dc 0.5)
-; Properties of Lion
-(SubsetLink (stv 1 dc) lion mammal)
-(SubsetLink (stv 1 dc) lion carnivor)
-(SubsetLink (stv 0 dc) lion striped)
-(SubsetLink (stv 1 dc) lion predator)
-(SubsetLink (stv 0.8 dc) lion facingExtincion)
-; Properties of NOT Lion
-(SubsetLink (stv 0.2 dc) (NotLink lion) mammal)
-(SubsetLink (stv 0.1 dc) (NotLink lion) carnivor)
-(SubsetLink (stv 0.17 dc) (NotLink lion) striped)
-(SubsetLink (stv 0.3 dc) (NotLink lion) predator)
-(SubsetLink (stv 0.4 dc) (NotLink lion) facingExtincion)
-; Properties of Tiger
-(SubsetLink (stv 1 dc) tiger mammal)
-(SubsetLink (stv 1 dc) tiger carnivor)
-(SubsetLink (stv 0.9 dc) tiger striped)
-(SubsetLink (stv 1 dc) tiger predator)
-(SubsetLink (stv 1 dc) tiger facingExtincion)
-; Properties of NOT Tiger
-(SubsetLink (stv 0.2 dc) (NotLink tiger) mammal)
-(SubsetLink (stv 0.1 dc) (NotLink tiger) carnivor)
-(SubsetLink (stv 0.15 dc) (NotLink tiger) striped)
-(SubsetLink (stv 0.3 dc) (NotLink tiger) predator)
-(SubsetLink (stv 0.37 dc) (NotLink tiger) facingExtincion)
+; How likely various things are to be a Lion
+(SubsetLink (stv 1 dc) mammal lion)
+(SubsetLink (stv 1 dc) carnivor lion)
+(SubsetLink (stv 0 dc) striped lion)
+(SubsetLink (stv 1 dc) predator lion)
+(SubsetLink (stv 0.8 dc) facingExtincion lion)
+; How likely you are to be a Lion if you are NOT those things
+(SubsetLink (stv 0.2 dc) (NotLink mammal) lion)
+(SubsetLink (stv 0.1 dc) (NotLink carnivor) lion)
+(SubsetLink (stv 0.17 dc) (NotLink striped) lion)
+(SubsetLink (stv 0.3 dc) (NotLink predator) lion)
+(SubsetLink (stv 0.4 dc) (NotLink facingExtincion) lion)
+
+(SubsetLink (stv 1 dc) mammal tiger)
+(SubsetLink (stv 1 dc) carnivor tiger)
+(SubsetLink (stv 0.9 dc) striped tiger)
+(SubsetLink (stv 1 dc) predator tiger)
+(SubsetLink (stv 1 dc) facingExtincion tiger)
+
+(SubsetLink (stv 0.2 dc) (NotLink mammal) tiger)
+(SubsetLink (stv 0.1 dc) (NotLink carnivor) tiger)
+(SubsetLink (stv 0.15 dc) (NotLink striped) tiger)
+(SubsetLink (stv 0.3 dc) (NotLink predator) tiger)
+(SubsetLink (stv 0.37 dc) (NotLink facingExtincion) tiger)
 
 
