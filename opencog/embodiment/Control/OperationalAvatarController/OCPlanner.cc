@@ -1624,6 +1624,9 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
             vector<paramIndex>::iterator indexIt = (paraIt->second).begin();
             for (; indexIt != (paraIt->second).end(); ++ indexIt)
             {
+                if (((paramIndex)(*indexIt)).first == 0)
+                    continue;
+
                 list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
                 for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
                 {
