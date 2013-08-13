@@ -50,7 +50,7 @@
 #ifdef HAVE_UBIGRAPH
 #include "HopfieldUbigrapher.h"
 extern "C" {
-    #include <opencog/ubigraph/UbigraphAPI.h>
+    #include <opencog/visualization/ubigraph/UbigraphAPI.h>
 }
 #endif //HAVE_UBIGRAPH
 
