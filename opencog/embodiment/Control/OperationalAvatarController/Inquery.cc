@@ -820,6 +820,7 @@ HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNo
         {
             // it has not been grounded, so add it as a variable node
             results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(paramValue)).c_str()));
+            return results;
         }
     }
 
