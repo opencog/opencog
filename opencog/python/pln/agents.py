@@ -16,38 +16,47 @@ class SimpleForwardInferenceAgent(MindAgent):
             return None
         fc = ForwardChainer(atomspace)
         fc.add_rule(rules.DeductionRule(atomspace))
-        return fc.run(node)
+        atoms = fc.run(node)
+        print 'fia:', atoms
+        return atoms
 
     def fetch(self, atomspace=None):
         links = list(atomspace.get_atoms_by_type(types.InheritanceLink))
-        link = self._selectOne(links)
+        link = self._selectOne(links, atomspace)
         if link is None:
             return None
         return link.out[0]
 
-    def _selectOne(self, links):
-        max = sum([link.getav().sti for link in links])
+    def _selectOne(self, links, atomspace):
+        max = sum([atomspace.get_av(link.h)['sti'] for link in links])
         pick = random.uniform(0, max)
         current = 0
         for link in links:
-            current += link.getav().sti
+            current += atomspace.get_av(link.h)['sti']
             if current >= pick:
                 return link
 
 
 class AtomspacePopulatorAgent(MindAgent):
+    def __init__(self):
+        self.counter = 0
+
     def run(self, atomspace):
+        if self.counter < 101:
+            self.counter += 1
+        else:
+            return None
         pick = random.random()
         if pick > 0.65:
             atom = self._add_atom(atomspace)
             if atom is not None:
-                a = atomspace.set_av(atom.h, random.uniform(0, 1), random.uniform(0, 1))
-                pass
+                atomspace.set_av(atom.h, random.uniform(0, 1), random.uniform(0, 1))
+            print 'apa:', atom
             return atom
 
     def _add_atom(self, atomspace):
         pick = random.random()
-        if pick > 0.8:
+        if pick > 0.5:
             return self._add_node(atomspace)
         else:
             return self._add_link(atomspace)

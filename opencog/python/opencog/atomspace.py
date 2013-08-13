@@ -218,7 +218,10 @@ class AtomSpace(object):
     def set_av(self, h, sti=0, lti=0, vlti=None, av_dict=None):
         atom = self[h]
         atom.setav(AttentionValue(sti, lti))
-        return atom
+
+    def get_av(self, h):
+        atom = self[h]
+        return atom.getav()
 
     # legacy Cython-style interface
     def add_node(self, type, name, tv=DEFAULT_TV):

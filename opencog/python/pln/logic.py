@@ -11,12 +11,10 @@ class ForwardChainer(object):
     def run(self, node):
         result = []
         links = node.incoming
-
         for rule in self.rules:
             for link in links:
                 if rule.can_use(link):
                     result += rule.run(node, link)
-
         return result
 
     def add_rule(self, rule):

@@ -17,8 +17,8 @@ class Rule(object):
 
 class DeductionRule(Rule):
     def can_use(self, link):
-        allowed_types = [types.InheritanceLink, types.IntensionalInheritanceLink, types.SubsetLink, types.ImplicationLink, types.ExtensionalImplicationLink, types.IntensionalImplicationLink]
-        return link.gettype() in allowed_types
+        allowed_types = [types.InheritanceLink]#, types.IntensionalInheritanceLink, types.SubsetLink, types.ImplicationLink, types.ExtensionalImplicationLink, types.IntensionalImplicationLink]
+        return link.type in allowed_types
 
     def run(self, node, link):
         result = []
@@ -28,7 +28,7 @@ class DeductionRule(Rule):
             out_links = list(n.incoming)
             out_links.remove(link)
             for l in out_links:
-                if l.gettype() == link.gettype():
+                if l.type == link.type:
                     a = node
                     b = n
                     c = list(l.out)
