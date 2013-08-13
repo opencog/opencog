@@ -11,9 +11,10 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
-
+#ifdef HAVE_CYTHON
 #include <opencog/cython/PyIncludeWrapper.h>
 #include <opencog/cython/logic_wrapper_api.h>
+#endif
 
 #include <boost/filesystem.hpp>
 
@@ -193,11 +194,13 @@ bool runSCMTargets(string testDir, bool test_bc) {
                     // Run the C++ PLN backward chainer first, for comparison.
                     cout << "Running C++ backward chainer for comparison" << endl;
                     runPLNTest_CPP(_test, test_bc);
-                
+ 
+#ifdef HAVE_CYTHON
                     _test = setupSCMTarget(filename.c_str(), test_bc);
                     cout << "Running Python backward chainer" << endl;
                     if (!runPLNTest(_test, test_bc))
                         failedSCMTargets.push_back(filename);
+#endif /* HAVE_CYTHON */
                 }
             }
         }
@@ -262,6 +265,7 @@ Btr<PLNTest> findSCMTarget(std::string test_name, bool test_bc) {
 
 bool runPLNTest(Btr<PLNTest> t, bool test_bc)
 {
+#ifdef HAVE_CYTHON
     clock_t start, finish;
     double duration;
 
@@ -330,6 +334,9 @@ bool runPLNTest(Btr<PLNTest> t, bool test_bc)
          << tests_total << " tests." << endl;
 
     return passed;
+#else /* HAVE_CYTHON */
+    return false;
+#endif /* HAVE_CYTHON */
 }
 
 bool runPLNTest_CPP(Btr<PLNTest> t, bool test_bc)

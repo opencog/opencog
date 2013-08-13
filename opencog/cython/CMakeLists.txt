@@ -11,17 +11,17 @@ INCLUDE_DIRECTORIES(
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-  DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace.pxd"  "opencog/atomspace_details.pyx")
+  DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace.pxd"  "opencog/atomspace_details.pyx" opencog_atom_types)
 
 add_custom_command(OUTPUT opencog/cogserver.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
-  DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
+  DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd" opencog_atom_types)
 
 add_custom_command(OUTPUT opencog/util.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/util.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/util.pyx"
-  DEPENDS "opencog/util.pyx" "opencog/atomspace.pxd")
+  DEPENDS "opencog/util.pyx" "opencog/atomspace.pxd" opencog_atom_types)
 
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp"
     "opencog/util.cpp")
@@ -35,13 +35,13 @@ list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
   COMMAND
   ${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
-  DEPENDS "opencog/atomspace.pxd")
+  DEPENDS "opencog/atomspace.pxd" opencog_atom_types)
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
 
 add_custom_command(OUTPUT scheme_wrapper.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
-  DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd")
+  DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 # opencog.atomspace Python bindings

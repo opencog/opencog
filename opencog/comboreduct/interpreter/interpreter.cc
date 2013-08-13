@@ -129,24 +129,24 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 
         // Continuous operators
         case id::plus : {
-            // if plus does not have any argument, return plus operator
+            // If plus does not have any argument, return plus operator
             if (it.is_childless()) // For correct foldr behaviour
                 return *b;
 
             contin_t res = 0;
-            //assumption : plus can have 1 or more arguments
+            // Assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
                 res += contin_eval(sib);
             return res;
         }
 
         case id::times : {
-            //if times does not have any argument, return times operator
+            // If times does not have any argument, return times operator
             if (it.is_childless())  // For correct foldr behaviour
                 return *b;
 
             contin_t res = 1;
-            //assumption : times can have 1 or more arguments
+            // Assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
                 res *= contin_eval(sib);
                 if (0.0 == res) return res;  // avoid pointless evals
@@ -181,7 +181,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 
         case id::exp : {
             contin_t res = exp(contin_eval(it.begin()));
-            // this may happen in case the argument is too high, then
+            // This may happen when the argument is too large, then
             // exp will be infty
             if (isinf(res)) throw EvalException(vertex(res));
             return res;
@@ -197,8 +197,9 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
         default: {
             std::stringstream ss;
             ss << *b;
-            OC_ASSERT(false, "contin_interpreter does not handle builtin %s",
-                      ss.str().c_str());
+            throw ComboException(TRACE_INFO,
+                  "contin_interpreter does not handle builtin %s",
+                  ss.str().c_str());
             return contin_t();
         }
         }
@@ -212,8 +213,9 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
     else {
         std::stringstream ss;
         ss << v;
-        OC_ASSERT(false, "contin_interpreter does not handle vertex %s",
-                  ss.str().c_str());
+        throw ComboException(TRACE_INFO,
+              "contin_interpreter does not handle vertex %s",
+              ss.str().c_str());
         return contin_t();
     }
 }
@@ -223,12 +225,17 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
 ///////////////////////
 
 mixed_interpreter::mixed_interpreter(const std::vector<vertex>& inputs)
-    : mixed_inputs(inputs) {}
+    : _use_contin_inputs(false), mixed_inputs(inputs) {}
 
-vertex mixed_interpreter::operator()(const combo_tree& tr) const {
+mixed_interpreter::mixed_interpreter(const std::vector<contin_t>& inputs)
+    : contin_interpreter(inputs), _use_contin_inputs(true), mixed_inputs(std::vector<vertex>()) {}
+
+vertex mixed_interpreter::operator()(const combo_tree& tr) const
+{
     return mixed_eval(tr.begin());
 }
-vertex mixed_interpreter::operator()(const combo_tree::iterator it) const {
+vertex mixed_interpreter::operator()(const combo_tree::iterator it) const
+{
     return mixed_eval(it);
 }
 
@@ -249,6 +256,18 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
 
     if (const argument* a = boost::get<argument>(&v)) {
         arity_t idx = a->idx;
+
+        // The mixed interpreter could be getting an array of
+        // all contins, if the signature of the problem is
+        // ->(contin ... contin boolean) or ->(contin ... contin enum_t)
+        // so deal with this case.
+        // XXX FIXME, we should also handle the cases
+        // ->(bool ... bool contin) and ->(bool ... bool enum)
+        // which would have an empty contin and an empty mixed ...
+        if (_use_contin_inputs)
+            return contin_inputs[idx - 1];
+
+        // A negative index means boolean-negate. 
         return idx > 0 ? mixed_inputs[idx - 1]
             : negate_vertex(mixed_inputs[-idx - 1]);
     }

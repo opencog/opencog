@@ -71,8 +71,9 @@ class Atom(object):
     def gettv(self):
         return self._tv
 
-    def settv(self, tv):
-        assert tv is None or isinstance(tv, TruthValue)
+    def settv(self,tv):
+        assert not tv is None
+        assert isinstance(tv,TruthValue)
         self._tv = tv
 
     def getav(self):
@@ -221,7 +222,8 @@ class AtomSpace(object):
 
     def get_av(self, h):
         atom = self[h]
-        return atom.getav()
+        av = atom.getav()
+        return {'sti': av.sti}
 
     # legacy Cython-style interface
     def add_node(self, type, name, tv=DEFAULT_TV):
@@ -237,8 +239,8 @@ class AtomSpace(object):
         return atom
 
     # legacy Cython-style interface. Adds a node or link depending on arguments
-    def add(self, type, name=None, out=None, tv=None):
-        if is_a(type, types.Node):
+    def add(self, type, name=None, out=None, tv=DEFAULT_TV):
+        if is_a(type,types.Node):
             assert out is None, "Nodes can't have outgoing sets"
             atom = self.add_node(type, name, tv)
         else:

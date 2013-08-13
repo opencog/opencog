@@ -14,7 +14,6 @@ file       -- file-based storage
 hypertable -- experimental HyperTable support.
 memcache   -- experimental/broken, uses memcached for persistence.
 sql        -- works well for most uses -- with caveats
-tulip      -- dump the AtomSpace to the Tulip tlp graph format
 xml        -- XML-based file storage
 
 
@@ -22,3 +21,6 @@ The hypertable, memcache and sql systems all support networked,
 peer-to-peer communications between cogservers.  (Although both 
 hypertable and sql are currently buggy).
 
+Note that additional i/o methods can be found in the "visualization"
+directory, which e.g. dump the entire atomspace into various graphics
+formats.

@@ -22,16 +22,17 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "../include/AtomTypes.h"
-#include "../include/AtomSpaceInterface.h"
-#include "../include/Graph.h"
-#include "../include/Vertex.h"
-
+#include <limits>
 #include <stdlib.h>
+#include <string.h>
+
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
-#include <string.h>
-#include <limits>
+
+#include "AtomTypes.h"
+#include "AtomSpaceInterface.h"
+#include "Graph.h"
+#include "Vertex.h"
 
 /*
 	To build in eclipse:
