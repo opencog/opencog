@@ -4,6 +4,9 @@
 #  SIGAR_INCLUDE_DIR - where to find SIGAR.h, etc.
 #  SIGAR_LIBRARIES   - List of libraries when using SIGAR.
 #  SIGAR_FOUND       - True if SIGAR found.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
 if (SIGAR_INCLUDE_DIR)

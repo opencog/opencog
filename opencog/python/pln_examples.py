@@ -2,6 +2,7 @@
 to linking issues.'''
 import ConfigParser
 from time import time
+from pprint import pprint
 
 import util
 from opencog.atomspace import AtomSpace, Atom, Handle
@@ -48,7 +49,16 @@ both/28_test.conf
 bc/plus_test.conf
 #bc/new/pathfinding_test.conf
 #bc/new/before_test.conf
+bc/new/subset_test.conf
+bc/new/destin_test.conf
 ''')
+
+files_list = '''bc/new/and_test.conf'''
+
+#files_list = '''psi/psi_planning_one_step_test.conf'''
+
+#files_list = '''bc/new/destin_test.conf'''
+#files_list = '''bc/new/subset_test.conf'''
 
 #files_list = '''bc/new/before_test.conf'''
 
@@ -61,6 +71,10 @@ bc/plus_test.conf
 files = files_list.split('\n')
 
 def test_all(a):
+    import plop.collector
+    plop_collector = plop.collector.Collector()
+    plop_collector.start()
+
     start = time()
     
     for f in files:
@@ -74,6 +88,12 @@ def test_all(a):
             print f
     
     print "Total time:",time() - start
+
+    plop_collector.stop()
+    profile_data = repr(dict(plop_collector.stack_counts))
+    f = open('pln_examples.plop_profile','w')
+    f.write(profile_data)
+    f.close()
 
 passed = []
 failed = []
@@ -94,6 +114,9 @@ def run_pln_example(a, f):
     def get(field):
         return config.get('PLN_TEST',field)
 
+    def get_list(field):
+        return get(field).replace(' ','').split(',')
+
     print f
     
     def load_axioms(fname):
@@ -108,7 +131,7 @@ def run_pln_example(a, f):
                 continue
         raise IOError("missing data file: "+kf)
         
-    data_files = get('load').replace(' ','').split(',')
+    data_files = get_list('load')
     for fname in data_files:
         load_axioms(fname)
     scm_target = '(cog-handle %s)' % (get('target'),)
@@ -123,13 +146,20 @@ def run_pln_example(a, f):
     nsteps = int(get('max_steps'))
     
     target = Atom(Handle(h), a)
-    
+
+    try:
+        rule_names = get_list('allowed_rules')
+    except ConfigParser.NoOptionError, e:
+        rule_names = []
+
     print target
-    
+
     import logic
     import tree
 
-    c = logic.Chainer(a)
+
+
+    c = logic.Chainer(a, allowed_rule_names = rule_names, use_fc = True)
     target_tr = tree.tree_from_atom(target)
 
     # hack - won't work if the Scheme target is some variable that doesn't contain "Demand"
@@ -137,7 +167,9 @@ def run_pln_example(a, f):
         res = logic.do_planning(a, target_tr,c)
     else:
         res = c.bc(target_tr, nsteps)
-    
+
+    print map(str, res)
+
     if len(res):
         print 'PASSED'
         passed.append(f)

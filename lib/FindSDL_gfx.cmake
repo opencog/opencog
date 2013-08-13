@@ -10,6 +10,9 @@
 #
 # Created by Olivier DOLE. This was copied from the FindSDL_image.cmake 
 # module.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 # On OSX, this will prefer the Framework version (if found) over others.
 # People will have to manually change the cache values of 
