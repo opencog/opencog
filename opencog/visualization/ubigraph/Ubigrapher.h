@@ -1,5 +1,5 @@
 /*
- * opencog/ubigraph/Ubigrapher.h
+ * opencog/visualization/ubigraph/Ubigrapher.h
  *
  * Copyright (C) 2008-2009 by OpenCog Foundation
  * All Rights Reserved
