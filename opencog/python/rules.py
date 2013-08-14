@@ -224,7 +224,7 @@ def rules(a, deduction_types):
 
     #rules += quantifier_rules(a)
 
-    #rules += temporal_rules(a)
+    rules += temporal_rules(a)
     
     #rules += planning_rules(a)
 
@@ -386,6 +386,78 @@ def temporal_rules(atomspace):
                         [ ],
                         name='Before',
                         match = create_temporal_matching_function(formulas.beforeFormula)
+                        )
+                )
+    rules.append(Rule(T('OverlapsLink', 1, 2),
+                        [ ],
+                        name='Overlaps',
+                        match = create_temporal_matching_function(formulas.overlapsFormula)
+                        )
+                )
+    rules.append(Rule(T('DuringLink', 1, 2),
+                        [ ],
+                        name='During',
+                        match = create_temporal_matching_function(formulas.duringFormula)
+                        )
+                )
+    rules.append(Rule(T('MeetsLink', 1, 2),
+                        [ ],
+                        name='Meets',
+                        match = create_temporal_matching_function(formulas.meetsFormula)
+                        )
+                )
+    rules.append(Rule(T('StartsLink', 1, 2),
+                        [ ],
+                        name='Starts',
+                        match = create_temporal_matching_function(formulas.startsFormula)
+                        )
+                )
+    rules.append(Rule(T('FinishesLink', 1, 2),
+                        [ ],
+                        name='Finishes',
+                        match = create_temporal_matching_function(formulas.finishesFormula)
+                        )
+                )
+    rules.append(Rule(T('EqualsLink', 1, 2),
+                        [ ],
+                        name='Equals',
+                        match = create_temporal_matching_function(formulas.equalsFormula)
+                        )
+                )
+    rules.append(Rule(T('AfterLink', 1, 2),
+                        [ ],
+                        name='After',
+                        match = create_temporal_matching_function(formulas.afterFormula)
+                        )
+                )
+    rules.append(Rule(T('Overlapped_byLink', 1, 2),
+                        [ ],
+                        name='Overlapped_by',
+                        match = create_temporal_matching_function(formulas.overlapped_byFormula)
+                        )
+                )
+    rules.append(Rule(T('ContainsLink', 1, 2),
+                        [ ],
+                        name='Contains',
+                        match = create_temporal_matching_function(formulas.containsFormula)
+                        )
+                )
+    rules.append(Rule(T('Met_byLink', 1, 2),
+                        [ ],
+                        name='Met_by',
+                        match = create_temporal_matching_function(formulas.met_byFormula)
+                        )
+                )
+    rules.append(Rule(T('Started_byLink', 1, 2),
+                        [ ],
+                        name='Started_by',
+                        match = create_temporal_matching_function(formulas.started_byFormula)
+                        )
+                )
+    rules.append(Rule(T('Finished_byLink', 1, 2),
+                        [ ],
+                        name='Finished_by',
+                        match = create_temporal_matching_function(formulas.finished_byFormula)
                         )
                 )
     return rules
