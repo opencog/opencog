@@ -1,5 +1,5 @@
 /*
- * opencog/ubigraph/UbigraphModule.h
+ * opencog/visualization/ubigraph/UbigraphModule.h
  *
  * Copyright (C) 2008-2009 by OpenCog Foundation
  * All Rights Reserved

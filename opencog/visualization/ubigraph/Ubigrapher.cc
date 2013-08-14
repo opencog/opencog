@@ -1,5 +1,5 @@
 /*
- * opencog/ubigraph/Ubigrapher.cc
+ * opencog/visualization/ubigraph/Ubigrapher.cc
  *
  * Copyright (C) 2008-2009 by OpenCog Foundation
  * All Rights Reserved
