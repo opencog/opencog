@@ -917,22 +917,26 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 {
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
 
-    set<string> allVariables;
+    vector<string> _allVariables;
     for(int i = 0; i < stateIndexes.size() ; ++ i)
     {
         int index = stateIndexes[i];
         list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
-        for(int x = 0; x <= index; ++x)
+        for(int x = 0; x < index; ++x)
              ++ it;
 
         UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
-        vector<string> tempVariables;
-        set_union(allVariables.begin(),allVariables.end(),record.vars.begin(),record.vars.end(),tempVariables.begin());
-        allVariables = set<string>(tempVariables.begin(),tempVariables.end());
+
+        std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
+
         andLinkOutgoings.push_back(record.PMLink);
     }
 
-    set<string>::iterator itor = allVariables.begin();
+    // remove the repeated elements
+    vector<string> allVariables;
+    std::unique_copy(_allVariables.begin(),_allVariables.end(),std::back_inserter(allVariables));
+
+    vector<string>::iterator itor = allVariables.begin();
     for(;itor != allVariables.end(); ++ itor)
     {
         variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
