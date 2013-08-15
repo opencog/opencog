@@ -358,6 +358,8 @@ class Chainer:
         
         input_tvs = [self.get_tvs(g) for g in app.goals]
         if all(input_tvs):
+            assert len(input_tvs)
+
             input_tvs = [tvs[0] for tvs in input_tvs]
             input_tvs = [(float(tv.mean), float(tv.count)) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)

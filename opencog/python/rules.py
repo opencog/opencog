@@ -4,6 +4,7 @@ except ImportError:
     from atomspace_remote import TruthValue, types as t, confidence_to_count, types as t
 
 import formulas
+import temporalFormulas
 from tree import *
 import math
 
@@ -382,79 +383,79 @@ def temporal_rules(atomspace):
     rules.append(Rule(T('BeforeLink', 1, 2),
                         [ ],
                         name='Before',
-                        match = create_temporal_matching_function(formulas.beforeFormula)
+                        match = create_temporal_matching_function(temporalFormulas.beforeFormula)
                         )
                 )
     rules.append(Rule(T('OverlapsLink', 1, 2),
                         [ ],
                         name='Overlaps',
-                        match = create_temporal_matching_function(formulas.overlapsFormula)
+                        match = create_temporal_matching_function(temporalFormulas.overlapsFormula)
                         )
                 )
     rules.append(Rule(T('DuringLink', 1, 2),
                         [ ],
                         name='During',
-                        match = create_temporal_matching_function(formulas.duringFormula)
+                        match = create_temporal_matching_function(temporalFormulas.duringFormula)
                         )
                 )
     rules.append(Rule(T('MeetsLink', 1, 2),
                         [ ],
                         name='Meets',
-                        match = create_temporal_matching_function(formulas.meetsFormula)
+                        match = create_temporal_matching_function(temporalFormulas.meetsFormula)
                         )
                 )
     rules.append(Rule(T('StartsLink', 1, 2),
                         [ ],
                         name='Starts',
-                        match = create_temporal_matching_function(formulas.startsFormula)
+                        match = create_temporal_matching_function(temporalFormulas.startsFormula)
                         )
                 )
     rules.append(Rule(T('FinishesLink', 1, 2),
                         [ ],
                         name='Finishes',
-                        match = create_temporal_matching_function(formulas.finishesFormula)
+                        match = create_temporal_matching_function(temporalFormulas.finishesFormula)
                         )
                 )
     rules.append(Rule(T('EqualsLink', 1, 2),
                         [ ],
                         name='Equals',
-                        match = create_temporal_matching_function(formulas.equalsFormula)
+                        match = create_temporal_matching_function(temporalFormulas.equalsFormula)
                         )
                 )
     rules.append(Rule(T('AfterLink', 1, 2),
                         [ ],
                         name='After',
-                        match = create_temporal_matching_function(formulas.afterFormula)
+                        match = create_temporal_matching_function(temporalFormulas.afterFormula)
                         )
                 )
     rules.append(Rule(T('Overlapped_byLink', 1, 2),
                         [ ],
                         name='Overlapped_by',
-                        match = create_temporal_matching_function(formulas.overlapped_byFormula)
+                        match = create_temporal_matching_function(temporalFormulas.overlapped_byFormula)
                         )
                 )
     rules.append(Rule(T('ContainsLink', 1, 2),
                         [ ],
                         name='Contains',
-                        match = create_temporal_matching_function(formulas.containsFormula)
+                        match = create_temporal_matching_function(temporalFormulas.containsFormula)
                         )
                 )
     rules.append(Rule(T('Met_byLink', 1, 2),
                         [ ],
                         name='Met_by',
-                        match = create_temporal_matching_function(formulas.met_byFormula)
+                        match = create_temporal_matching_function(temporalFormulas.met_byFormula)
                         )
                 )
     rules.append(Rule(T('Started_byLink', 1, 2),
                         [ ],
                         name='Started_by',
-                        match = create_temporal_matching_function(formulas.started_byFormula)
+                        match = create_temporal_matching_function(temporalFormulas.started_byFormula)
                         )
                 )
     rules.append(Rule(T('Finished_byLink', 1, 2),
                         [ ],
                         name='Finished_by',
-                        match = create_temporal_matching_function(formulas.finished_byFormula)
+                        match = create_temporal_matching_function(temporalFormulas.finished_byFormula)
                         )
                 )
     return rules

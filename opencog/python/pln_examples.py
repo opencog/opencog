@@ -52,7 +52,11 @@ bc/plus_test.conf
 bc/new/subset_test.conf
 ''')
 
-files_list = '''bc/new/destin_test.conf'''
+files_list = '''tempTest.conf'''
+
+#files_list = '''psi/psi_planning_one_step_test.conf'''
+
+#files_list = '''bc/new/destin_test.conf'''
 #files_list = '''bc/new/subset_test.conf'''
 
 #files_list = '''bc/new/before_test.conf'''

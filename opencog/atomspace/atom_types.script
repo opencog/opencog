@@ -7,6 +7,8 @@
 // compiles, that does not mean that these types are unused!  Be sure to grep
 // for the CamelCase names, to see if they show up elsewhere!
 //
+// Some of them are used by Python PLN code (which also uses the CamelCase names).
+//
 // Special type designating that no atom type has been assigned
 NOTYPE
 
