@@ -12,7 +12,7 @@
 # Copyright 2011 Duncan Mac-Vicar P. <duncan@kde.org>
 #
 # Distributed under the OSI-approved BSD License (the "License");
-# see accompanying file Copyright.txt for details.
+# see accompanying file COPYING-CMAKE-SCRIPTS for details.
 #
 # This software is distributed WITHOUT ANY WARRANTY; without even the
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
