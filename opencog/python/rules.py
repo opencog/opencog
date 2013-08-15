@@ -462,7 +462,7 @@ def temporal_rules(atomspace):
 
 def lookup_times(tree, atomspace):
     '''For the specified Tree (which can contain a Node or Link), search for
-    all the AtTimeLinks. Return a dictionary from timestamp (as a string) to
+    all the AtTimeLinks. Return a dictionary from timestamp (as an int) to
     a float, representing the fuzzy truth value. (Ignore confidence which is
     probably OK.)'''
     template = T('AtTimeLink',
@@ -473,8 +473,8 @@ def lookup_times(tree, atomspace):
     dist = {}
     for link in attimes:
         assert isinstance(link, Atom)
-        time = link.out[0].name
-        fuzzy_tv = link.out[1]
+        time = int(link.out[0].name)
+        fuzzy_tv = link.tv.mean
         dist[time] = fuzzy_tv
     
     return dist
@@ -488,6 +488,17 @@ def create_temporal_matching_function(formula):
         distribution_event1 = lookup_times(target.args[0], space)
         distribution_event2 = lookup_times(target.args[1], space)
         
+        missing_data = (len(distribution_event1) == 0 or len(distribution_event2) == 0)
+        error_message = "unable to find distribution for targets", target.args[0], distribution_event1, target.args[1], distribution_event2
+
+        assert not missing_data, error_message
+        # Enable this instead of the assert after you finish debugging the rules.
+        # For real-world use the assert is wrong - if you don't have the right data you should just not apply that Rule.
+        if missing_data:
+            print error_message
+            # No info available for those events. So return no results
+            return []
+
         strength = formula(distribution_event1, distribution_event2)
         
         # I'm not sure what to choose for this
