@@ -69,6 +69,7 @@ struct feature_selection_parameters
         hc_fraction_of_remaining(1.0),
         hc_crossover(true),
         hc_crossover_pop_size(300),
+        hc_widen_search(true),
         mi_confi(50.0)
     {}
 
