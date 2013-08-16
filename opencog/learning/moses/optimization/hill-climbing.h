@@ -53,7 +53,8 @@ struct hc_parameters
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
-          max_allowed_instances(10000)
+          max_allowed_instances(10000),
+          allow_resize_deme(false)
     {
         OC_ASSERT(0.0 < fraction_of_nn);
     }
