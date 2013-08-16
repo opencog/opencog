@@ -11,6 +11,12 @@ ADD_LIBRARY (PredicateUpdaters
 	PetPsychePredicatesUpdater.cc
 )
 
+ADD_DEPENDENCIES(PredicateUpdaters opencog_atom_types)
+ADD_DEPENDENCIES(PredicateUpdaters spacetime_types)
+ADD_DEPENDENCIES(PredicateUpdaters nlp_atom_types)
+ADD_DEPENDENCIES(PredicateUpdaters embodiment_atom_types)
+
+
 SET(CMAKE_BUILD_TYPE Debug)
 
 TARGET_LINK_LIBRARIES (PredicateUpdaters

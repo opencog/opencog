@@ -2,9 +2,10 @@
                             Benchmarking Diary
                             ------------------
 
-This file contains benchmark assorted benchmark results.  This is meant
-to be a historical log: as changes to the atomspace are made, we can
-see how performance changes over time.
+This file contains assorted benchmark results.  This is meant to be a
+historical log: as changes to the atomspace are made, we can see how
+performance changes over time.
+
 
 26 March 2013
 -------------
@@ -174,7 +175,7 @@ So...
 The AtomSpceImpl adds an aprox 30 usec overhead to addNode/addLink and
 the client/server interface adds another 2 usecs
 
-Its not clear why AtomSpaceImple does NOT add an overhead to getType and
+Its not clear why AtomSpaceImpl does NOT add an overhead to getType and
 get/setTV ... instead, there seems to be a very hefty communications 
 overhead for this?  This doesn't make sense when compared to addNode/Link
 
@@ -254,7 +255,7 @@ we see that getType, getTV, setTV and getOutgoingSewt are running at
 near-noop speeds.
 
 Added scheme tests. The scheme tests create strings, and pass them to
-the scheme interpreter.  The scheme interpreter is currently build on
+the scheme interpreter.  The scheme interpreter is currently built on
 top of the AtomSpace.  The scheme API does not currently expose the 
 getHandleSet and getNodeHandles API, so no measurements made for those.
 
@@ -279,7 +280,7 @@ Some comments about the scheme performance:
 Measuring scheme performance the way it is currently measured is rather
 misleading.  This is because the rate-limiting factor is the time it
 takes to enter and exit the scheme interpreter.  Specifically, it seems
-to take about 30 microseconds to camm scm_with_guile() and about 110
+to take about 30 microseconds to call scm_with_guile() and about 110
 microseconds to move from outside of scm_c_catch() to the inside, where
 the C code for the atomspace is being called.  Thus, these two steps 
 alone rate-limit the measurement to 7K-ops/sec max. 
@@ -289,7 +290,7 @@ one would enter the interpeter, do a wholw lot of stuff, and then exit.
 In other words, the correct way to measure performance for the scheme
 bindings would be to create maybe 10 or 100 atoms, once one is 'inside'.
 
-The above can be tests: grep for ONE_SHOT in the code.  It defines the
+The above can be tested: grep for ONE_SHOT in the code.  It defines the
 following loop, and then calls (crea 100)
 
 (define (crea n) 
@@ -303,7 +304,7 @@ following loop, and then calls (crea 100)
 )
 
 Thus, 100 nodes are created for just one entry into the interpreter.
-The resulting crete performance works out to be 11.7K creates/sec
+The resulting create performance works out to be 11.7K creates/sec
 which although is not stellar, clearly spends nearly half its time in
 the atomspace, as opposed to the scheme code ... which is BTW no longer
 trivial.  To conclude: the AtomSpace is a bottleneck, even for scheme.

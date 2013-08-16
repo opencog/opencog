@@ -45,7 +45,7 @@
 
 #ifdef USE_BITUBIGRAPHER
 //! @todo
-#include <opencog/ubigraph/BITUbigrapher.h>
+#include <opencog/visualization/ubigraph/BITUbigrapher.h>
 #endif // USE_BITUBIGRAPHER
 
 // TODELETE: wasn't updated, or used (to any effect)

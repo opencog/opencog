@@ -45,8 +45,6 @@
 #include "TestTargets.h"
 #include "ForwardChainer.h"
 
-#include <opencog/adaptors/tulip/TulipWriter.h>
-
 using namespace opencog;
 using namespace opencog::pln;
 using namespace test;
@@ -150,7 +148,7 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
     
     // Make sure that the ASW is initialized on module load
-    AtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+    AtomSpaceWrapper* asw = ASW(&server().getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
@@ -293,7 +291,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     // result to be overwriten
     vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE);
 
-    OC_ASSERT(rule, "Apparently the rule %s is undefined", ruleName.c_str());
+    OC_ASSERT(rule.get(), "Apparently the rule %s is undefined", ruleName.c_str());
 
     pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
     if(rule->isComposer()) {

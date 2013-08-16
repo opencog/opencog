@@ -94,7 +94,8 @@ protected:
      */
     void log_selected_feature_sets(const feature_set_pop& sf_pop,
                                    const feature_set& xmplr_features,
-                                   const string_seq& ilabels) const;
+                                   const string_seq& ilabels,
+                                   const std::vector<demeID_t>& demeIDs) const;
 
     /**
      * Return pruned exemplar from non-selected features

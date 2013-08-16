@@ -25,7 +25,6 @@
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/Config.h>
 

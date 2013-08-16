@@ -124,7 +124,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Energy #, Integrity, Certainty, Competence, Affiliation
+PSI_DEMANDS = Energy, Integrity #, Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -426,19 +426,18 @@ SCM_PRELOAD           = scm/core_types.scm,
                         scm/nlp_types.scm,
                         scm/attention_types.scm,
                         scm/embodiment_types.scm,
-                        viterbi/viterbi_types.scm,
                         scm/persistence.scm,
                         scm/utilities.scm,
-                        scm/apply.scm,
+#                        scm/apply.scm,
                         scm/file-utils.scm,
                         scm/debug.scm,
-                        nlp/scm/type-definitions.scm,
-                        nlp/scm/config.scm,
-                        nlp/scm/file-utils.scm,
-                        nlp/scm/nlp-utils.scm,
-                        nlp/scm/disjunct-list.scm,
-                        nlp/scm/processing-utils.scm,
-                        reasoning/pln/scm/pln-rules.scm,
+#                        nlp/scm/type-definitions.scm,
+#                        nlp/scm/config.scm,
+#                        nlp/scm/file-utils.scm,
+#                        nlp/scm/nlp-utils.scm,
+#                        nlp/scm/disjunct-list.scm,
+#                        nlp/scm/processing-utils.scm,
+#                        reasoning/pln/scm/pln-rules.scm,
                         scm/embodiment/predicates-frames.scm,
                         scm/embodiment/language-comprehension.scm,
                         scm/embodiment/reference-resolution-rules.scm,

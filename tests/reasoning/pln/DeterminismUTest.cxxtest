@@ -85,7 +85,7 @@ public:
         // Initialize PLN test environment
         try {        
             logger().info("Initializing PLN test env...");
-            asw = ASW(cogserver().getAtomSpace());                                  
+            asw = ASW(&cogserver().getAtomSpace());                                  
         }
         catch(std::string s) {
             logger().error("at root level while initializing.");

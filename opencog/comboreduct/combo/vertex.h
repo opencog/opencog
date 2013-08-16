@@ -66,7 +66,7 @@ namespace id {
 // leads to nightmarish errors. It might also that the new standard
 // C++0x fixes that that problem all by itself since in that standard
 // 2 different enums are considered to be different types.
-enum builtin
+enum __attribute__ ((packed)) builtin
 {
     null_vertex = 0,
 

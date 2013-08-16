@@ -24,7 +24,7 @@
  */
 
 extern "C" {
-    #include <opencog/ubigraph/UbigraphAPI.h>
+    #include <opencog/visualization/ubigraph/UbigraphAPI.h>
 }
 
 #include <opencog/atomspace/Handle.h>

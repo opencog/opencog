@@ -927,13 +927,8 @@ void precision_bscore::set_complexity_coef(score_t ratio)
     complexity_coef = 0.0;
     occam = (ratio > 0);
 
-    // The complexity coeff is normalized by the size of the table,
-    // because the precision is normalized as well.  So e.g.
-    // max precision for boolean problems is 1.0.  However...
-    // umm XXX I think the normalization here should be the
-    // best-possible activation, not the usize, right?
     if (occam)
-        complexity_coef = 1.0 / (ctable_usize * ratio);
+        complexity_coef = 1.0 / ratio;
 
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
 }
@@ -1305,13 +1300,8 @@ void precision_conj_bscore::set_complexity_coef(score_t ratio)
     complexity_coef = 0.0;
     occam = (ratio > 0);
 
-    // The complexity coeff is normalized by the size of the table,
-    // because the precision is normalized as well.  So e.g.
-    // max precision for boolean problems is 1.0.  However...
-    // umm XXX I think the normalization here should be the
-    // best-possible activation, not the usize, right?
     if (occam)
-        complexity_coef = 1.0 / (ctable_usize * ratio);
+        complexity_coef = 1.0 / ratio;
 
     logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
 }

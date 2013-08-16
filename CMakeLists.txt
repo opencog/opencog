@@ -200,6 +200,16 @@ ENDIF (GSL_FOUND)
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
 
+# Gtk-3 required for visualization
+FIND_PACKAGE(GTK3)
+IF (GTK3_FOUND)
+	# MESSAGE(STATUS "GTK3 found.")
+	ADD_DEFINITIONS(-DHAVE_GTK)
+	SET(HAVE_GTK 1)
+ELSE (GTK3_FOUND)
+	MESSAGE(STATUS "GTK missing: needed for the the gtk-visualizer.")
+ENDIF (GTK3_FOUND)
+
 # Gnu Guile scheme interpreter
 # Versions prior to 1.8.6 have assorted serious problems with
 # multi-threading.  If you need guile, you need this version.
@@ -455,7 +465,7 @@ ENDIF(Boost_FOUND)
 IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
-#    SET(HAVE_PLN 1)
+    SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
@@ -707,9 +717,10 @@ SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HA
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
 SUMMARY_ADD("FeatureSelection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
+SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
-#SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
+SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("SchemeBinding" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)

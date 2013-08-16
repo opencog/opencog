@@ -102,6 +102,7 @@ pair<score_t, string> cheap_parse_result(const string& tempfile)
     return {hiscore, hitr_str};
 }
 
+// Test passes only if the score is exatly equal to expected_sc
 void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
 {
     auto t1 = microsec_clock::local_time();
@@ -113,6 +114,27 @@ void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
     auto result = parse_result(tempfile);
     // check that the result is the expected one
     TS_ASSERT_LESS_THAN(fabs(result.first - expected_sc), 1.0e-8);
+    auto t2 = microsec_clock::local_time();
+    std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
+
+    // Unlink only if test passed.
+    if (fabs(result.first - expected_sc) < 1.0e-8)
+         unlink(tempfile.c_str());
+}
+
+// Same as above, except that we accept any score that is better
+// than the expected score.
+void moses_test_good_enough_score(vector<string> arguments, score_t expected_sc)
+{
+    auto t1 = microsec_clock::local_time();
+    // build arguments
+    string tempfile = build_arguments(arguments);
+    // run moses
+    moses_exec(arguments);
+    // parse the result
+    auto result = parse_result(tempfile);
+    // check that the result is the expected one
+    TS_ASSERT_LESS_THAN(expected_sc, result.first);
     auto t2 = microsec_clock::local_time();
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
 

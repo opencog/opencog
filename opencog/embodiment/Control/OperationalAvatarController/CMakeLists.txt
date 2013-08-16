@@ -29,6 +29,11 @@ ADD_LIBRARY (oac SHARED
     OCPlanningAgent
 )
 
+ADD_DEPENDENCIES(oac opencog_atom_types)
+ADD_DEPENDENCIES(oac spacetime_types)
+ADD_DEPENDENCIES(oac nlp_atom_types)
+ADD_DEPENDENCIES(oac embodiment_atom_types)
+
 INCLUDE_DIRECTORIES (
     ${PYTHON_INCLUDE_PATH}
     ${CMAKE_SOURCE_DIR}

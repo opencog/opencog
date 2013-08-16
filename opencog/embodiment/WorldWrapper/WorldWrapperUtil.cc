@@ -307,6 +307,27 @@ throw (opencog::ComboException,
 {
 
     std::string res;
+
+    switch (ioe) {
+            case id::pet_home: {
+                printf("Looking up pet_home...\n")    ;
+                res = lookupInheritanceLink(atomSpace, toHandle(atomSpace, "pet_home",
+                                            self_id, owner_id));
+                printf("Pet_home resolved as '%s'\n", res.c_str());
+            } break;
+
+            default: {
+                printf("switch(ioe) defaulted..\n");
+                std::stringstream stream (std::stringstream::out);
+                stream << "Unrecognized indefinite object '"
+                << vertex(ioe) << "'" << std::endl;
+                throw opencog::ComboException(TRACE_INFO,
+                                              "WorldWrapperUtil - %s.",
+                                              stream.str().c_str());
+            }
+        }
+
+
     /*
     SpaceServer::SpaceMapPoint selfLoc;
 

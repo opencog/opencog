@@ -238,21 +238,25 @@ struct get_type_tree_at_visitor : public boost::static_visitor<type_tree> {
     }    
     size_t _pos;
 };
+
 /**
- * Interpreter visitor, depending on the type of the row choose which
- * interpreter to use. Note that returning the same type (here vertex)
- * is not the right long term solution, it should return the type
- * returned by the interpreter, however given the way Tables are
- * implemented it makes sense for now.
+ * Interpreter visitor.
+ * Chooses the interpreter type, based on the types of the input columns.
+ * Note that the choice of the correct interpreter also depends on the
+ * output type, which is currently not handled here. XXX FIXME.
  */
-struct interpreter_visitor : public boost::static_visitor<vertex> {
+struct interpreter_visitor : public boost::static_visitor<vertex>
+{
     interpreter_visitor(const combo_tree& tr) : _it(tr.begin()) {}
     interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
     vertex operator()(const std::vector<builtin>& inputs) {
         return boolean_interpreter(inputs)(_it);
     }    
     vertex operator()(const std::vector<contin_t>& inputs) {
-        return contin_interpreter(inputs)(_it);
+        // Can't use contin, since the output might be non-contin,
+        // e.g. a boolean, or an enum.  
+        // return contin_interpreter(inputs)(_it);
+        return mixed_interpreter(inputs)(_it);
     }    
     vertex operator()(const std::vector<vertex>& inputs) {
         return mixed_interpreter(inputs)(_it);
@@ -530,7 +534,8 @@ public:
     typedef std::vector<std::string> string_seq;
     typedef std::vector<type_node> type_seq;
     ITable();
-    ITable(const super& mat, string_seq il = string_seq());
+    ITable(const type_seq& ts, const string_seq& il = string_seq());
+    ITable(const super& mat, const string_seq& il = string_seq());
     /**
      * generate an input table according to the signature tt.
      *
@@ -617,8 +622,8 @@ public:
     int get_column_offset(const std::string& col_name) const;
 
 protected:
-    mutable string_seq labels; // list of input labels
     mutable type_seq types;    // list of types of the columns
+    mutable string_seq labels; // list of input labels
 
 private:
     string_seq get_default_labels() const;
@@ -707,19 +712,35 @@ struct Table
 
     Table();
 
-    Table(const OTable& otable_, const ITable& itable_, const type_tree& tt_);
+    Table(const OTable& otable_, const ITable& itable_);
 
     template<typename Func>
     Table(const Func& func, arity_t a, int nsamples = -1) :
-        tt(gen_signature(type_node_of<bool>(),
-                         type_node_of<bool>(), a)),
-        itable(tt), otable(func, itable) {}
+        itable(gen_signature(type_node_of<bool>(),
+                             type_node_of<bool>(), a)),
+        otable(func, itable) {}
 
     Table(const combo_tree& tr, int nsamples = -1,
           contin_t min_contin = -1.0, contin_t max_contin = 1.0);
+
     size_t size() const { return itable.size(); }
+
     arity_t get_arity() const { return itable.get_arity(); }
-    const type_tree& get_signature() const { return tt; }
+
+    // Return the types of the columns in the table.
+    // The type is returned as a lambda(input col types) -> output col type.
+    // This is computed on the fly each time, instead ov being
+    // stored with the object, so that RAM isn't wasted holding this 
+    // infrequently-needed info.
+    type_tree get_signature() const
+    {
+        type_tree tt(id::lambda_type);
+        auto root = tt.begin();
+        for (type_node tn : itable.get_types())
+            tt.append_child(root, tn);
+        tt.append_child(root, otable.get_type());
+        return tt;
+    }
 
     // return a string with the io labels, the output label comes first
     string_seq get_labels() const;
@@ -738,17 +759,14 @@ struct Table
         // set output table
         res.otable = otable;
 
-        // set type tree
-        type_tree::iterator head = res.tt.set_head(id::lambda_type);
-        for (type_node tn : res.itable.get_types())
-            res.tt.append_child(head, tn);
-        res.tt.append_child(head, otable.get_type());
-
         // update target_pos
         if (target_pos > 0) {
             auto it = boost::adjacent_find(f, [&](int l, int r) {
                     return l < target_pos && target_pos < r; });
-            res.target_pos = distance(f.begin(), ++it);
+            if (it == f.end())  // it is at the end
+                res.target_pos = f.size();
+            else                // it is in between f
+                res.target_pos = distance(f.begin(), ++it);
         } else
             res.target_pos = target_pos;
 
@@ -766,7 +784,6 @@ struct Table
     void add_features_from_file(const std::string& input_file,
                                 std::vector<std::string> features);
 
-    type_tree tt;
     ITable itable;
     OTable otable;
     int target_pos;             // position of the target, useful for
@@ -998,7 +1015,9 @@ double mutualInformation(const CTable& ctable, const FeatureSet& fs)
     //////////////////////////////////
     else
     {
-        OC_ASSERT(0, "Unsupported type for mutual information");
+        std::stringstream ss;
+        ss << "Type " << otype << " is not supported for mutual information";
+        OC_ASSERT(0, ss.str());
         return 0.0;
     }
 }
