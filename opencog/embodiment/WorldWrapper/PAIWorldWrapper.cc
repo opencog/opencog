@@ -598,7 +598,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
 }
 */
 
-<<<<<<< HEAD
+
 //void PAIWorldWrapper::get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint,
 //        const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm )
 //{
@@ -615,23 +615,7 @@ void PAIWorldWrapper::getWaypoints( const spatial::Point& startPoint,
 //    }
 
 //}
-=======
-void PAIWorldWrapper::get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint,
-        const SpaceServer::SpaceMapPoint& endPoint, std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm )
-{
-    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions))
-    {
-        printf("Pathfinding successful! From (%d,%d,%d) to (%d, %d, %d)",
-               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
-    }
-    else
-    {
-        printf("Pathfinding failed! From (%d,%d,%d) to (%d, %d, %d)",
-               startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
-    }
 
-}
->>>>>>> 7be54a9bda6888565f87721f2aeee087a422310c
 
 /*
 bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions, bool useExistingId, Handle toNudge, float customSpeed )
