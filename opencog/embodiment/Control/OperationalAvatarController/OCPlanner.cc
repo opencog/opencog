@@ -31,16 +31,34 @@
 #include <list>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/atom_types.h>
+#include <opencog/embodiment/WorldWrapper/PAIWorldWrapper.h>
+
+#include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+
+#include <map>
+#include <math.h>
+#include <stdio.h>
+#include <sstream>
+#include "OAC.h"
 
 using namespace opencog::oac;
+using namespace std;
+
 
 // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
 // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
 // it its forward rule node has multiple forward state node, using the deepest one
 void StateNode::calculateNodeDepth()
 {
-    if (! this->forwardRuleNode)
+    if (this->depth == 0)
+    {
+        return; // it's the goal state nodes
+    }
+    else if (! this->forwardRuleNode)
+    {
+        this->depth = -1;
         return;
+    }
 
     set<StateNode*>::iterator it;
 
@@ -62,11 +80,81 @@ void RuleNode::updateCurrentAllBindings()
     currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
 }
 
-OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
+bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
+{
+    list<StateNode*>::iterator it;
+    for (it = stateNodeList.begin(); it != stateNodeList.end(); ++ it)
+    {
+        if (state == (*it))
+            return true;
+    }
+
+    return false;
+}
+
+
+// @ bool &found: return if this same state is found in temporaryStateNodes
+// @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
+bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode)
+{
+    //  check if this state has beed satisfied by the previous state nodes
+    list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
+    float satisfiedDegree;
+
+    for (;vit != temporaryStateNodes.end(); vit ++)
+    {
+        // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
+        // but the latest one is put in the front, so we can just check the first one we find
+        State* vState = ((StateNode*)(*vit))->state;
+        if (vState->isSameState(goalState))
+        {
+            found = true;
+            satstateNode = ((StateNode*)(*vit));
+
+             if (vState->isSatisfied(goalState,satisfiedDegree))
+             {
+                 return true;
+             }
+             else
+             {
+                 return false;
+             }
+
+        }
+
+    }
+
+    // cannot find this state in temporaryStateNodes
+    found = false;
+    satstateNode = 0;
+
+    return false;
+}
+
+int RuleNode::getDepthOfRuleNode(const RuleNode* r)
+{
+     // check the depth of the effect state nodes of this rule, get the deepest state node.
+    set<StateNode*>::iterator it;
+
+    int deepest = 0;
+    for ( it = r->forwardLinks.begin(); it != r->forwardLinks.end();  ++ it)
+    {
+        int d = ((StateNode*)(*it))->depth;
+        if (d > deepest)
+            deepest = d;
+    }
+
+    return deepest;
+}
+
+OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
 {
 
     atomSpace = _atomspace;
-    oac = _oac;
+
+    selfEntityParamValue = Entity(_selfID,_selfType);
+
+    std::cout << "Debug: OCPlanner init: selfID = " << _selfID << ", slef type = " << _selfType << std::endl;
 
     loadAllRulesFromAtomSpace();
 
@@ -87,6 +175,12 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace,OAC* _oac)
         addRuleEffectIndex(r);
 
     }
+}
+
+OCPlanner::~OCPlanner()
+{
+    // todo: delete everything
+
 }
 
 void OCPlanner::addRuleEffectIndex(Rule* r)
@@ -138,7 +232,7 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 
 // basically, we only care about the satisfied degree of the numberic state
-bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  State* original_state)
+bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree,  State* original_state)
 {
     // if this goal doesn't really require an exact value, just return fully achieved
     if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
@@ -147,11 +241,11 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
         return 1.0f;
     }
 
-//    // First search this state in the historyStateNodes list
-//    vector<StateNode*>::const_iterator vit = historyStateNodes.begin();
-//    for (;vit != historyStateNodes.end(); vit ++)
+//    // First search this state in the temporaryStateNodes list
+//    vector<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
+//    for (;vit != temporaryStateNodes.end(); vit ++)
 //    {
-//        // there are possible mutiple same state nodes describe this same state in historyStateNodes,
+//        // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
 //        // but the latest one is put in the front, so we can just check the first one we find
 //        State* vState = ((StateNode*)(*vit))->state;
 //        if (vState->isSameState(oneGoal))
@@ -159,15 +253,14 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
 
 //    }
 
-    // has not been found in the globalStatesCache,
     // then we should inquery this state from the run time environment
     if (oneGoal.need_inquery)
     {
         // call its inquery funciton
-        InqueryFun f = oneGoal.inqueryFun;
-        StateValue inqueryValue = f(oneGoal.stateOwnerList);
+        InqueryStateFun f = oneGoal.inqueryStateFun;
+        ParamValue inqueryValue = f(oneGoal.stateOwnerList);
         OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
+                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
                   oneGoal.name().c_str());
 
         return oneGoal.isSatisfiedMe(inqueryValue,satisfiedDegree,original_state);
@@ -176,13 +269,13 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
     else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
     {
         // TODO
-        StateValue value = Inquery::getStateValueFromAtomspace(oneGoal);
+        ParamValue value = Inquery::getParamValueFromAtomspace(oneGoal);
         OC_ASSERT(!(value == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchieved: the inqueried value for state: %s is invalid.\n",
+                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
                   oneGoal.name().c_str());
 
         // put this state into the cache, so we don't need to search for it next time
-        State curState(oneGoal.name(),oneGoal.getStateValuleType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
+        State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
 
         return curState.isSatisfied(oneGoal, satisfiedDegree,original_state);
 
@@ -190,14 +283,42 @@ bool OCPlanner::checkIsGoalAchieved(State& oneGoal, float& satisfiedDegree,  Sta
 
 }
 
-
-bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
+ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog::CogServer * server)
 {
-//    globalStatesCache.clear();
+    // need to translate the psi demanding goal Handle into vector<State*>
+    vector<State*> goal,knownStates;
+
+    // the goal handle is like: [EvaluationLink <EnergyDemandGoal> 0.999857 0.00124844]
+    Handle goal_predicate = this->atomSpace->getOutgoing(goalHandle,0);
+    OC_ASSERT( (goal_predicate != Handle::UNDEFINED), "OCPlanner::doPlanningForPsiDemandingGoal: The current goal is Handle::UNDEFINED!");
+
+    string goalname = this->atomSpace->getName(goal_predicate);
+    std::cout<< "OCPLANNER_DEBUG:Goalgame: "<< goalname.c_str() << std::endl;
+
+    State* goalState = new State(goalname,ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_TRUE);
+    goalState->addOwner(this->selfEntityParamValue);
+
+    State* knownState = new State(goalname,ActionParamType::BOOLEAN(),STATE_EQUAL_TO,SV_FALSE);
+    knownState->addOwner(this->selfEntityParamValue);
+
+    goal.push_back(goalState);
+
+    knownStates.push_back(knownState);
+
+    return doPlanning(goal,knownStates,server);
+
+}
+
+ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State*>& knownStates,opencog::CogServer * server)
+{
+
+    // Get OAC
+    OAC* oac = dynamic_cast<OAC*>(server);
+    OC_ASSERT(oac, "OCPlanner::doPlanning: Did not get an OAC server!");
 
     int ruleNodeCount = 0;
 
-    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp(); ;
+    curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
@@ -206,17 +327,31 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     // Set this cloned spaceMap for Inquery
     Inquery::setSpaceMap(clonedMap);
 
+    allRuleNodeInThisPlan.clear();
+    unsatisfiedStateNodes.clear();
+    temporaryStateNodes.clear();
+    imaginaryHandles.clear(); // TODO: Create imaginary atoms
+
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
     // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
     // Because our embodiment game world is not a simple finite boolean-state world, we cannot use a full forward breadth-frist which will be too slowly
 
-    // Firstly, we construct the original unsatisfiedStateNodes and historyStateNodes from the input goals
-    list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
+    // Firstlyt, we construct the knownStates as the original temporaryStateNodes from input :
+    vector<State*>::const_iterator itknown;
+    for (itknown = knownStates.begin(); itknown != knownStates.end(); ++ itknown)
+    {
+        StateNode* newStateNode = new StateNode(*itknown);
 
-    // all the state nodes that store the temporary state nodes generated by effect of some rule nodes,
-    // all the new elements should be put_front , so the latest update of the same state will already put in front of the older history
-    list<StateNode*> historyStateNodes;
+        newStateNode->backwardRuleNode = 0;
+        newStateNode->forwardRuleNode = 0;
+        newStateNode->depth = 0;
+
+        temporaryStateNodes.push_front(newStateNode);
+
+    }
+
+    // And then, we construct the original unsatisfiedStateNodes and temporaryStateNodes from the input goals
 
     // this is to store the already satisfied goal states before beginning planning, in case some planning steps  will change them into unsatisfied
     // Everytime it's changed into unsatisfied, it should be put into the unsatisfiedStateNodes list and removed from goalStateNodes list
@@ -231,16 +366,36 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         newStateNode->forwardRuleNode = 0;
         newStateNode->depth = 0;
 
-        if (checkIsGoalAchieved(*(newStateNode->state), satisfiedDegree))
+        bool found;
+        StateNode* knownStateNode;
+
+        if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode))
         {
             goalStateNodes.push_back(newStateNode);
-            historyStateNodes.push_front(newStateNode);
+            temporaryStateNodes.push_front(newStateNode);
+        }
+
+        if (found)
+        {
+            unsatisfiedStateNodes.push_front(newStateNode);
+        }
+        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
+        {
+            goalStateNodes.push_back(newStateNode);
+            temporaryStateNodes.push_front(newStateNode);
         }
         else
         {
             unsatisfiedStateNodes.push_front(newStateNode);
         }
 
+    }
+
+
+    if (unsatisfiedStateNodes.size() == 0)
+    {
+        std::cout << "The goal is already satisfied! There is no need to do planning!" << std::endl;
+        return 0;
     }
 
     while(unsatisfiedStateNodes.size() != 0)
@@ -302,7 +457,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                     // TODO: check if this rule is positive or negative for the current state
 
-                    // Because grounding every rule is time consuming, but some cost of rule requires the calculation of grounded variables.
+                    // Because grounding every rule fully is time consuming, but some cost of rule requires the calculation of grounded variables.
                     // So here we just use the basic cost of every rule as the cost value.
                     float curRuleScore = 0.5f* ruleIt->first + 0.5*(1.0f - r->getBasicCost());
                     if (r->IsRecursiveRule)
@@ -311,6 +466,10 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     // the rules with higher score are put in front
                     list< pair<float,Rule*> >::iterator canIt;
                     canIt = curStateNode->candidateRules.begin();
+
+                    // ground it only by this current state node,  to check if its other effects negative some of the other temporaryStateNodes
+                    int negativeNum = checkNegativeStateNumBythisRule(r,curStateNode);
+                    curRuleScore -= negativeNum;
 
                     while(true)
                     {
@@ -334,7 +493,6 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 selectedRule = (curStateNode->candidateRules.begin())->second;
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.begin())->second);
                 curStateNode->candidateRules.pop_front();
-
 
             }
 
@@ -360,7 +518,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                 if (forwardRuleNode == 0)
                 {
                     // oh, this state node is already the goal state node, and it's impossible to achieve, return planning fail
-                    return false;
+                    return "";
                 }
 
                 if (forwardRuleNode->ParamCandidates.size() == 0)
@@ -369,7 +527,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     // so it means this rule doesn't work, we have to go back to its forward state node
 
                     // Remove this rule from the candidate rules of all its foward state nodes
-                    // and move all its foward state nodes from historyStateNodes to unsatisfiedStateNodes
+                    // and move all its foward state nodes from temporaryStateNodes to unsatisfiedStateNodes
                     set<StateNode*>::iterator forwardStateIt;
                     for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
                     {
@@ -388,29 +546,35 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
                         }
 
-                        deleteStateNodeInHistory((StateNode*)(*forwardStateIt), historyStateNodes);
-                        unsatisfiedStateNodes.push_front(*forwardStateIt);
+                        deleteStateNodeInTemporaryList((StateNode*)(*forwardStateIt));
+
+                        // only when there is any rule node need this state node as a prediction, put it to the unsatisfed list
+                        if ((StateNode*)(*forwardStateIt)->forwardRuleNode != 0)
+                            unsatisfiedStateNodes.push_front(*forwardStateIt);
                     }
 
-                    deleteRuleNode(forwardRuleNode);
+                    deleteRuleNodeRecursively(forwardRuleNode);
 
                 }
                 else
                 {
-                    // check which states of the effects of this forwardRuleNode have been sovled , which still remand unsloved.
-                    set<StateNode*>::iterator effectItor;
-                    map<State*,StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's effects that have been solved by previous planning steps
-                    for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                    // There are still Candidate bindings for this rule node to try.
+
+                    // check which states of the preconditions of this forwardRuleNode have been sovled , which still remand unsloved.
+                    set<StateNode*>::iterator preconItor;
+                    map<State*,StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's preditions that have been solved by previous planning steps
+                    for (preconItor = forwardRuleNode->backwardLinks.begin(); preconItor != forwardRuleNode->backwardLinks.end(); ++ preconItor)
                     {
                         // skip the current state node
-                        if ((*effectItor) == curStateNode)
+                        if ((*preconItor) == curStateNode)
                             continue;
 
-                        if ((*effectItor)->backwardRuleNode != 0)
+                        // when this state node has already been tried a backward rule to solve it, or this state node is not in the unsatisfiedStateNodes
+                        // it means it's solved
+                        if (((*preconItor)->backwardRuleNode != 0) || (! findInStateNodeList(unsatisfiedStateNodes,*preconItor)))
                         {
-                            // currently , this state node has already been tried a backward rule to solve it
                             // so put it in the solvedStateNodes map
-                            StateNode* sn = (StateNode*)(*effectItor);
+                            StateNode* sn = (StateNode*)(*preconItor);
                             solvedStateNodes.insert(pair<State*,StateNode*>(sn->forwardEffectState , sn ) );
                         }
                     }
@@ -425,17 +589,17 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         forwardRuleNode->ParamCandidates.erase(forwardRuleNode->ParamCandidates.begin());
 
                         forwardRuleNode->updateCurrentAllBindings();
+                        recordOrginalParamValuesAfterGroundARule(forwardRuleNode);
 
-
-                        // rebind all the effect state nodes in the forward rule
-                        for (effectItor = forwardRuleNode->backwardLinks.begin(); effectItor != forwardRuleNode->backwardLinks.end(); ++ effectItor)
+                        // rebind all the precondition state nodes in the forward rule
+                        for (preconItor = forwardRuleNode->backwardLinks.begin(); preconItor != forwardRuleNode->backwardLinks.end(); ++ preconItor)
                         {
-                            reBindStateNode((*effectItor),forwardRuleNode->currentAllBindings);
+                            reBindStateNode((*preconItor),forwardRuleNode->currentAllBindings);
                         }
 
-                        continue;
+                        continue; // continue with the big while loop to check the next subgoal in unsatisfiedStateNodes
                     }
-                    else // some of the effect states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
+                    else // some of the predition states of this forwardRuleNode has been solved, so we cannot simply replace the current bindings with another random bindings
                     {
                         // try to find a group of bindings from the candidates, that won't affect the solved states
                         // if cannot find any , try to find a group of candidate bindings will affect as few as possible solved states
@@ -469,7 +633,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                                 {
                                     string& varName = (string&)(bindIt->first);
 
-                                    // try to find this find this variable name in the ungrounded variable records
+                                    // try to find this find this variable name() in the ungrounded variable records
                                     if (ungroundVarInAState.vars.find(varName) != ungroundVarInAState.vars.end())
                                     {
                                         oneAffectRecord.push_back((StateNode*)(solvedItor->second));
@@ -497,28 +661,35 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                         forwardRuleNode->currentBindingsViaSelecting =  *bestBindingIt;
                         forwardRuleNode->ParamCandidates.erase(bestBindingIt);
                         forwardRuleNode->updateCurrentAllBindings();
+                        recordOrginalParamValuesAfterGroundARule(forwardRuleNode);
 
                         // have to rebind the affected state nodes and delete the affected effect states' branches
                         vector<StateNode*>::iterator affectedStateNodeIt;
                         for ( affectedStateNodeIt =  (willBeAffecteds[index]).begin(); affectedStateNodeIt !=  (willBeAffecteds[index]).end(); ++ affectedStateNodeIt)
                         {
                             StateNode* affectedStateNode = (StateNode* )(*affectedStateNodeIt);
+
+                            deleteStateNodeInTemporaryList(affectedStateNode);
+
                             reBindStateNode(affectedStateNode,forwardRuleNode->currentAllBindings);
 
-                            deleteStateNodeInHistory(affectedStateNode, historyStateNodes);
-                            unsatisfiedStateNodes.push_front(affectedStateNode);
+                            // now affectedStateNode is a new node after being rebinded
+                            // only when there is other rule node used it as a predition , we need to put it into the unsatisfiedStateNodes list
+                            if (affectedStateNode->forwardRuleNode != 0)
+                                unsatisfiedStateNodes.push_front(affectedStateNode);
 
-                            deleteRuleNode(affectedStateNode->backwardRuleNode);
+                            // the affectedStateNode has been rebinded, should not delete it as well
+                            deleteRuleNodeRecursively(affectedStateNode->backwardRuleNode,affectedStateNode, false);
+
                         }
 
-                        continue;
+                        continue; // continue with the big while loop to check the next subgoal in unsatisfiedStateNodes
 
                     }
                 }
 
             }
         }
-
 
         // Till now have selected one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
 
@@ -528,6 +699,8 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         ruleNode->forwardLinks.insert(curStateNode);
         curStateNode->backwardRuleNode = ruleNode;
 
+        allRuleNodeInThisPlan.push_front(ruleNode);
+
         // When apply a rule, we need to select proper variables to ground it.
 
         // To ground a rule, first, we get all the variable values from the current state node to ground it.
@@ -536,13 +709,16 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
-        groundARuleNodeBySelectingValues(ruleNode);
+        groundARuleNodeBySelectingNonNumericValues(ruleNode);
 
         ruleNode->updateCurrentAllBindings();
 
-        recordOrginalStateValuesAfterGroundARule(ruleNode);
+        // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
+        selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
 
-        //  find if there are other forward states besides curStateNode will be affected by this rule
+        recordOrginalParamValuesAfterGroundARule(ruleNode);
+
+        //  find if there are other previous states besides curStateNode will be affected by this rule
         vector<EffectPair>::iterator effectItor;
 
         for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor)
@@ -560,10 +736,11 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             newStateNode->backwardRuleNode = ruleNode;
             newStateNode->forwardRuleNode = 0;
             newStateNode->forwardEffectState = 0;
-            historyStateNodes.push_front(newStateNode);
+            temporaryStateNodes.push_front(newStateNode);
 
             list<StateNode*>::iterator unsait;
 
+            // check if there are any unsatisfied nodes in previous steps will be satisfied by this effect
             for (unsait = unsatisfiedStateNodes.begin(); unsait != unsatisfiedStateNodes.end(); )
             {
                 if (effState->isSameState( *((StateNode*)(*unsait))->state ))
@@ -587,6 +764,47 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
 
             }
 
+
+            list<StateNode*>::iterator sait;
+
+            for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); )
+            {
+                // only check the state nodes without backward rule node,
+                // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+                if (((StateNode*)(*sait))->backwardRuleNode == 0)
+                {
+                     ++ sait;
+                    continue;
+                }
+
+                if (effState->isSameState( *((StateNode*)(*sait))->state ))
+                {
+                    // check if this effect unsatisfy this state
+                    float satDegree;
+                    StateNode* satStateNode = (StateNode*)(*sait);
+                    if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
+                    {
+                        ruleNode->negativeForwardLinks.insert(satStateNode);
+
+                        // if there is any other rule node in any forward step used it as a precondition, which suggests it's an intermediate goal that need to be satisfied,
+                        // put it into the unsatisfied node list
+                        if (satStateNode->forwardRuleNode != 0)
+                        {
+                            unsatisfiedStateNodes.push_front(satStateNode);
+                        }
+
+                        // remove it from the already satisfied node list
+                        temporaryStateNodes.erase(sait);
+
+                    }
+                    else
+                        ++ sait;
+                }
+                else
+                    ++ sait;
+
+            }
+
             // need to check in the goal state node list, if this effect change the already satisfied states in the goal list
             vector<StateNode*>::iterator goIt;
             for (goIt = goalStateNodes.begin(); goIt != goalStateNodes.end();)
@@ -597,7 +815,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
                     float satDegree;
 
                     if (! effState->isSatisfied(*(goalNode->state) ,satDegree))
-                    {
+                    {                        
                         // This effect dissatisfied this goal, put this goal into the unsatisfied state node list and remove it from goal list
                         unsatisfiedStateNodes.push_front(goalNode);
                         goalStateNodes.erase(goIt);
@@ -612,7 +830,7 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
         }
 
         // move the current state node from unsatisfied to satisfied list
-        historyStateNodes.push_front(curStateNode);
+        temporaryStateNodes.push_front(curStateNode);
         unsatisfiedStateNodes.pop_back();
 
         // ground all the precondition state and create new nodes for each and add the forwardEffectStates
@@ -631,49 +849,57 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
             newStateNode->forwardEffectState = ps;
 
             // first check if this state has beed satisfied by the previous state nodes
-            list<StateNode*>::const_iterator vit = historyStateNodes.begin();
             bool found = false;
-            for (;vit != historyStateNodes.end(); vit ++)
+            StateNode* satStateNode;
+
+            bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode);
+
+            // if it's found in the temporaryStateNodes
+            if (found)
             {
-                // there are possible mutiple same state nodes describe this same state in historyStateNodes,
-                // but the latest one is put in the front, so we can just check the first one we find
-                State* vState = ((StateNode*)(*vit))->state;
-                if (vState->isSameState(*groundPs))
+                if (satByTemp)
                 {
-                     if (vState->isSatisfied(*groundPs,satisfiedDegree))
-                     {
-                         // the current state satisfied this precondition,
-                         // connect this precondition to the backward rule node of the state which satisfied this precondition
-                         found = true;
 
-                         RuleNode* backwardRuleNode = ((StateNode*)(*vit))->backwardRuleNode;
-                         if (backwardRuleNode)
-                         {
-                             ((StateNode*)(*vit))->backwardRuleNode->forwardLinks.insert(newStateNode);
-                             newStateNode->backwardRuleNode =  ((StateNode*)(*vit))->backwardRuleNode;
-                         }
+                    // the current state satisfied this precondition,
+                    // connect this precondition to the backward rule node of the state which satisfied this precondition
 
-                         // not need to add it in the historyStateNodes list, because it has beed satisfied by the previous steps
-                     }
+                    RuleNode* backwardRuleNode = satStateNode->backwardRuleNode;
+                    if (backwardRuleNode)
+                    {
+                        satStateNode->backwardRuleNode->forwardLinks.insert(newStateNode);
+                        newStateNode->backwardRuleNode =  satStateNode->backwardRuleNode;
+                    }
+
+                    // ToBeImproved: Need to check if there is any dependency loop,
+                    // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
+                    // it means two branches depend on each other. How to deal with this case?
+
+                    // not need to add it in the temporaryStateNodes list, because it has beed satisfied by the previous steps
 
                 }
-
-            }
-
-            // cannot find this state in the historyStateNodes list, need to check it in real time
-            if (! found)
-            {
-                // check real time
-                if (! checkIsGoalAchieved(*groundPs,satisfiedDegree))
+                else
                 {
                     // add it to unsatisfied list
                     unsatisfiedStateNodes.push_front(newStateNode);
+                    if (newStateNode->backwardRuleNode)
+                        newStateNode->backwardRuleNode->negativeForwardLinks.insert(newStateNode);
+
+                }
+            }
+            else
+            {
+                // cannot find this state in the temporaryStateNodes list, need to check it in real time
+                // check real time
+                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+                {
+                    // add it to unsatisfied list
+                    unsatisfiedStateNodes.push_front(newStateNode);
+
                 }
 
             }
 
         }
-
 
         // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
         executeActionInImaginarySpaceMap(ruleNode,clonedMap);
@@ -681,12 +907,178 @@ bool OCPlanner::doPlanning(const vector<State*>& goal, vector<PetAction> &plan)
     }
 
     // finished planning!
-    // todo: generate the action series according to the planning network we have constructed in this planning process
+
+    // generate the action series according to the planning network we have constructed in this planning process
+    planID = oac->getPAI().createActionPlan();
+
+    std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
+
+    // sort the list of rule node
+    allRuleNodeInThisPlan.end();
+
+    // and then encapsule the action plac for each step and send to PAI
+    list<RuleNode*>::iterator planRuleNodeIt;
+    int stepNum = 1;
+    for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
+    {
+        RuleNode* r = (RuleNode*)(*planRuleNodeIt);
+
+        // generate the action series according to the planning network we have constructed in this planning process
+        PetAction* originalAction = r->originalRule->action;
+        if (originalAction->getType().getCode() == DO_NOTHING_CODE)
+            continue;
+
+        // ground the parameter according to the current bindings
+        PetAction action(originalAction->getType());
+        list<ActionParameter>::const_iterator paraIt;
+        const list<ActionParameter>& params = originalAction->getParameters();
+
+        std::cout<<std::endl<<"Step No."<< stepNum << originalAction->getName();
+
+        // for navigation actions, need to call path finder to create every step of it
+        if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
+        {
+            spatial::BlockVector startPos,targetPos;
+
+            ActionParameter oparam = (ActionParameter)params.front();
+
+            ParamValue value;
+
+            if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+            {
+                ParamGroundedMapInARule::iterator bindIt = r->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+                OC_ASSERT( (bindIt != r->currentAllBindings.end()),
+                          "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                           originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+                value = bindIt->second;
+
+            }
+            else
+                value =  oparam.getValue();
+
+            if ((originalAction->getType().getCode() == WALK_CODE))
+            {
+                Vector v1 = boost::get<Vector>(value);
+                targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+                std::cout<< ActionParameter::ParamValueToString(v1)<<std::endl;
+            }
+            else
+            {
+                Entity entity1 = boost::get<Entity>(value);
+                targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
+
+                std::cout<< entity1.stringRepresentation()<<std::endl;
+            }
+
+            // Get the right location of it at current step, from the orginalGroundedParamValues, it's the starting position before it moves
+
+            // For any moving action, it's the second element in the effect list, as well as in the  orginalGroundedParamValues
+            Vector v1 = boost::get<Vector>( r->orginalGroundedParamValues[1]);
+            startPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+
+            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),spaceServer().getLatestMap(),startPos,targetPos,planID);
+
+        }
+        else
+        {
+            for (paraIt = params.begin(); paraIt != params.end(); ++ paraIt)
+            {
+                ActionParameter oparam = (ActionParameter)(*paraIt);
+                if  (Rule::isParamValueUnGrounded(oparam.getValue()))
+                {
+                    ParamGroundedMapInARule::iterator bindIt = r->currentAllBindings.find(ActionParameter::ParamValueToString(oparam.getValue()));
+                    OC_ASSERT( (bindIt != r->currentAllBindings.end()),
+                              "OCPlanner::sendPlan: in action %s, parameter: %s is ungrounded.\n",
+                               originalAction->getType().getName().c_str() ,oparam.getName().c_str());
+
+                    action.addParameter(ActionParameter(oparam.getName(),
+                                                        oparam.getType(),
+                                                        bindIt->second) );
+                    std::cout<< ActionParameter::ParamValueToString(bindIt->second);
+                }
+                else
+                {
+                    action.addParameter(ActionParameter(oparam.getName(),
+                                                        oparam.getType(),
+                                                        oparam.getValue() ));
+                    std::cout<< oparam.stringRepresentation();
+                }
+
+            }
+
+            oac->getPAI().addAction(planID, action);
+
+        }
+        stepNum ++;
+    }
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
 
-    return true;
+    // todo: remove all the imaginary atoms in imaginaryHandles
+
+    return planID;
+}
+
+
+// return how many states in the temporaryStateNodes will be Negatived by this rule
+int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState)
+{
+
+    RuleNode* tmpRuleNode = new RuleNode(rule);
+
+    groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
+
+    int num = 0;
+
+    // check all the effects:
+    vector<EffectPair>::iterator effectItor;
+
+    for (effectItor = rule->effectList.begin(); effectItor != rule->effectList.end(); ++ effectItor)
+    {
+        Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
+
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentAllBindings);
+
+        if (! effState)
+            continue;
+
+        list<StateNode*>::iterator sait;
+
+        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); )
+        {
+            // only check the state nodes without backward rule node,
+            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+            if (((StateNode*)(*sait))->backwardRuleNode == 0)
+            {
+                 ++ sait;
+                continue;
+            }
+
+            if (effState->isSameState( *((StateNode*)(*sait))->state ))
+            {
+                // check if this effect unsatisfy this state
+                float satDegree;
+                StateNode* satStateNode = (StateNode*)(*sait);
+                if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
+                {
+                    num ++;
+
+                }
+                else
+                    ++ sait;
+            }
+            else
+                ++ sait;
+
+        }
+    }
+
+    delete tmpRuleNode;
+
+    return num;
+
 }
 
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
@@ -781,7 +1173,7 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
             Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
 
             // get old location from the record before execute this effect
-            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
+            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
             spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
             iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp);
 
@@ -796,7 +1188,7 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
             Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
 
             // get old location from the record before execute this effect
-            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedStateValues)[1]);
+            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
             spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
             iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp);
 
@@ -824,33 +1216,215 @@ void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& n
 }
 
 // delete a rule node and recursivly delete all its backward state nodes and rule nodes
-void OCPlanner::deleteRuleNode(RuleNode* ruleNode)
+void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode, bool deleteThisforwardStateNode)
 {
-    // todo
-    // historyStateNodes
+
+    // For the other forward state node of this rule node which is not the given forwardStateNode,
+    // does not belong to the main branch of this given forwardStateNode
+    // so don't need to delete such state nodes, only need to remove them from the temporaryStateNodes ,
+    // and put them into the unsatisfied list if there is any other rule node used them as preconditions
+    set<StateNode*>::iterator forwardStateIt;
+    for (forwardStateIt = ruleNode->forwardLinks.begin(); forwardStateIt != ruleNode->forwardLinks.end(); ++ forwardStateIt)
+    {
+        StateNode* curStateNode = (StateNode*)(*forwardStateIt);
+        if (curStateNode == forwardStateNode)
+            continue;
+
+        deleteStateNodeInTemporaryList(curStateNode);
+
+        if (curStateNode->forwardRuleNode != 0)
+            unsatisfiedStateNodes.push_front(curStateNode);
+    }
+
+    if (forwardStateNode && deleteThisforwardStateNode)
+        delete forwardStateNode;
+
+    // check all its backward state nodes
+    // delete them recursively
+    set<StateNode*>::iterator backwardStateIt;
+    for (backwardStateIt = ruleNode->backwardLinks.begin(); backwardStateIt != ruleNode->backwardLinks.end(); ++ backwardStateIt)
+    {
+        StateNode* curStateNode = (StateNode*)(*backwardStateIt);
+
+        deleteStateNodeInTemporaryList(curStateNode);
+
+         if (curStateNode->backwardRuleNode != 0)
+             deleteRuleNodeRecursively(curStateNode->backwardRuleNode, curStateNode);
+         else
+             delete curStateNode;
+
+    }
+
+    deleteRuleNodeInAllRuleNodeList(ruleNode);
+    delete ruleNode;
+
 }
 
-void OCPlanner::deleteStateNodeInHistory(StateNode* stateNode, list<StateNode*> &historyStateNodes)
+void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
 {
     list<StateNode*>::iterator it;
-    for (it = historyStateNodes.begin(); it != historyStateNodes.end(); ++it)
+    for (it = temporaryStateNodes.begin(); it != temporaryStateNodes.end(); ++it)
     {
         if ((*it) == stateNode)
         {
-            historyStateNodes.erase(it);
+            temporaryStateNodes.erase(it);
             break;
         }
     }
 }
 
-bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
+void OCPlanner::deleteRuleNodeInAllRuleNodeList(RuleNode *ruleNode)
+{
+    list<RuleNode*>::iterator it;
+    for (it = allRuleNodeInThisPlan.begin(); it != allRuleNodeInThisPlan.end(); ++it)
+    {
+        if ((*it) == ruleNode)
+        {
+            allRuleNodeInThisPlan.erase(it);
+            break;
+        }
+    }
+}
+
+// the forwardState can be a ungrounded state from other rule
+// if cannot unify it , return 0
+Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState )
 {
     // first, find the state in the effect list of this rule which the same to this forward state
     vector<EffectPair>::iterator effectIt;
     Effect* e;
     State* s;
 
-    // Todo: Maybe need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name
+    // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name()
+    for (effectIt = toBeUnifiedRule->effectList.begin(); effectIt != toBeUnifiedRule->effectList.end(); ++ effectIt)
+    {
+        e = effectIt->second;
+
+        s = e->state;
+        if (s->name() ==  forwardState->name())
+            break;
+    }
+
+    if (effectIt == toBeUnifiedRule->effectList.end())
+        return false;
+
+    // check if all the stateOwner parameters grounded
+    vector<ParamValue>::iterator f_ownerIt = forwardState->stateOwnerList.begin(); // state owner list in forward state
+    vector<ParamValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
+
+    map<string, ParamValue> currentBindingsFromForwardState;
+
+    for ( ; r_ownerIt != s->stateOwnerList.end(); ++ f_ownerIt, ++r_ownerIt)
+    {
+        if (Rule::isParamValueUnGrounded(*r_ownerIt))
+        {
+            string variableName = ActionParameter::ParamValueToString((ParamValue)(*r_ownerIt));
+            map<string, ParamValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+            if (paraIt == currentBindingsFromForwardState.end())
+                currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,*f_ownerIt));
+        }
+    }
+
+    // unify actor
+    ParamValue actor;
+    if (Rule::isParamValueUnGrounded(toBeUnifiedRule->actor))
+    {
+        string variableName = ActionParameter::ParamValueToString(toBeUnifiedRule->actor);
+        map<string, ParamValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+        if (paraIt == currentBindingsFromForwardState.end())
+            actor = toBeUnifiedRule->actor;
+        else
+            actor = paraIt->second;
+    }
+
+    Rule* unifiedRule = new Rule(toBeUnifiedRule->action,actor,toBeUnifiedRule->basic_cost);
+
+    // unify preconditionList
+    vector<State*>::iterator itpre = toBeUnifiedRule->preconditionList.begin();
+    for (; itpre != toBeUnifiedRule->preconditionList.end(); ++ itpre)
+    {
+        State* unifiedState = Rule::groundAStateByRuleParamMap(*itpre,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+        unifiedRule->addPrecondition(unifiedState);
+    }
+
+    // unify effect
+    for (effectIt = toBeUnifiedRule->effectList.begin(); effectIt != toBeUnifiedRule->effectList.end(); ++ effectIt)
+    {
+        e = effectIt->second;
+        s = e->state;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(s,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        // unify effect operator value
+        ParamValue opValue;
+        if (Rule::isParamValueUnGrounded(e->opParamValue))
+        {
+            string variableName = ActionParameter::ParamValueToString(toBeUnifiedRule->actor);
+            map<string, ParamValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
+            if (paraIt == currentBindingsFromForwardState.end())
+                opValue = e->opParamValue;
+            else
+                opValue = paraIt->second;
+        }
+
+        Effect* unifiedEffect = new Effect(unifiedState, e->effectOp, opValue);
+
+        unifiedRule->addEffect(EffectPair(effectIt->first,unifiedEffect));
+
+    }
+
+    // unify BestNumericVariableInqueryFun
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = toBeUnifiedRule->bestNumericVariableinqueryStateFuns.begin();
+    for (; beIt != toBeUnifiedRule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
+    {
+        BestNumericVariableInqueryStruct& bs = beIt->second;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(bs.goalState,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        BestNumericVariableInqueryStruct unifiedBS;
+        unifiedBS.bestNumericVariableInqueryFun = bs.bestNumericVariableInqueryFun;
+        unifiedBS.goalState = unifiedState;
+
+        string varName;
+        map<string, ParamValue>::iterator paraIt = currentBindingsFromForwardState.find(beIt->first);
+        if (paraIt == currentBindingsFromForwardState.end())
+            varName = beIt->first;
+        else
+            varName = ActionParameter::ParamValueToString(paraIt->second);
+
+        unifiedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(varName, unifiedBS));
+    }
+
+    // unify heuristics
+    vector<CostHeuristic>::iterator costIt;
+    for(costIt = toBeUnifiedRule->CostHeuristics.begin(); costIt != toBeUnifiedRule->CostHeuristics.end(); ++costIt)
+    {
+        State* cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
+        State* unifiedState = Rule::groundAStateByRuleParamMap(cost_state,currentBindingsFromForwardState);
+        if (unifiedState == 0)
+            return 0;
+
+        unifiedRule->addCostHeuristic(CostHeuristic(unifiedState,((CostHeuristic)(*costIt)).cost_coefficient));
+    }
+
+    unifiedRule->IsRecursiveRule = toBeUnifiedRule->IsRecursiveRule;
+
+    return unifiedRule;
+
+}
+
+bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
+{
+    // first, find the state in the effect list of this rule which the same to this forward state
+    vector<EffectPair>::iterator effectIt;
+    Effect* e;
+    State* s;
+
+    // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name()
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
@@ -863,20 +1437,47 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
     if (effectIt == ruleNode->originalRule->effectList.end())
         return false;
 
-    // check if all the stateOwner parameters grounded
-    vector<StateValue>::iterator f_ownerIt = forwardStateNode->state->stateOwnerList.begin(); // state owner list in forward state
-    vector<StateValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
+    // ground stateOwner parameters
+    vector<ParamValue>::iterator f_ownerIt = forwardStateNode->state->stateOwnerList.begin(); // state owner list in forward state
+    vector<ParamValue>::iterator r_ownerIt = s->stateOwnerList.begin(); // state owner list in rule effect state
 
     for ( ; r_ownerIt != s->stateOwnerList.end(); ++ f_ownerIt, ++r_ownerIt)
     {
         if (Rule::isParamValueUnGrounded(*r_ownerIt))
         {
-            string variableName = StateVariable::ParamValueToString((StateValue)(*r_ownerIt));
-            map<string, StateValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
+            string variableName = ActionParameter::ParamValueToString((ParamValue)(*r_ownerIt));
+            map<string, ParamValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
             if (paraIt == ruleNode->currentBindingsFromForwardState.end())
-                ruleNode->currentBindingsFromForwardState.insert(std::pair<string, StateValue>(variableName,*f_ownerIt));
+            {
+                std::cout << "Debug: Add currentBindingsFromForwardState pair: variableName = "<< variableName
+                          << ", value = "<< ActionParameter::ParamValueToString(*f_ownerIt) << std::endl;
+                ruleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,*f_ownerIt));
+            }
         }
     }
+
+    // ground the state value
+    if (Rule::isParamValueUnGrounded(s->stateVariable->getValue()))
+    {
+        string variableName = ActionParameter::ParamValueToString(s->stateVariable->getValue());
+        map<string, ParamValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
+        if (paraIt == ruleNode->currentBindingsFromForwardState.end())
+        {
+            std::cout << "Debug: Add currentBindingsFromForwardState pair: variableName = "<< variableName
+                      << ", value = "<< ActionParameter::ParamValueToString(forwardStateNode->state->getParamValue()) << std::endl;
+            ruleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,forwardStateNode->state->getParamValue()));
+        }
+    }
+
+    return true;
+}
+
+bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode)
+{
+
+    // First ground all the parameters
+    if (! groundARuleNodeParametersFromItsForwardState (ruleNode,forwardStateNode))
+        return false;
 
     // The cost calculation states should in the same context of the main parts of the rule, so it should not contain other new ungrounded variables
     // so we don't need to check the cost calculation states.
@@ -927,8 +1528,8 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
-                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryFun);
-                vector<StateValue>::iterator ownerIt;
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun);
+                vector<ParamValue>::iterator ownerIt;
                 for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
                 {
                     // if this state_owner is a const, not a variable, just copy it
@@ -936,13 +1537,13 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
                         cost_state->addOwner(*ownerIt);
                     else
                     {
-                        // this state_owner is a variable, we need to change its variable name into the corresponding variable name in current rule
+                        // this state_owner is a variable, we need to change its variable name() into the corresponding variable name() in current rule
                         // e.g.: the forward rule is: MoveTo(pos1,pos2), cost is :Distance(pos1,pos2).
                         //       But the current rule variables are different: If ExistAPath(x,m) & ExistAPath(m,y), then ExistAPath(x,y)
                         //       so we need to make the cost in current rule like: Distance(x,m)+ Distance(m,y), using the variables x,m,y, rather than pos1, pos2
 
-                        vector<StateValue>::iterator f_rule_ownerIt = forwardStateNode->forwardEffectState->stateOwnerList.begin();
-                        vector<StateValue>::iterator cur_ownerIt = ((State*)(*itpre))->stateOwnerList.begin();
+                        vector<ParamValue>::iterator f_rule_ownerIt = forwardStateNode->forwardEffectState->stateOwnerList.begin();
+                        vector<ParamValue>::iterator cur_ownerIt = ((State*)(*itpre))->stateOwnerList.begin();
                         // This two state should be the same state just with possible different variable names
                         // So the state owners in the same order of bot stateOwnerLists should suggest the same usage
                         for ( ; f_rule_ownerIt != forwardStateNode->forwardEffectState->stateOwnerList.end(); ++ f_rule_ownerIt, ++ cur_ownerIt)
@@ -950,7 +1551,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
                             // need to find the state owner of this cost heuristic in the forward effect state
                             if ((*f_rule_ownerIt) == (*ownerIt))
                             {
-                                // assign the state owner (variable name) in the same position of current rule precondition to the new cost_state we creat
+                                // assign the state owner (variable name()) in the same position of current rule precondition to the new cost_state we creat
                                 cost_state->addOwner(*cur_ownerIt);
 
                                 break;
@@ -962,10 +1563,10 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
                         if (f_rule_ownerIt == forwardStateNode->forwardEffectState->stateOwnerList.end())
                         {
                             // find the grounded value of this variable
-                            ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindingsFromForwardState.find(StateVariable::ParamValueToString((StateValue)(*ownerIt)));
+                            ParamGroundedMapInARule::iterator bindIt = forwardRuleNode->currentBindingsFromForwardState.find(ActionParameter::ParamValueToString((ParamValue)(*ownerIt)));
                             OC_ASSERT(!(bindIt == forwardRuleNode->currentBindingsFromForwardState.end()),
                                       "OCPlanner::groundARuleNodeFromItsForwardState: Cannot find the binding of this variable:\n",
-                                      StateVariable::ParamValueToString((StateValue)(*ownerIt)).c_str());
+                                      ActionParameter::ParamValueToString((ParamValue)(*ownerIt)).c_str());
 
                             cost_state->addOwner(bindIt->second);
 
@@ -1009,12 +1610,12 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
         return; // we have find All the Ungounded Variables for this rule before, we don't need to find them again
 
     map<string , vector<paramIndex> >::iterator paraIt = ruleNode->originalRule->paraIndexMap.begin();
-    ParamGroundedMapInARule::iterator bindIt = ruleNode->currentBindingsFromForwardState.begin();
+    ParamGroundedMapInARule::iterator bindIt ;
     for( ; paraIt != ruleNode->originalRule->paraIndexMap.end(); ++ paraIt)
     {
-        // try to find this variable name in the currentBindings
         bindIt = ruleNode->currentBindingsFromForwardState.find(paraIt->first);
 
+        // try to find this variable name() in the currentBindings
         // if cannot find it, it means this variable remains ungrounded, add it into the curUngroundedVariables
         if (bindIt == ruleNode->currentBindingsFromForwardState.end())
         {
@@ -1023,6 +1624,9 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
             vector<paramIndex>::iterator indexIt = (paraIt->second).begin();
             for (; indexIt != (paraIt->second).end(); ++ indexIt)
             {
+                if (((paramIndex)(*indexIt)).first == 0)
+                    continue;
+
                 list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
                 for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
                 {
@@ -1041,6 +1645,9 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
                 else
                 {
                     ruleNode->curUngroundedVariables.push_back(UngroundedVariablesInAState(((paramIndex)(*indexIt)).first,paraIt->first));
+
+                    std::cout<< "Debug: find ungrounded variable : " << paraIt->first << std::endl;
+
                 }
 
             }
@@ -1056,8 +1663,47 @@ void OCPlanner::findAllUngroundedVariablesInARuleNode(RuleNode *ruleNode)
 }
 
 
-// this function should be called after groundARuleNodeFromItsForwardState
-bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
+void generateNextCombinationGroup(bool* &indexes, int n_max)
+{
+    int trueCount = -1;
+    int i = 0;
+    for (; i < n_max - 1; ++ i)
+    {
+        if (indexes[i]   )
+        {
+            ++ trueCount;
+
+            if (! indexes[i+1])
+                break;
+        }
+    }
+
+    indexes[i] = false;
+    indexes[i+1] = true;
+
+    for (int j = 0; j < trueCount; ++ j)
+        indexes[j] = true;
+
+    for (int j = trueCount; j < i; ++ j)
+        indexes[j] = false;
+
+}
+
+bool isLastNElementsAllTrue(bool* array, int size, int n)
+{
+    for (int i = size - 1; i >= size - n; i --)
+    {
+        if (! array[i])
+            return false;
+    }
+
+    return true;
+}
+
+
+// this function should be called after groundARuleNodeFromItsForwardState.
+// this function only ground non-numeric states
+bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 {
     // First find all the ungrounded variables
     findAllUngroundedVariablesInARuleNode(ruleNode);
@@ -1067,15 +1713,16 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
     // First, get all the non-need-real-time-inquery states as the conditions for mattern matching
     // if cannot find any solution, then remove the last condition. Repeat this, till only have one condition left
 
-    // Because the curUngroundedVariables list has already been in order, so we just need to find out the first need-inquery one,
+    // Because the curUngroundedVariables list has already been in the order easiness of grounding,
+    // so we just need to find out the first need-inquery one,
     // and only select variables by pattern matching for the states before
 
-    // find the last state in the list curUngroundedVariables, which needs no real-time inquery state , and not numeric
-    int number_easy_state = -1;
+    // find the last state in the list ParamCandidates, which needs no real-time inquery state , and not numeric
+    int number_easy_state = 0;
     list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
     for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
     {
-        number_easy_state ++;
+
         if (((((UngroundedVariablesInAState&)(*uvIt)).state)->need_inquery )
                 || ((UngroundedVariablesInAState&)(*uvIt)).contain_numeric_var)
             break;
@@ -1083,48 +1730,317 @@ bool OCPlanner::groundARuleNodeBySelectingValues(RuleNode *ruleNode)
         {
             // generate all the evaluationlink will be used to do pattern matching for each easy state
             ((UngroundedVariablesInAState&)(*uvIt)).PMLink = Inquery::generatePMLinkFromAState((((UngroundedVariablesInAState&)(*uvIt)).state), ruleNode);
+            number_easy_state ++;
         }
     }
 
-    // TODO: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
-    // currentBindingsViaSelecting
-    // find all the canditates meet as many as possible preconditions
-    // first try all the combinations of  these in the
-    int tryTotalStateNum = number_easy_state;
+    // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
 
-    while (tryTotalStateNum > 0)
+    // find all the canditates meet as many as possible preconditions, and put all the candidates in ParamCandidates
+    // first, find from the easy state via selecting values from the Atomspace
+
+    int n_max = number_easy_state;
+    bool* indexes = new bool[n_max];
+
+    // ToBeImproved: in fact we don't need to generate all the possible groups of candidates at this moment,
+    //               we can just allow it generateNextCandidates every time one group failed in a planning step
+    // we generate the candidates by trying full combination calculation
+    for (int n_gram = n_max; n_gram >= 1; -- n_gram)
     {
-        -- tryTotalStateNum;
+        // Use the binary method to generate all combinations:
+
+        // generate the first combination
+        for (int i = 0; i < n_gram; ++ i)
+            indexes[i] = true;
+
+        for (int i = n_gram; i <n_max; ++ i)
+            indexes[i] = false;
+
+        // the int in the pair is how many other real-time-inquery states this group of candicates meets
+        list< TmpParamCandidate > tmpcandidates;
+
+        while (true)
+        {
+            // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node
+            // that will be used as conditions of patttern matching query in this function
+            vector<int> indexesVector;
+
+            for (int x = 0; x < n_max; ++ x)
+            {
+                if (indexes[x])
+                    indexesVector.push_back(x);
+            }
+            vector<string> varNames;
+            HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+
+            if (candidateListHandles.size() != 0)
+            {
+                foreach (Handle listH, candidateListHandles)
+                {
+                    HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
+                    ParamGroundedMapInARule oneGroupCandidate;
+                    int index = 0;
+
+                    foreach (Handle h, candidateHandlesInOneGroup)
+                    {
+                        ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
+                        oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
+
+                        // Check if this group of candidates is able to ground some other need_real_time_inquery states
+                        // and how many of these need_real_time_inquery state can be satisifed by this group of candidates
+                        int numOfSat = 0;
+                        list<UngroundedVariablesInAState>::iterator nrtiIt= uvIt;
+                        for (; nrtiIt != ruleNode->curUngroundedVariables.end(); ++ nrtiIt)
+                        {
+                            if (((UngroundedVariablesInAState&)(*nrtiIt)).contain_numeric_var)
+                                break;
+
+                            if (! ((UngroundedVariablesInAState&)(*nrtiIt)).state->need_inquery)
+                                break;
+
+                            ParamGroundedMapInARule tryBindings = ruleNode->currentBindingsFromForwardState;
+                            tryBindings.insert(oneGroupCandidate.begin(),oneGroupCandidate.end());
+                            State* groundedState = Rule::groundAStateByRuleParamMap(((UngroundedVariablesInAState&)(*nrtiIt)).state, tryBindings);
+                            if (groundedState != 0)
+                            {
+                                bool found;
+                                StateNode* satStateNode;
+                                if (checkIfThisGoalIsSatisfiedByTempStates(*groundedState,found,satStateNode))
+                                    numOfSat ++;
+                                else if (found)
+                                    continue; // found in temp state list, but is not satisfied
+                                else
+                                {
+                                    // cannot find it in temp state list, check it in real time
+                                    float satDegree;
+                                    if (checkIsGoalAchievedInRealTime(*groundedState,satDegree ))
+                                        numOfSat ++;
+                                    else
+                                        continue;
+                                }
+
+                            }
+
+                        }
+
+                        tmpcandidates.push_back(TmpParamCandidate(numOfSat, oneGroupCandidate));
+
+                        index ++;
+                    }
+
+                }
+
+            }
+
+            if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+                break;
+
+            generateNextCombinationGroup(indexes, n_max);
+
+        }
+
+        // Finished n-gram candidates generation
+        // sort the groups of candidates for this n-gram, in the order of meeting as many as possible other need_real_time_inquery states
+        // pls reference to above function:
+        // bool operator < (const pair<int,ParamGroundedMapInARule>& pair1, const pair<int,ParamGroundedMapInARule>& pair2)
+        tmpcandidates.sort();
+
+        // now, it's in the right order, copy it to candidates
+        list< TmpParamCandidate >::iterator tmpIt;
+        for(tmpIt = tmpcandidates.begin(); tmpIt != tmpcandidates.end(); ++ tmpIt)
+            ruleNode->ParamCandidates.push_back(((TmpParamCandidate&)(*tmpIt)).aGroupOfParmCandidate);
+
     }
 
+    delete indexes;
+
+    // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
+    // we won't ground the numeric states here, because it's too time-consuming,
+    // we won't give all the possible combinations of numeric values and non-numeric values for candidates
+
 }
 
-bool OCPlanner::selectValueForAVariableToGroundARule(RuleNode* ruleNode, string variableStr)
+// this should be called only after the currentAllBindings has been chosen
+// ToBeImproved: currently it can only solve that kind of rules with only one ungrounded Numeric variable
+bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode* ruleNode)
+{
+    // todo: need to implement the general way of numeric selection without pre-defined or learnt heuristic functions
+
+    // if this rule variable has pre-defined or learnt heuristic functions to inquery a best value which is most closed to this numeric goal
+    // in fact all such variable with pre-defined inquery functions, can also be grounded by general way, but general way is slower,
+    // so pre-defined inquery functions can make it more efficient, which may be a bit cheating, not AGI enough, but still make sense
+
+    // only deal with the numeric states, assuming that all the other non-numeric variables should have been grounded
+    // ToBeImproved: currently we are only able to deal with the numeric rule that only has one numeric ungrounded
+    map<string,BestNumericVariableInqueryStruct>::iterator beIt = rule->bestNumericVariableinqueryStateFuns.begin();
+    for (; beIt != rule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
+    {
+        // find in the currentAllBindings to check if this variable has been grounded or not
+        if (currentbindings.find(beIt->first) != currentbindings.end())
+            continue;
+
+        break;
+    }
+
+    if (beIt == rule->bestNumericVariableinqueryStateFuns.end())
+        return false;
+
+    // this variable has not been grouned , call its BestNumericVariableInquery to ground it
+    // first, ground the state required by bestNumericVariableinqueryStateFun
+    BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
+    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings);
+    if (groundedState == 0)
+    {
+        // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
+        logger().error("OCPlanner::selectValueForGroundingNumericState :the goal state needed in BestNumericVariableInquery cannot be grouned in previous grouding steps. State name() is:,"
+                       +  bs.goalState->name() );
+        return false;
+    }
+
+    vector<ParamValue> values = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
+
+    if (values.size() == 0)
+    {
+        // cannot find a good value by this pre-defined inquery functions
+
+        // if this is not a recursive rule, currently our framework cannot give out any soluction, just return failed
+        if (! rule->IsRecursiveRule)
+            return false;
+
+        // for recursive rule, we borrow the preconditions from the unrecursive rule which has the same effect of this rule
+        // ToBeImproved: now recursive rule only has one effect
+
+        if (ruleNode == 0)
+            return false;
+
+        StateNode* effectStateNode = *(ruleNode->forwardLinks.begin());
+
+        // find the first unrecursive rule
+        // you can also find it by ruleEffectIndexes
+        // ToBeImproved: currently we only borrow from the first unrecursive rule found
+        list< pair<float,Rule*> >::iterator canIt;
+        Rule* unrecursiveRule = 0;
+
+        for (canIt = effectStateNode->candidateRules.begin(); canIt != effectStateNode->candidateRules.end(); ++ canIt)
+        {
+            Rule* r = canIt->second;
+            if (! r->IsRecursiveRule)
+            {
+                unrecursiveRule = r;
+                break;
+            }
+        }
+
+        if (unrecursiveRule == 0)
+            return false; // cannot find a unrecursiveRule to borrow from
+
+        // ground this unrecursiveRule by the effectStateNode
+        Effect* e = rule->effectList.begin()->second;
+
+        // ToBeImproved: currently only apply the borrowed rule in the first precondition of recursiveRule
+        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList.front());
+        if (borrowedRule == 0)
+            return false; // cannot unify the borrowed rule
+
+        // because we have unified the rules, so the borrowed rule can use the same grounding map with
+        if (! selectValueForGroundingNumericState(borrowedRule,currentbindings))
+             return false; // cannot find a proper value from the borrowed rule
+
+        //  check if this variable has been grounded by selectValueForGroundingNumericState from the borrowed rule
+        if (currentbindings.find(beIt->first) != currentbindings.end())
+            return true;
+        else
+            return false;
+
+        // todo: for general way:
+        // if there are more than two preconditions in this rule, borrow the one without any other backward rule to satisfy it, as hard restrics for selecting values.
+        // because others preconditions can be achieved by other rules.
+        // so that we can select values at least satisfied one condition.
+
+    }
+
+    //  select the best one in this vector<ParamValue> that get the highest score according to the heuristics cost calculations
+    ParamValue bestValue;
+
+    if (rule->CostHeuristics.size() != 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+    }
+    else if (ruleNode && (ruleNode->costHeuristics.size()!= 0) )
+    {
+        bestValue = selectBestNumericValueFromCandidates(0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values);
+    }
+    else
+    {
+        logger().error("OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation!" );
+        return false;
+    }
+
+
+    if (bestValue == UNDEFINED_VALUE)
+    {
+        logger().error("OCPlanner::selectValueForGroundingNumericState: failed to find the best value for grounding numeric state!" );
+        return false;
+    }
+
+    //  ground the rule fully first
+    currentbindings.insert(std::pair<string, ParamValue>(beIt->first,bestValue));
+    return true;
+
+
+}
+
+
+ParamValue OCPlanner::selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values)
 {
 
+    vector<ParamValue>::iterator vit;
+    float lowestcost = 999999.9;
+    ParamValue bestValue = UNDEFINED_VALUE;
+
+    for (vit = values.begin(); vit != values.end(); ++ vit)
+    {
+        // try to ground the rule fully first
+        currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
+
+        float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
+
+        if (cost < -0.00001f)
+        {
+            logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
+            return UNDEFINED_VALUE;
+        }
+
+        currentbindings.erase(varName);
+
+        if (cost < lowestcost)
+        {
+            lowestcost = cost;
+            bestValue = *vit;
+        }
+    }
+
+    return bestValue;
 }
 
-// this function should be called after completely finished grounding a rule
-void OCPlanner::recordOrginalStateValuesAfterGroundARule(RuleNode* ruleNode)
+// this function should be called after completely finished grounding a rule.but it is before the effect taking place.
+void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
 {
     vector<EffectPair>::iterator effectIt;
     Effect* e;
     State* s;
 
-    ruleNode->orginalGroundedStateValues.clear();
+    ruleNode->orginalGroundedParamValues.clear();
 
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
         s = e->state;
         State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
-        ruleNode->orginalGroundedStateValues.push_back(groundedState->getStateValue());
-
+        ruleNode->orginalGroundedParamValues.push_back(groundedState->getParamValue());
     }
 }
 
-// hard constraints as heuristics for recursive rule, borrowed from the non-recursive rule has the same effect with it.
-// only applied for recursive rules.
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
@@ -1133,50 +2049,55 @@ void OCPlanner::loadTestRulesFromCodes()
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
 
     //----------------------------Begin Rule: if energy value is high enough, the energy goal is achieved-------------------------------------------
-    StateValue var_avatar = entity_var[1];
-    StateValue var_achieve_energy_goal = bool_var[1];
+//    ParamValue var_avatar = entity_var[1];
+//    ParamValue var_achieve_energy_goal = bool_var[1];
 
-    // precondition 1:
-    vector<StateValue> energyStateOwnerList0;
-    energyStateOwnerList0.push_back(var_avatar);
-    State* energyState0 = new State("Energy",StateValuleType::FLOAT(),STATE_GREATER_THAN ,StateValue("0.8"), energyStateOwnerList0, true, Inquery::inqueryEnergy);
-    // effect1: energy increases
-    State* energyGoalState = new State("EnergyGoal",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
+//    // precondition 1:
+//    vector<ParamValue> energyStateOwnerList0;
+//    energyStateOwnerList0.push_back(var_avatar);
+//    State* energyState0 = new State("Energy",ActionParamType::FLOAT(),STATE_GREATER_THAN ,ParamValue("0.8"), energyStateOwnerList0);
+//    // effect1: energy increases
+//    State* energyGoalState = new State("EnergyGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
 
-    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
+//    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
 
-    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
-    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
+//    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
+//    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
 
-    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
+//    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
 
-    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
+//    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
 
     //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
 
-    //----------------------------Begin Rule: eat food to increase energy-------------------------------------------
+    //----------------------------Begin Rule: eat food to achieve energy demanding goal -------------------------------------------
     // define variables:
-    StateValue var_food = entity_var[0];
-    StateValue var_energy = float_var[0];
+    ParamValue var_food = entity_var[0];
+    ParamValue var_achieve_energy_goal = bool_var[1];
+    ParamValue var_avatar =  entity_var[1];
+
+    std::cout<<"holder: "<< ActionParameter::ParamValueToString(var_avatar).c_str()<< std::endl;
 
     // Add rule: increasing energy by eat an edible object held in hand
 
     // precondition 1:food exists
-    vector<StateValue> existStateOwnerList;
+    vector<ParamValue> existStateOwnerList;
     existStateOwnerList.push_back(var_food);
 
-    State* existState = new State("exist",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, existStateOwnerList, true, &opencog::oac::Inquery::inqueryExist);
+    string statename = "exist";
+    State* existState = new State(statename,ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, existStateOwnerList, true, &opencog::oac::Inquery::inqueryExist);
 
     // precondition 2: The agent hold an object
-    vector<StateValue> holderStateOwnerList;
+    vector<ParamValue> holderStateOwnerList;
     holderStateOwnerList.push_back(var_food);
 
-    State* holderState = new State("holder",StateValuleType::ENTITY(),STATE_EQUAL_TO ,var_avatar, holderStateOwnerList);
+
+    State* holderState = new State("holder",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_avatar, holderStateOwnerList);
 
     // precondition 3: This object is ediable
-    vector<StateValue> edibleStateOwnerList;
+    vector<ParamValue> edibleStateOwnerList;
     edibleStateOwnerList.push_back(var_food);
-    State* edibleState = new State("is_edible",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, edibleStateOwnerList);
+    State* edibleState = new State("is_edible",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, edibleStateOwnerList);
 
     // action: eat
     PetAction* eatAction = new PetAction(ActionType::EAT());
@@ -1185,15 +2106,16 @@ void OCPlanner::loadTestRulesFromCodes()
                                         var_food));
 
     // energy state:
-    vector<StateValue> energyStateOwnerList;
+    vector<ParamValue> energyStateOwnerList;
     energyStateOwnerList.push_back(var_avatar);
-    State* energyState = new State("Energy",StateValuleType::FLOAT(),STATE_EQUAL_TO ,var_energy, energyStateOwnerList, true, Inquery::inqueryEnergy);
+    State* energyGoalState = new State("EnergyDemandGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList);
 
-    // effect1: energy increases
-    Effect* energyIncreaseEffect = new Effect(energyState, OP_ADD, StateValue("0.55"));
+
+    // effect1: energy Goal Achieved
+    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
 
     // effect2: the food disappear
-    Effect* foodDisappearEffect = new Effect(existState, OP_ASSIGN, "false");
+    Effect* foodDisappearEffect = new Effect(existState, OP_ASSIGN, SV_FALSE);
 
     // effect3: no one holds the food any more
     Effect* nonHolderEffect = new Effect(holderState, OP_ASSIGN, Entity::NON_Entity);
@@ -1204,7 +2126,7 @@ void OCPlanner::loadTestRulesFromCodes()
     eatRule->addPrecondition(edibleState);
     eatRule->addPrecondition(holderState);
 
-    eatRule->addEffect(EffectPair(1.0f,energyIncreaseEffect));
+    eatRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
     eatRule->addEffect(EffectPair(1.0f,nonHolderEffect));
     eatRule->addEffect(EffectPair(1.0f,foodDisappearEffect));
 
@@ -1214,21 +2136,21 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: pick up an object to hold it if closed enough-------------------------------
     // define variables:
-    StateValue varAvatar = entity_var[0];
-    StateValue varFood = entity_var[1];
-    StateValue var_holder = entity_var[2];
+    ParamValue varAvatar = entity_var[0];
+    ParamValue varFood = entity_var[1];
+    ParamValue var_holder = entity_var[2];
 
     // precondition 1: The agent and the object is closed enough ( e.g. < 2.0)
-    vector<StateValue> closedStateOwnerList;
+    vector<ParamValue> closedStateOwnerList;
     closedStateOwnerList.push_back(varAvatar);
     closedStateOwnerList.push_back(varFood);
-    StateValue svtest = ACCESS_DISTANCE;
-    State* closedState = new State("Distance",StateValuleType::FLOAT(),STATE_LESS_THAN ,svtest, closedStateOwnerList, true, &Inquery::inqueryDistance);
+    ParamValue svtest = ACCESS_DISTANCE;
+    State* closedState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,svtest, closedStateOwnerList, true, &Inquery::inqueryDistance);
 
     // precondition 2: The object can be picked up
-    vector<StateValue> pickupableStateOwnerList;
+    vector<ParamValue> pickupableStateOwnerList;
     pickupableStateOwnerList.push_back(varFood);
-    State* pickupableState = new State("is_pickupable",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", pickupableStateOwnerList);
+    State* pickupableState = new State("is_pickupable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", pickupableStateOwnerList);
 
     // todo: precondition 3: The agent doesn't hold other object currently
     // todo: precondition 4: The object is not be held by other agent currently
@@ -1241,9 +2163,9 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // effect1: The agent hold this object
     // holder state
-    vector<StateValue> holderStateOwnerList2;
+    vector<ParamValue> holderStateOwnerList2;
     holderStateOwnerList2.push_back(varFood);
-    State* holderState2 = new State("holder",StateValuleType::ENTITY(),STATE_EQUAL_TO ,var_holder, holderStateOwnerList2);
+    State* holderState2 = new State("holder",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_holder, holderStateOwnerList2);
     Effect* holderEffect = new Effect(holderState2, OP_ASSIGN, varAvatar);
 
     // rule:  pick up an object if closed enough, to hold it
@@ -1259,17 +2181,17 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: Move_to an object to get closed to it-----------------------------------------
     // define variables:
-    StateValue var_obj = entity_var[0];
-    StateValue float_dis = float_var[0];
+    ParamValue var_obj = entity_var[0];
+    ParamValue float_dis = float_var[0];
 
-    StateValue var_pos = vector_var[0];
-    StateValue var_oldpos = vector_var[1];
+    ParamValue var_pos = vector_var[0];
+    ParamValue var_oldpos = vector_var[1];
 
     // precondition 1:There exists a path from the agent to object
-    vector<StateValue> existPathStateOwnerList;
+    vector<ParamValue> existPathStateOwnerList;
     existPathStateOwnerList.push_back(var_avatar);
     existPathStateOwnerList.push_back(var_obj);
-    State* existPathState = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList, true, &Inquery::inqueryExistPath);
+    State* existPathState = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList, true, &Inquery::inqueryExistPath);
 
     // action: move to object
     PetAction* moveToObjectAction = new PetAction(ActionType::MOVE_TO_OBJ());
@@ -1278,16 +2200,16 @@ void OCPlanner::loadTestRulesFromCodes()
                                         boost::get<Entity>(var_obj)));
 
     // effect: get closed to the object
-    vector<StateValue> closedStateOwnerList2;
+    vector<ParamValue> closedStateOwnerList2;
     closedStateOwnerList2.push_back(var_avatar);
     closedStateOwnerList2.push_back(var_obj);
-    State* closedState2 = new State("Distance",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , float_dis , closedStateOwnerList2, true, &Inquery::inqueryDistance);
+    State* closedState2 = new State("Distance",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , float_dis , closedStateOwnerList2, true, &Inquery::inqueryDistance);
     Effect* getClosedEffect = new Effect(closedState2, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
 
     // effect2: position changed
-    vector<StateValue> atLocationStateOwnerList2;
+    vector<ParamValue> atLocationStateOwnerList2;
     atLocationStateOwnerList2.push_back(var_avatar);
-    State* atLocationState2 = new State("AtLocation",StateValuleType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList2, true, &Inquery::inqueryAtLocation);
+    State* atLocationState2 = new State("AtLocation",ActionParamType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList2, true, &Inquery::inqueryAtLocation);
     Effect* changedLocationEffect2 = new Effect(atLocationState2, OP_ASSIGN_NOT_EQUAL_TO, var_oldpos);
 
     // rule:   Move_to an object to get closed to it
@@ -1302,13 +2224,13 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(movetoObjRule);
     //----------------------------End Rule: Move_to an object to get closed to it-------------------------------------------
 
-    //----------------------------Begin Rule: walk to a position to get closed to it-----------------------------------------
+    //----------------------------Begin Rule: walk to a position to get closed to it  and stand on it-----------------------------------------
 
     // precondition 1:There exists a path from the agent to object
-    vector<StateValue> existPathStateOwnerList2;
+    vector<ParamValue> existPathStateOwnerList2;
     existPathStateOwnerList2.push_back(var_avatar);
     existPathStateOwnerList2.push_back(var_pos);
-    State* existPathState2 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList2, true, &Inquery::inqueryExistPath);
+    State* existPathState2 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList2, true, &Inquery::inqueryExistPath);
 
     // action: walk to an position
     PetAction* walkAction = new PetAction(ActionType::WALK());
@@ -1317,16 +2239,16 @@ void OCPlanner::loadTestRulesFromCodes()
                                             var_pos));
 
     // effect1: get closed to the position
-    vector<StateValue> closedStateOwnerList3;
+    vector<ParamValue> closedStateOwnerList3;
     closedStateOwnerList3.push_back(var_avatar);
     closedStateOwnerList3.push_back(var_pos);
-    State* closedState3 = new State("Distance",StateValuleType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList3, true, &Inquery::inqueryDistance);
+    State* closedState3 = new State("Distance",ActionParamType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList3, true, &Inquery::inqueryDistance);
     Effect* getClosedEffect2 = new Effect(closedState3, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
 
     // effect2: position changed
-    vector<StateValue> atLocationStateOwnerList;
+    vector<ParamValue> atLocationStateOwnerList;
     atLocationStateOwnerList.push_back(var_avatar);
-    State* atLocationState = new State("AtLocation",StateValuleType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList, true, &Inquery::inqueryAtLocation);
+    State* atLocationState = new State("AtLocation",ActionParamType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList, true, &Inquery::inqueryAtLocation);
     Effect* changedLocationEffect = new Effect(atLocationState, OP_ASSIGN, var_pos);
 
     // rule:   Move_to an object to get closed to it
@@ -1339,39 +2261,98 @@ void OCPlanner::loadTestRulesFromCodes()
     walkRule->addCostHeuristic(CostHeuristic(closedState3, 0.01f));
 
     this->AllRules.push_back(walkRule);
-    //----------------------------End Rule: walk to a position to get closed to it-----------------------------------------
+    //----------------------------End Rule: walk to a position to get closed to it and stand on it-----------------------------------------
+
+    //----------------------------Begin Rule: walk closed a position to get closed to it, but not to stand on it-----------------------------------------
+
+    // precondition 1:There exists a path from the agent to a position closed to the target postion
+    ParamValue nearby_pos = vector_var[0];
+    ParamValue target_pos = vector_var[2];
+
+    vector<ParamValue> existPathStateOwnerList7;
+    existPathStateOwnerList7.push_back(var_avatar);
+    existPathStateOwnerList7.push_back(nearby_pos);
+    State* existPathState7 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList7, true, &Inquery::inqueryExistPath);
+
+    // precondition 2: nearby_pos is adjacent to target_pos
+    vector<ParamValue> adjacentStateOwnerList0;
+    adjacentStateOwnerList0.push_back(target_pos);
+    adjacentStateOwnerList0.push_back(nearby_pos);
+    State* adjacentState0 = new State("is_adjacent",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", adjacentStateOwnerList0, true, &Inquery::inqueryIsAdjacent);
+
+    // action: walk to the nearby_pos
+    PetAction* walkAction0 = new PetAction(ActionType::WALK());
+    walkAction0->addParameter(ActionParameter("target",
+                                            ActionParamType::VECTOR(),
+                                            nearby_pos));
+
+    // effect1: get closed to the position
+    vector<ParamValue> closedStateOwnerList7;
+    closedStateOwnerList7.push_back(var_avatar);
+    closedStateOwnerList7.push_back(target_pos);
+    State* closedState7 = new State("Distance",ActionParamType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList7, true, &Inquery::inqueryDistance);
+    Effect* getClosedEffect7 = new Effect(closedState7, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
+
+    // effect2: position changed
+    vector<ParamValue> atLocationStateOwnerList7;
+    atLocationStateOwnerList7.push_back(var_avatar);
+    State* atLocationState7 = new State("AtLocation",ActionParamType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList7, true, &Inquery::inqueryAtLocation);
+    Effect* changedLocationEffect7 = new Effect(atLocationState7, OP_ASSIGN, nearby_pos);
+
+    // rule:   Move_to an object to get closed to it
+    Rule* walkclosedRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
+    walkclosedRule->addPrecondition(existPathState7);
+    walkclosedRule->addPrecondition(adjacentState0);
+
+    walkclosedRule->addEffect(EffectPair(0.9f,getClosedEffect7));
+    walkclosedRule->addEffect(EffectPair(0.9f,changedLocationEffect7));
+
+    vector<ParamValue> closedStateOwnerList8;
+    closedStateOwnerList8.push_back(var_avatar);
+    closedStateOwnerList8.push_back(nearby_pos);
+    State* closedState8 = new State("Distance",ActionParamType::FLOAT(),STATE_EQUAL_TO ,float_dis, closedStateOwnerList8, true, &Inquery::inqueryDistance);
+
+    walkclosedRule->addCostHeuristic(CostHeuristic(closedState8, 0.01f));
+
+    BestNumericVariableInqueryStruct bs2;
+    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryStandableNearbyAccessablePosition;
+    bs2.goalState = closedState7;
+    walkclosedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(nearby_pos), bs2));
+
+    this->AllRules.push_back(walkclosedRule);
+    //----------------------------End Rule: walk to a position to get closed to it, but not stand on it-----------------------------------------
 
     //----------------------------Begin Rule: build a block in a position to make it possible to stand on it-----------------------------------------
     // define variables:
-    StateValue var_pos_on = vector_var[1];
-    StateValue var_is_standable = bool_var[0];
+    ParamValue var_pos_on = vector_var[1];
+    ParamValue var_is_standable = bool_var[0];
 
     // precondition 1: This pos should be empty, if it already has a block in it, you cannot build another block in it
-    vector<StateValue> solidStateOwnerList;
+    vector<ParamValue> solidStateOwnerList;
     solidStateOwnerList.push_back(var_pos);
-    State* solidState = new State("is_solid",StateValuleType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList, true, &Inquery::inqueryIsSolid);
+    State* solidState = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList, true, &Inquery::inqueryIsSolid);
 
     // precondition 2: The agent should be closed enough to the position to build the block ( < 2.0)
-    vector<StateValue> closedStateOwnerList4;
+    vector<ParamValue> closedStateOwnerList4;
     closedStateOwnerList4.push_back(varAvatar);
     closedStateOwnerList4.push_back(var_pos);
-    State* closedState4 = new State("Distance",StateValuleType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedStateOwnerList4, true, &Inquery::inqueryDistance);
+    State* closedState4 = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedStateOwnerList4, true, &Inquery::inqueryDistance);
 
     // precondition 3: The agent should not stand on the position to build the block
-    vector<StateValue> atLocationStateOwnerList3;
+    vector<ParamValue> atLocationStateOwnerList3;
     atLocationStateOwnerList3.push_back(varAvatar);
-    State* atLocationState3 = new State("AtLocation",StateValuleType::VECTOR(),STATE_NOT_EQUAL_TO, var_pos, atLocationStateOwnerList3, true, &Inquery::inqueryAtLocation);
+    State* atLocationState3 = new State("AtLocation",ActionParamType::VECTOR(),STATE_NOT_EQUAL_TO, var_pos, atLocationStateOwnerList3, true, &Inquery::inqueryAtLocation);
 
     // precondition 4: The position to bulid a block should be just on the desired position to stand on
-    vector<StateValue> IsBelowStateOwnerList;
+    vector<ParamValue> IsBelowStateOwnerList;
     IsBelowStateOwnerList.push_back(var_pos);
     IsBelowStateOwnerList.push_back(var_pos_on);
-    State* IsBelowState = new State("is_below",StateValuleType::BOOLEAN(),STATE_EQUAL_TO, "true",
+    State* IsBelowState = new State("is_below",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "true",
                                             IsBelowStateOwnerList, true, &Inquery::inqueryIsBelow);
-    vector<StateValue> IsTouchingStateOwnerList;
+    vector<ParamValue> IsTouchingStateOwnerList;
     IsTouchingStateOwnerList.push_back(var_pos);
     IsTouchingStateOwnerList.push_back(var_pos_on);
-    State* IsTouchingState = new State("is_touching",StateValuleType::BOOLEAN(),STATE_EQUAL_TO, "true",
+    State* IsTouchingState = new State("is_touching",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "true",
                                             IsTouchingStateOwnerList, true, &Inquery::inqueryIsTouching);
 
     // action: build an block at an desired position
@@ -1383,9 +2364,9 @@ void OCPlanner::loadTestRulesFromCodes()
                                             ActionParamType::STRING(),
                                             "stone"));
     // effect1: the position on it is possible to become standable (the agent can stand on it)
-    vector<StateValue> standableStateOwnerList;
+    vector<ParamValue> standableStateOwnerList;
     standableStateOwnerList.push_back(var_pos_on);
-    State* standableState = new State("is_standable",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , var_is_standable, standableStateOwnerList, true, &Inquery::inqueryIsStandable);
+    State* standableState = new State("is_standable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , var_is_standable, standableStateOwnerList, true, &Inquery::inqueryIsStandable);
     Effect* becomeStandableEffect2 = new Effect(standableState, OP_ASSIGN, "true");
 
     // effect2: the position to build this block become solid
@@ -1406,28 +2387,30 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------End Rule: build a block in a position to make it possible to stand on it-----------------------------------------
 
+
+
     //----------------------------Begin Rule: if a position is standable and adjacent(neighbour) then there is possible existing a path from here to this adjacent postion------------------
     // define variables:
-    StateValue var_pos_from = vector_var[0];
-    StateValue var_pos_to = vector_var[1];
-    StateValue var_exist_path = bool_var[0];
+    ParamValue var_pos_from = vector_var[0];
+    ParamValue var_pos_to = vector_var[1];
+    ParamValue var_exist_path = bool_var[0];
 
     // precondition 1: this position is standable
-    vector<StateValue> standableStateOwnerList2;
+    vector<ParamValue> standableStateOwnerList2;
     standableStateOwnerList2.push_back(var_pos_to);
-    State* standableState2 = new State("is_standable",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , "true", standableStateOwnerList2, true, &Inquery::inqueryIsStandable);
+    State* standableState2 = new State("is_standable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", standableStateOwnerList2, true, &Inquery::inqueryIsStandable);
 
     // precondition 2: this position is adjacent to
-    vector<StateValue> adjacentStateOwnerList;
+    vector<ParamValue> adjacentStateOwnerList;
     adjacentStateOwnerList.push_back(var_pos_to);
     adjacentStateOwnerList.push_back(var_pos_from);
-    State* adjacentState = new State("is_adjacent",StateValuleType::BOOLEAN(),STATE_EQUAL_TO , "true", adjacentStateOwnerList, true, &Inquery::inqueryIsAdjacent);
+    State* adjacentState = new State("is_adjacent",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", adjacentStateOwnerList, true, &Inquery::inqueryIsAdjacent);
 
     // effect: it's possible to access from var_pos_from to var_pos_to
-    vector<StateValue> existPathStateOwnerList3;
+    vector<ParamValue> existPathStateOwnerList3;
      existPathStateOwnerList3.push_back(var_pos_from);
      existPathStateOwnerList3.push_back(var_pos_to);
-     State* existPathState3 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList3, true, &Inquery::inqueryExistPath);
+     State* existPathState3 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList3, true, &Inquery::inqueryExistPath);
     Effect* becomeExistPathEffect = new Effect(existPathState3, OP_ASSIGN, "true");
 
     // add rule:
@@ -1437,32 +2420,38 @@ void OCPlanner::loadTestRulesFromCodes()
 
     accessAdjacentRule->addEffect(EffectPair(0.7f,becomeExistPathEffect));
 
+    BestNumericVariableInqueryStruct bs0;
+    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs0.goalState = existPathState3;
+    accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_from), bs0));
+
+
     this->AllRules.push_back(accessAdjacentRule);
     //----------------------------End Rule: if a position is standable and adjacent(neighbour) then there is possible existing a path from here to this adjacent postion-----------------------------
 
     //----------------------------Begin Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
     // define variables:
-    StateValue var_pos_1 = vector_var[0];
-    StateValue var_pos_2 = vector_var[1];
-    StateValue var_pos_3 = vector_var[2];
+    ParamValue var_pos_1 = vector_var[0];
+    ParamValue var_pos_2 = vector_var[1];
+    ParamValue var_pos_3 = vector_var[2];
 
     // precondition 1:There exists a path from the pos1 to pos2
-    vector<StateValue> existPathStateOwnerList4;
+    vector<ParamValue> existPathStateOwnerList4;
     existPathStateOwnerList4.push_back(var_pos_1);
     existPathStateOwnerList4.push_back(var_pos_2);
-    State* existPathState4 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList4, true, &Inquery::inqueryExistPath);
+    State* existPathState4 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList4, true, &Inquery::inqueryExistPath);
 
     // precondition 2:There exists a path from the pos2 to pos3
-    vector<StateValue> existPathStateOwnerList5;
+    vector<ParamValue> existPathStateOwnerList5;
     existPathStateOwnerList5.push_back(var_pos_2);
     existPathStateOwnerList5.push_back(var_pos_3);
-    State* existPathState5 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList5, true, &Inquery::inqueryExistPath);
+    State* existPathState5 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList5, true, &Inquery::inqueryExistPath);
 
     // effect: it's possible to access from var_pos_from to var_pos_to
-    vector<StateValue> existPathStateOwnerList6;
+    vector<ParamValue> existPathStateOwnerList6;
     existPathStateOwnerList6.push_back(var_pos_1);
-    existPathStateOwnerList6.push_back(var_pos_2);
-    State* existPathState6 = new State("existPath",StateValuleType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
+    existPathStateOwnerList6.push_back(var_pos_3);
+    State* existPathState6 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
     Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true");
 
     // add rule:
@@ -1470,11 +2459,16 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
     pathTransmitRule->addPrecondition(existPathState5);
 
+    BestNumericVariableInqueryStruct bs;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.goalState = existPathState6;
+    pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_2), bs));
+
     pathTransmitRule->addEffect(EffectPair(1.0f,becomeExistPathEffect2));
 
     this->AllRules.push_back(pathTransmitRule);
 
-    //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---------------------
+    //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
 
 
 }

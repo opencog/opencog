@@ -280,6 +280,8 @@ public:
 			unsigned int actionSeqNum = 1) 
 		throw (opencog::RuntimeException, std::bad_exception); 
 
+    HandleSeq getActionSeqFromPlan(ActionPlanID planId);
+
     /**
      * Sends an Feelings XML message to PVP. Note that not all feelings are
      * sent, only the ones that where updated during last actions selection

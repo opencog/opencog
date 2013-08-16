@@ -209,14 +209,32 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
                                                     )
                                                                      );
 
-    this->registerAgent( PsiActionSelectionAgent::info().id, 
-                         &psiActionSelectionAgentFactory
-                       );
-    psiActionSelectionAgent = static_cast<PsiActionSelectionAgent*>(
-                                  this->createAgent( PsiActionSelectionAgent::info().id,
-                                                     false
-                                                   )
-                                                                   );
+    // OCPlanningAgent and PsiActionSelectionAgent cannot be enabled at the same time
+    if (config().get_bool("OCPLANNING_AGENT_ENABLED"))
+    {
+        this->registerAgent( OCPlanningAgent::info().id,
+                             &ocPlanningAgentAgentFactory
+                           );
+        ocPlanningAgent = static_cast<OCPlanningAgent*>(
+                                      this->createAgent( OCPlanningAgent::info().id,
+                                                         false
+                                                       )
+                                                                       );
+
+        psiActionSelectionAgent = 0;
+    }
+    else
+    {
+        this->registerAgent( PsiActionSelectionAgent::info().id,
+                             &psiActionSelectionAgentFactory
+                           );
+        psiActionSelectionAgent = static_cast<PsiActionSelectionAgent*>(
+                                      this->createAgent( PsiActionSelectionAgent::info().id,
+                                                         false
+                                                       )
+                                                                       );
+        ocPlanningAgent = 0;
+    }
 
     this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
     procedureInterpreterAgent = static_cast<ProcedureInterpreterAgent*>(
@@ -332,7 +350,15 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->startAgent(psiDemandUpdaterAgent);
     }
   
-    if (config().get_bool("PSI_ACTION_SELECTION_ENABLED")) {
+    // OCPlanningAgent and PsiActionSelectionAgent cannot be enabled at the same time
+    if (config().get_bool("OCPLANNING_AGENT_ENABLED"))
+    {
+        this->ocPlanningAgent->setFrequency(
+                    config().get_int( "OCPLANNING_AGENT_CYCLE_PERIOD" ) );
+        this->startAgent(ocPlanningAgent);
+
+    }
+    else if (config().get_bool("PSI_ACTION_SELECTION_ENABLED")) {
         this->psiActionSelectionAgent->setFrequency(
            config().get_int( "PSI_ACTION_SELECTION_CYCLE_PERIOD" ) );
         this->startAgent(psiActionSelectionAgent);
@@ -444,7 +470,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     } // if
 
-    Inquery::init(this,atomSpace);
+    Inquery::init(atomSpace);
 
     // Run demand/ feeling updater agents as soon as possible, then virtual
     // world (say unity) will not wait too much time to get the initial values
@@ -640,7 +666,13 @@ OAC::~OAC()
     delete (procedureInterpreterAgent);
 //    delete (importanceDecayAgent);
     delete (psiModulatorUpdaterAgent);
-    delete (psiActionSelectionAgent);
+
+    if (psiActionSelectionAgent)
+        delete (psiActionSelectionAgent);
+
+    if (ocPlanningAgent)
+        delete (ocPlanningAgent);
+
     delete (psiRelationUpdaterAgent); 
     delete (psiFeelingUpdaterAgent); 
 

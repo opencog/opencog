@@ -39,8 +39,9 @@ namespace opencog
         class Pathfinder3D
         {
         public:
-            static bool AStar3DPathFinder(Octree3DMapManager* mapManager, const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path);
-            static double calculateCostByDistance(const BlockVector& begin,const BlockVector& target,const BlockVector& pos);
+            // return the nearestPos as well, which would possibably useful when it cannot find a path, at least it find the nearest location to the target
+            static bool AStar3DPathFinder(Octree3DMapManager* mapManager, const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path, BlockVector& nearestPos);
+            static double calculateCostByDistance(const BlockVector& begin,const BlockVector& target,const BlockVector& pos,float nearestDis,BlockVector& nearestPos);
             static bool checkNeighbourAccessable(Octree3DMapManager *mapManager, BlockVector& lastPos, int i, int j, int k);
         };
     }
