@@ -68,6 +68,7 @@
 #include "PsiRelationUpdaterAgent.h"
 #include "PsiFeelingUpdaterAgent.h"
 #include "StimulusUpdaterAgent.h"
+#include "OCPlanningAgent.h"
 
 
 #ifdef HAVE_CYTHON
@@ -77,7 +78,7 @@
 class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
 class PsiFeelingUpdaterAgentUTest; 
-class PsiActionSelectionAgentUTest; 
+class PsiActionSelectionAgentUTest;
 
 namespace opencog { namespace oac {
 
@@ -173,6 +174,10 @@ private:
     PsiActionSelectionAgent * psiActionSelectionAgent;
     PsiRelationUpdaterAgent * psiRelationUpdaterAgent; 
     PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
+
+    OCPlanningAgent* ocPlanningAgent;
+
+
 
     StimulusUpdaterAgent * stimulusUpdaterAgent;
 
@@ -352,6 +357,8 @@ public:
     SingletonFactory <PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
     SingletonFactory <PsiRelationUpdaterAgent, Agent> psiRelationUpdaterAgentFactory; 
     SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
+
+    SingletonFactory <OCPlanningAgent, Agent> ocPlanningAgentAgentFactory;
 
     SingletonFactory <StimulusUpdaterAgent, Agent> stimulusUpdaterAgentFactory; 
 
