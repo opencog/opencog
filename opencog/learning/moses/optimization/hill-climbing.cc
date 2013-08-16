@@ -212,22 +212,23 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // log neighborhood distance
         if (logger().isDebugEnabled()) {
             stringstream nbh_dst;
-            nbh_dst << "Evaluate " << number_of_new_instances << " neighbors ";
-            if (xover) {
-                // compute the min and max hamming distances between the
-                // center instance and the crossed-over instances
-                vector<int> dst_seq;
-                transform(deme_inst_from, deme.end_instances(),
-                          back_inserter(dst_seq), [&](const instance& inst) {
-                              return deme.fields().hamming_distance(inst,
-                                                                    center_inst);
-                          });
-                auto pmm = boost::minmax_element(dst_seq.begin(), dst_seq.end());
-                nbh_dst << "from distance " << *pmm.first
-                        << " to " << *pmm.second;
+            nbh_dst << "Evaluate " << number_of_new_instances << " neighbors";
+            if (number_of_new_instances > 0) {
+                if (xover) {
+                    // compute the min and max hamming distances between the
+                    // center instance and the crossed-over instances
+                    auto dst_from_center = [&](const instance& inst) {
+                        return deme.fields().hamming_distance(inst, center_inst);
+                    };
+                    vector<int> dsts;
+                    transform(deme_inst_from, deme.end_instances(),
+                              back_inserter(dsts), dst_from_center);
+                    auto pmm = boost::minmax_element(dsts.begin(), dsts.end());
+                    nbh_dst << " from distance " << *pmm.first
+                            << " to " << *pmm.second;
+                }
+                else nbh_dst << " at distance " << distance;
             }
-            else nbh_dst << "at distance " << distance;
-
             logger().debug(nbh_dst.str());
         }
 
