@@ -66,14 +66,8 @@ State::~State()
 
 State* State::clone()
 {
-    State* cloneState = new State();
-
-    cloneState->stateName = this->stateName;
-    cloneState->stateVariable = new ActionParameter(this->stateName,this->getActionParamType(), this->stateVariable->getValue());
-    cloneState->stateType = this->stateType;
-    cloneState->stateOwnerList = this->stateOwnerList;
-    cloneState->need_inquery = this->need_inquery;
-    cloneState->inqueryStateFun = this->inqueryStateFun;
+    State* cloneState = new State(this->stateName,this->getActionParamType(),this->stateType, this->stateVariable->getValue(),
+                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun );
     return cloneState;
 }
 
@@ -804,8 +798,9 @@ bool Rule::isParameterUnGrounded( ActionParameter& param)
     case STRING_CODE:
     case INT_CODE:
     case FLOAT_CODE:
-    case BOOLEAN_CODE:
+    case BOOLEAN_CODE:  
         return isUnGroundedString(boost::get<string>(param.getValue()));
+
     default:
         return false;
     }
@@ -866,6 +861,7 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
 {
     State* groundedState = s->clone();
+
     vector<ParamValue>::iterator ownerIt;
     ParamGroundedMapInARule::iterator paramMapIt;
 
@@ -879,12 +875,12 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             if (paramMapIt == groundings.end())
                 return 0;
             else
-                groundedState->stateVariable->assignValue(paramMapIt->second);
+                ((ParamValue&)(*ownerIt)) = paramMapIt->second;
         }
     }
 
     // check the state value
-    if (isParameterUnGrounded(*(groundedState->stateVariable)))
+    if (isParameterUnGrounded(*(s->stateVariable)))
     {
         // look for the value of this variable in the parameter map
         paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());

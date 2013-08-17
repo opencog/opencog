@@ -74,6 +74,8 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
         OC_ASSERT(false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
         break;
     }
+
+    valueString = stringRepresentation();
 }
 
 ActionParameter::~ActionParameter()
@@ -325,11 +327,8 @@ std::string ActionParameter::stringRepresentation() const throw (opencog::Runtim
 
     ActionParamTypeCode typeCode = type.getCode();
     switch (typeCode) {
-    case BOOLEAN_CODE: {
-        answer = (atoi((boost::get<std::string>(value)).c_str()) ? "true" : "false");
-        break;
-    }
-    // int and float are stored as string as well
+    // bool,int and float are stored as string as well
+    case BOOLEAN_CODE:
     case INT_CODE:
     case FLOAT_CODE:
     case STRING_CODE: {
