@@ -915,26 +915,45 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
 HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames)
 {
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+    vector<string> allVariables;
 
-    vector<string> _allVariables;
-    for(int i = 0; i < stateIndexes.size() ; ++ i)
+    if (stateIndexes.size() == 1) // only contains one condition
     {
-        int index = stateIndexes[i];
+        int index = stateIndexes[0];
         list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
         for(int x = 0; x < index; ++x)
              ++ it;
 
         UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+        std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
 
-        std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
+        implicationLinkOutgoings.push_back(record.PMLink);
+    }
+    else
+    {
+        // contains mutiple conditions, so add them one by one
+        vector<string> _allVariables;
+        for(int i = 0; i < stateIndexes.size() ; ++ i)
+        {
+            int index = stateIndexes[i];
+            list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+            for(int x = 0; x < index; ++x)
+                 ++ it;
 
-        andLinkOutgoings.push_back(record.PMLink);
+            UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+            std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
+            andLinkOutgoings.push_back(record.PMLink);
+        }
+
+        // remove the repeated elements
+        std::unique_copy(_allVariables.begin(),_allVariables.end(),std::back_inserter(allVariables));
+        Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
+
+        implicationLinkOutgoings.push_back(hAndLink);
+
     }
 
-    // remove the repeated elements
-    vector<string> allVariables;
-    std::unique_copy(_allVariables.begin(),_allVariables.end(),std::back_inserter(allVariables));
-
+    // add variable atoms
     vector<string>::iterator itor = allVariables.begin();
     for(;itor != allVariables.end(); ++ itor)
     {
@@ -943,15 +962,17 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     }
 
     Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
-    Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
 
-    implicationLinkOutgoings.push_back(hAndLink);
     implicationLinkOutgoings.push_back(hVariablesListLink);
+
     Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
+
+    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;
