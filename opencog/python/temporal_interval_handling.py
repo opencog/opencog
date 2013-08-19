@@ -145,3 +145,17 @@ def calculateCenterMass(dist):
 	init_segment = end_segment
 	
       return centroid_t/float(total_area) , centroid_c/float(total_area)
+
+# arbitrary
+NORMALIZE_FACTOR = 0.5
+def normalize(diff):
+    'Takes the scaled difference between (the centers of mass of) two intervals.
+    Uses an (arbitrary) formula to normalize it to a fuzzy truth value between 0 and 1.
+    A higher diff produces a fuzzy TV closer to 1'
+
+    return tanh(NORMALIZE_FACTOR*diff)/2
+
+def reverse_normalize(diff):
+    'Normalizes a diff in the opposite direction. A higher diff produces a fuzzy TV closer to 0.'
+   
+    return 1-normalize(diff)

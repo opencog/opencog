@@ -42,7 +42,7 @@ def	beforeFormula(dist1,dist2):
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   
   #return com_end_1 < com_beg_2
-  return (com_beg_2[0] - com_end_1[0]) / (size_end_1+size_beg_2)
+  return temporal_interval_handling.normalize( (com_beg_2[0] - com_end_1[0]) / (size_end_1+size_beg_2) )
 
 
 def	overlapsFormula(dist1,dist2):
@@ -62,7 +62,7 @@ def	overlapsFormula(dist1,dist2):
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   size_end_2 = temporal_interval_handling.getSize(end_2)
   
-  return min((com_beg_2[0] - com_beg_1[0]) / (size_beg_2 + size_beg_1),(com_end_1[0] - com_beg_2[0]) / (size_end_1 + size_beg_2),(com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1))
+  return temporal_interval_handling.normalize( min((com_beg_2[0] - com_beg_1[0]) / (size_beg_2 + size_beg_1),(com_end_1[0] - com_beg_2[0]) / (size_end_1 + size_beg_2),(com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1)) )
 
 
 def	duringFormula(dist1,dist2):
@@ -82,7 +82,7 @@ def	duringFormula(dist1,dist2):
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   size_end_2 = temporal_interval_handling.getSize(end_2)
   
-  return min((com_beg_1[0] - com_beg_2[0]) / (size_beg_1 + size_beg_2) , (com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1))
+  return temporal_interval_handling.normalize( min((com_beg_1[0] - com_beg_2[0]) / (size_beg_1 + size_beg_2) , (com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1)) )
 
 
 def	meetsFormula(dist1,dist2):
@@ -96,7 +96,7 @@ def	meetsFormula(dist1,dist2):
   size_end_1 = temporal_interval_handling.getSize(end_1)
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   
-  return ((size_end_1 + size_beg_2) - abs(com_end_1[0] - com_beg_2[0] )) / (size_end_1 + size_beg_2)
+  return temporal_interval_handling.normalize( ((size_end_1 + size_beg_2) - abs(com_end_1[0] - com_beg_2[0] )) / (size_end_1 + size_beg_2) )
 
 
 def	startsFormula(dist1,dist2):
@@ -116,7 +116,7 @@ def	startsFormula(dist1,dist2):
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   size_end_2 = temporal_interval_handling.getSize(end_2)
   
-  return min(((size_beg_1 + size_beg_2) - abs(com_beg_1[0] - com_beg_2[0] )) / (size_beg_1 + size_beg_2) , (com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1))
+  return temporal_interval_handling.normalize( min(((size_beg_1 + size_beg_2) - abs(com_beg_1[0] - com_beg_2[0] )) / (size_beg_1 + size_beg_2) , (com_end_2[0] - com_end_1[0]) / (size_end_2 + size_end_1)) )
 
 
 def	finishesFormula(dist1,dist2):
@@ -141,7 +141,7 @@ def	finishesFormula(dist1,dist2):
   print size_end_1
   print size_end_2
   
-  return min(((size_end_1+size_end_2) - abs(com_end_1[0] - com_end_2[0] )) / (size_end_1+size_end_2) , (com_beg_1[0] - com_beg_2[0]) / (size_beg_1+size_beg_2))
+  return temporal_interval_handling.normalize( min(((size_end_1+size_end_2) - abs(com_end_1[0] - com_end_2[0] )) / (size_end_1+size_end_2) , (com_beg_1[0] - com_beg_2[0]) / (size_beg_1+size_beg_2)) )
   
 
 def	equalsFormula(dist1,dist2):
@@ -161,7 +161,7 @@ def	equalsFormula(dist1,dist2):
   size_beg_2 = temporal_interval_handling.getSize(beg_2)
   size_end_2 = temporal_interval_handling.getSize(end_2)
   
-  return min(((size_beg_1+size_beg_2) - abs(com_beg_1[0] - com_beg_2[0] )) / (size_beg_1+size_beg_2) , ((size_end_1+size_end_2) - abs(com_end_1[0] - com_end_2[0] )) / (size_end_1+size_end_2) )
+  return temporal_interval_handling.normalize( min(((size_beg_1+size_beg_2) - abs(com_beg_1[0] - com_beg_2[0] )) / (size_beg_1+size_beg_2) , ((size_end_1+size_end_2) - abs(com_end_1[0] - com_end_2[0] )) / (size_end_1+size_end_2) ) )
 
 
 def	afterFormula(dist1,dist2):
