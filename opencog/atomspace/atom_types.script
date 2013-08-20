@@ -7,6 +7,8 @@
 // compiles, that does not mean that these types are unused!  Be sure to grep
 // for the CamelCase names, to see if they show up elsewhere!
 //
+// Some of them are used by Python PLN code (which also uses the CamelCase names).
+//
 // Special type designating that no atom type has been assigned
 NOTYPE
 
@@ -78,6 +80,32 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 
+// Temporal Links used by Python PLN which are important so there
+
+AT_TIME_LINK <- ORDERED_LINK
+TIME_NODE <- NODE
+
+PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
+TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
+SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
+
+EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
+EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
+
+BEFORE_LINK <- ORDERED_LINK
+OVERLAPS_LINK <- ORDERED_LINK
+DURING_LINK <- ORDERED_LINK
+MEETS_LINK <- ORDERED_LINK
+STARTS_LINK <- ORDERED_LINK
+FINISHES_LINK <- ORDERED_LINK
+EQUALS_LINK <- ORDERED_LINK
+AFTER_LINK <- ORDERED_LINK
+OVERLAPPED_BY_LINK <- ORDERED_LINK
+CONTAINS_LINK <- ORDERED_LINK
+MET_BY_LINK <- ORDERED_LINK
+STARTED_BY_LINK <- ORDERED_LINK
+FINISHED_BY_LINK <- ORDERED_LINK
 
 // ====================================================================
 // XXX its not clear which of these are in current use ... !?
