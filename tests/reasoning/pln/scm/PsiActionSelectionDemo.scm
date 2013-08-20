@@ -13,8 +13,8 @@
 ;#; variables
 ;#(define Vobj (VariableNode "$obj"))
 ;#(define V10000 (VariableNode "$10000"))
-;#(define V1 (FWVariableNode "$1"))
-;#(define V2 (FWVariableNode "$2"))
+;#(define V1 (VariableNode "$1"))
+;#(define V2 (VariableNode "$2"))
 ;#
 ;#; predicates
 ;#(define PPP (PredicateNode "+++"))

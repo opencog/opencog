@@ -2,20 +2,20 @@
 <list>
     <ImplicationLink strength="1.000000" confidence="0.999000">
         <AndLink strength="1.000000" confidence="0.000000">
-            <Element class="FWVariableNode" name="$ZETW1"/>
+            <Element class="VariableNode" name="$ZETW1"/>
         </AndLink>
         <ImplicationLink strength="1.000000" confidence="0.000000">
-            <Element class="FWVariableNode" name="$ZETW2"/>
-            <Element class="FWVariableNode" name="$ZETW1"/>
+            <Element class="VariableNode" name="$ZETW2"/>
+            <Element class="VariableNode" name="$ZETW1"/>
         </ImplicationLink>
     </ImplicationLink>
     <ConceptNode strength="0.000000" confidence="0.000000" name="___PLN___"/>
-    <FWVariableNode strength="1.000000" confidence="0.000000" name="$ZETW1"/>
-    <FWVariableNode strength="1.000000" confidence="0.000000" name="$ZETW2"/>
+    <VariableNode strength="1.000000" confidence="0.000000" name="$ZETW1"/>
+    <VariableNode strength="1.000000" confidence="0.000000" name="$ZETW2"/>
     <tagdescription>
         <tag name="ConceptNode" value="ConceptNode"/>
         <tag name="AndLink" value="AndLink"/>
         <tag name="ImplicationLink" value="ImplicationLink"/>
-        <tag name="FWVariableNode" value="FWVariableNode"/>
+        <tag name="VariableNode" value="VariableNode"/>
     </tagdescription>
 </list>

@@ -51,27 +51,27 @@
             </ListLink>
         </EvaluationLink>
     </ForAllLink>
-    <FWVariableNode strength="1.000000" confidence="0.000000" name="$1"/>
+    <VariableNode strength="1.000000" confidence="0.000000" name="$1"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="actionDone"/>
     <ImplicationLink strength="1.000000" confidence="0.999000">
         <AndLink strength="1.000000" confidence="0.000000">
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="actionTried"/>
                 <ListLink strength="1.000000" confidence="0.000000">
-                    <Element class="FWVariableNode" name="$1"/>
+                    <Element class="VariableNode" name="$1"/>
                 </ListLink>
             </EvaluationLink>
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="can_do"/>
                 <ListLink strength="1.000000" confidence="0.000000">
-                    <Element class="FWVariableNode" name="$1"/>
+                    <Element class="VariableNode" name="$1"/>
                 </ListLink>
             </EvaluationLink>
         </AndLink>
         <EvaluationLink strength="1.000000" confidence="0.000000">
             <Element class="PredicateNode" name="actionDone"/>
             <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="FWVariableNode" name="$1"/>
+                <Element class="VariableNode" name="$1"/>
             </ListLink>
         </EvaluationLink>
     </ImplicationLink>
@@ -94,25 +94,25 @@
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="do"/>
                 <ListLink strength="1.000000" confidence="0.000000">
-                    <Element class="FWVariableNode" name="$1"/>
+                    <Element class="VariableNode" name="$1"/>
                 </ListLink>
             </EvaluationLink>
             <EvaluationLink strength="1.000000" confidence="0.000000">
                 <Element class="PredicateNode" name="can_do"/>
                 <ListLink strength="1.000000" confidence="0.000000">
-                    <Element class="FWVariableNode" name="$1"/>
+                    <Element class="VariableNode" name="$1"/>
                 </ListLink>
             </EvaluationLink>
         </AndLink>
         <EvaluationLink strength="1.000000" confidence="0.000000">
             <Element class="PredicateNode" name="just_done"/>
             <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="FWVariableNode" name="$1"/>
+                <Element class="VariableNode" name="$1"/>
             </ListLink>
         </EvaluationLink>
     </ImplicationLink>
     <SchemaNode strength="1.000000" confidence="0.000000" name="walktowards"/>
-    <FWVariableNode strength="1.000000" confidence="0.000000" name="$2"/>
+    <VariableNode strength="1.000000" confidence="0.000000" name="$2"/>
     <PredicateNode strength="1.000000" confidence="0.000000" name="near"/>
     <ImplicationLink strength="1.000000" confidence="0.999000">
         <AndLink strength="1.000000" confidence="0.000000">
@@ -122,7 +122,7 @@
                     <EvaluationLink strength="1.000000" confidence="0.000000">
                         <Element class="SchemaNode" name="walktowards"/>
                         <ListLink strength="1.000000" confidence="0.000000">
-                            <Element class="FWVariableNode" name="$2"/>
+                            <Element class="VariableNode" name="$2"/>
                         </ListLink>
                     </EvaluationLink>
                 </ListLink>
@@ -131,7 +131,7 @@
         <EvaluationLink strength="1.000000" confidence="0.000000">
             <Element class="PredicateNode" name="near"/>
             <ListLink strength="1.000000" confidence="0.000000">
-                <Element class="FWVariableNode" name="$2"/>
+                <Element class="VariableNode" name="$2"/>
             </ListLink>
         </EvaluationLink>
     </ImplicationLink>
@@ -184,6 +184,6 @@
         <tag name="EvaluationLink" value="EvaluationLink"/>
         <tag name="SchemaNode" value="SchemaNode"/>
         <tag name="PredicateNode" value="PredicateNode"/>
-        <tag name="FWVariableNode" value="FWVariableNode"/>
+        <tag name="VariableNode" value="VariableNode"/>
     </tagdescription>
 </list>
