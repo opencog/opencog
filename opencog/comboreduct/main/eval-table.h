@@ -87,8 +87,10 @@ Out& output_results(Out& out, const evalTableParameters& pa,
 {
     Table eval_table = table;
     eval_table.otable = ot_tr;
-    if (!pa.display_inputs)
+    if (!pa.display_inputs) {
         eval_table.itable = ITable();
+        eval_table.target_pos = 0;
+    }
     if (!pa.force_features_str.empty())
         eval_table.add_features_from_file(pa.input_table_file,
                                           pa.force_features_str);
