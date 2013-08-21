@@ -97,39 +97,63 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
 bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode)
 {
+
+    satstateNode = 0;
+
+    // find this state in temporaryStateNodes
+    if (findStateInTempStates(goalState,satstateNode))
+    {
+        //  check if this state has beed satisfied by the previous state nodes
+        float satisfiedDegree;
+
+        State* vState = satstateNode->state;
+        if (vState->isSatisfied(goalState,satisfiedDegree))
+        {
+            found = true;
+            return true;
+        }
+        else
+        {
+            found = true;
+            return false;
+        }
+    }
+    else
+    {
+        // cannot find this state in temporaryStateNodes
+        found = false;
+        return false;
+    }
+}
+
+//  return if this same state is found in temporaryStateNodes
+// @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
+bool OCPlanner::findStateInTempStates(State& state, StateNode* &stateNode)
+{
     //  check if this state has beed satisfied by the previous state nodes
     list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
-    float satisfiedDegree;
 
     for (;vit != temporaryStateNodes.end(); vit ++)
     {
         // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
         // but the latest one is put in the front, so we can just check the first one we find
         State* vState = ((StateNode*)(*vit))->state;
-        if (vState->isSameState(goalState))
+        if (vState->isSameState(state))
         {
-            found = true;
-            satstateNode = ((StateNode*)(*vit));
+            stateNode = ((StateNode*)(*vit));
 
-             if (vState->isSatisfied(goalState,satisfiedDegree))
-             {
-                 return true;
-             }
-             else
-             {
-                 return false;
-             }
-
+            return true;
         }
 
     }
 
     // cannot find this state in temporaryStateNodes
-    found = false;
-    satstateNode = 0;
-
+    stateNode = 0;
     return false;
+
 }
+
+
 
 int RuleNode::getDepthOfRuleNode(const RuleNode* r)
 {
@@ -2036,8 +2060,18 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
     {
         e = effectIt->second;
         s = e->state;
-        State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
-        ruleNode->orginalGroundedParamValues.push_back(groundedState->getParamValue());
+        StateNode* stateNode;
+        if (findStateInTempStates(*s, stateNode))
+        {
+            ruleNode->orginalGroundedParamValues.push_back(stateNode->state->getParamValue());
+        }
+        else
+        {
+            // Cannot find in Temp States. Inquery it in real time.
+            State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
+            ruleNode->orginalGroundedParamValues.push_back(groundedState->getParamValue());
+        }
+
     }
 }
 

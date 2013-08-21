@@ -330,6 +330,10 @@ protected:
 
      void recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode);
 
+     //  return if this same state is found in temporaryStateNodes
+     // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
+     bool findStateInTempStates(State& state, StateNode* &stateNode);
+
      // @ bool &found: return if this same state is found in temporaryStateNodes
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode);

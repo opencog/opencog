@@ -78,15 +78,13 @@ void State::assignValue(const ParamValue& newValue)
 
 ParamValue State::getParamValue()
 {
+    if (Rule::isParameterUnGrounded(*(this->stateVariable)))
+        return this->stateVariable->getValue();
+
     if (need_inquery)
         return inqueryStateFun(stateOwnerList);
     else
-    {
-        if (Rule::isParameterUnGrounded(*(this->stateVariable)))
-            return (Inquery::getParamValueFromAtomspace(*this));
-        else
-            return this->stateVariable->getValue();
-    }
+        return (Inquery::getParamValueFromAtomspace(*this));
 
 }
 

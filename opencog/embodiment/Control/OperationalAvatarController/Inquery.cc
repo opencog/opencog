@@ -340,7 +340,10 @@ ParamValue Inquery::inqueryExist(const vector<ParamValue>& stateOwnerList)
     // if (! entity)
     //    return "false";
     bool is_exist = spaceMap->containsObject(entity.id);
-    return (opencog::toString(is_exist));
+    if (is_exist)
+        return "true";
+    else
+        return "false";
 }
 
 ParamValue Inquery::inqueryAtLocation(const vector<ParamValue>& stateOwnerList)
