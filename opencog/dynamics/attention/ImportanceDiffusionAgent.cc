@@ -189,8 +189,6 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
         std::vector<Handle> links)
 {
-    //! @warning Doesn't handle multiple Hebbian links between two atoms (the
-    //! weights will be set to the weight of whatever link was last processed.
     std::vector<Handle>::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
@@ -256,7 +254,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     connections(sourceIndex,targetIndex) = val;
                 } else {
                     //gsl_matrix_set(connections,targetIndex,sourceIndex,val);
-                    connections(targetIndex,sourceIndex) = val;
+                    connections(targetIndex,sourceIndex) += val;
                 }
             }
         } else {
@@ -284,7 +282,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                         connections(sourceIndex,targetIndex) = val;
                     } else {
-                        connections(targetIndex,sourceIndex) = val;
+                        connections(targetIndex,sourceIndex) += val;
                     }
                 }
             }

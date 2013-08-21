@@ -162,7 +162,8 @@ private:
     //! Is a normalised value from -1 to 1. 0 == AF
     float diffusionThreshold;
 
-    //! Whether to spread STI across all types of Links and not just HebbianLinks
+    //! Whether to spread STI across all types of Links and not just HebbianLinks.
+    //! If there are multiple links between the same two Atoms, then it will add up their strengths.
     bool allLinksSpread;
 
     //! Spread importance along Hebbian links.
