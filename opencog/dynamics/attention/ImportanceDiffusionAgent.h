@@ -162,6 +162,9 @@ private:
     //! Is a normalised value from -1 to 1. 0 == AF
     float diffusionThreshold;
 
+    //! Whether to spread STI across all types of Links and not just HebbianLinks
+    bool allLinksSpread;
+
     //! Spread importance along Hebbian links.
     //! @todo split into sub functions instead of one giant beast.
     void spreadImportance();

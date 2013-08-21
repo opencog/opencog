@@ -18,7 +18,7 @@ class HebbianMiningAgent(opencog.cogserver.MindAgent):
             for node2 in attentional_focus:
                 if node1 == node2:
                     continue
-                print atomspace.add_edge(types.AsymmetricHebbianLink, [node1, node2], TruthValue(0.5,1))
+                print atomspace.add_edge(types.SymmetricHebbianLink, [node1, node2], TruthValue(0.5,1))
                 #print 'Heb. link between "' + node1.name +'" and "' + node2.name + '" generated'
                 #print '\n'
 

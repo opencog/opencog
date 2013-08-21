@@ -47,6 +47,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent()
         "ECAN_DIFFUSION_THRESHOLD","0.0",
         //! Maximum percentage of STI that is spread from an atom
         "ECAN_MAX_SPREAD_PERCENTAGE","1.0",
+        "ECAN_ALL_LINKS_SPREAD","false",
         "",""
     };
     setParameters(defaultConfig);
@@ -60,6 +61,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent()
     setSpreadDecider(STEP);
     setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
 
+    allLinksSpread = config().get_bool("ECAN_ALL_LINKS_SPREAD");
 }
 
 void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
@@ -342,7 +344,11 @@ void ImportanceDiffusionAgent::spreadImportance()
     logger().debug("Begin diffusive importance spread.");
 
     // Get all HebbianLinks
-    a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    if (allLinksSpread) {
+      a->getHandleSet(out_hi, LINK, true);
+    } else {
+      a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);
 
