@@ -2069,6 +2069,8 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
         {
             // Cannot find in Temp States. Inquery it in real time.
             State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
+
+            // todo: if can ground this state
             ruleNode->orginalGroundedParamValues.push_back(groundedState->getParamValue());
         }
 

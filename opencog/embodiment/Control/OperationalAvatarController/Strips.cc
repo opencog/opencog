@@ -78,7 +78,8 @@ void State::assignValue(const ParamValue& newValue)
 
 ParamValue State::getParamValue()
 {
-    if (Rule::isParameterUnGrounded(*(this->stateVariable)))
+    // if it's not an ungrouned variable , just return its value
+    if (! Rule::isParameterUnGrounded(*(this->stateVariable)))
         return this->stateVariable->getValue();
 
     if (need_inquery)
