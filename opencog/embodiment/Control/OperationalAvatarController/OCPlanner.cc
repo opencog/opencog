@@ -735,10 +735,21 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // So we need to select suitable variables to ground them.
         groundARuleNodeBySelectingNonNumericValues(ruleNode);
 
+        ruleNode->currentBindingsViaSelecting = ruleNode->ParamCandidates.front();
+        ruleNode->ParamCandidates.erase(ruleNode->ParamCandidates.begin());
+
         ruleNode->updateCurrentAllBindings();
 
         // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
         selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
+
+        // out put all the bindings:
+        cout<<"Debug: Variable bindings:"<<std::endl;
+        ParamGroundedMapInARule::iterator curparamit = ruleNode->currentAllBindings.begin();
+        for (; curparamit != ruleNode->currentAllBindings.end(); ++ curparamit)
+        {
+            cout << curparamit->first << "= " << ActionParameter::ParamValueToString(curparamit->second) << std::endl;
+        }
 
         recordOrginalParamValuesAfterGroundARule(ruleNode);
 
@@ -1742,6 +1753,8 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     // and only select variables by pattern matching for the states before
 
     // find the last state in the list ParamCandidates, which needs no real-time inquery state , and not numeric
+
+    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() is finding candidate groups..." << std::endl;
     int number_easy_state = 0;
     list<UngroundedVariablesInAState>::iterator uvIt= ruleNode->curUngroundedVariables.begin();
     for (; uvIt != ruleNode->curUngroundedVariables.end(); ++ uvIt)
@@ -1796,19 +1809,25 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             }
             vector<string> varNames;
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+            int candidateGroupNum = 1;
 
             if (candidateListHandles.size() != 0)
             {
+
                 foreach (Handle listH, candidateListHandles)
                 {
                     HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
                     ParamGroundedMapInARule oneGroupCandidate;
                     int index = 0;
 
+                    cout<<"CandidateGroup "<< candidateGroupNum ++ << std::endl;
+
                     foreach (Handle h, candidateHandlesInOneGroup)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
+
+                        cout<<varNames[index]<< "= " << ActionParameter::ParamValueToString(v) << std::endl;
 
                         // Check if this group of candidates is able to ground some other need_real_time_inquery states
                         // and how many of these need_real_time_inquery state can be satisifed by this group of candidates
@@ -1877,6 +1896,9 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     }
 
     delete indexes;
+
+    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() found candidate group number totally: "<<ruleNode->ParamCandidates.size()<<std::endl;
+
 
     // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
     // we won't ground the numeric states here, because it's too time-consuming,

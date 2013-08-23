@@ -870,7 +870,8 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         if (isParamValueUnGrounded(*ownerIt))
         {
             // look for the value of this variable in the parameter map
-            paramMapIt = groundings.find(ActionParameter::ParamValueToString((ParamValue)(*ownerIt)));
+            string varName = ActionParameter::ParamValueToString((ParamValue)(*ownerIt));
+            paramMapIt = groundings.find(varName);
             if (paramMapIt == groundings.end())
                 return 0;
             else
