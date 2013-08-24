@@ -254,7 +254,7 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
 
     case STATE_GREATER_THAN:
 
-        float ori,cur;
+        float ori,cur=0.0f;
 
         if (stateType  == STATE_FUZZY_WITHIN)
             cur = fuzzyFloat.bound_low ;
@@ -451,7 +451,7 @@ float State::calculateNumbericsatisfiedDegree(float goal, float current, float o
 
 float State::calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, float current, float origin)
 {
-    float disCurToGoal,disOriToGoal;
+    float disCurToGoal=0.0f,disOriToGoal=0.0f;
 
     // Make sure that both current and origin value are not inside the goal boundaries
     OC_ASSERT((!goal.isInsideMe(current)) && (!goal.isInsideMe(origin)),
