@@ -645,7 +645,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                             willBeAffecteds.push_back(oneAffectRecord);
 
-                            if (oneAffectRecord.size() < affectLeastStateNum)
+                            if (oneAffectRecord.size() < (std::size_t)affectLeastStateNum)
                             {
                                 index = i;
                                 affectLeastStateNum = oneAffectRecord.size();
@@ -1141,7 +1141,9 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer:
             iSpaceMap->addSolidUnitBlock(buildPos,iBlockH);
             break;
         }
-
+        default:
+            // TODO: TNick: is this the right way of handling other codes?
+            break;
     }
 
 }
@@ -1205,6 +1207,9 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
             iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
             break;
         }
+        default:
+            // TODO: TNick: is this the right way of handling other codes?
+            break;
     }
 }
 
@@ -1306,7 +1311,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
     }
 
     if (effectIt == toBeUnifiedRule->effectList.end())
-        return false;
+        return 0;
 
     // check if all the stateOwner parameters grounded
     vector<ParamValue>::iterator f_ownerIt = forwardState->stateOwnerList.begin(); // state owner list in forward state
@@ -1858,6 +1863,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     // we won't ground the numeric states here, because it's too time-consuming,
     // we won't give all the possible combinations of numeric values and non-numeric values for candidates
 
+	return true;
 }
 
 // this should be called only after the currentAllBindings has been chosen

@@ -628,7 +628,7 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
 
     TruthValuePtr res1 = TV[0];
     TruthValuePtr res2 = TV[1];
-    //auto_ptr<const TruthValue> ptr1, ptr2;
+    //unique_ptr<const TruthValue> ptr1, ptr2;
 
     if (N > 2) {
 //  TVType* next[2];
@@ -643,12 +643,12 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
 
         if (N1 == 1) { //Either (>1, >1) or (1, >1).
             res2 = TruthValuePtr(simpleCompute(TV2, U));
-            //ptr2 = auto_ptr<const TruthValue>(res2);
+            //ptr2 = unique_ptr<const TruthValue>(res2);
         } else {
             res1 = TruthValuePtr(simpleCompute(TV1, U));
             res2 = TruthValuePtr(simpleCompute(TV2, U));
-            //ptr1 = auto_ptr<const TruthValue>(res1);
-            //ptr2 = auto_ptr<const TruthValue>(res2);
+            //ptr1 = unique_ptr<const TruthValue>(res1);
+            //ptr2 = unique_ptr<const TruthValue>(res2);
         }
     }
 

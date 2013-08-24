@@ -166,7 +166,7 @@ const std::string& ClassServer::getTypeName(Type type)
 
 ClassServer& opencog::classserver(ClassServerFactory* factory)
 {
-    static std::auto_ptr<ClassServer> instance((*factory)());
+    static std::unique_ptr<ClassServer> instance((*factory)());
     return *instance;
 }
 

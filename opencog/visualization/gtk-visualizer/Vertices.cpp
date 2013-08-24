@@ -31,13 +31,13 @@ Vertices::Vertices()
 
 Vertices::~Vertices()
 {
-    for (int i = 0; i < vertices.size(); i++)
+    for (std::size_t i = 0; i < vertices.size(); i++)
         delete vertices[i];
 }
 
 Vertex* Vertices::FindVertexByUUID(UUID uuid)
 {
-    for (int i = 0; i < vertices.size(); i++)
+    for (std::size_t i = 0; i < vertices.size(); i++)
         if(vertices[i]->uuid==uuid)
             return vertices[i];
     return NULL;
@@ -45,7 +45,7 @@ Vertex* Vertices::FindVertexByUUID(UUID uuid)
 
 void Vertices::Remove(Vertex* vertex)
 {
-    for (int i = 0; i < vertices.size(); i++)
+    for (std::size_t i = 0; i < vertices.size(); i++)
         if(vertices[i]==vertex)
         {
             vertices.erase(vertices.begin()+i);

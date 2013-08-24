@@ -121,7 +121,7 @@ void AtomSpaceInterface::GetConnectedAtoms(Vertex* vertex, NodeFilter* nodeFilte
 	bool dummy;
 	RetrieveVerticesFromCogServer(query, connectedVertices,dummy);
 
-    int v = 0;
+    std::size_t v = 0;
     while(v < connectedVertices.size())
     {
         Vertex* connectedVertex = connectedVertices[v];
@@ -142,7 +142,7 @@ void AtomSpaceInterface::GetConnectedAtoms(Vertex* vertex, NodeFilter* nodeFilte
         }
     }
 
-    if(!vertex->isEllipsisClicked && vertex->connectedHandles.size()>maxNumberOfConnectedVertices)
+    if(!vertex->isEllipsisClicked && vertex->connectedHandles.size()>(std::size_t)maxNumberOfConnectedVertices)
     {
     	Vertex *ellipsis = new Vertex();
     	ellipsis->isEllipsis=true;
@@ -172,7 +172,7 @@ void AtomSpaceInterface::RetrieveVerticesFromCogServer(string query,vector<Verte
 	stringstream ssList(mapResult["result"]);
 	vector < string > vectorResults;
 	ParseList(ssList, vectorResults);
-	for (int i = 0; i < vectorResults.size(); i++)
+	for (std::size_t i = 0; i < vectorResults.size(); i++)
 	{
 		stringstream ssRecord(vectorResults[i]);
 		map < string, string > mapRecord;
@@ -245,7 +245,7 @@ void AtomSpaceInterface::RetrieveVerticesFromCogServer(string query,vector<Verte
 		foundVertices.push_back(vertex);
 	}
 
-	isFinished=(lexical_cast<int>(mapResult["skipped"])+vectorResults.size()>=lexical_cast<int>(mapResult["total"]));
+	isFinished=(lexical_cast<int>(mapResult["skipped"])+vectorResults.size()>=(std::size_t)lexical_cast<int>(mapResult["total"]));
 }
 
 void AtomSpaceInterface::UpdateAtom(UUID uuid, short lti, short sti, string truthValue)

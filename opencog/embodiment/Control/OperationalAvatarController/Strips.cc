@@ -156,6 +156,8 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
     // So their will be a big number of combinations, currently only finish some common combinations.
     // TODO: finish all the combinations
 
+    float ori,cur=0.0f;
+
     switch (goal.stateType)
     {
     case STATE_EQUAL_TO:
@@ -253,8 +255,6 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
         return false;
 
     case STATE_GREATER_THAN:
-
-        float ori,cur=0.0f;
 
         if (stateType  == STATE_FUZZY_WITHIN)
             cur = fuzzyFloat.bound_low ;

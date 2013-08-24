@@ -45,7 +45,7 @@ using std::string;
 using std::map;
 using std::set;
 using std::vector;
-using std::auto_ptr;
+using std::unique_ptr;
 using std::cout;
 using std::endl;
 
@@ -324,55 +324,55 @@ bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
 
 //Ok, I got too excited with these conv
 
-void convertTo(const VertexVector& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexVector& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args->size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>((*args)[i]);
 }
 
-void convertTo(const VertexSeq& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexSeq& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>(args[i]);
 }
 
-void convertTo(const vector<BoundVertex>& args, auto_ptr<Handle>& ret)
+void convertTo(const vector<BoundVertex>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>(args[i].value);
 }
 
-void convertTo(const set<BoundVertex>& args, auto_ptr<Handle>& ret)
+void convertTo(const set<BoundVertex>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     int i = 0;
     for (set<BoundVertex>::const_iterator k = args.begin(); k != args.end(); k++, i++)
         ret.get()[i] = boost::get<Handle>(k->value);
 }
 
-void convertTo(const VertexSet& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexSet& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args->size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     int i = 0;
     for (set<Vertex>::iterator k = args->begin(); k != args->end(); k++, i++)
         ret.get()[i] = boost::get<Handle>(*k);
 }
 
-void convertTo(const vector<Handle>& args, auto_ptr<Handle>& ret)
+void convertTo(const vector<Handle>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     for (int i = 0; i < N; i++)
         ret.get()[i] = args[i];
 }

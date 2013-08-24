@@ -52,7 +52,7 @@ void AtomTypes::LoadAtomTypeScript()
     getline (typesfile,line);
     while ( typesfile.good() )
     {
-        int comment = line.find_first_of("/");
+        std::size_t comment = line.find_first_of("/");
         if (comment != string::npos)
             line = line.substr(0, comment);
 
@@ -61,7 +61,7 @@ void AtomTypes::LoadAtomTypeScript()
         if (line.length()>0)
         {
         	string specialTypeName="";
-            int quote = line.find("\"");
+            std::size_t quote = line.find("\"");
             if (quote != string::npos)
             {
             	int quote2 = line.find("\"", quote+1);
@@ -71,7 +71,7 @@ void AtomTypes::LoadAtomTypeScript()
 
     		Trim(line);
 
-    		int arrow = line.find(" <- ");
+    		std::size_t arrow = line.find(" <- ");
             string typeName;
             string parentTypes;
             if (arrow == string::npos)
@@ -162,11 +162,11 @@ void AtomTypes::AddSubTypes(string parentTypes)
     {
         vector<string> parentTypeNames;
         split(parentTypes, ',', parentTypeNames);
-        for (int p = 0; p < parentTypeNames.size(); p++)
+        for (std::size_t p = 0; p < parentTypeNames.size(); p++)
         {
             string parentTypeName = MakeMixedCase(parentTypeNames[p]);
             int parentTypeNumber = ConvertTypeNameToNumber(parentTypeName);
-            for (int t = 0; t < atomTypeSubTypes.size(); t++)
+            for (std::size_t t = 0; t < atomTypeSubTypes.size(); t++)
                 if(atomTypeSubTypes[t]->count(parentTypeNumber)>0)
                     atomTypeSubTypes[t]->insert(typeNumber);
         }
@@ -175,10 +175,10 @@ void AtomTypes::AddSubTypes(string parentTypes)
 
 int AtomTypes::ConvertTypeNameToNumber(string typeName)
 {
-    for (int i = 0; i < atomTypeNames.size(); i++)
+    for (std::size_t i = 0; i < atomTypeNames.size(); i++)
     {
         if (atomTypeNames[i].compare(typeName) == 0)
-            return i;
+            return (int)i;
     }
 
     throw runtime_error("Invalid atomtype " + typeName + ". Make sure the atom_types.script file in the application directory is up to date.");
@@ -187,7 +187,7 @@ int AtomTypes::ConvertTypeNameToNumber(string typeName)
 string AtomTypes::MakeMixedCase(string typeName)
 {
     string s = typeName.substr(0, 1);
-    for (int i = 1; i < typeName.length(); i++)
+    for (std::size_t i = 1; i < typeName.length(); i++)
     {
         if (typeName[i] == '_')
         {
@@ -203,24 +203,24 @@ string AtomTypes::MakeMixedCase(string typeName)
 int AtomTypes::ConvertNodeTypeToAtomType(int nodeType)
 {
     string type = nodeTypeNames[nodeType];
-    for (int i = 0; i < atomTypeNames.size(); i++)
+    for (std::size_t i = 0; i < atomTypeNames.size(); i++)
         if (atomTypeNames[i].compare(type) == 0)
-            return i;
+            return (int)i;
     return -1;
 }
 
 int AtomTypes::ConvertLinkTypeToAtomType(int linkType)
 {
     string type = linkTypeNames[linkType];
-    for (int i = 0; i < atomTypeNames.size(); i++)
+    for (std::size_t i = 0; i < atomTypeNames.size(); i++)
         if (atomTypeNames[i].compare(type) == 0)
-            return i;
+            return (int)i;
     return -1;
 }
 
 bool AtomTypes::CheckAtomType(Vertex* vertex, int type, bool includeSubtypes)
 {
-    if (vertex->type < 0 || vertex->type >= atomTypeNames.size())
+    if (vertex->type < 0 || (std::size_t)vertex->type >= atomTypeNames.size())
     {
         throw runtime_error("Invalid atomtype. Make sure the atom_types.script file in the application directory is up to date.");
     }
@@ -233,7 +233,7 @@ bool AtomTypes::CheckAtomType(Vertex* vertex, int type, bool includeSubtypes)
 
 bool AtomTypes::IsNode(string &typeName)
 {
-	for(int i=0;i<nodeTypeNames.size();i++)
+	for(std::size_t i=0;i<nodeTypeNames.size();i++)
 		if(nodeTypeNames[i]==typeName)
 			return true;
 

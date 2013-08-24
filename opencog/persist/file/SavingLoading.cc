@@ -719,10 +719,10 @@ void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (Ru
         rc = fread(&idSize, sizeof(int), 1, f);
         if (rc != 1) { logger().error("Bad iidSize read, truncated. "); return; }
 
-        std::auto_ptr<char> id(new char[idSize]);
+        std::unique_ptr<char> id(new char[idSize]);
 
         rc = fread(id.get(), sizeof(char), idSize, f);
-        if (rc != idSize) { logger().error("Bad id read, truncated. "); return; }
+        if (rc != (size_t)idSize) { logger().error("Bad id read, truncated. "); return; }
 
         logger().debug("Loading repository: %s\n", id.get());
 

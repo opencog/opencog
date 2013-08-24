@@ -114,7 +114,7 @@ void PythonEval::init(void)
     pyLocal = PyDict_New();
 
     // Getting sys.path and keeping the refrence, used in this->addSysPath()
-    sys_path = PySys_GetObject("path");
+    sys_path = PySys_GetObject((char*)"path");
 
     // Import pattern_match_functions which contains user defined functions
     this->addModuleFromPath(PROJECT_SOURCE_DIR"/opencog/python/pattern_match_functions");
@@ -290,7 +290,7 @@ std::string PythonEval::apply_script(const std::string& script)
 
 
     PyObject *catcher = PyObject_GetAttrString(this->pyRootModule,"_opencog_output_stream");
-    PyObject *output = PyObject_CallMethod(catcher, "getvalue", NULL);
+    PyObject *output = PyObject_CallMethod(catcher, (char*)"getvalue", NULL);
 
 //    pError = PyErr_Occurred();
 

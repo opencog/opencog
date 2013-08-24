@@ -118,7 +118,7 @@ static void ShowError(const gchar *errorMessage)
 {
 	GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, errorMessage);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", errorMessage);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -134,7 +134,7 @@ static void ShowWarning (const gchar *message)
 {
     GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE, message);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE, "%s", message);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -148,7 +148,7 @@ static void ShowInfo (const gchar *message)
 
     GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, message);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "%s", message);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -263,7 +263,7 @@ void StartNewGraph(vector<Vertex*> vertices)
 	graph = Graph(&atomSpaceInterface);
 	graph.AddVertices(vertices);
 
-	for(int i=0;i<vertices.size();i++)
+	for(std::size_t i=0;i<vertices.size();i++)
 		vertices[i]->positionLocked = TRUE;
 
 	if(vertices.size()==1)
@@ -441,13 +441,13 @@ gboolean drawingArea_draw (GtkWidget *widget, cairo_t *cr, gpointer data)
 		double xFactor = (double)width / (double)graph.positions.maxCol;
 		double yFactor = (double)height / (double)graph.positions.maxRow;
 
-		for (int i = 0; i < graph.vertices.vertices.size(); i++)
+		for (std::size_t i = 0; i < graph.vertices.vertices.size(); i++)
 		{
 			Vertex* vertex = graph.vertices.vertices[i];
 			double x = (double)vertex->col * xFactor;
 			double y = (double)vertex->row * yFactor;
 
-			for (int j = 0; j < vertex->connectedVertices.size(); j++)
+			for (std::size_t j = 0; j < vertex->connectedVertices.size(); j++)
 			{
 				Vertex* connectedVertex = vertex->connectedVertices[j];
 				if (vertex->uuid <= connectedVertex->uuid) //avoid drawing edges twice
@@ -463,7 +463,7 @@ gboolean drawingArea_draw (GtkWidget *widget, cairo_t *cr, gpointer data)
 			}
 		}
 
-		for (int i = 0; i < graph.vertices.vertices.size(); i++)
+		for (std::size_t i = 0; i < graph.vertices.vertices.size(); i++)
 		{
 			Vertex* vertex = graph.vertices.vertices[i];
 			double x = (double)vertex->col * xFactor;
@@ -864,17 +864,17 @@ void BuildWindow()
 void FillComboboxes()
 {
 	atomTypes.LoadAtomTypeScript();
-	for (int i = 0; i < atomTypes.atomTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.atomTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxAtomType), "", atomTypes.atomTypeNames[i].c_str());
 	}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxAtomType), 1);
-	for (int i = 0; i < atomTypes.nodeTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.nodeTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxNodeType), "", atomTypes.nodeTypeNames[i].c_str());
 	}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxNodeType), 0);
-	for (int i = 0; i < atomTypes.linkTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.linkTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxLinkType), "", atomTypes.linkTypeNames[i].c_str());
 	}

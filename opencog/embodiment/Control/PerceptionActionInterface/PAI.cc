@@ -469,6 +469,12 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
             break;
         case ENTITY_CODE:
             break;
+        default:
+			// TODO: TNick: is this the right way of handling other values? 
+			// FUZZY_INTERVAL_INT_CODE
+			// FUZZY_INTERVAL_FLOAT_CODE
+			// NUMBER_OF_ACTION_PARAM_TYPES
+			break;
         }
 
         singleActionElement->appendChild(paraElement);
