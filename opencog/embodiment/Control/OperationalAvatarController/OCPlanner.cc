@@ -23,6 +23,7 @@
 
 #include "OCPlanner.h"
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/macros.h>
 #include "Inquery.h"
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
@@ -1941,7 +1942,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
             return false; // cannot find a unrecursiveRule to borrow from
 
         // ground this unrecursiveRule by the effectStateNode
-        Effect* e = rule->effectList.begin()->second;
+        /* Effect* e = */ rule->effectList.begin()->second;
 
         // ToBeImproved: currently only apply the borrowed rule in the first precondition of recursiveRule
         Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList.front());

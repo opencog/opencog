@@ -36,6 +36,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/macros.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -158,7 +159,8 @@ void PLNModule::init()
 
     // Initialise ruleprovider (because it needs to monitor atom add/remove)
     RuleProvider& rp = referenceRuleProvider();
-
+	OC_UNUSED(rp);
+	
 #ifdef HAVE_GUILE
     // Define a scheme wrapper -- the scheme function pln-bc will
     // call the pln_bc method.
@@ -382,7 +384,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
     std::stringstream ss;
 
     try {
-        int a1T, a2T, bT, tempi=0;
+        int a1T, a2T, bT;
         string a10, a11, a20, a21, b1, b2;
         vtree avt1, avt2, bvt;
         Rule::MPs rule_args;
@@ -391,8 +393,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         std::string temps;
         long h=0, h2=0;
         int j;
-        int test_i=0;
-        int s_i=0;
         bool axioms_ok;
         boost::shared_ptr<set<pHandle> > ts;
         Vertex v;

@@ -27,6 +27,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/macros.h>
 
 #include "PLN.h"
 
@@ -1198,6 +1199,7 @@ pHandle _v2h(const Vertex& v) {
 
 bool equal_ignoreVarNameDifferences(pHandle l, pHandle r) {
     AtomSpaceWrapper* asw = GET_ASW;
+    OC_UNUSED(asw);
 
     //! @todo implement it here. This is just to ensure consistency with the existing implementation
     //! (by using it).
@@ -1966,6 +1968,7 @@ meta ForceRootLinkVirtual(meta _target)
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
 
     Type t = asw->getType(*ph);
+    OC_UNUSED(t);
     if (ph && !asw->isType(*ph) && asw->getType(*ph) != FW_VARIABLE_NODE) {
         cprintf(2, "ForceVirtual: [%d] (exists).\n", *ph);
 

@@ -23,11 +23,13 @@
  */
 
 #include "AtomTypes.h"
+#include <opencog/util/macros.h>
 
 AtomTypes::AtomTypes()
 {
     char buffer[500];
-    readlink("/proc/self/exe", buffer, 500);
+    ssize_t i = readlink("/proc/self/exe", buffer, 500);
+    OC_UNUSED(i);
     string path = buffer;
     size_t positionLastSlash = path.find_last_of('/');
 

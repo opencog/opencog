@@ -20,6 +20,7 @@
  */
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/util/macros.h>
 
 #include "PLN.h"
 #include "AtomSpaceWrapper.h"
@@ -249,7 +250,7 @@ LOG(5, "Variable arity argument list processing...");
         }
         
         va_end(vars);
-      } catch(...) { puts("atom() exception."); int d; scanf("%d",&d); }
+      } catch(...) { puts("atom() exception."); int d; int i = scanf("%d",&d); OC_UNUSED(i); }
 
 LOG(5, "Variable arity argument list ok.");
 
