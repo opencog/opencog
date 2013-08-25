@@ -1,3 +1,4 @@
+namespace opencog {
 /**
 
 \page libcogutil cogutil library
@@ -8,7 +9,30 @@ found no place elsewhere. To build it use:
 make cogutil
 @endcode
 
+\section sect_files Files
 
+\subsection ssect_algorithm_h algorithm.h
+Hosts small templated functions like for_each(),
+accumulate2d(), etc. Sets utilities are also present.
+
+\subsection ssect_ansi ansi (.h & .cc)
+ANSI codes for colored output in terminals that support this feature.
+Instead of directly using the codes, make use of the ansi_code()
+function that checks the \b ANSI_ENABLED configuration variable
+and either appends the code or an empty string.
+
+\subsection ssect_basedvar based_variant.h
+Defines a simple variant with base; seems to be used only in defining
+moses::disc_knob type.
+
+\section sect_libs Libraries
+
+\subsection ssect_clustering The C Clustering Library
+This library (version 1.49) was written at the Laboratory of DNA Information Analysis,
+Human Genome Center, Institute of Medical Science, University of Tokyo
+by Michiel Jan Laurens de Hoon.
+
+Methods such as clusterdistance(), getclustercentroids(), kcluster() are provided.
 
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
@@ -23,4 +47,4 @@ ignored by doxygen; used as markers for update-links.py;
 ignored by doxygen; used as markers for update-links.py;
 \endif
 */
-
+} //~namespace opencog

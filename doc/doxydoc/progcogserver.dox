@@ -1,6 +1,10 @@
 /**
-
 \page progcogserver cogserver program
+
+To build it use:
+@code
+make cogserver
+@endcode
 
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
