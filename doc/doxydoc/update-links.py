@@ -122,6 +122,10 @@ def    updateAFile(dox_file_p,fileindex):
         idx_end = dox_cont.find( "\\if MARKER_TREE_END", idx_st )
         if ( idx_end == -1 ): break
         # we reach this point only if all the markers were found
+        # do we really need an update of this file?
+        if ( dox_cont[idx_st:idx_end] == new_cont ):
+            print( "    ... skipped" )
+            return True
         # now change the content
         dox_cont = dox_cont[:idx_st] + new_cont + dox_cont[idx_end:]
         # and save new content

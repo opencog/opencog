@@ -118,7 +118,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD>\ref index "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref license "Next"</TD>
+<TD>\ref bldtargets "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
