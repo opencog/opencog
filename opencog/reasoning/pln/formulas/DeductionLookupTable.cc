@@ -159,7 +159,7 @@ void DeductionLookupTable::readTable()
   
   //FABRICIO
   int column = 0;
-  float A, B, C, AB, BC, result;
+  float A = 0.0f, B = 0.0f, C = 0.0f, AB = 0.0f, BC = 0.0f, result = 0.0f;
 
   //data.push_back( vector <string>() );
   while( in.read( (char*)&ch, 1 ) )

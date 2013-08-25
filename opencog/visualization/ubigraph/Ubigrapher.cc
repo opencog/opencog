@@ -198,7 +198,7 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
 void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, float baseline)
 {
     if (!isConnected()) return;
-    float scaler;
+    float scaler = 0.0f;
     std::ostringstream ost;
     switch (p) {
     case NONE:
@@ -245,7 +245,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
 {
     if (!isConnected()) return;
     unsigned char val[3];
-    float scaler;
+    float scaler = 0.0f;
     int j;
     std::ostringstream ost, ost2;
     unsigned char diff[3];
@@ -258,7 +258,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     ost << "#";
     switch (p) {
     case NONE:
-        scaler=1.0f;
+        scaler = 1.0f;
         break;
     case TV_STRENGTH:
         scaler = space.getMean(h);

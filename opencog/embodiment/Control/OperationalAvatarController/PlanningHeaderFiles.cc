@@ -30,18 +30,18 @@ using namespace opencog::oac;
  bool opencog::oac::isAVariableNumeric(std::string var)
  {
      int pos = var.find("$int_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return true;
 
      pos = var.find("$float_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return true;
 
      pos = var.find('(');
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
      {
          pos = var.find("$entity_var");
-         if (pos == std::string::npos)
+         if ((size_t)pos == std::string::npos)
              return true;
          else
              return false;
@@ -54,26 +54,26 @@ using namespace opencog::oac;
  opencog::pai::ActionParamTypeCode opencog::oac::GetVariableType(std::string var)
  {
      int pos = var.find("$int_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return opencog::pai::INT_CODE;
 
      pos = var.find("$float_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return opencog::pai::FLOAT_CODE;
 
      pos = var.find("$bool_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return opencog::pai::BOOLEAN_CODE;
 
      pos = var.find("$str_var");
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
          return opencog::pai::STRING_CODE;
 
      pos = var.find('(');
-     if (pos != std::string::npos)
+     if ((size_t)pos != std::string::npos)
      {
          pos = var.find("$entity_var");
-         if (pos != std::string::npos)
+         if ((size_t)pos != std::string::npos)
              return opencog::pai::ENTITY_CODE;
          else
              return opencog::pai::VECTOR_CODE;

@@ -35,6 +35,7 @@
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/tree.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/macros.h>
 
 
 //#define DPRINTF printf
@@ -1501,9 +1502,11 @@ pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
                                 const TruthValue& tvn, bool fresh)
 {
     AtomSpace *a = atomspace;
+    OC_UNUSED(a);
     pHandle ret= PHANDLE_UNDEFINED;
 
     bool ok_forall=false;
+    OC_UNUSED(ok_forall);
 
     char buf[500];
     sprintf(buf, "Adding link of type %s (%d)", Type2Name(T), T);
@@ -1911,6 +1914,7 @@ printTree(ret,0,1);
 
         int zz=ImpTarget1.size();
         assert(ImpTarget1.size()==2);
+        OC_UNUSED(zz);
         
         for (pHandleSeq::const_reverse_iterator j = EquiTarget.rbegin(); j != EquiTarget.rend(); j++)
             ImpTarget2.push_back((*j));

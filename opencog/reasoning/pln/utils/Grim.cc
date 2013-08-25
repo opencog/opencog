@@ -22,6 +22,7 @@
 #include "../PLN.h"
 #include "fim.h"
 #include <stdio.h>
+#include <opencog/util/macros.h>
 
 using namespace std;
 using namespace fim;
@@ -147,7 +148,6 @@ bool grim::create_next_pat(PAT src, pat_id* ret)
 
 bool grim::find_next_pat(PAT src, pat_id* ret)
 {
-	PAT next = NULL;
 	pat_id longest = zeropat_index;
 
 	int longest_len=0;

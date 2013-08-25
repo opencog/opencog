@@ -47,7 +47,7 @@ void Graph::AddVertices(vector<Vertex*> newVertices)
 			vertices.vertices.push_back(newVertices[i]);
 			positions.PlaceAt(newVertices[i], row, col);
 			i++;
-			if(i==newVertices.size())
+			if((std::size_t)i==newVertices.size())
 			{
 				row=positions.maxRow;
 				col=positions.maxCol;
@@ -75,7 +75,7 @@ void Graph::CollapseVertex(Vertex* vertex)
 {   //Remove all vertices from the graph that are only connected to
     //the given vertex.
 
-    int l = 0;
+    std::size_t l = 0;
     while (l < vertex->connectedVertices.size())
     {
         Vertex* otherVertex = vertex->connectedVertices[l];
@@ -104,7 +104,7 @@ void Graph::ExpandVertex(Vertex* vertex, int expansionDepth,NodeFilter* nodeFilt
     vector<Vertex*> connectedVertices;
     atomSpaceInterface->GetConnectedAtoms(vertex,nodeFilter,linkFilter,connectedVertices);
 
-    for (int i = 0; i < connectedVertices.size(); i++)
+    for (std::size_t i = 0; i < connectedVertices.size(); i++)
     {
         Vertex* dependentVertex = connectedVertices[i];
 
@@ -174,7 +174,7 @@ bool Graph::OptimizeLayout()
     do
     {
         anyMoves = false;
-        for (int i = 0; i < vertices.vertices.size(); i++)
+        for (std::size_t i = 0; i < vertices.vertices.size(); i++)
         {
             Vertex* vertex = vertices.vertices[i];
             if (!vertex->positionLocked)

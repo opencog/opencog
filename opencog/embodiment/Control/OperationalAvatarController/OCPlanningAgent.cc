@@ -126,8 +126,8 @@ void OCPlanningAgent::init(opencog::CogServer * server)
 
 bool OCPlanningAgent::isMoveAction(string s)
 {
-    int pos1 = s.find("walk");
-    int pos2 = s.find("jump_toward");
+    std::size_t pos1 = s.find("walk");
+    std::size_t pos2 = s.find("jump_toward");
     if ( (pos1 != std::string::npos) || (pos2 != std::string::npos))
         return true;
     else
@@ -171,7 +171,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                     << " [PlanId = " <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
 
             // get next action in this plan
-            if (this->current_actions.size() == this->current_step)
+            if (this->current_actions.size() == (std::size_t)this->current_step)
             {
                 // the current action is already the last action in this plan. so this plan is exectued successfully!
                 std::cout<<std::endl<<"OCPlanningAgent::Action plan is executed successfully! Plan ID = "<< this->currentOCPlanID
@@ -219,7 +219,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
               {
                     // check if current step , its previous step and its next step are all move to location, don't need to print out the message
 
-                    if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
+                    if ( (this->current_step != 1) &&  ((std::size_t)this->current_step != this->current_actions.size()))
                     {
                         string cur_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-1]);
                         string pre_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-2]);

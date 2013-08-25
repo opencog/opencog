@@ -27,6 +27,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/macros.h>
 
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 #include <opencog/embodiment/Control/MessagingSystem/NetworkElement.h>
@@ -152,24 +153,22 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(dump));
     char buffer[1<<16];
-
     bool tc = config().get_bool("TYPE_CHECK_LOADING_PROCEDURES");
 
-
     int size;
-    fscanf(dump, "%d", &size);
+    bool b_read = (fscanf(dump, "%d", &size) > 0);
     for (int i = 0; i < size; i++) {
         // get the name
         int nameLength;
-        fread(&nameLength, sizeof(int), 1, dump);
-        fread(buffer, sizeof(char), nameLength + 1, dump);
+        FREAD_CK(&nameLength, sizeof(int), 1, dump);
+        FREAD_CK(buffer, sizeof(char), nameLength + 1, dump);
         string name(buffer);
         int arity;
-        fread(&arity, sizeof(int), 1, dump);
+        FREAD_CK(&arity, sizeof(int), 1, dump);
         // get the combo_tree
         int treeStrLength;
-        fread(&treeStrLength, sizeof(int), 1, dump);
-        fread(buffer, sizeof(char), treeStrLength + 1, dump);
+        FREAD_CK(&treeStrLength, sizeof(int), 1, dump);
+        FREAD_CK(buffer, sizeof(char), treeStrLength + 1, dump);
         logger().fine("name: %s\ntree: %s\n", name.c_str(), buffer);
         std::stringstream ss(buffer);
         combo_tree tr;
@@ -177,6 +176,7 @@ void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* con
         // add the new entry
         add(ComboProcedure(name, arity, tr));
     }
+    CHECK_FREAD;
     //doing the resolution here allows for mutual recursion amongst functions defined in the input
     instantiate_procedure_calls(true);
     // TODO: if combo_tree contains Handles, they must be replaced by the new ones, according with the passed handleMap
