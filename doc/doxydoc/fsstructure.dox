@@ -1,5 +1,5 @@
 /**
-\page fsstructure Organisation of the package
+\page fsstructure Structure of the package
 
 This page gives some hints about the organisation of the
 package in directories and files.
@@ -7,8 +7,7 @@ package in directories and files.
 \section sect_main Main directory files
 
 <DL>
-<DT><DT></DT>
-<DD></DD>AUTHORS</DT>
+<DT>AUTHORS</DT>
 <DD>lists persons that contributed to the project</DD>
 <DT>CMakeLists.txt</DT>
 <DD>control file for CMake build system</DD>
