@@ -1024,7 +1024,7 @@ HandleSeq Octree3DMapManager::getAllUnitBlockHandlesOfABlock(Block3D& _block)
         return handles;
 }
 
-// a recursive funciton
+// a recursive function
 bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles)
 {
     if (_blockLevel < 1)
@@ -1047,8 +1047,13 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
                 {
                     BlockVector pos(_nearLeftPos.x + newLevel * i,_nearLeftPos.y + newLevel * j, _nearLeftPos.z + newLevel * k);
                     return (getUnitBlockHandlesOfABlock(pos, newLevel, handles));
+					/* TODO: TNick: my guess is that this was intended to be:
+					if ( !getUnitBlockHandlesOfABlock(pos, newLevel, handles)) )
+					    return false;
+					*/
                 }
     }
+    return true;
 }
 
 

@@ -27,6 +27,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/macros.h>
 
 #include <boost/foreach.hpp>
 #include <boost/thread/thread.hpp>
@@ -481,7 +482,7 @@ public:
 #define USE_RULES_BESIDES_DEDUCTION
 ForwardComposerRuleProvider::ForwardComposerRuleProvider(void)
 {
-    AtomSpaceWrapper* asw = GET_ASW;
+    AtomSpaceWrapper* asw = GET_ASW; OC_UNUSED(asw);
 
     float AndEvaluatorPriority = 10.0f;
 
@@ -542,7 +543,7 @@ ForwardComposerRuleProvider::~ForwardComposerRuleProvider(void)
 //// Generator RuleProvider
 ForwardGeneratorRuleProvider::ForwardGeneratorRuleProvider(void)
 {
-	AtomSpaceWrapper* asw = GET_ASW;
+	AtomSpaceWrapper* asw = GET_ASW; OC_UNUSED(asw);
 
     addRule("Lookup", 20.0f);
     addRule("ScholemFunctionProductionRule", 20.0f);
@@ -558,7 +559,7 @@ ForwardGeneratorRuleProvider::~ForwardGeneratorRuleProvider(void)
 
 
 DeductionRuleProvider::DeductionRuleProvider(void) {
-    AtomSpaceWrapper* asw = GET_ASW;
+    AtomSpaceWrapper* asw = GET_ASW; OC_UNUSED(asw);
 
     //  addRule(new ImplicationBreakdownRule(asw), 9.0f);
     addRule("ModusPonensRule", 9.0f);
@@ -578,7 +579,7 @@ DeductionRuleProvider::~DeductionRuleProvider(void) {
 }
 
 EvaluationRuleProvider::EvaluationRuleProvider(void) {
-    AtomSpaceWrapper* asw = GET_ASW;
+    AtomSpaceWrapper* asw = GET_ASW; OC_UNUSED(asw);
 
     float AndEvaluatorPriority = 10.0f;
 

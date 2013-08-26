@@ -25,6 +25,7 @@
 #include <exception>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/files.h>
+#include <opencog/util/macros.h>
 #include "Spawner.h"
 
 using namespace opencog::messaging;
@@ -54,11 +55,13 @@ int main(int argc, char *argv[])
     // the specified ones is thrown in the code
     std::set_unexpected(spawner_unexpected_handler);
 
-    system("./router &");
+	int i;
+    i = system("./router &");
     sleep(5);
-    system("./learningServer &");
-    //system("./pvpSimulator &"); // proxy
-
+    i = system("./learningServer &");
+    //i = system("./pvpSimulator &"); // proxy
+	OC_UNUSED( i );
+	
     try {
 
         server(Spawner::createInstance);

@@ -15,27 +15,27 @@
 FIND_PATH(HYPERTABLE_INCLUDE_DIR Hypertable/Lib/Client.h 
 	/usr/include
 	/usr/local/include 
-	/usr/hypertable/0.9.2.4/include
-	/usr/local/hypertable/0.9.2.4/include
-	/opt/hypertable/0.9.2.4/include
+	/usr/hypertable/current/include
+	/usr/local/hypertable/current/include
+	/opt/hypertable/current/include
 )
 
 # Look for the config file .. this is needed by the C++ code ...
 FIND_FILE(HYPERTABLE_CONFIG_FILE conf/hypertable.cfg
 	/usr/include
 	/usr/local/include 
-	/usr/hypertable/0.9.2.4
-	/usr/local/hypertable/0.9.2.4
-	/opt/hypertable/0.9.2.4
+	/usr/hypertable/current
+	/usr/local/hypertable/current
+	/opt/hypertable/current
 )
 
 # Assume that the base path is the install path
 FIND_PATH(HYPERTABLE_INSTALL_DIR conf/hypertable.cfg
 	/usr/include
 	/usr/local/include 
-	/usr/hypertable/0.9.2.4
-	/usr/local/hypertable/0.9.2.4
-	/opt/hypertable/0.9.2.4
+	/usr/hypertable/current
+	/usr/local/hypertable/current
+	/opt/hypertable/current
 )
 
 
@@ -43,9 +43,9 @@ FIND_PATH(HYPERTABLE_INSTALL_DIR conf/hypertable.cfg
 set(HYPER_LIB_PATHS 
 		/usr/lib 
 		/usr/local/lib
-		/usr/hypertable/0.9.2.4/lib
-		/usr/local/hypertable/0.9.2.4/lib
-		/opt/hypertable/0.9.2.4/lib
+		/usr/hypertable/current/lib
+		/usr/local/hypertable/current/lib
+		/opt/hypertable/current/lib
 )
 
 FIND_LIBRARY(HYPERTABLE_LIBRARY NAMES HyperCommon PATHS ${HYPER_LIB_PATHS})

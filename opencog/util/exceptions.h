@@ -30,10 +30,7 @@
 
 #include <stdarg.h>
 #include <string.h>
-
-#define STRINGIFY(x) #x
-#define TOSTRING(x) STRINGIFY(x)
-#define TRACE_INFO " (" __FILE__ ":" TOSTRING(__LINE__) ")"
+#include "macros.h"
 
 namespace opencog 
 {
