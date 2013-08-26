@@ -29,7 +29,7 @@ using namespace opencog::oac;
 
  bool opencog::oac::isAVariableNumeric(std::string var)
  {
-     int pos = var.find("$int_var");
+     std::size_t pos = var.find("$int_var");
      if ((size_t)pos != std::string::npos)
          return true;
 
@@ -53,7 +53,7 @@ using namespace opencog::oac;
 
  opencog::pai::ActionParamTypeCode opencog::oac::GetVariableType(std::string var)
  {
-     int pos = var.find("$int_var");
+     std::size_t pos = var.find("$int_var");
      if ((size_t)pos != std::string::npos)
          return opencog::pai::INT_CODE;
 
