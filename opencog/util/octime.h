@@ -26,15 +26,14 @@
 namespace opencog
 {
 
-/**
- * Initializes the reference time that will be used for getting current elapsed times
- */
+//! Initializes the reference time that will be used for getting current elapsed times
 void initReferenceTime();
 
+//! Gets the elapsed time (in milliseconds) since the reference time.
 /**
- * Gets the elapsed time (in milliseconds) since the reference time initialized with
- * initReferenceTime() function. The initReferenceTime() function must be called before
- * this function be called by the first time.
+ * Reference time is initialized with initReferenceTime() function.
+ * The initReferenceTime() function must be called before
+ * first invocation of this function.
  */
 unsigned long getElapsedMillis();
 
