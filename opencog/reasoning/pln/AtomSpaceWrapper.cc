@@ -1501,8 +1501,6 @@ NormalizingATW::NormalizingATW(AtomSpace *a): FIMATW(a)
 pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
                                 const TruthValue& tvn, bool fresh)
 {
-    AtomSpace *a = atomspace;
-    OC_UNUSED(a);
     pHandle ret= PHANDLE_UNDEFINED;
 
     bool ok_forall=false;
@@ -1912,9 +1910,7 @@ printTree(ret,0,1);
         for (pHandleSeq::const_iterator i = EquiTarget.begin(); i != EquiTarget.end(); i++)
             ImpTarget1.push_back((*i));
 
-        int zz=ImpTarget1.size();
         assert(ImpTarget1.size()==2);
-        OC_UNUSED(zz);
         
         for (pHandleSeq::const_reverse_iterator j = EquiTarget.rbegin(); j != EquiTarget.rend(); j++)
             ImpTarget2.push_back((*j));
