@@ -475,7 +475,7 @@ bool metapopulation::merge_demes(boost::ptr_vector<deme_t>& demes,
                       "there must be a bug");
             unsigned delta = total_max_pot_cnd - pot_candidates.size();
             deme_begin = deme_end;
-            deme_end = std::distance(deme_begin, demes[i].cend()) <= delta ?
+            deme_end = (unsigned int)std::distance(deme_begin, demes[i].cend()) <= delta ?
                 demes[i].end() : deme_begin + delta;
         }
     }

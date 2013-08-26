@@ -118,7 +118,7 @@ static void ShowError(const gchar *errorMessage)
 {
 	GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, errorMessage);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_ERROR, GTK_BUTTONS_CLOSE, "%s", errorMessage);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -134,7 +134,7 @@ static void ShowWarning (const gchar *message)
 {
     GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE, message);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_WARNING, GTK_BUTTONS_CLOSE, "%s", message);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -148,7 +148,7 @@ static void ShowInfo (const gchar *message)
 
     GtkWidget *dialog = NULL;
 
-    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, message);
+    dialog = gtk_message_dialog_new (GTK_WINDOW (window), GTK_DIALOG_MODAL, GTK_MESSAGE_INFO, GTK_BUTTONS_CLOSE, "%s", message);
     gtk_window_set_title (GTK_WINDOW (dialog), "OpenCog Atomspace Visualizer");
     gtk_window_set_position (GTK_WINDOW (dialog), GTK_WIN_POS_CENTER);
     gtk_dialog_run (GTK_DIALOG (dialog));
@@ -263,7 +263,7 @@ void StartNewGraph(vector<Vertex*> vertices)
 	graph = Graph(&atomSpaceInterface);
 	graph.AddVertices(vertices);
 
-	for(int i=0;i<vertices.size();i++)
+	for(std::size_t i=0;i<vertices.size();i++)
 		vertices[i]->positionLocked = TRUE;
 
 	if(vertices.size()==1)
@@ -441,13 +441,13 @@ gboolean drawingArea_draw (GtkWidget *widget, cairo_t *cr, gpointer data)
 		double xFactor = (double)width / (double)graph.positions.maxCol;
 		double yFactor = (double)height / (double)graph.positions.maxRow;
 
-		for (int i = 0; i < graph.vertices.vertices.size(); i++)
+		for (std::size_t i = 0; i < graph.vertices.vertices.size(); i++)
 		{
 			Vertex* vertex = graph.vertices.vertices[i];
 			double x = (double)vertex->col * xFactor;
 			double y = (double)vertex->row * yFactor;
 
-			for (int j = 0; j < vertex->connectedVertices.size(); j++)
+			for (std::size_t j = 0; j < vertex->connectedVertices.size(); j++)
 			{
 				Vertex* connectedVertex = vertex->connectedVertices[j];
 				if (vertex->uuid <= connectedVertex->uuid) //avoid drawing edges twice
@@ -463,7 +463,7 @@ gboolean drawingArea_draw (GtkWidget *widget, cairo_t *cr, gpointer data)
 			}
 		}
 
-		for (int i = 0; i < graph.vertices.vertices.size(); i++)
+		for (std::size_t i = 0; i < graph.vertices.vertices.size(); i++)
 		{
 			Vertex* vertex = graph.vertices.vertices[i];
 			double x = (double)vertex->col * xFactor;
@@ -694,7 +694,7 @@ void BuildWindow()
     gtk_widget_add_events (window, GDK_CONFIGURE);
     g_signal_connect(window, "configure-event", G_CALLBACK(window_configure), NULL);
 
-    GtkWidget *vbox = gtk_vbox_new (TRUE, 6);
+    GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 6);
     gtk_box_set_homogeneous (GTK_BOX (vbox),FALSE);
     gtk_container_add (GTK_CONTAINER (window), vbox);
 
@@ -722,23 +722,24 @@ void BuildWindow()
     buttonNextPage = gtk_button_new_with_label ("Next page");
     g_signal_connect (G_OBJECT (buttonNextPage), "clicked", G_CALLBACK (buttonNextPage_clicked), (gpointer) window);
 
-    GtkWidget *tableSearch = gtk_table_new(2, 8, TRUE);
-    gtk_table_set_row_spacings(GTK_TABLE(tableSearch), 2);
-    gtk_table_set_col_spacings(GTK_TABLE(tableSearch), 2);
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), gtk_label_new ("Name"), 0, 1, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), entryAtomName, 1, 3, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), gtk_label_new ("Handle"), 3, 4, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), entryAtomUUID, 4, 5, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), gtk_label_new ("Auto expand levels"), 5, 6, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), spinbuttonAtomLevels, 6, 7, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), buttonSearch, 7, 8, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), gtk_label_new ("Type"), 0, 1, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), comboboxAtomType, 1, 3, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), checkboxAtomIncludeSubtypes, 3, 4, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), gtk_label_new ("Sort by"), 5, 6, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), comboboxSort, 6, 7, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableSearch), buttonNextPage, 7, 8, 1, 2 );
-
+	
+    GtkWidget *tableSearch = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(tableSearch), 2);
+    gtk_grid_set_column_spacing(GTK_GRID(tableSearch), 2);
+    gtk_grid_attach(GTK_GRID(tableSearch), gtk_label_new ("Name"), 0, 1, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), entryAtomName, 1, 3, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), gtk_label_new ("Handle"), 3, 4, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), entryAtomUUID, 4, 5, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), gtk_label_new ("Auto expand levels"), 5, 6, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), spinbuttonAtomLevels, 6, 7, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), buttonSearch, 7, 8, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableSearch), gtk_label_new ("Type"), 0, 1, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableSearch), comboboxAtomType, 1, 3, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableSearch), checkboxAtomIncludeSubtypes, 3, 4, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableSearch), gtk_label_new ("Sort by"), 5, 6, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableSearch), comboboxSort, 6, 7, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableSearch), buttonNextPage, 7, 8, 1, 2 );
+    
     comboboxNodeType = gtk_combo_box_text_new();
 
     checkboxNodeIncludeSubtypes = gtk_check_button_new_with_label("Include Subtypes");
@@ -752,20 +753,20 @@ void BuildWindow()
 
     entryNodeMinimumConfidence = gtk_entry_new ();
 
-    GtkWidget *tableNodeFilter = gtk_table_new(2, 8, TRUE);
-    gtk_table_set_row_spacings(GTK_TABLE(tableNodeFilter), 2);
-    gtk_table_set_col_spacings(GTK_TABLE(tableNodeFilter), 2);
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), gtk_label_new ("Type"), 0, 1, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), comboboxNodeType, 1, 3, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), checkboxNodeIncludeSubtypes, 1, 3, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), gtk_label_new ("Minimum STI"), 3, 4, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), entryNodeMinimumSTI, 4, 5, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), gtk_label_new ("Minimum Strength"), 5, 6, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), entryNodeMinimumStrength, 6, 7, 0, 1 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), gtk_label_new ("Minimum LTI"), 3, 4, 1, 2 );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), entryNodeMinimumLTI, 4, 5, 1, 2  );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), gtk_label_new ("Minimum Confidence"), 5, 6, 1, 2  );
-    gtk_table_attach_defaults(GTK_TABLE(tableNodeFilter), entryNodeMinimumConfidence, 6, 7, 1, 2  );
+    GtkWidget *tableNodeFilter = gtk_grid_new();
+    gtk_grid_set_row_spacing(GTK_GRID(tableNodeFilter), 2);
+    gtk_grid_set_column_spacing(GTK_GRID(tableNodeFilter), 2);
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), gtk_label_new ("Type"), 0, 1, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), comboboxNodeType, 1, 3, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), checkboxNodeIncludeSubtypes, 1, 3, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), gtk_label_new ("Minimum STI"), 3, 4, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), entryNodeMinimumSTI, 4, 5, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), gtk_label_new ("Minimum Strength"), 5, 6, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), entryNodeMinimumStrength, 6, 7, 0, 1 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), gtk_label_new ("Minimum LTI"), 3, 4, 1, 2 );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), entryNodeMinimumLTI, 4, 5, 1, 2  );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), gtk_label_new ("Minimum Confidence"), 5, 6, 1, 2  );
+    gtk_grid_attach(GTK_GRID(tableNodeFilter), entryNodeMinimumConfidence, 6, 7, 1, 2  );
 
     comboboxLinkType = gtk_combo_box_text_new();
 
@@ -780,20 +781,20 @@ void BuildWindow()
 
 	entryLinkMinimumConfidence = gtk_entry_new ();
 
-	GtkWidget *tableLinkFilter = gtk_table_new(2, 8, TRUE);
-	gtk_table_set_row_spacings(GTK_TABLE(tableLinkFilter), 2);
-	gtk_table_set_col_spacings(GTK_TABLE(tableLinkFilter), 2);
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), gtk_label_new ("Type"), 0, 1, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), comboboxLinkType, 1, 3, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), checkboxLinkIncludeSubtypes, 1, 3, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), gtk_label_new ("Minimum STI"), 3, 4, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), entryLinkMinimumSTI, 4, 5, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), gtk_label_new ("Minimum Strength"), 5, 6, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), entryLinkMinimumStrength, 6, 7, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), gtk_label_new ("Minimum LTI"), 3, 4, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), entryLinkMinimumLTI, 4, 5, 1, 2  );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), gtk_label_new ("Minimum Confidence"), 5, 6, 1, 2  );
-	gtk_table_attach_defaults(GTK_TABLE(tableLinkFilter), entryLinkMinimumConfidence, 6, 7, 1, 2  );
+	GtkWidget *tableLinkFilter = gtk_grid_new();
+	gtk_grid_set_row_spacing(GTK_GRID(tableLinkFilter), 2);
+	gtk_grid_set_column_spacing(GTK_GRID(tableLinkFilter), 2);
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), gtk_label_new ("Type"), 0, 1, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), comboboxLinkType, 1, 3, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), checkboxLinkIncludeSubtypes, 1, 3, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), gtk_label_new ("Minimum STI"), 3, 4, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), entryLinkMinimumSTI, 4, 5, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), gtk_label_new ("Minimum Strength"), 5, 6, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), entryLinkMinimumStrength, 6, 7, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), gtk_label_new ("Minimum LTI"), 3, 4, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), entryLinkMinimumLTI, 4, 5, 1, 2  );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), gtk_label_new ("Minimum Confidence"), 5, 6, 1, 2  );
+	gtk_grid_attach(GTK_GRID(tableLinkFilter), entryLinkMinimumConfidence, 6, 7, 1, 2  );
 
 	entrySelectedName = gtk_entry_new ();
 	gtk_editable_set_editable(GTK_EDITABLE(entrySelectedName), FALSE);
@@ -822,26 +823,26 @@ void BuildWindow()
 	entrySelectedTruthValue = gtk_entry_new ();
 	//gtk_editable_set_editable(GTK_EDITABLE(entrySelectedTruthValue), FALSE);
 
-	GtkWidget *tableSelectedAtom = gtk_table_new(2, 10, TRUE);
-	gtk_table_set_row_spacings(GTK_TABLE(tableSelectedAtom), 2);
-	gtk_table_set_col_spacings(GTK_TABLE(tableSelectedAtom), 2);
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Name"), 0, 1, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedName, 1, 3, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Type"), 0, 1, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedType, 1, 3, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Handle"), 3, 4, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedUUID, 4, 5, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("STI"), 5, 6, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedSTI, 6, 7, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Strength"), 7, 8, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedStrength, 8, 9, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), buttonUpdate, 9, 10, 0, 1 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Truth value"), 3, 4, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedTruthValue, 4, 5, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("LTI"), 5, 6, 1, 2 );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedLTI, 6, 7, 1, 2  );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), gtk_label_new ("Confidence"), 7, 8, 1, 2  );
-	gtk_table_attach_defaults(GTK_TABLE(tableSelectedAtom), entrySelectedConfidence, 8, 9, 1, 2  );
+	GtkWidget *tableSelectedAtom = gtk_grid_new();
+	gtk_grid_set_row_spacing(GTK_GRID(tableSelectedAtom), 2);
+	gtk_grid_set_column_spacing(GTK_GRID(tableSelectedAtom), 2);
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Name"), 0, 1, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedName, 1, 3, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Type"), 0, 1, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedType, 1, 3, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Handle"), 3, 4, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedUUID, 4, 5, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("STI"), 5, 6, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedSTI, 6, 7, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Strength"), 7, 8, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedStrength, 8, 9, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), buttonUpdate, 9, 10, 0, 1 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Truth value"), 3, 4, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedTruthValue, 4, 5, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("LTI"), 5, 6, 1, 2 );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedLTI, 6, 7, 1, 2  );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), gtk_label_new ("Confidence"), 7, 8, 1, 2  );
+	gtk_grid_attach(GTK_GRID(tableSelectedAtom), entrySelectedConfidence, 8, 9, 1, 2  );
 
 	notebook = gtk_notebook_new();
     gtk_notebook_append_page (GTK_NOTEBOOK(notebook), tableSearch,gtk_label_new ("Search"));
@@ -864,17 +865,17 @@ void BuildWindow()
 void FillComboboxes()
 {
 	atomTypes.LoadAtomTypeScript();
-	for (int i = 0; i < atomTypes.atomTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.atomTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxAtomType), "", atomTypes.atomTypeNames[i].c_str());
 	}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxAtomType), 1);
-	for (int i = 0; i < atomTypes.nodeTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.nodeTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxNodeType), "", atomTypes.nodeTypeNames[i].c_str());
 	}
 	gtk_combo_box_set_active(GTK_COMBO_BOX(comboboxNodeType), 0);
-	for (int i = 0; i < atomTypes.linkTypeNames.size(); i++)
+	for (std::size_t i = 0; i < atomTypes.linkTypeNames.size(); i++)
 	{
 		gtk_combo_box_text_append(GTK_COMBO_BOX_TEXT(comboboxLinkType), "", atomTypes.linkTypeNames[i].c_str());
 	}

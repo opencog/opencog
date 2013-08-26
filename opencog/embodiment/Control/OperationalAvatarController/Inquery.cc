@@ -118,7 +118,7 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      HandleSeq listLinkOutgoings = atomSpace->getOutgoing(listLink);
 
 
-     if ( listLinkOutgoings.size() == ownerSize )
+     if ( listLinkOutgoings.size() == (std::size_t)ownerSize )
      {   // some evalLink without a value node, e.g.:
          /*    It means these two objects are far away from each other, we'll get its value from its truthvalue
         (EvaluationLink (stv 1 0.0012484394) (av -14 1 0)
@@ -778,6 +778,11 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
             evalNonFirstOutgoings.push_back(AtomSpaceUtil::addNode(*atomSpace, NUMBER_NODE, opencog::toString(value.bound_high).c_str()));
             break;
         }
+        default:
+            // TODO: TNick: is this the right way of dealing with other codes?
+            // BOOLEAN_CODE
+            // NUMBER_OF_ACTION_PARAM_TYPES
+		    break;
     }
 
     // first search from EvaluationLinks
@@ -843,7 +848,7 @@ HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNo
         }
 
     }
-    else if ( entity = boost::get<Entity>(realValue))
+    else if ( (entity = boost::get<Entity>(realValue)) )
     {
         Handle entityHandle = AtomSpaceUtil::getEntityHandle(*atomSpace,entity->id);
         OC_ASSERT((entityHandle != Handle::UNDEFINED),
@@ -851,24 +856,24 @@ HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNo
                   ActionParameter::ParamValueToString(*realValue).c_str());
         results.push_back(entityHandle);
     }
-    else if (vector = boost::get<Vector>(realValue))
+    else if ( (vector = boost::get<Vector>(realValue)) )
     {
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->x).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->y).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(vector->z).c_str()));
     }
-    else if (rot = boost::get<Rotation>(realValue))
+    else if ( (rot = boost::get<Rotation>(realValue)) )
     {
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->pitch).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->roll).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(rot->yaw).c_str()));
     }
-    else if (fuzzyInt = boost::get<FuzzyIntervalInt>(realValue))
+    else if ( (fuzzyInt = boost::get<FuzzyIntervalInt>(realValue)) )
     {
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyInt->bound_low).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyInt->bound_high).c_str()));
     }
-    else if (fuzzyFloat = boost::get<FuzzyIntervalFloat>(realValue))
+    else if ( (fuzzyFloat = boost::get<FuzzyIntervalFloat>(realValue)) )
     {
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_low).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_high).c_str()));
@@ -917,7 +922,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
 
     vector<string> _allVariables;
-    for(int i = 0; i < stateIndexes.size() ; ++ i)
+    for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
     {
         int index = stateIndexes[i];
         list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();

@@ -30,6 +30,7 @@
 #include <gsl/gsl_randist.h>
 
 #include <algorithm>
+#include <opencog/util/macros.h>
 
 using std::vector;
 
@@ -601,6 +602,7 @@ IndefiniteTruthValue* AbductionRule::solve()
     int n1 = 100, n2 = 100;
     vector <float *> distributionAC;
     const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+    OC_UNUSED(distributionA);
     const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
     const pvector& distributionC = tvset[2]->getFirstOrderDistribution();
     const pvector& distributionAB = tvset[3]->getFirstOrderDistribution();
@@ -669,6 +671,7 @@ IndefiniteTruthValue* DeductionRule::solve()
     vector <float *> distributionAC;
 
     const pvector& distributionA = tvset[0]->getFirstOrderDistribution();
+    OC_UNUSED(distributionA);
     const pvector& distributionB = tvset[1]->getFirstOrderDistribution();
     const pvector& distributionC = tvset[2]->getFirstOrderDistribution();
     const pvector& distributionAB = tvset[3]->getFirstOrderDistribution();
