@@ -22,7 +22,7 @@ find_path(SIGAR_INCLUDE_DIR sigar.h
 
 # SIGAR support a lot more platforms than listed here.
 # cf. sigar.hyperic.com
-set(SIGAR_NAMES sigar-x86-linux sigar-x86_64-linux sigar-amd64-linux sigar-universal-macosx)
+set(SIGAR_NAMES sigar-x86-linux sigar-x86_64-linux sigar-amd64-linux sigar-universal-macosx sigar)
 find_library(SIGAR_LIBRARY
   NAMES ${SIGAR_NAMES}
   PATHS /usr/lib /usr/local/lib /opt/local/lib
