@@ -542,7 +542,7 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // load and init module
-    Module* module = (Module*) (*load_func)(this);
+    Module* module = (Module*) (*load_func)(*this);
 
     // store two entries in the module map:
     //    1: filename => <struct module data>

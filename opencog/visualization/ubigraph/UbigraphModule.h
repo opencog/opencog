@@ -76,11 +76,11 @@ public:
         return _ci;
     }
     
-    static inline const char* id();
+    static const char* id();
 
-    UbigraphModule();
-    ~UbigraphModule();
-    void init();
+    UbigraphModule(CogServer&);
+    virtual ~UbigraphModule();
+    virtual void init();
 
 }; // class
 

@@ -132,7 +132,7 @@ public:
 
 };
 
-DottyModule::DottyModule() : Module()
+DottyModule::DottyModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DottyModule] constructor");
     do_dotty_register();

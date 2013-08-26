@@ -97,7 +97,7 @@ public:
     }
     static inline const char* id();
 
-    PythonModule();
+    PythonModule(CogServer&);
     ~PythonModule();
     void init();
 

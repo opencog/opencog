@@ -32,31 +32,30 @@ using namespace opencog;
 
 DECLARE_MODULE(AttentionModule)
 
-AttentionModule::AttentionModule()
+AttentionModule::AttentionModule(CogServer& cs) :
+    Module(cs)
 {
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
-    cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
+    _cogserver.registerAgent(ForgettingAgent::info().id,          &forgettingFactory);
+    _cogserver.registerAgent(HebbianUpdatingAgent::info().id,     &hebbianFactory);
 #ifdef HAVE_GSL
-    cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
+    _cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &diffusionFactory);
 #endif
-    cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
-    cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
-    cogserver.registerAgent(STIDecayingAgent::info().id,         &stidecayingFactory);
+    _cogserver.registerAgent(ImportanceSpreadingAgent::info().id, &spreadingFactory);
+    _cogserver.registerAgent(ImportanceUpdatingAgent::info().id,  &updatingFactory);
+    _cogserver.registerAgent(STIDecayingAgent::info().id,         &stidecayingFactory);
 }
 
 AttentionModule::~AttentionModule()
 {
     logger().debug("[AttentionModule] enter destructor");
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.unregisterAgent(ForgettingAgent::info().id);
-    cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
-    cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
+    _cogserver.unregisterAgent(ForgettingAgent::info().id);
+    _cogserver.unregisterAgent(HebbianUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(ImportanceSpreadingAgent::info().id);
 #ifdef HAVE_GSL
-    cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
+    _cogserver.unregisterAgent(ImportanceDiffusionAgent::info().id);
 #endif
-    cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
-    cogserver.unregisterAgent(STIDecayingAgent::info().id);
+    _cogserver.unregisterAgent(ImportanceUpdatingAgent::info().id);
+    _cogserver.unregisterAgent(STIDecayingAgent::info().id);
     logger().debug("[AttentionModule] exit destructor");
 }
 

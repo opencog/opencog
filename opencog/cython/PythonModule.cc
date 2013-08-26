@@ -77,7 +77,7 @@ Request* PythonRequestFactory::create() const
 
 // ------
 
-PythonModule::PythonModule() : Module()
+PythonModule::PythonModule(CogServer& cs) : Module(cs)
 {
 }
 
@@ -102,11 +102,11 @@ bool PythonModule::unregisterAgentsAndRequests()
     // Requires GIL
     foreach (std::string s, _agentNames) {
         DPRINTF("Deleting all instances of %s\n", s.c_str());
-        cogserver().unregisterAgent(s);
+        _cogserver.unregisterAgent(s);
     }
     foreach (std::string s, _requestNames) {
         DPRINTF("Unregistering requests of id %s\n", s.c_str());
-        cogserver().unregisterRequest(s);
+        _cogserver.unregisterRequest(s);
     }
 
     return true;
@@ -233,7 +233,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
 
             // register the agent with a custom factory that knows how to
             // instantiate new Python MindAgents
-            cogserver().registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
+            _cogserver.registerAgent(dottedName, new PythonAgentFactory(moduleName,s));
 
             // save a list of Python agents that we've added to the CogServer
             _agentNames.push_back(dottedName);
@@ -258,7 +258,7 @@ std::string PythonModule::do_load_py(Request *dummy, std::list<std::string> args
             // Register request with cogserver using dotted name: module.RequestName
             std::string dottedName = moduleName + "." + s;
             // register the agent with a custom factory that knows how to
-            cogserver().registerRequest(dottedName, 
+            _cogserver.registerRequest(dottedName, 
                 new PythonRequestFactory(moduleName, s, short_desc, long_desc, is_shell));
             // save a list of Python agents that we've added to the CogServer
             _requestNames.push_back(dottedName);
