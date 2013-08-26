@@ -52,7 +52,7 @@ printContainer(), printlnContainer(), containerToStr(), istreamContainer()
 are present
 - KLD.h: Functions to compute the Kullback-Leibler Divergence of discrete
 and continouous distirbution; see KLDS structure documentation.
-
+- lazy selector
 
 \section sect_libs Other components
 
