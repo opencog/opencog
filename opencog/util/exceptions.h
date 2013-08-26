@@ -110,7 +110,7 @@ public:
      */
     RuntimeException() throw();
 
-}; // RuntimException
+}; // RuntimeException
 
 /**
  * Exception to be thrown when a XML operation (processing, creation) fails.
