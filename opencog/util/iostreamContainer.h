@@ -34,11 +34,13 @@
 #include "foreach.h"
 #include "oc_assert.h"
 
-/**
- * functions to read, write, print or convert to string generic containers
- */
-
 namespace opencog {
+
+    /** @name IO stream container
+     * functions to read, write, print or convert to string generic containers
+     */
+    ///@{
+    
     
     /**
      * stream out all elements in [from, to( with delimiter
@@ -203,11 +205,12 @@ namespace opencog {
                                 delimiter, left, right, empty_lr).str();
     }
 
-    // used by istreamContainer
+    //! used by istreamContainer
     inline bool exists_white_space(const std::string& str) {
         foreach(const char& c, str) if(isspace(c)) return true;
         return false;
     }
+    //! used by istreamContainer
     inline bool all_white_space(const std::string& str) {
         foreach(const char& c, str) if(!isspace(c)) return false;
         return true;
@@ -285,5 +288,7 @@ namespace opencog {
         return in;
     }
     
+    ///@}
+
 } // ~namespace opencog
 #endif // _OPENCOG_PRINTCONTAINER_H

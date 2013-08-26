@@ -38,7 +38,7 @@
 
 using namespace opencog;
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * StandardException class
  * ----------------------------------------------------------------------------
@@ -123,7 +123,7 @@ void StandardException::setMessage(const char * msg)
     strcpy(message, msg);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * RuntimeException class
  * ----------------------------------------------------------------------------
@@ -140,7 +140,7 @@ RuntimeException::RuntimeException() throw()
 {
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * XMLException class
  * ----------------------------------------------------------------------------
@@ -153,7 +153,7 @@ XMLException::XMLException(const char * trace, const char * fmt, ...) throw()
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * IOException class
  * ----------------------------------------------------------------------------
@@ -166,7 +166,7 @@ IOException::IOException(const char * trace, const char * fmt, ...) throw()
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * ComboException class
  * ----------------------------------------------------------------------------
@@ -179,7 +179,7 @@ ComboException::ComboException(const char * trace, const char * fmt, ...) throw(
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * IndexErrorException class
  * ----------------------------------------------------------------------------
@@ -192,7 +192,7 @@ IndexErrorException::IndexErrorException(const char * trace, const char * fmt, .
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * InvalidException class
  * ----------------------------------------------------------------------------
@@ -205,7 +205,7 @@ InvalidParamException::InvalidParamException(const char * trace, const char * fm
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * InconsistenceException class
  * ----------------------------------------------------------------------------
@@ -218,7 +218,7 @@ InconsistenceException::InconsistenceException(const char * trace, const char * 
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * FatalErrorException class
  * ----------------------------------------------------------------------------
@@ -231,7 +231,7 @@ FatalErrorException::FatalErrorException(const char * trace, const char * fmt, .
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * NetworkException class
  * ----------------------------------------------------------------------------
@@ -244,7 +244,7 @@ NetworkException::NetworkException(const char * trace, const char * fmt, ...) th
     va_end(ap);
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * NotFoundException class
  * ----------------------------------------------------------------------------
@@ -269,7 +269,7 @@ NotFoundException::NotFoundException(const char * trace, const char * fmt, ...) 
     delete [] concatMsg;
 }
 
-/**
+/*
  * ----------------------------------------------------------------------------
  * AssertionException class
  * ----------------------------------------------------------------------------

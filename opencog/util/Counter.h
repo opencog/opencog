@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
- * Author: Nil Geisweiller
+ * \author Nil Geisweiller
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -35,17 +35,15 @@ namespace opencog {
 
 using boost::adaptors::map_values;
 
-/**
- * Class that mimics python Counter container
- */
-
+//! Class that mimics python Counter container
 template<typename T, typename CT>
 class Counter : public std::map<T, CT>,
     boost::addable<Counter<T, CT>>
 {
 protected:
-    // this will be replaced by C++11 constructor delegation instead
-    // of init
+    /** @todo this will be replaced by C++11 constructor 
+     * delegation instead of init
+     */
     template<typename IT>
     void init(IT from, IT to) {
         while(from != to) {
@@ -90,13 +88,13 @@ public:
         return it == this->cend()? c : it->second;
     }
     
-    /// Return the total of all counted elements
+    //! Return the total of all counted elements
     CT total_count() const
     {
         return boost::accumulate(*this | map_values, 0);
     }
 
-    /// Return the element that occurs most frequently
+    //! Return the element that occurs most frequently
     T most_frequent() const
     {
         T key = super::begin()->first;
@@ -109,18 +107,22 @@ public:
     }
 
     
-    // add 2 counters, for example
-    // c1 = {'a':1, 'b':1}
-    // c2 = {'b':1, 'c':3}
-    // after
-    // c1 += c2
-    // now
-    // c1 = {'a':1, 'b':2, 'c':3}
+    //! add 2 counters,
+    /**
+     * for example
+     * c1 = {'a':1, 'b':1}
+     * c2 = {'b':1, 'c':3}
+     * after
+     * c1 += c2
+     * now
+     * c1 = {'a':1, 'b':2, 'c':3}
+     */
     Counter& operator+=(const Counter& other) {
         for (const auto& v : other)
             this->operator[](v.first) += v.second;
         return *this;
     }
+    
     /// @todo add method to subtract, multiply, etc Counters, or
     /// scalar and Counter, etc...
 };
