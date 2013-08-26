@@ -678,6 +678,14 @@ INCLUDE(CPack)
 # documentation
 FIND_PACKAGE(Doxygen)
 IF (DOXYGEN_FOUND)
+
+    # versions before 1.8.2 have no HTML_EXTRA_STYLESHEET
+    IF (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
+        SET (DOXYGEN_CSS_VAR "HTML_EXTRA_STYLESHEET = ${CMAKE_SOURCE_DIR}/doc/doxydoc/customdoxygen.css")
+    ELSE (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
+        SET (DOXYGEN_CSS_VAR "HTML_STYLESHEET = ${CMAKE_SOURCE_DIR}/doc/doxydoc/customdoxygen.css")
+    ENDIF (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
+    
     # doc dir has no CMakeList.txt
     #ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 	EXECUTE_PROCESS(
@@ -730,3 +738,5 @@ SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
 SUMMARY_SHOW()
+
+
