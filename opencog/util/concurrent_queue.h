@@ -29,6 +29,7 @@
 #include <deque>
 #include <stdio.h>
 
+//! Represents a thread-safe first in-first out list.
 template<typename Data>
 class concurrent_queue
 {

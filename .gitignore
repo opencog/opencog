@@ -1,6 +1,7 @@
 *.a
 opencog.log
 opencog-python.log
+.vagrant
 
 # misc binaries
 bin

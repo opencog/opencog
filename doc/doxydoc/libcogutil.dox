@@ -1,0 +1,114 @@
+namespace opencog {
+/**
+
+\page libcogutil cogutil library
+
+This library (<em>opencog/util</em>) groups various pices of support code that
+found no place elsewhere. To build it use:
+@code
+make cogutil
+@endcode
+
+\section sect_files Algorithms
+
+- algorithm.h hosts small templated functions like for_each(),
+accumulate2d(), etc. Set utilities are also present.
+- based_variant.h: Defines a simple variant with base; seems to be used only in defining
+moses::disc_knob type.
+- comprehension.h - container comprehension constructors
+- concurrent_queue.h concurrent_queue represents a thread-safe first in-first out list
+- Counter.h has Counter class that mimics python Counter container
+- Cover_Tree.h hosts CoverTree class that sllows for insertion,
+removal, and k-nearest-neighbor queries. 
+<a href="http://en.wikipedia.org/wiki/Cover_tree">Wikipedia:</a> 
+The cover tree is a type of data structure in computer science
+that is specifically designed to facilitate the speed-up of a nearest neighbor
+search. It is a refinement of the Navigating Net data structure, and related to
+a variety of other data structures developed for indexing intrinsically
+low-dimensional data.
+- digraph.h has a directed graph class - digraph - where
+each node is represented by an unsigned int; a randomized_topological_sort()
+is based on it.
+- dorepeat.h has dorepeat() macro
+- exceptions.h defines a number of exceptions inheriting StandardException:
+    - RuntimeException
+    - XMLException
+    - IOException
+    - ComboException
+    - IndexErrorException
+    - InvalidParamException
+    - InconsistenceException
+    - FatalErrorException
+    - NotFoundException
+    - NetworkException
+    - AssertionException
+- foreach.h and functional.h have templated helpers like addressof(),
+random_access_view(), tagged_item and so on
+- hashing.h provides several functors: obj_ptr_hash, deref_hash, 
+deref_equals, obj_ptr_cmp
+- iostreamContainer.h provides functions to read, write, print or convert to 
+string generic containers; various flavours of ostreamContainer(), 
+printContainer(), printlnContainer(), containerToStr(), istreamContainer()
+are present
+- KLD.h: Functions to compute the Kullback-Leibler Divergence of discrete
+and continouous distirbution; see KLDS structure documentation.
+- lazy selector
+
+\section sect_libs Other components
+
+\subsection ssect_ansi ansi (.h & .cc)
+ANSI codes for colored output in terminals that support this feature.
+Instead of directly using the codes, make use of the ansi_code()
+function that checks the \b ANSI_ENABLED configuration variable
+and either appends the code or an empty string.
+
+\subsection ssect_clustering The C Clustering Library
+This library (version 1.49) was written at the Laboratory of
+DNA Information Analysis, Human Genome Center, 
+Institute of Medical Science, University of Tokyo
+by Michiel Jan Laurens de Hoon.
+
+Methods such as clusterdistance(), getclustercentroids(), 
+kcluster() are provided.
+
+\subsection ssect_config configuration
+Config class manages the variables important for various parts of the
+package. A list of key:value entries is stored, both of them being strings.
+@todo link to definitive list of variables (keys)
+
+include/win32/getopt.h and the two files in opencog/util (getopt.c and
+getopt_long.c) implement 
+<a href="http://www.gnu.org/software/libc/manual/html_node/Getopt.html">Parsing program options</a>
+for Windows targets. The reason for getopt.h being where it is is unknown.
+
+
+\subsection ssect_others File system helpers
+- FileList class is capable of loading entries from a directory 
+(either recursively or not)
+- file.h has functions 
+    - appendFileContent()
+    - createDirectory()
+    - exists()
+    - fileExists()
+    - LoadTextFile()
+    - getExeDir() 
+    - getExeName()
+    - expandPath()
+
+
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libraries "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref fsstructure "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+} //~namespace opencog

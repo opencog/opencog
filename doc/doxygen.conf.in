@@ -124,7 +124,7 @@ FULL_PATH_NAMES        = YES
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = @CMAKE_CURRENT_BINARY_DIR@
+STRIP_FROM_PATH        = @CMAKE_SOURCE_DIR@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
 # the path mentioned in the documentation of a class, which tells 
@@ -251,7 +251,7 @@ IDL_PROPERTY_SUPPORT   = YES
 # member in the group (if any) for the other members of the group. By default 
 # all members of a group must be documented explicitly.
 
-DISTRIBUTE_GROUP_DOC   = NO
+DISTRIBUTE_GROUP_DOC   = YES
 
 # Set the SUBGROUPING tag to YES (the default) to allow class member groups of 
 # the same type (for instance a group of public functions) to be put as a 
@@ -468,8 +468,8 @@ SHOW_USED_FILES        = YES
 # If the sources in your project are distributed over multiple directories 
 # then setting the SHOW_DIRECTORIES tag to YES will show the directory hierarchy 
 # in the documentation. The default is NO.
-
-SHOW_DIRECTORIES       = YES
+# deprecated
+# SHOW_DIRECTORIES       = YES
 
 # Set the SHOW_FILES tag to NO to disable the generation of the Files page.
 # This will remove the Files entry from the Quick Index and from the 
@@ -708,7 +708,10 @@ INPUT_FILTER           =
 # info on how filters are used. If FILTER_PATTERNS is empty, INPUT_FILTER 
 # is applied to all files.
 
-FILTER_PATTERNS        = *README=@PROJECT_SOURCE_DIR@/doc/README_to_doxygen.sh
+# the content in the readme's will be added by hand and updated
+# making the README_to_doxygen.sh script obsolete
+
+# FILTER_PATTERNS        = *README=@PROJECT_SOURCE_DIR@/doc/README_to_doxygen.sh
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using 
 # INPUT_FILTER) will be used to filter the input files when producing source 
@@ -819,13 +822,13 @@ HTML_FILE_EXTENSION    = .html
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard header.
 
-HTML_HEADER            = 
+HTML_HEADER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/header.html
 
 # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = 
+HTML_FOOTER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -833,14 +836,16 @@ HTML_FOOTER            =
 # will generate a default style sheet. Note that doxygen will try to copy 
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
-
+# deprecated
 HTML_STYLESHEET        = 
+
+HTML_EXTRA_STYLESHEET  = @CMAKE_SOURCE_DIR@/doc/doxydoc/customdoxygen.css
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 
 # NO a bullet list will be used.
-
-HTML_ALIGN_MEMBERS     = YES
+# deprecated
+# HTML_ALIGN_MEMBERS     = YES
 
 # If the HTML_DYNAMIC_SECTIONS tag is set to YES then the generated HTML 
 # documentation will contain sections that can be hidden and shown after the 
