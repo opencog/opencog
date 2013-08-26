@@ -74,8 +74,8 @@ const double EPSILON = 1e-6; // default error when comparing 2 floats
 const double SMALL_EPSILON = 1e-32;
 const double PROB_EPSILON = 1e-127; // error when comparing 2 probabilities
 
-// absolute_value_order
-//   codes the following order, for T == int, -1,1,-2,2,-3,3,...
+//! absolute_value_order
+//!   codes the following order, for T == int, -1,1,-2,2,-3,3,...
 template<typename T>
 struct absolute_value_order
 {
@@ -92,16 +92,21 @@ struct absolute_value_equality
     }
 };
 
-// the following functions are adapted from the bit twiddling hacks page:
-// http://graphics.stanford.edu/~seander/bithacks.html
-// 32-bit version is faster, than the others
-// but beware, you need to check the number of bits yourself
-// awkward phrasing cuz c++ doesn't allow partial specialization of functions
-//
-// a few possibilities were tried; gcc has a built-in function called
-// __builtin_popcount which is somewhat slower. Using a lookup table might
-// be somwhat faster under some circumstances, but was avoided because it
-// might hog the fast memory ...
+/** @name Bithacks
+ *
+ * The following functions are adapted from the bit twiddling hacks page:
+ * http://graphics.stanford.edu/~seander/bithacks.html
+ * 32-bit version is faster, than the others
+ * but beware, you need to check the number of bits yourself
+ * awkward phrasing cuz c++ doesn't allow partial specialization of functions
+ *
+ * a few possibilities were tried; gcc has a built-in function called
+ * __builtin_popcount which is somewhat slower. Using a lookup table might
+ * be somwhat faster under some circumstances, but was avoided because it
+ * might hog the fast memory ...
+ */
+///@{
+
 template<int> struct bits
 {
     template<typename T>
@@ -167,7 +172,7 @@ template<> struct bits<128>
     }
 };
 
-// count_bits will work up to 128-bits
+//! count_bits will work up to 128-bits
 template<typename T>
 inline unsigned int count_bits32(T v)
 {
@@ -184,10 +189,11 @@ inline unsigned int count_bits(T v)
     return ((T)(v * ((T)~(T)0 / 255)) >> (sizeof(v) - 1) * CHAR_BIT);
 }
 
-// return p the smallest power of 2 so that p >= x. So for instance:
-//   next_power_of_two(1) = 1
-//   next_power_of_two(2) = 2
-//   next_power_of_two(3) = 4
+//! return p the smallest power of 2 so that p >= x
+/// So for instance:
+///   - next_power_of_two(1) = 1
+///   - next_power_of_two(2) = 2
+///   - next_power_of_two(3) = 4
 inline size_t next_power_of_two(size_t x)
 {
     OC_ASSERT(x > 0);
@@ -222,19 +228,20 @@ template<typename FloatT> FloatT log2(FloatT x)
     return std::log(x) / std::log(static_cast<FloatT>(2));
 }
 
-// return the smaller exponent in base 2. This is used to know how
-// many bits should be used to pack a certain number of values. So
-// for instance
-//    nbits_to_pack(2) = 1,
-//    nbits_to_pack(3) = 2,
-//    nbits_to_pack(50) = 8
+//! return the smaller exponent in base 2. 
+/// This is used to know how
+/// many bits should be used to pack a certain number of values. So
+/// for instance
+///    - nbits_to_pack(2) = 1,
+///    - nbits_to_pack(3) = 2,
+///    - nbits_to_pack(50) = 8
 inline unsigned int nbits_to_pack(size_t multy)
 {
     OC_ASSERT(multy > 0);
     return next_power_of_two(integer_log2(multy -1) + 1);
 }
 
-//sums of natural logarithms (for a particular floating-point type)
+//! sums of natural logarithms (for a particular floating-point type)
 template<typename FloatT>
 FloatT logsum(size_t n)
 {
@@ -256,27 +263,27 @@ FloatT logsum(size_t n)
     return sums[n];
 }
 
-// return the number of digits (in base 10 by default) of an integer
+//! return the number of digits (in base 10 by default) of an integer
 template<typename Int> Int ndigits(Int x, Int base = 10) {
     Int nd = 0;
     while (x != 0) { x /= base; nd++; }
     return nd;
 }
 
-// returns true iff x >= min and x <= max
+//! returns true iff x >= min and x <= max
 template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max)
 {
     return x >= min && x <= max;
 }
 
-// returns true iff abs(x - y) <= epsilon
+//! returns true iff abs(x - y) <= epsilon
 template<typename FloatT> bool isWithin(FloatT x, FloatT y, FloatT epsilon)
 {
     return std::abs(x - y) <= epsilon;
 }
 
-// compare 2 FloatT with precision epsilon,
-// note that, unlike isWithin, the precision adapts with the scale of x and y
+//! compare 2 FloatT with precision epsilon,
+/// note that, unlike isWithin, the precision adapts with the scale of x and y
 template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon)
 {
     FloatT diff = std::abs(x - y);
@@ -286,8 +293,8 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y, FloatT epsilon)
     else return diff <= epsilon;
 }
 
-// compare 2 FloatT with precision EPSILON
-// note that, unlike isWithin, the precision adapts with the scale of x and y
+//! compare 2 FloatT with precision EPSILON
+/// note that, unlike isWithin, the precision adapts with the scale of x and y
 template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 {
     return isApproxEq(x, y, static_cast<FloatT>(EPSILON));
@@ -304,13 +311,13 @@ Float bound(Float x, Float l, Float u)
     return std::max(l, std::min(u, x));
 }
     
-// useful for entropy
+//! useful for entropy
 template<typename FloatT> FloatT weightInformation(FloatT p)
 {
     return p > PROB_EPSILON? -p * opencog::log2(p) : 0;
 }
 
-// compute the binary entropy of probability p
+//! compute the binary entropy of probability p
 template<typename FloatT> FloatT binaryEntropy(FloatT p)
 {
     OC_ASSERT(p >= 0 && p <= 1,
@@ -337,14 +344,14 @@ template<typename It> double entropy(It from, It to)
     return res;
 }
 
-// helper
+//! helper
 template<typename C>
 double entropy(const C& c)
 {
     return entropy(c.begin(), c.end());
 }
 
-// compute the smallest divisor of n
+//! compute the smallest divisor of n
 template<typename IntT> IntT smallest_divisor(IntT n)
 {
     OC_ASSERT(n > 0, "smallest_divisor: n must be superior than 0");
@@ -362,10 +369,10 @@ template<typename IntT> IntT smallest_divisor(IntT n)
     }
 }
 
-// calculate the square of x
+//! calculate the square of x
 template<typename T> T sq(T x) { return x*x; }
 
-// check if x isn't too high and return 2^x
+//! check if x isn't too high and return 2^x
 template<typename OutInt> OutInt pow2(unsigned int x)
 {
     OC_ASSERT(8*sizeof(OutInt) - (numeric_limits<OutInt>::is_signed?1:0) > x,
@@ -374,7 +381,7 @@ template<typename OutInt> OutInt pow2(unsigned int x)
 }
 inline unsigned int pow2(unsigned int x) { return pow2<unsigned int>(x); }
 
-// Generalized mean http://en.wikipedia.org/wiki/Generalized_mean
+//! Generalized mean http://en.wikipedia.org/wiki/Generalized_mean
 template<typename It, typename Float>
 Float generalized_mean(It from, It to, Float p = 1.0)
 {
@@ -388,6 +395,9 @@ Float generalized_mean(const C& c, Float p = 1.0)
 {
     return generalized_mean(c.begin(), c.end(), p);
 }
+
+///@}
+
 
 /// Compute the distance between two vectors, using the p-norm.  For
 /// p=2, this is the usual Eucliden distance, and for p=1, this is the
