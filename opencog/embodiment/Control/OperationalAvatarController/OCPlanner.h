@@ -332,11 +332,15 @@ protected:
 
      //  return if this same state is found in temporaryStateNodes
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
-     bool findStateInTempStates(State& state, StateNode* &stateNode);
+     // @ RuleNode* forwardRuleNode : the state's forward rule node
+     // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
+     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode);
 
+     // @ RuleNode* forwardRuleNode : the goal state's forward rule node
      // @ bool &found: return if this same state is found in temporaryStateNodes
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
-     bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode* &satstateNode);
+     // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
+     bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,bool ifCheckSameRuleNode);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
      void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);

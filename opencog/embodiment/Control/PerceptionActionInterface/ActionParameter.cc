@@ -87,6 +87,7 @@ ActionParameter::~ActionParameter()
 void ActionParameter::assignValue(const ParamValue& newValue)
 {
     value = newValue;
+    valueString = stringRepresentation();
 }
 
 string ActionParameter::getName() const
