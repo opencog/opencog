@@ -35,17 +35,11 @@ namespace opencog
 
 class CustomAtomTypesModule : public Module
 {
-public:
-
-    static const char* id() {
-        static const char* _id = "opencog::CustomAtomTypesModule";
-        return _id;
-    }
-
-    CustomAtomTypesModule();
-    ~CustomAtomTypesModule();
-    void init();
-
+    public:
+        CustomAtomTypesModule(CogServer&);
+        virtual ~CustomAtomTypesModule();
+        virtual void init();
+        const char* id();
 }; // class
 
 } // namespace opencog
