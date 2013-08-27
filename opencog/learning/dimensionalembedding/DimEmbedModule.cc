@@ -67,10 +67,10 @@ void DimEmbedModule::init()
 {
     logger().info("[DimEmbedModule] init");
     this->as = &_cogserver.getAtomSpace();
-    as->atomSpaceAsync->
+    addedAtomConnection = as->atomSpaceAsync->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));
-    as->atomSpaceAsync->
+    removedAtomConnection = as->atomSpaceAsync->
         removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
                                      this, _1, _2));
 #ifdef HAVE_GUILE
@@ -334,7 +334,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
     HandleSeq nodes;//candidates for new pivots
     as->getHandleSet(std::back_inserter(nodes), NODE, true);
     if (nodes.empty()) return;
-    if (nodes.size()<(unsigned int) numDimensions) numDimensions = nodes.size();
+    if (nodes.size() < (size_t) numDimensions) numDimensions = nodes.size();
 
     for (int i=0; i<numDimensions; ++i) {
         Handle newPivot;

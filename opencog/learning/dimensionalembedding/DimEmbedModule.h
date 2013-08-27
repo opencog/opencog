@@ -184,7 +184,7 @@ namespace opencog
          * picked as the farthest from the current pivots, but connectedness
          * should be incorporated to avoid picking pivots with no links
          */
-        void embedAtomSpace(Type linkType, const int numDimensions=5);
+        void embedAtomSpace(Type linkType, int numDimensions=5);
 
         /**
          * Clears the AtomEmbedMap and PivotMap for linkType, also

@@ -55,6 +55,7 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
@@ -153,6 +154,7 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "1", SimpleTruthValue(0.001f, 0.00001f));
@@ -306,6 +308,7 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "1", SimpleTruthValue(0.001f, 0.00001f));
@@ -440,6 +443,7 @@ public:
     {
         CogServer& cs = cogserver();
         AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
         DimEmbedModule dimEmbed = DimEmbedModule(cs);
 
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
