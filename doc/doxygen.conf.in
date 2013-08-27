@@ -836,10 +836,11 @@ HTML_FOOTER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/footer.html
 # will generate a default style sheet. Note that doxygen will try to copy 
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
-# deprecated
-HTML_STYLESHEET        = 
-
-HTML_EXTRA_STYLESHEET  = @CMAKE_SOURCE_DIR@/doc/doxydoc/customdoxygen.css
+# HTML_STYLESHEET is deprecated
+#
+# will be either HTML_STYLESHEET or HTML_EXTRA_STYLESHEET, depending on version
+# (1.8.2)
+@DOXYGEN_CSS_VAR@
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 

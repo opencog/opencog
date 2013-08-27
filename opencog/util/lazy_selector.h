@@ -41,7 +41,7 @@ using namespace boost::multi_index;
  * When the operator is called more than n times an assertion is raised
  */
 class lazy_selector
-{
+{	
     typedef std::pair<unsigned int, unsigned int> uint_pair;
 
     //! tags for accessing both sides of a bidirectional map
