@@ -44,7 +44,7 @@ private:
 
 public:
 
-    ImportanceDecayAgent();
+    ImportanceDecayAgent(CogServer&);
     virtual ~ImportanceDecayAgent();
 
     virtual const ClassInfo& classinfo() const {
@@ -55,7 +55,7 @@ public:
         return _ci;
     }
 
-    void run(opencog::CogServer *server);
+    virtual void run();
 
     // connects to the signals from AtomSpace it needs to know
     void connectSignals(AtomSpace& as);

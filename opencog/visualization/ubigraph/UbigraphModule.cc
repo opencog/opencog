@@ -33,6 +33,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/Request.h>
 #include <opencog/util/mt19937ar.h>
 
 
@@ -42,7 +43,7 @@ using namespace opencog;
 
 DECLARE_MODULE(UbigraphModule);
 
-UbigraphModule::UbigraphModule() : Module()
+UbigraphModule::UbigraphModule(CogServer& cs) : Module(cs)
 {
     logger().info("[UbigraphModule] constructor");
     do_ubigraphUpdate_register();    
@@ -123,13 +124,13 @@ std::string UbigraphModule::do_ubigraphRandomSTI(Request *dummy, std::list<std::
     int nNodes = 2;
 
     if (!args.empty()) nNodes = atoi(args.front().c_str());
-    server().getAtomSpace().getHandleSet(out_hi, NODE, true);
+    _cogserver.getAtomSpace().getHandleSet(out_hi, NODE, true);
     if (hs.size() == 0) return "";
     while (nNodes > 0) {
-        server().getAtomSpace().setSTI(hs[rng.randint(hs.size())], 1000);
+        _cogserver.getAtomSpace().setSTI(hs[rng.randint(hs.size())], 1000);
         nNodes--;
     }
-    server().getAtomSpace().updateMaxSTI(1000);
+    _cogserver.getAtomSpace().updateMaxSTI(1000);
 
     return "";
 }

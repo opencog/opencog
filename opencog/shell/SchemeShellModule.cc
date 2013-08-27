@@ -31,7 +31,7 @@ using namespace opencog;
 
 DECLARE_MODULE(SchemeShellModule);
 
-SchemeShellModule::SchemeShellModule(void)
+SchemeShellModule::SchemeShellModule(CogServer& cs) : Module(cs)
 {
 }
 

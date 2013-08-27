@@ -38,7 +38,7 @@
 using namespace opencog::oac;
 using namespace std;
 
-OCPlanningAgent::OCPlanningAgent()
+OCPlanningAgent::OCPlanningAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
@@ -51,17 +51,13 @@ OCPlanningAgent::~OCPlanningAgent()
     delete ocplanner;
 }
 
-void OCPlanningAgent::init(opencog::CogServer * server)
+void OCPlanningAgent::init()
 {
-    std::cout<<"OCPlanningAgent begins init..."<<std::endl;
-
     logger().debug( "OCPlanningAgent::%s - Initializing the Agent [cycle = %d]",
-                    __FUNCTION__,
-                    this->cycleCount
-                  );
+                    __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Avoid initialize during next cycle
@@ -134,21 +130,19 @@ bool OCPlanningAgent::isMoveAction(string s)
         return false;
 }
 
-void OCPlanningAgent::run(opencog::CogServer * server)
+void OCPlanningAgent::run()
 {
-    this->cycleCount = server->getCycleCount();
+    this->cycleCount = _cogserver.getCycleCount();
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    if ( !this->bInitialized )
-        this->init(server);
+    if (!this->bInitialized)
+        this->init();
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
-                     __FUNCTION__,
-                     this->cycleCount
-                  );
+                     __FUNCTION__, this->cycleCount);
 
     // if the space map has not been set up yet, won't run the planner.
     if (! spaceServer().isLatestMapValid())
@@ -283,7 +277,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                  <<std::endl;
 
         // the demand goal is something like "EnergyDemandGoal"
-        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal,server);
+        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal, &_cogserver);
 
         // if planning failed
         if (currentOCPlanID == "")

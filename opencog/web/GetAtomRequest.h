@@ -33,6 +33,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 namespace opencog
 {
@@ -59,16 +60,16 @@ public:
         return _cci;
     }
 
-    GetAtomRequest();
+    GetAtomRequest(CogServer&);
     virtual ~GetAtomRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}
     std::string getHTML(std::string);
     std::string getHTMLHeader();
-    void html_makeOutput(Handle h);
-    static std::string json_makeOutput(Handle h);
-    static std::string tvToJSON(const TruthValue* tv);
-    void generateProcessingGraph(Handle h);
+    void html_makeOutput(Handle);
+    static std::string json_makeOutput(CogServer&, Handle);
+    static std::string tvToJSON(const TruthValue*);
+    void generateProcessingGraph(Handle);
 };
 
 } // namespace 

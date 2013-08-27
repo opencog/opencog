@@ -39,7 +39,7 @@
 using namespace opencog;
 using namespace opencog::pln;
 
-BackChainingAgent::BackChainingAgent() : Bstate(), state(NULL), steps(0), maxSteps(500), stepsPerCycle(100)
+BackChainingAgent::BackChainingAgent(CogServer& cs) : Agent(cs), Bstate(), state(NULL), steps(0), maxSteps(500), stepsPerCycle(100)
 {
     logger().info("[BackChainingAgent] constructor");
     // Starting values for rent and wage
@@ -109,7 +109,7 @@ void BackChainingAgent::chooseTarget()
     steps = 0;
 }
 
-void BackChainingAgent::run(CogServer *server)
+void BackChainingAgent::run()
 {
     log->info("=========== BackChainingAgent::run =======");
     // if zero steps have been done, that means the target hasn't been set yet.

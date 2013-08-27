@@ -7,7 +7,7 @@
 
 using namespace opencog;
 
-ListModulesRequest::ListModulesRequest()
+ListModulesRequest::ListModulesRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -25,9 +25,7 @@ bool ListModulesRequest::syntaxError()
 
 bool ListModulesRequest::execute()
 {
-    CogServer& cogserver = static_cast<CogServer&>(server());
-
-    std::string moduleList = cogserver.listModules();
+    std::string moduleList = _cogserver.listModules();
 
     send(moduleList);
 

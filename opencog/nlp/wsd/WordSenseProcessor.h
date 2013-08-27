@@ -18,7 +18,7 @@
 
 namespace opencog {
 
-class WordSenseProcessor :public Module
+class WordSenseProcessor : public Module
 {
 	private:
 
@@ -44,12 +44,12 @@ class WordSenseProcessor :public Module
 
 	public:
 
-		WordSenseProcessor(void);
+		WordSenseProcessor(CogServer&);
 		virtual ~WordSenseProcessor();
 		const char * id(void);
 		virtual void init(void);
-		virtual void run(CogServer *server);
-		virtual void run_no_delay(CogServer *server);
+		virtual void run();
+		virtual void run_no_delay();
 		void use_threads(bool);
 };
 

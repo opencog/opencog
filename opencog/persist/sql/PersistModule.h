@@ -86,7 +86,7 @@ private:
 public:
     const char* id(void);
 
-    PersistModule(void);
+    PersistModule(CogServer&);
     virtual ~PersistModule();
 
     virtual void init(void);

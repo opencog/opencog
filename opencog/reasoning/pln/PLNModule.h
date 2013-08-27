@@ -94,7 +94,7 @@ public:
 
     bool recordingTrails;
     
-    PLNModule();
+    PLNModule(CogServer&);
     ~PLNModule();
     void init();
 

@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-ImportanceSpreadingAgent::ImportanceSpreadingAgent()
+ImportanceSpreadingAgent::ImportanceSpreadingAgent(CogServer& cs) :
+    Agent(cs)
 {
     static const std::string defaultConfig[] = {
         "ECAN_DEFAULT_SPREAD_THRESHOLD","0",
@@ -48,9 +49,9 @@ ImportanceSpreadingAgent::~ImportanceSpreadingAgent()
 {
 }
 
-void ImportanceSpreadingAgent::run(CogServer* server)
+void ImportanceSpreadingAgent::run()
 {
-    a = &server->getAtomSpace();
+    a = &_cogserver.getAtomSpace();
     spreadImportance();
 }
 
