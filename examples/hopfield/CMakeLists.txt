@@ -14,10 +14,8 @@ INCLUDE_DIRECTORIES (
 )
 
 IF (XMLRPC_FOUND AND CURL_FOUND)
-    SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
-    SET (PROJECT_UBI_LIB ubigraph
-        ${XMLRPC_LIBRARIES}
-        )
+	SET (HOPFIELD_UBI_SRC HopfieldUbigrapher.cc)
+	SET (PROJECT_UBI_LIB ubigraph ${XMLRPC_LIBRARIES})
 ENDIF (XMLRPC_FOUND AND CURL_FOUND)
 
 ADD_EXECUTABLE (hopfield
@@ -26,8 +24,8 @@ ADD_EXECUTABLE (hopfield
 	Pattern.cc
 	HopfieldOptions.cc
 	StorkeyAgent.cc
-    ImprintAgent.cc
-    ${HOPFIELD_UBI_SRC}
+	ImprintAgent.cc
+	${HOPFIELD_UBI_SRC}
 )
 
 ADD_DEPENDENCIES(hopfield attention_atom_types)
@@ -35,7 +33,7 @@ ADD_DEPENDENCIES(hopfield attention_atom_types)
 TARGET_LINK_LIBRARIES (hopfield
 	server
 	attention
-    ${PROJECT_UBI_LIB}
+	${PROJECT_UBI_LIB}
 	${Boost_SIGNALS_LIBRARY}
 	${EXPAT_LIBRARIES}
 )
