@@ -677,46 +677,9 @@ INCLUDE(CPack)
 
 # documentation
 FIND_PACKAGE(Doxygen)
-IF (DOXYGEN_FOUND)
-
-    # versions before 1.8.2 have no HTML_EXTRA_STYLESHEET
-    IF (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
-        SET (DOXYGEN_CSS_VAR "HTML_EXTRA_STYLESHEET = ${CMAKE_SOURCE_DIR}/doc/doxydoc/customdoxygen.css")
-    ELSE (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
-        SET (DOXYGEN_CSS_VAR "HTML_STYLESHEET = ${CMAKE_SOURCE_DIR}/doc/doxydoc/customdoxygen.css")
-    ENDIF (${DOXYGEN_VERSION} VERSION_GREATER "1.8.1") 
-    
-    # doc dir has no CMakeList.txt
-    #ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
-	EXECUTE_PROCESS(
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-		# COMMAND bzr nick
-		# This will get the current branch name; I think that is what is wanted?
-		COMMAND git rev-parse --abbrev-ref HEAD
-		OUTPUT_VARIABLE BZR_NICK OUTPUT_STRIP_TRAILING_WHITESPACE)
-	EXECUTE_PROCESS(
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-		# I dunno, git doesn't have anything analogous to bzr revno...
-		# COMMAND bzr revno
-		# COMMAND git describe
-		COMMAND git rev-parse HEAD
-		OUTPUT_VARIABLE BZR_REVNO OUTPUT_STRIP_TRAILING_WHITESPACE)
-	CONFIGURE_FILE(
-		${PROJECT_SOURCE_DIR}/doc/doxygen.conf.in
-		${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-	ADD_CUSTOM_TARGET (
-		doxygen
-		COMMAND ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		COMMENT "Generating documentation"
-	)
-ELSE (DOXYGEN_FOUND)
-    MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
-ENDIF (DOXYGEN_FOUND)
+ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # Show a summary of what we got
-
-
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
