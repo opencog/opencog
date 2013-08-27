@@ -239,7 +239,8 @@ public:
     static std::vector<Handle> getNodesByInheritanceLink(AtomSpace &atomSpace, Handle &hSecondOutgoing);
 
     // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
-    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace & atomSpace, string predicate, HandleSeq& hNonFirstOutgoings);
+    // if returnEval is true, return the EvaluationLinks, if is false, return the value nodes
+    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq& hNonFirstOutgoings, bool returnEval=false);
 
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate
@@ -474,7 +475,7 @@ public:
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
      */
-    static Handle getLatestEvaluationLink(const AtomSpace &atomSpace,
+    static Handle getLatestEvaluationLink(AtomSpace &atomSpace,
                                  std::string predicateName,
                                  Handle a,
                                  Handle b = Handle::UNDEFINED,
