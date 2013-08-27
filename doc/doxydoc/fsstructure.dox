@@ -89,7 +89,7 @@ Main source directory.
 <DT>spatial</DT>
 <DD></DD>
 <DT>util</DT>
-<DD></DD>
+<DD>Various code relevant to entire project; see \ref libcogutil "its page"</DD>
 <DT>visualization</DT>
 <DD></DD>
 <DT>viterbi</DT>

@@ -84,13 +84,13 @@ unsigned int       sleep(unsigned seconds);
 
 size_t getMemUsage();
 
-/// return the number of bytes of RAM
+//! return the number of bytes of RAM
 uint64_t getTotalRAM();
 
-/// return the number of free bytes in RAM (excluding OS caches)
+//! return the number of free bytes in RAM (excluding OS caches)
 uint64_t getFreeRAM();
 
-/// return the OS username
+//! return the OS username
 const char* getUserName();
 
 } // namespace opencog

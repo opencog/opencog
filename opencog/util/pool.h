@@ -31,7 +31,7 @@
 
 namespace opencog {
 
-/// Thread-safe blocking resource allocator.
+//! Thread-safe blocking resource allocator.
 /// If there are no resources to borrow, then the borrow() method will
 /// block until one is given back.
 //

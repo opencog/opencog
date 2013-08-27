@@ -31,6 +31,7 @@
 namespace opencog
 {
 
+//! interface for random generators
 class RandGen
 {
 
@@ -38,28 +39,28 @@ public:
 
     virtual ~RandGen() {}
 
-    // reset the random seed
+    //! reset the random seed
     virtual void seed(unsigned long) = 0;
     
-    // random int between 0 and max rand number.
+    //! random int between 0 and max rand number.
     virtual int randint() = 0;
 
-    //random float in [0,1]
+    //! random float in [0,1]
     virtual float randfloat() = 0;
 
-    //random double in [0,1]
+    //! random double in [0,1]
     virtual double randdouble() = 0;
 
-    //random double in [0,1)
+    //! random double in [0,1)
     virtual double randDoubleOneExcluded() = 0;
 
-    //random int in [0,n)
+    //! random int in [0,n)
     virtual int randint(int n) = 0;
 
-    // return -1 or 1 randonly
+    //! return -1 or 1 randonly
     virtual int randPositiveNegative() = 0;
 
-    //random boolean
+    //! random boolean
     virtual bool randbool() = 0;
 };
 

@@ -36,6 +36,15 @@ namespace opencog {
 using boost::adaptors::map_values;
 
 //! Class that mimics python Counter container
+/**
+ * This is basically a dictionary of key:count values. 
+ * Given following pseudocode:
+ * @code
+ * for word in ['red', 'blue', 'red', 'green', 'blue', 'blue']:
+ *   cnt[word] += 1
+ * @endcode
+ * the counter will hold 'blue': 3, 'red': 2, 'green': 1
+ */
 template<typename T, typename CT>
 class Counter : public std::map<T, CT>,
     boost::addable<Counter<T, CT>>
