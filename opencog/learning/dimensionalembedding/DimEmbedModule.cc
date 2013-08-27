@@ -48,17 +48,19 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DimEmbedModule] constructor");
     this->as = &_cogserver.getAtomSpace();
-    as->atomSpaceAsync->
+    addedAtomConnection = as->atomSpaceAsync->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));
-    as->atomSpaceAsync->
+    removedAtomConnection = as->atomSpaceAsync->
         removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
                                      this, _1, _2));
 }
 
 DimEmbedModule::~DimEmbedModule()
 {
-	logger().info("[DimEmbedModule] destructor");
+    logger().info("[DimEmbedModule] destructor");
+    addedAtomConnection.disconnect();   
+    removedAtomConnection.disconnect();
 }
 
 void DimEmbedModule::init()
