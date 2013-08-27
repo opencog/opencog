@@ -31,11 +31,9 @@
 using namespace opencog;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()                  { return SampleModule::info().id.c_str(); }
-extern "C" Module*     opencog_module_load()                { return new SampleModule(); }
-extern "C" void        opencog_module_unload(Module* m)     { delete m; }
+DECLARE_MODULE(SampleModule)
 
-SampleModule::SampleModule()
+SampleModule::SampleModule(CogServer& cs) : Module(cs)
 {
     logger().info("[SampleModule] constructor");
 }
@@ -43,28 +41,27 @@ SampleModule::SampleModule()
 SampleModule::~SampleModule()
 {
     logger().info("[SampleModule] destructor");
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.destroyAllAgents(SampleAgent::info().id);
+    _cogserver.destroyAllAgents(SampleAgent::info().id);
 }
 
 void SampleModule::init()
 {
     logger().info("[SampleModule] init");
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerAgent(SampleAgent::info().id, &factory);
-    cogserver.createAgent(SampleAgent::info().id, true);
+    _cogserver.registerAgent(SampleAgent::info().id, &factory);
+    _cogserver.createAgent(SampleAgent::info().id, true);
 }
 
-SampleAgent::SampleAgent() : Agent(100)
+SampleAgent::SampleAgent(CogServer& cs) : Agent(cs, 100)
 {
     logger().info("[SampleAgent] constructor");
 }
 
-SampleAgent::~SampleAgent() {
+SampleAgent::~SampleAgent()
+{
     logger().info("[SampleAgent] destructor");
 }
 
-void SampleAgent::run(CogServer* server)
+void SampleAgent::run()
 {
     logger().info("[SampleAgent] run");
 }
