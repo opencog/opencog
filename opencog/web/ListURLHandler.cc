@@ -77,6 +77,7 @@ void ListURLHandler::handleRequest( struct mg_connection *conn,
         }
     }
     // Get list parameters from URL if they exist
+    // take /list/x/ as wanting type x
     boost::regex reg("list/([^/]*)");
     boost::cmatch m;
     bool hasHandle;
@@ -86,7 +87,15 @@ void ListURLHandler::handleRequest( struct mg_connection *conn,
         params.push_back(typeName);
         hasHandle = true;
     }
-    if (!hasHandle) {
+    bool hasType=false;
+    if (!hasHandle){
+		// take /list?*type=x* as wanting type x
+		boost::regex typeSpecRegex("type=([^&]*)");
+		if (boost::regex_search(ri->query_string,m,typeSpecRegex)) {
+			hasType = true;
+		}
+    }
+    if (!hasHandle && !hasType) {
         std::string p;
         p = "type=Atom";
         params.push_back(p);
