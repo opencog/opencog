@@ -87,7 +87,7 @@ private:
     /**
      * Initialize feelingMetaMap etc.
      */
-    void init(opencog::CogServer * server);
+    void init();
 
     /**
      * Get corresponding EvaluationLink of the feeling 
@@ -97,21 +97,21 @@ private:
     /**
      * Run updaters (combo scripts)
      */
-    void runUpdaters(opencog::CogServer * server);
+    void runUpdaters();
 
     /**
      * Set updated values to AtomSpace
      */
-    void setUpdatedValues(opencog::CogServer * server);
+    void setUpdatedValues();
 
     /**
      * Send updated values to the virtual world where the pet lives
      */
-    void sendUpdatedValues(opencog::CogServer * server); 
+    void sendUpdatedValues(); 
 
 public:
 
-    PsiFeelingUpdaterAgent();
+    PsiFeelingUpdaterAgent(CogServer&);
     virtual ~PsiFeelingUpdaterAgent();
 
     virtual const ClassInfo& classinfo() const {
@@ -124,7 +124,7 @@ public:
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
-    void run(opencog::CogServer * server);
+    virtual void run();
 
     // After calling this function, the Agent will invoke its "init" method firstly 
     // in "run" function during its next cycle

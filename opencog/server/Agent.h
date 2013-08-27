@@ -101,6 +101,7 @@ class Agent : public AttentionValueHolder
 {
 
 protected:
+    CogServer& _cogserver;
 
     /** The agent's frequency. Determines how often the opencog server should
      *  schedule this agent. A value of 1 (the default) means that the agent
@@ -133,14 +134,14 @@ protected:
 public:
 
     /** Agent's constructor. By default, initializes the frequency to 1. */
-    Agent(const unsigned int f = 1);    
+    Agent(CogServer&, const unsigned int f = 1);    
 
     /** Agent's destructor */
     virtual ~Agent();
 
     /** Abstract run method. Should be overriden by a derived agent with the
      *  actual agent's behavior. */
-    virtual void run(CogServer* server) = 0;
+    virtual void run() = 0;
 
     /** Returns the agent's frequency. */
     virtual int frequency(void) const { return _frequency; }

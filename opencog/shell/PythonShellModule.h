@@ -65,10 +65,10 @@ private:
         false, false)
 
 public:
-    PythonShellModule();
+    PythonShellModule(CogServer&);
     ~PythonShellModule();
 
-    virtual const char *id(void);
+    static const char *id(void);
     virtual void init(void);
 };
 

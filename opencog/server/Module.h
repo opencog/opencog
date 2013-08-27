@@ -39,10 +39,10 @@ namespace opencog
     extern "C" const char* opencog_module_id(void) {                  \
        return "opencog::" #MODNAME;                                   \
     }                                                                 \
-    extern "C" Module * opencog_module_load(CogServer *cogserver) {   \
-       return new MODNAME();                                          \
+    extern "C" Module * opencog_module_load(CogServer& cogserver) {   \
+       return new MODNAME(cogserver);                                 \
     }                                                                 \
-    extern "C" void opencog_module_unload(Module * m) {               \
+    extern "C" void opencog_module_unload(Module* m) {                \
        delete m;                                                      \
     }                                                                 \
     inline const char * MODNAME::id(void) {                           \
@@ -69,7 +69,7 @@ namespace opencog
     namespace opencog {                                               \
     class MODNAME : public Module {                                   \
     public:                                                           \
-        MODNAME(void) {}                                              \
+        MODNAME(CogServer& cs) : Module(cs) {}                        \
         virtual ~MODNAME() {}                                         \
         const char * id(void);                                        \
         virtual void init(void) {}                                    \
@@ -143,11 +143,21 @@ public:
     }
 
     typedef const char* IdFunction    (void);
-    typedef Module*     LoadFunction  (CogServer*);
+    typedef Module*     LoadFunction  (CogServer&);
     typedef void        UnloadFunction(Module*);
 
-    virtual ~Module() {};
+    Module(CogServer& cs) : _cogserver(cs) {}
+    virtual ~Module() {}
     virtual void init() = 0;
+
+protected: 
+    // Keep a copy of the server we were created with. This is needed
+    // to avoid a race condition when the cogserver destructor is
+    // called  -- when in the destructor, the server() global function
+    // will return NULL, and thus any module that needs the server will
+    // not be able to get at it.  This solves that problem.  Besides,
+    // using globals is a bad idea, in general.
+    CogServer& _cogserver;
 
 }; // class
 

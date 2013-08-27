@@ -112,13 +112,13 @@ const char* PLNModule::usageInfo =
     " loop-check         - check for loops\n";
 
 
-PLNModule::PLNModule() : Module()
+PLNModule::PLNModule(CogServer& cs) : Module(cs)
 {
     logger().info("[PLNModule] constructor");
     setParameters(DEFAULT());
     do_pln_register();  
-    cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
-    cogserver().registerAgent(ForwardChainingAgent::info().id, &forwardChainingFactory);
+    _cogserver.registerAgent(BackChainingAgent::info().id, &backChainingFactory);
+    _cogserver.registerAgent(ForwardChainingAgent::info().id, &forwardChainingFactory);
 }
 
 void PLNModule::setParameters(const std::string* params) {
@@ -129,11 +129,12 @@ void PLNModule::setParameters(const std::string* params) {
     }
 }
 
-PLNModule::~PLNModule() {
+PLNModule::~PLNModule()
+{
     logger().info("[PLNModule] destructor");
     do_pln_unregister();
-    cogserver().unregisterAgent(BackChainingAgent::info().id);
-    cogserver().unregisterAgent(ForwardChainingAgent::info().id);
+    _cogserver.unregisterAgent(BackChainingAgent::info().id);
+    _cogserver.unregisterAgent(ForwardChainingAgent::info().id);
 }
 
 // state variables for running multiple PLNShell commands.
@@ -149,7 +150,7 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
     
     // Make sure that the ASW is initialized on module load
-    AtomSpaceWrapper* asw = ASW(&server().getAtomSpace());
+    AtomSpaceWrapper* asw = ASW(&_cogserver.getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  

@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-LoadModuleRequest::LoadModuleRequest()
+LoadModuleRequest::LoadModuleRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -51,9 +51,8 @@ bool LoadModuleRequest::execute()
         return false;
     }
     std::string& filename = _parameters.front();
-    CogServer& cogserver = static_cast<CogServer&>(server());
 
-    if (cogserver.loadModule(filename)) {
+    if (_cogserver.loadModule(filename)) {
         oss << "done" << std::endl;
         send(oss.str());
         return true;

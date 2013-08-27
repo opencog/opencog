@@ -31,13 +31,13 @@ ActionSelectionAgent::~ActionSelectionAgent()
 {
 }
 
-ActionSelectionAgent::ActionSelectionAgent()
+ActionSelectionAgent::ActionSelectionAgent(CogServer& cs) : Agent(cs)
 {
     lastTickTime = 0;
 }
 
-void ActionSelectionAgent::run(opencog::CogServer *server)
+void ActionSelectionAgent::run()
 {
     logger().debug("ActionSelectionAgent - Executing schemaSelection().");
-    ((OAC *) server)->schemaSelection();
+    dynamic_cast<OAC*>(&_cogserver)->schemaSelection();
 }

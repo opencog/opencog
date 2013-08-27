@@ -30,6 +30,7 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 namespace opencog
 {
@@ -49,7 +50,7 @@ public:
         return _cci;
     }
 
-    SleepRequest();
+    SleepRequest(CogServer&);
     virtual ~SleepRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}

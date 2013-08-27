@@ -143,8 +143,7 @@ namespace opencog
     public:
         const char* id();
 
-        DimEmbedModule(AtomSpace* atomSpace);
-        DimEmbedModule();
+        DimEmbedModule(CogServer&);
         virtual ~DimEmbedModule();
         virtual void init();
 

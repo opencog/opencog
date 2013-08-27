@@ -29,6 +29,7 @@
 #include <string>
 
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 namespace opencog
 {
@@ -48,7 +49,7 @@ public:
         return _cci;
     }
 
-    ShutdownRequest();
+    ShutdownRequest(CogServer&);
     virtual ~ShutdownRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}

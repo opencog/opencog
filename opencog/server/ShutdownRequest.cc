@@ -30,7 +30,7 @@
 
 using namespace opencog;
 
-ShutdownRequest::ShutdownRequest()
+ShutdownRequest::ShutdownRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -45,8 +45,7 @@ bool ShutdownRequest::execute()
         oss << "Shutting down cogserver" << std::endl;
     send(oss.str());
 
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.stop();
+    _cogserver.stop();
     _requestResult->Exit();
     _requestResult = NULL;
 

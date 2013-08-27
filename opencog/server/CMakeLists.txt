@@ -110,6 +110,7 @@ INSTALL (FILES
 	SystemActivityTable.h
 	Registry.h
 	Request.h
+	RequestClassInfo.h
 	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h

@@ -136,7 +136,7 @@ private:
     void getActions(AtomSpace & atomSpace, Handle hStep, std::vector<Handle> & actions); 
 
     // Initialize demandGoalList etc.
-    void init(opencog::CogServer * server);
+    void init();
 
     // Add the list of demand goals in AtomSpace
     //
@@ -195,7 +195,7 @@ private:
 
 public:
 
-    PsiActionSelectionAgent();
+    PsiActionSelectionAgent(CogServer&);
     virtual ~PsiActionSelectionAgent();
 
     virtual const ClassInfo& classinfo() const {
@@ -208,8 +208,7 @@ public:
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
-    void run(opencog::CogServer * server);
-
+    virtual void run();
 
     // After calling this function, the Agent will invoke its "init" method firstly 
     // in "run" function during its next cycle
