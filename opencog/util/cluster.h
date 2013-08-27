@@ -30,6 +30,10 @@
 #ifndef	_C_CLUSTERING_LIBRARY_H
 #define	_C_CLUSTERING_LIBRARY_H
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 /** @name C Clustering Library
  * This library was written at the Laboratory of DNA Information Analysis,
  * Human Genome Center, Institute of Medical Science, University of Tokyo,
@@ -714,5 +718,6 @@ double* calculate_weights(int nrows, int ncolumns, double** data, int** mask,
 
 
 ///@}
+/** @}*/
 
 #endif /* _C_CLUSTERING_LIBRARY_H */

@@ -1,4 +1,4 @@
-/** iostreamContainer.h --- 
+/* iostreamContainer.h --- 
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -35,6 +35,9 @@
 #include "oc_assert.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
     /** @name IO stream container
      * functions to read, write, print or convert to string generic containers
@@ -290,5 +293,6 @@ namespace opencog {
     
     ///@}
 
+/** @}*/
 } // ~namespace opencog
 #endif // _OPENCOG_PRINTCONTAINER_H

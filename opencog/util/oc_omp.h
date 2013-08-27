@@ -1,4 +1,4 @@
-/** oc_omp.h --- 
+/* oc_omp.h --- 
  *
  * Copyright (C) 2011 Nil Geisweiller
  *
@@ -23,6 +23,10 @@
 
 #ifndef _OPENCOG_OC_OMP_H
 #define _OPENCOG_OC_OMP_H
+
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /** @name Multi-threading support
  *
@@ -65,8 +69,10 @@ unsigned num_threads();
 /// recursive functions
 std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs);
 
+///@}
+
+/** @}*/
 } // ~namespace opencog
 
-///@}
 
 #endif // _OPENCOG_OC_OMP_H

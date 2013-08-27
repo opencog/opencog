@@ -27,6 +27,9 @@
 
 // needed by CHECK_FREAD
 #include <boost/current_function.hpp>
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! helper to create strings at compile time
 #define STRINGIFY(x) #x
@@ -47,4 +50,5 @@
     { if ( !b_read ) throw IOException(TRACE_INFO, "%s - failed to read.", BOOST_CURRENT_FUNCTION ); }
 
 
+/** @}*/
 #endif // _OPENCOG_MACROS_H

@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! a lazy random selector without replacement
 /**
@@ -44,6 +47,7 @@ private:
     opencog::RandGen& rng;
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif

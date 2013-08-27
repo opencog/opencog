@@ -6,6 +6,9 @@
 #include <boost/version.hpp>
 
 namespace boost {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 // Work-around for bug, see
 // https://svn.boost.org/trac/boost/ticket/6131  for details.
@@ -57,5 +60,7 @@ namespace opencog {
 
 #define foreach BOOST_FOREACH
 #define reverse_foreach BOOST_REVERSE_FOREACH
+
+/** @}*/
 
 #endif

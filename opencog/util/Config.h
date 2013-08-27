@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 class Config;
 
@@ -124,6 +127,7 @@ public:
 Config& config(ConfigFactory* = Config::createInstance,
                bool overwrite = false);
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_CONFIG_H

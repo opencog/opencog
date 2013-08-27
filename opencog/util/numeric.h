@@ -44,6 +44,10 @@
 
 #include "iostreamContainer.h"
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 // These and many other constants are in <math.h>
 #define PI          M_PI  // 3.1415926535897932384626433832795029L
 #define EXPONENTIAL M_E   // 2.7182818284590452353602874713526625L
@@ -522,6 +526,7 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
         return 0;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_NUMERIC_H

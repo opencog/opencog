@@ -1,4 +1,4 @@
-/** MannWhitneyU.h --- 
+/* MannWhitneyU.h --- 
  *
  * Copyright (C) 2012 Nil Geisweiller
  *
@@ -30,6 +30,9 @@
 #include "ranking.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 using boost::adaptors::map_values;
 
@@ -71,6 +74,7 @@ FloatT standardizedMannWhitneyU(const Counter<Key, FloatT>& c1,
     return (U - mU) / sU;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_MANNWHITNEYU_H
