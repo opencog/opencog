@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Functor returning the address of an object pointed by an iterator.
 /**
@@ -81,6 +84,7 @@ struct obj_ptr_cmp {
     }
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif // _OPENCOG_HASHING_H

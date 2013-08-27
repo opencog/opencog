@@ -33,6 +33,9 @@
 
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
     /** @name KLD
      * Functions to compute the Kullback-Leibler Divergence of discrete
@@ -203,7 +206,7 @@ typename SortedSeq::value_type KLD(const SortedSeq& p, const SortedSeq& q) {
 }
     
 ///@}
-
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_KLD_H

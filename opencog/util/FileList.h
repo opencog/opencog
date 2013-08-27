@@ -29,6 +29,9 @@
 #include <vector>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! a list of files
 /**
@@ -85,6 +88,7 @@ public:
     const char* getFile(unsigned int) throw (IndexErrorException);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif /* OPENCOG_FILE_LIST_H */

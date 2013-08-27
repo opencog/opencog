@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! interface for random generators
 class RandGen
@@ -64,6 +67,7 @@ public:
     virtual bool randbool() = 0;
 };
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_RAND_GEN_H

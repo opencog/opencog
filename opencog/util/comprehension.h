@@ -1,4 +1,4 @@
-/** comprehension.h --- 
+/* comprehension.h --- 
  *
  * Copyright (C) 2012 Nil Geisweiller
  *
@@ -30,6 +30,9 @@
 #include <opencog/util/functional.h>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /** @name Container comprehension constructors
  * I didn't find anything satisfactory here
@@ -153,7 +156,7 @@ auto list_comp(const Container& c, const Function& func,
 }
 
 ///@}
-
+/** @}*/
 
 #endif // _OPENCOG_COMPREHENSION_H
 

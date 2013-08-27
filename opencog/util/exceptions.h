@@ -34,6 +34,9 @@
 
 namespace opencog 
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /**
  * Base exception class from which all other exceptions should inheritates.
@@ -301,6 +304,7 @@ public:
     AssertionException(const char* fmt, va_list ap) throw();
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_EXCEPTIONS_H

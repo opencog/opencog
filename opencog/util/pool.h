@@ -30,6 +30,9 @@
 #include <condition_variable>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Thread-safe blocking resource allocator.
 /// If there are no resources to borrow, then the borrow() method will
@@ -81,6 +84,7 @@ class pool
 };
 
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_UTIL_POOL_H

@@ -91,6 +91,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 class MT19937RandGen : public RandGen
 {
@@ -181,6 +184,7 @@ public:
 //! singleton instance (following Meyer's design pattern)
 RandGen& randGen();
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MT19937AR_H

@@ -28,6 +28,9 @@
 #include <sstream>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Returns a string from the given argument by using the << operator
 template <typename T>
@@ -81,7 +84,7 @@ public:
 
 }; // class
 
-
+/** @}*/
 }  // namespace
 
 #endif /*_OPENCOG_STRINGMANIPULATOR_H_*/

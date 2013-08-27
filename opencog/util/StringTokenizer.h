@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Tokenize a string and produce a std::vector list of items
 /**
@@ -96,6 +99,8 @@ private:
     std::string::size_type delimiterSize();
 
 }; // class
+
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_STRING_TOKENIZER_H

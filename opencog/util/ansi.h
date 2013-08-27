@@ -25,6 +25,9 @@
 
 #include <opencog/util/Config.h>
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //!@{
 //! color codes in ANSI
@@ -57,4 +60,5 @@ inline void ansi_cyan(std::string &s) { ansi_code(s,CYAN); }
 inline void ansi_white(std::string &s) { ansi_code(s,WHITE); }
 //!@}
 
+/** @}*/
 }

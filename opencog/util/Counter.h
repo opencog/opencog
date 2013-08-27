@@ -32,6 +32,9 @@
 #include <opencog/util/foreach.h>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 using boost::adaptors::map_values;
 
@@ -151,6 +154,7 @@ std::ostream& operator<<(std::ostream& out, const Counter<T, CT>& c)
     return out;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_COUNTER_H

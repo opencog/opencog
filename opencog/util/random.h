@@ -1,4 +1,4 @@
-/** random.h --- 
+/* random.h --- 
  *
  * Copyright (C) 2010 Novamente LLC
  *
@@ -31,10 +31,15 @@
 #include "numeric.h"
 
 /**
+ * \file random.h
+ *
  * This file contains a collection of random generators based on RandGen
  */
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! choose uniformly randomly an element of the set s
 /// \warning it is assumed that s is non-empty
@@ -71,6 +76,7 @@ static inline bool biased_randbool(float b, RandGen& rng = randGen()) {
     return b > rng.randfloat();
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_RANDOM_H

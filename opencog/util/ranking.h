@@ -1,4 +1,4 @@
-/** ranking.h --- 
+/* ranking.h --- 
  *
  * Copyright (C) 2012 Nil Geisweiller
  *
@@ -27,6 +27,9 @@
 #include "Counter.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Return a rank given a counter. Ties ranks are averaged.
 /**
@@ -44,6 +47,7 @@ Counter<Key, FloatT> ranking(const Counter<Key, FloatT>& counter) {
     return res;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_RANKING_H

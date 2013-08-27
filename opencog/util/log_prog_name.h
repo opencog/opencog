@@ -1,4 +1,4 @@
-/** log_prog_name.h --- 
+/* log_prog_name.h --- 
  *
  * Copyright (C) 2011 OpenCog Foundation
  *
@@ -27,6 +27,9 @@
 #include "iostreamContainer.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /**
  * This file contains a little function to determine a log file name
@@ -63,6 +66,7 @@ std::string determine_log_name(const std::string& log_file_prefix,
                                const std::set<std::string>& ignore_opt,
                                const std::string& log_file_suffix = ".log");
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_LOG_PROG_NAME_H

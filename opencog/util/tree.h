@@ -84,6 +84,9 @@
 // so here is a copy.
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 namespace kp {
 
@@ -3246,6 +3249,7 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     return  in;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif

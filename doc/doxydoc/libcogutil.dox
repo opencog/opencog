@@ -9,6 +9,9 @@ found no place elsewhere. To build it use:
 make cogutil
 @endcode
 
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_cogutil "the comprehensive overview".
+
 \section sect_files Algorithms
 
 - algorithm.h hosts small templated functions like for_each(),
@@ -168,5 +171,18 @@ ignored by doxygen; used as markers for update-links.py;
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
 \endif
+*/
+
+/**
+\defgroup grp_cogutil cogutil library
+
+This library (<em>opencog/util</em>) groups various pices of support code that
+found no place elsewhere. To build it use:
+@code
+make cogutil
+@endcode
+
+To read a high level overview of this library head to 
+\ref libcogutil "dedicated page".
 */
 } //~namespace opencog

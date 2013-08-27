@@ -27,6 +27,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! recent_val is a value that can update which also
 //! keeps a exponential decaying record of it's recent value
@@ -52,6 +55,8 @@ template<class ValueType> struct recent_val {
         recent = ((decay) * val) + ((1.0f - decay) * recent);
     }
 };
+
+/** @}*/
 }
 
 #endif // _OPENCOG_RECENT_VAL_H

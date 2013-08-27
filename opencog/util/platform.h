@@ -41,6 +41,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 struct eqstr {
     bool operator()(char *s1, char *s2) const {
@@ -93,6 +96,7 @@ uint64_t getFreeRAM();
 //! return the OS username
 const char* getUserName();
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_PLATFORM_H

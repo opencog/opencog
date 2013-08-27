@@ -28,6 +28,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! apply lazy_selector but the select method returns always the same
 //! number, created for testing
@@ -42,6 +45,7 @@ public:
     unsigned int select();
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif
