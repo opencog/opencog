@@ -99,7 +99,7 @@ bool State::isSatisfiedMe( ParamValue& value, float &satisfiedDegree,  State *or
 // pls make sure the goal describes the same state content with this state first
 bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_state)
 {
-    if ((goal.stateType == stateType)&&(stateVariable == goal.stateVariable))
+    if ((goal.stateType == stateType)&&(stateVariable->getValue() == goal.stateVariable->getValue()))
     {
        satisfiedDegree = 1.0f;
        return true;
