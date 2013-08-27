@@ -74,7 +74,11 @@ bool GetAtomRequest::execute()
         }
     }
     if (!as.isValidHandle(handle)) {
-        _output << "Invalid handle: " << handle.value() << std::endl;
+	if(output_format!=json_format){
+	    _output << "Invalid handle: " << handle.value() << std::endl;
+	}else{
+	    _output << "{\"error\": \"Invalid handle "<<handle.value()<<"\"}"<<std::endl;
+	}
         send(_output.str());
         return false;
     }
