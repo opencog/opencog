@@ -65,8 +65,8 @@ protected:
 
 public:
 
-    OCPlanningAgent();
-    void init(opencog::CogServer * server);
+    OCPlanningAgent(CogServer&);
+    void init();
 
     virtual ~OCPlanningAgent();
 
@@ -80,8 +80,7 @@ public:
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
-    void run(opencog::CogServer * server);
-
+    virtual void run();
 
     // After calling this function, the Agent will invoke its "init" method firstly
     // in "run" function during its next cycle

@@ -247,7 +247,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
     if (args.size() == 0) {
         for (std::vector<Agent*>::const_iterator it = agents.begin();
              it != agents.end(); ++it) {
-            (*it)->run(&_cogserver);
+            (*it)->run();
         }
         return "Ran a step of each active agent";
     } else {
@@ -267,7 +267,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
                 // construct a temporary agent
                 agent = _cogserver.createAgent(*it, false);
                 if (agent) {
-                    agent->run(&_cogserver);
+                    agent->run();
                     _cogserver.destroyAgent(agent);
                     numberAgentsRun++;
                 } else {
@@ -275,7 +275,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
                 }
             } else {
                 agent = *tmp;
-                agent->run(&_cogserver);
+                agent->run();
             }
         }
         std::stringstream returnMsg;

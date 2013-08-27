@@ -31,7 +31,6 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
 
 #include "Ubigrapher.h"
 

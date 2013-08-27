@@ -277,7 +277,7 @@ void CogServer::runAgent(Agent *agent)
                    agent->classinfo().id.c_str(),  this->cycleCount);
 
     agent->resetUtilizedHandleSets();
-    agent->run(this);
+    agent->run();
 
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
@@ -337,7 +337,7 @@ std::list<const char*> CogServer::agentIds() const
 
 Agent* CogServer::createAgent(const std::string& id, const bool start)
 {
-    Agent* a = Registry<Agent>::create(id);
+    Agent* a = Registry<Agent>::create(*this, id);
     if (a && start) startAgent(a);
     return a; 
 }
@@ -417,7 +417,7 @@ bool CogServer::unregisterRequest(const std::string& name)
 
 Request* CogServer::createRequest(const std::string& name)
 {
-    return Registry<Request>::create(name);
+    return Registry<Request>::create(*this, name);
 }
 
 const RequestClassInfo& CogServer::requestInfo(const std::string& name) const

@@ -60,10 +60,10 @@ public:
     }
 
     ~GoldStdReaderAgent();
-    GoldStdReaderAgent();
+    GoldStdReaderAgent(CogServer&);
     void init(const char* goldStdFilename);
 
-    void run(CogServer *server);
+    void run();
 
 }; // class
 }  // namespace

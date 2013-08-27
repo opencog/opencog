@@ -46,7 +46,7 @@ using namespace opencog;
 using namespace json_spirit;
 using namespace std;
 
-CreateAtomRequest::CreateAtomRequest()
+CreateAtomRequest::CreateAtomRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -65,7 +65,7 @@ bool CreateAtomRequest::execute()
 {
     std::string& data = _parameters.front();
     decode(data);
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;

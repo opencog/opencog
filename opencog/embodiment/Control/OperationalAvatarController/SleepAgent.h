@@ -46,10 +46,10 @@ public:
         return _ci;
     }
 
-    ~SleepAgent();
-    SleepAgent();
+    virtual ~SleepAgent();
+    SleepAgent(CogServer&);
 
-    void run(CogServer *oac);
+    virtual void run();
 
 }; // class
 

@@ -34,11 +34,12 @@ using std::endl;
 
 namespace opencog
 {
-ForwardChainingAgent::ForwardChainingAgent() { }
+ForwardChainingAgent::ForwardChainingAgent(CogServer& cs) : Agent(cs) { }
 
 ForwardChainingAgent::~ForwardChainingAgent() { }
 
-void ForwardChainingAgent::run(CogServer *server) {
+void ForwardChainingAgent::run()
+{
 	// More of this should be / is done elsewhere
 
 	cout << "FWBETA Starting chaining:" << endl;

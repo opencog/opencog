@@ -61,17 +61,17 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 
 // Factories
 
-Agent* PythonAgentFactory::create() const
+Agent* PythonAgentFactory::create(CogServer& cs) const
 {
     logger().info() << "Creating python agent " << _pySrcModuleName << "." << _pyClassName;
-    PyMindAgent* pma = new PyMindAgent(_pySrcModuleName, _pyClassName);
+    PyMindAgent* pma = new PyMindAgent(cs, _pySrcModuleName, _pyClassName);
     return pma;
 }
 
-Request* PythonRequestFactory::create() const
+Request* PythonRequestFactory::create(CogServer& cs) const
 {
     logger().info() << "Creating python request " << _pySrcModuleName << "." << _pyClassName;
-    PyRequest* pma = new PyRequest(_pySrcModuleName, _pyClassName, _cci);
+    PyRequest* pma = new PyRequest(cs, _pySrcModuleName, _pyClassName, _cci);
     return pma;
 }
 

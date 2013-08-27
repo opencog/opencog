@@ -62,7 +62,5 @@ AtomSpace& BaseServer::getAtomSpace()
 BaseServer& opencog::server(BaseServer* (*factoryFunction)())
 {
     static std::unique_ptr<BaseServer> instance((*factoryFunction)());
-BaseServer& x = *instance;
-logger().debug("duuuude wtf instance is %p\n", &x);
     return *instance;
 }

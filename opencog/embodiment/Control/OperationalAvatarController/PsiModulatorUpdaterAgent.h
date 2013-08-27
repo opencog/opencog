@@ -142,13 +142,13 @@ private:
 #endif    
 
     // Initialize modulatorList etc.
-    void init(opencog::CogServer * server);
+    void init();
 
     bool bInitialized; 
 
 public:
 
-    PsiModulatorUpdaterAgent();
+    PsiModulatorUpdaterAgent(CogServer&);
     virtual ~PsiModulatorUpdaterAgent();
 
     virtual const ClassInfo& classinfo() const {
@@ -161,7 +161,7 @@ public:
     }
 
     // Entry of the Agent, CogServer will invoke this function during its cycle
-    void run(opencog::CogServer * server);
+    virtual void run();
 
     // After calling this function, the Agent will invoke its "init" method firstly 
     // in "run" function during its next cycle

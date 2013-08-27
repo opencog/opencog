@@ -33,6 +33,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/Request.h>
 #include <opencog/util/mt19937ar.h>
 
 

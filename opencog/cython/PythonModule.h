@@ -34,7 +34,7 @@ public:
     {
         delete _ci;
     }
-    virtual Agent* create() const;
+    virtual Agent* create(CogServer&) const;
     virtual const ClassInfo& info() const { return *_ci; }
 };
 
@@ -61,7 +61,7 @@ public:
     {
         delete _cci;
     }
-    virtual Request* create() const;
+    virtual Request* create(CogServer&) const;
     virtual const ClassInfo& info() const { return *_cci; }
 };
 
