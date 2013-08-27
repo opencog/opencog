@@ -48,17 +48,19 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DimEmbedModule] constructor");
     this->as = &_cogserver.getAtomSpace();
-    as->atomSpaceAsync->
+    addedAtomConnection = as->atomSpaceAsync->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));
-    as->atomSpaceAsync->
+    removedAtomConnection = as->atomSpaceAsync->
         removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
                                      this, _1, _2));
 }
 
 DimEmbedModule::~DimEmbedModule()
 {
-	logger().info("[DimEmbedModule] destructor");
+    logger().info("[DimEmbedModule] destructor");
+    addedAtomConnection.disconnect();   
+    removedAtomConnection.disconnect();
 }
 
 void DimEmbedModule::init()
@@ -91,8 +93,8 @@ void DimEmbedModule::init()
 #endif
 }
 
-const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
-                                                          const Type& l,
+const std::vector<double>& DimEmbedModule::getEmbedVector(Handle h,
+                                                          Type l,
                                                           bool fanin) const
 {
     if (!classserver().isLink(l))
@@ -125,7 +127,7 @@ const std::vector<double>& DimEmbedModule::getEmbedVector(const Handle& h,
     }
 }
 
-HandleSeq& DimEmbedModule::getPivots(const Type& l, bool fanin)
+HandleSeq& DimEmbedModule::getPivots(Type l, bool fanin)
 {
     if (!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -145,7 +147,7 @@ HandleSeq& DimEmbedModule::getPivots(const Type& l, bool fanin)
     }
 }
 
-HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int k, bool fanin)
+HandleSeq DimEmbedModule::kNearestNeighbors(Handle h, Type l, int k, bool fanin)
 {
     if (!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -185,7 +187,7 @@ HandleSeq DimEmbedModule::kNearestNeighbors(const Handle& h, const Type& l, int 
     return results;
 }
 
-void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool fanin)
+void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -283,7 +285,7 @@ void DimEmbedModule::addPivot(const Handle& h, const Type& linkType, bool fanin)
     }
 }
 
-Handle DimEmbedModule::pickPivot(const Type& linkType, HandleSeq& nodes, bool fanin)
+Handle DimEmbedModule::pickPivot(Type linkType, HandleSeq& nodes, bool fanin)
 {
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
 
@@ -311,8 +313,8 @@ Handle DimEmbedModule::pickPivot(const Type& linkType, HandleSeq& nodes, bool fa
     return bestChoice;
 }
 
-void DimEmbedModule::embedAtomSpace(const Type& linkType,
-                                    const int _numDimensions)
+void DimEmbedModule::embedAtomSpace(Type linkType,
+                                    int _numDimensions)
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -379,18 +381,19 @@ void DimEmbedModule::embedAtomSpace(const Type& linkType,
     //logger().info("done embedding");
 }
 
-std::vector<double> DimEmbedModule::addNode(const Handle& h,
-                                            const Type& linkType,
+std::vector<double> DimEmbedModule::addNode(Handle h,
+                                            Type linkType,
                                             AtomSpaceImpl* a)
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
-            "DimensionalEmbedding requires link type, not %s",
+            "DimensionalEmbedding requires link type, not %d \"%s\"",
+            linkType,
             classserver().getTypeName(linkType).c_str());
     if (!isEmbedded(linkType)) {
         const char* tName = classserver().getTypeName(linkType).c_str();
-        logger().error("No embedding exists for type %s", tName);
-        throw std::string("No embedding exists for type %s", tName);
+        logger().error("No embedding exists for type \"%s\"", tName);
+        throw std::string("No embedding exists for type \"%s\"", tName);
     }
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
     std::vector<double> newEmbedding (dimensionMap[linkType], 0.0);
@@ -441,8 +444,8 @@ std::vector<double> DimEmbedModule::addNode(const Handle& h,
     return newEmbedding;
 }
 
-void DimEmbedModule::removeNode(const Handle& h,
-                                const Type& linkType)
+void DimEmbedModule::removeNode(Handle h,
+                                Type linkType)
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -475,8 +478,8 @@ void DimEmbedModule::removeNode(const Handle& h,
     }
 }
 
-void DimEmbedModule::addLink(const Handle& h,
-                             const Type& linkType,
+void DimEmbedModule::addLink(Handle h,
+                             Type linkType,
                              AtomSpaceImpl* a)
 {
     if (!classserver().isLink(linkType))
@@ -493,8 +496,8 @@ void DimEmbedModule::addLink(const Handle& h,
     else asymAddLink(h,linkType,a);
 }
 
-void DimEmbedModule::symAddLink(const Handle& h,
-                                const Type& linkType,
+void DimEmbedModule::symAddLink(Handle h,
+                                Type linkType,
                                 AtomSpaceImpl* a)
 {
     EmbedTreeMap::iterator treeMapIt = embedTreeMap.find(linkType);
@@ -524,8 +527,8 @@ void DimEmbedModule::symAddLink(const Handle& h,
     }
 }
 
-void DimEmbedModule::asymAddLink(const Handle& h,
-                                 const Type& linkType,
+void DimEmbedModule::asymAddLink(Handle h,
+                                 Type linkType,
                                  AtomSpaceImpl* a)
 {
     AsymEmbedTreeMap::iterator treeMapIt = asymEmbedTreeMap.find(linkType);
@@ -571,7 +574,7 @@ void DimEmbedModule::asymAddLink(const Handle& h,
     if (sourceChanged) cTreeForw.insert(CoverTreePoint(source, sourceVecForw));
 }
 
-void DimEmbedModule::clearEmbedding(const Type& linkType)
+void DimEmbedModule::clearEmbedding(Type linkType)
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -594,7 +597,7 @@ void DimEmbedModule::clearEmbedding(const Type& linkType)
     dimensionMap.erase(linkType);
 }
 
-void DimEmbedModule::logAtomEmbedding(const Type& linkType)
+void DimEmbedModule::logAtomEmbedding(Type linkType)
 {
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
     AtomEmbedding atomEmbedding;
@@ -660,7 +663,7 @@ void DimEmbedModule::printEmbedding()
     std::cout << oss.str();
 }
 
-bool DimEmbedModule::isEmbedded(const Type& linkType) const
+bool DimEmbedModule::isEmbedded(Type linkType) const
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -674,7 +677,7 @@ bool DimEmbedModule::isEmbedded(const Type& linkType) const
     return false;
 }
 
-ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npass, bool pivotWise)
+ClusterSeq DimEmbedModule::kMeansCluster(Type l, int numClusters, int npass, bool pivotWise)
 {
     if (!isEmbedded(l)) {
         const char* tName = classserver().getTypeName(l).c_str();
@@ -791,7 +794,7 @@ ClusterSeq DimEmbedModule::kMeansCluster(const Type& l, int numClusters, int npa
     return clusters;
 }
 
-void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
+void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
                                        double threshold, int kPasses)
 {
     const AtomEmbedding& aE = atomMaps[l];
@@ -866,7 +869,7 @@ void DimEmbedModule::addKMeansClusters(const Type& l, int maxClusters,
 }
 
 double DimEmbedModule::homogeneity(const HandleSeq& cluster,
-                                   const Type& linkType) const
+                                   Type linkType) const
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -892,7 +895,7 @@ double DimEmbedModule::homogeneity(const HandleSeq& cluster,
 }
 
 double DimEmbedModule::separation(const HandleSeq& cluster,
-                                  const Type& linkType) const
+                                  Type linkType) const
 {
     if (!classserver().isLink(linkType))
         throw InvalidParamException(TRACE_INFO,
@@ -925,8 +928,8 @@ double DimEmbedModule::separation(const HandleSeq& cluster,
     return minDist;
 }
 
-Handle DimEmbedModule::blendNodes(const Handle& n1,
-                                  const Handle& n2, const Type& l)
+Handle DimEmbedModule::blendNodes(Handle n1,
+                                  Handle n2, Type l)
 {
     if (!classserver().isLink(l))
         throw InvalidParamException(TRACE_INFO,
@@ -984,9 +987,9 @@ double DimEmbedModule::euclidDist(double v1[], double v2[], int size)
     return dist;
 }
 
-double DimEmbedModule::euclidDist(const Handle& h1,
-                                  const Handle& h2,
-                                  const Type& l,
+double DimEmbedModule::euclidDist(Handle h1,
+                                  Handle h2,
+                                  Type l,
                                   bool fanin)
 {
     if (!classserver().isLink(l))
