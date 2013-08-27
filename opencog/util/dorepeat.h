@@ -21,6 +21,9 @@
  */
 
 #ifndef dorepeat
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //!@{
 //! helper for dorepeat(n)
@@ -37,5 +40,7 @@
  */
 #define dorepeat(N) \
     for (unsigned int __DOREPEAT_UNIQUE_NAME=N; __DOREPEAT_UNIQUE_NAME>0;--__DOREPEAT_UNIQUE_NAME)
+
+/** @}*/
 
 #endif

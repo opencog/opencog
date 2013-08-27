@@ -18,6 +18,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 using __gnu_cxx::select1st;
 using __gnu_cxx::select2nd;
 using __gnu_cxx::identity;
@@ -251,6 +255,7 @@ struct toFunc {
     const M& m;
 };
 
+/** @}*/
 } //~namespace opencog;
 
 #endif

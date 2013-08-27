@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 struct tournament_selection
 {
@@ -142,6 +145,7 @@ private:
     std::vector<int> _aritySums;
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif

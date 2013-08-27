@@ -28,10 +28,11 @@
 #include <sstream>
 
 namespace opencog {
-
-/**
- * Returns a string from the given argument by using the << operator
+/** \addtogroup grp_cogutil
+ *  @{
  */
+
+//! Returns a string from the given argument by using the << operator
 template <typename T>
 std::string toString(T data)
 {
@@ -40,34 +41,30 @@ std::string toString(T data)
     return oss.str();
 }
 
+//! container for string-related static methods
 class StringManipulator {
 
 public:
 
+    //! Convert a string to upper case
     /**
-     * Convert a string to upper case
-     *
      * @param str The string to be converted in upper cases
      * @return The string converted
      */
     static std::string toUpper(const std::string& str);
 
+    //! Convert a string to lower case
     /**
-     * Convert a string to lower case
-     *
      * @param str The string to be converted in lower cases
      * @return The string converted
      */
     static std::string toLower(const std::string& str);
 
-    /**
-     * Clean the string
-     */
+    //! Clean the string
     static std::string clean(const std::string& str);
 
+    //! Split the string according to the passed delimiter
     /**
-     * Split the string according to the passed delimiter
-     *
      * @param str The string to be split
      * @param delimiter The delimiter used to split the string. Blank space
      *                  is default.
@@ -75,14 +72,11 @@ public:
      */
     static std::vector<std::string> split(std::string& str, const std::string& delimiter = " ");
 
-    /**
-     * Trim the given string
-     */
+    //! Trim the given string
     static void trim(std::string& str);
 
+    //! Check if a string is a number or not.
     /**
-     * Check if a string is a number or not.
-     *
      * @param str The string to be checked
      * @return True if it is a number and false if not
      */
@@ -90,7 +84,7 @@ public:
 
 }; // class
 
-
+/** @}*/
 }  // namespace
 
 #endif /*_OPENCOG_STRINGMANIPULATOR_H_*/

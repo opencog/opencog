@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! directed graph, each node is represented by an unsigned int
 struct digraph {
@@ -116,6 +119,7 @@ Out randomized_topological_sort(digraph g, Out out)
     return out;
 }
 
+/** @}*/
 } //~namespace opencog
 
 #endif

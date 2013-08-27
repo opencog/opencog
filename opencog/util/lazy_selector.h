@@ -31,6 +31,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 using boost::multi_index_container;
 using namespace boost::multi_index;
@@ -113,6 +116,7 @@ private:
     inline void modify_target(unsigned int src_to, unsigned int dst_to);
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif

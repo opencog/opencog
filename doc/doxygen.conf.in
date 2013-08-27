@@ -821,14 +821,18 @@ HTML_FILE_EXTENSION    = .html
 # The HTML_HEADER tag can be used to specify a personal HTML header for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard header.
-
-HTML_HEADER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/header.html
+#
+# An attempt to use custom header/footer was reverted because of differences
+# in handling $markers in different Doxugen versions ($navbar, for example);
+# a new attempt should look into these matters to see differences between 
+# versions and to define a minimum supported version
+# HTML_HEADER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/header.html
 
 # The HTML_FOOTER tag can be used to specify a personal HTML footer for 
 # each generated HTML page. If it is left blank doxygen will generate a 
 # standard footer.
 
-HTML_FOOTER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/footer.html
+# HTML_FOOTER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/footer.html
 
 # The HTML_STYLESHEET tag can be used to specify a user-defined cascading 
 # style sheet that is used by each HTML page. It can be used to 
@@ -836,11 +840,14 @@ HTML_FOOTER            = @CMAKE_SOURCE_DIR@/doc/doxydoc/footer.html
 # will generate a default style sheet. Note that doxygen will try to copy 
 # the style sheet file to the HTML output directory, so don't put your own 
 # stylesheet in the HTML output directory as well, or it will be erased!
-# HTML_STYLESHEET is deprecated
 #
-# will be either HTML_STYLESHEET or HTML_EXTRA_STYLESHEET, depending on version
-# (1.8.2)
-@DOXYGEN_CSS_VAR@
+# HTML_STYLESHEET is deprecated in newer version in favor of
+# HTML_EXTRA_STYLESHEET; because older versions do not support
+# HTML_EXTRA_STYLESHEET and an attempt to use CMake's VERSION_GREATER
+# only showed that it (VERSION_GREATER) is not supported in earlier 
+# versions, we stick to this solution for now
+# HTML_STYLESHEET = @CMAKE_SOURCE_DIR@/doc/doxydoc/customdoxygen.css
+# HTML_STYLESHEET = doxydoc/customdoxygen.css
 
 # If the HTML_ALIGN_MEMBERS tag is set to YES, the members of classes, 
 # files or namespaces will be aligned in HTML using tables. If set to 

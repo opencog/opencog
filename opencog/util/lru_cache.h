@@ -38,6 +38,9 @@
 #include "platform.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /** @name Generic caches
  * A colection of generic caches. Please be careful if you add more
@@ -682,7 +685,7 @@ protected:
 };
 
 ///@}
-
+/** @}*/
 } //~namespace opencog
 
 #endif

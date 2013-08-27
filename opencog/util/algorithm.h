@@ -12,6 +12,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /// @todo these needs to be changed for non-gcc
 using __gnu_cxx::copy_n;
@@ -306,6 +309,7 @@ Seq seq_filtered(const Seq& seq, const Indices& indices) {
 }
 
     
+/** @}*/
 } //~namespace opencog
 
 #endif

@@ -31,6 +31,10 @@
 #include <float.h>
 #include <iostream>
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 //! Cover Tree. Allows for insertion, removal, and k-nearest-neighbor queries.
 /**
  * https://github.com/DNCrane/Cover-Tree
@@ -706,5 +710,7 @@ bool CoverTree<Point>::isValidTree() const {
     }
     return true;
 }
+
+/** @}*/
 #endif // _COVER_TREE_H
  

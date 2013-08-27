@@ -28,6 +28,10 @@
 
 #include "exceptions.h"
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 /** @name Assertions
  *  Macro OC_ASSERT corresponding to opencog::cassert(TRACE_INFO, ...)
  *  if IGNORE_OC_ASSERT is not defined, and ignored otherwise.
@@ -58,8 +62,9 @@ void cassert(const char* trace, bool condition, const std::string& msg);
 //! cassert without message. Just trace information
 void cassert(const char * trace, bool condition);
 
+///@}
+/** @}*/
 } // namespace opencog
 
-///@}
 
 #endif

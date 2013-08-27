@@ -30,8 +30,14 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-/** Tokenize a string and produce a std::vector list of items */
+//! Tokenize a string and produce a std::vector list of items
+/**
+ * The cnstrctor spans the string and stores the result.
+ */
 class AltStringTokenizer : public std::vector<std::string>
 {
 public:
@@ -39,6 +45,12 @@ public:
     std::vector<std::string> WithoutEmpty() const;
 };
 
+//! Tokenize a string one call at a time
+/**
+ * The class does not store a list of parts. Instead, initial string and the
+ * delimiter are stored, along with a pair of pointers. Each time nextToken()
+ * is called the pointers are updated and a new token computed.
+ */
 class StringTokenizer
 {
 
@@ -58,10 +70,9 @@ public:
     std::string getString();
     void setString(const std::string &str);
 
-    /**
-     * Getter and setter for the delimiter to the tokens.
-     */
+    //! Getter for the delimiter to the tokens.
     const std::string & getDelimiter();
+    //! Setter for the delimiter to the tokens.
     void setDelimiter(const std::string &str);
 
     /**
@@ -70,25 +81,26 @@ public:
      */
     const std::string nextToken();
 
-    /**
-     * Reset the position pointers to init position.
-     */
+    //! Reset the position pointers to init position.
     void reset();
 
 private:
+    //! string to split
     std::string str;
+    //! delimiter to use
     std::string delimiter;
 
-    // start/end position pointers
+    //! start position pointer
     std::string::size_type start;
+    //! end position pointer
     std::string::size_type end;
 
-    /**
-     * Inform the delimiter size
-     */
+    //! Inform the delimiter size
     std::string::size_type delimiterSize();
 
 }; // class
+
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_STRING_TOKENIZER_H

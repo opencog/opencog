@@ -25,6 +25,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 //! Initializes the reference time that will be used for getting current elapsed times
 void initReferenceTime();
@@ -37,6 +40,7 @@ void initReferenceTime();
  */
 unsigned long getElapsedMillis();
 
+/** @}*/
 } // namespace opencog
 
 #endif //  OPENCOG_UTILS_TIME_H

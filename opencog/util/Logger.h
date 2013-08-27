@@ -44,7 +44,11 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
+//! logging evens
 class Logger
 {
 
@@ -309,6 +313,7 @@ private:
 // singleton instance (following Meyer's design pattern)
 Logger& logger();
 
+/** @}*/
 }  // namespace opencog
 
 #endif // _OPENCOG_LOGGER_H
