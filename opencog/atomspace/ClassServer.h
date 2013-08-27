@@ -128,6 +128,14 @@ public:
     bool isA_non_recursive(Type sub, Type super);
 
     /**
+     * Returns true if given class is a valid atm type.
+     *
+     * @param class.
+     * @return Whether a given class is valid.
+     */
+    bool isValid(Type t) { return isA(t, ATOM); }
+
+    /**
      * Returns true if given class is a Link.
      *
      * @param class.
