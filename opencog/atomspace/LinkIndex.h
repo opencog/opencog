@@ -30,6 +30,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
 /**
  * Implements an (type, HandleSeq) index array of RB-trees (C++ set)
  * That is, given both a type, and a HandleSeq, it returns a single,
@@ -51,6 +55,7 @@ class LinkIndex
         UnorderedHandleSet getHandleSet(Type type, const HandleSeq &, bool subclass) const;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_LINK_INDEX_H

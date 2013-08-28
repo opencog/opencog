@@ -29,6 +29,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
 class Link;
 
 /**
@@ -43,6 +47,7 @@ class TargetTypeIndex:
 		void removeAtom(const Atom*);
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_TARGETINDEX_H

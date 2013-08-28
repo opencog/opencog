@@ -26,10 +26,10 @@ def    readLayout(lay_p):
     crt_lev = 1
     # iterate in each line
     for lay_line in layout.split("\n"):
-        if ( len( lay_line ) == 0 ):
-            continue
         # text only
         lay_lcont = lay_line.strip()
+        if ( len( lay_lcont ) == 0 ):
+            continue
         # comments that start with #
         if ( lay_lcont.startswith( "#" ) ):
             continue
@@ -151,6 +151,7 @@ def    main():
     lay_p = "layout.ini"
     if (readLayout(lay_p)==False):
         return -1
+    # print( lay_tree )
     lay_tree.insert(0,[0,"main"])
     idx = 0
     for itr_lay in lay_tree:

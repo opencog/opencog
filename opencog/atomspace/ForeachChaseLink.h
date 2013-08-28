@@ -41,6 +41,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * This class is not meant for external use, it is meant to be a
@@ -342,6 +345,7 @@ inline bool foreach_unordered_binary_link(Handle h, Type ltype, bool (T::*cb)(Ha
 	return cl.follow_unordered_binary_link(h, ltype, cb, data);
 }
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_LINK_CHASE_H
