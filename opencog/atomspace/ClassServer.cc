@@ -120,7 +120,6 @@ boost::signal<void (Type)>& ClassServer::addTypeSignal()
 
 unsigned int ClassServer::getNumberOfClasses()
 {
-    boost::mutex::scoped_lock l(type_mutex);
     return nTypes;
 }
 
