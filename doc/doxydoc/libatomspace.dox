@@ -235,10 +235,3 @@ To read a high level overview of this library head to
 \ref libatomspace "dedicated page".
 */
 } //~namespace opencog
-
-
-./src/opencog/atomspace/ForeachChaseLink.h \
-./src/opencog/atomspace/ForeachTwo.h \
-
-
-

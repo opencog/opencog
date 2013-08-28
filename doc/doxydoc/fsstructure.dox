@@ -77,8 +77,7 @@ comboreduct/main; see \ref libcomboreduct "its page"</DD>
 
 <DT>cycl-import (stub)</DT>
 <DD>has a readme with infos about 
-<a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> 
-- a prototype opencyc-chatbot
+<a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> - a prototype opencyc-chatbot
 </DD>
 
 <DT>cython</DT>
