@@ -71,6 +71,10 @@ See also:
 
 \section sect_handles Handles
 
+Atoms are uniquely identified by a Handle. Pointers to Atoms should never be
+kept in any data structure other than the AtomTable. All references to atoms
+should proceed through handles via the AtomSpace API.
+
 A Handle stores an unique identifier. Lists are called HandleSeq and 
 HandleSeqSeq.
 HandleMap ia a red-black tree where keys are Handle's and values are templated.
@@ -138,9 +142,31 @@ RB-tree (C++ set)
 
 (note that <- symbol above simply means related somehow, not necesarly inherit)
 
-
 See also:
 - <a href="http://wiki.opencog.org/w/AtomTable">wiki entry</a> on atom table
+
+
+\section sect_atomspace The atom space
+The access to inner atom space is done either synchronously (via AtomSpace)
+or asynchronously (via AtomSpaceAsync). 
+
+The AtomSpace is an interface for the manipulation and storage of hypergraphs,
+and is the central knowledge representation system provided by the OpenCog
+Framework. The AtomSpace provides a generic interface for creating and deleting
+hypergraphs of Atom's (the superclass for Node's and Link's). Requests are 
+ASRequest derivates; \ref grp_atomspace_requess "here" is a comprehensive
+list of ASRequests.
+
+An AttentionBank is associated with each atom space. Also, a TLB translates
+between handles and actual memory address for the atom in the local process
+address space.
+
+
+See also:
+- <a href="http://wiki.opencog.org/w/AtomSpace">wiki entry</a> on atom space
+- documentation for AtomSpace class
+- documentation for AtomSpace class
+- documentation for AtomSpaceImpl class
 
 
 \section sect_zmq ZeroMQ support
@@ -150,8 +176,8 @@ ZMQServer and ZMQClient, and uses ProtocolBufferSerializer together with
 <a href="http://code.google.com/p/protobuf/">protocol buffers</a> to 
 serialize/deserialize.
 
-The class only supports one function - ZMQgetAtom; to request an atom from the 
-server use ZMQClient::getAtom() that blocks waiting for a response.
+The class only supports one function - \b ZMQgetAtom - to request an atom from the 
+server; ZMQClient::getAtom() will use it and will block waiting for a response.
 
 See also:
 - <a href="http://wiki.opencog.org/w/ZeroMQ">wiki entry</a> on ZeroMQ
