@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements a Handle index as an RB-tree (C++ map)
@@ -52,6 +55,7 @@ class HandleSetIndex:
 		void remove(bool (*)(Handle));
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_HANDLE_SET_INDEX_H

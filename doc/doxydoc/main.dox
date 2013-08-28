@@ -19,6 +19,8 @@ ignored by doxygen; used as markers for update-links.py;
 	- \ref progcogserver
 - \subpage libraries
 	- \ref libcogutil
+	- \ref libatomspace
+	- \ref libcomboreduct
 - \subpage fsstructure
 - \subpage bldtargets
 - \subpage license

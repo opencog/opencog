@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class Trail
 {
@@ -71,6 +74,7 @@ public:
     Handle getElement(int) throw (IndexErrorException, std::bad_exception);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TRAIL_H

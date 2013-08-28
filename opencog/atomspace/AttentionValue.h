@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class Atom;
 class AtomSpaceImpl;
@@ -190,6 +193,7 @@ public:
     }
 };
 
+/** @}*/
 } // namespace opencog 
 
 #endif // _OPENCOG_ATTENTION_VALUE_H

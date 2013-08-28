@@ -36,13 +36,17 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class Atom;
 
-// type and arity of Atoms, represented as short integers (16 bits)
+//! type of Atoms, represented as short integer (16 bits)
 typedef unsigned short Type;
+//! arity of Atoms, represented as short integer (16 bits)
 typedef unsigned short Arity;
-// stimulus
+//! stimulus
 typedef short stim_t;
 
 typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
@@ -67,6 +71,7 @@ public:
 };
 
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TYPES_H

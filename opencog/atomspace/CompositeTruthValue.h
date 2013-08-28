@@ -43,6 +43,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
 class AtomSpace;
 
 typedef std::unordered_map<VersionHandle, 
@@ -53,6 +57,7 @@ typedef std::unordered_map<VersionHandle,
 class Atom;
 class CompositeRenumber;
 
+//! a TruthValue that consists of a number of VersionHandles paired with TruthValues
 class CompositeTruthValue: public TruthValue
 {
     friend class CompositeRenumber; // XXX ugly hack
@@ -64,7 +69,7 @@ private:
     TruthValue* primaryTV;
     VersionedTruthValueMap versionedTVs;
 
-    // Special constructor for use by the fromString() method.
+    //! Special constructor for use by the fromString() method.
     CompositeTruthValue();
 
 protected:
@@ -81,7 +86,7 @@ public:
      *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE
      *        constant). In this case its indicator component does not
      *        matter.
-     * NOTE:  This object will take care of memory deallocation of the
+     * @note  This object will take care of memory deallocation of the
      *        TruthValue object passed as argument to this method. So,
      *        the caller should not delete it outside.
      */
@@ -220,6 +225,7 @@ public:
 
 typedef boost::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG__COMPOSITE_TRUTH_VALUE_H_
