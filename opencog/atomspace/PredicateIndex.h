@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements an index with additional routines needed for managing 
@@ -74,6 +77,7 @@ class PredicateIndex:
 		const UnorderedHandleSet& findHandlesByGPN(Handle) const;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_PREDICATEINDEX_H

@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class ClassServer; 
 
@@ -120,17 +123,17 @@ public:
     /**
      * Returns whether a given class is assignable from another.
      *
-     * @param Super class.
-     * @param Subclass.
+     * @param super Super class.
+     * @param sub Subclass.
      * @return Whether a given class is assignable from another.
      */
     bool isA(Type sub, Type super);
     bool isA_non_recursive(Type sub, Type super);
 
     /**
-     * Returns true if given class is a valid atm type.
+     * Returns true if given class is a valid atom type.
      *
-     * @param class.
+     * @param t class.
      * @return Whether a given class is valid.
      */
     bool isValid(Type t) { return isA(t, ATOM); }
@@ -138,7 +141,7 @@ public:
     /**
      * Returns true if given class is a Link.
      *
-     * @param class.
+     * @param t class.
      * @return Whether a given class is Link.
      */
     bool isLink(Type t) { return isA(t, LINK); }
@@ -146,7 +149,7 @@ public:
     /**
      * Returns true if given class is a Node.
      *
-     * @param class.
+     * @param t class.
      * @return Whether a given class is Node.
      */
     bool isNode(Type t) { return isA(t, NODE); }
@@ -159,7 +162,7 @@ public:
     /**
      * Returns the type of a given class.
      *
-     * @param Class type name.
+     * @param typeName Class type name.
      * @return The type of a givenn class.
      */
     Type getType(const std::string& typeName);
@@ -167,7 +170,7 @@ public:
     /**
      * Returns the string representation of a given atom type.
      *
-     * @param Atom type code.
+     * @param type Atom type code.
      * @return The string representation of a givenn class.
      */
     const std::string& getTypeName(Type type);
@@ -176,6 +179,7 @@ public:
 /** Gets the singleton instance (following meyer's design pattern) */
 ClassServer& classserver(ClassServerFactory* = ClassServer::createInstance);
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_CLASS_SERVER_H

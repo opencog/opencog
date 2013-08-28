@@ -28,6 +28,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
 class Atom;
 class AtomTable;
 
@@ -74,6 +78,7 @@ public:
 
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_IMPORTANCEINDEX_H

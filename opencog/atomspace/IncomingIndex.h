@@ -30,12 +30,15 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements a Handle index array of RB-trees (C++ set)
  * Given a Handle, this returns the incoming set of that handle.
  *
- * XXX TODO The iterator is NOT thread-safe against the insertion or
+ * @todo The iterator is NOT thread-safe against the insertion or
  * removal of atoms!  Either inserting or removing an atom will cause
  * the iterator references to be freed, leading to mystery crashes!
  *
@@ -80,6 +83,7 @@ class IncomingIndex
 
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_INCOMING_INDEX_H

@@ -39,6 +39,8 @@
 using namespace std;
 
 /*
+TODO: remove text from this file, as an exact copy is in wiki
+http://wiki.opencog.org/w/ZeroMQ
 
 Setup:
 	Install zeroMQ (should already be installed)
@@ -130,6 +132,9 @@ TODO:
 class AtomSpaceAsyncUTest;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class ZMQServer {
     zmq::context_t* zmqContext;
@@ -145,6 +150,7 @@ public:
     ~ZMQServer();
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ZMQ_SERVER_H

@@ -10,7 +10,7 @@ ignored by doxygen; used as markers for update-links.py;
 - \subpage progcogserver
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref index "Previous"</TD>
+<TD>\ref libcomboreduct "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref progcogserver "Next"</TD>
 </TR></TABLE>

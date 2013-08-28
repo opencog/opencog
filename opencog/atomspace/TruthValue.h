@@ -33,6 +33,9 @@
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class TruthValueUTest;
 
@@ -57,12 +60,13 @@ typedef std::vector<confidence_t> confidence_seq;
 typedef strength_seq::iterator confidence_seq_it;
 typedef strength_seq::const_iterator confidence_seq_const_it;
 
-// TODO: This variable was moved from reasoning/StdAfx.h as it was. Find a better
-// implementation for it... (???)
+/** @todo This variable was moved from reasoning/StdAfx.h as it was. Find a better
+ * implementation for it... (???)
+ */
 const strength_t MAX_TRUTH  = 1.0;
 const confidence_t MAX_CONFIDENCE = 1.0;
 
-// TruthValue types
+//! TruthValue types
 // NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
 enum TruthValueType {
     SIMPLE_TRUTH_VALUE = 1,
@@ -228,4 +232,5 @@ namespace std {
 } // ~namespace std
 
 
+/** @}*/
 #endif // _OPENCOG_TRUTH_VALUE_H
