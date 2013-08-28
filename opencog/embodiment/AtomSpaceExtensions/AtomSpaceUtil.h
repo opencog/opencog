@@ -239,8 +239,9 @@ public:
     static std::vector<Handle> getNodesByInheritanceLink(AtomSpace &atomSpace, Handle &hSecondOutgoing);
 
     // get all the nodes from EvaluationLinks, given the PredicateNode,and the second,third...outgoings of the listLink if any
-    // if returnEval is true, return the EvaluationLinks, if is false, return the value nodes
-    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq& hNonFirstOutgoings, bool returnEval=false);
+    static std::vector<Handle> getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq& hNonFirstOutgoings);
+
+    static std::vector<Handle> getEvaluationLinks(AtomSpace &atomSpace, string predicate, HandleSeq &hfirstOutgoings);
 
     /**
      * Returns witin timestamps vector all EvaluationLinks for a given predicate

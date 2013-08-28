@@ -135,7 +135,7 @@ bool OCPlanningAgent::isMoveAction(string s)
 }
 
 void OCPlanningAgent::run(opencog::CogServer * server)
-{/*
+{
     this->cycleCount = server->getCycleCount();
 
     // Get OAC
@@ -309,5 +309,5 @@ void OCPlanningAgent::run(opencog::CogServer * server)
             this->timeStartCurrentAction = time(NULL);
         }
     }
-*/
+
 }
