@@ -36,7 +36,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
@@ -116,7 +115,6 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // updates the importance index
         if (oldBin != newBin) {
             atomTable->updateImportanceIndex(this, oldBin);
-            StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
         }
     }
 }

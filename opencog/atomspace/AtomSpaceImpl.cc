@@ -36,7 +36,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
@@ -542,12 +541,6 @@ size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Nodes Atom space address: %p\n", this);
 
-    /* This is too expensive and depending on an Agent that may be disabled.
-     * Besides it does not have statistics by VersionHandles
-     DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
-     agent->reevaluateAllStatistics();
-     return agent->getNodeCount();
-     */
     // The following implementation is still expensive, but already deals with VersionHandles:
     // It would be cheaper if instead we just used foreachHandleByTypeVH
     // and just had a function that simply counts!!

@@ -80,12 +80,6 @@ private:
 
     int size;
 
-    /**
-     * Indicates whether DynamicStatisticsAgent should be used
-     * for atoms inserted in this table or not.
-     */
-    bool useDSA;
-
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
     TypeIndex typeIndex;
@@ -152,7 +146,7 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable(bool dsa = true);
+    AtomTable();
     ~AtomTable();
 
     /**
@@ -740,12 +734,6 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
-
-    /**
-     * Returns whether DynamicsStatisticsAgent is to be used with
-     * this table or not.
-     */
-    bool usesDSA() const;
 };
 
 /** @}*/

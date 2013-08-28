@@ -45,7 +45,6 @@
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/macros.h>
@@ -258,14 +257,10 @@ void SavingLoading::load(const char *fileName,
 
     logger().fine("Starting Memory load");
 
-    if (StatisticsMonitor::getInstance()->getAtomCount() > 0) {
-        throw RuntimeException(TRACE_INFO,
-                               "SavingLoading - Can only load binary image from disk into an empty atom table.");
-    }
-    // The above sanity check does not work if StatisticMonitor is disabled. So, makes a different check:
+    // sanity check
     if (atomSpace.getSize() > 0) {
         throw RuntimeException(TRACE_INFO,
-                               "SavingLoading - Can only load binary image from disk in a empty atom table.");
+            "SavingLoading - Can only load binary image from disk into an empty atom table.");
     }
 
     time_t start = time(NULL);
@@ -274,7 +269,7 @@ void SavingLoading::load(const char *fileName,
     FILE *f = fopen(fileName, "rb");
     if (f == NULL) {
         throw IOException(TRACE_INFO,
-                          "SavingLoading - Unable to open file '%s' for reading.", fileName);
+            "SavingLoading - Unable to open file '%s' for reading.", fileName);
     }
 
     // reads the file format
@@ -286,7 +281,7 @@ void SavingLoading::load(const char *fileName,
     }
 
     // reads the total number of atoms. Just an idea for now.
-    int atomCount = StatisticsMonitor::getInstance()->getAtomCount();
+    int atomCount = 0;
     if ( fread(&atomCount, sizeof(int), 1, f) != 1 ) {
         throw RuntimeException(TRACE_INFO, "SavingLoading - failed to read.");
     }
@@ -326,9 +321,6 @@ void SavingLoading::load(const char *fileName,
     delete handles;
 
     fclose(f);
-
-    // update all statistics
-    StatisticsMonitor::getInstance()->reevaluateAllStatistics(atomSpace);
 
     // calculates the total time that the process of loading has spent
     time_t duration = time(NULL) - start;
