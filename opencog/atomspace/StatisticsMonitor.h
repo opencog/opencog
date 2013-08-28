@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * The dynamics statistics agent is responsible for collecting several
@@ -206,6 +209,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_STATISTICS_MONITOR_H

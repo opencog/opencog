@@ -13,10 +13,12 @@
 
 namespace opencog
 {
-
-/**
- * Invoke the callback on each atom in the outgoing set of handle h.
+/** \addtogroup grp_atomspace
+ *  @{
  */
+
+
+//! Invoke the callback on each atom in the outgoing set of handle h.
 template<class T>
 inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
@@ -34,6 +36,7 @@ inline bool foreach_outgoing_handle(Handle h, bool (T::*cb)(Handle), T *data)
 
 /* ----------------------------------------------------------- */
 
+//! Invoke the callback on each atom in the incoming set of handle h.
 template<class T>
 inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
 {
@@ -49,6 +52,7 @@ inline bool foreach_incoming_handle(Handle h, bool (T::*cb)(Handle), T *data)
     return false;
 }
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_FOREACH_H

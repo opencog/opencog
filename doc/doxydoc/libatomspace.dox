@@ -33,7 +33,7 @@ The type of an atom cannot be changed after the atom has been inserted into
 the AtomSpace: OpenCog atoms are immutable.
 
 Each Atom is an AttentionValueHolder, and, thus, has an AttentionValue that has
-three components: short term, long term and very long term value. The 
+three components: short term, long term and very long term importance. The 
 \em attention is the process of focusing mental activity (actions) on some
 particular subset of a mind. Attention is the process of bringing content to
 consciousness. 
@@ -65,8 +65,31 @@ higher-order relationships between links, and between nodes and links.
 A Link is uniquely defined by its type and its outgoing set, i.e., 
 the set of Atoms linked by it. It also stores a Trail.
 
+FollowLink provides methods for looking at the end of a link. The methods
+store the result inside (functor):
+\ref FollowLink::follow_binary_link "follow_binary_link()",
+\ref FollowLink::backtrack_binary_link "backtrack_binary_link()",
+\ref FollowLink::follow_link "follow_binary_link()".
+
+foreach_outgoing_handle() and foreach_incoming_handle() invoke 
+the callback argument on each atom in the outgoing/incoming set of a handle.
+foreach_atom_pair() is typically useful for making comparisons between atoms.
+It invokes the callback on each pair of corresponding atoms in the
+two input vectors. Other usefull functions: foreach_binary_link(),
+foreach_reverse_binary_link(), foreach_link(), foreach_unordered_binary_link().
+
+
 See also:
 - <a href="http://wiki.opencog.org/w/Link">wiki entry</a> on links
+
+\subsection ssect_clserver Class server
+
+There are two main types of atoms, nodes and links, and atoms can have further
+sub-types, such as being directed or undirected links and representing specific
+types of relationships and entities. The Type of an atom is an unique
+identificator assigned by a ClassServer. This class keeps track of the complete
+atom class hierarchy. The current implementation is hardwired. Future versions
+may include different structures based on run-time type identification.
 
 
 \section sect_handles Handles
@@ -138,7 +161,8 @@ the single, unique Link which is that pair.
 short-term importance.
 - TargetTypeIndex <- TypeIndex <- FixedIntegerIndex : an integer index as an 
 RB-tree (C++ set)
-- PredicateIndex <- FixedIntegerIndex : associates predicates with atoms
+- PredicateIndex <- FixedIntegerIndex, PredicateEvaluator : 
+associates predicates with atoms
 
 (note that <- symbol above simply means related somehow, not necesarly inherit)
 
@@ -159,13 +183,14 @@ list of ASRequests.
 
 An AttentionBank is associated with each atom space. Also, a TLB translates
 between handles and actual memory address for the atom in the local process
-address space.
+address space. StatisticsMonitor collects several statistics values from 
+many parts of the system and makes them available through its API.
 
 
 See also:
 - <a href="http://wiki.opencog.org/w/AtomSpace">wiki entry</a> on atom space
 - documentation for AtomSpace class
-- documentation for AtomSpace class
+- documentation for AtomSpaceAsync class
 - documentation for AtomSpaceImpl class
 
 
@@ -210,3 +235,10 @@ To read a high level overview of this library head to
 \ref libatomspace "dedicated page".
 */
 } //~namespace opencog
+
+
+./src/opencog/atomspace/ForeachChaseLink.h \
+./src/opencog/atomspace/ForeachTwo.h \
+
+
+

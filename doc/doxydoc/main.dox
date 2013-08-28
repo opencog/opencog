@@ -15,12 +15,12 @@ The main project site is at <a href="http://opencog.org/">opencog.org</a>.
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
 \endif
-- \subpage programs
-	- \ref progcogserver
 - \subpage libraries
 	- \ref libcogutil
 	- \ref libatomspace
 	- \ref libcomboreduct
+- \subpage programs
+	- \ref progcogserver
 - \subpage fsstructure
 - \subpage bldtargets
 - \subpage license
@@ -28,7 +28,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD></TD>
 <TD width="100%"></TD>
-<TD>\ref programs "Next"</TD>
+<TD>\ref libraries "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;

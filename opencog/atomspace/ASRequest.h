@@ -19,9 +19,9 @@ namespace opencog {
  *  @{
  */
 
-/** \defgroup grp_atomspace_requess
+/** \defgroup grp_atomspace_requess Asynchronous requests
  *
- * The AtomSpace class is essentially just be a wrapper of the asynchronous
+ * The AtomSpace class is essentially just a wrapper of the asynchronous
  * AtomSpaceAsync which returns ASRequest "futures" as well as allowing
  * thread-local caching of some requests. Functions in this
  * class will block until notified that they've been fulfilled by the
