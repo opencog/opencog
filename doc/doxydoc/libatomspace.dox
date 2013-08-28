@@ -11,6 +11,41 @@ make atomspace
 This page is a high level overview of the library; to dig into the details 
 read \ref grp_atomspace "the comprehensive overview".
 
+Dependencies:
+- gsl
+- boost signals
+- boost thread
+- zmq (if present)
+
+\section atom The atom
+
+The atom is a basic entity used in OpenCog as an element for building
+representations. Some atoms directly represent patterns in the world or mind,
+others are components of representations. There are two kinds of atoms: nodes
+and links.
+
+A \em relized atom is one hat exists in RAM at a certain point in time. Atoms
+may be \em serialized for transmission from one software process to another, or
+for saving to disk (a atom is called \em frozen when is saved to disk).
+The type of an atom cannot be changed after the atom has been inserted into 
+the AtomSpace: OpenCog atoms are immutable.
+
+Each Atom is an AttentionValueHolder, and, thus, has an AttentionValue that has
+three components: short term, long term and very long term value. The 
+\em attention is the process of focusing mental activity (actions) on some
+particular subset of a mind. Attention is the process of bringing content to
+consciousness. The aspect of an intelligent system’s dynamics focused on
+guiding which aspects of an the system's memory & functionality gets more
+computational resources at a certain point in time.
+
+
+See also:
+- <a href="http://wiki.opencog.org/w/Atom">wiki entry</a> on atom design
+- <a href="http://wiki.opencog.org/w/OpenCogPrime:Atom">wiki entry</a> on atom implementation
+- <a href="http://wiki.opencog.org/w/OpenCog_Atom_types">wiki entry</a> on atom types
+- Atom class
+
+
 
 
 \if MARKER_TREE_START

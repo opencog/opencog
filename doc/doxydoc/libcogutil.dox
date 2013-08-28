@@ -12,6 +12,12 @@ make cogutil
 This page is a high level overview of the library; to dig into the details 
 read \ref grp_cogutil "the comprehensive overview".
 
+Dependencies:
+- boost filesystem
+- boost system
+- boost regex
+- boost thread
+
 \section sect_files Algorithms
 
 - algorithm.h hosts small templated functions like for_each(),
