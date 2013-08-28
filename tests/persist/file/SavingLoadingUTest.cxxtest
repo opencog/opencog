@@ -33,7 +33,6 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/persist/file/SavingLoading.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/util/Logger.h>
 
@@ -158,21 +157,8 @@ public:
         logger().debug("runLoading()");
         SavingLoading savingLoading;
 
-        // Check statistics:
-        StatisticsMonitor* sm = StatisticsMonitor::getInstance();
-        sm->reevaluateAllStatistics(atomSpace);
-
         savingLoading.load(DUMP_FILENAME, atomSpace, *ss, *ts);
         logger().debug("loaded %s", DUMP_FILENAME);
-
-#if 0 // TODO: SM code has been disabled. So this test fails. We can get back with this when it is enabled again.
-        logger().debug("atomCount=%d", sm->getAtomCount());
-        logger().debug("nodeCount=%d", sm->getNodeCount());
-        logger().debug("LinkCount=%d", sm->getLinkCount());
-        TS_ASSERT(sm->getAtomCount() == 9);
-        TS_ASSERT(sm->getNodeCount() == 5);
-        TS_ASSERT(sm->getLinkCount() == 4);
-#endif
 
         // Check if it loads all inserted atoms with the same attributes (specially TruthValues)
 

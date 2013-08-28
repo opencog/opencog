@@ -28,9 +28,9 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
