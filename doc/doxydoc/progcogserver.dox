@@ -6,6 +6,19 @@ To build it use:
 make cogserver
 @endcode
 
+This page is a high level overview of the program; to dig into the details 
+read \ref grp_server "the comprehensive overview".
+
+Dependencies:
+- \ref libserver "server"
+- boost system
+- Guile
+
+The program heavily relies on \ref libserver "server" library. Initialisation 
+options are discussed here, while the runnings of the server is detailed in
+\ref libserver "library's page"
+
+
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
 \endif
