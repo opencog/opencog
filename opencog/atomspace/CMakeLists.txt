@@ -39,7 +39,6 @@ ADD_LIBRARY (atomspace SHARED
     NullTruthValue.cc
     PredicateIndex.cc
     SimpleTruthValue.cc
-    StatisticsMonitor.cc
     StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
@@ -115,7 +114,6 @@ INSTALL (FILES
     PredicateEvaluator.h
     PredicateIndex.h
     SimpleTruthValue.h
-    StatisticsMonitor.h
     StringIndex.h
     TargetTypeIndex.h
     TLB.h

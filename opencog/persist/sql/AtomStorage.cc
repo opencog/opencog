@@ -831,7 +831,8 @@ void AtomStorage::setup_typemap(void)
 	rp.rs->foreach_row(&Response::type_cb, &rp);
 	rp.rs->release();
 
-	for (Type t=0; t<classserver().getNumberOfClasses(); t++)
+	unsigned int numberOfTypes = classserver().getNumberOfClasses();
+	for (Type t=0; t<numberOfTypes; t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
