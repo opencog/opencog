@@ -236,7 +236,7 @@ void OCPlanner::addRuleEffectIndex(Rule* r)
         {
             // the map can make sure the rules are put in the list in the order of their probabilities from large to small
 
-            ((map<float,Rule*>)(it->second)).insert(std::pair<float,Rule*>(effectIt->first,r));
+            ((map<float,Rule*>&)(it->second)).insert(std::pair<float,Rule*>(effectIt->first,r));
 
         }
 
