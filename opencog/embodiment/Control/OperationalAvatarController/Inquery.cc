@@ -941,7 +941,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     {
         // contains mutiple conditions, so add them one by one
         vector<string> _allVariables;
-        for(int i = 0; i < stateIndexes.size() ; ++ i)
+        for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
         {
             int index = stateIndexes[i];
             list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();

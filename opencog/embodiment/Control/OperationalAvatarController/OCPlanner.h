@@ -300,7 +300,8 @@ protected:
      bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
      // return how many states in the temporaryStateNodes will be Negatived by this rule
-     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState);
+     // bool &negativeGoal return if this rule after grounded will negative this forward goal state
+     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 

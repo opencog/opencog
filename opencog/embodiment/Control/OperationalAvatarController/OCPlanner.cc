@@ -479,6 +479,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             map<string,multimap<float,Rule*> >::iterator it;
             it = ruleEffectIndexes.find(curStateNode->state->name());
 
+            // todo : if it == ruleEffectIndexes.end()
+
             // Select a rule to apply
 
             multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
@@ -520,8 +522,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     list< pair<float,Rule*> >::iterator canIt;
                     canIt = curStateNode->candidateRules.begin();
 
-                    // ground it only by this current state node,  to check if its other effects negative some of the other temporaryStateNodes
-                    int negativeNum = checkNegativeStateNumBythisRule(r,curStateNode);
+                    // ground it only by this current state node,  to check if its effect will negative this current selected goal state
+                    // and also check if other effects negative some of the other temporaryStateNodes
+                    bool isNegativeGoal;
+                    int negativeNum = checkNegativeStateNumBythisRule(r,curStateNode,isNegativeGoal);
+
+                    if (isNegativeGoal)
+                        continue; //  its effect will negative this current selected goal state, it's a opposite rule, should not add it into candidate rules
+
                     curRuleScore -= negativeNum;
 
                     while(true)
@@ -1085,9 +1093,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-
 // return how many states in the temporaryStateNodes will be Negatived by this rule
-int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState)
+int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool& negativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -1095,6 +1102,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
     groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
 
     int num = 0;
+    negativeGoal = false;
 
     // check all the effects:
     vector<EffectPair>::iterator effectItor;
@@ -1103,10 +1111,20 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
     {
         Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentAllBindings);
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState);
 
         if (! effState)
             continue;
+
+        if (effState->isSameState(*(fowardState->state)))
+        {
+            float satDegree;
+            if (! effState->isSatisfied(*(fowardState->state),satDegree))
+            {
+                negativeGoal = true;
+                return 10000;
+            }
+        }
 
         list<StateNode*>::iterator sait;
 
