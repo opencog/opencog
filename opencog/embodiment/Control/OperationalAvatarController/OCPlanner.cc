@@ -206,6 +206,22 @@ OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
         addRuleEffectIndex(r);
 
     }
+
+    // debug: print all the rule indexes:
+    cout<< "Debug: all rule indexes:" << std::endl;
+    map<string,multimap<float,Rule*> >::iterator itr;
+    for (itr = ruleEffectIndexes.begin(); itr != ruleEffectIndexes.end(); ++ itr)
+    {
+        cout<< itr->first <<":" << std::endl;
+        multimap<float,Rule*>::iterator iter;
+
+        for(iter =  ((multimap<float,Rule*>&)(itr->second)).begin(); iter !=  ((multimap<float,Rule*>&)(itr->second)).end(); ++ iter)
+        {
+            cout<< (((Rule*)(iter->second))->action)->getName() << std::endl;
+
+        }
+    }
+
 }
 
 OCPlanner::~OCPlanner()
@@ -223,20 +239,25 @@ void OCPlanner::addRuleEffectIndex(Rule* r)
 
         State* s = e->state;
 
-        map<string,map<float,Rule*> >::iterator it;
+        map<string,multimap<float,Rule*> >::iterator it;
         it = ruleEffectIndexes.find(s->name());
+
+        cout << "Debug: addRuleEffectIndex: State name:" << s->name() << std::endl;
 
         if (it == ruleEffectIndexes.end())
         {
-            map<float,Rule*> rules;
+            multimap<float,Rule*> rules;
             rules.insert(std::pair<float,Rule*>(effectIt->first,r));
-            ruleEffectIndexes.insert(std::pair<string , map<float,Rule*> >(s->name(),rules));
+            ruleEffectIndexes.insert(std::pair<string , multimap<float,Rule*> >(s->name(),rules));
         }
         else
         {
             // the map can make sure the rules are put in the list in the order of their probabilities from large to small
+            // map<string,map<float,Rule*> >
 
-            ((map<float,Rule*>&)(it->second)).insert(std::pair<float,Rule*>(effectIt->first,r));
+            multimap<float,Rule*>& indexMap = ((multimap<float,Rule*>&)(it->second));
+
+            indexMap.insert(std::pair<float,Rule*>(effectIt->first,r));
 
         }
 
@@ -454,17 +475,17 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // if we have not tried to achieve this state node before, find all the candidate rules first
         if (! curStateNode->hasFoundCandidateRules)
         {
-            map<string,map<float,Rule*> >::iterator it;
+            map<string,multimap<float,Rule*> >::iterator it;
             it = ruleEffectIndexes.find(curStateNode->state->name());
 
             // Select a rule to apply
 
-            map<float,Rule*> rules = (map<float,Rule*>)(it->second);
+            multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
 
             if ( rules.size() == 1)
             {
                 // if there is one rule to achieve this goal, just select it
-                selectedRule = (((map<float,Rule*>)(it->second)).begin())->second;
+                selectedRule = (((multimap<float,Rule*>)(it->second)).begin())->second;
                 curStateNode->ruleHistory.push_back(selectedRule);
             }
             else
@@ -480,7 +501,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // score = probability (50%) + lowest cost (50%)
                 // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
 
-                map<float,Rule*> ::iterator ruleIt;
+                multimap<float,Rule*> ::iterator ruleIt;
 
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {

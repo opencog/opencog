@@ -263,7 +263,7 @@ protected:
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
      // map<float,Rule*> is map<probability, rule>
-     map<string,map<float,Rule*> > ruleEffectIndexes;
+     map<string,multimap<float,Rule*> > ruleEffectIndexes;
 
      list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
 
