@@ -486,6 +486,12 @@ bool AtomSpaceUtil::isMovingBtwSpaceMap(const AtomSpace& atomSpace,
 
 Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& handles)
 {
+    if (handles.size() < 1)
+        return Handle::UNDEFINED;
+
+    if ( handles.size() < 2)
+        return handles.front();
+
     std::vector<HandleTemporalPair> handleTemporalPairs;
 
     foreach(Handle h, handles)
@@ -523,7 +529,7 @@ Handle AtomSpaceUtil::getLatestHandle(const AtomSpace &atomSpace,HandleSeq& hand
     return iLatestHandleTemporalPair->getHandle();
 }
 
-Handle AtomSpaceUtil::getLatestEvaluationLink(const AtomSpace &atomSpace,
+Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace &atomSpace,
                              std::string predicateName,
                              Handle a,
                              Handle b,
@@ -567,10 +573,15 @@ throw(opencog::NotFoundException)
                            seq, NULL, NULL, 2, EVALUATION_LINK, false);
 
 
-    if (evalLinkHandleset.size() == 0) {
-        throw opencog::NotFoundException(TRACE_INFO,
-               ("AtomSpaceUtil - getLatestEvaluationLink:There is no evaluation link for predicate: "
-                 + predicateName).c_str() );
+    if (evalLinkHandleset.size() == 0)
+    {
+//        cout<< "predicateHandle: \n" << atomSpace.atomAsString(predicateHandle) << std::endl;
+//        cout<< "listLinkHandle: \n" << atomSpace.atomAsString(listLinkHandle) << std::endl;
+//        throw opencog::NotFoundException(TRACE_INFO,
+//               ("AtomSpaceUtil - getLatestEvaluationLink:There is no evaluation link for predicate: "
+//                 + predicateName).c_str() );
+        evalLinkHandleset = getEvaluationLinks(atomSpace,predicateName,seq0);
+
     }
 
     return getLatestHandle(atomSpace,evalLinkHandleset);
@@ -899,6 +910,61 @@ std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace & atomSpa
     return resultSet;
 }
 
+std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, string predicate, HandleSeq &hfirstOutgoings)
+{
+    // Create BindLink used by pattern matcher
+    std::vector<Handle> implicationLinkOutgoings, bindLinkOutgoings;
+
+    Handle hVariableNode = atomSpace.addNode(VARIABLE_NODE, "$var_any");
+
+    Handle predicateNode = atomSpace.addNode(PREDICATE_NODE, predicate);
+
+    HandleSeq predicateListLinkOutgoings;
+
+    foreach (Handle h, hfirstOutgoings)
+    {
+        predicateListLinkOutgoings.push_back(h);
+    }
+
+    predicateListLinkOutgoings.push_back(hVariableNode);
+
+    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings);
+
+    HandleSeq evalLinkOutgoings;
+    evalLinkOutgoings.push_back(predicateNode);
+    evalLinkOutgoings.push_back(predicateListLink);
+    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings);
+
+    implicationLinkOutgoings.push_back(hEvalLink);
+
+    // return the EvaluationLinks
+    implicationLinkOutgoings.push_back(hEvalLink);
+
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+
+    bindLinkOutgoings.push_back(hVariableNode);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+
+            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+
+
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(&atomSpace);
+    Handle hResultListLink = pm.bindlink(hBindLink);
+
+    // Get result
+    // Note: Don't forget remove the hResultListLink, otherwise some scheme script
+    //       may fail to remove the inheritanceLink when necessary.
+    //       Because the inheritanceLink would have an incoming (i.e. hResultListLink here),
+    //       which would make cog-delete scheme function fail.
+    std::vector<Handle> resultSet = atomSpace.getOutgoing(hResultListLink);
+    atomSpace.removeAtom(hResultListLink);
+
+    return resultSet;
+}
+
 std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace, string predicate, HandleSeq &hNonFirstOutgoings)
 {
     // Create BindLink used by pattern matcher
@@ -924,12 +990,17 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings);
 
     implicationLinkOutgoings.push_back(hEvalLink);
+
     implicationLinkOutgoings.push_back(hVariableNode);
+
     Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
 
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+
+            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+
 
     // Run pattern matcher
     PatternMatch pm;
