@@ -19,6 +19,19 @@ options are discussed here, while the runnings of the server is detailed in
 \ref libserver "library's page"
 
 
+The <a href="http://wiki.opencog.org/w/Understanding_the_opencog.conf_file">opencog.conf
+file</a> lives in the /lib directory and is loaded by default when Cogserver
+starts. See the 
+<a href="http://wiki.opencog.org/w/Understanding_the_opencog.conf_file">wiki entry</a>
+that describes it.
+
+Several tutorials including
+<a href="http://wiki.opencog.org/w/Starting_the_Cogserver">Starting the Cogserver</a> and
+<a href="http://wiki.opencog.org/w/Connecting_to_the_Cogserver">Connecting to the Cogserver</a>
+are also present in 
+<a href="http://wiki.opencog.org/w/Category:OpenCog_for_Noobs">the wiki</a>
+
+
 \if MARKER_TREE_START
 ignored by doxygen; used as markers for update-links.py;
 \endif

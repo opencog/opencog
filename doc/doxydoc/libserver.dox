@@ -23,6 +23,35 @@ Dependencies:
 - persist (if available)
 
 
+The basic requirements for a server are grouped in BaseServer class. It only
+provides \ref BaseServer::getAtomSpace "getAtomSpace()" and 
+\ref BaseServer::createInstance "createInstance()". There are also
+two global functions: server() to get the one and only instance and
+atomspace() that returns the AtomSpace associated with the server.
+
+CogServer class, derived from BaseServer, implements the official server used
+by the opencog framework. It is responsible for managing 4 base structures
+(cycles, modules, agents and requests) and a NetworkServer for external access
+to the server.
+
+The types of agents and requests known to the server are managed using Registry
+templated with Agent and Request. Registry helps to register, unregister and
+list classes, create, destroy and other management tasks.
+
+An Agent (or mind agent 
+<a href="http://wiki.opencog.org/w/MindAgent">in wiki</a>) is a 
+base abstract class that should be extended by all opencog agents. To write a 
+custom agent, all one has to do is to derive from
+the Agent class and implement the desired behavior inside the 
+\ref Agent::run "run()" method. See 
+<a href="http://wiki.opencog.org/w/Creating_a_new_Mind_Agent_in_C">Creating a new Mind Agent in C</a> and 
+<a href="http://wiki.opencog.org/w/Creating_a_Mind_Agent_that_does_something_in_C">Creating a Mind Agent that does something in C</a>
+
+Extening the repertoire of known commands is done using either module made of
+commands or with shells.
+
+
+
 
 
 \section sect_builtinreqs   builtinreqs library
