@@ -30,10 +30,14 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 UnorderedHandleSet intersection(const std::vector<UnorderedHandleSet> &)
     throw (RuntimeException);
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_INTERSECT_H

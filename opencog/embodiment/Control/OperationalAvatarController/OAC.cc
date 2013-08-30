@@ -425,7 +425,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
 #ifdef HAVE_CYTHON
     if ( config().get_bool("FISHGRAM_ENABLED") ) {
-        this->fishgramAgent = new PyMindAgent("fishgram", "FishgramMindAgent"); 
+        this->fishgramAgent = new PyMindAgent(*this, "fishgram", "FishgramMindAgent"); 
         this->fishgramAgent->setFrequency( config().get_int("FISHGRAM_CYCLE_PERIOD") ); 
         this->startAgent(this->fishgramAgent); 
     }
@@ -433,7 +433,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->fishgramAgent = NULL; 
 
     if ( config().get_bool("MONITOR_CHANGES_ENABLED") ) {
-        this->monitorChangesAgent = new PyMindAgent("monitor_changes", "MonitorChangesMindAgent"); 
+        this->monitorChangesAgent = new PyMindAgent(*this, "monitor_changes", "MonitorChangesMindAgent"); 
         this->monitorChangesAgent->setFrequency( config().get_int("MONITOR_CHANGES_CYCLE_PERIOD") ); 
         this->startAgent(this->monitorChangesAgent); 
     }

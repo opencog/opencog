@@ -27,15 +27,15 @@
 #ifndef _OPENCOG_REQUEST_H
 #define _OPENCOG_REQUEST_H
 
-#include <string>
-#include <sstream>
 #include <list>
+#include <string>
 
 #include <opencog/server/Factory.h>
 #include <opencog/server/RequestResult.h>
 
 namespace opencog
 {
+class CogServer;
 
 /**
  * The DECLARE_CMD_REQUEST macro provides a simple, easy-to-use interface
@@ -140,14 +140,14 @@ namespace opencog
                                                  hidden);             \
               return _cci;                                            \
     }                                                                 \
-    do_cmd##Request(void) {};                                         \
+    do_cmd##Request(CogServer& cs) : Request(cs) {};                  \
     virtual ~do_cmd##Request() {};                                    \
     virtual bool execute(void) {                                      \
         logger().debug("[" cmd_str " Request] execute");              \
         std::ostringstream oss;                                       \
                                                                       \
         mod_type* mod =                                               \
-            static_cast<mod_type *>(cogserver().getModule(            \
+            static_cast<mod_type *>(_cogserver.getModule(             \
                  "opencog::" #mod_type));                             \
                                                                       \
         std::string rs = mod->do_cmd(this, _parameters);              \
@@ -170,41 +170,13 @@ namespace opencog
                                                                       \
     /* Declare routines to register and unregister the factories */   \
     void do_cmd##_register(void) {                                    \
-        cogserver().registerRequest(do_cmd##Request::info().id,       \
+        _cogserver.registerRequest(do_cmd##Request::info().id,        \
                                     & do_cmd##Factory);               \
     }                                                                 \
     void do_cmd##_unregister(void) {                                  \
-        cogserver().unregisterRequest(do_cmd##Request::info().id);    \
+        _cogserver.unregisterRequest(do_cmd##Request::info().id);     \
     }
 
-
-/**
- * This struct defines the extended set of attributes used by opencog requests.
- * The current set of attributes are:
- *     id:          the name of the request
- *     description: a short description of what the request does
- *     help:        an extended description of the request, listing multiple
- *                  usage patterns and parameters
- */
-struct RequestClassInfo : public ClassInfo
-{
-    std::string description;
-    std::string help;
-    bool is_shell;
-    /** Whether default shell should be hidden from help */
-    bool hidden;
-
-    RequestClassInfo() : is_shell(false), hidden(false) {};
-    RequestClassInfo(const char* i, const char *d, const char* h,
-            bool s = false, bool hide = false)
-        : ClassInfo(i), description(d), help(h), is_shell(s), hidden(hide) {};
-    RequestClassInfo(const std::string& i, 
-                     const std::string& d,
-                     const std::string& h, 
-                     bool s = false,
-                     bool hide = false)
-        : ClassInfo(i), description(d), help(h), is_shell(s), hidden(hide) {};
-};
 
 /**
  * This class defines the base abstract class that should be extended
@@ -271,6 +243,7 @@ class Request
 
 protected:
 
+    CogServer&             _cogserver;
     RequestResult*         _requestResult;
     std::list<std::string> _parameters;
     std::string            _mimeType;
@@ -278,7 +251,7 @@ protected:
 public:
 
     /** Request's constructor */
-    Request();
+    Request(CogServer&);
 
     /** Request's desconstructor */
     virtual ~Request();

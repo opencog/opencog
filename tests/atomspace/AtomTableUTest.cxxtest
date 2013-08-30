@@ -109,7 +109,7 @@ public:
     }
 
     void testSimple() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         Handle sense = atomTable.add(new Node(CONCEPT_NODE, "28675194"));
         std::vector<Handle> os;
@@ -120,7 +120,7 @@ public:
 
     void testHolds() {
         Handle h(100101);
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(atomTable.holds(word));
         TS_ASSERT(!atomTable.holds(h));
@@ -128,14 +128,14 @@ public:
 
     void testIsCleared() {
 
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         TS_ASSERT(atomTable.isCleared());
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(!atomTable.isCleared());
     }
 
     void testGetRandom() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         ostringstream oss;
         size_t numBuckets = atomTable.getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
@@ -507,7 +507,7 @@ public:
     }
 
     void testSimpleWithCustomAtomTypes() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");

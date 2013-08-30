@@ -303,7 +303,7 @@ std::string Config::to_string() const
 Config& opencog::config(ConfigFactory* factoryFunction,
                         bool overwrite)
 {
-    static std::auto_ptr<Config> instance((*factoryFunction)());
+    static std::unique_ptr<Config> instance((*factoryFunction)());
     if (overwrite)
         instance.reset((*factoryFunction)());
     return *instance;

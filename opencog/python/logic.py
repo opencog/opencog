@@ -62,12 +62,10 @@ class Chainer:
     successful_num_app_pdns_per_level = Counter()
     successful_num_uses_per_rule_per_level = defaultdict(Counter)
 
-    def __init__(self, space, planning_mode = False, allowed_rule_names = set(), use_fc = False):
+    def __init__(self, space, planning_mode = False):
 
         #self.deduction_types = ['SubsetLink', 'ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
         self.deduction_types = ['ImplicationLink', 'InheritanceLink', 'PredictiveImplicationLink']
-
-        self.use_fc = use_fc
 
         self.pd = dict()
 
@@ -77,16 +75,11 @@ class Chainer:
         self.planning_mode = planning_mode
         self.viz = PLNviz(space)
         self.viz.connect()
-        self.setup_rules(allowed_rule_names)
+        self.setup_rules()
 
         self.trace = Trace_Chainer()
         self.bc_later = OrderedSet()
-
-        # If you do BC, it is necessary to put an App for every Atom available.
-        # Let's suppose that means every Rule to start with...
-        for rule in self.rules:
-            self.bc_later.append(rule)
-
+        
         # simple statistics
         self.num_app_pdns_per_level = Counter()
         self.num_uses_per_rule_per_level = defaultdict(Counter)
@@ -108,7 +101,7 @@ class Chainer:
             #    raise NotImplementedError('Cannot revise multiple TruthValues, so no point in doing this search')
             
             #log.info(format_log('bc', target))
-            #self.bc_later = OrderedSet([target])
+            self.bc_later = OrderedSet([target])
             self.results = []
     
             self.target = target
@@ -118,8 +111,7 @@ class Chainer:
             dummy_app = rules.Rule(self.root,[target],name='producing target')
             # is this line necessary?
             self.rules.append(dummy_app)
-            #self.bc_later = OrderedSet([dummy_app])
-            self.bc_later.append(dummy_app)
+            self.bc_later = OrderedSet([dummy_app])
             self.add_app_to_pd(dummy_app)
     
             # viz - visualize the root
@@ -128,13 +120,8 @@ class Chainer:
             steps_so_far = 0
             start = time()
 
-            import pdb; pdb.set_trace()
             while self.bc_later and steps_so_far < nsteps and (nresults == 0 or len(self.results) < nresults):
-                if self.use_fc:
-                    self.fc_step()
-                else:
-                    self.bc_step()
-
+                self.bc_step()
                 steps_so_far += 1
     
                 #msg = '%s goals expanded, %s remaining, %s Proof DAG Nodes' % (len(self.bc_before), len(self.bc_later), len(self.pd))
@@ -186,25 +173,25 @@ class Chainer:
 
 
 
-#    def fc(self):
-#        #axioms = [r.head for r in self.rules if r.tv.count > 0]
-#        #self.propogate_results_loop(axioms)
-#
-#        while self.fc_later:
-#            next_premise = self.get_fittest() # Best-first search
-#            log.info(format_log('-CQ', next_premise))
-#
-#            apps = self.find_new_rule_applications_by_premise(next_premise)
-#            for app in apps:
-#                got_result = self.check_goals_found_already(app)
-#                if got_result:
-#                    self.compute_and_add_tv(app)
-#
-#                    if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
-#                        self.add_tree_to_index(app.head, self.fc_before)
-#                        self.add_tree_to_index(app.head, self.fc_later)
-#                        log.info(format_log('+FCQ', app.head, app.name))
-#                        stdout.flush()
+    #def fc(self):
+    #    axioms = [r.head for r in self.rules if r.tv.count > 0]
+    #    self.propogate_results_loop(axioms)
+    #    
+    #    while self.fc_later:
+    #        next_premise = self.get_fittest() # Best-first search
+    #        log.info(format_log('-FCQ', next_premise))
+    #
+    #        apps = self.find_new_rule_applications_by_premise(next_premise)
+    #        for app in apps:
+    #            got_result = self.check_goals_found_already(app)
+    #            if got_result:
+    #                self.compute_and_add_tv(app)
+    #                
+    #                if not self.contains_isomorphic_tree(app.head, self.fc_before) and not self.contains_isomorphic_tree(app.head, self.fc_later):
+    #                    self.add_tree_to_index(app.head, self.fc_before)
+    #                    self.add_tree_to_index(app.head, self.fc_later)
+    #                    log.info(format_log('+FCQ', app.head, app.name))
+    #                    stdout.flush()
 
     def bc_step(self):
         # Choose the best app
@@ -232,7 +219,7 @@ class Chainer:
             next_apps = [self.bc_later.pop_first()] # Breadth-first search
 
         for next_app in next_apps:
-            log.info(format_log('-BCQ', next_app))
+            #log.info(format_log('-BCQ', next_app))
 
             # This step will also call propogate_results and propogate_specialization,
             # so it will check for premises, compute the TV if possible, etc.
@@ -249,55 +236,6 @@ class Chainer:
                 for a in apps:
                     a = a.standardize_apart()
                     self.add_app_if_good(a)
-
-        return None
-
-    def fc_step(self):
-        # Choose the best app
-        # Check for axioms that match its premises
-        # If any variables are filled, make a copy of this app
-        # Otherwise, check if all premises have been filled
-        # If so, compute the TV and produce the head of this app.
-        #
-        # Note: It will take multiple BC steps to find all the goals for an app.
-        # And when it does happen, often you will find all the goals for a clone of the app,
-        # and not the original app.
-
-        assert self.bc_later
-        self.trace.step_count += 1
-        #print 'bcq', map(str, self.bc_later)
-        #next_target = self.bc_later.pop_first() # Breadth-first search
-        #next_target = self.bc_later.pop_last() # Depth-first search
-        #next_target = self.get_fittest(self.bc_later) # Best-first search
-        #next_target = self.select_stochastic() # A better version of best-first search (still a prototype)
-
-        STOCHASTIC = False
-        if STOCHASTIC:
-            next_apps = self.select_stochastic()
-        else:
-            next_apps = [self.bc_later.pop_first()] # Breadth-first search
-
-        for next_app in next_apps:
-            log.info(format_log('-FCQ', next_app))
-
-            # This step will also call propogate_results and propogate_specialization,
-            # so it will check for premises, compute the TV if possible, etc.
-            self.find_axioms_for_rule_app(next_app)
-
-            # This should probably use the extra things in found_axiom
-            self.propogate_result(next_app)
-
-            #next_target = standardize_apart(next_target)
-
-            # For each app, see if it is currently proven (above).
-            # Find all of the rule applications that could use head as one of their premises
-            # and add them to the Proof DAG.
-
-            apps = self.find_rule_applications_FC(next_app)
-
-            for a in apps:
-                a = a.standardize_apart()
-                self.add_app_if_good(a)
 
         return None
 
@@ -420,6 +358,8 @@ class Chainer:
         
         input_tvs = [self.get_tvs(g) for g in app.goals]
         if all(input_tvs):
+            assert len(input_tvs)
+
             input_tvs = [tvs[0] for tvs in input_tvs]
             input_tvs = [(float(tv.mean), float(tv.count)) for tv in input_tvs]
             tv_tuple = app.formula(input_tvs,  None)
@@ -625,14 +565,6 @@ class Chainer:
                     ret.append(new_rule)
         return ret
 
-    def find_rule_applications_FC(self, app):
-        # You need to already have apps for everything that's initially available
-        # (i.e. every atom).
-        # And then you should generate new apps by checking which apps are applicable
-        # (just like the BC procedure)
-
-        head = app.head
-        return self.find_new_rule_applications_by_premise(head)
 
     def get_tvs(self, expr):
         # Only want to find results for this exact target, not every possible specialized version of it.
@@ -727,13 +659,10 @@ class Chainer:
         if rule.tv.confidence > 0:
             self.app2pdn(rule)
 
-    def setup_rules(self, allowed_rule_names):
-        allowed_rule_names = set(rule_name.lower() for rule_name in allowed_rule_names)
-
+    def setup_rules(self):
         self.rules = []
         for r in rules.rules(self.space, self.deduction_types):
-            if not allowed_rule_names or r.name.lower() in allowed_rule_names:
-                self.add_rule(r)
+            self.add_rule(r)
 
     def head_dag(self, app):
         """ a tree dag could have multiple parents,

@@ -43,6 +43,7 @@ class NameIndex:
         void removeAtom(const Atom* a);
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_NAMEINDEX_H

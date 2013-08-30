@@ -1,0 +1,22 @@
+/**
+\page progcogserver cogserver program
+
+To build it use:
+@code
+make cogserver
+@endcode
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref programs "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref fsstructure "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+

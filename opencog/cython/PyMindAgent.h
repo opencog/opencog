@@ -61,14 +61,14 @@ public:
     //PyMindAgent();
 
     /** Pass a PyObject that is a Python MindAgent object.  */
-    PyMindAgent(const std::string& moduleName, const std::string& className);
+    PyMindAgent(CogServer&, const std::string& moduleName, const std::string& className);
 
     virtual ~PyMindAgent();
 
     /** Run method - this calls the run method of the encapsulated Python
      * MindAgent class.
      */
-    virtual void run(CogServer* server);
+    virtual void run();
 
 }; // class
 

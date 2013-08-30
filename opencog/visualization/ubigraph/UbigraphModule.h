@@ -31,7 +31,6 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
-#include <opencog/server/Request.h>
 
 #include "Ubigrapher.h"
 
@@ -76,11 +75,11 @@ public:
         return _ci;
     }
     
-    static inline const char* id();
+    static const char* id();
 
-    UbigraphModule();
-    ~UbigraphModule();
-    void init();
+    UbigraphModule(CogServer&);
+    virtual ~UbigraphModule();
+    virtual void init();
 
 }; // class
 

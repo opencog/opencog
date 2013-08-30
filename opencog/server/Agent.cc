@@ -29,7 +29,7 @@
 
 using namespace opencog;
 
-Agent::Agent(const unsigned int f) : _frequency(f)
+Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
     // an empty set of parameters and defaults (so that various
     // methods will still work even if none are set in this or a derived
@@ -42,15 +42,15 @@ Agent::Agent(const unsigned int f) : _frequency(f)
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = server().getAtomSpace().atomSpaceAsync->removeAtomSignal(
+    conn = _cogserver.getAtomSpace().atomSpaceAsync->removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1, _2));
 }
 
 Agent::~Agent()
 {
     // give back funds
-    server().getAtomSpace().getAttentionBank().setSTI(this, 0);
-    server().getAtomSpace().getAttentionBank().setLTI(this, 0);
+    _cogserver.getAtomSpace().getAttentionBank().setSTI(this, 0);
+    _cogserver.getAtomSpace().getAttentionBank().setLTI(this, 0);
 
     resetUtilizedHandleSets();
     delete stimulatedAtoms;

@@ -40,7 +40,7 @@
 
 using namespace opencog;
 
-GetAtomRequest::GetAtomRequest()
+GetAtomRequest::GetAtomRequest(CogServer& cs) : Request(cs)
 {
     output_format = html_tabular_format;
 }
@@ -53,7 +53,7 @@ GetAtomRequest::~GetAtomRequest()
 bool GetAtomRequest::execute()
 {
     Handle handle = Handle::UNDEFINED;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
 
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
@@ -74,22 +74,26 @@ bool GetAtomRequest::execute()
         }
     }
     if (!as.isValidHandle(handle)) {
-        _output << "Invalid handle: " << handle.value() << std::endl;
+	if(output_format!=json_format){
+	    _output << "Invalid handle: " << handle.value() << std::endl;
+	}else{
+	    _output << "{\"error\": \"Invalid handle "<<handle.value()<<"\"}"<<std::endl;
+	}
         send(_output.str());
         return false;
     }
     if (output_format == json_format)
-        _output << json_makeOutput(handle);
+        _output << json_makeOutput(_cogserver, handle);
     else html_makeOutput(handle);
     send(_output.str());
     return true;
 }
 
-std::string GetAtomRequest::json_makeOutput(Handle h)
+std::string GetAtomRequest::json_makeOutput(CogServer& cs, Handle h)
 {
     std::ostringstream output;
     
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = cs.getAtomSpace();
     output << "{\"handle\":" << h.value() << ",";// << std::endl;
 
     output << "\"type\":\"" << classserver().getTypeName(as.getType(h)) <<
@@ -168,7 +172,7 @@ std::string GetAtomRequest::tvToJSON(const TruthValue* tv)
 
 void GetAtomRequest::html_makeOutput(Handle h)
 {
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
     _output << "<table border=\"1\"><tr>";

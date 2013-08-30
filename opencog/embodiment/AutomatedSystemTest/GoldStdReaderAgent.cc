@@ -35,7 +35,7 @@ GoldStdReaderAgent::~GoldStdReaderAgent()
     if (goldStdFile) fclose(goldStdFile);
 }
 
-GoldStdReaderAgent::GoldStdReaderAgent()
+GoldStdReaderAgent::GoldStdReaderAgent(CogServer& cs) : Agent(cs)
 {
 }
 
@@ -51,10 +51,10 @@ void GoldStdReaderAgent::init(const char* goldStdFilename)
     endOfFile = false;
 }
 
-void GoldStdReaderAgent::run(opencog::CogServer *server)
+void GoldStdReaderAgent::run()
 {
 
-    PBTester* pbTester = (PBTester*) server;
+    PBTester* pbTester = dynamic_cast<PBTester*>(&_cogserver);
     //if (!pbTester->hasExpectedMessages()) { // THIS WAY, IT WAITS NEXT CYCLE TO RUN THE NEXT CONSECUTIVE MESSAGE
     if (!pbTester->hasExpectedMessages() && endOfFile) {
         pbTester->notifyEndOfGoldStdFile();

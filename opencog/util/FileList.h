@@ -29,26 +29,66 @@
 #include <vector>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
+//! a list of files
+/**
+ * Each entry in the list contains:
+ * - the path that was provided in constructor or to the method that created the entry 
+ * - a slash (/)
+ * - the name of that particular entry.
+ *
+ * So:
+ * @code
+ * FileList("/foo");
+ * @endcode
+ * may have an entry: /foo/bar, and
+ * @code
+ * FileList("../../foo");
+ * @endcode
+ * may have an entry: ../../foo/bar
+ *
+ */
 class FileList
 {
 
 private:
 
+    //! the list
     std::vector<char *>fileList;
 
 public:
 
-    FileList(const char* ) throw (IOException);
+    //! constructor; loads the file(s) in the list
+    /**
+     * If the input is a file, that file alone is pushed into the list; if
+     * the input is a directory, then all files and directories will be added;
+     * unlike getAllFilesRecursively(), this sets only direct kids of the directory.
+     */
+    FileList(const char* path) throw (IOException);
+    //! constructor; creates an empty list
     FileList();
+    //! destructor
     ~FileList();
 
+    //! create a file list structure with all files and directories
+    /**
+     * \warning The ownership of the returned pointer goes to the caller.
+     *
+     * @todo trivial: create a helper method to avoid new-delete on each step
+     */
     static FileList *getAllFilesRecursively(const char* );
-
+    
+    //! number of entries in the list
     unsigned int getSize();
+    
+    //! file at a specific index
     const char* getFile(unsigned int) throw (IndexErrorException);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif /* OPENCOG_FILE_LIST_H */

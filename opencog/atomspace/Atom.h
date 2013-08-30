@@ -42,6 +42,9 @@ class AtomUTest;
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AtomTable;
 
@@ -74,7 +77,7 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
-    // XXX FIXME, atoms fundamentally must not be clonable! Yeah?
+    /** @todo atoms fundamentally must not be clonable! Yeah? */
     virtual Atom* clone() const = 0;
 
     Handle handle;
@@ -182,6 +185,7 @@ public:
     virtual bool operator!=(const Atom&) const = 0;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOM_H

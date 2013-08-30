@@ -30,13 +30,12 @@ SleepAgent::~SleepAgent()
 {
 }
 
-SleepAgent::SleepAgent()
+SleepAgent::SleepAgent(CogServer& cs) : Agent(cs)
 {
 }
 
-void SleepAgent::run(CogServer *ls)
+void SleepAgent::run()
 {
-    logger().fine(
-                 "SleepAgent - Executing SleepAgent.");
+    logger().fine("SleepAgent - Executing SleepAgent.");
     sleep(2);
 }

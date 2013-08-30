@@ -36,6 +36,9 @@
 class HandleEntry;
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Nodes in OpenCog are connected to each other by links. Each link embodies
@@ -61,10 +64,12 @@ private:
 #endif
     void init(const std::vector<Handle>&) throw (InvalidParamException);
 
-    // Adds a new handle to the outgoing set. Note that this is
-    // used only in the NMXmlParser friend class. The parser should
-    // be fixed not to need this, and this should be removed.
-    // Actually, the NMXml parser is obsolete, and should be retired.
+    /**
+     * Adds a new handle to the outgoing set. Note that this is
+     * used only in the NMXmlParser friend class. The parser should
+     * be fixed not to need this, and this should be removed.
+     * Actually, the NMXml parser is obsolete, and should be retired.
+     */
     void addOutgoingAtom(Handle h);
 
     /**
@@ -77,13 +82,15 @@ private:
     void setOutgoingSet(const std::vector<Handle>& o)
     throw (RuntimeException);
 
-    // cloning atoms is a fundamental violation of the architecture.
-    // this method should be removed. XXX FIXME.
+    /**
+     * @todo cloning atoms is a fundamental violation of the architecture.
+     * this method should be removed.
+     */
     virtual Atom* clone() const;
 
 protected:
 
-    // Array that does not change during atom lifespan.
+    //! Array that does not change during atom lifespan.
     std::vector<Handle> outgoing;
 
 public:
@@ -200,8 +207,8 @@ public:
      * Builds the target type index structure according to the types of
      * elements in the outgoing set of the given atom.
      *
+     * @param size gets the size of the returned array.
      * @return A pointer to target types array built.
-     * NOTE: The argument size gets the size of the returned array.
      */
     Type* buildTargetIndexTypes(int *size);
 
@@ -312,6 +319,7 @@ public:
     virtual bool operator!=(const Atom&) const;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_LINK_H

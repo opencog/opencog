@@ -41,12 +41,14 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
+#include <opencog/server/Request.h>
 #include <opencog/server/Registry.h>
 
 namespace opencog
 {
 
 typedef std::vector<Agent*> AgentSeq;
+class Request;
 
 /**
  * This class implements the official server used by the opencog framework. It

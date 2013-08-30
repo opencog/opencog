@@ -15,6 +15,9 @@
 class AtomSpaceAsyncUTest;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AtomSpace;
 class SavingLoading;
@@ -49,7 +52,7 @@ public:
     AtomSpaceAsync();
     ~AtomSpaceAsync();
 
-    // TODO: should be protected by mutex 
+    /** @todo should be protected by mutex */
     int get_counter() { return counter; }
 
     bool isQueueEmpty() { return requestQueue.empty(); } ;
@@ -718,6 +721,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_ASYNC_H

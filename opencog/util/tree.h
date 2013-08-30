@@ -9,14 +9,14 @@
 
 */
 
-/** @file tree.hh
+/** @file tree.h
     \author   Kasper Peeters
     \version  2.3
     \date     29-Nov-2006
     \see      http://www.aei.mpg.de/~peekas/tree/
     \see      http://www.aei.mpg.de/~peekas/tree/ChangeLog
 
-   The tree.hh library for C++ provides an STL-like container class
+   The tree.h library for C++ provides an STL-like container class
    for n-ary trees, templated over the data stored at the
    nodes. Various types of iterators are provided (post-order,
    pre-order, and others). Where possible the access methods are
@@ -84,6 +84,9 @@
 // so here is a copy.
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 namespace kp {
 
@@ -3246,6 +3249,7 @@ std::istream& operator>>(std::istream& in, opencog::tree<T>& tr)
     return  in;
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif

@@ -27,9 +27,10 @@
 
 #include "PyIncludeWrapper.h"
 
-#include <opencog/server/Request.h>
-#include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/Factory.h>
+#include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 namespace opencog
 {
@@ -49,7 +50,7 @@ public:
     const RequestClassInfo& info() const { return *_cci; }
 
     /** Request's constructor */
-    PyRequest(const std::string& moduleName, const std::string& className,
+    PyRequest(CogServer&, const std::string& moduleName, const std::string& className,
               RequestClassInfo*);
 
     /** Request's desconstructor */

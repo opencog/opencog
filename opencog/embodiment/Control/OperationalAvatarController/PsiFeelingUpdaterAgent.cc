@@ -35,34 +35,34 @@ using namespace opencog::oac;
 PsiFeelingUpdaterAgent::~PsiFeelingUpdaterAgent()
 {
 #ifdef HAVE_ZMQ
-    delete this->publisher; 
+    delete this->publisher;
 #endif
 }
 
-PsiFeelingUpdaterAgent::PsiFeelingUpdaterAgent()
+PsiFeelingUpdaterAgent::PsiFeelingUpdaterAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
 #ifdef HAVE_ZMQ
-    this->publisher = NULL; 
+    this->publisher = NULL;
 #endif
 
-    // Force the Agent initialize itself during its first cycle. 
+    // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 }
 
 #ifdef HAVE_ZMQ
-void PsiFeelingUpdaterAgent::publishUpdatedValue(Plaza & plaza, 
-                                                 zmq::socket_t & publisher, 
+void PsiFeelingUpdaterAgent::publishUpdatedValue(Plaza & plaza,
+                                                 zmq::socket_t & publisher,
                                                  const unsigned long timeStamp)
 {
-    using namespace json_spirit; 
+    using namespace json_spirit;
 
     // Send the name of current mind agent which would be used as a filter key by subscribers
-    std::string keyString = "PsiFeelingUpdaterAgent"; 
-    plaza.publishStringMore(publisher, keyString); 
+    std::string keyString = "PsiFeelingUpdaterAgent";
+    plaza.publishStringMore(publisher, keyString);
 
-    // Pack time stamp and all the feeling values in json format 
+    // Pack time stamp and all the feeling values in json format
     Object jsonObj; // json_spirit::Object is of type std::vector< Pair >
     jsonObj.push_back( Pair("timestamp", (uint64_t) timeStamp) );
 
@@ -87,36 +87,31 @@ void PsiFeelingUpdaterAgent::publishUpdatedValue(Plaza & plaza,
 }
 #endif // HAVE_ZMQ
 
-void PsiFeelingUpdaterAgent::init(opencog::CogServer * server) 
+void PsiFeelingUpdaterAgent::init()
 {
     logger().debug( "PsiFeelingUpdaterAgent::%s - Initializing the Agent [ cycle = %d ]",
-                    __FUNCTION__, 
-                    this->cycleCount
-                  );
+                    __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
     const AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get petId
-    const std::string & petId = oac->getPet().getPetId(); 
+    const std::string & petId = oac->getPet().getPetId();
 
     // Get petHandle
-    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petId); 
+    Handle petHandle = AtomSpaceUtil::getAgentHandle(atomSpace, petId);
 
     if ( petHandle == Handle::UNDEFINED ) {
-        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to get the handle to the pet ( id = '%s' ) [ cycle = %d ]", 
-                        __FUNCTION__, 
-                        petId.c_str(), 
-                        this->cycleCount
-                     );
+        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to get the handle to the pet ( id = '%s' ) [ cycle = %d ]",
+                        __FUNCTION__, petId.c_str(), this->cycleCount);
         return;
     }
 
-    // Clear old feelingMetaMap; 
+    // Clear old feelingMetaMap;
     this->feelingMetaMap.clear();
 
     // Get feeling names from the configuration file
@@ -134,20 +129,16 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
         feeling = (*iFeelingName);
         feelingUpdater = feeling + "FeelingUpdater";
 
-        logger().debug( "PsiFeelingUpdaterAgent::%s - Searching the meta data of feeling '%s'.", 
-                        __FUNCTION__, 
-                        feeling.c_str() 
-                      );
-    
+        logger().debug( "PsiFeelingUpdaterAgent::%s - Searching the meta data of feeling '%s'.",
+                        __FUNCTION__, feeling.c_str());
+
         // Get the corresponding EvaluationLink of the pet's feeling
-        Handle evaluationLink = this->getFeelingEvaluationLink(server, feeling, petHandle);
+        Handle evaluationLink = this->getFeelingEvaluationLink(&_cogserver, feeling, petHandle);
 
         if ( evaluationLink == Handle::UNDEFINED )
         {
             logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to get the EvaluationLink for feeling '%s'",
-                           __FUNCTION__, 
-                           feeling.c_str()
-                         );
+                           __FUNCTION__, feeling.c_str());
 
             continue;
         }
@@ -156,21 +147,19 @@ void PsiFeelingUpdaterAgent::init(opencog::CogServer * server)
         feelingMeta.init(feelingUpdater, evaluationLink);
         feelingMetaMap[feeling] = feelingMeta;
 
-        logger().debug( "PsiFeelingUpdaterAgent::%s - Store the meta data of feeling '%s' successfully.", 
-                        __FUNCTION__, 
-                        feeling.c_str() 
-                      );
+        logger().debug( "PsiFeelingUpdaterAgent::%s - Store the meta data of feeling '%s' successfully.",
+                        __FUNCTION__, feeling.c_str());
     }// for
 
     // Initialize ZeroMQ publisher and add it to the plaza
 #ifdef HAVE_ZMQ
     Plaza & plaza = oac->getPlaza();
     this->publisher = new zmq::socket_t (plaza.getZmqContext(), ZMQ_PUB);
-    this->publishEndPoint = "ipc://" + petId + ".PsiFeelingUpdaterAgent.ipc"; 
+    this->publishEndPoint = "ipc://" + petId + ".PsiFeelingUpdaterAgent.ipc";
     this->publisher->bind( this->publishEndPoint.c_str() );
 
-    plaza.addPublisher(this->publishEndPoint); 
-#endif    
+    plaza.addPublisher(this->publishEndPoint);
+#endif
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
@@ -187,13 +176,10 @@ Handle PsiFeelingUpdaterAgent::getFeelingEvaluationLink(opencog::CogServer * ser
     Handle feelingPredicateHandle = atomSpace.getHandle(PREDICATE_NODE, feelingName);
 
     if (feelingPredicateHandle == Handle::UNDEFINED) {
-        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to find the PredicateNode for feeling '%s' [ cycle = %d ].", 
-                       __FUNCTION__, 
-                       feelingName.c_str(), 
-                       this->cycleCount
-                      );
+        logger().warn("PsiFeelingUpdaterAgent::%s - Failed to find the PredicateNode for feeling '%s' [ cycle = %d ].",
+                       __FUNCTION__, feelingName.c_str(), this->cycleCount);
 
-        return opencog::Handle::UNDEFINED; 
+        return opencog::Handle::UNDEFINED;
     }
 
     // Get the Handle to ListLink that contains the pet handle
@@ -204,17 +190,14 @@ Handle PsiFeelingUpdaterAgent::getFeelingEvaluationLink(opencog::CogServer * ser
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, listLinkOutgoing);
 
     if (listLinkHandle == Handle::UNDEFINED) {
-        logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to find the ListLink containing the pet ( id = '%s' ) [ cycle = %d ].", 
-                        __FUNCTION__, 
-                        atomSpace.getName(petHandle).c_str(),
-                        this->cycleCount
-                      );
+        logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to find the ListLink containing the pet ( id = '%s' ) [ cycle = %d ].",
+                        __FUNCTION__, atomSpace.getName(petHandle).c_str(), this->cycleCount);
 
-        return opencog::Handle::UNDEFINED; 
-    } 
+        return opencog::Handle::UNDEFINED;
+    }
 
     // Get the Handle to EvaluationLink holding the pet's feeling
-    std::vector<Handle> evaluationLinkOutgoing; 
+    std::vector<Handle> evaluationLinkOutgoing;
 
     evaluationLinkOutgoing.push_back(feelingPredicateHandle);
     evaluationLinkOutgoing.push_back(listLinkHandle);
@@ -222,39 +205,35 @@ Handle PsiFeelingUpdaterAgent::getFeelingEvaluationLink(opencog::CogServer * ser
     Handle evaluationLinkHandle = atomSpace.getHandle(EVALUATION_LINK, evaluationLinkOutgoing);
 
     if (evaluationLinkHandle == Handle::UNDEFINED) {
-        logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to find the EvaluationLink holding the feling '%s' of the pet ( id = '%s' ) [ cycle = %d ].", 
-                        __FUNCTION__, 
-                        feelingName.c_str(), 
+        logger().warn( "PsiFeelingUpdaterAgent::%s - Failed to find the EvaluationLink holding the feling '%s' of the pet ( id = '%s' ) [ cycle = %d ].",
+                        __FUNCTION__, feelingName.c_str(),
                         atomSpace.getName(petHandle).c_str(),
-                        this->cycleCount
-                     );
+                        this->cycleCount);
 
-        return opencog::Handle::UNDEFINED; 
-    } 
+        return opencog::Handle::UNDEFINED;
+    }
 
     return evaluationLinkHandle;
 
 }
 
-void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
+void PsiFeelingUpdaterAgent::runUpdaters()
 {
-    logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (scheme scripts) [ cycle = %d ]", 
-                    __FUNCTION__ , 
-                    this->cycleCount
-                  );
+    logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (scheme scripts) [ cycle = %d ]",
+                    __FUNCTION__ , this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
     AtomSpace& atomSpace = oac->getAtomSpace();
 
 
-#if HAVE_GUILE    
+#if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);    
+    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one
@@ -275,10 +254,8 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
         scheme_return_value = evaluator.eval(scheme_expression);
 
         if ( evaluator.eval_error() ) {
-            logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'", 
-                             __FUNCTION__, 
-                             scheme_expression.c_str() 
-                          );
+            logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'",
+                             __FUNCTION__, scheme_expression.c_str());
 
             iFeeling->second.bUpdated = false;
 
@@ -289,8 +266,8 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
         }
 
         // Store updated value to FeelingMeta.updatedValue
-        // 
-        // Note: Don't use boost::lexical_cast as below, because SchemeEval will append 
+        //
+        // Note: Don't use boost::lexical_cast as below, because SchemeEval will append
         //       a '\n' to the end of the result (scheme_return_value),  which will make
         //       boost::lexical_cast throw exception
         //
@@ -299,26 +276,21 @@ void PsiFeelingUpdaterAgent::runUpdaters(opencog::CogServer * server)
         iFeeling->second.updatedValue = atof( scheme_return_value.c_str() );
 
         // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiFeelingUpdaterAgent::%s - The new level of feeling '%s' will be %f", 
-                         __FUNCTION__, 
-                         feeling.c_str(),
-                         iFeeling->second.updatedValue                      
-                      );
+        logger().debug( "PsiFeelingUpdaterAgent::%s - The new level of feeling '%s' will be %f",
+                         __FUNCTION__, feeling.c_str(), iFeeling->second.updatedValue);
     }// for
 
-#endif // HAVE_GUILE    
+#endif // HAVE_GUILE
 
-}    
+}
 
-void PsiFeelingUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
+void PsiFeelingUpdaterAgent::setUpdatedValues()
 {
     logger().debug( "PsiFeelingUpdaterAgent::%s - Setting updated feelings to AtomSpace [ cycle =%d ]",
-                    __FUNCTION__, 
-                    this->cycleCount
-                  );
+                    __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
@@ -328,7 +300,7 @@ void PsiFeelingUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
     std::map <std::string, FeelingMeta>::iterator iFeeling;
     std::string feeling;
     double updatedValue;
-    Handle evaluationLink; 
+    Handle evaluationLink;
 
     for ( iFeeling = feelingMetaMap.begin();
           iFeeling != feelingMetaMap.end();
@@ -340,42 +312,37 @@ void PsiFeelingUpdaterAgent::setUpdatedValues(opencog::CogServer * server)
         feeling = iFeeling->first;
         evaluationLink = iFeeling->second.evaluationLink;
         updatedValue = iFeeling->second.updatedValue;
-       
-        // Set truth value of corresponding EvaluationLink 
-        SimpleTruthValue stvFeeling = SimpleTruthValue(updatedValue, 1.0);  
+
+        // Set truth value of corresponding EvaluationLink
+        SimpleTruthValue stvFeeling = SimpleTruthValue(updatedValue, 1.0);
         atomSpace.setTV(evaluationLink, stvFeeling);
 
-        // Reset bUpdated  
+        // Reset bUpdated
         iFeeling->second.bUpdated = false;
 
         // TODO: Change the log level to fine, after testing
-        logger().debug( "PsiFeelingUpdaterAgent::%s - Set the level of feeling '%s' to %f", 
-                         __FUNCTION__, 
-                         feeling.c_str(),
-                         updatedValue
-                      );
+        logger().debug( "PsiFeelingUpdaterAgent::%s - Set the level of feeling '%s' to %f",
+                         __FUNCTION__, feeling.c_str(), updatedValue);
     }// for
 }
 
-void PsiFeelingUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
+void PsiFeelingUpdaterAgent::sendUpdatedValues()
 {
     logger().debug( "PsiFeelingUpdaterAgent::%s - Sending updated feelings to the virtual world where the pet lives [ cycle =%d ]",
-                    __FUNCTION__, 
-                    this->cycleCount
-                  );
+                    __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC * oac = (OAC *) server;
+    OAC * oac = dynamic_cast<OAC *>(&_cogserver);
 
     // Get AtomSpace
 //    AtomSpace & atomSpace = * ( oac->getAtomSpace() );
 
     // Get petName
-    const std::string & petName = oac->getPet().getName(); 
+    const std::string & petName = oac->getPet().getName();
 
     // Prepare the data to be sent
     std::map <std::string, FeelingMeta>::iterator iFeeling;
-    std::map <std::string, float> feelingValueMap; 
+    std::map <std::string, float> feelingValueMap;
     std::string feeling;
     double updatedValue;
 
@@ -386,7 +353,7 @@ void PsiFeelingUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
         feeling = iFeeling->first;
         updatedValue = iFeeling->second.updatedValue;
 
-        feelingValueMap[feeling] = updatedValue;        
+        feelingValueMap[feeling] = updatedValue;
 
     }// for
 
@@ -394,35 +361,33 @@ void PsiFeelingUpdaterAgent::sendUpdatedValues(opencog::CogServer * server)
     oac->getPAI().sendEmotionalFeelings(petName, feelingValueMap);
 }
 
-void PsiFeelingUpdaterAgent::run(opencog::CogServer * server)
+void PsiFeelingUpdaterAgent::run()
 {
     this->cycleCount ++;
 
     logger().debug( "PsiFeelingUpdaterAgent::%s - Executing run %d times",
-                     __FUNCTION__, 
-                     this->cycleCount
-                  );
+                     __FUNCTION__, this->cycleCount);
 
     // Initialize the Agent (feelingMetaMap etc)
     if ( !this->bInitialized )
-        this->init(server);
+        this->init();
 
     // Run feeling updaters (combo scripts)
-    this->runUpdaters(server);
+    this->runUpdaters();
 
     // Set updated values to AtomSpace
-    this->setUpdatedValues(server);
+    this->setUpdatedValues();
 
     // Send updated values to the virtual world where the pet lives
-    this->sendUpdatedValues(server); 
+    this->sendUpdatedValues();
 
-#ifdef HAVE_ZMQ    
+#ifdef HAVE_ZMQ
     // Publish updated modulator values via ZeroMQ
-    OAC * oac = (OAC *) server;
-    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();   
+    OAC * oac = dynamic_cast<OAC *>(&_cogserver);
+    unsigned long timeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     Plaza & plaza = oac->getPlaza();
-    this->publishUpdatedValue(plaza, *this->publisher, timeStamp); 
-#endif 
+    this->publishUpdatedValue(plaza, *this->publisher, timeStamp);
+#endif
 }
 
