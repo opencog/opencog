@@ -136,7 +136,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 
     enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
 
-
+    trueConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "true");
+    falseConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "false");
 
 }
 
@@ -2929,6 +2930,13 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
                  atomSpace.getName(objectNode).c_str());
 
     AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
+
+    // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
+    // so we need to add both
+    if (propertyValue)
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
+    else
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
 }
 
 void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)

@@ -180,6 +180,9 @@ private:
 
     int blockNum;
 
+    Handle trueConceptNode;
+    Handle falseConceptNode;
+
 public:
 
     /**

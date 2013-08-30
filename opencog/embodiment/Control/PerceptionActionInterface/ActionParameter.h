@@ -239,6 +239,8 @@ private:
      */
     ParamValue value;
 
+    string valueString; // The string to represent value, for easy debugging
+
 public:
     static bool areFromSameType(const ParamValue& v1, const ParamValue& v2);
 
