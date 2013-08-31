@@ -12,7 +12,7 @@ This page is a high level overview of the program; to dig into the details
 read \ref grp_spatial "the comprehensive overview".
 
 Dependencies:
-- SpaceMap
+- \ref libspatial "SpaceMap"
 - \ref libcogutil "cogutil"
 - sdl
 - sdlgfx

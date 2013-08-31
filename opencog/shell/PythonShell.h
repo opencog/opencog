@@ -41,6 +41,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class PythonShellModule;
 
@@ -74,6 +77,8 @@ public:
     void hush_output(bool);
     void hush_prompt(bool);
 };
+
+/** @}*/
 }
 
 #endif // PYTHONSHELL_H

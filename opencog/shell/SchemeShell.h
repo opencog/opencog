@@ -31,6 +31,9 @@
 #include <opencog/server/ConsoleSocket.h>
 
 namespace opencog {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class SchemeShellModule;
 
@@ -65,6 +68,7 @@ class SchemeShell : public GenericShell
 		void hush_prompt(bool);
 };
 
+/** @}*/
 }
 
 #endif // _OPENCOG_SCHEME_SHELL_H
