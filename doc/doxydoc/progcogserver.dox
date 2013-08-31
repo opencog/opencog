@@ -1,3 +1,4 @@
+namespace opencog {
 /**
 \page progcogserver cogserver program
 
@@ -12,9 +13,9 @@ read \ref grp_server "the comprehensive overview".
 Dependencies:
 - \ref libserver "server"
 - boost system
-- Guile
+- <a href="http://www.gnu.org/software/guile/">Guile</a>
 
-The program heavily relies on \ref libserver "server" library. Initialisation 
+The program heavily relies on the \ref libserver "server" library. Initialisation 
 options are discussed here, while the runnings of the server is detailed in
 \ref libserver "library's page"
 
@@ -24,12 +25,29 @@ file</a> lives in the /lib directory and is loaded by default when Cogserver
 starts. See the 
 <a href="http://wiki.opencog.org/w/Understanding_the_opencog.conf_file">wiki entry</a>
 that describes it.
-
 Several tutorials including
 <a href="http://wiki.opencog.org/w/Starting_the_Cogserver">Starting the Cogserver</a> and
 <a href="http://wiki.opencog.org/w/Connecting_to_the_Cogserver">Connecting to the Cogserver</a>
 are also present in 
 <a href="http://wiki.opencog.org/w/Category:OpenCog_for_Noobs">the wiki</a>
+
+Two options are supported by the program: configuration files and option definitions:
+@code
+cogserver [[-c <config-file>]..] [[-DOPTION="VALUE"]..]
+@endcode
+Each config file is loaded sequentially, with the values in later files
+overwriting earlier. Then each singular option overrides options in config
+files. If no configuration file is provided it is searched in /etc/opencog.conf and
+${CRTDIR}/../lib/opencog.conf
+
+Once the option map has been constructed the program initialises the Logger,
+creates a CogServer instance, opens the database, loads modules specified in config,
+enables networking and enters \ref CogServer::serverLoop "server loop".
+
+The program always returns success (0) to the operating system in normal execution.
+\if DOCUMENTATION_TODO
+What does abort() returns? Suppose something else than 0.
+\endif
 
 
 \if MARKER_TREE_START
@@ -45,4 +63,4 @@ ignored by doxygen; used as markers for update-links.py;
 ignored by doxygen; used as markers for update-links.py;
 \endif
 */
-
+}

@@ -38,6 +38,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 class AtomSpaceImpl;
 
 /**
@@ -128,6 +131,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SYSTEM_ACTIVITY_TABLE_H

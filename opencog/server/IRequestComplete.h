@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class defines an interface that classes that handles the result 
@@ -50,6 +53,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_I_REQUEST_COMPLETE_H

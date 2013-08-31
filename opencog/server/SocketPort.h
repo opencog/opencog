@@ -27,6 +27,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class stores a socket port
@@ -45,6 +48,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SOCKET_PORT_H

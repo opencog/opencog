@@ -11,6 +11,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class ListModulesRequest : public Request
 {
@@ -42,6 +45,7 @@ public:
     virtual bool isShell(void) {return info().is_shell;}
 };
 
+/** @}*/
 } // namespace
 
 #endif // _OPENCOG_LIST_MODULES_REQUEST_H

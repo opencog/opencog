@@ -39,6 +39,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class BuiltinRequestsModule : public Module
 {
@@ -149,6 +152,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_BUILTIN_REQUESTS_MODULE_H
