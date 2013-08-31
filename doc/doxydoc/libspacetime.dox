@@ -3,7 +3,8 @@ namespace opencog {
 
 \page libspacetime spacetime library
 
-This library (<em>opencog/spacetime</em>) ...
+This library (<em>opencog/spacetime</em>) handles the spatio-temporal 
+aspect of the atomspace.
 @code
 make spacetime
 @endcode
@@ -12,7 +13,7 @@ This page is a high level overview of the library; to dig into the details
 read \ref grp_spacetime "the comprehensive overview".
 
 Dependencies:
-- SpaceMap
+- \ref libspatial "SpaceMap"
 - \ref libserver "server"
 - \ref libatomspace "atomspace"
 
@@ -61,7 +62,8 @@ ignored by doxygen; used as markers for update-links.py;
 /**
 \defgroup grp_spacetime spacetime library
 
-This library (<em>opencog/spacetime</em>) is ...
+This library (<em>opencog/spacetime</em>) handles the spatio-temporal 
+aspect of the atomspace.
 To build it type:
 @code
 make spacetime
