@@ -68,7 +68,7 @@ double Vertex::CalculateForce(Positions *positions)
     double force = 0;
 
     //calculate attractive forces
-    for (int i=0; i<connectedVertices.size(); i++)
+    for (std::size_t i=0; i<connectedVertices.size(); i++)
     {
         double distanceSquared = DistanceSquared(row, col, connectedVertices[i]);
         force += distanceSquared * attractiveForceStrength;
@@ -120,7 +120,7 @@ void Vertex::ConnectVertex(Vertex *vertex2)
 
 void Vertex::DisconnectVertex(Vertex *vertex2)
 {
-    for(int i=0;i<connectedVertices.size();i++)
+    for(std::size_t i=0;i<connectedVertices.size();i++)
         if(connectedVertices[i]==vertex2)
         {
             connectedVertices.erase(connectedVertices.begin()+i);
@@ -137,7 +137,7 @@ double Vertex::DistanceSquared(int row, int col, Vertex *otherVertex)
 
 Vertex *Vertex::FindConnectedVertexByUUID(UUID uuid)
 {
-    for(int i=0;i<connectedVertices.size();i++)
+    for(std::size_t i=0;i<connectedVertices.size();i++)
         if(connectedVertices[i]->uuid==uuid)
             return connectedVertices[i];
     return NULL;

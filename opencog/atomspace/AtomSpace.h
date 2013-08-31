@@ -49,6 +49,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 typedef boost::shared_ptr<TruthValue> TruthValuePtr;
 
@@ -206,7 +209,7 @@ public:
     /**
      * Add a new node to the AtomTable. A random 16-character string
      * will be appended to the provided name.
-     * @TODO: Later on, the names can include server/time info to decrease
+     * @todo: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
     Handle addPrefixedNode(Type t, const std::string& prefix = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
@@ -468,7 +471,7 @@ public:
 #endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
 
 
-    /** Retrieve the TruthValue summary of a given Handle
+    /* Retrieve the TruthValue summary of a given Handle
      */
     //tv_summary_t getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
@@ -1225,6 +1228,7 @@ private:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_H

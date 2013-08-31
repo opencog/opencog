@@ -55,10 +55,10 @@ class SchemeShellModule : public Module
 			false, false)
 
 	public:
-		SchemeShellModule(void);
+		SchemeShellModule(CogServer&);
 		virtual ~SchemeShellModule();
 
-		virtual const char *id(void);
+		static const char *id(void);
 		virtual void init(void);
 };
 

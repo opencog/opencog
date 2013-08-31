@@ -68,48 +68,46 @@ private:
 
     void setupURIsForREST();
     void setupURIsForUI();
-public:
 
+public:
     static const unsigned int DEFAULT_PORT = 17034;
     static const char* DEFAULT_SERVER_ADDRESS;
 
     static const char* jsonHeader()
-{
-return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
-    "content-Type: application/json\r\n\r\n"));
-}
-    static const char* openHtmlHeader()
-{
-return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
-    "content-Type: text/html\r\n\r\n"
-    "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"/resources/ab.css\">" ));
-
-}
-    static const char* closeHtmlHeader(){
-
-return(const_cast<char *>("</head><body>"));
-
-}
-    static const char* HtmlrefreshHeader(){
-
-return(const_cast<char *>( "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">"));
-
-}
-    static const char* htmlFooter(){
-
-return(const_cast<char *>("</body></html>\r\n"));
-
-}
-
-    static inline const char* id() {
-        static const char* _id = "opencog::WebModule";
-        return _id;
+    {
+        return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
+            "content-Type: application/json\r\n\r\n"));
     }
 
-    WebModule();
+    static const char* openHtmlHeader()
+    {
+        return(const_cast<char *>("HTTP/1.1 200 OK\r\n"
+            "content-Type: text/html\r\n\r\n"
+            "<html><head><link rel=\"stylesheet\" type=\"text/css\" href=\"/resources/ab.css\">" ));
+
+    }
+
+    static const char* closeHtmlHeader()
+    {
+        return(const_cast<char *>("</head><body>"));
+    }
+
+    static const char* HtmlrefreshHeader()
+    {
+        return(const_cast<char *>( "<META HTTP-EQUIV=\"Refresh\" CONTENT=\"5\">"));
+    }
+
+    static const char* htmlFooter()
+    {
+        return(const_cast<char *>("</body></html>\r\n"));
+    }
+
+    static const char* id();
+
+    WebModule(CogServer&);
     virtual ~WebModule();
     virtual void init  (void);
-    
+
     void setupURIs();
     static void return400(mg_connection* conn, const std::string& message);
     static void return404(mg_connection* conn);

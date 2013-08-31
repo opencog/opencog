@@ -56,6 +56,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class SavingLoading;
 
@@ -77,15 +80,8 @@ private:
 
     int size;
 
-    /**
-     * Indicates whether DynamicStatisticsAgent should be used
-     * for atoms inserted in this table or not.
-     */
-    bool useDSA;
-
-    /**
-     * Indexes for quick retreival of certain kinds of atoms.
-     */
+    //!@{
+    //! Index for quick retreival of certain kinds of atoms.
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
@@ -93,7 +89,8 @@ private:
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
-
+	//!@}
+	
     /**
      * signal connection used to keep track of atom type addition in the
      * ClassServer 
@@ -107,7 +104,7 @@ private:
 
     static bool decayed(Handle h);
 
-    // Warning, this should only be called by decayShortTermImportance
+    /** \warning this should only be called by decayShortTermImportance */
     void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
 
     /**
@@ -118,19 +115,19 @@ private:
      * Note: The caller is responsible for releasing the memory of
      * both the returned list and the refered Atoms inside it.
      *
-     * @param The atom to be extracted.
-     * @param Recursive-removal flag; if set, the links in the
+     * @param handle The atom to be extracted.
+     * @param recursive Recursive-removal flag; if set, the links in the
      *        incoming set will also be extracted.
      * @return A list with the Handles of all extracted Atoms.
      */
-    UnorderedHandleSet extract(Handle, bool recursive = false);
+    UnorderedHandleSet extract(Handle handle, bool recursive = false);
 
     /**
      * Removes the previously extracted Handles (using the extract
      * method) from this table.
      * @param The list of the Handles previously extracted.
      *
-     * NOTE: This method also frees the memory of the Atom objects!
+     * \note This method also frees the memory of the Atom objects!
      */
     void removeExtractedHandles(const UnorderedHandleSet&);
 
@@ -149,7 +146,7 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable(bool dsa = true);
+    AtomTable();
     ~AtomTable();
 
     /**
@@ -190,7 +187,7 @@ public:
      *      - the given Handle is not in the AtomTable
      *      - there is already an index for this predicate id/Handle
      *      - the predicate index table is full.
-     * NOTE: Does not apply the new predicate index to the atoms
+     * \note Does not apply the new predicate index to the atoms
      * inserted previously in the AtomTable.
      */
     void addPredicateIndex(Handle h, PredicateEvaluator *pe)
@@ -737,14 +734,9 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
-
-    /**
-     * Returns whether DynamicsStatisticsAgent is to be used with
-     * this table or not.
-     */
-    bool usesDSA() const;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_ATOMTABLE_H

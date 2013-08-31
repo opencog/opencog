@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /**
  * Counts the number of bits in 1 in the given unsigned long argument.
@@ -79,6 +82,7 @@ struct safe_deleter : public std::unary_function<_T*&, void>
 std::string demangle(const std::string& mangled);
 #endif
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MISC_H

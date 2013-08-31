@@ -38,7 +38,7 @@
 using namespace opencog::oac;
 using namespace std;
 
-OCPlanningAgent::OCPlanningAgent()
+OCPlanningAgent::OCPlanningAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
@@ -51,17 +51,13 @@ OCPlanningAgent::~OCPlanningAgent()
     delete ocplanner;
 }
 
-void OCPlanningAgent::init(opencog::CogServer * server)
+void OCPlanningAgent::init()
 {
-    std::cout<<"OCPlanningAgent begins init..."<<std::endl;
-
     logger().debug( "OCPlanningAgent::%s - Initializing the Agent [cycle = %d]",
-                    __FUNCTION__,
-                    this->cycleCount
-                  );
+                    __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Avoid initialize during next cycle
@@ -126,29 +122,27 @@ void OCPlanningAgent::init(opencog::CogServer * server)
 
 bool OCPlanningAgent::isMoveAction(string s)
 {
-    int pos1 = s.find("walk");
-    int pos2 = s.find("jump_toward");
+    std::size_t pos1 = s.find("walk");
+    std::size_t pos2 = s.find("jump_toward");
     if ( (pos1 != std::string::npos) || (pos2 != std::string::npos))
         return true;
     else
         return false;
 }
 
-void OCPlanningAgent::run(opencog::CogServer * server)
+void OCPlanningAgent::run()
 {
-    this->cycleCount = server->getCycleCount();
+    this->cycleCount = _cogserver.getCycleCount();
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    if ( !this->bInitialized )
-        this->init(server);
+    if (!this->bInitialized)
+        this->init();
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
-                     __FUNCTION__,
-                     this->cycleCount
-                  );
+                     __FUNCTION__, this->cycleCount);
 
     // if the space map has not been set up yet, won't run the planner.
     if (! spaceServer().isLatestMapValid())
@@ -171,7 +165,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                     << " [PlanId = " <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
 
             // get next action in this plan
-            if (this->current_actions.size() == this->current_step)
+            if (this->current_actions.size() == (std::size_t)this->current_step)
             {
                 // the current action is already the last action in this plan. so this plan is exectued successfully!
                 std::cout<<std::endl<<"OCPlanningAgent::Action plan is executed successfully! Plan ID = "<< this->currentOCPlanID
@@ -219,7 +213,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
               {
                     // check if current step , its previous step and its next step are all move to location, don't need to print out the message
 
-                    if ( (this->current_step != 1) &&  (this->current_step != this->current_actions.size()))
+                    if ( (this->current_step != 1) &&  ((std::size_t)this->current_step != this->current_actions.size()))
                     {
                         string cur_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-1]);
                         string pre_s = oac->getAtomSpace().atomAsString(current_actions[this->current_step-2]);
@@ -283,7 +277,7 @@ void OCPlanningAgent::run(opencog::CogServer * server)
                  <<std::endl;
 
         // the demand goal is something like "EnergyDemandGoal"
-        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal,server);
+        currentOCPlanID = ocplanner->doPlanningForPsiDemandingGoal(this->hSelectedDemandGoal, &_cogserver);
 
         // if planning failed
         if (currentOCPlanID == "")

@@ -25,7 +25,12 @@
 
 #include <opencog/util/Config.h>
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
+//!@{
+//! color codes in ANSI
 static const char* const COLOR_OFF = "\033[0m";
 static const char* const BRIGHT = "\033[1m";
 static const char* const RED = "\033[31m";
@@ -35,11 +40,15 @@ static const char* const BLUE = "\033[34m";
 static const char* const MAGENTA = "\033[35m";
 static const char* const CYAN = "\033[36m";
 static const char* const WHITE = "\033[37m";
-  
+//!@}
+
+//! inserts the code only if \b ANSI_ENABLED variable is set
 inline void ansi_code(std::string &s,const std::string &code) {
     if (config().get_bool("ANSI_ENABLED")) s.append(code);
 }
 
+//!@{
+//! appends the code if \b ANSI_ENABLED variable is set
 inline void ansi_off(std::string &s) { ansi_code(s,COLOR_OFF); }
 inline void ansi_bright(std::string &s) { ansi_code(s,BRIGHT); }
 inline void ansi_red(std::string &s) { ansi_code(s,RED); }
@@ -49,5 +58,7 @@ inline void ansi_blue(std::string &s) { ansi_code(s,BLUE); }
 inline void ansi_magenta(std::string &s) { ansi_code(s,MAGENTA); }
 inline void ansi_cyan(std::string &s) { ansi_code(s,CYAN); }
 inline void ansi_white(std::string &s) { ansi_code(s,WHITE); }
+//!@}
 
+/** @}*/
 }

@@ -39,7 +39,8 @@
 namespace opencog
 {
 
-ImportanceDiffusionAgent::ImportanceDiffusionAgent()
+ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
+    Agent(cs)
 {
     static const std::string defaultConfig[] = {
         //! Default value that normalised STI has to be above before
@@ -72,10 +73,10 @@ void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
     }
     switch (type) {
     case HYPERBOLIC:
-        spreadDecider = (SpreadDecider*) new HyperbolicDecider(shape);
+        spreadDecider = (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
         break;
     case STEP:
-        spreadDecider = (SpreadDecider*) new StepDecider();
+        spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
         break;
     }
     
@@ -103,9 +104,9 @@ void ImportanceDiffusionAgent::setDiffusionThreshold(float p)
 float ImportanceDiffusionAgent::getDiffusionThreshold() const
 { return diffusionThreshold; }
 
-void ImportanceDiffusionAgent::run(CogServer* server)
+void ImportanceDiffusionAgent::run()
 {
-    a = &server->getAtomSpace();
+    a = &_cogserver.getAtomSpace();
     spreadDecider->setFocusBoundary(diffusionThreshold);
 #ifdef DEBUG
     totalSTI = 0;
@@ -419,7 +420,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
 
     val = (AttentionValue::sti_t) (a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) )));
 /*
-    AtomSpace *a = server().getAtomSpace();
+    AtomSpace *a = _cogserver.getAtomSpace();
     float af = a->getAttentionalFocusBoundary();
     scaledSTI = (scaledSTI * 2) - 1;
     if (scaledSTI <= 1.0) {
@@ -469,15 +470,16 @@ bool SpreadDecider::spreadDecision(AttentionValue::sti_t s)
         return false;
 }
 
-RandGen* SpreadDecider::getRNG() {
+RandGen* SpreadDecider::getRNG()
+{
     if (!rng)
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     return rng;
 }
 
-float HyperbolicDecider::function(AttentionValue::sti_t s)
+double HyperbolicDecider::function(AttentionValue::sti_t s)
 {
-    AtomSpace& a = server().getAtomSpace();
+    AtomSpace& a = _cogserver.getAtomSpace();
     // Convert boundary from -1..1 to 0..1
     float af = a.getAttentionalFocusBoundary();
     float minSTI = a.getMinSTI(false);
@@ -499,14 +501,14 @@ void HyperbolicDecider::setFocusBoundary(float b)
     focusBoundary = b;
 }
 
-float StepDecider::function(AttentionValue::sti_t s)
+double StepDecider::function(AttentionValue::sti_t s)
 {
     return (s>focusBoundary ? 1.0f : 0.0f);
 }
 
 void StepDecider::setFocusBoundary(float b)
 {
-    AtomSpace& a = server().getAtomSpace();
+    AtomSpace& a = _cogserver.getAtomSpace();
     // Convert to an exact STI amount
     float af = a.getAttentionalFocusBoundary();
     focusBoundary = (b > 0.0f)?

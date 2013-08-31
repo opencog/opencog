@@ -47,6 +47,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/macros.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
@@ -135,7 +136,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 
     enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
 
-
+    trueConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "true");
+    falseConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "false");
 
 }
 
@@ -469,6 +471,12 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
             break;
         case ENTITY_CODE:
             break;
+        default:
+			// TODO: TNick: is this the right way of handling other values? 
+			// FUZZY_INTERVAL_INT_CODE
+			// FUZZY_INTERVAL_FLOAT_CODE
+			// NUMBER_OF_ACTION_PARAM_TYPES
+			break;
         }
 
         singleActionElement->appendChild(paraElement);
@@ -1483,7 +1491,8 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     }
     else
         eventTYpe = oac::EVENT_TYPE_ACTION;
-
+	OC_UNUSED(eventTYpe);
+	
     // Jared    
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
     // while PLN may find it useful to have them together or separate.
@@ -2921,6 +2930,13 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
                  atomSpace.getName(objectNode).c_str());
 
     AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
+
+    // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
+    // so we need to add both
+    if (propertyValue)
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
+    else
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
 }
 
 void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)

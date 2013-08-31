@@ -55,11 +55,11 @@ public:
         return _ci;
     }
     
-    static inline const char* id();
+    static const char* id();
 
-    DottyModule();
-    ~DottyModule();
-    void init();
+    DottyModule(CogServer&);
+    virtual ~DottyModule();
+    virtual void init();
 
 }; // class
 

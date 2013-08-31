@@ -40,7 +40,7 @@ namespace opencog
 
 DECLARE_MODULE(PythonShellModule);
 
-PythonShellModule::PythonShellModule()
+PythonShellModule::PythonShellModule(CogServer& cs) : Module(cs)
 {
 }
 

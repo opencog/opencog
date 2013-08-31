@@ -109,7 +109,8 @@ std::string NMXmlExporter::toXML(const UnorderedHandleSet *elements)
     }
     sprintf(aux, "<%s>\n", TAG_DESCRIPTION_TOKEN);
     result += aux;
-    for (unsigned int i = 0 ; i < classserver().getNumberOfClasses(); i++) {
+    unsigned int numberOfTypes = classserver().getNumberOfClasses();
+    for (unsigned int i = 0 ; i < numberOfTypes; i++) {
         if (typesUsed[i]) {
             sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, classserver().getTypeName(i).c_str(), VALUE_TOKEN, classserver().getTypeName(i).c_str());
             result += aux;

@@ -13,6 +13,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Invoke the callback on each pair of corresponding atoms in the
@@ -48,6 +51,7 @@ inline bool foreach_atom_pair(const std::vector<Handle> &va,
     return false;
 }
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_FOREACH_TWO_H

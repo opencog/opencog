@@ -82,20 +82,6 @@ class PsiActionSelectionAgentUTest;
 
 namespace opencog { namespace oac {
 
-/* Defines a single factory template to allow insert a same agent
- * multiple times in the Cogserver schedule */
-template< typename _Type, typename _BaseType >
-class SingletonFactory : public Factory<_Type, _BaseType>
-{
-public:
-    explicit SingletonFactory() : Factory<_Type, _BaseType>() {}
-    virtual ~SingletonFactory() {}
-    virtual _BaseType* create() const {
-        static _BaseType* inst =  new _Type;
-        return inst;
-    }
-};
-
 class OAC : public opencog::messaging::MessageCogServer
 {
     friend class::PsiModulatorUpdaterAgentUTest; 

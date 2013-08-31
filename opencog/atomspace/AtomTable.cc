@@ -38,7 +38,6 @@
 #include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -49,9 +48,8 @@
 
 using namespace opencog;
 
-AtomTable::AtomTable(bool dsa)
+AtomTable::AtomTable()
 {
-    useDSA = dsa;
     size = 0;
 
     //connect signals
@@ -458,12 +456,6 @@ Handle AtomTable::add(Atom *atom) throw (RuntimeException)
 
     atom->setAtomTable(this);
 
-    // XXX the Statistics monitor should use signals, just like everyone else,
-    // it should not get special treatment here!.
-    if (useDSA) {
-        StatisticsMonitor::getInstance()->add(atom);
-    }
-
     DPRINTF("Atom added: %ld => %s\n", handle.value(), atom->toString().c_str());
 
     return handle;
@@ -566,9 +558,6 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
     // decrements the size of the table
     size--;
 
-    // updates all global statistics regarding the removal of this atom
-    if (useDSA) StatisticsMonitor::getInstance()->remove(atom);
-
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
@@ -624,25 +613,12 @@ void AtomTable::clearIndexesAndRemoveAtoms(const UnorderedHandleSet& exh)
     linkIndex.remove(decayed);
     typeIndex.remove(decayed);
 
+    // update the AtomTable's size
     UnorderedHandleSet::const_iterator it;
     for (it = exh.begin(); it != exh.end(); it++) {
         Atom* atom = getAtom(*it);
-
-        // update the AtomTable's size
         size--;
-
-        // XXX FIXME the DSA should be using signals to get
-        // notified of shit happening. None of this lazy-ass coding
-        // allowed here. XXX FIXME
-        if (useDSA)
-            // updates all global statistics regarding the removal of this atom
-            StatisticsMonitor::getInstance()->remove(atom);
     }
-}
-
-bool AtomTable::usesDSA() const
-{
-    return useDSA;
 }
 
 void AtomTable::typeAdded(Type t)

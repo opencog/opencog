@@ -99,9 +99,9 @@ public:
         return _ci;
     }
 
-    ImportanceSpreadingAgent();
+    ImportanceSpreadingAgent(CogServer&);
     virtual ~ImportanceSpreadingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     /** Set minimal amount of STI necessary for an atom to have before it
      * spreads STI.

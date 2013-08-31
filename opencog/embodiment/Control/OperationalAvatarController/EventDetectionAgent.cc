@@ -40,7 +40,8 @@ using namespace opencog;
 map<unsigned long,Frame*> EventDetectionAgent::frames;
 
 
-EventDetectionAgent::EventDetectionAgent(AtomSpace& _atomSpace ):atomSpace(_atomSpace)
+EventDetectionAgent::EventDetectionAgent(CogServer& cs) :
+    Agent(cs), atomSpace(cs.getAtomSpace())
 {
     this->cycleCount = 0;
     // dataProvider = new DataProvider(3, false);
@@ -114,23 +115,16 @@ void EventDetectionAgent::addAnEvent(Handle eventHandle, unsigned long timestamp
     }
 }
 
-void EventDetectionAgent::run(opencog::CogServer * server)
+void EventDetectionAgent::run()
 {
-    this->cycleCount = server->getCycleCount();
+    this->cycleCount = _cogserver.getCycleCount();
 
     logger().debug( "EventDetectionAgent::%s - Executing run at %d cycles ",
-                     __FUNCTION__,
-                     this->cycleCount
-                  );
+                     __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
-
-
-
-
-
 }
 
 bool Skeleton::isSameSkeletonToMe(HandleSeq _rootLinks)

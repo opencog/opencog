@@ -32,13 +32,18 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AttentionBank
 {
     AtomSpaceImpl *atomspace;
-    /* Boundary at which an atom is considered within the attentional
+    /**
+     * Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent */
+     * not charged STI rent 
+     */
     AttentionValue::sti_t attentionalFocusBoundary;
 
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
@@ -57,7 +62,7 @@ class AttentionBank
 
     mutable boost::mutex lock_funds;
 
-    /*
+    /**
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */
     void removeStimulus(Handle h);
@@ -195,6 +200,7 @@ public:
 
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_ATTENTION_BANK_H

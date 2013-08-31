@@ -315,10 +315,8 @@ private:
     void updateAttentionalFocusSizes(AtomSpace* a);
 
     /** Initialise iterative variables with suitable starting values.
-     *
-     * @param server A pointer to the \a CogServer running the Agent.
      */
-    void init(CogServer *server);
+    void init();
 
     //! Has init been run to give iterative variables sensible start points
     bool initialEstimateMade;
@@ -355,9 +353,9 @@ public:
         return _ci;
     }
 
-    ImportanceUpdatingAgent();
+    ImportanceUpdatingAgent(CogServer&);
     virtual ~ImportanceUpdatingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     virtual std::string toString();
 

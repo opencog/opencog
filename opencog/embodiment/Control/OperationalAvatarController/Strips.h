@@ -329,7 +329,7 @@ namespace opencog { namespace oac {
         vector<EffectPair> effectList;
 
         // The cost function as heuristics, linearly
-        // the totoal cost = basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
+        // the total cost = basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
         float basic_cost;
         vector<CostHeuristic> CostHeuristics;
 
@@ -348,11 +348,14 @@ namespace opencog { namespace oac {
         // In vector<ParamValue*>, the ParamValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
         map<string , vector<paramIndex> > paraIndexMap;
 
+        // constructors
         Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
-            action(_action) , actor(_actor),basic_cost(_basic_cost), preconditionList(_preconditionList), effectList(_effectList){}
+            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
 
         Rule(PetAction* _action, ParamValue _actor, float _basic_cost):
-            action(_action) , actor(_actor), basic_cost(_basic_cost){}
+            action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
 
         float getBasicCost();
 

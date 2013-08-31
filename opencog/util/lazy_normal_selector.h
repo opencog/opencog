@@ -28,9 +28,12 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-// apply lazy_selector but the select method returns always the same
-// number, created for testing
+//! apply lazy_selector but the select method returns always the same
+//! number, created for testing
 struct lazy_normal_selector : public lazy_selector {
 private:
     unsigned int _s;
@@ -42,6 +45,7 @@ public:
     unsigned int select();
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif

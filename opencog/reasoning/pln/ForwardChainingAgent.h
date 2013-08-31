@@ -64,9 +64,9 @@ public:
         return _ci;
     }
 
-    ForwardChainingAgent();
+    ForwardChainingAgent(CogServer&);
     virtual ~ForwardChainingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
 }; // class
 

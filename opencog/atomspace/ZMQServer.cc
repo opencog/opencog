@@ -37,8 +37,9 @@ ZMQServer::ZMQServer(AtomSpace* atomSpace1, string networkAdress)
 
 ZMQServer::~ZMQServer()
 {
-    //TODO send signal to exit gracefully
-    //zmqServerThread.join();
+    /** TODO send signal to exit gracefully@n
+     * zmqServerThread.join();
+     */
 };
 
 void ZMQServer::zmqLoop(string networkAddress)

@@ -120,7 +120,6 @@ boost::signal<void (Type)>& ClassServer::addTypeSignal()
 
 unsigned int ClassServer::getNumberOfClasses()
 {
-    boost::mutex::scoped_lock l(type_mutex);
     return nTypes;
 }
 
@@ -166,7 +165,7 @@ const std::string& ClassServer::getTypeName(Type type)
 
 ClassServer& opencog::classserver(ClassServerFactory* factory)
 {
-    static std::auto_ptr<ClassServer> instance((*factory)());
+    static std::unique_ptr<ClassServer> instance((*factory)());
     return *instance;
 }
 

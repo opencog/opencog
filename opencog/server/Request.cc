@@ -29,8 +29,9 @@
 
 using namespace opencog;
 
-Request::Request() : _requestResult(NULL), _mimeType("text/plain") {
-//    cleanUp(true), complete(false) {
+Request::Request(CogServer& cs) :
+    _cogserver(cs), _requestResult(NULL), _mimeType("text/plain")
+{
 }
 
 Request::~Request()

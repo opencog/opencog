@@ -66,14 +66,8 @@ State::~State()
 
 State* State::clone()
 {
-    State* cloneState = new State();
-
-    cloneState->stateName = this->stateName;
-    cloneState->stateVariable = new ActionParameter(this->stateName,this->getActionParamType(), this->stateVariable->getValue());
-    cloneState->stateType = this->stateType;
-    cloneState->stateOwnerList = this->stateOwnerList;
-    cloneState->need_inquery = this->need_inquery;
-    cloneState->inqueryStateFun = this->inqueryStateFun;
+    State* cloneState = new State(this->stateName,this->getActionParamType(),this->stateType, this->stateVariable->getValue(),
+                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun );
     return cloneState;
 }
 
@@ -84,15 +78,14 @@ void State::assignValue(const ParamValue& newValue)
 
 ParamValue State::getParamValue()
 {
+    // if it's not an ungrouned variable , just return its value
+    if (! Rule::isParameterUnGrounded(*(this->stateVariable)))
+        return this->stateVariable->getValue();
+
     if (need_inquery)
         return inqueryStateFun(stateOwnerList);
     else
-    {
-        if (Rule::isParameterUnGrounded(*(this->stateVariable)))
-            return (Inquery::getParamValueFromAtomspace(*this));
-        else
-            return this->stateVariable->getValue();
-    }
+        return (Inquery::getParamValueFromAtomspace(*this));
 
 }
 
@@ -106,7 +99,7 @@ bool State::isSatisfiedMe( ParamValue& value, float &satisfiedDegree,  State *or
 // pls make sure the goal describes the same state content with this state first
 bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_state)
 {
-    if ((goal.stateType == stateType)&&(stateVariable == goal.stateVariable))
+    if ((goal.stateType == stateType)&&(stateVariable->getValue() == goal.stateVariable->getValue()))
     {
        satisfiedDegree = 1.0f;
        return true;
@@ -155,6 +148,8 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
     // and also allow they have different value types (Int, float, fuzzy values and so on)
     // So their will be a big number of combinations, currently only finish some common combinations.
     // TODO: finish all the combinations
+
+    float ori,cur=0.0f;
 
     switch (goal.stateType)
     {
@@ -253,8 +248,6 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
         return false;
 
     case STATE_GREATER_THAN:
-
-        float ori,cur;
 
         if (stateType  == STATE_FUZZY_WITHIN)
             cur = fuzzyFloat.bound_low ;
@@ -451,7 +444,7 @@ float State::calculateNumbericsatisfiedDegree(float goal, float current, float o
 
 float State::calculateNumbericsatisfiedDegree(const FuzzyIntervalFloat& goal, float current, float origin)
 {
-    float disCurToGoal,disOriToGoal;
+    float disCurToGoal=0.0f,disOriToGoal=0.0f;
 
     // Make sure that both current and origin value are not inside the goal boundaries
     OC_ASSERT((!goal.isInsideMe(current)) && (!goal.isInsideMe(origin)),
@@ -804,8 +797,9 @@ bool Rule::isParameterUnGrounded( ActionParameter& param)
     case STRING_CODE:
     case INT_CODE:
     case FLOAT_CODE:
-    case BOOLEAN_CODE:
+    case BOOLEAN_CODE:  
         return isUnGroundedString(boost::get<string>(param.getValue()));
+
     default:
         return false;
     }
@@ -866,6 +860,7 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
 {
     State* groundedState = s->clone();
+
     vector<ParamValue>::iterator ownerIt;
     ParamGroundedMapInARule::iterator paramMapIt;
 
@@ -875,23 +870,24 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         if (isParamValueUnGrounded(*ownerIt))
         {
             // look for the value of this variable in the parameter map
-            paramMapIt = groundings.find(ActionParameter::ParamValueToString((ParamValue)(*ownerIt)));
+            string varName = ActionParameter::ParamValueToString((ParamValue)(*ownerIt));
+            paramMapIt = groundings.find(varName);
             if (paramMapIt == groundings.end())
                 return 0;
             else
-                groundedState->stateVariable->assignValue(paramMapIt->second);
+                ((ParamValue&)(*ownerIt)) = paramMapIt->second;
         }
     }
 
     // check the state value
-    if (isParameterUnGrounded(*(groundedState->stateVariable)))
+    if (isParameterUnGrounded(*(s->stateVariable)))
     {
         // look for the value of this variable in the parameter map
         paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
         if (paramMapIt != groundings.end())
             groundedState->stateVariable->assignValue(paramMapIt->second);
         else
-            groundedState->getParamValue();
+            groundedState->stateVariable->assignValue(s->getParamValue());
     }
 
     return groundedState;

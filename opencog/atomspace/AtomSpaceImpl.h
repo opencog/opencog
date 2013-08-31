@@ -44,13 +44,16 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AtomSpaceImpl;
 
 typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
 
 /** 
- * WARNING: The AtomSpaceImpl class contains methods that are only to be called by
+ * \warning The AtomSpaceImpl class contains methods that are only to be called by
  * AtomSpace requests that are running within the AtomSpaceAsync event loop.
  */
 class AtomSpaceImpl
@@ -1039,7 +1042,7 @@ private:
     boost::signals::connection removedAtomConnection; 
     boost::signals::connection addedAtomConnection; 
 
-    /* Boundary at which an atom is considered within the attentional
+    /** Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
      * not charged STI rent */
     AttentionValue::sti_t attentionalFocusBoundary;
@@ -1052,7 +1055,7 @@ private:
     long fundsSTI;
     long fundsLTI;
 
-    /*
+    /**
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */
     void removeStimulus(Handle h);
@@ -1090,6 +1093,7 @@ public:
     AtomSpaceImpl(const AtomSpaceImpl&);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_IMPL_H

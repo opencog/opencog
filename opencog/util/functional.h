@@ -18,6 +18,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 using __gnu_cxx::select1st;
 using __gnu_cxx::select2nd;
 using __gnu_cxx::identity;
@@ -33,8 +37,8 @@ T& valueof(T* v)
 {
     return *v;
 }
-    
-// Returns a vector of const pointers given a container
+
+//! Returns a vector of const pointers given a container
 template<typename Container>
 std::vector<const typename Container::value_type*>
 random_access_view(const Container& c) {
@@ -45,8 +49,8 @@ random_access_view(const Container& c) {
     return res;
 }
 
-// Convenience class for manipulating Item that are tagged with &
-// ordered by Tags
+//! Convenience class for manipulating Item that are tagged with &
+//! ordered by Tags
 template<typename Item, typename Tag>
 struct tagged_item : public std::pair<Item, Tag>,
             boost::less_than_comparable<tagged_item<Item, Tag> > {
@@ -102,7 +106,7 @@ struct select_tag {
     }
 };
 
-//for creating a range of n calls to a generator
+//! for creating a range of n calls to a generator
 template<typename Generator>
 struct generator_iterator :
             boost::transform_iterator<Generator, boost::counting_iterator<int> > {
@@ -154,7 +158,7 @@ transform_output_iterator<It, F> make_transform_output_iterator(It it, F f)
     return transform_output_iterator<It, F>(it, f);
 }
 
-//an output iterator that pushes into a container
+//! an output iterator that pushes into a container
 template<typename Container>
 struct push_output_iterator :
             boost::output_iterator_helper<push_output_iterator<Container> > {
@@ -174,7 +178,7 @@ push_output_iterator<Container> pusher(Container& c)
     return push_output_iterator<Container>(c);
 }
 
-//an output iterator that inserts into a container (without a hint)
+//! an output iterator that inserts into a container (without a hint)
 template<typename Container>
 struct insert_output_iterator :
             boost::output_iterator_helper<insert_output_iterator<Container> > {
@@ -199,7 +203,7 @@ struct nullary_function {
     typedef ResultType result_type;
 };
 
-//0-ary function that returns t
+//! 0-ary function that returns t
 template<typename T>
 struct const_function {
     const_function(const T& t) : _t(t) { }
@@ -230,8 +234,9 @@ const_function<T> make_const_function(const T& t)
     return const_function<T>(t);
 }
 
+//! turn a modifer into a unary function
 /**
- * turn a modifer into a unary function. The modifier should be as follows
+ * The modifier should be as follows
  * struct M {
  *     typedef X argument_type ;
  *     void operator()(X& x);
@@ -250,6 +255,7 @@ struct toFunc {
     const M& m;
 };
 
+/** @}*/
 } //~namespace opencog;
 
 #endif

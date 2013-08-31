@@ -7,8 +7,10 @@
 
 using namespace opencog;
 
-PyRequest::PyRequest(const std::string& moduleName, const std::string& className,
-                    RequestClassInfo* cci)
+PyRequest::PyRequest(CogServer& cs,
+                     const std::string& moduleName, const std::string& className,
+                     RequestClassInfo* cci) :
+    Request(cs)
 {
     _cci = cci;
 
@@ -41,8 +43,7 @@ PyRequest::~PyRequest()
 
 bool PyRequest::execute()
 {
-    CogServer &s = cogserver();
-    string result = run_request(_pyrequest, _parameters, &s.getAtomSpace());
+    string result = run_request(_pyrequest, _parameters, &_cogserver.getAtomSpace());
     // errors only with result is not empty... && duplicate errors are not reported.
     if (result.size() > 0 && result != _last_result) {
         // Any string returned is a traceback

@@ -1,4 +1,4 @@
-/** comprehension.h --- 
+/* comprehension.h --- 
  *
  * Copyright (C) 2012 Nil Geisweiller
  *
@@ -30,9 +30,12 @@
 #include <opencog/util/functional.h>
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-/**
- * Container comprehension constructors. I didn't find anything satisfactory here
+/** @name Container comprehension constructors
+ * I didn't find anything satisfactory here
  * http://en.wikipedia.org/wiki/List_comprehension#C.2B.2B
  *
  * Though the solution involing Boost.Range is nearly satisfactory, I
@@ -55,17 +58,15 @@ namespace opencog {
  *
  * Of course the return type of filter must boolean.
  */
+///@{
 
-/**
- * default filter (returns true)
- */
+
+//! default filter (returns true)
 typedef const_function<bool> const_bool;
 static const const_bool default_filter(true);
 
     
-/**
- * vector comprehension (STL functor version)
- */
+//! vector comprehension (STL functor version)
 template<typename Container, typename Function, typename Filter = const_bool>
 auto vector_comp(const Container& c, const Function& func,
                  const Filter& filter = default_filter)
@@ -77,9 +78,7 @@ auto vector_comp(const Container& c, const Function& func,
     return v;
 }
 
-/**
- * vector comprehension (lambda version)
- */
+//! vector comprehension (lambda version)
 template<typename Container, typename Function, typename Filter = const_bool>
 auto vector_comp(const Container& c, const Function& func,
                  const Filter& filter = default_filter)
@@ -91,9 +90,7 @@ auto vector_comp(const Container& c, const Function& func,
     return v;
 }
 
-/**
- * list comprehension (STL functor version)
- */
+//! list comprehension (STL functor version)
 template<typename Container, typename Function, typename Filter = const_bool>
 auto list_comp(const Container& c, const Function& func,
                const Filter& filter = default_filter)
@@ -105,9 +102,7 @@ auto list_comp(const Container& c, const Function& func,
     return l;
 }
 
-/**
- * list comprehension (lambda version)
- */
+//! list comprehension (lambda version)
 template<typename Container, typename Function, typename Filter = const_bool>
 auto list_comp(const Container& c, const Function& func,
                const Filter& filter = default_filter)
@@ -134,9 +129,7 @@ auto list_comp(const Container& c, const Function& func,
 // Anyway it's weird enough that I'd rather not even try to attempt fix that for now, I think it might well be a gcc bug. //
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
-/**
- * set comprehension (STL functor version)
- */
+/// @todo set comprehension (STL functor version)
 // template<typename Container, typename Function, typename Filter = const_bool>
 // auto set_comp(const Container& c, const Function& func,
 //               const Filter& filter = default_filter)
@@ -148,9 +141,7 @@ auto list_comp(const Container& c, const Function& func,
 //     return s;
 // }
 
-/**
- * set comprehension (lambda version)
- */
+/// @todo set comprehension (lambda version)
 // template<typename Container, typename Function, typename Filter = const_bool>
 // auto set_comp(const Container& c, const Function& func,
 //               const Filter& filter = default_filter)
@@ -163,6 +154,9 @@ auto list_comp(const Container& c, const Function& func,
 // }
 
 }
+
+///@}
+/** @}*/
 
 #endif // _OPENCOG_COMPREHENSION_H
 

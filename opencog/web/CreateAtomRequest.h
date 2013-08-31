@@ -33,6 +33,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 #include <opencog/web/json_spirit/json_spirit.h>
 
@@ -63,7 +64,7 @@ public:
         return _cci;
     }
 
-    CreateAtomRequest();
+    CreateAtomRequest(CogServer&);
     virtual ~CreateAtomRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}

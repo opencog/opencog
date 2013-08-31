@@ -277,16 +277,9 @@ void AtomURLHandler::OnRequestComplete()
         }
 
         result << replaceURL(serverAdd);
-    //mg_printf(conn, result.str().c_str());
-        char buffer[512];
-        for (uint i = 0; i < result.str().size(); i+=511) {
-            memset(buffer,'\0',512);
-            result.str().copy(buffer,511,i);
-            if (i+511 > result.str().size())
-                buffer[(result.str().size() % 511) + 1] = '\0';
-            mg_printf(_conn, buffer);
-        }
-            
+
+	mg_printf(_conn, result.str().c_str());
+
         if (!isJSON) {
             result.str("");
             result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
@@ -297,7 +290,7 @@ void AtomURLHandler::OnRequestComplete()
             result << WebModule::htmlFooter();
             mg_printf(_conn, result.str().c_str(), call_url.c_str(),
                     query_string.c_str());
-        }
+	}
     } else if (method == "POST") {
         mg_printf(_conn, request_output.str().c_str());
     }

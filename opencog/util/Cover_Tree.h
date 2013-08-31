@@ -31,10 +31,13 @@
 #include <float.h>
 #include <iostream>
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
+//! Cover Tree. Allows for insertion, removal, and k-nearest-neighbor queries.
 /**
  * https://github.com/DNCrane/Cover-Tree
- * Cover Tree. Allows for insertion, removal, and k-nearest-neighbor
- * queries.
  *
  * The user should define double Point::distance(const Point& p) and
  * bool Point::operator==(const Point& p), where
@@ -43,6 +46,46 @@
  * For example, a point could consist of a vector and a string
  * name, where their distance measure is simply euclidean distance but to be
  * equal they must have the same name in addition to having distance 0.
+ *
+ * This is a C++ implementation of the cover tree datastructure. Implements the
+ * cover tree algorithms for insert, removal, and k-nearest-neighbor search.
+ *
+ * Relevant links:
+ * - <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Cover_tree">Wikipedia's page</a>
+ * on cover trees.
+ * - John Langford's (one of the inventors of cover trees)
+ * <a href="http://hunch.net/~jl/projects/cover_tree/cover_tree.html">page</a>
+ * on cover trees with links to papers.
+ *
+ * To use the Cover Tree, you must implement your own Point class. CoverTreePoint
+ * is provided for testing and as an example. Your Point class must implement the
+ * following functions:
+ *
+ * @code
+ * double YourPoint::distance(const YourPoint& p);
+ * bool YourPoint::operator==(const YourPoint& p);
+ * and optionally (for debugging/printing only):
+ * void YourPoint::print();
+ * @endcode
+ *
+ * The distance function must be a Metric, meaning (from Wikipedia):
+ * 1: d(x, y) = 0   if and only if   x = y
+ * 2: d(x, y) = d(y, x)     (symmetry)
+ * 3: d(x, z) =< d(x, y) + d(y, z)     (subadditivity / triangle inequality).
+ *
+ * See https://secure.wikimedia.org/wikipedia/en/wiki/Metric_%28mathematics%29
+ * for details.
+ *
+ * Actually, 1 does not exactly need to hold for this implementation; you can
+ * provide, for example, names for your points which are unrelated to distance
+ * but important for equality. You can insert multiple points with distance 0 to
+ * each other and the tree will keep track of them, but you cannot insert multiple
+ * points that are equal to each other; attempting to insert a point that
+ * already exists in the tree will not alter the tree at all.
+ *
+ * If you do not want to allow multiple nodes with distance 0, then just make
+ * your equality operator always return true when distance is 0.
+ *
  */
 template<class Point>
 class CoverTree
@@ -667,5 +710,7 @@ bool CoverTree<Point>::isValidTree() const {
     }
     return true;
 }
+
+/** @}*/
 #endif // _COVER_TREE_H
  

@@ -1,0 +1,194 @@
+namespace opencog {
+/**
+
+\page libcogutil cogutil library
+
+This library (<em>opencog/util</em>) groups various pices of support code that
+found no place elsewhere. To build it use:
+@code
+make cogutil
+@endcode
+
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_cogutil "the comprehensive overview".
+
+Dependencies:
+- boost filesystem
+- boost system
+- boost regex
+- boost thread
+
+\section sect_files Algorithms
+
+- algorithm.h hosts small templated functions like for_each(),
+accumulate2d(), etc. Set utilities are also present
+- based_variant.h: defines a simple variant with base; seems to be used only in defining
+moses::disc_knob type
+- comprehension.h - container comprehension constructors
+- concurrent_queue.h concurrent_queue represents a thread-safe first in-first out list
+- Counter.h has Counter class that mimics python Counter container; it
+may be ranked using ranking() (ranking.h)
+- Cover_Tree.h hosts CoverTree class that sllows for insertion,
+removal, and k-nearest-neighbor queries
+<a href="http://en.wikipedia.org/wiki/Cover_tree">Wikipedia:</a> 
+The cover tree is a type of data structure in computer science
+that is specifically designed to facilitate the speed-up of a nearest neighbor
+search. It is a refinement of the Navigating Net data structure, and related to
+a variety of other data structures developed for indexing intrinsically
+low-dimensional data
+- digraph.h has a directed graph class - digraph - where
+each node is represented by an unsigned int; a randomized_topological_sort()
+is based on it
+- dorepeat.h has dorepeat() macro
+- exceptions.h defines a number of exceptions inheriting StandardException:
+    - RuntimeException
+    - XMLException
+    - IOException
+    - ComboException
+    - IndexErrorException
+    - InvalidParamException
+    - InconsistenceException
+    - FatalErrorException
+    - NotFoundException
+    - NetworkException
+    - AssertionException
+- foreach.h and functional.h have templated helpers like addressof(),
+random_access_view(), tagged_item and so on
+- hashing.h provides several functors: obj_ptr_hash, deref_hash, 
+deref_equals, obj_ptr_cmp
+- iostreamContainer.h provides functions to read, write, print or convert to 
+string generic containers; various flavours of ostreamContainer(), 
+printContainer(), printlnContainer(), containerToStr(), istreamContainer()
+are present
+- KLD.h: Functions to compute the Kullback-Leibler Divergence of discrete
+and continouous distirbution; see KLDS structure documentation
+- lazy_selector class allows to select integers in [0,n) but never select twice the same;
+lazy_random_selector and lazy_normal_selector are also provided
+- generic caches in lru_cache.h include inf_cache_base, cache_base, 
+lru_cache, lru_cache_threaded (Least Recently Used Cache), 
+prr_cache (Pseudo Random Replacement), 
+inf_cache (unlimited cache), 
+adaptive_cache (adjusting automatically its size)
+- MannWhitneyU.h implements 
+<a href="http://en.wikipedia.org/wiki/Mann%E2%80%93Whitney_U">Mann–Whitney U</a>
+in MannWhitneyU() and standardizedMannWhitneyU()
+- numeric.h contains math related code; it includes important math headers
+and adds bits manipulation, methods like next_power_of_two(), integer_log2(), log2(),
+logsum(), entropy(), smallest_divisor(), generalized_mean(), tanimoto_distance()
+and so on
+- recent_val is capable of keeping an exponential 
+decaying record of it's recent value (usable for integers, floats, ...)
+- the tree.h library for C++ provides an STL-like container class for n-ary trees
+   
+\section sect_libs Other components
+
+\subsection ssect_random Randomness
+<a href="http://en.wikipedia.org/wiki/Mersenne_twister">Mersenne twister</a>
+pseudo random number generator implemented in mt19937ar.h as MT19937RandGen class.
+The interface (RandGen) for random number generators that MT19937RandGen
+inherits is in RandGen.h. Other generators are found in random.h ( randset(), 
+gaussian_rand(), biased_randbool() ).
+
+tournament_selection, roulette_select() and NodeSelector are also relevant to
+this topic.
+
+\subsection ssect_clustering The C Clustering Library
+This library (version 1.49) was written at the Laboratory of
+DNA Information Analysis, Human Genome Center, 
+Institute of Medical Science, University of Tokyo
+by Michiel Jan Laurens de Hoon
+
+Methods such as clusterdistance(), getclustercentroids(), 
+kcluster() are provided
+
+\subsection ssect_strings Strings
+
+StringManipulator groups string related methods like toUpper(), toLower(), 
+clean(), split(), isNumber(). Also note the toString() templated function
+that converts various things by using << operator.
+
+To tokenize a string one may use AltStringTokenizer that splits the string 
+and stores the result (thus allowing random access to tokens) or StringTokenizer
+that runs sequentially, producing one token at a time.
+
+Basic methods like strnlen() and strndup() are provded and conditionally 
+included by CMake based on the target system.
+
+\subsection ssect_config Configuration and logging
+Config class manages the variables important for various parts of the
+package. A list of key:value entries is stored, both of them being strings
+@todo link to definitive list of variables (keys)
+
+include/win32/getopt.h and the two files in opencog/util (getopt.c and
+getopt_long.c) implement 
+<a href="http://www.gnu.org/software/libc/manual/html_node/Getopt.html">Parsing program options</a>
+for Windows targets. The reason for getopt.h being where it is is unknown
+
+Logger class is the central way of communicating states to outside world. It has
+five  mutually exclusive levels: ERROR, WARN, INFO, DEBUG and FINE
+Notice \b LOG_FILE and \b LOG_LEVEL variables relevant to logging process
+
+\subsection ssect_others File system helpers
+- FileList class is capable of loading entries from a directory 
+(either recursively or not)
+- file.h has functions 
+    - appendFileContent()
+    - createDirectory()
+    - exists()
+    - fileExists()
+    - LoadTextFile()
+    - getExeDir() 
+    - getExeName()
+    - expandPath()
+- determine_log_name() in log_prog_name.h to determine a log file name 
+automatically depending on its boost.program_option
+
+\subsection ssect_generic And some other things
+- ansi (.h & .cc) - ANSI codes for colored output in terminals that support this feature
+Instead of directly using the codes, make use of the ansi_code()
+function that checks the \b ANSI_ENABLED configuration variable
+and either appends the code or an empty string
+- macros.h - simple macros for converting a symbol to string,
+reading files using fread, etc
+- misc-test.h - addAtomIter() and addAtom() to help with testing
+- misc.h and misc.cc have utilities like bitcount(), tokenize(),  safe_deleter
+- assertion with OC_ASSERT macro is supported by oc_assert.h; see related 
+cassert() function
+- oc_omp.h and oc_omp.cc has multithreading support: 
+setting_omp(), num_threads(), split_jobs()
+- time keeping is initialised with initReferenceTime() and 
+querried with getElapsedMillis() from octime.h
+- some platform dependent code is in platform.h and .cc to smooth 
+differences between platforms
+- pool.h implements a thread-safe blocking resource allocator. 
+See pool class documentation for further detail.
+
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libraries "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libatomspace "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+
+/**
+\defgroup grp_cogutil cogutil library
+
+This library (<em>opencog/util</em>) groups various pices of support code that
+found no place elsewhere. To build it use:
+@code
+make cogutil
+@endcode
+
+To read a high level overview of this library head to 
+\ref libcogutil "dedicated page".
+*/
+} //~namespace opencog

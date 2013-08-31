@@ -29,9 +29,14 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-// Functor returning the address of an object pointed by an
-// iterator. Useful for defining the hash function of an iterator.
+//! Functor returning the address of an object pointed by an iterator.
+/**
+ * Useful for defining the hash function of an iterator.
+ */
 template<typename It>
 struct obj_ptr_hash {
     size_t operator()(const It& it) const {
@@ -65,10 +70,13 @@ std::size_t hash_value(const tree<T>& tr)
     return boost::hash_range(tr.begin(), tr.end());
 }
 
-// Functor comparing the addresses of objects pointed by 
-// tree iterators.  Useful for storing iterators in a std::map.
-// (the tree has pointer to node, we use that to identify the
-// tree node uniquely).
+//! Functor comparing the addresses of objects pointed by 
+//! tree iterators.
+/**
+ * Useful for storing iterators in a std::map.
+ * (the tree has pointer to node, we use that to identify the
+ * tree node uniquely).
+ */
 template<typename It>
 struct obj_ptr_cmp {
     bool operator()(const It& lit, const It& rit) const {
@@ -76,6 +84,7 @@ struct obj_ptr_cmp {
     }
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif // _OPENCOG_HASHING_H
