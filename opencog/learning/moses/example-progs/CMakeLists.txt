@@ -72,3 +72,11 @@ TARGET_LINK_LIBRARIES (moses-perf
 	moses
 	cogutil
 )
+
+ADD_EXECUTABLE (xor xor)
+TARGET_LINK_LIBRARIES (xor
+   moses_exec
+        moses
+        cogutil
+)
+
