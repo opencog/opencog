@@ -9,6 +9,11 @@ of completion, some already displaying interesting and useful functionalities
 alone and in combination.
 
 The main project site is at <a href="http://opencog.org/">opencog.org</a>.
+To get you started, a number of pages were prepared for you in 
+<a href="http://wiki.opencog.org/w/Category:OpenCog_for_Noobs">the wiki</a>.
+
+
+
 
 \section mainpage_toc Table of Contents
 
@@ -18,9 +23,13 @@ ignored by doxygen; used as markers for update-links.py;
 - \subpage libraries
 	- \ref libcogutil
 	- \ref libatomspace
+	- \ref libserver
+	- \ref libspatial
+	- \ref libspacetime
 	- \ref libcomboreduct
 - \subpage programs
 	- \ref progcogserver
+	- \ref progMapTools
 - \subpage fsstructure
 - \subpage bldtargets
 - \subpage license
@@ -34,4 +43,3 @@ ignored by doxygen; used as markers for update-links.py;
 ignored by doxygen; used as markers for update-links.py;
 \endif
 */
-

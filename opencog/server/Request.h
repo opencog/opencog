@@ -35,6 +35,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
+
 class CogServer;
 
 /**
@@ -44,6 +48,7 @@ class CogServer;
  * processing system.
  *
  * To be clear: the basic design goals of these macros are:
+ *
  * 1) A module implementation that is isolated from the detailed inner
  *    guts and workings of the module loading mechanism. This allows
  *    changes to the module loading and command-request processing 
@@ -72,25 +77,26 @@ class CogServer;
  * shell prompt.
  *
  * Arguments:
- * mod_type:  Typename of the class that implements the module.
- * cmd_str:   The string name of the command
- * do_cmd:    Name of the method to call to run the command.
+ * - mod_type:Typename of the class that implements the module.
+ * - cmd_str: The string name of the command
+ * - do_cmd:  Name of the method to call to run the command.
  *            The signature of the method mus be as follows (see also
  *            exmple):
  *            std::string mod_type::do_cmd(Request *, std::list<std::string>)
  *            The first arg is the original request; most users will not
  *            need this. The second arg is the parsed command line,
  *            presented as a list of strings.
- * cmd_sum:   A short string to be printed as a command summary.
- * cmd_desc:  A long string describing the command in detail.
- * shell_cmd: A boolean value that indicates the command is for entering a
+ * - cmd_sum: A short string to be printed as a command summary.
+ * - cmd_desc:A long string describing the command in detail.
+ * - shell_cmd:A boolean value that indicates the command is for entering a
  *            shell.
- * hidden:    A boolean value that indicates the command is not listed
+ * - hidden:  A boolean value that indicates the command is not listed
  *            when 'help' is used to list commands.
  *
  *
  * Example usage:
  *
+ * @code
  * class MyModule: public Module {
  *    private:
  *        DECLARE_CMD_REQUEST(MyModule, "stir-fry", do_stirfry,
@@ -119,6 +125,7 @@ class CogServer;
  *
  *     return "Your meal is now ready to be eaten!";
  * }
+ * @endcode
  *
  * The above is all there's to it! Just register and unregister the 
  * commands with the command processing subsystem, implement the "do"
@@ -201,6 +208,7 @@ class CogServer;
  * A typical derived Request declaration and initialization would thus
  * look as follows:
  *
+ * @code
  * // MyRequest.h
  * #include <opencog/server/Request.h>
  * #include <opencog/server/Factory.h>
@@ -237,6 +245,7 @@ class CogServer;
  * CogServer& cogserver = static_cast<CogServer&>(server());
  * cogserver.registerRequest(MyRequest::info().id, &factory); 
  * ...
+ * @endcode
  */
 class Request
 {
@@ -279,6 +288,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace 
 
 #endif // _OPENCOG_REQUEST_H

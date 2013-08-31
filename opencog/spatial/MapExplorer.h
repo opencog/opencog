@@ -34,6 +34,9 @@ struct SDL_Surface;
 
 namespace opencog 
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial 
     {
         /**

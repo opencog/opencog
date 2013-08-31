@@ -1,15 +1,21 @@
 namespace opencog {
 /**
 
-\page libcomboreduct comboreduct library
+\page libspacetime spacetime library
 
-This library (<em>opencog/comboreduct</em>) is the backbone of the project
+This library (<em>opencog/spacetime</em>) ...
 @code
-make comboreduct
+make spacetime
 @endcode
 
 This page is a high level overview of the library; to dig into the details 
-read \ref grp_comboreduct "the comprehensive overview".
+read \ref grp_spacetime "the comprehensive overview".
+
+Dependencies:
+- SpaceMap
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+
 
 
 
@@ -18,9 +24,9 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref libspacetime "Previous"</TD>
+<TD>\ref libspatial "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref programs "Next"</TD>
+<TD>\ref libcomboreduct "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
@@ -28,15 +34,15 @@ ignored by doxygen; used as markers for update-links.py;
 */
 
 /**
-\defgroup grp_cogutil cogutil library
+\defgroup grp_spacetime spacetime library
 
-This library (<em>opencog/comboreduct</em>) is the backbone of the project. To build it
-type:
+This library (<em>opencog/spacetime</em>) is ...
+To build it type:
 @code
-make comboreduct
+make spacetime
 @endcode
 
 To read a high level overview of this library head to 
-\ref libcomboreduct "dedicated page".
+\ref libspacetime "dedicated page".
 */
 } //~namespace opencog

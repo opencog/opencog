@@ -77,8 +77,7 @@ comboreduct/main; see \ref libcomboreduct "its page"</DD>
 
 <DT>cycl-import (stub)</DT>
 <DD>has a readme with infos about 
-<a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> 
-- a prototype opencyc-chatbot
+<a href="http://lillybot.wiki.sourceforge.net/">Lillybot</a> - a prototype opencyc-chatbot
 </DD>
 
 <DT>cython</DT>
@@ -219,7 +218,7 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref progcogserver "Previous"</TD>
+<TD>\ref progMapTools "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref bldtargets "Next"</TD>
 </TR></TABLE>

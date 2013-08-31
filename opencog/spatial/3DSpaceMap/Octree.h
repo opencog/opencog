@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
 
     namespace spatial
     {
@@ -202,6 +205,7 @@ namespace opencog
 
         };
     }
+/** @}*/
 }
 
 #endif // _SPATIAL_OCTREE_H_

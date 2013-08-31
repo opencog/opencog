@@ -35,6 +35,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class ListRequest : public Request
 {
@@ -70,6 +73,7 @@ public:
     virtual bool isShell(void) {return info().is_shell;}
 };
 
+/** @}*/
 } // namespace 
 
 #endif // _OPENCOG_LIST_REQUEST_H

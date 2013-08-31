@@ -27,6 +27,9 @@
 #include <opencog/spatial/Entity.h>
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -97,6 +100,7 @@ namespace opencog
         }; // Block
         
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_STATICENTITY_H_

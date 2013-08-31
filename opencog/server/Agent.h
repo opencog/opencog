@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 typedef boost::unordered_map<Handle, stim_t> AtomStimHashMap;
 
@@ -169,7 +172,7 @@ public:
     /**
      * Stimulate a Handle's atom.
      *
-     * @param atom handle
+     * @param h atom handle
      * @param amount of stimulus to give.
      * @return total stimulus given since last reset.
      */
@@ -209,7 +212,7 @@ public:
     /**
      * Get stimulus for Atom.
      *
-     * @param handle of atom to get stimulus for.
+     * @param h handle of atom to get stimulus for.
      * @return total stimulus since last reset.
      */
     stim_t getAtomStimulus(Handle h) const;
@@ -219,6 +222,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_AGENT_H
