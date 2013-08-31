@@ -280,12 +280,12 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
     // perception
     else if (is_perception(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
+        return pe->eval_percept(it);
     }
     // indefinite objects are evaluated by the pe
     else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_indefinite_object(*io, combo::variable_unifier::DEFAULT_VU());
+        return pe->eval_indefinite_object(*io);
     }
     // definite objects evaluate to themselves
     else if (is_definite_object(v)) {

@@ -41,11 +41,10 @@ using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        const std::vector<combo::vertex>& arguments,
-        bool dsdp, combo::variable_unifier& vu)
+        const std::vector<combo::vertex>& arguments)
         : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
-        _doesSendDefinitePlan(dsdp), _vu(vu)
+        _doesSendDefinitePlan(dsdp)
 {
     finished = false;
     init(arguments);
@@ -55,7 +54,7 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
         : _ww(rhs._ww), _tr(rhs._tr), _it(_tr.begin()),
         _hasBegun(false), _planSent(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
-        _doesSendDefinitePlan(rhs._doesSendDefinitePlan), _vu(rhs._vu)
+        _doesSendDefinitePlan(rhs._doesSendDefinitePlan)
 {
     if (_hasBegun != false || (!rhs._tr.empty() && rhs._it != rhs._tr.begin())) {
         std::stringstream stream (std::stringstream::out);
@@ -69,15 +68,16 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
     finished = false;
 }
 
-vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it)
 {
     //!@todo Can a percept have arguments that need to be evaluated?
-    return _ww.evalPerception(it, vu);
+    //!@todo Remove the unifier system completely
+    return _ww.evalPerception(it, combo::variable_unifier::DEFAULT_VU());
 }
 
-vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io, combo::variable_unifier& vu)
+vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io)
 {
-    return _ww.evalIndefiniteObject(io, vu);
+    return _ww.evalIndefiniteObject(io, combo::variable_unifier::DEFAULT_VU());
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
@@ -148,7 +148,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
         } else if (*_it == id::action_boolean_if) {
             try {
-                vertex res = eval_throws(_it.begin(), this, _vu);
+                vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
                 if (res == id::logical_true) {
                     _it = ++_it.begin();
                 } else if (res == id::logical_false) {
@@ -177,7 +177,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 moveOn();
             } else {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, _vu);
+                    vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
                     if (res == id::logical_true) {
                         _it = ++_it.begin();
                     } else {
@@ -221,7 +221,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         } else if (*_it == id::repeat_n) {
             if (_stack.empty() || _stack.top().first != _it) {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, _vu);
+                    vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
                     OC_ASSERT(is_contin(res));
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
@@ -256,7 +256,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 bool tostop = false;
                 for (sib_it sib = _it.begin();sib != _it.end();++sib) {
                     //first evaluate the children
-                    *sib = eval_throws(sib, this, _vu);
+                    *sib = eval_throws(sib, this, combo::variable_unifier::DEFAULT_VU());
                     if (*sib == id::null_obj) { //just fail
                         logger().error("RunningComboProc - Sibling is null_obj.");
 
@@ -285,8 +285,8 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             bool execed =
                 ( (_tr.is_valid(parent) && *parent == id::sequential_and) ?
                   execSeq(_it, std::find_if(_it, parent.end(),
-                                            !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)), _vu)
-                  : exec(_it, _vu) );
+                                            !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)), combo::variable_unifier::DEFAULT_VU())
+                  : exec(_it) );
             if (execed) {
                 moveOn();
                 return;
@@ -324,7 +324,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             } else {
                 //try passing it off to the regular combo interpreter - evaluation
                 //without actions will get done in a single cycle
-                _tr = combo::combo_tree(eval_throws(_it, this, _vu));
+                _tr = combo::combo_tree(eval_throws(_it, this, combo::variable_unifier::DEFAULT_VU()));
                 _it = _tr.begin();
                 moveOn();
             }
@@ -333,7 +333,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
     //logger().error("popl");
 }
 
-bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unifier& vu)
+bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
 {
     //debug print
     //std::cout << "EXECSEQ FROM : "
@@ -349,12 +349,12 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unif
     _failed = boost::logic::indeterminate;
     std::for_each(make_counting_iterator(from),
                   make_counting_iterator(to),
-                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, vu));
+                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, combo::variable_unifier::DEFAULT_VU()));
 
     if (_doesSendDefinitePlan) {
         for (sib_it sib = from; sib != to; ++sib) {
             for (sib_it arg = sib.begin(); arg != sib.end();++arg) {
-                *arg = eval_throws(arg, this, vu);
+                *arg = eval_throws(arg, this, combo::variable_unifier::DEFAULT_VU());
 
                 if (*arg == id::null_obj) {
                     //will definitely fail at this point..

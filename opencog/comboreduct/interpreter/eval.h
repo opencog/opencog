@@ -43,11 +43,10 @@ namespace opencog { namespace combo {
 
 struct Evaluator {
     virtual ~Evaluator() { }
-    virtual vertex eval_percept(combo_tree::iterator, variable_unifier&) = 0;
+    virtual vertex eval_percept(combo_tree::iterator) = 0;
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
-    virtual vertex eval_indefinite_object(indefinite_object,
-                                          variable_unifier&) = 0;
+    virtual vertex eval_indefinite_object(indefinite_object) = 0;
 };
 
 // it has this name because it evaluates a procedure and returns a tree

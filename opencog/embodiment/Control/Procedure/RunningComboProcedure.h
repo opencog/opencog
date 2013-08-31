@@ -65,16 +65,13 @@ struct RunningComboProcedure : public combo::Evaluator {
 
     //these implement the callback interface combo::Evaluator used by the
     //regular combo interpreter when called by us
-    combo::vertex eval_percept(combo::combo_tree::iterator,
-                               combo::variable_unifier&);
-    combo::vertex eval_indefinite_object(combo::indefinite_object,
-                                         combo::variable_unifier&);
+    combo::vertex eval_percept(combo::combo_tree::iterator);
+    combo::vertex eval_indefinite_object(combo::indefinite_object);
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
                           const std::vector<combo::vertex>& arguments,
-                          bool doesSendDefinitePlan = true,
-                          combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+                          bool doesSendDefinitePlan = true);
 
     //copy ctor - fatal runtime error if the rhs has already begun running
     RunningComboProcedure(const RunningComboProcedure&);
@@ -133,11 +130,6 @@ struct RunningComboProcedure : public combo::Evaluator {
         return combo::id::action_success;
     }
 
-    combo::variable_unifier& getUnifierResult() {
-        OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
-        return _vu;
-    }
-
 protected:
     typedef combo::combo_tree::sibling_iterator sib_it;
 
@@ -164,10 +156,10 @@ protected:
     bool _inCompound; //used for handling builtin compound functions (e.g. follow)
 
     //used for sending action plans
-    bool exec(sib_it x, combo::variable_unifier& vu) {
-        return execSeq(x, ++sib_it(x), vu);
+    bool exec(sib_it x) {
+        return execSeq(x, ++sib_it(x));
     }
-    bool execSeq(sib_it, sib_it, combo::variable_unifier& vu);
+    bool execSeq(sib_it, sib_it);
 
     /// @return true iff an action plan gets executed
     bool beginCompound();
@@ -178,7 +170,7 @@ protected:
     void moveOn();
 
     /// for evaluating procedures inplace
-    void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
+    void expand_and_evaluate_subtree(combo::combo_tree::iterator it);
 
 private:
     /// initialization - only called from ctors
@@ -199,10 +191,6 @@ private:
      * simulations
      */
     bool _doesSendDefinitePlan;
-
-    // unifier that holds options to be tested when a wild card character "_*_" is
-    // used in a combo script
-    combo::variable_unifier _vu;
 
     bool finished;
 };
