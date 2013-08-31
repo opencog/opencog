@@ -63,8 +63,8 @@ void cassert(const char* trace, bool condition, const std::string& msg);
 void cassert(const char * trace, bool condition);
 
 ///@}
-/** @}*/
 } // namespace opencog
+/** @}*/
 
 
 #endif

@@ -71,8 +71,8 @@ std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs);
 
 ///@}
 
-/** @}*/
 } // ~namespace opencog
 
+/** @}*/
 
 #endif // _OPENCOG_OC_OMP_H

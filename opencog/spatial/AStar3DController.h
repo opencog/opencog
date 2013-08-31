@@ -112,7 +112,7 @@ namespace opencog
         };
 
     } // spatial
-/** @}*/
 } // opencog
+/** @}*/
 
 #endif /*_SPATIAL_ASTAR3D_CONTROLLER_H_*/
