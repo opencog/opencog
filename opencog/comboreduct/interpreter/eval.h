@@ -45,11 +45,6 @@ struct Evaluator {
     virtual ~Evaluator() { }
     virtual vertex eval_action(combo_tree::iterator, variable_unifier&) = 0;
     virtual vertex eval_percept(combo_tree::iterator, variable_unifier&) = 0;
-    // @todo : change the Embodiment code so it doesn't use instantiate this method.
-    // It has now been integrated into the eval functions
-    // there would be a way to specify with the procedure is lazy or note
-    // in order to be fully compatible with the way it is already used
-    virtual vertex eval_procedure(combo_tree::iterator, variable_unifier&) = 0;
     // eval_indefinite_object takes no arguments because it is assumed
     // that it has no child, this assumption may change over time
     virtual vertex eval_indefinite_object(indefinite_object,
