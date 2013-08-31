@@ -26,7 +26,11 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+/** \addtogroup grp_spatial
+ *  @{
+ */
 
 #define TB_ASSERT(x) if (!(x)) OC_ASSERT("TB_ASSERT - %s",  #x)
 
+/** @}*/
 #endif

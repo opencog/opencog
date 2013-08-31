@@ -27,6 +27,9 @@
 #include <opencog/spatial/Entity.h>
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 

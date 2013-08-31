@@ -35,12 +35,14 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
 
         /**
-         * class HPASearch
          * This is an implementation of the HPA* algorithm. HPA* builds an abstract graph by doing
          * a grid partitioning that results on a set of clusters of original grid cells.
          * Each two sibbling clusters may or may not has entrances. An entrance is the way
@@ -209,6 +211,7 @@ namespace opencog
         };
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif

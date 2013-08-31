@@ -41,7 +41,9 @@
 
 namespace opencog
 {
-
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         class Entity;
@@ -378,7 +380,7 @@ namespace opencog
              */
             LimitRelation computeObjectsLimits( const Entity& entityB ) const;
 
-            /**
+            /*
              * Extract the spatial relations between two objects
              * 
              * @param observer The observer entity
@@ -394,7 +396,7 @@ namespace opencog
                                                                    double besideDistance,
                                                                    const Entity& entityB ) const;
             */
-            /**
+            /*
              * Finds the list of spatial relationships that apply to the three entities.
              * Currently this can only be BETWEEN, which states that A is between B and C
              *
@@ -415,7 +417,7 @@ namespace opencog
                                                                    const Entity& entityB,
                                                                    const Entity& entityC ) const;
 */
-            /**
+            /*
              * Return a string description of the relation
              */
          //   static std::string spatialRelationToString( SPATIAL_RELATION relation );
@@ -444,6 +446,7 @@ namespace opencog
         typedef boost::unordered_map<long, EntityPtr, boost::hash<long> > LongEntityPtrHashMap;
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_ENTITY_H_

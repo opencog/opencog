@@ -29,6 +29,9 @@
 
 namespace opencog 
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial 
     {
         class MapTools 
@@ -58,7 +61,8 @@ namespace opencog
             boost::asio::io_service visualDebuggerClientService;
         };
 
-    }; // spatial
-}; // opencog
+    } // spatial
+/** @}*/
+} // opencog
 
 #endif // MAPTOOLS

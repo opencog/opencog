@@ -11,6 +11,9 @@ using namespace std;
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
 
     namespace spatial
     {
@@ -431,6 +434,7 @@ namespace opencog
         };
 
     }
+/** @}*/
 }
 
 

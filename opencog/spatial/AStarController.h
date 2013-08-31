@@ -60,6 +60,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -108,6 +111,7 @@ namespace opencog
         };
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif /*_SPATIAL_ASTARCONTROLLER_H_*/
