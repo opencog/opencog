@@ -69,16 +69,9 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
     finished = false;
 }
 
-vertex RunningComboProcedure::eval_action(combo_tree::iterator it, combo::variable_unifier& vu)
-{
-    //TODO
-    OC_ASSERT(false, "Not implemented yet");
-    return vertex();
-}
-
 vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it, combo::variable_unifier& vu)
 {
-    expand_and_evaluate_subtree(it, vu);
+    //!@todo Can a percept have arguments that need to be evaluated?
     return _ww.evalPerception(it, vu);
 }
 

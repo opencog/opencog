@@ -65,8 +65,6 @@ struct RunningComboProcedure : public combo::Evaluator {
 
     //these implement the callback interface combo::Evaluator used by the
     //regular combo interpreter when called by us
-    combo::vertex eval_action(combo::combo_tree::iterator,
-                              combo::variable_unifier&);
     combo::vertex eval_percept(combo::combo_tree::iterator,
                                combo::variable_unifier&);
     combo::vertex eval_indefinite_object(combo::indefinite_object,
@@ -178,6 +176,9 @@ protected:
 
     /// update _it to go to the next point of execution
     void moveOn();
+
+    /// for evaluating procedures inplace
+    void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
 private:
     /// initialization - only called from ctors

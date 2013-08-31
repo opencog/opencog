@@ -421,11 +421,6 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
     }
 
     // PetBrain stuff
-    // action
-    else if (is_action(v) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_action(it, combo::variable_unifier::DEFAULT_VU());
-    }
     // perception
     else if (is_perception(v) && pe) {
         OC_ASSERT(pe, "Non null Evaluator must be provided");
