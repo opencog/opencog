@@ -48,6 +48,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
         "ECAN_DIFFUSION_THRESHOLD","0.0",
         //! Maximum percentage of STI that is spread from an atom
         "ECAN_MAX_SPREAD_PERCENTAGE","1.0",
+        "ECAN_ALL_LINKS_SPREAD","false",
         "",""
     };
     setParameters(defaultConfig);
@@ -61,6 +62,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
     setSpreadDecider(STEP);
     setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
 
+    allLinksSpread = config().get_bool("ECAN_ALL_LINKS_SPREAD");
 }
 
 void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
@@ -188,8 +190,6 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
         std::vector<Handle> links)
 {
-    //! @warning Doesn't handle multiple Hebbian links between two atoms (the
-    //! weights will be set to the weight of whatever link was last processed.
     std::vector<Handle>::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
@@ -255,7 +255,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     connections(sourceIndex,targetIndex) = val;
                 } else {
                     //gsl_matrix_set(connections,targetIndex,sourceIndex,val);
-                    connections(targetIndex,sourceIndex) = val;
+                    connections(targetIndex,sourceIndex) += val;
                 }
             }
         } else {
@@ -283,7 +283,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                         connections(sourceIndex,targetIndex) = val;
                     } else {
-                        connections(targetIndex,sourceIndex) = val;
+                        connections(targetIndex,sourceIndex) += val;
                     }
                 }
             }
@@ -343,7 +343,11 @@ void ImportanceDiffusionAgent::spreadImportance()
     logger().debug("Begin diffusive importance spread.");
 
     // Get all HebbianLinks
-    a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    if (allLinksSpread) {
+      a->getHandleSet(out_hi, LINK, true);
+    } else {
+      a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);
 
