@@ -31,6 +31,9 @@
 using namespace std;
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
 
     namespace spatial
     {
@@ -45,6 +48,7 @@ namespace opencog
             static bool checkNeighbourAccessable(Octree3DMapManager *mapManager, BlockVector& lastPos, int i, int j, int k);
         };
     }
+/** @}*/
 }
 
 

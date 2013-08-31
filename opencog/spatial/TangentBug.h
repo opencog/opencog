@@ -44,6 +44,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         class TangentBug
@@ -260,6 +263,7 @@ namespace opencog
         }; // class TangentBug
 
     } // namespace spatial
+/** @}*/
 } // opencog
 
 #endif

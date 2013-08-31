@@ -38,6 +38,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         /**
@@ -195,6 +198,7 @@ namespace opencog
         }; // SuperEntity
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_SUPERENTITY_H_

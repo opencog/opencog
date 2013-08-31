@@ -35,6 +35,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -151,6 +154,7 @@ namespace opencog
 
         } // math
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_MATH_BOUNDINGBOX_H_

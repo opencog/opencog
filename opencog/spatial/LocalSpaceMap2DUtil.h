@@ -43,6 +43,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         class LocalSpaceMap2D;
@@ -233,6 +236,7 @@ namespace opencog
                             int obstacles, const spatial::GridPoint& prob_center, int std_dev = 75);
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif

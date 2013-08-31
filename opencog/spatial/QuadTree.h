@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         /**
@@ -55,7 +58,7 @@ namespace opencog
                 unsigned int clusterSideSize, HPASearch::Graph* graph, 
                     QuadTree* parentQuad = 0, GridPoint* currentPosition = 0 );
 
-            virtual ~QuadTree( void ) { };
+            virtual ~QuadTree( void ) { }
 
             void connectEdges( void );
 
@@ -84,6 +87,7 @@ namespace opencog
         };
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_QUADTREE_H_

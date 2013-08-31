@@ -4,7 +4,7 @@
 
 This module contains several tools for creating and managing a
 simplified representation of a given environment. It has a
-map struture that stores the physical elements perceived by 
+map structure that stores the physical elements perceived by 
 the agent. It is useful for reasoning and decision making
 proccess that takes into account the current state of the 
 agent's body and the body of all objects that are located

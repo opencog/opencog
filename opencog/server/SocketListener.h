@@ -34,6 +34,9 @@ using boost::asio::ip::tcp;
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class defines a socket listener for a given port number 
@@ -88,6 +91,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SOCKET_LISTENER_H
