@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 /**
  * This is an abstract class to provide an interface used by SpaceServer so that
@@ -50,6 +53,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _SPACE_SERVER_CONTAINER_H

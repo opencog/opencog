@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class TemporalTableFile;
 
@@ -164,6 +167,7 @@ private:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TEMPORAL_TABLE_H
