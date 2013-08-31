@@ -5,7 +5,6 @@ allocation among atoms within OpenCog.
 
 == TODO ==
 
-- Implement HebbianMiningAgent
 - Move all MindAgents and code to the opencog::ecan namespace.
 - Spread LTI
   - Create ECANBank singleton, keep track of various stats, handles that need LTI spread.
