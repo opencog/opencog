@@ -479,9 +479,4 @@ void RunningComboProcedure::moveOn()
 }
 
 
-void RunningComboProcedure::init(const std::vector<vertex>& args)
-{
-    combo::set_bindings(_tr, args);
-}
-
 }} // ~namespace opencog::Procedure

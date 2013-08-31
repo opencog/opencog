@@ -79,150 +79,6 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterat
     return ret;
 }
 
-#if ALMOST_DEAD_EVAL_CODE
-// @todo all users of the code below should switch to using
-// eval_throws_binding() instead.
-//
-// Right now, as far as I can tell, only embodiment code uses this.
-//
-void set_bindings(combo_tree& tr, combo_tree::iterator it,
-                  const std::vector<vertex>& args, arity_t explicit_arity)
-{
-    combo_tree::iterator end = it;
-    end.skip_children();
-    ++end;
-    arity_t implicit_idx = explicit_arity;
-    arity_t ap_args = args.size();
-    for (combo_tree::iterator at = it;at != end;++at) {
-        if (at.is_childless()) {
-
-            //if argument #idx then substitute it by
-            //args[idx-1]
-            if (is_argument(*at)) {
-                argument& arg = get_argument(*at);
-                if (arg.is_negated()) {
-                    tr.append_child(at, *at);
-                    *at = id::logical_not;
-                    at = at.begin();
-                    arg.negate();
-                }
-                *at = args[arg.idx-1];
-            } else {
-                arity_t a = get_arity(*at);
-                if (a != 0) {
-                    arity_t ama = abs_min_arity(a);
-                    arity_t rest_ap_arg = ap_args - implicit_idx;
-                    if (ama <= rest_ap_arg) {
-                        arity_t idx_bound;
-                        if (a > 0) //that is the arity is fixed
-                            idx_bound = implicit_idx + ama;
-                        else //that is at uses arg_list
-                            idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; ++implicit_idx)
-                            tr.append_child(at, args[implicit_idx]);
-                    } else { //raise an assert
-                        std::stringstream ss;
-                        ss << *at;
-                        OC_ASSERT(false,
-                                  "There is not enough arguments given"
-                                  " in input, %s needs at least %d"
-                                  " arguments and only %d are provided",
-                                  ss.str().c_str(),
-                                  static_cast<int>(ama),
-                                  static_cast<int>(rest_ap_arg));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void set_bindings(combo_tree& tr, combo_tree::iterator it,
-                  combo_tree::iterator arg_parent, arity_t explicit_arity)
-{
-    std::vector<combo_tree::iterator>
-    args(boost::make_counting_iterator(arg_parent.begin()),
-         boost::make_counting_iterator(arg_parent.end()));
-    combo_tree::iterator end = it;
-    end.skip_children();
-    ++end;
-    arity_t implicit_idx = explicit_arity;
-    arity_t ap_args = args.size();
-    for (combo_tree::iterator at = it;at != end;++at) {
-        if (at.is_childless()) {
-            //if argument #idx then substitute it by
-            //args[idx-1]
-            if (is_argument(*at)) {
-                argument& arg = get_argument(*at);
-                if (arg.is_negated()) {
-                    tr.append_child(at, *at);
-                    *at = id::logical_not;
-                    at = at.begin();
-                    arg.negate();
-                }
-                combo_tree tmp(args[arg.idx-1]);
-                at = tr.move_ontop(at, tmp.begin());
-                at.skip_children();
-            } else {
-                arity_t a = get_arity(*at);
-                if (a != 0) {
-                    arity_t ama = abs_min_arity(a);
-                    arity_t rest_ap_arg = ap_args - implicit_idx;
-                    if (ama <= rest_ap_arg) {
-                        arity_t idx_bound;
-                        if (a > 0) //that is the arity is fixed
-                            idx_bound = implicit_idx + ama;
-                        else //that is at uses arg_list
-                            idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; ++implicit_idx) {
-                            combo_tree tmp(args[implicit_idx]);
-                            tr.move_ontop(tr.append_child(at), tmp.begin());
-                        }
-                        at.skip_children();
-                    } else { //raise an assert
-                        std::stringstream ss;
-                        ss << *at;
-                        OC_ASSERT(false,
-                                  "There is not enough arguments given"
-                                  " in input, %s needs at least %d"
-                                  " arguments and only %d are provided",
-                                  ss.str().c_str(),
-                                  static_cast<int>(ama),
-                                  static_cast<int>(rest_ap_arg));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void set_bindings(combo_tree& tr, const std::vector<vertex>& args)
-{
-    if (!tr.empty())
-        set_bindings(tr, tr.begin(), args, explicit_arity(tr));
-}
-
-void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
-{
-    if (!tr.empty())
-        set_bindings(tr, tr.begin(), arg_parent, explicit_arity(tr));
-}
-
-// debug printing
-void print_binding_map(const binding_map& bmap) {
-    std::cout << "bmap = {";
-    for (const binding_map::value_type& vt : bmap) {
-        std::cout << vt.first << ":";
-        if (const vertex* v = boost::get<const vertex>(&vt.second))
-            std::cout << *v;
-        else
-            std::cout << boost::get<combo_tree::iterator>(&vt.second);
-        std::cout << ",";
-    }
-    std::cout << "}" << std::endl;
-}
-#endif /* ALMOST_DEAD_EVAL_CODE */
-
 /// eval_throws_binding -- evaluate a combo tree, using the argument
 /// values supplied in the vertex_seq list.
 ///
@@ -671,7 +527,10 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return tr;
         }
 
+        // The apply() operator is a sensible thing to have, but this code is bad so I disabled it.
+        // It shouldn't use set_bindings; if we want lambda functions then we should use scopes properly -- Jade
         case id::apply : {
+            OC_ASSERT(false, "apply() is not implemented");
             combo_tree tr(it);
             sib_it tr_it = tr.begin().begin();
             sib_it lambda_it = tr_it.end();
@@ -683,7 +542,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             for(; tr_it!=tr.begin().end(); tr_it++){
                 al.push_back(*tr_it);
             }
-            set_bindings(exp_tr, exp_tr.begin(), al, explicit_arity(exp_tr));
+            //set_bindings(exp_tr, exp_tr.begin(), al, explicit_arity(exp_tr));
             return eval_throws_tree(bmap, exp_tr);
         }
 

@@ -182,7 +182,7 @@ protected:
 
 private:
     /// initialization - only called from ctors
-    void init(const std::vector<combo::vertex>&);
+    void init(const std::vector<combo::vertex>&) {}
 
     /**
      * true if the combo interpreter
