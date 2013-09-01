@@ -23,6 +23,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class AtomCache
 {
@@ -52,7 +55,8 @@ class AtomCache
 		void store(const AtomTable &);
 };
 
-};
+/** @}*/
+}
 
 #endif // HAVE_LIBMEMCACHED
 

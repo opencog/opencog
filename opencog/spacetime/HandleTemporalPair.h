@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class HandleTemporalPair
 {
@@ -50,6 +53,7 @@ private:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_HANDLE_TEMPORAL_PAIR_H

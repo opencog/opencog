@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 /**
  * This class implements a linked-list of times, and provides several
@@ -233,6 +236,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TEMPORAL_ENTRY_H

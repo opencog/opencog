@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -121,6 +124,7 @@ public:
 
 }; // class
 
+/** @}*/
 } // namespace
 
 #endif // _OPENCOG_HEBBIAN_LEARNING_AGENT_H

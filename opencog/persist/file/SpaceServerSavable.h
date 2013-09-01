@@ -39,6 +39,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class SpaceServerSavable : public SavableRepository
 {
@@ -57,6 +60,8 @@ public:
     void clear();
 
 };
+
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SPACESERVER_SAVABLE_H

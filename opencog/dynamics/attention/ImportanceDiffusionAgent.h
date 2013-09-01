@@ -44,6 +44,9 @@ typedef boost::numeric::ublas::compressed_matrix<float> bmatrix;
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -224,6 +227,7 @@ public:
     float getDiffusionThreshold() const;
 }; // class
 
-}; // namespace
+/** @}*/
+} // namespace
 
 #endif // _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H

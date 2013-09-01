@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 /** Module for including any core-specific common utilities */
 class CoreUtils
@@ -54,6 +57,7 @@ public:
     static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_CORE_UTILS_H_

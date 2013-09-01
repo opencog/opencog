@@ -21,7 +21,7 @@ Dependencies:
 - boost filesystem
 - boost thread
 - dl
-- smob - Guile (if available)
+- \ref libsmob "smob" - Guile (if available)
 - persist (if available)
 
 
@@ -91,6 +91,59 @@ These provide a basic system where the user is able to close the connection,
 list available commands, start, stop, advance and list agents. 
 A comprehensive list is available in 
 <a href="http://wiki.opencog.org/w/CogServer_Commands">the wiki</a>.
+
+\section sect_shells   Shells
+
+Two libraries are provided that implement GenericShell interface:
+
+\subsection ssect_schemeshell  Scheme shell
+
+To build it use:
+@code
+make scheme-shell
+@endcode
+
+Dependencies:
+- \ref libsmob "smob"
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+- \ref libcogutil "cogutil"
+- boost system
+
+The command to enter this shell (provided by SchemeShellModule) is 
+@code
+scm
+@endcode
+Executing <a href="http://en.wikipedia.org/wiki/Scheme_%28programming_language%29">Scheme</a>
+code without actually entering the shell is also possible:
+@code
+scm-eval <scheme code>
+@endcode
+
+\subsection ssect_pythonshell  Python shell
+
+To build it use:
+@code
+make py-shell
+@endcode
+
+Dependencies:
+- \ref libsmob "smob"
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+- \ref libcogutil "cogutil"
+- boost system
+- python library
+
+The command to enter this shell (provided by PythonShellModule) is 
+@code
+py
+@endcode
+Executing <a href="http://www.python.org/">Python</a>
+code without actually entering the shell is also possible:
+@code
+py-eval <scheme code>
+@endcode
 
 
 \if MARKER_TREE_START

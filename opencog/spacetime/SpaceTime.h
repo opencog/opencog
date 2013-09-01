@@ -33,6 +33,9 @@ namespace opencog {
 // At the moment, this is a cheap hack to provie all-things
 // embodiment related with access to spacetime.
 
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 class SpaceTimeCogServer : public CogServer
 {
 
@@ -50,6 +53,7 @@ public:
 SpaceServer& spaceServer();
 TimeServer& timeServer();
 
+/** @}*/
 } // namepsace opencog
 
 #endif // _EMBODIMENT_SPACETIME_H

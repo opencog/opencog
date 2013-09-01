@@ -26,6 +26,9 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
+/** \addtogroup grp_smob
+ *  @{
+ */
 
 #ifdef HAVE_GUILE
 int load_scm_file (AtomSpace& as, const char * filename);
@@ -35,6 +38,7 @@ int load_scm_file (AtomSpace& as, const char * filename);
 static inline int load_scm_file (AtomSpace& as, const char *) { return 1; }
 #endif /* HAVE_GUILE */
 
+/** @}*/
 }
 
 #endif /* OPENCOG_SERVER_LOAD_FILE_H */

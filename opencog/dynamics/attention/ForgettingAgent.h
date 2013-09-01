@@ -35,6 +35,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -134,6 +137,7 @@ struct ForgettingLTIThenTVAscendingSort {
 
 };
 
+/** @}*/
 } // namespace
 
 #endif // _OPENCOG_FORGETTING_AGENT_H

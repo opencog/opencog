@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class AtomStorage
 {
@@ -135,6 +138,7 @@ class AtomStorage
 		void reserve(void);     // reserve range of UUID's
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_PERSITENT_ATOM_STORAGE_H

@@ -122,7 +122,7 @@ the execution of the A* on the abstract graph. QuadTree subdivides the grid on
 a quad tree and builds a graph that represents the free nodes of the tree.
 
 
-@todo if run_tangent_bug is to stay that it should 
+@todo if run_tangent_bug is to stay then it should 
 generate output elsewhere
 
 \if MARKER_TREE_START

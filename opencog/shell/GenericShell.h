@@ -42,6 +42,9 @@
  */
 
 namespace opencog {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class ConsoleSocket;
 
@@ -60,6 +63,7 @@ class GenericShell
 		virtual void socketClosed(void) = 0;
 };
 
+/** @}*/
 }
 
 #endif // _OPENCOG_GENERIC_SHELL_H

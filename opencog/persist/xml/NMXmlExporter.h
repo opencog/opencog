@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 /**
  * This class is used to export XML from a subset of Atoms.
@@ -84,6 +87,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_NMXML_EXPORTER_H

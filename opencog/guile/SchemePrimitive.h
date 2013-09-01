@@ -20,6 +20,9 @@
 #include <opencog/atomspace/ClassServer.h>
 
 namespace opencog {
+/** \addtogroup grp_smob
+ *  @{
+ */
 
 class PrimitiveEnviron
 {
@@ -430,6 +433,7 @@ DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
 DECLARE_DECLARE_4(void, Type, int, double, int)
 DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 
+/** @}*/
 }
 
 #endif // _OPENCOG_SCHEME_PRIMITIVE_H

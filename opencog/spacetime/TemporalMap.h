@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class TemporalMapIterator;
 
@@ -244,6 +247,7 @@ public:
     Temporal* next() throw (IndexErrorException);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TEMPORALMAP_H
