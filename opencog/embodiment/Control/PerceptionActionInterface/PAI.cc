@@ -1129,7 +1129,7 @@ Handle PAI::processActionAvailability(DOMElement* signal)
         
         string targetTypeStr(targetType);
         
-        std::string internalTargetId = PAIUtils::getInternalId(targetName);
+        internalTargetId = PAIUtils::getInternalId(targetName);
         
         if (targetTypeStr == "avatar")
         {
