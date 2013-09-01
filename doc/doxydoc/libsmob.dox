@@ -31,7 +31,7 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref libspacetime "Previous"</TD>
+<TD>\ref libattention "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref libpersist "Next"</TD>
 </TR></TABLE>
