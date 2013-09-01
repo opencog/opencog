@@ -21,7 +21,7 @@ Dependencies:
 - boost filesystem
 - boost thread
 - dl
-- smob - Guile (if available)
+- \ref libsmob "smob" - Guile (if available)
 - persist (if available)
 
 
@@ -104,7 +104,7 @@ make scheme-shell
 @endcode
 
 Dependencies:
-- smob
+- \ref libsmob "smob"
 - \ref libserver "server"
 - \ref libatomspace "atomspace"
 - \ref libcogutil "cogutil"
@@ -128,7 +128,7 @@ make py-shell
 @endcode
 
 Dependencies:
-- smob
+- \ref libsmob "smob"
 - \ref libserver "server"
 - \ref libatomspace "atomspace"
 - \ref libcogutil "cogutil"
