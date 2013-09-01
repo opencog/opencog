@@ -37,6 +37,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 /**
  * This class implements a linked-list of HandleTemporalPair objects, and provides several
@@ -249,6 +252,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_HANDLE_TEMPORAL_PAIR_ENTRY_H

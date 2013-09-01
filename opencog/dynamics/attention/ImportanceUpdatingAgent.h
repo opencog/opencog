@@ -40,6 +40,9 @@ class ImportanceUpdatingAgentUTest;
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -416,6 +419,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_IMPORTANCE_UPDATING_AGENT_H

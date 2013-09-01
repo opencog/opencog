@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class TemporalToHandleSetMap
 {
@@ -120,6 +123,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TEMPORAL_TO_HANDLE_SET_MAP_H

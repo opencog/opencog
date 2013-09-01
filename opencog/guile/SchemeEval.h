@@ -18,6 +18,9 @@
 #include <opencog/util/exceptions.h>
 
 namespace opencog {
+/** \addtogroup grp_smob
+ *  @{
+ */
 
 class AtomSpace;
 
@@ -127,6 +130,7 @@ class SchemeEval
 /** For easier wrapping by Cython */
 std::string eval_scheme(std::string &s);
 
+/** @}*/
 }
 
 #endif/* HAVE_GUILE */

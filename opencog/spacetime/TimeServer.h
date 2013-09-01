@@ -35,6 +35,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class AtomSpaceImpl;
 class TimeServerSavable;
@@ -362,6 +365,7 @@ private:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TIME_SERVER_H

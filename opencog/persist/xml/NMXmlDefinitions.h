@@ -23,6 +23,10 @@
 #ifndef _OPENCOG_NMXML_DEFINITIONS_H
 #define _OPENCOG_NMXML_DEFINITIONS_H
 
+/** \addtogroup grp_persist
+ *  @{
+ */
+
 /* ATOM XML TOKENS */
 #define HYPOTETHICAL_TOKEN "hyp"
 #define LIST_TOKEN "list"
@@ -40,5 +44,7 @@
 #define POLYGON_CORNER_X_TOKEN "x"
 #define POLYGON_CORNER_Y_TOKEN "y"
 #define POLYGON_CORNER_Z_TOKEN "z"
+
+/** @}*/
 
 #endif // _OPENCOG_NMXML_DEFINITIONS_H

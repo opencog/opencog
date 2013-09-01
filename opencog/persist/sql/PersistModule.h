@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class SQLBackingStore;
 class PersistModule : public Module
@@ -93,6 +96,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_PERSIST_MODULE_H

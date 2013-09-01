@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class FileXMLBufferReader : public XMLBufferReader
 {
@@ -66,6 +69,7 @@ private:
     FILE* file;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_FILE_XML_BUFFER_READER_H

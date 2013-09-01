@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 /**
  * This class implements SavableRepository so that it can be saved and loaded by
@@ -72,6 +75,7 @@ public:
     void clear();
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TIME_SERVER_SAVABLE_H

@@ -40,6 +40,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 enum NMXmlParseType { PARSE_NODES, PARSE_LINKS };
 
@@ -146,6 +149,7 @@ public:
     static Handle holdsHandle(const boost::shared_ptr<Atom> a) { return a->getHandle(); } 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_NMXML_PARSER_H
