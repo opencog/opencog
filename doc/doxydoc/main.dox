@@ -27,6 +27,7 @@ ignored by doxygen; used as markers for update-links.py;
 	- \ref libspatial
 	- \ref libspacetime
 	- \ref libsmob
+	- \ref libpersist
 	- \ref libcomboreduct
 - \subpage programs
 	- \ref progcogserver

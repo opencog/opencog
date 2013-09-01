@@ -26,7 +26,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
-/** \addtogroup grp_atomspace
+/** \addtogroup grp_smob
  *  @{
  */
 

@@ -12,9 +12,12 @@ make smob
 Dependencies:
 - guile library
 
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_smob "the comprehensive overview".
+
 The <a href="http://opencog.org/wiki/Scheme">wiki page</a> describes both
 how to run it and the core functions that are provided.
-Main class for evaluation is SchemeEval. It is implemented as a singletons,
+Main class for evaluation is SchemeEval. It is implemented as a singleton,
 so to get the instance use:
 @code
 SchemeEval &eval = SchemeEval::instance(&as);
@@ -30,7 +33,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD>\ref libspacetime "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref libcomboreduct "Next"</TD>
+<TD>\ref libpersist "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
