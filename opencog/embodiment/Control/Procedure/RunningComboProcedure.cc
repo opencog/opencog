@@ -85,6 +85,8 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         AssertionException,
         std::bad_exception)
 {
+    vertex_seq empty;
+
     //debug log
     if (logger().isDebugEnabled()) {
         stringstream tr_ss;
@@ -149,7 +151,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
         } else if (*_it == id::action_boolean_if) {
             try {
-                vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
+                vertex res = eval_throws_binding(empty, _it.begin(), this);
                 if (res == id::logical_true) {
                     _it = ++_it.begin();
                 } else if (res == id::logical_false) {
@@ -178,7 +180,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 moveOn();
             } else {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
+                    vertex res = eval_throws_binding(empty, _it.begin(), this);
                     if (res == id::logical_true) {
                         _it = ++_it.begin();
                     } else {
@@ -222,7 +224,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         } else if (*_it == id::repeat_n) {
             if (_stack.empty() || _stack.top().first != _it) {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, combo::variable_unifier::DEFAULT_VU());
+                    vertex res = eval_throws_binding(empty, _it.begin(), this);
                     OC_ASSERT(is_contin(res));
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
@@ -257,7 +259,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 bool tostop = false;
                 for (sib_it sib = _it.begin();sib != _it.end();++sib) {
                     //first evaluate the children
-                    *sib = eval_throws(sib, this, combo::variable_unifier::DEFAULT_VU());
+                    *sib = eval_throws_binding(empty, sib, this);
                     if (*sib == id::null_obj) { //just fail
                         logger().error("RunningComboProc - Sibling is null_obj.");
 
@@ -326,7 +328,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             } else {
                 //try passing it off to the regular combo interpreter - evaluation
                 //without actions will get done in a single cycle
-                _tr = combo::combo_tree(eval_throws(_it, this, combo::variable_unifier::DEFAULT_VU()));
+                _tr = combo::combo_tree(eval_throws_binding(empty, _it, this);
                 _it = _tr.begin();
                 moveOn();
             }
@@ -357,7 +359,7 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
     if (_doesSendDefinitePlan) {
         for (sib_it sib = from; sib != to; ++sib) {
             for (sib_it arg = sib.begin(); arg != sib.end();++arg) {
-                *arg = eval_throws(arg, this, combo::variable_unifier::DEFAULT_VU());
+                *arg = eval_throws_binding(empty, arg, this);
 
                 if (*arg == id::null_obj) {
                     //will definitely fail at this point..
