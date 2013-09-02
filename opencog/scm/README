@@ -16,9 +16,6 @@ OpenCog atoms and systems, in various general ways. These utilities include:
 -- persistence.scm
    + store, fetch groups of atoms from persistent store.
 
--- type_constructors.scm
-   + constructors for all atom types.
-
 -- utilities.scm
    + increment a CountTruthValue
    + delete an OpenCog hypergraph, from the top-node downards
