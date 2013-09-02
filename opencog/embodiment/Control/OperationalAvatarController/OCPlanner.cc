@@ -798,6 +798,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
             State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings);
+            OC_ASSERT( ( effState != 0),
+                      "OCPlanner::doPlanning: effect state: %s is not able to be grounded.\n",
+                       e->state->name().c_str());
+
+            bool isEffectExecuted = Effect::executeEffectOp(effState,e,ruleNode->currentAllBindings);
+
+            OC_ASSERT( isEffectExecuted,
+                      "OCPlanner::doPlanning: in Effect::executeEffectOp of state: %s, the effect value is ungrounded.\n",
+                       e->state->name().c_str());
 
             // skip the current state node
             if (curStateNode->state->isSameState(*effState) )
@@ -1111,9 +1120,12 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
     {
         Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState);
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState,false);
 
         if (! effState)
+            continue;
+
+        if (! Effect::executeEffectOp(effState,e,tmpRuleNode->currentBindingsFromForwardState))
             continue;
 
         if (effState->isSameState(*(fowardState->state)))

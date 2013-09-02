@@ -214,6 +214,16 @@ namespace opencog { namespace oac {
 
     };
 
+    // map to save grounded values for one rule:
+    // map<parameter name, grounded value>
+    // e.g.: <$Entity0,Robot001>
+    //       <$Vector0,Vector(45,82,29)>
+    //       <$Entity1,Battery83483>
+    typedef map<string, ParamValue> ParamGroundedMapInARule;
+
+    // pair<the state this varaible belongs to, one address of this variable>
+    typedef pair<State*,ParamValue*> paramIndex;
+
 
     class Effect
     {
@@ -228,9 +238,11 @@ namespace opencog { namespace oac {
 
         Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue);
 
+        // execute the effect to a grounded state. will change this state.
+        // will look up the value from groundings if the opParamValue is ungrouned
         // only when there are misusge of the value type of opParamValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
-        bool executeEffectOp();
+        static bool executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings);
 
         // make sure the value type of the operater value is the same with the value type of the state
         // and also this value type can be the parameter of this operator
@@ -254,16 +266,6 @@ namespace opencog { namespace oac {
     // the float in this pair is the probability of the happenning of this Effect
     typedef pair<float,Effect*> EffectPair;
 
-
-    // map to save grounded values for one rule:
-    // map<parameter name, grounded value>
-    // e.g.: <$Entity0,Robot001>
-    //       <$Vector0,Vector(45,82,29)>
-    //       <$Entity1,Battery83483>
-    typedef map<string, ParamValue> ParamGroundedMapInARule;
-
-    // pair<the state this varaible belongs to, one address of this variable>
-    typedef pair<State*,ParamValue*> paramIndex;
 
     // ToBeImproved, in fact,there should rules for selecting values as well,
     // so that the variable grounding process can be also consided as the same reasoning process as the main planning process.
@@ -384,7 +386,7 @@ namespace opencog { namespace oac {
         // in some planning step, need to ground some state to calculate the cost or others
         // return a new state which is the grounded version of s, by a parameter value map
         // if the "groundings" cannot ground all the variables in this state, return 0
-       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
+       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool ifRealTimeQueryStateValue = true);
 
         bool static isRuleUnGrounded( Rule* rule);
 

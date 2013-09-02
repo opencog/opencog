@@ -507,9 +507,25 @@ Effect::Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue)
     opParamValue = _OPValue;
 }
 
-bool Effect::executeEffectOp()
+bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings)
 {
-    if (effectOp != OP_ASSIGN_NOT_EQUAL_TO)
+    ParamValue opParamValue;
+    if (Rule::isParamValueUnGrounded(effect->opParamValue))
+    {
+        // look up this value in groundings
+        string varName = ActionParameter::ParamValueToString(effect->opParamValue);
+        ParamGroundedMapInARule::iterator paramMapIt = groundings.find(varName);
+        if (paramMapIt == groundings.end())
+            return false;
+        else
+            opParamValue = paramMapIt->second;
+    }
+    else
+    {
+        opParamValue = effect->opParamValue;
+    }
+
+    if (effect->effectOp != OP_ASSIGN_NOT_EQUAL_TO)
     {
         if (state->stateType != STATE_EQUAL_TO)
             state->changeStateType(STATE_EQUAL_TO);
@@ -520,17 +536,17 @@ bool Effect::executeEffectOp()
             state->changeStateType(STATE_NOT_EQUAL_TO);
     }
 
-    if (effectOp == OP_ASSIGN)
+    if (effect->effectOp == OP_ASSIGN)
     {
         state->assignValue(opParamValue);
 
     }
-    else if (effectOp == OP_ASSIGN_NOT_EQUAL_TO)
+    else if (effect->effectOp == OP_ASSIGN_NOT_EQUAL_TO)
     {
         state->assignValue(opParamValue);
 
     }
-    else if (effectOp == OP_REVERSE)
+    else if (effect->effectOp == OP_REVERSE)
     {
         string oldStr = boost::get<string>(state->stateVariable->getValue());
         if (oldStr == "true")
@@ -548,7 +564,7 @@ bool Effect::executeEffectOp()
         double oldv = atof(oldStr.c_str());
         double opv = atof(opvStr.c_str());
         double newV;
-        switch (effectOp)
+        switch (effect->effectOp)
         {
         case OP_ADD:
             newV = oldv + opv;
@@ -857,7 +873,7 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 
 // in some planning step, need to ground some state to calculate the cost or others
 // return a new state which is the grounded version of s, by a parameter value map
-State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings)
+State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool ifRealTimeQueryStateValue)
 {
     State* groundedState = s->clone();
 
@@ -886,8 +902,10 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
         if (paramMapIt != groundings.end())
             groundedState->stateVariable->assignValue(paramMapIt->second);
-        else
+        else if (ifRealTimeQueryStateValue)
             groundedState->stateVariable->assignValue(s->getParamValue());
+        else
+            return 0;
     }
 
     return groundedState;
