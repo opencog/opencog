@@ -41,7 +41,8 @@ using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        const std::vector<combo::vertex>& arguments)
+        const std::vector<combo::vertex>& arguments,
+        bool dsdp)
         : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
         _doesSendDefinitePlan(dsdp)
@@ -284,8 +285,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             }
             bool execed =
                 ( (_tr.is_valid(parent) && *parent == id::sequential_and) ?
-                  execSeq(_it, std::find_if(_it, parent.end(),
-                                            !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)), combo::variable_unifier::DEFAULT_VU())
+                  execSeq(_it, std::find_if(_it, parent.end(), !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)) )
                   : exec(_it) );
             if (execed) {
                 moveOn();
@@ -293,9 +293,11 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             }
 
         } else if (is_procedure_call(*_it)) { //an action procedure
+            // This probably shouldn't be handled here...
+            OC_ASSERT(false, "RunningComboProcedure does not support function calls inside a combo expression");
             try {
 
-                expand_procedure_call(_it);
+                //expand_procedure_call(_it);
                 continue;
 
             } catch (ComboException& e) {
@@ -347,9 +349,10 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
     }
     _hasBegun = true; //since we're going to send a plan
     _failed = boost::logic::indeterminate;
-    std::for_each(make_counting_iterator(from),
-                  make_counting_iterator(to),
-                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, combo::variable_unifier::DEFAULT_VU()));
+    //! @todo evaluate subtrees correctly
+//    std::for_each(make_counting_iterator(from),
+//                  make_counting_iterator(to),
+//                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, combo::variable_unifier::DEFAULT_VU()));
 
     if (_doesSendDefinitePlan) {
         for (sib_it sib = from; sib != to; ++sib) {

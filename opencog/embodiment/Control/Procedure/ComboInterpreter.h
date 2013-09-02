@@ -77,10 +77,6 @@ public:
     //add a procedure to be run by the interpreter
     RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments);
 
-    //add a procedure to be run by the interpreter with variable unifier
-    RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments,
-                                    combo::variable_unifier& vu);
-
     bool isFinished(RunningProcedureId id);
 
     // Note: this will return false if the stopProcedure() method was previously called for this same procedure id,
@@ -94,21 +90,12 @@ public:
     // - procedure execution was not stopped (by calling stopProcedure() method)
     combo::vertex getResult(RunningProcedureId id);
 
-    // Get the result of the variable unification carried within the procedure
-    // execution.
-    // Can be called only if the following conditions are true:
-    // - procedure execution is finished (checked by isFinished() method)
-    // - procedure execution has not failed (checked by isFailed() method)
-    // - procedure execution was not stopped (by calling stopProcedure() method)
-    combo::variable_unifier& getUnifierResult(RunningProcedureId id);
-
     // makes the procedure with the given id to stop and remove it from the interpreter
     void stopProcedure(RunningProcedureId id);
 
 protected:
     typedef std::set<RunningProcedureId> Set;
     typedef std::map<RunningProcedureId, combo::vertex> ResultMap;
-    typedef std::map<RunningProcedureId, combo::variable_unifier> UnifierResultMap;
 
 //    WorldWrapper::PAIWorldWrapper _ww;
     WorldWrapperBase * _ww;
@@ -116,7 +103,6 @@ protected:
     Vec _vec;
     Set _failed;
     ResultMap _resultMap;
-    UnifierResultMap _unifierResultMap;
 
     unsigned long _next;
 
