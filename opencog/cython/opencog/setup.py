@@ -23,9 +23,10 @@ setup(
     ext_modules = [
     Extension("pymoses",
               sources=["pymoses.pyx"],
-              libraries=["moses"],              # refers to "libmoses.so"
+#              libraries=["moses"],              # refers to "libmoses.so"
               language="c++",                   # remove this if C and not C++
-              extra_compile_args=["-fopenmp", "-O3", "-std=c++0x"]
+              extra_compile_args=["-fopenmp", "-O3", "-std=c++0x"],
+              extra_objects=["/home/cosmo/opencog/src/qtbin/opencog/learning/moses/libmoses.a"],
               )
     ]
 )

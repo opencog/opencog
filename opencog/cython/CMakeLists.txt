@@ -8,10 +8,10 @@ INCLUDE_DIRECTORIES(
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 # How to Cython the .pyx file
-add_custom_command(OUTPUT opencog/moses.cpp
+add_custom_command(OUTPUT opencog/pymoses.cpp
   COMMAND
-  ${CYTHON_EXECUTABLE} -o opencog/moses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/moses.pyx"
-  DEPENDS "opencog/moses.pyx" "opencog/moses.pxd")
+  ${CYTHON_EXECUTABLE} -o opencog/pymoses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/pymoses.pyx"
+  DEPENDS "opencog/pymoses.pyx" "opencog/pymoses.pxd")
 
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
@@ -50,20 +50,20 @@ add_custom_command(OUTPUT scheme_wrapper.cpp
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 # opencog.moses Python bindings
-ADD_LIBRARY(moses_cython SHARED
-    opencog/moses.cpp
+ADD_LIBRARY(pymoses_cython SHARED
+    opencog/pymoses.cpp
 )
 
-TARGET_LINK_LIBRARIES(moses_cython
+TARGET_LINK_LIBRARIES(pymoses_cython
         moses
         cogutil
         ${Boost_THREAD_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
 )
 
-SET_TARGET_PROPERTIES(moses_cython PROPERTIES
+SET_TARGET_PROPERTIES(pymoses_cython PROPERTIES
     PREFIX ""
-    OUTPUT_NAME opencog/moses)
+    OUTPUT_NAME opencog/pymoses)
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython SHARED

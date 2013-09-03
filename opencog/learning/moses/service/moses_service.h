@@ -1,4 +1,5 @@
 #include "../main/moses_exec.h"
+#include <vector>
 
 namespace opencog {
 namespace moses {

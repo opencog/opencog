@@ -6,5 +6,5 @@
 CC="gcc"   \
 CXX="g++"   \
 CFLAGS="-I../../learning/moses/service/ -I../../../ -I../../../DEPENDENCIES/python2.7/inc -I../../../DEPENDENCIES/gsl-1.15"   \
-LDFLAGS="-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/"   \
+#LDFLAGS="-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/"   \
     python setup.py build_ext --inplace

@@ -161,6 +161,49 @@ private:
     bool is_mpi;
 };
 
+/**
+ * Create metapopulation, run moses, print results.
+ */
+template<typename Printer>
+void metapop_moses_results_new(const std::vector<combo_tree>& bases,
+                             const opencog::combo::type_tree& tt,
+                             const reduct::rule& si_ca,
+                             const reduct::rule& si_kb,
+                             const cscore_base& sc,
+                             const bscore_base& bsc,
+                             const optim_parameters& opt_params,
+                             const hc_parameters& hc_params,
+                             const metapop_parameters& meta_params,
+                             const moses_parameters& moses_params,
+                             Printer& printer)
+{
+    moses_statistics stats;
+    optimizer_base* optimizer = nullptr;
+
+    if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
+        optimizer = new hill_climbing(opt_params, hc_params);
+    }
+    else if (opt_params.opt_algo == sa) { // simulated annealing
+        optimizer = new simulated_annealing(opt_params);
+    }
+    else if (opt_params.opt_algo == un) { // univariate
+        optimizer = new univariate_optimization(opt_params);
+    }
+    else {
+        std::cerr << "Unknown optimization algo " << opt_params.opt_algo
+                  << ". Supported algorithms are un (for univariate),"
+                  << " sa (for star-shaped search) and hc (for local search)"
+                  << std::endl;
+        exit(1);
+    }
+
+    metapopulation metapop(bases, tt, si_ca, si_kb, sc, bsc,
+                           *optimizer, meta_params);
+
+    run_moses(metapop, moses_params, stats);
+    printer(metapop, stats);
+    delete optimizer;
+}
 
 /**
  * Create metapopulation, run moses, print results.
