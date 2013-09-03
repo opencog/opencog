@@ -799,7 +799,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
 
         // out put all the bindings:
-        cout<<"Debug: Variable bindings:"<<std::endl;
+        cout<<"Debug: All Variable bindings:"<<std::endl;
         ParamGroundedMapInARule::iterator curparamit = ruleNode->currentAllBindings.begin();
         for (; curparamit != ruleNode->currentAllBindings.end(); ++ curparamit)
         {
@@ -828,7 +828,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             // skip the current state node
             if (curStateNode->state->isSameState(*effState) )
+            {
+                delete effState;
                 continue;
+            }
 
             // create a new state node for it
             StateNode* newStateNode = new StateNode(effState);
@@ -1144,7 +1147,10 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
             continue;
 
         if (! Effect::executeEffectOp(effState,e,tmpRuleNode->currentBindingsFromForwardState))
+        {
+            delete effState;
             continue;
+        }
 
         if (effState->isSameState(*(fowardState->state)))
         {
@@ -1152,6 +1158,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
             if (! effState->isSatisfied(*(fowardState->state),satDegree))
             {
                 negativeGoal = true;
+                delete effState;
                 return 10000;
             }
         }
@@ -1185,6 +1192,8 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
                 ++ sait;
 
         }
+
+        delete effState;
     }
 
     delete tmpRuleNode;
@@ -1541,6 +1550,9 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
     Effect* e;
     State* s;
 
+    std::cout << "Debug: Begin grounding variables for rule: "<< ruleNode->originalRule->action->getName().c_str()
+              << " from its forward state " << forwardStateNode->state->name().c_str() << std::endl;
+
     // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name()
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
@@ -1573,10 +1585,11 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
         }
     }
 
-    // ground the state value
-    if (Rule::isParamValueUnGrounded(s->stateVariable->getValue()))
+    // don't need to ground the old state value itself
+    // just ground the effect op value
+    if (Rule::isParamValueUnGrounded(e->opParamValue))
     {
-        string variableName = ActionParameter::ParamValueToString(s->stateVariable->getValue());
+        string variableName = ActionParameter::ParamValueToString(e->opParamValue);
         map<string, ParamValue>::iterator paraIt = ruleNode->currentBindingsFromForwardState.find(variableName);
         if (paraIt == ruleNode->currentBindingsFromForwardState.end())
         {
@@ -1585,6 +1598,9 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
             ruleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,forwardStateNode->state->getParamValue()));
         }
     }
+
+    std::cout << "Debug: End grounding variables for rule: "<< ruleNode->originalRule->action->getName().c_str()
+              << " from its forward state " << forwardStateNode->state->name().c_str() << std::endl;
 
     return true;
 }
@@ -1946,6 +1962,8 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
                             }
 
+                            delete groundedState;
+
                         }
 
                         tmpcandidates.push_back(TmpParamCandidate(numOfSat, oneGroupCandidate));
@@ -2027,6 +2045,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     }
 
     vector<ParamValue> values = bs.bestNumericVariableInqueryFun(groundedState->stateOwnerList);
+
+    delete groundedState;
 
     if (values.size() == 0)
     {
@@ -2157,14 +2177,17 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
 {
     vector<EffectPair>::iterator effectIt;
     Effect* e;
-    State* s;
 
     ruleNode->orginalGroundedParamValues.clear();
 
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
-        s = e->state;
+        State* s = Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,false);
+        OC_ASSERT( (s != 0),
+                  "OCPlanner::recordOrginalParamValuesAfterGroundARule: cannot ground state: %s!\n",
+                    s->name().c_str());
+
         StateNode* stateNode;
         if (findStateInTempStates(*s, 0, stateNode, false))
         {
@@ -2172,12 +2195,10 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
         }
         else
         {
-            // Cannot find in Temp States. Inquery it in real time.
-            State* groundedState = Rule::groundAStateByRuleParamMap(s,ruleNode->currentAllBindings);
-
-            // todo: if can ground this state
-            ruleNode->orginalGroundedParamValues.push_back(groundedState->getParamValue());
+            ruleNode->orginalGroundedParamValues.push_back(s->getParamValue());
         }
+
+        delete s;
 
     }
 }
