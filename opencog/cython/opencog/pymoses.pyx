@@ -1,7 +1,3 @@
-# distutils: language = c++
-# distutils: extra_compile_args = ['--std=c++0x']
-# distutils: sources = ["../../learning/moses/service/moses_service.cc"]
-
 cdef class pymoses:
     cdef moses_service *thisptr
     def __cinit__(self):

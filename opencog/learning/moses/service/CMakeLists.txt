@@ -19,3 +19,9 @@ TARGET_LINK_LIBRARIES (moses_service_demo
         moses
         cogutil
 )
+
+TARGET_LINK_LIBRARIES (moses_service
+   moses_exec
+        moses
+        cogutil
+)

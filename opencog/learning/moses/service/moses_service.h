@@ -1,3 +1,5 @@
+#include "../main/moses_exec.h"
+
 namespace opencog {
 namespace moses {
 
