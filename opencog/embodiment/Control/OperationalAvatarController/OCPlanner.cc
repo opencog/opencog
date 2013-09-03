@@ -478,8 +478,12 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             map<string,multimap<float,Rule*> >::iterator it;
             it = ruleEffectIndexes.find(curStateNode->state->name());
+            curStateNode->hasFoundCandidateRules = true;
 
-            // todo : if it == ruleEffectIndexes.end()
+            // if there is not any rule related to this goal, continue to next loop;
+            // in fact in next loop,it will go into the else for processing the situation when curStateNode->hasFoundCandidateRules is true;
+            if (it == ruleEffectIndexes.end())
+                continue;
 
             // Select a rule to apply
 
@@ -487,8 +491,17 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             if ( rules.size() == 1)
             {
-                // if there is one rule to achieve this goal, just select it
-                selectedRule = (((multimap<float,Rule*>)(it->second)).begin())->second;
+                // if there is one rule related to this goal,
+                // check if it's negative or positive for this goal:
+                Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
+                bool isNegativeGoal;
+                checkNegativeStateNumBythisRule(r,curStateNode,isNegativeGoal);
+
+                if (isNegativeGoal) // if this rule will negative this goal, we should not choose to apply it.
+                    continue;
+
+                // this rule is positive for this goal, apply it.
+                selectedRule = r;
                 curStateNode->ruleHistory.push_back(selectedRule);
             }
             else
@@ -551,13 +564,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 }
 
+                // if cannot find a proper rule for this goal, continue to next loop;
+                // in fact in next loop,it will go into the else for processing the situation when curStateNode->hasFoundCandidateRules is true;
+                if (curStateNode->candidateRules.size() == 0)
+                    continue;
+
                 selectedRule = (curStateNode->candidateRules.begin())->second;
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.begin())->second);
                 curStateNode->candidateRules.pop_front();
 
             }
 
-            curStateNode->hasFoundCandidateRules = true;
+
         }
         else //  we have  tried to achieve this state node before,which suggests we have found all the candidate rules
         {
