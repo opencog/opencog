@@ -20,8 +20,6 @@ moses_service::~moses_service()
 
 void moses_service::run()
 {
-    cout << "Hello Frog.";
-
     const std::vector<std::string>& args = {
         "moses",
         "-i",
@@ -34,7 +32,6 @@ void moses_service::run()
         "./out.txt"
     };
 
-    // opencog::moses::
     moses_exec(args);
 
 }
