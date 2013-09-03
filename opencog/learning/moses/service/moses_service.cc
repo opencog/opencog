@@ -1,8 +1,6 @@
 #include <iostream>
 #include "../main/moses_exec.h"
-//#include "../main/moses_exec_def.h"
 #include "moses_service.h"
-//#include <vector>
 
 using namespace std;
 
