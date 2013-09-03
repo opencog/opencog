@@ -156,7 +156,15 @@ namespace opencog { namespace oac {
 
         inline bool isSameState(const State& other) const
         {
-            return ((name() == other.name())&&(stateOwnerList == other.stateOwnerList));
+            if (name() == other.name())
+            {
+                if (std::equal(stateOwnerList.begin(),stateOwnerList.end(),other.stateOwnerList.begin()))
+                    return true;
+            }
+
+            return false;
+
+            // return ((name() == other.name())&&(stateOwnerList == other.stateOwnerList));
         }
 
         // @ satisfiedDegree is a return value between (-infinity,1.0], which shows how many percentage has this goal been achieved,

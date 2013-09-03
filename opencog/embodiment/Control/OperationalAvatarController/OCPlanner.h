@@ -144,6 +144,7 @@ public:
         originalRule = _originalRule;
         costHeuristics.clear();
         still_useful = true;
+        appliedTimes = 0;
     }
 
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
