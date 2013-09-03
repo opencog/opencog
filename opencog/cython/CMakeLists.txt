@@ -8,6 +8,11 @@ INCLUDE_DIRECTORIES(
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 # How to Cython the .pyx file
+add_custom_command(OUTPUT opencog/moses.cpp
+  COMMAND
+  ${CYTHON_EXECUTABLE} -o opencog/moses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/moses.pyx"
+  DEPENDS "opencog/moses.pyx" "opencog/moses.pxd")
+
 add_custom_command(OUTPUT opencog/atomspace.cpp
   COMMAND
   ${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
@@ -43,6 +48,22 @@ add_custom_command(OUTPUT scheme_wrapper.cpp
   ${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
   DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
+
+# opencog.moses Python bindings
+ADD_LIBRARY(moses_cython SHARED
+    opencog/moses.cpp
+)
+
+TARGET_LINK_LIBRARIES(moses_cython
+        moses
+        cogutil
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+)
+
+SET_TARGET_PROPERTIES(moses_cython PROPERTIES
+    PREFIX ""
+    OUTPUT_NAME opencog/moses)
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython SHARED
