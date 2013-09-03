@@ -12,13 +12,13 @@ ADD_LIBRARY (
     moses_service
 )
 
-ADD_EXECUTABLE (moses_service_demo moses_service_demo)
-TARGET_LINK_LIBRARIES (moses_service_demo
-        moses_service
-        moses_exec
-        moses
-        cogutil
-)
+#ADD_EXECUTABLE (moses_service_demo moses_service_demo)
+#TARGET_LINK_LIBRARIES (moses_service_demo
+#        moses_service
+#        moses_exec
+#        moses
+#        cogutil
+#)
 
 TARGET_LINK_LIBRARIES (moses_service
    moses_exec
