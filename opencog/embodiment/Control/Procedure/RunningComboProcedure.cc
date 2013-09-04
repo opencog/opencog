@@ -45,10 +45,10 @@ RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         bool dsdp, combo::variable_unifier& vu)
         : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
+        _arguments(arguments),
         _doesSendDefinitePlan(dsdp), _vu(vu)
 {
     finished = false;
-    init(arguments);
 }
 
 RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)

@@ -159,6 +159,8 @@ protected:
      */
     sib_it _it;
 
+    const std::vector<combo::vertex>& _arguments;
+
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
     boost::tribool _failed; //set to true if failed, false if not failed,
@@ -187,9 +189,6 @@ protected:
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
 
 private:
-    /// initialization - only called from ctors
-    void init(const std::vector<combo::vertex>&);
-
     /**
      * true if the combo interpreter
      * evaluates the indefinite aguments
