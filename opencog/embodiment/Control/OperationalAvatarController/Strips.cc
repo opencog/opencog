@@ -873,7 +873,7 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 
 // in some planning step, need to ground some state to calculate the cost or others
 // return a new state which is the grounded version of s, by a parameter value map
-State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool toGroundStateValue,bool ifRealTimeQueryStateValue)
+State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool toGroundStateValue,bool ifRealTimeQueryStateValue,ParamValue knownStateVal)
 {
     State* groundedState = s->clone();
 
@@ -901,16 +901,24 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
     // check the state value
     if (toGroundStateValue && isParameterUnGrounded(*(s->stateVariable)))
     {
-        // look for the value of this variable in the parameter map
-        paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
-        if (paramMapIt != groundings.end())
-            groundedState->stateVariable->assignValue(paramMapIt->second);
-        else if (ifRealTimeQueryStateValue)
-            groundedState->stateVariable->assignValue(s->getParamValue());
+        // if the state value is assigned
+        if ( !(knownStateVal == UNDEFINED_VALUE))
+        {
+            groundedState->stateVariable->assignValue(knownStateVal);
+        }
         else
         {
-            delete groundedState;
-            return 0;
+            // look for the value of this variable in the parameter map
+            paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
+            if (paramMapIt != groundings.end())
+                groundedState->stateVariable->assignValue(paramMapIt->second);
+            else if (ifRealTimeQueryStateValue)
+                groundedState->stateVariable->assignValue(s->getParamValue());
+            else
+            {
+                delete groundedState;
+                return 0;
+            }
         }
     }
 

@@ -810,12 +810,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         //  find if there are other previous states besides curStateNode will be affected by this rule
         vector<EffectPair>::iterator effectItor;
+        vector<ParamValue>::iterator oldValItor = ruleNode->orginalGroundedParamValues.begin();
 
-        for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor)
+        for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor, ++ oldValItor)
         {
             Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings);
+            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,true,false,(*oldValItor));
             OC_ASSERT( ( effState != 0),
                       "OCPlanner::doPlanning: effect state: %s is not able to be grounded.\n",
                        e->state->name().c_str());
@@ -1141,7 +1142,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
     {
         Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState,false);
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState, true,false);
 
         if (! effState)
             continue;
