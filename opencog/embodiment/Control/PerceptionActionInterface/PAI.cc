@@ -3762,6 +3762,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
+
     const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
     if (isEdible)
@@ -3780,6 +3782,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
     addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
     addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
+    addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
 
     // Add the inheritance link to mark the family of this entity.
     addInheritanceLink(std::string("pet_home"), objectNode, isHome);
