@@ -873,7 +873,7 @@ bool Rule::isParamValueUnGrounded(ParamValue& paramVal)
 
 // in some planning step, need to ground some state to calculate the cost or others
 // return a new state which is the grounded version of s, by a parameter value map
-State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool ifRealTimeQueryStateValue)
+State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings, bool toGroundStateValue,bool ifRealTimeQueryStateValue)
 {
     State* groundedState = s->clone();
 
@@ -889,14 +889,17 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             string varName = ActionParameter::ParamValueToString((ParamValue)(*ownerIt));
             paramMapIt = groundings.find(varName);
             if (paramMapIt == groundings.end())
+            {
+                delete groundedState;
                 return 0;
+            }
             else
                 ((ParamValue&)(*ownerIt)) = paramMapIt->second;
         }
     }
 
     // check the state value
-    if (isParameterUnGrounded(*(s->stateVariable)))
+    if (toGroundStateValue && isParameterUnGrounded(*(s->stateVariable)))
     {
         // look for the value of this variable in the parameter map
         paramMapIt = groundings.find(groundedState->stateVariable->stringRepresentation());
@@ -905,7 +908,10 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         else if (ifRealTimeQueryStateValue)
             groundedState->stateVariable->assignValue(s->getParamValue());
         else
+        {
+            delete groundedState;
             return 0;
+        }
     }
 
     return groundedState;

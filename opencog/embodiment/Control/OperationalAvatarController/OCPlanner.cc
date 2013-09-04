@@ -2183,7 +2183,7 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
     for (effectIt = ruleNode->originalRule->effectList.begin(); effectIt != ruleNode->originalRule->effectList.end(); ++ effectIt)
     {
         e = effectIt->second;
-        State* s = Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,false);
+        State* s = Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,false,false);
         OC_ASSERT( (s != 0),
                   "OCPlanner::recordOrginalParamValuesAfterGroundARule: cannot ground state: %s!\n",
                     s->name().c_str());
