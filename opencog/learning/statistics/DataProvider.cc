@@ -29,8 +29,8 @@ using namespace opencog::statistics;
 
 
 template<typename Metadata>
-DataProvider<Metadata>::DataProvider(int _n_gram)
-    :n_gram(_n_gram)
+DataProvider<Metadata>::DataProvider(int _n_gram, bool _isOrderDependent)
+    :n_gram(_n_gram),isOrderDependent(_isOrderDependent)
 {
     mDataMaps = new map<string,int>[n_gram + 1];
 

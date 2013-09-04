@@ -29,12 +29,14 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path)
+bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path, BlockVector& nearestPos)
 {
     BlockVector end = target;
     map<BlockVector,double> costMap;
     map<BlockVector,double>::const_iterator itercost;
     int searchTimes = 0;
+    float nearestDis = begin - target;
+    nearestPos = begin;
 
     while(true)
     {
@@ -113,7 +115,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
                         }
 
                         // calculate the cost of this pos
-                        curCost = calculateCostByDistance(begin, end, curPos);
+                        curCost = calculateCostByDistance(begin, end, curPos,nearestDis,nearestPos);
 
                         pathfindingSteps++;
                         costMap.insert(pair<BlockVector, int>(curPos,curCost));
@@ -179,10 +181,16 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
 }
 
 
-double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos)
+double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,float nearestDis,BlockVector& nearestPos)
 {
     // return (target - pos) * 2.0 + (begin - pos);
-    return (target - pos);
+    float dis = target - pos;
+    if (dis < nearestDis)
+    {
+        nearestDis = dis;
+        nearestPos = pos;
+    }
+    return dis;
 }
 
 

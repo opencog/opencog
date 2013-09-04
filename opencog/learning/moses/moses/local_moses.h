@@ -24,7 +24,7 @@
 #ifndef _MOSES_LOCAL_MOSES_H
 #define _MOSES_LOCAL_MOSES_H
 
-#include "metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 #include "moses_params.h"
 
 namespace opencog {

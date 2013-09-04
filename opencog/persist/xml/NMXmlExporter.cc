@@ -39,59 +39,60 @@ NMXmlExporter::NMXmlExporter(const AtomSpace* _as) :
 NMXmlExporter::~NMXmlExporter() {
 }
 
-std::string NMXmlExporter::toXML(HandleEntry *subset)
+std::string NMXmlExporter::toXML(const HandleSeq& subseq)
 {
-    HandleSet *exportable = findExportables(subset);
+    UnorderedHandleSet subset;
+    std::copy(subseq.begin(), subseq.end(), inserter(subset));
+    UnorderedHandleSet *exportable = findExportables(subset);
 
     return(toXML(exportable));
 }
 
-std::string NMXmlExporter::toXML(HandleSeq& subset)
+#if 0
+std::string NMXmlExporter::toXML(const UnorderedHandleSet* subset)
 {
-    HandleEntry* subset_he = HandleEntry::fromHandleVector(subset);
-    HandleSet *exportable = findExportables(subset_he);
+    UnorderedHandleSet *exportable = findExportables(*subset);
     return(toXML(exportable));
 }
+#endif
 
-HandleSet *NMXmlExporter::findExportables(HandleEntry *seed)
+UnorderedHandleSet *NMXmlExporter::findExportables(const UnorderedHandleSet& seed)
 {
     //Finds the subset.
-    HandleSet *exportables = new HandleSet();
-    HandleSet *internalLinks  = new HandleSet();
-    HandleEntry *it = seed;
-    while (it != NULL) {
-        exportables->add(it->handle);
-        findExportables(exportables, internalLinks, it->handle);
-        it = it->next;
+    UnorderedHandleSet *exportables = new UnorderedHandleSet();
+    UnorderedHandleSet *internalLinks  = new UnorderedHandleSet();
+    UnorderedHandleSet::const_iterator it;
+    for (it = seed.begin(); it != seed.end(); it++) {
+        exportables->insert(*it);
+        findExportables(exportables, internalLinks, *it);
     }
-    delete(seed);
     //Eliminates internalLinks.
-    HandleSetIterator *internals = internalLinks->keys();
-    while (internals->hasNext()) {
-        Handle h = internals->next();
-        exportables->remove(h);
+    UnorderedHandleSet::iterator internals = internalLinks->begin();
+    while (internals != internalLinks->end()) {
+        Handle h = *internals;
+        internals++;
+        exportables->erase(h);
     }
-    delete(internals);
     delete(internalLinks);
     return(exportables);
 }
 
-void NMXmlExporter::findExportables(HandleSet *exportables, HandleSet *internalLinks, Handle h)
+void NMXmlExporter::findExportables(UnorderedHandleSet *exportables, UnorderedHandleSet *internalLinks, Handle h)
 {
     if (!as->isLink(h)) return;
 
     for (int i = 0; i < as->getArity(h); i++) {
         Handle j = as->getOutgoing(h,i);
-        exportables->add(j);
+        exportables->insert(j);
 
         if (classserver().isA(as->getType(j), LINK)) {
-            internalLinks->add(j);
+            internalLinks->insert(j);
             findExportables(exportables, internalLinks, j);
         }
     }
 }
 
-std::string NMXmlExporter::toXML(HandleSet *elements)
+std::string NMXmlExporter::toXML(const UnorderedHandleSet *elements)
 {
     bool typesUsed[classserver().getNumberOfClasses()];
     char aux[1<<16];
@@ -101,14 +102,15 @@ std::string NMXmlExporter::toXML(HandleSet *elements)
     result += aux;
 
     memset(typesUsed, 0, sizeof(bool) * classserver().getNumberOfClasses());
-    HandleSetIterator *it = elements->keys();
-    while (it->hasNext()) {
-        exportAtom(it->next(), typesUsed, result);
+    UnorderedHandleSet::const_iterator it = elements->begin();
+    while (it != elements->end()) {
+        exportAtom(*it, typesUsed, result);
+        it++;
     }
-    delete(it);
     sprintf(aux, "<%s>\n", TAG_DESCRIPTION_TOKEN);
     result += aux;
-    for (unsigned int i = 0 ; i < classserver().getNumberOfClasses(); i++) {
+    unsigned int numberOfTypes = classserver().getNumberOfClasses();
+    for (unsigned int i = 0 ; i < numberOfTypes; i++) {
         if (typesUsed[i]) {
             sprintf(aux, "<%s %s=\"%s\" %s=\"%s\" />\n", TAG_TOKEN, NAME_TOKEN, classserver().getTypeName(i).c_str(), VALUE_TOKEN, classserver().getTypeName(i).c_str());
             result += aux;

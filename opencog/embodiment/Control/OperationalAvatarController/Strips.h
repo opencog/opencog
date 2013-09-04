@@ -32,6 +32,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
 #include "PlanningHeaderFiles.h"
+#include "Inquery.h"
 
 using namespace std;
 using namespace opencog::pai;
@@ -43,13 +44,15 @@ using namespace opencog::pai;
 
 namespace opencog { namespace oac {
 
-class Inquery;
+
 
     enum EFFECT_OPERATOR_TYPE
     {
         OP_REVERSE, // this is only for the bool variables
         OP_ASSIGN,  // this operator can be used in any variable type =
         OP_ASSIGN_NOT_EQUAL_TO, // this operator can be used in any variable type !=
+        OP_ASSIGN_GREATER_THAN, // this operator can be used in any variable type >
+        OP_ASSIGN_LESS_THAN, // this operator can be used in any variable type <
         OP_ADD,     // only for numeric variables +=
         OP_SUB,     // only for numeric variables -=
         OP_MUL,     // only for numeric variables *=
@@ -57,7 +60,7 @@ class Inquery;
         OP_NUM_OPS  // must always be the last one in this list.
     };
 
-    extern const char* EFFECT_OPERATOR_NAME[7];
+    extern const char* EFFECT_OPERATOR_NAME[9];
 
 
     // There are 3 kinds of state types:
@@ -76,7 +79,11 @@ class Inquery;
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
-    typedef StateValue (*InqueryFun)(const vector<StateValue>&);
+    typedef ParamValue (*InqueryStateFun)(const vector<ParamValue>&);
+
+    // return a vector of all the possible values for grounding a variable in a rule
+    // if cannot find proper value, return a empty vector
+    typedef vector<ParamValue> (*InqueryVariableFun)(const vector<ParamValue>&);
 
     // A state is an environment variable representing some feature of the system in a certain time point
     // like the foodState of the egg(id_5904) is now RAW
@@ -95,13 +102,17 @@ class Inquery;
     class State
     {
     public:
-        StateVariable* stateVariable;
+        ActionParameter* stateVariable;
 
         // whose feature this state describes. e.g. the robot's energy
         // sometimes it's more than one ower, e.g. the relationship between RobotA and RobotB
-        // typedef variant<string, Rotation, Vector, Entity > StateValue
+        // typedef variant<string, Rotation, Vector, Entity > ParamValue
         // the owner can be any type
-        vector<StateValue> stateOwnerList;
+        vector<ParamValue> stateOwnerList;
+
+        string stateName;
+
+        string name() const {return stateName;}
 
         // see the enum StateType
         StateType stateType;
@@ -112,26 +123,33 @@ class Inquery;
         bool need_inquery;
 
         // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
-        InqueryFun inqueryFun;
-
-        string name() const {return stateVariable->getName();}
+        InqueryStateFun inqueryStateFun;
 
         void changeStateType(StateType newType){this->stateType = newType;}
 
-        StateValue& getStateValue()  {return stateVariable->getValue();}
+        // If this state doesn't need real time inquery, this fuction will return the direct value of the variable.
+        // If it need real time inquery, it will do inquery and return the value.
+        ParamValue getParamValue();
 
-        StateValuleType getStateValuleType()  {return stateVariable->getType();}
+        ActionParamType getActionParamType()  {return stateVariable->getType();}
 
-        State(string _stateName, StateValuleType _valuetype,StateType _stateType, StateValue  _stateValue,
-              vector<StateValue> _stateOwnerList, bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+        //map<string , vector<ParamValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
-        State(string _stateName, StateValuleType _valuetype ,StateType _stateType, StateValue _stateValue,
-               bool _need_inquery = false, InqueryFun _inqueryFun = 0);
+        State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
+              vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
+
+        State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
+               bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
+
+        State(){}
+
+        // clone a same state
+        State* clone();
         ~State();
 
-        void assignValue(const StateValue& newValue);
+        void assignValue(const ParamValue& newValue);
 
-        void addOwner(StateValue& _owner)
+        void addOwner(ParamValue& _owner)
         {
             stateOwnerList.push_back(_owner);
         }
@@ -148,19 +166,21 @@ class Inquery;
         // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
         //                  to calculate its satisfiedDegree value.
         // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-        bool isSatisfiedMe( StateValue& value, float& satisfiedDegree,  State *original_state = 0);
+        bool isSatisfiedMe( ParamValue& value, float& satisfiedDegree,  State *original_state = 0);
         bool isSatisfied( State& goal, float &satisfiedDegree,  State *original_state = 0) ;
-
 
         // To get int,float value or fuzzy int or float value from a state
         // For convenience, we will also consider int value as float value
         // if the value type is not numberic, return false and the floatVal and fuzzyFloat will not be assigned value
         bool getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIntervalInt& fuzzyInt, opencog::pai::FuzzyIntervalFloat& fuzzyFloat);
 
+        // please make sure this a numberic state before call this function
+        float getFloatValueFromNumbericState();
+
         bool isNumbericState() const;
 
         // About the calculation of Satisfie Degree
-        // compare 3 statevalue for a same state: the original statevalue, the current statevalue and the goal statevalue
+        // compare 3 ParamValue for a same state: the original ParamValue, the current ParamValue and the goal ParamValue
         // to see how many persentage the current value has achieved the goal, compared to the original value
         // it can be negative, when it's getting farther away from the goal than the original value
         // For these 3, the state should be the same state, but the state operator type can be different, e.g.:
@@ -199,30 +219,62 @@ class Inquery;
     {
     public:
         // the specific state this effect will take effect on
-        State* state;
+        State* state; // it recoards the orginal value of this state which has not been changed by this effect
 
-        //e.g. when this effect is to add the old stateValue by 5,
-        //then effectOp = OP_ADD, opStateValue = 5
+        //e.g. when this effect is to add the old ParamValue by 5,
+        //then effectOp = OP_ADD, opParamValue = 5
         EFFECT_OPERATOR_TYPE effectOp;
-        StateValue opStateValue;
+        ParamValue opParamValue;
 
-        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, StateValue _OPValue);
+        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue);
 
-
-        // only when there are misusge of the value type of opStateValue, it will return false,
+        // only when there are misusge of the value type of opParamValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
         bool executeEffectOp();
 
         // make sure the value type of the operater value is the same with the value type of the state
         // and also this value type can be the parameter of this operator
-        static bool _AssertValueType(State& _state, EFFECT_OPERATOR_TYPE effectOp, StateValue &OPValue);
+        static bool _AssertValueType(State& _state, EFFECT_OPERATOR_TYPE effectOp, ParamValue &OPValue);
 
 
+    };
+
+    struct CostHeuristic //  cost = value(cost_cal_state) * cost_coefficient
+    {
+        State* cost_cal_state;
+        float cost_coefficient;
+        CostHeuristic(State* _state, float _coefficient)
+        {
+            cost_cal_state = _state;
+            cost_coefficient = _coefficient;
+        }
     };
 
 
     // the float in this pair is the probability of the happenning of this Effect
     typedef pair<float,Effect*> EffectPair;
+
+
+    // map to save grounded values for one rule:
+    // map<parameter name, grounded value>
+    // e.g.: <$Entity0,Robot001>
+    //       <$Vector0,Vector(45,82,29)>
+    //       <$Entity1,Battery83483>
+    typedef map<string, ParamValue> ParamGroundedMapInARule;
+
+    // pair<the state this varaible belongs to, one address of this variable>
+    typedef pair<State*,ParamValue*> paramIndex;
+
+    // ToBeImproved, in fact,there should rules for selecting values as well,
+    // so that the variable grounding process can be also consided as the same reasoning process as the main planning process.
+    // But currently, we don't have enough time to implement this, so we add such predefined BestNumericVariableInqueryStruct for selecting grounding values
+    // e.g., for a rule to select a Adjacent location of a given location x, currently we would just assign a function to return its possible 26 neighbours,
+    // but the right way, we should define 26 rules to tell the planner what is "Adjacent location"
+    struct BestNumericVariableInqueryStruct
+    {
+        State* goalState;
+        InqueryVariableFun bestNumericVariableInqueryFun;
+    };
 
     // the rule to define the preconditions of an action and what effects it would cause
     // A rule will be represented in the Atomspace by ImplicationLink
@@ -267,10 +319,7 @@ class Inquery;
         PetAction* action;
 
         // the actor who carry out this action, usually an Entity
-        StateValue actor;
-
-        // the cost of this action under the conditions of this rule (the cost value is between 0 ~ 100)
-        int cost;
+        ParamValue actor;
 
         // All the precondition required to perform this action
         vector<State*> preconditionList;
@@ -279,18 +328,39 @@ class Inquery;
         // there are probability for each effect
         vector<EffectPair> effectList;
 
+        // The cost function as heuristics, linearly
+        // the total cost = basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
+        float basic_cost;
+        vector<CostHeuristic> CostHeuristics;
+
+        // return if this rule is recursive. A recursive rule means its precondition and effect are the same state
+        //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
+        bool IsRecursiveRule;
+
+        // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
+        // which is the most closed to the a grounded numeric goal
+        map<string,BestNumericVariableInqueryStruct> bestNumericVariableinqueryStateFuns;
+
         // ungrounded parameter indexes
-        // map<string , vector<StateValue&> >
+        // map<string , vector<ParamValue&> >
         // the string is the string representation of an orginal ungrounded parameter,
         // such like: OCPlanner::vector_var[3].stringRepresentation(), see ActionParameter::stringRepresentation()
-        // In vector<StateValue*>, the StateValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
-        map<string , vector<StateValue*> > paraIndexMap;
+        // In vector<ParamValue*>, the ParamValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
+        map<string , vector<paramIndex> > paraIndexMap;
 
-        Rule(PetAction* _action, StateValue _actor, int _cost, vector<State*> _preconditionList, vector<EffectPair> _effectList):
-            action(_action) , actor(_actor), cost(_cost), preconditionList(_preconditionList), effectList(_effectList){}
+        // constructors
+        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
+            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
 
-        Rule(PetAction* _action, StateValue _actor, int _cost):
-            action(_action) , actor(_actor), cost(_cost){}
+        Rule(PetAction* _action, ParamValue _actor, float _basic_cost):
+            action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
+
+        float getBasicCost();
+
+        // the cost calculation is : basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
+        static float getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings);
 
         void addEffect(EffectPair effect)
         {
@@ -302,24 +372,41 @@ class Inquery;
             preconditionList.push_back(precondition);
         }
 
-        // go through all the parameters in this rule and add their indexes to paraIndexMap
-        void preProcessRuleParameterIndexes();
+        void addCostHeuristic(CostHeuristic costH)
+        {
+            CostHeuristics.push_back(costH);
+        }
 
+        // need to be called after a rule is finished added all its information (predictions, effects...)
+        // to add parameter index and check if it's a recursive rule
+        void preProcessRule();
+
+        // in some planning step, need to ground some state to calculate the cost or others
+        // return a new state which is the grounded version of s, by a parameter value map
+        // if the "groundings" cannot ground all the variables in this state, return 0
+       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
 
         bool static isRuleUnGrounded( Rule* rule);
 
         // Check if a parameter is an ungrounded parameter
         // Compared to the bool_var[PARAMETER_NUM],str_var[PARAMETER_NUM]...in PlanningHeaderFiles.h
         bool static isParameterUnGrounded(ActionParameter &param);
-        bool static isParamValueUnGrounded( StateValue& paramVal);
-        bool static isUnGroundedString( string& s);
-        bool static isUnGroundedVector( Vector& v);
-        bool static isUnGroundedEntity( Entity& e);
+        bool static isParamValueUnGrounded( ParamValue &paramVal);
+        bool static isUnGroundedString( string &s);
+        bool static isUnGroundedVector(Vector& v);
+        bool static isUnGroundedEntity( Entity &e);
 
     protected:
-        // Add one parameter to index
-        void addParameterIndex(StateValue &paramVal);
 
+        // go through all the parameters in this rule and add their indexes to paraIndexMap
+        void _preProcessRuleParameterIndexes();
+
+        // Add one parameter to index
+        void _addParameterIndex(State *s, ParamValue &paramVal);
+
+        // check if this rule is a recursive rule
+        // Recursive rule is to break a problem into the same problems of smaller scales
+        bool _isRecursiveRule();
 
     };
 

@@ -28,9 +28,9 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/Trail.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -139,8 +139,8 @@ std::string Link::toString(void) const
         if (i > 0) answer += ",";
         Handle h = outgoing[i];
         if (atomTable) {
-            if (atomTable->holds(h)) {
-                Atom *a = atomTable->getAtom(h);
+            Atom *a = atomTable->getAtom(h);
+            if (a) {
                 Node *nnn = dynamic_cast<Node *>(a);
                 if (nnn) {
                     snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
@@ -275,14 +275,6 @@ bool Link::operator!=(const Atom& other) const
     return !(*this == other);
 }
 
-size_t Link::hashCode(void) const
-{
-    size_t result = getType() + (getArity() << 8);
-    for (unsigned int i = 0; i < getArity(); i++)
-        result = result  ^ (((long) outgoing[i].value()) << i);
-    return result;
-}
-
 class HandleComparison
 {
     public:
@@ -312,13 +304,10 @@ void Link::addOutgoingAtom(Handle h)
     outgoing.push_back(h);
 }
 
+// This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
 Atom* Link::clone() const
 {
     Atom* a = new Link(*this);
-    for (HandleEntry *h = getIncomingSet(); h != NULL; h = h->next) {
-        a->addIncomingHandle(h->handle);
-    }
-    a->handle = handle;
     return a;
 }
 

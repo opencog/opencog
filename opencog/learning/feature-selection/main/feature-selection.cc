@@ -81,21 +81,15 @@ void log_selected_features(arity_t old_arity, const Table& ftable,
                            const feature_selection_parameters& fs_params)
 {
     // log the number selected features
-    logger().info("%d out of %d have been selected",
+    logger().info("%d out of %d features have been selected",
                   ftable.get_arity(), old_arity);
+
     // log set of selected feature set
+    const string_seq& labs = ftable.itable.get_labels();
+    const vector<double>& sco = score_individual_features(ftable, fs_params);
+    for (unsigned i=0; i<labs.size(); i++)
     {
-        stringstream ss;
-        ss << "The following features have been selected: ";
-        ostreamContainer(ss, ftable.itable.get_labels(), ",");
-        logger().info(ss.str());
-    }
-    // log the score of each feature individually
-    {
-        stringstream ss;
-        ss << "With the following scores (individually): ";
-        ostreamContainer(ss, score_individual_features(ftable, fs_params), ",");
-        logger().info(ss.str());            
+        logger().info() << "log_selected_features(): " << labs[i] << " " << sco[i];
     }
 }
 
@@ -143,7 +137,7 @@ feature_set initial_features(const vector<string>& ilabels,
             vif += f;
         }
         else // feature not found
-            logger().warn("No such a feature #%s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
+            logger().warn("No such a feature %s in file %s. It will be ignored as initial feature.", f.c_str(), fs_params.input_file.c_str());
     }
     // Logger
     if(vif.empty())
@@ -158,8 +152,8 @@ feature_set initial_features(const vector<string>& ilabels,
     return res;
 }
 
-feature_set select_features(const CTable& ctable,
-                            const feature_selection_parameters& fs_params)
+feature_set_pop select_feature_sets(const CTable& ctable,
+                                    const feature_selection_parameters& fs_params)
 {
     if (fs_params.algorithm == moses::hc) {
         // setting moses optimization parameters
@@ -173,24 +167,34 @@ feature_set select_features(const CTable& ctable,
         op_params.max_dist = max_dist;
         op_params.set_min_score_improv(min_score_improv);
         hc_parameters hc_params;
-        hc_params.widen_search = true;
+        hc_params.widen_search = fs_params.hc_widen_search;
         hc_params.single_step = false;
-        hc_params.crossover = false;
+        hc_params.crossover = fs_params.hc_crossover;
+        hc_params.crossover_pop_size = fs_params.hc_crossover_pop_size;
+        hc_params.prefix_stat_deme = "FSDemes";
         hill_climbing hc(op_params, hc_params);
-        return moses_select_features(ctable, hc, fs_params);
+        return moses_select_feature_sets(ctable, hc, fs_params);
     } else if (fs_params.algorithm == inc) {
-        return incremental_select_features(ctable, fs_params);
+        return incremental_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == smd) {
-        return smd_select_features(ctable, fs_params);
+        return smd_select_feature_sets(ctable, fs_params);
     } else if (fs_params.algorithm == simple) {
-        return simple_select_features(ctable, fs_params);
+        return simple_select_feature_sets(ctable, fs_params);
     } else {
         cerr << "Fatal Error: Algorithm '" << fs_params.algorithm
              << "' is unknown, please consult the help for the "
              << "list of algorithms." << endl;
         exit(1);
-        return feature_set(); // to please Mr compiler
+        return feature_set_pop(); // to please Mr compiler
     }
+}
+
+feature_set select_features(const CTable& ctable,
+                            const feature_selection_parameters& fs_params)
+{
+    feature_set_pop fs_pop = select_feature_sets(ctable, fs_params);
+    OC_ASSERT(!fs_pop.empty(), "There might a bug");
+    return fs_pop.begin()->second;
 }
 
 feature_set select_features(const Table& table,

@@ -7,10 +7,11 @@
 #include <opencog/comboreduct/interpreter/eval.h>
 
 #include "../moses/moses_main.h"
-#include "../moses/scoring.h"
-#include "../moses/ann_scoring.h"
+#include "../scoring/scoring.h"
 #include "../optimization/optimization.h"
 #include "../representation/representation.h"
+
+#include "ann_xor_scoring.h"
 
 using namespace moses;
 using namespace reduct;
@@ -58,8 +59,8 @@ int main(int argc, char** argv)
 
 
     // binary XOR task
-    ann_cscore cscore;
-    ann_bscore bscore;
+    ann_xor_cscore cscore;
+    ann_xor_bscore bscore;
 
     const reduct::rule* si = &(ann_reduction());
     if(!reduce)

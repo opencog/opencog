@@ -23,13 +23,14 @@
 #ifndef _OPENCOG_MT19937AR_H
 #define _OPENCOG_MT19937AR_H
 
-// Once C++11 is fully supported by GCC feel free to remove anything
-// wrapped by #ifndef USE_STL_RANDOM  
-// The situation is confusing... According to gnu.org, this has been
-// supported since gcc-4.3 (but possibly in the tr1 namespace ??)
-// In Ubuntu oneiric, with gcc-4.6.2, the build failed.
-//  With gcc-4.6.3, things work.  I'm confused. This
-// needs more user reports.
+/** @todo Once C++11 is fully supported by GCC feel free to remove anything
+ * wrapped by #ifndef USE_STL_RANDOM  
+ * The situation is confusing... According to gnu.org, this has been
+ * supported since gcc-4.3 (but possibly in the tr1 namespace ??)
+ * In Ubuntu oneiric, with gcc-4.6.2, the build failed.
+ *  With gcc-4.6.3, things work.  I'm confused. This
+ * needs more user reports.
+ */
 #if (__GNUC__ >= 4) && (__GNUC_MINOR__ >= 6)
 #define USE_STL_RANDOM
 #endif
@@ -90,6 +91,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 class MT19937RandGen : public RandGen
 {
@@ -101,40 +105,40 @@ private:
     /* Period parameters */  
     static int  N;
     static int  M;
-    static unsigned long MATRIX_A;   /* constant vector a */
-    static unsigned long UPPER_MASK; /* most significant w-r bits */
-    static unsigned long LOWER_MASK; /* least significant r bits */
+    static unsigned long MATRIX_A;   /**< constant vector a */
+    static unsigned long UPPER_MASK; /**< most significant w-r bits */
+    static unsigned long LOWER_MASK; /**< least significant r bits */
 
-    unsigned long *mt; /* the array for the state vector  */
-    int mti; /* mti==N+1 means mt[N] is not initialized */
+    unsigned long *mt; /**< the array for the state vector  */
+    int mti; /**< mti==N+1 means mt[N] is not initialized */
 
-    /* creates the data structures */
+    //! creates the data structures 
     void init();
 
-    /* initializes mt[N] with a seed */
+    //! initializes mt[N] with a seed 
     void init_genrand(unsigned long s);
 
-    /* initialize by an array with array-length */
-    /* init_key is the array for initializing keys */
-    /* key_length is its length */
+    //! initialize by an array with array-length 
+    /// \param init_key is the array for initializing keys 
+    /// \param key_length is its length 
     void init_by_array(unsigned long init_key[], int key_length);
     
-    /* generates a random number on [0,0xffffffff]-interval */
+    //! generates a random number on [0,0xffffffff]-interval 
     unsigned long genrand_int32(void);
 
-    /* generates a random number on [0,0x7fffffff]-interval */
+    //! generates a random number on [0,0x7fffffff]-interval 
     long genrand_int31(void);
 
-    /* generates a random number on [0,1]-real-interval */
+    //! generates a random number on [0,1]-real-interval 
     double genrand_real1(void);
 
-    /* generates a random number on [0,1)-real-interval */
+    //! generates a random number on [0,1)-real-interval 
     double genrand_real2(void);
 
-    /* generates a random number on (0,1)-real-interval */
+    //! generates a random number on (0,1)-real-interval 
     double genrand_real3(void);
 
-    /* generates a random number on [0,1) with 53-bit resolution*/
+    //! generates a random number on [0,1) with 53-bit resolution
     double genrand_res53(void);
 
 #else
@@ -152,34 +156,35 @@ public:
     ~MT19937RandGen();
 #endif
 
-    // reset the random seed
+    //! reset the random seed
     void seed(unsigned long); 
     
-    // random int between 0 and max rand number.
+    //! random int between 0 and max rand number.
     int randint();
 
-    //random float in [0,1]
+    //! random float in [0,1]
     float randfloat(); 
 
-    //random double in [0,1]
+    //! random double in [0,1]
     double randdouble();
 
-    //random double in [0,1)
+    //! random double in [0,1)
     double randDoubleOneExcluded();
 
-    //random int in [0,n)
+    //! random int in [0,n)
     int randint(int n);
 
-    // return -1 or 1 randonly
+    //! return -1 or 1 randonly
     int randPositiveNegative();
 
-    //random boolean
+    //! random boolean
     bool randbool();
 };
 
-// singleton instance (following Meyer's design pattern)
+//! singleton instance (following Meyer's design pattern)
 RandGen& randGen();
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MT19937AR_H

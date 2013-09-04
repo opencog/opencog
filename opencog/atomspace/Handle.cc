@@ -23,7 +23,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Handle.h"
 #include <climits>
+#include "Handle.h"
 
-const opencog::Handle opencog::Handle::UNDEFINED(ULONG_MAX);
+using namespace opencog;
+
+const Handle Handle::UNDEFINED(ULONG_MAX);
+

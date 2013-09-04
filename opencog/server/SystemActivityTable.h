@@ -48,23 +48,19 @@ class Activity
 public:
     Activity(long cycleCount, struct timeval &elapsedTime, size_t memUsed, 
                               size_t atomsUsed,
-                              const HandleSetSeq &utilized) :
+                              const std::vector<UnorderedHandleSet>& utilized) :
             cycleCount(cycleCount), 
             elapsedTime(elapsedTime), 
             memUsed(memUsed),
             atomsUsed(atomsUsed) {
         for (size_t n = 0; n < utilized.size(); n++)
-            utilizedHandleSets.push_back(utilized[n]->clone());
-    }
-    ~Activity() {
-        for (size_t n = 0; n < utilizedHandleSets.size(); n++)
-            delete utilizedHandleSets[n];
+            utilizedHandleSets.push_back(utilized[n]);
     }
     long cycleCount;
     struct timeval elapsedTime;
     size_t memUsed;
     size_t atomsUsed;
-    HandleSetSeq utilizedHandleSets;
+    std::vector<UnorderedHandleSet> utilizedHandleSets;
 };
 typedef std::vector<Activity*> ActivitySeq;
 typedef std::map<Agent*, ActivitySeq> AgentActivityTable;

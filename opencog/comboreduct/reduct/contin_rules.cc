@@ -2,6 +2,7 @@
  * opencog/comboreduct/reduct/contin_rules.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
+ * Copyright (C) 2013 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Nil Geisweiller
@@ -21,50 +22,71 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "contin_rules.h"
-#include <opencog/util/exceptions.h>
 #include <map>
+#include <opencog/util/exceptions.h>
+#include <opencog/comboreduct/type_checker/type_tree.h>
+#include "contin_rules.h"
 
 namespace opencog { namespace reduct {
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::pre_order_iterator pre_it;
 
-//x+0 -> x
-void reduce_plus_zero::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::plus) {
-        for(sib_it sib=it.begin(); sib!=it.end();) {
-            if(is_contin(*sib) && get_contin(*sib)==0.0) {
+// x+0 -> x
+// x*NAN -> NAN
+void reduce_plus_zero::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it != id::plus)
+        return;
+
+    for (sib_it sib = it.begin(); sib != it.end();) {
+        if (is_contin(*sib)) {
+            contin_t c = get_contin(*sib);
+            if (0.0 == c) {
                 sib = tr.erase(sib);
             }
-            else ++sib;
-        }
-        if(it.is_childless())
-            *it = 0.0;
-    }
-}
-
-//x*1 -> x
-//x*0 -> 0
-void reduce_times_one_zero::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::times) {
-        for(sib_it sib=it.begin(); sib!=it.end();) {
-            if(is_contin(*sib)) {
-                if(get_contin(*sib)==1.0) {
-                    sib = tr.erase(sib);
-                }
-                else if(get_contin(*sib)==0.0) {
-                    tr.erase_children(it);
-                    *it = 0.0;
-                    return;
-                }
-                else ++sib;
+            else if (not isfinite(c)) {
+                tr.erase_children(it);
+                *it = FP_NAN;
+                return;
             }
             else ++sib;
         }
-        if(*it==id::times && it.is_childless())
-            *it = 1.0;
+        else ++sib;
     }
+    if (it.is_childless())
+        *it = 0.0;
+}
+
+// x*1 -> x
+// x*0 -> 0
+// x*NAN -> NAN
+void reduce_times_one_zero::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it != id::times)
+        return;
+    for (sib_it sib = it.begin(); sib != it.end();) {
+        if (is_contin(*sib)) {
+            contin_t c = get_contin(*sib);
+            if (c == 1.0) {
+                sib = tr.erase(sib);
+            }
+            else if (c == 0.0) {
+                tr.erase_children(it);
+                *it = 0.0;
+                return;
+            }
+            else if (not isfinite(c)) {
+                tr.erase_children(it);
+                *it = FP_INFINITE;
+                return;
+            }
+            else ++sib;
+        }
+        else ++sib;
+    }
+    if (*it == id::times && it.is_childless())
+        *it = 1.0;
 }
 
 //x/z+y/z -> (x+y)/z
@@ -72,7 +94,8 @@ void reduce_times_one_zero::operator()(combo_tree& tr,combo_tree::iterator it) c
 //when sevelar choices are possible the chosen one :
 //1)is the one that shorten the most the expression
 //2)if not unique, the lowest one according to the index order
-void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     //equiv_subtrees is a set of equal subtrees
     //the first element of the pair contains the size of one examplar
     //the second element contains a vector of all iterators corresponding
@@ -251,7 +274,8 @@ void reduce_factorize_fraction::operator()(combo_tree& tr,combo_tree::iterator i
 //1)is the one that shorten the most the expression
 //2)if not unique, the lowest one according to the index order
 //Note : if x is a numerator of div, it works too
-void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     //equiv_subtrees is a set of equal subtrees
     //the first element of the pair contains the size of one exemplar
     //the second element contains a vector of all iterators corresponding
@@ -434,7 +458,8 @@ void reduce_factorize::operator()(combo_tree& tr,combo_tree::iterator it) const 
     }
 }
     
-void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it == id::times && it.number_of_children() >= 2) {
         sib_it plus_it = std::find(it.begin(), it.end(), vertex(id::plus));
         if(plus_it != it.end()) {
@@ -471,61 +496,79 @@ void reduce_distribute::operator()(combo_tree& tr,combo_tree::iterator it) const
     }
 }
 
-//x/c -> 1/c * x
-//x/(c*y) -> 1/c *x/y
-//0/x -> 0
-void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::div) {
-        OC_ASSERT(it.number_of_children()==2, 
-                  "combo_tree node should have exactly two children (reduce_invert_constant)." );
-        sib_it sib=it.begin();
-        if(is_contin(*sib) && get_contin(*sib)==0.0) { //0/x -> 0
+// x/c -> 1/c * x
+// x/(c*y) -> 1/c *x/y
+// 0/x -> 0
+// x/0 -> NAN
+void reduce_invert_constant::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it != id::div) 
+        return;
+
+    OC_ASSERT(it.number_of_children() == 2, 
+              "combo_tree node should have exactly two children (reduce_invert_constant)." );
+    sib_it sib = it.begin();
+    if (is_contin(*sib) && get_contin(*sib) == 0.0) { // 0/x -> 0
+        tr.erase_children(it);
+        *it = 0.0;
+        return;
+    }
+
+    ++sib;
+    if (is_contin(*sib)) { // x/c -> 1/c * x
+        contin_t divisor = get_contin(*sib);
+        if (divisor != 0.0) {
+            *sib = 1.0 / divisor;
+            *it = id::times;
+        } else {
+            // Divide by zero
             tr.erase_children(it);
-            *it = 0.0;
-            return;
+            *it = FP_INFINITE;
         }
-        ++sib;
-        if(is_contin(*sib)) { //x/c -> 1/c * x
-            contin_t divisor = get_contin(*sib);
-            if(divisor!=0.0) {
-                *sib = 1.0 / divisor;
+        return;
+    }
+
+    if (*sib == id::times) { //x/(c*y) -> 1/c * x/y
+        contin_t divisor = 1.0;
+        for (sib_it mul_sib = sib.begin(); mul_sib != sib.end();) {
+            if (is_contin(*mul_sib)) {
+                divisor *= get_contin(*mul_sib);
+                mul_sib = tr.erase(mul_sib);
+            }
+            else ++mul_sib;
+        }
+        if (divisor != 1.0) {
+            if (divisor != 0.0) {
                 *it = id::times;
-            }
-        }
-        else if(*sib==id::times) { //x/(c*y) -> 1/c * x/y
-            contin_t divisor = 1.0;
-            for(sib_it mul_sib = sib.begin(); mul_sib != sib.end();) {
-                if(is_contin(*mul_sib)) {
-                    divisor *= get_contin(*mul_sib);
-                    mul_sib = tr.erase(mul_sib);
-                }
-                else ++mul_sib;
-            }
-            if(divisor != 1.0)
-                if(divisor != 0.0) {
-                    *it = id::times;
-                    if(sib.is_childless())
-                        *sib = 1.0 / divisor;
-                    else {
-                        if(sib.has_one_child()) {
-                            sib = tr.erase(tr.flatten(sib));
-                        }
-                        pre_it new_div = tr.append_child(it, id::div);
-                        tr.reparent(new_div, it.begin(), sib_it(new_div));
-                        tr.append_child(it, 1.0/divisor);
+                if (sib.is_childless())
+                    *sib = 1.0 / divisor;
+                else {
+                    if(sib.has_one_child()) {
+                        sib = tr.erase(tr.flatten(sib));
                     }
+                    pre_it new_div = tr.append_child(it, id::div);
+                    tr.reparent(new_div, it.begin(), sib_it(new_div));
+                    tr.append_child(it, 1.0 / divisor);
                 }
-                else tr.append_child(sib, divisor); //divisor is put back
-            else if(sib.is_childless())
-                *sib = 1.0;
+            }
+            else {
+                // Divide by zero
+                // tr.append_child(sib, divisor); //divisor is put back
+                tr.erase_children(it);
+                *it = FP_INFINITE;
+            }
         }
+        else if (sib.is_childless())
+            *sib = 1.0;
     }
 }
+
 
 //(x*y)/(x*z) -> y/z
 //or more generally,
 //(prod x_i*prod y_j)/(prod x_i*prod z_k)-> prod y_j/prod z_k
-void reduce_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     //associate the number of instances of each subtree encountered
     //on the numerator of the fraction
     typedef std::multiset<pre_it, lexicographic_subtree_order<vertex> >
@@ -594,7 +637,8 @@ void reduce_fraction::operator()(combo_tree& tr,combo_tree::iterator it) const {
 //x/(y/z) -> (x*z)/y
 //x*(y/z) -> (x*y)/z,
 //more generally prod x_i * prod y_j/z_j -> (prod x_i * prod y_j)/(prod z_j)
-void reduce_times_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_times_div::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::div) {
         OC_ASSERT(it.number_of_children()==2,
                   "combo_tree node should have exactly two children (reduce_times_div)." );
@@ -656,7 +700,8 @@ void reduce_times_div::operator()(combo_tree& tr,combo_tree::iterator it) const 
 
 //+(x) -> x
 //*(x) -> x
-void reduce_plus_times_one_child::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_plus_times_one_child::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if((*it==id::plus || *it==id::times) && it.has_one_child()) {
         pre_it it_child = it.begin();
         *it=*it_child;
@@ -670,180 +715,209 @@ void reduce_plus_times_one_child::operator()(combo_tree& tr,combo_tree::iterator
 //sum log(x_i) - sum log(y_j) -> log((prod x_i)/(prod y_j))
 //works only if at least one log(x_i) exists otherwise
 //there would be a conflict with the rule log(c/x) -> -log((1/c)*x)
-void reduce_sum_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::plus) {
-        sib_it first_log = it.find_child(id::log);
-        if(first_log != it.end()) {
-            OC_ASSERT(first_log.has_one_child(),
-                      "combo_tree node should have exactly one child.");
-            pre_it num = first_log.begin(); //sibling at the numerator of div
-            pre_it denom = tr.end(); //sibling at the denominator of div
-            pre_it num_times = tr.end(); //times at the numerator
-            pre_it denom_times = tr.end(); //times at the denominator
-            for(sib_it sib=it.begin(); sib!=it.end();) {
-                //detect log(x) to add to log(prod x_i)
-                if(*sib == id::log && sib != first_log) {
-                    OC_ASSERT(sib.has_one_child(), 
-                              "combo_tree sibiling node should have exactly one child.");
-                    if(num_times == tr.end())
-                        num_times = tr.wrap(num, id::times);
-                    tr.move_after(num, pre_it(sib.begin()));
-                    sib = tr.erase(sib);
-                }
-                else if(*sib==id::times && sib.number_of_children()==2) {
-                    //check if there is -1*log
-                    sib_it minus1 = sib.end();
-                    sib_it log = sib.end();
-                    bool is_minus_log = (minus1 != sib.end() && log != sib.end());//false
-                    for(sib_it times_child=sib.begin();
-                        times_child!=sib.end() && !is_minus_log; ++times_child) {
-                        if(minus1 == sib.end())
-                            if(is_contin(*times_child) && get_contin(*times_child)==-1.0)
-                                minus1 = times_child;
-                        if(log == sib.end())
-                            if(*times_child==id::log)
-                                log = times_child;
-                        is_minus_log = (minus1 != sib.end() && log != sib.end());
-                    }
-                    if(is_minus_log) { //there is -1*log
-                        if(denom == tr.end()) {
-                            OC_ASSERT(first_log.has_one_child(),
-                                      "combo_tree node should have exactly one child");
-                            pre_it tmp_child_log = first_log.begin();
-                            pre_it div_node = tr.wrap(tmp_child_log, id::div);
-                            OC_ASSERT(div_node.has_one_child(),
-                                      "combo_tree sibiling node should have exactly one child");
-                            //below cannot be replace by move_before because it has
-                            //to be the second argument of div, i.e. the denominator
-                            denom = tr.move_after(div_node.begin(), log.begin());
-                            sib = tr.erase(sib);
-                        }
-                        else {
-                            if(denom_times == tr.end()) {
-                                denom_times = tr.wrap(denom, id::times);
-                            }
-                            OC_ASSERT(log.has_one_child(),
-                                      "combo_tree node (log) should have exactly one child");
-                            tr.move_after(denom, pre_it(log.begin()));
-                            sib = tr.erase(sib);
-                        }
-                    }
-                    else ++sib;
-                }
-                else ++sib;
-            }
-        }
-    }
-}
-  
-//log(c/x) -> -log(c^1*x)
-//and also
-//log(exp(x)*y) -> x+log(y)
-//or more generally log(prod exp(x_i)*prod y_j) -> sum x_i +log(prod y_j)
-void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::log) {
-        OC_ASSERT(it.has_one_child(), 
-                  "combo_tree node id::log should have exactly one child");
-        pre_it log_child = it.begin();
-        if(*log_child==id::div) { //log(c/x) -> log(c^1*x)
-            OC_ASSERT(log_child.number_of_children()==2,
-                      "combo_tree node id::div should have exactly two children");
-            pre_it num = log_child.begin();
-            // pre_it denom = log_child.last_child();
-            if(is_contin(*num)) {
-                contin_t c = get_contin(*num);
-                if(c != 0.0) {
-                    *num = 1.0/get_contin(*num);
-                    *log_child = id::times;
-                    //trick to keep it as root of the subtree
-                    *it = id::times;
-                    tr.insert_after(tr.wrap(log_child, id::log), -1.0);
-                }
-            }
-        }
-        else if(*log_child==id::exp) { //log(exp(x)) -> x
-            OC_ASSERT(log_child.has_one_child(),
-                      "combo_tree node id::exp should have exactly one child");
-            tr.erase(tr.flatten(log_child));
-            *it=*it.begin();
-            tr.erase(tr.flatten(it.begin()));
-        }
-        else if(*log_child==id::times) { //log(prod exp(x_i)*prod y_j)
-            //-> sum x_i + log(prod y_j)
-            pre_it new_log = tr.end();
-            for(sib_it sib = log_child.begin(); sib != log_child.end();) {
-                if(*sib==id::exp) {
-                    if(*it!=id::plus) {
-                        new_log = tr.insert_above(log_child, id::log);
-                        *it = id::plus;
-                    }
-                    OC_ASSERT(sib.has_one_child(),
-                              "combo_tree sibling node should have exactly one child");
-                    //the child of exp is moved under plus beside log
-                    tr.reparent(it, pre_it(sib));
-                    sib = tr.erase(sib);
-                }
-                else ++sib;
-            }
-            //sum x_i + log(*()) -> sum x_i
-            if(new_log.has_one_child() && new_log.begin().is_childless())
-                tr.erase(new_log);
-        }
-    }
-}
+void reduce_sum_log::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it != id::plus)
+        return;
 
-//prod exp(x_i) -> exp(sum x_i)
-void reduce_exp_times::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::times) {
-        pre_it x_1 = tr.end(); //first x_i detected
-        for(sib_it sib = it.begin(); sib != it.end(); ) {
-            if(*sib==id::exp) {
-                OC_ASSERT(sib.has_one_child(), 
-                          "combo_tree sibling node should have exactly one child (reduce_exp_times).");
-                if(x_1==tr.end()) {
-                    x_1 = sib.begin();
-                    ++sib;
+    sib_it first_log = it.find_child(id::log);
+    if (first_log == it.end())
+        return;
+
+    OC_ASSERT(first_log.has_one_child(),
+              "combo_tree node should have exactly one child.");
+    pre_it num = first_log.begin(); // sibling at the numerator of div
+    pre_it denom = tr.end(); // sibling at the denominator of div
+    pre_it num_times = tr.end(); // times at the numerator
+    pre_it denom_times = tr.end(); // times at the denominator
+    for (sib_it sib = it.begin(); sib != it.end();) {
+        // detect log(x) to add to log(prod x_i)
+        if (*sib == id::log && sib != first_log) {
+            OC_ASSERT(sib.has_one_child(), 
+                      "combo_tree sibiling node should have exactly one child.");
+            if (num_times == tr.end())
+                num_times = tr.wrap(num, id::times);
+            tr.move_after(num, pre_it(sib.begin()));
+            sib = tr.erase(sib);
+        }
+        else if (*sib == id::times && sib.number_of_children() == 2) {
+            // check if there is -1*log
+            sib_it minus1 = sib.end();
+            sib_it log = sib.end();
+            bool is_minus_log = (minus1 != sib.end() && log != sib.end());//false
+            for (sib_it times_child = sib.begin();
+                times_child != sib.end() && !is_minus_log; ++times_child) {
+                if (minus1 == sib.end())
+                    if (is_contin(*times_child) && get_contin(*times_child) == -1.0)
+                        minus1 = times_child;
+                if (log == sib.end())
+                    if (*times_child == id::log)
+                        log = times_child;
+                is_minus_log = (minus1 != sib.end() && log != sib.end());
+            }
+            if (is_minus_log) { // there is -1*log
+                if (denom == tr.end()) {
+                    OC_ASSERT(first_log.has_one_child(),
+                              "combo_tree node should have exactly one child");
+                    pre_it tmp_child_log = first_log.begin();
+                    pre_it div_node = tr.wrap(tmp_child_log, id::div);
+                    OC_ASSERT(div_node.has_one_child(),
+                              "combo_tree sibiling node should have exactly one child");
+                    // below cannot be replaced by move_before because it has
+                    // to be the second argument of div, i.e. the denominator
+                    denom = tr.move_after(div_node.begin(), log.begin());
+                    sib = tr.erase(sib);
                 }
                 else {
-                    if(*tr.parent(x_1)!=id::plus)
-                        tr.insert_above(x_1, id::plus);
-                    tr.move_after(x_1, pre_it(sib.begin()));
+                    if (denom_times == tr.end()) {
+                        denom_times = tr.wrap(denom, id::times);
+                    }
+                    OC_ASSERT(log.has_one_child(),
+                              "combo_tree node (log) should have exactly one child");
+                    tr.move_after(denom, pre_it(log.begin()));
                     sib = tr.erase(sib);
                 }
             }
             else ++sib;
         }
+        else ++sib;
     }
 }
-   
-//x/exp(y) -> x*exp(-y)
-void reduce_exp_div::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::div) {
-        OC_ASSERT(it.number_of_children()==2,
-                  "combo_tree node should have exactly two childrem (reduce_exp_div).");
-        pre_it denom = it.last_child();
-        if(*denom==id::exp) {
-            *it = id::times;
-            OC_ASSERT(denom.has_one_child(),
-                      "combo_tree node should have exactly one child (reduce_exp_times - demon).");
-            pre_it y = denom.begin();
-            if(*y==id::times) {
-                OC_ASSERT(!y.is_childless(),
-                          "combo_tree sibling node should have exactly one child (reduce_exp_times - y).");
-                y = y.begin();
+
+  
+// log(c/x) -> -log(c^-1*x)
+// log(0) -> NAN
+// and also
+// log(exp(x)*y) -> x+log(y)
+// or more generally log(prod exp(x_i)*prod y_j) -> sum x_i +log(prod y_j)
+void reduce_log_div_times::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it != id::log)
+        return;
+
+    OC_ASSERT(it.has_one_child(), 
+              "combo_tree node id::log should have exactly one child");
+
+    pre_it log_child = it.begin();
+    if (*log_child == id::div) { // log(c/x) -> log(c^-1*x)
+        OC_ASSERT(log_child.number_of_children() == 2,
+                  "combo_tree node id::div should have exactly two children");
+        pre_it num = log_child.begin();
+        // pre_it denom = log_child.last_child();
+        if (is_contin(*num)) {
+            contin_t c = get_contin(*num);
+            if (c != 0.0) {
+                *num = 1.0 / c;
+                *log_child = id::times;
+                //trick to keep it as root of the subtree
+                *it = id::times;
+                tr.insert_after(tr.wrap(log_child, id::log), -1.0);
             }
-            else tr.insert_above(y, id::times);
-            tr.insert_after(y, -1.0);
+            else {
+                // log(0)
+                tr.erase_children(it);
+                *it = FP_INFINITE;
+                return;
+            }
         }
+        return;
+    }
+
+    if (*log_child == id::exp) { // log(exp(x)) -> x
+        OC_ASSERT(log_child.has_one_child(),
+                  "combo_tree node id::exp should have exactly one child");
+        tr.erase(tr.flatten(log_child));
+        *it = *it.begin();
+        tr.erase(tr.flatten(it.begin()));
+        return;
+    }
+
+   if (*log_child == id::times) { // log(prod exp(x_i)*prod y_j)
+        // -> sum x_i + log(prod y_j)
+        pre_it new_log = tr.end();
+        for (sib_it sib = log_child.begin(); sib != log_child.end();) {
+            if (*sib == id::exp) {
+                if (*it != id::plus) {
+                    new_log = tr.insert_above(log_child, id::log);
+                    *it = id::plus;
+                }
+                OC_ASSERT(sib.has_one_child(),
+                          "combo_tree sibling node should have exactly one child");
+                //the child of exp is moved under plus beside log
+                tr.reparent(it, pre_it(sib));
+                sib = tr.erase(sib);
+            }
+            else ++sib;
+        }
+        // sum x_i + log(*()) -> sum x_i
+        if (new_log.has_one_child() && new_log.begin().is_childless())
+            tr.erase(new_log);
+        return;
     }
 }
+
+
+//prod exp(x_i) -> exp(sum x_i)
+void reduce_exp_times::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it != id::times)
+        return;
+
+    pre_it x_1 = tr.end(); //first x_i detected
+    for (sib_it sib = it.begin(); sib != it.end(); ) {
+        if (*sib == id::exp) {
+            OC_ASSERT(sib.has_one_child(), 
+                      "combo_tree sibling node should have exactly one child (reduce_exp_times).");
+                if (x_1 == tr.end()) {
+                x_1 = sib.begin();
+                ++sib;
+            }
+            else {
+                if (*tr.parent(x_1) != id::plus)
+                    tr.insert_above(x_1, id::plus);
+                tr.move_after(x_1, pre_it(sib.begin()));
+                sib = tr.erase(sib);
+            }
+        }
+        else ++sib;
+    }
+}
+
+   
+// x/exp(y) -> x*exp(-y)
+void reduce_exp_div::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
+    if (*it != id::div)
+        return;
+
+    OC_ASSERT(it.number_of_children() == 2,
+              "combo_tree node should have exactly two childrem (reduce_exp_div).");
+    pre_it denom = it.last_child();
+    if (*denom != id::exp)
+        return;
+
+    *it = id::times;
+    OC_ASSERT(denom.has_one_child(),
+              "combo_tree node should have exactly one child (reduce_exp_times - demon).");
+    pre_it y = denom.begin();
+    if (*y == id::times) {
+        OC_ASSERT(!y.is_childless(),
+                  "combo_tree sibling node should have exactly one child (reduce_exp_times - y).");
+        y = y.begin();
+    }
+    else tr.insert_above(y, id::times);
+
+    tr.insert_after(y, -1.0);
+}
+
   
 // the following rules is not valid if log has the semantics log(abs(x))
 // the macro ABS_LOG is defined in file vertex.h
 #ifndef ABS_LOG
 // exp(log(x)+y) -> x*exp(y)
 // or more generally, exp(sum log(x_i) + sum y_j) -> prod x_i * exp(sum y_j)
-void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
+void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const
+{
     if(*it==id::exp) {
         OC_ASSERT(it.has_one_child(), 
                   "combo_tree node should have exactly one child (reduce_exp_log).");
@@ -882,43 +956,53 @@ void reduce_exp_log::operator()(combo_tree& tr,combo_tree::iterator it) const {
 }
 #endif
   
-//sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
-//or more generally
-//sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
-void reduce_sin::operator()(combo_tree& tr,combo_tree::iterator it) const {
-    if(*it==id::sin) {
-        OC_ASSERT(it.has_one_child(),
-                  "combo_tree node id::sin should have exactly one child (reduce_sin).");
-        pre_it c_it = tr.end();
-        pre_it sin_child = it.begin();
-        if(*sin_child==id::plus) {
-            OC_ASSERT(!sin_child.is_childless(), 
-                      "combo_tree node id::plus should no be childless (reduce_sin).");
-            for(sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
-                if(is_contin(*sib)) {
-                    if(c_it == tr.end()) {
-                        c_it = sib;
-                        ++sib;
-                    }
-                    else {
-                        *c_it = get_contin(*c_it) + get_contin(*sib);
-                        sib = tr.erase(sib);
-                    }
+// sin(x + c) -> sin(x + (c>pi? c-pi : (c<= pi? c+pi))
+// or more generally
+// sin(sum x_i + sum c_j) -> sin(sum x_i + ((sum c_j)+pi)%2pi -pi
+//
+// TODO:  sin(*(-1 x)) -> -sin(x)
+// The above is frequently seen in real-life ...
+void reduce_sin::operator()(combo_tree& tr, combo_tree::iterator it) const
+{
+    if (*it != id::sin)
+        return;
+
+    OC_ASSERT(it.has_one_child(),
+              "combo_tree node id::sin should have exactly one child (reduce_sin).");
+    pre_it c_it = tr.end();
+    pre_it sin_child = it.begin();
+    if (*sin_child == id::plus) {
+        OC_ASSERT(!sin_child.is_childless(), 
+                  "combo_tree node id::plus should not be childless (reduce_sin).");
+        for (sib_it sib = sin_child.begin(); sib != sin_child.end(); ) {
+            if (is_contin(*sib)) {
+                if (c_it == tr.end()) {
+                    c_it = sib;
+                    ++sib;
                 }
-                else ++sib;
+                else {
+                    *c_it = get_contin(*c_it) + get_contin(*sib);
+                    sib = tr.erase(sib);
+                }
             }
+            else ++sib;
         }
-        else if(is_contin(*sin_child))
-            c_it = sin_child;
-        if(c_it!=tr.end()) {
-            OC_ASSERT(is_contin(*c_it),
-                      "sin_child isn't of type contin (reduce_sin).");
-            contin_t c = get_contin(*c_it);
-            OC_ASSERT(isfinite(c),
-                      "contin isn't of infinite (reduce_sin).");
-            if(c <= PI || c > PI)
-                *c_it = fmod((c+PI), 2.0*PI) - PI;
+    }
+    else if (is_contin(*sin_child))
+        c_it = sin_child;
+
+    // Put the constant term into the range (-PI, PI]
+    if (c_it != tr.end()) {
+        OC_ASSERT(is_contin(*c_it),
+                  "sin_child isn't of type contin (reduce_sin).");
+        contin_t c = get_contin(*c_it);
+        if (not isfinite(c)) {
+            tr.erase_children(it);
+            *it = FP_NAN;
+            return;
         }
+        if (c <= -PI || c > PI)
+            *c_it = fmod((c+PI), 2.0*PI) - PI;
     }
 }
 
@@ -929,7 +1013,8 @@ void reduce_impulse_arg::operator()(combo_tree& tr, combo_tree::iterator it) con
         return;
 
     OC_ASSERT(it.has_one_child(),
-              "impulse should have exactly one child (reduce_impulse_arg).");
+              "impulse should have exactly one child (reduce_impulse_arg).\n%s\n",
+             ({std::stringstream ss; ss<<tr; ss.str().c_str(); }));
     pre_it it_child = it.begin();
     logical_reduce(reduct_effort, tr, it_child, ignore_ops);
 }

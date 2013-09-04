@@ -261,7 +261,6 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
           AssertionException, std::bad_exception)
 {
     typedef combo_tree::sibling_iterator sib_it;
-    typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
     if (const argument* a = boost::get<argument>(&v)) {

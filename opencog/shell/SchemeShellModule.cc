@@ -31,7 +31,7 @@ using namespace opencog;
 
 DECLARE_MODULE(SchemeShellModule);
 
-SchemeShellModule::SchemeShellModule(void)
+SchemeShellModule::SchemeShellModule(CogServer& cs) : Module(cs)
 {
 }
 
@@ -53,9 +53,9 @@ SchemeShellModule::~SchemeShellModule()
 std::string SchemeShellModule::shellout(Request *req, std::list<std::string> args)
 {
 	ConsoleSocket *s = dynamic_cast<ConsoleSocket*>(req->getRequestResult());
-    if (!s) 
-        throw RuntimeException(TRACE_INFO, "Invalid RequestResult object"
-                " for SchemeShellModule: a ConsoleSocket object was expected.");
+	if (!s)
+		throw RuntimeException(TRACE_INFO, "Invalid RequestResult object"
+		       " for SchemeShellModule: a ConsoleSocket object was expected.");
 
 	SchemeShell *sh = new SchemeShell();
 	sh->set_socket(s);
@@ -79,13 +79,13 @@ std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args
 	// Needs to join the args back up into one string.
 	std::string expr;
 	std::string out;
-	
+
 	// Adds an extra space on the end, but that doesn't matter.
 	foreach(std::string arg, args)
 	{
 		expr += arg + " ";
 	}
-	
+
 	SchemeEval& eval = SchemeEval::instance();
 	out = eval.eval(expr);
 	// May not be necessary since an error message and backtrace are provided.
@@ -96,7 +96,7 @@ std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args
 		out += "Invalid Scheme expression: missing something";
 	}
 	eval.clear_pending();
-	
+
 	return out;
 }
 

@@ -23,38 +23,30 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "WebModule.h"
-#include "BaseURLHandler.h"
+#include <sstream>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/function.hpp>
+#include <boost/mem_fn.hpp>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Request.h>
 #include <opencog/util/Config.h>
 
-#include <sstream>
-#include <boost/bind.hpp>
-#include <boost/mem_fn.hpp>
-#include <boost/function.hpp>
-#include <boost/algorithm/string.hpp>
-
-#include <boost/filesystem.hpp>
+#include "BaseURLHandler.h"
+#include "WebModule.h"
 
 using namespace opencog;
 
-WebModule *rest_mod;
 
-// load/unload functions for the Module interface
-extern "C" const char* opencog_module_id()   { return WebModule::id(); }
-extern "C" Module*     opencog_module_load() {
-    rest_mod = new WebModule();
-    return rest_mod;
-}
-extern "C" void        opencog_module_unload(Module* module) { delete module; }
+DECLARE_MODULE(WebModule)
 
 const char* WebModule::DEFAULT_SERVER_ADDRESS = "http://localhost";
 
-
-
-WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
+WebModule::WebModule(CogServer& cs) :
+    Module(cs), _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRESS)
 {
     if (config().has("Web_PORT"))
         _port = config().get_int("Web_PORT");
@@ -62,18 +54,16 @@ WebModule::WebModule() : _port(DEFAULT_PORT), serverAddress(DEFAULT_SERVER_ADDRE
         serverAddress = config().get("Web_SERVER");
 
     // Register all requests with CogServer
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory); 
-    cogserver.registerRequest(GetListRequest::info().id, &getListFactory); 
-    cogserver.registerRequest(CreateAtomRequest::info().id, &createAtomFactory); 
-    cogserver.registerRequest(UpdateAtomRequest::info().id, &updateAtomFactory); 
+    _cogserver.registerRequest(GetAtomRequest::info().id, &getAtomFactory);
+    _cogserver.registerRequest(GetListRequest::info().id, &getListFactory);
+    _cogserver.registerRequest(CreateAtomRequest::info().id, &createAtomFactory);
+    _cogserver.registerRequest(UpdateAtomRequest::info().id, &updateAtomFactory);
 
     timeout = 100;
 }
 
 WebModule::~WebModule()
 {
-    rest_mod = NULL;
     // Stop mongoose webserver
     mg_stop(ctx);
 }
@@ -203,7 +193,7 @@ void viewListPage( struct mg_connection *conn,
 
 void makeRequest ( struct mg_connection *conn,
         const struct mg_request_info *ri, void *data)
-{ 
+{
     ServerRequestWrapper *handler = new ServerRequestWrapper();
     handler->handleRequest(conn, ri, data);
     while (!handler->completed) {usleep(50);};

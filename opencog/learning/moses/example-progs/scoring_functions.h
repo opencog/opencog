@@ -1,5 +1,5 @@
 /*
- * opencog/learning/moses/eda/scoring_functions.h
+ * opencog/learning/moses/example-progs/scoring_functions.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#ifndef _EDA_SCORING_FUNCTIONS_H
-#define _EDA_SCORING_FUNCTIONS_H
+#ifndef _EXAMPLE_SCORING_FUNCTIONS_H
+#define _EXAMPLE_SCORING_FUNCTIONS_H
 
 #include <cmath>
 #include <boost/lexical_cast.hpp>
@@ -34,8 +34,8 @@
 
 #include "../representation/field_set.h"
 
-namespace opencog {
-namespace moses {
+using namespace opencog;
+using namespace moses;
 
 // Example scoring functions.
 //
@@ -117,7 +117,7 @@ struct contin_uniform : public unary_function<instance, contin_t>
         generate(target.begin(), target.end(),
                  bind(std::plus<contin_t>(),
                       bind(std::multiplies<contin_t>(),
-                           bind(&RandGen::randdouble, ref(randGen())),
+                           bind(&RandGen::randdouble, boost::ref(randGen())),
                            maxval - minval), minval));
     }
 
@@ -180,8 +180,5 @@ struct termmax: public unary_function<instance, contin_t>
     }
     const field_set& fields;
 };
-
-} // ~namespace moses
-} // ~namespace opencog
 
 #endif

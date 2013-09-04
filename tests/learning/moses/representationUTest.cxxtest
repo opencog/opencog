@@ -112,38 +112,21 @@ public:
         const rule& r2 = r.operator()(2);
         const rule& r3 = r.operator()(3);
 
-        representation rep(r2, r3, tr, tt, vertex_set());
+        representation rep(r2, r3, tr, tt, vertex_set(),
+                           nullptr, nullptr, false,
+                           1.0 /* all permutation are generated, that
+                                  way we avoid sampling */);
 
         TS_ASSERT_LESS_THAN(0, rep.fields().raw_size());
 
         rep.ostream_prototype(std::cout << "Prototype = ") << std::endl;
 
-        // The expected string is randm-number-genereator dependent.
-        // For the old opencog-implemented generator in util/mt19937ar.h
-        // the below is correct. But, for the new c++11 standard
-        // std::mt19937, this is not what we get.
-        string expected_str("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$1 $3) [nil or !or](!$2 $3) [nil or !or](!$1 $2) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$2 $3) [nil and !and](!$1 $3) [nil and !and](!$1 $2))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and]($1 $3) [nil and !and](!$1 $2) [nil and !and]($1 $2) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$1 $2) [nil or !or]($1 $2) [nil or !or](!$1 $3)))");
-
-        // This is the string I get from c++11 std::mt19937 which is
-        // reasonable.
-        string alt_expected("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$2 $3) [nil or !or]($1 $2) [nil or !or](!$1 $3) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and]($1 $2) [nil and !and](!$2 $3) [nil and !and](!$1 $3))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$1 $2) [nil and !and]($1 $2) [nil and !and](!$1 $3) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or]($2 $3) [nil or !or](!$2 $3) [nil or !or](!$1 $3)))");
-
-        // Hmm. So, sometimes, I get the below, which is also valid.
-        // Not sure, but I suspect that this is because the multi-threaded
-        // code is sometimes taking different paths, i.e. its not
-        // deterministic.
-        string alt_two("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$2 $3) [nil or !or]($1 $2) [nil or !or](!$1 $3) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and]($1 $2) [nil and !and](!$2 $3) [nil and](!$1 $3))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$1 $2) [nil and !and]($1 $2) [nil and !and](!$1 $3) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or]($2 $3) [nil or !or](!$2 $3) [nil or !or](!$1 $3)))");
-
-        string alt_three("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or](!$2 $3) [nil or !or]($1 $2) [nil or !or](!$1 $3) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and]($1 $2) [nil and !and](!$2 $3) [nil and !and](!$1 $3))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$1 $2) [nil and !and]($1 $2) [nil and](!$1 $3) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or]($2 $3) [nil or !or](!$2 $3) [nil or !or](!$1 $3)))");
+        string expected_str("or(and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or]($1 $2) [nil or !or](!$2 $3) [nil or !or](!$1 $2) [nil or !or]($2 $3) [nil or !or](!$1 $3) [nil or !or]($1 $3) or([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$1 $3) [nil and !and]($2 $3) [nil and !and](!$1 $2) [nil and !and]($1 $2) [nil and !and](!$2 $3) [nil and !and]($1 $3))) [nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil and !and](!$1 $3) [nil and !and]($1 $2) [nil and !and](!$1 $2) [nil and !and](!$2 $3) [nil and !and]($1 $3) [nil and !and]($2 $3) and([nil $1 !$1] [nil $2 !$2] [nil $3 !$3] [nil or !or]($1 $2) [nil or !or]($2 $3) [nil or !or]($1 $3) [nil or !or](!$1 $2) [nil or !or](!$1 $3) [nil or !or](!$2 $3)))");
 
         std::stringstream ss;
         rep.ostream_prototype(ss);
         
-        TS_ASSERT((ss.str() == expected_str) || 
-                  (ss.str() == alt_expected) ||
-                  (ss.str() == alt_two) ||
-                  (ss.str() == alt_three));
-
+        TS_ASSERT_EQUALS(ss.str(), expected_str);
     }
 
     void test_boolean_rep2()

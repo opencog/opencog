@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_ARGUMENT_H
-#define _OPENCOG_ARGUMENT_H
+#ifndef _COMBO_ARGUMENT_H
+#define _COMBO_ARGUMENT_H
 
 #include "common_def.h"
 #include <boost/operators.hpp>
@@ -93,4 +93,4 @@ public:
 } // ~namespace combo
 } // ~namespace opencog
 
-#endif // _OPENCOG_ARGUMENT_H
+#endif // _COMBO_ARGUMENT_H

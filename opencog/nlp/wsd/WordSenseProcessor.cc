@@ -33,13 +33,16 @@ void WordSenseProcessor::init(void)
 }
 
 // ----------------------------------------
-WordSenseProcessor::WordSenseProcessor(void)
+
+WordSenseProcessor::WordSenseProcessor(CogServer& cs) : Module(cs)
 {
 	pthread_mutex_init(&queue_lock, NULL);
 	thread_running = false;
 	do_use_threads = true;
 	cnt = 0;
 	wsd = new Mihalcea();
+	atom_space = &_cogserver.getAtomSpace();
+	wsd->set_atom_space(atom_space);
 
 #ifdef HAVE_GUILE
 	define_scheme_primitive("run-wsd", &WordSenseProcessor::run_wsd, this);
@@ -61,7 +64,7 @@ void WordSenseProcessor::use_threads(bool use)
 void WordSenseProcessor::run_wsd(void)
 {
 	do_use_threads = false;
-	run_no_delay(&cogserver());
+	run_no_delay();
 }
 // ----------------------------------------
 
@@ -101,20 +104,16 @@ void WordSenseProcessor::work_thread(void)
 
 // ----------------------------------------
 
-void WordSenseProcessor::run_no_delay(CogServer *server)
+void WordSenseProcessor::run_no_delay()
 {
-	atom_space = &server->getAtomSpace();
-
-	wsd->set_atom_space(atom_space);
-
 	// Look for recently entered text
 	atom_space->foreach_handle_of_type("DocumentNode",
 	               &WordSenseProcessor::do_document, this);
 }
 
-void WordSenseProcessor::run(CogServer *server)
+void WordSenseProcessor::run()
 {
-	run_no_delay(server);
+	run_no_delay();
 
 	// XXX we are being called too often. this needs to be fixed.
 	// in truth, should only poll on new input.
@@ -123,14 +122,14 @@ void WordSenseProcessor::run(CogServer *server)
 
 /**
  * Process a document fed into the system. A document is taken to be
- * an ordered list of sentences, discussing some topic or set of 
+ * an ordered list of sentences, discussing some topic or set of
  * connected ideas.  The sentences composing the document are handled
  * in order.
  */
 bool WordSenseProcessor::do_document(Handle h)
 {
 	// Obtain the handle which indicates that the WSD processing of a
- 	// document has started. 
+ 	// document has started.
 	start_handle = atom_space->addNode(ANCHOR_NODE, "#WSD_started");
 
 	// Look to see if the document is associated with the

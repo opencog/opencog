@@ -27,8 +27,8 @@
 
 #include <string>
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/spacetime/TemporalMap.h>
-#include <opencog/atomspace/HandleSet.h>
 
 namespace opencog
 {
@@ -53,7 +53,7 @@ public:
      * @param Key.
      * @param Element.
      */
-    void add(Temporal*, HandleSet*);
+    void add(Temporal*, UnorderedHandleSet*);
 
     /**
      * Returns the element for a given key.
@@ -61,7 +61,7 @@ public:
      * @param Key.
      * @return Element for a given key.
      */
-    HandleSet* get(Temporal*);
+    UnorderedHandleSet* get(Temporal*);
 
     /**
      * Returns the key Temporal object equals to the given parameter.
@@ -86,7 +86,7 @@ public:
      * @param Key.
      * @return Removed element.
      */
-    HandleSet* remove(Temporal*);
+    UnorderedHandleSet* remove(Temporal*);
 
     /**
      * Returns the total number of elements in the hash table.

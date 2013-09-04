@@ -28,7 +28,6 @@
 #include <string>
 #include <exception>
 
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>

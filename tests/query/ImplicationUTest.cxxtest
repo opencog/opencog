@@ -101,6 +101,28 @@ void ImplicationUTest::setUp(void)
 	pm.set_atomspace(as);
 	SchemeEval::instance(as);
 
+	// Load the atom types
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so");
+
+	config().set("SCM_PRELOAD",
+      "opencog/atomspace/core_types.scm, "
+      "opencog/nlp/types/nlp_types.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] = 
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver().loadModules(paths);
+	cogserver().loadSCMModules(paths);
+
+
 	// Create initialzation
 	const char * setup = 
 	"(define (stv mean conf) (cog-new-stv mean conf))\n"

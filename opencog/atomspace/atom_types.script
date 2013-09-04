@@ -2,6 +2,13 @@
 // Script for automatic "atom type" generation. For more more information,
 // consult  the documentation in the opencog/atomspace/README file.
 //
+// Please note: some of the types below are used only via the scheme bindings.
+// Thus, just because you can comment some of these out, and the code still
+// compiles, that does not mean that these types are unused!  Be sure to grep
+// for the CamelCase names, to see if they show up elsewhere!
+//
+// Some of them are used by Python PLN code (which also uses the CamelCase names).
+//
 // Special type designating that no atom type has been assigned
 NOTYPE
 
@@ -27,11 +34,20 @@ MEMBER_LINK <- ORDERED_LINK
 SUBSET_LINK <- ORDERED_LINK
 
 // Boolean set operations, logical constants
+// The ordered version of AND_LINK is SEQUENTIAL_AND_LINK, below.
 AND_LINK <- UNORDERED_LINK
 OR_LINK <- UNORDERED_LINK
 NOT_LINK <- UNORDERED_LINK
 FALSE_LINK <- ORDERED_LINK
 TRUE_LINK <- ORDERED_LINK
+
+// ====================================================================
+// Herbrand/First-order-logic/lambda-calc/model-theory style links
+// and nodes.  This are used to implement the pattern matcher, and
+// everything built from the pattern matcher, including the query
+// engine, the atomspace indexes, and the graph rewrite rules.
+//
+// Not all of these are in active use: e.g. SCHOLEM_LINK is not used ATM.
 
 // Universe of discourse
 CONTEXT_LINK <- ORDERED_LINK
@@ -50,6 +66,8 @@ SCHOLEM_LINK <- ORDERED_LINK
 
 // Basic first-order logic operations
 IMPLICATION_LINK <- ORDERED_LINK
+
+// To be used with PredicateNode
 EVALUATION_LINK <- ORDERED_LINK
 
 // ??? symbol link not used anywhere. What is it's semantics?
@@ -62,8 +80,38 @@ ASSOCIATIVE_LINK <- ORDERED_LINK
 INHERITANCE_LINK <- ORDERED_LINK
 SIMILARITY_LINK <- UNORDERED_LINK
 
+// Temporal Links used by Python PLN which are important so there
 
-// that one is redundant with SUBSET_LINK and officially disabled
+AT_TIME_LINK <- ORDERED_LINK
+TIME_NODE <- NODE
+
+PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
+TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
+SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
+SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
+
+EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
+EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
+
+BEFORE_LINK <- ORDERED_LINK
+OVERLAPS_LINK <- ORDERED_LINK
+DURING_LINK <- ORDERED_LINK
+MEETS_LINK <- ORDERED_LINK
+STARTS_LINK <- ORDERED_LINK
+FINISHES_LINK <- ORDERED_LINK
+EQUALS_LINK <- ORDERED_LINK
+AFTER_LINK <- ORDERED_LINK
+OVERLAPPED_BY_LINK <- ORDERED_LINK
+CONTAINS_LINK <- ORDERED_LINK
+MET_BY_LINK <- ORDERED_LINK
+STARTED_BY_LINK <- ORDERED_LINK
+FINISHED_BY_LINK <- ORDERED_LINK
+
+// ====================================================================
+// XXX its not clear which of these are in current use ... !?
+// Or who is using these?  Some of these are dead.
+//
+// ExtInh is redundant with SUBSET_LINK and officially disabled
 // EXTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
 EXTENSIONAL_SIMILARITY_LINK <- ORDERED_LINK
 INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
@@ -87,55 +135,7 @@ SCHEMA_EVALUATION_LINK <- SCHEMA_EXECUTION_LINK
 EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
-// Temporal Links
-
-PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
-SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
-SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
-
-EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
-EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
-
-BEFORE_LINK <- ORDERED_LINK
-
-/// PLN types:
-// These are used in PLN currently, but can perhaps be replaced/removed
-HYPOTHETICAL_LINK <- ORDERED_LINK
-MIXED_IMPLICATION_LINK <- ORDERED_LINK
-EXTENSIONAL_IMPLICATION_LINK <- ORDERED_LINK
-
-// Should be replaced by extensional and intensional equivalence
-EQUIVALENCE_LINK <- UNORDERED_LINK
-SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
-EXTENSIONAL_EQUIVALENCE_LINK <- UNORDERED_LINK
-
-
-// Older parsing and language handling nodes;
-// Commented out, as these are currently unused,
-// and are being replaced by newer RelEx forms.
-// Some of these may be revived. See below.
-//
-// PHRASE_NODE <- NODE
-// COLLOCATION_NODE <- WORD_NODE
-// SEQUENCE_LINK <- ORDERED_LINK
-// 
-// TENSE_LINK <- FEATURE_LINK
-// QUANTITY_LINK <- FEATURE_LINK
-// NOUN_NUMBER_LINK <- FEATURE_LINK
-// WORD_GENDER_LINK <- FEATURE_LINK
-//
-// TENSE_NODE <- FEATURE_NODE
-// NOUN_NUMBER_NODE <- FEATURE_NODE
-// WORD_GENDER_NODE <- FEATURE_NODE
-// FLAG_NODE <- NODE
-//
-// QUERY_VARIABLE_LINK <- ORDERED_LINK
-//
-// New RelEx nodes, added by Linas per names used by Ben
-// These are subject to change or deletion pending review.
-// Some of the link types may go away.
-
+// ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
@@ -147,109 +147,4 @@ ANCHOR_NODE <- NODE
 // Holder of statistical truth values. 
 // XXX not clear if this is used anywhere ... maybe should remove this.
 COUNT_LINK <- ORDERED_LINK
-
-WORD_NODE <- NODE
-REFERENCE_LINK <- ASSOCIATIVE_LINK
-
-// Custom atoms to identify documents, sentences, word instances
-// These are emitted by RelEx and are used to input text into OpenCog.
-DOCUMENT_NODE <- CONCEPT_NODE
-SENTENCE_NODE <- CONCEPT_NODE
-PARSE_NODE <- CONCEPT_NODE
-PARSE_LINK <- ASSOCIATIVE_LINK
-WORD_INSTANCE_NODE <- CONCEPT_NODE
-WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
-
-// Custom atoms to identify features, relations
-// Note that the feature links could (should ??) be replaced by
-// predicate links, where the feature type is encodeed in the 
-// predicate name, rather than in the link type.  However, there
-// is no immediate need for this, and custom link-types use less RAM.
-// So we define a bunch of custom link types.
-FEATURE_NODE <- CONCEPT_NODE
-FEATURE_LINK <- ORDERED_LINK
-LINK_GRAMMAR_RELATIONSHIP_NODE <- PREDICATE_NODE   // e.g. "MX+"
-LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
-
-// Used to represent RelEx dependency relations
-DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
-DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
-PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
-
-// Frame related stuff, almost certainly will be changed soon
-// These are semi-obsolete, probably need to be redesigned.
-// These are emitted by RelEx.
-DEFINED_FRAME_NODE <- CONCEPT_NODE
-DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
-FRAME_ELEMENT_LINK <- ORDERED_LINK
-
-// New wordnet-import nodes, added by Linas.
-// These are subject to change, pending review.
-// See nlp/wordnet-import/README and nlp/wsd/README for details.
-// LEMMA_NODE appears to be currently unused.
-WORD_SENSE_NODE <- CONCEPT_NODE
-WORD_SENSE_LINK <- ASSOCIATIVE_LINK
-PART_OF_SPEECH_NODE <- FEATURE_NODE
-PART_OF_SPEECH_LINK <- FEATURE_LINK
-LEMMA_NODE <- CONCEPT_NODE
-LEMMA_LINK <- ORDERED_LINK
-HOLONYM_LINK <- INHERITANCE_LINK
-
-// New word-sense-disambiguation nodes, added by Linas
-// See nlp/wsd/README for details.
-COSENSE_LINK <- UNORDERED_LINK
-
-// Concept-formation anchors.
-// See nlp/seme/README for details.
-SEME_NODE <- CONCEPT_NODE
-SEMANTIC_RELATION_NODE <- SEME_NODE
-// CONTEXT_NODE <- CONCEPT_NODE // apparently useless
-
-// AGISim related links and nodes
-AGISIM_SOUND_NODE <- NODE "AGISIMSoundNode"
-AGISIM_TASTE_NODE <- NODE "AGISIMTasteNode"
-AGISIM_SMELL_NODE <- NODE "AGISIMSmellNode"
-AGISIM_SELF_NODE <- NODE "AGISIMSelfNode"
-AGISIM_PERCEPT_NODE <- NODE "AGISIMPerceptNode"
-AGISIM_VISUAL_PERCEPT_NODE <- NODE "AGIMSIMVisualPerceptNode" // note
-AGISIM_PIXEL_PERCEPT_NODE <- NODE "AGISIMPixelPerceptNode"
-AGISIM_POLYGON_PERCEPT_NODE <- NODE "AGISIMPolygonPerceptNode"
-AGISIM_OBJECT_PERCEPT_NODE <- NODE "AGISIMObjectPerceptNode"
-
-CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
-CW_COLOR_NODE <- NODE "CWColorNode"
-
-FW_VARIABLE_NODE <- NODE "FWVariableNode"
-
-// SpaceServer atoms
-SPACE_MAP_NODE <- NODE
-
-// Embodiment atoms
-
-LATEST_LINK <- ORDERED_LINK
-
-OBJECT_NODE <- NODE
-BLOCK_ENTITY_NODE <- OBJECT_NODE
-PET_NODE <- OBJECT_NODE
-AVATAR_NODE <- OBJECT_NODE
-STRUCTURE_NODE <- OBJECT_NODE
-ACCESSORY_NODE <- OBJECT_NODE
-HUMANOID_NODE <- OBJECT_NODE
-UNKNOWN_OBJECT_NODE <- OBJECT_NODE
-
-// Time-related atoms:
-
-AT_TIME_LINK <- ORDERED_LINK
-TIME_NODE <- NODE
-
-// Perception specific terms
-IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
-
-// Attention allocation atoms:
-
-HEBBIAN_LINK <- LINK
-ASYMMETRIC_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
-SYMMETRIC_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
-INVERSE_HEBBIAN_LINK <- ORDERED_LINK,HEBBIAN_LINK
-SYMMETRIC_INVERSE_HEBBIAN_LINK <- UNORDERED_LINK,HEBBIAN_LINK
 

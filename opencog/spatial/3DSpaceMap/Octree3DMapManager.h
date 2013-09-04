@@ -88,7 +88,7 @@ namespace opencog
             // to store the super blockEntities need to be updated the predicates
             vector<BlockEntity*> updateSuperBlockEntityList;
 
-            static const int AccessDistance = 1;
+            static const int AccessDistance = 2;
 
             /**
              * @ min_x and min_y is the start position of this octree space
@@ -105,15 +105,17 @@ namespace opencog
 
             bool hasPerceptedMoreThanOneTimes;
 
-            const map<Handle, BlockVector>& getAllUnitBlockatoms(){return mAllUnitAtomsToBlocksMap;}
+            const map<Handle, BlockVector>& getAllUnitBlockatoms() const {return mAllUnitAtomsToBlocksMap;}
 
-            const map<int,BlockEntity*>& getBlockEntityList(){return mBlockEntityList;}
+            const map<int,BlockEntity*>& getBlockEntityList() const {return mBlockEntityList;}
 
-            const map<int,BlockEntity*>& getSuperBlockEntityList(){return mSuperBlockEntityList;}
+            const map<int,BlockEntity*>& getSuperBlockEntityList() const {return mSuperBlockEntityList;}
 
-            const map<Handle, Entity3D*>& getAllNoneBlockEntities(){return mAllNoneBlockEntities;}
+            const map<Handle, Entity3D*>& getAllNoneBlockEntities() const {return mAllNoneBlockEntities;}
 
-            int getTotalDepthOfOctree(){return mTotalDepthOfOctree;}
+            const map<Handle, Entity3D*>& getAllAvatarList() const {return mAllAvatarList;}
+
+            int getTotalDepthOfOctree() const {return mTotalDepthOfOctree;}
 
             inline  int   getFloorHeight() const {return mFloorHeight;}
             inline  int   getTotalUnitBlockNum() const {return mTotalUnitBlockNum;}
@@ -134,7 +136,9 @@ namespace opencog
 
             // currently we consider all the none block entities has no collision, agents can get through them
             void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
-                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,bool is_obstacle = false);
+                                    int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,unsigned long timestamp,bool is_obstacle = false);
+
+            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp);
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
@@ -301,6 +305,15 @@ namespace opencog
 
             HandleSeq getAllUnitBlockHandlesOfABlock(Block3D& _block);
 
+            bool isAvatarEntity(const Entity3D* entity) const;
+
+            // to recoard all the history locations/ centerPosition for all the nonBlockEntities, the lastest one is push_back
+            // map <EntityHandle, vector< pair < timestamp, location> >
+            map< Handle, vector< pair<unsigned long,BlockVector> > > nonBlockEntitieshistoryLocations;
+
+            // get the last location this nonBlockEntity appeared
+            BlockVector getLastAppearedLocation(Handle entityHandle);
+
         protected:
 
             // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
@@ -310,6 +323,7 @@ namespace opencog
             map<int,BlockEntity*> mBlockEntityList;
             map<int,BlockEntity*> mSuperBlockEntityList;
             map<Handle, Entity3D*> mAllNoneBlockEntities;
+            map<Handle, Entity3D*> mAllAvatarList;
             multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
 
             int mTotalDepthOfOctree;
@@ -333,11 +347,16 @@ namespace opencog
 
             bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
 
+            void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
+
             // this constructor is only used for clone
             Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
                                int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                               Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap);
+                               Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
+                               map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations);
+
+
 
 
 #ifdef HAVE_ZMQ

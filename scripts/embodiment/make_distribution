@@ -33,6 +33,9 @@ if {[llength $argv] > 0} {
 
 set binDirH $pdh/$binDir
 
+puts "Project Directory from here = $pdh"
+puts "Build Directory = $binDirH"
+
 set flist [list  \
 $binDirH/opencog/embodiment/Control/MessagingSystem/router \
 $binDirH/opencog/embodiment/Control/MessagingSystem/spawner \
@@ -80,15 +83,18 @@ if  [file exists $binDirH/opencog/cython/libPythonModule.so] then {
 }
 
 set schemeOpencogFiles [list \
-$pdh/opencog/scm/type_constructors.scm \
 $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
 $pdh/opencog/scm/debug.scm \
+$binDirH/opencog/atomspace/core_types.scm \
+$binDirH/opencog/nlp/types/nlp_types.scm \
+$binDirH/opencog/spacetime/spacetime_types.scm \
+$binDirH/opencog/dynamics/attention/attention_types.scm \
+$binDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
 ]
 
 set schemeEmbodimentFiles [list \
-$pdh/opencog/embodiment/scm/type_constructors.scm \
 $pdh/opencog/embodiment/scm/predicates-frames.scm \
 $pdh/opencog/embodiment/scm/language-comprehension.scm \
 $pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
@@ -97,10 +103,10 @@ $pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 if {$type_dist == "dev"} {
-    # embodiment config - use example file if it doesn't exist
+    # embodiment config - use default file if it doesn't exist
     set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf
     if { [file exists $embodimentConf] != 1 } {
-        set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.example
+        set embodimentConf $pdh/opencog/embodiment/dev_embodiment.conf.default
     }
     set flistconfig [list \
     $binDirH/opencog/embodiment/AutomatedSystemTest/pbTest \
@@ -111,10 +117,10 @@ if {$type_dist == "dev"} {
     run_system_test.sh \
     ]
 } elseif {$type_dist == "user"} {
-    # embodiment config - use example file if it doesn't exist
+    # embodiment config - use default file if it doesn't exist
     set embodimentConf $pdh/opencog/embodiment/embodiment.conf
     if { [file exists $embodimentConf] != 1 } {
-        set embodimentConf $pdh/opencog/embodiment/embodiment.conf.example
+        set embodimentConf $pdh/opencog/embodiment/embodiment.conf.default
     }
 }
 

@@ -122,7 +122,7 @@ private:
     /**
      * Initialize instantRelationRules etc.
      */
-    void init(opencog::CogServer * server);
+    void init();
 
     /**
      * Get the EvaluationLink holding the relation between the pet and the entity.
@@ -166,7 +166,7 @@ private:
 
 public:
 
-    PsiRelationUpdaterAgent();
+    PsiRelationUpdaterAgent(CogServer&);
     virtual ~PsiRelationUpdaterAgent();
 
     virtual const ClassInfo& classinfo() const {
@@ -181,7 +181,7 @@ public:
     /**
      *  Entry of the Agent, CogServer will invoke this function during its cycle
      */
-    void run(opencog::CogServer * server);
+    virtual void run();
 
      /**
       * After calling this function, the Agent will invoke its "init" method firstly 

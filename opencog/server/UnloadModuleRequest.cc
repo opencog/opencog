@@ -33,7 +33,7 @@
 
 using namespace opencog;
 
-UnloadModuleRequest::UnloadModuleRequest()
+UnloadModuleRequest::UnloadModuleRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -51,8 +51,7 @@ bool UnloadModuleRequest::execute()
         return false;
     }
     std::string& filename = _parameters.front();
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    if (cogserver.unloadModule(filename)) {
+    if (_cogserver.unloadModule(filename)) {
         oss << "done" << std::endl;
         send(oss.str());
         return true;

@@ -30,10 +30,13 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
+#include <vector>
 
 namespace opencog { namespace oac {
 
 using namespace spatial;
+using namespace std;
 
 /**
  * This class is used to update predicates of spatial relations whenever an object
@@ -55,6 +58,13 @@ public:
 private:
 
     unsigned long lastTimestamp; 
+
+    bool is_only_update_about_avatars;
+    string update_types;
+
+    bool enableCollectActions;
+
+    vector<spatial::SPATIAL_RELATION> RELATIONS_NEED_TO_UPDATE; // the spatial relations we need to update
 
     typedef std::vector <spatial::SPATIAL_RELATION> SPATIAL_RELATION_VECTOR;
     typedef SPATIAL_RELATION_VECTOR::iterator SPATIAL_RELATION_VECTOR_ITER; 
@@ -97,6 +107,20 @@ private:
             boost::unordered_map <std::string, SPATIAL_RELATION_VECTOR> _entityRelationMap;
 
     }; // class SpatialRelationCache
+
+    // compute all the relationships between all objects
+    void computeRelationshipsBetweenAllObjects(const SpaceServer::SpaceMap & spaceMap,
+                                               vector<const Entity3D *> &allEntities,
+                                               Handle observer,
+                                               unsigned long timestamp);
+
+    // compute only the relationships between objects and avatar , which means every piece here descrips a relationship between an object and an avatar
+    void computeRelationshipsBetweenObjectsAndAvatars(const SpaceServer::SpaceMap & spaceMap,
+                                                      std::set<const spatial::Entity3D*>& avatars,
+                                                      std::vector<const spatial::Entity3D*>& nonblockEntities,
+                                                      std::vector<const spatial::Entity3D*>& blockEntities,
+                                                      Handle observer,
+                                                      unsigned long timestamp);
 
     // Cache all the 2-size spatial relations. 
     // 3-size spatial relations calculation would rely on this cache. 
@@ -174,9 +198,9 @@ private:
      *
      * It could be 2-size relations from A to B or 3-size relations among A, B and C. 
      */
-    void addSpatialRelations(const SPATIAL_RELATION_VECTOR & relations, 
+    void addSpatialRelations(const set<spatial::SPATIAL_RELATION> & relations,
                              AtomSpace & atomSpace, unsigned long timestamp, 
-                             Handle objetA, 
+                             Handle objectA,
                              Handle objectB, 
                              Handle objectC = Handle::UNDEFINED
                             ); 

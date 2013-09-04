@@ -54,9 +54,9 @@ public:
         return _ci;
     }
 
-    STIDecayingAgent();
+    STIDecayingAgent(CogServer&);
     virtual ~STIDecayingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
 }; // class
 

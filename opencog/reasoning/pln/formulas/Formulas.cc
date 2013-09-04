@@ -18,14 +18,17 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <assert.h>
+#include <memory>
+#include <algorithm>
+
+#include <opencog/util/numeric.h>
+#include <opencog/util/macros.h>
 
 #include "../PLN.h"
 #include "FormulasIndefinite.h"
 #include "Formulas.h"
 #include "../PLNUtils.h"
-#include <assert.h>
-#include <memory>
-#include <algorithm>
 
 using namespace std;
 
@@ -270,7 +273,7 @@ TruthValue* DeductionSimpleFormula::simpleCompute(const TVSeq& TV, long U) const
 
     TruthValuePtr linkTEMP = TV[0];
 
-    PLNFormulaBodyFor_Link2Node3;
+    PLNFormulaBodyFor_Link2Node3; OC_UNUSED(nC);
     DebugPLNBodyFor_Link2Node3;
 
     /// Temporary filtering fix to make sure that nAB >= nA
@@ -315,7 +318,7 @@ TruthValue* DeductionGeometryFormula::simpleCompute(const TVSeq& TV, long U) con
 {
     cprintf(-3, "Geom: deduct\n");
 
-    PLNFormulaBodyFor_Link2Node3;
+    PLNFormulaBodyFor_Link2Node3; OC_UNUSED(nC); OC_UNUSED(nAB);
     DebugPLNBodyFor_Link2Node3;
 
     TVSeq baTV(1, linkAB);
@@ -337,6 +340,7 @@ TruthValue* DeductionGeometryFormula::simpleCompute(const TVSeq& TV, long U) con
         IndependenceAssumptionGeometryDiscount * nA * nBC
         / std::max(nB, TV_MIN);
 
+	OC_UNUSED(sAC); OC_UNUSED(nAC);
     return NULL; // @todo ???
     //    return checkTruthValue(  new SimpleTruthValue(sAC,nAC) );
 }
@@ -373,7 +377,7 @@ TruthValue* Inh2SimFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Inh2Sim...\n");
 
-    PLNFormulaBodyFor_Link2Node2;
+    PLNFormulaBodyFor_Link2Node2; OC_UNUSED(nB);
     DebugPLNBodyFor_Link2Node2;
 
     strength_t sABsim =
@@ -419,7 +423,7 @@ TruthValue* ModusPonensFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     cprintf(-3, "Modus Ponens...\n");
 
-    PLNFormulaBodyFor_Atom2;
+    PLNFormulaBodyFor_Atom2; OC_UNUSED(nB);
     //    DebugPLNBodyFor_atom2;
 
     // Note that sB corresponds to sAB
@@ -589,7 +593,7 @@ TruthValue* AsymmetricAndFormula::simpleCompute(const TVSeq& TV, long U) const
 {
     //if (Log::getDefaultLevel() >= 3) cprintf(-3, "Logical And2...\n");
 
-    PLNFormulaBodyFor_Atom2;
+    PLNFormulaBodyFor_Atom2; OC_UNUSED(nA);
     //    DebugPLNBodyFor_Atom2;
 
     strength_t sAnd = sA * sB;
@@ -626,7 +630,7 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
 
     TruthValuePtr res1 = TV[0];
     TruthValuePtr res2 = TV[1];
-    //auto_ptr<const TruthValue> ptr1, ptr2;
+    //unique_ptr<const TruthValue> ptr1, ptr2;
 
     if (N > 2) {
 //  TVType* next[2];
@@ -641,12 +645,12 @@ TruthValue* OrFormula::simpleCompute(const TVSeq& TV, long U) const
 
         if (N1 == 1) { //Either (>1, >1) or (1, >1).
             res2 = TruthValuePtr(simpleCompute(TV2, U));
-            //ptr2 = auto_ptr<const TruthValue>(res2);
+            //ptr2 = unique_ptr<const TruthValue>(res2);
         } else {
             res1 = TruthValuePtr(simpleCompute(TV1, U));
             res2 = TruthValuePtr(simpleCompute(TV2, U));
-            //ptr1 = auto_ptr<const TruthValue>(res1);
-            //ptr2 = auto_ptr<const TruthValue>(res2);
+            //ptr1 = unique_ptr<const TruthValue>(res1);
+            //ptr2 = unique_ptr<const TruthValue>(res2);
         }
     }
 
@@ -941,7 +945,7 @@ template<int _TVN>
 TruthValue* Formula<_TVN>::compute(const TVSeq& TV, long U) const
 {
     int N = TV.size();
-
+	OC_UNUSED(N);
     //cprintf(-3, "Formula<_TVN>::compute(N = %d)\n", N);
 
     return this->simpleCompute(TV, U);

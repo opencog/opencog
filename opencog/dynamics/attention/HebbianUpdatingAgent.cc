@@ -31,7 +31,8 @@
 
 using namespace opencog;
 
-HebbianUpdatingAgent::HebbianUpdatingAgent()
+HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
+    Agent(cs)
 {
     static const std::string defaultConfig[] = {
         "ECAN_CONVERT_LINKS","false",
@@ -64,9 +65,9 @@ Logger* HebbianUpdatingAgent::getLogger()
     return log;
 }
 
-void HebbianUpdatingAgent::run(CogServer *server)
+void HebbianUpdatingAgent::run()
 {
-    a = &server->getAtomSpace();
+    a = &_cogserver.getAtomSpace();
     hebbianUpdatingUpdate();
 }
 

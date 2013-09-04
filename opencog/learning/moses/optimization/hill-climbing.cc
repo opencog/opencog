@@ -29,6 +29,8 @@
 
 #include <math.h>   // for sqrtf, cbrtf
 
+#include <boost/algorithm/minmax_element.hpp>
+
 #include <opencog/util/oc_omp.h>
 
 #include "../moses/neighborhood_sampling.h"
@@ -50,23 +52,8 @@ unsigned hill_climbing::operator()(deme_t& deme,
                                    unsigned* eval_best)
 {
     logger().debug("Local Search Optimization");
-    logger().info() << "Demes: # "   /* Legend for graph stats */
-            "deme_count\t"
-            "iteration\t"
-            "total_steps\t"
-            "total_evals\t"
-            "microseconds\t"
-            "new_instances\t"
-            "num_instances\t"
-            "inst_RAM\t"
-            "num_evals\t"
-            "has_improved\t"
-            "best_weighted_score\t"
-            "delta_weighted\t"
-            "best_raw\t"
-            "delta_raw\t"
-            "complexity";
 
+    log_stats_legend();
 
     // Collect statistics about the run, in struct optim_stats
     nsteps = 0;
@@ -84,10 +71,6 @@ unsigned hill_climbing::operator()(deme_t& deme,
     // Track RAM usage. Instances can chew up boat-loads of RAM.
     _instance_bytes = sizeof(instance)
         + sizeof(packed_t) * fields.packed_width();
-
-    // Estimate the number of nearest neighbors.
-    const size_t nn_estimate = information_theoretic_bits(fields);
-    field_set_size = nn_estimate;  // optim stats, printed by moses.
 
     size_t current_number_of_evals = 0;
     size_t current_number_of_instances = 0;
@@ -111,8 +94,13 @@ unsigned hill_climbing::operator()(deme_t& deme,
     instance prev_center = center_inst;
     size_t prev_start = 0;
     size_t prev_size = 0;
-
-    bool rescan = false;
+    
+    // keep track whether the population generated from the same
+    // center has already been crossover. This is to prevent to redo a
+    // useless crossover when distance widening is occurs
+    bool already_xover = false;
+    
+    // try a last crossover if no improvements (it's cheap)
     bool last_chance = false;
 
     // Whether the score has improved during an iteration
@@ -123,155 +111,86 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
         // Estimate the number of neighbours at the distance d.
         // This is faster than actually counting.
-        size_t total_number_of_neighbours;
+        size_t total_number_of_neighbours =
+            estimate_neighborhood(distance, fields);
 
         // Number of instances to try, this go-around.
-        size_t number_of_new_instances;
+        size_t number_of_new_instances =
+            n_new_instances(distance, max_evals, current_number_of_instances,
+                            total_number_of_neighbours);
 
-        // For a distance of one, we use
-        // information_theoretic_bits as an approximation of the
-        // number of neighbors, over-estimated by a factor of 2,
-        // just to decrease the chance of going into 'sample' mode
-        // when working with the deme. This saves cpu time.
-        if (distance == 1)
-        {
-            total_number_of_neighbours = 2*nn_estimate;
-            number_of_new_instances = 2*nn_estimate;
-
-            // fraction_of_nn is 1 by default
-            number_of_new_instances *= hc_params.fraction_of_nn;
-
-            // Clamp the number of nearest-neighbor evaluations
-            // we'll do.  This is necessitated because some systems
-            // have a vast number of nearest neighbors, and searching
-            // them all explodes the RAM usage, for no gain.
-            if (number_of_new_instances > hc_params.max_nn_evals)
-                number_of_new_instances = hc_params.max_nn_evals;
-
-            // avoid overflow.
-            size_t nleft =
-                max_evals - current_number_of_evals;
-            if (nleft < number_of_new_instances)
-                number_of_new_instances = nleft;
-
-        }
-        else if (distance == 0)
-        {
-            total_number_of_neighbours = 1;
-            number_of_new_instances = 1;
-        }
-        else // distance two or greater
-        {
-            // Distances greater than 1 occurs only when the -L1 flag
-            // is used.  This puts this algo into a very different mode
-            // of operation, in an attempt to overcome deceptive scoring
-            // functions.
-
-            // For large-distance searches, there is a combinatorial
-            // explosion of the size of the search volume. Thus, be
-            // careful budget our available cycles.
-            total_number_of_neighbours =
-                safe_binomial_coefficient(nn_estimate, distance);
-
-            number_of_new_instances = total_number_of_neighbours;
-
-            // binomial coefficient has a combinatoric explosion to
-            // the power distance. So throttle back by fraction raised
-            // to power dist.
-            for (unsigned k=0; k<distance; k++)
-               number_of_new_instances *= hc_params.fraction_of_nn;
-
-            // Clamp the number of nearest-neighbor evaluations
-            // we'll do.  This is necessitated because some systems
-            // have a vast number of nearest neighbors, and searching
-            // them all explodes the RAM usage, for no gain.
-            if (number_of_new_instances > hc_params.max_nn_evals)
-                number_of_new_instances = hc_params.max_nn_evals;
-
-            size_t nleft =
-                max_evals - current_number_of_evals;
-
-// we choose the number 100 because below that multithreading is
-// disabled and it leads to some massive slow down because then most
-// of the computational power is spent on successive representation
-// building
-#define MINIMUM_DEME_SIZE         100
-
-            // If fraction is small, just use up the rest of the cycles.
-            if (number_of_new_instances < MINIMUM_DEME_SIZE)
-                number_of_new_instances = nleft;
-
-            // avoid overflow.
-            if (nleft < number_of_new_instances)
-                number_of_new_instances = nleft;
-
-        }
-
-        if (hc_params.allow_resize_deme) {
-            // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
-            // half of installed RAM on the machine. This should work in a
-            // more or less scalable fashion on all machines, and still
-            // allow instances that are dozens of megabytes in size.
-            // (This is targeting machines with 4 GB to 100 GB of RAM).
-            //
-            // Currently, each disc knob takes 2 bits per instance, and
-            // each contin knob takes 10 bits per instance.  Thus, the
-            // practical limit is about 1M contin knobs on current-era
-            // machines, assuming that max_num_instances is about 10K.
-            //
-            // Note: A similar calculation is performed when the scored
-            // instances are merged into the deme, to limit the deme size.
-#define ACCEPTABLE_RAM_FRACTION 0.5
-#define MAX_RAM_LIMIT 0.9
-            uint64_t new_usage = _instance_bytes * number_of_new_instances;
-
-            if (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < new_usage)
-            {
-                // Cap ram usage at the lesser of the desired usage,
-                // or the actual available space.
-                uint64_t free_ram = getFreeRAM();
-                uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
-                                 MAX_RAM_LIMIT * free_ram);
-                number_of_new_instances = cap / _instance_bytes;
-                logger().debug(
-                   "Cap new instances. Tot RAM=%Ld new_usage=%Ld Free RAM=%Ld cap=%Ld",
-                   _total_RAM_bytes, new_usage, free_ram, cap);
-            }
-        }
-        logger().debug(
-            "Budget %u samples out of estimated %u neighbours",
-            number_of_new_instances, total_number_of_neighbours);
-
-        // The first few times through, (or, if we decided on a
-        // full rescan), explore the entire nearest neighborhood.
-        // Otherwise, make the optimistic assumption that the best
-        // the best new instances are likely to be genric cross-overs
-        // of the current top-scoring instances.  This assumption
-        // seems to work really quite well.
+        // The first few times through, (or, if we decided on a full
+        // rescan), explore the entire nearest neighborhood.
+        // Otherwise, make the optimistic assumption that the best new
+        // instances are likely to be genetic cross-overs of the
+        // current top-scoring instances.  This assumption seems to
+        // work really quite well.
         //
         // Based on experiments, crossing over the 40 highest-scoring
-        // instances seems to offer plenty of luck, to TOP_POP_SIZE
-        // is currently defined to be 40.
+        // instances seems to offer plenty of luck, so
+        // crossover_pop_size is defined to be 120 by default (40 for
+        // cross_top_one, 40 for cross_top_two, 40 for
+        // cross_top_three).
         //
         // If the size of the nearest neighborhood is small enough,
         // then don't bother with the optimistic guessing.  The
-        // cross-over guessing will generate 3*TOP_POP_SIZE
+        // cross-over guessing will generate crossover_pop_size
         // instances.  Our guestimate for number of neighbors
         // intentionally over-estimates by a factor of two. So the
-        // breakeven point would be 6*TOP_POP_SIZE, and we pad this
+        // breakeven point would be 2*crossover_pop_size, and we pad this
         // a bit, as small exhaustive searches do beat guessing...
+        size_t xover_min_neighbours = 10*(hc_params.crossover_pop_size/3);
         //
         // current_number_of_instances can drop as low as 1 if the
         // population trimmer wiped out everything, which can happen.
         // Anyway, cross-over generates nothing when its that small.
-#define TOP_POP_SIZE 40
-        if (!hc_params.crossover
-            || (iteration <= 2)
-            || rescan
-            || total_number_of_neighbours < 10*TOP_POP_SIZE
-            || current_number_of_instances < 3)
-        {
+        size_t xover_min_deme = 3;
 
+        // whether crossover must be attempted for the current iteration
+        bool large_nbh = total_number_of_neighbours >= xover_min_neighbours,
+            xover = hc_params.crossover
+            && (iteration > 2)
+            && !already_xover
+            && current_number_of_instances >= xover_min_deme
+            && (large_nbh || last_chance);
+
+        if (xover) {
+            // log why crossover is enabled
+            stringstream why_xover;
+            if (large_nbh)
+                why_xover << "too large neighborhood "
+                          << total_number_of_neighbours << ">="
+                          << xover_min_neighbours;
+            else if (last_chance)
+                why_xover << "last chance";
+            else
+                OC_ASSERT(false, "There must be a bug");
+            logger().debug() << "Crossover enabled ("
+                             << why_xover.str() << ")";
+
+            number_of_new_instances =
+                crossover(deme, current_number_of_instances,
+                          prev_start, prev_size, prev_center);
+
+            already_xover = true;
+        } else {
+            // log why crossover is disabled
+            stringstream whynot_xover;
+            if (!hc_params.crossover)
+                whynot_xover << "user option";
+            else if (iteration <= 2)
+                whynot_xover << "first 2 iterations";
+            else if (already_xover)
+                whynot_xover << "already done from that center";
+            else if (current_number_of_instances < xover_min_deme)
+                whynot_xover << "not enough instances to cross";
+            else if (!large_nbh)
+                whynot_xover << "small enough neighborhood for full search";
+            else
+                OC_ASSERT(false, "There must be a bug");
+            logger().debug() << "Crossover disabled ("
+                             << whynot_xover.str() << ")";
+            
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
             number_of_new_instances =
@@ -279,39 +198,45 @@ unsigned hill_climbing::operator()(deme_t& deme,
                                      number_of_new_instances,
                                      current_number_of_instances,
                                      center_inst, deme, distance);
-        } else {
-            // These cross-over (in the genetic sense) the
-            // top-scoring one, two and three instances,respectively.
-            number_of_new_instances =
-                cross_top_one(deme, current_number_of_instances, TOP_POP_SIZE,
-                              prev_start, prev_size, prev_center);
-
-            number_of_new_instances +=
-                cross_top_two(deme,
-                              current_number_of_instances + number_of_new_instances,
-                              TOP_POP_SIZE,
-                              prev_start, prev_size, prev_center);
-
-            number_of_new_instances +=
-                cross_top_three(deme,
-                              current_number_of_instances + number_of_new_instances,
-                              TOP_POP_SIZE,
-                              prev_start, prev_size, prev_center);
         }
         prev_start = current_number_of_instances;
         prev_size = number_of_new_instances;
         prev_center = center_inst;
 
-        logger().debug("Evaluate %u neighbors at distance %u",
-                       number_of_new_instances, distance);
+        auto deme_from = next(deme.begin(), current_number_of_instances);
+        auto deme_inst_from = next(deme.begin_instances(),
+                                   current_number_of_instances);
+        auto deme_score_from = next(deme.begin_scores(),
+                                    current_number_of_instances);
+
+        // log neighborhood distance
+        if (logger().isDebugEnabled()) {
+            stringstream nbh_dst;
+            nbh_dst << "Evaluate " << number_of_new_instances << " neighbors";
+            if (number_of_new_instances > 0) {
+                if (xover) {
+                    // compute the min and max hamming distances between the
+                    // center instance and the crossed-over instances
+                    auto dst_from_center = [&](const instance& inst) {
+                        return deme.fields().hamming_distance(inst, center_inst);
+                    };
+                    vector<int> dsts;
+                    transform(deme_inst_from, deme.end_instances(),
+                              back_inserter(dsts), dst_from_center);
+                    auto pmm = boost::minmax_element(dsts.begin(), dsts.end());
+                    nbh_dst << " from distance " << *pmm.first
+                            << " to " << *pmm.second;
+                }
+                else nbh_dst << " at distance " << distance;
+            }
+            logger().debug(nbh_dst.str());
+        }
 
         // score all new instances in the deme
-        OMP_ALGO::transform
-            (next(deme.begin(), current_number_of_instances), deme.end(),
-             next(deme.begin_scores(), current_number_of_instances),
-             // using bind cref so that score is passed by
-             // ref instead of by copy
-             boost::bind(boost::cref(iscorer), _1));
+        OMP_ALGO::transform(deme_from, deme.end(), deme_score_from,
+                            // using bind cref so that score is passed by
+                            // ref instead of by copy
+                            boost::bind(boost::cref(iscorer), _1));
 
         // Check if there is an instance in the deme better than
         // the best candidate
@@ -343,8 +268,10 @@ unsigned hill_climbing::operator()(deme_t& deme,
         bool has_improved = opt_params.score_improved(best_score, prev_hi);
 
         // Make a copy of the best instance.
-        if (has_improved)
+        if (has_improved) {
             center_inst = deme[ibest].first;
+            already_xover = false;
+        }
 
 #ifdef GATHER_STATS
         if (iteration > 1) {
@@ -396,6 +323,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             uint64_t deme_usage = _instance_bytes * current_number_of_instances;
 
 #define ACCEPTABLE_SIZE 5000
+#define ACCEPTABLE_RAM_FRACTION 0.5
             if ((ACCEPTABLE_SIZE < current_number_of_instances) or
                 (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < deme_usage))
             {
@@ -426,7 +354,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
                 }
             }
         }
-        else
+        else if (!xover)
             distance++;
 
         // Collect statistics about the run, in struct optim_stats
@@ -444,7 +372,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             double ram_usage = current_number_of_instances;
             ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
-            logger().info() << "Demes: "
+            logger().info() << hc_params.prefix_stat_deme << ": "
                 << deme_count << "\t"
                 << iteration << "\t"
                 << total_steps << "\t"
@@ -501,34 +429,22 @@ unsigned hill_climbing::operator()(deme_t& deme,
              */
             bool big_step = opt_params.score_improved(best_score, prev_hi);
             if (!big_step && !last_chance) {
-
-                /* If we've been using the simplex extrapolation
-                 * (which is the case when 2<iteration), and there's
-                 * been no improvement, then try a full nearest-
-                 * neighborhood scan.  This tends to refresh the pool
-                 * of candidates, and keep things going a while longer.
-                 */
-                if (!rescan && (2 < iteration)) {
-                    rescan = true;
-                    distance = 1;
-                    continue;
-                }
-
                 /* If we just did the nearest neighbors, and found no
                  * improvement, then try again with the simplexes.  That's
                  * cheap & quick and one last chance to get lucky ...
                  */
-                if (rescan || (2 == iteration)) {
-                    rescan = false;
+                if (!already_xover
+                    // in the case we can widen the search check that
+                    // the max distance has been reached, otherwise,
+                    // it's not really a last_change
+                    && (!hc_params.widen_search || max_distance < distance)) {
                     last_chance = true;
-                    distance = 1;
                     continue;
                 }
             }
 
             /* Reset back to normal mode. */
             has_improved = big_step;
-            rescan = false;
             last_chance = false;
         }
 
@@ -557,12 +473,121 @@ unsigned hill_climbing::operator()(deme_t& deme,
     return current_number_of_evals;
 }
 
+size_t hill_climbing::estimate_neighborhood(size_t distance,
+                                            const field_set& fields)
+{
+    if (distance == 0)
+        return 1;
+    
+    const size_t nn_estimate = information_theoretic_bits(fields);
+
+    if (nn_estimate < distance) {
+        logger().warn("hill_climbing::estimate_neighborhood : "
+                      "the distance %u is greater than the "
+                      "theoretic bit field size %u. This could be a bug "
+                      "(but not necessarily due to corner cases "
+                      "and the fact that it's an approximation of the actual "
+                      "field size)", distance, nn_estimate);
+        distance = nn_estimate;
+    }
+
+    if (distance == 1)
+        return 2*nn_estimate; // be large given nn_estimate is only... an estimate
+    else {  // more than one
+
+        // Distances greater than 1 occurs only when the -L1 or
+        // -T1 flags are used.  This puts this algo into a very
+        // different mode of operation, in an attempt to overcome
+        // deceptive scoring functions.
+        
+        // For large-distance searches, there is a combinatorial
+        // explosion of the size of the search volume. Thus, be
+        // careful budget our available cycles.
+        return safe_binomial_coefficient(nn_estimate, distance);
+    }
+}
+
+size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
+                                      size_t current_number_of_evals,
+                                      size_t total_number_of_neighbours)
+{
+    if (distance == 0)
+        return 1;
+    
+    size_t number_of_new_instances = total_number_of_neighbours;
+    
+    // binomial coefficient has a combinatoric explosion to the power
+    // distance. So throttle back by fraction raised to power dist.
+    for (unsigned k=0; k<distance; k++)
+        number_of_new_instances *= hc_params.fraction_of_nn;
+    
+    // Clamp the number of nearest-neighbor evaluations
+    // we'll do.  This is necessitated because some systems
+    // have a vast number of nearest neighbors, and searching
+    // them all explodes the RAM usage, for no gain.
+    if (number_of_new_instances > hc_params.max_nn_evals)
+        number_of_new_instances = hc_params.max_nn_evals;
+    
+    // avoid overflow.
+    size_t nleft =
+        max_evals - current_number_of_evals;
+    
+// we choose the number 100 because below that multithreading is
+// disabled and it leads to some massive slow down because then most
+// of the computational power is spent on successive representation
+// building
+#define MINIMUM_DEME_SIZE         100
+
+    // If fraction is small, just use up the rest of the cycles.
+    if (number_of_new_instances < MINIMUM_DEME_SIZE)
+        number_of_new_instances = nleft;
+    
+    if (nleft < number_of_new_instances)
+        number_of_new_instances = nleft;
+    
+    if (hc_params.allow_resize_deme) {
+        // To avoid being OOM-killed, set ACCEPTABLE_RAM_FRACTION to
+        // half of installed RAM on the machine. This should work in a
+        // more or less scalable fashion on all machines, and still
+        // allow instances that are dozens of megabytes in size.
+        // (This is targeting machines with 4 GB to 100 GB of RAM).
+        //
+        // Currently, each disc knob takes 2 bits per instance, and
+        // each contin knob takes 10 bits per instance.  Thus, the
+        // practical limit is about 1M contin knobs on current-era
+        // machines, assuming that max_num_instances is about 10K.
+        //
+        // Note: A similar calculation is performed when the scored
+        // instances are merged into the deme, to limit the deme size.
+#define MAX_RAM_LIMIT 0.9
+        uint64_t new_usage = _instance_bytes * number_of_new_instances;
+
+        if (ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes < new_usage)
+        {
+            // Cap ram usage at the lesser of the desired usage,
+            // or the actual available space.
+            uint64_t free_ram = getFreeRAM();
+            uint64_t cap = min(ACCEPTABLE_RAM_FRACTION * _total_RAM_bytes, 
+                               MAX_RAM_LIMIT * free_ram);
+            number_of_new_instances = cap / _instance_bytes;
+            logger().debug("Cap new instances. "
+                           "Tot RAM=%Ld new_usage=%Ld Free RAM=%Ld cap=%Ld",
+                           _total_RAM_bytes, new_usage, free_ram, cap);
+        }
+    }
+
+    logger().debug("Budget %u samples out of estimated %u neighbours",
+                   number_of_new_instances, total_number_of_neighbours);
+
+    return number_of_new_instances;
+}
+
 size_t hill_climbing::cross_top_one(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     OC_ASSERT (sample_size > 0, "Cross-over sample size must be positive");
     if (sample_size-1 < num_to_make) num_to_make = sample_size-1;
@@ -571,9 +596,6 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
     // We don't actually need them all sorted; we only need
     // the highest-scoring num_to_make+1 to appear first, and
     // after that, we don't care about the ordering.
-    // std::sort(next(deme.begin(), sample_start),
-    //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<deme_inst_t>());
     std::partial_sort(next(deme.begin(), sample_start),
                       next(deme.begin(), sample_start + num_to_make+1),
                       next(deme.begin(), sample_start + sample_size),
@@ -581,6 +603,7 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
 
     deme.resize(deme_size + num_to_make);
 
+    // best instance
     const instance &reference = deme[sample_start].first;
 
     // Skip the first entry; its the top scorer.
@@ -594,20 +617,16 @@ size_t hill_climbing::cross_top_one(deme_t& deme,
 
 /** two-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_two(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                    size_t deme_size,
+                                    size_t num_to_make,
+                                    size_t sample_start,
+                                    size_t sample_size,
+                                    const instance& base)
 {
     // sample_size choose two.
     unsigned max = sample_size * (sample_size-1) / 2;
     if (max < num_to_make) num_to_make = max;
 
-    // std::sort(next(deme.begin(), sample_start),
-    //          next(deme.begin(), sample_start + sample_size),
-    //          std::greater<deme_inst_t >());
-    //
     unsigned num_to_sort = sqrtf(2*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
@@ -619,7 +638,13 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
     // Summation is over a 2-simplex
     for (unsigned i = 1; i < sample_size; i++) {
+
+        // (i+1)th best instance
         const instance& reference = deme[sample_start+i].first;
+
+        // merge with all best instance (better than reference) but
+        // using reference as the one containing the mutations to pass
+        // on the other (better) instance.
         for (unsigned j = 0; j < i; j++) {
             unsigned n = i*(i-1)/2 + j;
             if (num_to_make <= n) return num_to_make;
@@ -633,24 +658,20 @@ size_t hill_climbing::cross_top_two(deme_t& deme,
 
 /** three-dimensional simplex version of above. */
 size_t hill_climbing::cross_top_three(deme_t& deme,
-                          size_t deme_size,
-                          size_t num_to_make,
-                          size_t sample_start,
-                          size_t sample_size,
-                          const instance& base)
+                                      size_t deme_size,
+                                      size_t num_to_make,
+                                      size_t sample_start,
+                                      size_t sample_size,
+                                      const instance& base)
 {
     // sample_size choose three.
     unsigned max = sample_size * (sample_size-1) * (sample_size-2) / 6;
     if (max < num_to_make) num_to_make = max;
 
-    // std::sort(next(deme.begin(), sample_start),
-    //           next(deme.begin(), sample_start + sample_size),
-    //           std::greater<deme_inst_t>());
-
     unsigned num_to_sort = cbrtf(6*num_to_make) + 3;
     if (sample_size < num_to_sort) num_to_sort = sample_size;
     std::partial_sort(next(deme.begin(), sample_start),
-                      next(deme.begin(), sample_start + num_to_make),
+                      next(deme.begin(), sample_start + num_to_sort),
                       next(deme.begin(), sample_start + sample_size),
                       std::greater<deme_inst_t>());
     deme.resize(deme_size + num_to_make);
@@ -673,6 +694,29 @@ size_t hill_climbing::cross_top_three(deme_t& deme,
     return num_to_make;
 }
 
+size_t hill_climbing::crossover(deme_t& deme, size_t deme_size,
+                                size_t sample_start, size_t sample_size,
+                                const instance& base) {
+    // These cross-over (in the genetic sense) the
+    // top-scoring one, two and three instances,respectively.
+    size_t number_of_new_instances =
+        cross_top_one(deme, deme_size, hc_params.crossover_pop_size / 3,
+                      sample_start, sample_size, base);
+    
+    number_of_new_instances +=
+        cross_top_two(deme, deme_size + number_of_new_instances,
+                      hc_params.crossover_pop_size / 3,
+                      sample_start, sample_size, base);
+
+    number_of_new_instances +=
+        cross_top_three(deme, deme_size + number_of_new_instances,
+                        hc_params.crossover_pop_size / 3,
+                        sample_start, sample_size, base);
+
+    return number_of_new_instances;
+}
+
+        
 /// Shrink the deme, by removing all instances with score less than
 /// 'cutoff'.  This is implemented with in-place deletion of elements
 /// from a vector, with at least a token attempt to delete contigous
@@ -771,6 +815,25 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
     return did_resize;
 }
 
+void hill_climbing::log_stats_legend() {
+    logger().info() << hc_params.prefix_stat_deme << ": # "   /* Legend for graph stats */
+        "deme_count\t"
+        "iteration\t"
+        "total_steps\t"
+        "total_evals\t"
+        "microseconds\t"
+        "new_instances\t"
+        "num_instances\t"
+        "inst_RAM\t"
+        "num_evals\t"
+        "has_improved\t"
+        "best_weighted_score\t"
+        "delta_weighted\t"
+        "best_raw\t"
+        "delta_raw\t"
+        "complexity";
+}
+ 
 } // ~namespace moses
 } // ~namespace opencog
 

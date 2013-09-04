@@ -25,9 +25,9 @@
 #include <boost/scoped_array.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include <opencog/atomspace/HandleTemporalPair.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/macros.h>
 
 #include "PLN.h"
 
@@ -46,7 +46,7 @@ using std::string;
 using std::map;
 using std::set;
 using std::vector;
-using std::auto_ptr;
+using std::unique_ptr;
 using std::cout;
 using std::endl;
 
@@ -325,55 +325,55 @@ bool equal_vectors(pHandle* lhs, int lhs_arity, pHandle* rhs)
 
 //Ok, I got too excited with these conv
 
-void convertTo(const VertexVector& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexVector& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args->size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>((*args)[i]);
 }
 
-void convertTo(const VertexSeq& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexSeq& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>(args[i]);
 }
 
-void convertTo(const vector<BoundVertex>& args, auto_ptr<Handle>& ret)
+void convertTo(const vector<BoundVertex>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
 
     for (int i = 0; i < N; i++)
         ret.get()[i] = boost::get<Handle>(args[i].value);
 }
 
-void convertTo(const set<BoundVertex>& args, auto_ptr<Handle>& ret)
+void convertTo(const set<BoundVertex>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     int i = 0;
     for (set<BoundVertex>::const_iterator k = args.begin(); k != args.end(); k++, i++)
         ret.get()[i] = boost::get<Handle>(k->value);
 }
 
-void convertTo(const VertexSet& args, auto_ptr<Handle>& ret)
+void convertTo(const VertexSet& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args->size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     int i = 0;
     for (set<Vertex>::iterator k = args->begin(); k != args->end(); k++, i++)
         ret.get()[i] = boost::get<Handle>(*k);
 }
 
-void convertTo(const vector<Handle>& args, auto_ptr<Handle>& ret)
+void convertTo(const vector<Handle>& args, unique_ptr<Handle>& ret)
 {
     const int N = (int)args.size();
-    ret = auto_ptr<Handle>(new Handle[N]);
+    ret = unique_ptr<Handle>(new Handle[N]);
     for (int i = 0; i < N; i++)
         ret.get()[i] = args[i];
 }
@@ -1199,6 +1199,7 @@ pHandle _v2h(const Vertex& v) {
 
 bool equal_ignoreVarNameDifferences(pHandle l, pHandle r) {
     AtomSpaceWrapper* asw = GET_ASW;
+    OC_UNUSED(asw);
 
     //! @todo implement it here. This is just to ensure consistency with the existing implementation
     //! (by using it).
@@ -1967,6 +1968,7 @@ meta ForceRootLinkVirtual(meta _target)
     pHandle *ph = boost::get<pHandle>(&(*_target->begin()));
 
     Type t = asw->getType(*ph);
+    OC_UNUSED(t);
     if (ph && !asw->isType(*ph) && asw->getType(*ph) != FW_VARIABLE_NODE) {
         cprintf(2, "ForceVirtual: [%d] (exists).\n", *ph);
 

@@ -180,6 +180,9 @@ private:
 
     int blockNum;
 
+    Handle trueConceptNode;
+    Handle falseConceptNode;
+
 public:
 
     /**
@@ -279,6 +282,8 @@ public:
 	void sendExtractedActionFromPlan(ActionPlanID planId, 
 			unsigned int actionSeqNum = 1) 
 		throw (opencog::RuntimeException, std::bad_exception); 
+
+    HandleSeq getActionSeqFromPlan(ActionPlanID planId);
 
     /**
      * Sends an Feelings XML message to PVP. Note that not all feelings are
@@ -501,7 +506,7 @@ private:
 
     void processBlockStructureSignal(DOMElement* element);
 
-    void processFinishedFirstTimePerceptTerrianSignal(DOMElement* element);
+    void processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles);
 
 
     /**
@@ -780,7 +785,7 @@ private:
      * Process the terrain information from minecraft-like world. The processed
      * result is then stored in local space map.
      */
-    void processTerrainInfo(DOMElement * element);
+    void processTerrainInfo(DOMElement * element, HandleSeq &toUpdateHandles);
 
     /**
      * The 2D local space map is now to be replaced by 3D block-octree map.

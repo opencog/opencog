@@ -23,7 +23,6 @@
  */
 
 #include "ProtocolBufferSerializer.h"
-#include <boost/foreach.hpp>
 #include "Handle.h"
 #include "AttentionValue.h"
 #include "Atom.h"

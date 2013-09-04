@@ -1,7 +1,8 @@
 # Script found on KDE-edu list
-# Permission obtained from Jan Woetzel to use under a BSD-style license
-# (left to OpenCog to determine the specific BSD license, but this file should
-# be included in CMake proper soon...).
+# Permission obtained from Jan Woetzel to use under a BSD-style license.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 # Look for the header file
 # Try to find gnu scientific library GSL

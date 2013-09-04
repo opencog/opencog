@@ -28,7 +28,8 @@
 
 using namespace opencog;
 
-STIDecayingAgent::STIDecayingAgent()
+STIDecayingAgent::STIDecayingAgent(CogServer& cs) :
+    Agent(cs)
 {
     logger().info("[STIDecayingAgent] constructor");
 }
@@ -38,8 +39,8 @@ STIDecayingAgent::~STIDecayingAgent()
     logger().info("[STIDecayingAgent] destructor");
 }
 
-void STIDecayingAgent::run(CogServer *cogserver)
+void STIDecayingAgent::run()
 {
     logger().info("[STIDecayingAgent] run");
-    cogserver->getAtomSpace().decayShortTermImportance();
+    _cogserver.getAtomSpace().decayShortTermImportance();
 }

@@ -170,7 +170,7 @@ void CogServer::serverLoop()
 //        }
 
         if (currentCycle != this->cycleCount) {
-            logger().debug("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
+            logger().fine("[CogServer::serverLoop] Cycle %d completed in %f seconds.",
                             currentCycle,
                            elapsed_time/1000000.0
                           );
@@ -199,7 +199,7 @@ void CogServer::runLoopStep(void)
         requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process requests: %f",
                    currentCycle,
                    requests_time/1000000.0
                   );
@@ -215,7 +215,7 @@ void CogServer::runLoopStep(void)
     elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
-    logger().debug("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
+    logger().fine("[CogServer::runLoopStep cycle = %d] Time to run customRunLoop: %f",
                    currentCycle,
                    elapsed_time/1000000.0
                   );
@@ -233,13 +233,13 @@ void CogServer::runLoopStep(void)
         gettimeofday(&timer_end, NULL); 
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
-        logger().debug("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
+        logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
                    currentCycle,
                    elapsed_time/1000000.0, currentCycle
                   );
     } else {
         // Skipping MindAgents, and not incremented cycle counter.
-        logger().debug("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
+        logger().fine("[CogServer::runLoopStep cycle = %d] customRunLoop returned false.", currentCycle);
     }
 
 }
@@ -277,7 +277,7 @@ void CogServer::runAgent(Agent *agent)
                    agent->classinfo().id.c_str(),  this->cycleCount);
 
     agent->resetUtilizedHandleSets();
-    agent->run(this);
+    agent->run();
 
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
@@ -337,7 +337,7 @@ std::list<const char*> CogServer::agentIds() const
 
 Agent* CogServer::createAgent(const std::string& id, const bool start)
 {
-    Agent* a = Registry<Agent>::create(id);
+    Agent* a = Registry<Agent>::create(*this, id);
     if (a && start) startAgent(a);
     return a; 
 }
@@ -417,7 +417,7 @@ bool CogServer::unregisterRequest(const std::string& name)
 
 Request* CogServer::createRequest(const std::string& name)
 {
-    return Registry<Request>::create(name);
+    return Registry<Request>::create(*this, name);
 }
 
 const RequestClassInfo& CogServer::requestInfo(const std::string& name) const
@@ -474,9 +474,16 @@ int CogServer::getRequestQueueSize()
 
 bool CogServer::loadModule(const std::string& filename)
 {
-    if (modules.find(filename) !=  modules.end()) {
-        logger().info("Module \"%s\" is already loaded.", filename.c_str());
-        return false;
+// TODO FIXME I guess this needs to be different for windows.
+#define PATH_SEP '/'
+    // The module file identifier does NOT include the file path!
+    string fi = filename;
+    size_t path_sep = fi.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        fi.erase(0, path_sep+1);
+    if (modules.find(fi) !=  modules.end()) {
+        logger().info("Module \"%s\" is already loaded.", fi.c_str());
+        return true;
     }
 
     // reset error
@@ -515,7 +522,7 @@ bool CogServer::loadModule(const std::string& filename)
     // get and check module id
     const char *module_id = (*id_func)();
     if (module_id == NULL) {
-        logger().error("Invalid module id (module \"%s\")", filename.c_str());
+        logger().warn("Invalid module id (module \"%s\")", filename.c_str());
         return false;
     }
 
@@ -535,7 +542,7 @@ bool CogServer::loadModule(const std::string& filename)
     }
 
     // load and init module
-    Module* module = (Module*) (*load_func)(this);
+    Module* module = (Module*) (*load_func)(*this);
 
     // store two entries in the module map:
     //    1: filename => <struct module data>
@@ -546,6 +553,10 @@ bool CogServer::loadModule(const std::string& filename)
     // (by convention) be prefixed with its class namespace (i.e., "opencog::")
     std::string i = module_id;
     std::string f = filename;
+    // The filename does NOT include the file path!
+    path_sep = f.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
     ModuleData mdata = {module, i, f, load_func, unload_func, dynLibrary};
     modules[i] = mdata;
     modules[f] = mdata;
@@ -556,12 +567,53 @@ bool CogServer::loadModule(const std::string& filename)
     return true;
 }
 
+std::string CogServer::listModules()
+{
+    // Prepare a stream to collect the module information
+    std::ostringstream oss;
+
+    // Prepare iterators to process the ModuleMap
+    ModuleMap::iterator startIterator = modules.begin();
+    ModuleMap::iterator endIterator = modules.end();
+
+    // Loop through the ModuleMap
+    for(; startIterator != endIterator; ++startIterator)
+    {
+        // Get the module_id from the item
+        std::string module_id = startIterator->first;
+        ModuleData moduleData = startIterator->second;
+
+        // Only list the names, not the filenames.
+        if (module_id.find(".so", 0) != string::npos)
+        {
+            // Add the module_id to our stream
+            oss
+            // << "ModuleID: " << module_id
+            << "Filename: " << moduleData.filename
+            << ", ID: " << moduleData.id
+            // << ", Load function: " << moduleData.loadFunction
+            // << ", Module: " << moduleData.module
+            // << ", Unload function: " << moduleData.unloadFunction
+            << std::endl;
+        }
+
+    }
+
+    // Return the contents of the stream
+    return oss.str();
+}
+
 bool CogServer::unloadModule(const std::string& moduleId)
 {
-    logger().info("[CogServer] unloadModule(%s)", moduleId.c_str());
-    ModuleMap::const_iterator it = modules.find(moduleId);
+    // The module file identifier does NOT include the file path!
+    string f = moduleId;
+    size_t path_sep = f.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
+    logger().info("[CogServer] unloadModule(%s)", f.c_str());
+    ModuleMap::const_iterator it = modules.find(f);
     if (it == modules.end()) {
-        logger().info("[CogServer::unloadModule] module \"%s\" is not loaded.", moduleId.c_str());
+        logger().info("[CogServer::unloadModule] module \"%s\" is not loaded.", f.c_str());
         return false;
     }
     ModuleData mdata = it->second;
@@ -586,7 +638,7 @@ bool CogServer::unloadModule(const std::string& moduleId)
     if (dlclose(handle) != 0) {
         const char* dlsymError = dlerror();
         if (dlsymError) {
-            logger().error("Unable to unload module \"%s\": %s", filename.c_str(), dlsymError);
+            logger().warn("Unable to unload module \"%s\": %s", filename.c_str(), dlsymError);
             return false;
         }
     }
@@ -596,9 +648,15 @@ bool CogServer::unloadModule(const std::string& moduleId)
 
 CogServer::ModuleData CogServer::getModuleData(const std::string& moduleId)
 {
-    ModuleMap::const_iterator it = modules.find(moduleId);
+    // The module file identifier does NOT include the file path!
+    string f = moduleId;
+    size_t path_sep = f.rfind(PATH_SEP);
+    if (path_sep != std::string::npos)
+        f.erase(0, path_sep+1);
+
+    ModuleMap::const_iterator it = modules.find(f);
     if (it == modules.end()) {
-        logger().info("[CogServer::getModuleData] module \"%s\" was not found.", moduleId.c_str());
+        logger().info("[CogServer::getModuleData] module \"%s\" was not found.", f.c_str());
         ModuleData nulldata = {NULL, "", "", NULL, NULL, NULL};
         return nulldata;
     }
@@ -610,14 +668,32 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
-void CogServer::loadModules() 
+void CogServer::loadModules(const char* module_paths[]) 
 {
     // Load modules specified in the config file
     std::vector<std::string> modules;
     tokenize(config()["MODULES"], std::back_inserter(modules), ", ");
-    for (std::vector<std::string>::const_iterator it = modules.begin();
-         it != modules.end(); ++it) {
-        loadModule(*it);
+    std::vector<std::string>::const_iterator it;
+    for (it = modules.begin(); it != modules.end(); ++it) {
+        bool rc = false;
+        const char * mod = (*it).c_str();
+        if ( module_paths != NULL ) {
+            for (int i = 0; module_paths[i] != NULL; ++i) {
+                boost::filesystem::path modulePath(module_paths[i]);
+                modulePath /= *it;
+                if (boost::filesystem::exists(modulePath)) {
+                    mod = modulePath.string().c_str();
+                    rc = loadModule(mod);
+                    if (rc) break;
+                }
+            }
+        } else {
+            rc = loadModule(mod);
+        }
+        if (!rc)
+        {
+           logger().warn("Failed to load %s", mod);
+        }
     }
 }
 
@@ -645,7 +721,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
         } // if
         if (rc)
         {
-           logger().error("Failed to load %s: %d %s", 
+           logger().warn("Failed to load %s: %d %s", 
                  mod, rc, strerror(rc));
         }
         else
@@ -681,7 +757,7 @@ void CogServer::openDatabase(void)
     Module *mod = getModule("opencog::PersistModule");
     if (NULL == mod)
     {
-        logger().error("Failed to pre-load database, because persist module not found!\n");
+        logger().warn("Failed to pre-load database, because persist module not found!\n");
         return;
     }
     PersistModule *pm = static_cast<PersistModule *>(mod);

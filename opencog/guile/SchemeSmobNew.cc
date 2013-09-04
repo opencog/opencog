@@ -143,6 +143,9 @@ SCM SchemeSmob::handle_to_scm (Handle h)
 
 Handle SchemeSmob::scm_to_handle (SCM sh)
 {
+    if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sh))
+        return Handle::UNDEFINED;
+
     SCM suuid = SCM_SMOB_OBJECT(sh);
     UUID uuid = scm_to_ulong(suuid);
     return Handle(uuid);
@@ -165,7 +168,7 @@ SCM SchemeSmob::ss_atom (SCM shandle)
  */
 SCM SchemeSmob::ss_handle (SCM satom)
 {
-    if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+    if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
         scm_wrong_type_arg_msg("cog-handle", 1, satom, "opencog atom");
 
     // We store the uuid, so just return that.
@@ -416,7 +419,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
             if ((tv == NULL) && (av == NULL)) {
                 // If its not an atom, and its not a truth value, and its
                 // not an attention value, then whatever it is, its bad.
-                scm_wrong_type_arg_msg("cog-new-link", pos, satom, "opencog atom");
+                scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
             }
         }
         sl = SCM_CDR(sl);
@@ -436,18 +439,22 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
 
-    // Fish out a truth value, if its there.
-    const TruthValue *tv = get_tv_from_list(satom_list);
-    if (!tv) tv = &TruthValue::DEFAULT_TV();
-
     // Now, create the actual link... in the actual atom space.
-    Handle h = atomspace->addLink(t, outgoing_set, *tv);
+    Handle h = atomspace->addLink(t, outgoing_set);
+
+    // Fish out a truth value, if its there.
+    // NB: we do this in two steps, because the atomspace::addLink()
+    // method is too stupid to set the truth value correctly.
+    const TruthValue *tv = get_tv_from_list(satom_list);
+    if (tv) {
+        atomspace->setTV(h, *tv);
+    }
 
     // Was an attention value explicitly specified?
     // If so, then we've got to set it.
     const AttentionValue *av = get_av_from_list(satom_list);
     if (av) {
-        atomspace->setAV(h,*av);
+        atomspace->setAV(h, *av);
     }
     return handle_to_scm (h);
 }

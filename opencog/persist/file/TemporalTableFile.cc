@@ -31,6 +31,7 @@
 #include <set>
 
 #include <opencog/util/Logger.h>
+#include <opencog/util/macros.h>
 
 using namespace opencog;
 
@@ -45,23 +46,24 @@ TemporalTableFile::~TemporalTableFile()
 void TemporalTableFile::load(FILE *fp, TemporalTable *tbl, HandleMap<Atom *> *conv)
 {
     int size;
+    bool b_read = true;
     // reads the table size (number of temporal entries)
-    fread(&size, sizeof(int), 1, fp);
+    FREAD_CK(&size, sizeof(int), 1, fp);
     for (int i = 0; i < size; i++) {
         // reads the current Temporal entry
         bool isNormal;
         unsigned long a, b;
-        fread(&isNormal, sizeof(bool), 1 , fp);
-        fread(&a, sizeof(unsigned long), 1 , fp);
-        fread(&b, sizeof(unsigned long), 1 , fp);
+        FREAD_CK(&isNormal, sizeof(bool), 1 , fp);
+        FREAD_CK(&a, sizeof(unsigned long), 1 , fp);
+        FREAD_CK(&b, sizeof(unsigned long), 1 , fp);
         Temporal t(a, b, isNormal);
         // reads the number of associated handles to the current Temporal entry
         int setSize;
-        fread(&setSize, sizeof(int), 1 , fp);
+        FREAD_CK(&setSize, sizeof(int), 1 , fp);
         for (int j = 0; j < setSize; j++) {
             // reads each associated handle
             Handle oldHandle;
-            fread(&oldHandle, sizeof(Handle), 1, fp);
+            FREAD_CK(&oldHandle, sizeof(Handle), 1, fp);
             if ((!conv->contains(oldHandle))) {
                 throw InconsistenceException(TRACE_INFO,
                      "Temporal TableFile - Couldn't load TemporalRepository, "
@@ -71,6 +73,7 @@ void TemporalTableFile::load(FILE *fp, TemporalTable *tbl, HandleMap<Atom *> *co
             tbl->add(conv_atom->getHandle(), t);
         }
     }
+    CHECK_FREAD;
 }
 
 void TemporalTableFile::save(FILE *fp, TemporalTable *tbl)
@@ -89,16 +92,16 @@ void TemporalTableFile::save(FILE *fp, TemporalTable *tbl)
         unsigned long b = t->getB();
         fwrite(&b, sizeof(unsigned long), 1, fp);
         // writes the number of associated handles to the current temporal entry
-        HandleSet* hs = tbl->temporalMap->get(t);
-        int setSize = hs->getSize();
+        UnorderedHandleSet* hs = tbl->temporalMap->get(t);
+        int setSize = hs->size();
         fwrite(&setSize, sizeof(int), 1, fp);
-        HandleSetIterator* itr = hs->keys();
-        while (itr->hasNext()) {
+        UnorderedHandleSet::iterator itr = hs->begin();
+        while (itr != hs->end()) {
             // writes each associated handle
-            Handle handle = itr->next();
+            Handle handle = *itr;
+            itr++;
             fwrite(&handle, sizeof(Handle), 1, fp);
         }
-        delete (itr);
         currentEntry = currentEntry->next;
     }
 }

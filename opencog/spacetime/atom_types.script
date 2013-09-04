@@ -1,0 +1,14 @@
+
+        
+// ====================================================================
+// SpaceServer atoms
+SPACE_MAP_NODE <- NODE
+OBJECT_NODE <- NODE
+BLOCK_ENTITY_NODE <- OBJECT_NODE
+STRUCTURE_NODE <- OBJECT_NODE
+IMAGINARY_STRUCTURE_NODE <- OBJECT_NODE
+
+// Time-related atoms:
+AT_TIME_LINK <- ORDERED_LINK
+TIME_NODE <- NODE
+

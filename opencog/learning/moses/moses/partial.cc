@@ -21,7 +21,7 @@
  */
 
 #include "partial.h"
-#include "scoring.h"
+#include "../scoring/scoring.h"
 
 namespace opencog { namespace moses {
 
@@ -131,12 +131,12 @@ cout<<"duuude end with prefix_count=" << _prefix_count <<" table_size=" << tcoun
 /// predicates are "good enough".  If we find one that is, then trim
 /// the scoring tables, and return (so as to run moses on the smaller
 /// problem).
-bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
+bool partial_solver::eval_candidates(const pbscored_combo_tree_set& cands)
 {
     logger().info() << "well-enough received " << cands.size() << " candidates";
     _most_good = 0;
     for (auto &item : cands) {
-        const combo_tree& cand = item.first;
+        const combo_tree& cand = get_tree(item);
         eval_candidate(cand);
     }
 
@@ -154,7 +154,7 @@ bool partial_solver::eval_candidates(const bscored_combo_tree_set& cands)
 /// of the pieces we've accumulated, and feed those back into the main
 /// algo as exemplars.  The main algo will realize that it's out of time,
 /// it will just score these, print them, and then all is done.
-void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
+void partial_solver::final_cleanup(const pbscored_combo_tree_ptr_set& cands)
 {
     logger().info() << "well-enough ending with " << cands.size()
                     << " exemplars. Prefix count= " << _prefix_count
@@ -190,8 +190,8 @@ void partial_solver::final_cleanup(const bscored_combo_tree_ptr_set& cands)
 /// That is, return how many answers it got right, and how many got
 /// flat-out wrong.
 void partial_solver::effective(combo_tree::iterator pred,
-                       unsigned& good_count,  // return value
-                       unsigned& fail_count)  //return value
+                               unsigned& good_count,  // return value
+                               unsigned& fail_count)  //return value
 {
     sib_it predicate = pred;
     sib_it conq = next(predicate);
@@ -199,13 +199,13 @@ void partial_solver::effective(combo_tree::iterator pred,
 
     unsigned total_count = 0;
     // Count how many items the first predicate mis-identifies.
+    interpreter_visitor iv(predicate);
+    auto interpret_predicate = boost::apply_visitor(iv);
     for (CTable& ctable : _ctables) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); cit++) {
-            const vertex_seq& vs = cit->first;
+            vertex pr = interpret_predicate(cit->first.get_variant());
             const CTable::counter_t& c = cit->second;
-
             total_count += c.total_count();
-            vertex pr = eval_throws_binding(vs, predicate);
             if (pr == id::logical_true) {
                 unsigned num_right = c.get(consequent);
                 unsigned num_total = c.total_count();
@@ -229,15 +229,15 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
                                 unsigned& total)    // return value
 
 {
+    interpreter_visitor iv(predicate);
+    auto interpret_predicate = boost::apply_visitor(iv);
     for (CTable& ctable : tabs) {
         for (CTable::iterator cit = ctable.begin(); cit != ctable.end(); ) {
-            const vertex_seq& vs = cit->first;
+            vertex pr = interpret_predicate(cit->first.get_variant());
             const CTable::counter_t& c = cit->second;
-
             unsigned tc = c.total_count();
             total += tc;
 
-            vertex pr = eval_throws_binding(vs, predicate);
             if (pr == id::logical_true) {
                 deleted += tc;
                 ctable.erase(cit++);
@@ -249,7 +249,7 @@ void partial_solver::trim_table(std::vector<CTable>& tabs,
 
 /// Refresh the exemplars list.  Basically, just copy the entire
 /// metapopulation from the previous run.
-void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
+void partial_solver::refresh(const pbscored_combo_tree_ptr_set& cands)
 {
     for (const auto &item : cands)
         _exemplars.push_back(get_tree(item));
@@ -259,7 +259,7 @@ void partial_solver::refresh(const bscored_combo_tree_ptr_set& cands)
 void partial_solver::eval_candidate (const combo_tree& cand)
 {
     // Are we done yet?
-    penalized_behavioral_score pbs = _bscore->operator()(cand);
+    penalized_bscore pbs = _bscore->operator()(cand);
     score_t total_score = 0.0;
     for (const score_t& sc : pbs.first)
         total_score += sc;

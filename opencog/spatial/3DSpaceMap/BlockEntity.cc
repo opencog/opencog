@@ -226,7 +226,7 @@ void BlockEntity::SortBlockOrder()
     for (int j = 0; j < size - 1 -k; j ++)
     {
 
-        if (blocks[j] > blocks[j+1])
+        if (blocks[j]->getPosition().z > blocks[j+1]->getPosition().z)
         {
             tmp = blocks[j];
             blocks[j] = blocks[j+1];

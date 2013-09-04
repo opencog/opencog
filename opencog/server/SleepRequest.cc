@@ -28,7 +28,8 @@
 
 using namespace opencog;
 
-SleepRequest::SleepRequest()
+SleepRequest::SleepRequest(CogServer& cs) :
+    Request(cs)
 {
 }
 

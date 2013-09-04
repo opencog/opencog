@@ -108,7 +108,9 @@ void NMXmlParserExperiment::createExperiment(int exp, AtomSpace* as)
         throw new RuntimeException(TRACE_INFO, "Could not create temporary file\n");
     }
 
-    write(fd, expContents[exp%2], strlen(expContents[exp%2]));
+    ssize_t rc = write(fd, expContents[exp%2], strlen(expContents[exp%2]));
+    if (rc != (ssize_t) strlen(expContents[exp%2]))
+        throw new RuntimeException(TRACE_INFO, "Failed to write");
 
     close(fd);
 

@@ -1,4 +1,4 @@
-/** oc_omp.h --- 
+/* oc_omp.h --- 
  *
  * Copyright (C) 2011 Nil Geisweiller
  *
@@ -24,8 +24,11 @@
 #ifndef _OPENCOG_OC_OMP_H
 #define _OPENCOG_OC_OMP_H
 
-/**
- * File containing definitions to ease multi-threading support.
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
+/** @name Multi-threading support
  *
  * The easiest way I found to do this is to use the parallel versions
  * of the STL algorithms.  To use them, include this file and put the
@@ -38,8 +41,9 @@
  * compiled with compilers that do not (yet) implement OMP, such as 
  * LLVM clang.
  */
+///@{
 
-// compile with multithread support
+//! compile with multithread support (!)
 #define OC_OMP
 
 #ifdef OC_OMP
@@ -52,18 +56,23 @@
 
 namespace opencog {
 
-// setting the parallel env, such as number of threads, number of
-// minimal iterations to parallelize
+//! setting the parallel env, such as number of threads, number of
+//! minimal iterations to parallelize
 void setting_omp(unsigned num_threads, unsigned min_n = 50);
 
-// returns the number of threads as configured by setting_omp
+//! returns the number of threads as configured by setting_omp
 unsigned num_threads();
 
-// split the number of jobs in 2. For instance if n_jobs is 3, then it
-// returns <1, 2>. This function is convenient for parallalizing
-// recursive functions
+//! split the number of jobs in 2. For instance if n_jobs is 3, then it
+//! returns <1, 2>. 
+/// This function is convenient for parallalizing
+/// recursive functions
 std::pair<unsigned, unsigned> split_jobs(unsigned n_jobs);
 
+///@}
+
+/** @}*/
 } // ~namespace opencog
+
 
 #endif // _OPENCOG_OC_OMP_H

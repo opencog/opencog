@@ -21,7 +21,6 @@ def scheme_eval(char* s):
     expr = string(s)
     ret = eval_scheme(expr)
     return ret.c_str()
-    return ""
 
 def load_scm(AtomSpace a, char* fname):
     status = load_scm_file(deref(a.atomspace), fname)

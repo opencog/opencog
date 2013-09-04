@@ -108,7 +108,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(n3 not in result)
 
         # test empty
-        result = self.space.get_atoms_by_name(types.SemeNode,"test",subtype=False)
+        result = self.space.get_atoms_by_name(types.AnchorNode,"test",subtype=False)
         self.assertEqual(len(result),0)
 
     def test_get_by_type(self):
@@ -134,7 +134,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(h3 not in result)
 
         # test empty
-        result = self.space.get_atoms_by_type(types.SemeNode,subtype=False)
+        result = self.space.get_atoms_by_type(types.AnchorNode,subtype=False)
         self.assertEqual(len(result),0)
 
     def test_get_by_target_type(self):

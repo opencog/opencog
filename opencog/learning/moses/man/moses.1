@@ -1083,7 +1083,9 @@ Distribution, approximated by (for now)
          = exp(-|M|*log(|A|))
 
 where A is the alphabet of the model, |A| is the alphabet size, 
-and |M| is the complexity of the model.  Putting it all together,
+and |M| is the complexity of the model.  Note that this
+distribution is identical to the Boltzmann distribution, for an
+inverse temperature of log(|A|). Putting it all together,
 the log-likelihood of M is:
 
     LL(M) = -|M|*log(|A|) + |D_ne| log(p/(1-p)) + |D| log(1-p)

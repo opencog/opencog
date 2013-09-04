@@ -30,12 +30,15 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 class Config;
 
 typedef Config* ConfigFactory(void);
 
-
+//! library-wide configuration; keys and values are strings
 class Config
 {
 
@@ -48,7 +51,7 @@ protected:
             "LOG_FILE",              "opencog_server.log",
             "LOG_LEVEL",             "info",
             "ANSI_ENABLED",          "false",
-            "BACK_TRACE_LOG_LEVEL",  "warn",
+            "BACK_TRACE_LOG_LEVEL",  "error",   // C++ stack trace printing!
             "LOG_TO_STDOUT",         "true",
             "SERVER_CYCLE_DURATION", "100",     // in milliseconds
             "EXTERNAL_TICK_MODE",    "false",
@@ -71,54 +74,60 @@ protected:
     std::string _path_where_found;
 
 public:
-    // constructor and destructor
+    //! constructor
     ~Config();
+    //! destructor
     Config();
 
-    // Returns a new Config instance
+    //! Returns a new Config instance
     static Config* createInstance(void);
 
-    // reset configuration to default
+    //! reset configuration to default
     virtual void reset();
 
-    /// Load passed file and redefines values for parameters.
+    //! Load passed file and redefines values for parameters.
     void load(const char* config_file, bool resetFirst = true);
 
+    //! location of the file
     const std::string& path_where_found() { return _path_where_found; }
 
-    // Checks whether a parameter exists
+    //! Checks whether a parameter exists
     const bool has(const std::string &parameter_name) const;
 
-    // Set the value of a given parameter.
+    //! Set the value of a given parameter.
     void set(const std::string &parameter_name, const std::string &parameter_value);
 
-    // Return current value of a given parameter.
+    //! Return current value of a given parameter.
     const std::string& get(const std::string &parameter_name) const;
+    //! Return current value of a given parameter.
     const std::string& operator[](const std::string &name) const;
 
-    // Return current value of a given parameter as an integer
+    //! Return current value of a given parameter as an integer
     int get_int(const std::string &parameter_name) const;
 
-    // Return current value of a given parameter as an long
+    //! Return current value of a given parameter as an long
     long get_long(const std::string &parameter_name) const;
 
-    // Return current value of a given parameter as a double
+    //! Return current value of a given parameter as a double
     double get_double(const std::string &parameter_name) const;
-    //
-    // Return current value of a given parameter as a boolean
+
+    //! Return current value of a given parameter as a boolean
     bool get_bool(const std::string &parameter_name) const;
 
-    // Dump all configuration parameters to a string
+    //! Dump all configuration parameters to a string
     std::string to_string() const;
 };
 
-// singleton instance (following meyer's design pattern)
-// Nil: if overwrite is true then the static variable instance
-//      is changed with the createInstance provided
-//      it is a temporary dirty hack 
+//! singleton instance (following meyer's design pattern)
+/**
+ * Nil: if overwrite is true then the static variable instance@n
+ *      is changed with the createInstance provided@n
+ *      it is a temporary dirty hack@n
+ */
 Config& config(ConfigFactory* = Config::createInstance,
                bool overwrite = false);
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_CONFIG_H

@@ -195,10 +195,11 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
         TemporalEntry* te = sortedTemporalList;
         while (te != NULL) {
             Temporal* time = te->time;
-            HandleSet* hs = temporalMap->get(time);
-            HandleSetIterator* itr = hs->keys();
-            while (itr->hasNext()) {
-                Handle h = itr->next();
+            UnorderedHandleSet* hs = temporalMap->get(time);
+            UnorderedHandleSet::iterator itr = hs->begin();
+            while (itr != hs->end()) {
+                Handle h = *itr;
+                itr++;
                 HandleTemporalPairEntry* hte = new HandleTemporalPairEntry(HandleTemporalPair(h, time));
                 if (result == NULL) {
                     result = hte;
@@ -208,22 +209,22 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                 tail = hte;
             }
             te = te->next;
-            delete (itr);
         }
     } else {
         switch (criterion) {
         case EXACT: {
             DPRINTF("ExactMatch! temporalMap = %p\n", temporalMap);
-            HandleSet* hs = temporalMap->get((Temporal*) & t);
+            UnorderedHandleSet* hs = temporalMap->get((Temporal*) & t);
             DPRINTF("Got hs = %p\n", hs);
             if (hs != NULL) {
                 Temporal* time = NULL; // internal Temporal object (Temporal argument cannot be used in the result)
                 // Build the HandleTemporalPairEntry
-                HandleSetIterator* itr = hs->keys();
+                UnorderedHandleSet::iterator itr = hs->begin();
                 DPRINTF("Got hs iterator = %p\n", itr);
-                while (itr->hasNext()) {
+                while (itr != hs->end()) {
                     DPRINTF("hs iterator has next\n");
-                    Handle handle = itr->next();
+                    Handle handle = *itr;
+                    itr++;
                     DPRINTF("Got handle = %p\n", handle);
                     if (time == NULL) {
                         DPRINTF("time is NULL. Creating Temporal object\n");
@@ -250,7 +251,6 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                     DPRINTF("Handle concatenated result = %p\n", result);
                     DPRINTF("result's head = (%p,%s)\n", result->handleTime->getHandle(), result->handleTime->getTemporal()->toString().c_str());
                 }
-                delete itr;
                 DPRINTF("hs iteration finished\n");
             }
             break;
@@ -285,13 +285,14 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                     // Check if current entry matches the interval by checking the upperBound of each entry.
                     if (currentEntry->time->getUpperBound() >= t.getLowerBound()) {
                         // Matched! Add associated handles to the result.
-                        HandleSet* hs = temporalMap->get(currentEntry->time);
+                        UnorderedHandleSet* hs = temporalMap->get(currentEntry->time);
                         // Build the HandleTemporalPairEntry
-                        HandleSetIterator* itr = hs->keys();
+                        UnorderedHandleSet::iterator itr = hs->begin();
                         DPRINTF("Handles for time %s:\n", currentEntry->time->toString().c_str());
                         DPRINTF("=> %s:\n", hs->toString().c_str());
-                        while (itr->hasNext()) {
-                            HandleTemporalPairEntry* newEntry = new HandleTemporalPairEntry(itr->next(), currentEntry->time);
+                        while (itr != hs->end()) {
+                            HandleTemporalPairEntry* newEntry = new HandleTemporalPairEntry(*itr, currentEntry->time);
+                            itr++;
                             if (result) {
                                 resultTail->next = newEntry;
                             } else {
@@ -299,7 +300,6 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                             }
                             resultTail = newEntry;
                         }
-                        delete itr;
                     }
                     currentEntry = currentEntry->next;
                 }
@@ -328,10 +328,11 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                         previousTime = te->time;
                     } else {
                         Temporal* time = te->time;
-                        HandleSet* hs = temporalMap->get(time);
-                        HandleSetIterator* itr = hs->keys();
-                        while (itr->hasNext()) {
-                            Handle h = itr->next();
+                        UnorderedHandleSet* hs = temporalMap->get(time);
+                        UnorderedHandleSet::iterator itr = hs->begin();
+                        while (itr != hs->end()) {
+                            Handle h = *itr;
+                            itr++;
                             HandleTemporalPairEntry* hte = new HandleTemporalPairEntry(HandleTemporalPair(h, time));
                             if (result == NULL) {
                                 result = hte;
@@ -340,17 +341,17 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                             }
                             tail = hte;
                         }
-                        delete itr;
                     }
                 }
                 te = te->next;
             }
             if (previousTime) {
                 // get all entries with the previous time
-                HandleSet* hs = temporalMap->get(previousTime);
-                HandleSetIterator* itr = hs->keys();
-                while (itr->hasNext()) {
-                    Handle h = itr->next();
+                UnorderedHandleSet* hs = temporalMap->get(previousTime);
+                UnorderedHandleSet::iterator itr = hs->begin();
+                while (itr != hs->end()) {
+                    Handle h = *itr;
+                    itr++;
                     HandleTemporalPairEntry* hte = new HandleTemporalPairEntry(HandleTemporalPair(h, previousTime));
                     if (result == NULL) {
                         result = hte;
@@ -359,7 +360,6 @@ HandleTemporalPairEntry* TemporalTable::get(const Temporal& t, TemporalRelations
                     }
                     tail = hte;
                 }
-                delete itr;
             }
             break;
         }
@@ -404,10 +404,10 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
                 previousTe = currentTe;
                 currentTe = currentTe->next;
             } else {
-                HandleSet* hs = temporalMap->get(currentTe->time);
-                hs->remove(h);
+                UnorderedHandleSet* hs = temporalMap->get(currentTe->time);
+                hs->erase(h);
                 DPRINTF("H removed from handle set!\n");
-                if (hs->getSize() == 0) {
+                if (hs->size() == 0) {
                     DPRINTF("Handle set became empty!\n");
                     temporalMap->remove(currentTe->time);
                     delete hs;
@@ -437,10 +437,10 @@ bool TemporalTable::remove(Handle h, const Temporal& t, TemporalRelationship cri
     }
     if (previousTe) {
         Temporal* previousTime = previousTe->time;
-        HandleSet* hs = temporalMap->get(previousTime);
-        hs->remove(h);
+        UnorderedHandleSet* hs = temporalMap->get(previousTime);
+        hs->erase(h);
         DPRINTF("H removed from handle set!\n");
-        if (hs->getSize() == 0) {
+        if (hs->size() == 0) {
             DPRINTF("Handle set became empty!\n");
             temporalMap->remove(previousTime);
             delete hs;
@@ -490,13 +490,14 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
             Temporal* internal_t = temporalMap->getKey(t);
             if (internal_t) {
                 result = true;
-                HandleSet* hs = temporalMap->remove(internal_t);
+                UnorderedHandleSet* hs = temporalMap->remove(internal_t);
                 DPRINTF("Got hs = %p\n", hs);
-                HandleSetIterator* itr = hs->keys();
+                UnorderedHandleSet::iterator itr = hs->begin();
                 DPRINTF("Got hs iterator = %p\n", itr);
-                while (itr->hasNext()) {
+                while (itr != hs->end()) {
                     DPRINTF("hs iterator has next\n");
-                    Handle handle = itr->next();
+                    Handle handle = *itr;
+                    itr++;
                     DPRINTF("Got handle = %p\n", handle);
                     TemporalEntry* te = handleMap->remove(handle);
                     TemporalEntry* tailTe = tailHandleMap->get(handle);
@@ -510,7 +511,6 @@ bool TemporalTable::remove(const Temporal& t, TemporalRelationship criterion)
                         handleMap->add(handle, te);
                     }
                 }
-                delete itr;
                 DPRINTF("hs iteration finished\n");
                 delete hs;
                 removeFromSortedEntries(t);
@@ -728,13 +728,13 @@ void TemporalTable::addToMaps(Handle h, Temporal* t)
 
 
     // Add to temporalMap
-    HandleSet* handleSet;
+    UnorderedHandleSet* handleSet;
     if (temporalMap->contains(t)) {
         handleSet = temporalMap->remove(t);
     } else {
-        handleSet = new HandleSet();
+        handleSet = new UnorderedHandleSet();
     }
-    handleSet->add(h);
+    handleSet->insert(h);
     temporalMap->add(t, handleSet);
 
     DPRINTF("TemporalTable::addToMaps - end.\n");

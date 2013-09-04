@@ -25,6 +25,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/spacetime/atom_types.h>
 
 #include <opencog/embodiment/Learning/Filter/ActionFilter.h>
 #include <opencog/embodiment/Control/LoggerFactory.h>
@@ -39,7 +40,7 @@ namespace opencog { namespace messaging {
 using namespace opencog;
 
 //constructor destructor
-ImitationLearningAgent::ImitationLearningAgent() : _lts(LTS_IDLE),
+ImitationLearningAgent::ImitationLearningAgent(CogServer& cs) : Agent(cs), _lts(LTS_IDLE),
         _BDCat(NULL),
         _entropyFilter(NULL),
         _fitnessEstimator(NULL),
@@ -73,7 +74,7 @@ ImitationLearningAgent::~ImitationLearningAgent()
 }
 
 //run method
-void ImitationLearningAgent::run(CogServer* server)
+void ImitationLearningAgent::run()
 {
 
     //std::cout << "IMITATION LEARNING AGENT RUN" << std::endl;

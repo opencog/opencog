@@ -40,6 +40,8 @@ IF (CMAKE_BUILD_TYPE STREQUAL "")
 	SET(CMAKE_BUILD_TYPE Release)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
+MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
@@ -131,7 +133,15 @@ SET(Boost_USE_MULTITHREADED ON)
 # Required boost packages
 # hypertable requires boost iostreams
 # boost-1.49 no longer has a libboost_iostreams
-FIND_PACKAGE(Boost 1.45 COMPONENTS date_time filesystem regex serialization signals system thread REQUIRED)
+# 1.46 is minimum for required filesystem support
+# program_options needed by some combo utilities
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+
+IF(Boost_FOUND)
+	SET(Boost_FOUND_SAVE 1)
+ELSE(Boost_FOUND)
+	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
+ENDIF(Boost_FOUND)
 
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
@@ -141,9 +151,13 @@ ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
 # Optional boost packages; can build without these.
-# Arghhh. Except cmake is treating these as required, not optional. #$%**&
-FIND_PACKAGE(Boost 1.45 COMPONENTS python program_options QUIET)
-FIND_PACKAGE(Boost 1.45 COMPONENTS math_c99 QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS python program_options QUIET)
+FIND_PACKAGE(Boost 1.46 COMPONENTS math_c99 QUIET)
+
+# Arghhh. Except cmake is treating above as required, not optional. #$%**&
+IF(Boost_FOUND_SAVE)
+	SET(Boost_FOUND 1)
+ENDIF(Boost_FOUND_SAVE)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
   MESSAGE(STATUS "Found Boost::program_options")
@@ -175,13 +189,26 @@ ENDIF (EXPAT_FOUND)
 # Gnu Scientific Library
 FIND_PACKAGE(GSL)
 IF (GSL_FOUND)
+	MESSAGE(STATUS "GSL found.")
 	ADD_DEFINITIONS(-DHAVE_GSL)
 	SET(HAVE_GSL 1)
+ELSE (GSL_FOUND)
+	MESSAGE(STATUS "GSL missing: needed for the AtomSpace.")
 ENDIF (GSL_FOUND)
 
 # This is required for Guile
 FIND_LIBRARY(GMP_LIBRARY gmp)
 FIND_PATH(GMP_INCLUDE_DIR gmp.h)
+
+# Gtk-3 required for visualization
+FIND_PACKAGE(GTK3)
+IF (GTK3_FOUND)
+	# MESSAGE(STATUS "GTK3 found.")
+	ADD_DEFINITIONS(-DHAVE_GTK)
+	SET(HAVE_GTK 1)
+ELSE (GTK3_FOUND)
+	MESSAGE(STATUS "GTK missing: needed for the the gtk-visualizer.")
+ENDIF (GTK3_FOUND)
 
 # Gnu Guile scheme interpreter
 # Versions prior to 1.8.6 have assorted serious problems with
@@ -217,6 +244,19 @@ ELSE (HYPERTABLE_FOUND)
 	MESSAGE(STATUS "Hypertable not found; the experimental distributed persistence DB needs it.")
 
 ENDIF (HYPERTABLE_FOUND)
+
+
+# Link-Gramar is needed for the Viterbi parser
+# Only 4.7.12 or newer has the required read-dict API in it.
+FIND_PACKAGE(LinkGrammar 4.7.12)
+IF (LINK_GRAMMAR_FOUND)
+	SET(HAVE_LINK_GRAMMAR 1)
+	MESSAGE(STATUS "Link Grammar was found.")
+	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
+ELSE (LINK_GRAMMAR_FOUND)
+	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
+ENDIF (LINK_GRAMMAR_FOUND)
+
 
 # MPI is needed for MOSES on compute clusters.
 FIND_PACKAGE(MPI)
@@ -425,7 +465,7 @@ ENDIF(Boost_FOUND)
 IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
-#    SET(HAVE_PLN 1)
+    SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
@@ -445,9 +485,9 @@ IF(HAVE_SERVER) # because web depends on server
 	SET(HAVE_WEB 1)
 ENDIF(HAVE_SERVER)
 
-IF(ODBC_FOUND) # SQL persistance
+IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
-ENDIF(ODBC_FOUND)
+ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
 
 # Here's the catch: much of embodiment relies on the MessagingSystem,
 # which uses NMXML as the message format.  And NMXML needs expat,
@@ -460,6 +500,10 @@ IF (CURL_FOUND AND XMLRPC_FOUND)
 	ADD_DEFINITIONS(-DHAVE_UBIGRAPH)
 	SET(HAVE_UBIGRAPH 1)
 ENDIF (CURL_FOUND AND XMLRPC_FOUND)
+
+IF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
+	SET(HAVE_VITERBI 1)
+ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 # At this time, there is no reason to build with memcached for
 # any "normal" use, so just stub it out.
@@ -633,38 +677,9 @@ INCLUDE(CPack)
 
 # documentation
 FIND_PACKAGE(Doxygen)
-IF (DOXYGEN_FOUND)
-    # doc dir has no CMakeList.txt
-    #ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
-	EXECUTE_PROCESS(
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-		# COMMAND bzr nick
-		# This will get the current branch name; I think that is what is wanted?
-		COMMAND git rev-parse --abbrev-ref HEAD
-		OUTPUT_VARIABLE BZR_NICK OUTPUT_STRIP_TRAILING_WHITESPACE)
-	EXECUTE_PROCESS(
-		WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-		# I dunno, git doesn't have anything analogous to bzr revno...
-		# COMMAND bzr revno
-		# COMMAND git describe
-		COMMAND git rev-parse HEAD
-		OUTPUT_VARIABLE BZR_REVNO OUTPUT_STRIP_TRAILING_WHITESPACE)
-	CONFIGURE_FILE(
-		${PROJECT_SOURCE_DIR}/doc/doxygen.conf.in
-		${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
-	ADD_CUSTOM_TARGET (
-		doxygen
-		COMMAND ${DOXYGEN} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
-		WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		COMMENT "Generating documentation"
-	)
-ELSE (DOXYGEN_FOUND)
-    MESSAGE(STATUS "Doxygen not found, you won't be able to generate API documentation.")
-ENDIF (DOXYGEN_FOUND)
+ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 
 # Show a summary of what we got
-
-
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
@@ -673,14 +688,18 @@ SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HA
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
 SUMMARY_ADD("FeatureSelection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
+SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
-#SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
+SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("SchemeBinding" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL Persist" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
+SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
 SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
 SUMMARY_SHOW()
+
+

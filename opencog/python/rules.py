@@ -4,6 +4,7 @@ except ImportError:
     from atomspace_remote import TruthValue, types as t, confidence_to_count, types as t
 
 import formulas
+import temporalFormulas
 from tree import *
 import math
 
@@ -84,30 +85,27 @@ def rules(a, deduction_types):
     # It won't add a new Rule for atoms that are created during the inference, rather they will be added to
     # the Proof DAG. It's simple to have a separate Rule for each axiom, but it's slow because the chainer
     # will try to unify a target against every axiom Rule.
-    rule_for_every_atom = True
-    if rule_for_every_atom:
+    #for obj in a.get_atoms_by_type(t.Atom):
+    #    # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
+    #    if obj.tv.count > 0 and obj.tv.mean > 0:
+    #        tr = tree_from_atom(obj)
+    #        # A variable with a TV could just prove anything; that's evil!
+    #        if not tr.is_variable():
+    #            
+    #            # tacky filter
+    #            if 'CHUNK' in str(tr):
+    #                continue
+    #            
+    #            r = Rule(tr, [], '[axiom]', tv = obj.tv)
+    #            rules.append(r)
 
-        for obj in a.get_atoms_by_type(t.Atom):
-            # POLICY: Ignore all false things. This means you can never disprove something! But much more useful for planning!
-            #if obj.tv.count > 0 and obj.tv.mean > 0:
-            tr = tree_from_atom(obj)
-            # A variable with a TV could just prove anything; that's evil!
-            if not tr.is_variable():
-
-                # tacky filter
-                if 'CHUNK' in str(tr):
-                    continue
-
-                r = Rule(tr, [], '[axiom]', tv = obj.tv)
-                rules.append(r)
-    else:
-        # Just lookup the rule rather than having separate rules. Would be faster
-        # with a large number of atoms (i.e. more scalable). Some examples will break if
-        # you use it due to bugs in the backward chainer.
-        r = Rule(Var(123),[],
-                          name='Lookup',
-                          match=match_axiom)
-        rules.append(r)
+    # Just lookup the rule rather than having separate rules. Would be faster
+    # with a large number of atoms (i.e. more scalable). Some examples will break if
+    # you use it due to bugs in the backward chainer.
+    r = Rule(Var(123),[],
+                      name='Lookup',
+                      match=match_axiom)
+    rules.append(r)
 
     # A simple example Rule to test the mechanism. You're allowed to add a Rule which calls
     # any Python function to decide one of the Atoms. This one does the plus calculation.
@@ -222,13 +220,13 @@ def rules(a, deduction_types):
 
     rules += logical_rules(a, deduction_types)
 
-    #rules += quantifier_rules(a)
+    rules += quantifier_rules(a)
 
-    #rules += temporal_rules(a)
+    rules += temporal_rules(a)
     
     #rules += planning_rules(a)
 
-    rules += subset_rules(a)
+    #rules += subset_rules(a)
 
     # Return every Rule specified above.
     return rules
@@ -386,14 +384,95 @@ def temporal_rules(atomspace):
     rules.append(Rule(T('BeforeLink', 1, 2),
                         [ ],
                         name='Before',
-                        match = create_temporal_matching_function(formulas.beforeFormula)
+                        match = create_temporal_matching_function(temporalFormulas.beforeFormula)
                         )
                 )
+    rules.append(Rule(T('OverlapsLink', 1, 2),
+                        [ ],
+                        name='Overlaps',
+                        match = create_temporal_matching_function(temporalFormulas.overlapsFormula)
+                        )
+                )
+    rules.append(Rule(T('DuringLink', 1, 2),
+                        [ ],
+                        name='During',
+                        match = create_temporal_matching_function(temporalFormulas.duringFormula)
+                        )
+                )
+    rules.append(Rule(T('MeetsLink', 1, 2),
+                        [ ],
+                        name='Meets',
+                        match = create_temporal_matching_function(temporalFormulas.meetsFormula)
+                        )
+                )
+    rules.append(Rule(T('StartsLink', 1, 2),
+                        [ ],
+                        name='Starts',
+                        match = create_temporal_matching_function(temporalFormulas.startsFormula)
+                        )
+                )
+    rules.append(Rule(T('FinishesLink', 1, 2),
+                        [ ],
+                        name='Finishes',
+                        match = create_temporal_matching_function(temporalFormulas.finishesFormula)
+                        )
+                )
+    rules.append(Rule(T('EqualsLink', 1, 2),
+                        [ ],
+                        name='Equals',
+                        match = create_temporal_matching_function(temporalFormulas.equalsFormula)
+                        )
+                )
+    rules.append(Rule(T('AfterLink', 1, 2),
+                        [ ],
+                        name='After',
+                        match = create_temporal_matching_function(temporalFormulas.afterFormula)
+                        )
+                )
+    rules.append(Rule(T('Overlapped_byLink', 1, 2),
+                        [ ],
+                        name='Overlapped_by',
+                        match = create_temporal_matching_function(temporalFormulas.overlapped_byFormula)
+                        )
+                )
+    rules.append(Rule(T('ContainsLink', 1, 2),
+                        [ ],
+                        name='Contains',
+                        match = create_temporal_matching_function(temporalFormulas.containsFormula)
+                        )
+                )
+    rules.append(Rule(T('Met_byLink', 1, 2),
+                        [ ],
+                        name='Met_by',
+                        match = create_temporal_matching_function(temporalFormulas.met_byFormula)
+                        )
+                )
+    rules.append(Rule(T('Started_byLink', 1, 2),
+                        [ ],
+                        name='Started_by',
+                        match = create_temporal_matching_function(temporalFormulas.started_byFormula)
+                        )
+                )
+    rules.append(Rule(T('Finished_byLink', 1, 2),
+                        [ ],
+                        name='Finished_by',
+                        match = create_temporal_matching_function(temporalFormulas.finished_byFormula)
+                        )
+                )
+
+    # This Rule is important but the TV formula is wrong
+    rules.append(Rule(T('BeforeLink', 1, 3),
+                        [ T('BeforeLink', 1, 2), T('BeforeLink', 2, 3), Var(1), Var(2), Var(3) ],
+                        name='BeforeTransitivityRule',
+                        formula = formulas.deductionSimpleFormula
+                        )
+                )
+
     return rules
 
 def lookup_times(tree, atomspace):
     '''For the specified Tree (which can contain a Node or Link), search for
-    all the AtTimeLinks. Return a dictionary from timestamp (as a string) to
+    all the AtTimeLinks. Return a dictionary from timestamp (as an int) to
     a float, representing the fuzzy truth value. (Ignore confidence which is
     probably OK.)'''
     template = T('AtTimeLink',
@@ -404,8 +483,8 @@ def lookup_times(tree, atomspace):
     dist = {}
     for link in attimes:
         assert isinstance(link, Atom)
-        time = link.out[0].name
-        fuzzy_tv = link.out[1]
+        time = int(link.out[0].name)
+        fuzzy_tv = link.tv.mean
         dist[time] = fuzzy_tv
     
     return dist
@@ -413,12 +492,24 @@ def lookup_times(tree, atomspace):
 def create_temporal_matching_function(formula):
     def match_temporal_relationship(space,target):
         assert isinstance(target, Tree)
-        assert not target.args[0].is_variable()
-        assert not target.args[1].is_variable()
+        # awkward technical limitation - can't look up (Before $x MyBirth) for example - all things that happened before i was born
+        if target.args[0].is_variable() or target.args[1].is_variable():
+            return []
         
         distribution_event1 = lookup_times(target.args[0], space)
         distribution_event2 = lookup_times(target.args[1], space)
         
+        missing_data = (len(distribution_event1) == 0 or len(distribution_event2) == 0)
+        error_message = "unable to find distribution for targets", target.args[0], distribution_event1, target.args[1], distribution_event2
+
+        #assert not missing_data, error_message
+        # Enable this instead of the assert after you finish debugging the rules.
+        # For real-world use the assert is wrong - if you don't have the right data you should just not apply that Rule.
+        if missing_data:
+            print error_message
+            # No info available for those events. So return no results
+            return []
+
         strength = formula(distribution_event1, distribution_event2)
         
         # I'm not sure what to choose for this

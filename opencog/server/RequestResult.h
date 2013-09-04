@@ -30,7 +30,6 @@
 
 #include <opencog/server/IHasMimeType.h>
 #include <opencog/server/IRequestComplete.h>
-#include <opencog/shell/GenericShell.h>
 
 namespace opencog
 {

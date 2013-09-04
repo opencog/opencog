@@ -27,12 +27,11 @@
 
 #include <functional>
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
+#include <boost/shared_ptr.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/platform.h>
-
-#include <opencog/atomspace/AtomSpace.h>
 
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
@@ -44,8 +43,13 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-typedef boost::unordered_map<VersionHandle, 
+class AtomSpace;
+
+typedef std::unordered_map<VersionHandle, 
                              TruthValue*,
                              hashVersionHandle,
                              eqVersionHandle> VersionedTruthValueMap;
@@ -53,6 +57,7 @@ typedef boost::unordered_map<VersionHandle,
 class Atom;
 class CompositeRenumber;
 
+//! a TruthValue that consists of a number of VersionHandles paired with TruthValues
 class CompositeTruthValue: public TruthValue
 {
     friend class CompositeRenumber; // XXX ugly hack
@@ -64,7 +69,7 @@ private:
     TruthValue* primaryTV;
     VersionedTruthValueMap versionedTVs;
 
-    // Special constructor for use by the fromString() method.
+    //! Special constructor for use by the fromString() method.
     CompositeTruthValue();
 
 protected:
@@ -81,7 +86,7 @@ public:
      *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE
      *        constant). In this case its indicator component does not
      *        matter.
-     * NOTE:  This object will take care of memory deallocation of the
+     * @note  This object will take care of memory deallocation of the
      *        TruthValue object passed as argument to this method. So,
      *        the caller should not delete it outside.
      */
@@ -179,7 +184,7 @@ public:
      *
      * @param atomspace The AtomSpace to check the handles against
      */
-    void removeInvalidTVs(AtomSpace& atomspace);
+    void removeInvalidTVs(AtomSpace*);
 
     // iterator over VersionHandles
 private:
@@ -220,6 +225,7 @@ public:
 
 typedef boost::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG__COMPOSITE_TRUTH_VALUE_H_

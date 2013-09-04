@@ -242,7 +242,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             score_t bpenalty;
             in >> bpenalty;
 
-            penalized_behavioral_score pbs;
+            penalized_bscore pbs;
             pbs.second = complexity_penalty;
             if (0 != bpenalty) {
                 OC_ASSERT(bpenalty == complexity_penalty,
@@ -254,15 +254,18 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
                 in.ignore(4123123, '\n');
             }
             // insert read element in candidates
-            bscored_combo_tree candidate =
-                make_pair(tr, make_pair(pbs, composite_score(score, complexity, complexity_penalty)));
+            composite_score cs(score, complexity, complexity_penalty);
+            metapop_candidates::value_type candidate = {tr, {{pbs, cs},
+                                                             demeID_t()}};
             candidates.insert(candidate);
 
             if (logger().isFineEnabled()) {
                 logger().fine("Parsed candidate:");
                 stringstream ss;
-                logger().fine(ostream_bscored_combo_tree(ss, candidate,
-                                                         true, true).str());
+                ostream_combo_tree_composite_pbscore(ss, get_tree(candidate),
+                                                     get_composite_penalized_bscore(candidate),
+                                                     true, true);
+                logger().fine(ss.str());
             }
         }
     }
@@ -349,7 +352,7 @@ void distributed_moses(metapopulation& mp,
     const variables_map& vm = pa.vm;
     const jobs_t& jobs = pa.jobs;
 
-    typedef bscored_combo_tree_ptr_set_cit mp_cit;
+    typedef pbscored_combo_tree_ptr_set_cit mp_cit;
 
     host_proc_map hpm = init(jobs);
 
@@ -419,8 +422,7 @@ void distributed_moses(metapopulation& mp,
                 stats.n_evals += evals;
 
                 // update best and merge
-                bscored_combo_tree_set mc(candidates.begin(),
-                                          candidates.end());
+                pbscored_combo_tree_set mc(candidates.begin(), candidates.end());
 
                 mp.update_best_candidates(mc);
                 mp.merge_candidates(mc);

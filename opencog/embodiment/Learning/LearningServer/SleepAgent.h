@@ -47,10 +47,10 @@ public:
         return _ci;
     }
 
-    ~SleepAgent();
-    SleepAgent();
+    virtual ~SleepAgent();
+    SleepAgent(CogServer&);
 
-    void run(opencog::CogServer *oac);
+    virtual void run();
 
 }; // class
 } } // namespace opencog::learningserver

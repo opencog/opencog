@@ -4,6 +4,9 @@
 #  SIGAR_INCLUDE_DIR - where to find SIGAR.h, etc.
 #  SIGAR_LIBRARIES   - List of libraries when using SIGAR.
 #  SIGAR_FOUND       - True if SIGAR found.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
 if (SIGAR_INCLUDE_DIR)
@@ -19,7 +22,7 @@ find_path(SIGAR_INCLUDE_DIR sigar.h
 
 # SIGAR support a lot more platforms than listed here.
 # cf. sigar.hyperic.com
-set(SIGAR_NAMES sigar-x86-linux sigar-x86_64-linux sigar-amd64-linux sigar-universal-macosx)
+set(SIGAR_NAMES sigar-x86-linux sigar-x86_64-linux sigar-amd64-linux sigar-universal-macosx sigar)
 find_library(SIGAR_LIBRARY
   NAMES ${SIGAR_NAMES}
   PATHS /usr/lib /usr/local/lib /opt/local/lib

@@ -26,11 +26,12 @@
 #define _OPENCOG_FEATURE_SELECTION_DEME_OPTIMIZE_H
 
 #include <boost/range/algorithm/sort.hpp>
+#include <boost/range/algorithm/find.hpp>
 
 #include <opencog/learning/moses/optimization/optimization.h>
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/representation/instance_set.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/table/table.h>
 
 #include "../main/feature-selection.h" // needed for feature_selection_params
@@ -46,33 +47,34 @@ instance initial_instance(const feature_selection_parameters& fs_params,
                           const std::vector<std::string>& labels);
 
 template<typename Optimize, typename Scorer>
-feature_set optimize_deme_select_features(const field_set& fields,
-                                          instance_set<composite_score>& deme,
-                                          instance& init_inst,
-                                          Optimize& optimize, const Scorer& scorer,
-                                          const feature_selection_parameters& fs_params)
+feature_set_pop optimize_deme_select_feature_sets(const field_set& fields,
+                                                  instance_set<composite_score>& deme,
+                                                  instance& init_inst,
+                                                  Optimize& optimize, const Scorer& scorer,
+                                                  const feature_selection_parameters& fs_params)
 {
     // optimize feature set
     unsigned ae; // actual number of evaluations to reached the best candidate
     unsigned evals = optimize(deme, init_inst, scorer,
-                             fs_params.hc_max_evals, fs_params.max_time,
-                             &ae);
+                              fs_params.hc_max_evals, fs_params.max_time,
+                              &ae);
 
-    // get the best one
-    boost::sort(deme, std::greater<scored_instance<composite_score> >());
-    instance best_inst = evals > 0 ? *deme.begin_instances() : init_inst;
-    composite_score best_score =
-        evals > 0 ? *deme.begin_scores() : worst_composite_score;
+    // convert the deme into feature_set_pop (ignoring redundant sets)
+    feature_set_pop fs_pop;
+    for (const auto& inst : deme) {
+        feature_set_pop::value_type p(select_tag()(inst).get_score(),
+                                      get_feature_set(fields, inst));
+        if (boost::find(fs_pop, p) == fs_pop.end())
+            fs_pop.insert(p);
+    }
 
-    // get the best feature set
-    feature_set selected_features = get_feature_set(fields, best_inst);
     // Logger
     {
         // log its score
         stringstream ss;
         ss << "Selected feature set has composite score: ";
         if (evals > 0)
-            ss << best_score;
+            ss << fs_pop.begin()->first;
         else
             ss << "Unknown";
         logger().info(ss.str());
@@ -83,17 +85,17 @@ feature_set optimize_deme_select_features(const field_set& fields,
         logger().info("Actual number of evaluations to reach the best feature set: %u", ae);
     }
     // ~Logger
-    return selected_features;
+    return fs_pop;
 }
 
 // run feature selection given a moses optimizer and a scorer, create
 // a deme a define the wrap the scorer for that deme. Possibly add
 // cache as well.
 template<typename Optimize, typename Scorer>
-feature_set create_deme_select_features(const CTable& ctable,
-                                        Optimize& optimize,
-                                        const Scorer& scorer,
-                                        const feature_selection_parameters& fs_params)
+feature_set_pop create_deme_select_feature_sets(const CTable& ctable,
+                                                Optimize& optimize,
+                                                const Scorer& scorer,
+                                                const feature_selection_parameters& fs_params)
 {
     arity_t arity = ctable.get_arity();
     field_set fields(field_set::disc_spec(2), arity);
@@ -108,26 +110,26 @@ feature_set create_deme_select_features(const CTable& ctable,
         // typedef prr_cache_threaded<DBScorer> ScorerCache;
         typedef iscorer_cache<DBScorer> ScorerCache;
         ScorerCache sc_cache(fs_params.hc_cache_size, db_sc);
-        feature_set selected_features =
-            optimize_deme_select_features(fields, deme, init_inst, optimize,
-                                          sc_cache, fs_params);
+        feature_set_pop sf_pop =
+            optimize_deme_select_feature_sets(fields, deme, init_inst, optimize,
+                                              sc_cache, fs_params);
         // Logger
         logger().info("Number of cache misses = %u", sc_cache.get_misses());
         // ~Logger
-        return selected_features;
+        return sf_pop;
     } else {
-        return optimize_deme_select_features(fields, deme, init_inst, optimize,
-                                             db_sc, fs_params);
+        return optimize_deme_select_feature_sets(fields, deme, init_inst, optimize,
+                                                 db_sc, fs_params);
     }
 }
 
 // run feature selection given a moses optimizer
 template<typename Optimize>
-feature_set moses_select_features(const CTable& ctable,
-                                  Optimize& optimize,
-                                  const feature_selection_parameters& fs_params) {
-    fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
-    return create_deme_select_features(ctable, optimize, fs_sc, fs_params);
+feature_set_pop moses_select_feature_sets(const CTable& ctable,
+                                          Optimize& optimize,
+                                          const feature_selection_parameters& fs_params) {
+    fs_scorer<set<arity_t>> fs_sc(ctable, fs_params);
+    return create_deme_select_feature_sets(ctable, optimize, fs_sc, fs_params);
 }
 
 } // ~namespace opencog

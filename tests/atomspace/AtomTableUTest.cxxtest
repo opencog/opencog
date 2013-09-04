@@ -37,7 +37,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -48,6 +47,8 @@
 #include <opencog/util/mt19937ar.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
+
+#include "HandleEntry.h"
 
 using namespace opencog;
 using namespace std;
@@ -92,7 +93,7 @@ public:
 
         try {
             // Check for existing links because there are 2 identical links in the test xml file
-            HandleEntry* result = NMXmlParser::loadXML(readers, atomSpace, false);
+            HandleEntry* result = HandleEntry::fromHandleVector(NMXmlParser::loadXML(readers, atomSpace, false));
             delete result;
 
             VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
@@ -108,7 +109,7 @@ public:
     }
 
     void testSimple() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         Handle sense = atomTable.add(new Node(CONCEPT_NODE, "28675194"));
         std::vector<Handle> os;
@@ -119,7 +120,7 @@ public:
 
     void testHolds() {
         Handle h(100101);
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(atomTable.holds(word));
         TS_ASSERT(!atomTable.holds(h));
@@ -127,16 +128,16 @@ public:
 
     void testIsCleared() {
 
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         TS_ASSERT(atomTable.isCleared());
         Handle word = atomTable.add(new Node(NUMBER_NODE, "1"));
         TS_ASSERT(!atomTable.isCleared());
     }
 
     void testGetRandom() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         ostringstream oss;
-        size_t numBuckets = atomTable.atomSet.bucket_count();
+        size_t numBuckets = atomTable.getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;
@@ -162,7 +163,11 @@ public:
         HandleEntry* expectedEntries[6];
         //logger().debug("building expectedEntries");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->getPredicateHandleSet(index);
+
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
+
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             expectedEntries[index] = indexedHandles;
             //logger().debug("Handles in the index %d: ", index);
@@ -177,7 +182,9 @@ public:
         }
         //logger().debug("testPredicateIndices with NULL_VERSION_HANDLE");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index]);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             //logger().debug("Handles that matches predicate %s: ", gpnNames[index]);
             HandleEntry* expectedEntry = expectedEntries[index];
@@ -219,7 +226,9 @@ public:
         }
         //logger().debug("testPredicateIndices with VH1");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH1);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH1);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
@@ -243,7 +252,9 @@ public:
         }
         //logger().debug("testPredicateIndices with VH2");
         for (int index = 0; index < 6; index++) {
-            HandleEntry* indexedHandles = table->findHandlesByGPN(gpnNames[index], VH2);
+            HandleSeq hs;
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH2);
+            HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
@@ -274,52 +285,53 @@ public:
     //          <Element class="CWPixelPerceptNode" name="00065349"/>
     //          <Element class="NumberNode" name="on"/>
     //      </ListLink>
-    void testGetHandleSet() {
+    void testGetHandleSet()
+    {
         //== getHandleSet(const char**, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         const char* names1[] = {"00065349", "12"};
         Type types1[] = {CONCEPT_NODE, NUMBER_NODE};
-        HandleEntry* result = table->getHandleSet(names1, types1, NULL, 2, LIST_LINK, false);
+        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByNames(names1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete (result);
 
         const char* names2[] = {"12", "00065349"};
         Type types2[] = {NUMBER_NODE, CONCEPT_NODE};
-        result = table->getHandleSet(names2, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result == NULL);
 
         const char* names3[] = {NULL, "12"};
         Type types3[] = {NOTYPE, NUMBER_NODE};
-        result = table->getHandleSet(names3, types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         const char* names4[] = {NULL, "00065349"};
         Type types4[] = {NOTYPE, CONCEPT_NODE};
-        result = table->getHandleSet(names4, types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames(names4, types4, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
-        result = table->getHandleSet((const char**) NULL, types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result != NULL);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet((const char**) NULL, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByNames((const char**) NULL, types2, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(result == NULL);
 
-        TS_ASSERT_THROWS(table->getHandleSet(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names3, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
-        TS_ASSERT_THROWS(table->getHandleSet(names4, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names1, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names2, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names3, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
+        TS_ASSERT_THROWS(table->getHandlesByNames(names4, NULL, NULL, 2, LIST_LINK, false), RuntimeException&);
 
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
         handles1[0] = table->getHandle("00065349", CONCEPT_NODE);
         handles1[1] = table->getHandle("12", NUMBER_NODE);
-        result = table->getHandleSet(handles1, types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
@@ -327,14 +339,14 @@ public:
         std::vector<Handle> handles2(2);
         handles2[0] = table->getHandle("12", NUMBER_NODE);
         handles2[1] = table->getHandle("00065349", CONCEPT_NODE);
-        result = table->getHandleSet(handles2, types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
         handles3[1] = table->getHandle("12", NUMBER_NODE);
-        result = table->getHandleSet(handles3, types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
@@ -342,70 +354,70 @@ public:
         std::vector<Handle> handles4(2);
         handles4[0] = table->getHandle("12", NUMBER_NODE);
         handles4[1] = Handle::UNDEFINED;
-        result = table->getHandleSet(handles4, types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, types4, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
-        result = table->getHandleSet(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(std::vector<Handle>(), types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(std::vector<Handle>(), types2, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(handles1, NULL , NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, NULL , NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(handles2, NULL, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, NULL, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(handles3, NULL , NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, NULL , NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(handles4, NULL, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, NULL, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
 
         //== getHandleSet(Type*, bool*, Arity, Type = ATOM, bool = true) ==/
 
-        result = table->getHandleSet(types1, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(types2, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
 
-        result = table->getHandleSet(types3, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
-        result = table->getHandleSet(types4, NULL, 2, LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByTypes(types4, NULL, 2, LIST_LINK, false));
         //if (result != NULL) logger().debug("result = %s", result->toString().c_str());
         TS_ASSERT(!result);
     }
 
     void testGetHandleSet_bugfix1() {
         HandleSeq emptyOutgoing;
-        HandleEntry* result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
+        HandleEntry* result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(!result);
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true));
         TS_ASSERT(!result);
         Link* link = new Link(LIST_LINK, emptyOutgoing);
         Handle h = table->add(link);
         if (link->getHandle() != h) delete link;
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, false));
         TS_ASSERT(result);
         delete result;
-        result = table->getHandleSet(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true);
+        result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(emptyOutgoing, NULL, NULL, emptyOutgoing.size(), LIST_LINK, true));
         TS_ASSERT(result);
         delete result;
     }
@@ -495,7 +507,7 @@ public:
     }
 
     void testSimpleWithCustomAtomTypes() {
-        AtomTable atomTable(false);
+        AtomTable atomTable;
         Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");

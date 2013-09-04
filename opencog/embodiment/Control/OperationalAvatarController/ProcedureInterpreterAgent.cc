@@ -31,7 +31,7 @@ ProcedureInterpreterAgent::~ProcedureInterpreterAgent()
 {
 }
 
-ProcedureInterpreterAgent::ProcedureInterpreterAgent()
+ProcedureInterpreterAgent::ProcedureInterpreterAgent(CogServer& cs) : Agent(cs)
 {
 }
 
@@ -40,8 +40,8 @@ void ProcedureInterpreterAgent::setInterpreter(Procedure::ProcedureInterpreter* 
     interpreter = _interpreter;
 }
 
-void ProcedureInterpreterAgent::run(opencog::CogServer *server)
+void ProcedureInterpreterAgent::run()
 {
     logger().fine("ProcedureInterpreterAgent::run()");
-    interpreter->run(&(((OAC*)server)->getNetworkElement()));
+    interpreter->run(&(dynamic_cast<OAC*>(&_cogserver)->getNetworkElement()));
 }

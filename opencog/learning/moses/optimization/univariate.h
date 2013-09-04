@@ -64,7 +64,7 @@ struct univariate_optimization : optimizer_base
 {
     univariate_optimization(const optim_parameters& op = optim_parameters(),
                             const eda_parameters& ep = eda_parameters())
-        : opt_params(op), eda_params(ep) {}
+        : optimizer_base(op), eda_params(ep) {}
 
     // Return # of evaluations actually performed
     unsigned operator()(deme_t& deme,
@@ -72,7 +72,6 @@ struct univariate_optimization : optimizer_base
                         unsigned max_evals,
                         time_t max_time);
 
-    optim_parameters opt_params;
     eda_parameters eda_params;
 };
 

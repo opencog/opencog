@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_SIMPLE_NN_H
-#define _OPENCOG_SIMPLE_NN_H
+#ifndef _COMBO_SIMPLE_NN_H
+#define _COMBO_SIMPLE_NN_H
 
 #include <vector>
 #include <utility>
@@ -39,8 +39,6 @@
 
 namespace opencog { namespace combo {
 
-using namespace std;
-
 //anns are composed of nodes and connections
 class ann;
 class ann_node;
@@ -55,8 +53,8 @@ struct compare_connection
 };
 
 //simple iterator types
-typedef vector<ann_node*>::iterator ann_node_it;
-typedef vector<ann_connection*>::iterator ann_connection_it;
+typedef std::vector<ann_node*>::iterator ann_node_it;
+typedef std::vector<ann_connection*>::iterator ann_connection_it;
 
 //different node types
 enum ann_nodetype { nodetype_input, nodetype_hidden, nodetype_output };
@@ -71,8 +69,8 @@ public:
     ann_node* dest;
     double weight;
 
-    friend ostream& operator<<(ostream& os, const ann_connection* a) {
-        os << "Connection with weight " << a->weight << endl;
+    friend std::ostream& operator<<(std::ostream& os, const ann_connection* a) {
+        os << "Connection with weight " << a->weight << std::endl;
         return os;
     }
 
@@ -100,8 +98,8 @@ public:
                          // can have this attribute true
   
     //connections
-    vector<ann_connection*> out_connections;
-    vector<ann_connection*> in_connections;
+    std::vector<ann_connection*> out_connections;
+    std::vector<ann_connection*> in_connections;
 
     //what is the activation level
     double activation;
@@ -130,7 +128,7 @@ public:
        sort(in_connections.begin(),in_connections.end(),compare_connection());
     }
 
-    friend ostream& operator<<(ostream& os, const ann_node* n) {
+    friend std::ostream& operator<<(std::ostream& os, const ann_node* n) {
         os << n->id << ":";
         if (n->nodetype == nodetype_input) os << "input";
         else if (n->nodetype == nodetype_hidden) os << "hidden";
@@ -146,16 +144,16 @@ class ann
 public:
 
     //complete list of nodes
-    vector<ann_node*> nodes;
+    std::vector<ann_node*> nodes;
     //only the input nodes
-    vector<ann_node*> inputs;
+    std::vector<ann_node*> inputs;
     //only the output nodes
-    vector<ann_node*> outputs;
+    std::vector<ann_node*> outputs;
     //only the hidden nodes
-    vector<ann_node*> hidden;
+    std::vector<ann_node*> hidden;
 
     //a list of all the connections
-    vector<ann_connection*> connections;
+    std::vector<ann_connection*> connections;
 
     ann() {}
 
@@ -227,19 +225,19 @@ public:
     //common graph visualization format.
     void write_dot(const char* filename)
     {
-        ofstream outfile(filename);
+        std::ofstream outfile(filename);
         ann_connection_it it;
         ann_node_it nit; 
-        outfile << "digraph g { " << endl;
+        outfile << "digraph g { " << std::endl;
 
         for(nit=inputs.begin();nit!=inputs.end();++nit)
         {
-            outfile << "N" << (*nit)->tag << " [shape=box]" << endl;
+            outfile << "N" << (*nit)->tag << " [shape=box]" << std::endl;
         }
         
         for(nit=outputs.begin();nit!=outputs.end();++nit)
         {
-            outfile << "N" << (*nit)->tag << " [shape=triangle]" << endl;
+            outfile << "N" << (*nit)->tag << " [shape=triangle]" << std::endl;
         }
 
         for(it=connections.begin();it!=connections.end();++it)
@@ -251,7 +249,7 @@ public:
                 outfile << "[color=green] ";
             else if ((*it)->weight < -0.3)
                 outfile << "[color=red] ";
-            outfile << endl;
+            outfile << std::endl;
         }
 
         
@@ -262,7 +260,7 @@ public:
                 int n1 = (*nit)->memory_ptr->tag;
                 int n2 = (*nit)->tag;
                 outfile << "N" << n1 << " -> N" << n2 << " [style=dotted] ";
-                outfile << endl;
+                outfile << std::endl;
             }
         }
 
@@ -271,7 +269,7 @@ public:
         {
             outfile << "N" << (*nit)->tag << " ";
         }
-        outfile << " } " << endl;
+        outfile << " } " << std::endl;
 
 
         outfile << " { rank=same; ";
@@ -279,9 +277,9 @@ public:
         {
             outfile << "N" << (*nit)->tag << " ";
         }
-        outfile << " } " << endl;
+        outfile << " } " << std::endl;
         
-        outfile << "}" << endl;
+        outfile << "}" << std::endl;
     }
 
     //add a new hidden node that is connected to all the outputs
@@ -340,7 +338,7 @@ public:
         //first enumerate valid hidden nodes 
         ann_node_it iter;
         ann_node_it in_iter;
-        vector<ann_node*> possible;
+        std::vector<ann_node*> possible;
         
         //see if there are any viable hidden nodes that are
         //not already being used to feed a memory input
@@ -454,7 +452,7 @@ public:
         }
     }
 
-    void load_inputs(const vector<double>& vals) {
+    void load_inputs(const std::vector<double>& vals) {
         unsigned counter = 0;
         for (unsigned x = 0;x < inputs.size();++x) {
             if(inputs[x]->memory_ptr)
@@ -544,21 +542,21 @@ public:
         d->in_connections.push_back(newconnection);
     }
     
-    void remove_from_vec(ann_node* n, vector<ann_node*> & l)
+    void remove_from_vec(ann_node* n, std::vector<ann_node*> & l)
     {
         ann_node_it loc = find(l.begin(), l.end(), n);
         if(loc!=l.end())
             l.erase(loc);
     }
 
-    void remove_from_vec(ann_connection* c, vector<ann_connection*>& l)
+    void remove_from_vec(ann_connection* c, std::vector<ann_connection*>& l)
     {
         ann_connection_it loc = find(l.begin(), l.end(), c);
         if(loc!=l.end())
             l.erase(loc);
     } 
     
-    void delete_connections(vector<ann_connection*>& c)
+    void delete_connections(std::vector<ann_connection*>& c)
     { 
         for(ann_connection_it iter=c.begin(); iter!= c.end();)
         {
@@ -620,15 +618,15 @@ public:
         }
     }
 
-    friend ostream& operator<<(ostream& os, const ann *a) {
+    friend std::ostream& operator<<(std::ostream& os, const ann *a) {
         for (unsigned int x = 0;x < a->connections.size();++x)
-            cout << a->connections[x]->source->id << " -> " <<
+            std::cout << a->connections[x]->source->id << " -> " <<
                  a->connections[x]->dest->id << " : " <<
-                 a->connections[x]->weight << endl;
+                 a->connections[x]->weight << std::endl;
         return os;
     }
 };
 
 }} // ~namespaces combo opencog
 
-#endif // _OPENCOG_SIMPLE_NN_H
+#endif // _COMBO_SIMPLE_NN_H

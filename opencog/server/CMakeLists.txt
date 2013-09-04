@@ -5,27 +5,18 @@ INCLUDE_DIRECTORIES (
 ADD_LIBRARY (builtinreqs SHARED
 	BuiltinRequestsModule
 	Request
-	DataRequest
-	ExitRequest
 	SleepRequest
-	HelpRequest
-	LoadRequest
-	SaveRequest
 	LoadModuleRequest
 	ListRequest
 	ShutdownRequest
 	UnloadModuleRequest
+	ListModulesRequest
 )
 
 TARGET_LINK_LIBRARIES(builtinreqs
 	atomspace
 	cogutil
 )
-
-IF (HAVE_EXPAT)
-	TARGET_LINK_LIBRARIES(builtinreqs xml)
-ENDIF (HAVE_EXPAT)
-
 
 ADD_LIBRARY (server SHARED
 	Agent
@@ -39,15 +30,12 @@ ADD_LIBRARY (server SHARED
 )
 
 TARGET_LINK_LIBRARIES(server
+	nlp-types
 	atomspace
 	${Boost_FILESYSTEM_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 	dl
 )
-
-IF (HAVE_EXPAT)
-	TARGET_LINK_LIBRARIES(server xml)
-ENDIF (HAVE_EXPAT)
 
 IF (HAVE_GUILE)
 	TARGET_LINK_LIBRARIES(server smob)
@@ -71,7 +59,7 @@ IF (APPLE)
 	# Apple's linker seems not to understand a colon-separated list of
 	# rpaths.
 	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-		"-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cogutil -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
+                "-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dynamics/attention -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/guile -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/nlp/wsd -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/persist/sql -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/query -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/server -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/shell -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cogutil -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/web -Wl,-rpath,/opt/local/lib -Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/cython/")
 	# doesn't work for some reason...
 	#SET_TARGET_PROPERTIES(cogserver PROPERTIES INSTALL_RPATH
 	#	${PROJECT_BINARY_DIR}/opencog/guile)
@@ -80,7 +68,7 @@ ELSE(APPLE)
 # This is just plain wrong, it won't link the test cases correctly.
 #
 #	SET_TARGET_PROPERTIES(server PROPERTIES LINK_FLAGS
-#		-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/dotty:${PROJECT_BINARY_DIR}/opencog/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web:${PROJECT_BINARY_DIR}/opencog/cython/)
+#		-Wl,-rpath,${PROJECT_BINARY_DIR}/opencog/visualization/dotty:${PROJECT_BINARY_DIR}/opencog/visualization/ubigraph:${PROJECT_BINARY_DIR}/opencog/dynamics/attention:${PROJECT_BINARY_DIR}/opencog/guile:${PROJECT_BINARY_DIR}/opencog/learning/dimensionalembedding:${PROJECT_BINARY_DIR}/opencog/nlp/wsd:${PROJECT_BINARY_DIR}/opencog/persist:${PROJECT_BINARY_DIR}/opencog/query:${PROJECT_BINARY_DIR}/opencog/server:${PROJECT_BINARY_DIR}/opencog/shell:${PROJECT_BINARY_DIR}/opencog/util:${PROJECT_BINARY_DIR}/opencog/web:${PROJECT_BINARY_DIR}/opencog/cython/)
 ENDIF (APPLE)
 #ENDIF (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
@@ -110,16 +98,11 @@ INSTALL (FILES
 	BuiltinRequestsModule.h
 	CogServer.h
 	ConsoleSocket.h
-	DataRequest.h
-	ExitRequest.h
 	Factory.h
-	HelpRequest.h
 	IHasMimeType.h
 	IRequestComplete.h
 	ListRequest.h
 	LoadModuleRequest.h
-	LoadRequest.h
-	SaveRequest.h
 	Module.h
 	NetworkServer.h
 	SocketListener.h
@@ -127,6 +110,7 @@ INSTALL (FILES
 	SystemActivityTable.h
 	Registry.h
 	Request.h
+	RequestClassInfo.h
 	RequestResult.h
 	ShutdownRequest.h
 	UnloadModuleRequest.h

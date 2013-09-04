@@ -27,6 +27,7 @@
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/macros.h>
 
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/Atom.h>
@@ -116,27 +117,29 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
 
     unsigned int mapSize;
-    fread(&mapSize, sizeof(unsigned int), 1, fp);
+    bool b_read = true;
+    int rc = fread(&mapSize, sizeof(unsigned int), 1, fp);
+    OC_ASSERT(0 < rc, "SpaceServerSavable - Failed read of mapSize.");
     for (unsigned int i = 0; i < mapSize; i++) {
         Handle mapHandle;
-        fread(&mapHandle, sizeof(Handle), 1, fp);
+        FREAD_CK(&mapHandle, sizeof(Handle), 1, fp);
         int xMin,yMin, zMin,floorHeight;
         unsigned int xDim, yDim, zDim;
 
         char charMapName[128];
 
-        fread(&charMapName, 128, 1, fp);
+        FREAD_CK(&charMapName, 128, 1, fp);
         std::string mapName(charMapName);
 
-        fread(&xMin, sizeof(int), 1, fp);
-        fread(&yMin, sizeof(int), 1, fp);
-        fread(&zMin, sizeof(int), 1, fp);
+        FREAD_CK(&xMin, sizeof(int), 1, fp);
+        FREAD_CK(&yMin, sizeof(int), 1, fp);
+        FREAD_CK(&zMin, sizeof(int), 1, fp);
 
-        fread(&xDim, sizeof(unsigned int), 1, fp);
-        fread(&yDim, sizeof(unsigned int), 1, fp);
-        fread(&zDim, sizeof(unsigned int), 1, fp);
+        FREAD_CK(&xDim, sizeof(unsigned int), 1, fp);
+        FREAD_CK(&yDim, sizeof(unsigned int), 1, fp);
+        FREAD_CK(&zDim, sizeof(unsigned int), 1, fp);
 
-        fread(&floorHeight, sizeof( int), 1, fp);
+        FREAD_CK(&floorHeight, sizeof( int), 1, fp);
 
         SpaceServer::SpaceMap *map = new SpaceServer::SpaceMap(mapName,xMin,yMin,zMin,xDim,yDim,zDim,floorHeight);
         map->load(fp);
@@ -146,12 +149,13 @@ void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::At
         Handle newMapHandle = conv->get(mapHandle)->getHandle();
         server->spaceMaps[newMapHandle] = map;
     }
+    CHECK_FREAD;
     /*
     unsigned int persistentHandlesSize;
-    fread(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
+    FREAD_CK(&persistentHandlesSize, sizeof(unsigned int), 1, fp);
     for (unsigned int i = 0; i < persistentHandlesSize; i++) {
         Handle mapHandle;
-        fread(&mapHandle, sizeof(Handle), 1, fp);
+        FREAD_CK(&mapHandle, sizeof(Handle), 1, fp);
         OC_ASSERT(conv->contains(mapHandle),
                 "SpaceServerSavable - HandleMap conv does not contain mapHandle.");
         Handle newMapHandle = conv->get(mapHandle)->getHandle();

@@ -1,4 +1,4 @@
-/** iostreamContainer.h --- 
+/* iostreamContainer.h --- 
  *
  * Copyright (C) 2010 OpenCog Foundation
  *
@@ -34,11 +34,16 @@
 #include "foreach.h"
 #include "oc_assert.h"
 
-/**
- * functions to read, write, print or convert to string generic containers
+namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
  */
 
-namespace opencog {
+    /** @name IO stream container
+     * functions to read, write, print or convert to string generic containers
+     */
+    ///@{
+    
     
     /**
      * stream out all elements in [from, to( with delimiter
@@ -203,11 +208,12 @@ namespace opencog {
                                 delimiter, left, right, empty_lr).str();
     }
 
-    // used by istreamContainer
+    //! used by istreamContainer
     inline bool exists_white_space(const std::string& str) {
         foreach(const char& c, str) if(isspace(c)) return true;
         return false;
     }
+    //! used by istreamContainer
     inline bool all_white_space(const std::string& str) {
         foreach(const char& c, str) if(!isspace(c)) return false;
         return true;
@@ -228,7 +234,7 @@ namespace opencog {
      * For instance 
      * std::stringstream ss("[1 2 3 4] 5");
      * std::vector<int> nums;
-     * istreamContainer(ss, back_inserter(nums), [", "]");
+     * istreamContainer(ss, back_inserter(nums), "[", "]");
      * inserts 1 to 4 in nums.
      * @note it is assumed the delimiter is a white-space
      * @todo upgrade that function to work with any delimiter
@@ -285,5 +291,8 @@ namespace opencog {
         return in;
     }
     
+    ///@}
+
+/** @}*/
 } // ~namespace opencog
 #endif // _OPENCOG_PRINTCONTAINER_H

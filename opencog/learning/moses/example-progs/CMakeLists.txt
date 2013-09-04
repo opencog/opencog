@@ -1,23 +1,25 @@
-ADD_EXECUTABLE (moses-ann-pole2nv moses-ann-pole2nv)
-TARGET_LINK_LIBRARIES (moses-ann-pole2nv
-	moses
-	cogutil
-)
-
 ADD_EXECUTABLE (moses-ann-pole1 moses-ann-pole1)
 TARGET_LINK_LIBRARIES (moses-ann-pole1
 	moses
 	cogutil
 )
 
-ADD_EXECUTABLE (moses-ann-pole2-hillclimbing moses-ann-pole2-hillclimbing)
-TARGET_LINK_LIBRARIES (moses-ann-pole2-hillclimbing
+ADD_EXECUTABLE (moses-ann-pole2 moses-ann-pole2 pole_balancing)
+TARGET_LINK_LIBRARIES (moses-ann-pole2
 	moses
 	cogutil
 )
 
-ADD_EXECUTABLE (moses-ann-pole2 moses-ann-pole2)
-TARGET_LINK_LIBRARIES (moses-ann-pole2
+ADD_EXECUTABLE (moses-ann-pole2nv moses-ann-pole2nv pole_balancing)
+TARGET_LINK_LIBRARIES (moses-ann-pole2nv
+	moses
+	cogutil
+)
+
+ADD_EXECUTABLE (moses-ann-pole2-hillclimbing
+	moses-ann-pole2-hillclimbing
+	pole_balancing)
+TARGET_LINK_LIBRARIES (moses-ann-pole2-hillclimbing
 	moses
 	cogutil
 )

@@ -51,22 +51,6 @@ struct scored_instance : public tagged_item<instance, ScoreT>
     }
 };
 
-/**
- * score_instance takes an instance and a scoring functor and returns
- * the scored_instance
- *
- * @param inst candidate instance
- * @param score scoring functor
- * @return scored_instance
- */
-template<typename Scoring>
-scored_instance < typename result_of < Scoring(instance) >::type >
-score_instance(const instance& inst, const Scoring& score)
-{
-    return scored_instance < typename result_of < Scoring(instance) >::type >
-        (inst, score(inst));
-}
-
 } // ~namespace moses
 } // ~namespace opencog
 

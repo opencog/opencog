@@ -29,7 +29,6 @@
 #define _OPENCOG_NM_XML_PARSER_EXPERIMENT_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/types.h>
 
 #define NNMXMLXMLEXPERIMENTS 1

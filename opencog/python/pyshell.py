@@ -9,6 +9,17 @@ ipshell = None
 
 class shell(opencog.cogserver.Request):
     
+    # These are printed by the 'help' command
+    summary = "OpenCog IPython Shell"
+    description = "Usage: pyshell.shell\n\n" \
+        "Start an IPython shell in the terminal from which the cogserver "  \
+        "was started.  This shell is a python read-evaluate-print loop " \
+        "for running arbitrary python commands. The atomspace can be " \
+        "accessed as 'space' or 'a'; thus, for example: \n\n" \
+        "\th = a.add_node(t.ConceptNode, \"Hello, World!\")\n\tprint h\n\n" \
+        "Use ctrl-D to exit the shell."
+    is_shell = True
+
     def run(self,args,atomspace):
         self.run_shell(atomspace)
 

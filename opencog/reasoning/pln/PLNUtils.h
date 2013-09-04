@@ -56,6 +56,7 @@
 // This is a 3rd party tree template library
 #include <opencog/util/tree.h>
 
+#include <opencog/reasoning/pln/atom_types.h>
 #include "PLN.h"
 #include "FitnessEvaluator.h"
 
@@ -542,12 +543,12 @@ public:
     }
 };
 
-void convertTo(const VertexSeq& args, std::auto_ptr<Handle>& ret);
-void convertTo(const VertexVector& args, std::auto_ptr<Handle>& ret);
-void convertTo(const std::vector<BoundVertex>& args, std::auto_ptr<Handle>& ret);
-void convertTo(const std::set<BoundVertex>& args, std::auto_ptr<Handle>& ret);
-void convertTo(const VertexSet& args, std::auto_ptr<Handle>& ret);
-void convertTo(const std::vector<Handle>& args, std::auto_ptr<Handle>& ret);
+void convertTo(const VertexSeq& args, std::unique_ptr<Handle>& ret);
+void convertTo(const VertexVector& args, std::unique_ptr<Handle>& ret);
+void convertTo(const std::vector<BoundVertex>& args, std::unique_ptr<Handle>& ret);
+void convertTo(const std::set<BoundVertex>& args, std::unique_ptr<Handle>& ret);
+void convertTo(const VertexSet& args, std::unique_ptr<Handle>& ret);
+void convertTo(const std::vector<Handle>& args, std::unique_ptr<Handle>& ret);
 void convertTo(const VertexVector& args, Handle*& ret);
 void convertTo(const VertexSeq& args, Handle*& ret);
 void convertTo(const std::vector<BoundVertex>& args, Handle*& ret);

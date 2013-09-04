@@ -40,8 +40,8 @@
 
 namespace opencog {
 
-feature_set incremental_select_features(const CTable& ctable,
-                                        const feature_selection_parameters& fs_params);
+feature_set_pop incremental_select_feature_sets(const CTable& ctable,
+                                                const feature_selection_parameters& fs_params);
 
 /**
  * Returns a set S of features following the algo:
@@ -84,7 +84,6 @@ FeatureSet incremental_selection(const FeatureSet& features,
     FeatureSet res; // set of relevant non-redundant features to return
 
     typedef boost::shared_mutex shared_mutex;
-    typedef boost::shared_lock<shared_mutex> shared_lock;
     typedef boost::unique_lock<shared_mutex> unique_lock;
     shared_mutex mutex;
 

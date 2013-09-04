@@ -30,13 +30,12 @@ SleepAgent::~SleepAgent()
 {
 }
 
-SleepAgent::SleepAgent()
+SleepAgent::SleepAgent(CogServer& cs) : Agent(cs)
 {
 }
 
-void SleepAgent::run(opencog::CogServer *server)
+void SleepAgent::run()
 {
-
     logger().fine("SleepAgent - Sleeping for one second.");
     sleep(1);
 }

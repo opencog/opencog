@@ -32,8 +32,8 @@ using namespace opencog;
 
 Handle DefaultPatternMatchCB::find_starter(Handle h)
 {
-    AtomSpace *as = pme->get_atomspace();
-    Type t = as->getType(h);
+	AtomSpace *as = pme->get_atomspace();
+	Type t = as->getType(h);
 	if (classserver().isNode(t)) {
 		if (t != VARIABLE_NODE) return h;
 		return Handle::UNDEFINED;
@@ -116,7 +116,6 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	Handle h = clauses[0];
 	root = h;
 	Handle start = find_starter(h);
-    AtomSpace *as = pme->get_atomspace();
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
 		// printf("Search start node: %s\n", as->atomAsString(start).c_str());
@@ -129,7 +128,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 		starter_pred = root;
 
 		// Get type of the first item in the predicate list.
-        Type ptype = as->getType(h);
+		AtomSpace *as = pme->get_atomspace();
+		Type ptype = as->getType(h);
 
 		// Plunge into the deep end - start looking at all viable
 		// candidates in the AtomSpace.

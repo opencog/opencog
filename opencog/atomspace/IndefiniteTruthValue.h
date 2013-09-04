@@ -36,8 +36,11 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
-/*
+/**
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
  * N will be hold constant and thus we have only ([L,U],b).
  */
@@ -51,23 +54,27 @@ private:
 
     strength_t U;
     strength_t L;
-    confidence_t confidenceLevel; //referred as "b" in the paper
+    confidence_t confidenceLevel; //!< referred as "b" in the paper
     bool symmetric;
 
-    // used in inference rule procedure in order to compute L1 and U1
-    // when diff is negative it means that it is outdated and must be
-    // recalculated
+    //! used in inference rule procedure in order to compute L1 and U1
+    //! when diff is negative it means that it is outdated and must be
+    //! recalculated
     strength_t diff;
 
-    // below, "mean", "count" and "confidence" are all three attributes
-    // used to translate an indefinite TV into a simple TV.
-    // If "mean" (as well as "count" or "confidence") is negative
-    // it means that it outdated and therefore must be recalculted,
-    // otherwise, i.e. positive of null, it means that the current value
-    // is correct
+	/** @name mean, count, confidence
+     * below, "mean", "count" and "confidence" are all three attributes
+     * used to translate an indefinite TV into a simple TV.
+     * If "mean" (as well as "count" or "confidence") is negative
+     * it means that it outdated and therefore must be recalculted,
+     * otherwise, i.e. positive of null, it means that the current value
+     * is correct
+	 */
+	///@{
     mutable strength_t mean;
     mutable count_t count;
     mutable confidence_t confidence;
+	///@}
 
     std::vector<strength_t*> firstOrderDistribution;
 
@@ -75,7 +82,7 @@ private:
               confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     void copy(const IndefiniteTruthValue&);
 
-    //find diff by dichotomy
+    //! find diff by dichotomy
     strength_t findDiff(strength_t idiff);
 
 public:
@@ -87,7 +94,7 @@ public:
     IndefiniteTruthValue* clone() const;
     IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 
-    //it is a strict equality comparison, without error interval tolerance
+    //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
     static IndefiniteTruthValue* fromString(const char*);
@@ -130,6 +137,7 @@ public:
 
 typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_INDEFINITE_TRUTH_VALUE_H

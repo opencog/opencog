@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <sstream>
 #include "TemporalToHandleSetMap.h"
 
 using namespace opencog;
@@ -35,13 +36,13 @@ TemporalToHandleSetMap::~TemporalToHandleSetMap()
 {
     TemporalMapIterator* keys = internalMap->keys();
     while (keys->hasNext()) {
-        delete ((HandleSet*) internalMap->get(keys->next()));
+        delete ((UnorderedHandleSet*) internalMap->get(keys->next()));
     }
     delete(keys);
     delete(internalMap);
 }
 
-void TemporalToHandleSetMap::add(Temporal* key, HandleSet* obj)
+void TemporalToHandleSetMap::add(Temporal* key, UnorderedHandleSet* obj)
 {
     if (contains(key)) {
         remove(key);
@@ -49,9 +50,9 @@ void TemporalToHandleSetMap::add(Temporal* key, HandleSet* obj)
     internalMap->add(key, (void *) obj);
 }
 
-HandleSet* TemporalToHandleSetMap::get(Temporal* key)
+UnorderedHandleSet* TemporalToHandleSetMap::get(Temporal* key)
 {
-    return((HandleSet*) internalMap->get(key));
+    return((UnorderedHandleSet*) internalMap->get(key));
 }
 
 Temporal* TemporalToHandleSetMap::getKey(const Temporal& lookupKey)
@@ -64,9 +65,9 @@ bool TemporalToHandleSetMap::contains(Temporal* key)
     return(internalMap->contains(key));
 }
 
-HandleSet* TemporalToHandleSetMap::remove(Temporal* key)
+UnorderedHandleSet* TemporalToHandleSetMap::remove(Temporal* key)
 {
-    return((HandleSet*) internalMap->remove(key));
+    return((UnorderedHandleSet*) internalMap->remove(key));
 }
 
 int TemporalToHandleSetMap::getCount()
@@ -101,12 +102,14 @@ std::string TemporalToHandleSetMap::toString()
     std::string answer;
     for (TemporalMapIterator *it = keys(); it->hasNext();) {
         Temporal* key = it->next();
-        HandleSet* value = get(key);
+        UnorderedHandleSet* value = get(key);
         /* append key */
         answer += key->toString();
         answer += ":";
         /* append value */
-        answer += value->toString();
+        std::stringstream ss;
+        ss << value;
+        answer += ss.str();
         if (it->hasNext()) {
             answer += ",";
         }

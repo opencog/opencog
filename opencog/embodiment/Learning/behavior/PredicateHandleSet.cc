@@ -187,16 +187,3 @@ bool PredicateHandleSet::empty() const
     return handles.empty();
 }
 
-int PredicateHandleSet::hashCode()
-{
-
-    int hashCode = 0;
-
-    std::set<Handle>::iterator it;
-    for (it = handles.begin(); it != handles.end(); ++it) {
-        hashCode += (int) (it->value());
-    }
-
-    return hashCode;
-}
-

@@ -32,7 +32,11 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
+//! a special type of TruthValue
 class NullTruthValue : public TruthValue
 {
 
@@ -53,14 +57,15 @@ public:
     virtual bool operator==(const TruthValue& rhs) const;
 
 protected:
-    // TODO: Make this constructor protected. For some reason compiler is
-    // complaining if it's declared protected.
+    //! @todo Make this constructor protected. For some reason compiler is
+    //! complaining if it's declared protected.
     NullTruthValue();
     TruthValue* merge(TruthValue*) throw (RuntimeException);
     TruthValue* clone() const throw (RuntimeException);
     NullTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
 };
 
+/** @}*/
 } // namespace
 
 #endif // _OPENCOG_NULL_TRUTH_VALUE_TV_H

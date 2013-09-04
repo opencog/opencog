@@ -1,0 +1,244 @@
+namespace opencog {
+/**
+
+\page libatomspace atomspace library
+
+This library (<em>opencog/atomspace</em>) is the backbone of the project
+@code
+make atomspace
+@endcode
+
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_atomspace "the comprehensive overview".
+
+Dependencies:
+- gsl
+- boost signals
+- boost thread
+- zmq (if present)
+
+\section sect_atom The atom
+
+The atom is a basic entity used in OpenCog as an element for building
+representations. Some atoms directly represent patterns in the world or mind,
+others are components of representations. There are two kinds of atoms: nodes
+and links. Atoms have Type and Arity, a Handle (see below), link to parent 
+AtomTable and to a TruthValue (see below).
+
+A \em relized atom is one that exists in RAM at a certain point in time. Atoms
+may be \em serialized for transmission from one software process to another, or
+for saving to disk using a BackingStore (an atom is called \em frozen when 
+is present only on disk).
+The type of an atom cannot be changed after the atom has been inserted into 
+the AtomSpace: OpenCog atoms are immutable.
+
+Each Atom is an AttentionValueHolder, and, thus, has an AttentionValue that has
+three components: short term, long term and very long term importance. The 
+\em attention is the process of focusing mental activity (actions) on some
+particular subset of a mind. Attention is the process of bringing content to
+consciousness. 
+Guiding which aspects of the system's memory & functionality gets more
+computational resources at a certain point in time is the job of an AttentionBank
+associated with an AtomSpace.
+
+See also:
+- <a href="http://wiki.opencog.org/w/Atom">wiki entry</a> on atom design
+- <a href="http://wiki.opencog.org/w/OpenCogPrime:Atom">wiki entry</a> on atom implementation
+- <a href="http://wiki.opencog.org/w/OpenCog_Atom_types">wiki entry</a> on atom types
+- Atom class
+- HandlePredicate AtomPredicate AtomComparator
+
+\subsection ssect_node Nodes
+A Node is an Atom with name (that may be empty string). 
+It represents the most basic kind of pattern known to the OpenCog system.
+The name and the type of a Node together determine a unique key.
+
+See also:
+- <a href="http://wiki.opencog.org/w/Node">wiki entry</a> on nodes
+
+\subsection ssect_link Links
+Nodes in OpenCog are connected to each other by links. Each Link embodies
+one of the basic inter-node relationships. They may describe
+relationships between more than two entities at once and may describe 
+higher-order relationships between links, and between nodes and links.
+
+A Link is uniquely defined by its type and its outgoing set, i.e., 
+the set of Atoms linked by it. It also stores a Trail.
+
+FollowLink provides methods for looking at the end of a link. The methods
+store the result inside (functor):
+\ref FollowLink::follow_binary_link "follow_binary_link()",
+\ref FollowLink::backtrack_binary_link "backtrack_binary_link()",
+\ref FollowLink::follow_link "follow_binary_link()".
+
+foreach_outgoing_handle() and foreach_incoming_handle() invoke 
+the callback argument on each atom in the outgoing/incoming set of a handle.
+foreach_atom_pair() is typically useful for making comparisons between atoms.
+It invokes the callback on each pair of corresponding atoms in the
+two input vectors. Other usefull functions: foreach_binary_link(),
+foreach_reverse_binary_link(), foreach_link(), foreach_unordered_binary_link().
+
+
+See also:
+- <a href="http://wiki.opencog.org/w/Link">wiki entry</a> on links
+
+\subsection ssect_clserver Class server
+
+There are two main types of atoms, nodes and links, and atoms can have further
+sub-types, such as being directed or undirected links and representing specific
+types of relationships and entities. The Type of an atom is an unique
+identificator assigned by a ClassServer. This class keeps track of the complete
+atom class hierarchy. The current implementation is hardwired. Future versions
+may include different structures based on run-time type identification.
+
+
+\section sect_handles Handles
+
+Atoms are uniquely identified by a Handle. Pointers to Atoms should never be
+kept in any data structure other than the AtomTable. All references to atoms
+should proceed through handles via the AtomSpace API.
+
+A Handle stores an unique identifier. Lists are called HandleSeq and 
+HandleSeqSeq.
+HandleMap ia a red-black tree where keys are Handle's and values are templated.
+It acts as an adapter to stl's HashMap.
+HandleSeqIndex associates a list of Handle's with one other Handle using standard 
+AtomIndex interface. HandleSetIndex does the opposite.
+Lists of UnorderedHandleSet may be 
+\ref intersection(const std::vector<UnorderedHandleSet>&) "intersected".
+
+
+\section sect_tv Truth values
+
+There are \ref TruthValueType "several types" of truth values that all inherit
+TruthValue:
+- SimpleTruthValue stores a mean and the number of observations for which 
+the mean was computed
+- CountTruthValue stores a mean, a confidence level and the number of 
+observations for which the mean was computed
+- IndefiniteTruthValue represents a distribution using an interval, 
+a credibility level and a "look-ahead" parameter 
+(see <a href="http://goo.gl/vPJdr2">Real-World Reasoning</a>)
+- CompositeTruthValue consisting of a number of VersionHandle's 
+paired with TruthValue's
+- NullTruthValue: indicate that there's no truth value available
+
+Inheritants of TruthValue are invited to implement methods like:
+\ref TruthValue::isDefaultTV "isDefaultTV",
+\ref TruthValue::isNullTv "isNullTv",
+\ref TruthValue::clone "clone",
+\ref TruthValue::merge "merge",
+\ref TruthValue::getMean "getMean",
+\ref TruthValue::getCount "getCount",
+\ref TruthValue::getConfidence "getConfidence",
+\ref TruthValue::toFloat "toFloat",
+\ref TruthValue::toString "toString",
+\ref TruthValue::getType "getType" and various operators.
+
+See also:
+- <a href="http://wiki.opencog.org/w/TruthValue">wiki entry</a> on truth value
+
+
+
+\section sect_atomtable The atom table
+
+AtomTable class provides mechanisms to store atoms and keep indices for
+efficient lookups. It implements the local storage data structure of
+OpenCog. It contains methods to add and remove atoms, as well as to
+retrieve specific sets according to different criteria.
+
+The atoms inside the table are indexed. OpenCog provides AtomIndex as a common
+interface to be used by indexes.
+- TypeIndex <- FixedIntegerIndex (list of UnorderedHandleSet) : given
+an atom Type, this returns all of the Handles for that Type.
+- NodeIndex <- NameIndex <- StringIndex : given the type and name of an atom, 
+this will return the corresponding handle
+- LinkIndex <- HandleSeqIndex given both a type, and a HandleSeq, it returns a 
+single, unique Handle associated with that pair.  In other words, it returns
+the single, unique Link which is that pair.
+- IncomingIndex: given a Handle, this returns the incoming set of that handle.
+- ImportanceIndex <- FixedIntegerIndex : additional routines needed for managing 
+short-term importance.
+- TargetTypeIndex <- TypeIndex <- FixedIntegerIndex : an integer index as an 
+RB-tree (C++ set)
+- PredicateIndex <- FixedIntegerIndex, PredicateEvaluator : 
+associates predicates with atoms
+
+(note that <- symbol above simply means related somehow, not necesarly inherit)
+
+See also:
+- <a href="http://wiki.opencog.org/w/AtomTable">wiki entry</a> on atom table
+
+
+\section sect_atomspace The atom space
+The access to inner atom space is done either synchronously (via AtomSpace)
+or asynchronously (via AtomSpaceAsync). 
+
+The AtomSpace is an interface for the manipulation and storage of hypergraphs,
+and is the central knowledge representation system provided by the OpenCog
+Framework. The AtomSpace provides a generic interface for creating and deleting
+hypergraphs of Atom's (the superclass for Node's and Link's). Requests are 
+ASRequest derivates; \ref grp_atomspace_requess "here" is a comprehensive
+list of ASRequests.
+
+An AttentionBank is associated with each atom space. Also, a TLB translates
+between handles and actual memory address for the atom in the local process
+address space. StatisticsMonitor collects several statistics values from 
+many parts of the system and makes them available through its API.
+
+
+See also:
+- <a href="http://wiki.opencog.org/w/AtomSpace">wiki entry</a> on atom space
+- documentation for AtomSpace class
+- documentation for AtomSpaceAsync class
+- documentation for AtomSpaceImpl class
+
+
+\section sect_zmq ZeroMQ support
+
+To support <a href="http://zeromq.org/">ZeroMQ</a> the library provides
+ZMQServer and ZMQClient, and uses ProtocolBufferSerializer together with 
+<a href="http://code.google.com/p/protobuf/">protocol buffers</a> to 
+serialize/deserialize.
+
+The class only supports one function - \b ZMQgetAtom - to request an atom from the 
+server; ZMQClient::getAtom() will use it and will block waiting for a response.
+
+See also:
+- <a href="http://wiki.opencog.org/w/ZeroMQ">wiki entry</a> on ZeroMQ
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libcogutil "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libcomboreduct "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+
+/**
+\defgroup grp_atomspace atomspace library
+
+This library (<em>opencog/atomspace</em>) is the backbone of the project. 
+To build it type:
+@code
+make atomspace
+@endcode
+
+To read a high level overview of this library head to 
+\ref libatomspace "dedicated page".
+*/
+} //~namespace opencog
+
+
+./src/opencog/atomspace/ForeachChaseLink.h \
+./src/opencog/atomspace/ForeachTwo.h \
+
+
+

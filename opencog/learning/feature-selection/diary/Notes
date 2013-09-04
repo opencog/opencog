@@ -80,6 +80,9 @@ mi-3.dat: sorted (ranked) MI between target and three features.
 mi-4: top-3 are 23-29-32-36 22-29-32-36 11-29-32-36 are all based from 
    the top-ranked featureset of mi-3  but the rest are more confused.
 
+   (Feb 2013: deleted mi3.dat, mi4.dat mi-4.dat; these are needlessly
+   slowing down git clone.)
+
 
 Bugs: incremental_selection was calling rel.empty() instead of
 rel.clear().
@@ -123,3 +126,21 @@ selected:  8 9 10 11 21 25 26 29 31 32 33 36 MI=0.640749 -r2
 selected:  8 9 10 11 22 25 26 29 31 32 33 36 MI=0.640749 -r3
 selected:  8 9 10 11 22 25 26 29 31 32 33 36 MI=0.640749 -r4
 selected:  8 9 10 11 21 25 26 29 31 32 33 36 MI=0.640749 -r5
+
+
+December 2012
+-------------
+Nil renamed algo mi to algo smd some months ago.
+Impl now in learning/feature-selection/algo/stochastic_max_dependency.h
+
+want to call stochastic_max_dependency_selection with num_features =
+whatever
+
+top_size = 10 ??
+
+main() {
+   feature_selection(table) {
+      smd_select_features(ctable, fs_params);
+   }
+}
+

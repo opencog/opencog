@@ -31,12 +31,12 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomSpaceImpl.h>
-#include <opencog/atomspace/atom_types.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
 #include <opencog/spatial/3DSpaceMap/Block3DMapUtil.h>
 
+#include <opencog/spacetime/atom_types.h>
 #include "SpaceServer.h"
 #include "TimeServer.h"
 
@@ -693,7 +693,7 @@ void SpaceServer::findAllBlockEntitiesOnTheMap()
         curMap->findAllBlockEntitiesOnTheMap();
 }
 
-void SpaceServer::addBlockEntityNodes()
+void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles)
 {
     vector<opencog::spatial::BlockEntity*>::iterator it = curMap->newAppearBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
@@ -701,7 +701,10 @@ void SpaceServer::addBlockEntityNodes()
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
-        atomspace->setSTI(entity->mEntityNode, 1000);
+        atomspace->setSTI(entity->mEntityNode, 10000);
+
+        if (! AtomSpace::isHandleInSeq(entity->mEntityNode, toUpdateHandles))
+            toUpdateHandles.push_back(entity->mEntityNode);
     }
 
     curMap->newAppearBlockEntityList.clear();
@@ -710,6 +713,49 @@ void SpaceServer::addBlockEntityNodes()
 // add blocklist to an entity
 void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity* _entity, const unsigned long timeStamp)
 {
+
+    //  Add every block a eval link that it's part of this block entity:
+    //    (AtTimeLink (stv 1 1)
+    //       (TimeNode "15818205490")
+    //       (EvaluationLink (stv 1 0.0012484394)
+    //          (PredicateNode "part-of")
+    //          (ListLink
+    //              (StructureNode "id_CHUNK_3_2_0_BLOCK_1_12_99")
+    //              (BlockEntityNode "blockentity7" (av 1000 0 0))
+    //
+    //          )
+    //       )
+    //    )
+
+    vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
+    vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
+    for (; it != blocks.end(); ++it)
+    {
+        opencog::spatial::Block3D* b = (opencog::spatial::Block3D*)(*it);
+        HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
+        foreach(Handle blockNode, unitBlockNodes)
+        {
+            SimpleTruthValue tv(1.0, 1.0);
+            Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);
+            timeser->addTimeInfo(evalLink,timeStamp);
+        }
+    }
+
+    /*
+    //    (AtTimeLink (stv 1 1)
+    //       (TimeNode "15818205490")
+    //       (EvaluationLink (stv 1 0.0012484394)
+    //          (PredicateNode "block-list")
+    //          (ListLink
+    //             (BlockEntityNode "7" (av 1000 0 0))
+    //             (ListLink
+    //                (StructureNode "id_CHUNK_3_2_0_BLOCK_1_12_99")
+    //                (StructureNode "id_CHUNK_3_2_0_BLOCK_2_12_99")
+    //                (StructureNode "id_CHUNK_3_2_0_BLOCK_2_11_99")
+    //             )
+    //          )
+    //       )
+    //    )
     HandleSeq blocklist;
     vector<opencog::spatial::Block3D*> blocks = (vector<opencog::spatial::Block3D*>&)(_entity->getBlockList());
     vector<opencog::spatial::Block3D*>::iterator it = blocks.begin();
@@ -726,6 +772,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
     Handle evalLink = addPropertyPredicate(BLOCK_LIST, _entity->mEntityNode, blocklistLink,tv);
 
     timeser->addTimeInfo(evalLink,timeStamp);
+    */
 
 }
 
@@ -758,11 +805,12 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
     evalLink = addPropertyPredicate("height", _entity->mEntityNode, numberNode,tv);
     timeser->addTimeInfo(evalLink,timestamp);
 
+
     // todo: add secondary properties
 
 }
 
-void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp)
+void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp,HandleSeq &toUpdateHandles)
 {
     vector<opencog::spatial::BlockEntity*>::iterator it = curMap->updateBlockEntityList.begin();
     opencog::spatial::BlockEntity* entity;
@@ -770,9 +818,11 @@ void SpaceServer::updateBlockEntitiesProperties(unsigned long timestamp)
     {
         entity = (opencog::spatial::BlockEntity*)(*it);
         updateBlockEntityProperties(entity, timestamp);
+        toUpdateHandles.push_back(entity->mEntityNode);
     }
 
     curMap->updateBlockEntityList.clear();
+
 }
 
 Handle SpaceServer::addPropertyPredicate(

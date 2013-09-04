@@ -51,10 +51,12 @@ public:
         return _factory;
     }
 
-    SingleAgentModule();
-    ~SingleAgentModule();
-    void run(CogServer*);
-    void init();
+    SingleAgentModule(CogServer&);
+    virtual ~SingleAgentModule();
+    virtual void run();
+    virtual void init();
+
+    void stopAgent();
 
     std::string name;
 

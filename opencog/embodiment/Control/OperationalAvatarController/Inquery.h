@@ -28,11 +28,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
-
-#include "OAC.h"
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
-
 
 using namespace std;
 using namespace opencog;
@@ -43,19 +40,21 @@ using namespace opencog::pai;
 
 namespace opencog { namespace oac {
 
+class State;
+class RuleNode;
+
 class Inquery
 {
 
 protected:
 
-    static OAC* oac;
     static AtomSpace* atomSpace;
     static SpaceServer::SpaceMap* spaceMap;
-    static set<spatial::SPATIAL_RELATION> getSpatialRelations(const vector<StateValue>& stateOwnerList);
+    static set<spatial::SPATIAL_RELATION> getSpatialRelations(const vector<ParamValue>& stateOwnerList);
 
 public:
 
-    static void init(OAC* _oac,AtomSpace* _atomSpace);
+    static void init(AtomSpace* _atomSpace);
 
     // when we are doing planning, we usually don't use the real spaceMap.
     // Instead, we use a clone of the real spaceMap, which is kinda imaginary spaceMap
@@ -68,15 +67,21 @@ public:
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static StateValue getStateValueFromAtomspace(State &state);
+    static ParamValue getParamValueFromAtomspace(State &state);
 
-    static StateValue inqueryDistance(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryExist(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryEnergy(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryAtLocation(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsSolid(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsStandable(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryExistPath(const vector<StateValue>& stateOwnerList);
+    static ParamValue inqueryDistance(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryExist(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryAtLocation(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsSolid(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsStandable(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryExistPath(const vector<ParamValue>& stateOwnerList);
+
+    // return a vector of all the possible values for grounding a variable in a rule
+    // if cannot find proper value, return a empty vector
+    static vector<ParamValue> inqueryNearestAccessiblePosition(const vector<ParamValue>& stateOwnerList);
+    static vector<ParamValue> inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList);
+    static vector<ParamValue> inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList);
+
 
     // inquery the spatial relationships
     // see the definition of SPATIAL_RELATION in Octree3DMapManager.h
@@ -99,30 +104,42 @@ public:
         TOTAL_RELATIONS
     };*/
     // relations for two objects themselves
-    static StateValue inqueryIsAbove(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBeside(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsNear(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsFar(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsTouching(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsInside(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsOutside(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBelow(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsLeftOf(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsRightOf(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsBehind(const vector<StateValue>& stateOwnerList);
-    static StateValue inqueryIsInFrontOf(const vector<StateValue>& stateOwnerList);
+    static ParamValue inqueryIsAbove(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsBeside(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsNear(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsFar(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsTouching(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsInside(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsOutside(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsBelow(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsLeftOf(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsRightOf(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsBehind(const vector<ParamValue>& stateOwnerList);
+    static ParamValue inqueryIsInFrontOf(const vector<ParamValue>& stateOwnerList);
 
     // only use in two position, in 3D block world, one is possible to be able to move from one position to the adjacent position
     // so the adjacent is the 24 neighbours, (the 26 neighbours except the block right above it and under it)
-    static StateValue inqueryIsAdjacent(const vector<StateValue>& stateOwnerList);
+    static ParamValue inqueryIsAdjacent(const vector<ParamValue>& stateOwnerList);
 
     // relations for 3 objects
-    static StateValue inqueryIsBetween(const vector<StateValue>& stateOwnerList);
+    static ParamValue inqueryIsBetween(const vector<ParamValue>& stateOwnerList);
 
+    // to search for all the handles of the Entities meet the given condition from the Atomspace
+    static HandleSeq findAllObjectsByGivenCondition(State* state);
 
-    // When want to ground a rule, when there is exist state precondition,
-    // Call this funciton to search for all the handles of the Entities meet the given condition from the Atomspace
-    static HandleSeq findAllObjectsByGivenCondition(vector<State*> states);
+    // generate a node for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
+    // it can be a const node or a variable node
+    // this function is used by generatePMLinkFromAState()
+    static HandleSeq generatePMNodeFromeAParamValue(ParamValue& ParamValue, RuleNode* ruleNode);
+
+    // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
+    static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
+
+    // the state indexes vector is the indexes of states in the curUngroundedVariables of this rule node that will be used as conditions of patttern matching query in this function
+    static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
+
+    static ParamValue getParamValueFromHandle(string var, Handle& valueH);
+
 
 };
 

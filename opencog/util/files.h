@@ -24,7 +24,7 @@
 #define _OPENCOG_FILES_H_
 
 /**
- * Files.h
+ * \file files.h
  *
  * Functions for manipulating files
  *
@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /**
  * Check if a file exists in the current directory
@@ -85,6 +88,7 @@ std::string getExeName();
  */
 std::string getExeDir(); 
 
+/** @}*/
 } // namespace opencog
 
 #endif //_OPENCOG_FILES_H_

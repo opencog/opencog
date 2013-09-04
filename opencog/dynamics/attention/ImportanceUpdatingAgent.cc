@@ -33,7 +33,8 @@
 
 using namespace opencog;
 
-ImportanceUpdatingAgent::ImportanceUpdatingAgent()
+ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
+    Agent(cs)
 {
     // Starting values for rent and wage
     static const std::string defaultConfig[] = {
@@ -110,7 +111,7 @@ ImportanceUpdatingAgent::~ImportanceUpdatingAgent()
     if (rng) delete rng;
 }
 
-void ImportanceUpdatingAgent::init(CogServer *server)
+void ImportanceUpdatingAgent::init()
 {
     // Not sure exactly what initial estimates should be made...
     log->fine("ImportanceUpdatingAgent::init");
@@ -165,10 +166,10 @@ void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &a
     }
 }
 
-void ImportanceUpdatingAgent::run(CogServer *server)
+void ImportanceUpdatingAgent::run()
 {
-    AgentSeq agents = server->runningAgents();
-    AtomSpace* a = &server->getAtomSpace();
+    AgentSeq agents = _cogserver.runningAgents();
+    AtomSpace* a = &_cogserver.getAtomSpace();
     HandleSeq hs;
     AttentionValue::sti_t maxSTISeen = AttentionValue::MINSTI;
     AttentionValue::sti_t minSTISeen = AttentionValue::MAXSTI;
@@ -176,7 +177,7 @@ void ImportanceUpdatingAgent::run(CogServer *server)
     log->fine("=========== ImportanceUpdatingAgent::run =======");
     /* init iterative variables, that can't be calculated in
      * (no pointer to CogServer there) */
-    if (!initialEstimateMade) init(server);
+    if (!initialEstimateMade) init();
 
     /* Calculate attentional focus sizes */
     updateAttentionalFocusSizes(a);

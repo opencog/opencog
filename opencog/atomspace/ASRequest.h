@@ -15,6 +15,20 @@
 using namespace std;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
+/** \defgroup grp_atomspace_requess Asynchronous requests
+ *
+ * The AtomSpace class is essentially just a wrapper of the asynchronous
+ * AtomSpaceAsync which returns ASRequest "futures" as well as allowing
+ * thread-local caching of some requests. Functions in this
+ * class will block until notified that they've been fulfilled by the
+ * AtomSpaceAsync event loop.
+ *
+ *  @{
+ */
 
 class ASRequest {
 
@@ -646,27 +660,6 @@ public:
     
 };
 
-class SaveToXMLASR : public OneParamASR<bool,std::string> {
-public:
-    SaveToXMLASR(AtomSpaceImpl *a, const std::string& filename) :
-        OneParamASR<bool,std::string>(a,filename) {}
-    
-    virtual void do_work() {
-        set_result(atomspace->saveToXML(p1));
-    }
-    
-};
-
-class GetAtomHashASR : public OneParamASR<size_t,Handle> {
-public:
-    GetAtomHashASR (AtomSpaceImpl *a, const Handle& h) :
-        OneParamASR<size_t,Handle>(a,h) {}
-    
-    virtual void do_work() {
-        set_result(atomspace->getAtomHash(p1));
-    }
-};
-
 
 // -----------------
 // Search requests
@@ -778,7 +771,7 @@ public:
     }
 
     virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),type,name,subclass,vh);
+        atomspace->getHandleSet(back_inserter(result), name, type, subclass, vh);
     }
 };
 
@@ -1025,6 +1018,8 @@ typedef boost::shared_ptr< GenericASR<std::string> > StringRequest;
 // Can't actually init template with void, so use bool as stand-in.
 typedef boost::shared_ptr< GenericASR<bool> > VoidRequest;
 
+/** @}*/
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_REQUEST_H

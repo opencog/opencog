@@ -29,7 +29,7 @@
 #include <opencog/learning/moses/representation/field_set.h>
 #include <opencog/learning/moses/eda/eda.h>
 #include <opencog/learning/moses/moses/types.h>
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
 
 namespace opencog {

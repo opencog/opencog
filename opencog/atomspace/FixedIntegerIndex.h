@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements an integer index as an RB-tree (C++ map)
@@ -38,10 +41,10 @@ class FixedIntegerIndex:
 	public AtomIndex<int,Handle>
 {
 	protected:
+		std::vector<UnorderedHandleSet> idx; 
 		void resize(size_t);
 
 	public:
-		std::vector<UnorderedHandleSet> idx; 
 		virtual ~FixedIntegerIndex() {}
 		virtual void insert(int, Handle);
 		virtual Handle get(int) const;
@@ -50,6 +53,7 @@ class FixedIntegerIndex:
 		virtual void remove(bool (*)(Handle));
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_FIXEDINTEGERINDEX_H

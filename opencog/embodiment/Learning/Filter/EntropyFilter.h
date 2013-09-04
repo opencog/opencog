@@ -32,6 +32,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/Temporal.h>
 
 #include <opencog/embodiment/Learning/behavior/WorldProvider.h>

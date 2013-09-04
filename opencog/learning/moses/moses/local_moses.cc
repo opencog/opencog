@@ -44,7 +44,8 @@ using namespace combo;
  *
  */
 bool expand_deme(metapopulation& mp,
-                 int max_evals, time_t max_time, moses_statistics& stats)
+                 int max_evals, time_t max_time,
+                 moses_statistics& stats)
 {
     if (mp.empty())
         return true;
@@ -53,7 +54,7 @@ bool expand_deme(metapopulation& mp,
     // over exemplars until we find one that expands.
     // XXX When would one never expand?  Wouldn't that be a bug?
     while (1) {
-        bscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
+        pbscored_combo_tree_ptr_set_cit exemplar = mp.select_exemplar();
 
         // Should have found something by now.
         if (exemplar == mp.end()) {
@@ -66,25 +67,25 @@ bool expand_deme(metapopulation& mp,
         }
 
         // if create_deme returned true, we are good to go.
-        if (mp._dex.create_deme(*exemplar)) break;
+        if (mp._dex.create_demes(get_tree(*exemplar), stats.n_expansions))
+            break;
 
+        logger().error() << "Exemplar: " << get_tree(*exemplar);
         OC_ASSERT(false, "Exemplar failed to expand!\n");
     }
 
-    size_t evals_this_deme = mp._dex.optimize_deme(max_evals, max_time);
-    stats.n_evals += evals_this_deme;
+    vector<unsigned> actl_evals = mp._dex.optimize_demes(max_evals, max_time);
+    stats.n_evals += boost::accumulate(actl_evals, 0U);
     stats.n_expansions++;
 
-    bool done = mp.merge_deme(mp._dex._deme, mp._dex._rep, evals_this_deme);
+    bool done = mp.merge_demes(mp._dex._demes, mp._dex._reps, actl_evals);
 
     if (logger().isInfoEnabled()) {
-        logger().info()
-           << "Expansion " << stats.n_expansions
-           << " total number of evaluations so far: " << stats.n_evals;
+        logger().info() << "Expansion " << stats.n_expansions << " done";
+        logger().info() << "Total number of evaluations so far: " << stats.n_evals;
         mp.log_best_candidates();
     }
-
-    mp._dex.free_deme();
+    mp._dex.free_demes();
 
     // Might be empty, if the eval fails and throws an exception
     return done || mp.empty();

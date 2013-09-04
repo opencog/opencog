@@ -12,15 +12,19 @@
 
 
 # Look for the header file
+# Look for guile-2.0 first, then 1.8
 # Macports for OSX puts things in /opt/local
 FIND_PATH(GUILE_INCLUDE_DIR libguile.h 
-	/usr/include
-	/usr/local/include
-	/usr/include/libguile
-	/usr/local/include/libguile
 	/usr/include/guile/2.0
 	/usr/local/include/guile/2.0
+	/opt/local/include/guile/2.0
+
+	/usr/include/libguile
+	/usr/local/include/libguile
 	/opt/local/include/guile
+
+	/usr/include
+	/usr/local/include
 )
 
 # Look for the library
@@ -48,15 +52,19 @@ IF(GUILE_INCLUDE_DIR AND NOT CMAKE_MAJOR_VERSION LESS 2 AND NOT CMAKE_MINOR_VERS
 	SET(GUILE_VERSION_MINOR 0)
 	SET(GUILE_VERSION_PATCH 0)
 
+	IF(NOT EXISTS "${GUILE_INCLUDE_DIR}/libguile/version.h")
+		MESSAGE(FATAL_ERROR "Found libguile.h but not version.h; check your guile installation!")
+	ENDIF(NOT EXISTS "${GUILE_INCLUDE_DIR}/libguile/version.h")
+
 	# Extract the libguile version from the 'version.h' file
 	SET(GUILE_MAJOR_VERSION 0)
 	FILE(READ "${GUILE_INCLUDE_DIR}/libguile/version.h" _GUILE_VERSION_H_CONTENTS)
 
 	STRING(REGEX MATCH "#define SCM_MAJOR_VERSION[	 ]+([0-9])" _MATCH "${_GUILE_VERSION_H_CONTENTS}")
 	SET(GUILE_VERSION_MAJOR ${CMAKE_MATCH_1})
-	STRING(REGEX MATCH "#define SCM_MINOR_VERSION[	 ]+([0-9])" _MATCH "${_GUILE_VERSION_H_CONTENTS}")
+	STRING(REGEX MATCH "#define SCM_MINOR_VERSION[	 ]+([0-9]+)" _MATCH "${_GUILE_VERSION_H_CONTENTS}")
 	SET(GUILE_VERSION_MINOR ${CMAKE_MATCH_1})
-	STRING(REGEX MATCH "#define SCM_MICRO_VERSION[	 ]+([0-9])" _MATCH "${_GUILE_VERSION_H_CONTENTS}")
+	STRING(REGEX MATCH "#define SCM_MICRO_VERSION[	 ]+([0-9]+)" _MATCH "${_GUILE_VERSION_H_CONTENTS}")
 	SET(GUILE_VERSION_PATCH ${CMAKE_MATCH_1})
 
 	# Check found version against required one

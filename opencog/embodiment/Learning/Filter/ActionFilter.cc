@@ -22,13 +22,15 @@
  */
 
 
-#include <opencog/atomspace/Node.h>
-
-#include "ActionFilter.h"
 #include <opencog/util/exceptions.h>
+#include <opencog/atomspace/Node.h>
+#include <opencog/spacetime/atom_types.h>
+
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
+
+#include "ActionFilter.h"
 
 namespace Filter
 {

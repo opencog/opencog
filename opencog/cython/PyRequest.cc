@@ -7,27 +7,29 @@
 
 using namespace opencog;
 
-PyRequest::PyRequest(const std::string& _moduleName, const std::string& _className)
+PyRequest::PyRequest(CogServer& cs,
+                     const std::string& moduleName, const std::string& className,
+                     RequestClassInfo* cci) :
+    Request(cs)
 {
-    cci = new RequestClassInfo(
-          _moduleName + _className,
-          "A python implemented request",
-          "long description including parameter types"
-    );
+    _cci = cci;
 
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure(); 
+    PyGILState_STATE gstate = PyGILState_Ensure(); 
 
     import_agent_finder();
-    moduleName = _moduleName;
-    className = _className;
+    _moduleName = moduleName;
+    _className = className;
     // call out to our helper module written in cython
-    pyrequest = instantiate_request(moduleName, className, this);
+    _pyrequest = instantiate_request(moduleName, className, this);
 
     PyGILState_Release(gstate); 
 
-    if (pyrequest == Py_None)
-        throw RuntimeException(TRACE_INFO, "Error creating Python Request");
+    if (_pyrequest == Py_None)
+        logger().error() << "Error creating python request "
+                         << _moduleName << "." << _className;
+    else
+        logger().info() << "Created python request "
+                        << _moduleName << "." << _className;
 }
 
 PyRequest::~PyRequest()
@@ -35,24 +37,22 @@ PyRequest::~PyRequest()
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure(); 
     // decrement python object reference counter
-    Py_DECREF(pyrequest);
+    Py_DECREF(_pyrequest);
     PyGILState_Release(gstate); 
-    delete cci;
 }
 
 bool PyRequest::execute()
 {
-    CogServer &s = cogserver();
-    string result = run_request(pyrequest, _parameters, &s.getAtomSpace());
+    string result = run_request(_pyrequest, _parameters, &_cogserver.getAtomSpace());
     // errors only with result is not empty... && duplicate errors are not reported.
-    if (result.size() > 0 && result != last_result) {
+    if (result.size() > 0 && result != _last_result) {
         // Any string returned is a traceback
         logger().error("[%s::execute] Python Exception:\n%s",
                 this->info().id.c_str(),result.c_str());
-        last_result = result;
+        _last_result = result;
         return false;
     }
-    last_result = result;
+    _last_result = result;
     return true;
 }
 

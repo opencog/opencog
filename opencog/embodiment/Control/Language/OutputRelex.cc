@@ -21,6 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
+
 #include <opencog/embodiment/Control/Language/OutputRelex.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 

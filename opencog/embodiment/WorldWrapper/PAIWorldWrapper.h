@@ -71,6 +71,20 @@ public:
     combo::vertex evalIndefiniteObject(combo::indefinite_object io,
            combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
 
+    /**
+     * Create a navigation planning action sequence(including walk, jump
+     * etc.) that will be sent to OAC.
+     * @param actions Calculated path plan
+     * @param useExistingID If this method get called two or more times and this
+     * var is true, the new walks will be added to the same navigation plan
+     * @param tuNudge nudge actions will be added to walk plan if it is not null
+     */
+    static bool createNavigationPlanAction( opencog::pai::PAI& pai,SpaceServer::SpaceMap& sm,
+                                            const SpaceServer::SpaceMapPoint& startPoint,
+                                            const SpaceServer::SpaceMapPoint& endPoint,
+                                            opencog::pai::ActionPlanID _planID = "",
+                                            float customSpeed = 0);
+
 private:
     opencog::pai::PAI& pai;
     opencog::pai::ActionPlanID planID;
@@ -108,16 +122,16 @@ private:
      */
     //void getWaypoints( const spatial::Point& startPoint, const spatial::Point& endPoint, std::vector<spatial::Point>& actions );
 
-    /**
-     * Given a start and an end point, return the 3D waypoints necessary to
-     * travel between them.
-     *
-     * @param startPoint Start point
-     * @param endPoint End point
-     * @param actions Return the vector of 3d points.
-     */
-    void get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint, const SpaceServer::SpaceMapPoint& endPoint,
-                        std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm);
+//    /**
+//     * Given a start and an end point, return the 3D waypoints necessary to
+//     * travel between them.
+//     *
+//     * @param startPoint Start point
+//     * @param endPoint End point
+//     * @param actions Return the vector of 3d points.
+//     */
+//    void get3DWaypoints( const SpaceServer::SpaceMapPoint& startPoint, const SpaceServer::SpaceMapPoint& endPoint,
+//                        std::vector<SpaceServer::SpaceMapPoint>& actions,SpaceServer::SpaceMap& sm);
 
 
     /**
@@ -133,18 +147,7 @@ private:
 //                               Handle toNudge = Handle::UNDEFINED,
 //                               float customSpeed = 0);
 
-    /**
-     * Create a navigation planning action sequence(including walk, jump
-     * etc.) that will be sent to OAC.
-     * @param actions Calculated path plan
-     * @param useExistingID If this method get called two or more times and this
-     * var is true, the new walks will be added to the same navigation plan
-     * @param tuNudge nudge actions will be added to walk plan if it is not null
-     */
-    bool createNavigationPlanAction( std::vector<SpaceServer::SpaceMapPoint>& actions,
-                                     bool useExistingID = false,
-                                     Handle toNudge = Handle::UNDEFINED,
-                                     float customSpeed = 0);
+
 
     //! Builds plans for actions relying on goto (goto_obj, follow, etc)
     bool build_goto_plan(Handle goalHandle,

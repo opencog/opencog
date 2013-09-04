@@ -27,6 +27,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
 namespace detail {
 template<typename Base>
 struct based_variant_visitor : public boost::static_visitor<Base*> {
@@ -66,6 +70,7 @@ struct based_variant : public Variant {
       }*/
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif // _OPENCOG_BASED_VARIANT_H

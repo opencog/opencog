@@ -102,7 +102,6 @@ types_graph.add_edge('Node','AGISIMPixelPerceptNode')
 types_graph.add_edge('Node','VariableTypeNode')
 types_graph.add_edge('Node','AGIMSIMVisualPerceptNode')
 types_graph.add_edge('Node','ProcedureNode')
-types_graph.add_edge('Node','FWVariableNode')
 types_graph.add_edge('Node','AGISIMSoundNode')
 types_graph.add_edge('Node','TimeNode')
 types_graph.add_edge('Node','ObjectNode')
@@ -179,7 +178,6 @@ name_type_dict["ForAllLink"] = t.ForAllLink
 name_type_dict["AGISIMSmellNode"] = t.AGISIMSmellNode
 name_type_dict["UnknownObjectNode"] = t.UnknownObjectNode
 name_type_dict["DefinedLinguisticConceptNode"] = t.DefinedLinguisticConceptNode
-name_type_dict["FWVariableNode"] = t.FWVariableNode
 name_type_dict["PredictiveImplicationLink"] = t.PredictiveImplicationLink
 name_type_dict["SatisfyingSetLink"] = t.SatisfyingSetLink
 name_type_dict["ExtensionalSimilarityLink"] = t.ExtensionalSimilarityLink
@@ -295,7 +293,6 @@ type_name_dict[t.LinkGrammarRelationshipNode] = "LinkGrammarRelationshipNode"
 type_name_dict[t.AGISIMSmellNode] = "AGISIMSmellNode"
 type_name_dict[t.SimilarityLink] = "SimilarityLink"
 type_name_dict[t.NumberNode] = "NumberNode"
-type_name_dict[t.FWVariableNode] = "FWVariableNode"
 type_name_dict[t.PartOfSpeechLink] = "PartOfSpeechLink"
 type_name_dict[t.SetLink] = "SetLink"
 type_name_dict[t.IntensionalInheritanceLink] = "IntensionalInheritanceLink"

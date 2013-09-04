@@ -91,30 +91,6 @@ public:
         delete atom;
     }
 
-    void testRemoveIncoming() {
-        // Test to ensure removing incoming handle when it doesn't exist is ok
-        std::vector<Handle> outgoing;
-        outgoing.push_back(sortedHandles[2]);
-        outgoing.push_back(sortedHandles[0]);
-        outgoing.push_back(sortedHandles[1]);
-
-        Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
-        Link *link = dynamic_cast<Link *>(atom);
-        TS_ASSERT(link != NULL);
-
-        TS_ASSERT_THROWS(atom->removeIncomingHandle(sortedHandles[0]), opencog::RuntimeException);
-
-        Handle h(2220);
-        atom->addIncomingHandle(h);
-        TS_ASSERT_THROWS(atom->removeIncomingHandle(sortedHandles[0]), opencog::RuntimeException);
-        // Test other execution branch when there are two atoms in incoming set
-        Handle h2(2222);
-        atom->addIncomingHandle(h2);
-        TS_ASSERT_THROWS(atom->removeIncomingHandle(sortedHandles[0]), opencog::RuntimeException);
-        delete atom;
-
-    }
-
     void testFlags() {
         // Test to ensure removing incoming handle when it doesn't exist is ok
         std::vector<Handle> outgoing;

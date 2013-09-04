@@ -92,9 +92,9 @@ public:
     //! Percentage of AtomSpace to forget.
     float forgetPercentage;
 
-    ForgettingAgent();
+    ForgettingAgent(CogServer&);
     virtual ~ForgettingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     void forget(float p);
 

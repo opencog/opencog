@@ -39,7 +39,8 @@
 namespace opencog
 {
 
-ImportanceDiffusionAgent::ImportanceDiffusionAgent()
+ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
+    Agent(cs)
 {
     static const std::string defaultConfig[] = {
         //! Default value that normalised STI has to be above before
@@ -47,6 +48,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent()
         "ECAN_DIFFUSION_THRESHOLD","0.0",
         //! Maximum percentage of STI that is spread from an atom
         "ECAN_MAX_SPREAD_PERCENTAGE","1.0",
+        "ECAN_ALL_LINKS_SPREAD","false",
         "",""
     };
     setParameters(defaultConfig);
@@ -60,6 +62,7 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent()
     setSpreadDecider(STEP);
     setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
 
+    allLinksSpread = config().get_bool("ECAN_ALL_LINKS_SPREAD");
 }
 
 void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
@@ -70,10 +73,10 @@ void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
     }
     switch (type) {
     case HYPERBOLIC:
-        spreadDecider = (SpreadDecider*) new HyperbolicDecider(shape);
+        spreadDecider = (SpreadDecider*) new HyperbolicDecider(_cogserver, shape);
         break;
     case STEP:
-        spreadDecider = (SpreadDecider*) new StepDecider();
+        spreadDecider = (SpreadDecider*) new StepDecider(_cogserver);
         break;
     }
     
@@ -101,9 +104,9 @@ void ImportanceDiffusionAgent::setDiffusionThreshold(float p)
 float ImportanceDiffusionAgent::getDiffusionThreshold() const
 { return diffusionThreshold; }
 
-void ImportanceDiffusionAgent::run(CogServer* server)
+void ImportanceDiffusionAgent::run()
 {
-    a = &server->getAtomSpace();
+    a = &_cogserver.getAtomSpace();
     spreadDecider->setFocusBoundary(diffusionThreshold);
 #ifdef DEBUG
     totalSTI = 0;
@@ -187,8 +190,6 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int totalDiffusionAtoms, std::map<Handle,int> diffusionAtomsMap,
         std::vector<Handle> links)
 {
-    //! @warning Doesn't handle multiple Hebbian links between two atoms (the
-    //! weights will be set to the weight of whatever link was last processed.
     std::vector<Handle>::iterator hi;
     // set connectivity matrix size, size is dependent on the number of atoms
     // that are connected by a HebbianLink in some way.
@@ -254,7 +255,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     connections(sourceIndex,targetIndex) = val;
                 } else {
                     //gsl_matrix_set(connections,targetIndex,sourceIndex,val);
-                    connections(targetIndex,sourceIndex) = val;
+                    connections(targetIndex,sourceIndex) += val;
                 }
             }
         } else {
@@ -282,7 +283,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
                     if (type == SYMMETRIC_INVERSE_HEBBIAN_LINK) {
                         connections(sourceIndex,targetIndex) = val;
                     } else {
-                        connections(targetIndex,sourceIndex) = val;
+                        connections(targetIndex,sourceIndex) += val;
                     }
                 }
             }
@@ -342,7 +343,11 @@ void ImportanceDiffusionAgent::spreadImportance()
     logger().debug("Begin diffusive importance spread.");
 
     // Get all HebbianLinks
-    a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    if (allLinksSpread) {
+      a->getHandleSet(out_hi, LINK, true);
+    } else {
+      a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+    }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);
 
@@ -415,7 +420,7 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
 
     val = (AttentionValue::sti_t) (a->getMinSTI(false) + (scaledSTI * ( a->getMaxSTI(false) - a->getMinSTI(false) )));
 /*
-    AtomSpace *a = server().getAtomSpace();
+    AtomSpace *a = _cogserver.getAtomSpace();
     float af = a->getAttentionalFocusBoundary();
     scaledSTI = (scaledSTI * 2) - 1;
     if (scaledSTI <= 1.0) {
@@ -465,15 +470,16 @@ bool SpreadDecider::spreadDecision(AttentionValue::sti_t s)
         return false;
 }
 
-RandGen* SpreadDecider::getRNG() {
+RandGen* SpreadDecider::getRNG()
+{
     if (!rng)
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     return rng;
 }
 
-float HyperbolicDecider::function(AttentionValue::sti_t s)
+double HyperbolicDecider::function(AttentionValue::sti_t s)
 {
-    AtomSpace& a = server().getAtomSpace();
+    AtomSpace& a = _cogserver.getAtomSpace();
     // Convert boundary from -1..1 to 0..1
     float af = a.getAttentionalFocusBoundary();
     float minSTI = a.getMinSTI(false);
@@ -495,14 +501,14 @@ void HyperbolicDecider::setFocusBoundary(float b)
     focusBoundary = b;
 }
 
-float StepDecider::function(AttentionValue::sti_t s)
+double StepDecider::function(AttentionValue::sti_t s)
 {
     return (s>focusBoundary ? 1.0f : 0.0f);
 }
 
 void StepDecider::setFocusBoundary(float b)
 {
-    AtomSpace& a = server().getAtomSpace();
+    AtomSpace& a = _cogserver.getAtomSpace();
     // Convert to an exact STI amount
     float af = a.getAttentionalFocusBoundary();
     focusBoundary = (b > 0.0f)?

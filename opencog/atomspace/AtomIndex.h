@@ -24,6 +24,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * This class provides a simple, generic interface for maintaining 
@@ -52,6 +55,7 @@ class AtomIndex
 		virtual void remove(bool (*)(Value)) = 0;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_ATOMINDEX_H

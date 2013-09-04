@@ -33,7 +33,7 @@
 #include <opencog/util/platform.h>
 
 #include "../representation/instance_set.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "optimization.h"
 
 namespace opencog { namespace moses {
@@ -49,10 +49,12 @@ struct hc_parameters
         : widen_search(widen),
           single_step(step),
           crossover(cross),
+          crossover_pop_size(120),
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
-          max_allowed_instances(10000)
+          max_allowed_instances(10000),
+          allow_resize_deme(false)
     {
         OC_ASSERT(0.0 < fraction_of_nn);
     }
@@ -60,6 +62,9 @@ struct hc_parameters
     bool widen_search;
     bool single_step;
     bool crossover;
+
+    // number of created instances by crossover
+    unsigned crossover_pop_size;
 
     // Evaluate no more than this number of instances per iteration.
     // Problems with 100 or more features easily lead to exemplars with
@@ -119,6 +124,10 @@ struct hc_parameters
     // parameters may not behave indentically between 2 machines, thus
     // the motivation of that flag.
     bool allow_resize_deme;
+
+    // Deme stat name. String to indicate that TAB seperated deme
+    // statistics are logged. By default 'Demes'.
+    string prefix_stat_deme;
 };
 
 ///////////////////
@@ -169,15 +178,27 @@ struct hill_climbing : optimizer_base
 {
     hill_climbing(const optim_parameters& op = optim_parameters(),
                   const hc_parameters& hc = hc_parameters())
-        : opt_params(op), hc_params(hc), _total_RAM_bytes(getTotalRAM())
+        : optimizer_base(op), hc_params(hc), _total_RAM_bytes(getTotalRAM())
     {}
 
 protected:
+    // log legend for graph stats
+    void log_stats_legend();
+
+    // Return an estimate of the size of the neighborhood at distance
+    // 'distance'
+    size_t estimate_neighborhood(size_t distance, const field_set& fields);
+
+    // Return an estimate of the number of new instances to search
+    size_t n_new_instances(size_t distance, unsigned max_evals,
+                           size_t current_number_of_evals,
+                           size_t total_number_of_neighbours);
+
     /**
      * Cross the single top-scoring instance against the next-highest scorers.
      *
      * As arguments, accepts a range of scored instances ("the sample"),
-     * and a singlee instance from which these were all derived ("the base"
+     * and a single instance from which these were all derived ("the base"
      * or center instance).  This will create a number of new instances,
      * which will be a cross of the highest-scoring instance with the
      * next-highest scoring instances.
@@ -221,6 +242,11 @@ protected:
                            size_t sample_size,
                            const instance& base);
 
+    // chain the 3 crossovers methods above and return the number of new instances
+    size_t crossover(deme_t& deme, size_t deme_size,
+                     size_t sample_start, size_t sample_size,
+                     const instance& base);
+
     bool resize_deme(deme_t& deme, score_t score_cutoff);
     size_t resize_by_score(deme_t& deme, score_t score_cutoff);
 
@@ -262,7 +288,6 @@ public:
     }
 
 protected:
-    const optim_parameters opt_params;
     const hc_parameters hc_params;
     const uint64_t _total_RAM_bytes;
     size_t _instance_bytes;

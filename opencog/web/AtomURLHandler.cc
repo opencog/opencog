@@ -75,7 +75,7 @@ void AtomURLHandler::handlePOSTCreate( struct mg_connection *conn,
         return;
     }
 
-    Request* request = cogserver.createRequest("create-atom-json");
+    Request* request = cogserver.createRequest("json-create-atom");
     if (request == NULL) {
         WebModule::return500( conn, std::string("unknown request"));
         completed = true;
@@ -118,7 +118,7 @@ void AtomURLHandler::handlePOSTUpdate( struct mg_connection *conn,
     }
 
     // TODO create update request
-    Request* request = cogserver.createRequest("update-atom-json");
+    Request* request = cogserver.createRequest("json-update-atom");
     if (request == NULL) {
         WebModule::return500( conn, std::string("unknown request"));
         completed = true;
@@ -151,7 +151,7 @@ void AtomURLHandler::handleGET( struct mg_connection *conn,
 {
     std::list<std::string> params = BaseURLHandler::splitQueryString(ri->query_string);
     CogServer& cogserver = static_cast<CogServer&>(server());
-    Request* request = cogserver.createRequest("get-atom");
+    Request* request = cogserver.createRequest("json-get-atom");
     if (request == NULL) {
         WebModule::return500( conn, std::string("unknown request"));
         completed = true;
@@ -277,16 +277,9 @@ void AtomURLHandler::OnRequestComplete()
         }
 
         result << replaceURL(serverAdd);
-    //mg_printf(conn, result.str().c_str());
-        char buffer[512];
-        for (uint i = 0; i < result.str().size(); i+=511) {
-            memset(buffer,'\0',512);
-            result.str().copy(buffer,511,i);
-            if (i+511 > result.str().size())
-                buffer[(result.str().size() % 511) + 1] = '\0';
-            mg_printf(_conn, buffer);
-        }
-            
+
+	mg_printf(_conn, result.str().c_str());
+
         if (!isJSON) {
             result.str("");
             result << "\r\n\r\n<small>You requested the url: %s<br> With query string:"
@@ -297,7 +290,7 @@ void AtomURLHandler::OnRequestComplete()
             result << WebModule::htmlFooter();
             mg_printf(_conn, result.str().c_str(), call_url.c_str(),
                     query_string.c_str());
-        }
+	}
     } else if (method == "POST") {
         mg_printf(_conn, request_output.str().c_str());
     }

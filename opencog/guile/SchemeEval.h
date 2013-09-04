@@ -10,6 +10,7 @@
 #ifdef HAVE_GUILE
 
 #include <string>
+#include <sstream>
 #include <pthread.h>
 #include <libguile.h>
 #include <opencog/server/CogServer.h>
@@ -57,7 +58,7 @@ class SchemeEval
 		static void * c_wrap_apply_scm(void *);
 	
 		// Error handling stuff
-		SCM error_string_port;
+		SCM error_string;
 		SCM captured_stack;
 		static SCM preunwind_handler_wrapper(void *, SCM, SCM);
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
@@ -71,6 +72,7 @@ class SchemeEval
 		// output port
 		SCM outport;
 		SCM saved_outport;
+		bool in_shell;
 	
 		// Make constructor, destructor private; force
 		// everyone to use the singleton instance, for now.
@@ -81,8 +83,12 @@ class SchemeEval
 		
 	public:
 					
-		std::string eval(const std::string &);
-		Handle eval_h(const std::string &);
+		std::string eval(const std::string&);
+		std::string eval(const std::stringstream& ss) { return eval(ss.str()); }
+
+		Handle eval_h(const std::string&);
+		Handle eval_h(const std::stringstream& ss) { return eval_h(ss.str()); }
+
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
 	

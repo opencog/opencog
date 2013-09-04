@@ -29,8 +29,9 @@
 #include "../representation/representation.h"
 #include "../optimization/optimization.h"
 #include "../moses/moses_main.h"
-#include "../moses/scoring.h"
-#include "../moses/ann_scoring.h"
+#include "../scoring/scoring.h"
+
+#include "pole_scoring.h"
 
 using namespace std;
 using namespace boost;

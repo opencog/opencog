@@ -38,15 +38,18 @@
 #include "platform.h"
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-
-/**
+/** @name Generic caches
  * A colection of generic caches. Please be careful if you add more
  * caches that they do not break when the function to cache raises an
  * exception.
  */
+///@{
 
-// base class for all unlimited caches
+//! base class for all unlimited caches
 struct inf_cache_base
 {
     typedef size_t size_type;
@@ -72,7 +75,7 @@ protected:
     std::string _cache_name;          // name of the cache (useful for logging)
 };
 
-// base class for all caches limited in size
+//! base class for all caches limited in size
 struct cache_base : public inf_cache_base
 {
     cache_base(size_type n, const std::string& name)
@@ -86,8 +89,8 @@ protected:
     size_type _n;                            // cache size
 };
 
-// Least Recently Used Cache. Non thread safe, use
-// lru_cache_threaded for that.
+//! Least Recently Used Cache. Non thread safe, use
+//! lru_cache_threaded for that.
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
@@ -211,8 +214,8 @@ protected:
     }
 };
 
-// Least Recently Used Cache with thread safety (this isn't really
-// thread safe yet, it's still buggy)
+//! Least Recently Used Cache with thread safety (this isn't really
+//! thread safe yet, it's still buggy)
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
@@ -349,9 +352,9 @@ protected:
     }
 };
 
-// Pseudo Random Replacement Cache, very fast, but very dumb, it just
-// removes the first element of the hash table when the cache is
-// full. No thread safety, use prr_cache_threaded for that.
+//! Pseudo Random Replacement Cache, very fast, but very dumb, it just
+//! removes the first element of the hash table when the cache is
+//! full. No thread safety, use prr_cache_threaded for that.
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
@@ -416,7 +419,7 @@ protected:
 
 };
 
-// Pseudo Random Replacement Cache with thread safety
+//! Pseudo Random Replacement Cache with thread safety
 template<typename F,
          typename Hash=boost::hash<typename F::argument_type>,
          typename Equals=std::equal_to<typename F::argument_type> >
@@ -681,6 +684,8 @@ protected:
     mutable list _lru;
 };
 
+///@}
+/** @}*/
 } //~namespace opencog
 
 #endif

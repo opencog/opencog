@@ -36,7 +36,7 @@
 using namespace opencog::oac;
 using namespace opencog;
 
-HCTestAgent::HCTestAgent()
+HCTestAgent::HCTestAgent(CogServer& cs) : Agent(cs)
 {
 }
 void HCTestAgent::init(std::string sn, std::vector<std::string> schemaArgs,
@@ -61,7 +61,7 @@ HCTestAgent::~HCTestAgent()
 }
 
 
-void HCTestAgent::run(CogServer* ne)
+void HCTestAgent::run()
 {
     logger().fine("Executing HCTestAgent.");
     cycle++;

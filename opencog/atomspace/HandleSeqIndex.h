@@ -30,11 +30,17 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements a Handle-sequence index as an RB-tree (C++ map)
+ * That is, given a HandleSeq, it will return a (single) Handle
+ * associated with that HandleSeq.  This map is in the "opposite"
+ * direction from the HandleIndex.
  *
- * XXX Notice that it this wastes a fair amount of RAM by storing a 
+ * @todo Notice that it this wastes a fair amount of RAM by storing a 
  * copy of a HandleSeq --- it could save a fair amount of space by storing
  * a pointer to the HandleSeq that is in the Link already (at the cost of
  * some fragility in Link deletion). Alternately, we could use a "HandleSeq 
@@ -56,6 +62,7 @@ class HandleSeqIndex:
 		virtual void remove(bool (*)(Handle));
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_HANDLE_SEQ_INDEX_H

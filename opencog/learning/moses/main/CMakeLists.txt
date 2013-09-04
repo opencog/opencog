@@ -18,10 +18,16 @@ TARGET_LINK_LIBRARIES (eval-diversity
     cogutil
     ${Boost_PROGRAM_OPTIONS_LIBRARY} 
 )
-SET_TARGET_PROPERTIES(moses-exec PROPERTIES OUTPUT_NAME "moses")
+
+ADD_EXECUTABLE (eval-candidate eval-candidate)
+TARGET_LINK_LIBRARIES (eval-candidate
+    moses
+    cogutil
+    ${Boost_PROGRAM_OPTIONS_LIBRARY}
+)
 
 # install moses-exec
-INSTALL(TARGETS moses-exec eval-diversity RUNTIME DESTINATION bin)
+INSTALL(TARGETS moses-exec eval-diversity eval-candidate RUNTIME DESTINATION bin)
 
 #install header files
 INSTALL(FILES

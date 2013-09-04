@@ -4,8 +4,6 @@
 #ifndef _OPENCOG_PYTHON_MODULE_H
 #define _OPENCOG_PYTHON_MODULE_H
 
-#include <Python.h>
-
 #include <string>
 
 #include <opencog/server/Agent.h>
@@ -14,77 +12,82 @@
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
 
-#include "PyMindAgent.h"
-#include "PyRequest.h"
-#include "agent_finder_types.h"
-
 namespace opencog
 {
-
-class CogServer;
 
 class PythonAgentFactory : public AbstractFactory<Agent>
 {
     // Store the name of the python module and class so that we can instantiate
     // them
-    std::string pySrcModuleName;
-    std::string pyClassName;
-    ClassInfo* ci;
+    std::string _pySrcModuleName;
+    std::string _pyClassName;
+    ClassInfo* _ci;
 public:
-    explicit PythonAgentFactory(std::string& module, std::string& clazz) : AbstractFactory<Agent>() {
-        pySrcModuleName = module;
-        pyClassName = clazz;
-        ci = new ClassInfo("opencog::PyMindAgent(" + module + "." + clazz + ")");
+    explicit PythonAgentFactory(std::string& module, std::string& clazz)
+      : AbstractFactory<Agent>()
+    {
+        _pySrcModuleName = module;
+        _pyClassName = clazz;
+        _ci = new ClassInfo("opencog::PyMindAgent(" + module + "." + clazz + ")");
     }
-    virtual ~PythonAgentFactory() {
-        delete ci;
+    virtual ~PythonAgentFactory()
+    {
+        delete _ci;
     }
-    virtual Agent* create() const;
-    virtual const ClassInfo& info() const { return *ci; }
-}; 
+    virtual Agent* create(CogServer&) const;
+    virtual const ClassInfo& info() const { return *_ci; }
+};
 
 class PythonRequestFactory : public AbstractFactory<Request>
 {
     // Store the name of the python module and class so that we can instantiate
     // them
-    std::string pySrcModuleName;
-    std::string pyClassName;
-    RequestClassInfo* cci;
+    std::string _pySrcModuleName;
+    std::string _pyClassName;
+    RequestClassInfo* _cci;
 public:
-    const ClassInfo& info() const {
-        // TODO, allow this stuff to come from the Python file...
-        return *cci;
+    explicit PythonRequestFactory(std::string& module, const std::string& clazz, 
+                                  const std::string& short_desc, 
+                                  const std::string& long_desc,
+                                  bool is_shell)
+       : AbstractFactory<Request>()
+    {
+        _pySrcModuleName = module;
+        _pyClassName = clazz;
+        _cci = new RequestClassInfo(
+              _pySrcModuleName + _pyClassName, short_desc, long_desc, is_shell);
     }
-    explicit PythonRequestFactory(std::string& module, std::string& clazz) : AbstractFactory<Request>() {
-        pySrcModuleName = module;
-        pyClassName = clazz;
-        cci = new RequestClassInfo(
-              pySrcModuleName + pyClassName,
-              "A python implemented request",
-              "long description including parameter types"
-        );
+    virtual ~PythonRequestFactory()
+    {
+        delete _cci;
     }
-    virtual ~PythonRequestFactory() {
-        delete cci;
-    }
-    virtual Request* create() const;
-}; 
+    virtual Request* create(CogServer&) const;
+    virtual const ClassInfo& info() const { return *_cci; }
+};
 
 class PythonModule : public Module
 {
-    DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py, 
-       "Load requests and MindAgents from a python module", 
-       "Usage: load_py module_name\n\n"
-       "Loads and registers all request classes and all MindAgents with the CogServer", 
-       false);
+    DECLARE_CMD_REQUEST(PythonModule, "loadpy", do_load_py,
+       "Load commands and MindAgents from a python module",
+       "Usage: load_py file_name\n\n"
+       "Load commands and MindAgents, written in python, from a file."
+       "After loading, commands will appear in the list of available "
+       "commands (use 'h' to list).  Commands must be implemented as "
+       "python modules, inheritiing from the class opencog.cogserver.Request. "
+       "Likewise, mind agents must inherit from opencog.cogserver.MindAgent. "
+       "The loaded agents can be viewed with the 'agents-list' command.",
+       false, false);
 
 private:
 
-    std::vector<std::string> agentNames;
-    std::vector<std::string> requestNames;
+    std::vector<std::string> _agentNames;
+    std::vector<std::string> _requestNames;
 
-    PyThreadState *tstate;
+    // Main thread state only.
+    PyThreadState* _mainstate;
 
+    bool preloadModules();
+    bool unregisterAgentsAndRequests();
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -94,16 +97,10 @@ public:
     }
     static inline const char* id();
 
-    PythonModule();
+    PythonModule(CogServer&);
     ~PythonModule();
     void init();
 
-    bool unregisterAgentsAndRequests();
-    std::string name;
-    
-    bool preloadModules();
-
-    //PyObject* load_module(std::string& filename);
 }; // class
 
 } // namespace opencog

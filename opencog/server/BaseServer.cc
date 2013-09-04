@@ -61,6 +61,6 @@ AtomSpace& BaseServer::getAtomSpace()
 // create and return static singleton instance
 BaseServer& opencog::server(BaseServer* (*factoryFunction)())
 {
-    static std::auto_ptr<BaseServer> instance((*factoryFunction)());
+    static std::unique_ptr<BaseServer> instance((*factoryFunction)());
     return *instance;
 }

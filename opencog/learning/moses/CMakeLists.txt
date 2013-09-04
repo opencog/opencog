@@ -1,19 +1,26 @@
 # MOSES' version, must be updated manually
 SET (MOSES_VERSION_MAJOR 3)
-SET (MOSES_VERSION_MINOR 4)
-SET (MOSES_VERSION_PATCH 0)
+SET (MOSES_VERSION_MINOR 6)
+SET (MOSES_VERSION_PATCH 8)
 
 ADD_DEFINITIONS(-DMOSES_VERSION_MAJOR="${MOSES_VERSION_MAJOR}")
 ADD_DEFINITIONS(-DMOSES_VERSION_MINOR="${MOSES_VERSION_MINOR}")
 ADD_DEFINITIONS(-DMOSES_VERSION_PATCH="${MOSES_VERSION_PATCH}")
 
 # MOSES git describe, automatically updated
-EXECUTE_PROCESS(COMMAND git describe OUTPUT_VARIABLE MOSES_GIT_DESCRIBE)
+EXECUTE_PROCESS(
+	COMMAND git describe
+	OUTPUT_VARIABLE MOSES_GIT_DESCRIBE
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
 IF (MOSES_GIT_DESCRIBE)
   ADD_DEFINITIONS(-DMOSES_GIT_DESCRIBE="${MOSES_GIT_DESCRIBE}")
 ENDIF (MOSES_GIT_DESCRIBE)
 
 ADD_SUBDIRECTORY (moses)
+ADD_SUBDIRECTORY (scoring)
+ADD_SUBDIRECTORY (metapopulation)
 ADD_SUBDIRECTORY (representation)
 ADD_SUBDIRECTORY (optimization)
 ADD_SUBDIRECTORY (eda)
@@ -25,22 +32,29 @@ ADD_SUBDIRECTORY (man)
 ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
 	eda/local_structure
+
 	moses/complexity
 	moses/distributed_moses
 	moses/local_moses
-	moses/metapopulation
 	moses/moses_main
 	moses/mpi_moses
 	moses/neighborhood_sampling
 	moses/partial
-	moses/pole_balancing
-	moses/scoring
 	moses/types
 	moses/using
+
+	scoring/scoring
+
+	metapopulation/metapopulation
+	metapopulation/metapop_params
+	metapopulation/deme_expander
+	metapopulation/feature_selector
+
 	optimization/hill-climbing
 	optimization/optimization
 	optimization/star-anneal
 	optimization/univariate
+
 	representation/build_knobs
 	representation/field_set
 	representation/knob_mapper

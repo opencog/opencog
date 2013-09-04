@@ -57,13 +57,14 @@ class SpreadDecider
     //!
     //! @param s The STI to base the decision on.
     //! @return Probability of given STI value resulting in spread.
-    virtual float function(AttentionValue::sti_t s) = 0;
+    virtual double function(AttentionValue::sti_t s) = 0;
 
 protected:
+    CogServer& _cogserver;
     static RandGen *rng;
 
 public:
-    SpreadDecider() {}
+    SpreadDecider(CogServer& cs) : _cogserver(cs) {}
     virtual ~SpreadDecider() {}
 
     //! Set the focus boundary, which is used for centralising
@@ -105,7 +106,7 @@ class HyperbolicDecider : SpreadDecider
     //!
     //! @param s The STI to base the decision on.
     //! @return Probability of given STI value resulting in spread.
-    float function(AttentionValue::sti_t s);
+    virtual double function(AttentionValue::sti_t s);
 
 public:
     //! Used to determine the steepness of the hyperbolic decision function.
@@ -113,13 +114,13 @@ public:
 
     //! The decision focus boundary, or where the decision function is centred
     //! around.
-    float focusBoundary;
+    double focusBoundary;
 
-    HyperbolicDecider(float _s=10.0f):
-        shape(_s), focusBoundary(0.0f) {}
+    HyperbolicDecider(CogServer& cs, float _s = 10.0f):
+        SpreadDecider(cs), shape(_s), focusBoundary(0.0f) {}
 
     virtual ~HyperbolicDecider() {}
-    void setFocusBoundary(float b = 0.0f);
+    virtual void setFocusBoundary(float b = 0.0f);
 };
 
 /** A basic spread decider based on a step function.
@@ -127,13 +128,13 @@ public:
  */
 class StepDecider : SpreadDecider
 {
-    float function(AttentionValue::sti_t s);
+    virtual double function(AttentionValue::sti_t s);
 
 public:
     int focusBoundary;
-    StepDecider() {}
+    StepDecider(CogServer& cs) : SpreadDecider(cs) {}
     virtual ~StepDecider() {}
-    void setFocusBoundary(float b = 0.0f);
+    virtual void setFocusBoundary(float b = 0.0f);
 };
 
 /** Spreads short term importance along HebbianLinks using a diffusion approach.
@@ -161,6 +162,10 @@ private:
     //! Value that normalised STI has to be above before being spread
     //! Is a normalised value from -1 to 1. 0 == AF
     float diffusionThreshold;
+
+    //! Whether to spread STI across all types of Links and not just HebbianLinks.
+    //! If there are multiple links between the same two Atoms, then it will add up their strengths.
+    bool allLinksSpread;
 
     //! Spread importance along Hebbian links.
     //! @todo split into sub functions instead of one giant beast.
@@ -201,9 +206,9 @@ public:
     enum { HYPERBOLIC, STEP };
     void setSpreadDecider(int type, float shape = 30);
 
-    ImportanceDiffusionAgent();
+    ImportanceDiffusionAgent(CogServer&);
     virtual ~ImportanceDiffusionAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     /** Set the maximum percentage of importance that can be spread.
      * @param p the maximum percentage of importance that can be spread.

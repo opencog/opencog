@@ -58,6 +58,7 @@ namespace opencog
             inline int getWidth() const {return mBoundingBox.size_x;}
             inline int getLength() const {return mBoundingBox.size_y;}
             inline int getHeight() const {return mBoundingBox.size_z;}
+            inline double getRadius() const {return  sqrt(mBoundingBox.size_x * mBoundingBox.size_x +  mBoundingBox.size_y * mBoundingBox.size_y)/2.0 ; }
 
             inline const AxisAlignedBox& getBoundingBox() const {return mBoundingBox;}
 
@@ -83,6 +84,8 @@ namespace opencog
             // when a nonblock entity change its position or direction or other space attributes, call this function
             // Note: only apply to non-block entities - pls do not apply in a blockEntity
             void updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _width, int _lenght, int _height,double yaw, bool _is_obstacle);
+
+            void updateNonBlockEntityLocation(BlockVector _centerPosition);
 
         protected:
             Entity3D(){};

@@ -20,6 +20,7 @@ MIN_STI               = -400
 PROMPT                = "opencog> "
 MODULES               = opencog/server/libbuiltinreqs.so,
                         opencog/persist/sql/libpersist.so,
+                        opencog/nlp/types/libnlp-types.so,
                         opencog/query/libquery.so,
                         opencog/shell/libscheme-shell.so
 

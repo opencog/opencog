@@ -36,9 +36,8 @@ extern "C" const char* opencog_module_id()
     return SingleAgentModule::info().id.c_str();
 }
 
-extern "C" Module* opencog_module_load()
+extern "C" Module* opencog_module_load(CogServer& cogserver)
 {
-    CogServer& cogserver = static_cast<CogServer&>(server());
     cogserver.registerAgent(SingleAgentModule::info().id, &(SingleAgentModule::factory()));
     SingleAgentModule* agent =
         static_cast<SingleAgentModule*>(cogserver.createAgent(SingleAgentModule::info().id, true));
@@ -49,23 +48,27 @@ extern "C" Module* opencog_module_load()
 extern "C" void opencog_module_unload(Module* m)
 {
     SingleAgentModule* agent = static_cast<SingleAgentModule*>(m);
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.stopAgent(agent);
+    agent->stopAgent();
     delete m;
 }
 
-SingleAgentModule::SingleAgentModule() : Agent(100), Module()
+SingleAgentModule::SingleAgentModule(CogServer& cs) : Agent(cs, 100), Module(cs)
 {
     logger().info("[SingleAgentModule] constructor (%s)", name.c_str());
 }
 
-SingleAgentModule::~SingleAgentModule() {
+SingleAgentModule::~SingleAgentModule()
+{
     logger().info("[SingleAgentModule] destructor (%s)", name.c_str());
-    CogServer& cogserver = static_cast<CogServer&>(server());
-    cogserver.destroyAllAgents(SingleAgentModule::info().id);
+    Module::_cogserver.destroyAllAgents(SingleAgentModule::info().id);
 }
 
-void SingleAgentModule::run(CogServer* server)
+void SingleAgentModule::stopAgent()
+{
+    Module::_cogserver.stopAgent(this);
+}
+
+void SingleAgentModule::run()
 {
     logger().info("[SingleAgentModule] run (%s)", name.c_str());
 }
@@ -73,15 +76,14 @@ void SingleAgentModule::run(CogServer* server)
 void SingleAgentModule::init()
 {
     logger().info("[TestModule] init (%s)", name.c_str());
-    CogServer& cogserver = static_cast<CogServer&>(server());
 
     SingleAgentModule* a =
-        static_cast<SingleAgentModule*>(cogserver.createAgent(info().id, true));
+        static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
     a->name = "SingleAgentModule1";
 
-    a = static_cast<SingleAgentModule*>(cogserver.createAgent(info().id, true));
+    a = static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
     a->name = "SingleAgentModule2";
 
-    a = static_cast<SingleAgentModule*>(cogserver.createAgent(info().id, true));
+    a = static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
     a->name = "SingleAgentModule3";
 }

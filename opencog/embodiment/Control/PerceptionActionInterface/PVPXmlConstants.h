@@ -111,6 +111,7 @@
 #define AGENT_TYPE_ATTRIBUTE     "type"
 #define ENTITY_CLASS_ATTRIBUTE  "class"
 #define COLOR_ATTRIBUTE         "color"
+#define COLOR_NAME_ATTRIBUTE         "color_name"
 #define MATERIAL_ATTRIBUTE      "material"
 #define TEXTURE_ATTRIBUTE       "texture"
 #define IS_TOY_ATTRIBUTE        "isToy"

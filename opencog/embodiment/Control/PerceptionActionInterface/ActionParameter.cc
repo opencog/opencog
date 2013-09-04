@@ -36,7 +36,7 @@ using namespace opencog::pai;
 
 ParamValue opencog::pai::UNDEFINED_VALUE = "UNDEFINED_VALUE";
 
-Entity Entity::NON_Entity = Entity("","");
+Entity Entity::NON_Entity = Entity("none","none");
 
 ActionParameter::ActionParameter() : type(ActionParamType::STRING())
 {
@@ -74,6 +74,8 @@ ActionParameter::ActionParameter(const string& _name, const ActionParamType& _ty
         OC_ASSERT(false, "ActionParameter constructor: got invalid parameter type: %s\n", _type.getName().c_str());
         break;
     }
+
+    valueString = stringRepresentation();
 }
 
 ActionParameter::~ActionParameter()
@@ -85,9 +87,10 @@ ActionParameter::~ActionParameter()
 void ActionParameter::assignValue(const ParamValue& newValue)
 {
     value = newValue;
+    valueString = stringRepresentation();
 }
 
-const string& ActionParameter::getName() const
+string ActionParameter::getName() const
 {
     return name;
 }
@@ -219,6 +222,37 @@ bool ActionParameter::isFuzzyIntervalFloatValue() const
     return boost::get<FuzzyIntervalFloat>(&value);
 }
 
+bool ActionParameter::isStringValue(ParamValue value)
+{
+    return boost::get<string>(&value);
+}
+
+bool ActionParameter::isRotationValue(ParamValue value)
+{
+    return boost::get<Rotation>(&value);
+}
+
+bool ActionParameter::isVectorValue(ParamValue value)
+{
+    return boost::get<Vector>(&value);
+}
+
+bool ActionParameter::isEntityValue(ParamValue value)
+{
+    return boost::get<Entity>(&value);
+}
+
+bool ActionParameter::isFuzzyIntervalIntValue(ParamValue value)
+{
+    return boost::get<FuzzyIntervalInt>(&value);
+}
+
+bool ActionParameter::isFuzzyIntervalFloatValue(ParamValue value)
+{
+    return boost::get<FuzzyIntervalFloat>(&value);
+}
+
+
 const string& ActionParameter::getStringValue() const
 {
     return get<string>(value);
@@ -249,6 +283,38 @@ const FuzzyIntervalFloat& ActionParameter::getFuzzyIntervalFloatValue() const
     return get<FuzzyIntervalFloat>(value);
 }
 
+
+const string& ActionParameter::getStringValue(ParamValue value)
+{
+    return get<string>(value);
+}
+
+const Rotation& ActionParameter::getRotationValue(ParamValue value)
+{
+    return get<Rotation>(value);
+}
+
+const Vector& ActionParameter::getVectorValue(ParamValue value)
+{
+    return get<Vector>(value);
+}
+
+const Entity& ActionParameter::getEntityValue(ParamValue value)
+{
+    return get<Entity>(value);
+}
+
+const FuzzyIntervalInt& ActionParameter::getFuzzyIntervalIntValue(ParamValue value)
+{
+    return get<FuzzyIntervalInt>(value);
+}
+
+const FuzzyIntervalFloat& ActionParameter::getFuzzyIntervalFloatValue(ParamValue value)
+{
+    return get<FuzzyIntervalFloat>(value);
+}
+
+
 bool ActionParameter::areFromSameType(const ParamValue& v1, const ParamValue& v2)
 {
     bool result = boost::apply_visitor(same_type_visitor(), v1, v2);
@@ -262,11 +328,8 @@ std::string ActionParameter::stringRepresentation() const throw (opencog::Runtim
 
     ActionParamTypeCode typeCode = type.getCode();
     switch (typeCode) {
-    case BOOLEAN_CODE: {
-        answer = (atoi((boost::get<std::string>(value)).c_str()) ? "true" : "false");
-        break;
-    }
-    // int and float are stored as string as well
+    // bool,int and float are stored as string as well
+    case BOOLEAN_CODE:
     case INT_CODE:
     case FLOAT_CODE:
     case STRING_CODE: {
@@ -333,13 +396,14 @@ std::string ActionParameter::ParamValueToString(const ParamValue& paramVal)
 {
     std::string answer ="";
 
-    if(boost::get<Entity>(&(paramVal)))
+    if(boost::get<std::string>(&(paramVal)))
     {
         answer = boost::get<std::string>(paramVal);
 
     }
     else if(boost::get<Entity>(&(paramVal)))
     {
+        Entity e = boost::get<Entity>(paramVal);
         answer = "(";
         answer.append(opencog::toString(boost::get<Entity>(paramVal).id));
         answer.append(",");

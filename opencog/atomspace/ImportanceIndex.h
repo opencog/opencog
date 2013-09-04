@@ -28,8 +28,12 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
+
 class Atom;
-class HandleEntry;
+class AtomTable;
 
 /**
  * Implements an index with additional routines needed for managing 
@@ -38,8 +42,8 @@ class HandleEntry;
 class ImportanceIndex: public FixedIntegerIndex
 {
 private:
-    static HandleEntry* extractOld(AttentionValue::sti_t,
-		                               Handle, bool recursive = false);
+    static UnorderedHandleSet extractOld(const AtomTable*, AttentionValue::sti_t,
+		                                   Handle, bool recursive = false);
 public:
     ImportanceIndex(void);
     void insertAtom(const Atom*);
@@ -54,8 +58,9 @@ public:
      */
     void updateImportance(Atom*, int);
 
-    HandleEntry* decayShortTermImportance(void);
-    HandleEntry* getHandleSet(AttentionValue::sti_t,
+    UnorderedHandleSet decayShortTermImportance(const AtomTable*);
+    UnorderedHandleSet getHandleSet(const AtomTable*,
+                              AttentionValue::sti_t,
                               AttentionValue::sti_t) const;
 
     /**
@@ -73,6 +78,7 @@ public:
 
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_IMPORTANCEINDEX_H

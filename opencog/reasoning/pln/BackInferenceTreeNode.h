@@ -55,7 +55,9 @@ class PLNUTest;
 /* Don't define USE_BITUBIGRAPHER unless cmake actually found Ubigraph
  * installed */
 #ifdef HAVE_UBIGRAPH
-#define USE_BITUBIGRAPHER
+// XXX Doing this here creates a circular dpendency between PLN and ubigrapher,
+// which breaks the build. So disable for now.
+// #define USE_BITUBIGRAPHER
 #endif
 
 typedef unsigned int BITNodeID;

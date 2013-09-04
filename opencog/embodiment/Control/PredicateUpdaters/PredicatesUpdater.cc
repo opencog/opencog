@@ -21,6 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+
 #include "PredicatesUpdater.h"
 #include "SpatialPredicateUpdater.h"
 #include "IsSmallPredicateUpdater.h"
@@ -30,6 +32,7 @@
 #include "IsPeePlacePredicateUpdater.h"
 #include "IsPickupablePredicateUpdater.h"
 #include "PetPsychePredicatesUpdater.h"
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 // this time frame corresponde to one minute
 static const unsigned long timeWindow = 600;
@@ -50,7 +53,8 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
 
     // Spatial relation predicates
-    updaters.push_back(new SpatialPredicateUpdater(atomSpace));
+    if (config().get_bool( "ENABLE_SPATIAL_RELATIONSHIP_UPDATER"))
+        updaters.push_back(new SpatialPredicateUpdater(atomSpace));
 
     petPsychePredicatesUpdater = new PetPsychePredicatesUpdater(atomSpace);
 }

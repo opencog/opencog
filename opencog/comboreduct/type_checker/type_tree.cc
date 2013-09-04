@@ -1176,8 +1176,7 @@ type_tree get_type_tree(const combo_tree& tr, combo_tree::iterator it)
         head = tmp.wrap(head, id::application_type);
         for (combo_tree::sibling_iterator sib = it.begin();
                 sib != it.end(); ++sib) {
-            type_tree arg_app = get_type_tree(tr,
-                                              combo_tree::iterator(sib));
+            type_tree arg_app = get_type_tree(tr, combo_tree::iterator(sib));
             type_tree_pre_it arg_app_it = arg_app.begin();
             type_tree_pre_it arg_it = tmp.append_child(head);
             tmp.replace(arg_it, arg_app_it);
@@ -1210,7 +1209,6 @@ bool is_well_formed(const type_tree& tt)
 bool does_contain_all_arg_up_to(const combo_tree& tr, arity_t n)
 {
     typedef combo_tree::leaf_iterator leaf_it;
-    typedef combo_tree::iterator pre_it;
     OC_ASSERT(!tr.empty(),
                       "cannot infer arg types on an empty combo_tree");
     OC_ASSERT(n >= 0, "Must be positive or null");

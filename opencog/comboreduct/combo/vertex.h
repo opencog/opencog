@@ -66,7 +66,7 @@ namespace id {
 // leads to nightmarish errors. It might also that the new standard
 // C++0x fixes that that problem all by itself since in that standard
 // 2 different enums are considered to be different types.
-enum builtin
+enum __attribute__ ((packed)) builtin
 {
     null_vertex = 0,
 
@@ -163,6 +163,26 @@ typedef argument_list_list::const_iterator argument_list_list_const_it;
 std::istream& operator>>(std::istream& in, combo::vertex& v);
 
 // -------------------------------------------------------
+// contin_t == vertex
+inline bool operator==(const vertex& v, contin_t c)
+{
+    if (const contin_t* vc = boost::get<contin_t>(&v))
+        return (*vc == c);
+    return false;
+}
+inline bool operator==(contin_t c, const vertex& v)
+{
+    return (v == c);
+}
+inline bool operator!=(const vertex& v, contin_t c)
+{
+    return !(v == c);
+}
+inline bool operator!=(contin_t c, const vertex& v)
+{
+    return !(v == c);
+}
+
 // builtin == vertex
 inline bool operator==(const vertex& v, builtin h)
 {
@@ -502,10 +522,18 @@ inline size_t hash_value(const vertex& v)
 // -------------------------------------------------------
 
 typedef tree<vertex> combo_tree;
+
+typedef std::vector<combo_tree> combo_tree_seq;
+typedef combo_tree_seq::iterator combo_tree_seq_it;
+typedef combo_tree_seq::const_iterator combo_tree_seq_const_it;
+
 // ns stands for normal size
 typedef std::set<combo_tree, size_tree_order<vertex> > combo_tree_ns_set;
 typedef combo_tree_ns_set::iterator combo_tree_ns_set_it;
 typedef combo_tree_ns_set::const_iterator combo_tree_ns_set_const_it;
+
+// default ordering between combo trees (size_tree_order<vertex>)
+bool operator<(const combo_tree& lt, const combo_tree& rt);
 
 // Disambiguate stream operator; use the one declared in util/tree.h
 std::istream& operator>>(std::istream& in, combo::combo_tree& tr);
@@ -670,12 +698,19 @@ inline bool vertex_to_bool(const vertex& v)
               "vertex should be 'id::logical_true' or 'id::logical_false'.");
     return (v == id::logical_true);
 }
+inline bool builtin_to_bool(const builtin& b)
+{
+    OC_ASSERT(b == id::logical_true || b == id::logical_false,
+              "builtin should be 'id::logical_true' or 'id::logical_false'.");
+    return (b == id::logical_true);
+}
 
 // Return logical_true if logical_false and vice versa
 //
 // Note: don't rename it negate as it enters in conflict with
 // std::negate(string)
 vertex negate_vertex(const vertex& v);
+builtin negate_builtin(builtin b);
 
 inline bool is_complement(const vertex& x, const vertex& y)
 {
@@ -687,7 +722,7 @@ inline bool is_complement(const vertex& x, const vertex& y)
     return false;
 }
 
-inline bool is_boolean(const vertex& v)
+template<typename T> bool is_boolean(const T& v)
 {
     return (v == id::logical_true || v == id::logical_false);
 }

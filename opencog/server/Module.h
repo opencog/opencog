@@ -1,8 +1,8 @@
 /*
  * opencog/CogServer/Module.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
- * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2008, 2011 OpenCog Foundation
+ * Copyright (C) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,15 +39,41 @@ namespace opencog
     extern "C" const char* opencog_module_id(void) {                  \
        return "opencog::" #MODNAME;                                   \
     }                                                                 \
-    extern "C" Module * opencog_module_load(CogServer *cogserver) {   \
-       return new MODNAME();                                          \
+    extern "C" Module * opencog_module_load(CogServer& cogserver) {   \
+       return new MODNAME(cogserver);                                 \
     }                                                                 \
-    extern "C" void opencog_module_unload(Module * m) {               \
+    extern "C" void opencog_module_unload(Module* m) {                \
        delete m;                                                      \
     }                                                                 \
     inline const char * MODNAME::id(void) {                           \
         return "opencog::" #MODNAME;                                  \
     }
+
+/**
+ * TRIVIAL_MODULE -- Declare a trivial module called MODNAME.
+ * This defines the class object, with trivial costructor and 
+ * desctructor. The primary users of this are expected to be 
+ * any .so's that need to define new atom types.  These will
+ * be treated as modules, so that the atom types get defined
+ * at module load time, rather than later.
+ *
+ * Here's the technical issue being solved here:
+ * 1) Atom types must be defined before use.
+ * 2) Atom types get used during scheme (and python!) preloads
+ * 3) ergo, shared lib init() ctors must be called before preload.
+ * 4) The ctors are not called until some function in the .so is called.
+ * 5) dlopen() will cause the init() ctor to run!
+ * So the trivial module solves 5) and ergo fixes 1).
+ */
+#define TRIVIAL_MODULE(MODNAME)                                       \
+    namespace opencog {                                               \
+    class MODNAME : public Module {                                   \
+    public:                                                           \
+        MODNAME(CogServer& cs) : Module(cs) {}                        \
+        virtual ~MODNAME() {}                                         \
+        const char * id(void);                                        \
+        virtual void init(void) {}                                    \
+    };}
 
 
 /**
@@ -88,7 +114,7 @@ namespace opencog
  * DECLARE_MODULE(DerivedModule);
  *
  * To implement the module's functionality, you will probably want to
- * write a custom constructor and destructor and perhaps overrite the
+ * write a custom constructor and destructor and perhaps overwrite the
  * init() method (which is called by the cogserver) after the module's
  * initialization has finished and the meta-data properly set.
  */
@@ -117,11 +143,21 @@ public:
     }
 
     typedef const char* IdFunction    (void);
-    typedef Module*     LoadFunction  (CogServer*);
+    typedef Module*     LoadFunction  (CogServer&);
     typedef void        UnloadFunction(Module*);
 
-    virtual ~Module() {};
+    Module(CogServer& cs) : _cogserver(cs) {}
+    virtual ~Module() {}
     virtual void init() = 0;
+
+protected: 
+    // Keep a copy of the server we were created with. This is needed
+    // to avoid a race condition when the cogserver destructor is
+    // called  -- when in the destructor, the server() global function
+    // will return NULL, and thus any module that needs the server will
+    // not be able to get at it.  This solves that problem.  Besides,
+    // using globals is a bad idea, in general.
+    CogServer& _cogserver;
 
 }; // class
 

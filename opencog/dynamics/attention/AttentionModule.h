@@ -41,7 +41,6 @@ class AttentionModule : public Module
 {
 
 private:
-
     Factory<ForgettingAgent, Agent>          forgettingFactory;
     Factory<HebbianUpdatingAgent, Agent>     hebbianFactory;
     Factory<ImportanceSpreadingAgent, Agent> spreadingFactory;
@@ -55,7 +54,7 @@ public:
 
     static inline const char* id();
 
-    AttentionModule();
+    AttentionModule(CogServer&);
     virtual ~AttentionModule();
     virtual void init();
 

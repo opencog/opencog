@@ -1,4 +1,4 @@
-/** random.h --- 
+/* random.h --- 
  *
  * Copyright (C) 2010 Novamente LLC
  *
@@ -31,13 +31,18 @@
 #include "numeric.h"
 
 /**
+ * \file random.h
+ *
  * This file contains a collection of random generators based on RandGen
  */
 
 namespace opencog {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
-// choose uniformly randomly an element of the set s
-// WARNING : it is assumed that s is non-empty
+//! choose uniformly randomly an element of the set s
+/// \warning it is assumed that s is non-empty
 template<typename T>
 T randset(const std::set<T>& s, RandGen& rng = randGen())
 {
@@ -45,9 +50,9 @@ T randset(const std::set<T>& s, RandGen& rng = randGen())
     return *std::next(s.begin(), rng.randint(s.size()));
 }
 
-// return a random number sampled according to a Gaussian
-// distribution. If the number falls out of the range of T then it is
-// automatically truncated.
+//! return a random number sampled according to a Gaussian
+//! distribution. If the number falls out of the range of T then it is
+//! automatically truncated.
 template<typename T>
 T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
 {
@@ -65,12 +70,13 @@ T gaussian_rand(T mean, T std_dev, RandGen& rng = randGen())
     return res;
 }
 
-// linear biased random bool, b in [0,1] when b tends to 1 the result
-// tends to be true
+//! linear biased random bool, b in [0,1] when b tends to 1 the result
+//! tends to be true
 static inline bool biased_randbool(float b, RandGen& rng = randGen()) {
     return b > rng.randfloat();
 }
 
+/** @}*/
 } // ~namespace opencog
 
 #endif // _OPENCOG_RANDOM_H

@@ -5,6 +5,7 @@ INCLUDE_DIRECTORIES (
 )
 
 LINK_DIRECTORIES(
+	${PROJECT_BINARY_DIR}/opencog/nlp/types
 	${PROJECT_BINARY_DIR}/opencog/atomspace
 	${PROJECT_BINARY_DIR}/opencog/query
 	${PROJECT_BINARY_DIR}/opencog/util
@@ -12,6 +13,7 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	atomspace
+	nlp-types
 	query
 	server
 	${Boost_SIGNALS_LIBRARY}

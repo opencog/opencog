@@ -2306,7 +2306,7 @@ typedef tagged_item<combo::combo_tree,
 
 The metapopulation is then a set of scored combo trees, defined in 
 \family typewriter
-moses/metapopulation.h.
+metapopulation/metapopulation.h.
 
 \family default
  More precisely, it is a template, inheriting from the set:

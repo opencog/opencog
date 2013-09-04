@@ -26,8 +26,9 @@
 
 #include <opencog/util/numeric.h>
 
-#include <opencog/learning/moses/moses/scoring.h>
+#include <opencog/learning/moses/scoring/scoring.h>
 #include <opencog/comboreduct/combo/common_def.h>
+#include "fs_scorer_base.h"
 
 namespace opencog {
 
@@ -36,7 +37,7 @@ using namespace combo;
 
 /**
  * Wrapper to use moses scoring precision (see
- * opencog/learning/moses/moses/scoring.h).  This is one of the
+ * opencog/learning/moses/scoring/scoring.h).  This is one of the
  * confusion-matrix based scorers.
  *
  * That wrapper uses the method best_possible_score() given a certain
@@ -45,27 +46,33 @@ using namespace combo;
  * feature set being evaluated.
  */
 template<typename FeatureSet>
-struct pre_scorer : public unary_function<FeatureSet, double>
+struct pre_scorer : public fs_scorer_base<FeatureSet>
 {
+    typedef fs_scorer_base<FeatureSet> super;
+
     pre_scorer(const CTable& ctable,
+               double confi = 100,
                float penalty = 1.0f,
                float min_activation = 0.5f,
                float max_activation = 1.0f,
                bool positive = true)
-        : _ctable(ctable), _penalty(penalty),
+        : super(ctable, confi), _penalty(penalty),
           _min_activation(min_activation), _max_activation(max_activation),
           _positive(positive) {}
 
     double operator()(const FeatureSet& fs) const {
         // filter the ctable
-        CTable filtered_ctable = _ctable.filtered(fs);
+        CTable filtered_ctable = super::_ctable.filtered(fs);
         // create the scorer
         precision_bscore sc(filtered_ctable, _penalty,
                             _min_activation, _max_activation, _positive);
-        return boost::accumulate(sc.best_possible_bscore(), 0.0);
+        double precision = boost::accumulate(sc.best_possible_bscore(), 0.0);
+        double cfdence = super::confidence(fs.size());
+        logger().fine("pre_scorer precision = %g, confidence = %g",
+                      precision, cfdence);
+        return precision * cfdence;
     }
 protected:
-    const CTable& _ctable;
     float _penalty, _min_activation, _max_activation;
     bool _positive;
 };

@@ -26,6 +26,7 @@
 #include <opencog/spatial/TB_ASSERT.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/macros.h>
 
 #include <opencog/spatial/math/Vector3.h>
 #include <opencog/spatial/StaticEntity.h>
@@ -285,27 +286,29 @@ void LocalSpaceMap2D::save( FILE* fp ) const
 void LocalSpaceMap2D::load(FILE* fp)
 {
     unsigned int numberOfObjects;
-    fread(&numberOfObjects, sizeof(unsigned int), 1, fp);
+    bool b_read = true;
+    FREAD_CK(&numberOfObjects, sizeof(unsigned int), 1, fp);
 
     for (unsigned int i = 0; i < numberOfObjects; ++i)
     {
         unsigned int length;
-        fread(&length, sizeof(unsigned int), 1, fp);
+        FREAD_CK(&length, sizeof(unsigned int), 1, fp);
 
         char* id = new char[length+1];
-        fread(id, sizeof(char), length, fp);
+        FREAD_CK(id, sizeof(char), length, fp);
         id[length] = '\0';
 
         spatial::ObjectMetaData metadata;
-        fread(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
+        FREAD_CK(&metadata, sizeof(spatial::ObjectMetaData), 1, fp);
 
         bool isObstacle;
-        fread(&isObstacle, sizeof(bool), 1, fp);
+        FREAD_CK(&isObstacle, sizeof(bool), 1, fp);
 
         addObject(std::string(id), metadata, isObstacle );
 
         delete id;
     }
+    CHECK_FREAD;
 }
 
 spatial::Distance LocalSpaceMap2D::xGridWidth() const

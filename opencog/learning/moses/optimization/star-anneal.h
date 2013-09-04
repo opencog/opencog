@@ -32,7 +32,7 @@
 #include <opencog/util/oc_assert.h>
 
 #include "../representation/instance_set.h"
-#include "../moses/scoring.h"
+#include "../scoring/scoring.h"
 #include "optimization.h"
 
 namespace opencog { namespace moses {
@@ -89,7 +89,7 @@ struct simulated_annealing : optimizer_base
 
     simulated_annealing(const optim_parameters& op = optim_parameters(),
                         const sa_parameters& sa = sa_parameters())
-        : opt_params(op), sa_params(sa) {}
+        : optimizer_base(op), sa_params(sa) {}
 
     double accept_probability(energy_t energy_new, energy_t energy_old,
                               double temperature)
@@ -150,7 +150,6 @@ struct simulated_annealing : optimizer_base
         return operator()(deme, init_inst, iscorer, max_evals, max_time);
     }
 
-    optim_parameters opt_params;
     sa_parameters sa_params;
 protected:
     unsigned max_distance;

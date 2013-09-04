@@ -39,13 +39,14 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/ansi.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/macros.h>
 
 #include <boost/iterator/indirect_iterator.hpp>
 #include <boost/foreach.hpp>
 
 #ifdef USE_BITUBIGRAPHER
 //! @todo
-#include <opencog/ubigraph/BITUbigrapher.h>
+#include <opencog/visualization/ubigraph/BITUbigrapher.h>
 #endif // USE_BITUBIGRAPHER
 
 // TODELETE: wasn't updated, or used (to any effect)
@@ -1261,7 +1262,7 @@ bool BITNode::expandRule(RulePtr new_rule, int target_i, BBvtree _target, Btr<bi
                                 insert_with_consistency_check(*combined_binds, jtree->bindings->begin(), jtree->bindings->end());
                             } catch(...) { puts("exception in expandRule (bindings combination)"); continue; }
 
-                        BITNode* new_node = createChild(target_i, new_rule, *j,_target, *combined_binds, spawning);                 
+                        /*BITNode* new_node = */ createChild(target_i, new_rule, *j,_target, *combined_binds, spawning);                 
                     }
                 }
             
@@ -1312,7 +1313,7 @@ void BITNode::tryClone(hpair binding) const
             }
             Btr<BoundVTree> new_target(new BoundVTree(*bind_vtree(*this->raw_target, single_bind)));
             
-            BITNode* new_node = p.link->createChild(p.parent_arg_i,
+            /* BITNode* new_node = */ p.link->createChild(p.parent_arg_i,
                                                     this->rule,
                                                     new_args,
                                                     new_target,
@@ -2301,6 +2302,7 @@ string BITNode::tlog(int msgLevel, const char *format, ...) const
     va_list ap;
     va_start(ap, format);
     int answer = vsnprintf(buf, MAX_TLOG_MESSAGE_SIZE, format, ap);
+    OC_UNUSED(answer);
     va_end(ap);
     ss << buf;
 

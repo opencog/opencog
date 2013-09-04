@@ -21,8 +21,8 @@
  */
 
 
-#ifndef _OPENCOG_CONVERTER_ANN_COMBO_TREE_H
-#define _OPENCOG_CONVERTER_ANN_COMBO_TREE_H
+#ifndef _COMBO_CONVERTER_ANN_COMBO_TREE_H
+#define _COMBO_CONVERTER_ANN_COMBO_TREE_H
 
 #include "simple_nn.h"
 #include "vertex.h"
@@ -173,7 +173,7 @@ struct tree_transform {
     }
 
     void decodify_subtree(ann& nn, ann_node* dest_node, sib_it it) const {
-        vector<ann_node*> sources;
+        std::vector<ann_node*> sources;
         sib_it sib;
         
         int count = -1;
@@ -204,4 +204,4 @@ struct tree_transform {
 
 }} // ~namespaces combo opencog
 
-#endif // _OPENCOG_CONVERTER_ANN_COMBO_TREE_H
+#endif // _COMBO_CONVERTER_ANN_COMBO_TREE_H

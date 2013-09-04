@@ -30,12 +30,15 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements a string index as an RB-tree (C++ map)
  */
 class StringIndex:
-	public AtomIndex<const char *,Handle>
+	public AtomIndex<const char *, Handle>
 {
 	private:
 		std::map<std::string, Handle> idx;
@@ -48,6 +51,7 @@ class StringIndex:
 		virtual void remove(bool (*)(Handle));
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_STRINGINDEX_H

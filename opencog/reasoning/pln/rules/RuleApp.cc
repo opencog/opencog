@@ -22,6 +22,7 @@
 #include "../PLN.h"
 #include "../AtomSpaceWrapper.h"
 #include "RuleApp.h"
+#include <opencog/util/macros.h>
 
 using std::vector;
 
@@ -72,7 +73,7 @@ RuleApp::RuleApp(//AtomSpaceWrapper *_asw,
         result(PHANDLE_UNDEFINED), arg_changes_since_last_compute(true), root_rule(_root_rule)
 { 
     if (!_root_rule->hasFreeInputArity())
-    { int i = 1; }
+    { int i = 1; OC_UNUSED(i); } // TODO: O.o ?
     //args.resize(_root_rule->getInputFilter().size());
     args.insert(args.begin(), 
                 (!_root_rule->hasFreeInputArity()

@@ -120,6 +120,69 @@ For a fully functional example, check the ''examples/atomtypes/' directory.
 ======================================================================
 ======================================================================
 
+                       Index Design
+                       ------------
+
+The AtomTable holds indexes for a number of commonly needed abilities,
+so as to allow for fast searches.  This includes searches for atoms by
+type, by outgoing set and by incoming set.
+
+Some of the indexes offer an iterator design, while others return 
+temporary copies of UnorderedHandeSets.  The iterator interface is used
+whenever the number of returned items is potentially large, as in such
+a case, using the temporaries would require too much RAM.  In particular,
+the TypeIndex uses an iterator.
+
+Note: Currently, the iterators are not safe against concurrent atom
+insertion or removal.  In particular, they are not thread-safe. 
+This needs to be fixed at some point... XXX TODO.
+
+
+======================================================================
+======================================================================
+======================================================================
+
+                   Garbage Collection Design
+                   -------------------------
+
+Without garbage collection (or smart pointers) it becomes unsafe to use
+bare pointers in a multi-threaded environment.  With garbage collection
+(or smart pointers), and a reasonably good design and coding style, the
+use of bare pointers in a multi-threaded environment becomes safe. In
+what follows, smart poiners will not be considered because they are 
+(1) generally slower (2) use more RAM, (3) are harder to design with,
+as compared to garbage collection.
+
+There is one big stumbling block to garbage collection, and that is 
+the need to maintain the incoming set for atoms, and the need to perform
+a Handle to Atom* lookup.  Both of these introduce circular references,
+and can thus stump the garbage collector.  The fix for this issue is
+two-fold:  (a) The IncomingIndex must still hold Handle, not Atom*
+(b) the TLB must NOT inherit from the garbage collector, and/or must
+disguise pointers, e.g. by using XOR.  Finally, the Atom destructor
+must be responsible for removing atoms from the TLB.  Aside from 
+these issues, it should be completely safe to convert all other uses
+of Handles to Atom* (with certain exceptions, e.g. in object the 
+persistance code, etc.)
+
+The primary motivation for raw pointer access is speed.  See the
+numbers reported in opencog/benchmark/diary.txt -- in many cases,
+raw pointer access is two orders of magnitude faster than using
+the 'safe', Handle-oriented AtomSpace interface.
+
+TODO:
+-- conditionally add boehm GC
+-- convert outgoing set to hold Atom*
+-- Add locks to TypeIndex iterator, etc.
+-- add threading to benchmark
+-- benchmark scheme API
+
+
+
+======================================================================
+======================================================================
+======================================================================
+
                    Foreach Iterators
                    -----------------
 XXX The below is strongly deprecated. There are now adequate foreach
@@ -270,6 +333,17 @@ Linas made the following observations/posted the following questions
 during review of the opencog internals, in April 2008. Some of these
 may already be fixed.
 
+5) class Atom has a AtomTable pointer that seems to be of little 
+   utility -- it seems to be used in only two places: by AtomTable
+   itself, and in SavingLoading. The first check is of little 
+   utility, since the check could be performed in other ways, and 
+   there is no need to have this check be computationally efficient.
+   The use in SavingLoading could probably be avoided as well.
+   Avoiding this pointer would provide a space-savings. 
+
+
+FIXED ISSUES:
+-------------
 1) typeIndex and atom->setNext() -- these seem to be trying to 
    maintain an unusual linked list of atoms based on type. 
    (unusual because it uses handles instead of pointers).
@@ -280,6 +354,8 @@ may already be fixed.
    Similar comments apply to targetTypes, importanceIndex, etc.
    See in particular point 1a) below.
 
+   Status: fixed in 2008 sometime.
+
 2) AtomTable::add(Atom *) uses AtomTable::getHandle() to see if
    the indicated atom aleady exists in the atom table. The 
    implementation of AtomTable::getHandle() is incredibly 
@@ -287,33 +363,44 @@ may already be fixed.
    instead, as the linear searches and filterings would be 
    replaced by O(log N) search.
 
+   Status: fixed in 2008 sometime.
+
 3) There are many uses of 
    ClassServer::isAssignableFrom(NODE, atom->getType()) 
    it would be more computationally efficient to replace these with
    (NULL != dynamic_cast<Node *>(atom);
 
+   Status: fixed in 2008 sometime.
+
 4) AtomTable::Add() computes a getNameHash() for all atoms, even
    when they are not of type Node. It would be more effcient to skip
-   this for Nodes.
+   this for Nodes. 
 
-5) class Atom has a AtomTable pointer that seems to be of little 
-   utility -- it seems to be used in only two places: by AtomTable
-   itself, and in SavingLoading. The first check is of little 
-   utility, since the check could be perormed in other ways, and 
-   there is no need to have this check be computationally efficient.
-   The use in SavingLoading could probably be avoided as well.
-   Avoiding this pointer would provide a space-savings. 
+   Status: fixed in 2008 sometime.
 
 7) Class HandleEntry is implemented as a linked list. It implements
    many O(N) and O(N^2) algorithms, such as set intersection, etc.
    Performance will almost certainly be improved by using
    std:map instead of linked lists.
 
+   In fact, all usage of HandleEntry should be completely eliminated.
+   The whole things is a boondoggle.  Its already partly eliminated
+   for many of the simpler functions, circa 2013.  The big nasties
+   remain... Finished March 2013
+
 8) AtomTable::makeSet() and AtomTable::buildSet() and
    the various flavors of getHandleSet() all create 
    linked lists. Presumably, some user will use these lists, 
-   and thn delete them. It would be much more computationally 
+   and then delete them. It would be much more computationally 
    efficient if the creation and destruction of the lists were
    skipped completely, and, instead, a foreach loop was used,
    to call the user's callback. This would avoid the cost of 
    malloc and free of the list, and un-needed data copying.
+
+   Status: these functions were nuked sometime before 2011
+
+9) AtomTable::AtomHashSet uses up memory to store atoms, but is not
+   really needed, since everything it does is already done by the
+   indexes.  It should be removed to save space.
+
+   Status: removed, March 2013

@@ -20,21 +20,27 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include <opencog/cython/PyIncludeWrapper.h>
+
+#include <opencog/util/Logger.h>
+
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/guile/SchemeEval.h>
+
+
 
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
 #include "CrispLogicPMCB.h"
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/util/Logger.h>
 
 using namespace opencog;
 
 PatternMatch::PatternMatch(void)
 {
-	atom_space = NULL;
+    atom_space = NULL;
 }
 
 /* ================================================================= */
@@ -205,19 +211,39 @@ Handle Instantiator::execution_link()
 	if (0 == schema.compare(0,4,"scm:", 4))
 	{
 #ifdef HAVE_GUILE
+		// Be freindly, and strip leading white-space, if any.
+		size_t pos = 4;
+		while (' ' == schema[pos]) pos++;
+
 		SchemeEval &applier = SchemeEval::instance();
-		Handle h = applier.apply(schema.substr(4), oset[1]);
+		Handle h = applier.apply(schema.substr(pos), oset[1]);
 		return h;
 #else
 		return Handle::UNDEFINED;
 #endif /* HAVE_GUILE */
 	}
-	else
+
+    if (0 == schema.compare(0, 3,"py:", 3))
 	{
-		// Unkown proceedure type.  Return it, maybe some other
-		// execution-link handler will be able to process it.
-		return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
+#ifdef HAVE_CYTHON
+		// Be freindly, and strip leading white-space, if any.
+		size_t pos = 3;
+        while (' ' == schema[pos]) pos++;
+
+        PythonEval &applier = PythonEval::instance();
+
+        Handle h = applier.apply(schema.substr(pos), oset[1]);
+
+        // Return the handle
+        return h;
+#else
+		return Handle::UNDEFINED;
+#endif /* HAVE_CYTHON */
 	}
+
+	// Unkown proceedure type.  Return it, maybe some other
+	// execution-link handler will be able to process it.
+	return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
 }
 
 bool Instantiator::walk_tree(Handle expr)

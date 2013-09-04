@@ -19,12 +19,14 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+#include  <boost/foreach.hpp>
 
 #include "AtomSpaceWrapper.h"
 
 #include "rules/Rules.h"
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spacetime/SpaceTime.h>
 #include <opencog/persist/xml/FileXMLBufferReader.h>
 #include <opencog/persist/xml/XMLBufferReader.h>
 #include <opencog/persist/xml/NMXmlParser.h>
@@ -33,8 +35,8 @@
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/tree.h>
 #include <opencog/util/algorithm.h>
+#include <opencog/util/macros.h>
 
-#include  <boost/foreach.hpp>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -386,7 +388,7 @@ pHandleSeq AtomSpaceWrapper::realToFakeHandle(const Handle h) {
     pHandleSeq result(1, realToFakeHandle(h, NULL_VERSION_HANDLE));
     TruthValuePtr tv(atomspace->getTV(h));
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
         foreach(VersionHandle vh, ctv->vh_range()) { 
             if (dummyContexts.find(vh) != dummyContexts.end()) {
                 // if dummyContext contains a VersionHandle for h
@@ -515,7 +517,7 @@ pHandle AtomSpaceWrapper::getHandle(Type t,const pHandleSeq& outgoing)
     // (need to clone, because we want to remove any invalid TVs before using)
     TruthValuePtr tv(atomspace->getTV(h));
     if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+        CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
         // The below removal should probably become a utility mindagent
         // that checks for invalid versioned TVs...
         // Remove any invalid version TVs
@@ -1139,7 +1141,7 @@ Handle AtomSpaceWrapper::getNewContextLink(Handle h, HandleSeq contexts) {
         // given atom
         TruthValuePtr tv = atomspace->getTV(h);
         if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-            CompositeTruthValuePtr ctv = boost::shared_dynamic_cast<CompositeTruthValue>(tv);
+            CompositeTruthValuePtr ctv = boost::dynamic_pointer_cast<CompositeTruthValue>(tv);
             bool found = false;
             do {
                 found = false;
@@ -1430,7 +1432,7 @@ bool AtomSpaceWrapper::isType(const pHandle h) const
 
 const TimeServer& AtomSpaceWrapper::getTimeServer() const
 {
-    return atomspace->getTimeServer();
+    return timeServer();
 }
 
 int AtomSpaceWrapper::getArity(pHandle h) const
@@ -1499,10 +1501,10 @@ NormalizingATW::NormalizingATW(AtomSpace *a): FIMATW(a)
 pHandle NormalizingATW::addLink(Type T, const pHandleSeq& hs,
                                 const TruthValue& tvn, bool fresh)
 {
-    AtomSpace *a = atomspace;
     pHandle ret= PHANDLE_UNDEFINED;
 
     bool ok_forall=false;
+    OC_UNUSED(ok_forall);
 
     char buf[500];
     sprintf(buf, "Adding link of type %s (%d)", Type2Name(T), T);
@@ -1908,7 +1910,6 @@ printTree(ret,0,1);
         for (pHandleSeq::const_iterator i = EquiTarget.begin(); i != EquiTarget.end(); i++)
             ImpTarget1.push_back((*i));
 
-        int zz=ImpTarget1.size();
         assert(ImpTarget1.size()==2);
         
         for (pHandleSeq::const_reverse_iterator j = EquiTarget.rbegin(); j != EquiTarget.rend(); j++)

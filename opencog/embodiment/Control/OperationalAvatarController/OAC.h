@@ -50,7 +50,7 @@
 #include <opencog/embodiment/Control/PredicateUpdaters/PredicatesUpdater.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/EventResponder.h>
-#include <opencog/embodiment/Control/PerceptionActionInterface/EventDetector.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureRepository.h>
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 
@@ -68,6 +68,7 @@
 #include "PsiRelationUpdaterAgent.h"
 #include "PsiFeelingUpdaterAgent.h"
 #include "StimulusUpdaterAgent.h"
+#include "OCPlanningAgent.h"
 
 
 #ifdef HAVE_CYTHON
@@ -77,23 +78,9 @@
 class PsiModulatorUpdaterAgentUTest; 
 class PsiDemandUpdaterAgentUTest;
 class PsiFeelingUpdaterAgentUTest; 
-class PsiActionSelectionAgentUTest; 
+class PsiActionSelectionAgentUTest;
 
 namespace opencog { namespace oac {
-
-/* Defines a single factory template to allow insert a same agent
- * multiple times in the Cogserver schedule */
-template< typename _Type, typename _BaseType >
-class SingletonFactory : public Factory<_Type, _BaseType>
-{
-public:
-    explicit SingletonFactory() : Factory<_Type, _BaseType>() {}
-    virtual ~SingletonFactory() {}
-    virtual _BaseType* create() const {
-        static _BaseType* inst =  new _Type;
-        return inst;
-    }
-};
 
 class OAC : public opencog::messaging::MessageCogServer
 {
@@ -173,6 +160,10 @@ private:
     PsiActionSelectionAgent * psiActionSelectionAgent;
     PsiRelationUpdaterAgent * psiRelationUpdaterAgent; 
     PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
+
+    OCPlanningAgent* ocPlanningAgent;
+
+
 
     StimulusUpdaterAgent * stimulusUpdaterAgent;
 
@@ -352,6 +343,8 @@ public:
     SingletonFactory <PsiActionSelectionAgent, Agent> psiActionSelectionAgentFactory;
     SingletonFactory <PsiRelationUpdaterAgent, Agent> psiRelationUpdaterAgentFactory; 
     SingletonFactory <PsiFeelingUpdaterAgent, Agent> psiFeelingUpdaterAgentFactory; 
+
+    SingletonFactory <OCPlanningAgent, Agent> ocPlanningAgentAgentFactory;
 
     SingletonFactory <StimulusUpdaterAgent, Agent> stimulusUpdaterAgentFactory; 
 

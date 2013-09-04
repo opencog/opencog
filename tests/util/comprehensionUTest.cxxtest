@@ -33,16 +33,24 @@ class comprehensionUTest : public CxxTest::TestSuite
 public:
     comprehensionUTest() {}
 
+    // Test vector comprehension
+    
     void test_vector_comp_function_object() {
         std::vector<int> ivec = {1,2,3,4};
-        struct Func : public std::unary_function<int, int> {
+        struct Inc : public std::unary_function<int, int> {
             int operator()(int i) {
                 return i + 1;
             }
         };
-        Func func;
-        auto ovec = vector_comp(ivec, func);
-        std::vector<int> evec = {2,3,4,5};
+        Inc func;
+        struct Odd : public std::unary_function<int, bool> {
+            bool operator()(int i) {
+                return i%2;
+            }
+        };
+        Odd filter;
+        auto ovec = vector_comp(ivec, func, filter);
+        std::vector<int> evec = {2,4};
         TS_ASSERT_EQUALS(ovec, evec);
     }
     // void test_vector_comp_phoenix() {
@@ -52,10 +60,67 @@ public:
     //     std::vector<int> evec = {2,3,4,5};
     //     TS_ASSERT_EQUALS(ovec, evec);
     // }
-    // void test_vector_comp_lambda() {
-    //     std::vector<int> ivec = {1,2,3,4};
-    //     auto ovec = vector_comp(ivec, [](int x) { return x + 1; });
-    //     std::vector<int> evec = {2,3,4,5};
+    void test_vector_comp_lambda() {
+        std::vector<int> ivec = {1,2,3,4};
+        auto ovec = vector_comp(ivec, [](int x) { return x + 1; },
+                                [](int x) { return x%2; });
+        std::vector<int> evec = {2,4};
+        TS_ASSERT_EQUALS(ovec, evec);
+    }
+
+    // Test list comprehension
+
+    void test_list_comp_function_object() {
+        std::list<int> ivec = {1,2,3,4};
+        struct Func : public std::unary_function<int, int> {
+            int operator()(int i) {
+                return i + 1;
+            }
+        };
+        Func func;
+        auto ovec = list_comp(ivec, func);
+        std::list<int> evec = {2,3,4,5};
+        TS_ASSERT_EQUALS(ovec, evec);
+    }
+    // void test_list_comp_phoenix() {
+    //     std::list<int> ivec = {1,2,3,4};
+    //     auto f = arg1 + 1;
+    //     auto ovec = list_comp(ivec, arg1);
+    //     std::list<int> evec = {2,3,4,5};
+    //     TS_ASSERT_EQUALS(ovec, evec);
+    // }
+    void test_list_comp_lambda() {
+        std::list<int> ivec = {1,2,3,4};
+        auto ovec = list_comp(ivec, [](int x) { return x + 1; });
+        std::list<int> evec = {2,3,4,5};
+        TS_ASSERT_EQUALS(ovec, evec);
+    }
+
+    // Test set comprehension
+
+    // void test_set_comp_function_object() {
+    //     std::set<int> ivec = {1,2,3,4};
+    //     struct Func : public std::unary_function<int, int> {
+    //         int operator()(int i) {
+    //             return i + 1;
+    //         }
+    //     };
+    //     Func func;
+    //     auto ovec = set_comp(ivec, func);
+    //     std::set<int> evec = {2,3,4,5};
+    //     TS_ASSERT_EQUALS(ovec, evec);
+    // }
+    // void test_set_comp_phoenix() {
+    //     std::set<int> ivec = {1,2,3,4};
+    //     auto f = arg1 + 1;
+    //     auto ovec = set_comp(ivec, arg1);
+    //     std::set<int> evec = {2,3,4,5};
+    //     TS_ASSERT_EQUALS(ovec, evec);
+    // }
+    // void test_set_comp_lambda() {
+    //     std::set<int> ivec = {1,2,3,4};
+    //     auto ovec = set_comp(ivec, [](int x) { return x + 1; });
+    //     std::set<int> evec = {2,3,4,5};
     //     TS_ASSERT_EQUALS(ovec, evec);
     // }
 };

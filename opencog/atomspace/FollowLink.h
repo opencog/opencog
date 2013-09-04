@@ -22,6 +22,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class FollowLink
 {
@@ -107,6 +110,7 @@ private:
 	}
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_FOLLOW_LINK_H

@@ -64,6 +64,9 @@ namespace opencog
             ClusterSeq; //the vector of doubles is the centroid of the cluster
         
         AtomSpace* as;
+        boost::signals::connection removedAtomConnection;
+        boost::signals::connection addedAtomConnection;
+
         AtomEmbedMap atomMaps;
         AsymAtomEmbedMap asymAtomMaps;
         PivotMap pivotsMap;//Pivot atoms which act as the basis
@@ -86,8 +89,8 @@ namespace opencog
          * embedding of a given node represents the weight of the path
          * starting from the node and going to the pivot.
          */
-        void addPivot(const Handle& h, const Type& linkType, bool fanin=false);
-        Handle pickPivot(const Type& linkType, HandleSeq& nodes, bool fanin=false);
+        void addPivot(Handle h, Type linkType, bool fanin=false);
+        Handle pickPivot(Type linkType, HandleSeq& nodes, bool fanin=false);
         /**
          * Adds node to the appropriate AtomEmbedding in the AtomEmbedMap.
          *
@@ -103,8 +106,8 @@ namespace opencog
          * @param linkType Type of link to use to embed h
          * @return The embedding vector (a vector of doubles between 0 and 1)
          */
-        std::vector<double> addNode(const Handle& h,
-                                    const Type& linkType,
+        std::vector<double> addNode(Handle h,
+                                    Type linkType,
                                     AtomSpaceImpl* a);
 
         /**
@@ -113,7 +116,7 @@ namespace opencog
          * @param h Handle of node to be removed.
          * @param linkType Type for which h is removed from the embedding.
          */
-        void removeNode(const Handle& h, const Type& linkType);
+        void removeNode(Handle h, Type linkType);
         
         /**
          * Updates nodes directly connected to link in the appropriate
@@ -129,22 +132,21 @@ namespace opencog
          * @param h Handle of new link
          * @param linkType Type of link (which embedding to alter)
          */
-        void addLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+        void addLink(Handle h, Type linkType, AtomSpaceImpl* a);
         /**
          * For adding symmetric links after the atomspace has been embedded. See
          * addLink.
          */
-        void symAddLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+        void symAddLink(Handle h, Type linkType, AtomSpaceImpl* a);
         /**
          * For adding asymmetric links after the atomspace has been embedded.
          * See addLink.
          */
-        void asymAddLink(const Handle& h, const Type& linkType, AtomSpaceImpl* a);
+        void asymAddLink(Handle h, Type linkType, AtomSpaceImpl* a);
     public:
         const char* id();
 
-        DimEmbedModule(AtomSpace* atomSpace);
-        DimEmbedModule();
+        DimEmbedModule(CogServer&);
         virtual ~DimEmbedModule();
         virtual void init();
 
@@ -160,12 +162,12 @@ namespace opencog
          * @return A vector of doubles corresponding to handle h's distance
          * from each of the pivots.
          */
-        const std::vector<double>& getEmbedVector(const Handle& h, const Type& l, bool fanin=false) const;
+        const std::vector<double>& getEmbedVector(Handle h, Type l, bool fanin=false) const;
 
         /**
          * Returns the list of pivots for the embedding of type l.
          */
-        HandleSeq& getPivots(const Type& l, bool fanin=false);
+        HandleSeq& getPivots(Type l, bool fanin=false);
 
         /**
          * Creates an AtomEmbedding of the atomspace using linkType
@@ -182,7 +184,7 @@ namespace opencog
          * picked as the farthest from the current pivots, but connectedness
          * should be incorporated to avoid picking pivots with no links
          */
-        void embedAtomSpace(const Type& linkType, const int numDimensions=5);
+        void embedAtomSpace(Type linkType, int numDimensions=5);
 
         /**
          * Clears the AtomEmbedMap and PivotMap for linkType, also
@@ -191,7 +193,7 @@ namespace opencog
          * @param linkType Type of link for which the embedding should be
          * cleared.
          */
-        void clearEmbedding(const Type& linkType);
+        void clearEmbedding(Type linkType);
         
         /**
          * Logs a string representation of of the (Handle,vector<Double>)
@@ -199,12 +201,12 @@ namespace opencog
          * in the atomspace (unless nodes have been added since the embedding).
          * Just used for testing/debugging.
          */
-        void logAtomEmbedding(const Type& linkType);
+        void logAtomEmbedding(Type linkType);
         
         /**
          * Returns true if a dimensional embedding exists for linkType l
          */
-        bool isEmbedded(const Type& linkType) const;
+        bool isEmbedded(Type linkType) const;
         
         /**
          * Returns the euclidean distance between handles h1 and h2 for the
@@ -216,7 +218,7 @@ namespace opencog
          * Then their distance for link type l is
          * sqrt((a1-a2)^2 + (b1-b2)^2 + ... + (n1-n2)^2)
          */
-        double euclidDist(const Handle& h1, const Handle& h2, const Type& l, bool fanin=false);
+        double euclidDist(Handle h1, Handle h2, Type l, bool fanin=false);
         static double euclidDist
             (const std::vector<double>& v1, const std::vector<double>& v2);
         static double euclidDist(double v1[], double v2[], int size);
@@ -233,7 +235,7 @@ namespace opencog
          * farthest (the 0ths element of the vector is closest to h). If there
          * is a tie for the kth closest, this may return more than k handles.
          */
-        HandleSeq kNearestNeighbors(const Handle& h, const Type& l, int k, bool fanin=false);
+        HandleSeq kNearestNeighbors(Handle h, Type l, int k, bool fanin=false);
 
         /**
          * Use k-means clustering to find clusters using the
@@ -250,7 +252,7 @@ namespace opencog
          * each HandleSeq represents a cluster and the vector of doubles its
          * centroid.
          */
-        ClusterSeq kMeansCluster(const Type& l, int numClusters, int nPasses=1, bool pivotWise=false);
+        ClusterSeq kMeansCluster(Type l, int numClusters, int nPasses=1, bool pivotWise=false);
 
         /**
          * Use k-means clustering to add new nodes to the atomspace (one
@@ -274,7 +276,7 @@ namespace opencog
          * kPasses=2, the k values are 2^(n/3) and 2^(2n/3). For
          * kPasses=3, the k values are 2^(n/4), 2^(2n/4), and 2^(3n/4).
          */
-        void addKMeansClusters(const Type& l, int maxClusters,
+        void addKMeansClusters(Type l, int maxClusters,
                                double threshold=0., int kPasses=-1);
 
         /**
@@ -284,7 +286,7 @@ namespace opencog
          * the distances of all members of the cluster to their nearest
          * clustermates.
          */
-        double homogeneity(const HandleSeq& cluster, const Type& linkType) const;
+        double homogeneity(const HandleSeq& cluster, Type linkType) const;
 
         /**
          * Calculate the separation of a cluster of handles for given linkType.
@@ -292,13 +294,13 @@ namespace opencog
          * Separation is the minimum distance from any given member of the
          * cluster to elements outside the cluster.
          */
-        double separation(const HandleSeq& cluster, const Type& linkType) const;
+        double separation(const HandleSeq& cluster, Type linkType) const;
 
         /**
          * Create a new node by blending the two existing nodes, n1 and n2,
          * based on their embeddings for link type l.
          */
-        Handle blendNodes(const Handle& n1, const Handle& n2, const Type& l);
+        Handle blendNodes(Handle n1, Handle n2, Type l);
 
         void printEmbedding();
 

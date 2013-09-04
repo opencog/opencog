@@ -43,10 +43,11 @@ using namespace opencog;
  * Comparison operator for using qsort on a vector of Handles.
  * Sorts by LTI
  */
-bool getListSortByLTIPredicate (bool descending,
-                                const Handle& h1, const Handle& h2) {
+bool getListSortByLTIPredicate (CogServer* cs, bool descending,
+                                const Handle& h1, const Handle& h2)
+{
     AttentionValue::lti_t lti1, lti2;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = cs->getAtomSpace();
 
     lti1 = as.getLTI(h1);
     lti2 = as.getLTI(h2);
@@ -61,10 +62,11 @@ bool getListSortByLTIPredicate (bool descending,
  * Comparison operator for using qsort on a vector of Handles.
  * Sorts by STI
  */
-bool getListSortBySTIPredicate (bool descending,
-                                const Handle& h1, const Handle& h2) {
+bool getListSortBySTIPredicate (CogServer* cs, bool descending,
+                                const Handle& h1, const Handle& h2)
+{
     AttentionValue::sti_t sti1, sti2;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = cs->getAtomSpace();
 
     sti1 = as.getSTI(h1);
     sti2 = as.getSTI(h2);
@@ -79,10 +81,11 @@ bool getListSortBySTIPredicate (bool descending,
  * Comparison operator for using qsort on a vector of Handles.
  * Sorts by TV Strength
  */
-bool getListSortByTVStrengthPredicate (bool descending,
-                                const Handle& h1, const Handle& h2) {
+bool getListSortByTVStrengthPredicate (CogServer* cs, bool descending,
+                                const Handle& h1, const Handle& h2)
+{
     float tv1, tv2;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = cs->getAtomSpace();
 
     tv1 = as.getMean(h1);
     tv2 = as.getMean(h2);
@@ -97,10 +100,11 @@ bool getListSortByTVStrengthPredicate (bool descending,
  * Comparison operator for using qsort on a vector of Handles.
  * Sorts by TV Confidence
  */
-bool getListSortByTVConfidencePredicate (bool descending,
-                                const Handle& h1, const Handle& h2) {
+bool getListSortByTVConfidencePredicate (CogServer* cs, bool descending,
+                                const Handle& h1, const Handle& h2)
+{
     float tv1, tv2;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = cs->getAtomSpace();
 
     tv1 = as.getConfidence(h1);
     tv2 = as.getConfidence(h2);
@@ -112,7 +116,9 @@ bool getListSortByTVConfidencePredicate (bool descending,
 }
 
 
-GetListRequest::GetListRequest() : output_format(html_tabular_format), 
+GetListRequest::GetListRequest(CogServer& cs) :
+    Request(cs),
+    output_format(html_tabular_format), 
     order_by(""), descending(true), name(""),
     type(NOTYPE), subtypes(false), maximum(GETLIST_MAXIMUM_RESULTS), skip(0)
 {
@@ -129,7 +135,7 @@ bool GetListRequest::execute()
     Handle handle = Handle::UNDEFINED;
     HandleSeq _handles;
     std::ostringstream errbuff;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
 
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
@@ -202,13 +208,15 @@ bool GetListRequest::execute()
         }
         //! @todo deal with refresh and unknown parameters
     }
-    if (name != "" && type != NOTYPE) { // filter by name & type
-        as.getHandleSet
-            (std::back_inserter(_handles), type, name.c_str(), subtypes);
-    } else if (name != "") {     // filter by name
-        as.getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
-    } else if (type != NOTYPE) { // filter by type
-        as.getHandleSet(std::back_inserter(_handles), type, subtypes);
+    if(_handles.empty()){
+    	if (name != "" && type != NOTYPE) { // filter by name & type
+			as.getHandleSet
+				(std::back_inserter(_handles), type, name.c_str(), subtypes);
+		} else if (name != "") {     // filter by name
+			as.getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
+		} else if (type != NOTYPE) { // filter by type
+			as.getHandleSet(std::back_inserter(_handles), type, subtypes);
+		}
     }
     if (order_by != "") {
         bool sortResult = sortHandles(_handles, order_by, descending);
@@ -235,16 +243,16 @@ bool GetListRequest::sortHandles(HandleSeq &hs, std::string order_by,
 {
     if (order_by == "lti") {
         std::sort(hs.begin(), hs.end(),
-                boost::bind(getListSortByLTIPredicate, descend, _1, _2));
+                boost::bind(getListSortByLTIPredicate, &_cogserver, descend, _1, _2));
     } else if (order_by == "sti") {
         std::sort(hs.begin(), hs.end(),
-                boost::bind(getListSortBySTIPredicate, descend, _1, _2));
+                boost::bind(getListSortBySTIPredicate, &_cogserver, descend, _1, _2));
     } else if (order_by == "tv.s") {
         std::sort(hs.begin(), hs.end(),
-                boost::bind(getListSortByTVStrengthPredicate, descend, _1, _2));
+                boost::bind(getListSortByTVStrengthPredicate, &_cogserver, descend, _1, _2));
     } else if (order_by == "tv.c") {
         std::sort(hs.begin(), hs.end(),
-                boost::bind(getListSortByTVConfidencePredicate, descend, _1, _2));
+                boost::bind(getListSortByTVConfidencePredicate, &_cogserver, descend, _1, _2));
     } else {
         _output << "unknown sort order" << std::endl;
         return false;
@@ -373,7 +381,7 @@ void GetListRequest::html_makeListHeader(unsigned int total_results)
 
 void GetListRequest::html_makeOutput(HandleSeq &hs)
 {
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
     // Make output from atom objects so we can access and create output from
     // them
     _output << "<table border=\"1\"><tr>";
@@ -471,7 +479,7 @@ void GetListRequest::json_makeOutput(HandleSeq &hs)
         if (!first) _output << ", ";
         else first = false;
         //_output << h.value();
-        _output << GetAtomRequest::json_makeOutput(h);
+        _output << GetAtomRequest::json_makeOutput(_cogserver, h);
     }
     _output << " ]" << std::endl << 
         "}" << std::endl;

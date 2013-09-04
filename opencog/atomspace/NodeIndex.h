@@ -30,31 +30,33 @@
 
 namespace opencog
 {
-class AtomTable;
-class HandleEntry;
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Implements an (type, name) index array of RB-trees (C++ set)
+ * That is, given only the type and name of an atom, this will
+ * return the corresponding handle of that atom.
  */
 class NodeIndex
 {
 	private:
-        const AtomTable* atomTable;
-	public:
 		std::vector<NameIndex> idx;
 
+	public:
 		NodeIndex();
 
-        void connectAtomTable(const AtomTable* table);
 		void insertAtom(Atom* a);
 		void removeAtom(Atom* a);
 		void remove(bool (*)(Handle));
-        void resize();
+		void resize();
 
 		Handle getHandle(Type type, const char *) const;
-		HandleEntry* getHandleSet(Type type, const char *, bool subclass) const;
+		UnorderedHandleSet getHandleSet(Type type, const char *, bool subclass) const;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_NODEINDEX_H

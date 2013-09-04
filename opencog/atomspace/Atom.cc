@@ -36,7 +36,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
@@ -49,12 +48,11 @@
 
 using namespace opencog;
 
-void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
+Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 {
     handle = Handle::UNDEFINED;
     flags = 0;
     atomTable = NULL;
-    incoming = NULL;
     type = t;
 
     truthValue = NULL;
@@ -62,14 +60,17 @@ void Atom::init(Type t, const TruthValue& tv, const AttentionValue& av)
     setAttentionValue(av);
 }
 
-Atom::Atom(Type type, const TruthValue& tv, const AttentionValue& av)
-{
-    init(type, tv, av);
-}
-
 Atom::~Atom()
 {
-    if (incoming != NULL) delete incoming;
+    // In a garbage-collected environment, we do NOT want the TLB to be
+    // visible to the garbage collector -- because if it was, then it
+    // would result in circular references that cannot be garage collectted.
+    // The same idea applies to smart pointers: using smart pointers in
+    // the TLB would result in loops.  Thus, all TLB pointers must be
+    // dumb, and we protect these by explicitly letting the TLB know
+    // when these go bad.
+    TLB::removeAtom(handle);
+
     if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
 }
 
@@ -114,52 +115,8 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // updates the importance index
         if (oldBin != newBin) {
             atomTable->updateImportanceIndex(this, oldBin);
-            StatisticsMonitor::getInstance()->atomChangeImportanceBin(type, oldBin, newBin);
         }
     }
-}
-
-void Atom::addIncomingHandle(Handle handle)
-{
-    // creates a new entry with handle
-    HandleEntry* entry = new HandleEntry(handle);
-    // entry is placed in the first position of the incoming set
-    entry->next = incoming;
-    incoming = entry;
-}
-
-void Atom::removeIncomingHandle(Handle handle) throw (RuntimeException)
-{
-    DPRINTF("Entering Atom::removeIncomingHandle(): handle:\n%lu\nincoming:\n%s\n", handle.value(), incoming->toString().c_str());
-    HandleEntry* current = incoming;
-    // checks if incoming set is empty
-    if (incoming == NULL) {
-        throw RuntimeException(TRACE_INFO, "unable to extract incoming element from empty set");
-    }
-
-    // checks if the handle to be removed is the first one
-    if (incoming->handle == handle) {
-        incoming = incoming->next;
-        current->next = NULL;
-        delete current;
-    } else {
-        if (current->next == NULL) {
-            throw RuntimeException(TRACE_INFO, "unable to extract incoming element");
-        }
-        // scans the list looking for the desired handle
-        while (current->next->handle != handle) {
-            current = current->next;
-            if (current->next == NULL) {
-                throw RuntimeException(TRACE_INFO, "unable to extract incoming element");
-            }
-        }
-        // deletes entry when the handle is found
-        HandleEntry* foundit = current->next;
-        current->next = foundit->next;
-        foundit->next = NULL;
-        delete foundit;
-    }
-    DPRINTF("Exiting Atom::removeIncomingHandle(): incoming:\n%s\n", incoming->toString().c_str());
 }
 
 bool Atom::getFlag(int flag) const

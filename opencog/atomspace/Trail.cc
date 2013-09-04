@@ -32,7 +32,6 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
-#include <boost/foreach.hpp>
 
 #define DEFAULT_INITIAL_TRAIL_SIZE 0
 #define DEFAULT_MAX_TRAIL_SIZE 1000

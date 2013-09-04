@@ -31,7 +31,7 @@ ImportanceDecayAgent::~ImportanceDecayAgent()
 {
 }
 
-ImportanceDecayAgent::ImportanceDecayAgent()
+ImportanceDecayAgent::ImportanceDecayAgent(CogServer& cs) : Agent(cs)
 {
     lastTickTime = 0;
     mergedAtomConnection.disconnect();
@@ -44,12 +44,10 @@ void ImportanceDecayAgent::connectSignals(AtomSpace& as)
             this, _1, _2));
 }
 
-void ImportanceDecayAgent::run(opencog::CogServer *server)
+void ImportanceDecayAgent::run()
 {
-
     logger().fine("ImportanceDecayTask - Executing decayShortTermImportance().");
-    ((OAC *) server)->decayShortTermImportance();
-
+    dynamic_cast<OAC *>(&_cogserver)->decayShortTermImportance();
 }
 
 void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)

@@ -35,7 +35,7 @@ PsiRelationUpdaterAgent::~PsiRelationUpdaterAgent()
 
 }
 
-PsiRelationUpdaterAgent::PsiRelationUpdaterAgent()
+PsiRelationUpdaterAgent::PsiRelationUpdaterAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
@@ -43,7 +43,7 @@ PsiRelationUpdaterAgent::PsiRelationUpdaterAgent()
     this->forceInitNextCycle();
 }
 
-void PsiRelationUpdaterAgent::init(opencog::CogServer * server) 
+void PsiRelationUpdaterAgent::init() 
 {
     logger().debug( "PsiRelationUpdaterAgent::%s - Initializing the Agent [ cycle = %d ]",
                     __FUNCTION__, 
@@ -51,7 +51,7 @@ void PsiRelationUpdaterAgent::init(opencog::CogServer * server)
                   );
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
@@ -294,17 +294,15 @@ Handle PsiRelationUpdaterAgent::getEntityHandle(opencog::CogServer * server, con
     return  entityHandleSet[0];
 }
 
-void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
+void PsiRelationUpdaterAgent::run()
 {
     this->cycleCount ++;
 
     logger().debug( "PsiRelationUpdaterAgent::%s - Executing run %d times",
-                     __FUNCTION__, 
-                     this->cycleCount
-                  );
+                     __FUNCTION__, this->cycleCount);
 
     // Get OAC
-    OAC* oac = dynamic_cast<OAC*>(server);
+    OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
@@ -362,7 +360,7 @@ void PsiRelationUpdaterAgent::run(opencog::CogServer * server)
 
     // Initialize entity, relation lists etc.
     if ( !this->bInitialized )
-        this->init(server);
+        this->init();
 
     // Allocate inference steps (totalRemainSteps and singleEntityRelationMaxSteps)
     this->allocInferSteps(); 

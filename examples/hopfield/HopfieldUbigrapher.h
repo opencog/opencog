@@ -23,7 +23,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/ubigraph/Ubigrapher.h>
+#include <opencog/visualization/ubigraph/Ubigrapher.h>
 
 #include "Pattern.h"
 

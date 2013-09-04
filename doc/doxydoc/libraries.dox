@@ -1,0 +1,23 @@
+/**
+
+\page libraries Libraries
+
+This page groups the libraries that are being build by the project.
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+- \subpage libcogutil
+- \subpage libatomspace
+- \subpage libcomboreduct
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref index "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libcogutil "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+

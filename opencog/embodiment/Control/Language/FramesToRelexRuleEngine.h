@@ -24,7 +24,6 @@
 #ifndef FRAMESTORELEXRULEENGINE_H
 #define FRAMESTORELEXRULEENGINE_H
 
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/atomspace/AtomSpace.h>
 
 #include "OutputRelex.h"

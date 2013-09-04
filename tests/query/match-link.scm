@@ -35,7 +35,7 @@
       )
 
       (AssociativeLink (stv 1.0 1.0)
-         (PetNode "want-this")
+         (FeatureNode "want-this")
          (MemberLink
             (WordInstanceNode "color")
             (WordInstanceNode "blue")
@@ -44,8 +44,8 @@
    )
 
    (AssociativeLink (stv 1.0 1.0)
-      (PetNode "want-this")
-      (PetNode "not really")
+      (FeatureNode "want-this")
+      (FeatureNode "not really")
       (MemberLink
          (WordInstanceNode "color")
          (WordInstanceNode "blue")
@@ -80,11 +80,11 @@
 )
 
 (AssociativeLink (stv 1.0 1.0)
-   (PetNode "want-this")
+   (FeatureNode "want-this")
    (AssociativeLink (stv 1.0 1.0)
-      (PetNode "want-this")
+      (FeatureNode "want-this")
       (MemberLink
-         (PetNode "want-this")
+         (FeatureNode "want-this")
          (AssociativeLink (stv 1.0 1.0)
             (WordInstanceNode "Volkerding")
             (WordInstanceNode "fnord")
@@ -193,7 +193,7 @@
          (VariableNode "$var-a")
          (TypedVariableLink
             (VariableNode "$var-b")
-            (VariableTypeNode "PetNode")
+            (VariableTypeNode "FeatureNode")
          )
       )
       (ImplicationLink

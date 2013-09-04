@@ -138,7 +138,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			Atom *atom = store->makeAtom(*this, handle);
-			table->add(atom, true);
+			table->add(atom);
 			return false;
 		}
 
@@ -831,7 +831,8 @@ void AtomStorage::setup_typemap(void)
 	rp.rs->foreach_row(&Response::type_cb, &rp);
 	rp.rs->release();
 
-	for (Type t=0; t<classserver().getNumberOfClasses(); t++)
+	unsigned int numberOfTypes = classserver().getNumberOfClasses();
+	for (Type t=0; t<numberOfTypes; t++)
 	{
 		int sqid = storing_typemap[t];
 		/* If this typename is not yet known, record it */
@@ -1271,7 +1272,8 @@ void AtomStorage::store(const AtomTable &table)
 	rp.rs->release();
 #endif
 
-	table.foreach_atom(&AtomStorage::store_cb, this);
+	table.foreachHandleByType(
+       [&](Handle h)->void { store_cb(table.getAtom(h)); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
 	// Create indexes

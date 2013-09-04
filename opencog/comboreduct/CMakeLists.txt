@@ -36,6 +36,7 @@ ADD_LIBRARY(comboreduct SHARED
 
 	interpreter/eval
 	interpreter/perception_eval
+    interpreter/interpreter
 
 	type_checker/type_tree_def
 	type_checker/type_tree

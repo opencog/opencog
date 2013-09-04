@@ -40,6 +40,10 @@
 #include "representation.h"
 #include "build_knobs.h"
 
+// uncomment the following to fine log the candidates before and after
+// reduction during optimization
+// #define __FINE_LOG_CND_REDUCED__
+
 namespace opencog { namespace moses {
 
 // Stepsize should be roughly the standard-deviation of the expected
@@ -77,6 +81,29 @@ void set_depth(int new_depth)
     depth = new_depth;
 }
 
+combo_tree type_to_exemplar(type_node type)
+{
+    switch(type) {
+    case id::boolean_type: return combo_tree(id::logical_and);
+    case id::contin_type: return combo_tree(id::plus);
+    case id::enum_type: {
+        combo_tree tr(id::cond);
+        tr.append_child(tr.begin(), enum_t::get_random_enum());
+        return tr;
+    }
+    case id::ill_formed_type:
+        OC_ASSERT(false, "Error: the data type is incorrect, "
+                  "perhaps it has not been possible to infer it from the "
+                  "input table.");
+    default: {
+        stringstream ss;
+        ss << "Error: type " << type << " not supported";
+        OC_ASSERT(false, ss.str());
+    }
+    }
+    return combo_tree();
+}
+
 representation::representation(const reduct::rule& simplify_candidate,
                                const reduct::rule& simplify_knob_building,
                                const combo_tree& exemplar_,
@@ -84,7 +111,8 @@ representation::representation(const reduct::rule& simplify_candidate,
                                const operator_set& ignore_ops,
                                const combo_tree_ns_set* perceptions,
                                const combo_tree_ns_set* actions,
-                               bool linear_contin)
+                               bool linear_contin,
+                               float perm_ratio)
     : _exemplar(exemplar_),
       _simplify_candidate(&simplify_candidate),
       _simplify_knob_building(&simplify_knob_building)
@@ -103,7 +131,7 @@ representation::representation(const reduct::rule& simplify_candidate,
     // Build the knobs.
     build_knobs(_exemplar, tt, *this, ignore_ops,
                 perceptions, actions, linear_contin,
-                stepsize, expansion, depth);
+                stepsize, expansion, depth, perm_ratio);
 
     logger().info() << "After knob building, rep size="
                     << _exemplar.size()
@@ -250,7 +278,7 @@ void representation::clean_combo_tree(combo_tree &tr,
     clean_reduce(tr);
 
     if (reduce) { //reduce
-#if DEBUG
+#ifdef __FINE_LOG_CND_REDUCED__
         // Save some cpu time by not even running this if-test.
         if (logger().isFineEnabled()) {
             logger().fine() << "Reduce "
@@ -262,7 +290,7 @@ void representation::clean_combo_tree(combo_tree &tr,
             (*get_simplify_knob_building())(tr);
         else
             (*get_simplify_candidate())(tr);
-#if DEBUG
+#ifdef __FINE_LOG_CND_REDUCED 
         if (logger().isFineEnabled()) {
             logger().fine() << "Reduced candidate: " << tr;
         }

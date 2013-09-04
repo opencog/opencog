@@ -76,7 +76,7 @@ public:
         cogserver().loadModules(); 
         cogserver().loadSCMModules(paths);
 
-        as = cogserver().getAtomSpace();
+        as = &cogserver().getAtomSpace();
         eval = &SchemeEval::instance(as);
 
         // Proper UTF-8 behaviour requires the right locale.

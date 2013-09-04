@@ -15,6 +15,9 @@
 class AtomSpaceAsyncUTest;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AtomSpace;
 class SavingLoading;
@@ -49,7 +52,7 @@ public:
     AtomSpaceAsync();
     ~AtomSpaceAsync();
 
-    // TODO: should be protected by mutex 
+    /** @todo should be protected by mutex */
     int get_counter() { return counter; }
 
     bool isQueueEmpty() { return requestQueue.empty(); } ;
@@ -414,12 +417,6 @@ public:
         return r;
     }
 
-    HashRequest getAtomHash(const Handle& h) {
-        HashRequest r(new GetAtomHashASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
     //--------------
     // These functions are query methods - they currently return HandleSeqs,
     // but in future the Request objects returned from these functions will be more
@@ -722,15 +719,9 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 
-    inline BoolRequest saveToXML(const std::string& filename) {
-        BoolRequest r(new SaveToXMLASR(&atomspace,filename));
-        requestQueue.push(r);
-        return r;
-    }
-
-
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_ASYNC_H

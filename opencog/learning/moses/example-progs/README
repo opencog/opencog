@@ -10,7 +10,7 @@ Some of these are better documented then others. A synopsis of the
 documented examples are given below.
 
 Most/all of these examples don't demonstrate MOSES at all, but rather
-exercise a certain compenent within MOSES. In most cases, this is the
+exercise a certain component within MOSES. In most cases, this is the
 optimizer, which implements a generic estimation-of-distribution
 algorithm.  The MOSES meta-optimizer draws heavily on this component
 to perform much of the "heavy lifting".
@@ -50,3 +50,29 @@ to perform much of the "heavy lifting".
 
 -- trap-bits. A variation of the trap-uni problem above. Under
    construction, curently broken.
+
+
+Artificial Neural Net (ANN) demos:
+==================================
+
+-- moses-ann-xor Demo for using ANN to solve the XOR problem.
+   The scoring function for this is located in ann_scoring.h
+
+-- moses-ann-pole1
+-- moses-ann-pole2
+-- moses-ann-pole2-hillclimbing
+-- moses-ann-pole2nv
+   These are all variations of the classic AI demo problem of balancing
+   a pole that is on top of a cart with wheels. The goal is to move the
+   cart around so tht the pole doesn't tip over.  The physics for the
+   cart and the pole are implemented in pole_balancing.cc pole_balancing.h
+   and the required scoring functions (to determine how well the system
+   is doing) is implemented in pole_scoring.h.
+
+
+Performance Measurement
+=======================
+This directory also contains some minor utilities that are handy for 
+measuring perofrmance. These include moses-perf.cc and the python
+script scaling.py which measures how well the system distributes
+across multiple MPI nodes.

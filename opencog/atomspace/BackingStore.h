@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * This class provides a simple, generic interface for dynamically
@@ -38,7 +41,6 @@ namespace opencog
  * rather than on bulk-save/restore (although perhaps that should
  * be provided as well.)  
  */
-
 class BackingStore
 {
 	public:
@@ -76,6 +78,7 @@ class BackingStore
 		virtual void storeAtom(Handle) = 0;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_BACKING_STORE_H

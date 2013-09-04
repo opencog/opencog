@@ -423,9 +423,9 @@ void MapExplorer::generateFloorTextures( void )
     bool colState = false;
     unsigned char* cursorChecker = floorTextureChecker;
     unsigned char* cursorOccupancy = floorTextureOccupancy;
-    for (i = 0; i < this->map->xDim( ); ++i) {
+    for (i = 0; i < (unsigned int)this->map->xDim( ); ++i) {
         rowState = (i%checkerGranularity) == 0 ? !rowState : rowState;
-        for (j = 0; j < this->map->yDim( ); ++j) {
+        for (j = 0; j < (unsigned int)this->map->yDim( ); ++j) {
             colState = (j%checkerGranularity) == 0 ? !colState : colState;                
             {
                 int c =  this->map->checkStandable( i, j ,z) ? 128 : 255;

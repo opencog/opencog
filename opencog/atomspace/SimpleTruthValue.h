@@ -34,7 +34,11 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
+//! a TruthValue that stores a mean and the number of observations (strength and confidance)
 class SimpleTruthValue : public TruthValue
 {
 #ifdef ZMQ_EXPERIMENT
@@ -92,6 +96,7 @@ public:
     void setConfidence(confidence_t);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SIMPLE_TRUTH_VALUE_H_

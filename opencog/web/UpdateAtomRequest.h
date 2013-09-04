@@ -34,6 +34,7 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 
 #include <opencog/web/json_spirit/json_spirit.h>
 
@@ -60,9 +61,9 @@ public:
 
     static inline const RequestClassInfo& info() {
         static const RequestClassInfo _cci(
-            "update-atom-json",
+            "json-update-atom",
             "update the STI, LTI, or TV of an atom with JSON message",
-            "Usage: update-atom handle {JSON}\n\n"
+            "Usage: json-update-atom handle {JSON}\n\n"
             "   Update an atom based on a JSON message with format:\n"
             "   { \"sti\": STI } \n"
             "   { \"lti\": LTI } \n"
@@ -72,7 +73,7 @@ public:
         return _cci;
     }
 
-    UpdateAtomRequest();
+    UpdateAtomRequest(CogServer&);
     virtual ~UpdateAtomRequest();
     virtual bool execute(void);
     virtual bool isShell(void) {return info().is_shell;}

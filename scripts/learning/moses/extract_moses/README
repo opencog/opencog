@@ -45,8 +45,8 @@ extracted directory:
 
 To compile:
 
-    $ mkdir bin
-    $ cd bin
+    $ mkdir build
+    $ cd build
     $ cmake ..
     $ make
 

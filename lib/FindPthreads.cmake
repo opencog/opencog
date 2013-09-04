@@ -2,6 +2,9 @@
 # This module searches for the Pthreads library (including the
 # pthreads-win32 port).
 #
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
 # This module defines these variables:
 #
 #  PTHREADS_FOUND       - True if the Pthreads library was found

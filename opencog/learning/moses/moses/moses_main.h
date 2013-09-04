@@ -34,9 +34,9 @@
 #include "../optimization/hill-climbing.h"
 #include "../optimization/star-anneal.h"
 #include "../optimization/univariate.h"
+#include "../scoring/scoring.h"
 #include "distributed_moses.h"
 #include "moses_params.h"
-#include "scoring.h"
 
 namespace opencog { namespace moses {
 
@@ -176,7 +176,7 @@ void metapop_moses_results_b(const std::vector<combo_tree>& bases,
                              Printer& printer)
 {
     moses_statistics stats;
-    optimizer_base *optimizer = NULL;
+    optimizer_base* optimizer = nullptr;
 
     if (opt_params.opt_algo == hc) { // exhaustive neighborhood search
         optimizer = new hill_climbing(opt_params, hc_params);
@@ -225,15 +225,25 @@ void metapop_moses_results(const std::vector<combo_tree>& bases,
     score_t target_score = c_scorer.best_possible_score();
     if (very_best_score != moses_params.max_score) {
         target_score = moses_params.max_score;
-        logger().info("Target score = %f", target_score);
+        logger().info("Target score = %g", target_score);
     } else {
-        logger().info("Inferred target score = %f", target_score);
+        logger().info("Inferred target score = %g", target_score);
     }
 
+    // negative min_improv is interpreted as percentage of
+    // improvement, if so then don't substract anything, since in that
+    // scenario the absolute min improvent can be arbitrarily small
+    score_t actual_min_improv = std::max(c_scorer.min_improv(), (score_t)0);
+    target_score -= actual_min_improv;
+    logger().info("Subtract %g (minimum significant improvement) "
+                  "from the target score to deal with float imprecision = %g",
+                  actual_min_improv, target_score);
+
     opt_params.terminate_if_gte = target_score;
+    moses_params.max_score = target_score;
+
     // update minimum score improvement
     opt_params.set_min_score_improv(c_scorer.min_improv());
-    moses_params.max_score = target_score;
 
     if (meta_params.cache_size > 0) {
         // WARNING: adaptive_cache is not thread safe (and therefore

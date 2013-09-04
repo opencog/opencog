@@ -1,6 +1,10 @@
 #SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
 
-OPENCOG_ADD_ATOM_TYPES(atom_types.script atom_types.h atom_types.definitions atom_types.inheritance)
+OPENCOG_ADD_ATOM_TYPES(atom_types.script 
+                      atom_types.h
+                      atom_types.definitions
+                      atom_types.inheritance
+                      core_types.scm)
 ADD_CUSTOM_TARGET(opencog_atom_types DEPENDS atom_types.h)
 
 # The atom_types.h file is written to the build directory
@@ -21,12 +25,12 @@ ADD_LIBRARY (atomspace SHARED
     CountTruthValue.cc
     FixedIntegerIndex.cc
     Handle.cc
-    HandleEntry.cc
-    HandleIterator.cc
     HandleSeqIndex.cc
-    HandleSet.cc
+    HandleSetIndex.cc
     ImportanceIndex.cc
+    IncomingIndex.cc
     IndefiniteTruthValue.cc
+    Intersect.cc
     Link.cc
     LinkIndex.cc
     NameIndex.cc
@@ -35,7 +39,6 @@ ADD_LIBRARY (atomspace SHARED
     NullTruthValue.cc
     PredicateIndex.cc
     SimpleTruthValue.cc
-    StatisticsMonitor.cc
     StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
@@ -45,6 +48,7 @@ ADD_LIBRARY (atomspace SHARED
     VersionHandle.cc
 )
 
+# Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
 SET(ATOMSPACE_LINK_LIBS
@@ -94,13 +98,13 @@ INSTALL (FILES
     Foreach.h
     ForeachTwo.h
     Handle.h
-    HandleEntry.h
-    HandleIterator.h
     HandleMap.h
     HandleSeqIndex.h
-    HandleSet.h
-    IndefiniteTruthValue.h
+    HandleSetIndex.h
     ImportanceIndex.h
+    IncomingIndex.h
+    IndefiniteTruthValue.h
+    Intersect.h
     Link.h
     LinkIndex.h
     NameIndex.h
@@ -110,7 +114,6 @@ INSTALL (FILES
     PredicateEvaluator.h
     PredicateIndex.h
     SimpleTruthValue.h
-    StatisticsMonitor.h
     StringIndex.h
     TargetTypeIndex.h
     TLB.h

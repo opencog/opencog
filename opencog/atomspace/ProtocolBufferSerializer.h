@@ -34,6 +34,9 @@
 using namespace std;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class AttentionValue;
 class AttentionValueHolder;
@@ -109,6 +112,7 @@ public:
     static void serialize(TruthValue &tv, ZMQTruthValueMessage* truthValueMessage);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H

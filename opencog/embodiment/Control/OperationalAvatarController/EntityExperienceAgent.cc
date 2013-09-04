@@ -23,6 +23,8 @@
 
 
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 
 #include <opencog/embodiment/Control/OperationalAvatarController/OAC.h>
@@ -34,12 +36,12 @@ EntityExperienceAgent::~EntityExperienceAgent()
 {
 }
 
-EntityExperienceAgent::EntityExperienceAgent()
+EntityExperienceAgent::EntityExperienceAgent(CogServer& cs) : Agent(cs)
 {
     this->elapsedMoments = 1.0f;
 }
 
-void EntityExperienceAgent::run(opencog::CogServer *server)
+void EntityExperienceAgent::run()
 {
     // Disable this agent
     return;
@@ -47,7 +49,7 @@ void EntityExperienceAgent::run(opencog::CogServer *server)
     logger().debug("EntityExperienceAgent::%s - Experiencing entities at moment '%d'", 
                    __FUNCTION__, this->elapsedMoments );
 
-    AtomSpace& atomSpace = server->getAtomSpace( );
+    AtomSpace& atomSpace = _cogserver.getAtomSpace();
 
     if ( spaceServer().getLatestMapHandle( ) == Handle::UNDEFINED ) {
         logger().warn( "EntityExperienceAgent::%s - There is no map info available yet!",

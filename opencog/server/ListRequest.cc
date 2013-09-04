@@ -31,7 +31,7 @@
 
 using namespace opencog;
 
-ListRequest::ListRequest()
+ListRequest::ListRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -53,7 +53,7 @@ bool ListRequest::execute()
     Type type = NOTYPE;
     Handle handle = Handle::UNDEFINED;
     bool subtypes = false;
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
     std::ostringstream err;
 
     std::list<std::string>::const_iterator it;
@@ -113,7 +113,7 @@ void ListRequest::sendOutput()
     std::ostringstream oss;
 
     if (_mimeType == "text/plain") {
-        AtomSpace& as = server().getAtomSpace();
+        AtomSpace& as = _cogserver.getAtomSpace();
         std::vector<Handle>::const_iterator it; 
         for (it = _handles.begin(); it != _handles.end(); ++it) {
             oss << as.atomAsString(*it) << std::endl;

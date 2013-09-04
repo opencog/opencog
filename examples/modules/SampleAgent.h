@@ -46,9 +46,9 @@ public:
         return _ci;
     }
 
-    SampleAgent();
-    ~SampleAgent();
-    void run(CogServer*);
+    SampleAgent(CogServer&);
+    virtual ~SampleAgent();
+    virtual void run();
 
 }; // class
 
@@ -60,14 +60,10 @@ private:
 
 public:
 
-    static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::SampleModule");
-        return _ci;
-    }
-
-    SampleModule();
-    ~SampleModule();
-    void init();
+    SampleModule(CogServer&);
+    virtual ~SampleModule();
+    virtual void init();
+    virtual const char* id();
 };
 
 } // namespace opencog

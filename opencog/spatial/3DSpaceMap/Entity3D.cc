@@ -98,3 +98,11 @@ void Entity3D::updateNonBlockEntitySpaceInfo(BlockVector _centerPosition, int _w
     mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - _height / 2;
     is_obstacle =  _is_obstacle;
 }
+
+void Entity3D::updateNonBlockEntityLocation(BlockVector _centerPosition)
+{
+    mCenterPosition = _centerPosition;
+    mBoundingBox.nearLeftBottomConer.x = _centerPosition.x - mBoundingBox.size_x / 2;
+    mBoundingBox.nearLeftBottomConer.y = _centerPosition.y - mBoundingBox.size_y / 2;
+    mBoundingBox.nearLeftBottomConer.z = _centerPosition.z - mBoundingBox.size_z / 2;
+}

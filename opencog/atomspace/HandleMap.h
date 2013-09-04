@@ -23,7 +23,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-/** HandleMap.h - red-black tree maps Handle keys to type T elements */
+/** \file HandleMap.h
+ * red-black tree maps Handle keys to type T elements
+ */
 
 #ifndef _OPENCOG_HANDLE_MAP_H
 #define _OPENCOG_HANDLE_MAP_H
@@ -37,9 +39,13 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 template<class T> class HandleMapIterator;
 
+//! red-black tree maps Handle keys to type T elements
 /**
  * This is an Adapter to stl's HashMap.
  */
@@ -359,6 +365,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_HANDLE_MAP_H

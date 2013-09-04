@@ -47,6 +47,7 @@
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/oc_assert.h>
+#include <opencog/util/macros.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/files.h>
 #include <opencog/util/StringManipulator.h>
@@ -56,6 +57,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/query/PatternMatch.h>
+#include <opencog/nlp/types/atom_types.h>
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
 
@@ -65,7 +68,7 @@
 #include "EmbodimentDOMParser.h"
 #include "EmbodimentErrorHandler.h"
 #include "EventResponder.h"
-#include "EventDetector.h"
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 
 using XERCES_CPP_NAMESPACE::Base64;
 using XERCES_CPP_NAMESPACE::XMLString;
@@ -133,7 +136,8 @@ PAI::PAI(AtomSpace& _atomSpace, ActionPlanSender& _actionSender,
 
     enableCollectActions = config().get_bool("ENABLE_ACTION_COLLECT");
 
-
+    trueConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "true");
+    falseConceptNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "false");
 
 }
 
@@ -467,6 +471,12 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
             break;
         case ENTITY_CODE:
             break;
+        default:
+			// TODO: TNick: is this the right way of handling other values? 
+			// FUZZY_INTERVAL_INT_CODE
+			// FUZZY_INTERVAL_FLOAT_CODE
+			// NUMBER_OF_ACTION_PARAM_TYPES
+			break;
         }
 
         singleActionElement->appendChild(paraElement);
@@ -499,6 +509,24 @@ ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (ope
         // TODO: throw an Exception?
     }
     return result;
+}
+
+HandleSeq PAI::getActionSeqFromPlan(ActionPlanID planId)
+{
+    HandleSeq actionHandles;
+    PlanToActionIdsMap::iterator planIt = planToActionIdsMaps.find(planId);
+    if (planIt == planToActionIdsMaps.end())
+        return actionHandles;
+
+    ActionIdMap::iterator actionIt ;
+
+
+    for (actionIt = planToActionIdsMaps[planId].begin(); actionIt != planToActionIdsMaps[planId].end(); ++ actionIt)
+    {
+        actionHandles.push_back(actionIt->second);
+    }
+
+    return actionHandles;
 }
 
 bool PAI::isActionPlanEmpty(const ActionPlanID& planId)
@@ -666,7 +694,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processTerrainInfo((DOMElement *)list->item(i));
+        processTerrainInfo((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d terrain-infos done", list->getLength());
@@ -737,7 +765,7 @@ void PAI::processPVPDocument(DOMDocument * doc, HandleSeq &toUpdateHandles)
     list = doc->getElementsByTagName(tag);
 
     for (unsigned int i = 0; i < list->getLength(); i++) {
-        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i));
+        processFinishedFirstTimePerceptTerrianSignal((DOMElement *)list->item(i), toUpdateHandles);
     }
     if (list->getLength() > 0)
         logger().debug("PAI - Processing %d finished-first-time-percept-terrian-signal done", list->getLength());
@@ -1446,6 +1474,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     actionConcernedHandles.push_back(atTimeLink);
 
     // if this is a statechage action, add the new value of this state into the atomspace
+    EVENT_TYPE eventTYpe;
     if (nameStr == "state_change")
     {
         OC_ASSERT(changedStateName != "");
@@ -1457,8 +1486,13 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
 
         actionConcernedHandles.push_back(newStateValNode);
         actionConcernedHandles.push_back(newStateEvalLink);
-    }
 
+        eventTYpe = oac::EVENT_TYPE_STATE_CHANGE;
+    }
+    else
+        eventTYpe = oac::EVENT_TYPE_ACTION;
+	OC_UNUSED(eventTYpe);
+	
     // Jared    
     // Make an AndLink with the relevant Handles (or just the links). Fishgram likes having them all in one place,
     // while PLN may find it useful to have them together or separate.
@@ -1472,7 +1506,10 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
     
     // call the event detector
     if (enableCollectActions)
-        EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+    {
+        //EventDetector::getInstance()->actionCorporaCollect(actionConcernedHandles);
+        //oac::EventDetectionAgent::addAnEvent(actionInstanceNode,tsValue,eventTYpe);
+    }
 
     // call the event responser
     EventResponder::getInstance()->response(nameStr,actionInstanceNode,agentNode,targetNode, actionHandles, tsValue);
@@ -2893,6 +2930,13 @@ void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, boo
                  atomSpace.getName(objectNode).c_str());
 
     AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, tv, permanent);
+
+    // for test: because some of our processing agents using truthvalue to check a boolean predicate, some are using Evaluaction value "true" "false" to check
+    // so we need to add both
+    if (propertyValue)
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, trueConceptNode,tv, permanent);
+    else
+        AtomSpaceUtil::addPropertyPredicate(atomSpace, predicateName, objectNode, falseConceptNode,tv, permanent);
 }
 
 void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, bool inheritanceValue)
@@ -3388,7 +3432,7 @@ std::string PAI::camelCaseToUnderscore(const char* s)
  * Private methods used to parse map info by protobuf.
  * ---------------------------------------------------
  */
-void PAI::processTerrainInfo(DOMElement * element)
+void PAI::processTerrainInfo(DOMElement * element,HandleSeq &toUpdateHandles)
 {
 
     // XML is to be replaced by protobuf, but currently, we use it to wrap a
@@ -3423,7 +3467,7 @@ void PAI::processTerrainInfo(DOMElement * element)
     {
         isFirstPerceptTerrian = true;
         perceptTerrianBeginTime = time(NULL);
-        printf("Begin the first time percept the terrain! Begin time: %d. Wait...\n",perceptTerrianBeginTime);
+        printf("Starting initial perception of the terrain! Begin time: %d. Please wait...\n",perceptTerrianBeginTime);
         addSpaceMap(element,timestamp);
         blockNum = 0;
     }
@@ -3456,11 +3500,11 @@ void PAI::processTerrainInfo(DOMElement * element)
             if (!isFirstPerceptTerrian)
             {
                 // maybe it has created new BlockEntities, add them to the atomspace
-                spaceServer().addBlockEntityNodes();
+                spaceServer().addBlockEntityNodes(toUpdateHandles);
 
                 // todo: how to represent the disappear of a BlockEntity,
                 // Since sometimes it's not really disappear, just be added into a bigger entity
-                spaceServer().updateBlockEntitiesProperties(timestamp);
+                spaceServer().updateBlockEntitiesProperties(timestamp, toUpdateHandles);
             }
             if (isFirstPerceptTerrian)
                 blockNum ++;
@@ -3718,6 +3762,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
+
+    if (isEdible)
+    {
+        printf("Something edible was reported!!\n\n\n");
+    }
+
     bool isVisible = isObjectVisible(properties);
 
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
@@ -3770,6 +3821,25 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
                                           SimpleTruthValue(1.0, 1.0), objectNode, materialConceptNode);
+    } // if
+
+    // Add color property predicate
+    if (color_name != NULL_ATTRIBUTE){
+       // printf("color_name found: %s\n",color_name.c_str());
+
+        Handle colorNameWordNode = atomSpace.addNode(WORD_NODE, color_name);
+        Handle colorNameConceptNode = atomSpace.addNode(CONCEPT_NODE, color_name);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(colorNameConceptNode);
+        referenceLinkOutgoing.push_back(colorNameWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
+                                          SimpleTruthValue(1.0, 1.0), objectNode, colorNameConceptNode);
     } // if
 
     // Add texture property predicate
@@ -4182,29 +4252,29 @@ Handle PAI::getParmValueHanleFromXMLDoc(DOMElement* paramElement)
     return resultHandle;
 }
 
-void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element)
+void PAI::processFinishedFirstTimePerceptTerrianSignal(DOMElement* element, HandleSeq &toUpdateHandles)
 {
     unsigned long timestamp = getTimestampFromElement(element);
     // if it's the first time percept this world, then we should find out all the possible existing block-entities
     if (isFirstPerceptTerrian)
     {
-        printf("Finished the first time percept the terrain - %d blocks in total!\n Now finding all the BlockEntities in the world...! \n", blockNum);
+        printf("Initial perception of the terrain is complete - %d blocks in total!\n Now finding all the BlockEntities in the world... \n", blockNum);
 
         spaceServer().findAllBlockEntitiesOnTheMap();
 
         // maybe it has created new BlockEntities, add them to the atomspace
-        spaceServer().addBlockEntityNodes();
+        spaceServer().addBlockEntityNodes(toUpdateHandles);
 
         // todo: how to represent the disappear of a BlockEntity,
         // Since sometimes it's not really disappear, just be added into a bigger entity
-        spaceServer().updateBlockEntitiesProperties(timestamp);
+        spaceServer().updateBlockEntitiesProperties(timestamp,toUpdateHandles);
 
         int t2 = time(NULL);
 
         spaceServer().markCurMapPerceptedForFirstTime();
 
         isFirstPerceptTerrian = false;
-        printf("FirstPerceptWorld finished! Finish time: %d. Costed %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
+        printf("Initial perception of the non-terrain entities is complete! Finish time: %d. Total time: %d seconds. \n", t2, t2 - perceptTerrianBeginTime);
     }
 
 }
@@ -4239,6 +4309,8 @@ void PAI::processBlockStructureSignal(DOMElement* element)
         {
             return;
         }
+
+        entity->SortBlockOrder();
 
         // Currently, for demo, once the oac figure out an blockEnity,
         // It will go to a random near place to build a same blockEnity by blocks.

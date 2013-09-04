@@ -621,7 +621,10 @@ interface.
 === cog-map-type proc type ===
       Call proceedure proc for each atom in the atomspace that is of 
       type type. If proc returns any value other than #f, then the 
-      iteration is terminated.
+      iteration is terminated.  Note that this iterates only over the
+      given type, and not its sub-types. Thus (cog-map-type proc 'Atom)
+      will never call proc, because no atoms in the atomspace can have
+      the type Atom: they are all subtypes of Atom.
 
       Example:
          ; define a function that prints the atoms:
@@ -637,9 +640,9 @@ interface.
       Currently-implemented primtives are:
       do-wsd                -- run word-sense disambiguation
       cog-bind handle       -- run pattern matcher on handle.
-                               handle must be an BindLink.
+                               handle must be a BindLink.
       cog-bind-crisp handle -- run pattern matcher on handle.
-                               handle must be an BindLink.
+                               handle must be a BindLink.
                                Use crisp logic during implication.
       store-atom handle     -- store indicated atom to SQL/persistent 
                                storage.

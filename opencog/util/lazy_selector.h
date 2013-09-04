@@ -31,6 +31,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 using boost::multi_index_container;
 using namespace boost::multi_index;
@@ -41,14 +44,15 @@ using namespace boost::multi_index;
  * When the operator is called more than n times an assertion is raised
  */
 class lazy_selector
-{
+{	
     typedef std::pair<unsigned int, unsigned int> uint_pair;
 
-    /* tags for accessing both sides of a bidirectional map */    
+    //! tags for accessing both sides of a bidirectional map
     struct from{};
+    //! tags for accessing both sides of a bidirectional map
     struct to{};
 
-    /* A bidirectional map one-to-many is simulated as a multi_index_container
+    /** A bidirectional map one-to-many is simulated as a multi_index_container
      * of pairs of (unsinged int,unsigned int) with first unique index, 
      * and second non unique index.
      *
@@ -81,34 +85,38 @@ public:
     virtual ~lazy_selector() {}
     bool empty() const;
 
-    // returns the number of elements < _n that can still be chosen
+    //! returns the number of elements < _n that can still be chosen
     unsigned int count_n_free() const;
 
-    // returns the selected number (never twice the same)
+    //! returns the selected number (never twice the same)
     unsigned int operator()();
 
     void reset_range(unsigned int new_n);
-
-    virtual unsigned int select() = 0; // a method that choses an int in [0,_n)
+    
+    //! a method that choses an int in [0,_n)
+    virtual unsigned int select() = 0; 
 
 protected:
-    unsigned int _n; // size of the integer list [0,_n)
+    //! size of the integer list [0,_n)
+    unsigned int _n; 
 
 private:
-    unsigned int _l; // lower index
+    //! lower index
+    unsigned int _l; 
     uint_one_to_many_map _map;
 
-    // an index is free if it has never been chosen before
-    // that is if no links are going out of it
+    //! an index is free if it has never been chosen before
+    //! that is if no links are going out of it
     inline bool is_free(unsigned int idx) const; 
 
-    // increase _l until it is located on a free index
+    //! increase _l until it is located on a free index
     inline void increase_l_till_free();
 
-    // modify all links coming into src_to so that they now go to dst_to
+    //! modify all links coming into src_to so that they now go to dst_to
     inline void modify_target(unsigned int src_to, unsigned int dst_to);
 };
 
+/** @}*/
 } //~namespace opencog
 
 #endif

@@ -91,7 +91,7 @@ struct majority : public iterator_function<bool>
     // function, the result corresponds to its output
     template<typename It>
     bool operator()(It from, It to) const {
-        return std::count(from, to, true) > arity / 2;
+        return (unsigned int)std::count(from, to, true) > arity / 2;
     }
 };
 

@@ -73,7 +73,7 @@ const std::string& GenericShell::get_prompt(void)
 std::string GenericShell::decode_input(const std::string &expr)
 {
 	size_t len = expr.length();
-	if (0 == len) 
+	if (0 == len)
 	{
 		return get_prompt();
 	}
@@ -110,7 +110,7 @@ std::string GenericShell::decode_input(const std::string &expr)
 		i--;
 	}
 
-	// Don't evaluate if the line is terminated by 
+	// Don't evaluate if the line is terminated by
 	// escape (^[), cancel (^X) or quit (^C)
 	// These would typically be sent by netcat, and not telnet.
 	unsigned char c = expr[len-1];
@@ -121,7 +121,7 @@ std::string GenericShell::decode_input(const std::string &expr)
 	}
 
 
-	/* The #$%^& opecog command shell processor cuts off the 
+	/* The #$%^& opecog command shell processor cuts off the
 	 * newline character. Re-insert it; otherwise, comments within
 	 * procedures will have the effect of commenting out the rest
 	 * of the procedure, leading to garbage.

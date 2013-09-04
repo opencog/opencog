@@ -78,19 +78,19 @@ class SchemePrimitive : public PrimitiveEnviron
 			// Below is the list of currently supported signatures.
 			// Extend as needed.
 			bool (T::*b_hi)(Handle, int);
-			double (T::*d_hht)(const Handle&, const Handle&, const Type&);
-			double (T::*d_hhtb)(const Handle&, const Handle&, const Type&, bool);
+			double (T::*d_hht)(Handle, Handle, Type);
+			double (T::*d_hhtb)(Handle, Handle, Type, bool);
 			Handle (T::*h_h)(Handle);
 			Handle (T::*h_hi)(Handle, int);
 			Handle (T::*h_sq)(const std::string&, const HandleSeq&);
 			Handle (T::*h_sqq)(const std::string&, const HandleSeq&, const HandleSeq&);
-			HandleSeq (T::*q_hti)(const Handle&, const Type&, int);
-			HandleSeq (T::*q_htib)(const Handle&, const Type&, int, bool);
+			HandleSeq (T::*q_hti)(Handle, Type, int);
+			HandleSeq (T::*q_htib)(Handle, Type, int, bool);
 			const std::string& (T::*s_s)(const std::string&);
 			void (T::*v_h)(Handle);
-			void (T::*v_t)(const Type&);
-			void (T::*v_ti)(const Type&, int);
-			void (T::*v_tidi)(const Type&, int, double, int);
+			void (T::*v_t)(Type);
+			void (T::*v_ti)(Type, int);
+			void (T::*v_tidi)(Type, int, double, int);
 			void (T::*v_v)(void);
 		} method;
 		T* that;
@@ -354,19 +354,19 @@ class SchemePrimitive : public PrimitiveEnviron
 		// Declare and define the constructors for this class. They all have
 		// the same basic form, except for the types.
 		DECLARE_CONSTR_2(B_HI, b_hi, bool, Handle, int)
-		DECLARE_CONSTR_3(D_HHT, d_hht, double, const Handle&, const Handle&, const Type&)
-		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, const Handle&, const Handle&, const Type&, bool)
+		DECLARE_CONSTR_3(D_HHT, d_hht, double, Handle, Handle, Type)
+		DECLARE_CONSTR_4(D_HHTB, d_hhtb, double, Handle, Handle, Type, bool)
 		DECLARE_CONSTR_1(H_H,  h_h,  Handle, Handle)
 		DECLARE_CONSTR_2(H_HI, h_hi, Handle, Handle, int)
 		DECLARE_CONSTR_2(H_SQ, h_sq, Handle, const std::string&, const HandleSeq&)
 		DECLARE_CONSTR_3(H_SQQ, h_sqq, Handle, const std::string&, const HandleSeq&, const HandleSeq&)
-		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, const Handle&, const Type&, int)
-		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, const Handle&, const Type&, int, bool)
+		DECLARE_CONSTR_3(Q_HTI, q_hti, HandleSeq, Handle, Type, int)
+		DECLARE_CONSTR_4(Q_HTIB, q_htib, HandleSeq, Handle, Type, int, bool)
 		DECLARE_CONSTR_1(S_S,  s_s,  const std::string&, const std::string&)
 		DECLARE_CONSTR_1(V_H, v_h, void, Handle)
-		DECLARE_CONSTR_1(V_T, v_t, void, const Type&)
-		DECLARE_CONSTR_2(V_TI, v_ti, void, const Type&, int)
-		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, const Type&, int, double, int)
+		DECLARE_CONSTR_1(V_T, v_t, void, Type)
+		DECLARE_CONSTR_2(V_TI, v_ti, void, Type, int)
+		DECLARE_CONSTR_4(V_TIDI, v_tidi, void, Type, int, double, int)
 
 		// Below is DECLARE_CONSTR_0(V_V, v_v, void*, void);
 		SchemePrimitive(const char *name, void (T::*cb)(void), T *data)
@@ -417,18 +417,18 @@ inline void define_scheme_primitive(const char *name, RET (T::*cb)(ARG1,ARG2,ARG
 DECLARE_DECLARE_1(Handle, Handle)
 DECLARE_DECLARE_1(const std::string&, const std::string&)
 DECLARE_DECLARE_1(void, Handle)
-DECLARE_DECLARE_1(void, const Type&)
+DECLARE_DECLARE_1(void, Type)
 DECLARE_DECLARE_1(void, void)
 DECLARE_DECLARE_2(bool, Handle, int)
 DECLARE_DECLARE_2(Handle, Handle, int)
 DECLARE_DECLARE_2(Handle, const std::string&, const HandleSeq&)
-DECLARE_DECLARE_2(void, const Type&, int)
-DECLARE_DECLARE_3(double, const Handle&, const Handle&, const Type&)
+DECLARE_DECLARE_2(void, Type, int)
+DECLARE_DECLARE_3(double, Handle, Handle, Type)
 DECLARE_DECLARE_3(Handle, const std::string&, const HandleSeq&, const HandleSeq&)
-DECLARE_DECLARE_3(HandleSeq, const Handle&, const Type&, int)
-DECLARE_DECLARE_4(double, const Handle&, const Handle&, const Type&, bool)
-DECLARE_DECLARE_4(void, const Type&, int, double, int)
-DECLARE_DECLARE_4(HandleSeq, const Handle&, const Type&, int, bool)
+DECLARE_DECLARE_3(HandleSeq, Handle, Type, int)
+DECLARE_DECLARE_4(double, Handle, Handle, Type, bool)
+DECLARE_DECLARE_4(void, Type, int, double, int)
+DECLARE_DECLARE_4(HandleSeq, Handle, Type, int, bool)
 
 }
 

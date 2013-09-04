@@ -41,12 +41,14 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
+#include <opencog/server/Request.h>
 #include <opencog/server/Registry.h>
 
 namespace opencog
 {
 
 typedef std::vector<Agent*> AgentSeq;
+class Request;
 
 /**
  * This class implements the official server used by the opencog framework. It
@@ -199,6 +201,10 @@ public:
      * the documentation in the Module.h file for more details. */
     virtual bool unloadModule(const std::string& id);
 
+
+    /** Lists the modules that are currently loaded. */
+    virtual std::string listModules();
+
     /** Retrieves the module's meta-data (id, filename, load/unload function
      * pointers, etc). Takes the module's id */
     virtual ModuleData getModuleData(const std::string& id);
@@ -207,7 +213,7 @@ public:
     virtual Module* getModule(const std::string& id);
 
     /** Load all modules specified in configuration file */
-    virtual void loadModules();
+    virtual void loadModules(const char* [] = NULL);
 
     /** Load all Scheme modules specified in configuration file */
     virtual void loadSCMModules(const char* [] = NULL);

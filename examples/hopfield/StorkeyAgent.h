@@ -69,11 +69,11 @@ private:
 
 public:
 
-    static float h(int i, w_t& w); //!< h function in learning rule from Storkey
+    float h(int i, w_t& w); //!< h function in learning rule from Storkey
     //! h function in old palimpsest learning rule from Storkey, needed for
     //! finding keyNode.
-    static float h(int i, int j, w_t& w);
-    static w_t getCurrentWeights();
+    float h(int i, int j, w_t& w);
+    w_t getCurrentWeights();
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
@@ -81,9 +81,9 @@ public:
         return _ci;
     }
 
-    StorkeyAgent();
+    StorkeyAgent(CogServer&);
     virtual ~StorkeyAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     /** Return the agent's logger object
      *

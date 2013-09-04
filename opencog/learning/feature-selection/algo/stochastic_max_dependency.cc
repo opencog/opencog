@@ -31,22 +31,22 @@ namespace opencog {
 using namespace std;
 
 /// Select features, using the SMD algorithm
-feature_set smd_select_features(const CTable& ctable,
-                                const feature_selection_parameters& fs_params)
+feature_set_pop smd_select_feature_sets(const CTable& ctable,
+                                        const feature_selection_parameters& fs_params)
 {
     auto ir = boost::irange(0, ctable.get_arity());
 
     feature_set all_features(ir.begin(), ir.end());
+    fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
 
-    if (fs_params.target_size <= 0)
+    if (fs_params.target_size <= 0) {
         // Nothing happened, return the all features by default
-        return all_features;
+        feature_set_pop::value_type sfs(fs_sc(all_features), all_features);
+        return {sfs};
+    }
 
     feature_set init_features = initial_features(ctable.get_input_labels(), fs_params);
-
-    fs_scorer<set<arity_t> > fs_sc(ctable, fs_params);
-    return stochastic_max_dependency_selection(all_features, init_features,
-                                               fs_sc,
+    return stochastic_max_dependency_selection(all_features, init_features, fs_sc,
                                                (unsigned) fs_params.target_size,
                                                fs_params.threshold,
                                                fs_params.smd_top_size);

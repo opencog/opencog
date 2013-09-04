@@ -33,7 +33,7 @@
 #include <opencog/learning/moses/moses/types.h>
 
 #include "eval-diversity.h"
-#include "../moses/metapopulation.h"
+#include "../metapopulation/metapopulation.h"
 
 using namespace std;
 using namespace boost::program_options;
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 
         ;
 
-        variables_map vm;
+    variables_map vm;
     try {
         store(parse_command_line(argc, argv, desc), vm);
     }
@@ -148,13 +148,13 @@ int main(int argc, char** argv) {
     if (!edp.moses_files.empty()) {
         // load the bscores
         vector<behavioral_score> bscores;
-        vector<bscored_combo_tree> bcts;
+        vector<pbscored_combo_tree> bcts;
         for (const string& file : edp.moses_files) {
             ifstream in(file);
             in.exceptions(ifstream::failbit | ifstream::badbit | ifstream::eofbit);
             while (in.good()) {
                 try {
-                    bcts.push_back(istream_bscored_combo_tree(in));
+                    bcts.push_back(istream_pbscored_combo_tree(in));
                 } catch(...) {}
             }
         }

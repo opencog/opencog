@@ -35,11 +35,9 @@
 using namespace opencog;
 
 // load/unload functions for the Module interface
-extern "C" const char* opencog_module_id() { return CustomAtomTypesModule::id(); }
-extern "C" Module* opencog_module_load()   { return new CustomAtomTypesModule(); }
-extern "C" void opencog_module_unload(Module* m) { delete m; }
+DECLARE_MODULE(CustomAtomTypesModule)
 
-CustomAtomTypesModule::CustomAtomTypesModule()
+CustomAtomTypesModule::CustomAtomTypesModule(CogServer& cs) : Module(cs)
 {
 }
 

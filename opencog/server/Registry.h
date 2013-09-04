@@ -29,13 +29,16 @@
 #include <list>
 
 #include <opencog/server/Factory.h>
-#include <opencog/server/Request.h>
+#include <opencog/server/RequestClassInfo.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/exceptions.h>
 
 namespace opencog
 {
+
+class Request;
+class CogServer;
 
 /**
  * This template implements a simplified Factory registry, following some of the
@@ -80,7 +83,7 @@ public:
     }
 
     /** Creates a new instance using the factory identified by 'id' */
-    virtual _BaseType* create(const std::string& id)
+    virtual _BaseType* create(CogServer& cs, const std::string& id)
     {
         FactoryMapConstIterator it = factories.find(id);
         if (it == factories.end()) {
@@ -93,7 +96,7 @@ public:
         // invoke the creation function
         logger().debug("creating %s instance with \"%s\"", 
              demangle(typeid(_BaseType).name()).c_str(), id.c_str());
-        return it->second->create();
+        return it->second->create(cs);
     }
 
     /** Returns the metadata associated with the factory identified by 'id' */

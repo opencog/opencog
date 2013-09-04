@@ -103,7 +103,7 @@ public:
         return _ci;
     }
     
-    MyAgentWithDefaults() : Agent() {
+    MyAgentWithDefaults(CogServer& cs) : Agent(cs) {
         _count = 0;
      
         static const std::string defaultConfig[] = {
@@ -120,8 +120,8 @@ public:
     void setFrequency(int f) { _frequency = f; }
     void setName(const std::string& n) { _name = n; }
     unsigned int count() { return _count; }
-    void run(CogServer *server) {
-        logger().debug("%ld: executed %s", server->getCycleCount(), _name.c_str());
+    virtual void run() {
+        logger().debug("%ld: executed %s", _cogserver.getCycleCount(), _name.c_str());
         _count++;
     }
 };

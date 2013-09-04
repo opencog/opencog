@@ -5,6 +5,9 @@
 # STLPORT_INCLUDE_DIR - where to find vector, etc.
 # STLPORT_LIBRARIES   - link against these to use STLPort
 # STLPORT_FOUND       - True if the X11 extensions are available.
+#
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 
 
 # Provide some common installation locations.

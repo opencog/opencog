@@ -24,11 +24,13 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/ClassServer.h>
+#include <opencog/server/CogServer.h>
+
+#include <opencog/learning/dimensionalembedding/DimEmbedModule.h>
 
 using namespace opencog;
 
@@ -36,18 +38,25 @@ class DimEmbedTestSuite : public CxxTest::TestSuite
 {
 public:
     void link(AtomSpace* as, Handle h1, Handle h2,
-              double strength, double confidence) {
+              double strength, double confidence)
+    {
         as->addLink(SIMILARITY_LINK, h1, h2,
                     SimpleTruthValue(strength, SimpleTruthValue::confidenceToCount(confidence)));
     }
+
     void inhLink(AtomSpace* as, Handle h1, Handle h2,
-                 double strength, double confidence) {
+                 double strength, double confidence)
+    {
         as->addLink(INHERITANCE_LINK, h1, h2,
                     SimpleTruthValue(strength, SimpleTruthValue::confidenceToCount(confidence)));
     }
-    void testMisc() {
-        AtomSpace *atomSpace = new AtomSpace();
-        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+
+    void testMisc()
+    {
+        CogServer& cs = cogserver();
+        AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
+        DimEmbedModule dimEmbed = DimEmbedModule(cs);
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue(0.001f, 0.00001f));
@@ -139,11 +148,14 @@ public:
         TS_ASSERT_DELTA(dimEmbed.euclidDist(h5,h4,SIMILARITY_LINK),
                         0.70950687,
                         .000001);
-        delete atomSpace;
     }
-    void testEmbed() {
-        AtomSpace *atomSpace = new AtomSpace();
-        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+
+    void testEmbed()
+    {
+        CogServer& cs = cogserver();
+        AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
+        DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "2", SimpleTruthValue(0.001f, 0.00001f));
@@ -290,11 +302,14 @@ public:
             TS_ASSERT(atomSpace->getVLTI(handles[i])
                       ==AttentionValue::DISPOSABLE);
         }
-        delete atomSpace;
     }
-    void testCluster() {
-        AtomSpace *atomSpace = new AtomSpace();
-        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+
+    void testCluster()
+    {
+        CogServer& cs = cogserver();
+        AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
+        DimEmbedModule dimEmbed = DimEmbedModule(cs);
         
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "2", SimpleTruthValue(0.001f, 0.00001f));
@@ -422,12 +437,15 @@ public:
                 }
             }
         }
-        delete atomSpace;
     }
 
-    void testAsym() {
-        AtomSpace *atomSpace = new AtomSpace();
-        DimEmbedModule dimEmbed=DimEmbedModule(atomSpace);
+    void testAsym()
+    {
+        CogServer& cs = cogserver();
+        AtomSpace* atomSpace = &cs.getAtomSpace();
+        atomSpace->clear();
+        DimEmbedModule dimEmbed = DimEmbedModule(cs);
+
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog2", SimpleTruthValue(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "dog3", SimpleTruthValue(0.001f, 0.00001f));
@@ -584,6 +602,5 @@ public:
                             dists7out[i],
                             .000001);
         }
-        delete atomSpace;
     }
 };

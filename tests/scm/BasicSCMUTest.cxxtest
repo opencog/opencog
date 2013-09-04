@@ -36,6 +36,8 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
 
+#include <opencog/nlp/types/atom_types.h>
+
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
@@ -77,9 +79,9 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	void tearDown(void) { }
 
-    // TVs
-    void check_truth_value(const TruthValue& tv);
-    void test_truth_value(void);
+	// TVs
+	void check_truth_value(const TruthValue& tv);
+	void test_truth_value(void);
 
 	// Nodes
 	void check_node(const char *, const char *, float, float);
@@ -88,6 +90,7 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 	// Links
 	void check_link(const char *, Type, const char *, const char *,
 	                const char *, const char *, float, float);
+	void test_link_tv_setting(void);
 	void test_reference_link(void);
 	void test_word_instance_link(void);
 	void test_inheritance_link(void);
@@ -125,58 +128,58 @@ void BasicSCMUTest::setUp(void)
 // ============================================================
 
 void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
-    std::cout << "check_truth_value(" << tv << ")" << std::endl;
+	std::cout << "check_truth_value(" << tv << ")" << std::endl;
 
-    // added check_truth_value_node in the atomspace
-    string node_str = "check_truth_value_node";
-    string add_node_str = string("(cog-new-node 'Node \"") + node_str + "\") ";
+	// added check_truth_value_node in the atomspace
+	string node_str = "check_truth_value_node";
+	string add_node_str = string("(cog-new-node 'Node \"") + node_str + "\") ";
 
-    eval->eval(add_node_str);
+	eval->eval(add_node_str);
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create the first atom!", !eval_err);
 
-    // set its truth value
-    stringstream ss;
-    ss << "(cog-set-tv! " << add_node_str << "(";
-    switch(TruthValueType tvt = tv.getType()) {
-    case SIMPLE_TRUTH_VALUE:
-        ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence();
-        break;
-    case COUNT_TRUTH_VALUE:
-        ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence()
-           << " " << tv.getCount();
-        break;
-    case INDEFINITE_TRUTH_VALUE: {
-        const IndefiniteTruthValue& itv =
-            static_cast<const IndefiniteTruthValue&>(tv);
-        ss << "cog-new-itv " << itv.getL() << " " << itv.getU()
-           << " " << itv.getConfidence();
-        break;
-    }
-    case COMPOSITE_TRUTH_VALUE:
-        // @todo
-    default: 
-        ss << "Wrong Truth Value Type (" << tvt << ")";
-        TSM_ASSERT(ss.str().c_str(), false);
-    }
-    ss << "))";
+	// set its truth value
+	stringstream ss;
+	ss << "(cog-set-tv! " << add_node_str << "(";
+	switch(TruthValueType tvt = tv.getType()) {
+	case SIMPLE_TRUTH_VALUE:
+		ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence();
+		break;
+	case COUNT_TRUTH_VALUE:
+		ss << "cog-new-stv " << tv.getMean() << " " << tv.getConfidence()
+		   << " " << tv.getCount();
+		break;
+	case INDEFINITE_TRUTH_VALUE: {
+		const IndefiniteTruthValue& itv =
+			static_cast<const IndefiniteTruthValue&>(tv);
+		ss << "cog-new-itv " << itv.getL() << " " << itv.getU()
+		   << " " << itv.getConfidence();
+		break;
+	}
+	case COMPOSITE_TRUTH_VALUE:
+		// @todo
+	default: 
+		ss << "Wrong Truth Value Type (" << tvt << ")";
+		TSM_ASSERT(ss.str().c_str(), false);
+	}
+	ss << "))";
 
-    // eval
-    eval->eval(ss.str());
+	// eval
+	eval->eval(ss.str());
 	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval", !eval_err);
 
-    // check that the atom has the right TV
-    Handle h = as->getHandle(NODE, node_str);
+	// check that the atom has the right TV
+	Handle h = as->getHandle(NODE, node_str);
 	TSM_ASSERT("Failed to get the handle", h != Handle::UNDEFINED);
-    // hack to avoid floating error
-    bool tv_eq = tv.toString() == as->getTV(h)->toString();
-    TSM_ASSERT("TVs are different", tv_eq);
+	// hack to avoid floating error
+	bool tv_eq = tv.toString() == as->getTV(h)->toString();
+	TSM_ASSERT("TVs are different", tv_eq);
 
-    // remove Node so we can redo the test
-    as->removeAtom(h);
+	// remove Node so we can redo the test
+	as->removeAtom(h);
 }
 
 void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float truth, float conf)
@@ -220,9 +223,9 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 void BasicSCMUTest::test_truth_value(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-    check_truth_value(SimpleTruthValue(0.5, 0.5));
-    check_truth_value(SimpleTruthValue(0.2, 0.7));
-    // @todo : add more
+	check_truth_value(SimpleTruthValue(0.5, 0.5));
+	check_truth_value(SimpleTruthValue(0.2, 0.7));
+	// @todo : add more
 }
 
 void BasicSCMUTest::test_single_atom(void)
@@ -370,6 +373,40 @@ void BasicSCMUTest::test_parse_link()
 	check_parse_link("ParseLink", PARSE_LINK, "ParseNode", "SentenceNode",
 	                 "sentence@8c13ec38-0295-4632-9205-e095035e4364_parse_0",
 	                 "sentence@8c13ec38-0295-4632-9205-e095035e4364", 1.0, 1.0);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_link_tv_setting(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Create initially with one set of trtuh values
+	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.5) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create a link", !eval_err);
+
+	TruthValuePtr tv = as->getTV(inh);
+	float m = tv->getMean();
+	float c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.5), 1.0e-6);
+
+	// Create it again, but with differeent truth values
+	// Make sure the new values grab hold.
+	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to create a link", !eval_err);
+
+	tv = as->getTV(inh);
+	m = tv->getMean();
+	c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

@@ -5,6 +5,9 @@
 # Adapted from:
 # http://cezarfx.blogspot.com/2009/09/using-xerces-version-with-cmake.html
 #
+# Redistribution and use is allowed according to the terms of the BSD license.
+# For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+#
 # Once done this will define
 #
 #  XERCESC_FOUND - system has Xerces-C

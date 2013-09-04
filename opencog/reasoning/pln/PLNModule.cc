@@ -36,6 +36,7 @@
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/macros.h>
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
@@ -44,8 +45,6 @@
 
 #include "TestTargets.h"
 #include "ForwardChainer.h"
-
-#include <opencog/adaptors/tulip/TulipWriter.h>
 
 using namespace opencog;
 using namespace opencog::pln;
@@ -113,13 +112,13 @@ const char* PLNModule::usageInfo =
     " loop-check         - check for loops\n";
 
 
-PLNModule::PLNModule() : Module()
+PLNModule::PLNModule(CogServer& cs) : Module(cs)
 {
     logger().info("[PLNModule] constructor");
     setParameters(DEFAULT());
     do_pln_register();  
-    cogserver().registerAgent(BackChainingAgent::info().id, &backChainingFactory);
-    cogserver().registerAgent(ForwardChainingAgent::info().id, &forwardChainingFactory);
+    _cogserver.registerAgent(BackChainingAgent::info().id, &backChainingFactory);
+    _cogserver.registerAgent(ForwardChainingAgent::info().id, &forwardChainingFactory);
 }
 
 void PLNModule::setParameters(const std::string* params) {
@@ -130,11 +129,12 @@ void PLNModule::setParameters(const std::string* params) {
     }
 }
 
-PLNModule::~PLNModule() {
+PLNModule::~PLNModule()
+{
     logger().info("[PLNModule] destructor");
     do_pln_unregister();
-    cogserver().unregisterAgent(BackChainingAgent::info().id);
-    cogserver().unregisterAgent(ForwardChainingAgent::info().id);
+    _cogserver.unregisterAgent(BackChainingAgent::info().id);
+    _cogserver.unregisterAgent(ForwardChainingAgent::info().id);
 }
 
 // state variables for running multiple PLNShell commands.
@@ -150,7 +150,7 @@ void PLNModule::init()
     fitnessEvaluator = getFitnessEvaluator(config().get("PLN_FITNESS_EVALUATOR"));
     
     // Make sure that the ASW is initialized on module load
-    AtomSpaceWrapper* asw = ASW(server().getAtomSpace());
+    AtomSpaceWrapper* asw = ASW(&_cogserver.getAtomSpace());
 #if LOCAL_ATW
     ((LocalATW*)asw)->SetCapacity(10000);
 #endif  
@@ -160,7 +160,8 @@ void PLNModule::init()
 
     // Initialise ruleprovider (because it needs to monitor atom add/remove)
     RuleProvider& rp = referenceRuleProvider();
-
+	OC_UNUSED(rp);
+	
 #ifdef HAVE_GUILE
     // Define a scheme wrapper -- the scheme function pln-bc will
     // call the pln_bc method.
@@ -293,7 +294,7 @@ Handle opencog::pln::applyRule(string ruleName, const HandleSeq& premises,
     // result to be overwriten
     vhpair vhp(Handle::UNDEFINED, NULL_VERSION_HANDLE);
 
-    OC_ASSERT(rule, "Apparently the rule %s is undefined", ruleName.c_str());
+    OC_ASSERT(rule.get(), "Apparently the rule %s is undefined", ruleName.c_str());
 
     pHandleSeq phs = ASW()->realToFakeHandles(premises, CX);
     if(rule->isComposer()) {
@@ -384,7 +385,7 @@ std::string PLNModule::runCommand(std::list<std::string> args)
     std::stringstream ss;
 
     try {
-        int a1T, a2T, bT, tempi=0;
+        int a1T, a2T, bT;
         string a10, a11, a20, a21, b1, b2;
         vtree avt1, avt2, bvt;
         Rule::MPs rule_args;
@@ -393,8 +394,6 @@ std::string PLNModule::runCommand(std::list<std::string> args)
         std::string temps;
         long h=0, h2=0;
         int j;
-        int test_i=0;
-        int s_i=0;
         bool axioms_ok;
         boost::shared_ptr<set<pHandle> > ts;
         Vertex v;

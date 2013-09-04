@@ -46,7 +46,7 @@ public:
         TS_ASSERT(config().get_double("SERVER_PORT") == 17001.0);
         TS_ASSERT(config()["LOG_FILE"] == "opencog_server.log");
         TS_ASSERT(config()["LOG_LEVEL"] == "info");
-        TS_ASSERT(config()["BACK_TRACE_LOG_LEVEL"] == "warn");
+        TS_ASSERT(config()["BACK_TRACE_LOG_LEVEL"] == "error"); // C++ stack traces only on error!
         TS_ASSERT(config().get_bool("LOG_TO_STDOUT"));
         TS_ASSERT(config().get_int("SERVER_CYCLE_DURATION") == 100);
         TS_ASSERT(!config().get_bool("EXTERNAL_TICK_MODE"));

@@ -24,4 +24,4 @@ LINK_LIBRARIES(
 	comboreduct
 )
 
-ADD_CXXTEST(BEUTest)
+#ADD_CXXTEST(BEUTest)

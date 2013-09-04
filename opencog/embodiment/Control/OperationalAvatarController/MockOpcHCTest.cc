@@ -22,6 +22,7 @@
  */
 
 
+#include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/TimeServer.h>
 

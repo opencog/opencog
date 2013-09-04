@@ -82,9 +82,9 @@ public:
         return _ci;
     }
 
-    BackChainingAgent();
+    BackChainingAgent(CogServer&);
     virtual ~BackChainingAgent();
-    virtual void run(CogServer *server);
+    virtual void run();
 
     /** Choose a new target (done automatically after the current inference
      * either finishes or runs out of resources)

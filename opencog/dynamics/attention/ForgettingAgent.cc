@@ -33,7 +33,8 @@
 
 using namespace opencog;
 
-ForgettingAgent::ForgettingAgent()
+ForgettingAgent::ForgettingAgent(CogServer& cs) :
+    Agent(cs)
 {
     std::string defaultForgetThreshold;
     std::ostringstream buf;
@@ -77,10 +78,10 @@ void ForgettingAgent::setLogger(Logger* _log)
     log = _log;
 }
 
-void ForgettingAgent::run(CogServer *c)
+void ForgettingAgent::run()
 {
     log->fine("=========== ForgettingAgent::run =======");
-    a = &c->getAtomSpace();
+    a = &_cogserver.getAtomSpace();
     forget(forgetPercentage);
 }
 

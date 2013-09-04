@@ -1,14 +1,15 @@
-#include <opencog/comboreduct/interpreter/eval.h>
-
 #include <iostream>
-#include "../moses/moses_main.h"
-#include "../optimization/optimization.h"
-#include "../moses/scoring.h"
-#include "../moses/ann_scoring.h"
 
 #include <opencog/util/mt19937ar.h>
-
 #include <opencog/util/Logger.h>
+#include <opencog/comboreduct/interpreter/eval.h>
+
+#include "../moses/moses_main.h"
+#include "../optimization/optimization.h"
+#include "../scoring/scoring.h"
+
+#include "pole_scoring.h"
+
 
 using namespace moses;
 using namespace reduct;

@@ -28,16 +28,20 @@
 #include <iostream>
 #include <string>
 #include <sstream>
+#include <unordered_set>
 #include <vector>
 
-#include <boost/unordered_set.hpp>
 
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 namespace opencog
 {
 
-// UUID == Universally Unique Identifier
+//! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
 
+//! contains an unique identificator
 class Handle
 {
 
@@ -54,9 +58,9 @@ public:
 
     static const Handle UNDEFINED;
 
-    explicit Handle(const UUID u) : uuid(u) {};
-    Handle(const Handle& h) : uuid(h.uuid) {};
-    explicit Handle() : uuid(UNDEFINED.uuid) {};
+    explicit Handle(const UUID u) : uuid(u) {}
+    Handle(const Handle& h) : uuid(h.uuid) {}
+    explicit Handle() : uuid(UNDEFINED.uuid) {}
     ~Handle() {}
 
     inline UUID value(void) const {
@@ -94,11 +98,31 @@ public:
         return 0;
     }
 };
+ 
+//! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
+//! (See very bottom of this file).
+struct handle_hash : public std::unary_function<Handle, size_t>
+{
+   size_t operator()(const Handle&h ) const
+   {
+       return static_cast<std::size_t>(h.value());
+   }
+};
+ 
+//! Boost needs this function to be called by exactly this name.
+inline std::size_t hash_value(Handle const& h)
+{
+    return static_cast<std::size_t>(h.value());
+}
 
+//! a list of handles
 typedef std::vector<Handle> HandleSeq;
+//! a list of lists of handles
 typedef std::vector<HandleSeq> HandleSeqSeq;
-typedef boost::unordered_set<Handle, boost::hash<opencog::Handle> > UnorderedHandleSet;
+//! a hash that associates the handle to its unique identificator
+typedef std::unordered_set<Handle, handle_hash> UnorderedHandleSet;
 
+//! append string representation of the Hash to the string
 static inline std::string operator+ (const char *lhs, Handle h)
 {
     std::string rhs = lhs;
@@ -107,6 +131,7 @@ static inline std::string operator+ (const char *lhs, Handle h)
     return rhs + buff;
 }
 
+//! append string representation of the Hash to the string
 static inline std::string operator+ (const std::string &lhs, Handle h)
 {
     char buff[25];
@@ -114,18 +139,27 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
     return lhs + buff;
 }
 
-inline std::size_t hash_value(Handle const& h)
-{
-    return static_cast<std::size_t>(h.value());
-}
-
 } // namespace opencog
 
 namespace std { 
-inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h) {
+inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
+{
     out << h.value();
     return out;
 }
+
+#ifdef THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+// I have no clue why gcc-4.7.2 broke this, and neither does google or
+// stackoverflow.  Use handle_hash, above, instead.
+
+template<>
+inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
+{  
+    return static_cast<std::size_t>(h.value());
+}
+#endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
+
 } //namespace std
 
+/** @}*/
 #endif // _OPENCOG_HANDLE_H

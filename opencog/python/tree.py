@@ -230,7 +230,7 @@ class DAG(Tree):
     
 def tree_from_atom(atom, dic = {}):
     if atom.is_node():
-        if atom.t in [types.VariableNode, types.FWVariableNode]:
+        if atom.t in [types.VariableNode]:
             try:
                 return dic[atom]
             except:

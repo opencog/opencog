@@ -245,7 +245,7 @@ throw (RuntimeException, InconsistenceException)
             boost::shared_ptr<Atom> currentAtom = top(ud->stack);
             if (currentAtom) {
                 logger().fine("Getting link element inside currentAtom = %p", currentAtom.get());
-                boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
+                boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
                 if (link) {
                     if (r) {
                         NMXmlParser::addOutgoingAtom(link,Handle::UNDEFINED);
@@ -295,7 +295,7 @@ throw (RuntimeException, InconsistenceException)
             logger().fine(" => h = %p", h.value());
             if (ud->atomSpace->isValidHandle(h)) {
                 logger().fine(ud->atomSpace->atomAsString(h).c_str());
-                boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
+                boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
                 if (link) {
                     logger().fine("adding atom %s to link %s", ud->atomSpace->atomAsString(h,true).c_str(), link->toShortString().c_str());
                     NMXmlParser::addOutgoingAtom(link,h);
@@ -345,7 +345,7 @@ throw (InconsistenceException)
                     if (classserver().isA(type, UNORDERED_LINK)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
-                        boost::shared_ptr<Link> link = boost::shared_dynamic_cast<Link>(currentAtom);
+                        boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
                         if (link) {
                             std::vector<Handle> outgoing = link->getOutgoingSet();
                             NMXmlParser::setOutgoingSet(link, outgoing);
@@ -383,7 +383,7 @@ throw (InconsistenceException)
                         logger().fine("(3) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
 
-                        boost::shared_ptr<Link> nextlink = boost::shared_dynamic_cast<Link>(nextUd);
+                        boost::shared_ptr<Link> nextlink = boost::dynamic_pointer_cast<Link>(nextUd);
                         if (nextlink) {
                             int arity = nextlink->getArity();
                             std::vector<Handle> outgoingSet = nextlink->getOutgoingSet();
@@ -431,7 +431,7 @@ NMXmlParser::~NMXmlParser()
 
 void NMXmlParser::setNodeName(boost::shared_ptr<Atom> node, const char* name)
 {
-    boost::shared_ptr<Node> n = boost::shared_dynamic_cast<Node>(node);
+    boost::shared_ptr<Node> n = boost::dynamic_pointer_cast<Node>(node);
     n->setName(name);
 }
 
@@ -445,7 +445,7 @@ void NMXmlParser::setOutgoingSet(boost::shared_ptr<Link> link, const std::vector
     link->setOutgoingSet(outgoing);
 }
 
-HandleEntry*
+HandleSeq
 NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
                      AtomSpace * atomSpace,
                      bool fresh,
@@ -454,7 +454,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
     logger().fine("NMXmlParser::loadXML");
     OC_ASSERT(atomSpace != NULL,
             "loadXML - atomSpace should pointer should not be NULL.");
-    HandleEntry* result = NULL;
+    HandleSeq result;
 
     if (xmlReaders.size() <= 0) return result;
 
@@ -491,7 +491,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         // logger().warn("Loading XML: %d%% done.\r", (int) (100 * ((float) (i + xmlReaders.size()) / (xmlReaders.size() * 2))));
         Handle lastInsertedLinkHandle = parser.parse(xmlReaders[i], PARSE_LINKS);
         if (lastInsertedLinkHandle != Handle::UNDEFINED) {
-            result = HandleEntry::concatenation(result, new HandleEntry(lastInsertedLinkHandle));
+            result.push_back(lastInsertedLinkHandle);
         }
     }
 

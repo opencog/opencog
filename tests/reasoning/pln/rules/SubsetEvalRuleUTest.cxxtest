@@ -25,6 +25,7 @@
 #include <opencog/reasoning/pln/rules/auxiliary/SubsetEvalRule.h>
 #include <opencog/reasoning/pln/AtomSpaceWrapper.h>
 #include <opencog/util/foreach.h>
+#include <opencog/util/numeric.h>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/assign/list_of.hpp>

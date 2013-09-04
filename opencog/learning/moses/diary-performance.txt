@@ -3879,7 +3879,7 @@ r12 -- 1m30
 
 disc_probe completely disabled:  this really makes mixedUTest
 suffer in a bad way -- I guess that proper probing really does
-matter for this case ... Hmm, this neeeds to be studeied more
+matter for this case ... Hmm, this neeeds to be studied more
 r0 - fail
 r1 - fail
 r2 - fail
@@ -3958,4 +3958,21 @@ speed up.  
  160K            -235  15048
 
 
+==================================================================
+
+August 2013
+-----------
+Take the IrisVirginica.txt data file from the wiki page... this is
+the one that attempts to separate the two hard-to-separate classifications.
+
+It should be possible to over-fit this dataset. How hard can this be?
+Appearently, its hard for moses...
+
+            -j1            
+     -m    time    score  
+    ----   ----    ----- 
+     10K     18      -4
+     40K     90      -3
+    160K    570      -3
+    640K   5682      -3
 

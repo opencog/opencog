@@ -43,6 +43,10 @@ IF (CXXTEST_FOUND)
 
  		ADD_SUBDIRECTORY (spatial)
 
+		IF (HAVE_VITERBI)
+			ADD_SUBDIRECTORY (viterbi)
+		ENDIF (HAVE_VITERBI)
+
 		# Rest interfaces assume that the cogserver is working;
 		# so run after the cogserver tests.
 		IF (HAVE_WEB)
@@ -59,16 +63,12 @@ IF (CXXTEST_FOUND)
 		ADD_SUBDIRECTORY (dynamics)
 	ENDIF (HAVE_ATTENTION)
 
-#	# currently, does not depend on atomspace...
-#	IF (HAVE_PLN)
-#		ADD_SUBDIRECTORY (reasoning)
-#	ENDIF (HAVE_PLN)
-
 	# currently, does not depend on atomspace...
 	ADD_SUBDIRECTORY (comboreduct)
 
 	# learning requires a working comboreduct.
 	ADD_SUBDIRECTORY (learning)
+	ADD_SUBDIRECTORY (reasoning)
 
 	# Embodiment requires that learning, reasoning, spatial, etc.
 	# all works fine. So run this last.

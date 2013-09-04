@@ -61,6 +61,123 @@ combo_tree str2combo_tree_label(const std::string& combo_prog_str,
     return tr;
 }
 
+vector<string> get_all_combo_tree_str(const evalTableParameters& pa)
+{
+    vector<string> res(pa.combo_programs);     // from command line
+    
+    // from files
+    for (const string& combo_programs_file : pa.combo_programs_files) {
+        ifstream in(combo_programs_file.c_str());
+        if (in) {
+            while (in.good()) {
+                string line;
+                getline(in, line);
+                if(line.empty())
+                    continue;
+                res += line;
+            }
+        } else {
+            logger().error("Error: file %s can not be found.",
+                           combo_programs_file.c_str());
+            exit(1);
+        }
+    }
+
+    return res;
+}
+
+void output_results(const evalTableParameters& pa,
+                    const Table& table, const OTable& ot_tr,
+                    const string output_file)
+{
+    if(output_file.empty())
+        output_results(cout, pa, table, ot_tr);
+    else {
+        ofstream of(output_file.c_str());
+        output_results(of, pa, table, ot_tr);
+    }
+}
+
+void eval_output_results(const evalTableParameters& pa,
+                         const Table& table, const vector<combo_tree>& trs)
+{
+    unsigned npad = ndigits(trs.size());
+    OC_ASSERT(pa.output_files.size() == trs.size() || pa.output_files.size() <= 1);
+    for (unsigned i = 0; i < trs.size(); i++) {
+        // evaluated tr over input table
+        OTable ot_tr(trs[i], table.itable);
+        if (!pa.target_feature_str.empty())
+            ot_tr.set_label(pa.target_feature_str);
+        // determine output file name
+        stringstream of_ss;
+        if (pa.output_files.size() == 1) {
+            of_ss << pa.output_files.front();
+            if (trs.size() > 1 && pa.split_output)
+                of_ss << setfill('0') << setw(npad) << i;
+        }
+        else if (pa.output_files.size() > 1)
+            of_ss << pa.output_files[i];
+        // print results
+        output_results(pa, table, ot_tr, of_ss.str());
+    }
+}
+
+void read_eval_output_results(evalTableParameters& pa)
+{
+    ostreamContainer(logger().info() << "Ignore the following features: ",
+                     pa.ignore_features_str);
+    OC_ASSERT(boost::find(pa.ignore_features_str, pa.target_feature_str)
+              == pa.ignore_features_str.end(),
+              "You cannot ignore the target feature %s",
+              pa.target_feature_str.c_str());
+
+    // get all combo tree strings (from command line and file)
+    vector<string> all_combo_tree_str = get_all_combo_tree_str(pa);
+
+    // parse all variables from all combo tree strings
+    vector<string> all_variables;
+    for (string combo_tree_str : all_combo_tree_str) {
+        vector<string> vars = parse_combo_variables(combo_tree_str);
+        all_variables.insert(all_variables.end(), vars.begin(), vars.end());
+    }
+    set<string> all_unique_variables(all_variables.begin(), all_variables.end());
+
+    /// HERE WE ARE ASSUMING THAT THE INPUT FILE HAS A HEADER!!!
+    vector<string> header = get_header(pa.input_table_file);
+
+    // get (header - all_unique_variables - target feature)
+    vector<string> ignore_variables;
+    for (string f : header)
+        if (f != pa.target_feature_str
+            && all_unique_variables.find(f) == all_unique_variables.end())
+            ignore_variables += f;
+
+    // read data ITable (using ignore_variables)
+    Table table;
+    if (pa.target_feature_str.empty())
+        table.itable = loadITable_optimized(pa.input_table_file, ignore_variables);
+    else {
+        table = loadTable(pa.input_table_file, pa.target_feature_str,
+                          ignore_variables);
+    }
+
+    ITable& it = table.itable;
+
+    // parse combo programs
+    vector<combo_tree> trs;
+    for (const string& tr_str : all_combo_tree_str) {
+        combo_tree tr = str2combo_tree_label(tr_str, pa.has_labels, it.get_labels());
+        if (logger().isFineEnabled()) {
+            logger().fine() << "Combo str: " << tr_str;
+            logger().fine() << "Parsed combo: " << tr;
+        }
+        trs += tr;
+    }
+
+    // eval and output the results
+    eval_output_results(pa, table, trs);
+}
+
 /**
  * Program to evaluate a combo program over a data set repsented as csv file.
  */
@@ -81,11 +198,13 @@ int main(int argc,char** argv) {
         
         (opt_desc_str(input_table_opt).c_str(),
          value<string>(&pa.input_table_file),
-         "Input table file in DSV format (seperators are comma, whitespace and tabulation).\n")
+         "Input table file in DSV format (seperators are comma, "
+         "whitespace and tabulation).\n")
         
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&pa.target_feature_str),
-         "Target feature name.\n")
+         "Target feature name. If empty (default) then no target feature "
+         "is considered and the table is assumed to be all input data.\n")
         
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&pa.ignore_features_str),
@@ -99,18 +218,41 @@ int main(int argc,char** argv) {
 
         (opt_desc_str(combo_str_opt).c_str(),
          value<vector<string>>(&pa.combo_programs),
-         "Combo program to evaluate against the input table. It can be used several times so that several programs are evaluated at once.\n")
+         "Combo program to evaluate against the input table. Note that in order "
+         "to have variables not being interpreted as shell variables you may "
+         "want to put the combi between single quotes. This option can be "
+         "used several times so that several programs are evaluated at once.\n")
         
         (opt_desc_str(combo_prog_file_opt).c_str(),
-         value<string>(&pa.combo_programs_file),
-         "File containing combo programs to evaluate against the input table. Each combo program in the file is seperated by a new line and each results are displaied in the same order, seperated by a new line.\n")
+         value<vector<string>>(&pa.combo_programs_files),
+         "File containing combo programs to evaluate against the input table. "
+         "Each combo program in the file is seperated by a new line and each "
+         "results are displaied in the same order, seperated by a new line.\n")
         
         (opt_desc_str(labels_opt).c_str(),
          value<bool>(&pa.has_labels)->default_value(true),
-         "If enabled then the combo program is expected to contain variables labels $labels1, etc, instead of place holders. For instance one provide the combo program 'and($large $tall)' instead of 'and($24 $124)'. In such a case it is expected that the input data file contains the labels as first row. TODO could be detected automatically.\n")
+         "If enabled then the combo program is expected to contain variables "
+         "labels $labels1, etc, instead of place holders. For instance one "
+         "provide the combo program 'and($large $tall)' instead of "
+         "'and($24 $124)'. In such a case it is expected that the input data "
+         "file contains the labels as first row. "
+         "TODO could be detected automatically.\n")
         
-        (opt_desc_str(output_file_opt).c_str(), value<string>(&pa.output_file),
-         "File where to save the results. If empty then it outputs on the stdout.\n")
+        (opt_desc_str(output_file_opt).c_str(),
+         value<vector<string>>(&pa.output_files),
+         "File where to save the results. If empty then it outputs on "
+         "the stdout. Can be used multiple times for multiple combo. "
+         "In this case it overwrites --split-output and the number of "
+         " output files must be identical to the number of combos.\n")
+
+        ("split-output", value<bool>(&pa.split_output)->default_value(true),
+         "If enabled, then if there are several combo programs the output file "
+         "is used as prefix for writing multiple output files corresponding to "
+         "each combo programs. In that case each output file name is appended "
+         "a suffix of digits representing the index of the combo program "
+         "(starting from 0). Suffixes are 0-padded to respect lexicographic "
+         "order as well. If disabled, or if no output file is provided "
+         "(stdout) all outputs are appended.\n")
                 
         (opt_desc_str(display_inputs_opt).c_str(), value<bool>(&pa.display_inputs)->default_value(false),
          "Display all inputs (as well as the output and the forced features), "

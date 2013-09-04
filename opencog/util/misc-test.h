@@ -31,6 +31,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_cogutil
+ *  @{
+ */
 
 /*
  * These functions appear to be used only by four test cases, and 
@@ -69,6 +72,7 @@ static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& t
 }
 
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MISC_TEST_H

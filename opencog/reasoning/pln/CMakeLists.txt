@@ -3,6 +3,26 @@ IF (CMAKE_COMPILER_IS_GNUCXX)
 	SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wno-deprecated -Wno-unused-variable")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
+
+OPENCOG_ADD_ATOM_TYPES(atom_types.script 
+   atom_types.h
+   atom_types.definitions
+   atom_types.inheritance
+   pln_types.scm)
+
+ADD_CUSTOM_TARGET(pln_atom_types DEPENDS atom_types.h)
+
+# The atom_types.h file is written to the build directory
+INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
+
+ADD_LIBRARY (pln-types SHARED
+   atom_types
+   PLNTypes
+)
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(pln-types pln_atom_types)
+
 ADD_LIBRARY (pln SHARED
 	PLNModule.cc
 	AtomSpaceWrapper.cc
@@ -61,6 +81,11 @@ ADD_LIBRARY (pln SHARED
 	ASSOC
 )
 
+# logic_wrapper is in the cython directory
+ADD_DEPENDENCIES(pln logic_wrapper)
+ADD_DEPENDENCIES(pln opencog_atom_types)
+ADD_DEPENDENCIES(pln pln_atom_types)
+
 INCLUDE_DIRECTORIES (
 	# For the Python PLN binding
 	${PYTHON_INCLUDE_PATH}
@@ -71,6 +96,7 @@ SET(PLN_LINK_LIBS
 	atomspace
 	server
 	cogutil
+	pln-types
 	#${Boost_SIGNALS_LIBRARY}
 )
 
@@ -180,5 +206,7 @@ INSTALL (FILES
 	iAtomSpaceWrapper.h
 	PLNEvaluator.h
 #	PLNShell.h
+	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
+
 	DESTINATION "include/${PROJECT_NAME}/reasoning/pln"
 )

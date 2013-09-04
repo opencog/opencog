@@ -110,15 +110,55 @@ static const string angular = "angular";
         
 // diversity dst2dp types
 static const string auto_str = "auto";        
-static const string inverse = "inverse";
-static const string complement = "complement";
+static const string inverse_str = "inverse";
+static const string complement_str = "complement";
+static const string power_str = "power";
+
+// focus types (which data points feature selection within moses
+// should focus on)
+static const string focus_all = "all"; // all data points are considered
+
+static const string focus_active = "active"; // only active data points are
+                                             // considered
+static const string focus_incorrect = "incorrect"; // only incorrect answers
+                                                   // are considered
+static const string focus_ai = "ai"; // only active data points that
+                                     // are incorrectly classified are considered
+
+// seed type (how to use the features of the exemplar to seed feature
+// selection)
+
+// empty initial feature set, however the features of the exemplar are
+// simply removed from the dataset before feature selection
+// occurs. This is to prevent that new selected features are ones from
+// the exemplar.
+static const string seed_none = "none";
+
+// empty initial feature set, the features of the exemplar are not
+// removed from the dataset but the number of features of the exemplar
+// is added to the number of features to select. That is (for that
+// particular expansion):
+//
+// fs-target-size += number of features in exemplar
+static const string seed_add = "add";
+
+// the features of the exemplar are used as initial guess for feature
+// selection, also the number of features to select is also added to
+// the number of features of the exemplar, as for add
+static const string seed_init = "init";
+
+// the "exemplar feature" us used as initial guess. The exemplar
+// feature is the output of the exemplar. The number of features to
+// select is incremented by 1 (to account for the exemplar
+// feature). that is the number of feature to select is fs-target-size + 1
+static const string seed_xmplr = "xmplr";
 
 void log_output_error_exit(string err_msg) {
     logger().info() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
     exit(1);    
 }
-        
+
 /**
  * Display error message about unspecified combo tree and exit
  */
@@ -212,32 +252,11 @@ void not_recognized_dst(const string& diversity_dst)
 void not_recognized_dst2dp(const string& diversity_dst2dp)
 {
     stringstream ss;
-    ss << diversity_dst2dp << " is not recognized. Valid distances to penalty are "
-       << auto_str << ", " << inverse << " and " << complement;
+    vector<string> valid_dsts = {auto_str, inverse_str, complement_str, power_str};
+    ostreamContainer(ss << diversity_dst2dp
+                     << " is not recognized. Valid distances to penalty are ",
+                     valid_dsts, ", ");
     log_output_error_exit(ss.str());
-}
-
-/**
- * determine the initial exemplar of a given type
- */
-combo_tree type_to_exemplar(type_node type)
-{
-    switch(type) {
-    case id::boolean_type: return combo_tree(id::logical_and);
-    case id::contin_type: return combo_tree(id::plus);
-    case id::enum_type: {
-        combo_tree tr(id::cond);
-        tr.append_child(tr.begin(), enum_t::get_random_enum());
-        return tr;
-    }
-    case id::ill_formed_type:
-        cerr << "Error: The data type is incorrect, perhaps it has not been"
-             << " possible to infer it from the input table." << endl;
-        exit(1);
-    default:
-        unsupported_type_exit(type);
-    }
-    return combo_tree();
 }
 
 combo_tree ann_exemplar(combo::arity_t arity)
@@ -432,6 +451,7 @@ int moses_exec(int argc, char** argv)
 
     // program options, see options_description below for their meaning
     vector<string> jobs_str;
+    unsigned min_pool;
     bool enable_mpi = false;
 
     unsigned long rand_seed;
@@ -471,12 +491,13 @@ int moses_exec(int argc, char** argv)
     // metapop_param
     int max_candidates;
     bool reduce_all;
-    bool revisit = false;
+    unsigned revisit;
     score_t complexity_temperature = 5.0f;
     score_t complexity_ratio = 3.5f;
     double cap_coef;
     unsigned cache_size;
     bool linear_regression;
+    float perm_ratio;
     
     // diversity parameters
     bool include_dominated;
@@ -504,6 +525,7 @@ int moses_exec(int argc, char** argv)
     bool hc_widen_search;
     bool hc_single_step;
     bool hc_crossover;
+    unsigned hc_crossover_pop_size;
     bool hc_allow_resize_deme;
     unsigned hc_max_nn;
     double   hc_frac_of_nn;
@@ -513,7 +535,6 @@ int moses_exec(int argc, char** argv)
 
     // pre params
     bool pre_worst_norm;
-    bool pre_subtract_neg_target;
     bool gen_best_tree;
 
     // it params
@@ -523,7 +544,10 @@ int moses_exec(int argc, char** argv)
     // feature selection happens before each representation building
     /// Enable feature selection while selecting exemplar
     bool enable_feature_selection;
-    feature_selection_parameters fs_params;
+    string fs_focus;
+    string fs_seed;
+    feature_selector_parameters festor_params;
+    feature_selection_parameters& fs_params = festor_params.fs_params;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -554,6 +578,10 @@ int moses_exec(int argc, char** argv)
                     " files are gonna be generated when using this option on"
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
+
+        ("min-pool", value<unsigned>(&min_pool)->default_value(50),
+         "Minimum number of elements to process in the pool to enable "
+         " multi-threading.\n")
 
         (opt_desc_str(exemplars_str_opt).c_str(),
          value<vector<string>>(&exemplars_str),
@@ -642,6 +670,14 @@ int moses_exec(int argc, char** argv)
                     "scoring functions, this can hurt performance.\n"
                     ) % hc).c_str())
 
+        ("hc-crossover-pop-size",
+         value<unsigned>(&hc_crossover_pop_size)->default_value(120),
+         "Number of new candidates created by crossover during each iteration "
+         "of hillclimbing. It also allows to control when crossover occurs over "
+         "exhaustive search. Specifically if the number of candidate to explore "
+         "by exhaustive search is more than 10/3 * crossover_pop_size, then "
+         "crossover kicks in.\n")
+
         ("hc-allow-resize-deme",
          value<bool>(&hc_allow_resize_deme)->default_value(true),
          str(format("Hillclimbing parameter (%s). If true then the deme "
@@ -659,11 +695,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(max_score_opt).c_str(),
          value<score_t>(&max_score)->default_value(very_best_score),
-         "The max score to reach, once reached MOSES halts. MOSES is"
-         " sometimes able to calculate the max score that can be reached"
-         " for a particular problem, in such case the max_score is"
-         " automatically reset of the minimum between MOSES's calculation"
-         " and the user's option.\n")
+         "The max score to reach, once reached MOSES halts. If the largest "
+         "floating point number is used and MOSES is able to calculate the "
+         "max score that can be reached for that particular problem, "
+         "it will overwrite it. "
+         "Otherwise, for any other value, the user's defined max-score will "
+         "be used.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
@@ -698,6 +735,19 @@ int moses_exec(int argc, char** argv)
          "searches to linear expressions only; that is, do not use "
          "polynomials in the fit.  Specifying this option also "
          "automatically disables the use of div, sin, exp and log.\n")
+
+        ("logical-perm-ratio",
+         value<float>(&perm_ratio)->default_value(0.0),
+         "When decorating boolean exemplars with knobs, this option "
+         "controls how many pairs of literals of the form op(L1 L2) are "
+         "created.  That is, such pairs are used to decorate the exemplar "
+         "tree. By default, N such pairs are created, where N is the "
+         "arity of the problem. Valid values for this option are in the "
+         "range of -1.0 to +1.0.  For negative values, the number of pairs "
+         "created are (1.0+r)*N where r is the value given in this option.  "
+         "For positive values, the number of pairs created is "
+         "(N + r*N*(N-2)). A larger number of pairs can lead to faster "
+         "solutions but can also result in over-training.\n")
 
         (opt_desc_str(rand_seed_opt).c_str(),
          value<unsigned long>(&rand_seed)->default_value(1),
@@ -855,6 +905,13 @@ int moses_exec(int argc, char** argv)
          "clause any further. In principle, this should speed "
          "convergence.  In practice, not so much; it can hurt "
          "performance.\n")
+
+        ("revisit", value<unsigned>(&revisit)->default_value(0),
+         "Number of times the same exemplar can be revisited. "
+         "This option is only worthwhile when there "
+         "is a great deal of stochasticity in the search so that exploring "
+         "a deme multiple times will yield substantially different results. "
+         "This might be the case is feature selection is used for instance.\n")
 
         // Output control options
         
@@ -1018,11 +1075,12 @@ int moses_exec(int argc, char** argv)
         ("diversity-dst2dp",
          value<string>(&diversity_dst2dp)->default_value(auto_str),
          str(format("Set the type of function to convert distance into penalty. "
-                    "3 options are available: %1%, %2% and %3%. "
+                    "4 options are available: %1%, %2%, %3% and %4%. "
                     "When %1% is selected the function is selected depending "
-                    "on the distance, if the distance is %4%, "
+                    "on the distance, if the distance is %5%, "
                     "then %2% is selected, otherwise %3% is selected.\n")
-             % auto_str % inverse % complement % p_norm).c_str())
+             % auto_str % inverse_str % complement_str
+             % power_str % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
          value<vector<contin_t>>(&discretize_thresholds),
@@ -1062,11 +1120,6 @@ int moses_exec(int argc, char** argv)
          value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
-        ("pre-subtract-neg-target",
-         value<bool>(&pre_subtract_neg_target)->default_value(false),
-         "If set to 1 then the negation of the target counts for -1 instead of 0. "
-         "[EXPERIMENTAL].\n")
-
         ("it-abs-err",
          value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
@@ -1086,9 +1139,87 @@ int moses_exec(int argc, char** argv)
 
         ("fs-target-size",
          value<unsigned>(&fs_params.target_size)->default_value(20),
-            "Feature count.  This option "
-            "specifies the number of features to be selected out of "
-            "the dataset.  A value of 0 disables feature selection. \n")
+         "Feature count.  This option "
+         "specifies the number of features to be selected out of "
+         "the dataset.  A value of 0 disables feature selection.\n")
+
+        ("fs-exp-distrib",
+         value<bool>(&fs_params.exp_distrib)->default_value(false),
+         "Use a smoth exponential distribution, instead of hard "
+         "cuttoff, when selecting the highest-scoring features.  "
+         "Without this option, the highest-scoring count=N features "
+         "will be selected. That is, the distribution will be a hard "
+         "cutoff or cliff: after ranking all features by score, the "
+         "k'th highest-ranked feature will be selected with probability "
+         "1.0 if k<N  and with probability 0.0 if k>N.  With this option "
+         "enabled, a total of count=N features will still be selected, "
+         "and most of these will be the highest scoring ones, but a few "
+         "lower-ranked features will also be included.  Specifically, "
+         "the probability of choosing the k'th ranked feature will be "
+         "exp(-tk) with t choosen so that, on average, N features are "
+         "selected.  The initial random seed affects the generated list. "
+         "Currently, this option only applies to the -asimple algo, and "
+         "is ignored by the others (this needs to be fixed.)\n")
+
+
+        ("fs-focus",
+         value<string>(&fs_focus)->default_value(focus_incorrect),
+         str(boost::format("Focus of feature selection (which data points "
+                           "feature will focus on):\n\n"
+                           "%s, all data points are considered\n\n"
+                           "%s, only active data points are considered\n\n"
+                           "%s, only incorrect answers are considered\n\n"
+                           "%s, only active data points that are incorrectly "
+                           "answered are considered.\n")
+             % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
+
+        ("fs-seed",
+         value<string>(&fs_seed)->default_value(seed_add),
+         str(boost::format("Seed type (how to use the features of the "
+                           "exemplar to seed feature selection):\n\n"
+
+                           "%s, empty initial feature set.  The "
+                           "features used in the exemplar are removed "
+                           "from the dataset before feature selection occurs. "
+                           "This prevents newly selected features from "
+                           "being those already in the exemplar.\n\n"
+
+                           "%s, empty initial feature set. The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected. "
+                           "This guarentees that at least fs_target_size "
+                           "features are not from the exemplar itself.\n\n"
+
+                           "%s, the features of the exemplar are used as "
+                           "an initial guess for feature selection. "
+                           "The number of "
+                           "features currently in the exemplar are added"
+                           "to the number of features to be selected.\n\n"
+
+                           "%s, the \"exemplar feature\" is used as initial "
+                           "guess. The exemplar feature is the output of the "
+                           "exemplar. The number of features to select is "
+                           "incremented by 1 (to account for the exemplar "
+                           "feature). That is, the number of feature to select "
+                           "is fs_target_size + 1\n")
+             % seed_none % seed_add % seed_init % seed_xmplr).c_str())
+
+        ("fs-prune-exemplar",
+         value<bool>(&festor_params.prune_xmplr)->default_value(0),
+         "Remove from the exemplar the literals of non-selected features.\n")
+
+        ("fs-subsampling-pbty",
+         value<float>(&festor_params.subsampling_pbty)->default_value(0),
+         "Probability of discarding an observation before carrying feature "
+         "selection. 0 means no observation is discard, 1 means all are discard. "
+         "This is to force to introduce some randomness in "
+         "feature selection, as not all feature selection algorithms "
+         "have some.\n")
+
+        ("fs-demes",
+         value<unsigned>(&festor_params.n_demes)->default_value(1),
+         "Number of feature sets to select out of feature selection and the "
+         "number of demes to accordingly spawn.\n")
 
         ("fs-algo",
          value<string>(&fs_params.algorithm)->default_value(simple),
@@ -1096,16 +1227,44 @@ int moses_exec(int argc, char** argv)
          .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
          .append(smd).append(" for stochastic maximal dependency,\n")
-         .append(moses::hc).append(" for moses-hillclimbing,\n").c_str())
+         .append(moses::hc).append(" for moses-hillclimbing.\n").c_str())
+
+        ("fs-scorer",
+         value<string>(&fs_params.scorer)->default_value(mi),
+         str(boost::format("Feature selection fitness function (scorer).\n"
+                           " Supported scorers are:\n"
+                           "%s, for mutual information\n"
+                           "%s, for precision (see moses -h for more info)\n")
+             % mi % pre).c_str())
 
         ("fs-threshold",
          value<double>(&fs_params.threshold)->default_value(0),
-            "Improvment threshold. Floating point number. "
-            "Specifies the threshold above which the mutual information "
-            "of a feature is considered to be significantly correlated "
+         "Improvement threshold. Floating point number. "
+         "Specifies the threshold above which the mutual information "
+         "of a feature is considered to be significantly correlated "
             "to the target.  A value of zero means that all features "
-            "will be selected. \n"
-            "For the -ainc algo only, the -C flag over-rides this setting.\n")
+         "will be selected. \n"
+         "For the -ainc algo only, the -C flag over-rides this setting.\n")
+
+        // ======= Feature-selection diveristy pressure =======
+        ("fs-diversity-pressure",
+         value<float>(&festor_params.diversity_pressure)->default_value(0),
+         "Multiplicative coefficient of the diversity penalty "
+         "(itself being in [0,1]).\n")
+
+        ("fs-diversity-cap",
+         value<size_t>(&festor_params.diversity_cap)->default_value(100),
+         "Place a cap on the maximum number of feature set to consider. "
+         "If zero, no cap is used (Warning: could be very slow). "
+         "Use this to speed up diversity computation on feature sets.\n")
+
+        ("fs-diversity-interaction",
+         value<int>(&festor_params.diversity_interaction)->default_value(-1),
+         "Maximum number of interactions to be considered when computing "
+         "the mutual information between feature sets. "
+         "This is used in case the number of selected features tends to "
+         "be high compared to the number of datapoints to decrease inacuracy "
+         "of the mutual information.\n")
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
@@ -1126,6 +1285,24 @@ int moses_exec(int argc, char** argv)
          "interaction terms considered during incremental feature "
          "selection. Higher values make the feature selection more "
          "accurate but is combinatorially more computationally expensive.\n")
+
+        // ======= Feature-selection pre scorer only params =======
+        ("fs-pre-penalty",
+         value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         "Activation penalty (see moses --help or man moses for more info).\n")
+
+        ("fs-pre-min-activation",
+         value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         "Minimum activation (see moses --help or man moses for more info).\n")
+
+        ("fs-pre-max-activation",
+         value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         "Maximum activation (see moses --help or man moses for more info).\n")
+
+        ("fs-pre-positive",
+         value<bool>(&fs_params.pre_positive)->default_value(true),
+         "If 1, then precision, otherwise negative predictive value "
+         "(see moses --help or man moses for more info).\n")
 
         // ======= Feature-selection hill-climbing only params =======
         ("fs-hc-max-score",
@@ -1152,15 +1329,33 @@ int moses_exec(int argc, char** argv)
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
 
+        ("fs-hc-crossover",
+         value<bool>(&fs_params.hc_crossover)->default_value(false),
+         "Hillclimber crossover (see --hc-crossover option)\n")
+
+        ("fs-hc-crossover-pop-size",
+         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(false),
+         "Hillclimber crossover pop size (see --hc-crossover option)\n")
+
+        ("fs-hc-widen-search",
+         value<bool>(&fs_params.hc_widen_search)->default_value(true),
+         "Hillclimber widen_search (see --widen-search)\n")
+
         // ======= Feature-selection MI scorer params =======
         ("fs-mi-penalty",
          value<double>(&fs_params.mi_confi)->default_value(100.0),
-         "Mutal-information scorer parameter.  Intensity of the confidence "
+         "Mutual-information scorer parameter.  Intensity of the confidence "
          "penalty, in the range (-Inf, +Inf).  100 means no confidence "
          "penalty. This parameter influences how much importance is "
          "attributed to the confidence of the quality measure. The "
          "fewer samples in the data set, the more features the "
          "less confidence in the feature set quality measure.\n")
+
+        // ======= Feature-selection SMD params =======
+        ("fs-smd-top-size",
+         value<unsigned>(&fs_params.smd_top_size)->default_value(10),
+         "Stochastic max dependency parameter. Number of feature subset "
+         "candidates to consider building the next superset.\n")
 
         // ========== THE END of the options; note semicolon ===========
         ;
@@ -1281,7 +1476,8 @@ int moses_exec(int argc, char** argv)
 
     // Set the initial exemplars.
     vector<combo_tree> exemplars;
-    boost::transform(exemplars_str, std::back_inserter(exemplars), str_to_combo_tree);
+    boost::transform(exemplars_str, std::back_inserter(exemplars),
+                     str_to_combo_tree);
 
     // Fill jobs
     jobs_t jobs{{localhost, 1}}; // by default the localhost has 1 job
@@ -1298,7 +1494,7 @@ int moses_exec(int argc, char** argv)
         }
     }
 
-    setting_omp(jobs[localhost]);
+    setting_omp(jobs[localhost], min_pool);
 
 #ifdef HAVE_MPI
     if (enable_mpi) {
@@ -1320,7 +1516,44 @@ int moses_exec(int argc, char** argv)
     // constructors (if you can avoid it), as it is prone to error,
     // whenever the constructor changes it may silently set the wrong
     // things (as long as they have the same types).
-    
+
+    // set feature selection parameters
+    if (fs_focus == focus_all) {
+        festor_params.restrict_incorrect = false;
+        festor_params.restrict_true = false;
+    } else if (fs_focus == focus_active) {
+        festor_params.restrict_incorrect = false;
+        festor_params.restrict_true = true;
+    } else if (fs_focus == focus_incorrect) {
+        festor_params.restrict_incorrect = true;
+        festor_params.restrict_true = false;
+    } else if (fs_focus == focus_ai) {
+        festor_params.restrict_incorrect = true;
+        festor_params.restrict_true = true;
+    }
+
+    if (fs_seed == seed_none) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = true;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_add) {
+        festor_params.increase_target_size = true;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_init) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = true;
+        festor_params.xmplr_as_feature = false;
+    } else if (fs_seed == seed_xmplr) {
+        festor_params.increase_target_size = false;
+        festor_params.ignore_xmplr_features = false;
+        festor_params.init_xmplr_features = false;
+        festor_params.xmplr_as_feature = true;
+    }
+
     // Set metapopulation parameters
     metapop_parameters meta_params;
     meta_params.max_candidates = max_candidates;
@@ -1334,6 +1567,7 @@ int moses_exec(int argc, char** argv)
     meta_params.cache_size = cache_size;          // is disabled
     meta_params.jobs = jobs[localhost];
     meta_params.linear_contin = linear_regression;
+    meta_params.perm_ratio = perm_ratio;
 
     // diversity parameters
     meta_params.diversity.include_dominated = include_dominated;
@@ -1358,10 +1592,12 @@ int moses_exec(int argc, char** argv)
     if (diversity_dst2dp == auto_str)
         d2de = diversity_dst == p_norm ?
             diversity_parameters::inverse : diversity_parameters::complement;
-    else if (diversity_dst2dp == inverse)
+    else if (diversity_dst2dp == inverse_str)
         d2de = diversity_parameters::inverse;
-    else if (diversity_dst2dp == complement)
+    else if (diversity_dst2dp == complement_str)
         d2de = diversity_parameters::complement;
+    else if (diversity_dst2dp == power_str)
+        d2de = diversity_parameters::pthpower;
     else {
         not_recognized_dst2dp(diversity_dst2dp);
         d2de = diversity_parameters::inverse; // silent compiler warning
@@ -1374,9 +1610,11 @@ int moses_exec(int argc, char** argv)
     hc_params.widen_search = hc_widen_search;
     hc_params.single_step = hc_single_step;
     hc_params.crossover = hc_crossover;
+    hc_params.crossover_pop_size = hc_crossover_pop_size;
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
     hc_params.allow_resize_deme = hc_allow_resize_deme;
+    hc_params.prefix_stat_deme = "Demes";
 
     // Set moses_parameters.
     moses_parameters moses_params(vm, jobs);
@@ -1511,10 +1749,10 @@ int moses_exec(int argc, char** argv)
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                \
     /* Enable feature selection while selecting exemplar */      \
-    if (enable_feature_selection) {                              \
+    if (enable_feature_selection && fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */     \
         /* tables, and not just the first. */                    \
-        meta_params.fstor = new feature_selector(TABLES.front(), fs_params); \
+        meta_params.fstor = new feature_selector(TABLES.front(), festor_params); \
     }                                                            \
     /* Keep the table input signature, just make sure */         \
     /* the output is the desired type. */                        \
@@ -1556,8 +1794,7 @@ int moses_exec(int argc, char** argv)
                                            min_rand_input,
                                            max_rand_input,
                                            hardness >= 0,
-                                           pre_worst_norm,
-                                           pre_subtract_neg_target);
+                                           pre_worst_norm);
                     set_noise_or_ratio(*r, as, noise, complexity_ratio);
                     bscores.push_back(r);
                     if (gen_best_tree) {
@@ -1570,10 +1807,10 @@ int moses_exec(int argc, char** argv)
                 }
 
                 // Enable feature selection while selecting exemplar
-                if (enable_feature_selection) {
+                if (enable_feature_selection && fs_params.target_size > 0) {
                     // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
-                                                             fs_params);
+                                                             festor_params);
                 }
 
                 multibscore_based_bscore bscore(bscores);
@@ -1606,10 +1843,10 @@ int moses_exec(int argc, char** argv)
                 }
 
                 // Enable feature selection while selecting exemplar
-                if (enable_feature_selection) {
+                if (enable_feature_selection && fs_params.target_size > 0) {
                     // XXX FIXME should use the concatenation of all ctables, not just first
                     meta_params.fstor = new feature_selector(ctables.front(),
-                                                             fs_params);
+                                                             festor_params);
                 }
 
                 multibscore_based_bscore bscore(bscores);
@@ -1796,6 +2033,9 @@ int moses_exec(int argc, char** argv)
     // program.
     else if (combo_based_problem(problem))
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         combo_tree tr = str_to_combo_tree(combo_str);
 
         // If the user specifies the combo program from bash or similar
@@ -1907,6 +2147,9 @@ int moses_exec(int argc, char** argv)
     // program will be a boolean circuit that computes parity.
     else if (problem == pa)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         even_parity func;
 
         // If no exemplar has been provided in the options, use the
@@ -1930,6 +2173,9 @@ int moses_exec(int argc, char** argv)
     // k is the number of inputs specified by the -k option.
     else if (problem == dj)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
 
@@ -1952,6 +2198,9 @@ int moses_exec(int argc, char** argv)
     // one and exactly one wire out of 2^k wires.  Here, k==problem_size.
     else if (problem == mux)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         multiplex func(problem_size);
 
@@ -1969,10 +2218,13 @@ int moses_exec(int argc, char** argv)
     }
 
     // Demo/example problem: majority. Learn the combo program that
-    // return true iff the number of true arguments is scriptly
+    // return true iff the number of true arguments is strictly
     // greater than half of the arity
     else if (problem == maj)
     {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
+
         // @todo: for the moment occam's razor and partial truth table are ignored
         majority func(problem_size);
 
@@ -1997,7 +2249,9 @@ int moses_exec(int argc, char** argv)
     // *(+(1 $1) $1) (that is, the  solution is p(x)=x(x+1) in the usual
     // arithmetical notation).
     else if (problem == sr)
-    { // simple regression of f(x)_o = sum_{i={1,o}} x^i
+    {
+        if (enable_feature_selection)
+            logger().warn("Feature selection is not supported for that problem");
 
         // If no exemplar has been provided in the options, use the
         // default contin_type exemplar (+)

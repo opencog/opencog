@@ -26,6 +26,7 @@
 #include <opencog/util/platform.h>
 
 #include "CompositeTruthValue.h"
+#include "AtomSpace.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -426,7 +427,7 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
 /**
  * Nearly identical to above, except tht all invalid handles are removed 
  */
-void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
+void CompositeTruthValue::removeInvalidTVs(AtomSpace* atomspace)
 {
     VersionedTruthValueMap toBeRemovedEntries;
 
@@ -435,7 +436,7 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace& atomspace)
          itr != versionedTVs.end(); ++itr)
     {
         VersionHandle key = itr->first;
-        if (!atomspace.isValidHandle(key.substantive))
+        if (!atomspace->isValidHandle(key.substantive))
         {
             toBeRemovedEntries[key] = NULL;
             // Free TruthValue object at once

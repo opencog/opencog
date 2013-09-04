@@ -38,7 +38,7 @@
 (SimilarityLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
-	(LatestLink (stv 1.0 1.0)
+	(AtTimeLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")
@@ -53,7 +53,7 @@
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(NumberNode "0.24")
 	(SetLink (stv 1.0 1.0)
-		(CWColorNode "Big Red Button")
+		(PrepositionalRelationshipNode "Big Red Button")
 		(ListLink
 			(LemmaNode "thing1")
 			(LemmaNode "thing2")
@@ -65,7 +65,7 @@
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
-	(PetNode "here kitty kitty")
+	(FeatureNode "here kitty kitty")
 	(CountLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
@@ -151,7 +151,7 @@
 
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
-	(HumanoidNode "ActivationModulatorUpdater")
+	(SemeNode "ActivationModulatorUpdater")
 	(ConceptNode "big idea")
 	(SetLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
@@ -265,7 +265,7 @@
 
 ;; this should not match.
 (SimilarityLink (stv 1.0 1.0)
-	(CWColorNode "Big Red Button")
+	(PrepositionalRelationshipNode "Big Red Button")
 	(NumberNode "0.24")
 	(SetLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")

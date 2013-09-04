@@ -32,15 +32,11 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/StatisticsMonitor.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/persist/xml/NMXmlExporter.h>
-#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
 
@@ -57,11 +53,8 @@ using namespace opencog;
 
 // ====================================================================
 
-AtomSpaceImpl::AtomSpaceImpl(void) : 
-    type_itr(0,false)
+AtomSpaceImpl::AtomSpaceImpl(void)
 {
-    _handle_iterator = NULL;
-    emptyName = "";
     backing_store = NULL;
 
     // connect signals
@@ -77,12 +70,6 @@ AtomSpaceImpl::~AtomSpaceImpl()
     // disconnect signals
     addedAtomConnection.disconnect();
     removedAtomConnection.disconnect();
-
-    // Check if has already been deleted. See in code where it can be delete.
-    if (_handle_iterator) {
-        delete _handle_iterator;
-         _handle_iterator = NULL;
-    }
 }
 
 // ====================================================================
@@ -140,23 +127,9 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
 
 // ====================================================================
 
-const AtomTable& AtomSpaceImpl::getAtomTable() const
-{
-    DPRINTF("AtomSpaceImpl::getAtomTable this(%p), atomTable address = %p\n", this, &atomTable);
-    return atomTable;
-}
-
 void AtomSpaceImpl::print(std::ostream& output, Type type, bool subclass) const
 {
     atomTable.print(output, type, subclass);
-}
-
-Handle AtomSpaceImpl::getHandle(Type t, const std::string& str) const {
-    return atomTable.getHandle(str.c_str(), t);
-}
-
-Handle AtomSpaceImpl::getHandle(Type t, const HandleSeq& outgoing) const {
-    return atomTable.getHandle(t, outgoing);
 }
 
 AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
@@ -165,81 +138,31 @@ AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other):
-    type_itr(0,false)
+AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 {
     throw opencog::RuntimeException(TRACE_INFO, 
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
-Type AtomSpaceImpl::getType(Handle h) const
-{
-    DPRINTF("AtomSpaceImpl::getType Atom space address: %p\n", this);
-    Atom* a = atomTable.getAtom(h);
-    if (a) return a->getType();
-    else return NOTYPE;
-}
-
-bool AtomSpaceImpl::isNode(const Handle& h) const
-{
-    DPRINTF("AtomSpaceImpl::isNode Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, NODE);
-}
-
-bool AtomSpaceImpl::isLink(const Handle& h) const
-{
-    DPRINTF("AtomSpaceImpl::isLink Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, LINK);
-}
-
-bool AtomSpaceImpl::containsVersionedTV(Handle h, VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::containsVersionedTV Atom space address: %p\n", this);
-
-    bool result = isNullVersionHandle(vh);
-    if (!result) {
-        const TruthValue& tv = this->getTV(h);
-        result = !tv.isNullTv() && tv.getType() == COMPOSITE_TRUTH_VALUE &&
-                 !(((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv());
-    }
-    return result;
-}
-
-AttentionBank& AtomSpaceImpl::getAttentionBank() { return bank; }
-
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
-    HandleEntry* extractedHandles = atomTable.extract(h, recursive);
-    if (extractedHandles) {
-        HandleEntry* currentEntry = extractedHandles;
-        while (currentEntry) {
-            Handle h = currentEntry->handle;
+    UnorderedHandleSet extractedHandles = atomTable.extract(h, recursive);
+    if (extractedHandles.size() == 0) return false;
 
-            // Also refund sti/lti to AtomSpace funds pool
-            bank.updateSTIFunds(getSTI(h));
-            bank.updateLTIFunds(getLTI(h));
+    UnorderedHandleSet::const_iterator it;
+    for (it = extractedHandles.begin(); it != extractedHandles.end(); it++) {
+        Handle h = *it;
 
-            // emit remove atom signal
-            _removeAtomSignal(this,h);
+        // Also refund sti/lti to AtomSpace funds pool
+        bank.updateSTIFunds(getSTI(h));
+        bank.updateLTIFunds(getLTI(h));
 
-            currentEntry = currentEntry->next;
-        }
-        atomTable.removeExtractedHandles(extractedHandles);
-        
-        delete extractedHandles;
-        return true;
+        // emit remove atom signal
+        _removeAtomSignal(this, h);
     }
-    return false;
-}
-
-const HandleSeq& AtomSpaceImpl::getOutgoing(Handle h) const
-{
-    static HandleSeq hs;
-    Link *link = atomTable.getLink(h);
-    if (!link) return hs;
-    return link->getOutgoingSet();
+    atomTable.removeExtractedHandles(extractedHandles);
+        
+    return true;
 }
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
@@ -396,16 +319,8 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
         delete mergedTV;
     }
 
+    // XXX Should also merge Attention values and trails, right?
     return result;
-}
-
-const string& AtomSpaceImpl::getName(Handle h) const
-{
-    Node * nnn = atomTable.getNode(h);
-    if (nnn)
-        return nnn->getName();
-    else
-        return emptyName;
 }
 
 boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle& h) const
@@ -438,7 +353,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
     return std::string("ERROR: Bad handle");
 }
 
-HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
+HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         bool fanout, Type desiredLinkType, bool subClasses) const 
 {
     Atom* a = atomTable.getAtom(h);
@@ -448,8 +363,11 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
     }
     HandleSeq answer;
 
-    for (HandleEntry *he = a->getIncomingSet(); he != NULL; he = he ->next) {
-        Link *link = atomTable.getLink(he->handle);
+    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
+    for (UnorderedHandleSet::const_iterator it = iset.begin();
+         it != iset.end(); it++)
+    {
+        Link *link = atomTable.getLink(*it);
         Type linkType = link->getType();
         DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
@@ -466,59 +384,22 @@ HandleSeq AtomSpaceImpl::getNeighbors(const Handle& h, bool fanin,
     return answer;
 }
 
-bool AtomSpaceImpl::isSource(Handle source, Handle link) const
-{
-    const Link *l = atomTable.getLink(link);
-    if (l != NULL) {
-        return l->isSource(source);
-    }
-    return false;
-}
-
-size_t AtomSpaceImpl::getAtomHash(const Handle& h) const 
-{
-    return atomTable.getAtom(h)->hashCode();
-}
-
-bool AtomSpaceImpl::isValidHandle(const Handle& h) const 
-{
-    return atomTable.holds(h);
-}
-
 bool AtomSpaceImpl::commitAtom(const Atom& a)
 {
     // TODO: Check for differences and abort if timestamp is out of date
 
-    // Get the version in the atomTable
-    Atom* original = atomTable.getAtom(a.getHandle());
+    Handle h = atomTable.getHandle(&a);
+    Atom* original = atomTable.getAtom(h);
     if (original == NULL)
         // TODO: allow committing a new atom?
         return false;
     // The only mutable properties of atoms are the TV and AttentionValue
     // TODO: this isn't correct, trails, flags and other things might change
-    // too...
+    // too... XXX the AtomTable already has a merge function; shouldn't we
+    // be using that?
     original->setTruthValue(a.getTruthValue());
     original->setAttentionValue(a.getAttentionValue());
     return true;
-}
-
-Handle AtomSpaceImpl::getOutgoing(Handle h, int idx) const
-{
-    Link * l = atomTable.getLink(h);
-    if (NULL == l)
-        throw new IndexErrorException(TRACE_INFO,
-            "Asked for outgoing set on atom that is not a link!\n");
-    if (idx >= l->getArity())
-        throw new IndexErrorException(TRACE_INFO, "Invalid outgoing set index: %d (atom: %s)\n",
-                                      idx, l->toString().c_str());
-    return l->getOutgoingSet()[idx];
-}
-
-int AtomSpaceImpl::getArity(Handle h) const
-{
-    Link * l = atomTable.getLink(h);
-    if (NULL == l) return 0;
-    return l->getArity();
 }
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)
@@ -534,11 +415,10 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // TODO: solution where user can specify whether to poll storage/repository
 
-    Atom *a = atomTable.getAtom(h);
-    HandleEntry* he = NULL;
-    if (a) he = a->getIncomingSet();
-    if (he) return he->toHandleVector();
-    else return HandleSeq();
+    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
+    HandleSeq hs;
+    std::copy(iset.begin(), iset.end(), back_inserter(hs));
+    return hs;
 }
 
 bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
@@ -657,130 +537,54 @@ float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool a
     }
 }
 
-int AtomSpaceImpl::Nodes(VersionHandle vh) const
+size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Nodes Atom space address: %p\n", this);
 
-    /* This is too expensive and depending on an Agent that may be disabled.
-     * Besides it does not have statistics by VersionHandles
-     DynamicsStatisticsAgent *agent=DynamicsStatisticsAgent::getInstance();
-     agent->reevaluateAllStatistics();
-     return agent->getNodeCount();
-     */
     // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(NODE, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
+    // It would be cheaper if instead we just used foreachHandleByTypeVH
+    // and just had a function that simply counts!!
+    HandleSeq hs;
+    atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+    return hs.size();
 }
 
 void AtomSpaceImpl::decayShortTermImportance()
 {
     DPRINTF("AtomSpaceImpl::decayShortTermImportance Atom space address: %p\n", this);
-    HandleEntry* oldAtoms = atomTable.decayShortTermImportance();
-    if (oldAtoms) {
-        // Remove from indexes
-        atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
-        // Send signals
-        HandleEntry* current;
-        for (current = oldAtoms; current != NULL; current = current->next) {
-            // emit remove atom signal
-            _removeAtomSignal(this,current->handle);
-        }
-        // actually remove atoms from AtomTable
-        atomTable.removeExtractedHandles(oldAtoms);
-        delete oldAtoms;
-    }
+    UnorderedHandleSet oldAtoms = atomTable.decayShortTermImportance();
+
+    // Remove from indexes
+    atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
+
+    // Send signals  -- emit remove atom signal
+    UnorderedHandleSet::const_iterator it;
+    for (it = oldAtoms.begin(); it != oldAtoms.end(); it++)
+        _removeAtomSignal(this, *it);
+
+    // actually remove atoms from AtomTable
+    atomTable.removeExtractedHandles(oldAtoms);
 }
 
-int AtomSpaceImpl::Links(VersionHandle vh) const
+size_t AtomSpaceImpl::Links(VersionHandle vh) const
 {
     DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
 
     // The following implementation is still expensive, but already deals with VersionHandles:
-    HandleEntry* he = atomTable.getHandleSet(LINK, true, vh);
-    int result = he->getSize();
-    delete he;
-    return result;
+    // It would be cheaper if instead we just used foreachHandleByTypeVH
+    // and just had a function that simply counts!!
+    HandleSeq hs;
+    atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+    return hs.size();
 }
 
-void AtomSpaceImpl::_getNextAtomPrepare()
-{
-    _handle_iterator = atomTable.getHandleIterator(ATOM, true);
-}
-
-Handle AtomSpaceImpl::_getNextAtom()
-{
-    if (_handle_iterator->hasNext())
-        return _handle_iterator->next();
-    else {
-        delete _handle_iterator;
-        _handle_iterator = NULL;
-        return Handle::UNDEFINED;
-    }
-}
-
-void AtomSpaceImpl::_getNextAtomPrepare_type(Type type)
-{
-    type_itr = atomTable.typeIndex.begin(type, true);
-}
-
-Handle AtomSpaceImpl::_getNextAtom_type(Type type)
-{
-    Handle h = *type_itr;
-    type_itr++;
-    return h;
-}
-
-bool AtomSpaceImpl::saveToXML(const std::string& filename) const {
-    // Saving to XML is messed up so it always fails for now
-    return false;
-#if 0
-    // This should possible be moved out of the AtomSpace and made into
-    // generalised saving interface. This code was moved from
-    // SaveRequest because it uses the AtomTable and it'd be (even more)
-    // inefficient to make a HandleEntry *and* HandleSeq of all atom handles.
-
-    // This blocks the (planned) atomspace event loop until
-    // save is completed.
-    pthread_mutex_lock(&atomSpaceLock);
-
-    // XXX/FIXME This is an insanely inefficient way to export the 
-    // atomspace! For anything containing a million or more handles,
-    // this is just mind-bogglingly bad, as it will results in a vast
-    // amount of mallocs & frees, and blow out RAM usage.  Strongly
-    // suggest redesign using appropriate iterators.  Anyway, should
-    // probably be exporting to scheme, not XML, anyway ... since XML
-    // is slow in general.
-    HandleEntry *handles = getAtomTable().getHandleSet(ATOM, true);
-    NMXmlExporter exporter(this);
-    std::fstream file(filename.c_str(), std::fstream::out);
-    bool rc = true;
-    try {
-        file << exporter.toXML(handles);
-        rc = true;
-    } catch (StandardException &e) {
-        logger().error("AtomSpace::saveToXML exception (%s)", e.getMessage());
-        rc = false;
-    }
-    pthread_mutex_unlock(&atomSpaceLock);
-    file.flush();
-    file.close();
-    delete handles;
-    return rc;
-#endif
-}
 
 void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
-    std::vector<Handle>::iterator i;
-    std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
-    bool result;
 
-    getHandleSet(outputI, ATOM, true);
+    getHandleSet(back_inserter(allAtoms), ATOM, true);
 
-    int j = 0;
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
     DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
@@ -788,8 +592,10 @@ void AtomSpaceImpl::clear()
     Logger::Level save = logger().getLevel();
     logger().setLevel(Logger::DEBUG);
 
+    size_t j = 0;
+    std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        result = removeAtom(*i,true);
+        bool result = removeAtom(*i, true);
         if (result) {
             DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
                 j,i->value(),Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
@@ -798,8 +604,7 @@ void AtomSpaceImpl::clear()
     }
 
     allAtoms.clear();
-    std::back_insert_iterator< std::vector<Handle> > output2(allAtoms);
-    getHandleSet(output2, ATOM, true);
+    getHandleSet(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);

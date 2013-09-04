@@ -73,7 +73,7 @@ public:
         return _ci;
     }
 
-    HCTestAgent();
+    HCTestAgent(CogServer&);
 
     /**
      * @param lt1 Time (in second) to wait for the first learning iteration
@@ -84,9 +84,9 @@ public:
               std::string b, std::string a, AtomSpace* as, MessageSender* s,
               unsigned int lt1 = 10, unsigned int lt2 = 100,
               unsigned long mc = 10000);
-    ~HCTestAgent();
+    virtual ~HCTestAgent();
 
-    void run(opencog::CogServer* ne);
+    virtual void run();
 
     void setWait2() {
         mode = HCT_WAIT2;

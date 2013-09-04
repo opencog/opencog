@@ -57,7 +57,7 @@ class CrispLogicPMCB :
  		 */
 		virtual bool clause_match(Handle pattrn, Handle grnd)
 		{
-            AtomSpace *as = pme->get_atomspace();
+			AtomSpace *as = pme->get_atomspace();
 			TruthValuePtr tv(as->getTV(grnd));
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
 			if (tv->getMean() < 0.5) return true;
@@ -78,7 +78,7 @@ class CrispLogicPMCB :
  		 */
 		virtual bool optional_clause_match(Handle pattrn, Handle grnd)
 		{
-            AtomSpace *as = pme->get_atomspace();
+			AtomSpace *as = pme->get_atomspace();
 			// printf (">>>>>>>>>> hello optional term!! %p\n", grnd);
 			if (!as->isValidHandle(grnd)) return false;
 			TruthValuePtr tv = as->getTV(grnd);

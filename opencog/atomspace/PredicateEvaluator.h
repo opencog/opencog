@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class PredicateEvaluator
 {
@@ -38,6 +41,7 @@ public:
     virtual bool evaluate(Handle h) = 0;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_PREDICATEEVALUATOR_H

@@ -49,7 +49,7 @@ private:
        "Close the SQL database", 
        "Usage: sql-close\n\n"
        "Close the currently open SQL database", 
-       false)
+       false, false)
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-load", do_load,
        "Load contents of SQL database",
@@ -59,7 +59,7 @@ private:
        "is a bulk load -- *all* atoms in the database will be loaded.\n"
        "The loading ocurrs in a distinct thread; this command only initiates\n"
        "the loading.", 
-       false)
+       false, false)
 
 public:
     DECLARE_CMD_REQUEST(PersistModule, "sql-open", do_open,
@@ -68,7 +68,7 @@ public:
        "Open a connection to an SQL database, for saving or restoring\n"
        "atomtable contents. If the tables needed to hold atomtable\n"
        "information do not yet exist, they will be created.",
-       false)
+       false, false)
 
 private:
     DECLARE_CMD_REQUEST(PersistModule, "sql-store", do_store,
@@ -77,7 +77,7 @@ private:
        "Save the contents of the atomtable into the currently open SQL\n"
        "database.  This is a bulk-save -- all atoms will be saved. They can\n"
        "be loaded at a later time with the sql-load command.",
-       false)
+       false, false)
 
     Handle fetch_atom(Handle);
     Handle fetch_incoming_set(Handle);
@@ -86,7 +86,7 @@ private:
 public:
     const char* id(void);
 
-    PersistModule(void);
+    PersistModule(CogServer&);
     virtual ~PersistModule();
 
     virtual void init(void);

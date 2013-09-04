@@ -1,0 +1,95 @@
+/** irisUTest.cxxtest ---
+ *
+ * Copyright (C) 2013 OpenCog Foundation
+ *
+ * Author: Linas Vepstas <linasveptas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string mixedUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test learning of problems that require a mixture of boolean
+ * and predicate terms.
+ */
+class mixedUTest : public CxxTest::TestSuite
+{
+public:
+    mixedUTest()
+    {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
+    // A simple mixed-learning problem, requiring the learning
+    // of a two-way (boolean) classifier based on contin inputs.
+    void test_iris_simple()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "IrisSetosa.data");
+        // We expect a score of zero, no matter what.
+        moses_test_score({"-Hit", 
+                          "-uCLASS",
+                          "-ndiv", "-nsin", "-nexp", "-nlog",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
+                          "-Z1",   // much much faster w/this flag...
+                          data_file_path,
+                          });
+    }
+
+    // A more difficult mixed-learning problem, requiring the learning
+    // of a three-way classifier based on contin inputs.
+    void test_iris_dataset()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "iris.data");
+        // We expect a score of zero, no matter what.
+        moses_test_good_enough_score({"-Hit", 
+                          "-uclass",
+                          "-ndiv", "-nsin", "-nexp", "-nlog",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
+                          "-Z1",   // much much faster w/this flag...
+                          data_file_path,
+                          },
+                          -4.5);
+    }
+
+    // Exactly same as above, but with two threads.  This tests
+    // for crashes, race-conditions in the contin and mixed reduction
+    // code.  (multi-thread crashes in generic code are already tested by
+    // MOSESUTest).
+    void test_iris_threaded()
+    {
+        string data_file_path("-i" + mixedUTest_dir + "iris.data");
+        // We expect a score of zero, no matter what.
+        moses_test_good_enough_score({"-Hit", 
+                          "-uclass",
+                          "-ndiv", "-nsin", "-nexp", "-nlog",
+                          "-m10000",
+                          "-r0",   // Seems to work best ...
+                          "-j2",   // two threads
+                          "-Z1",   // much much faster w/this flag...
+                          data_file_path,
+                          },
+                          -4.5);
+    }
+};

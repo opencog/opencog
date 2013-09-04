@@ -29,6 +29,11 @@
 #include <deque>
 #include <stdio.h>
 
+/** \addtogroup grp_cogutil
+ *  @{
+ */
+
+//! Represents a thread-safe first in-first out list.
 template<typename Data>
 class concurrent_queue
 {
@@ -134,5 +139,6 @@ public:
     }
 
 };
+/** @}*/
 
 #endif // __CONCURRENT_QUEUE__

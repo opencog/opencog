@@ -46,7 +46,7 @@ using namespace opencog;
 using namespace json_spirit;
 using namespace std;
 
-CreateAtomRequest::CreateAtomRequest()
+CreateAtomRequest::CreateAtomRequest(CogServer& cs) : Request(cs)
 {
 }
 
@@ -63,9 +63,10 @@ void CreateAtomRequest::setRequestResult(RequestResult* rr)
 
 bool CreateAtomRequest::execute()
 {
+    logger().debug("json-create-atom execute called");
     std::string& data = _parameters.front();
     decode(data);
-    AtomSpace& as = server().getAtomSpace();
+    AtomSpace& as = _cogserver.getAtomSpace();
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;
@@ -73,8 +74,12 @@ bool CreateAtomRequest::execute()
     Value json_top;
 
     try {
+	logger().debug("start parsing");
         read( data, json_top);
+	logger().debug("data is read");
         const Object &json_obj = json_top.get_obj();
+	logger().debug("json_obj gotten; parsing");
+	logger().debug("json_obj size: %d", json_obj.size());
         for( Object::size_type i = 0; i != json_obj.size(); ++i ) {
             std::string s;
             const Pair& pair = json_obj[i];
@@ -82,8 +87,10 @@ bool CreateAtomRequest::execute()
             const Value&  value = pair.value_;
             std::cout << name << std::endl;
             if (name == "type") {
+		logger().debug("json type: ");//, value.get_str());
                 t = classserver().getType(value.get_str());
             } else if (name == "name") {
+		logger().debug("json name: ");//%s", value.get_str());
                 atomName = value.get_str();
             } else if (name == "outgoing") {
                 const Array &outArray = value.get_array();
@@ -109,7 +116,8 @@ bool CreateAtomRequest::execute()
         if (tv) delete tv;
         if (_output.str().size() == 0) {
             //_output << "{\"error\":\"parsing json\"}" << std::endl;
-            _output << "{\"error\":"<<e.what()<<"\"}" << std::endl;
+	    logger().debug("json_spirit error: %s", e.what());
+            _output << "{\"error\":\"json_spirit error "<<e.what()<<"\"}" << std::endl;
             send(_output.str());
         }
         return false;

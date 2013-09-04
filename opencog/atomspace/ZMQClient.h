@@ -38,6 +38,9 @@
 using namespace std;
 
 namespace opencog {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class ZMQClient {
     zmq::socket_t* zmqClientSocket;
@@ -46,14 +49,16 @@ class ZMQClient {
     void SendMessage(ZMQRequestMessage& requestMessage,
             ZMQReplyMessage& replyMessage);
 
-public: 
+public:
     ZMQClient(string networkAddres="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
     ~ZMQClient();
 
     boost::shared_ptr<Atom> getAtom(Handle& h);
-    //TODO add other functions as needed
+    
+    /** @todo add other functions as needed */
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ZMQ_CLIENT_H

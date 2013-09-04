@@ -33,8 +33,12 @@
 #include "ProtocolBufferSerializer.h"
 #endif
 
+class HandleEntry;
 namespace opencog
 {
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 /**
  * Nodes in OpenCog are connected to each other by links. Each link embodies
@@ -46,12 +50,9 @@ namespace opencog
  */
 class Link : public Atom
 {
-    friend class SavingLoading;
-    friend class AtomTable;
-    friend class NMXmlParser;
-    friend class Atom;
-    // Needs access to getOutgoingAtom
-    friend class HandleEntry;
+    friend class NMXmlParser;  // needs access to addOutgoingAtom()
+    friend class SavingLoading;  // needs access to setOutgoingSet()
+    friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -63,25 +64,36 @@ private:
 #endif
     void init(const std::vector<Handle>&) throw (InvalidParamException);
 
-    // Adds a new handle to the outgoing set. Note that this is
-    // used only in the NativeParser friend class, and, due to
-    // performance issues, it should not be used anywhere else...
+    /**
+     * Adds a new handle to the outgoing set. Note that this is
+     * used only in the NMXmlParser friend class. The parser should
+     * be fixed not to need this, and this should be removed.
+     * Actually, the NMXml parser is obsolete, and should be retired.
+     */
     void addOutgoingAtom(Handle h);
 
-protected:
-
-    // Array that does not change during atom lifespan.
-    std::vector<Handle> outgoing;
-
     /**
-      * Sets the outgoing set of the atom
-      * This method can be called only if the atom is not inserted
-      * in an AtomTable yet.
-      * Otherwise, it throws a RuntimeException.
+      * Sets the outgoing set of the atom. This method can be
+      * called only if the atom is not inserted in an AtomTable yet.
+      * Otherwise, it throws a RuntimeException.  This is used only
+      * by the SavingLoading file reader. That reader should be fixed.
+      * Actually, that reader is obsolete and should be retired.
       */
     void setOutgoingSet(const std::vector<Handle>& o)
     throw (RuntimeException);
 
+    /**
+     * @todo cloning atoms is a fundamental violation of the architecture.
+     * this method should be removed.
+     */
+    virtual Atom* clone() const;
+
+protected:
+
+    //! Array that does not change during atom lifespan.
+    std::vector<Handle> outgoing;
+
+public:
     /**
      * Returns a specific atom in the outgoing set (using the connected
      * AtomTable).
@@ -92,7 +104,6 @@ protected:
      */
     Atom * getOutgoingAtom(int pos) const;
 
-public:
 
     /**
      * Constructor for this class.
@@ -196,8 +207,8 @@ public:
      * Builds the target type index structure according to the types of
      * elements in the outgoing set of the given atom.
      *
+     * @param size gets the size of the returned array.
      * @return A pointer to target types array built.
-     * NOTE: The argument size gets the size of the returned array.
      */
     Type* buildTargetIndexTypes(int *size);
 
@@ -306,17 +317,9 @@ public:
      * @return true if they are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const;
-
-    /**
-     * Returns the hashCode of the link.
-     * @return an unsigned integer value as the hashCode of the link.
-     */
-    virtual size_t hashCode(void) const;
-
-    virtual Atom* clone() const;
-
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_LINK_H

@@ -22,17 +22,18 @@
 #ifndef _OPENCOG_NAMEINDEX_H
 #define _OPENCOG_NAMEINDEX_H
 
-#include <map>
-
 #include <opencog/atomspace/StringIndex.h>
 
 namespace opencog
 {
 class Atom;
-class HandleEntry;
 
 /**
  * Implements an atom name index as an RB-tree (C++ map)
+ * That is, given an atom name, this returns a Handle to that atom.
+ * This class can only hold *one* handle for a given name. For a
+ * multi-name storage, use the NodeIndex, which kys by name and 
+ * atom type.
  */
 class NameIndex:
     public StringIndex
@@ -40,9 +41,9 @@ class NameIndex:
     public:
         void insertAtom(const Atom* a);
         void removeAtom(const Atom* a);
-        HandleEntry* getHandleSet(const char* name) const;
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_NAMEINDEX_H

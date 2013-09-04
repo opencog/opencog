@@ -29,7 +29,13 @@
 
 namespace opencog { namespace combo {
 
-class ComboReductException {
+/// Base class for all combo user-error exceptions
+///
+/// Non-user errors, such as internal bugs, use ComboException
+/// (defined in util/exceptions.h) so that a stack trace gets printed
+/// to the log-file.
+class ComboReductException
+{
 protected:
     std::string _message;
 public:
@@ -39,7 +45,10 @@ public:
     std::string get_message() const;
 };
 
-class EvalException : public ComboReductException {
+/// Overflow/ divide-by-zero exception during evaluation.
+// XXX should change this to "OverflowException"
+class EvalException : public ComboReductException
+{
     vertex _vertex;
 public:
     EvalException();
@@ -48,7 +57,9 @@ public:
     vertex get_vertex() const;
 };
 
-class TypeCheckException : public ComboReductException {
+/// Typing problem
+class TypeCheckException : public ComboReductException
+{
     int _arg;
 public:
     TypeCheckException();

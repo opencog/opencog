@@ -8,7 +8,10 @@
 
 using namespace opencog;
 
-PyMindAgent::PyMindAgent(const std::string& _moduleName, const std::string& _className)
+PyMindAgent::PyMindAgent(CogServer& cs,
+                         const std::string& _moduleName,
+                         const std::string& _className) :
+    Agent(cs)
 {
     PyGILState_STATE gstate;
     gstate = PyGILState_Ensure(); 
@@ -37,9 +40,9 @@ PyMindAgent::~PyMindAgent()
     PyGILState_Release(gstate); 
 }
 
-void PyMindAgent::run(CogServer* server)
+void PyMindAgent::run()
 {
-    string result = run_agent(pyagent, &server->getAtomSpace());
+    string result = run_agent(pyagent, &_cogserver.getAtomSpace());
     // errors only with result is not empty... && duplicate errors are not reported.
     if (result.size() > 0 && result != last_result) {
         // Any string returned is a traceback

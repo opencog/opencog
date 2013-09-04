@@ -94,7 +94,7 @@ template<typename Metadata>
      // like whether "a-b-c" is considered to be the same with "b-c-a"
      bool isOrderDependent;
 
-     DataProvider(int _n_gram);
+     DataProvider(int _n_gram, bool _isOrderDependent);
 
      ~DataProvider();
 

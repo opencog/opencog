@@ -79,6 +79,7 @@ INSTALL(FILES
 	log_prog_name.h
 	Logger.h
 	lru_cache.h
+	macros.h
 	MannWhitneyU.h
 	misc.h
 	mt19937ar.h

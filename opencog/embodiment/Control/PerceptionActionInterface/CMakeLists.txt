@@ -27,7 +27,6 @@ ADD_LIBRARY (PAI SHARED
 	EmbodimentDOMParser
 	EmbodimentErrorHandler
 	EventResponder
-	EventDetector
 	${PROTO_SRCS}
 )
 
@@ -36,6 +35,7 @@ TARGET_LINK_LIBRARIES(PAI
 	Language
 	Control
 	AtomSpaceExtensions
+	nlp-types
 	query
 	${XERCESC_LIBRARIES}
 	${Boost_DATE_TIME_LIBRARY} 

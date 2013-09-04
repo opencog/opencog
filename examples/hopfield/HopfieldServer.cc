@@ -50,7 +50,7 @@
 #ifdef HAVE_UBIGRAPH
 #include "HopfieldUbigrapher.h"
 extern "C" {
-    #include <opencog/ubigraph/UbigraphAPI.h>
+    #include <opencog/visualization/ubigraph/UbigraphAPI.h>
 }
 #endif //HAVE_UBIGRAPH
 
@@ -245,9 +245,9 @@ void HopfieldServer::init(int width, int height, int numLinks)
         hebUpdateAgent = static_cast<HebbianUpdatingAgent*>(
                 this->createAgent(HebbianUpdatingAgent::info().id, true));
     } else {
-        storkeyAgent = new StorkeyAgent();
+        storkeyAgent = new StorkeyAgent(*this);
     }
-    imprintAgent = new ImprintAgent();
+    imprintAgent = new ImprintAgent(*this);
     startAgent(imprintAgent);
     diffuseAgent = static_cast<ImportanceDiffusionAgent*>(
             this->createAgent(ImportanceDiffusionAgent::info().id, true));
@@ -588,9 +588,11 @@ std::map<Handle,Handle> HopfieldServer::getDestinationsFrom(Handle src, Type lin
 
 }
 
-Handle HopfieldServer::findKeyNode() {
+Handle HopfieldServer::findKeyNode()
+{
     Handle keyHandle;
     AtomSpace& a = getAtomSpace();
+    StorkeyAgent ska(*this);
     if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
         // This could probably be done by diffusing the important, but the simpler
         // and hopefully quicker way is just to sum the weights * stimulus
@@ -644,15 +646,15 @@ Handle HopfieldServer::findKeyNode() {
     } else {
         float minDiff = FLT_MAX;
         int keyIndex = -1;
-        StorkeyAgent::w_t w(StorkeyAgent::getCurrentWeights());
+        StorkeyAgent::w_t w(ska.getCurrentWeights());
         // Use inaccuracy method from glocal paper
         for(uint i = 0; i < keyNodes.size(); i++) {
             float diff = 0.0f;
             for (uint j = 0; j < hGrid.size(); j++) {
                 if (hGridKey[j]) continue;
                 
-                diff += fabs(StorkeyAgent::h(i,j,w) * a.getNormalisedSTI(hGrid[j],false)) +
-                    fabs(StorkeyAgent::h(j,i,w) * a.getNormalisedSTI(hGrid[i],false));
+                diff += fabs(ska.h(i,j,w) * a.getNormalisedSTI(hGrid[j],false)) +
+                    fabs(ska.h(j,i,w) * a.getNormalisedSTI(hGrid[i],false));
             }
             if (diff < minDiff) {
                 minDiff = diff;
@@ -693,7 +695,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
 
         // ImportanceUpdating with links
         logger().fine("---Imprint:Running Importance update");
-        importUpdateAgent->run(this);
+        importUpdateAgent->run();
         printStatus();
 
 #ifdef HAVE_UBIGRAPH
@@ -727,7 +729,7 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
             first = false;
         else
             logger().fine("---Imprint:Forgetting", totalEnergy());
-        forgetAgent->run(this);
+        forgetAgent->run();
 
         if (options->keyNodes) {
             // add links from keyNode to pattern nodes
@@ -747,10 +749,10 @@ void HopfieldServer::imprintPattern(Pattern pattern, int cycles)
         // then update with learning
         if (hebUpdateAgent) {
             logger().fine("---Imprint:Hebbian learning");
-            hebUpdateAgent->run(this);
+            hebUpdateAgent->run();
         } else {
             logger().fine("---Imprint:Storkey update rule");
-            storkeyAgent->run(this);
+            storkeyAgent->run();
         }
 #ifdef HAVE_UBIGRAPH
         if (options->visualize) {
@@ -804,7 +806,7 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 //    }
     getAtomSpace().getAttentionBank().setSTI(imprintAgent, patternStimulus);
     imprintAgent->setPattern(pattern);
-    imprintAgent->run(this);
+    imprintAgent->run();
 }
 
 std::vector<bool> HopfieldServer::checkNeighbourStability(Pattern p, float tolerance)
@@ -912,7 +914,7 @@ void HopfieldServer::updateAtomSpaceForRetrieval(int spreadCycles = 1,
     importUpdateAgent->setUpdateLinksFlag(false);
 
     logger().info("---Retreive:Running Importance updating agent");
-    importUpdateAgent->run(this);
+    importUpdateAgent->run();
 #ifdef HAVE_UBIGRAPH
     if (options->visualize) {
         if (originalPattern.size() == hGrid.size()) {
@@ -949,7 +951,7 @@ void HopfieldServer::updateAtomSpaceForRetrieval(int spreadCycles = 1,
 //--
         diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,temp);
         temp *= 1.5;
-        diffuseAgent->run(this);
+        diffuseAgent->run();
 #ifdef HAVE_UBIGRAPH
         if (options->visualize) {
             if (originalPattern.size() == hGrid.size()) {

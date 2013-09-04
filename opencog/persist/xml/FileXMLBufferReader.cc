@@ -33,6 +33,7 @@
 #endif
 
 #include <opencog/util/platform.h>
+#include <opencog/util/macros.h>
 
 using namespace opencog;
 
@@ -58,8 +59,8 @@ void FileXMLBufferReader::open() throw (IOException)
     file = fopen(filename, "r");
     if (file == NULL) {
         char buff[1000];
-        getcwd(buff, 1000);
-        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s'. cwd='%s'.", filename, buff);
+        char * p_buff = getcwd(buff, 1000);
+        throw IOException(TRACE_INFO, "FileXMLBufferReader - unable to open file '%s'. cwd='%s'.", filename, p_buff);
     }
 }
 

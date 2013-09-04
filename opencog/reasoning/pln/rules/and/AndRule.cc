@@ -20,6 +20,7 @@
  */
 
 #include <opencog/util/platform.h>
+#include <opencog/util/macros.h>
 #include "../../PLN.h"
 
 #include "../Rule.h"
@@ -172,7 +173,7 @@ BoundVertex AndRule::compute(const VertexSeq& premiseArray,
                                 Di.insert(*j);
                         }
                     LOG(4, "W AndRule::compute");
-                    int Dis = Di.size();
+                    /* int Dis = Di.size(); */
                     
                     std::set<pHandle> DiSubsets;
                     pHandle largest_intersection;

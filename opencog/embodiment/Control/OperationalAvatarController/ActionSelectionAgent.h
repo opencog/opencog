@@ -41,8 +41,8 @@ private:
 
 public:
 
-    ~ActionSelectionAgent();
-    ActionSelectionAgent();
+    virtual ~ActionSelectionAgent();
+    ActionSelectionAgent(CogServer&);
 
     virtual const ClassInfo& classinfo() const {
         return info();
@@ -53,7 +53,7 @@ public:
         return _ci;
     }
 
-    void run(opencog::CogServer *server);
+    virtual void run();
 
 }; // class
 

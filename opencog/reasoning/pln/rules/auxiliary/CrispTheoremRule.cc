@@ -20,6 +20,7 @@
  */
 
 #include <opencog/util/platform.h>
+#include <opencog/util/macros.h>
 #include "../../PLN.h"
 
 #include "../Rule.h"
@@ -216,7 +217,6 @@ Rule::setOfMPs CrispTheoremRule::o2iMetaExtra(meta outh, bool& overrideInputFilt
             foreach(vtree targ, thm_args)
             {
                 cprintf(4,"Subst next...\n");
-                bool changes = false;
                 
                 BBvtree thm_substed = bind_vtree(targ, binds);
 

@@ -42,7 +42,9 @@ using namespace opencog;
 using namespace json_spirit;
 using namespace std;
 
-UpdateAtomRequest::UpdateAtomRequest() : sti_mod(sti_none), lti_mod(lti_none),
+UpdateAtomRequest::UpdateAtomRequest(CogServer& cs) :
+    Request(cs),
+    sti_mod(sti_none), lti_mod(lti_none),
     tv_mod(tv_none), tv(NULL)
 {
 }
@@ -61,7 +63,7 @@ void UpdateAtomRequest::setRequestResult(RequestResult* rr)
 
 bool UpdateAtomRequest::execute()
 {
-    AtomSpace* as = &server().getAtomSpace();
+    AtomSpace* as = &_cogserver.getAtomSpace();
 
     Handle h;
     if (_parameters.size() != 2) {

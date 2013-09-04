@@ -26,8 +26,6 @@
 #define _OPENCOG_NMXML_EXPORTER_H
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/HandleSet.h>
 #include <opencog/persist/xml/NMXmlParser.h>
 
 namespace opencog
@@ -50,30 +48,21 @@ private:
      * Find the set of atoms to be exported based on an
      * initial seed.
      */
-    HandleSet *findExportables(HandleEntry *);
+    UnorderedHandleSet *findExportables(const UnorderedHandleSet&);
 
     /**
      * Used to explor a subgraph of the AtomTable.
      */
-    void findExportables(HandleSet *, HandleSet *, Handle);
+    void findExportables(UnorderedHandleSet *, UnorderedHandleSet *, Handle);
 
     /**
      * Exports a subset of the AtomSpace to XML.
      * @param hs The set of Handles to be exported.
      *        After the handles are exported
-     *        the HandleSet is deleted.
+     *        the UnorderedHandleSet is deleted.
      * @return An string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleSet* hs);
-
-    /**
-     * Exports a subset of the AtomSpace to XML.
-     * @param hs The set of Handles from where the subset
-     *        should be built. After the handles are exported
-     *        the HandleEntry is deleted.
-     * @return A string describing the subset of Atoms in XML.
-     */
-    std::string toXML(HandleEntry* hs);
+    std::string toXML(const UnorderedHandleSet* hs);
 
     /**
      * Exports an Atom and the Atoms in its outgoingset.
@@ -91,7 +80,7 @@ public:
      * @param hs The HandleSeq of Handles to be exported.
      * @return An string describing the subset of Atoms in XML.
      */
-    std::string toXML(HandleSeq& hs);
+    std::string toXML(const HandleSeq& hs);
 
 };
 

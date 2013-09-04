@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,16 +27,19 @@
 
 #include <iostream>
 #include <vector>
+#include <unordered_set>
 
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/TLB.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
-#include <opencog/atomspace/HandleEntry.h>
-#include <opencog/atomspace/HandleIterator.h>
 #include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/IncomingIndex.h>
+#include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -52,16 +56,9 @@
 
 namespace opencog
 {
-
-struct atom_ptr_hash : public std::unary_function<const Atom*, std::size_t>
-{
-    std::size_t operator()(const Atom* const& __x) const;
-};
-struct atom_ptr_equal_to : public std::binary_function<const Atom*, const Atom*, bool>
-{
-    bool operator()(const Atom* const& __x, const Atom* const& __y) const;
-};
-typedef boost::unordered_set<const Atom*, atom_ptr_hash, atom_ptr_equal_to> AtomHashSet;
+/** \addtogroup grp_atomspace
+ *  @{
+ */
 
 class SavingLoading;
 
@@ -77,44 +74,23 @@ class AtomTable
     friend class SavingLoading;
     friend class AtomSpace;
     friend class AtomSpaceImpl;
-    friend class HandleIterator;
     friend class ::AtomTableUTest;
 
 private:
 
     int size;
 
-    /**
-     * Lookup table ... XXX is this really needed? The various indexes
-     * below should be enough, maybe? This should probably be eliminated
-     * if possible.
-     */
-    AtomHashSet atomSet;
-
-    /**
-     * Indicates whether DynamicStatisticsAgent should be used
-     * for atoms inserted in this table or not.
-     */
-    bool useDSA;
-
-    /**
-     * Indexes for quick retreival of certain kinds of atoms.
-     */
+    //!@{
+    //! Index for quick retreival of certain kinds of atoms.
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
+    IncomingIndex incomingIndex;
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
-
-    /** iterators, used in an (incomplete) attempt at thread-safety. */
-    std::vector<HandleIterator*> iterators;
-    void lockIterators();
-    void unlockIterators();
-#ifdef HAVE_LIBPTHREAD
-    pthread_mutex_t iteratorsLock;
-#endif
-
+	//!@}
+	
     /**
      * signal connection used to keep track of atom type addition in the
      * ClassServer 
@@ -127,8 +103,9 @@ private:
     void typeAdded(Type);
 
     static bool decayed(Handle h);
-    // Warning, this should only be called by decayShortTermImportance
-    void clearIndexesAndRemoveAtoms(HandleEntry* extractedHandles);
+
+    /** \warning this should only be called by decayShortTermImportance */
+    void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
 
     /**
      * Extracts atoms from the table. Table will not contain the
@@ -138,24 +115,21 @@ private:
      * Note: The caller is responsible for releasing the memory of
      * both the returned list and the refered Atoms inside it.
      *
-     * @param The atom to be extracted.
-     * @param Recursive-removal flag; if set, the links in the
+     * @param handle The atom to be extracted.
+     * @param recursive Recursive-removal flag; if set, the links in the
      *        incoming set will also be extracted.
      * @return A list with the Handles of all extracted Atoms.
      */
-    HandleEntry* extract(Handle, bool recursive = false);
+    UnorderedHandleSet extract(Handle handle, bool recursive = false);
 
     /**
      * Removes the previously extracted Handles (using the extract
      * method) from this table.
      * @param The list of the Handles previously extracted.
      *
-     * NOTE: This method also frees the memory of both list
-     * and Atom objects corresponding to the Handles inside the list.
-     * XXX Huh ??? What if there are other things referenceing these
-     * atoms/handles?
+     * \note This method also frees the memory of the Atom objects!
      */
-    void removeExtractedHandles(HandleEntry* extractedHandles);
+    void removeExtractedHandles(const UnorderedHandleSet&);
 
     // JUST FOR TESTS:
     bool isCleared() const;
@@ -172,7 +146,7 @@ public:
     /**
      * Constructor and destructor for this class.
      */
-    AtomTable(bool dsa = true);
+    AtomTable();
     ~AtomTable();
 
     /**
@@ -203,63 +177,6 @@ public:
     int getSize() const;
 
     /**
-     * Registers an iterator. Iterators must be registered because when
-     * using a multi-threaded configuration, the contents of an active
-     * iterator may become invalid due to the removal of atoms. All
-     * registered iterators are then properly notified. This method is
-     * automatically called every time a new iterator is created.
-     *
-     * @param The iterator to be registered.
-     */
-    void registerIterator(HandleIterator*);
-
-    /**
-     * Unregisters an iterator. This method is automatically called every
-     * time a new iterator is deleted.
-     *
-     * @param The iterator to be unregistered.
-     */
-    void unregisterIterator(HandleIterator*) throw (RuntimeException);
-
-    /**
-     * Creates a new handle iterator that iterates on all atoms of the
-     * atom table.
-     *
-     * @return The newly created iterator.
-     */
-    HandleIterator* getHandleIterator();
-
-    /**
-     * Creates a new handle iterator that iterates on atoms of a specific
-     * type, and optionally in its subclasses as well.
-     *
-     * @param The type of atom to be iterated.
-     * @param Whether subclasses of the given type are to be iterated as
-     * well.
-     * @param VersionHandle for filtering the resulting atoms by context.
-     *         NULL_VERSION_HANDLE indicates no filtering
-     * @return The newly created iterator.
-     */
-    HandleIterator* getHandleIterator(Type,
-                                      bool subclass = false,
-                                      VersionHandle vh = NULL_VERSION_HANDLE);
-
-    /**
-     * Makes a set from a index head. It receives a linked-list and an
-     * index. The received linked-list is the tail of the newly created
-     * list, where its head is created by iterating the received index
-     * head until the end.
-     *
-     * @param The tail linked-list.
-     * @param The first element of the index linked-list that will be
-     * placed in the beginning of the newly created linked-list.
-     * @param Which index is to be followed.
-     * @return The concatenation of the parameter list with the list
-     * created by following given index head.
-     */
-    HandleEntry* makeSet(HandleEntry*, Handle, int) const;
-
-    /**
      * Adds a new predicate index to this atom table given the Handle of
      * the PredicateNode.
      * @param The handle of the predicate node, whose name is the id
@@ -270,7 +187,7 @@ public:
      *      - the given Handle is not in the AtomTable
      *      - there is already an index for this predicate id/Handle
      *      - the predicate index table is full.
-     * NOTE: Does not apply the new predicate index to the atoms
+     * \note Does not apply the new predicate index to the atoms
      * inserted previously in the AtomTable.
      */
     void addPredicateIndex(Handle h, PredicateEvaluator *pe)
@@ -295,8 +212,14 @@ public:
      * @param VersionHandle for filtering the resulting atoms by
      *        context. NULL_VERSION_HANDLE indicates no filtering
      */
-    HandleEntry* findHandlesByGPN(const char*,
-                                  VersionHandle = NULL_VERSION_HANDLE) const;
+    template <typename OutputIterator> OutputIterator
+    getHandlesByGPN(OutputIterator result,
+                    const std::string& gpnNodeName,
+                    VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
+        return getHandlesByGPN(result, gpnHandle, vh);
+    }
 
     /**
      * Returns a list of handles that matches the GroundedPredicateNode
@@ -305,10 +228,14 @@ public:
      * @param VersionHandle for filtering the resulting atoms by
      *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
-    HandleEntry* findHandlesByGPN(Handle h,
-                                  VersionHandle vh = NULL_VERSION_HANDLE) const
+    template <typename OutputIterator> OutputIterator
+    getHandlesByGPN(OutputIterator result,
+                    Handle h,
+                    VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return predicateIndex.findHandlesByGPN(h, vh);
+        const UnorderedHandleSet& hs = predicateIndex.findHandlesByGPN(h);
+        return std::copy_if(hs.begin(), hs.end(), result,
+                 [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
     }
 
     /**
@@ -320,12 +247,39 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const char* name, Type t) const;
-    Handle getHandle(const Node* n) const;
+    Handle getHandle(const std::string&, Type) const;
+    Handle getHandle(const Node*) const;
 
-    Handle getHandle(Type t, const HandleSeq &seq) const;
-    Handle getHandle(const Link* l) const;
+    Handle getHandle(Type, const HandleSeq&) const;
+    Handle getHandle(const Link*) const;
+    Handle getHandle(const Atom*) const;
 
+protected:
+    /* Some basic predicates */
+    static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
+    bool isType(Handle h, Type t, bool subclass) const
+    {
+        Type at = getAtom(h)->getType();
+        if (not subclass) return t == at;
+        return classserver().isA(at, t);
+    }
+    bool containsVersionedTV(Handle h, VersionHandle vh) const
+    {
+        if (isNullVersionHandle(vh)) return true;
+        const TruthValue& tv = getAtom(h)->getTruthValue();
+        return (not tv.isNullTv())
+               and (tv.getType() == COMPOSITE_TRUTH_VALUE)
+               and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
+    }
+    bool hasNullName(Handle h) const
+    {
+        Atom* a = getAtom(h);
+        if (dynamic_cast<Link*>(a)) return true;
+        if (dynamic_cast<Node*>(a)->getName().c_str()[0] == 0) return true;
+        return false;
+    }
+
+public:
     /**
      * Returns the set of atoms of a given type (subclasses optionally).
      *
@@ -333,9 +287,86 @@ public:
      * @param Whether type subclasses should be considered.
      * @return The set of atoms of a given type (subclasses optionally).
      */
-    HandleEntry* getHandleSet(Type type, bool subclass = false) const
+    template <typename OutputIterator> OutputIterator
+    getHandlesByType(OutputIterator result,
+                       Type type,
+                       bool subclass = false) const
     {
-        return typeIndex.getHandleSet(type, subclass);
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+                            isDefined);
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTypeVH(OutputIterator result,
+                       Type type,
+                       bool subclass,
+                       VersionHandle vh) const
+    {
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                  return isDefined(h) and containsVersionedTV(h, vh);
+             });
+    }
+
+    /** Calls function 'func' on all atoms */
+    template <typename Function> void
+    foreachHandleByType(Function func,
+                        Type type,
+                        bool subclass = false) const
+    {
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+             [&](Handle h)->void { 
+                  if (not isDefined(h)) return;
+                  (func)(h);
+             });
+    }
+
+    template <typename Function> void
+    foreachHandleByTypeVH(Function func,
+                        Type type,
+                        bool subclass,
+                        VersionHandle vh) const
+    {
+        std::for_each(typeIndex.begin(type, subclass),
+                      typeIndex.end(),
+             [&](Handle h)->void { 
+                  if (not isDefined(h)) return;
+                  if (not containsVersionedTV(h, vh)) return;
+                  (func)(h);
+             });
+    }
+
+    /**
+     * Returns all atoms satisfying the predicate
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTypePredVH(OutputIterator result,
+                           Type type,
+                           bool subclass,
+                           AtomPredicate* pred,
+                           VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool { 
+                  return isDefined(h)
+                      and (*pred)(*getAtom(h))
+                      and containsVersionedTV(h, vh);
+             });
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByPredVH(OutputIterator result,
+                       AtomPredicate* pred,
+                       VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getHandlesByTypePredVH(result, ATOM, true, pred, vh);
     }
 
     /**
@@ -349,17 +380,47 @@ public:
      * @return The set of atoms of a given type and target type
      *         (subclasses optionally).
      */
-    HandleEntry* getHandleSet(Type type, Type targetType,
-                              bool subclass = false,
-                              bool targetSubclass = false) const
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTargetTypeVH(OutputIterator result,
+                             Type type,
+                             Type targetType,
+                             bool subclass,
+                             bool targetSubclass,
+                             VersionHandle vh = NULL_VERSION_HANDLE,
+                             VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
-        HandleEntry *set = targetTypeIndex.getHandleSet(targetType,targetSubclass);
-        return HandleEntry::filterSet(set, type, subclass);
+        return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
+                            targetTypeIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                 return isDefined(h)
+                    and isType(h, type, subclass)
+                    and containsVersionedTV(h, vh)
+                    and containsVersionedTV(h, targetVh);
+             });
     }
+
+    /**
+     * Return the incoming set associated with handle h.
+     */
+    const UnorderedHandleSet& getIncomingSet(Handle h) const
+        { return incomingIndex.getIncomingSet(h); }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSet(OutputIterator result,
+                   Handle h) const
+    {
+        return std::copy(incomingIndex.begin(h),
+                         incomingIndex.end(),
+                         result);
+    }
+
 
     /**
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
+     * That is, returns the incoming set of Handle h, with some optional
+     * filtering.
      *
      * @param The handle that must be in the outgoing set of the atom.
      * @param The optional type of the atom.
@@ -367,9 +428,78 @@ public:
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      */
-    HandleEntry* getHandleSet(Handle h,
-                              Type type = ATOM,
-                              bool subclass = true) const;
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                         Handle h,
+                         Type type,
+                         bool subclass = false) const
+    {
+        return std::copy_if(incomingIndex.begin(h),
+                            incomingIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                     return isDefined(h)
+                        and isType(h, type, subclass); });
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByTypeVH(OutputIterator result,
+                           Handle h,
+                           Type type,
+                           bool subclass,
+                           VersionHandle vh) const
+    {
+        return std::copy_if(incomingIndex.begin(h),
+                            incomingIndex.end(),
+                            result,
+             [&](Handle h)->bool{
+                   return isDefined(h)
+                      and isType(h, type, subclass)
+                      and containsVersionedTV(h, vh); });
+    }
+
+    /**
+     * Returns the set of atoms whose outgoing set contains at least one
+     * atom with the given name and type (atom type and subclasses
+     * optionally).
+     *
+     * @param The name of the atom in the outgoing set of the searched
+     *        atoms.
+     * @param The type of the atom in the outgoing set of the searched
+     *        atoms.
+     * @param The optional type of the atom.
+     * @param Whether atom type subclasses should be considered.
+     * @return The set of atoms of the given type and name whose outgoing
+     *         set contains at least one atom of the given type and name.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByName(OutputIterator result,
+                         const std::string& targetName,
+                         Type targetType,
+                         Type type = ATOM,
+                         bool subclass = true) const
+    {
+        // Gets the exact atom with the given name and type, in any AtomTable.
+        Handle targh = getHandle(targetName, targetType);
+        return getIncomingSetByType(result, targh, type, subclass);
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByNameVH(OutputIterator result,
+                           const std::string& targetName,
+                           Type targetType,
+                           Type type,
+                           bool subclass,
+                           VersionHandle vh,
+                           VersionHandle targetVh) const
+    {
+        // Gets the exact atom with the given name and type, in any AtomTable.
+        Handle targh = getHandle(targetName, targetType);
+        // XXX TODO what the heck with targetVH ?? Are we supposed to
+        // check if targh above has it ?? And if not, I guess return
+        // empty set ... Who needs this stuff, anyway?
+        return getIncomingSetByTypeVH(result, targh, type, subclass, vh);
+    }
 
     /**
      * Returns the set of atoms with the given target handles and types
@@ -395,47 +525,52 @@ public:
      * @return The set of atoms of the given type with the matching
      *         criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const std::vector<Handle>&,
+    UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
                               Type*, bool*, Arity,
                               Type type = ATOM,
-                              bool subclass = true) const;
+                              bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     /**
      * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).
+     * optionally).  If the name is not null or the empty string, then
+     * this returns Nodes ONLY (of the requested name, of course). However,
+     * if the name is null (or empty string) then Links might be included!
+     * This behaviour is surprising, but is explicilty tested for in the
+     * AtomSpaceImplUTest. I don't know why its done like this.
      *
      * @param The desired name of the atoms.
      * @param The optional type of the atom.
      * @param Whether atom type subclasses should be considered.
      * @return The set of atoms of the given type and name.
      */
-    HandleEntry* getHandleSet(const char* name,
-                              Type type = ATOM, bool subclass = true) const
+    template <typename OutputIterator> OutputIterator
+    getHandlesByName(OutputIterator result,
+                     const std::string& name,
+                     Type type = ATOM,
+                     bool subclass = true) const
     {
-        if (name == NULL || *name == 0)
-        {
-            HandleEntry *set = typeIndex.getHandleSet(type, subclass);
-            return HandleEntry::filterSet(set, "");
-        }
-        return nodeIndex.getHandleSet(type, name, subclass);
+        if (name.c_str()[0] == 0)
+            return getHandlesByType(result, type, subclass);
+
+        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
-    /**
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param The name of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The type of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     *         set contains at least one atom of the given type and name.
-     */
-    HandleEntry* getHandleSet(const char*, Type,
-                              Type type = ATOM, bool subclass = true) const;
+    template <typename OutputIterator> OutputIterator
+    getHandlesByNameVH(OutputIterator result,
+                       const std::string& name,
+                       Type type,
+                       bool subclass,
+                       VersionHandle vh) const
+    {
+        if (name.c_str()[0] == 0)
+            return getHandlesByTypeVH(result, type, subclass, vh);
+
+        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
+        return std::copy_if(hs.begin(), hs.end(), result,
+             [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
+    }
 
     /**
      * Returns the set of atoms with the given target names and/or types
@@ -461,8 +596,9 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const
+    UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
     throw (RuntimeException);
 
     /**
@@ -484,8 +620,10 @@ public:
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      */
-    HandleEntry* getHandleSet(Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true) const;
+    UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
+                              Type type = ATOM, bool subclass = true,
+                              VersionHandle vh = NULL_VERSION_HANDLE) const
+    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass, vh); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -494,16 +632,19 @@ public:
      * @param Importance range upper bound (inclusive).
      * @return The set of atoms within the given importance range.
      */
-    HandleEntry* getHandleSet(AttentionValue::sti_t lowerBound,
+    UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
                               AttentionValue::sti_t upperBound = 32767) const
-    {
-        return importanceIndex.getHandleSet(lowerBound, upperBound);
-    }
+        { return importanceIndex.getHandleSet(this, lowerBound, upperBound); }
 
-    HandleEntry* getPredicateHandleSet(int index)
-    {
-        return predicateIndex.getHandleSet(index);
-    }
+    /**
+     * Decays importance of all atoms in the table, reindexing
+     * importanceIndex accordingly and extracting the atoms that fall
+     * below the "LOWER_STI_VALUE" threshold.
+     * @return the list of the handles that should be removed.
+     */
+    UnorderedHandleSet decayShortTermImportance()
+        { return importanceIndex.decayShortTermImportance(this); }
+
 
     /**
      * Updates the importance index for the given atom. According to the
@@ -532,22 +673,15 @@ public:
      * code should ever attempt to delete the pointer that is passed 
      * into this method.
      *
-     * When adding atoms in bulk, it can be convenient to defer
-     * the setup of incoming links until a later stage.
-     *
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(Atom*, bool dont_defer_incoming_links = true) throw (RuntimeException);
+    Handle add(Atom*) throw (RuntimeException);
 
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(const Handle& h) const {
-        Atom *a = getAtom(h);
-        if (NULL == a) return false;
-        return true;
-    }
+    bool holds(const Handle& h) const { return (NULL != getAtom(h)); }
 
     /** Get Atom object already in the AtomTable.
      *
@@ -598,78 +732,11 @@ public:
 
     /**
      * Return a random atom in the AtomTable.
-     * @note Uses the atomSet buckets to provide reasonbly quick look-up.
      */
     Handle getRandom(RandGen* rng) const;
-
-    /**
-     * Decays importance of all atoms in the table, reindexing
-     * importanceIndex accordingly and extracting the atoms that fall
-     * below the "LOWER_STI_VALUE" threshold.
-     * @return the list of the handles that should be removed.
-     */
-    HandleEntry* decayShortTermImportance();
-
-    /**
-     * Returns whether DynamicsStatisticsAgent is to be used with
-     * this table or not.
-     */
-    bool usesDSA() const;
-
-    HandleEntry* getHandleSet(Type type, bool subclass, VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type type, Type targetType, bool subclass, bool
-            targetSubclass, VersionHandle vh, VersionHandle targetVh) const;
-    HandleEntry* getHandleSet(Handle handle, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(const std::vector<Handle>& handles, Type* types,
-            bool* subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* name, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(const char* targetName, Type targetType,
-            Type type, bool subclass, VersionHandle vh,
-            VersionHandle targetVh) const;
-    HandleEntry* getHandleSet(const char** names, Type* types, bool*
-            subclasses, Arity arity, Type type, bool subclass,
-            VersionHandle vh) const;
-    HandleEntry* getHandleSet(Type* types, bool* subclasses, Arity arity,
-            Type type, bool subclass, VersionHandle vh) const;
-
-    /*
-    * If this method is needed it needs to be refactored to use
-    * AttentionValue instead of floats
-    HandleEntry* getHandleSet(float lowerBound, float upperBound, VersionHandle vh) const;
-    */
-
-    /**
-     * Invoke the callback cb for *every* atom in the AtomTable
-     * This assumes that the callback does *not* modify the AtomTable,
-     * specifically, does not insert or remove atoms from the atom table.
-     */
-    template<class T>
-    inline bool foreach_atom(bool (T::*cb)(const Atom *), T *data) const
-    {
-        AtomHashSet::const_iterator it;
-        for (it = atomSet.begin(); it != atomSet.end(); it++) {
-            const Atom* atom = *it;
-            bool rc = (data->*cb)(atom);
-            if (rc) return rc;
-        }
-        return false;
-    }
-
-    /**
-     * For use by atom table persistence systems only. When bulk-adding
-     * atoms to the atom table, it is convenient to avoid resolving
-     * incoming pointers until all atoms have been added. However, the
-     * incoming set of an atom *must* be set up before the atom can be
-     * used. This routine will review the contents of the AtomTable,
-     * and set up all incoming sets of each atom.
-     */
-    void scrubIncoming(void);
-
 };
 
+/** @}*/
 } //namespace opencog
 
 #endif // _OPENCOG_ATOMTABLE_H

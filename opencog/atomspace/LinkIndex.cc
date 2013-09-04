@@ -22,7 +22,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/HandleEntry.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
@@ -80,12 +79,11 @@ void LinkIndex::remove(bool (*filter)(Handle))
 	}
 }
 
-HandleEntry * LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subclass) const
+UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subclass) const
 {
+	UnorderedHandleSet hs;
 	if (subclass)
 	{
-		HandleEntry *he = NULL;
-		
 		int max = classserver().getNumberOfClasses();
 		for (Type s = 0; s < max; s++)
 		{
@@ -97,15 +95,17 @@ HandleEntry * LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool subc
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);
 				if (TLB::isValidHandle(h))
-					he = new HandleEntry(h, he);
+					hs.insert(h);
 			}
 		}
-		return he;
 	}
 	else
 	{
-		return new HandleEntry(getHandle(type, seq));
+		Handle h = getHandle(type, seq);
+		if (Handle::UNDEFINED != h)
+			hs.insert(h);
 	}
+	return hs;
 }
 
 // ================================================================
