@@ -7,10 +7,10 @@ INSTALL(FILES
         "include/${PROJECT_NAME}/learning/moses/service"
 )
 
-ADD_LIBRARY (
-    moses_service
-    moses_service
-)
+#ADD_LIBRARY (
+#    moses_service
+#    moses_service
+#)
 
 #ADD_EXECUTABLE (moses_service_demo moses_service_demo)
 #TARGET_LINK_LIBRARIES (moses_service_demo
@@ -20,8 +20,8 @@ ADD_LIBRARY (
 #        cogutil
 #)
 
-TARGET_LINK_LIBRARIES (moses_service
-   moses_exec
-        moses
-        cogutil
-)
+#TARGET_LINK_LIBRARIES (moses_service
+#   moses_exec
+#        moses
+#        cogutil
+#)

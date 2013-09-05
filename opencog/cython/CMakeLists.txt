@@ -50,18 +50,30 @@ add_custom_command(OUTPUT scheme_wrapper.cpp
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
 # opencog.moses Python bindings
-ADD_LIBRARY(pymoses_cython SHARED
+ADD_LIBRARY(moses_cython SHARED
     opencog/pymoses.cpp
 )
 
-TARGET_LINK_LIBRARIES(pymoses_cython
+TARGET_LINK_LIBRARIES(moses_cython
         moses
         cogutil
+        comboreduct
+        feature_selection
+        cogutil
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_THREAD_LIBRARY}
-        ${Boost_SYSTEM_LIBRARY}
+#        ${Boost_SYSTEM_LIBRARY}
 )
 
-SET_TARGET_PROPERTIES(pymoses_cython PROPERTIES
+IF (HAVE_MPI)
+    TARGET_LINK_LIBRARIES (moses_cython
+        # These two work for both MPICH2 and OpenMPI, for me.
+        ${MPI_LIBRARY}
+        ${MPI_EXTRA_LIBRARY}
+    )
+ENDIF (HAVE_MPI)
+
+SET_TARGET_PROPERTIES(moses_cython PROPERTIES
     PREFIX ""
     OUTPUT_NAME opencog/pymoses)
 
