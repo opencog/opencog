@@ -9,34 +9,18 @@ namespace moses {
 
 moses_service::moses_service()
 {
-    cout << "MOSES Service instanciated";
+    cout << "MOSES Service instanciated\n";
 }
 
 moses_service::~moses_service()
 {
 }
 
-void moses_service::run()
+void moses_service::run(int argc, char** argv)
 {
-    const std::vector<std::string>& args = {
-        "moses"
-
-        // For now, just demonstrate that we can invoke moses."
-
-        /*,
-        "-i",
-        //"/home/cosmo/opencog/src/qtbin/opencog/learning/moses/main/test/xor.txt",
-        "./xor.txt",
-        "-c",
-        "1",
-        "-o",
-        //"/home/cosmo/opencog/src/qtbin/opencog/learning/moses/main/test/out.txt"
-        "./out.txt"*/
-
-    };
-
-    moses_exec(args);
-
+    // Later, this method will be extended to return details on the metapopulation
+    // For now, it just calls moses_exec
+    moses_exec(argc, argv);
 }
 
 }
