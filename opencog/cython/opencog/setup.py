@@ -1,6 +1,5 @@
 # setup.py file, from http://stackoverflow.com/questions/16993927/using-cython-to-link-python-to-a-shared-library
 
-import sys
 import os
 import shutil
 
@@ -23,7 +22,6 @@ setup(
     ext_modules = [
     Extension("pymoses",
               sources=["pymoses.pyx"],
-#              libraries=["moses"],              # refers to "libmoses.so"
               language="c++",                   # remove this if C and not C++
               extra_compile_args=["-fopenmp", "-O3", "-std=c++0x",
                                   "-I../../learning/moses/service/",
@@ -41,9 +39,6 @@ setup(
                                "-I/usr/lib/openmpi/include", "-I/usr/lib/openmpi/include/openmpi", "-pthread", "-L/usr/lib/openmpi/lib", "-lmpi_cxx", "-lmpi", "-lopen-rte",
                                "-lopen-pal", "-ldl", "-Wl,-export-dynamic", "-lnsl", "-lutil", "-lm", "-ldl",
                                ],
-              extra_objects=["/home/cosmo/opencog/src/qtbin/opencog/learning/moses/libmoses.a",
- git                            "/home/cosmo/opencog/src/qtbin/opencog/learning/moses/main/libmoses_exec.a"
-              ],
               )
     ]
 )

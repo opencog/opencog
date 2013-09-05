@@ -61,13 +61,6 @@ ADD_LIBRARY (moses SHARED STATIC
 	representation/knob_mapper
 	representation/knobs
 	representation/representation
-
-#    main/moses_exec
-#    main/moses_exec_def
-#    main/eval-candidate
-#    main/eval-diversity
-
-#    service/moses_service
 )
 
 TARGET_LINK_LIBRARIES (moses
