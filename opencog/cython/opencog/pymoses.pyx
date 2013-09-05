@@ -19,14 +19,6 @@ from libc.stdlib cimport malloc, free
 import shlex
 
 cdef class moses:
-    cdef moses_service *thisptr
-
-    def __cinit__(self):
-        self.thisptr = new moses_service()
-
-    def __dealloc__(self):
-        del self.thisptr
-
     def run(self, args):
         self.run_args_list(shlex.split(args))
 
@@ -38,7 +30,7 @@ cdef class moses:
         for idx, s in enumerate(args_list):
             c_argv[idx] = s
         try:
-            self.thisptr.run(len(args_list), c_argv)
+            moses_exec(len(args_list), c_argv)
         except RuntimeError, ex:
             print "Exception occurred when calling MOSES:\n" + ex.message
         finally:

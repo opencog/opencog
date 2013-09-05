@@ -1,5 +1,3 @@
-cdef extern from "opencog/learning/moses/service/moses_service.h" namespace "opencog::moses":
-    cdef cppclass moses_service:
-        moses_service() except +
-        void run(int argc, char **argv) except +
+cdef extern from "opencog/learning/moses/main/moses_exec.h" namespace "opencog::moses":
+    int moses_exec(int argc, char **argv) except +
 

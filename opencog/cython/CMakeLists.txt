@@ -59,10 +59,8 @@ TARGET_LINK_LIBRARIES(moses_cython
         cogutil
         comboreduct
         feature_selection
-        cogutil
         ${Boost_PROGRAM_OPTIONS_LIBRARY}
         ${Boost_THREAD_LIBRARY}
-#        ${Boost_SYSTEM_LIBRARY}
 )
 
 IF (HAVE_MPI)

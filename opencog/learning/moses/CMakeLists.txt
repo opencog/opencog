@@ -28,7 +28,6 @@ ADD_SUBDIRECTORY (main)
 ADD_SUBDIRECTORY (example-ant)
 ADD_SUBDIRECTORY (example-progs)
 ADD_SUBDIRECTORY (man)
-ADD_SUBDIRECTORY (service)
 
 ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
