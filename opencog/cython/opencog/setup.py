@@ -31,15 +31,18 @@ setup(
                                   "-I../../../DEPENDENCIES/python2.7/inc",
                                   "-I../../../DEPENDENCIES/gsl-1.15]",
                                   ],
-              extra_link_args=["-lmoses", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/",
+              extra_link_args=[#"-lmoses_exec", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/main/",
+                               "-lmoses", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/",
                                "-lcogutil", "-L/home/cosmo/opencog/src/qtbin/opencog/util/",
                                "-lcomboreduct", "-L/home/cosmo/opencog/src/qtbin/opencog/comboreduct/",
                                "-lfeature_selection", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/feature-selection/",
+                               "-lmoses_service", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/service/",
                                "-lboost_program_options", "-lboost_thread",
                                "-I/usr/lib/openmpi/include", "-I/usr/lib/openmpi/include/openmpi", "-pthread", "-L/usr/lib/openmpi/lib", "-lmpi_cxx", "-lmpi", "-lopen-rte",
                                "-lopen-pal", "-ldl", "-Wl,-export-dynamic", "-lnsl", "-lutil", "-lm", "-ldl",
                                ],
-              extra_objects=["/home/cosmo/opencog/src/qtbin/opencog/learning/moses/libmoses.a"],
+              extra_objects=["/home/cosmo/opencog/src/qtbin/opencog/learning/moses/libmoses.a",
+                             "/home/cosmo/opencog/src/qtbin/opencog/learning/moses/main/libmoses_exec.a"],
               )
     ]
 )

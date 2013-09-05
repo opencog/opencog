@@ -28,12 +28,13 @@ ADD_SUBDIRECTORY (main)
 ADD_SUBDIRECTORY (example-ant)
 ADD_SUBDIRECTORY (example-progs)
 ADD_SUBDIRECTORY (man)
+ADD_SUBDIRECTORY (service)
 
 ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
 	eda/local_structure
 
-	moses/complexity
+    moses/complexity
 	moses/distributed_moses
 	moses/local_moses
 	moses/moses_main
@@ -61,12 +62,12 @@ ADD_LIBRARY (moses SHARED STATIC
 	representation/knobs
 	representation/representation
 
-    main/moses_exec
-    main/moses_exec_def
-    main/eval-candidate
-    main/eval-diversity
+#    main/moses_exec
+#    main/moses_exec_def
+#    main/eval-candidate
+#    main/eval-diversity
 
-    service/moses_service
+#    service/moses_service
 )
 
 TARGET_LINK_LIBRARIES (moses
