@@ -65,6 +65,8 @@ ADD_LIBRARY (moses SHARED STATIC
     main/moses_exec_def
     main/eval-candidate
     main/eval-diversity
+
+    service/moses_service
 )
 
 TARGET_LINK_LIBRARIES (moses

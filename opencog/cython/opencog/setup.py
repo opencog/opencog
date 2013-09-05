@@ -25,7 +25,20 @@ setup(
               sources=["pymoses.pyx"],
 #              libraries=["moses"],              # refers to "libmoses.so"
               language="c++",                   # remove this if C and not C++
-              extra_compile_args=["-fopenmp", "-O3", "-std=c++0x"],
+              extra_compile_args=["-fopenmp", "-O3", "-std=c++0x",
+                                  "-I../../learning/moses/service/",
+                                  "-I../../../",
+                                  "-I../../../DEPENDENCIES/python2.7/inc",
+                                  "-I../../../DEPENDENCIES/gsl-1.15]",
+                                  ],
+              extra_link_args=["-lmoses", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/moses/",
+                               "-lcogutil", "-L/home/cosmo/opencog/src/qtbin/opencog/util/",
+                               "-lcomboreduct", "-L/home/cosmo/opencog/src/qtbin/opencog/comboreduct/",
+                               "-lfeature_selection", "-L/home/cosmo/opencog/src/qtbin/opencog/learning/feature-selection/",
+                               "-lboost_program_options", "-lboost_thread",
+                               "-I/usr/lib/openmpi/include", "-I/usr/lib/openmpi/include/openmpi", "-pthread", "-L/usr/lib/openmpi/lib", "-lmpi_cxx", "-lmpi", "-lopen-rte",
+                               "-lopen-pal", "-ldl", "-Wl,-export-dynamic", "-lnsl", "-lutil", "-lm", "-ldl",
+                               ],
               extra_objects=["/home/cosmo/opencog/src/qtbin/opencog/learning/moses/libmoses.a"],
               )
     ]
