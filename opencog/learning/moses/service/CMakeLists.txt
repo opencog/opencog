@@ -12,16 +12,20 @@ ADD_LIBRARY (moses_service
     moses_service
 )
 
-#ADD_EXECUTABLE (moses_service_demo moses_service_demo)
-#TARGET_LINK_LIBRARIES (moses_service_demo
-#        moses_service
-#        moses_exec
-#        moses
-#        cogutil
-#)
-
 TARGET_LINK_LIBRARIES (moses_service
         moses_exec
         moses
         cogutil
+        comboreduct
+        feature_selection
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
 )
+
+IF (HAVE_MPI)
+    TARGET_LINK_LIBRARIES (moses_service
+        # These two work for both MPICH2 and OpenMPI, for me.
+        ${MPI_LIBRARY}
+        ${MPI_EXTRA_LIBRARY}
+    )
+ENDIF (HAVE_MPI)
