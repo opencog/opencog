@@ -171,6 +171,9 @@ void Octree3DMapManager::addNoneBlockEntity(const Handle &entityNode, BlockVecto
 
         if (isAvatarEntity(newEntity))
             mAllAvatarList.insert(map<Handle, Entity3D*>::value_type(entityNode, newEntity));
+
+        std::cout<<"Debug: add None Block Entitye: " << _entityName <<std::endl;
+
     }
     else
     {

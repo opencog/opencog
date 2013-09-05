@@ -49,16 +49,16 @@ using namespace std;
 // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
 // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
 // it its forward rule node has multiple forward state node, using the deepest one
-void StateNode::calculateNodeDepth()
+int StateNode::calculateNodeDepth()
 {
     if (this->depth == 0)
     {
-        return; // it's the goal state nodes
+        return 0; // it's the goal state nodes
     }
     else if (! this->forwardRuleNode)
     {
         this->depth = -1;
-        return;
+        return -1;
     }
 
     set<StateNode*>::iterator it;
@@ -72,6 +72,7 @@ void StateNode::calculateNodeDepth()
     }
 
     this->depth = deepest + 1;
+    return this->depth;
 
 }
 
@@ -93,6 +94,31 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
     return false;
 }
 
+SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode)
+{
+    // first , get the BackwardStateNodes
+    if (ruleNode->backwardLinks.size() == 0)
+        return &(spaceServer().getLatestMap());
+
+    set<StateNode*>::iterator it = ruleNode->backwardLinks.begin();
+    StateNode* lastedStateNode;
+    int smallestDepth = 99999;
+    for (; it != ruleNode->backwardLinks.end(); ++ it)
+    {
+        int depth = ((StateNode*)(*it))->calculateNodeDepth();
+        if ( depth <  smallestDepth)
+        {
+            smallestDepth = depth;
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+
+    // get the curMap of the backward rule of this state node
+    if (lastedStateNode->backwardRuleNode != 0)
+        return lastedStateNode->backwardRuleNode->curMap;
+    else
+        return &(spaceServer().getLatestMap());
+}
 
 // @ bool &found: return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
@@ -375,10 +401,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
-    SpaceServer::SpaceMap* clonedMap = spaceServer().cloneTheLatestSpaceMap();
-
-    // Set this cloned spaceMap for Inquery
-    Inquery::setSpaceMap(clonedMap);
 
     allRuleNodeInThisPlan.clear();
     unsatisfiedStateNodes.clear();
@@ -398,7 +420,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         newStateNode->backwardRuleNode = 0;
         newStateNode->forwardRuleNode = 0;
-        newStateNode->depth = 0;
+        newStateNode->depth = 999;
 
         temporaryStateNodes.push_front(newStateNode);
 
@@ -468,6 +490,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         // the state node with deeper depth will be solved first
         StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
+
+        SpaceServer::SpaceMap* curImaginaryMap;
+        if (curStateNode->backwardRuleNode == 0)
+            curImaginaryMap = &(spaceServer().getLatestMap());
+        else
+            curImaginaryMap = curStateNode->backwardRuleNode->curMap;
+
+        // Set this cloned spaceMap for Inquery
+        Inquery::setSpaceMap(curImaginaryMap);
 
         // if the deepest state node has a depth of -1, it means all the required states have been satisfied
         if (curStateNode->depth == -1)
@@ -1005,7 +1036,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
-        executeActionInImaginarySpaceMap(ruleNode,clonedMap);
+        // return the changed map
+        SpaceServer::SpaceMap* newCurMap = executeActionInImaginarySpaceMap(ruleNode,curImaginaryMap);
+        ruleNode->curMap = newCurMap;
 
     }
 
@@ -1204,27 +1237,31 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
 }
 
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
-void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
+SpaceServer::SpaceMap* OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer::SpaceMap *iSpaceMap)
 {
     static int imaginaryBlockNum = 1;
 
     // currently we just cheat to enable the following actions
     // ToBeImproved: the right way is to add a callback function for each action to auto execute
 
+    SpaceServer::SpaceMap* newClonedMap = iSpaceMap;
+
     switch (ruleNode->originalRule->action->getType().getCode())
     {
         case pai::EAT_CODE:
         {
             // get the handle of the food to eat
+            newClonedMap = iSpaceMap->clone();
             string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
             Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-            iSpaceMap->removeNoneBlockEntity(foodH);
+            newClonedMap->removeNoneBlockEntity(foodH);
             break;
         }
         case pai::MOVE_TO_OBJ_CODE:
         {
             // get the actor entity handle
+            newClonedMap = iSpaceMap->clone();
             string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
             Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
             Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
@@ -1234,13 +1271,14 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer:
             Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
             Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
             // get new location it moves tol
-            spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
+            spatial::BlockVector targetLocation = newClonedMap->getObjectLocation(targetH);
+            newClonedMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
             break;
         }
         case pai::WALK_CODE:
         {
             // get the actor entity handle
+            newClonedMap = iSpaceMap->clone();
             string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
             Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
             Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
@@ -1249,24 +1287,27 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer:
             string newPosVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
             spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
+            newClonedMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
 
             break;
         }
         case pai::BUILD_BLOCK_CODE:
         {
+            newClonedMap = iSpaceMap->clone();
             // get the  location of block
             string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
             spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
             Handle iBlockH = AtomSpaceUtil::addNode(*atomSpace, IMAGINARY_STRUCTURE_NODE,"Imaginary_Block_" + imaginaryBlockNum++);
-            iSpaceMap->addSolidUnitBlock(buildPos,iBlockH);
+            newClonedMap->addSolidUnitBlock(buildPos,iBlockH);
             break;
         }
         default:
             // TODO: TNick: is this the right way of handling other codes?
             break;
     }
+
+    return newClonedMap;
 
 }
 
