@@ -123,25 +123,52 @@ SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNo
 // @ bool &found: return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
 // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,bool ifCheckSameRuleNode)
+bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,
+                                                       bool ifCheckSameRuleNode, StateNode* curStateNode)
 {
+    //   if curStateNode is 0, it means it has no backward links yet, so only check in startStateNodes.
+    //   if curStateNode is not 0, check temporaryStateNodes first , if cannot find in temporaryStateNodes, check in startStateNodes.
     satstateNode = 0;
+    if ( (curStateNode != 0) && (curStateNode->backwardRuleNode != 0))
+    {
+        // find this state in temporaryStateNodes
+        if (findStateInTempStates(goalState,forwardRuleNode,satstateNode,ifCheckSameRuleNode,RuleNode::getDepthOfRuleNode(curStateNode->backwardRuleNode)))
+        {
+            //  check if this state has beed satisfied by the previous state nodes
+            float satisfiedDegree;
+            found = true;
 
-    // find this state in temporaryStateNodes
-    if (findStateInTempStates(goalState,forwardRuleNode,satstateNode,ifCheckSameRuleNode))
+            State* vState = satstateNode->state;
+            if (vState->isSatisfied(goalState,satisfiedDegree))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
+            // cannot find this state in temporaryStateNodes
+            found = false;
+        }
+    }
+
+    // cannot find in temporaryStateNodes , try to find in startStateNodes
+    if (findStateInStartStateNodes(goalState,satstateNode))
     {
         //  check if this state has beed satisfied by the previous state nodes
         float satisfiedDegree;
+        found = true;
 
         State* vState = satstateNode->state;
         if (vState->isSatisfied(goalState,satisfiedDegree))
         {
-            found = true;
             return true;
         }
         else
         {
-            found = true;
             return false;
         }
     }
@@ -151,19 +178,27 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
         found = false;
         return false;
     }
+
 }
 
 //  return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
-bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,StateNode* &stateNode,bool ifCheckSameRuleNode)
+bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,StateNode* &stateNode,bool ifCheckSameRuleNode, int depth)
 {
     //  check if this state has beed satisfied by the previous state nodes
     list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
 
+    // most closed state node, describing the same state of the input state
+    stateNode = 0;
+    int smallestDepth = depth;
+
     for (;vit != temporaryStateNodes.end(); vit ++)
     {
-        // there are possible mutiple same state nodes describe this same state in temporaryStateNodes,
-        // but the latest one is put in the front, so we can just check the first one we find
+        // only check the states backward then the input depth
+        // cuz the forward state won't affect the current state
+        int sdepth = ((StateNode*)(*vit))->calculateNodeDepth();
+        if (sdepth < depth)
+            continue;
 
         // toBeImproved: there is some messy logic order problem in backward reasoning,
         // sometimes need to add the effect states of a rulenode into temporaryStateNodes, before check the precondition states of this rule node
@@ -174,19 +209,44 @@ bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,St
         State* vState = ((StateNode*)(*vit))->state;
         if (vState->isSameState(state))
         {
-            stateNode = ((StateNode*)(*vit));
+            if (sdepth < smallestDepth ) // get the most closed state node to the input depth
+            {
+                stateNode = ((StateNode*)(*vit));
+            }
 
-            return true;
         }
 
     }
 
     // cannot find this state in temporaryStateNodes
-    stateNode = 0;
-    return false;
+    if (stateNode != 0)
+        return true;
+    else
+        return false;
 
 }
 
+bool OCPlanner::findStateInStartStateNodes(State& state, StateNode* &stateNode)
+{
+    //  check if this state has beed satisfied by the previous state nodes
+    list<StateNode*>::const_iterator vit = startStateNodes.begin();
+
+    // most closed state node, describing the same state of the input state
+    stateNode = 0;
+
+    for (;vit != startStateNodes.end(); vit ++)
+    {
+        State* vState = ((StateNode*)(*vit))->state;
+        if (vState->isSameState(state))
+        {
+            stateNode = ((StateNode*)(*vit));
+            return true;
+        }
+    }
+
+    return false;
+
+}
 
 
 int RuleNode::getDepthOfRuleNode(const RuleNode* r)
@@ -397,13 +457,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     int ruleNodeCount = 0;
 
-    imaginarySpaceMaps.clear();
-
     curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
     // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
 
+    imaginarySpaceMaps.clear();
+    startStateNodes.clear();
     allRuleNodeInThisPlan.clear();
     unsatisfiedStateNodes.clear();
     temporaryStateNodes.clear();
@@ -424,7 +484,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         newStateNode->forwardRuleNode = 0;
         newStateNode->depth = 999;
 
-        temporaryStateNodes.push_front(newStateNode);
+        startStateNodes.push_front(newStateNode);
 
     }
 
@@ -475,11 +535,20 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         return 0;
     }
 
+    int tryStepNum = 0;
+
     while(unsatisfiedStateNodes.size() != 0)
     {
         Rule* selectedRule = 0;
 
         curtimeStamp ++;
+
+        tryStepNum ++;
+        if (tryStepNum > 999)
+        {
+            std::cout << "Planning failed! Has tried more than 999 steps of planning, cannot find a plan!" << std::endl;
+            return 0;
+        }
 
         // decide which state should be chosed to achieved first
         list<StateNode*>::iterator stateNodeIter;
@@ -2246,7 +2315,7 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
                     s->name().c_str());
 
         StateNode* stateNode;
-        if (findStateInTempStates(*s, 0, stateNode, false))
+        if (findStateInTempStates(*s, 0, stateNode, false, RuleNode::getDepthOfRuleNode(ruleNode)))
         {
             ruleNode->orginalGroundedParamValues.push_back(stateNode->state->getParamValue());
         }
