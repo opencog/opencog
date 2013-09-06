@@ -397,6 +397,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     int ruleNodeCount = 0;
 
+    imaginarySpaceMaps.clear();
+
     curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
     // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
@@ -1152,6 +1154,16 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
 
+    // delete all imaginary space map
+    vector<SpaceServer::SpaceMap*>::iterator iMapIt = imaginarySpaceMaps.begin();
+    for (;iMapIt != imaginarySpaceMaps.end(); ++ iMapIt)
+    {
+        SpaceServer::SpaceMap* iMap = (SpaceServer::SpaceMap*)(*iMapIt);
+
+        if (iMap)
+            delete iMap;
+    }
+
     // todo: remove all the imaginary atoms in imaginaryHandles
 
     return planID;
@@ -1306,6 +1318,9 @@ SpaceServer::SpaceMap* OCPlanner::executeActionInImaginarySpaceMap(RuleNode* rul
             // TODO: TNick: is this the right way of handling other codes?
             break;
     }
+
+    if (newClonedMap != iSpaceMap)
+        imaginarySpaceMaps.push_back(newClonedMap);
 
     return newClonedMap;
 

@@ -280,6 +280,8 @@ protected:
      // this list will be sorted after a planning finised according to the order of dependency relations
      list<RuleNode*> allRuleNodeInThisPlan;
 
+     vector<SpaceServer::SpaceMap*> imaginarySpaceMaps;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
