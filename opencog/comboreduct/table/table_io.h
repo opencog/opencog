@@ -292,11 +292,6 @@ std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::vector<std::string>& ignore_features,
                                 const type_tree& tt, bool has_header);
 
-std::istream& istreamDenseTable_noHeader(std::istream& in, Table& tab,
-                                         unsigned target_idx,
-                                         const std::vector<unsigned>& ignore_idxs,
-                                         const type_tree& tt);
-
 // WARNING: this implementation only supports boolean ctable!!!!
 CTable loadCTable(const std::string& file_name);
 

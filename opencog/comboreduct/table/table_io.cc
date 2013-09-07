@@ -871,6 +871,55 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
     return in;
 }
 
+// ==================================================================
+
+static istream&
+istreamDenseTable_noHeader(istream& in, Table& tab,
+                                    unsigned target_idx,
+                                    const vector<unsigned>& ignore_idxs,
+                                    const type_tree& tt) {
+    // Get the entire dataset into memory (cleaning weird stuff)
+    string line;
+    std::vector<string> lines;
+    while (get_data_line(in, line))
+        lines.push_back(line);
+
+    // Allocate all rows in the itable and otable
+    tab.itable.resize(lines.size());
+    tab.otable.resize(lines.size());
+
+    // Get the elementary io types
+    vector<type_node> itypes =
+        vector_comp(get_signature_inputs(tt), get_type_node);
+    type_node otype = get_type_node(get_signature_output(tt));
+
+    // Assign the io type to the table
+    tab.itable.set_types(itypes);
+    tab.otable.set_type(otype);
+
+    // Instantiate type conversion for inputs
+    from_tokens_visitor ftv(itypes);
+
+    // Function to parse each line (to be called in parallel)
+    auto parse_line = [&](unsigned i) {
+        auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
+        tab.itable[i] = ftv(tokenIO.first);
+        tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+    };
+
+    // Call it for each line in parallel
+    auto ir = boost::irange((size_t)0, lines.size());
+    vector<size_t> row_idxs(ir.begin(), ir.end());
+    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
+
+    // Assign the target position relative to the ignored indices
+    // (useful for writing that file back)
+    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
+                                                  arg1 < target_idx);
+
+    return in;
+}
+
 istream& istreamDenseTable(istream& in, Table& tab,
                            const string& target_feature,
                            const vector<string>& ignore_features,
@@ -906,51 +955,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
     return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt);
 }
 
-istream& istreamDenseTable_noHeader(istream& in, Table& tab,
-                                    unsigned target_idx,
-                                    const vector<unsigned>& ignore_idxs,
-                                    const type_tree& tt) {
-    // Get the entire dataset into memory (cleaning weird stuff)
-    string line;
-    std::vector<string> lines;
-    while (get_data_line(in, line))
-        lines.push_back(line);
-
-    // Allocate all rows in the itable and otable
-    tab.itable.resize(lines.size());
-    tab.otable.resize(lines.size());
-
-    // Get the elementary io types
-    vector<type_node> itypes =
-        vector_comp(get_signature_inputs(tt), get_type_node);
-    type_node otype = get_type_node(get_signature_output(tt));
-
-    // Assign the io type to the table
-    tab.itable.set_types(itypes);
-    tab.otable.set_type(otype);
-
-    // Instantiate type convertion for inputs
-    from_tokens_visitor ftv(itypes);
-
-    // Function to parse each line (to be called in parallel)
-    auto parse_line = [&](unsigned i) {
-        auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
-        tab.itable[i] = ftv(tokenIO.first);
-        tab.otable[i] = token_to_vertex(otype, tokenIO.second);
-    };
-
-    // Call it for each line in parallel
-    auto ir = boost::irange((size_t)0, lines.size());
-    vector<size_t> row_idxs(ir.begin(), ir.end());
-    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
-
-    // Assign the target position relative to the ignored indices
-    // (useful for writing that file back)
-    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
-                                                  arg1 < target_idx);
-
-    return in;
-}
+// ==================================================================
 
 // Parse a CTable row
 CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_str)
