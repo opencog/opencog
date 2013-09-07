@@ -879,6 +879,34 @@ istream& istreamTable_NEW(istream& in, Table& tab,
 
 // ==================================================================
 
+/**
+ * Take a line and return a pair with vector containing the input
+ * elements and then output element.
+ */
+template<typename T>
+std::pair<std::vector<T>, T>
+tokenizeRowIO(const std::string& line,
+              const std::vector<unsigned>& ignored_indices = empty_unsigned_vec,
+              unsigned target_idx = 0)
+{
+    std::pair<std::vector<T>, T> res;
+    table_tokenizer tok = get_row_tokenizer(line);
+    unsigned i = 0;
+    for (const std::string& t : tok) {
+        if (!boost::binary_search(ignored_indices, i)) {
+            T el = boost::lexical_cast<T>(t);
+            if (target_idx == i)
+                res.second = el;
+            else
+                res.first.push_back(el);
+        }
+        i++;
+    }
+    return res;
+}
+
+// ==================================================================
+
 static istream&
 istreamDenseTable_noHeader(istream& in, Table& tab,
                                     unsigned target_idx,
