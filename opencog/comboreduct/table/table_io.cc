@@ -746,43 +746,16 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
     return in;
 }
 
-/**
- * Perform 2 passes:
- *
- * 1) Infer
- * 1.1) its type
- * 1.2) whether it has a header
- * 1.3) whether it is dense or sparse
- *
- * 2) Load the actual data
- */
-istream& istreamTable_NEW(istream& in, Table& tab,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
-{
-    // Infer the properties of the table without loading its content
-    type_tree tt;
-    bool has_header, is_sparse;
-    streampos beg = in.tellg();
-    inferTableAttributes(in, target_feature, ignore_features,
-                         tt, has_header, is_sparse);
-    in.seekg(beg);
+// ==================================================================
 
-    if (is_sparse) {
-        // fallback on the old loader
-        // TODO:  this could be definitely be optimized
-        return istreamTable(in, tab, target_feature, ignore_features);
-    } else {
-        return istreamDenseTable(in, tab, target_feature, ignore_features,
-                                 tt, has_header);
-    }
-}
-
-istream& inferTableAttributes(istream& in, const string& target_feature,
+static istream&
+inferTableAttributes(istream& in, const string& target_feature,
                               const vector<string>& ignore_features,
-                              type_tree& tt, bool& has_header, bool& is_sparse,
-                              int maxline)
+                              type_tree& tt, bool& has_header, bool& is_sparse)
 {
+    // maxline is the maximum number of lines to read to infer the
+    // attributes. A negative number means reading all lines.
+    int maxline = 20;
     streampos beg = in.tellg();
 
     // Get a portion of the dataset into memory (cleaning weird stuff)
@@ -871,13 +844,46 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
     return in;
 }
 
+/**
+ * Perform 2 passes:
+ *
+ * 1) Infer
+ * 1.1) its type
+ * 1.2) whether it has a header
+ * 1.3) whether it is dense or sparse
+ *
+ * 2) Load the actual data
+ */
+istream& istreamTable_NEW(istream& in, Table& tab,
+                          const string& target_feature,
+                          const vector<string>& ignore_features)
+{
+    // Infer the properties of the table without loading its content
+    type_tree tt;
+    bool has_header, is_sparse;
+    streampos beg = in.tellg();
+    inferTableAttributes(in, target_feature, ignore_features,
+                         tt, has_header, is_sparse);
+    in.seekg(beg);
+
+    if (is_sparse) {
+        // fallback on the old loader
+        // TODO:  this could be definitely be optimized
+        return istreamTable(in, tab, target_feature, ignore_features);
+    } else {
+        return istreamDenseTable(in, tab, target_feature, ignore_features,
+                                 tt, has_header);
+    }
+}
+
 // ==================================================================
 
 static istream&
 istreamDenseTable_noHeader(istream& in, Table& tab,
                                     unsigned target_idx,
                                     const vector<unsigned>& ignore_idxs,
-                                    const type_tree& tt) {
+                                    const type_tree& tt)
+{
     // Get the entire dataset into memory (cleaning weird stuff)
     string line;
     std::vector<string> lines;

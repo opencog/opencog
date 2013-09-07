@@ -276,17 +276,6 @@ Table loadTable(const std::string& file_name,
 
 type_node infer_type_from_token2(type_node curr_guess, const std::string& token);
 
-/**
- * maxline is the maximum number of lines to read to infer the
- * attributes. A negative number means reading all lines.
- */
-std::istream& inferTableAttributes(std::istream& in,
-                                   const std::string& target_feature,
-                                   const std::vector<std::string>& ignore_features,
-                                   type_tree& tt,
-                                   bool& has_header, bool& is_sparse,
-                                   int maxline = 20);
-
 std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::string& target_feature,
                                 const std::vector<std::string>& ignore_features,
