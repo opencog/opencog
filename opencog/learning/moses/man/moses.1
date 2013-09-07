@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "December 22, 2012" "3.2.13" "OpenCog Learning"
+.TH MOSES 1 "Sept 7, 2013" "3.6.8" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -331,8 +331,16 @@ precision and recall, that is, the F_1 score.
 T}
 
 \fBip\fR@T{
-Clustering ("interesting patterns") on an input table. XXX more detail,
-please.
+Discovery of "interesting predicates" that select rows from the
+input table. The data table is assumed to consist of a number of 
+boolean-valued input columns, and a contin-valued (floating point)
+target column. \fBmoses\fP will learn predicates that select the 
+most "interesting" subset of the rows in the table.  The values in
+the output columns of the selected rows form a probability
+distribution (PDF); this PDF is considered to be "interesting"
+if it maximizes a linear combination of several different measures
+of the the PDF: the Kullback-Leibler divergence, the skewness, and
+the standardized Mann-Whitney U statistic. 
 T}
 
 \fBkl\fR@T{
@@ -344,7 +352,7 @@ T}
 
 \fBann-it\fR@T{
 Regression on an input table, using a neural network.  (kind-of-like
-a hidden Markov model-sih, kind of. XXX Huh???)
+a hidden Markov model-ish, kind of. XXX Huh???)
 T}
 .TE
 .PP

@@ -2,7 +2,7 @@
  * opencog/learning/moses/scoring/scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012,2013 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
