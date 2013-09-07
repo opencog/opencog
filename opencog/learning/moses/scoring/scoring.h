@@ -806,13 +806,8 @@ struct contin_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    // Hmmm, not picked up from base class, for some reason... Perhaps
-    // this is because another set_complexity_coef method is being
-    // overloaded and gcc relies solely on the name of the method.
-//    virtual void set_complexity_coef(score_t complexity_ratio) {
-//        bscore_base::set_complexity_coef(complexity_ratio);
-//    }
     virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    using bscore_base::set_complexity_coef; // Avoid hiding/shadowing
 
 protected:
     OTable target;
@@ -1099,7 +1094,7 @@ protected:
 };
 
 // Bscore to find interesting predicates. Interestingness is measured
-// in terms of several aspects such as
+// in terms of a linear combination of the following:
 //
 //    1) The Kullback Leibler divergence between the distribution
 //       output of the dataset and the distribution over the output
@@ -1144,13 +1139,8 @@ struct interesting_predicate_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    // Hmmm, not picked up from base class, for some reason... Perhaps
-    // this is because another set_complexity_coef method is being
-    // overloaded and gcc relies solely on the name of the method.
-//    virtual void set_complexity_coef(score_t complexity_ratio) {
-//        bscore_base::set_complexity_coef(complexity_ratio);
-//    }
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
+    using bscore_base::set_complexity_coef; // Avoid hiding/shadowing
 
 protected:
 
