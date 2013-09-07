@@ -1093,22 +1093,31 @@ protected:
     size_t _ctable_usize;
 };
 
-// Bscore to find interesting predicates. Interestingness is measured
-// in terms of a linear combination of the following:
+// Bscore to find interesting predicates. 
+//
+// The "predicate" that is found is a combo tree program that selects
+// only certain rows out of the data table.  The data table is assumed
+// to have one contin-valued output column, and boolean-valued input
+// columns. The predicate efectively selects a bunch of outputs. The
+// distribution of the resulting outputs is then examined; this
+// distribution is deemed "interesting" by maximizing a linear
+// combination of the following measures:
 //
 //    1) The Kullback Leibler divergence between the distribution
-//       output of the dataset and the distribution over the output
-//       filtered in by the program (when the predicate is true).
-//    2) The (absolute or relative) difference in skewness of the 2 distributions
-//    3) The standardized Mann-Whitney U statistic
-//    4) The product of #2 and #3
-//    5) Whether the activation is with a desired range
+//       of the output values of the entire dataset, and the distribution
+//       of the output values of the rows selected by the predicate.
+//    2) The (absolute or relative) difference in skewness of the two
+//       distributions.
+//    3) The standardized Mann-Whitney U statistic on the selected outputs.
+//    4) The product of #2 and #3.
+//    5) Whether the fraction of rows that were welected (the "activation")
+//       is with a desired range.
 //
-// All those aspects are weighted; any that have null weight are
+// All those measures are weighted; any that have null weight are
 // disabled (it isn't computed and isn't pushed in the bscore).
 //
-// The predicate can be positive (we retain the outputs when the
-// predicate is true), or negative (we retain the outputs when the
+// The predicate can be positive (we retain the rows/outputs when the
+// predicate is true), or negative (we retain the rows/outputs when the
 // predicate is false).
 struct interesting_predicate_bscore : public bscore_base
 {

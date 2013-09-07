@@ -1851,6 +1851,8 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
       _decompose_kld(decompose_kld_)
 {
     // Define counter (mapping between observation and its number of occurences)
+    // That is, create a historgram showing how often each output value
+    // occurs in the ctable.
     boost::for_each(_ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
                     _counter[get_contin(v.first)] += v.second; }); });
@@ -1871,14 +1873,22 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
 
 penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
-    OTable pred_ot(tr, _ctable);
+    // OK, here's the deal. The combo tree evaluates to T/F on each
+    // input table row. That is, the combo tree is a predicate that
+    // selects certain rows of the input table.  Here, pred_cache is just
+    // a cache, to avoid multiple evaluations of the combo tree: its 
+    // just a table with just one column, equal to the value of the
+    // combo tree on each input row.
+    OTable pred_cache(tr, _ctable);
 
+    // target simply negates (inverts) the predicate.
     vertex target = bool_to_vertex(_positive);
     
+    // Count how many rows the predicate selected.
     unsigned total = 0;   // total number of observations (could be optimized)
     unsigned actives = 0; // total number of positive (or negative if
                           // positive is false) predicate values
-    boost::for_each(_ctable | map_values, pred_ot,
+    boost::for_each(_ctable | map_values, pred_cache,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         unsigned tc = c.total_count();
                         if (v == target)
@@ -1892,28 +1902,31 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
     penalized_bscore pbs;
     behavioral_score &bs = pbs.first;
 
-    // filter the output according to pred_ot
-    counter_t pred_counter;     // map obvervation to occurence
-                                // conditioned by predicate truth
-    boost::for_each(_ctable | map_values, pred_ot,
+    // Create a histogram of output values, ignoring non-slected rows.
+    // Do this by filtering the ctable output column according to the,
+    // predicate, discarding non-selected rows. Then total up how often
+    // each distinct output value occurs.
+    counter_t pred_counter;
+    boost::for_each(_ctable | map_values, pred_cache,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         if (v == target) {
                             for (const auto& mv : c)
                                 pred_counter[get_contin(mv.first)] = mv.second;
                         }});
 
-    logger().fine("pred_ot.size() = %u", pred_ot.size());
+    logger().fine("pred_cache.size() = %u", pred_cache.size());
     logger().fine("pred_counter.size() = %u", pred_counter.size());
 
-    // If there's only one row that was selected, then punt.
-    // Statistics like skewness need more than one row.
+    // If there's only one output value left, then punt.  Statistics
+    // like skewness need a distribution that isn't a single spike.
     if (pred_counter.size() == 1) {
         pbs.first.push_back(very_worst_score);
         log_candidate_pbscore(tr, pbs);
         return pbs;
     }
 
-    // compute KLD
+    // Compute Kullbeck-Liebler divergence (KLD) of the filetered
+    // distribution.
     if (_kld_w > 0.0) {
         if (_decompose_kld) {
             _klds(pred_counter, back_inserter(bs));
@@ -1925,9 +1938,10 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
         }
     }
 
+    // Compute skewness of the filtered distribution.
     if (_skewness_w > 0 || _stdU_w > 0 || _skew_U_w > 0) {
         
-        // gather statistics with a boost accumulator
+        // Gather statistics with a boost accumulator
         accumulator_t acc;
         for (const auto& v : pred_counter)
             acc(v.first, weight = v.second);
@@ -1949,7 +1963,7 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
         score_t stdU = 0;
         if (_stdU_w > 0 || _skew_U_w > 0) {
 
-            // compute the standardized Mann–Whitney U
+            // Compute the standardized Mann–Whitney U
             stdU = standardizedMannWhitneyU(_counter, pred_counter);
             logger().fine("stdU = %f", stdU);
             if (_stdU_w > 0.0)
