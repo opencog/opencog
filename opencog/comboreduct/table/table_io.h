@@ -58,19 +58,53 @@ void removeNonASCII(std::string& str);
  */
 bool checkCarriageReturn(std::istream& in);
 
+/**
+ * Convert strings to typed values
+ */
 builtin token_to_boolean(const std::string& token);
 contin_t token_to_contin(const std::string& token);
 vertex token_to_vertex(const type_node &tipe, const std::string& token);
 
 
-//////////////////
-// istreamTable //
-//////////////////
+// ===========================================================
 
 static const std::vector<unsigned> empty_unsigned_vec =
     std::vector<unsigned>();
 static const std::vector<std::string> empty_string_vec =
     std::vector<std::string>();
+
+
+typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
+
+/**
+ * Take a row, return a tokenizer.  Tokenization uses the
+ * separator characters comma, blank, tab (',', ' ' or '\t').
+ */
+table_tokenizer get_row_tokenizer(const std::string& line);
+
+/**
+ * Take a line and return a vector containing the elements parsed.
+ * Used by istreamTable.
+ */
+template<typename T>
+static std::vector<T> tokenizeRow(const std::string& line,
+                           const std::vector<unsigned>& ignored_indices =
+                           empty_unsigned_vec)
+{
+    table_tokenizer tok = get_row_tokenizer(line);
+    std::vector<T> res;
+    unsigned i = 0;
+    for (const std::string& t : tok)
+        if (!boost::binary_search(ignored_indices, i++))
+            res.push_back(boost::lexical_cast<T>(t));
+    return res;
+}
+
+// ===========================================================
+
+//////////////////
+// istreamTable //
+//////////////////
 
 // some hacky function to get the header of a DSV file (assuming there is one)
 std::vector<std::string> get_header(const std::string& input_file);
@@ -114,8 +148,6 @@ Table loadTable(const std::string& file_name,
                 const std::string& target_feature = std::string(),
                 const std::vector<std::string>& ignore_features
                 = empty_string_vec);
-
-type_node infer_type_from_token2(type_node curr_guess, const std::string& token);
 
 std::istream& istreamDenseTable(std::istream& in, Table& tab,
                                 const std::string& target_feature,

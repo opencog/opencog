@@ -148,13 +148,11 @@ parse_key_val(string chunk)
     return {key, val};
 }
         
-typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
-
 /**
  * Take a row, return a tokenizer.  Tokenization uses the
- * seperator characters comma, blank, tab (',', ' ' or '\t').
+ * separator characters comma, blank, tab (',', ' ' or '\t').
  */
-static table_tokenizer get_row_tokenizer(const string& line)
+table_tokenizer get_row_tokenizer(const std::string& line)
 {
     typedef boost::escaped_list_separator<char> separator;
     typedef boost::tokenizer<separator> tokenizer;
@@ -232,7 +230,8 @@ type_node infer_type_from_token(const string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-type_node infer_type_from_token2(type_node curr_guess, const string& token)
+static type_node 
+infer_type_from_token2(type_node curr_guess, const string& token)
 {
     type_node tokt = infer_type_from_token(token);
 
@@ -308,25 +307,6 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 
     // unreachable
     return id::null_vertex;
-}
-
-// ===========================================================
-/**
- * Take a line and return a vector containing the elements parsed.
- * Used by istreamTable.
- */
-template<typename T>
-static std::vector<T> tokenizeRow(const std::string& line,
-                           const std::vector<unsigned>& ignored_indices =
-                           empty_unsigned_vec)
-{
-    table_tokenizer tok = get_row_tokenizer(line);
-    std::vector<T> res;
-    unsigned i = 0;
-    for (const std::string& t : tok)
-        if (!boost::binary_search(ignored_indices, i++))
-            res.push_back(boost::lexical_cast<T>(t));
-    return res;
 }
 
 // ===========================================================
