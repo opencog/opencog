@@ -76,6 +76,8 @@ namespace opencog { namespace oac {
         STATE_LESS_THAN     // LessThanLink
     };
 
+    extern const char* STATE_TYPE_NAME[5];
+
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
@@ -102,6 +104,7 @@ namespace opencog { namespace oac {
     class State
     {
     public:
+
         ActionParameter* stateVariable;
 
         // whose feature this state describes. e.g. the robot's energy
@@ -116,6 +119,7 @@ namespace opencog { namespace oac {
 
         // see the enum StateType
         StateType stateType;
+
 
         // some kinds of state is not apparent, need real-time inquery from the system
         // e.g.: Distance(a,b) - the distance between a and b, it's usually not apparent, need to call corresponding funciton to calcuate

@@ -979,8 +979,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;

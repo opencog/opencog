@@ -42,6 +42,15 @@ const char* opencog::oac::EFFECT_OPERATOR_NAME[9] =
     "OP_DIV"      // only for numeric variables /=
 };
 
+const char* opencog::oac::STATE_TYPE_NAME[5] =
+{
+    "=",     // EvaluationLink
+    "!=",     // EvaluationLink
+    "WITHIN", // EvaluationLink + PredicationNode "Fuzzy_within"
+    ">", // GreaterThanLink
+    "<"     // LessThanLink
+};
+
 State::State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
              vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
     : stateOwnerList(_stateOwnerList),stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)

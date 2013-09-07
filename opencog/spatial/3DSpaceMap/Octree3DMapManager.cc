@@ -91,6 +91,7 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
     nonBlockEntitieshistoryLocations.clear();
 
+    /*
 #ifdef HAVE_ZMQ
     // set up the zmq socket to communicate with the learning server
     this->zmqLSContext = new zmq::context_t(1);
@@ -112,14 +113,39 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 #endif // HAVE_ZMQ
 
     this->enableStaticsMapLearning = config().get_bool("ENABLE_STATICS_MAP_LEARNING");
+   */
+}
 
+Octree3DMapManager::~Octree3DMapManager()
+{
+    // delete all the BlockEnties
+    map<int,BlockEntity*>::iterator iter2;
+    for (iter2 = mBlockEntityList.begin(); iter2 != mBlockEntityList.end(); ++iter2)
+    {
+        if((BlockEntity*)(iter2->second))
+            delete ((BlockEntity*)(iter2->second));
+    }
+
+    // delete all the SuperBlockEntities TODO
+
+    // delete all the NoneBlockEntities
+    map<Handle,Entity3D*>::iterator nonBlockEnIt = mAllNoneBlockEntities.begin();
+    for (; nonBlockEnIt != mAllNoneBlockEntities.end(); ++ nonBlockEnIt)
+    {
+        if ((Entity3D*)(nonBlockEnIt->second))
+            delete ((Entity3D*)(nonBlockEnIt->second));
+    }
+
+    // delete octree
+    if (mRootOctree)
+        delete mRootOctree;
 }
 
 Octree3DMapManager* Octree3DMapManager::clone()
 {
 
     Octree3DMapManager* cloneMap = new Octree3DMapManager(mTotalDepthOfOctree,mMapName, mRootOctree,mFloorHeight,mAgentHeight,mTotalUnitBlockNum,mMapBoundingBox,selfAgentEntity,
-                                    mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,mPosToNoneBlockEntityMap,nonBlockEntitieshistoryLocations);
+                                    mAllUnitAtomsToBlocksMap, mAllUnitBlocksToAtomsMap,mBlockEntityList, mAllNoneBlockEntities,nonBlockEntitieshistoryLocations);
     return cloneMap;
 }
 
@@ -627,6 +653,8 @@ const Entity3D* Octree3DMapManager::getEntity( std::string entityName) const
 
     for ( it = mAllNoneBlockEntities.begin( ); it != mAllNoneBlockEntities.end( ); ++it )
     {
+        // debug
+        Entity3D* e = (Entity3D*)(it->second);
         if (((Entity3D*)(it->second))->getEntityName() == entityName)
             return (it->second);
     } // for
@@ -1254,8 +1282,7 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
 Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
                  int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                  map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                 Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
-                 map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations):
+                 Entity3D*>& _AllNoneBlockEntities, map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations):
                 mTotalDepthOfOctree(_TotalDepthOfOctree), mMapName(_MapName),mFloorHeight(_FloorHeight),mAgentHeight(_AgentHeight),mTotalUnitBlockNum(_TotalUnitBlockNum),
                 mMapBoundingBox(_MapBoundingBox), selfAgentEntity(_selfAgentEntity)
 
@@ -1269,6 +1296,7 @@ Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _Map
     mAllUnitBlocksToAtomsMap = _AllUnitBlocksToAtomsMap;
 
     // clone all the BlockEnties
+    mBlockEntityList.clear();
     map<int,BlockEntity*>::iterator iter2;
     for (iter2 = _BlockEntityList.begin(); iter2 != _BlockEntityList.end(); ++iter2)
     {
@@ -1278,9 +1306,21 @@ Octree3DMapManager::Octree3DMapManager(int _TotalDepthOfOctree,std::string  _Map
 
     // clone all the SuperBlockEntities TODO
 
-    // copy all the NoneBlockEntities
-    mAllNoneBlockEntities = _AllNoneBlockEntities;
-    mPosToNoneBlockEntityMap = _PosToNoneBlockEntityMap;
+    // copy all the NoneBlockEntities and mPosToNoneBlockEntityMap and mAllAvatarList
+    mAllNoneBlockEntities.clear();
+    mPosToNoneBlockEntityMap.clear();
+    mAllAvatarList.clear();
+    map<Handle,Entity3D*>::iterator nonBlockEnIt = _AllNoneBlockEntities.begin();
+    for (; nonBlockEnIt != _AllNoneBlockEntities.end(); ++ nonBlockEnIt)
+    {
+        Entity3D* clonedEntity = ((Entity3D*)(nonBlockEnIt->second))->clone();
+        mAllNoneBlockEntities.insert(map<Handle,Entity3D*>::value_type(nonBlockEnIt->first, clonedEntity));
+        mPosToNoneBlockEntityMap.insert(multimap<BlockVector, Entity3D*>::value_type(clonedEntity->getPosition(),clonedEntity));
+        if (isAvatarEntity(clonedEntity))
+            mAllAvatarList.insert(map<Handle, Entity3D*>::value_type(nonBlockEnIt->first, clonedEntity));
+
+    }
+
     nonBlockEntitieshistoryLocations = _nonBlockEntitieshistoryLocations;
 
  }

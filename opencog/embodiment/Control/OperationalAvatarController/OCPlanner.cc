@@ -940,8 +940,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             cout<<"Effect  " << effectNum <<": ";
             outputStateInfo(effState, false);
             cout << std::endl;
-            cout << "      value changed:" << ActionParameter::ParamValueToString(*oldValItor) << " -> " << effState->stateVariable->stringRepresentation();
-            cout << std::endl;
+            cout << "           [value changed]:  "
+                 << STATE_TYPE_NAME[e->state->stateType] << " " << ActionParameter::ParamValueToString(*oldValItor)
+                 << " -> " << STATE_TYPE_NAME[effState->stateType]<< " "<< effState->stateVariable->stringRepresentation()
+                 << std::endl;
 
             // skip the current state node
             if (curStateNode->state->isSameState(*effState) )
@@ -2369,7 +2371,7 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
 
 void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
 {
-    cout<< "State:"<< s->name() << " ( " ;
+    cout<< "State: "<< s->name() << " ( " ;
     vector<ParamValue>::iterator ownerIt;
     bool isFirstOne = true;
     for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
@@ -2383,7 +2385,7 @@ void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
 
     if (outPutStateValue)
     {
-        cout << " = " << s->stateVariable->stringRepresentation();
+        cout << " " << STATE_TYPE_NAME[s->stateType] << " " << s->stateVariable->stringRepresentation();
     }
 
 }

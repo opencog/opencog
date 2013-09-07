@@ -82,6 +82,7 @@ Octree::Octree(Octree3DMapManager* _om, BlockVector& _nearLeftBottomPoint, Octre
 
 Octree::~Octree()
 {
+    // delete itself at the same time delete all its children octrees recursively
     if (mParent != 0)
     {
         mParent->mChildren[mIndex_x][mIndex_y][mIndex_z] = 0;
