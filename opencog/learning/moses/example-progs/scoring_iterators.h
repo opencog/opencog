@@ -24,7 +24,13 @@
 #ifndef _MOSES_SCORING_ITERATORS_H
 #define _MOSES_SCORING_ITERATORS_H
 
+#include <opencog/util/dorepeat.h>
+#include <opencog/util/numeric.h> // needed for pow2
+#include <opencog/comboreduct/combo/vertex.h> // needed for contin_t
+
 namespace opencog { namespace moses {
+
+using namespace opencog::combo;
 
 // Base functor for functors taking an iterator range of value type and result T
 template<typename T>
