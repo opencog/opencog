@@ -1,7 +1,7 @@
 /** 
  * problem.cc ---
  *
- * Copyright (C) 2013 Poulin Holdings LLC
+ * Copyright (C) 2013 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -35,6 +35,24 @@ problem_params::problem_params(const reduct::rule& bool_reduct_,
     mmr_pa(mmr_pa_)
 {
 }
+
+
+map<std::string, problem_base*> problem_set;
+
+void register_problem(problem_base* prob)
+{
+    std::pair<std::string, problem_base*> pr(prob->name(), prob);
+    problem_set.insert(pr);
+}
+
+problem_base* find_problem(const string& name)
+{
+    auto it = problem_set.find(name);
+    if (it != problem_set.end())
+        return it->second;
+    return NULL;
+}
+
 
 } // ~namespace moses
 } // ~namespace opencog

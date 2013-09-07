@@ -1,7 +1,7 @@
 /** 
  * problem.h ---
  *
- * Copyright (C) 2013 Poulin Holdings LLC
+ * Copyright (C) 2013 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>
  *
@@ -69,8 +69,10 @@ class problem_base
         virtual void run(problem_params&) = 0;
 };
 
-// XXX temporary hack
-extern problem_base* probm;
+void register_problem(problem_base*);
+problem_base* find_problem(const string&);
+
+
 
 } // ~namespace moses
 } // ~namespace opencog

@@ -1,9 +1,12 @@
 /** 
  * demo-problems.cc ---
  *
- * Copyright (C) 2013 Poulin Holdings LLC
+ * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2013 Linas Vepstas
  *
- * Author: Linas Vepstas <linasvepstas@gmail.com>
+ * Author: Nil Geisweiller <ngeiswei@gmail.com>
+ *         Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -25,6 +28,7 @@
 #include <opencog/learning/moses/example-progs/scoring_iterators.h>
 
 #include "problem.h"
+#include "demo-problems.h"
 
 namespace opencog { namespace moses {
 
@@ -35,10 +39,13 @@ class majority_problem : public problem_base
         virtual void run(problem_params&);
 };
 
+/// Demo/example problem: majority. Learn the combo program that
+/// return true iff the number of true arguments is strictly
+/// greater than half of the arity
 void majority_problem::run(problem_params& pms)
 {
     if (pms.enable_feature_selection)
-        logger().warn("Feature selection is not supported for that problem");
+        logger().warn("Feature selection is not supported for the majority problem");
 
     // @todo: for the moment occam's razor and partial truth table are ignored
     majority func(pms.problem_size);
@@ -57,8 +64,10 @@ void majority_problem::run(problem_params& pms)
                           pms.moses_params, pms.mmr_pa);
 }
 
-// XXX hack
-problem_base* probm = new majority_problem();
+void register_demo_problems()
+{
+	register_problem(new majority_problem());
+}
 
 } // ~namespace moses
 } // ~namespace opencog

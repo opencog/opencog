@@ -40,6 +40,7 @@
 
 #include "moses_exec.h"
 #include "moses_exec_def.h"
+#include "demo-problems.h"
 #include "problem.h"
 
 #include "../moses/moses_main.h"
@@ -1710,6 +1711,8 @@ int moses_exec(int argc, char** argv)
 
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
     
+    register_demo_problems();
+
     // Problem based on input table.
     if (datafile_based_problem(problem))
     {
@@ -2225,22 +2228,6 @@ int moses_exec(int argc, char** argv)
                               opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
 
-    // Demo/example problem: majority. Learn the combo program that
-    // return true iff the number of true arguments is strictly
-    // greater than half of the arity
-    else if (problem == maj)
-    {
-problem_params pms(bool_reduct, bool_reduct_rep, moses_params, mmr_pa);
-pms.enable_feature_selection = enable_feature_selection;
-pms.arity = arity;
-pms.exemplars = exemplars;
-pms.opt_params = opt_params;
-pms.hc_params = hc_params;
-pms.meta_params = meta_params;
-
-probm->run(pms);
-    }
-
     // Demo/Example problem: polynomial regression.  Given the polynomial
     // p(x)=x+x^2+x^3+...x^k, this searches for the  shortest  program
     // consisting  of  nested arithmetic operators to compute p(x),
@@ -2279,8 +2266,23 @@ probm->run(pms);
                               contin_reduct, contin_reduct, bscore,
                               opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
-    else
-       unsupported_problem_exit(problem);
+    else {
+        problem_base* probm = find_problem(problem);
+        if (probm)
+        {
+problem_params pms(bool_reduct, bool_reduct_rep, moses_params, mmr_pa);
+pms.enable_feature_selection = enable_feature_selection;
+pms.arity = arity;
+pms.exemplars = exemplars;
+pms.opt_params = opt_params;
+pms.hc_params = hc_params;
+pms.meta_params = meta_params;
+
+            probm->run(pms);
+        }
+        else
+            unsupported_problem_exit(problem);
+    }
     return 0;
 }
 
