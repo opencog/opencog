@@ -1844,39 +1844,41 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            bool positive_,
                                                            bool abs_skewness_,
                                                            bool decompose_kld_)
-    : ctable(ctable_),
-      kld_w(kld_w_), skewness_w(skewness_w_), abs_skewness(abs_skewness_),
-      stdU_w(stdU_w_), skew_U_w(skew_U_w_), min_activation(min_activation_),
-      max_activation(max_activation_), penalty(penalty_), positive(positive_),
-      decompose_kld(decompose_kld_)
+    : _ctable(ctable_),
+      _kld_w(kld_w_), _skewness_w(skewness_w_), _abs_skewness(abs_skewness_),
+      _stdU_w(stdU_w_), _skew_U_w(skew_U_w_), _min_activation(min_activation_),
+      _max_activation(max_activation_), _penalty(penalty_), _positive(positive_),
+      _decompose_kld(decompose_kld_)
 {
-    // define counter (mapping between observation and its number of occurences)
-    boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
+    // Define counter (mapping between observation and its number of occurences)
+    boost::for_each(_ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    counter[get_contin(v.first)] += v.second; }); });
-    // precompute pdf
-    if (kld_w > 0) {
-        pdf = counter;
-        klds.set_p_pdf(pdf);
+                    _counter[get_contin(v.first)] += v.second; }); });
+
+    // Precompute pdf (probability distribution function)
+    if (_kld_w > 0) {
+        _pdf = _counter;
+        _klds.set_p_pdf(_pdf);
+
+        // Compute the skewness of the pdf
+        accumulator_t acc;
+        for (const auto& v : _pdf)
+            acc(v.first, weight = v.second);
+        _skewness = weighted_skewness(acc);
+        logger().fine("interesting_predicate_bscore::_skewness = %f", _skewness);
     }
-    // compute the skewness of pdf
-    accumulator_t acc;
-    for (const auto& v : pdf)
-        acc(v.first, weight = v.second);
-    skewness = weighted_skewness(acc);
-    logger().fine("skewness = %f", skewness);
 }
 
 penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
-    OTable pred_ot(tr, ctable);
+    OTable pred_ot(tr, _ctable);
 
-    vertex target = bool_to_vertex(positive);
+    vertex target = bool_to_vertex(_positive);
     
-    unsigned total = 0, // total number of observations (could be optimized)
-        actives = 0; // total number of positive (or negative if
-                     // positive is false) predicate values
-    boost::for_each(ctable | map_values, pred_ot,
+    unsigned total = 0;   // total number of observations (could be optimized)
+    unsigned actives = 0; // total number of positive (or negative if
+                          // positive is false) predicate values
+    boost::for_each(_ctable | map_values, pred_ot,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         unsigned tc = c.total_count();
                         if (v == target)
@@ -1893,7 +1895,7 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
     // filter the output according to pred_ot
     counter_t pred_counter;     // map obvervation to occurence
                                 // conditioned by predicate truth
-    boost::for_each(ctable | map_values, pred_ot,
+    boost::for_each(_ctable | map_values, pred_ot,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         if (v == target) {
                             for (const auto& mv : c)
@@ -1907,18 +1909,18 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
                                    // messed up (for instance
                                    // pred_skewness can be inf)
         // compute KLD
-        if (kld_w > 0) {
-            if (decompose_kld) {
-                klds(pred_counter, back_inserter(bs));
-                boost::transform(bs, bs.begin(), kld_w * arg1);
+        if (_kld_w > 0.0) {
+            if (_decompose_kld) {
+                _klds(pred_counter, back_inserter(bs));
+                boost::transform(bs, bs.begin(), _kld_w * arg1);
             } else {
-                score_t pred_klds = klds(pred_counter);
+                score_t pred_klds = _klds(pred_counter);
                 logger().fine("klds = %f", pred_klds);
-                bs.push_back(kld_w * pred_klds);
+                bs.push_back(_kld_w * pred_klds);
             }
         }
 
-        if (skewness_w > 0 || stdU_w > 0 || skew_U_w > 0) {
+        if (_skewness_w > 0 || _stdU_w > 0 || _skew_U_w > 0) {
             
             // gather statistics with a boost accumulator
             accumulator_t acc;
@@ -1926,35 +1928,35 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
                 acc(v.first, weight = v.second);
 
             score_t diff_skewness = 0;
-            if (skewness_w > 0 || skew_U_w > 0) {
+            if (_skewness_w > 0 || _skew_U_w > 0) {
                 // push the absolute difference between the
                 // unconditioned skewness and conditioned one
                 score_t pred_skewness = weighted_skewness(acc);
-                diff_skewness = pred_skewness - skewness;
-                score_t val_skewness = (abs_skewness?
+                diff_skewness = pred_skewness - _skewness;
+                score_t val_skewness = (_abs_skewness?
                                         abs(diff_skewness):
                                         diff_skewness);
                 logger().fine("pred_skewness = %f", pred_skewness);
-                if (skewness_w > 0)
-                    bs.push_back(skewness_w * val_skewness);
+                if (_skewness_w > 0)
+                    bs.push_back(_skewness_w * val_skewness);
             }
 
             score_t stdU = 0;
-            if (stdU_w > 0 || skew_U_w > 0) {
+            if (_stdU_w > 0 || _skew_U_w > 0) {
 
                 // compute the standardized Mann–Whitney U
-                stdU = standardizedMannWhitneyU(counter, pred_counter);
+                stdU = standardizedMannWhitneyU(_counter, pred_counter);
                 logger().fine("stdU = %f", stdU);
-                if (stdU_w > 0)
-                    bs.push_back(stdU_w * abs(stdU));
+                if (_stdU_w > 0.0)
+                    bs.push_back(_stdU_w * abs(stdU));
             }
                 
             // push the product of the relative differences of the
             // shift (stdU) and the skewness (so that if both go
             // in the same direction the value if positive, and
             // negative otherwise)
-            if (skew_U_w > 0)
-                bs.push_back(skew_U_w * stdU * diff_skewness);
+            if (_skew_U_w > 0)
+                bs.push_back(_skew_U_w * stdU * diff_skewness);
         }
             
         // add activation_penalty component
@@ -1998,18 +2000,18 @@ void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
 
 score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const
 {
-    score_t dst = max(max(min_activation - activation, score_t(0))
-                      / min_activation,
-                      max(activation - max_activation, score_t(0))
-                      / (1 - max_activation));
+    score_t dst = max(max(_min_activation - activation, score_t(0))
+                      / _min_activation,
+                      max(activation - _max_activation, score_t(0))
+                      / (1 - _max_activation));
     logger().fine("dst = %f", dst);
-    return log(pow((1 - dst), penalty));
+    return log(pow((1 - dst), _penalty));
 }
 
 score_t interesting_predicate_bscore::min_improv() const
 {
     return 0.0;                 // not necessarily right, just the
-                                // backward behavior
+                                // backwards-compatible behavior
 }
 
 //////////////////////////////
