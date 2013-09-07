@@ -148,7 +148,13 @@ parse_key_val(string chunk)
     return {key, val};
 }
         
-table_tokenizer get_row_tokenizer(const string& line)
+typedef boost::tokenizer<boost::escaped_list_separator<char>> table_tokenizer;
+
+/**
+ * Take a row, return a tokenizer.  Tokenization uses the
+ * seperator characters comma, blank, tab (',', ' ' or '\t').
+ */
+static table_tokenizer get_row_tokenizer(const string& line)
 {
     typedef boost::escaped_list_separator<char> separator;
     typedef boost::tokenizer<separator> tokenizer;
@@ -406,6 +412,44 @@ vector<string> get_header(const string& file_name)
 }
 
 // ===========================================================
+/**
+ * Visitor to parse a list of strings (buried in a multi_type_seq)
+ * into a multi_type_seq containing the typed values given the input
+ * type signature.
+ */
+struct from_tokens_visitor : public boost::static_visitor<multi_type_seq>
+{
+    from_tokens_visitor(const std::vector<type_node>& types) : _types(types) {
+        all_boolean = boost::count(types, id::boolean_type) == (int)types.size();
+        all_contin = boost::count(types, id::contin_type) == (int)types.size();
+    }
+    result_type operator()(const string_seq& seq) {
+        result_type res;
+        if (all_boolean) {
+            res = builtin_seq();
+            builtin_seq& bs = res.get_seq<builtin>();
+            boost::transform(seq, back_inserter(bs), token_to_boolean);
+        }
+        else if (all_contin) {
+            res = contin_seq();
+            contin_seq& cs = res.get_seq<contin_t>();
+            boost::transform(seq, back_inserter(cs), token_to_contin);
+        }
+        else {
+            res = vertex_seq();
+            vertex_seq& vs = res.get_seq<vertex>();
+            boost::transform(_types, seq, back_inserter(vs), token_to_vertex);
+        }
+        return res;
+    }
+    template<typename Seq> result_type operator()(const Seq& seq) {
+        OC_ASSERT(false, "You are not supposed to do that");
+        return result_type();
+    }
+    const std::vector<type_node>& _types;
+    bool all_boolean, all_contin;
+};
+
 
 /**
  * The class below tokenizes one row, and jams it into the table
