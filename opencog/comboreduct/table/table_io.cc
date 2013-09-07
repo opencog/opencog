@@ -838,6 +838,7 @@ inferTableAttributes(istream& in, const string& target_feature,
         types.erase(types.begin());
         tt = gen_signature(types, otype);
     }
+    logger().debug() << "Infered type tree: " << tt;
 
     in.seekg(beg);
     in.clear();         // in case it has reached the eof
