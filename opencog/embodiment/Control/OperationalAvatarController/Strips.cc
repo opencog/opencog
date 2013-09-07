@@ -260,7 +260,7 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
 
         if (stateType  == STATE_FUZZY_WITHIN)
             cur = fuzzyFloat.bound_low ;
-        else if ((stateType  == STATE_EQUAL_TO) || (stateType == STATE_GREATER_THAN))
+        else if ((stateType  == STATE_EQUAL_TO) || (stateType == STATE_GREATER_THAN) || (stateType  == STATE_LESS_THAN))
             cur = floatVal;
 
         if (original_state)
@@ -295,7 +295,7 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
 
         if (stateType  == STATE_FUZZY_WITHIN)
             cur = fuzzyFloat.bound_high ;
-        else if ((stateType  == STATE_EQUAL_TO) || (stateType == STATE_GREATER_THAN))
+        else if ((stateType  == STATE_EQUAL_TO) || (stateType == STATE_GREATER_THAN)||(stateType  == STATE_LESS_THAN) )
             cur = floatVal;
 
         if (original_state)
@@ -394,11 +394,15 @@ bool State::getNumbericValues(int& intVal, float& floatVal,opencog::pai::FuzzyIn
         fuzzyFloat = boost::get<opencog::pai::FuzzyIntervalFloat>(stateVariable->getValue());
     else if (getActionParamType().getCode()  == INT_CODE)
     {
-        intVal = boost::get<int>(stateVariable->getValue());
+        string str = boost::get<string>(stateVariable->getValue());
+        intVal = atoi(str.c_str());
         floatVal = (float)intVal;
     }
     else if (getActionParamType().getCode()  == FLOAT_CODE)
-        floatVal = boost::get<float>(stateVariable->getValue());
+    {
+        string str = boost::get<string>(stateVariable->getValue());
+        floatVal = (float)atof(str.c_str());
+    }
     else
         return false;
 
@@ -421,12 +425,17 @@ float State::getFloatValueFromNumbericState()
     }
     else if (getActionParamType().getCode()  == INT_CODE)
     {
-        int intVal = boost::get<int>(stateVariable->getValue());
+        string str = boost::get<string>(stateVariable->getValue());
+        int intVal = atoi(str.c_str());
         return (float)intVal;
 
     }
     else if (getActionParamType().getCode()  == FLOAT_CODE)
-        return boost::get<float>(stateVariable->getValue());
+    {
+        string str = boost::get<string>(stateVariable->getValue());
+        float floatVal = (float)atof(str.c_str());
+        return floatVal;
+    }
 
 
     return 0.0f;
