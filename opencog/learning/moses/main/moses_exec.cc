@@ -40,11 +40,15 @@
 
 #include "moses_exec.h"
 #include "moses_exec_def.h"
+#include "problem.h"
+
 #include "../moses/moses_main.h"
 #include "../moses/partial.h"
 #include "../optimization/hill-climbing.h"
 #include "../optimization/optimization.h"
 #include "../example-progs/scoring_iterators.h"
+
+
 
 namespace opencog { namespace moses {
 
@@ -91,14 +95,18 @@ static const string pre_conj="pre_conj";    // simplified version of
                                             // conjunctions
 
 static const string ip="ip"; // find interesting patterns
-static const string cp="cp"; // regression based on combo program to fit
+
+/* ANN problems */
+static const string ann_it="ann-it"; // regression based on input table using ann
+static const string ann_cp="ann-cp"; // regression based on combo program using ann
+
+/* Demo problems */
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
 static const string mux="mux"; // multiplex
 static const string maj="maj"; // majority
+static const string cp="cp"; // regression based on combo program to fit
 static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
-static const string ann_it="ann-it"; // regression based on input table using ann
-static const string ann_cp="ann-cp"; // regression based on combo program using ann
 static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
@@ -2222,23 +2230,15 @@ int moses_exec(int argc, char** argv)
     // greater than half of the arity
     else if (problem == maj)
     {
-        if (enable_feature_selection)
-            logger().warn("Feature selection is not supported for that problem");
+problem_params pms(bool_reduct, bool_reduct_rep, moses_params, mmr_pa);
+pms.enable_feature_selection = enable_feature_selection;
+pms.arity = arity;
+pms.exemplars = exemplars;
+pms.opt_params = opt_params;
+pms.hc_params = hc_params;
+pms.meta_params = meta_params;
 
-        // @todo: for the moment occam's razor and partial truth table are ignored
-        majority func(problem_size);
-
-        // If no exemplar has been provided in the options, use the
-        // default boolean_type exemplar (which is 'and').
-        if (exemplars.empty()) {
-            exemplars.push_back(type_to_exemplar(id::boolean_type));
-        }
-
-        type_tree tt = gen_signature(id::boolean_type, arity);
-        logical_bscore bscore(func, arity);
-        metapop_moses_results(exemplars, tt,
-                              bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
+probm->run(pms);
     }
 
     // Demo/Example problem: polynomial regression.  Given the polynomial
