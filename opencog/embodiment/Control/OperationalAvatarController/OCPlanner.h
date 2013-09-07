@@ -386,6 +386,8 @@ protected:
      // if cannot unify it , return 0
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
 
+     void outputStateInfo(State* s, bool outPutStateValue);
+
 };
 
 

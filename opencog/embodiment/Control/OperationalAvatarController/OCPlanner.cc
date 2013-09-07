@@ -562,6 +562,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // the state node with deeper depth will be solved first
         StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
 
+        // out put selected subgoal debug info:
+        cout<<"Debug planning step " << tryStepNum <<": Selected subgoal :"<< curStateNode->state->name() << std::endl;
+
         SpaceServer::SpaceMap* curImaginaryMap;
         if (curStateNode->backwardRuleNode == 0)
             curImaginaryMap = &(spaceServer().getLatestMap());
@@ -873,6 +876,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         // Till now have selected one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
+        // out put selected rule debug info:
+        cout<<"Debug planning step " << tryStepNum <<": Selected rule :"<< selectedRule->action->getName() << std::endl;
 
         // create a new RuleNode to apply this selected rule
         RuleNode* ruleNode = new RuleNode(selectedRule);
@@ -901,7 +906,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
 
         // out put all the bindings:
-        cout<<"Debug: All Variable bindings:"<<std::endl;
+        cout<<"Debug planning step " << tryStepNum <<": All Variable bindings for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
         ParamGroundedMapInARule::iterator curparamit = ruleNode->currentAllBindings.begin();
         for (; curparamit != ruleNode->currentAllBindings.end(); ++ curparamit)
         {
@@ -914,7 +919,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         vector<EffectPair>::iterator effectItor;
         vector<ParamValue>::iterator oldValItor = ruleNode->orginalGroundedParamValues.begin();
 
-        for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor, ++ oldValItor)
+        // out put all the effects debug info:
+        cout<<"Debug planning step " << tryStepNum <<": All effects for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
+        int effectNum = 1;
+        for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor, ++ oldValItor, ++effectNum)
         {
             Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
@@ -928,6 +936,12 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             OC_ASSERT( isEffectExecuted,
                       "OCPlanner::doPlanning: in Effect::executeEffectOp of state: %s, the effect value is ungrounded.\n",
                        e->state->name().c_str());
+
+            cout<<"Effect  " << effectNum <<": ";
+            outputStateInfo(effState, false);
+            cout << std::endl;
+            cout << "      value changed:" << ActionParameter::ParamValueToString(*oldValItor) << " -> " << effState->stateVariable->stringRepresentation();
+            cout << std::endl;
 
             // skip the current state node
             if (curStateNode->state->isSameState(*effState) )
@@ -1042,7 +1056,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // and then check each precondition if it has already been satisfied, put it the unsatisfied one to the
         vector<State*>::iterator itpre;
         float satisfiedDegree;
-        for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
+        // out put all the effects debug info:
+        cout<<"Debug planning step " << tryStepNum <<": All preconditions for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
+        int preConNum = 1;
+        for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre, ++preConNum)
         {
             State* ps = *itpre;
             State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -1055,6 +1072,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             // first check if this state has beed satisfied by the previous state nodes
             bool found = false;
+            bool isSat = false;
             StateNode* satStateNode;
 
             bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode,ruleNode,true);
@@ -1075,6 +1093,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                         newStateNode->backwardRuleNode =  satStateNode->backwardRuleNode;
                     }
 
+                    isSat = true;
+
                     // ToBeImproved: Need to check if there is any dependency loop,
                     // if any precondiction in the backward branch depends on any states in the forward branch of current rule node,
                     // it means two branches depend on each other. How to deal with this case?
@@ -1089,6 +1109,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     if (newStateNode->backwardRuleNode)
                         newStateNode->backwardRuleNode->negativeForwardLinks.insert(newStateNode);
 
+                    isSat = false;
+
                 }
             }
             else
@@ -1099,10 +1121,22 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 {
                     // add it to unsatisfied list
                     unsatisfiedStateNodes.push_front(newStateNode);
+                    isSat = false;
 
+                }
+                else
+                {
+                    isSat = true;
                 }
 
             }
+
+            cout<<"Precondition  " << preConNum <<": ";
+            outputStateInfo(groundPs, true);
+            if(isSat)
+                cout << " is satisfied :)" << std::endl;
+            else
+                cout << " is unsatisfied :(" << std::endl;
 
         }
 
@@ -2319,6 +2353,10 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
         {
             ruleNode->orginalGroundedParamValues.push_back(stateNode->state->getParamValue());
         }
+        else if (findStateInStartStateNodes(*s,stateNode))
+        {
+            ruleNode->orginalGroundedParamValues.push_back(stateNode->state->getParamValue());
+        }
         else
         {
             ruleNode->orginalGroundedParamValues.push_back(s->getParamValue());
@@ -2329,6 +2367,26 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
     }
 }
 
+void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
+{
+    cout<< "State:"<< s->name() << " ( " ;
+    vector<ParamValue>::iterator ownerIt;
+    bool isFirstOne = true;
+    for (ownerIt = s->stateOwnerList.begin(); ownerIt != s->stateOwnerList.end(); ++ ownerIt)
+    {
+        if (! isFirstOne)
+            cout<<", ";
+        cout<< ActionParameter::ParamValueToString( (ParamValue&)(*ownerIt) );
+        isFirstOne = false;
+    }
+    cout<< " )";
+
+    if (outPutStateValue)
+    {
+        cout << " = " << s->stateVariable->stringRepresentation();
+    }
+
+}
 
 // a bunch of rules for test, load from c++ codes
 void OCPlanner::loadTestRulesFromCodes()
