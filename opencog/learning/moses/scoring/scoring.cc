@@ -1905,77 +1905,77 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
     logger().fine("pred_ot.size() = %u", pred_ot.size());
     logger().fine("pred_counter.size() = %u", pred_counter.size());
 
-    if (pred_counter.size() > 1) { // otherwise the statistics are
-                                   // messed up (for instance
-                                   // pred_skewness can be inf)
-        // compute KLD
-        if (_kld_w > 0.0) {
-            if (_decompose_kld) {
-                _klds(pred_counter, back_inserter(bs));
-                boost::transform(bs, bs.begin(), _kld_w * arg1);
-            } else {
-                score_t pred_klds = _klds(pred_counter);
-                logger().fine("klds = %f", pred_klds);
-                bs.push_back(_kld_w * pred_klds);
-            }
-        }
-
-        if (_skewness_w > 0 || _stdU_w > 0 || _skew_U_w > 0) {
-            
-            // gather statistics with a boost accumulator
-            accumulator_t acc;
-            for (const auto& v : pred_counter)
-                acc(v.first, weight = v.second);
-
-            score_t diff_skewness = 0;
-            if (_skewness_w > 0 || _skew_U_w > 0) {
-                // push the absolute difference between the
-                // unconditioned skewness and conditioned one
-                score_t pred_skewness = weighted_skewness(acc);
-                diff_skewness = pred_skewness - _skewness;
-                score_t val_skewness = (_abs_skewness?
-                                        abs(diff_skewness):
-                                        diff_skewness);
-                logger().fine("pred_skewness = %f", pred_skewness);
-                if (_skewness_w > 0)
-                    bs.push_back(_skewness_w * val_skewness);
-            }
-
-            score_t stdU = 0;
-            if (_stdU_w > 0 || _skew_U_w > 0) {
-
-                // compute the standardized Mann–Whitney U
-                stdU = standardizedMannWhitneyU(_counter, pred_counter);
-                logger().fine("stdU = %f", stdU);
-                if (_stdU_w > 0.0)
-                    bs.push_back(_stdU_w * abs(stdU));
-            }
-                
-            // push the product of the relative differences of the
-            // shift (stdU) and the skewness (so that if both go
-            // in the same direction the value if positive, and
-            // negative otherwise)
-            if (_skew_U_w > 0)
-                bs.push_back(_skew_U_w * stdU * diff_skewness);
-        }
-            
-        // add activation_penalty component
-        score_t activation = actives / (score_t) total;
-        score_t activation_penalty = get_activation_penalty(activation);
-        logger().fine("activation = %f", activation);
-        logger().fine("activation penalty = %e", activation_penalty);
-        bs.push_back(activation_penalty);
-        
-        // add the Occam's razor feature
-        if (occam)
-            pbs.second = tree_complexity(tr) * complexity_coef;
-    } else {
+    // If there's only one row that was selected, then punt.
+    // Statistics like skewness need more than one row.
+    if (pred_counter.size() == 1) {
         pbs.first.push_back(very_worst_score);
+        log_candidate_pbscore(tr, pbs);
+        return pbs;
     }
 
-    // Logger
+    // compute KLD
+    if (_kld_w > 0.0) {
+        if (_decompose_kld) {
+            _klds(pred_counter, back_inserter(bs));
+            boost::transform(bs, bs.begin(), _kld_w * arg1);
+        } else {
+            score_t pred_klds = _klds(pred_counter);
+            logger().fine("klds = %f", pred_klds);
+            bs.push_back(_kld_w * pred_klds);
+        }
+    }
+
+    if (_skewness_w > 0 || _stdU_w > 0 || _skew_U_w > 0) {
+        
+        // gather statistics with a boost accumulator
+        accumulator_t acc;
+        for (const auto& v : pred_counter)
+            acc(v.first, weight = v.second);
+
+        score_t diff_skewness = 0;
+        if (_skewness_w > 0 || _skew_U_w > 0) {
+            // push the absolute difference between the
+            // unconditioned skewness and conditioned one
+            score_t pred_skewness = weighted_skewness(acc);
+            diff_skewness = pred_skewness - _skewness;
+            score_t val_skewness = (_abs_skewness?
+                                    abs(diff_skewness):
+                                    diff_skewness);
+            logger().fine("pred_skewness = %f", pred_skewness);
+            if (_skewness_w > 0)
+                bs.push_back(_skewness_w * val_skewness);
+        }
+
+        score_t stdU = 0;
+        if (_stdU_w > 0 || _skew_U_w > 0) {
+
+            // compute the standardized Mann–Whitney U
+            stdU = standardizedMannWhitneyU(_counter, pred_counter);
+            logger().fine("stdU = %f", stdU);
+            if (_stdU_w > 0.0)
+                bs.push_back(_stdU_w * abs(stdU));
+        }
+            
+        // push the product of the relative differences of the
+        // shift (stdU) and the skewness (so that if both go
+        // in the same direction the value if positive, and
+        // negative otherwise)
+        if (_skew_U_w > 0)
+            bs.push_back(_skew_U_w * stdU * diff_skewness);
+    }
+        
+    // add activation_penalty component
+    score_t activation = actives / (score_t) total;
+    score_t activation_penalty = get_activation_penalty(activation);
+    logger().fine("activation = %f", activation);
+    logger().fine("activation penalty = %e", activation_penalty);
+    bs.push_back(activation_penalty);
+    
+    // add the Occam's razor feature
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
+
     log_candidate_pbscore(tr, pbs);
-    // ~Logger
 
     return pbs;
 }
