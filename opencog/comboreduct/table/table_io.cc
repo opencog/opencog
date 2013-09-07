@@ -890,11 +890,11 @@ tokenizeRowIO(const std::string& line,
               unsigned target_idx = 0)
 {
     std::pair<std::vector<T>, T> res;
-    table_tokenizer tok = get_row_tokenizer(line);
-    unsigned i = 0;
-    for (const std::string& t : tok) {
+    table_tokenizer toker = get_row_tokenizer(line);
+    size_t i = 0;
+    for (const std::string& tok : toker) {
         if (!boost::binary_search(ignored_indices, i)) {
-            T el = boost::lexical_cast<T>(t);
+            T el = boost::lexical_cast<T>(tok);
             if (target_idx == i)
                 res.second = el;
             else
@@ -940,7 +940,10 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
         try {
             auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
             tab.itable[i] = ftv(tokenIO.first);
-            tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+
+            // If there is no target index, then there is no "output" column!
+            if (""  != tokenIO.second)
+                tab.otable[i] = token_to_vertex(otype, tokenIO.second);
         }
         catch (AssertionException& ex) {
             OC_ASSERT(false, "Parsing error occurred on line %d", i);
