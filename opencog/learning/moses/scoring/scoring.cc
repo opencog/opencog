@@ -2,7 +2,7 @@
  * opencog/learning/moses/moses/scoring.cc
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012,2013 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -1844,39 +1844,51 @@ interesting_predicate_bscore::interesting_predicate_bscore(const CTable& ctable_
                                                            bool positive_,
                                                            bool abs_skewness_,
                                                            bool decompose_kld_)
-    : ctable(ctable_),
-      kld_w(kld_w_), skewness_w(skewness_w_), abs_skewness(abs_skewness_),
-      stdU_w(stdU_w_), skew_U_w(skew_U_w_), min_activation(min_activation_),
-      max_activation(max_activation_), penalty(penalty_), positive(positive_),
-      decompose_kld(decompose_kld_)
+    : _ctable(ctable_),
+      _kld_w(kld_w_), _skewness_w(skewness_w_), _abs_skewness(abs_skewness_),
+      _stdU_w(stdU_w_), _skew_U_w(skew_U_w_), _min_activation(min_activation_),
+      _max_activation(max_activation_), _penalty(penalty_), _positive(positive_),
+      _decompose_kld(decompose_kld_)
 {
-    // define counter (mapping between observation and its number of occurences)
-    boost::for_each(ctable | map_values, [this](const CTable::mapped_type& mv) {
+    // Define counter (mapping between observation and its number of occurences)
+    // That is, create a historgram showing how often each output value
+    // occurs in the ctable.
+    boost::for_each(_ctable | map_values, [this](const CTable::mapped_type& mv) {
             boost::for_each(mv, [this](const CTable::mapped_type::value_type& v) {
-                    counter[get_contin(v.first)] += v.second; }); });
-    // precompute pdf
-    if (kld_w > 0) {
-        pdf = counter;
-        klds.set_p_pdf(pdf);
+                    _counter[get_contin(v.first)] += v.second; }); });
+
+    // Precompute pdf (probability distribution function)
+    if (_kld_w > 0) {
+        _pdf = _counter;
+        _klds.set_p_pdf(_pdf);
+
+        // Compute the skewness of the pdf
+        accumulator_t acc;
+        for (const auto& v : _pdf)
+            acc(v.first, weight = v.second);
+        _skewness = weighted_skewness(acc);
+        logger().fine("interesting_predicate_bscore::_skewness = %f", _skewness);
     }
-    // compute the skewness of pdf
-    accumulator_t acc;
-    for (const auto& v : pdf)
-        acc(v.first, weight = v.second);
-    skewness = weighted_skewness(acc);
-    logger().fine("skewness = %f", skewness);
 }
 
 penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) const
 {
-    OTable pred_ot(tr, ctable);
+    // OK, here's the deal. The combo tree evaluates to T/F on each
+    // input table row. That is, the combo tree is a predicate that
+    // selects certain rows of the input table.  Here, pred_cache is just
+    // a cache, to avoid multiple evaluations of the combo tree: its 
+    // just a table with just one column, equal to the value of the
+    // combo tree on each input row.
+    OTable pred_cache(tr, _ctable);
 
-    vertex target = bool_to_vertex(positive);
+    // target simply negates (inverts) the predicate.
+    vertex target = bool_to_vertex(_positive);
     
-    unsigned total = 0, // total number of observations (could be optimized)
-        actives = 0; // total number of positive (or negative if
-                     // positive is false) predicate values
-    boost::for_each(ctable | map_values, pred_ot,
+    // Count how many rows the predicate selected.
+    unsigned total = 0;   // total number of observations (could be optimized)
+    unsigned actives = 0; // total number of positive (or negative if
+                          // positive is false) predicate values
+    boost::for_each(_ctable | map_values, pred_cache,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         unsigned tc = c.total_count();
                         if (v == target)
@@ -1890,90 +1902,94 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
     penalized_bscore pbs;
     behavioral_score &bs = pbs.first;
 
-    // filter the output according to pred_ot
-    counter_t pred_counter;     // map obvervation to occurence
-                                // conditioned by predicate truth
-    boost::for_each(ctable | map_values, pred_ot,
+    // Create a histogram of output values, ignoring non-slected rows.
+    // Do this by filtering the ctable output column according to the,
+    // predicate, discarding non-selected rows. Then total up how often
+    // each distinct output value occurs.
+    counter_t pred_counter;
+    boost::for_each(_ctable | map_values, pred_cache,
                     [&](const CTable::counter_t& c, const vertex& v) {
                         if (v == target) {
                             for (const auto& mv : c)
                                 pred_counter[get_contin(mv.first)] = mv.second;
                         }});
 
-    logger().fine("pred_ot.size() = %u", pred_ot.size());
+    logger().fine("pred_cache.size() = %u", pred_cache.size());
     logger().fine("pred_counter.size() = %u", pred_counter.size());
 
-    if (pred_counter.size() > 1) { // otherwise the statistics are
-                                   // messed up (for instance
-                                   // pred_skewness can be inf)
-        // compute KLD
-        if (kld_w > 0) {
-            if (decompose_kld) {
-                klds(pred_counter, back_inserter(bs));
-                boost::transform(bs, bs.begin(), kld_w * arg1);
-            } else {
-                score_t pred_klds = klds(pred_counter);
-                logger().fine("klds = %f", pred_klds);
-                bs.push_back(kld_w * pred_klds);
-            }
-        }
-
-        if (skewness_w > 0 || stdU_w > 0 || skew_U_w > 0) {
-            
-            // gather statistics with a boost accumulator
-            accumulator_t acc;
-            for (const auto& v : pred_counter)
-                acc(v.first, weight = v.second);
-
-            score_t diff_skewness = 0;
-            if (skewness_w > 0 || skew_U_w > 0) {
-                // push the absolute difference between the
-                // unconditioned skewness and conditioned one
-                score_t pred_skewness = weighted_skewness(acc);
-                diff_skewness = pred_skewness - skewness;
-                score_t val_skewness = (abs_skewness?
-                                        abs(diff_skewness):
-                                        diff_skewness);
-                logger().fine("pred_skewness = %f", pred_skewness);
-                if (skewness_w > 0)
-                    bs.push_back(skewness_w * val_skewness);
-            }
-
-            score_t stdU = 0;
-            if (stdU_w > 0 || skew_U_w > 0) {
-
-                // compute the standardized Mann–Whitney U
-                stdU = standardizedMannWhitneyU(counter, pred_counter);
-                logger().fine("stdU = %f", stdU);
-                if (stdU_w > 0)
-                    bs.push_back(stdU_w * abs(stdU));
-            }
-                
-            // push the product of the relative differences of the
-            // shift (stdU) and the skewness (so that if both go
-            // in the same direction the value if positive, and
-            // negative otherwise)
-            if (skew_U_w > 0)
-                bs.push_back(skew_U_w * stdU * diff_skewness);
-        }
-            
-        // add activation_penalty component
-        score_t activation = actives / (score_t) total;
-        score_t activation_penalty = get_activation_penalty(activation);
-        logger().fine("activation = %f", activation);
-        logger().fine("activation penalty = %e", activation_penalty);
-        bs.push_back(activation_penalty);
-        
-        // add the Occam's razor feature
-        if (occam)
-            pbs.second = tree_complexity(tr) * complexity_coef;
-    } else {
+    // If there's only one output value left, then punt.  Statistics
+    // like skewness need a distribution that isn't a single spike.
+    if (pred_counter.size() == 1) {
         pbs.first.push_back(very_worst_score);
+        log_candidate_pbscore(tr, pbs);
+        return pbs;
     }
 
-    // Logger
+    // Compute Kullback-Leibler divergence (KLD) of the filetered
+    // distribution.
+    if (_kld_w > 0.0) {
+        if (_decompose_kld) {
+            _klds(pred_counter, back_inserter(bs));
+            boost::transform(bs, bs.begin(), _kld_w * arg1);
+        } else {
+            score_t pred_klds = _klds(pred_counter);
+            logger().fine("klds = %f", pred_klds);
+            bs.push_back(_kld_w * pred_klds);
+        }
+    }
+
+    // Compute skewness of the filtered distribution.
+    if (_skewness_w > 0 || _stdU_w > 0 || _skew_U_w > 0) {
+        
+        // Gather statistics with a boost accumulator
+        accumulator_t acc;
+        for (const auto& v : pred_counter)
+            acc(v.first, weight = v.second);
+
+        score_t diff_skewness = 0;
+        if (_skewness_w > 0 || _skew_U_w > 0) {
+            // push the absolute difference between the
+            // unconditioned skewness and conditioned one
+            score_t pred_skewness = weighted_skewness(acc);
+            diff_skewness = pred_skewness - _skewness;
+            score_t val_skewness = (_abs_skewness?
+                                    abs(diff_skewness):
+                                    diff_skewness);
+            logger().fine("pred_skewness = %f", pred_skewness);
+            if (_skewness_w > 0)
+                bs.push_back(_skewness_w * val_skewness);
+        }
+
+        score_t stdU = 0;
+        if (_stdU_w > 0 || _skew_U_w > 0) {
+
+            // Compute the standardized Mann–Whitney U
+            stdU = standardizedMannWhitneyU(_counter, pred_counter);
+            logger().fine("stdU = %f", stdU);
+            if (_stdU_w > 0.0)
+                bs.push_back(_stdU_w * abs(stdU));
+        }
+            
+        // push the product of the relative differences of the
+        // shift (stdU) and the skewness (so that if both go
+        // in the same direction the value if positive, and
+        // negative otherwise)
+        if (_skew_U_w > 0)
+            bs.push_back(_skew_U_w * stdU * diff_skewness);
+    }
+        
+    // add activation_penalty component
+    score_t activation = actives / (score_t) total;
+    score_t activation_penalty = get_activation_penalty(activation);
+    logger().fine("activation = %f", activation);
+    logger().fine("activation penalty = %e", activation_penalty);
+    bs.push_back(activation_penalty);
+    
+    // add the Occam's razor feature
+    if (occam)
+        pbs.second = tree_complexity(tr) * complexity_coef;
+
     log_candidate_pbscore(tr, pbs);
-    // ~Logger
 
     return pbs;
 }
@@ -1998,18 +2014,18 @@ void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
 
 score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const
 {
-    score_t dst = max(max(min_activation - activation, score_t(0))
-                      / min_activation,
-                      max(activation - max_activation, score_t(0))
-                      / (1 - max_activation));
+    score_t dst = max(max(_min_activation - activation, score_t(0))
+                      / _min_activation,
+                      max(activation - _max_activation, score_t(0))
+                      / (1 - _max_activation));
     logger().fine("dst = %f", dst);
-    return log(pow((1 - dst), penalty));
+    return log(pow((1 - dst), _penalty));
 }
 
 score_t interesting_predicate_bscore::min_improv() const
 {
     return 0.0;                 // not necessarily right, just the
-                                // backward behavior
+                                // backwards-compatible behavior
 }
 
 //////////////////////////////

@@ -1967,7 +1967,7 @@ int moses_exec(int argc, char** argv)
             }
         }
 
-        // Find interesting patterns
+        // Find interesting predicates
         else if (problem == ip) {
             // ip assumes that the inputs are boolean and the output is contin
             type_tree ettt = gen_signature(id::boolean_type,
