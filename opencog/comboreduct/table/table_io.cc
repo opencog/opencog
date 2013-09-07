@@ -909,9 +909,14 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
 
     // Function to parse each line (to be called in parallel)
     auto parse_line = [&](unsigned i) {
-        auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
-        tab.itable[i] = ftv(tokenIO.first);
-        tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+        try {
+            auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
+            tab.itable[i] = ftv(tokenIO.first);
+            tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+        }
+        catch (AssertionException& ex) {
+            OC_ASSERT(false, "Parsing error occurred on line %d", i);
+        }
     };
 
     // Call it for each line in parallel
