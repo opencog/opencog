@@ -2,7 +2,7 @@
  * opencog/learning/moses/scoring/scoring.h
  *
  * Copyright (C) 2002-2008 Novamente LLC
- * Copyright (C) 2012 Poulin Holdings
+ * Copyright (C) 2012,2013 Poulin Holdings LLC
  * All Rights Reserved
  *
  * Written by Moshe Looks, Nil Geisweiller, Linas Vepstas
@@ -337,8 +337,8 @@ struct discriminating_bscore : public bscore_base, discriminator
 
     /// Over-ride the default complexity setters, since our scoring is
     /// normalized to 1.0, unlike other scorers.
-    void set_complexity_coef(score_t complexity_ratio);
-    void set_complexity_coef(unsigned alphabet_size, float stddev);
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
 
 protected:
     //* The two functions below are used to implement a generic
@@ -562,8 +562,8 @@ struct precision_bscore : public bscore_base
      */
     void ignore_idxs(const set<arity_t>&) const;
 
-    void set_complexity_coef(score_t complexity_ratio);
-    void set_complexity_coef(unsigned alphabet_size, float stddev);
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
     
     /**
      * This is a experimental feature, we generate a massive combo
@@ -640,8 +640,8 @@ struct precision_conj_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    void set_complexity_coef(score_t complexity_ratio);
-    void set_complexity_coef(unsigned alphabet_size, float stddev);
+    virtual void set_complexity_coef(score_t complexity_ratio);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
     
 protected:
     const CTable& ctable;
@@ -806,13 +806,8 @@ struct contin_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    // Hmmm, not picked up from base class, for some reason... Perhaps
-    // this is because another set_complexity_coef method is being
-    // overloaded and gcc relies solely on the name of the method.
-    void set_complexity_coef(score_t complexity_ratio) {
-        bscore_base::set_complexity_coef(complexity_ratio);
-    }
-    void set_complexity_coef(unsigned alphabet_size, float stddev);
+    virtual void set_complexity_coef(unsigned alphabet_size, float stddev);
+    using bscore_base::set_complexity_coef; // Avoid hiding/shadowing
 
 protected:
     OTable target;
@@ -1098,22 +1093,31 @@ protected:
     size_t _ctable_usize;
 };
 
-// Bscore to find interesting predicates. Interestingness is measured
-// in terms of several features such as
+// Bscore to find interesting predicates. 
 //
-//    1) the Kullback Leibler divergence between the distribution
-// output of the dataset and the distribution over the output filtered
-// in by the program (when the predicate is true).
-//    2) the (absolute or relative) difference in skewness of the 2 distributions
-//    3) the standardized Mann-Whitney U statistic
-//    4) the product of #2 and #3
-//    5) the whether the activation is with a desired range
+// The "predicate" that is found is a combo tree program that selects
+// only certain rows out of the data table.  The data table is assumed
+// to have one contin-valued output column, and boolean-valued input
+// columns. The predicate efectively selects a bunch of outputs. The
+// distribution of the resulting outputs is then examined; this
+// distribution is deemed "interesting" by maximizing a linear
+// combination of the following measures:
 //
-// All those features are weighted, any one with null weight is
+//    1) The Kullback Leibler divergence between the distribution
+//       of the output values of the entire dataset, and the distribution
+//       of the output values of the rows selected by the predicate.
+//    2) The (absolute or relative) difference in skewness of the two
+//       distributions.
+//    3) The standardized Mann-Whitney U statistic on the selected outputs.
+//    4) The product of #2 and #3.
+//    5) Whether the fraction of rows that were welected (the "activation")
+//       is with a desired range.
+//
+// All those measures are weighted; any that have null weight are
 // disabled (it isn't computed and isn't pushed in the bscore).
 //
-// the predicate can be positive (we retain the outputs when the
-// predicate is true), or negative (we retain the outputs when the
+// The predicate can be positive (we retain the rows/outputs when the
+// predicate is true), or negative (we retain the rows/outputs when the
 // predicate is false).
 struct interesting_predicate_bscore : public bscore_base
 {
@@ -1144,35 +1148,30 @@ struct interesting_predicate_bscore : public bscore_base
 
     score_t min_improv() const;
 
-    // Hmmm, not picked up from base class, for some reason... Perhaps
-    // this is because another set_complexity_coef method is being
-    // overloaded and gcc relies solely on the name of the method.
-    void set_complexity_coef(score_t complexity_ratio) {
-        bscore_base::set_complexity_coef(complexity_ratio);
-    }
-    void set_complexity_coef(unsigned alphabet_size, float p);
+    virtual void set_complexity_coef(unsigned alphabet_size, float p);
+    using bscore_base::set_complexity_coef; // Avoid hiding/shadowing
 
 protected:
 
-    counter_t counter; // counter of the unconditioned distribution
-    pdf_t pdf;     // pdf of the unconditioned distribution
-    mutable KLDS<contin_t> klds; /// @todo dangerous: not thread safe!!!
-    CTable ctable;
-    contin_t skewness;   // skewness of the unconditioned distribution
+    counter_t _counter; // counter of the unconditioned distribution
+    pdf_t _pdf;     // pdf of the unconditioned distribution
+    mutable KLDS<contin_t> _klds; /// @todo dangerous: not thread safe!!!
+    CTable _ctable;
+    contin_t _skewness;   // skewness of the unconditioned distribution
 
     // weights of the various features
-    weight_t kld_w;
-    weight_t skewness_w;
-    bool abs_skewness;
-    weight_t stdU_w;
-    weight_t skew_U_w;
-    score_t min_activation, max_activation;
-    score_t penalty;
-    bool positive;
+    weight_t _kld_w;
+    weight_t _skewness_w;
+    bool _abs_skewness;
+    weight_t _stdU_w;
+    weight_t _skew_U_w;
+    score_t _min_activation, _max_activation;
+    score_t _penalty;
+    bool _positive;
     // If true then each component of the computation of KLD
     // corresponds to an element of the bscore. Otherwise the whole
     // KLD occupies just one bscore element
-    bool decompose_kld;
+    bool _decompose_kld;
 
 private:
     score_t get_activation_penalty(score_t activation) const;

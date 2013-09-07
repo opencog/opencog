@@ -118,8 +118,25 @@ istream &get_data_line(istream& is, string& line)
 }
 
 // -------------------------------------------------------
+
 static const char *sparse_delim = " : ";
-pair<string, string> parse_key_val(string chunk) {
+
+/**
+ * parse a pair of key/value in a parse dataset, using ':' as
+ * delimiter. For instance
+ * 
+ * parse_key_val("key : val")
+ *
+ * returns
+ *
+ * {"key", "val"}
+ *
+ * If no such delimiter is found then it return a pair with empty key
+ * and empty val.
+ */
+static pair<string, string>
+parse_key_val(string chunk)
+{
     pair<string, string> res;
     size_t pos = chunk.find(sparse_delim);
     if (string::npos == pos)
@@ -131,7 +148,11 @@ pair<string, string> parse_key_val(string chunk) {
     return {key, val};
 }
         
-table_tokenizer get_row_tokenizer(const string& line)
+/**
+ * Take a row, return a tokenizer.  Tokenization uses the
+ * separator characters comma, blank, tab (',', ' ' or '\t').
+ */
+table_tokenizer get_row_tokenizer(const std::string& line)
 {
     typedef boost::escaped_list_separator<char> separator;
     typedef boost::tokenizer<separator> tokenizer;
@@ -209,7 +230,8 @@ type_node infer_type_from_token(const string& token)
  * Compare this to 'curr_guess', and upgrade the type inference
  * if it can be done consistently.
  */
-type_node infer_type_from_token2(type_node curr_guess, const string& token)
+static type_node 
+infer_type_from_token2(type_node curr_guess, const string& token)
 {
     type_node tokt = infer_type_from_token(token);
 
@@ -369,6 +391,108 @@ vector<string> get_header(const string& file_name)
     return tokenizeRow<string>(line);
 }
 
+// ===========================================================
+/**
+ * Visitor to parse a list of strings (buried in a multi_type_seq)
+ * into a multi_type_seq containing the typed values given the input
+ * type signature.
+ */
+struct from_tokens_visitor : public boost::static_visitor<multi_type_seq>
+{
+    from_tokens_visitor(const std::vector<type_node>& types) : _types(types) {
+        all_boolean = boost::count(types, id::boolean_type) == (int)types.size();
+        all_contin = boost::count(types, id::contin_type) == (int)types.size();
+    }
+    result_type operator()(const string_seq& seq) {
+        result_type res;
+        if (all_boolean) {
+            res = builtin_seq();
+            builtin_seq& bs = res.get_seq<builtin>();
+            boost::transform(seq, back_inserter(bs), token_to_boolean);
+        }
+        else if (all_contin) {
+            res = contin_seq();
+            contin_seq& cs = res.get_seq<contin_t>();
+            boost::transform(seq, back_inserter(cs), token_to_contin);
+        }
+        else {
+            res = vertex_seq();
+            vertex_seq& vs = res.get_seq<vertex>();
+            boost::transform(_types, seq, back_inserter(vs), token_to_vertex);
+        }
+        return res;
+    }
+    template<typename Seq> result_type operator()(const Seq& seq) {
+        OC_ASSERT(false, "You are not supposed to do that");
+        return result_type();
+    }
+    const std::vector<type_node>& _types;
+    bool all_boolean, all_contin;
+};
+
+
+/**
+ * The class below tokenizes one row, and jams it into the table
+ */
+struct from_sparse_tokens_visitor : public from_tokens_visitor
+{
+    from_sparse_tokens_visitor(const std::vector<type_node>& types,
+                               const std::map<const std::string, size_t>& index,
+                               size_t fixed_arity)
+        : from_tokens_visitor(types), _index(index), _fixed_arity(fixed_arity) {}
+    result_type operator()(const string_seq& seq) {
+        using std::transform;
+        using std::for_each;
+        result_type res;
+        if (all_boolean) {
+            res = builtin_seq(_types.size(), id::logical_false);
+            builtin_seq& bs = res.get_seq<builtin>();
+            auto begin_sparse = seq.begin() + _fixed_arity;
+            transform(seq.begin(), begin_sparse, bs.begin(), token_to_boolean);
+            for (auto it = begin_sparse; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    bs[idx] = token_to_boolean(key_val.second);
+                }
+            }
+        }
+        else if (all_contin) {
+            res = contin_seq(_types.size(), 0.0);
+            contin_seq& cs = res.get_seq<contin_t>();
+            auto begin_sparse = seq.cbegin() + _fixed_arity;
+            transform(seq.begin(), begin_sparse, cs.begin(), token_to_contin);
+            for (auto it = begin_sparse; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    cs[idx] = token_to_contin(key_val.second);
+                }
+            }
+        }
+        else {
+            res = vertex_seq(_types.size());
+            vertex_seq& vs = res.get_seq<vertex>();
+            auto begin_sparse_types = _types.cbegin() + _fixed_arity;
+            auto begin_sparse_seq = seq.cbegin() + _fixed_arity;
+            transform(_types.begin(), begin_sparse_types,
+                      seq.begin(), vs.begin(), token_to_vertex);
+            for (auto it = begin_sparse_seq; it != seq.end(); ++it) {
+                auto key_val = parse_key_val(*it);
+                if (key_val != std::pair<std::string, std::string>()) {
+                    size_t idx = _index.at(key_val.first);
+                    vs[idx] = token_to_vertex(_types[idx], key_val.second);
+                }
+            }
+        }
+        return res;
+    }
+    std::map<const std::string, size_t> _index;
+    size_t _fixed_arity;
+};
+
+
+// ===========================================================
 /**
  * Fill the input table, given a file in 'sparse' format.
  *
@@ -746,43 +870,16 @@ istream& istreamTable_ignore_indices(istream& in, Table& tab,
     return in;
 }
 
-/**
- * Perform 2 passes:
- *
- * 1) Infer
- * 1.1) its type
- * 1.2) whether it has a header
- * 1.3) whether it is dense or sparse
- *
- * 2) Load the actual data
- */
-istream& istreamTable_NEW(istream& in, Table& tab,
-                          const string& target_feature,
-                          const vector<string>& ignore_features)
-{
-    // Infer the properties of the table without loading its content
-    type_tree tt;
-    bool has_header, is_sparse;
-    streampos beg = in.tellg();
-    inferTableAttributes(in, target_feature, ignore_features,
-                         tt, has_header, is_sparse);
-    in.seekg(beg);
+// ==================================================================
 
-    if (is_sparse) {
-        // fallback on the old loader
-        // TODO:  this could be definitely be optimized
-        return istreamTable(in, tab, target_feature, ignore_features);
-    } else {
-        return istreamDenseTable(in, tab, target_feature, ignore_features,
-                                 tt, has_header);
-    }
-}
-
-istream& inferTableAttributes(istream& in, const string& target_feature,
+static istream&
+inferTableAttributes(istream& in, const string& target_feature,
                               const vector<string>& ignore_features,
-                              type_tree& tt, bool& has_header, bool& is_sparse,
-                              int maxline)
+                              type_tree& tt, bool& has_header, bool& is_sparse)
 {
+    // maxline is the maximum number of lines to read to infer the
+    // attributes. A negative number means reading all lines.
+    int maxline = 20;
     streampos beg = in.tellg();
 
     // Get a portion of the dataset into memory (cleaning weird stuff)
@@ -865,9 +962,128 @@ istream& inferTableAttributes(istream& in, const string& target_feature,
         types.erase(types.begin());
         tt = gen_signature(types, otype);
     }
+    logger().debug() << "Infered type tree: " << tt;
 
     in.seekg(beg);
     in.clear();         // in case it has reached the eof
+    return in;
+}
+
+/**
+ * Perform 2 passes:
+ *
+ * 1) Infer
+ * 1.1) its type
+ * 1.2) whether it has a header
+ * 1.3) whether it is dense or sparse
+ *
+ * 2) Load the actual data
+ */
+istream& istreamTable_NEW(istream& in, Table& tab,
+                          const string& target_feature,
+                          const vector<string>& ignore_features)
+{
+    // Infer the properties of the table without loading its content
+    type_tree tt;
+    bool has_header, is_sparse;
+    streampos beg = in.tellg();
+    inferTableAttributes(in, target_feature, ignore_features,
+                         tt, has_header, is_sparse);
+    in.seekg(beg);
+
+    if (is_sparse) {
+        // fallback on the old loader
+        // TODO:  this could be definitely be optimized
+        return istreamTable(in, tab, target_feature, ignore_features);
+    } else {
+        return istreamDenseTable(in, tab, target_feature, ignore_features,
+                                 tt, has_header);
+    }
+}
+
+// ==================================================================
+
+/**
+ * Take a line and return a pair with vector containing the input
+ * elements and then output element.
+ */
+template<typename T>
+std::pair<std::vector<T>, T>
+tokenizeRowIO(const std::string& line,
+              const std::vector<unsigned>& ignored_indices = empty_unsigned_vec,
+              unsigned target_idx = 0)
+{
+    std::pair<std::vector<T>, T> res;
+    table_tokenizer toker = get_row_tokenizer(line);
+    size_t i = 0;
+    for (const std::string& tok : toker) {
+        if (!boost::binary_search(ignored_indices, i)) {
+            T el = boost::lexical_cast<T>(tok);
+            if (target_idx == i)
+                res.second = el;
+            else
+                res.first.push_back(el);
+        }
+        i++;
+    }
+    return res;
+}
+
+// ==================================================================
+
+static istream&
+istreamDenseTable_noHeader(istream& in, Table& tab,
+                                    unsigned target_idx,
+                                    const vector<unsigned>& ignore_idxs,
+                                    const type_tree& tt)
+{
+    // Get the entire dataset into memory (cleaning weird stuff)
+    string line;
+    std::vector<string> lines;
+    while (get_data_line(in, line))
+        lines.push_back(line);
+
+    // Allocate all rows in the itable and otable
+    tab.itable.resize(lines.size());
+    tab.otable.resize(lines.size());
+
+    // Get the elementary io types
+    vector<type_node> itypes =
+        vector_comp(get_signature_inputs(tt), get_type_node);
+    type_node otype = get_type_node(get_signature_output(tt));
+
+    // Assign the io type to the table
+    tab.itable.set_types(itypes);
+    tab.otable.set_type(otype);
+
+    // Instantiate type conversion for inputs
+    from_tokens_visitor ftv(itypes);
+
+    // Function to parse each line (to be called in parallel)
+    auto parse_line = [&](unsigned i) {
+        try {
+            auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
+            tab.itable[i] = ftv(tokenIO.first);
+
+            // If there is no target index, then there is no "output" column!
+            if (""  != tokenIO.second)
+                tab.otable[i] = token_to_vertex(otype, tokenIO.second);
+        }
+        catch (AssertionException& ex) {
+            OC_ASSERT(false, "Parsing error occurred on line %d", i);
+        }
+    };
+
+    // Call it for each line in parallel
+    auto ir = boost::irange((size_t)0, lines.size());
+    vector<size_t> row_idxs(ir.begin(), ir.end());
+    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
+
+    // Assign the target position relative to the ignored indices
+    // (useful for writing that file back)
+    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
+                                                  arg1 < target_idx);
+
     return in;
 }
 
@@ -906,51 +1122,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
     return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt);
 }
 
-istream& istreamDenseTable_noHeader(istream& in, Table& tab,
-                                    unsigned target_idx,
-                                    const vector<unsigned>& ignore_idxs,
-                                    const type_tree& tt) {
-    // Get the entire dataset into memory (cleaning weird stuff)
-    string line;
-    std::vector<string> lines;
-    while (get_data_line(in, line))
-        lines.push_back(line);
-
-    // Allocate all rows in the itable and otable
-    tab.itable.resize(lines.size());
-    tab.otable.resize(lines.size());
-
-    // Get the elementary io types
-    vector<type_node> itypes =
-        vector_comp(get_signature_inputs(tt), get_type_node);
-    type_node otype = get_type_node(get_signature_output(tt));
-
-    // Assign the io type to the table
-    tab.itable.set_types(itypes);
-    tab.otable.set_type(otype);
-
-    // Instantiate type convertion for inputs
-    from_tokens_visitor ftv(itypes);
-
-    // Function to parse each line (to be called in parallel)
-    auto parse_line = [&](unsigned i) {
-        auto tokenIO = tokenizeRowIO<string>(lines[i], ignore_idxs, target_idx);
-        tab.itable[i] = ftv(tokenIO.first);
-        tab.otable[i] = token_to_vertex(otype, tokenIO.second);
-    };
-
-    // Call it for each line in parallel
-    auto ir = boost::irange((size_t)0, lines.size());
-    vector<size_t> row_idxs(ir.begin(), ir.end());
-    OMP_ALGO::for_each(row_idxs.begin(), row_idxs.end(), parse_line);
-
-    // Assign the target position relative to the ignored indices
-    // (useful for writing that file back)
-    tab.target_pos = target_idx - boost::count_if(ignore_idxs,
-                                                  arg1 < target_idx);
-
-    return in;
-}
+// ==================================================================
 
 // Parse a CTable row
 CTable::value_type parseCTableRow(const type_tree& tt, const std::string& row_str)
