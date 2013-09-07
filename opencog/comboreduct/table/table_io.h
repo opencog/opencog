@@ -184,24 +184,6 @@ struct from_sparse_tokens_visitor : public from_tokens_visitor {
     size_t _fixed_arity;
 };
 
-/**
- * Take a line and return a vector containing the elements parsed.
- * Used by istreamTable.
- */
-template<typename T>
-std::vector<T> tokenizeRow(const std::string& line,
-                           const std::vector<unsigned>& ignored_indices =
-                           empty_unsigned_vec)
-{
-    table_tokenizer tok = get_row_tokenizer(line);
-    std::vector<T> res;
-    unsigned i = 0;
-    for (const std::string& t : tok)
-        if (!boost::binary_search(ignored_indices, i++))
-            res.push_back(boost::lexical_cast<T>(t));
-    return res;
-}
-
 //////////////////
 // istreamTable //
 //////////////////

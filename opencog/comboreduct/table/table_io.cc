@@ -288,6 +288,25 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 }
 
 // ===========================================================
+/**
+ * Take a line and return a vector containing the elements parsed.
+ * Used by istreamTable.
+ */
+template<typename T>
+static std::vector<T> tokenizeRow(const std::string& line,
+                           const std::vector<unsigned>& ignored_indices =
+                           empty_unsigned_vec)
+{
+    table_tokenizer tok = get_row_tokenizer(line);
+    std::vector<T> res;
+    unsigned i = 0;
+    for (const std::string& t : tok)
+        if (!boost::binary_search(ignored_indices, i++))
+            res.push_back(boost::lexical_cast<T>(t));
+    return res;
+}
+
+// ===========================================================
 // istream regular tables.
 
 /**
