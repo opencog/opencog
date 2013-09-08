@@ -1620,6 +1620,10 @@ int moses_exec(int argc, char** argv)
     moses_params.max_time = max_time;
     moses_params.max_cnd_output = result_count;
 
+
+    // Must register before call to infer_arity()
+    register_demo_problems();
+
     // Infer arity
     combo::arity_t arity = infer_arity(problem, problem_size, combo_str);
 
@@ -1706,8 +1710,6 @@ pms.exemplars = exemplars;
 pms.opt_params = opt_params;
 pms.hc_params = hc_params;
 pms.meta_params = meta_params;
-
-    register_demo_problems();
 
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
