@@ -25,15 +25,26 @@
 
 namespace opencog { namespace moses {
 
-problem_params::problem_params(const reduct::rule& bool_reduct_,
-                               const reduct::rule& bool_reduct_rep_,
-                               const reduct::rule& contin_reduct_,
+using namespace reduct;
+
+problem_params::problem_params(const vertex_set& ignore_ops_,
+                               int reduct_candidate_effort_,
+                               int reduct_knob_building_effort_,
                                const moses_parameters& moses_params_,
                                metapop_printer& mmr_pa_) :
     default_nsamples(20),
-    bool_reduct(bool_reduct_),
-    bool_reduct_rep(bool_reduct_rep_),
-    contin_reduct(contin_reduct_),
+    ignore_ops(ignore_ops_),
+
+    // Logical reduction rules used during search.
+    lr(logical_reduction(ignore_ops_)),
+    bool_reduct(lr(reduct_candidate_effort_)),
+
+    // Logical reduction rules used during representation building.
+    bool_reduct_rep(lr(reduct_knob_building_effort_)),
+
+    // Continuous reduction rules used during search and representation
+    // building.
+    contin_reduct(contin_reduction(reduct_candidate_effort_, ignore_ops)),
     moses_params(moses_params_),
     mmr_pa(mmr_pa_)
 {

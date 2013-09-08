@@ -39,8 +39,7 @@ namespace opencog { namespace moses {
 
 struct problem_params
 {
-    problem_params(const reduct::rule&, const reduct::rule&,
-                   const reduct::rule&,
+    problem_params(const vertex_set&, int, int,
                    const moses_parameters&,
                    metapop_printer&);
 
@@ -49,7 +48,7 @@ struct problem_params
     int nsamples;
     float min_rand_input;
     float max_rand_input;
-    vertex_set ignore_ops; // should be const&
+    const vertex_set& ignore_ops;
 
     float noise;
     score_t complexity_ratio;
@@ -63,6 +62,7 @@ struct problem_params
     bool enable_feature_selection;
     std::vector<combo_tree> exemplars;
 
+    reduct::logical_reduction lr;
     const reduct::rule& bool_reduct;
     const reduct::rule& bool_reduct_rep;
     const reduct::rule& contin_reduct;

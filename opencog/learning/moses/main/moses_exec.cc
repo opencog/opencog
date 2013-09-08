@@ -1602,24 +1602,14 @@ int moses_exec(int argc, char** argv)
                            output_python,
                            enable_mpi);
 
-    // Continuous reduction rules used during search and representation
-    // building.
-    const rule& contin_reduct = contin_reduction(reduct_candidate_effort,
-                                                 ignore_ops);
+problem_params pms(ignore_ops, reduct_candidate_effort,
+  reduct_knob_building_effort, moses_params, mmr_pa);
 
-    // Logical reduction rules used during search.
-    logical_reduction r(ignore_ops);
-    const rule& bool_reduct = r(reduct_candidate_effort);
 
-    // Logical reduction rules used during representation building.
-    const rule& bool_reduct_rep = r(reduct_knob_building_effort);
-
-problem_params pms(bool_reduct, bool_reduct_rep, contin_reduct, moses_params, mmr_pa);
 pms.enable_feature_selection = enable_feature_selection;
 pms.nsamples = nsamples;
 pms.min_rand_input = min_rand_input;
 pms.max_rand_input = max_rand_input;
-pms.ignore_ops = ignore_ops;
 pms.it_abs_err = it_abs_err;
 pms.noise = noise;
 pms.complexity_ratio = complexity_ratio;
@@ -1748,7 +1738,7 @@ pms.combo_str = combo_str;
 
                 multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
-                                      bool_reduct, bool_reduct_rep, bscore,
+                                      pms.bool_reduct, pms.bool_reduct_rep, bscore,
                                       opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             }
@@ -1784,7 +1774,7 @@ pms.combo_str = combo_str;
 
                 multibscore_based_bscore bscore(bscores);
                 metapop_moses_results(exemplars, cand_sig,
-                                      bool_reduct, bool_reduct_rep, bscore,
+                                      pms.bool_reduct, pms.bool_reduct_rep, bscore,
                                       opt_params, hc_params, meta_params, moses_params,
                                       mmr_pa);
             }
@@ -1795,7 +1785,7 @@ pms.combo_str = combo_str;
                 if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.5;
                     max_rand_input = 1.0; }
                 REGRESSION(id::boolean_type,
-                           bool_reduct, bool_reduct_rep,
+                           pms.bool_reduct, pms.bool_reduct_rep,
                            ctables, prerec_bscore,
                            (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
@@ -1805,7 +1795,7 @@ pms.combo_str = combo_str;
                 if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.8;
                     max_rand_input = 1.0; }
                 REGRESSION(id::boolean_type,
-                           bool_reduct, bool_reduct_rep,
+                           pms.bool_reduct, pms.bool_reduct_rep,
                            ctables, recall_bscore,
                            (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
@@ -1815,7 +1805,7 @@ pms.combo_str = combo_str;
                 if (0.0 == hardness) { hardness = 1.0; min_rand_input= 0.0;
                     max_rand_input = 0.5; }
                 REGRESSION(id::boolean_type,
-                           bool_reduct, bool_reduct_rep,
+                           pms.bool_reduct, pms.bool_reduct_rep,
                            ctables, bep_bscore,
                            (table, min_rand_input, max_rand_input, fabs(hardness)));
             }
@@ -1823,7 +1813,7 @@ pms.combo_str = combo_str;
             // f_one = F_1 harmonic ratio of recall and precision
             else if (problem == f_one) {
                 REGRESSION(id::boolean_type,
-                           bool_reduct, bool_reduct_rep,
+                           pms.bool_reduct, pms.bool_reduct_rep,
                            ctables, f_one_bscore,
                            (table));
             }
@@ -1835,7 +1825,7 @@ pms.combo_str = combo_str;
                 // --------- Boolean output type
                 if (output_type == id::boolean_type) {
                     REGRESSION(output_type,
-                               bool_reduct, bool_reduct_rep,
+                               pms.bool_reduct, pms.bool_reduct_rep,
                                ctables, ctruth_table_bscore,
                                (table));
                 }
@@ -1857,7 +1847,7 @@ pms.combo_str = combo_str;
                         // Might be good for some problem. See diary.
                         partial_solver well(ctables,
                                         table_type_signature,
-                                        exemplars, contin_reduct,
+                                        exemplars, pms.contin_reduct,
                                         opt_params, hc_params, meta_params,
                                         moses_params, mmr_pa);
                         well.solve();
@@ -1865,7 +1855,7 @@ pms.combo_str = combo_str;
                         // Much like the boolean-output-type above,
                         // just uses a slightly different scorer.
                         REGRESSION(output_type,
-                                   contin_reduct, contin_reduct,
+                                   pms.contin_reduct, pms.contin_reduct,
                                    ctables, enum_effective_bscore,
                                    (table));
                     }
@@ -1880,13 +1870,13 @@ pms.combo_str = combo_str;
                             contin_bscore::squared_error;
 
                         REGRESSION(output_type,
-                                   contin_reduct, contin_reduct,
+                                   pms.contin_reduct, pms.contin_reduct,
                                    tables, contin_bscore,
                                    (table, eft));
 
                     } else {
                         REGRESSION(output_type,
-                                   contin_reduct, contin_reduct,
+                                   pms.contin_reduct, pms.contin_reduct,
                                    tables, discretize_contin_bscore,
                                    (table.otable, table.itable,
                                         discretize_thresholds, weighted_accuracy));
@@ -1934,7 +1924,7 @@ pms.combo_str = combo_str;
             }
             multibscore_based_bscore bscore(bscores);
             metapop_moses_results(exemplars, tt,
-                                  bool_reduct, bool_reduct_rep, bscore,
+                                  pms.bool_reduct, pms.bool_reduct_rep, bscore,
                                   opt_params, hc_params, meta_params, moses_params,
                                   mmr_pa);
         }
