@@ -47,29 +47,20 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 }
 
 
-
 // ==================================================================
-/// Demo/example problem: majority. Learn the combo program that
-/// return true iff the number of true arguments is strictly
-/// greater than half of the arity
+// Boolean Demo/example problem common code.
 
-class majority_problem : public problem_base
+class bool_problem_base : public problem_base
 {
     public:
-        virtual const std::string name() const { return "maj"; }
-        virtual const std::string description() const {
-             return "Majority problem demo"; }
-        virtual combo::arity_t arity(size_t sz) { return sz; }
         virtual void run(problem_params&);
+        virtual logical_bscore get_bscore(arity_t) = 0;
 };
 
-void majority_problem::run(problem_params& pms)
+void bool_problem_base::run(problem_params& pms)
 {
     if (pms.enable_feature_selection)
-        logger().warn("Feature selection is not supported for the majority problem");
-
-    // @todo: for the moment occam's razor and partial truth table are ignored
-    majority func(pms.problem_size);
+        logger().warn("Feature selection is not supported for the demo problems");
 
     // If no exemplar has been provided in the options, use the
     // default boolean_type exemplar (which is 'and').
@@ -77,13 +68,54 @@ void majority_problem::run(problem_params& pms)
         pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
     }
 
+    logical_bscore bscore = get_bscore(pms.problem_size);
+
     type_tree tt = gen_signature(id::boolean_type, pms.arity);
-    logical_bscore bscore(func, pms.arity);
     metapop_moses_results(pms.exemplars, tt,
                           pms.bool_reduct, pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
+
+// ==================================================================
+// Demo/example problem: learn the logical disjunction. That is,
+// moses should learn the following program: or($1 $2 ... $k) where
+// k is the number of inputs specified by the -k option.
+class dj_problem : public bool_problem_base
+{
+    public:
+        virtual const std::string name() const { return "dj"; }
+        virtual const std::string description() const {
+             return "Learn logicical disjunction demo"; }
+        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual logical_bscore get_bscore(int problem_size) {
+            // @todo: for the moment occam's razor and partial truth table are ignored
+            disjunction func;
+            logical_bscore bscore(func, problem_size);
+            return bscore;
+        }
+};
+
+
+// ==================================================================
+/// Demo/example problem: majority. Learn the combo program that
+/// return true iff the number of true arguments is strictly
+/// greater than half of the arity
+
+class majority_problem : public bool_problem_base
+{
+    public:
+        virtual const std::string name() const { return "maj"; }
+        virtual const std::string description() const {
+             return "Majority problem demo"; }
+        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual logical_bscore get_bscore(int problem_size) {
+            // @todo: for the moment occam's razor and partial truth table are ignored
+            majority func(problem_size);
+            logical_bscore bscore(func, problem_size);
+            return bscore;
+        }
+};
 
 // ==================================================================
 
@@ -92,7 +124,7 @@ void majority_problem::run(problem_params& pms)
 /// (de-)multiplexer.  That is, a k-bit binary address will specify
 /// one and exactly one wire out of 2^k wires.  Here, k==problem_size.
 
-class mux_problem : public problem_base
+class mux_problem : public bool_problem_base
 {
     public:
         virtual const std::string name() const { return "mux"; }
@@ -101,30 +133,13 @@ class mux_problem : public problem_base
         virtual combo::arity_t arity(size_t sz) {
             return sz + pow2(sz);
         }
-        virtual void run(problem_params&);
+        virtual logical_bscore get_bscore(int problem_size) {
+            // @todo: for the moment occam's razor and partial truth table are ignored
+            multiplex func(problem_size);
+            logical_bscore bscore(func, arity(problem_size));
+            return bscore;
+        }
 };
-
-void mux_problem::run(problem_params& pms)
-{
-    if (pms.enable_feature_selection)
-        logger().warn("Feature selection is not supported for the mux problem");
-
-    // @todo: for the moment occam's razor and partial truth table are ignored
-    multiplex func(pms.problem_size);
-
-    // If no exemplar has been provided in the options, use the
-    // default boolean_type exemplar (which is 'and').
-    if (pms.exemplars.empty()) {
-        pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
-    }
-
-    type_tree tt = gen_signature(id::boolean_type, pms.arity);
-    logical_bscore bscore(func, pms.arity);
-    metapop_moses_results(pms.exemplars, tt,
-                          pms.bool_reduct, pms.bool_reduct_rep, bscore,
-                          pms.opt_params, pms.hc_params, pms.meta_params,
-                          pms.moses_params, pms.mmr_pa);
-}
 
 // ==================================================================
 /// Demo/Example problem: polynomial regression.  Given the polynomial
@@ -182,7 +197,9 @@ void polynomial_problem::run(problem_params& pms)
 // ==================================================================
 void register_demo_problems()
 {
+	register_problem(new dj_problem());
 	register_problem(new majority_problem());
+	register_problem(new mux_problem());
 	register_problem(new polynomial_problem());
 }
 
