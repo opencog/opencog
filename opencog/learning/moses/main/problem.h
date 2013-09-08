@@ -1,4 +1,4 @@
-/** 
+/**
  * problem.h ---
  *
  * Copyright (C) 2013 Linas Vepstas
@@ -40,19 +40,32 @@ namespace opencog { namespace moses {
 struct problem_params
 {
     problem_params(const reduct::rule&, const reduct::rule&,
+                   const reduct::rule&,
                    const moses_parameters&,
                    metapop_printer&);
+
+    // default number of samples to describe a problem
+    const unsigned int default_nsamples;
+    int nsamples;
+    vertex_set ignore_ops; // should be const&
+    unsigned int problem_size;
+
+    float noise;
+    score_t complexity_ratio;
+
+    // it params
+    bool it_abs_err;
 
     // EXPERIMENTAL
     // feature selection happens before each representation building
     /// Enable feature selection while selecting exemplar
     bool enable_feature_selection;
-    unsigned int problem_size;
     std::vector<combo_tree> exemplars;
     combo::arity_t arity;
 
     const reduct::rule& bool_reduct;
     const reduct::rule& bool_reduct_rep;
+    const reduct::rule& contin_reduct;
 
     optim_parameters opt_params; // XXX should be const
     hc_parameters hc_params;
@@ -66,6 +79,8 @@ class problem_base
     public:
         virtual ~problem_base() {}
         virtual const std::string name() const = 0;
+        virtual const std::string description() const = 0;
+        virtual combo::arity_t arity(size_t) = 0;
         virtual void run(problem_params&) = 0;
 };
 

@@ -1,4 +1,4 @@
-/** 
+/**
  * problem.cc ---
  *
  * Copyright (C) 2013 Linas Vepstas
@@ -27,10 +27,13 @@ namespace opencog { namespace moses {
 
 problem_params::problem_params(const reduct::rule& bool_reduct_,
                                const reduct::rule& bool_reduct_rep_,
+                               const reduct::rule& contin_reduct_,
                                const moses_parameters& moses_params_,
                                metapop_printer& mmr_pa_) :
+    default_nsamples(20),
     bool_reduct(bool_reduct_),
     bool_reduct_rep(bool_reduct_rep_),
+    contin_reduct(contin_reduct_),
     moses_params(moses_params_),
     mmr_pa(mmr_pa_)
 {

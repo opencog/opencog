@@ -105,9 +105,7 @@ static const string ann_cp="ann-cp"; // regression based on combo program using 
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
 static const string mux="mux"; // multiplex
-static const string maj="maj"; // majority
 static const string cp="cp"; // regression based on combo program to fit
-static const string sr="sr"; // simple regression of f(x)_o = sum_{i={1,o}} x^i
 static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
@@ -432,7 +430,7 @@ combo::arity_t infer_arity(const string& problem,
             return -1;
         }
     }
-    else if (problem == pa || problem == dj || problem == maj)
+    else if (problem == pa || problem == dj)
     {
         return problem_size;
     }
@@ -440,12 +438,11 @@ combo::arity_t infer_arity(const string& problem,
     {
         return problem_size + pow2(problem_size);
     }
-    else if (problem == sr)
-    {
-        return 1;
-    }
     else
     {
+        problem_base* probm = find_problem(problem);
+        if (probm) return probm->arity(problem_size);
+
         unsupported_problem_exit(problem);
         return -1;
     }
@@ -620,9 +617,9 @@ int moses_exec(int argc, char** argv)
                     "%s, demo, even parity problem\n\n"
                     "%s, demo, disjunction problem\n\n"
                     "%s, demo, multiplex problem\n\n"
-                    "%s, demo, majority problem\n\n"
-                    "%s, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux % maj % sr).c_str())
+                    "maj, demo, majority problem\n\n"
+                    "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux).c_str())
 
         // Input specification options
 
@@ -978,12 +975,12 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
-         str(format("For even parity (%s), disjunction (%s) and majority (%s) "
+         str(format("For even parity (%s), disjunction (%s) and majority (maj) "
                     "the problem size corresponds directly to the arity. "
                     "For multiplex (%s) the arity is arg+2^arg. "
-                    "For regression of f(x)_o = sum_{i={1,o}} x^i (%s) "
+                    "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
                     "the problem size corresponds to the order o.\n")
-             % pa % dj % maj % mux % sr).c_str())
+             % pa % dj % mux).c_str())
 
         // The remaining options (TODO organize that)
         
@@ -1709,9 +1706,22 @@ int moses_exec(int argc, char** argv)
     // Logical reduction rules used during representation building.
     const rule& bool_reduct_rep = r(reduct_knob_building_effort);
 
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-    
+problem_params pms(bool_reduct, bool_reduct_rep, contin_reduct, moses_params, mmr_pa);
+pms.enable_feature_selection = enable_feature_selection;
+pms.nsamples = nsamples;
+pms.arity = arity;
+pms.ignore_ops = ignore_ops;
+pms.it_abs_err = it_abs_err;
+pms.noise = noise;
+pms.complexity_ratio = complexity_ratio;
+pms.exemplars = exemplars;
+pms.opt_params = opt_params;
+pms.hc_params = hc_params;
+pms.meta_params = meta_params;
+
     register_demo_problems();
+
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
     // Problem based on input table.
     if (datafile_based_problem(problem))
@@ -2227,57 +2237,10 @@ int moses_exec(int argc, char** argv)
                               bool_reduct, bool_reduct_rep, bscore,
                               opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
-
-    // Demo/Example problem: polynomial regression.  Given the polynomial
-    // p(x)=x+x^2+x^3+...x^k, this searches for the  shortest  program
-    // consisting  of  nested arithmetic operators to compute p(x),
-    // given x as a free variable.  So, for example the order-2 polynomial
-    // can be written as x+x^2, and the shortest combo program is
-    // *(+(1 $1) $1) (that is, the  solution is p(x)=x(x+1) in the usual
-    // arithmetical notation).
-    else if (problem == sr)
-    {
-        if (enable_feature_selection)
-            logger().warn("Feature selection is not supported for that problem");
-
-        // If no exemplar has been provided in the options, use the
-        // default contin_type exemplar (+)
-        if (exemplars.empty()) {
-            exemplars.push_back(type_to_exemplar(id::contin_type));
-        }
-
-        // sr is fundamentally a kind of non-linear regression!
-        // over-ride any flag settings regarding this.
-        meta_params.linear_contin = false;
-
-        type_tree tt = gen_signature(id::contin_type, arity);
-
-        ITable it(tt, (nsamples>0 ? nsamples : default_nsamples));
-
-        int as = alphabet_size(tt, ignore_ops);
-
-        contin_bscore::err_function_type eft =
-            it_abs_err ? contin_bscore::abs_error :
-            contin_bscore::squared_error;
-        contin_bscore bscore(simple_symbolic_regression(problem_size),
-                             it, eft);
-        set_noise_or_ratio(bscore, as, noise, complexity_ratio);
-        metapop_moses_results(exemplars, tt,
-                              contin_reduct, contin_reduct, bscore,
-                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
-    }
     else {
         problem_base* probm = find_problem(problem);
         if (probm)
         {
-problem_params pms(bool_reduct, bool_reduct_rep, moses_params, mmr_pa);
-pms.enable_feature_selection = enable_feature_selection;
-pms.arity = arity;
-pms.exemplars = exemplars;
-pms.opt_params = opt_params;
-pms.hc_params = hc_params;
-pms.meta_params = meta_params;
-
             probm->run(pms);
         }
         else
