@@ -86,6 +86,47 @@ void majority_problem::run(problem_params& pms)
 }
 
 // ==================================================================
+
+/// Demo/example problem: multiplex. Learn the combo program that
+/// corresponds to the boolean (electrical) circuit that is a
+/// (de-)multiplexer.  That is, a k-bit binary address will specify
+/// one and exactly one wire out of 2^k wires.  Here, k==problem_size.
+
+class mux_problem : public problem_base
+{
+    public:
+        virtual const std::string name() const { return "mux"; }
+        virtual const std::string description() const {
+            return "Multiplex problem demo"; }
+        virtual combo::arity_t arity(size_t sz) {
+            return sz + pow2(sz);
+        }
+        virtual void run(problem_params&);
+};
+
+void mux_problem::run(problem_params& pms)
+{
+    if (pms.enable_feature_selection)
+        logger().warn("Feature selection is not supported for the mux problem");
+
+    // @todo: for the moment occam's razor and partial truth table are ignored
+    multiplex func(pms.problem_size);
+
+    // If no exemplar has been provided in the options, use the
+    // default boolean_type exemplar (which is 'and').
+    if (pms.exemplars.empty()) {
+        pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
+    }
+
+    type_tree tt = gen_signature(id::boolean_type, pms.arity);
+    logical_bscore bscore(func, pms.arity);
+    metapop_moses_results(pms.exemplars, tt,
+                          pms.bool_reduct, pms.bool_reduct_rep, bscore,
+                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.moses_params, pms.mmr_pa);
+}
+
+// ==================================================================
 /// Demo/Example problem: polynomial regression.  Given the polynomial
 /// p(x)=x+x^2+x^3+...x^k, this searches for the  shortest  program
 /// consisting  of  nested arithmetic operators to compute p(x),

@@ -104,7 +104,6 @@ static const string ann_cp="ann-cp"; // regression based on combo program using 
 /* Demo problems */
 static const string pa="pa"; // even parity
 static const string dj="dj"; // disjunction
-static const string mux="mux"; // multiplex
 static const string cp="cp"; // regression based on combo program to fit
 static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
@@ -434,10 +433,6 @@ combo::arity_t infer_arity(const string& problem,
     {
         return problem_size;
     }
-    else if (problem == mux)
-    {
-        return problem_size + pow2(problem_size);
-    }
     else
     {
         problem_base* probm = find_problem(problem);
@@ -616,10 +611,10 @@ int moses_exec(int argc, char** argv)
                     "%s, demo, regression based on combo program\n\n"
                     "%s, demo, even parity problem\n\n"
                     "%s, demo, disjunction problem\n\n"
-                    "%s, demo, multiplex problem\n\n"
+                    "mux, demo, multiplex problem\n\n"
                     "maj, demo, majority problem\n\n"
                     "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj % mux).c_str())
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa % dj).c_str())
 
         // Input specification options
 
@@ -977,10 +972,10 @@ int moses_exec(int argc, char** argv)
          value<unsigned int>(&problem_size)->default_value(5),
          str(format("For even parity (%s), disjunction (%s) and majority (maj) "
                     "the problem size corresponds directly to the arity. "
-                    "For multiplex (%s) the arity is arg+2^arg. "
+                    "For multiplex (mux) the arity is arg+2^arg. "
                     "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
                     "the problem size corresponds to the order o.\n")
-             % pa % dj % mux).c_str())
+             % pa % dj).c_str())
 
         // The remaining options (TODO organize that)
         
@@ -2199,31 +2194,6 @@ pms.meta_params = meta_params;
 
         // @todo: for the moment occam's razor and partial truth table are ignored
         disjunction func;
-
-        // If no exemplar has been provided in the options, use the
-        // default boolean_type exemplar (which is 'and').
-        if (exemplars.empty()) {
-            exemplars.push_back(type_to_exemplar(id::boolean_type));
-        }
-
-        type_tree tt = gen_signature(id::boolean_type, arity);
-        logical_bscore bscore(func, arity);
-        metapop_moses_results(exemplars, tt,
-                              bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
-    }
-
-    // Demo/example problem: multiplex. Learn the combo program that
-    // corresponds to the boolean (electrical) circuit that is a
-    // (de-)multiplexer.  That is, a k-bit binary address will specify
-    // one and exactly one wire out of 2^k wires.  Here, k==problem_size.
-    else if (problem == mux)
-    {
-        if (enable_feature_selection)
-            logger().warn("Feature selection is not supported for that problem");
-
-        // @todo: for the moment occam's razor and partial truth table are ignored
-        multiplex func(problem_size);
 
         // If no exemplar has been provided in the options, use the
         // default boolean_type exemplar (which is 'and').
