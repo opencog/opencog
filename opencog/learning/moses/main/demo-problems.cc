@@ -70,12 +70,35 @@ void bool_problem_base::run(problem_params& pms)
 
     logical_bscore bscore = get_bscore(pms.problem_size);
 
-    type_tree tt = gen_signature(id::boolean_type, pms.arity);
-    metapop_moses_results(pms.exemplars, tt,
+    type_tree sig = gen_signature(id::boolean_type, pms.arity);
+    unsigned as = alphabet_size(sig, pms.ignore_ops);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+
+    metapop_moses_results(pms.exemplars, sig,
                           pms.bool_reduct, pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
+
+// ==================================================================
+// Demo/Example: learn a combo program that determines if the
+// program inputs are even parity or not.  That is, the combo
+// program will be a boolean circuit that computes parity.
+class pa_problem : public bool_problem_base
+{
+    public:
+        virtual const std::string name() const { return "pa"; }
+        virtual const std::string description() const {
+             return "Learn parity function demo"; }
+        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual logical_bscore get_bscore(int problem_size)
+        {
+            even_parity func;
+            logical_bscore bscore(func, problem_size);
+            return bscore;
+        }
+};
+
 
 // ==================================================================
 // Demo/example problem: learn the logical disjunction. That is,
@@ -88,8 +111,8 @@ class dj_problem : public bool_problem_base
         virtual const std::string description() const {
              return "Learn logicical disjunction demo"; }
         virtual combo::arity_t arity(size_t sz) { return sz; }
-        virtual logical_bscore get_bscore(int problem_size) {
-            // @todo: for the moment occam's razor and partial truth table are ignored
+        virtual logical_bscore get_bscore(int problem_size)
+        {
             disjunction func;
             logical_bscore bscore(func, problem_size);
             return bscore;
@@ -109,8 +132,8 @@ class majority_problem : public bool_problem_base
         virtual const std::string description() const {
              return "Majority problem demo"; }
         virtual combo::arity_t arity(size_t sz) { return sz; }
-        virtual logical_bscore get_bscore(int problem_size) {
-            // @todo: for the moment occam's razor and partial truth table are ignored
+        virtual logical_bscore get_bscore(int problem_size)
+        {
             majority func(problem_size);
             logical_bscore bscore(func, problem_size);
             return bscore;
@@ -133,8 +156,8 @@ class mux_problem : public bool_problem_base
         virtual combo::arity_t arity(size_t sz) {
             return sz + pow2(sz);
         }
-        virtual logical_bscore get_bscore(int problem_size) {
-            // @todo: for the moment occam's razor and partial truth table are ignored
+        virtual logical_bscore get_bscore(int problem_size)
+        {
             multiplex func(problem_size);
             logical_bscore bscore(func, arity(problem_size));
             return bscore;
@@ -195,8 +218,10 @@ void polynomial_problem::run(problem_params& pms)
 }
 
 // ==================================================================
+
 void register_demo_problems()
 {
+	register_problem(new pa_problem());
 	register_problem(new dj_problem());
 	register_problem(new majority_problem());
 	register_problem(new mux_problem());

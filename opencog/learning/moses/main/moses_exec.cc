@@ -102,7 +102,6 @@ static const string ann_it="ann-it"; // regression based on input table using an
 static const string ann_cp="ann-cp"; // regression based on combo program using ann
 
 /* Demo problems */
-static const string pa="pa"; // even parity
 static const string cp="cp"; // regression based on combo program to fit
 static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
@@ -428,10 +427,6 @@ combo::arity_t infer_arity(const string& problem,
             return -1;
         }
     }
-    else if (problem == pa)
-    {
-        return problem_size;
-    }
     else
     {
         problem_base* probm = find_problem(problem);
@@ -608,12 +603,12 @@ int moses_exec(int argc, char** argv)
                     " and other things being experimented.\n\n"
                     "%s, regression based on input table using ann\n\n"
                     "%s, demo, regression based on combo program\n\n"
-                    "%s, demo, even parity problem\n\n"
+                    "pa, demo, even parity problem\n\n"
                     "dj, demo, disjunction problem\n\n"
                     "mux, demo, multiplex problem\n\n"
                     "maj, demo, majority problem\n\n"
                     "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp % pa).c_str())
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp).c_str())
 
         // Input specification options
 
@@ -969,12 +964,11 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
-         str(format("For even parity (%s), disjunction (dj) and majority (maj) "
-                    "the problem size corresponds directly to the arity. "
-                    "For multiplex (mux) the arity is arg+2^arg. "
-                    "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
-                    "the problem size corresponds to the order o.\n")
-             % pa).c_str())
+         "For even parity (pa), disjunction (dj) and majority (maj) "
+         "the problem size corresponds directly to the arity. "
+         "For multiplex (mux) the arity is arg+2^arg. "
+         "For regression of f(x)_o = sum_{i={1,o}} x^i (sr) "
+         "the problem size corresponds to the order o.\n")
 
         // The remaining options (TODO organize that)
         
@@ -1005,11 +999,11 @@ int moses_exec(int argc, char** argv)
 
         (opt_desc_str(log_file_dep_opt_opt).c_str(),
          str(format("The name of the log is determined by the options, for"
-                    " instance if moses-exec is called with -%s 123 -%s %s"
+                    " instance if moses-exec is called with -%s 123 -%s pa"
                     " the log name is moses_random-seed_123_problem_pa.log."
                     " The name will be truncated in order not to"
                     " be longer than %s characters.\n")
-             % rand_seed_opt.second % problem_opt.second % pa
+             % rand_seed_opt.second % problem_opt.second 
              % max_filename_size).c_str())
 
         (opt_desc_str(log_file_opt).c_str(),
@@ -2155,32 +2149,6 @@ pms.meta_params = meta_params;
                                   contin_reduct, contin_reduct, bscore,
                                   opt_params, hc_params, meta_params, moses_params, mmr_pa);
         }
-    }
-
-    // Demo/Example: learn a combo program that determines if the
-    // program inputs are even parity or not.  That is, the combo
-    // program will be a boolean circuit that computes parity.
-    else if (problem == pa)
-    {
-        if (enable_feature_selection)
-            logger().warn("Feature selection is not supported for that problem");
-
-        even_parity func;
-
-        // If no exemplar has been provided in the options, use the
-        // default boolean_type exemplar (which is 'and').
-        if (exemplars.empty()) {
-            exemplars.push_back(type_to_exemplar(id::boolean_type));
-        }
-
-        type_tree sig = gen_signature(id::boolean_type, arity);
-        unsigned as = alphabet_size(sig, ignore_ops);
-
-        logical_bscore bscore(func, arity);
-        set_noise_or_ratio(bscore, as, noise, complexity_ratio);
-        metapop_moses_results(exemplars, sig,
-                              bool_reduct, bool_reduct_rep, bscore,
-                              opt_params, hc_params, meta_params, moses_params, mmr_pa);
     }
     else {
         problem_base* probm = find_problem(problem);
