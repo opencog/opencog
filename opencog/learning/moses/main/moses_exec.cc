@@ -99,12 +99,6 @@ static const string ip="ip"; // find interesting patterns
 
 /* ANN problems */
 static const string ann_it="ann-it"; // regression based on input table using ann
-static const string ann_cp="ann-cp"; // regression based on combo program using ann
-
-/* Demo problems */
-static const string ann_xor="ann-xor"; // binary-xor problem using ann
-static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
-static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
 
 // diversity distance types
 static const string p_norm = "p_norm";
