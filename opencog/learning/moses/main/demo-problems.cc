@@ -154,7 +154,19 @@ class mux_problem : public bool_problem_base
         virtual const std::string name() const { return "mux"; }
         virtual const std::string description() const {
             return "Multiplex problem demo"; }
+
         virtual combo::arity_t get_arity(int sz) {
+            if (4 < sz) {
+                // A mux of 5 would multiplex 32 bits, requiring a truth
+                // table of 2^37 rows ... which is some many umpteen gigabytes.
+                logger().warn() << 
+                    "Error: maximum mux demo problem size is 4;\n"
+                    "use the -k flag to pick a smaller size";
+                std::cerr << 
+                    "Error: maximum mux demo problem size is 4;\n"
+                    "use the -k flag to pick a smaller size" << std::endl;
+                exit(-1);
+            }
             return sz + pow2(sz);
         }
         virtual logical_bscore get_bscore(int problem_size)
@@ -235,9 +247,7 @@ static combo_tree str_to_combo_tree(const string& combo_str)
 class combo_problem_base : public problem_base
 {
     public:
-        virtual combo::arity_t arity(size_t sz) { return -1; }
         void check_args(problem_params&);
-        //* Convert string to a combo_tree
 };
 
 void combo_problem_base::check_args(problem_params& pms)
