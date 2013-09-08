@@ -53,8 +53,9 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 class bool_problem_base : public problem_base
 {
     public:
+        virtual combo::arity_t get_arity(int) = 0;
+        virtual logical_bscore get_bscore(int) = 0;
         virtual void run(problem_params&);
-        virtual logical_bscore get_bscore(arity_t) = 0;
 };
 
 void bool_problem_base::run(problem_params& pms)
@@ -70,7 +71,7 @@ void bool_problem_base::run(problem_params& pms)
 
     logical_bscore bscore = get_bscore(pms.problem_size);
 
-    type_tree sig = gen_signature(id::boolean_type, pms.arity);
+    type_tree sig = gen_signature(id::boolean_type, get_arity(pms.problem_size));
     unsigned as = alphabet_size(sig, pms.ignore_ops);
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
@@ -90,7 +91,7 @@ class pa_problem : public bool_problem_base
         virtual const std::string name() const { return "pa"; }
         virtual const std::string description() const {
              return "Learn parity function demo"; }
-        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual combo::arity_t get_arity(int sz) { return sz; }
         virtual logical_bscore get_bscore(int problem_size)
         {
             even_parity func;
@@ -110,7 +111,7 @@ class dj_problem : public bool_problem_base
         virtual const std::string name() const { return "dj"; }
         virtual const std::string description() const {
              return "Learn logicical disjunction demo"; }
-        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual combo::arity_t get_arity(int sz) { return sz; }
         virtual logical_bscore get_bscore(int problem_size)
         {
             disjunction func;
@@ -131,7 +132,7 @@ class majority_problem : public bool_problem_base
         virtual const std::string name() const { return "maj"; }
         virtual const std::string description() const {
              return "Majority problem demo"; }
-        virtual combo::arity_t arity(size_t sz) { return sz; }
+        virtual combo::arity_t get_arity(int sz) { return sz; }
         virtual logical_bscore get_bscore(int problem_size)
         {
             majority func(problem_size);
@@ -153,13 +154,13 @@ class mux_problem : public bool_problem_base
         virtual const std::string name() const { return "mux"; }
         virtual const std::string description() const {
             return "Multiplex problem demo"; }
-        virtual combo::arity_t arity(size_t sz) {
+        virtual combo::arity_t get_arity(int sz) {
             return sz + pow2(sz);
         }
         virtual logical_bscore get_bscore(int problem_size)
         {
             multiplex func(problem_size);
-            logical_bscore bscore(func, arity(problem_size));
+            logical_bscore bscore(func, get_arity(problem_size));
             return bscore;
         }
 };
@@ -179,7 +180,7 @@ class polynomial_problem : public problem_base
         virtual const std::string name() const { return "sr"; }
         virtual const std::string description() const {
              return "Simple regression of f_n(x) = sum_{k={1,n}} x^k"; }
-        virtual combo::arity_t arity(size_t sz) { return 1; }
+        virtual combo::arity_t get_arity(int sz) { return 1; }
         virtual void run(problem_params&);
 };
 
@@ -198,7 +199,7 @@ void polynomial_problem::run(problem_params& pms)
     // over-ride any flag settings regarding this.
     pms.meta_params.linear_contin = false;
 
-    type_tree tt = gen_signature(id::contin_type, pms.arity);
+    type_tree tt = gen_signature(id::contin_type, 1);
 
     ITable it(tt, (pms.nsamples>0 ? pms.nsamples : pms.default_nsamples));
 

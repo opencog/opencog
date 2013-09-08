@@ -62,7 +62,6 @@ struct problem_params
     /// Enable feature selection while selecting exemplar
     bool enable_feature_selection;
     std::vector<combo_tree> exemplars;
-    combo::arity_t arity;
 
     const reduct::rule& bool_reduct;
     const reduct::rule& bool_reduct_rep;
@@ -85,7 +84,6 @@ class problem_base
         virtual ~problem_base() {}
         virtual const std::string name() const = 0;
         virtual const std::string description() const = 0;
-        virtual combo::arity_t arity(size_t) = 0;
         virtual void run(problem_params&) = 0;
 };
 

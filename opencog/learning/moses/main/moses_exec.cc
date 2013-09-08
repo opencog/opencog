@@ -365,25 +365,6 @@ bool datafile_based_problem(const string& problem)
     return dbp.find(problem) != dbp.end();
 }
 
-// Infer the arity of the problem
-combo::arity_t infer_arity(const string& problem,
-                           unsigned int problem_size)
-{
-    if (datafile_based_problem(problem)) {
-        return -1;
-    }
-    else
-    {
-        problem_base* probm = find_problem(problem);
-        if (probm) return probm->arity(problem_size);
-
-        unsupported_problem_exit(problem);
-        return -1;
-    }
-}
-
-
-
 int moses_exec(int argc, char** argv)
 {
     // for(int i = 0; i < argc; ++i)
@@ -1568,17 +1549,11 @@ int moses_exec(int argc, char** argv)
     moses_params.max_time = max_time;
     moses_params.max_cnd_output = result_count;
 
-
-    // Must register before call to infer_arity()
-    register_demo_problems();
-
-    // Infer arity
-    combo::arity_t arity = infer_arity(problem, problem_size);
-
     // Input data for table-based problems.
     vector<Table> tables;
     vector<CTable> ctables;
     vector<string> ilabels;     // labels of the input table (table.itable)
+    combo::arity_t arity = 0;
 
     // Problem based on input table.
     if (datafile_based_problem(problem))
@@ -1617,9 +1592,8 @@ int moses_exec(int argc, char** argv)
                 }
             }
         }
+        logger().info("Inferred arity = %d", arity);
     }
-
-    logger().info("Inferred arity = %d", arity);
 
     // Set metapop printer parameters.
     metapop_printer mmr_pa(result_count,
@@ -1651,7 +1625,6 @@ pms.enable_feature_selection = enable_feature_selection;
 pms.nsamples = nsamples;
 pms.min_rand_input = min_rand_input;
 pms.max_rand_input = max_rand_input;
-pms.arity = arity;
 pms.ignore_ops = ignore_ops;
 pms.it_abs_err = it_abs_err;
 pms.noise = noise;
@@ -1663,6 +1636,8 @@ pms.meta_params = meta_params;
 
 pms.problem_size = problem_size;
 pms.combo_str = combo_str;
+
+    register_demo_problems();
 
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
