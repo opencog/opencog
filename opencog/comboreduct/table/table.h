@@ -1135,16 +1135,8 @@ void subsampleTable(ITable& it, unsigned nsamples);
 /////////////////
 
 //////////////////////////////
-// probably soon deprecated //
+// probably soon deprecated //  ??? Why deprecated ??? Because its used for demo problems only ???
 //////////////////////////////
-
-// shorthands used by class contin_input_table and contin_output_table
-typedef std::vector<bool> bool_vector;
-typedef bool_vector::iterator bv_it;
-typedef bool_vector::const_iterator bv_cit;
-typedef std::vector<bool_vector> bool_matrix;
-typedef bool_matrix::iterator bm_it;
-typedef bool_matrix::const_iterator bm_cit;
 
 /**
  * complete truth table, it contains only the outputs, the inputs are
@@ -1163,6 +1155,7 @@ typedef bool_matrix::const_iterator bm_cit;
  * |complete_truth_table[3]|T |T |
  * +-----------------------+--+--+
  */
+typedef std::vector<bool> bool_vector;
 class complete_truth_table : public bool_vector
 {
 public:
@@ -1192,7 +1185,7 @@ public:
         for (int i = 0; it != end(); ++i, ++it) {
             bool_vector v(_arity);
             for (arity_t j = 0;j < _arity;++j)
-                v[j] = (i >> j) % 2;
+                v[j] = (i >> j) % 2;  // j'th bit of i
             (*it) = f(v.begin(), v.end());
         }
     }
@@ -1228,8 +1221,8 @@ protected:
         iterator it = begin();
         for (int i = 0; it != end(); ++i, ++it) {
             for (int j = 0; j < _arity; ++j)
-                bmap[j] = bool_to_vertex((i >> j) % 2);
-            *it = eval_binding(bmap, tr) == id::logical_true;
+                bmap[j] = bool_to_vertex((i >> j) % 2);  // j'th bit of i
+            *it = (eval_binding(bmap, tr) == id::logical_true);
         }
     }
     arity_t _arity;
