@@ -102,7 +102,6 @@ static const string ann_it="ann-it"; // regression based on input table using an
 static const string ann_cp="ann-cp"; // regression based on combo program using ann
 
 /* Demo problems */
-static const string cp="cp"; // regression based on combo program to fit
 static const string ann_xor="ann-xor"; // binary-xor problem using ann
 static const string ann_pole1="ann-pole1"; // pole balancing problem using ann
 static const string ann_pole2="ann-pole2"; // double pole balancing problem ann
@@ -158,17 +157,9 @@ static const string seed_init = "init";
 static const string seed_xmplr = "xmplr";
 
 void log_output_error_exit(string err_msg) {
-    logger().info() << "Error: " << err_msg;
+    logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
     exit(1);    
-}
-
-/**
- * Display error message about unspecified combo tree and exit
- */
-void unspecified_combo_exit()
-{
-    log_output_error_exit("you must specify which combo tree to learn (option -y).");
 }
 
 /**
@@ -183,16 +174,6 @@ void unsupported_type_exit(const type_tree& tt)
 void unsupported_type_exit(type_node type)
 {
     unsupported_type_exit(type_tree(type));
-}
-
-/**
- * Display error message about ill formed combo tree and exit
- */
-void illformed_exit(const combo_tree& tr)
-{
-    stringstream ss;
-    ss << "the combo tree " << tr << " is not well formed.";
-    log_output_error_exit(ss.str());
 }
 
 /**
@@ -367,28 +348,13 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 }
 
 //* Convert string to a combo_tree
-combo_tree str_to_combo_tree(const string& combo_str)
+static combo_tree str_to_combo_tree(const string& combo_str)
 {
     stringstream ss;
     combo_tree tr;
     ss << combo_str;
     ss >> tr;
     return tr;
-}
-
-//* Get largest contin constant in a combo tree
-contin_t largest_const_in_tree(const combo_tree &tr)
-{
-    contin_t rc = 0.0;
-    combo_tree::pre_order_iterator it;
-    for(it = tr.begin(); it != tr.end(); it++) {
-        if (is_contin(*it)) {
-            contin_t val = get_contin(*it);
-            if (rc < val) rc = val;
-        }
-    }
-
-    return rc;
 }
 
 //* return true iff the problem is based on data file
@@ -399,33 +365,12 @@ bool datafile_based_problem(const string& problem)
     return dbp.find(problem) != dbp.end();
 }
 
-//* return true iff the problem is based on a combo tree
-bool combo_based_problem(const string& problem)
-{
-    return problem == cp || problem == ann_cp;
-}
-
 // Infer the arity of the problem
 combo::arity_t infer_arity(const string& problem,
-                           unsigned int problem_size,
-                           const string& combo_str)
+                           unsigned int problem_size)
 {
     if (datafile_based_problem(problem)) {
         return -1;
-    }
-    else if (combo_based_problem(problem))
-    {
-        if (combo_str.empty())
-            unspecified_combo_exit();
-        // get the combo_tree and infer its type
-        combo_tree tr = str_to_combo_tree(combo_str);
-        type_tree tt = infer_type_tree(tr);
-        if (is_well_formed(tt)) {
-            return type_tree_arity(tt);
-        } else {
-            illformed_exit(tr);
-            return -1;
-        }
     }
     else
     {
@@ -453,8 +398,11 @@ int moses_exec(int argc, char** argv)
     vector<string> input_data_files;
     string target_feature;
     string problem;
+
+    // XXX Demo options, these should be removed!
     string combo_str;
     unsigned int problem_size;
+
     int nsamples;
     float min_rand_input;
     float max_rand_input;
@@ -602,13 +550,13 @@ int moses_exec(int argc, char** argv)
                     " Or the difference of skewnesses between the 2 distributions"
                     " and other things being experimented.\n\n"
                     "%s, regression based on input table using ann\n\n"
-                    "%s, demo, regression based on combo program\n\n"
+                    "cp, demo, regression based on combo program\n\n"
                     "pa, demo, even parity problem\n\n"
                     "dj, demo, disjunction problem\n\n"
                     "mux, demo, multiplex problem\n\n"
                     "maj, demo, majority problem\n\n"
                     "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it % cp).c_str())
+             % it % pre % prerec % recall % bep % f_one % ip % ann_it).c_str())
 
         // Input specification options
 
@@ -959,8 +907,8 @@ int moses_exec(int argc, char** argv)
         (opt_desc_str(combo_str_opt).c_str(),
          value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
-                    " %s is selected (option -%s).\n")
-             % cp % problem_opt.second).c_str())
+                    " cp is selected (option -%s).\n")
+             % problem_opt.second).c_str())
 
         (opt_desc_str(problem_size_opt).c_str(),
          value<unsigned int>(&problem_size)->default_value(5),
@@ -1625,7 +1573,7 @@ int moses_exec(int argc, char** argv)
     register_demo_problems();
 
     // Infer arity
-    combo::arity_t arity = infer_arity(problem, problem_size, combo_str);
+    combo::arity_t arity = infer_arity(problem, problem_size);
 
     // Input data for table-based problems.
     vector<Table> tables;
@@ -1701,6 +1649,8 @@ int moses_exec(int argc, char** argv)
 problem_params pms(bool_reduct, bool_reduct_rep, contin_reduct, moses_params, mmr_pa);
 pms.enable_feature_selection = enable_feature_selection;
 pms.nsamples = nsamples;
+pms.min_rand_input = min_rand_input;
+pms.max_rand_input = max_rand_input;
 pms.arity = arity;
 pms.ignore_ops = ignore_ops;
 pms.it_abs_err = it_abs_err;
@@ -1710,6 +1660,9 @@ pms.exemplars = exemplars;
 pms.opt_params = opt_params;
 pms.hc_params = hc_params;
 pms.meta_params = meta_params;
+
+pms.problem_size = problem_size;
+pms.combo_str = combo_str;
 
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
 
@@ -2020,7 +1973,6 @@ pms.meta_params = meta_params;
         // regression based on input table using ann
         else if (problem == ann_it)
         {
-
             // If no exemplar has been provided in the options,
             // insert the default.
             if (exemplars.empty()) {
@@ -2035,120 +1987,6 @@ pms.meta_params = meta_params;
             set_noise_or_ratio(bscore, as, noise, complexity_ratio);
             metapop_moses_results(exemplars, tt,
                                   ann_reduction(), ann_reduction(), bscore,
-                                  opt_params, hc_params, meta_params, moses_params, mmr_pa);
-        }
-    }
-
-    // Demo/Example: Problem based on input combo program.
-    // Learn a program that should be identical to the specified input
-    // program.
-    else if (combo_based_problem(problem))
-    {
-        if (enable_feature_selection)
-            logger().warn("Feature selection is not supported for that problem");
-
-        combo_tree tr = str_to_combo_tree(combo_str);
-
-        // If the user specifies the combo program from bash or similar
-        // shells, and forgets to escape the $ in the variable names,
-        // then the resulting combo program will be garbage.  Try to
-        // sanity-check this, so as to avoid user frustration.
-        // A symptom of this error is that the arity will be -1.
-        if (-1 == arity || NULL == strchr(combo_str.c_str(), '$')) {
-            cerr << "Error: the combo program " << tr << "\n"
-                 << "appears not to contain any arguments. Did you\n"
-                 << "forget to escape the $'s in the shell command line?"
-                 << endl;
-            exit(2);
-        }
-
-        if (problem == cp) { // Regression based on combo program
-            // Get the combo_tree and infer its type
-            type_tree tt = infer_type_tree(tr);
-
-            type_node output_type = get_type_node(get_signature_output(tt));
-
-            // If no exemplar has been provided in the options, use the
-            // default one.
-            if (exemplars.empty()) {
-                exemplars.push_back(type_to_exemplar(output_type));
-            }
-
-            if (output_type == id::boolean_type) {
-                // @todo: Occam's razor and nsamples is not taken into account
-                logical_bscore bscore(tr, arity);
-                metapop_moses_results(exemplars, tt,
-                                      bool_reduct, bool_reduct_rep, bscore,
-                                      opt_params, hc_params, meta_params, moses_params,
-                                      mmr_pa);
-            }
-            else if (output_type == id::contin_type) {
-
-                // Naive users of the combo regression mode will fail
-                // to understand that the input program must be sampled
-                // in order for the fitness function to be evaluated.
-                // The default sample range 0<x<1 is probably too small
-                // for any fancy-pants input program, so try to make
-                // a reasonable guess.  Yes, this is a stupid hack, but
-                // it does avoid the problem of naive users saying
-                // "aww moses sucks" when they fail to invoke it correctly.
-                if ((0.0 == min_rand_input) && (1.0 == max_rand_input)) {
-                    max_rand_input = 2.0 * largest_const_in_tree(tr);
-                    min_rand_input = -max_rand_input;
-                    if ((nsamples <= 0) &&
-                        (default_nsamples < 2 * arity * max_rand_input)) {
-                        nsamples = 2 * arity * max_rand_input;
-                    }
-                }
-
-                if (nsamples <= 0)
-                    nsamples = default_nsamples;
-
-                logger().info() << "Will sample combo program " << tr << "\n"
-                                << "\tat " << nsamples << " input values, "
-                                << "ranging between " << min_rand_input
-                                << " and " << max_rand_input <<endl;
-
-                // @todo: introduce some noise optionally
-                ITable it(tt, nsamples, max_rand_input, min_rand_input);
-                OTable ot(tr, it);
-
-                int as = alphabet_size(tt, ignore_ops);
-
-                contin_bscore bscore(ot, it);
-                set_noise_or_ratio(bscore, as, noise, complexity_ratio);
-                metapop_moses_results(exemplars, tt,
-                                      contin_reduct, contin_reduct, bscore,
-                                      opt_params, hc_params, meta_params, moses_params,
-                                      mmr_pa);
-            } else {
-                unsupported_type_exit(tt);
-            }
-        }
-        else if (problem == ann_cp)
-        {
-            // regression based on combo program using ann
-            // get the combo_tree and infer its type
-            type_tree tt = gen_signature(id::ann_type, 0);
-            int as = alphabet_size(tt, ignore_ops);
-
-            // If no exemplar has been provided in the options,
-            // use the default.
-            if (exemplars.empty()) {
-                exemplars.push_back(ann_exemplar(arity));
-            }
-
-            // @todo: introduce some noise optionally
-            if (nsamples <= 0)
-                nsamples = default_nsamples;
-
-            ITable it(tt, nsamples, max_rand_input, min_rand_input);
-            OTable ot(tr, it);
-
-            contin_bscore bscore(ot, it);
-            set_noise_or_ratio(bscore, as, noise, complexity_ratio);
-            metapop_moses_results(exemplars, tt,
-                                  contin_reduct, contin_reduct, bscore,
                                   opt_params, hc_params, meta_params, moses_params, mmr_pa);
         }
     }

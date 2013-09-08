@@ -218,6 +218,200 @@ void polynomial_problem::run(problem_params& pms)
 }
 
 // ==================================================================
+// Demo/Example: Problem based on input combo program.
+// Learn a program that should be identical to the specified input
+// program.
+
+static combo_tree str_to_combo_tree(const string& combo_str)
+{
+    stringstream ss;
+    combo_tree tr;
+    ss << combo_str;
+    ss >> tr;
+    return tr;
+}
+
+class combo_problem_base : public problem_base
+{
+    public:
+        virtual combo::arity_t arity(size_t sz) { return -1; }
+        void check_args(problem_params&);
+        //* Convert string to a combo_tree
+};
+
+void combo_problem_base::check_args(problem_params& pms)
+{
+    if (pms.enable_feature_selection)
+        logger().warn("Feature selection is not supported for the combo demo.");
+
+    if (pms.combo_str.empty()) {
+        logger().warn() << "You must specify a combo tree to learn (option -y).";
+        std::cerr << "You must specify a combo tree to learn (option -y)." << std::endl;
+        exit(-1);
+    }
+
+    // get the combo_tree and infer its type
+    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    type_tree tt = infer_type_tree(tr);
+    if (not is_well_formed(tt)) {
+        logger().warn() << "The combo tree " << tr << " is not well formed.";
+        std::cerr << "The combo tree " << tr << " is not well formed." << std::endl;
+        exit(-1);
+    }
+    
+    combo::arity_t arity = type_tree_arity(tt);
+
+    // If the user specifies the combo program from bash or similar
+    // shells, and forgets to escape the $ in the variable names,
+    // then the resulting combo program will be garbage.  Try to
+    // sanity-check this, so as to avoid user frustration.
+    // A symptom of this error is that the arity will be -1.
+    if (-1 == arity || NULL == strchr(pms.combo_str.c_str(), '$')) {
+        cerr << "Error: the combo program " << tr << "\n"
+             << "appears not to contain any arguments. Did you\n"
+             << "forget to escape the $'s in the shell command line?"
+             << endl;
+        exit(-2);
+    }
+}
+
+//* Get largest contin constant in a combo tree
+static contin_t largest_const_in_tree(const combo_tree &tr)
+{
+    contin_t rc = 0.0;
+    combo_tree::pre_order_iterator it;
+    for(it = tr.begin(); it != tr.end(); it++) {
+        if (is_contin(*it)) {
+            contin_t val = get_contin(*it);
+            if (rc < val) rc = val;
+        }
+    }
+
+    return rc;
+}
+
+class combo_problem : public combo_problem_base
+{
+    public:
+        virtual const std::string name() const { return "cp"; }
+        virtual const std::string description() const {
+             return "Demo: Learn a given combo program"; }
+        virtual void run(problem_params&);
+};
+
+void combo_problem::run(problem_params& pms)
+{
+    check_args(pms);
+
+    // get the combo_tree and infer its type
+    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    type_tree tt = infer_type_tree(tr);
+    type_node output_type = get_type_node(get_signature_output(tt));
+    combo::arity_t arity = type_tree_arity(tt);
+
+    // If no exemplar has been provided in the options, use the
+    // default one.
+    if (pms.exemplars.empty()) {
+        pms.exemplars.push_back(type_to_exemplar(output_type));
+    }
+
+    if (output_type == id::boolean_type) {
+        // @todo: Occam's razor and nsamples is not taken into account
+        logical_bscore bscore(tr, arity);
+        metapop_moses_results(pms.exemplars, tt,
+                              pms.bool_reduct, pms.bool_reduct_rep, bscore,
+                              pms.opt_params, pms.hc_params, pms.meta_params,
+                              pms.moses_params, pms.mmr_pa);
+    }
+    else if (output_type == id::contin_type) {
+
+        // Naive users of the combo regression mode will fail
+        // to understand that the input program must be sampled
+        // in order for the fitness function to be evaluated.
+        // The default sample range 0<x<1 is probably too small
+        // for any fancy-pants input program, so try to make
+        // a reasonable guess.  Yes, this is a stupid hack, but
+        // it does avoid the problem of naive users saying
+        // "aww moses sucks" when they fail to invoke it correctly.
+        if ((0.0 == pms.min_rand_input) && (1.0 == pms.max_rand_input)) {
+            pms.max_rand_input = 2.0 * largest_const_in_tree(tr);
+            pms.min_rand_input = -pms.max_rand_input;
+            if ((pms.nsamples <= 0) &&
+                (pms.default_nsamples < 2 * arity * pms.max_rand_input)) {
+                pms.nsamples = 2 * arity * pms.max_rand_input;
+            }
+        }
+
+        if (pms.nsamples <= 0)
+            pms.nsamples = pms.default_nsamples;
+
+        logger().info() << "Will sample combo program " << tr << "\n"
+                        << "\tat " << pms.nsamples << " input values, "
+                        << "ranging between " << pms.min_rand_input
+                        << " and " << pms.max_rand_input;
+
+        // @todo: introduce some noise optionally
+        ITable it(tt, pms.nsamples, pms.max_rand_input, pms.min_rand_input);
+        OTable ot(tr, it);
+
+        int as = alphabet_size(tt, pms.ignore_ops);
+
+        contin_bscore bscore(ot, it);
+        set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+        metapop_moses_results(pms.exemplars, tt,
+                              pms.contin_reduct, pms.contin_reduct, bscore,
+                              pms.opt_params, pms.hc_params, pms.meta_params,
+                              pms.moses_params, pms.mmr_pa);
+    } else {
+        logger().error() << "Error: combo_problem: type " << tt << " not supported.";
+        std::cerr << "Error: combo_problem: type " << tt << " not supported." << std::endl;
+        exit(-1);
+    }
+}
+
+/// Regression based on combo program using ann
+class ann_combo_problem : public combo_problem_base
+{
+    public:
+        virtual const std::string name() const { return "ann-cp"; }
+        virtual const std::string description() const {
+             return "Demo: Learn a given combo program using ANN"; }
+        virtual void run(problem_params&);
+};
+
+void ann_combo_problem::run(problem_params& pms)
+{
+    check_args(pms);
+
+    // get the combo_tree and infer its type
+    combo_tree tr = str_to_combo_tree(pms.combo_str);
+    type_tree tt = infer_type_tree(tr);
+    // type_tree tt = gen_signature(id::ann_type, 0);
+
+    // If no exemplar has been provided in the options, use the
+    // default one.
+    if (pms.exemplars.empty()) {
+        type_node output_type = get_type_node(get_signature_output(tt));
+        pms.exemplars.push_back(type_to_exemplar(output_type));
+    }
+
+    if (pms.nsamples <= 0)
+        pms.nsamples = pms.default_nsamples;
+
+    ITable it(tt, pms.nsamples, pms.max_rand_input, pms.min_rand_input);
+    OTable ot(tr, it);
+
+    contin_bscore bscore(ot, it);
+    int as = alphabet_size(tt, pms.ignore_ops);
+    set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
+
+    metapop_moses_results(pms.exemplars, tt,
+                          pms.contin_reduct, pms.contin_reduct, bscore,
+                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.moses_params, pms.mmr_pa);
+}
+
+// ==================================================================
 
 void register_demo_problems()
 {
@@ -226,6 +420,8 @@ void register_demo_problems()
 	register_problem(new majority_problem());
 	register_problem(new mux_problem());
 	register_problem(new polynomial_problem());
+	register_problem(new combo_problem());
+	register_problem(new ann_combo_problem());
 }
 
 } // ~namespace moses

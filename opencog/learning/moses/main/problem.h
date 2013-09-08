@@ -47,8 +47,9 @@ struct problem_params
     // default number of samples to describe a problem
     const unsigned int default_nsamples;
     int nsamples;
+    float min_rand_input;
+    float max_rand_input;
     vertex_set ignore_ops; // should be const&
-    unsigned int problem_size;
 
     float noise;
     score_t complexity_ratio;
@@ -66,6 +67,10 @@ struct problem_params
     const reduct::rule& bool_reduct;
     const reduct::rule& bool_reduct_rep;
     const reduct::rule& contin_reduct;
+
+    // Demo options XXX these should be removed!
+    unsigned int problem_size;
+    std::string combo_str;
 
     optim_parameters opt_params; // XXX should be const
     hc_parameters hc_params;
