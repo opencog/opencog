@@ -71,24 +71,24 @@ void bscore_base::set_complexity_coef(unsigned alphabet_size, float p)
 {
     // Both p==0.0 and p==0.5 are singularities in the forumla.
     // See the explanation in the comment above ctruth_table_bscore.
-    complexity_coef = 0.0;
-    occam = (p > 0.0f && p < 0.5f);
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p);
+    _complexity_coef = 0.0;
+    _occam = (p > 0.0f && p < 0.5f);
+    if (_occam)
+        _complexity_coef = discrete_complexity_coef(alphabet_size, p);
 
     logger().info() << "BScore noise = " << p
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 void bscore_base::set_complexity_coef(score_t complexity_ratio)
 {
-    complexity_coef = 0.0;
-    occam = (complexity_ratio > 0.0);
-    if (occam)
-        complexity_coef = 1.0 / complexity_ratio;
+    _complexity_coef = 0.0;
+    _occam = (complexity_ratio > 0.0);
+    if (_occam)
+        _complexity_coef = 1.0 / complexity_ratio;
 
-    logger().info() << "BScore complexity ratio = " << 1.0/complexity_coef;
+    logger().info() << "BScore complexity ratio = " << 1.0/_complexity_coef;
 }
 
 ////////////////////
@@ -97,22 +97,22 @@ void bscore_base::set_complexity_coef(score_t complexity_ratio)
         
 penalized_bscore logical_bscore::operator()(const combo_tree& tr) const
 {
-    combo::complete_truth_table tt(tr, arity);
+    combo::complete_truth_table tt(tr, _arity);
     penalized_bscore pbs(
-        make_pair<behavioral_score, score_t>(behavioral_score(target.size()), 0));
+        make_pair<behavioral_score, score_t>(behavioral_score(_target.size()), 0));
 
-    boost::transform(tt, target, pbs.first.begin(), [](bool b1, bool b2) {
+    boost::transform(tt, _target, pbs.first.begin(), [](bool b1, bool b2) {
             return -score_t(b1 != b2); });
 
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     return pbs;
 }
 
 behavioral_score logical_bscore::best_possible_bscore() const
 {
-    return behavioral_score(target.size(), 0);
+    return behavioral_score(_target.size(), 0);
 }
 
 score_t logical_bscore::min_improv() const
@@ -148,8 +148,8 @@ penalized_bscore contin_bscore::operator()(const combo_tree& tr) const
                          return -err_func(res, tar);
                      });
     // add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     // Logger
     log_candidate_pbscore(tr, pbs);
@@ -178,14 +178,14 @@ score_t contin_bscore::min_improv() const
         
 void contin_bscore::set_complexity_coef(unsigned alphabet_size, float stdev)
 {
-    occam = (stdev > 0.0);
-    complexity_coef = 0.0;
-    if (occam)
-        complexity_coef = contin_complexity_coef(alphabet_size, stdev);
+    _occam = (stdev > 0.0);
+    _complexity_coef = 0.0;
+    if (_occam)
+        _complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 
     logger().info() << "contin_bscore noise = " << stdev
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 ///////////////////
@@ -482,26 +482,26 @@ score_t discriminating_bscore::get_threshold_penalty(score_t value) const
 
 void discriminating_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
-    complexity_coef = 0.0;
+    _complexity_coef = 0.0;
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore)
-    occam = p > 0.0f && p < 0.5f;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+    _occam = p > 0.0f && p < 0.5f;
+    if (_occam)
+        _complexity_coef = discrete_complexity_coef(alphabet_size, p)
             / _ctable_usize;    // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
 
     logger().info() << "Discriminating scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 void discriminating_bscore::set_complexity_coef(score_t ratio)
 {
-    complexity_coef = 0.0;
-    occam = (ratio > 0);
+    _complexity_coef = 0.0;
+    _occam = (ratio > 0);
 
     // The complexity coeff is normalized by the size of the table,
     // because the precision is normalized as well.  So e.g.
@@ -511,11 +511,11 @@ void discriminating_bscore::set_complexity_coef(score_t ratio)
     //
     // @todo Sounds good too, as long as it's constant, so you would
     // replace _ctable_usize by _ctable_usize * max_activation?
-    if (occam)
-        complexity_coef = 1.0 / (_ctable_usize * ratio);
+    if (_occam)
+        _complexity_coef = 1.0 / (_ctable_usize * ratio);
 
     logger().info() << "Discriminating scorer, table size = " << _ctable_usize;
-    logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/complexity_coef;
+    logger().info() << "Discriminating scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
 
@@ -553,8 +553,8 @@ penalized_bscore recall_bscore::operator()(const combo_tree& tr) const
                      precision, recall, precision_penalty);
  
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -672,8 +672,8 @@ penalized_bscore prerec_bscore::operator()(const combo_tree& tr) const
                       precision, recall, recall_penalty);
  
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -729,8 +729,8 @@ penalized_bscore bep_bscore::operator()(const combo_tree& tr) const
                      bep, bep_diff, bep_penalty);
  
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -792,8 +792,8 @@ penalized_bscore f_one_bscore::operator()(const combo_tree& tr) const
                      precision, recall, f_one);
  
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -906,31 +906,31 @@ precision_bscore::precision_bscore(const CTable& _ctable,
 
 void precision_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
-    complexity_coef = 0.0;
+    _complexity_coef = 0.0;
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore)
-    occam = p > 0.0f && p < 0.5f;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+    _occam = p > 0.0f && p < 0.5f;
+    if (_occam)
+        _complexity_coef = discrete_complexity_coef(alphabet_size, p)
             / ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
 
     logger().info() << "Precision scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 void precision_bscore::set_complexity_coef(score_t ratio)
 {
-    complexity_coef = 0.0;
-    occam = (ratio > 0);
+    _complexity_coef = 0.0;
+    _occam = (ratio > 0);
 
-    if (occam)
-        complexity_coef = 1.0 / ratio;
+    if (_occam)
+        _complexity_coef = 1.0 / ratio;
 
-    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
+    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
 penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
@@ -1052,8 +1052,8 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
                       precision, activation, activation_penalty);
 
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -1279,31 +1279,31 @@ precision_conj_bscore::precision_conj_bscore(const CTable& _ctable,
 
 void precision_conj_bscore::set_complexity_coef(unsigned alphabet_size, float p)
 {
-    complexity_coef = 0.0;
+    _complexity_coef = 0.0;
     // Both p==0.0 and p==0.5 are singularity points in the Occam's
     // razor formula for discrete outputs (see the explanation in the
     // comment above ctruth_table_bscore)
-    occam = p > 0.0f && p < 0.5f;
-    if (occam)
-        complexity_coef = discrete_complexity_coef(alphabet_size, p)
+    _occam = p > 0.0f && p < 0.5f;
+    if (_occam)
+        _complexity_coef = discrete_complexity_coef(alphabet_size, p)
             / ctable_usize;     // normalized by the size of the table
                                 // because the precision is normalized
                                 // as well
 
     logger().info() << "Precision scorer, noise = " << p
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 void precision_conj_bscore::set_complexity_coef(score_t ratio)
 {
-    complexity_coef = 0.0;
-    occam = (ratio > 0);
+    _complexity_coef = 0.0;
+    _occam = (ratio > 0);
 
-    if (occam)
-        complexity_coef = 1.0 / ratio;
+    if (_occam)
+        _complexity_coef = 1.0 / ratio;
 
-    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/complexity_coef;
+    logger().info() << "Precision scorer, complexity ratio = " << 1.0f/_complexity_coef;
 }
 
 penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
@@ -1353,8 +1353,8 @@ penalized_bscore precision_conj_bscore::operator()(const combo_tree& tr) const
                      precision, conj_n, conj_n_penalty);
 
     // Add the Complexity penalty
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -1451,8 +1451,8 @@ penalized_bscore discretize_contin_bscore::operator()(const combo_tree& tr) cons
         });
 
     // Add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     // Logger
     log_candidate_pbscore(tr, pbs);
@@ -1481,8 +1481,8 @@ penalized_bscore ctruth_table_bscore::operator()(const combo_tree& tr) const
     }
 
     // Add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -1534,8 +1534,8 @@ penalized_bscore enum_table_bscore::operator()(const combo_tree& tr) const
     }
 
     // Add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -1612,8 +1612,8 @@ penalized_bscore enum_filter_bscore::operator()(const combo_tree& tr) const
     }
 
     // Add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -1703,9 +1703,9 @@ penalized_bscore enum_graded_bscore::operator()(const combo_tree& tr) const
 
     // Add the Occam's razor feature
     pbs.second = 0.0;
-    if (occam) {
+    if (_occam) {
         // pbs.second = tree_complexity(tr) * complexity_coef;
-        pbs.second = graded_complexity(it) * complexity_coef;
+        pbs.second = graded_complexity(it) * _complexity_coef;
     }
 
     log_candidate_pbscore(tr, pbs);
@@ -1819,9 +1819,9 @@ penalized_bscore enum_effective_bscore::operator()(const combo_tree& tr) const
 
     // Add the Occam's razor feature
     pbs.second = 0.0;
-    if (occam) {
+    if (_occam) {
         // pbs.second = tree_complexity(tr) * complexity_coef;
-        pbs.second = graded_complexity(it) * complexity_coef;
+        pbs.second = graded_complexity(it) * _complexity_coef;
     }
 
     log_candidate_pbscore(tr, pbs);
@@ -1986,8 +1986,8 @@ penalized_bscore interesting_predicate_bscore::operator()(const combo_tree& tr) 
     bs.push_back(activation_penalty);
     
     // add the Occam's razor feature
-    if (occam)
-        pbs.second = tree_complexity(tr) * complexity_coef;
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
 
     log_candidate_pbscore(tr, pbs);
 
@@ -2002,14 +2002,14 @@ behavioral_score interesting_predicate_bscore::best_possible_bscore() const
 void interesting_predicate_bscore::set_complexity_coef(unsigned alphabet_size,
                                                        float stdev)
 {
-    complexity_coef = 0.0;
-    occam = stdev > 0;
-    if (occam)
-        complexity_coef = contin_complexity_coef(alphabet_size, stdev);
+    _complexity_coef = 0.0;
+    _occam = stdev > 0;
+    if (_occam)
+        _complexity_coef = contin_complexity_coef(alphabet_size, stdev);
 
     logger().info() << "intersting_predicate_bscore noise = " << stdev
                     << " alphabest size = " << alphabet_size
-                    << " complexity ratio = " << 1.0/complexity_coef;
+                    << " complexity ratio = " << 1.0/_complexity_coef;
 }
 
 score_t interesting_predicate_bscore::get_activation_penalty(score_t activation) const
