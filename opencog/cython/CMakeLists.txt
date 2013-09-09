@@ -55,6 +55,7 @@ ADD_LIBRARY(moses_cython SHARED
 )
 
 TARGET_LINK_LIBRARIES(moses_cython
+        moses_exec
         moses
         cogutil
         comboreduct
