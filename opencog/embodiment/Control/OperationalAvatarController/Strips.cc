@@ -453,6 +453,22 @@ bool State::isNumbericState() const
 
 }
 
+bool State::isStateOwnerTypeTheSameWithMe(const State& other) const
+{
+    if (stateOwnerList.size() != other.stateOwnerList.size())
+        return false;
+
+    vector<ParamValue>::const_iterator it1 = stateOwnerList.begin();
+    vector<ParamValue>::const_iterator it2 = other.stateOwnerList.begin();
+    for ( ; it1 != stateOwnerList.end(); ++ it1, ++ it2)
+    {
+        if ( ! ActionParameter::areFromSameType(*it1, *it2))
+            return false;
+    }
+
+    return true;
+}
+
 float State::calculateNumbericsatisfiedDegree(float goal, float current, float origin)
 {
     float disCurToGoal = fabs(goal - current);
@@ -514,7 +530,7 @@ float State::distanceBetween2FuzzyFloat(const FuzzyIntervalFloat& goal, const Fu
 
 }
 
-Effect::Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue)
+Effect::Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue, bool _ifCheckStateOwnerType)
 {
 //    OC_ASSERT(_AssertValueType(*_state,_op,_OPValue),
 //              "Effect constructor: got invalid effect value type: s% for state value type: %s, operator: %s, in state: %s\n",
@@ -523,6 +539,7 @@ Effect::Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue)
     state = _state;
     effectOp = _op;
     opParamValue = _OPValue;
+    ifCheckStateOwnerType = _ifCheckStateOwnerType;
 }
 
 bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings)

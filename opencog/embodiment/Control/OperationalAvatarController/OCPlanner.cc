@@ -1722,7 +1722,9 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
 
         s = e->state;
         if (s->name() ==  forwardStateNode->state->name())
+        {
             break;
+        }
     }
 
     if (effectIt == ruleNode->originalRule->effectList.end())
@@ -2759,7 +2761,7 @@ void OCPlanner::loadTestRulesFromCodes()
      existPathStateOwnerList3.push_back(var_pos_from);
      existPathStateOwnerList3.push_back(var_pos_to);
      State* existPathState3 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList3, true, &Inquery::inqueryExistPath);
-    Effect* becomeExistPathEffect = new Effect(existPathState3, OP_ASSIGN, "true");
+    Effect* becomeExistPathEffect = new Effect(existPathState3, OP_ASSIGN, "true",false);
 
     // add rule:
     Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
@@ -2800,7 +2802,7 @@ void OCPlanner::loadTestRulesFromCodes()
     existPathStateOwnerList6.push_back(var_pos_1);
     existPathStateOwnerList6.push_back(var_pos_3);
     State* existPathState6 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_exist_path, existPathStateOwnerList6, true, &Inquery::inqueryExistPath);
-    Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true");
+    Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true", false);
 
     // add rule:
     Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
@@ -2817,7 +2819,6 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(pathTransmitRule);
 
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
-
 
 }
 

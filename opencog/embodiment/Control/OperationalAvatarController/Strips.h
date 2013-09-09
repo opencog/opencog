@@ -191,6 +191,8 @@ namespace opencog { namespace oac {
 
         bool isNumbericState() const;
 
+        bool isStateOwnerTypeTheSameWithMe(const State& other) const;
+
         // About the calculation of Satisfie Degree
         // compare 3 ParamValue for a same state: the original ParamValue, the current ParamValue and the goal ParamValue
         // to see how many persentage the current value has achieved the goal, compared to the original value
@@ -248,7 +250,12 @@ namespace opencog { namespace oac {
         EFFECT_OPERATOR_TYPE effectOp;
         ParamValue opParamValue;
 
-        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue);
+        // if the StateOwner Type matter or not. Some rules are applied for all kind of state owners, some rules only apply for the assigned state owenr types.
+        // e.g.: the recursive rule: if there exists a path from a to b, and there exists a path from b to c, so there should exitst a path from a to c,
+        //       in this rule a,b,c can be vectors and also entities.
+        bool ifCheckStateOwnerType;
+
+        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue,bool _ifCheckStateOwnerType = true);
 
         // execute the effect to a grounded state. will change this state.
         // will look up the value from groundings if the opParamValue is ungrouned
