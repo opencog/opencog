@@ -53,53 +53,6 @@ struct Evaluator {
 combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe);
 
 
-#define ALMOST_DEAD_EVAL_CODE 1
-#if ALMOST_DEAD_EVAL_CODE
-/// @todo all users of the code below should switch to using
-/// eval_throws_binding() instead.
-
-// Used by Embodiment. Previously supported a tacky variable unification system, but now just calls the normal evaluator.
-template<typename It>
-vertex eval_throws(It it, Evaluator* pe = NULL,
-                   combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU())
-    throw(EvalException, ComboException,
-          AssertionException, std::bad_exception)
-{
-
-    vertex_seq empty;
-    return eval_throws_binding(empty, it, pe);
-}
-
-template<typename It>
-vertex eval(It it)
-     throw(ComboException,
-           AssertionException, std::bad_exception)
-{
-    try {
-        return eval_throws(it);
-    } catch (EvalException e) {
-        return e.get_vertex();
-    }
-}
-
-template<typename T>
-vertex eval(const tree<T>& tr)
-     throw(StandardException, std::bad_exception)
-{
-    return eval(tr.begin());
-}
-
-template<typename T>
-vertex eval_throws(const tree<T>& tr)
-     throw(EvalException,
-           ComboException,
-           AssertionException,
-           std::bad_exception)
-{
-    return eval_throws(tr.begin());
-}
-#endif /* ALMOST_DEAD_EVAL_CODE */
-
 /// eval_throws_binding -- evaluate a combo tree, using the argument
 /// values supplied in the vertex_seq list.
 ///
