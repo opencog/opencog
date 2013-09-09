@@ -313,7 +313,8 @@ protected:
 
      // return how many states in the temporaryStateNodes will be Negatived by this rule
      // bool &negativeGoal return if this rule after grounded will negative this forward goal state
-     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal);
+     // bool &isDiffStateOwnerType return if the effect state owner types are differnt from its fowardState
+     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal, bool &isDiffStateOwnerType);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
