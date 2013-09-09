@@ -54,7 +54,7 @@ namespace opencog { namespace Procedure {
 using namespace pai;
 using namespace world;
 
-struct RunningComboProcedure : public combo::Evaluator {
+struct RunningComboProcedure {
 
     //the exception that
     //TODO

@@ -41,16 +41,8 @@
 
 namespace opencog { namespace combo {
 
-struct Evaluator {
-    virtual ~Evaluator() { }
-    virtual vertex eval_percept(combo_tree::iterator) = 0;
-    // eval_indefinite_object takes no arguments because it is assumed
-    // that it has no child, this assumption may change over time
-    virtual vertex eval_indefinite_object(indefinite_object) = 0;
-};
-
 // it has this name because it evaluates a procedure and returns a tree
-combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it, Evaluator* pe);
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
 
 
 /// eval_throws_binding -- evaluate a combo tree, using the argument
@@ -58,15 +50,13 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it, 
 ///
 /// This proceedure does not do any type-checking; the static type-checker
 /// should be used for this purpose.
-/// The Evaluator is currently unused; we're waiting for variable unification
-/// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe = NULL)
+                           combo_tree::iterator it)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
 
 vertex eval_throws_vertex(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe = NULL)
+                           combo_tree::iterator it)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception);
 
@@ -82,7 +72,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
            std::bad_exception);
 
 combo_tree eval_throws_tree(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe = NULL)
+                           combo_tree::iterator it)
      throw(EvalException, ComboException, AssertionException,
            std::bad_exception);
 
