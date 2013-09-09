@@ -78,8 +78,11 @@ int StateNode::calculateNodeDepth()
 
 void RuleNode::updateCurrentAllBindings()
 {
-    currentAllBindings = currentBindingsFromForwardState;
-    currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
+    if (currentBindingsFromForwardState.size() > 0)
+        currentAllBindings = currentBindingsFromForwardState;
+
+    if (currentBindingsViaSelecting.size() > 0)
+        currentAllBindings.insert(currentBindingsViaSelecting.begin(),currentBindingsViaSelecting.end());
 }
 
 bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
@@ -897,8 +900,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // So we need to select suitable variables to ground them.
         groundARuleNodeBySelectingNonNumericValues(ruleNode);
 
-        ruleNode->currentBindingsViaSelecting = ruleNode->ParamCandidates.front();
-        ruleNode->ParamCandidates.erase(ruleNode->ParamCandidates.begin());
+        if (ruleNode->ParamCandidates.size() > 0)
+        {
+            ruleNode->currentBindingsViaSelecting = ruleNode->ParamCandidates.front();
+            ruleNode->ParamCandidates.erase(ruleNode->ParamCandidates.begin());
+        }
 
         ruleNode->updateCurrentAllBindings();
 

@@ -30,8 +30,8 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <set>
 
-#define ACCESS_DISTANCE "2.1"
-#define CLOSED_DISTANCE "0.9"
+#define ACCESS_DISTANCE "1.0"
+#define CLOSED_DISTANCE "1.0"
 #define PARAMETER_NUM 7
 
 using namespace std;
