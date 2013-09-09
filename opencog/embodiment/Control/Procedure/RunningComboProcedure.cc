@@ -31,7 +31,7 @@
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include <opencog/comboreduct/interpreter/eval.h>
+#include <opencog/comboreduct/interpreter/interpreter.h>
 
 namespace opencog { namespace Procedure {
 
@@ -41,18 +41,18 @@ using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        const std::vector<combo::vertex>& arguments,
+        const vertex_seq& arguments,
         bool dsdp)
-        : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),
+        : _ww(ww), _tr(tr), _arguments(arguments), _it(_tr.begin()),
+        _hasBegun(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
         _doesSendDefinitePlan(dsdp)
 {
     finished = false;
-    init(arguments);
 }
 
 RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
-        : _ww(rhs._ww), _tr(rhs._tr), _it(_tr.begin()),
+        : _ww(rhs._ww), _tr(rhs._tr), _arguments(rhs._arguments), _it(_tr.begin()),
         _hasBegun(false), _planSent(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
         _doesSendDefinitePlan(rhs._doesSendDefinitePlan)
@@ -79,6 +79,40 @@ vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it)
 vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io)
 {
     return _ww.evalIndefiniteObject(io, combo::variable_unifier::DEFAULT_VU());
+}
+
+vertex RunningComboProcedure::eval_anything(sib_it it)
+{
+    typedef combo_tree::iterator pre_it;
+    const vertex& v = *it;
+
+    if (const argument* a = boost::get<argument>(&v)) {
+        arity_t idx = a->idx;
+        // Assumption : when idx is negative, the argument is
+        // necessarily boolean, and must be negated.
+        // return idx > 0? v : negate_vertex(v);
+        return idx > 0? _arguments[idx - 1] : negate_vertex(_arguments[-idx - 1]);
+    }
+    // perception
+    else if (is_perception(v)) {
+        return eval_percept(it);
+    }
+    else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
+        return eval_indefinite_object(*io);
+    }
+    // definite objects evaluate to themselves
+    else if (is_definite_object(v)) {
+        return v;
+    }
+    // action symbol
+    else if (is_action_symbol(v)) {
+        return v;
+    } else {
+        // Delegate it to Nil's new mixed interpreter (which handles boolean, contin and mixed operators).
+        // It will give an error for any other operator
+        mixed_interpreter mi;
+        return mi(it);
+    }
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
@@ -151,7 +185,8 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
         } else if (*_it == id::action_boolean_if) {
             try {
-                vertex res = eval_throws_binding(empty, _it.begin(), this);
+                //vertex res = eval_throws_binding(empty, _it.begin(), this);
+                vertex res = eval_anything(_it.begin());
                 if (res == id::logical_true) {
                     _it = ++_it.begin();
                 } else if (res == id::logical_false) {
@@ -180,7 +215,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 moveOn();
             } else {
                 try {
-                    vertex res = eval_throws_binding(empty, _it.begin(), this);
+                    vertex res = eval_anything(_it.begin());
                     if (res == id::logical_true) {
                         _it = ++_it.begin();
                     } else {
@@ -224,7 +259,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         } else if (*_it == id::repeat_n) {
             if (_stack.empty() || _stack.top().first != _it) {
                 try {
-                    vertex res = eval_throws_binding(empty, _it.begin(), this);
+                    vertex res = eval_anything(_it.begin());
                     OC_ASSERT(is_contin(res));
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
@@ -259,7 +294,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 bool tostop = false;
                 for (sib_it sib = _it.begin();sib != _it.end();++sib) {
                     //first evaluate the children
-                    *sib = eval_throws_binding(empty, sib, this);
+                    *sib = eval_anything(sib);
                     if (*sib == id::null_obj) { //just fail
                         logger().error("RunningComboProc - Sibling is null_obj.");
 
@@ -310,9 +345,6 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 return;
             }
 
-        } else if (is_argument(*_it)) {
-            OC_ASSERT(false);
-
         } else {
 
             if (_hasBegun) {
@@ -325,11 +357,10 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 _it = _tr.end();
                 return;
 
-            } else {
-                //try passing it off to the regular combo interpreter - evaluation
-                //without actions will get done in a single cycle
-                _tr = combo::combo_tree(eval_throws_binding(empty, _it, this);
-                _it = _tr.begin();
+            } else {          
+                // use the general evaluator and modify this tree (which seems ugly but that's how cycle() seems to work) -- Jade      
+                vertex result = eval_anything(_it);
+                *_it = result;
                 moveOn();
             }
         }
@@ -359,7 +390,8 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
     if (_doesSendDefinitePlan) {
         for (sib_it sib = from; sib != to; ++sib) {
             for (sib_it arg = sib.begin(); arg != sib.end();++arg) {
-                *arg = eval_throws_binding(empty, arg, this);
+                vertex_seq empty;
+                *arg = eval_anything(arg);
 
                 if (*arg == id::null_obj) {
                     //will definitely fail at this point..

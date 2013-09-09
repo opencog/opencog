@@ -76,9 +76,9 @@ struct RunningComboProcedure : public combo::Evaluator {
     //copy ctor - fatal runtime error if the rhs has already begun running
     RunningComboProcedure(const RunningComboProcedure&);
 
-    //each call to cycle executes a single action plan (if ready)
+    //each call to cycle executes a single action, and will exit after sending it to the virtual world.
+    //it won't continue executing until the virtual world says the action has finished (or failed).
     //throws if execution of the action plan (PAI::sendActionPlan(ActionPlanID)) fails
-    //TODO : above is not true anymore, find the equivalent
     void cycle() throw(ActionPlanSendingFailure, AssertionException, std::bad_exception);
 
     //terminate - prevent future plans from being evaluated,
@@ -136,6 +136,7 @@ protected:
     WorldWrapperBase& _ww;
 
     combo::combo_tree _tr;
+    const std::vector<combo::vertex>& _arguments;
     
     /** _it is kept pointing at the tree node to be executed next; an
      * invalid iterator indicates nothing more to execute. for an
@@ -172,10 +173,9 @@ protected:
     /// for evaluating procedures inplace
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it);
 
-private:
-    /// initialization - only called from ctors
-    void init(const std::vector<combo::vertex>&) {}
+    combo::vertex eval_anything(sib_it it);
 
+private:
     /**
      * true if the combo interpreter
      * evaluates the indefinite aguments
