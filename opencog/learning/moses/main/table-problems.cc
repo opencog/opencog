@@ -148,10 +148,146 @@ void ann_table_problem::run(problem_params& pms)
 
 // ==================================================================
 
+class table_problem_base : public problem_base
+{
+protected:
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
+
+    void common_setup(problem_params&);
+
+    type_tree table_type_signature;
+    type_tree table_output_tt;
+    type_node table_output_tn;
+    type_node output_type;
+};
+
+void table_problem_base::common_setup(problem_params& pms)
+{
+    // Infer the signature based on the input table.
+    table_type_signature = pms.tables.front().get_signature();
+    logger().info() << "Inferred data signature " << table_type_signature;
+
+    // Infer the type of the input table
+    table_output_tt = get_signature_output(table_type_signature);
+    table_output_tn = get_type_node(table_output_tt);
+
+    // Determine the default exemplar to start with
+    // problem == pre  precision-based scoring
+    // precision combo trees always return booleans.
+    if (pms.exemplars.empty())
+        pms.exemplars.push_back(type_to_exemplar(
+            pms.problem == pre? id::boolean_type : table_output_tn));
+
+    // XXX This seems strange to me .. when would the exemplar output
+    // type ever differ from the table?  Well,, it could for pre problem,
+    // but that's over-ridden later, anyway...
+    output_type =
+        get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
+    if (output_type == id::unknown_type)
+        output_type = table_output_tn;
+
+    logger().info() << "Inferred output type: " << output_type;
+}
+
+// ==================================================================
+
+// Generic table regression code.  Could be a template, I suppose, but
+// the args are variable length, tables is a variable, and scorer is a type,
+// and I don't feel like fighting templates to make all three happen just
+// exactly right.
+#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
+{                                                                    \
+    /* Enable feature selection while selecting exemplar */          \
+    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
+        /* XXX FIXME: should use the concatenation of all */         \
+        /* tables, and not just the first. */                        \
+        pms.meta_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
+    }                                                                \
+    /* Keep the table input signature, just make sure */             \
+    /* the output is the desired type. */                            \
+    type_tree cand_sig = gen_signature(                              \
+        get_signature_inputs(table_type_signature),                  \
+        type_tree(OUT_TYPE));                                        \
+    int as = alphabet_size(cand_sig, pms.ignore_ops);                \
+    typedef SCORER BScore;                                           \
+    BScorerSeq bscores;                                              \
+    for (const auto& table : TABLES) {                               \
+        BScore* r = new BScore ARGS ;                                \
+        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
+        bscores.push_back(r);                                        \
+    }                                                                \
+    multibscore_based_bscore bscore(bscores);                        \
+    metapop_moses_results(pms.exemplars, cand_sig,                   \
+                      REDUCT, REDUCT_REP, bscore,                    \
+                      pms.opt_params, pms.hc_params, pms.meta_params, \
+                      pms.moses_params, pms.mmr_pa);                 \
+}
+
+// ==================================================================
+/// precision-based scoring
+class pre_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "pre"; }
+        virtual const std::string description() const {
+             return "Precision-Activation scoring"; }
+        virtual void run(problem_params&);
+};
+
+void pre_table_problem::run(problem_params& pms)
+{
+    // Very nearly identical to the REGRESSION macro above,
+    // except that some new experimental features are being tried.
+    common_setup(pms);
+
+    // Keep the table input signature, just make sure the
+    // output is a boolean.
+    type_tree cand_sig = gen_signature(
+        get_signature_inputs(table_type_signature),
+        type_tree(id::boolean_type));
+    int as = alphabet_size(cand_sig, pms.ignore_ops);
+    typedef precision_bscore BScore;
+    BScorerSeq bscores;
+    for (const CTable& ctable : pms.ctables) {
+        BScore* r = new BScore(ctable,
+                               fabs(pms.hardness),
+                               pms.min_rand_input,
+                               pms.max_rand_input,
+                               pms.hardness >= 0,
+                               pms.pre_worst_norm);
+        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
+        bscores.push_back(r);
+        if (pms.gen_best_tree) {
+            // experimental: use some canonically generated
+            // candidate as exemplar seed
+            combo_tree tr = r->gen_canonical_best_candidate();
+            logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
+            pms.exemplars.push_back(tr);
+        }
+    }
+
+    // Enable feature selection while selecting exemplar
+    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
+        // XXX FIXME should use the concatenation of all ctables, not just first
+        pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+                                                 pms.festor_params);
+    }
+
+    multibscore_based_bscore bscore(bscores);
+    metapop_moses_results(pms.exemplars, cand_sig,
+                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.moses_params, pms.mmr_pa);
+
+}
+
+// ==================================================================
+
 void register_table_problems()
 {
 	register_problem(new ip_problem());
 	register_problem(new ann_table_problem());
+	register_problem(new pre_table_problem());
 }
 
 } // ~namespace moses

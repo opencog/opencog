@@ -197,7 +197,7 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 bool datafile_based_problem(const string& problem)
 {
     static set<string> dbp
-        = {it, pre, pre_conj, recall, prerec, bep, f_one};
+        = {it, pre_conj, recall, prerec, bep, f_one};
     return dbp.find(problem) != dbp.end();
 }
 
@@ -286,55 +286,8 @@ int moses_exec(int argc, char** argv)
                       pms.opt_params, pms.hc_params, pms.meta_params, \
                       pms.moses_params, pms.mmr_pa);                 \
 }
- 
-    // problem == pre  precision-based scoring
-    if (pms.problem == pre) {
-
-        // Very nearly identical to the REGRESSION macro above,
-        // except that some new experimental features are being tried.
-
-        // Keep the table input signature, just make sure the
-        // output is a boolean.
-        type_tree cand_sig = gen_signature(
-            get_signature_inputs(table_type_signature),
-            type_tree(id::boolean_type));
-        int as = alphabet_size(cand_sig, pms.ignore_ops);
-        typedef precision_bscore BScore;
-        BScorerSeq bscores;
-        for (const CTable& ctable : pms.ctables) {
-            BScore* r = new BScore(ctable,
-                                   fabs(pms.hardness),
-                                   pms.min_rand_input,
-                                   pms.max_rand_input,
-                                   pms.hardness >= 0,
-                                   pms.pre_worst_norm);
-            set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-            bscores.push_back(r);
-            if (pms.gen_best_tree) {
-                // experimental: use some canonically generated
-                // candidate as exemplar seed
-                combo_tree tr = r->gen_canonical_best_candidate();
-                logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
-                pms.exemplars.push_back(tr);
-            }
-        }
-
-        // Enable feature selection while selecting exemplar
-        if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-            // XXX FIXME should use the concatenation of all ctables, not just first
-            pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
-                                                     pms.festor_params);
-        }
-
-        multibscore_based_bscore bscore(bscores);
-        metapop_moses_results(pms.exemplars, cand_sig,
-                              *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
-                              pms.opt_params, pms.hc_params, pms.meta_params,
-                              pms.moses_params, pms.mmr_pa);
-    }
-
     // problem == pre_conj  precision-based scoring (maximizing # conj)
-    else if (pms.problem == pre_conj) {
+    if (pms.problem == pre_conj) {
 
         // Very nearly identical to the REGRESSION macro above,
         // except that some new experimental features are being tried.
