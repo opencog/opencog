@@ -76,8 +76,6 @@ static const string pre_conj="pre_conj";    // simplified version of
                                             // maximize number of
                                             // conjunctions
 
-static const string ip="ip"; // find interesting patterns
-
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
@@ -199,7 +197,7 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 bool datafile_based_problem(const string& problem)
 {
     static set<string> dbp
-        = {it, pre, pre_conj, recall, prerec, bep, f_one, ip};
+        = {it, pre, pre_conj, recall, prerec, bep, f_one};
     return dbp.find(problem) != dbp.end();
 }
 
@@ -236,293 +234,249 @@ int moses_exec(int argc, char** argv)
     // 'recall' means we must maximize recall while holding precision fixed.
     // 'f_one' means we must maximize the f_one score while holding ratio const
     // 'bep' means we must maximize the break-even point while holding difference const
-    if (pms.problem == it || pms.problem == pre || pms.problem == pre_conj ||
-        pms.problem == prerec || pms.problem == recall ||
-        pms.problem == f_one || pms.problem == bep)
-    {
-        // Infer the type of the input table
-        type_tree table_output_tt = get_signature_output(table_type_signature);
-        type_node table_output_tn = get_type_node(table_output_tt);
+    // Infer the type of the input table
+    type_tree table_output_tt = get_signature_output(table_type_signature);
+    type_node table_output_tn = get_type_node(table_output_tt);
 
-        // Determine the default exemplar to start with
-        // problem == pre  precision-based scoring
-        // precision combo trees always return booleans.
-        if (pms.exemplars.empty())
-            pms.exemplars.push_back(type_to_exemplar(
-                pms.problem == pre? id::boolean_type : table_output_tn));
+    // Determine the default exemplar to start with
+    // problem == pre  precision-based scoring
+    // precision combo trees always return booleans.
+    if (pms.exemplars.empty())
+        pms.exemplars.push_back(type_to_exemplar(
+            pms.problem == pre? id::boolean_type : table_output_tn));
 
-        // XXX This seems strange to me .. when would the exemplar output
-        // type ever differ from the table?  Well,, it could for pre problem,
-        // but that's over-ridden later, anyway...
-        type_node output_type =
-            get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
-        if (output_type == id::unknown_type)
-            output_type = table_output_tn;
+    // XXX This seems strange to me .. when would the exemplar output
+    // type ever differ from the table?  Well,, it could for pre problem,
+    // but that's over-ridden later, anyway...
+    type_node output_type =
+        get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
+    if (output_type == id::unknown_type)
+        output_type = table_output_tn;
 
-        logger().info() << "Inferred output type: " << output_type;
+    logger().info() << "Inferred output type: " << output_type;
 
 // Generic table regression code.  Could be a template, I suppose, but
 // the args are variable length, tables is a variable, and scorer is a type,
 // and I don't feel like fighting templates to make all three happen just
 // exactly right.
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
-{                                                            \
-/* Enable feature selection while selecting exemplar */      \
-if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
-    /* XXX FIXME: should use the concatenation of all */     \
-    /* tables, and not just the first. */                    \
-    pms.meta_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
-}                                                            \
-/* Keep the table input signature, just make sure */         \
-/* the output is the desired type. */                        \
-type_tree cand_sig = gen_signature(                          \
-    get_signature_inputs(table_type_signature),              \
-    type_tree(OUT_TYPE));                                    \
-int as = alphabet_size(cand_sig, pms.ignore_ops);            \
-typedef SCORER BScore;                                       \
-BScorerSeq bscores;                                          \
-for (const auto& table : TABLES) {                           \
-    BScore* r = new BScore ARGS ;                            \
-    set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
-    bscores.push_back(r);                                    \
-}                                                            \
-multibscore_based_bscore bscore(bscores);                    \
-metapop_moses_results(pms.exemplars, cand_sig,               \
-                      REDUCT, REDUCT_REP, bscore,            \
+{                                                                    \
+    /* Enable feature selection while selecting exemplar */          \
+    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
+        /* XXX FIXME: should use the concatenation of all */         \
+        /* tables, and not just the first. */                        \
+        pms.meta_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
+    }                                                                \
+    /* Keep the table input signature, just make sure */             \
+    /* the output is the desired type. */                            \
+    type_tree cand_sig = gen_signature(                              \
+        get_signature_inputs(table_type_signature),                  \
+        type_tree(OUT_TYPE));                                        \
+    int as = alphabet_size(cand_sig, pms.ignore_ops);                \
+    typedef SCORER BScore;                                           \
+    BScorerSeq bscores;                                              \
+    for (const auto& table : TABLES) {                               \
+        BScore* r = new BScore ARGS ;                                \
+        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
+        bscores.push_back(r);                                        \
+    }                                                                \
+    multibscore_based_bscore bscore(bscores);                        \
+    metapop_moses_results(pms.exemplars, cand_sig,                   \
+                      REDUCT, REDUCT_REP, bscore,                    \
                       pms.opt_params, pms.hc_params, pms.meta_params, \
                       pms.moses_params, pms.mmr_pa);                 \
 }
  
-        // problem == pre  precision-based scoring
-        if (pms.problem == pre) {
+    // problem == pre  precision-based scoring
+    if (pms.problem == pre) {
 
-            // Very nearly identical to the REGRESSION macro above,
-            // except that some new experimental features are being tried.
+        // Very nearly identical to the REGRESSION macro above,
+        // except that some new experimental features are being tried.
 
-            // Keep the table input signature, just make sure the
-            // output is a boolean.
-            type_tree cand_sig = gen_signature(
-                get_signature_inputs(table_type_signature),
-                type_tree(id::boolean_type));
-            int as = alphabet_size(cand_sig, pms.ignore_ops);
-            typedef precision_bscore BScore;
-            BScorerSeq bscores;
-            for (const CTable& ctable : pms.ctables) {
-                BScore* r = new BScore(ctable,
-                                       fabs(pms.hardness),
-                                       pms.min_rand_input,
-                                       pms.max_rand_input,
-                                       pms.hardness >= 0,
-                                       pms.pre_worst_norm);
-                set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-                bscores.push_back(r);
-                if (pms.gen_best_tree) {
-                    // experimental: use some canonically generated
-                    // candidate as exemplar seed
-                    combo_tree tr = r->gen_canonical_best_candidate();
-                    logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
-                    pms.exemplars.push_back(tr);
-                }
-            }
-
-            // Enable feature selection while selecting exemplar
-            if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-                // XXX FIXME should use the concatenation of all ctables, not just first
-                pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
-                                                         pms.festor_params);
-            }
-
-            multibscore_based_bscore bscore(bscores);
-            metapop_moses_results(pms.exemplars, cand_sig,
-                                  *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
-                                  pms.opt_params, pms.hc_params, pms.meta_params,
-                                  pms.moses_params, pms.mmr_pa);
-        }
-
-        // problem == pre_conj  precision-based scoring (maximizing # conj)
-        else if (pms.problem == pre_conj) {
-
-            // Very nearly identical to the REGRESSION macro above,
-            // except that some new experimental features are being tried.
-
-            // Keep the table input signature, just make sure the
-            // output is a boolean.
-            type_tree cand_sig = gen_signature(
-                get_signature_inputs(table_type_signature),
-                type_tree(id::boolean_type));
-            int as = alphabet_size(cand_sig, pms.ignore_ops);
-            typedef precision_conj_bscore BScore;
-            BScorerSeq bscores;
-            for (const CTable& ctable : pms.ctables) {
-                BScore* r = new BScore(ctable,
-                                       fabs(pms.hardness),
-                                       pms.hardness >= 0);
-                set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-                bscores.push_back(r);
-            }
-
-            // Enable feature selection while selecting exemplar
-            if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-                // XXX FIXME should use the concatenation of all ctables, not just first
-                pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
-                                                         pms.festor_params);
-            }
-
-            multibscore_based_bscore bscore(bscores);
-            metapop_moses_results(pms.exemplars, cand_sig,
-                                  *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
-                                  pms.opt_params, pms.hc_params, pms.meta_params,
-                                  pms.moses_params, pms.mmr_pa);
-        }
-
-        // problem == prerec  maximize precision, holding recall const.
-        // Identical to above, just uses a different scorer.
-        else if (pms.problem == prerec) {
-            if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
-                pms.max_rand_input = 1.0; }
-            REGRESSION(id::boolean_type,
-                       *pms.bool_reduct, *pms.bool_reduct_rep,
-                       pms.ctables, prerec_bscore,
-                       (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-        }
-
-        // problem == recall  maximize recall, holding precision const.
-        else if (pms.problem == recall) {
-            if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
-                pms.max_rand_input = 1.0; }
-            REGRESSION(id::boolean_type,
-                       *pms.bool_reduct, *pms.bool_reduct_rep,
-                       pms.ctables, recall_bscore,
-                       (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-        }
-
-        // bep == beak-even point between recall and precision.
-        else if (pms.problem == bep) {
-            if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
-                pms.max_rand_input = 0.5; }
-            REGRESSION(id::boolean_type,
-                       *pms.bool_reduct, *pms.bool_reduct_rep,
-                       pms.ctables, bep_bscore,
-                       (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-        }
-
-        // f_one = F_1 harmonic ratio of recall and precision
-        else if (pms.problem == f_one) {
-            REGRESSION(id::boolean_type,
-                       *pms.bool_reduct, *pms.bool_reduct_rep,
-                       pms.ctables, f_one_bscore,
-                       (table));
-        }
-
-        // problem == it  i.e. input-table based scoring.
-        else {
-            OC_ASSERT(output_type == table_output_tn);
-
-            // --------- Boolean output type
-            if (output_type == id::boolean_type) {
-                REGRESSION(output_type,
-                           *pms.bool_reduct, *pms.bool_reduct_rep,
-                           pms.ctables, ctruth_table_bscore,
-                           (table));
-            }
-
-            // --------- Enumerated output type
-            else if (output_type == id::enum_type) {
-
-                // For enum targets, like boolean targets, the score
-                // can never exceed zero (perfect score).
-                // XXX Eh ??? for precision/recall scorers,
-                // the score range is 0.0 to 1.0 so this is wrong...
-                if (0.0 < pms.moses_params.max_score) {
-                    pms.moses_params.max_score = 0.0;
-                    pms.opt_params.terminate_if_gte = 0.0;
-                }
-                if (pms.use_well_enough) {
-                    // The "leave well-enough alone" algorithm.
-                    // Works. Kind of. Not as well as hoped.
-                    // Might be good for some problem. See diary.
-                    partial_solver well(pms.ctables,
-                                    table_type_signature,
-                                    pms.exemplars, *pms.contin_reduct,
-                                    pms.opt_params, pms.hc_params, pms.meta_params,
-                                    pms.moses_params, pms.mmr_pa);
-                    well.solve();
-                } else {
-                    // Much like the boolean-output-type above,
-                    // just uses a slightly different scorer.
-                    REGRESSION(output_type,
-                               *pms.contin_reduct, *pms.contin_reduct,
-                               pms.ctables, enum_effective_bscore,
-                               (table));
-                }
-            }
-
-            // --------- Contin output type
-            else if (output_type == id::contin_type) {
-                if (pms.discretize_thresholds.empty()) {
-
-                    contin_bscore::err_function_type eft =
-                        pms.it_abs_err ? contin_bscore::abs_error :
-                        contin_bscore::squared_error;
-
-                    REGRESSION(output_type,
-                               *pms.contin_reduct, *pms.contin_reduct,
-                               pms.tables, contin_bscore,
-                               (table, eft));
-
-                } else {
-                    REGRESSION(output_type,
-                               *pms.contin_reduct, *pms.contin_reduct,
-                               pms.tables, discretize_contin_bscore,
-                               (table.otable, table.itable,
-                                    pms.discretize_thresholds, pms.weighted_accuracy));
-                }
-            }
-
-            // --------- Unknown output type
-            else {
-                unsupported_type_exit(output_type);
-            }
-        }
-    }
-
-    // Find interesting predicates
-    else if (pms.problem == ip) {
-        // ip assumes that the inputs are boolean and the output is contin
-        type_tree ettt = gen_signature(id::boolean_type,
-                                       id::contin_type, pms.arity);
-        OC_ASSERT(ettt == table_type_signature,
-                  "The input table doesn't have the right data types."
-                  " The output should be contin and the inputs should"
-                  " be boolean");
-        // signature of the functions to learn
-        type_tree tt = gen_signature(id::boolean_type, pms.arity);
-
-        // determine the default exemplar to start with
-        if (pms.exemplars.empty())
-            pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
-
-        int as = alphabet_size(tt, pms.ignore_ops);
-
-        typedef interesting_predicate_bscore BScore;
+        // Keep the table input signature, just make sure the
+        // output is a boolean.
+        type_tree cand_sig = gen_signature(
+            get_signature_inputs(table_type_signature),
+            type_tree(id::boolean_type));
+        int as = alphabet_size(cand_sig, pms.ignore_ops);
+        typedef precision_bscore BScore;
         BScorerSeq bscores;
         for (const CTable& ctable : pms.ctables) {
-            BScore *r = new BScore(ctable,
-                                   pms.ip_kld_weight,
-                                   pms.ip_skewness_weight,
-                                   pms.ip_stdU_weight,
-                                   pms.ip_skew_U_weight,
+            BScore* r = new BScore(ctable,
+                                   fabs(pms.hardness),
                                    pms.min_rand_input,
                                    pms.max_rand_input,
-                                   pms.hardness, pms.hardness >= 0);
+                                   pms.hardness >= 0,
+                                   pms.pre_worst_norm);
             set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
             bscores.push_back(r);
+            if (pms.gen_best_tree) {
+                // experimental: use some canonically generated
+                // candidate as exemplar seed
+                combo_tree tr = r->gen_canonical_best_candidate();
+                logger().info() << "Canonical program tree (non reduced) maximizing precision = " << tr;
+                pms.exemplars.push_back(tr);
+            }
         }
+
+        // Enable feature selection while selecting exemplar
+        if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
+            // XXX FIXME should use the concatenation of all ctables, not just first
+            pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+                                                     pms.festor_params);
+        }
+
         multibscore_based_bscore bscore(bscores);
-        metapop_moses_results(pms.exemplars, tt,
+        metapop_moses_results(pms.exemplars, cand_sig,
                               *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                               pms.opt_params, pms.hc_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
+    }
+
+    // problem == pre_conj  precision-based scoring (maximizing # conj)
+    else if (pms.problem == pre_conj) {
+
+        // Very nearly identical to the REGRESSION macro above,
+        // except that some new experimental features are being tried.
+
+        // Keep the table input signature, just make sure the
+        // output is a boolean.
+        type_tree cand_sig = gen_signature(
+            get_signature_inputs(table_type_signature),
+            type_tree(id::boolean_type));
+        int as = alphabet_size(cand_sig, pms.ignore_ops);
+        typedef precision_conj_bscore BScore;
+        BScorerSeq bscores;
+        for (const CTable& ctable : pms.ctables) {
+            BScore* r = new BScore(ctable,
+                                   fabs(pms.hardness),
+                                   pms.hardness >= 0);
+            set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
+            bscores.push_back(r);
+        }
+
+        // Enable feature selection while selecting exemplar
+        if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
+            // XXX FIXME should use the concatenation of all ctables, not just first
+            pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+                                                     pms.festor_params);
+        }
+
+        multibscore_based_bscore bscore(bscores);
+        metapop_moses_results(pms.exemplars, cand_sig,
+                              *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                              pms.opt_params, pms.hc_params, pms.meta_params,
+                              pms.moses_params, pms.mmr_pa);
+    }
+
+    // problem == prerec  maximize precision, holding recall const.
+    // Identical to above, just uses a different scorer.
+    else if (pms.problem == prerec) {
+        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
+            pms.max_rand_input = 1.0; }
+        REGRESSION(id::boolean_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, prerec_bscore,
+                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+    }
+
+    // problem == recall  maximize recall, holding precision const.
+    else if (pms.problem == recall) {
+        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
+            pms.max_rand_input = 1.0; }
+        REGRESSION(id::boolean_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, recall_bscore,
+                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+    }
+
+    // bep == beak-even point between recall and precision.
+    else if (pms.problem == bep) {
+        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
+            pms.max_rand_input = 0.5; }
+        REGRESSION(id::boolean_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, bep_bscore,
+                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+    }
+
+    // f_one = F_1 harmonic ratio of recall and precision
+    else if (pms.problem == f_one) {
+        REGRESSION(id::boolean_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, f_one_bscore,
+                   (table));
+    }
+
+    // problem == it  i.e. input-table based scoring.
+    else {
+        OC_ASSERT(output_type == table_output_tn);
+
+        // --------- Boolean output type
+        if (output_type == id::boolean_type) {
+            REGRESSION(output_type,
+                       *pms.bool_reduct, *pms.bool_reduct_rep,
+                       pms.ctables, ctruth_table_bscore,
+                       (table));
+        }
+
+        // --------- Enumerated output type
+        else if (output_type == id::enum_type) {
+
+            // For enum targets, like boolean targets, the score
+            // can never exceed zero (perfect score).
+            // XXX Eh ??? for precision/recall scorers,
+            // the score range is 0.0 to 1.0 so this is wrong...
+            if (0.0 < pms.moses_params.max_score) {
+                pms.moses_params.max_score = 0.0;
+                pms.opt_params.terminate_if_gte = 0.0;
+            }
+            if (pms.use_well_enough) {
+                // The "leave well-enough alone" algorithm.
+                // Works. Kind of. Not as well as hoped.
+                // Might be good for some problem. See diary.
+                partial_solver well(pms.ctables,
+                                table_type_signature,
+                                pms.exemplars, *pms.contin_reduct,
+                                pms.opt_params, pms.hc_params, pms.meta_params,
+                                pms.moses_params, pms.mmr_pa);
+                well.solve();
+            } else {
+                // Much like the boolean-output-type above,
+                // just uses a slightly different scorer.
+                REGRESSION(output_type,
+                           *pms.contin_reduct, *pms.contin_reduct,
+                           pms.ctables, enum_effective_bscore,
+                           (table));
+            }
+        }
+
+        // --------- Contin output type
+        else if (output_type == id::contin_type) {
+            if (pms.discretize_thresholds.empty()) {
+
+                contin_bscore::err_function_type eft =
+                    pms.it_abs_err ? contin_bscore::abs_error :
+                    contin_bscore::squared_error;
+
+                REGRESSION(output_type,
+                           *pms.contin_reduct, *pms.contin_reduct,
+                           pms.tables, contin_bscore,
+                           (table, eft));
+
+            } else {
+                REGRESSION(output_type,
+                           *pms.contin_reduct, *pms.contin_reduct,
+                           pms.tables, discretize_contin_bscore,
+                           (table.otable, table.itable,
+                                pms.discretize_thresholds, pms.weighted_accuracy));
+            }
+        }
+
+        // --------- Unknown output type
+        else {
+            unsupported_type_exit(output_type);
+        }
     }
 
     return 0;

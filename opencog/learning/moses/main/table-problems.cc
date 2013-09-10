@@ -45,6 +45,58 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
         scorer.set_complexity_coef(ratio);
 }
 
+// ==================================================================
+
+/// Find interesting predicates
+class ip_problem : public problem_base
+{
+    public:
+        virtual const std::string name() const { return "ip"; }
+        virtual const std::string description() const {
+             return "Find interesting patterns"; }
+        virtual void run(problem_params&);
+};
+
+void ip_problem::run(problem_params& pms)
+{
+    // ip assumes that the inputs are boolean and the output is contin
+    type_tree ettt = gen_signature(id::boolean_type,
+                                   id::contin_type, pms.arity);
+    OC_ASSERT(ettt == pms.tables.front().get_signature(),
+              "The input table doesn't have the right data types."
+              " The output should be contin and the inputs should"
+              " be boolean");
+    // signature of the functions to learn
+    type_tree tt = gen_signature(id::boolean_type, pms.arity);
+
+    // determine the default exemplar to start with
+    if (pms.exemplars.empty())
+        pms.exemplars.push_back(type_to_exemplar(id::boolean_type));
+
+    int as = alphabet_size(tt, pms.ignore_ops);
+
+    typedef interesting_predicate_bscore BScore;
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
+    BScorerSeq bscores;
+    for (const CTable& ctable : pms.ctables) {
+        BScore *r = new BScore(ctable,
+                               pms.ip_kld_weight,
+                               pms.ip_skewness_weight,
+                               pms.ip_stdU_weight,
+                               pms.ip_skew_U_weight,
+                               pms.min_rand_input,
+                               pms.max_rand_input,
+                               pms.hardness, pms.hardness >= 0);
+        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
+        bscores.push_back(r);
+    }
+    multibscore_based_bscore bscore(bscores);
+    metapop_moses_results(pms.exemplars, tt,
+                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.moses_params, pms.mmr_pa);
+
+}
 
 // ==================================================================
 
@@ -98,6 +150,7 @@ void ann_table_problem::run(problem_params& pms)
 
 void register_table_problems()
 {
+	register_problem(new ip_problem());
 	register_problem(new ann_table_problem());
 }
 

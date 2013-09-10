@@ -1305,6 +1305,17 @@ void problem_params::parse_options(int argc, char* argv[])
     moses_params.max_time = max_time;
     moses_params.max_cnd_output = result_count;
 
+    // Logical reduction rules used during search.
+    lr = logical_reduction(ignore_ops);
+    bool_reduct = lr(reduct_candidate_effort).clone();
+
+    // Logical reduction rules used during representation building.
+    bool_reduct_rep = lr(reduct_knob_building_effort).clone();
+
+    // Continuous reduction rules used during search and representation
+    // building.
+    contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops).clone();
+
     // Problem based on input table.
     if (datafile_based_problem(problem))
     {
@@ -1358,17 +1369,6 @@ void problem_params::parse_options(int argc, char* argv[])
                            output_python,
                            enable_mpi);
 
-
-    // Logical reduction rules used during search.
-    lr = logical_reduction(ignore_ops);
-    bool_reduct = lr(reduct_candidate_effort).clone();
-
-    // Logical reduction rules used during representation building.
-    bool_reduct_rep = lr(reduct_knob_building_effort).clone();
-
-    // Continuous reduction rules used during search and representation
-    // building.
-    contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops).clone();
 }
 
 map<std::string, problem_base*> problem_set;
