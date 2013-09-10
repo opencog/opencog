@@ -64,7 +64,6 @@ void ProcedureInterpreter::run(NetworkElement *ne)
                     _failed.insert(it->first);
                 } else {
                     _resultMap[it->first] = comboInterpreter->getResult(rcpID);
-                    _unifierResultMap[it->first] = comboInterpreter->getUnifierResult(rcpID);
                 }
             }
         }
@@ -126,7 +125,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
     if (p.getType() == COMBO) {
         logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
-        RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments, vu);
+        RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(std::make_pair(++_next, rcpID));
 
     } else {

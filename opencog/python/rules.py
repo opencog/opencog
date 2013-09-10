@@ -321,6 +321,7 @@ def subset_rules(atomspace):
     return rules
 
 def planning_rules(atomspace):
+    '''A bunch of dubious hacks for using PLN as a STRIPS-style planner. Which isn't a great idea anyway'''
     rules = []
     # Used by planning. An ExecutionLink indicates an action being performed, so we can
     # assume that the action will be performed as part of the plan (i.e. if any action
