@@ -225,6 +225,9 @@ void table_problem_base::common_setup(problem_params& pms)
 
 // ==================================================================
 /// precision-based scoring
+// regression based on input table by maximizing precision (or negative
+// predictive value), holding activation const.
+
 class pre_table_problem : public table_problem_base
 {
     public:
@@ -282,12 +285,59 @@ void pre_table_problem::run(problem_params& pms)
 }
 
 // ==================================================================
+/// precision-based scoring (maximizing number of conjunctions)
+class pre_conj_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "pre"; }
+        virtual const std::string description() const {
+             return "Precision-Conjunction-Maximization"; }
+        virtual void run(problem_params&);
+};
+
+void pre_conj_table_problem::run(problem_params& pms)
+{
+    // Very nearly identical to the REGRESSION macro above,
+    // except that some new experimental features are being tried.
+    common_setup(pms);
+
+    // Keep the table input signature, just make sure the
+    // output is a boolean.
+    type_tree cand_sig = gen_signature(
+        get_signature_inputs(table_type_signature),
+        type_tree(id::boolean_type));
+    int as = alphabet_size(cand_sig, pms.ignore_ops);
+    typedef precision_conj_bscore BScore;
+    BScorerSeq bscores;
+    for (const CTable& ctable : pms.ctables) {
+        BScore* r = new BScore(ctable,
+                               fabs(pms.hardness),
+                               pms.hardness >= 0);
+        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
+        bscores.push_back(r);
+    }
+
+    // Enable feature selection while selecting exemplar
+    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
+        // XXX FIXME should use the concatenation of all ctables, not just first
+        pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+                                                 pms.festor_params);
+    }
+    multibscore_based_bscore bscore(bscores);
+    metapop_moses_results(pms.exemplars, cand_sig,
+                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
+                          pms.opt_params, pms.hc_params, pms.meta_params,
+                          pms.moses_params, pms.mmr_pa);
+}
+
+// ==================================================================
 
 void register_table_problems()
 {
 	register_problem(new ip_problem());
 	register_problem(new ann_table_problem());
 	register_problem(new pre_table_problem());
+	register_problem(new pre_conj_table_problem());
 }
 
 } // ~namespace moses

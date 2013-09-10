@@ -66,16 +66,6 @@ static const string bep="bep";    // regression based on input table,
 static const string f_one="f_one"; // regression based on input table,
                                   // maximize f_1 score
 
-static const string pre="pre";    // regression based on input table by
-                                  // maximizing precision (or negative
-                                  // predictive value), holding activation
-                                  // const.
-
-static const string pre_conj="pre_conj";    // simplified version of
-                                            // pre, but tries to
-                                            // maximize number of
-                                            // conjunctions
-
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
@@ -197,7 +187,7 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 bool datafile_based_problem(const string& problem)
 {
     static set<string> dbp
-        = {it, pre_conj, recall, prerec, bep, f_one};
+        = {it, recall, prerec, bep, f_one};
     return dbp.find(problem) != dbp.end();
 }
 
@@ -286,45 +276,10 @@ int moses_exec(int argc, char** argv)
                       pms.opt_params, pms.hc_params, pms.meta_params, \
                       pms.moses_params, pms.mmr_pa);                 \
 }
-    // problem == pre_conj  precision-based scoring (maximizing # conj)
-    if (pms.problem == pre_conj) {
-
-        // Very nearly identical to the REGRESSION macro above,
-        // except that some new experimental features are being tried.
-
-        // Keep the table input signature, just make sure the
-        // output is a boolean.
-        type_tree cand_sig = gen_signature(
-            get_signature_inputs(table_type_signature),
-            type_tree(id::boolean_type));
-        int as = alphabet_size(cand_sig, pms.ignore_ops);
-        typedef precision_conj_bscore BScore;
-        BScorerSeq bscores;
-        for (const CTable& ctable : pms.ctables) {
-            BScore* r = new BScore(ctable,
-                                   fabs(pms.hardness),
-                                   pms.hardness >= 0);
-            set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio);
-            bscores.push_back(r);
-        }
-
-        // Enable feature selection while selecting exemplar
-        if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
-            // XXX FIXME should use the concatenation of all ctables, not just first
-            pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
-                                                     pms.festor_params);
-        }
-
-        multibscore_based_bscore bscore(bscores);
-        metapop_moses_results(pms.exemplars, cand_sig,
-                              *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
-                              pms.opt_params, pms.hc_params, pms.meta_params,
-                              pms.moses_params, pms.mmr_pa);
-    }
 
     // problem == prerec  maximize precision, holding recall const.
     // Identical to above, just uses a different scorer.
-    else if (pms.problem == prerec) {
+    if (pms.problem == prerec) {
         if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
             pms.max_rand_input = 1.0; }
         REGRESSION(id::boolean_type,
