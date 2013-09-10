@@ -49,7 +49,7 @@ type 'ls'; this will reveal what was created.
 
 The above can be prettied up with some "syntactic sugar."
 A set of wrapper functions are defined in 
-"src/atomspace/type_constructors.scm", which is loaded using the 
+"src/atomspace/core_types.scm", which is loaded using the 
 opencog/scm/load.sh shell script. To get an idea of what these
 are like, some of these wrappers are shown below:
 

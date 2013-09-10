@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class Atom;
 
@@ -84,6 +87,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SAVABLE_REPOSITORY_H

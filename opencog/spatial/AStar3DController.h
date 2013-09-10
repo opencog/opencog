@@ -53,6 +53,10 @@
 
 #include <opencog/spatial/LSMap3DSearchNode.h>
 
+/** \addtogroup grp_spatial
+ *  @{
+ */
+
 #define MAX_3D_SEARCH_NODES 5000
 #define DEBUG_LISTS 0
 #define DEBUG_LIST_LENGTHS_ONLY 0
@@ -109,5 +113,6 @@ namespace opencog
 
     } // spatial
 } // opencog
+/** @}*/
 
 #endif /*_SPATIAL_ASTAR3D_CONTROLLER_H_*/

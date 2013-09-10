@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 /**
  * Persistent Atom storage, backed by Hypertable.
@@ -99,6 +102,7 @@ class AtomspaceHTabler : public BackingStore
         virtual Atom * getAtom(Handle) const;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_ATOMSPACE_HTABLER_H

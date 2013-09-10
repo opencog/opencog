@@ -9,6 +9,12 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 - \subpage libcogutil
 - \subpage libatomspace
+- \subpage libserver
+- \subpage libspatial
+- \subpage libspacetime
+- \subpage libattention
+- \subpage libsmob
+- \subpage libpersist
 - \subpage libcomboreduct
 
 <TABLE width="100%" border="0"><TR>

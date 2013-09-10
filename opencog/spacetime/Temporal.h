@@ -32,6 +32,10 @@
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
+/** \addtogroup grp_spacetime
+ *  @{
+ */
+
 namespace opencog
 {
 
@@ -187,4 +191,5 @@ struct equalTemporal {
 
 std::ostream& operator<<(std::ostream& out, const opencog::Temporal& t);
 
+/** @}*/
 #endif // _OPENCOG_TEMPORAL_H

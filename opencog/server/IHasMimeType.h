@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class defines an interface that sockets compatible with opencog requests
@@ -60,6 +63,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_I_HAS_MIME_TYPE_H

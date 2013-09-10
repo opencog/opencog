@@ -30,6 +30,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class TemporalTableFile
 {
@@ -54,6 +57,7 @@ public:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_TEMPORAL_TABLE_H

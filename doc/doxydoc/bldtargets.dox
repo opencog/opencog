@@ -9,9 +9,11 @@ run:
 make help
 @endcode
 
+<a href="http://wiki.opencog.org/w/Make_install">make install</a>
+wiki page describes the layout of the installed package.
 Since building the entire package may take a long time 
 depending on the architecture, building only specific 
-components may save some time.
+components may save some time; here are some:
 
 \section sect_important Important ones
 
@@ -20,18 +22,21 @@ The common targets are present: all,
 depend, rebuild_cache, edit_cache, install, clean, and test.
 
 
-
 \subsection ssect_atoms Atoms
 The base library for atom manipulation is \b atomspace; this is
 a shared library with support code. 
 
-@TODO A custom target is also used: opencog_atom_types; explain
-what it does
+A custom target is also used: \b opencog_atom_types helps in
+generating atom types behind the scene.
 
 Two helper programs are
 produced: \b atomspace_async for testing and \b atomspace_bm
 for benchmarking.
 
+\subsection ssect_server server
+\b builtinreqs is a shared library that groups build-in requests.
+\b server is the \ref libserver "shared library" representing the actual server
+that gets linked into \b cogserver - \ref progcogserver "the program".
 
 
 \subsection ssect_doxyt Documentation and examples
@@ -81,7 +86,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD>\ref fsstructure "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref license "Next"</TD>
+<TD>\ref otherwikis "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
@@ -146,8 +151,6 @@ TODO: look into other interesting targets
 ... xml
 ... attention
 ... attention_atom_types
-... builtinreqs
-... server
 ... ocweb
 ... json_spirit
 ... PrimitiveExample

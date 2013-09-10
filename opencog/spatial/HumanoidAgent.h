@@ -28,6 +28,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
 namespace spatial
 {
 

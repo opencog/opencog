@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class implements a base server class that provides basic functionality
@@ -70,6 +73,7 @@ inline AtomSpace& atomspace(void)
     return server().getAtomSpace();
 }
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_BASE_SERVER_H

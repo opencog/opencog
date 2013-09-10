@@ -50,6 +50,9 @@
  */
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -551,6 +554,7 @@ namespace opencog
         }; // struct LocalSpaceMap2D
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif

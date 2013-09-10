@@ -27,6 +27,9 @@
 #include <opencog/spatial/math/Dimension2.h>
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         namespace math {

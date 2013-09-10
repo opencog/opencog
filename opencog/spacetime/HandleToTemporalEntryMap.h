@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class HandleToTemporalEntryMap
 {
@@ -111,6 +114,7 @@ public:
     std::string toString();
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_HANDLE_TO_TEMPORAL_ENTRY_MAP_H

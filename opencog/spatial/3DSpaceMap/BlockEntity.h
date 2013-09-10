@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         class Block3D;
@@ -102,6 +105,7 @@ namespace opencog
 
         };
     }
+/** @}*/
 }
 
 

@@ -27,6 +27,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class StringXMLBufferReader : public XMLBufferReader
 {
@@ -53,6 +56,7 @@ private:
 
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_STRING_XML_BUFFER_READER_H

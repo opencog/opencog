@@ -18,7 +18,7 @@ ignored by doxygen; used as markers for update-links.py;
 \endif
 
 <TABLE width="100%" border="0"><TR>
-<TD>\ref libatomspace "Previous"</TD>
+<TD>\ref libpersist "Previous"</TD>
 <TD width="100%"></TD>
 <TD>\ref programs "Next"</TD>
 </TR></TABLE>

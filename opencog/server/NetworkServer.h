@@ -36,6 +36,10 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
+
 
 /**
  * This class implements the entity responsible for managing all the opencog
@@ -122,6 +126,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SIMPLE_NETWORK_SERVER_H

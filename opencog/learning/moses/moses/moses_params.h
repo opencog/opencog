@@ -56,8 +56,8 @@ struct moses_parameters
     bool local;
     bool mpi;
     bool force_feed;
-    const jobs_t& jobs;
-    const boost::program_options::variables_map& vm;
+    /* const */ jobs_t jobs;
+    /* const */ boost::program_options::variables_map vm;
 
     // total maximun number of evals
     int max_evals;

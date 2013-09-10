@@ -35,6 +35,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -132,6 +135,7 @@ public:
     };
 }; // class
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_IMPORTANCE_SPREADING_AGENT_H

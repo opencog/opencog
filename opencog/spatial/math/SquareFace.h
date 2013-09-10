@@ -27,7 +27,11 @@
 #include <opencog/spatial/math/Face.h>
 #include <vector>
 
-namespace opencog { namespace spatial {
+namespace opencog {
+/** \addtogroup grp_spatial
+ *  @{
+ */
+namespace spatial {
 namespace math {
 
 class SquareFace : public Face

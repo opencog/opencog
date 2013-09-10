@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -60,6 +63,7 @@ public:
 
 }; // class
 
+/** @}*/
 } // namespace
 
 #endif // _OPENCOG_STI_DECAYING_AGENT_H

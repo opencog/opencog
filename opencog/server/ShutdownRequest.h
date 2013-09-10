@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class ShutdownRequest : public Request
 {
@@ -55,6 +58,7 @@ public:
     virtual bool isShell(void) {return info().is_shell;}
 };
 
+/** @}*/
 } // namespace 
 
 #endif // _OPENCOG_SHUTDOWN_REQUEST_H

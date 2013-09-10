@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class Request;
 class CogServer;
@@ -141,6 +144,7 @@ public:
     }
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_REGISTRY_H

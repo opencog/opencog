@@ -34,6 +34,10 @@
 #include <sql.h>
 #include <sqlext.h>
 
+/** \addtogroup grp_persist
+ *  @{
+ */
+
 class ODBCRecordSet;
 
 class ODBCConnection
@@ -139,5 +143,7 @@ inline void escape_single_quotes(std::string &str)
 		pos = str.find('\'', pos);
 	}
 }
+
+/** @}*/
 
 #endif // _OPENCOG_PERSISTENT_ODBC_DRIVER_H

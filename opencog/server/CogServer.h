@@ -46,6 +46,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 typedef std::vector<Agent*> AgentSeq;
 class Request;
@@ -191,7 +194,7 @@ public:
 
     /**** Module API ****/
     /** Loads a dynamic library/module. Takes the filename of the library (.so
-     * or .dll). On Linux/Unix, it the filename may be absolute or relative to
+     * or .dll). On Linux/Unix, the filename may be absolute or relative to
      * the server's RPATH path (which, tipically, should be
      * "INSTALL_PREFIX/lib/opencog") */
     virtual bool loadModule(const std::string& filename);
@@ -301,6 +304,7 @@ inline CogServer& cogserver(void)
     return dynamic_cast<CogServer&>(server(CogServer::createInstance));
 }
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_COGSERVER_H

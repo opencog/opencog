@@ -55,6 +55,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spacetime
+ *  @{
+ */
 
 class AtomSpace;
 class AtomSpaceImpl;
@@ -580,6 +583,7 @@ private:
 //};
 
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SPACESERVER_H

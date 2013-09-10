@@ -29,6 +29,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         namespace math {
@@ -168,6 +171,7 @@ namespace opencog
 
         } // math
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_MATH_MATRIX4_H_

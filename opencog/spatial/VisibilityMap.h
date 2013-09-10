@@ -33,6 +33,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -224,6 +227,7 @@ namespace opencog
         }; // VisibilityMap
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_VISIBILITY_MAP_H_

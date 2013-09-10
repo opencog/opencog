@@ -265,8 +265,6 @@ protected:
             
             "MANUAL_OAC_LAUNCH",            "false",
 
-            "SCHEME_TYPEDEFS_PATH",         "type_constructors.scm",
-
             "FRAMES_2_RELEX_RULES_FILE",    "frames2relex.rules",
 
             "NLGEN_SERVER_PORT",            "5555",
