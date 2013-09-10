@@ -127,7 +127,8 @@ const rule& contin_reduction(int reduct_effort,
                              // ignore_size_increase(sequential(complete_factorize,
                              //                                 complete_distribute)),
                              ignore_size_increase(sequential(complete_distribute,
-                                                             complete_factorize))));
+                                                             complete_factorize))),
+                 "contin_reduction");
 
     if (pr == NULL) pr = &res;
     return *pr;

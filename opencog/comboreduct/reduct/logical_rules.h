@@ -52,8 +52,8 @@ struct remove_unary_junctors : public crule<remove_unary_junctors>
 /// Simplify any predicate terms that are found in the tree.
 ///
 /// Predicate terms are boolean-valued functions whose arguments
-/// are not boolen.  Currently, the only predicate we have is 
-/// greater_than_zero. This rule will simplify the contin-valued 
+/// are not boolen.  Currently, the only predicate we have is
+/// greater_than_zero. This rule will simplify the contin-valued
 /// arguments of all such predicates.
 ///
 struct simplify_predicates : public crule<simplify_predicates>
@@ -62,6 +62,11 @@ struct simplify_predicates : public crule<simplify_predicates>
                         const vertex_set& ignore_ops_)
         : crule<simplify_predicates>::crule("simplify_predicates"),
           reduct_effort(effort), ignore_ops(ignore_ops_) {}
+
+    simplify_predicates(const simplify_predicates& rhs)
+        : crule<simplify_predicates>::crule("simplify_predicates"),
+          reduct_effort(rhs.reduct_effort), ignore_ops(rhs.ignore_ops) {}
+
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 
 protected:
@@ -141,7 +146,7 @@ protected:
 //    if X is a subset of (or equal to) Y, remove Y
 // Also, true||X -> true, false||X -> X
 struct reduce_ors : public crule<reduce_ors>
-{ 
+{
     reduce_ors() : crule<reduce_ors>::crule("reduce_ors") {}
     void operator()(combo_tree& tr, combo_tree::iterator it) const;
 };
@@ -192,19 +197,19 @@ protected:
         void operator()(sib_it it);
         bool consistent(const subtree_set& s);
         bool and_cut(sib_it child);
-        void or_cut(sib_it current);      
+        void or_cut(sib_it current);
         Result reduce(sib_it current,const subtree_set& dominant,
                       const subtree_set& command);
         Result reduce_and(sib_it current,const subtree_set& dominant,
                           const subtree_set& command);
         Result reduce_or(sib_it current,const subtree_set& dominant,
                          const subtree_set& command);
-        
+
         template<typename Out>
         void build_subtree_sets_upwards(up_it up,Out dom_out,Out cmd_out) const
         {
             static const type_tree boolean_type_tree = type_tree(id::boolean_type);
-            
+
             for (up_it p = tr.parent(up);
                  p != tr.end_upwards() && is_logical_operator(*p); ++p) {
                 if (*p == id::logical_and) {
@@ -218,7 +223,7 @@ protected:
                             *cmd_out++ = sib;
                 }
                 up = p;
-            }	    
+            }
         }
 
         template<typename Dst>
@@ -231,7 +236,7 @@ protected:
                 }
             }
         }
-        
+
         struct tree_eraser
         {
             tree_eraser(combo_tree& t) : tr(t) { }
@@ -255,11 +260,11 @@ protected:
             sib_it it;
             template<typename It1,typename It2>
             void operator()(It1 it1, It2 it2)
-            { 
+            {
                 if (it1->node == 0)
                     tr.append_child(it, it2);
                 else
-                    tr.insert_subtree(*it1, it2); 
+                    tr.insert_subtree(*it1, it2);
             }
         };
     };
@@ -267,9 +272,9 @@ protected:
 
 // (suggested by Moshe) check if the truth table is the same after
 // removal of any subtree
-struct reduce_remove_subtree_equal_tt 
+struct reduce_remove_subtree_equal_tt
     : public crule<reduce_remove_subtree_equal_tt>
-{ 
+{
     reduce_remove_subtree_equal_tt()
         : crule<reduce_remove_subtree_equal_tt>::crule("reduce_remove_subtree_equal_tt") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
