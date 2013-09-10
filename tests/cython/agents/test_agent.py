@@ -1,5 +1,5 @@
 import opencog.cogserver
-from opencog.atomspace import fromtypes
+from opencog.atomspace import types
 
 class TestAgent(opencog.cogserver.MindAgent):
 

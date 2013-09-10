@@ -1,7 +1,7 @@
 INCLUDE_DIRECTORIES (
 	${PROJECT_SOURCE_DIR}/opencog/atomspace
 	${PROJECT_SOURCE_DIR}/opencog/query
-    ${PROJECT_SOURCE_DIR}/opencog/util
+	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
 LINK_DIRECTORIES(
@@ -44,7 +44,4 @@ IF (HAVE_GUILE)
 		cogutil
 	)
 ENDIF (HAVE_GUILE)
-
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
-    ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
 

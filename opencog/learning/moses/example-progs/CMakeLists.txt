@@ -72,4 +72,3 @@ TARGET_LINK_LIBRARIES (moses-perf
 	moses
 	cogutil
 )
-
