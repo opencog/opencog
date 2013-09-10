@@ -54,7 +54,7 @@ namespace opencog { namespace Procedure {
 using namespace pai;
 using namespace world;
 
-struct RunningComboProcedure : public combo::Evaluator {
+struct RunningComboProcedure {
 
     //the exception that
     //TODO
@@ -65,27 +65,20 @@ struct RunningComboProcedure : public combo::Evaluator {
 
     //these implement the callback interface combo::Evaluator used by the
     //regular combo interpreter when called by us
-    combo::vertex eval_action(combo::combo_tree::iterator,
-                              combo::variable_unifier&);
-    combo::vertex eval_procedure(combo::combo_tree::iterator,
-                                 combo::variable_unifier&);
-    combo::vertex eval_percept(combo::combo_tree::iterator,
-                               combo::variable_unifier&);
-    combo::vertex eval_indefinite_object(combo::indefinite_object,
-                                         combo::variable_unifier&);
+    combo::vertex eval_percept(combo::combo_tree::iterator);
+    combo::vertex eval_indefinite_object(combo::indefinite_object);
 
     //construct an rp from a worldwrapper and a tree
     RunningComboProcedure(WorldWrapperBase& ww, const combo::combo_tree& tr,
                           const std::vector<combo::vertex>& arguments,
-                          bool doesSendDefinitePlan = true,
-                          combo::variable_unifier& vu = combo::variable_unifier::DEFAULT_VU());
+                          bool doesSendDefinitePlan = true);
 
     //copy ctor - fatal runtime error if the rhs has already begun running
     RunningComboProcedure(const RunningComboProcedure&);
 
-    //each call to cycle executes a single action plan (if ready)
+    //each call to cycle executes a single action, and will exit after sending it to the virtual world.
+    //it won't continue executing until the virtual world says the action has finished (or failed).
     //throws if execution of the action plan (PAI::sendActionPlan(ActionPlanID)) fails
-    //TODO : above is not true anymore, find the equivalent
     void cycle() throw(ActionPlanSendingFailure, AssertionException, std::bad_exception);
 
     //terminate - prevent future plans from being evaluated,
@@ -137,17 +130,13 @@ struct RunningComboProcedure : public combo::Evaluator {
         return combo::id::action_success;
     }
 
-    combo::variable_unifier& getUnifierResult() {
-        OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
-        return _vu;
-    }
-
 protected:
     typedef combo::combo_tree::sibling_iterator sib_it;
 
     WorldWrapperBase& _ww;
 
     combo::combo_tree _tr;
+    const std::vector<combo::vertex>& _arguments;
     
     /** _it is kept pointing at the tree node to be executed next; an
      * invalid iterator indicates nothing more to execute. for an
@@ -159,6 +148,8 @@ protected:
      */
     sib_it _it;
 
+    const std::vector<combo::vertex>& _arguments;
+
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
     boost::tribool _failed; //set to true if failed, false if not failed,
@@ -168,10 +159,10 @@ protected:
     bool _inCompound; //used for handling builtin compound functions (e.g. follow)
 
     //used for sending action plans
-    bool exec(sib_it x, combo::variable_unifier& vu) {
-        return execSeq(x, ++sib_it(x), vu);
+    bool exec(sib_it x) {
+        return execSeq(x, ++sib_it(x));
     }
-    bool execSeq(sib_it, sib_it, combo::variable_unifier& vu);
+    bool execSeq(sib_it, sib_it);
 
     /// @return true iff an action plan gets executed
     bool beginCompound();
@@ -182,14 +173,10 @@ protected:
     void moveOn();
 
     /// for evaluating procedures inplace
-    void expand_procedure_call(combo::combo_tree::iterator) throw
-        (ComboException, AssertionException, std::bad_exception);
-    void expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier&);
+    void expand_and_evaluate_subtree(combo::combo_tree::iterator it);
 
+    combo::vertex eval_anything(sib_it it);
 private:
-    /// initialization - only called from ctors
-    void init(const std::vector<combo::vertex>&);
-
     /**
      * true if the combo interpreter
      * evaluates the indefinite aguments
@@ -205,10 +192,6 @@ private:
      * simulations
      */
     bool _doesSendDefinitePlan;
-
-    // unifier that holds options to be tested when a wild card character "_*_" is
-    // used in a combo script
-    combo::variable_unifier _vu;
 
     bool finished;
 };

@@ -123,7 +123,6 @@ void ComboInterpreter::run(messaging::NetworkElement *ne)
                     _failed.insert((*it)->first); //record failures for querying
                 } else {
                     _resultMap.insert(make_pair((*it)->first, rp.getResult()));
-                    _unifierResultMap.insert(make_pair((*it)->first, rp.getUnifierResult()));
                 }
 
             } else { //do the same and also send a message recording the result
@@ -137,7 +136,6 @@ void ComboInterpreter::run(messaging::NetworkElement *ne)
 
                 } else {
                     _resultMap.insert(make_pair((*it)->first, rp.getResult()));
-                    _unifierResultMap.insert(make_pair((*it)->first, rp.getUnifierResult()));
                     stringstream ss;
                     ss << rp.getResult();
                     StringMessage msg(ne->getID(),
@@ -157,14 +155,6 @@ RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, c
 {
     RunningProcedureId id(++_next, COMBO);
     _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, arguments))).first);
-    return id;
-}
-
-//add a procedure to be run by the interpreter
-RunningProcedureId ComboInterpreter::runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments, combo::variable_unifier& vu)
-{
-    RunningProcedureId id(++_next, COMBO);
-    _vec.push_back(_map.insert(make_pair(id, RunningComboProcedure(*_ww, tr, arguments, true, vu))).first);
     return id;
 }
 
@@ -208,20 +198,6 @@ combo::vertex ComboInterpreter::getResult(RunningProcedureId id)
     return it->second;
 }
 
-combo::variable_unifier& ComboInterpreter::getUnifierResult(RunningProcedureId id)
-{
-    OC_ASSERT(isFinished(id), "ComboInterpreter - Procedure '%d' not finished.", id.getId());
-    OC_ASSERT(!isFailed(id), "ComboInterpreter - Procedure '%d' failed.", id.getId());
-
-    UnifierResultMap::iterator it = _unifierResultMap.find(id);
-    if (it == _unifierResultMap.end()) {
-        Map::iterator m_it = _map.find(id);
-        OC_ASSERT(m_it != _map.end(), "ComboInterpreter - Unable to find procedure '%d' in _map.", id.getId());
-        return m_it->second.getUnifierResult();
-    }
-    return it->second;
-}
-
 // makes the procedure with the given id to stop and remove it from the interpreter
 void ComboInterpreter::stopProcedure(RunningProcedureId id)
 {
@@ -236,10 +212,6 @@ void ComboInterpreter::stopProcedure(RunningProcedureId id)
         ResultMap::iterator result_it = _resultMap.find(id);
         if (result_it != _resultMap.end()) {
             _resultMap.erase(result_it);
-        }
-        UnifierResultMap::iterator uresult_it = _unifierResultMap.find(id);
-        if (uresult_it != _unifierResultMap.end()) {
-            _unifierResultMap.erase(uresult_it);
         }
     }
 }
