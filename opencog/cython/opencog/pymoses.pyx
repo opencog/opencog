@@ -10,12 +10,14 @@ Enumeration of program_type: python, combo.
 For python, there is an eval method that will evaluate the model on new data.
 
 run_manually:
-The run_manually method invokes MOSES without any extra integration. Useful for using it non-programatically via stdout.
+The run_manually method invokes MOSES without any extra integration.
+Useful for using it non-programatically via stdout.
 
 Options for use:
 1. Within the CogServer, from an embedded MindAgent
 2. Within the CogServer, from the interactive python shell
-3. In your Python IDE or interpreter. You need to ensure that your path includes '{PROJECT_BINARY_DIR}/opencog/cython'
+3. In your Python IDE or interpreter. You need to ensure that
+   your path includes '{PROJECT_BINARY_DIR}/opencog/cython'
 
 Loading the module:
 
@@ -81,10 +83,8 @@ cdef class moses:
         # Create temporary files for sending input/output to the moses_exec function
         if input is not None:
             input_file = tempfile.NamedTemporaryFile()
-
             input_file_builder = csv.writer(input_file, delimiter = ',')
             input_file_builder.writerows(input)
-
             input_file.flush()
 
         output_file = tempfile.NamedTemporaryFile()
@@ -111,7 +111,6 @@ cdef class moses:
             raise MosesException('Error: No output file was obtained from MOSES. Check to make sure the input file and arguments provided were valid.')
 
         # Python output
-        # @todo fix iostream_combo.h, so that it doesn't add the extra comma at the end of the python program, on line 69, perhaps by adding a check to see if number_of_children > 1
         elif output.splitlines()[0].startswith('#!/usr/bin/python'):
             # The Python header is declared in opencog/learning/moses/moses/types.h (ostream_combo_tree_composite_pbscore_python)
             python_header = "#!/usr/bin/python"
@@ -120,8 +119,10 @@ cdef class moses:
 
             for candidate in output_list: #output.split("#!/usr/bin/python")[1:]:
                 program = candidate #.splitlines()
-                program = program.rpartition(',')[0] # @todo fix opencog/comboreduct/combo/iostream_combo.h (ostream_combo_it) to remove the unneeded trailing comma that is inserted by the Python formatter
-                candidates.append(MosesCandidate(score = None, program = program, program_type = "python")) # @todo Add score for python programs
+                # @todo Fix opencog/comboreduct/combo/iostream_combo.h (ostream_combo_it) to remove the unneeded trailing comma that is inserted by the Python formatter
+                program = program.rpartition(',')[0]
+                # @todo Add score for python programs
+                candidates.append(MosesCandidate(score = None, program = program, program_type = "python"))
 
         # Combo output
         else:
