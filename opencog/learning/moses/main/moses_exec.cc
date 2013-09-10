@@ -85,56 +85,6 @@ static const string ip="ip"; // find interesting patterns
 /* ANN problems */
 static const string ann_it="ann-it"; // regression based on input table using ann
 
-// diversity distance types
-static const string p_norm = "p_norm";
-static const string tanimoto = "tanimoto";
-static const string angular = "angular";
-        
-// diversity dst2dp types
-static const string auto_str = "auto";        
-static const string inverse_str = "inverse";
-static const string complement_str = "complement";
-static const string power_str = "power";
-
-// focus types (which data points feature selection within moses
-// should focus on)
-static const string focus_all = "all"; // all data points are considered
-
-static const string focus_active = "active"; // only active data points are
-                                             // considered
-static const string focus_incorrect = "incorrect"; // only incorrect answers
-                                                   // are considered
-static const string focus_ai = "ai"; // only active data points that
-                                     // are incorrectly classified are considered
-
-// seed type (how to use the features of the exemplar to seed feature
-// selection)
-
-// empty initial feature set, however the features of the exemplar are
-// simply removed from the dataset before feature selection
-// occurs. This is to prevent that new selected features are ones from
-// the exemplar.
-static const string seed_none = "none";
-
-// empty initial feature set, the features of the exemplar are not
-// removed from the dataset but the number of features of the exemplar
-// is added to the number of features to select. That is (for that
-// particular expansion):
-//
-// fs-target-size += number of features in exemplar
-static const string seed_add = "add";
-
-// the features of the exemplar are used as initial guess for feature
-// selection, also the number of features to select is also added to
-// the number of features of the exemplar, as for add
-static const string seed_init = "init";
-
-// the "exemplar feature" us used as initial guess. The exemplar
-// feature is the output of the exemplar. The number of features to
-// select is incremented by 1 (to account for the exemplar
-// feature). that is the number of feature to select is fs-target-size + 1
-static const string seed_xmplr = "xmplr";
-
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
