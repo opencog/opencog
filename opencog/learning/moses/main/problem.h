@@ -41,6 +41,8 @@ class problem_base
 void register_problem(problem_base*);
 problem_base* find_problem(const std::string&);
 
+unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops);
+
 
 } // ~namespace moses
 } // ~namespace opencog
