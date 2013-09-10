@@ -3,6 +3,7 @@
 ADD_LIBRARY (moses_exec
     demo-problems
     problem
+    problem-params
     moses_exec
     moses_exec_def
     table-problems
