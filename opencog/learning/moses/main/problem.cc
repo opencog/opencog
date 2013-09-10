@@ -42,38 +42,21 @@ using namespace boost::program_options;
 using namespace std;
 using namespace reduct;
 
-// problems XXX make these go away, they do not belong here.. FIXME
-static const string it="it"; // regression based on input table
-                             // maximize accuracy.
+map<std::string, problem_base*> problem_set;
 
-static const string recall="recall"; // regression based on input table,
-                                  // maximize recall, while holding
-                                  // precision const.
+void register_problem(problem_base* prob)
+{
+    std::pair<std::string, problem_base*> pr(prob->name(), prob);
+    problem_set.insert(pr);
+}
 
-static const string prerec="prerec"; // regression based on input table,
-                                  // maximize precision, while holding
-                                  // recall const.
-
-static const string bep="bep";    // regression based on input table,
-                                  // maximize break-even point
-
-static const string f_one="f_one"; // regression based on input table,
-                                  // maximize f_1 score
-
-static const string pre="pre";    // regression based on input table by
-                                  // maximizing precision (or negative
-                                  // predictive value), holding activation
-                                  // const.
-
-static const string pre_conj="pre_conj";    // simplified version of
-                                            // pre, but tries to
-                                            // maximize number of
-                                            // conjunctions
-
-static const string ip="ip"; // find interesting patterns
-
-/* ANN problems */
-static const string ann_it="ann-it"; // regression based on input table using ann
+problem_base* find_problem(const string& name)
+{
+    auto it = problem_set.find(name);
+    if (it != problem_set.end())
+        return it->second;
+    return NULL;
+}
 
 
 // diversity distance types
@@ -237,15 +220,15 @@ void problem_params::options_init()
         // Problem-type options
         
         (opt_desc_str(problem_opt).c_str(),
-         value<string>(&problem)->default_value(it),
-         str(format("Problem to solve, supported problems are:\n\n"
-                    "%s, regression based on input table\n\n"
-                    "%s, regression based on input table, maximizing precision, while holding activation fixed\n\n"
-                    "%s, regression based on input table, maximizing precision, while holding recall fixed\n\n"
-                    "%s, regression based on input table, maximizing recall while holding precision fixed\n\n"
-                    "%s, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
-                    "%s, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
-                    "%s, search interesting patterns, where interestingness"
+         value<string>(&problem)->default_value("it"),
+                    "Problem to solve, supported problems are:\n\n"
+                    "it, regression based on input table\n\n"
+                    "pre, regression based on input table, maximizing precision, while holding activation fixed\n\n"
+                    "prerec, regression based on input table, maximizing precision, while holding recall fixed\n\n"
+                    "recall, regression based on input table, maximizing recall while holding precision fixed\n\n"
+                    "bep, regression based on input table, maximizing break-even point (BEP) between precision and recall\n\n"
+                    "f_one, regression based on input table, maximizing the F_1 score (harmonic mean of precision and recall)\n\n"
+                    "ip, search interesting patterns, where interestingness"
                     " is defined in terms of several features such as maximizing"
                     " the Kullback-Leibler"
                     " divergence between the distribution of the outputs and"
@@ -253,14 +236,13 @@ void problem_params::options_init()
                     " being true."
                     " Or the difference of skewnesses between the 2 distributions"
                     " and other things being experimented.\n\n"
-                    "%s, regression based on input table using ann\n\n"
+                    "ann-it, regression based on input table using ann\n\n"
                     "cp, demo, regression based on combo program\n\n"
                     "pa, demo, even parity problem\n\n"
                     "dj, demo, disjunction problem\n\n"
                     "mux, demo, multiplex problem\n\n"
                     "maj, demo, majority problem\n\n"
                     "sr, demo, regression of f_n(x) = sum_{k=1,n} x^k\n")
-             % it % pre % prerec % recall % bep % f_one % ip % ann_it).c_str())
 
         // Input specification options
 
@@ -737,19 +719,19 @@ void problem_params::options_init()
 
         (opt_desc_str(ip_kld_weight_opt).c_str(),
          value<double>(&ip_kld_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of the KLD.\n") % ip).c_str())
+         "Interesting patterns (ip). Weight of the KLD.\n")
 
         (opt_desc_str(ip_skewness_weight_opt).c_str(),
          value<double>(&ip_skewness_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of skewness.\n") % ip).c_str())
+         "Interesting patterns (ip). Weight of skewness.\n")
 
         (opt_desc_str(ip_stdU_weight_opt).c_str(),
          value<double>(&ip_stdU_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of stdU.\n") % ip).c_str())
+         "Interesting patterns (ip). Weight of stdU.\n")
 
         (opt_desc_str(ip_skew_U_weight_opt).c_str(),
          value<double>(&ip_skew_U_weight)->default_value(1.0),
-         str(format("Interesting patterns (%s). Weight of skew_U.\n") % ip).c_str())
+         "Interesting patterns (ip). Weight of skew_U.\n")
 
         (opt_desc_str(alpha_opt).c_str(),
          value<score_t>(&hardness)->default_value(0.0),
@@ -1297,23 +1279,6 @@ void problem_params::parse_options(int argc, char* argv[])
                            enable_mpi);
 
 }
-
-map<std::string, problem_base*> problem_set;
-
-void register_problem(problem_base* prob)
-{
-    std::pair<std::string, problem_base*> pr(prob->name(), prob);
-    problem_set.insert(pr);
-}
-
-problem_base* find_problem(const string& name)
-{
-    auto it = problem_set.find(name);
-    if (it != problem_set.end())
-        return it->second;
-    return NULL;
-}
-
 
 } // ~namespace moses
 } // ~namespace opencog

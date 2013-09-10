@@ -22,17 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <signal.h>
-#include <unistd.h>
-
 #include <opencog/util/log_prog_name.h>
 
 #include "moses_exec.h"
 #include "demo-problems.h"
 #include "table-problems.h"
 #include "problem.h"
-
-#include "../moses/moses_main.h"
 
 namespace opencog { namespace moses {
 
