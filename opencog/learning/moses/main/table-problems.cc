@@ -25,9 +25,11 @@
  */
 
 #include <opencog/util/Logger.h>
+#include <opencog/comboreduct/table/table_io.h>
 
 #include "../moses/partial.h"
 
+#include "moses_exec_def.h"
 #include "problem.h"
 #include "table-problems.h"
 
@@ -47,10 +49,107 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
         scorer.set_complexity_coef(ratio);
 }
 
+static void log_output_error_exit(string err_msg) {
+    logger().error() << "Error: " << err_msg;
+    cerr << "Error: " << err_msg << endl;
+    exit(1);
+}
+
+// ==================================================================
+
+class table_problem_base : public problem_base
+{
+protected:
+    typedef boost::ptr_vector<bscore_base> BScorerSeq;
+
+    void common_setup(problem_params&);
+    void common_type_setup(problem_params&);
+
+    type_tree table_type_signature;
+    type_tree table_output_tt;
+    type_node table_output_tn;
+    type_node output_type;
+};
+
+void table_problem_base::common_setup(problem_params& pms)
+{
+    if (pms.input_data_files.empty()) {
+        stringstream ss;
+        ss << "no input data file has been specified (option -"
+           << input_data_file_opt.second << ")";
+        log_output_error_exit(ss.str());
+    }
+
+    // Read input data files
+    size_t num_rows = 0;
+    for (const string& idf : pms.input_data_files) {
+        logger().info("Read data file %s", idf.c_str());
+        Table table = loadTable(idf, pms.target_feature, pms.ignore_features_str);
+        num_rows += table.size();
+        // possible subsample the table
+        if (pms.nsamples > 0)
+            subsampleTable(table, pms.nsamples);
+        pms.tables.push_back(table);
+        pms.ctables.push_back(table.compressed());
+    }
+    logger().info("Number of rows in tables = %d", num_rows);
+
+    // Get the labels contained in the data file.
+    if (pms.output_with_labels)
+        pms.ilabels = pms.tables.front().itable.get_labels();
+
+    pms.arity = pms.tables.front().get_arity();
+
+    // Check that all input data files have the same arity
+    if (pms.tables.size() > 1) {
+        combo::arity_t test_arity;
+        for (size_t i = 1; i < pms.tables.size(); ++i) {
+            test_arity = pms.tables[i].get_arity();
+            if (test_arity != pms.arity) {
+                stringstream ss;
+                ss << "File " << pms.input_data_files[0] << " has arity " << pms.arity
+                   << " while file " << pms.input_data_files[i] << " has arity " << test_arity;
+                log_output_error_exit(ss.str());
+            }
+        }
+    }
+    logger().info("Inferred arity = %d", pms.arity);
+
+    pms.mmr_pa.ilabels = pms.ilabels;
+}
+
+void table_problem_base::common_type_setup(problem_params& pms)
+{
+    // Infer the signature based on the input table.
+    table_type_signature = pms.tables.front().get_signature();
+    logger().info() << "Inferred data signature " << table_type_signature;
+
+    // Infer the type of the input table
+    table_output_tt = get_signature_output(table_type_signature);
+    table_output_tn = get_type_node(table_output_tt);
+
+    // Determine the default exemplar to start with
+    // problem == pre  precision-based scoring
+    // precision combo trees always return booleans.
+    if (pms.exemplars.empty())
+        pms.exemplars.push_back(type_to_exemplar(
+            pms.problem == pre? id::boolean_type : table_output_tn));
+
+    // XXX This seems strange to me .. when would the exemplar output
+    // type ever differ from the table?  Well,, it could for pre problem,
+    // but that's over-ridden later, anyway...
+    output_type =
+        get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
+    if (output_type == id::unknown_type)
+        output_type = table_output_tn;
+
+    logger().info() << "Inferred output type: " << output_type;
+}
+
 // ==================================================================
 
 /// Find interesting predicates
-class ip_problem : public problem_base
+class ip_problem : public table_problem_base
 {
     public:
         virtual const std::string name() const { return "ip"; }
@@ -61,6 +160,7 @@ class ip_problem : public problem_base
 
 void ip_problem::run(problem_params& pms)
 {
+    common_setup(pms);
     // ip assumes that the inputs are boolean and the output is contin
     type_tree ettt = gen_signature(id::boolean_type,
                                    id::contin_type, pms.arity);
@@ -120,7 +220,7 @@ static combo_tree ann_exemplar(combo::arity_t arity)
 }
 
 /// Regression based on combo program using ann
-class ann_table_problem : public problem_base
+class ann_table_problem : public table_problem_base
 {
     public:
         virtual const std::string name() const { return "ann-it"; }
@@ -131,6 +231,7 @@ class ann_table_problem : public problem_base
 
 void ann_table_problem::run(problem_params& pms)
 {
+    common_setup(pms);
     // If no exemplar has been provided in the options,
     // insert the default.
     if (pms.exemplars.empty()) {
@@ -150,49 +251,6 @@ void ann_table_problem::run(problem_params& pms)
 
 // ==================================================================
 
-class table_problem_base : public problem_base
-{
-protected:
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-
-    void common_setup(problem_params&);
-
-    type_tree table_type_signature;
-    type_tree table_output_tt;
-    type_node table_output_tn;
-    type_node output_type;
-};
-
-void table_problem_base::common_setup(problem_params& pms)
-{
-    // Infer the signature based on the input table.
-    table_type_signature = pms.tables.front().get_signature();
-    logger().info() << "Inferred data signature " << table_type_signature;
-
-    // Infer the type of the input table
-    table_output_tt = get_signature_output(table_type_signature);
-    table_output_tn = get_type_node(table_output_tt);
-
-    // Determine the default exemplar to start with
-    // problem == pre  precision-based scoring
-    // precision combo trees always return booleans.
-    if (pms.exemplars.empty())
-        pms.exemplars.push_back(type_to_exemplar(
-            pms.problem == pre? id::boolean_type : table_output_tn));
-
-    // XXX This seems strange to me .. when would the exemplar output
-    // type ever differ from the table?  Well,, it could for pre problem,
-    // but that's over-ridden later, anyway...
-    output_type =
-        get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
-    if (output_type == id::unknown_type)
-        output_type = table_output_tn;
-
-    logger().info() << "Inferred output type: " << output_type;
-}
-
-// ==================================================================
-
 // Generic table regression code.  Could be a template, I suppose, but
 // the args are variable length, tables is a variable, and scorer is a type,
 // and I don't feel like fighting templates to make all three happen just
@@ -200,6 +258,7 @@ void table_problem_base::common_setup(problem_params& pms)
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                    \
     common_setup(pms);                                               \
+    common_type_setup(pms);                                          \
     /* Enable feature selection while selecting exemplar */          \
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */         \
@@ -245,6 +304,7 @@ void pre_table_problem::run(problem_params& pms)
     // Very nearly identical to the REGRESSION macro above,
     // except that some new experimental features are being tried.
     common_setup(pms);
+    common_type_setup(pms);
 
     // Keep the table input signature, just make sure the
     // output is a boolean.
@@ -303,6 +363,7 @@ void pre_conj_table_problem::run(problem_params& pms)
     // Very nearly identical to the REGRESSION macro above,
     // except that some new experimental features are being tried.
     common_setup(pms);
+    common_type_setup(pms);
 
     // Keep the table input signature, just make sure the
     // output is a boolean.

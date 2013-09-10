@@ -39,20 +39,11 @@ namespace opencog { namespace moses {
 using namespace std;
 using namespace reduct;
 
-static void log_output_error_exit(string err_msg) {
+static void log_output_error_exit(string err_msg)
+{
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
     exit(1);    
-}
-
-/**
- * Display error message about unsupported problem and exit
- */
-void unsupported_problem_exit(const string& problem)
-{
-    stringstream ss;
-    ss << "problem type \"" << problem << "\" is currently unsupported.";
-    log_output_error_exit(ss.str());
 }
 
 static bool contains_type(const type_tree_pre_it it, id::type_node ty)
@@ -148,7 +139,10 @@ int moses_exec(int argc, char** argv)
         return 0;
     }
 
-    unsupported_problem_exit(pms.problem);
+    stringstream ss;
+    ss << "problem type \"" << pms.problem << "\" is currently unsupported.";
+    log_output_error_exit(ss.str());
+
     return 1;
 }
 

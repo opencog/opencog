@@ -177,39 +177,6 @@ static void not_recognized_dst2dp(const string& diversity_dst2dp)
     log_output_error_exit(ss.str());
 }
 
-/**
- * Display error message about missing input data file and exit
- */
-static void no_input_datafile_exit()
-{
-    stringstream ss;
-    ss << "no input data file has been specified (option -"
-       << input_data_file_opt.second << ")";
-    log_output_error_exit(ss.str());
-}
-
-/**
-  * Display error that not all data files have same arity and exit
-  */
-void not_all_same_arity_exit(const string& input_data_file1, arity_t arity1,
-                             const string& input_data_file2, arity_t arity2)
-{
-    stringstream ss;
-    ss << "File " << input_data_file1 << " has arity " << arity1
-       << " while file " << input_data_file2 << "has_arity " << arity2;
-    log_output_error_exit(ss.str());
-}
-
-//* return true iff the problem is based on data file
-/// XXX hack alert -- this needs to go away!
-static bool datafile_based_problem(const string& problem)
-{
-    static set<string> dbp
-        = {it, pre, pre_conj, recall, prerec, bep, f_one, ann_it, ip};
-    return dbp.find(problem) != dbp.end();
-}
-
-
 problem_params::problem_params() :
     enable_mpi(false),
     default_nsamples(20),
@@ -1315,46 +1282,6 @@ void problem_params::parse_options(int argc, char* argv[])
     // Continuous reduction rules used during search and representation
     // building.
     contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops).clone();
-
-    // Problem based on input table.
-    if (datafile_based_problem(problem))
-    {
-        if (input_data_files.empty())
-            no_input_datafile_exit();
-
-        // Read input data files
-        size_t num_rows = 0;
-        for (const string& idf : input_data_files) {
-            logger().info("Read data file %s", idf.c_str());
-            Table table = loadTable(idf, target_feature, ignore_features_str);
-            num_rows += table.size();
-            // possible subsample the table
-            if (nsamples > 0)
-                subsampleTable(table, nsamples);
-            tables.push_back(table);
-            ctables.push_back(table.compressed());
-        }
-        logger().info("Number of rows in tables = %d", num_rows);
-
-        // Get the labels contained in the data file.
-        if (output_with_labels)
-            ilabels = tables.front().itable.get_labels();
-
-        arity = tables.front().get_arity();
-
-        // Check that all input data files have the same arity
-        if (tables.size() > 1) {
-            combo::arity_t test_arity;
-            for (size_t i = 1; i < tables.size(); ++i) {
-                test_arity = tables[i].get_arity();
-                if (test_arity != arity) {
-                    not_all_same_arity_exit(input_data_files[0], arity,
-                                            input_data_files[i], test_arity);
-                }
-            }
-        }
-        logger().info("Inferred arity = %d", arity);
-    }
 
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,
