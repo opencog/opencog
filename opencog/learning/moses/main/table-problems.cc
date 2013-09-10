@@ -197,6 +197,7 @@ void table_problem_base::common_setup(problem_params& pms)
 // exactly right.
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                    \
+    common_setup(pms);                                               \
     /* Enable feature selection while selecting exemplar */          \
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */         \
@@ -289,7 +290,7 @@ void pre_table_problem::run(problem_params& pms)
 class pre_conj_table_problem : public table_problem_base
 {
     public:
-        virtual const std::string name() const { return "pre"; }
+        virtual const std::string name() const { return "pre-conj"; }
         virtual const std::string description() const {
              return "Precision-Conjunction-Maximization"; }
         virtual void run(problem_params&);
@@ -331,6 +332,88 @@ void pre_conj_table_problem::run(problem_params& pms)
 }
 
 // ==================================================================
+/// maximize precision, holding recall const.
+class prerec_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "prerec"; }
+        virtual const std::string description() const {
+             return "Precision Maximization (holding recall constant)"; }
+        virtual void run(problem_params&);
+};
+
+void prerec_table_problem::run(problem_params& pms)
+{
+    if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
+        pms.max_rand_input = 1.0; }
+    REGRESSION(id::boolean_type,
+               *pms.bool_reduct, *pms.bool_reduct_rep,
+               pms.ctables, prerec_bscore,
+               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+}
+
+// ==================================================================
+/// maximize recall, holding precision const.
+class recall_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "recall"; }
+        virtual const std::string description() const {
+             return "Recall Maximization (holding precision constant)"; }
+        virtual void run(problem_params&);
+};
+
+void recall_table_problem::run(problem_params& pms)
+{
+    if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
+        pms.max_rand_input = 1.0; }
+    REGRESSION(id::boolean_type,
+               *pms.bool_reduct, *pms.bool_reduct_rep,
+               pms.ctables, recall_bscore,
+               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+}
+
+// ==================================================================
+/// bep == beak-even point between bep and precision.
+class bep_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "bep"; }
+        virtual const std::string description() const {
+             return "Maximize Break-even Point"; }
+        virtual void run(problem_params&);
+};
+
+void bep_table_problem::run(problem_params& pms)
+{
+    if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
+        pms.max_rand_input = 0.5; }
+    REGRESSION(id::boolean_type,
+               *pms.bool_reduct, *pms.bool_reduct_rep,
+               pms.ctables, bep_bscore,
+               (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
+}
+
+// ==================================================================
+/// f_one = F_1 harmonic mean of recall and precision
+class f_one_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "f_one"; }
+        virtual const std::string description() const {
+             return "Maximize F_1 score"; }
+        virtual void run(problem_params&);
+};
+
+void f_one_table_problem::run(problem_params& pms)
+{
+        REGRESSION(id::boolean_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, f_one_bscore,
+                   (table));
+}
+
+// ==================================================================
 
 void register_table_problems()
 {
@@ -338,6 +421,10 @@ void register_table_problems()
 	register_problem(new ann_table_problem());
 	register_problem(new pre_table_problem());
 	register_problem(new pre_conj_table_problem());
+	register_problem(new prerec_table_problem());
+	register_problem(new recall_table_problem());
+	register_problem(new bep_table_problem());
+	register_problem(new f_one_table_problem());
 }
 
 } // ~namespace moses

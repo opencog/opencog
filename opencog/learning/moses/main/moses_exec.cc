@@ -52,20 +52,6 @@ using namespace reduct;
 static const string it="it"; // regression based on input table
                              // maximize accuracy.
 
-static const string recall="recall"; // regression based on input table,
-                                  // maximize recall, while holding
-                                  // precision const.
-
-static const string prerec="prerec"; // regression based on input table,
-                                  // maximize precision, while holding
-                                  // recall const.
-
-static const string bep="bep";    // regression based on input table,
-                                  // maximize break-even point
-
-static const string f_one="f_one"; // regression based on input table,
-                                  // maximize f_1 score
-
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
@@ -187,7 +173,7 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 bool datafile_based_problem(const string& problem)
 {
     static set<string> dbp
-        = {it, recall, prerec, bep, f_one};
+        = {it};
     return dbp.find(problem) != dbp.end();
 }
 
@@ -277,114 +263,73 @@ int moses_exec(int argc, char** argv)
                       pms.moses_params, pms.mmr_pa);                 \
 }
 
-    // problem == prerec  maximize precision, holding recall const.
-    // Identical to above, just uses a different scorer.
-    if (pms.problem == prerec) {
-        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
-            pms.max_rand_input = 1.0; }
-        REGRESSION(id::boolean_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, prerec_bscore,
-                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-    }
+    // problem == it  i.e. input-table based scoring.
+    OC_ASSERT(output_type == table_output_tn);
 
-    // problem == recall  maximize recall, holding precision const.
-    else if (pms.problem == recall) {
-        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
-            pms.max_rand_input = 1.0; }
-        REGRESSION(id::boolean_type,
+    // --------- Boolean output type
+    if (output_type == id::boolean_type) {
+        REGRESSION(output_type,
                    *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, recall_bscore,
-                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-    }
-
-    // bep == beak-even point between recall and precision.
-    else if (pms.problem == bep) {
-        if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
-            pms.max_rand_input = 0.5; }
-        REGRESSION(id::boolean_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, bep_bscore,
-                   (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
-    }
-
-    // f_one = F_1 harmonic ratio of recall and precision
-    else if (pms.problem == f_one) {
-        REGRESSION(id::boolean_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, f_one_bscore,
+                   pms.ctables, ctruth_table_bscore,
                    (table));
     }
 
-    // problem == it  i.e. input-table based scoring.
-    else {
-        OC_ASSERT(output_type == table_output_tn);
+    // --------- Enumerated output type
+    else if (output_type == id::enum_type) {
 
-        // --------- Boolean output type
-        if (output_type == id::boolean_type) {
+        // For enum targets, like boolean targets, the score
+        // can never exceed zero (perfect score).
+        // XXX Eh ??? for precision/recall scorers,
+        // the score range is 0.0 to 1.0 so this is wrong...
+        if (0.0 < pms.moses_params.max_score) {
+            pms.moses_params.max_score = 0.0;
+            pms.opt_params.terminate_if_gte = 0.0;
+        }
+        if (pms.use_well_enough) {
+            // The "leave well-enough alone" algorithm.
+            // Works. Kind of. Not as well as hoped.
+            // Might be good for some problem. See diary.
+            partial_solver well(pms.ctables,
+                            table_type_signature,
+                            pms.exemplars, *pms.contin_reduct,
+                            pms.opt_params, pms.hc_params, pms.meta_params,
+                            pms.moses_params, pms.mmr_pa);
+            well.solve();
+        } else {
+            // Much like the boolean-output-type above,
+            // just uses a slightly different scorer.
             REGRESSION(output_type,
-                       *pms.bool_reduct, *pms.bool_reduct_rep,
-                       pms.ctables, ctruth_table_bscore,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.ctables, enum_effective_bscore,
                        (table));
         }
+    }
 
-        // --------- Enumerated output type
-        else if (output_type == id::enum_type) {
+    // --------- Contin output type
+    else if (output_type == id::contin_type) {
+        if (pms.discretize_thresholds.empty()) {
 
-            // For enum targets, like boolean targets, the score
-            // can never exceed zero (perfect score).
-            // XXX Eh ??? for precision/recall scorers,
-            // the score range is 0.0 to 1.0 so this is wrong...
-            if (0.0 < pms.moses_params.max_score) {
-                pms.moses_params.max_score = 0.0;
-                pms.opt_params.terminate_if_gte = 0.0;
-            }
-            if (pms.use_well_enough) {
-                // The "leave well-enough alone" algorithm.
-                // Works. Kind of. Not as well as hoped.
-                // Might be good for some problem. See diary.
-                partial_solver well(pms.ctables,
-                                table_type_signature,
-                                pms.exemplars, *pms.contin_reduct,
-                                pms.opt_params, pms.hc_params, pms.meta_params,
-                                pms.moses_params, pms.mmr_pa);
-                well.solve();
-            } else {
-                // Much like the boolean-output-type above,
-                // just uses a slightly different scorer.
-                REGRESSION(output_type,
-                           *pms.contin_reduct, *pms.contin_reduct,
-                           pms.ctables, enum_effective_bscore,
-                           (table));
-            }
+            contin_bscore::err_function_type eft =
+                pms.it_abs_err ? contin_bscore::abs_error :
+                contin_bscore::squared_error;
+
+            REGRESSION(output_type,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.tables, contin_bscore,
+                       (table, eft));
+
+        } else {
+            REGRESSION(output_type,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.tables, discretize_contin_bscore,
+                       (table.otable, table.itable,
+                            pms.discretize_thresholds, pms.weighted_accuracy));
         }
+    }
 
-        // --------- Contin output type
-        else if (output_type == id::contin_type) {
-            if (pms.discretize_thresholds.empty()) {
-
-                contin_bscore::err_function_type eft =
-                    pms.it_abs_err ? contin_bscore::abs_error :
-                    contin_bscore::squared_error;
-
-                REGRESSION(output_type,
-                           *pms.contin_reduct, *pms.contin_reduct,
-                           pms.tables, contin_bscore,
-                           (table, eft));
-
-            } else {
-                REGRESSION(output_type,
-                           *pms.contin_reduct, *pms.contin_reduct,
-                           pms.tables, discretize_contin_bscore,
-                           (table.otable, table.itable,
-                                pms.discretize_thresholds, pms.weighted_accuracy));
-            }
-        }
-
-        // --------- Unknown output type
-        else {
-            unsupported_type_exit(output_type);
-        }
+    // --------- Unknown output type
+    else {
+        unsupported_type_exit(output_type);
     }
 
     return 0;
