@@ -3,40 +3,56 @@ __author__ = 'cosmo'
 '''
 Wrapper for MOSES. Uses the C++ moses_exec function to access MOSES functionality.
 
+run:
+The run method returns a collection of candidates as MosesCandidate objects.
+Each candidate containing a score, program, and program_type.
+Enumeration of program_type: python, combo.
+For python, there is an eval method that will evaluate the model on new data.
+
+run_manually:
+The run_manually method invokes MOSES without any extra integration. Useful for using it non-programatically via stdout.
+
 Options for use:
-    1. Within the CogServer, from an embedded MindAgent
-    2. Within the CogServer, from the interactive python shell
-    3. In your Python IDE or interpreter. You need to ensure that your path includes '{PROJECT_BINARY_DIR}/opencog/cython'
+1. Within the CogServer, from an embedded MindAgent
+2. Within the CogServer, from the interactive python shell
+3. In your Python IDE or interpreter. You need to ensure that your path includes '{PROJECT_BINARY_DIR}/opencog/cython'
 
 Loading the module:
-    from opencog.pymoses import moses
-    moses = moses()
 
-To view the available arguments:
-    moses.run("")
+from opencog.pymoses import moses
+moses = moses()
 
-Example usage: @todo: Update this to the enhanced version and add python doc
-    moses.run("--version")
-    moses.run("-H pa -c 1")
-    moses.run("-i input.txt -c 1 -o output.txt")
+Example usage of run:
 
-    XOR example with Python:
+Example #1: XOR example with Python output and Python input
 
-    output = moses.run(input = [[0,0,0],[1,1,0],[1,0,1],[0,1,1]], args = "--python 1")
-    program = output[0].program
-    exec program
-    moses_eval([0, 1])
+input_data = [[0,0,0],[1,1,0],[1,0,1],[0,1,1]]
+output = moses.run(input = input_data, python = True)
+model = output[0].eval
+model([0,1])  # Returns: True
+model([1,1])  # Returns: False
 
-    Returns: True
+Example #2: Run the majority demo problem, return only one candidate, and use Python output
+output = moses.run(args = "-H maj -c 1", python = True)
+model = output[0]
+model.eval([0,1,0,1,0])  # Returns: False
+model.eval([1,1,0,1,0])  # Returns: True
 
-Needed improvements:
-    @todo Make moses_exec return the combo program of the best candidate solution and expose it to the Cython wrapper
-          so that it can be wrapped in a GroundedSchemaNode and added to the AtomSpace.
-    @todo Implement an option to use a Python function as the scoring function
+Example #3: Load the XOR input data from a file, return only one candidate, and use Combo output
+
+output = moses.run(args = "-i /path/to/input.txt -c 1")
+combo_program = output[0].program
+print combo_program  # Prints: and(or(!$1 !$2) or($1 $2))
+
+Example usage of run_manually:
+
+moses.run_manually("--version")
+moses.run_manually("-i input.txt -o output.txt")
+
+@todo Implement an option to use a Python function as the MOSES scoring function
 '''
 
 from libc.stdlib cimport malloc, free
-from collections import namedtuple
 import shlex
 import tempfile
 import csv
@@ -44,31 +60,24 @@ import csv
 class MosesException(Exception):
     pass
 
+class MosesCandidate(object):
+    def __init__(self, score = None, program = None, program_type = None):
+        self.score = score
+        self.program = program
+        self.program_type = program_type
+
+    def eval(self, arglist):
+        if self.program_type != "python":
+            raise MosesException('Error: eval method is only defined for candidates with program_type of python.')
+        if len(arglist) == 0:
+            raise MosesException('Error: eval method requires a list of input values.')
+
+        namespace = {}
+        exec self.program in namespace
+        return namespace.get('moses_eval')(arglist)
+
 cdef class moses:
-    def __init__(self):
-        pass
-
-    def __dealloc__(self):
-        pass
-
-    # @todo remove this test method
-    def test(self, args = ""):
-        test_input = [['out','a','b'],
-                      [0,0,0],
-                      [1,1,0],
-                      [1,0,1],
-                      [0,1,1]]
-
-        # @todo test functionality to allow an easy-to-access method to be created and returned or accessed based on the best candidate solution:
-        #args += " --python 1"
-        #python_output = self.run(input = test_input, args = args)
-        #exec python_output[0].program
-        #moses_solution = moses_eval @todo How to make moses_eval visible to Cython after exec?
-        #return moses_solution
-
-        return self.run(input = test_input, args = args)
-
-    def run(self, input = None, args = ""):
+    def run(self, input = None, args = "", python = False):
         # Create temporary files for sending input/output to the moses_exec function
         if input is not None:
             input_file = tempfile.NamedTemporaryFile()
@@ -78,16 +87,19 @@ cdef class moses:
 
             input_file.flush()
 
-        #temp_input_filename = "/home/cosmo/xor.txt"
-
         output_file = tempfile.NamedTemporaryFile()
 
         # Process the argument list for moses_exec
         _args_list = []
+
         if input is not None:
             _args_list.extend(['-i', input_file.name])
+        if python:
+            _args_list.extend(['--python', '1'])
+
         _args_list.extend(['-o', output_file.name])
         _args_list.extend(shlex.split(args))
+
         #@todo
         print "Debug: args_list = "
         print _args_list
@@ -96,11 +108,10 @@ cdef class moses:
         # Process the output file
         output = output_file.file.read()
 
-        Candidate = namedtuple("Candidate", "score program program_type")
+        #Candidate = namedtuple("Candidate", "score program program_type")
         candidates = []
 
-        if output is None:
-            # @todo raise error
+        if len(output) == 0:
             raise MosesException('Error: No output file was obtained from MOSES. Check to make sure the input file and arguments provided were valid.')
 
         # Python output
@@ -114,7 +125,7 @@ cdef class moses:
             for candidate in output_list: #output.split("#!/usr/bin/python")[1:]:
                 program = candidate #.splitlines()
                 program = program.rpartition(',')[0] # @todo fix opencog/comboreduct/combo/iostream_combo.h (ostream_combo_it) to remove the unneeded trailing comma that is inserted by the Python formatter
-                candidates.append(Candidate(score = None, program = program, program_type = "python")) # @todo add score for python programs
+                candidates.append(MosesCandidate(score = None, program = program, program_type = "python")) #candidates.append(Candidate(score = None, program = program, program_type = "python")) # @todo add score for python programs
 
         # Combo output
         else:
@@ -123,12 +134,12 @@ cdef class moses:
             for candidate in output_list:
                 score = candidate.partition(' ')[0]
                 program = candidate.partition(' ')[2]
-                candidates.append(Candidate(score = score, program = program, program_type = "combo"))
+                candidates.append(MosesCandidate(score = score, program = program, program_type = "combo")) # Candidate(score = score, program = program, program_type = "combo"))
 
         return candidates
 
     def run_manually(self, args=""):
-        self._run_args_list(args)
+        self._run_args_list(shlex.split(args))
 
     def _run_args_list(self, args_list):
         args_list.insert(0, "moses")
