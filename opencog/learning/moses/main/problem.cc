@@ -126,7 +126,7 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
         case id::ill_formed_type:
         default:
             stringstream ss;
-            ss << "type " << tt << " currently not supported.";
+            ss << "alphabet_size: type " << tt << " currently not supported.";
             log_output_error_exit(ss.str());
     }
 

@@ -253,8 +253,6 @@ void ann_table_problem::run(problem_params& pms)
 // exactly right.
 #define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
 {                                                                    \
-    common_setup(pms);                                               \
-    common_type_setup(pms);                                          \
     /* Enable feature selection while selecting exemplar */          \
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
         /* XXX FIXME: should use the concatenation of all */         \
@@ -403,6 +401,9 @@ class prerec_table_problem : public table_problem_base
 
 void prerec_table_problem::run(problem_params& pms)
 {
+    common_setup(pms);
+    common_type_setup(pms);
+
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.5;
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
@@ -424,6 +425,9 @@ class recall_table_problem : public table_problem_base
 
 void recall_table_problem::run(problem_params& pms)
 {
+    common_setup(pms);
+    common_type_setup(pms);
+
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.8;
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
@@ -445,6 +449,9 @@ class bep_table_problem : public table_problem_base
 
 void bep_table_problem::run(problem_params& pms)
 {
+    common_setup(pms);
+    common_type_setup(pms);
+
     if (0.0 == pms.hardness) { pms.hardness = 1.0; pms.min_rand_input= 0.0;
         pms.max_rand_input = 0.5; }
     REGRESSION(id::boolean_type,
@@ -466,10 +473,13 @@ class f_one_table_problem : public table_problem_base
 
 void f_one_table_problem::run(problem_params& pms)
 {
-        REGRESSION(id::boolean_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, f_one_bscore,
-                   (table));
+    common_setup(pms);
+    common_type_setup(pms);
+
+    REGRESSION(id::boolean_type,
+               *pms.bool_reduct, *pms.bool_reduct_rep,
+               pms.ctables, f_one_bscore,
+               (table));
 }
 
 // ==================================================================
@@ -486,6 +496,9 @@ class it_table_problem : public table_problem_base
 
 void it_table_problem::run(problem_params& pms)
 {
+    common_setup(pms);
+    common_type_setup(pms);
+
     // problem == it  i.e. input-table based scoring.
     OC_ASSERT(output_type == table_output_tn);
 
@@ -552,9 +565,9 @@ void it_table_problem::run(problem_params& pms)
 
     // --------- Unknown output type
     else {
-        logger().error() << "Error: type " << type_tree(output_type)
+        logger().error() << "Error: output type " << type_tree(output_type)
             << " currently not supported.";
-        std::cerr << "Error: type " << type_tree(output_type)
+        std::cerr << "Error: output type " << type_tree(output_type)
             << " currently not supported." << std::endl;
         exit(1);
     }
