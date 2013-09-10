@@ -26,6 +26,8 @@
 
 #include <opencog/util/Logger.h>
 
+#include "../moses/partial.h"
+
 #include "problem.h"
 #include "table-problems.h"
 
@@ -415,6 +417,94 @@ void f_one_table_problem::run(problem_params& pms)
 
 // ==================================================================
 
+/// Maximize accuracy
+class it_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "it"; }
+        virtual const std::string description() const {
+             return "Maximize Accuracy"; }
+        virtual void run(problem_params&);
+};
+
+void it_table_problem::run(problem_params& pms)
+{
+    // problem == it  i.e. input-table based scoring.
+    OC_ASSERT(output_type == table_output_tn);
+
+    // --------- Boolean output type
+    if (output_type == id::boolean_type) {
+        REGRESSION(output_type,
+                   *pms.bool_reduct, *pms.bool_reduct_rep,
+                   pms.ctables, ctruth_table_bscore,
+                   (table));
+    }
+
+    // --------- Enumerated output type
+    else if (output_type == id::enum_type) {
+
+        // For enum targets, like boolean targets, the score
+        // can never exceed zero (perfect score).
+        // XXX Eh ??? for precision/recall scorers,
+        // the score range is 0.0 to 1.0 so this is wrong...
+        if (0.0 < pms.moses_params.max_score) {
+            pms.moses_params.max_score = 0.0;
+            pms.opt_params.terminate_if_gte = 0.0;
+        }
+        if (pms.use_well_enough) {
+            // The "leave well-enough alone" algorithm.
+            // Works. Kind of. Not as well as hoped.
+            // Might be good for some problem. See diary.
+            partial_solver well(pms.ctables,
+                            table_type_signature,
+                            pms.exemplars, *pms.contin_reduct,
+                            pms.opt_params, pms.hc_params, pms.meta_params,
+                            pms.moses_params, pms.mmr_pa);
+            well.solve();
+        } else {
+            // Much like the boolean-output-type above,
+            // just uses a slightly different scorer.
+            REGRESSION(output_type,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.ctables, enum_effective_bscore,
+                       (table));
+        }
+    }
+
+    // --------- Contin output type
+    else if (output_type == id::contin_type) {
+        if (pms.discretize_thresholds.empty()) {
+
+            contin_bscore::err_function_type eft =
+                pms.it_abs_err ? contin_bscore::abs_error :
+                contin_bscore::squared_error;
+
+            REGRESSION(output_type,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.tables, contin_bscore,
+                       (table, eft));
+
+        } else {
+            REGRESSION(output_type,
+                       *pms.contin_reduct, *pms.contin_reduct,
+                       pms.tables, discretize_contin_bscore,
+                       (table.otable, table.itable,
+                            pms.discretize_thresholds, pms.weighted_accuracy));
+        }
+    }
+
+    // --------- Unknown output type
+    else {
+        logger().error() << "Error: type " << type_tree(output_type)
+            << " currently not supported.";
+        std::cerr << "Error: type " << type_tree(output_type)
+            << " currently not supported." << std::endl;
+        exit(1);
+    }
+}
+
+// ==================================================================
+
 void register_table_problems()
 {
 	register_problem(new ip_problem());
@@ -425,6 +515,7 @@ void register_table_problems()
 	register_problem(new recall_table_problem());
 	register_problem(new bep_table_problem());
 	register_problem(new f_one_table_problem());
+	register_problem(new it_table_problem());
 }
 
 } // ~namespace moses

@@ -25,11 +25,7 @@
 #include <signal.h>
 #include <unistd.h>
 
-#include <boost/range/algorithm/transform.hpp>
-#include <boost/lexical_cast.hpp>
-
 #include <opencog/util/log_prog_name.h>
-#include <opencog/util/numeric.h>
 
 #include "moses_exec.h"
 #include "demo-problems.h"
@@ -37,40 +33,16 @@
 #include "problem.h"
 
 #include "../moses/moses_main.h"
-#include "../moses/partial.h"
-#include "../optimization/hill-climbing.h"
-#include "../optimization/optimization.h"
 
 namespace opencog { namespace moses {
 
-using boost::lexical_cast;
 using namespace std;
 using namespace reduct;
-
-
-// problems
-static const string it="it"; // regression based on input table
-                             // maximize accuracy.
 
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
     exit(1);    
-}
-
-/**
- * Display error message about unsupported type and exit
- */
-static void unsupported_type_exit(const type_tree& tt)
-{
-    stringstream ss;
-    ss << "type " << tt << " currently not supported.";
-    log_output_error_exit(ss.str());
-}
-
-static void unsupported_type_exit(type_node type)
-{
-    unsupported_type_exit(type_tree(type));
 }
 
 /**
@@ -151,30 +123,14 @@ unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops)
         case id::unknown_type:
         case id::ill_formed_type:
         default:
-            unsupported_type_exit(tt);
+            stringstream ss;
+            ss << "type " << tt << " currently not supported.";
+            log_output_error_exit(ss.str());
     }
 
     logger().info() << "Alphabet size = " << as
                     << " output = " << output_type;
     return as;
-}
-
-// set the complexity ratio.
-template <typename BScorer>
-void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio)
-{
-    if (noise >= 0.0)
-        scorer.set_complexity_coef(as, noise);
-    else
-        scorer.set_complexity_coef(ratio);
-}
-
-//* return true iff the problem is based on data file
-bool datafile_based_problem(const string& problem)
-{
-    static set<string> dbp
-        = {it};
-    return dbp.find(problem) != dbp.end();
 }
 
 int moses_exec(int argc, char** argv)
@@ -192,147 +148,8 @@ int moses_exec(int argc, char** argv)
         return 0;
     }
 
-    // Problem based on input table.
-    if (not datafile_based_problem(pms.problem))
-        unsupported_problem_exit(pms.problem);
-
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-
-    // Infer the signature based on the input table.
-    const type_tree& table_type_signature = pms.tables.front().get_signature();
-    logger().info() << "Inferred data signature " << table_type_signature;
-
-    // 'it' means regression based on input table; we maximimze accuracy.
-    // 'pre' means we must maximize precision (i.e minimize the number of
-    // false positives) while holding activation fixed.
-    // 'prerec' means we must maximize precision (i.e minimize the number of
-    // false positives) while holding recall fixed.
-    // 'recall' means we must maximize recall while holding precision fixed.
-    // 'f_one' means we must maximize the f_one score while holding ratio const
-    // 'bep' means we must maximize the break-even point while holding difference const
-    // Infer the type of the input table
-    type_tree table_output_tt = get_signature_output(table_type_signature);
-    type_node table_output_tn = get_type_node(table_output_tt);
-
-    // Determine the default exemplar to start with
-    // problem == pre  precision-based scoring
-    // precision combo trees always return booleans.
-    if (pms.exemplars.empty())
-        pms.exemplars.push_back(type_to_exemplar(
-            pms.problem == pre? id::boolean_type : table_output_tn));
-
-    // XXX This seems strange to me .. when would the exemplar output
-    // type ever differ from the table?  Well,, it could for pre problem,
-    // but that's over-ridden later, anyway...
-    type_node output_type =
-        get_type_node(get_output_type_tree(*pms.exemplars.begin()->begin()));
-    if (output_type == id::unknown_type)
-        output_type = table_output_tn;
-
-    logger().info() << "Inferred output type: " << output_type;
-
-// Generic table regression code.  Could be a template, I suppose, but
-// the args are variable length, tables is a variable, and scorer is a type,
-// and I don't feel like fighting templates to make all three happen just
-// exactly right.
-#define REGRESSION(OUT_TYPE, REDUCT, REDUCT_REP, TABLES, SCORER, ARGS) \
-{                                                                    \
-    /* Enable feature selection while selecting exemplar */          \
-    if (pms.enable_feature_selection && pms.fs_params.target_size > 0) { \
-        /* XXX FIXME: should use the concatenation of all */         \
-        /* tables, and not just the first. */                        \
-        pms.meta_params.fstor = new feature_selector(TABLES.front(), pms.festor_params); \
-    }                                                                \
-    /* Keep the table input signature, just make sure */             \
-    /* the output is the desired type. */                            \
-    type_tree cand_sig = gen_signature(                              \
-        get_signature_inputs(table_type_signature),                  \
-        type_tree(OUT_TYPE));                                        \
-    int as = alphabet_size(cand_sig, pms.ignore_ops);                \
-    typedef SCORER BScore;                                           \
-    BScorerSeq bscores;                                              \
-    for (const auto& table : TABLES) {                               \
-        BScore* r = new BScore ARGS ;                                \
-        set_noise_or_ratio(*r, as, pms.noise, pms.complexity_ratio); \
-        bscores.push_back(r);                                        \
-    }                                                                \
-    multibscore_based_bscore bscore(bscores);                        \
-    metapop_moses_results(pms.exemplars, cand_sig,                   \
-                      REDUCT, REDUCT_REP, bscore,                    \
-                      pms.opt_params, pms.hc_params, pms.meta_params, \
-                      pms.moses_params, pms.mmr_pa);                 \
-}
-
-    // problem == it  i.e. input-table based scoring.
-    OC_ASSERT(output_type == table_output_tn);
-
-    // --------- Boolean output type
-    if (output_type == id::boolean_type) {
-        REGRESSION(output_type,
-                   *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, ctruth_table_bscore,
-                   (table));
-    }
-
-    // --------- Enumerated output type
-    else if (output_type == id::enum_type) {
-
-        // For enum targets, like boolean targets, the score
-        // can never exceed zero (perfect score).
-        // XXX Eh ??? for precision/recall scorers,
-        // the score range is 0.0 to 1.0 so this is wrong...
-        if (0.0 < pms.moses_params.max_score) {
-            pms.moses_params.max_score = 0.0;
-            pms.opt_params.terminate_if_gte = 0.0;
-        }
-        if (pms.use_well_enough) {
-            // The "leave well-enough alone" algorithm.
-            // Works. Kind of. Not as well as hoped.
-            // Might be good for some problem. See diary.
-            partial_solver well(pms.ctables,
-                            table_type_signature,
-                            pms.exemplars, *pms.contin_reduct,
-                            pms.opt_params, pms.hc_params, pms.meta_params,
-                            pms.moses_params, pms.mmr_pa);
-            well.solve();
-        } else {
-            // Much like the boolean-output-type above,
-            // just uses a slightly different scorer.
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       pms.ctables, enum_effective_bscore,
-                       (table));
-        }
-    }
-
-    // --------- Contin output type
-    else if (output_type == id::contin_type) {
-        if (pms.discretize_thresholds.empty()) {
-
-            contin_bscore::err_function_type eft =
-                pms.it_abs_err ? contin_bscore::abs_error :
-                contin_bscore::squared_error;
-
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       pms.tables, contin_bscore,
-                       (table, eft));
-
-        } else {
-            REGRESSION(output_type,
-                       *pms.contin_reduct, *pms.contin_reduct,
-                       pms.tables, discretize_contin_bscore,
-                       (table.otable, table.itable,
-                            pms.discretize_thresholds, pms.weighted_accuracy));
-        }
-    }
-
-    // --------- Unknown output type
-    else {
-        unsupported_type_exit(output_type);
-    }
-
-    return 0;
+    unsupported_problem_exit(pms.problem);
+    return 1;
 }
 
 int moses_exec(const vector<string>& argvs)
