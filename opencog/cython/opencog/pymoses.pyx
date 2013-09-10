@@ -26,21 +26,21 @@ Example usage of run:
 
 Example #1: XOR example with Python output and Python input
 
-input_data = [[0,0,0],[1,1,0],[1,0,1],[0,1,1]]
-output = moses.run(input = input_data, python = True)
+input_data = [[0, 0, 0], [1, 1, 0], [1, 0, 1], [0, 1, 1]]
+output = moses.run(input=input_data, python=True)
 model = output[0].eval
-model([0,1])  # Returns: True
-model([1,1])  # Returns: False
+model([0, 1])  # Returns: True
+model([1, 1])  # Returns: False
 
 Example #2: Run the majority demo problem, return only one candidate, and use Python output
-output = moses.run(args = "-H maj -c 1", python = True)
-model = output[0]
-model.eval([0,1,0,1,0])  # Returns: False
-model.eval([1,1,0,1,0])  # Returns: True
+output = moses.run(args="-H maj -c 1", python=True)
+model = output[0].eval
+model([0, 1, 0, 1, 0])  # Returns: False
+model([1, 1, 0, 1, 0])  # Returns: True
 
 Example #3: Load the XOR input data from a file, return only one candidate, and use Combo output
 
-output = moses.run(args = "-i /path/to/input.txt -c 1")
+output = moses.run(args="-i /path/to/input.txt -c 1")
 combo_program = output[0].program
 print combo_program  # Prints: and(or(!$1 !$2) or($1 $2))
 
@@ -100,15 +100,11 @@ cdef class moses:
         _args_list.extend(['-o', output_file.name])
         _args_list.extend(shlex.split(args))
 
-        #@todo
-        print "Debug: args_list = "
-        print _args_list
         self._run_args_list(_args_list)
 
         # Process the output file
         output = output_file.file.read()
 
-        #Candidate = namedtuple("Candidate", "score program program_type")
         candidates = []
 
         if len(output) == 0:
@@ -116,7 +112,7 @@ cdef class moses:
 
         # Python output
         # @todo fix iostream_combo.h, so that it doesn't add the extra comma at the end of the python program, on line 69, perhaps by adding a check to see if number_of_children > 1
-        elif output.splitlines()[0].startswith('#!/usr/bin/python'): # @todo modify the python output parser to not put a blank line at the beginning
+        elif output.splitlines()[0].startswith('#!/usr/bin/python'):
             # The Python header is declared in opencog/learning/moses/moses/types.h (ostream_combo_tree_composite_pbscore_python)
             python_header = "#!/usr/bin/python"
 
@@ -125,7 +121,7 @@ cdef class moses:
             for candidate in output_list: #output.split("#!/usr/bin/python")[1:]:
                 program = candidate #.splitlines()
                 program = program.rpartition(',')[0] # @todo fix opencog/comboreduct/combo/iostream_combo.h (ostream_combo_it) to remove the unneeded trailing comma that is inserted by the Python formatter
-                candidates.append(MosesCandidate(score = None, program = program, program_type = "python")) #candidates.append(Candidate(score = None, program = program, program_type = "python")) # @todo add score for python programs
+                candidates.append(MosesCandidate(score = None, program = program, program_type = "python")) # @todo Add score for python programs
 
         # Combo output
         else:
@@ -134,7 +130,7 @@ cdef class moses:
             for candidate in output_list:
                 score = candidate.partition(' ')[0]
                 program = candidate.partition(' ')[2]
-                candidates.append(MosesCandidate(score = score, program = program, program_type = "combo")) # Candidate(score = score, program = program, program_type = "combo"))
+                candidates.append(MosesCandidate(score = score, program = program, program_type = "combo"))
 
         return candidates
 
@@ -151,7 +147,6 @@ cdef class moses:
         try:
             moses_exec(len(args_list), c_argv)
         except RuntimeError, ex:
-            print "Exception occurred when calling MOSES:\n" + ex.message
-            # @todo raise error
+            raise MosesException('Error: exception occured when calling C++ MOSES. Exception message:\n' + ex.message)
         finally:
             free(c_argv)
