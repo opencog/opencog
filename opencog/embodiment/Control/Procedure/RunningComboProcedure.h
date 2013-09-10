@@ -148,6 +148,8 @@ protected:
      */
     sib_it _it;
 
+    const std::vector<combo::vertex>& _arguments;
+
     bool _hasBegun; //have we started an plan yet?
     bool _planSent;
     boost::tribool _failed; //set to true if failed, false if not failed,
@@ -174,7 +176,6 @@ protected:
     void expand_and_evaluate_subtree(combo::combo_tree::iterator it);
 
     combo::vertex eval_anything(sib_it it);
-
 private:
     /**
      * true if the combo interpreter
