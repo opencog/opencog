@@ -155,7 +155,6 @@ problem_params::problem_params() :
     complexity_ratio(3.5f),
     use_well_enough(false),
     fs_params(festor_params.fs_params),
-    arity(0),
     max_filename_size(255),
     desc("Allowed options")
 {
@@ -1259,7 +1258,7 @@ void problem_params::parse_options(int argc, char* argv[])
                            output_only_best,
                            output_eval_number,
                            output_with_labels,
-                           ilabels,
+                           col_labels,
                            output_file,
                            output_python,
                            enable_mpi);

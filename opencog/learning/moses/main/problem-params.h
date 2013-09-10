@@ -157,12 +157,6 @@ struct problem_params
     feature_selector_parameters festor_params;
     feature_selection_parameters& fs_params;
 
-    // Input data for table-based problems.
-    vector<Table> tables;
-    vector<CTable> ctables;
-    vector<string> ilabels;     // labels of the input table (table.itable)
-    combo::arity_t arity;
-
     reduct::rule* bool_reduct;
     reduct::rule* bool_reduct_rep;
     reduct::rule* contin_reduct;
@@ -177,6 +171,7 @@ protected:
 
     reduct::logical_reduction lr;
     options_description desc;
+    std::vector<std::string> col_labels;
 
     void options_init();
 };

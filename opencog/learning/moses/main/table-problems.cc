@@ -61,6 +61,12 @@ protected:
     void common_setup(problem_params&);
     void common_type_setup(problem_params&);
 
+    // Input data for table-based problems.
+    vector<Table> tables;
+    vector<CTable> ctables;
+    vector<string> ilabels;     // labels of the input table (table.itable)
+    combo::arity_t arity;
+
     type_tree table_type_signature;
     type_tree table_output_tt;
     type_node table_output_tn;
@@ -85,39 +91,39 @@ void table_problem_base::common_setup(problem_params& pms)
         // possible subsample the table
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
-        pms.tables.push_back(table);
-        pms.ctables.push_back(table.compressed());
+        tables.push_back(table);
+        ctables.push_back(table.compressed());
     }
     logger().info("Number of rows in tables = %d", num_rows);
 
     // Get the labels contained in the data file.
     if (pms.output_with_labels)
-        pms.ilabels = pms.tables.front().itable.get_labels();
+        ilabels = tables.front().itable.get_labels();
 
-    pms.arity = pms.tables.front().get_arity();
+    arity = tables.front().get_arity();
 
     // Check that all input data files have the same arity
-    if (pms.tables.size() > 1) {
+    if (tables.size() > 1) {
         combo::arity_t test_arity;
-        for (size_t i = 1; i < pms.tables.size(); ++i) {
-            test_arity = pms.tables[i].get_arity();
-            if (test_arity != pms.arity) {
+        for (size_t i = 1; i < tables.size(); ++i) {
+            test_arity = tables[i].get_arity();
+            if (test_arity != arity) {
                 stringstream ss;
-                ss << "File " << pms.input_data_files[0] << " has arity " << pms.arity
+                ss << "File " << pms.input_data_files[0] << " has arity " << arity
                    << " while file " << pms.input_data_files[i] << " has arity " << test_arity;
                 log_output_error_exit(ss.str());
             }
         }
     }
-    logger().info("Inferred arity = %d", pms.arity);
+    logger().info("Inferred arity = %d", arity);
 
-    pms.mmr_pa.ilabels = pms.ilabels;
+    pms.mmr_pa.ilabels = ilabels;
 }
 
 void table_problem_base::common_type_setup(problem_params& pms)
 {
     // Infer the signature based on the input table.
-    table_type_signature = pms.tables.front().get_signature();
+    table_type_signature = tables.front().get_signature();
     logger().info() << "Inferred data signature " << table_type_signature;
 
     // Infer the type of the input table
@@ -159,13 +165,13 @@ void ip_problem::run(problem_params& pms)
     common_setup(pms);
     // ip assumes that the inputs are boolean and the output is contin
     type_tree ettt = gen_signature(id::boolean_type,
-                                   id::contin_type, pms.arity);
-    OC_ASSERT(ettt == pms.tables.front().get_signature(),
+                                   id::contin_type, arity);
+    OC_ASSERT(ettt == tables.front().get_signature(),
               "The input table doesn't have the right data types."
               " The output should be contin and the inputs should"
               " be boolean");
     // signature of the functions to learn
-    type_tree tt = gen_signature(id::boolean_type, pms.arity);
+    type_tree tt = gen_signature(id::boolean_type, arity);
 
     // determine the default exemplar to start with
     if (pms.exemplars.empty())
@@ -176,7 +182,7 @@ void ip_problem::run(problem_params& pms)
     typedef interesting_predicate_bscore BScore;
     typedef boost::ptr_vector<bscore_base> BScorerSeq;
     BScorerSeq bscores;
-    for (const CTable& ctable : pms.ctables) {
+    for (const CTable& ctable : ctables) {
         BScore *r = new BScore(ctable,
                                pms.ip_kld_weight,
                                pms.ip_skewness_weight,
@@ -231,13 +237,13 @@ void ann_table_problem::run(problem_params& pms)
     // If no exemplar has been provided in the options,
     // insert the default.
     if (pms.exemplars.empty()) {
-        pms.exemplars.push_back(ann_exemplar(pms.arity));
+        pms.exemplars.push_back(ann_exemplar(arity));
     }
 
     type_tree tt = gen_signature(id::ann_type, 0);
     int as = alphabet_size(tt, pms.ignore_ops);
 
-    contin_bscore bscore(pms.tables.front());
+    contin_bscore bscore(tables.front());
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, tt,
                           reduct::ann_reduction(), reduct::ann_reduction(), bscore,
@@ -308,7 +314,7 @@ void pre_table_problem::run(problem_params& pms)
     int as = alphabet_size(cand_sig, pms.ignore_ops);
     typedef precision_bscore BScore;
     BScorerSeq bscores;
-    for (const CTable& ctable : pms.ctables) {
+    for (const CTable& ctable : ctables) {
         BScore* r = new BScore(ctable,
                                fabs(pms.hardness),
                                pms.min_rand_input,
@@ -329,7 +335,7 @@ void pre_table_problem::run(problem_params& pms)
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
         // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+        pms.meta_params.fstor = new feature_selector(ctables.front(),
                                                  pms.festor_params);
     }
 
@@ -367,7 +373,7 @@ void pre_conj_table_problem::run(problem_params& pms)
     int as = alphabet_size(cand_sig, pms.ignore_ops);
     typedef precision_conj_bscore BScore;
     BScorerSeq bscores;
-    for (const CTable& ctable : pms.ctables) {
+    for (const CTable& ctable : ctables) {
         BScore* r = new BScore(ctable,
                                fabs(pms.hardness),
                                pms.hardness >= 0);
@@ -378,7 +384,7 @@ void pre_conj_table_problem::run(problem_params& pms)
     // Enable feature selection while selecting exemplar
     if (pms.enable_feature_selection && pms.fs_params.target_size > 0) {
         // XXX FIXME should use the concatenation of all ctables, not just first
-        pms.meta_params.fstor = new feature_selector(pms.ctables.front(),
+        pms.meta_params.fstor = new feature_selector(ctables.front(),
                                                  pms.festor_params);
     }
     multibscore_based_bscore bscore(bscores);
@@ -408,7 +414,7 @@ void prerec_table_problem::run(problem_params& pms)
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               pms.ctables, prerec_bscore,
+               ctables, prerec_bscore,
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -432,7 +438,7 @@ void recall_table_problem::run(problem_params& pms)
         pms.max_rand_input = 1.0; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               pms.ctables, recall_bscore,
+               ctables, recall_bscore,
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -456,7 +462,7 @@ void bep_table_problem::run(problem_params& pms)
         pms.max_rand_input = 0.5; }
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               pms.ctables, bep_bscore,
+               ctables, bep_bscore,
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
@@ -478,7 +484,7 @@ void f_one_table_problem::run(problem_params& pms)
 
     REGRESSION(id::boolean_type,
                *pms.bool_reduct, *pms.bool_reduct_rep,
-               pms.ctables, f_one_bscore,
+               ctables, f_one_bscore,
                (table));
 }
 
@@ -506,7 +512,7 @@ void it_table_problem::run(problem_params& pms)
     if (output_type == id::boolean_type) {
         REGRESSION(output_type,
                    *pms.bool_reduct, *pms.bool_reduct_rep,
-                   pms.ctables, ctruth_table_bscore,
+                   ctables, ctruth_table_bscore,
                    (table));
     }
 
@@ -525,7 +531,7 @@ void it_table_problem::run(problem_params& pms)
             // The "leave well-enough alone" algorithm.
             // Works. Kind of. Not as well as hoped.
             // Might be good for some problem. See diary.
-            partial_solver well(pms.ctables,
+            partial_solver well(ctables,
                             table_type_signature,
                             pms.exemplars, *pms.contin_reduct,
                             pms.opt_params, pms.hc_params, pms.meta_params,
@@ -536,7 +542,7 @@ void it_table_problem::run(problem_params& pms)
             // just uses a slightly different scorer.
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       pms.ctables, enum_effective_bscore,
+                       ctables, enum_effective_bscore,
                        (table));
         }
     }
@@ -551,13 +557,13 @@ void it_table_problem::run(problem_params& pms)
 
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       pms.tables, contin_bscore,
+                       tables, contin_bscore,
                        (table, eft));
 
         } else {
             REGRESSION(output_type,
                        *pms.contin_reduct, *pms.contin_reduct,
-                       pms.tables, discretize_contin_bscore,
+                       tables, discretize_contin_bscore,
                        (table.otable, table.itable,
                             pms.discretize_thresholds, pms.weighted_accuracy));
         }
