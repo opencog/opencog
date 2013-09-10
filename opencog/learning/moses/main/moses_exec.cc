@@ -33,6 +33,7 @@
 
 #include "moses_exec.h"
 #include "demo-problems.h"
+#include "table-problems.h"
 #include "problem.h"
 
 #include "../moses/moses_main.h"
@@ -77,9 +78,6 @@ static const string pre_conj="pre_conj";    // simplified version of
 
 static const string ip="ip"; // find interesting patterns
 
-/* ANN problems */
-static const string ann_it="ann-it"; // regression based on input table using ann
-
 static void log_output_error_exit(string err_msg) {
     logger().error() << "Error: " << err_msg;
     cerr << "Error: " << err_msg << endl;
@@ -109,24 +107,6 @@ void unsupported_problem_exit(const string& problem)
     stringstream ss;
     ss << "problem type \"" << problem << "\" is currently unsupported.";
     log_output_error_exit(ss.str());
-}
-
-
-combo_tree ann_exemplar(combo::arity_t arity)
-{
-    combo_tree ann_tr(ann_type(0, id::ann));
-    // ann root
-    combo_tree::iterator root_node = ann_tr.begin();
-    // output node
-    combo_tree::iterator output_node =
-        ann_tr.append_child(root_node, ann_type(1, id::ann_node));
-    // input nodes
-    for (combo::arity_t i = 0; i <= arity; ++i)
-        ann_tr.append_child(output_node, ann_type(i + 2, id::ann_input));
-    // input nodes' weights
-    ann_tr.append_children(output_node, 0.0, arity + 1);
-
-    return ann_tr;
 }
 
 static bool contains_type(const type_tree_pre_it it, id::type_node ty)
@@ -219,7 +199,7 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
 bool datafile_based_problem(const string& problem)
 {
     static set<string> dbp
-        = {it, pre, pre_conj, recall, prerec, bep, f_one, ann_it, ip};
+        = {it, pre, pre_conj, recall, prerec, bep, f_one, ip};
     return dbp.find(problem) != dbp.end();
 }
 
@@ -229,6 +209,7 @@ int moses_exec(int argc, char** argv)
     pms.parse_options(argc, argv);
 
     register_demo_problems();
+    register_table_problems();
 
     problem_base* probm = find_problem(pms.problem);
     if (probm)
@@ -544,26 +525,6 @@ metapop_moses_results(pms.exemplars, cand_sig,               \
                               pms.moses_params, pms.mmr_pa);
     }
 
-    // regression based on input table using ann
-    else if (pms.problem == ann_it)
-    {
-        // If no exemplar has been provided in the options,
-        // insert the default.
-        if (pms.exemplars.empty()) {
-            pms.exemplars.push_back(ann_exemplar(pms.arity));
-        }
-
-        type_tree tt = gen_signature(id::ann_type, 0);
-
-        int as = alphabet_size(tt, pms.ignore_ops);
-
-        contin_bscore bscore(pms.tables.front());
-        set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
-        metapop_moses_results(pms.exemplars, tt,
-                              ann_reduction(), ann_reduction(), bscore,
-                              pms.opt_params, pms.hc_params, pms.meta_params,
-                              pms.moses_params, pms.mmr_pa);
-    }
     return 0;
 }
 

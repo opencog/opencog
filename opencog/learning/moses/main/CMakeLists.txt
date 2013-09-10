@@ -5,6 +5,7 @@ ADD_LIBRARY (moses_exec
     problem
     moses_exec
     moses_exec_def
+    table-problems
 )
 
 ADD_EXECUTABLE (moses-exec moses-exec)
