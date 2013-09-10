@@ -24,6 +24,9 @@
 #include "reduct.h"
 
 namespace opencog { namespace reduct {
+
+// This little piece of silliness is needed by boost, in order
+// to implement ptr_vector and other things ...
 reduct::rule* new_clone(const reduct::rule& r) { return r.clone(); }
 
 } // ~namespace reduct

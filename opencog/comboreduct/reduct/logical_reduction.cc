@@ -79,8 +79,21 @@ logical_reduction::logical_reduction(void)
 
 logical_reduction::~logical_reduction()
 {
-	if (p_medium) delete p_medium;
-	if (p_complexe) delete p_complexe;
+    if (p_medium) delete p_medium;
+    if (p_complexe) delete p_complexe;
+    p_medium = NULL;
+    p_complexe = NULL;
+}
+
+logical_reduction::logical_reduction(const logical_reduction& rhs) :
+    p_medium(rhs.p_medium->clone()), p_complexe(rhs.p_complexe->clone())
+{}
+
+logical_reduction& logical_reduction::operator=(const logical_reduction& rhs)
+{
+    p_medium = rhs.p_medium->clone();
+    p_complexe = rhs.p_complexe->clone();
+    return *this;
 }
 
 logical_reduction::logical_reduction(const vertex_set& ignore_ops)

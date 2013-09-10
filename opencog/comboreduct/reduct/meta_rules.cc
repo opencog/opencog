@@ -79,13 +79,13 @@ void ignore_size_increase::operator()(combo_tree& tr, combo_tree::iterator it) c
 void downwards::operator()(combo_tree& tr, combo_tree::iterator it) const
 {
     INC_TAB
-    combo_tree::iterator end = it;  
+    combo_tree::iterator end = it;
     end.skip_children();
     ++end;
-    
-    static const type_tree unknown_type_tree = 
+
+    static const type_tree unknown_type_tree =
         type_tree(opencog::combo::id::unknown_type);
-    
+
     if (input == unknown_type_tree)
         for( ; it != end; ++it) {
             PRINT_DEBUG_STANDARD
@@ -95,7 +95,7 @@ void downwards::operator()(combo_tree& tr, combo_tree::iterator it) const
         for( ; it != end; ++it) {
             PRINT_DEBUG_STANDARD
             if(// combo::get_argument_type_tree(*it, tr.sibling_index(it))==input
-               // && 
+               // &&
                // @todo: checking that it inherits would be better
                // but has to be sure of it (Nil)
                opencog::combo::get_output_type_tree(*it) == type_tree(output))
@@ -111,14 +111,14 @@ void upwards::operator()(combo_tree& tr, combo_tree::iterator it) const
     combo_tree::post_order_iterator at=it,end=it;
     ++end;
     at.descend_all();
-    
+
     for (;at!=end;++at) {
         PRINT_DEBUG_STANDARD
         (*r)(tr,at);
     }
     DEC_TAB
 }
-    
+
 void sequential::operator()(combo_tree& tr,combo_tree::iterator it) const {
     INC_TAB
     for (const rule& r : rules) {
@@ -139,7 +139,7 @@ void iterative::operator()(combo_tree& tr,combo_tree::iterator it) const
     } while (!tr.equal_subtree(it, tmp.begin()));
     DEC_TAB
 }
-    
+
 void assum_iterative::operator()(combo_tree& tr,combo_tree::iterator it) const {
     INC_TAB
     combo_tree tmp;

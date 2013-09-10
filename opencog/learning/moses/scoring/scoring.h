@@ -84,7 +84,7 @@ struct cscore_base : public unary_function<combo_tree, composite_score>
 // Abstract bscoring function class to implement
 struct bscore_base : public unary_function<combo_tree, penalized_bscore>
 {
-    bscore_base() : occam(false), complexity_coef(0.0) {};
+    bscore_base() : _occam(false), _complexity_coef(0.0) {};
     virtual ~bscore_base() {};
 
     // Evaluate the candidate tr
@@ -109,8 +109,8 @@ struct bscore_base : public unary_function<combo_tree, penalized_bscore>
     virtual void set_complexity_coef(unsigned alphabet_size, float p);
 
 protected:
-    bool occam; // If true, then Occam's razor is taken into account.
-    score_t complexity_coef;
+    bool _occam; // If true, then Occam's razor is taken into account.
+    score_t _complexity_coef;
 };
 
 /**
@@ -236,9 +236,9 @@ struct logical_bscore : public bscore_base
 {
     template<typename Func>
     logical_bscore(const Func& func, int a)
-            : target(func, a), arity(a) {}
+            : _target(func, a), _arity(a) {}
     logical_bscore(const combo_tree& tr, int a)
-            : target(tr, a), arity(a) {}
+            : _target(tr, a), _arity(a) {}
 
     penalized_bscore operator()(const combo_tree& tr) const;
 
@@ -247,8 +247,8 @@ struct logical_bscore : public bscore_base
     score_t min_improv() const;
 
 protected:
-    complete_truth_table target;
-    int arity;
+    complete_truth_table _target;
+    int _arity;
 };
 
 /// Used to define the complexity scoring component given that p is the
