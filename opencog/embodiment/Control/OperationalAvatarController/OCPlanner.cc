@@ -2547,8 +2547,6 @@ void OCPlanner::loadTestRulesFromCodes()
     // define variables:
     ParamValue var_obj = entity_var[0];
     ParamValue float_dis = float_var[0];
-
-    ParamValue var_pos = vector_var[0];
     ParamValue var_oldpos = vector_var[1];
 
     // precondition 1:There exists a path from the agent to object
@@ -2567,7 +2565,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> closedStateOwnerList2;
     closedStateOwnerList2.push_back(var_avatar);
     closedStateOwnerList2.push_back(var_obj);
-    State* closedState2 = new State("Distance",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , float_dis , closedStateOwnerList2, true, &Inquery::inqueryDistance);
+    State* closedState2 = new State("Distance",ActionParamType::FLOAT(),STATE_EQUAL_TO , float_dis , closedStateOwnerList2, true, &Inquery::inqueryDistance);
     Effect* getClosedEffect = new Effect(closedState2, OP_ASSIGN_LESS_THAN, CLOSED_DISTANCE);
 
     // effect2: position changed
@@ -2589,6 +2587,8 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: Move_to an object to get closed to it-------------------------------------------
 
     //----------------------------Begin Rule: walk to a position to get closed to it  and stand on it-----------------------------------------
+    // define variables:
+    ParamValue var_pos = vector_var[0];
 
     // precondition 1:There exists a path from the agent to object
     vector<ParamValue> existPathStateOwnerList2;

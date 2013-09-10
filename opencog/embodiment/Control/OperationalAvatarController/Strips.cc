@@ -542,22 +542,101 @@ Effect::Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue, boo
     ifCheckStateOwnerType = _ifCheckStateOwnerType;
 }
 
+bool Effect::isEffectOpOpposite(Effect* effect)
+{
+    if ( ((effect->effectOp == OP_ASSIGN) && (effect->state->stateType == STATE_NOT_EQUAL_TO)) ||
+         ((effect->effectOp == OP_ASSIGN_NOT_EQUAL_TO) && (effect->state->stateType == STATE_EQUAL_TO)) ||
+         ((effect->effectOp == OP_ASSIGN_GREATER_THAN) && (effect->state->stateType == STATE_LESS_THAN)) ||
+         ((effect->effectOp == OP_ASSIGN_LESS_THAN) && (effect->state->stateType == STATE_GREATER_THAN)) )
+        return true;
+    else
+        return false;
+}
+/*
+enum EFFECT_OPERATOR_TYPE
+{
+    OP_REVERSE, // this is only for the bool variables
+    OP_ASSIGN,  // this operator can be used in any variable type =
+    OP_ASSIGN_NOT_EQUAL_TO, // this operator can be used in any variable type !=
+    OP_ASSIGN_GREATER_THAN, // this operator can be used in any variable type >
+    OP_ASSIGN_LESS_THAN, // this operator can be used in any variable type <
+    OP_ADD,     // only for numeric variables +=
+    OP_SUB,     // only for numeric variables -=
+    OP_MUL,     // only for numeric variables *=
+    OP_DIV,     // only for numeric variables /=
+    OP_NUM_OPS  // must always be the last one in this list.
+};
+
+extern const char* EFFECT_OPERATOR_NAME[9];
+
+
+// There are 3 kinds of state types:
+// 1. equal, which can be used in non-numeric and numeric state values: e.g.: the price of Book1 is 15 dollors
+// 2. fuzzy value, e.g.: the price of Book1 is between 10~20 dollors
+// 3. comparator: the price of Book1 is greater than 10, less than 20
+enum StateType
+{
+    STATE_EQUAL_TO,     // EvaluationLink
+    STATE_NOT_EQUAL_TO,     // EvaluationLink
+    STATE_FUZZY_WITHIN, // EvaluationLink + PredicationNode "Fuzzy_within"
+    STATE_GREATER_THAN, // GreaterThanLink
+    STATE_LESS_THAN     // LessThanLink
+};
+*/
+
+StateType Effect::getTargetStateType()
+{
+    if (effectOp == OP_ASSIGN)
+        return STATE_EQUAL_TO;
+
+    if (effectOp == OP_ASSIGN_NOT_EQUAL_TO)
+        return STATE_NOT_EQUAL_TO;
+
+    if (effectOp == OP_ASSIGN_GREATER_THAN)
+        return STATE_GREATER_THAN;
+
+    if (effectOp == OP_ASSIGN_LESS_THAN)
+        return STATE_LESS_THAN;
+
+   /* if ( (effectOp == OP_REVERSE)||
+         (effectOp == OP_ADD)||
+         (effectOp == OP_SUB)||
+         (effectOp == OP_MUL)||
+         (effectOp == OP_DIV))*/
+    return state->stateType;
+
+}
+
 bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings)
 {
     ParamValue opParamValue;
-    if (Rule::isParamValueUnGrounded(effect->opParamValue))
+
+    if (effect->effectOp != OP_REVERSE) // OP_REVERSE doesn't need an opParamValue
     {
-        // look up this value in groundings
-        string varName = ActionParameter::ParamValueToString(effect->opParamValue);
-        ParamGroundedMapInARule::iterator paramMapIt = groundings.find(varName);
-        if (paramMapIt == groundings.end())
-            return false;
+        if (Rule::isParamValueUnGrounded(effect->opParamValue))
+        {
+            // look up this value in groundings
+            string varName = ActionParameter::ParamValueToString(effect->opParamValue);
+            ParamGroundedMapInARule::iterator paramMapIt = groundings.find(varName);
+            if (paramMapIt == groundings.end())
+            {
+                // if the effect operator is to make the operator opposite, e.g. change from STATE_EQUAL_TO to STATE_NOT_EQUAL_TO
+                // then just need to change the state type, don't need to change the value
+                if (Effect::isEffectOpOpposite(effect))
+                {
+                    state->changeStateType(effect->getTargetStateType());
+                    return true;
+                }
+
+                return false;
+            }
+            else
+                opParamValue = paramMapIt->second;
+        }
         else
-            opParamValue = paramMapIt->second;
-    }
-    else
-    {
-        opParamValue = effect->opParamValue;
+        {
+            opParamValue = effect->opParamValue;
+        }
     }
 
     if (effect->effectOp != OP_ASSIGN_NOT_EQUAL_TO)

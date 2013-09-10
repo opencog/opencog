@@ -83,12 +83,12 @@ namespace oac {
 
       const  opencog::pai::Vector vector_var[] = {
          opencog::pai::Vector(999999.00000,999999.00000,999999.00000),
-         opencog::pai::Vector(999999.01000,999999.01000,999999.01000),
-         opencog::pai::Vector(999999.02000,999999.02000,999999.02000),
-         opencog::pai::Vector(999999.03000,999999.03000,999999.03000),
-         opencog::pai::Vector(999999.04000,999999.04000,999999.04000),
-         opencog::pai::Vector(999999.05000,999999.05000,999999.05000),
-         opencog::pai::Vector(999999.06000,999999.06000,999999.06000) };
+         opencog::pai::Vector(999998.00000,999999.00000,999999.00000),
+         opencog::pai::Vector(999997.00000,999999.00000,999999.00000),
+         opencog::pai::Vector(999996.00000,999999.00000,999999.00000),
+         opencog::pai::Vector(999995.00000,999999.00000,999999.00000),
+         opencog::pai::Vector(999994.00000,999999.00000,999999.00000),
+         opencog::pai::Vector(999993.00000,999999.00000,999999.00000) };
 
       const  opencog::pai::Entity entity_var[] = {
         opencog::pai::Entity("$entity_var0", "undefined"),

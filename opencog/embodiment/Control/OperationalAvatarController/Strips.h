@@ -257,11 +257,18 @@ namespace opencog { namespace oac {
 
         Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue,bool _ifCheckStateOwnerType = true);
 
+        // get the target state type that this effect will change to , according to the effectOp
+        StateType getTargetStateType();
+
         // execute the effect to a grounded state. will change this state.
         // will look up the value from groundings if the opParamValue is ungrouned
         // only when there are misusge of the value type of opParamValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
         static bool executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings);
+
+        // if the effect operator is to make the operator opposite, e.g. change from STATE_EQUAL_TO to STATE_NOT_EQUAL_TO
+        // then just need to change the state type, don't need to change the value
+        static bool isEffectOpOpposite(Effect* effect);
 
         // make sure the value type of the operater value is the same with the value type of the state
         // and also this value type can be the parameter of this operator
