@@ -33,7 +33,7 @@ ADD_LIBRARY (moses SHARED STATIC
 	eda/initialization
 	eda/local_structure
 
-    moses/complexity
+	moses/complexity
 	moses/distributed_moses
 	moses/local_moses
 	moses/moses_main
