@@ -31,6 +31,7 @@
 #include <opencog/learning/moses/moses/types.h>
 #include <opencog/learning/moses/main/moses_exec.h>
 
+using namespace std;
 using boost::trim_copy;
 using namespace boost::posix_time;
 using namespace opencog::moses;

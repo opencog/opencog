@@ -32,10 +32,6 @@
 
 namespace opencog { namespace moses {
 
-// XXX FIXME protytpe later
-unsigned alphabet_size(const type_tree& tt, const vertex_set ignore_ops);
-
-//XXX template should be moved to header file somwhere ... 
 // set the complexity ratio.
 template <typename BScorer>
 void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio)
@@ -45,7 +41,6 @@ void set_noise_or_ratio(BScorer& scorer, unsigned as, float noise, score_t ratio
     else
         scorer.set_complexity_coef(ratio);
 }
-
 
 // ==================================================================
 // Boolean Demo/example problem common code.
