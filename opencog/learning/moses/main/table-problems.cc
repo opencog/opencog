@@ -83,6 +83,8 @@ void table_problem_base::common_setup(problem_params& pms)
     }
 
     // Read input data files
+    tables.clear();
+    ctables.clear();
     size_t num_rows = 0;
     for (const string& idf : pms.input_data_files) {
         logger().info("Read data file %s", idf.c_str());
@@ -97,6 +99,7 @@ void table_problem_base::common_setup(problem_params& pms)
     logger().info("Number of rows in tables = %d", num_rows);
 
     // Get the labels contained in the data file.
+    ilabels.clear();
     if (pms.output_with_labels)
         ilabels = tables.front().itable.get_labels();
 
@@ -104,9 +107,8 @@ void table_problem_base::common_setup(problem_params& pms)
 
     // Check that all input data files have the same arity
     if (tables.size() > 1) {
-        combo::arity_t test_arity;
         for (size_t i = 1; i < tables.size(); ++i) {
-            test_arity = tables[i].get_arity();
+            combo::arity_t test_arity = tables[i].get_arity();
             if (test_arity != arity) {
                 stringstream ss;
                 ss << "File " << pms.input_data_files[0] << " has arity " << arity
