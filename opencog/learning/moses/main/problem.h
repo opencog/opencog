@@ -28,6 +28,7 @@
 #include <vector>
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/table/table.h>
 #include <opencog/learning/moses/metapopulation/metapop_params.h>
 #include <opencog/learning/moses/moses/moses_main.h>
 #include <opencog/learning/moses/moses/moses_params.h>

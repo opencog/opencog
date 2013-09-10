@@ -1,7 +1,7 @@
 /** moses_exec.cc ---
  *
  * Copyright (C) 2010 OpenCog Foundation
- * Copyright (C) 2012 Poulin Holdings LLC
+ * Copyright (C) 2012, 2013 Poulin Holdings LLC
  *
  * Author: Nil Geisweiller <ngeiswei@gmail.com>
  *         Linas Vepstas <linasvepstas@gmail.com>
@@ -31,8 +31,6 @@
 #include <opencog/util/log_prog_name.h>
 #include <opencog/util/numeric.h>
 
-#include <opencog/comboreduct/table/table.h>
-
 #include "moses_exec.h"
 #include "demo-problems.h"
 #include "problem.h"
@@ -41,9 +39,6 @@
 #include "../moses/partial.h"
 #include "../optimization/hill-climbing.h"
 #include "../optimization/optimization.h"
-#include "../example-progs/scoring_iterators.h"
-
-
 
 namespace opencog { namespace moses {
 
