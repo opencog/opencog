@@ -62,10 +62,9 @@ struct problem_params
     bool enable_feature_selection;
     std::vector<combo_tree> exemplars;
 
-    reduct::logical_reduction lr;
-    const reduct::rule& bool_reduct;
-    const reduct::rule& bool_reduct_rep;
-    const reduct::rule& contin_reduct;
+    reduct::rule* bool_reduct;
+    reduct::rule* bool_reduct_rep;
+    reduct::rule* contin_reduct;
 
     // Demo options XXX these should be removed!
     unsigned int problem_size;
@@ -76,6 +75,8 @@ struct problem_params
     const moses_parameters& moses_params;
     metapop_parameters meta_params;
     metapop_printer& mmr_pa;
+protected:
+    reduct::logical_reduction lr;
 };
 
 class problem_base

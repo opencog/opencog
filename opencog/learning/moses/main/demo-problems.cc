@@ -76,7 +76,7 @@ void bool_problem_base::run(problem_params& pms)
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
     metapop_moses_results(pms.exemplars, sig,
-                          pms.bool_reduct, pms.bool_reduct_rep, bscore,
+                          *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -225,7 +225,7 @@ void polynomial_problem::run(problem_params& pms)
 
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
     metapop_moses_results(pms.exemplars, tt,
-                          pms.contin_reduct, pms.contin_reduct, bscore,
+                          *pms.contin_reduct, *pms.contin_reduct, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }
@@ -330,7 +330,7 @@ void combo_problem::run(problem_params& pms)
         // @todo: Occam's razor and nsamples is not taken into account
         logical_bscore bscore(tr, arity);
         metapop_moses_results(pms.exemplars, tt,
-                              pms.bool_reduct, pms.bool_reduct_rep, bscore,
+                              *pms.bool_reduct, *pms.bool_reduct_rep, bscore,
                               pms.opt_params, pms.hc_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     }
@@ -370,7 +370,7 @@ void combo_problem::run(problem_params& pms)
         contin_bscore bscore(ot, it);
         set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
         metapop_moses_results(pms.exemplars, tt,
-                              pms.contin_reduct, pms.contin_reduct, bscore,
+                              *pms.contin_reduct, *pms.contin_reduct, bscore,
                               pms.opt_params, pms.hc_params, pms.meta_params,
                               pms.moses_params, pms.mmr_pa);
     } else {
@@ -417,7 +417,7 @@ void ann_combo_problem::run(problem_params& pms)
     set_noise_or_ratio(bscore, as, pms.noise, pms.complexity_ratio);
 
     metapop_moses_results(pms.exemplars, tt,
-                          pms.contin_reduct, pms.contin_reduct, bscore,
+                          *pms.contin_reduct, *pms.contin_reduct, bscore,
                           pms.opt_params, pms.hc_params, pms.meta_params,
                           pms.moses_params, pms.mmr_pa);
 }

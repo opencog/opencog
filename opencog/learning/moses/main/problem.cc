@@ -22,6 +22,7 @@
  */
 
 #include "problem.h"
+#include <opencog/comboreduct/reduct/meta_rules.h>
 
 namespace opencog { namespace moses {
 
@@ -34,22 +35,20 @@ problem_params::problem_params(const vertex_set& ignore_ops_,
                                metapop_printer& mmr_pa_) :
     default_nsamples(20),
     ignore_ops(ignore_ops_),
-
-    // Logical reduction rules used during search.
-    lr(logical_reduction(ignore_ops_)),
-    bool_reduct(lr(reduct_candidate_effort_)),
-
-    // Logical reduction rules used during representation building.
-    bool_reduct_rep(lr(reduct_knob_building_effort_)),
-
-    // Continuous reduction rules used during search and representation
-    // building.
-    contin_reduct(contin_reduction(reduct_candidate_effort_, ignore_ops)),
     moses_params(moses_params_),
     mmr_pa(mmr_pa_)
 {
-}
+    // Logical reduction rules used during search.
+    lr = logical_reduction(ignore_ops);
+    bool_reduct = lr(reduct_candidate_effort_).clone();
 
+    // Logical reduction rules used during representation building.
+    bool_reduct_rep = lr(reduct_knob_building_effort_).clone();
+
+    // Continuous reduction rules used during search and representation
+    // building.
+    contin_reduct = contin_reduction(reduct_candidate_effort_, ignore_ops).clone();
+}
 
 map<std::string, problem_base*> problem_set;
 
