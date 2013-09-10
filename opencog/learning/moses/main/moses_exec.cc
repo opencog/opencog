@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/util/log_prog_name.h>
-
 #include "moses_exec.h"
 #include "demo-problems.h"
 #include "table-problems.h"

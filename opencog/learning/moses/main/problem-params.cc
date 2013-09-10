@@ -26,6 +26,7 @@
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
 
 #include <opencog/util/oc_omp.h>

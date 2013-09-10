@@ -110,14 +110,13 @@ struct problem_params
     score_t max_score;
     size_t max_dist;
 
-    // continuous optimization
+    // contin optimization
     std::vector<contin_t> discretize_thresholds;
-    double ip_kld_weight;
-    double ip_skewness_weight;
-    double ip_stdU_weight;
-    double ip_skew_U_weight;
-    score_t hardness;       // hardness of the activation range
-                            // constraint for problems pre, recall, prerec
+
+    // hardness of the activation range
+    // constraint for problems pre, recall, prerec
+    score_t hardness;
+
     // hc_param
     bool hc_widen_search;
     bool hc_single_step;
@@ -138,12 +137,20 @@ struct problem_params
     bool it_abs_err;
 
     // XXX Demo options, these should be removed!
+    // viz the demo problems should get access to argc, argv...
+    // and do their own parsing.
     std::string combo_str;
     unsigned int problem_size;
 
-    // EXPERIMENTAL
-    // feature selection happens before each representation building
+    // interesting predicates options.
+    // XXX just like above, the ip argv parser should grab these...
+    double ip_kld_weight;
+    double ip_skewness_weight;
+    double ip_stdU_weight;
+    double ip_skew_U_weight;
+
     /// Enable feature selection while selecting exemplar
+    /// feature selection happens before each representation building
     bool enable_feature_selection;
     std::string fs_focus;
     std::string fs_seed;
@@ -160,7 +167,7 @@ struct problem_params
     reduct::rule* bool_reduct_rep;
     reduct::rule* contin_reduct;
 
-    optim_parameters opt_params; // XXX should be const
+    optim_parameters opt_params;
     hc_parameters hc_params;
     moses_parameters moses_params;
     metapop_parameters meta_params;
