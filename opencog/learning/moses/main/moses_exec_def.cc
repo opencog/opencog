@@ -24,7 +24,8 @@
 
 namespace opencog { namespace moses {
 
-string opt_desc_str(const pair<string, string>& opt) {
+string opt_desc_str(const pair<string, string>& opt)
+{
     string res = string(opt.first);
     if (!opt.second.empty())
         res += string(",") + opt.second;
