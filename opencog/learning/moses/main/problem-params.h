@@ -49,8 +49,6 @@ struct problem_params
     bool enable_mpi;
 
     unsigned long rand_seed;
-    std::vector<std::string> input_data_files;
-    std::string target_feature;
     std::string problem;
 
     // default number of samples to describe a problem
@@ -60,6 +58,12 @@ struct problem_params
     float max_rand_input;
     unsigned long max_evals;
     time_t max_time;
+    int max_gens;
+    std::string log_level;
+    std::string log_file;
+    bool log_file_dep_opt;
+
+    // output printing options (metapop_printer)
     long result_count;
     bool output_score;
     bool output_penalty;
@@ -69,26 +73,22 @@ struct problem_params
     bool output_with_labels;
     bool output_python;
     std::string output_file;
-    int max_gens;
-    std::string log_level;
-    std::string log_file;
-    bool log_file_dep_opt;
-    float noise;
+
+    // reduct options
+    int reduct_candidate_effort;
+    int reduct_knob_building_effort;
     std::vector<std::string> include_only_ops_str;
     std::vector<std::string> ignore_ops_str;
     vertex_set ignore_ops;
     std::vector<std::string> ignore_features_str;
-    std::string opt_algo; //optimization algorithm
     std::vector<std::string> exemplars_str;
     std::vector<combo_tree> exemplars;
-    int reduct_candidate_effort;
-    int reduct_knob_building_effort;
-    bool weighted_accuracy;
 
     // metapop_param
     int max_candidates;
     bool reduce_all;
     unsigned revisit;
+    float noise;
     score_t complexity_temperature;
     score_t complexity_ratio;
     double cap_coef;
@@ -106,11 +106,13 @@ struct problem_params
     std::string diversity_dst2dp;
 
     // optim_param
+    std::string opt_algo; //optimization algorithm
     double pop_size_ratio;
     score_t max_score;
     size_t max_dist;
 
     // contin optimization
+    bool weighted_accuracy;
     std::vector<contin_t> discretize_thresholds;
 
     // hardness of the activation range
@@ -126,7 +128,7 @@ struct problem_params
     unsigned hc_max_nn;
     double   hc_frac_of_nn;
 
-    // classifier paramters
+    // classifier parameters
     bool use_well_enough;
 
     // pre params
@@ -148,6 +150,11 @@ struct problem_params
     double ip_skewness_weight;
     double ip_stdU_weight;
     double ip_skew_U_weight;
+
+    // Table-related options
+    // XXX just like above, the table_base argv parser should grab these...
+    std::vector<std::string> input_data_files;
+    std::string target_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
@@ -171,9 +178,10 @@ protected:
 
     reduct::logical_reduction lr;
     options_description desc;
-    std::vector<std::string> col_labels;
-
     void options_init();
+
+private:
+    std::vector<std::string> col_labels;
 };
 
 } // ~namespace moses
