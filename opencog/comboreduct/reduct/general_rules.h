@@ -44,9 +44,7 @@ struct level : public crule<level>
 // op(op(const,const),var), e.g., +(2,x,1) => +(3,x)
 struct eval_constants : public crule<eval_constants>
 { 
-    Evaluator* evaluator;
-    eval_constants(Evaluator* e = NULL)
-        : crule<eval_constants>::crule("eval_constants"), evaluator(e) {}
+    eval_constants() : crule<eval_constants>::crule("eval_constants") {}
     void operator()(combo_tree& tr,combo_tree::iterator it) const;
 };
 
