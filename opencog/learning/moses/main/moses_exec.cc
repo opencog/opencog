@@ -234,7 +234,7 @@ int moses_exec(int argc, char** argv)
     if (probm)
     {
         probm->run(pms);
-        exit(0);
+        return 0;
     }
 
     // Problem based on input table.
