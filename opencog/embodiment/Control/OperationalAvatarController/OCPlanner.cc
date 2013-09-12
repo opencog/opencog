@@ -1166,11 +1166,22 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     allRuleNodeInThisPlan.end();
 
     // and then encapsule the action plac for each step and send to PAI
-    list<RuleNode*>::iterator planRuleNodeIt;
+    list<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
     int stepNum = 1;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
         RuleNode* r = (RuleNode*)(*planRuleNodeIt);
+
+        SpaceServer::SpaceMap* backwardStepMap ;
+
+        if (stepNum == 1)
+            backwardStepMap = &(spaceServer().getLatestMap());
+        else
+        {
+            lastStepIt = planRuleNodeIt;
+            lastStepIt --;
+            backwardStepMap = ((RuleNode*)(*lastStepIt))->curMap;
+        }
 
         // generate the action series according to the planning network we have constructed in this planning process
         PetAction* originalAction = r->originalRule->action;
@@ -1182,7 +1193,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         list<ActionParameter>::const_iterator paraIt;
         const list<ActionParameter>& params = originalAction->getParameters();
 
-        std::cout<<std::endl<<"Step No."<< stepNum << originalAction->getName();
+        std::cout<<std::endl<<"Step No."<< stepNum << ": "<< originalAction->getName();
 
         // for navigation actions, need to call path finder to create every step of it
         if ((originalAction->getType().getCode() == WALK_CODE) || (originalAction->getType().getCode() == MOVE_TO_OBJ_CODE) )
@@ -1215,7 +1226,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             else
             {
                 Entity entity1 = boost::get<Entity>(value);
-                targetPos = spaceServer().getLatestMap().getObjectLocation(entity1.id);
+                targetPos = backwardStepMap->getObjectLocation(entity1.id);
 
                 std::cout<< entity1.stringRepresentation()<<std::endl;
             }
@@ -1226,7 +1237,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             Vector v1 = boost::get<Vector>( r->orginalGroundedParamValues[1]);
             startPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
 
-            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),spaceServer().getLatestMap(),startPos,targetPos,planID);
+            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),*backwardStepMap,startPos,targetPos,planID);
 
         }
         else
