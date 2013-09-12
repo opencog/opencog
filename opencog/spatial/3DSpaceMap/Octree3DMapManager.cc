@@ -118,7 +118,7 @@ Octree3DMapManager::Octree3DMapManager(std::string _mapName,int _xMin, int _yMin
 
 Octree3DMapManager::~Octree3DMapManager()
 {
-    // delete all the BlockEnties
+    // delete all the BlockEntities
     map<int,BlockEntity*>::iterator iter2;
     for (iter2 = mBlockEntityList.begin(); iter2 != mBlockEntityList.end(); ++iter2)
     {

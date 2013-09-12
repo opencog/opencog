@@ -552,37 +552,7 @@ bool Effect::isEffectOpOpposite(Effect* effect)
     else
         return false;
 }
-/*
-enum EFFECT_OPERATOR_TYPE
-{
-    OP_REVERSE, // this is only for the bool variables
-    OP_ASSIGN,  // this operator can be used in any variable type =
-    OP_ASSIGN_NOT_EQUAL_TO, // this operator can be used in any variable type !=
-    OP_ASSIGN_GREATER_THAN, // this operator can be used in any variable type >
-    OP_ASSIGN_LESS_THAN, // this operator can be used in any variable type <
-    OP_ADD,     // only for numeric variables +=
-    OP_SUB,     // only for numeric variables -=
-    OP_MUL,     // only for numeric variables *=
-    OP_DIV,     // only for numeric variables /=
-    OP_NUM_OPS  // must always be the last one in this list.
-};
 
-extern const char* EFFECT_OPERATOR_NAME[9];
-
-
-// There are 3 kinds of state types:
-// 1. equal, which can be used in non-numeric and numeric state values: e.g.: the price of Book1 is 15 dollors
-// 2. fuzzy value, e.g.: the price of Book1 is between 10~20 dollors
-// 3. comparator: the price of Book1 is greater than 10, less than 20
-enum StateType
-{
-    STATE_EQUAL_TO,     // EvaluationLink
-    STATE_NOT_EQUAL_TO,     // EvaluationLink
-    STATE_FUZZY_WITHIN, // EvaluationLink + PredicationNode "Fuzzy_within"
-    STATE_GREATER_THAN, // GreaterThanLink
-    STATE_LESS_THAN     // LessThanLink
-};
-*/
 
 StateType Effect::getTargetStateType()
 {

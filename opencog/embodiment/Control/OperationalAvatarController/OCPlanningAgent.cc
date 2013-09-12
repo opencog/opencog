@@ -258,7 +258,6 @@ void OCPlanningAgent::run()
             hSelectedDemandGoal = Handle::UNDEFINED;
         }
 
-
         hSelectedDemandGoal =  AtomSpaceUtil::getReference(oac->getAtomSpace(),
                                         oac->getAtomSpace().getHandle(CONCEPT_NODE,
                                                             "plan_selected_demand_goal"));

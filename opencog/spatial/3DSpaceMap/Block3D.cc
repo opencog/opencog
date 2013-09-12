@@ -54,7 +54,7 @@ Block3D::Block3D(int _composedLevel, BlockVector& _position, string _materialTyp
 Block3D::~Block3D()
 {
     // remove this big block from the blocklist of myEntity
-    if (mBlockEntity != 0)
+    if (mBlockEntity)
         mBlockEntity->removeBlock(this);
 }
 
