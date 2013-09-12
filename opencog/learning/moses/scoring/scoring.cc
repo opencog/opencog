@@ -2037,22 +2037,98 @@ cluster_bscore::cluster_bscore(const ITable& itable)
 
 penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
 {
-    // size_t nclusters = 3;
-
-    score_t avg = 0.0;
-    score_t asq = 0.0;
+    // evaluate the tree on the table
     OTable oned(tr, _itable);
+
+    size_t nclusters = 3;
+
+    OC_ASSERT(nclusters < oned.size());
+
+    // Initial guess for the centroids
+    vector<score_t> edges(nclusters-1);
+    size_t i;
+    for (i=0; i<nclusters-1; i++)
+    {
+        edges[i] = 0.5 * (get_contin(oned[i]) + get_contin(oned[i+1]));
+    }
+    std::sort(edges.begin(), edges.end());
+
+for (i=0; i<nclusters-1; i++)
+{
+printf("duuude initially its this: %d %f\n", i, edges[i]);
+}
+
+    // One-dimensional k-means algorithm (LLoyd's algorithm)
+    vector<size_t> assign(oned.size());
+    bool changed = true;
+    while (changed) {
+        vector<score_t> cnt(nclusters);
+        vector<score_t> sum(nclusters);
+        changed = false;
+        int j=0;
+        for (auto val : oned)
+        {
+            score_t sc = get_contin(val);
+
+            // Assign values to clusters
+            for (i=0; i<nclusters-1; i++)
+            {
+                if (sc < edges[i])
+                {
+                    cnt[i] += 1.0;
+                    sum[i] += sc;
+                    if (i != assign[j]) changed = true;
+                    assign[j] = i;
+                    break;
+                }
+            }
+            if (nclusters - 1 == i)
+            {
+                cnt[i] += 1.0;
+                sum[i] += sc;
+            }
+
+            // Compute cluster centers.
+            for (i=0; i<nclusters; i++)
+            {
+                // If one of the clusters is empty, that's bad....
+                if (cnt[i] < 0.9)
+                {
+                    penalized_bscore pbs;
+                    pbs.first.push_back(-1.0e150);
+                    return pbs;
+                }
+                sum[i] /= cnt[i];
+            }
+            for (i=0; i<nclusters-1; i++) edges[i] = 0.5 * (sum[i] + sum[i+1]);
+            j++;
+        }
+    }
+
+
+    // Compute the RMS width of each cluster.
+    vector<score_t> cnt(nclusters);
+    vector<score_t> sum(nclusters);
+    vector<score_t> squ(nclusters);
+    size_t j = 0;
     for (auto val : oned)
     {
         score_t sc = get_contin(val);
-        avg += sc;
-        asq += sc*sc;
+        i = assign[j];
+        cnt[i] += 1.0;
+        sum[i] += sc;
+        squ[i] += sc*sc;
+        j++;
     }
-    score_t ocnt = 1.0 / oned.size();
-    avg *= ocnt;
-    asq *= ocnt;
-    score_t final = avg*avg - asq;
 
+    score_t final = 0.0;
+    for (i=0; i<nclusters; i++)
+    {
+        sum[i] /= cnt[i];
+        squ[i] /= cnt[i];
+
+        final += squ[i] - sum[i]*sum[i];
+    }
     penalized_bscore pbs;
     pbs.first.push_back(final);
 std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
