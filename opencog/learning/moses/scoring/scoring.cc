@@ -2028,6 +2028,58 @@ score_t interesting_predicate_bscore::min_improv() const
                                 // backwards-compatible behavior
 }
 
+// ====================================================================
+
+cluster_bscore::cluster_bscore(const ITable& itable)
+    : _itable(itable)
+{
+}
+
+penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
+{
+    // size_t nclusters = 3;
+
+    score_t avg = 0.0;
+    score_t asq = 0.0;
+    OTable oned(tr, _itable);
+    for (auto val : oned)
+    {
+        score_t sc = get_contin(val);
+        avg += sc;
+        asq += sc*sc;
+    }
+    score_t ocnt = 1.0 / oned.size();
+    avg *= ocnt;
+    asq *= ocnt;
+    score_t final = avg*avg - asq;
+
+    penalized_bscore pbs;
+    pbs.first.push_back(final);
+std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
+
+    // Add the Complexity penalty
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
+// Return the best possible bscore. Used as one of the
+// termination conditions (when the best bscore is reached).
+behavioral_score cluster_bscore::best_possible_bscore() const
+{
+    // return behavioral_score(_table.size(), 0.0);
+    return behavioral_score(1, 0.0);
+}
+
+score_t cluster_bscore::min_improv() const 
+{
+    return 0.01;
+}
+    
+// ====================================================================
 //////////////////////////////
 // multibscore_based_bscore //
 //////////////////////////////
