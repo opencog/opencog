@@ -941,7 +941,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     {
         // contains mutiple conditions, so add them one by one
         vector<string> _allVariables;
-        for(int i = 0; i < stateIndexes.size() ; ++ i)
+        for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
         {
             int index = stateIndexes[i];
             list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
@@ -979,8 +979,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;

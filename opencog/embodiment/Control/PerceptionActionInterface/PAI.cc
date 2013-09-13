@@ -630,10 +630,46 @@ bool PAI::isActionDone(ActionID actionId, unsigned long sinceTimestamp) const
             atomSpace, ACTION_DONE_PREDICATE_NAME, actionId, sinceTimestamp);
 }
 
+bool PAI::isActionDone(ActionPlanID planId, unsigned int seqNumber) const
+{
+    ActionPlanMap::const_iterator it = pendingActionPlans.find(planId);
+    if (it != pendingActionPlans.end())
+    {
+        const ActionPlan& plan = it->second;
+        return plan.isDone(seqNumber);
+    }
+    else
+    {
+        // check if this plan is failed
+        if ( hasPlanFailed(planId))
+            return false;
+        else
+            return true; // the whole plan has been finshed successfully.
+    }
+}
+
 bool PAI::isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const
 {
     return AtomSpaceUtil::isActionPredicatePresent(
             atomSpace, ACTION_FAILED_PREDICATE_NAME, actionId, sinceTimestamp);
+}
+
+bool PAI::isActionFailed(ActionPlanID planId, unsigned int seqNumber) const
+{
+    ActionPlanMap::const_iterator it = pendingActionPlans.find(planId);
+    if (it != pendingActionPlans.end())
+    {
+        const ActionPlan& plan = it->second;
+        return plan.isFailed(seqNumber);
+    }
+    else
+    {
+        // check if this plan is failed
+        if ( hasPlanFailed(planId))
+            return true;
+        else
+            return false; // the whole plan has been finshed successfully.
+    }
 }
 
 bool PAI::isActionTried(ActionID actionId, unsigned long sinceTimestamp) const
@@ -3761,6 +3797,8 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isToy = getBooleanProperty(properties, IS_TOY_ATTRIBUTE);
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
+    bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
+
     const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
     if (isEdible)
@@ -3779,6 +3817,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
     addPropertyPredicate(std::string("is_drinkable"), objectNode, isDrinkable, true);
     addPropertyPredicate(std::string("is_toy"), objectNode, isToy, true);
+    addPropertyPredicate(std::string("is_pickupable"), objectNode, isPickupable, true);
 
     // Add the inheritance link to mark the family of this entity.
     addInheritanceLink(std::string("pet_home"), objectNode, isHome);

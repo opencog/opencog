@@ -212,8 +212,7 @@ IMPORTANCE_DECAY_CYCLE_PERIOD = 1
 #NEGATIVE_REWARD -1.0
 
 # Parameter to control the maximal time spent by a procedure to be executed by Procedure Interpreter (in seconds)
-#PROCEDURE_EXECUTION_TIMEOUT     = 90 
-PROCEDURE_EXECUTION_TIMEOUT     = 20
+PROCEDURE_EXECUTION_TIMEOUT     = 90 
 
 # Indicates if walk actions sent to PVP can be canceled so that new navigation plan be sent to PVP when needed.
 ALLOW_WALKING_CANCELATION       = false

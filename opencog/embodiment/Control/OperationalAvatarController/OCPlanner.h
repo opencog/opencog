@@ -114,6 +114,8 @@ public:
 
     set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
+    SpaceServer::SpaceMap* curMap; // to store an imaginary cloned 3D space map after execute the effects of this rule node
+
     // cost as soft heuristics inherited from its
     // these carry the heuristics information for the backward steps to select variable values
     // ungrounded, but the variable names should be consistent with its originalRule
@@ -144,6 +146,7 @@ public:
         originalRule = _originalRule;
         costHeuristics.clear();
         still_useful = true;
+        appliedTimes = 0;
     }
 
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
@@ -192,7 +195,8 @@ public:
     // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
     // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
     // it its forward rule node has multiple forward state node, using the deepest one
-    void calculateNodeDepth();
+    // return depth
+    int calculateNodeDepth();
 
     // have tried to find candidateRules
     bool hasFoundCandidateRules;
@@ -224,6 +228,9 @@ struct TmpParamCandidate
    }
 };
 
+// about node depth: both state nodes and rule nodes have depth, is to describe the relative position of these nodes;
+//                   the goal state node's depth is 0, the starting nodes (most backward nodes, original state nodes) is 999;
+//                   The max step number we do for a planning problem is 999 steps. If try 999 steps, still cannot find a solution, return planning fail.
 class OCPlanner
 {
 public:
@@ -271,10 +278,15 @@ protected:
      // all the new elements should be put_front , so the latest update of the same state will already put in front of the older history
      list<StateNode*> temporaryStateNodes;
 
+     // the orginal states when the planning starts
+     list<StateNode*> startStateNodes;
+
      // to store all the rule node in current plan. it should be clear everytime begin new planning.
      // every new rule node will be insurt into this list, and it will be removed from the set if it's deleted
      // this list will be sorted after a planning finised according to the order of dependency relations
      list<RuleNode*> allRuleNodeInThisPlan;
+
+     vector<SpaceServer::SpaceMap*> imaginarySpaceMaps;
 
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
@@ -300,7 +312,9 @@ protected:
      bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
      // return how many states in the temporaryStateNodes will be Negatived by this rule
-     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState);
+     // bool &negativeGoal return if this rule after grounded will negative this forward goal state
+     // bool &isDiffStateOwnerType return if the effect state owner types are differnt from its fowardState
+     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal, bool &isDiffStateOwnerType);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
@@ -334,13 +348,19 @@ protected:
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      // @ RuleNode* forwardRuleNode : the state's forward rule node
      // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode);
+     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode, int depth);
+
+     bool findStateInStartStateNodes(State& state, StateNode* &stateNode);
 
      // @ RuleNode* forwardRuleNode : the goal state's forward rule node
      // @ bool &found: return if this same state is found in temporaryStateNodes
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-     bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,bool ifCheckSameRuleNode);
+     // @ curStateNode is the state node of goalState, it cannot be 0 if curStateNode has not been created
+     //   if it's 0, it means it has no backward links yet, so only check in startStateNodes.
+     //   if it's not 0, check state nodes in temporaryStateNodes with a depth  first , if cannot find in temporaryStateNodes, check in startStateNodes.
+     bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,
+                                                 RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curStateNode = 0);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
      void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);
@@ -348,8 +368,12 @@ protected:
      // rebind a state node, replace the old state in this node with the new state generated by new bindings
      void reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings);
 
-     // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
-     void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+     SpaceServer::SpaceMap* getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode);
+
+     // execute the current rule action if any action that involved changing space map
+     // return the input iSpaceMap if there is no change to space map, return a new cloned imaginary space map if the space map changed by the action.
+     // iSpaceMap will remain unchanged.
+     SpaceServer::SpaceMap *executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap *iSpaceMap);
 
      void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
@@ -362,6 +386,8 @@ protected:
      // the forwardState can be a ungrounded state from other rule
      // if cannot unify it , return 0
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
+
+     void outputStateInfo(State* s, bool outPutStateValue);
 
 };
 

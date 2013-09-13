@@ -81,7 +81,9 @@ BlockEntity::BlockEntity(Octree3DMapManager* map,vector<BlockEntity*> subEntitie
 
 BlockEntity::~BlockEntity()
 {
+    clearAllBlocks();
     spaceMap->newDisappearBlockEntityList.push_back(mEntityNode);
+
 }
 
 BlockEntity* BlockEntity::clone(Octree3DMapManager* _newSpaceMap)
@@ -248,7 +250,11 @@ void BlockEntity::clearAllBlocks()
     for (it = mMyBlocks.begin(); it != mMyBlocks.end(); ++it)
     {
         Block3D* b = *it;
-        b->mBlockEntity = 0;
+        if (b)
+        {
+            if (b->mBlockEntity == this)
+                b->mBlockEntity = 0;
+        }
     }
 
     mMyBlocks.clear();
