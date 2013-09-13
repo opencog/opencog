@@ -27,6 +27,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class XMLBufferReader
 {
@@ -39,6 +42,7 @@ public:
     virtual XMLBufferReader* clone() = 0;
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_XML_BUFFER_READER_H

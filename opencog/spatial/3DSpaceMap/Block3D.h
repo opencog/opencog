@@ -31,7 +31,9 @@ using namespace std;
 
 namespace opencog
 {
-
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         /**
@@ -92,6 +94,7 @@ namespace opencog
 
         };
     }
+/** @}*/
 }
 
 #endif // _SPATIAL_BLOCK3D_H_

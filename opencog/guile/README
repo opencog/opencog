@@ -24,11 +24,9 @@ guile binding -- these provide for the creation and deletion of OpenCog
 Nodes, Links, TruthValues and VersionHandles, as well as ways to get 
 properties (such as the names of Nodes, or the outgoing sets of Links).  
 Although the core interface is documented below, it is important to notice
-that scheme makes "syntactic sugar" very easy to use; thus the interface
-below can be simplified, and has been simplified (in the  file
-''opencog/scm/type_constructors.scm'', which may be loaded by running 
-the shell script ''opencog/scm/load.sh'') Thus, atom creation can be as
-simple as the following example:
+that scheme makes "syntactic sugar" very easy to use.  Some default sugar
+is provided in order to make the creation of typed atoms extremely easy.
+Atom creation can be as simple as the following example:
 
    (ReferenceLink (stv 0.987 0.234)
        (ConceptNode "dog-instance-1") (WordNode "dog"))
@@ -675,7 +673,7 @@ startup, or manually.
 To load automatically, edit ''[[opencog.conf]]'', and append the
 filename to the line ''SCM_PRELOAD'', for example:
 
-   SCM_PRELOAD = scm/type_constructors.scm, scm/utilities.scm
+   SCM_PRELOAD = atomspace/core_type.scm, scm/utilities.scm
 
 The [[cogserver]] is then started with the -c flag:
 

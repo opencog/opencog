@@ -1,8 +1,12 @@
 
 # We need to put this in a library, so that MOSESUTest can link to it.
 ADD_LIBRARY (moses_exec
+    demo-problems
+    problem
+    problem-params
     moses_exec
     moses_exec_def
+    table-problems
 )
 
 ADD_EXECUTABLE (moses-exec moses-exec)

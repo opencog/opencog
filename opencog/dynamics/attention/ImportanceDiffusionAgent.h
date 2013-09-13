@@ -44,6 +44,9 @@ typedef boost::numeric::ublas::compressed_matrix<float> bmatrix;
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class CogServer;
 
@@ -163,6 +166,10 @@ private:
     //! Is a normalised value from -1 to 1. 0 == AF
     float diffusionThreshold;
 
+    //! Whether to spread STI across all types of Links and not just HebbianLinks.
+    //! If there are multiple links between the same two Atoms, then it will add up their strengths.
+    bool allLinksSpread;
+
     //! Spread importance along Hebbian links.
     //! @todo split into sub functions instead of one giant beast.
     void spreadImportance();
@@ -220,6 +227,7 @@ public:
     float getDiffusionThreshold() const;
 }; // class
 
-}; // namespace
+/** @}*/
+} // namespace
 
 #endif // _OPENCOG_IMPORTANCE_DIFFUSION_AGENT_H

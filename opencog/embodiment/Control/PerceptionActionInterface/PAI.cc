@@ -1161,29 +1161,28 @@ Handle PAI::processActionAvailability(DOMElement* signal)
         char* targetType = XMLString::transcode(signal->getAttribute(tag));
 
         opencog::Type targetTypeCode;
-
-        if (strlen(targetType))
+        OC_ASSERT(strlen(targetType) > 0);
+        
+        string targetTypeStr(targetType);
+        
+        internalTargetId = PAIUtils::getInternalId(targetName);
+        
+        if (targetTypeStr == "avatar")
         {
-            string targetTypeStr(targetType);
-
-            std::string internalTargetId = PAIUtils::getInternalId(targetName);
-
-            if (targetTypeStr == "avatar")
-            {
-                if (internalTargetId == avatarInterface.getPetId())
-                    targetTypeCode = PET_NODE;
-                else
-                    targetTypeCode = AVATAR_NODE;
-            }
-            else if (targetTypeStr == "accessory")
-            {
-                targetTypeCode = ACCESSORY_NODE;
-            }
+            if (internalTargetId == avatarInterface.getPetId())
+                targetTypeCode = PET_NODE;
             else
-            {
-                targetTypeCode = OBJECT_NODE; // Set a default type.
-            }
+                targetTypeCode = AVATAR_NODE;
         }
+        else if (targetTypeStr == "accessory")
+        {
+            targetTypeCode = ACCESSORY_NODE;
+        }
+        else
+        {
+            targetTypeCode = OBJECT_NODE; // Set a default type.
+        }
+
 
         // Add the target of this action into AtomSpace
         targetNode = AtomSpaceUtil::addNode(atomSpace, targetTypeCode, internalTargetId.c_str());

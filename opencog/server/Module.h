@@ -28,6 +28,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * DECLARE_MODULE -- Declare a new module, called MODNAME
@@ -99,19 +102,23 @@ namespace opencog
  * a static 'const char*' member which will be used to identify this
  * module.
  *
+ * @code
  * // DerivedModule.h
  * #include <opencog/server/Module.h>
  * class DerivedModule : public opencog::Module
  * {
  *     static const char* id = "DerivedModule"
  * }
+ * @endcode
  *
  * 2. In the class implementation, define three external C functions with
  * signatures and names matching those defined in the base Module class:
  *
+ * @code
  * // DerivedModule.cc
  * #include "DerivedModule.h"
  * DECLARE_MODULE(DerivedModule);
+ * @endcode
  *
  * To implement the module's functionality, you will probably want to
  * write a custom constructor and destructor and perhaps overwrite the
@@ -161,6 +168,7 @@ protected:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_MODULE_H

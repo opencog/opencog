@@ -34,6 +34,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 class SleepRequest : public Request
 {
@@ -56,6 +59,7 @@ public:
     virtual bool isShell(void) {return info().is_shell;}
 };
 
+/** @}*/
 } // namespace 
 
 #endif // _OPENCOG_SLEEP_REQUEST_H

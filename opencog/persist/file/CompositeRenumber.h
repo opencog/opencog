@@ -32,6 +32,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 class CompositeRenumber
 {
@@ -44,6 +47,7 @@ public:
     static void updateVersionHandles(CompositeTruthValue&, HandleMap<Atom *> *handles);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG__COMPOSITE_RENUMBER_H_

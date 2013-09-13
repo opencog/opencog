@@ -26,6 +26,9 @@
 #include <opencog/atomspace/VersionHandle.h>
 
 namespace opencog {
+/** \addtogroup grp_smob
+ *  @{
+ */
 
 class Atom;
 
@@ -176,6 +179,7 @@ class SchemeSmob
 		static std::string vh_to_string(const VersionHandle *);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SCHEME_SMOB_H

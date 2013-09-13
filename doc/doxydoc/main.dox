@@ -9,6 +9,30 @@ of completion, some already displaying interesting and useful functionalities
 alone and in combination.
 
 The main project site is at <a href="http://opencog.org/">opencog.org</a>.
+To get you started, a number of pages were prepared for you in 
+<a href="http://wiki.opencog.org/w/Category:OpenCog_for_Noobs">the wiki</a>.
+
+These pages at the forefront of doxygen generated documentation are intended to
+show a high level overview of the project. It pays to read them all in one
+breath, without following other links except \b Next at the bottom of each page.
+This will give you a raw view of what is already been done and whant still 
+needs to be done, of what should be part of the project and what should be build
+outside it. You can refine that first, raw look by passing once again through 
+these pages, following links towards wiki pages and inside documentation. You may
+also want to keep track of where you are in the source directory, just in case you 
+feel a sudden urge to view the source file in question. Once you've done these
+two passes, you will be able to get to any part of the project in under 10 seconds
+to find out the name of that class. And, while we're at this, one may
+find a cross-platform code editor with symbol navigation and CMake support quite usefull.
+It just so happens that <a href="http://qt-project.org/wiki/Category:Tools::QtCreator">Qt Creator</a>
+is one such free, open source tool.
+
+Just to prevent future frustrations: the project is 
+<a href="http://buildbot.opencog.org/doxygen/dd/da0/todo.html">not as stable</a>
+as one preparing to dive into it may wish. Be prepared for swift changes, for
+obsolete documentation and undocumented code. We need YOU to make things better
+wheter you're <a href="https://github.com/opencog/opencog/issues?state=open">a coder</a>
+or <a href="http://wiki.opencog.org/w/ToDo">not</a>.
 
 \section mainpage_toc Table of Contents
 
@@ -18,11 +42,19 @@ ignored by doxygen; used as markers for update-links.py;
 - \subpage libraries
 	- \ref libcogutil
 	- \ref libatomspace
+	- \ref libserver
+	- \ref libspatial
+	- \ref libspacetime
+	- \ref libattention
+	- \ref libsmob
+	- \ref libpersist
 	- \ref libcomboreduct
 - \subpage programs
 	- \ref progcogserver
+	- \ref progMapTools
 - \subpage fsstructure
 - \subpage bldtargets
+- \subpage otherwikis
 - \subpage license
 
 <TABLE width="100%" border="0"><TR>
@@ -34,4 +66,3 @@ ignored by doxygen; used as markers for update-links.py;
 ignored by doxygen; used as markers for update-links.py;
 \endif
 */
-

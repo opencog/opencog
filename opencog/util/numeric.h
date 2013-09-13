@@ -526,7 +526,7 @@ Float angular_distance(const Vec& a, const Vec& b, bool pos_n_neg = true)
         return 0;
 }
 
-/** @}*/
 } // ~namespace opencog
+/** @}*/
 
 #endif // _OPENCOG_NUMERIC_H

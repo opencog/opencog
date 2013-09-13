@@ -155,9 +155,9 @@ def normalize(diff):
     Uses an (arbitrary) formula to normalize it to a fuzzy truth value between 0 and 1.
     A higher diff produces a fuzzy TV closer to 1'''
 
-    return tanh(1 - NORMALIZE_FACTOR*diff)/2
+    return (1 - tanh(NORMALIZE_FACTOR*diff))/2
 
 def reverse_normalize(diff):
     '''Normalizes a diff in the opposite direction. A higher diff produces a fuzzy TV closer to 0.'''
    
-    return 1-normalize(diff)
+    return tanh(NORMALIZE_FACTOR*diff)/2

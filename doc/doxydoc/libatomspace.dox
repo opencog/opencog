@@ -19,7 +19,8 @@ Dependencies:
 
 \section sect_atom The atom
 
-The atom is a basic entity used in OpenCog as an element for building
+<a href="http://wiki.opencog.org/w/Atoms_for_Noobs">The atom</a>
+is a basic entity used in OpenCog as an element for building
 representations. Some atoms directly represent patterns in the world or mind,
 others are components of representations. There are two kinds of atoms: nodes
 and links. Atoms have Type and Arity, a Handle (see below), link to parent 
@@ -215,7 +216,7 @@ ignored by doxygen; used as markers for update-links.py;
 <TABLE width="100%" border="0"><TR>
 <TD>\ref libcogutil "Previous"</TD>
 <TD width="100%"></TD>
-<TD>\ref libcomboreduct "Next"</TD>
+<TD>\ref libserver "Next"</TD>
 </TR></TABLE>
 \if MARKER_TREE_END
 ignored by doxygen; used as markers for update-links.py;
@@ -235,10 +236,3 @@ To read a high level overview of this library head to
 \ref libatomspace "dedicated page".
 */
 } //~namespace opencog
-
-
-./src/opencog/atomspace/ForeachChaseLink.h \
-./src/opencog/atomspace/ForeachTwo.h \
-
-
-

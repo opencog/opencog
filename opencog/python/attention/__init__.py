@@ -1,1 +1,4 @@
-__author__ = 'keyvan'
+__author__ = 'keyvan & jade'
+
+from HebbianMining import HebbianMiningAgent
+

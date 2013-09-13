@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_attention
+ *  @{
+ */
 
 class AttentionModule : public Module
 {
@@ -60,6 +63,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_ATTENTION_MODULE_H

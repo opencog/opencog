@@ -31,7 +31,7 @@
 #include <opencog/embodiment/AvatarComboVocabulary/avatar_builtin_action.h>
 #include <opencog/embodiment/WorldWrapper/WorldWrapperUtil.h>
 
-#include <opencog/comboreduct/interpreter/eval.h>
+#include <opencog/comboreduct/interpreter/interpreter.h>
 
 namespace opencog { namespace Procedure {
 
@@ -41,21 +41,21 @@ using namespace pai;
 
 RunningComboProcedure::RunningComboProcedure(WorldWrapperBase& ww,
         const combo::combo_tree& tr,
-        const std::vector<combo::vertex>& arguments,
-        bool dsdp, combo::variable_unifier& vu)
-        : _ww(ww), _tr(tr), _it(_tr.begin()), _hasBegun(false),
+        const vertex_seq& arguments,
+        bool dsdp)
+        : _ww(ww), _tr(tr), _arguments(arguments), _it(_tr.begin()),
+        _hasBegun(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
-        _doesSendDefinitePlan(dsdp), _vu(vu)
+        _doesSendDefinitePlan(dsdp)
 {
     finished = false;
-    init(arguments);
 }
 
 RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
-        : _ww(rhs._ww), _tr(rhs._tr), _it(_tr.begin()),
+        : _ww(rhs._ww), _tr(rhs._tr), _arguments(rhs._arguments), _it(_tr.begin()),
         _hasBegun(false), _planSent(false),
         _failed(boost::logic::indeterminate), _inCompound(false),
-        _doesSendDefinitePlan(rhs._doesSendDefinitePlan), _vu(rhs._vu)
+        _doesSendDefinitePlan(rhs._doesSendDefinitePlan)
 {
     if (_hasBegun != false || (!rhs._tr.empty() && rhs._it != rhs._tr.begin())) {
         std::stringstream stream (std::stringstream::out);
@@ -69,89 +69,58 @@ RunningComboProcedure::RunningComboProcedure(const RunningComboProcedure& rhs)
     finished = false;
 }
 
-vertex RunningComboProcedure::eval_action(combo_tree::iterator it, combo::variable_unifier& vu)
+vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it)
 {
-    //TODO
-    OC_ASSERT(false, "Not implemented yet");
-    return vertex();
+    //!@todo Can a percept have arguments that need to be evaluated?
+    //!@todo Remove the unifier system completely
+    return _ww.evalPerception(it, combo::variable_unifier::DEFAULT_VU());
 }
 
-vertex RunningComboProcedure::eval_procedure(combo::combo_tree::iterator it, combo::variable_unifier& vu)
+vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io)
 {
-    expand_procedure_call(it);
-    *it = eval_throws(it, this, vu);
-    _tr.erase_children(it);
-    return *it;
+    return _ww.evalIndefiniteObject(io, combo::variable_unifier::DEFAULT_VU());
 }
 
-void RunningComboProcedure::expand_procedure_call(combo::combo_tree::iterator it) throw (ComboException, AssertionException, std::bad_exception)
+vertex RunningComboProcedure::eval_anything(sib_it it)
 {
+    typedef combo_tree::iterator pre_it;
+    const vertex& v = *it;
 
-    // sanity checks
-    if (!is_procedure_call(*it)) {
-        throw ComboException(TRACE_INFO,
-                                      "RunningComboProcedure - combo_tree node does not represent a combo procedure call.");
+    if (const argument* a = boost::get<argument>(&v)) {
+        arity_t idx = a->idx;
+        // Assumption : when idx is negative, the argument is
+        // necessarily boolean, and must be negated.
+        // return idx > 0? v : negate_vertex(v);
+        return idx > 0? _arguments[idx - 1] : negate_vertex(_arguments[-idx - 1]);
     }
-    procedure_call pc = get_procedure_call(*it);
-
-    arity_t ar = pc->arity();
-    bool fixed_arity = ar >= 0; //the procedure gets fix number of
-    //input arguments
-    combo::arity_t exp_arity = combo::abs_min_arity(ar);
-    arity_t ap_args = it.number_of_children();
-    //OC_ASSERT(ar>=0, "It is assumed that arity is 0 or above, if not in that case the procedure must contain operator with arbitrary arity like and_seq and no variable binding to it, it is probably an error but if you really want to deal with that then ask Nil to add the support of it");
-    if (fixed_arity) {
-        if (ap_args != ar) {
-            throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s arity differs from no. node's children. Arity: %d, number_of_children: %d",
-                                          get_procedure_call(*it)->get_name().c_str(), ar, ap_args);
-        }
+    // perception
+    else if (is_perception(v)) {
+        return eval_percept(it);
+    }
+    else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
+        return eval_indefinite_object(*io);
+    }
+    // definite objects evaluate to themselves
+    else if (is_definite_object(v)) {
+        return v;
+    }
+    // action symbol
+    else if (is_action_symbol(v)) {
+        return v;
     } else {
-        if (ap_args < exp_arity) {
-            throw ComboException(TRACE_INFO,
-                                          "RunningComboProcedure - %s minimum arity is greater than no. node's children. Minimum arity: %d, number_of_children: %d",
-                                          get_procedure_call(*it)->get_name().c_str(), exp_arity, ap_args);
-        }
+        // Delegate it to Nil's new mixed interpreter (which handles boolean, contin and mixed operators).
+        // It will give an error for any other operator
+        mixed_interpreter mi;
+        return mi(it);
     }
-
-    combo::combo_tree tmp(get_procedure_call(*it)->get_body());
-    combo::set_bindings(tmp, it);
-    *it = *tmp.begin();
-    _tr.erase_children(it);
-    _tr.reparent(it, tmp.begin());
-}
-
-void RunningComboProcedure::expand_and_evaluate_subtree(combo::combo_tree::iterator it, combo::variable_unifier& vu)
-{
-    //expand procedure calls and evaluate them
-    combo::combo_tree::iterator end = it;
-    end.skip_children();
-    ++end;
-    for (combo::combo_tree::iterator at = it;at != end;++at) {
-        if (is_procedure_call(*at)) {
-            expand_procedure_call(at);
-            *at = eval_throws(at, this, vu);
-            _tr.erase_children(at);
-        }
-    }
-}
-
-
-vertex RunningComboProcedure::eval_percept(combo::combo_tree::iterator it, combo::variable_unifier& vu)
-{
-    expand_and_evaluate_subtree(it, vu);
-    return _ww.evalPerception(it, vu);
-}
-
-vertex RunningComboProcedure::eval_indefinite_object(indefinite_object io, combo::variable_unifier& vu)
-{
-    return _ww.evalIndefiniteObject(io, vu);
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         AssertionException,
         std::bad_exception)
 {
+    vertex_seq empty;
+
     //debug log
     if (logger().isDebugEnabled()) {
         stringstream tr_ss;
@@ -216,7 +185,8 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
         } else if (*_it == id::action_boolean_if) {
             try {
-                vertex res = eval_throws(_it.begin(), this, _vu);
+                //vertex res = eval_throws_binding(empty, _it.begin(), this);
+                vertex res = eval_anything(_it.begin());
                 if (res == id::logical_true) {
                     _it = ++_it.begin();
                 } else if (res == id::logical_false) {
@@ -245,7 +215,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 moveOn();
             } else {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, _vu);
+                    vertex res = eval_anything(_it.begin());
                     if (res == id::logical_true) {
                         _it = ++_it.begin();
                     } else {
@@ -289,7 +259,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
         } else if (*_it == id::repeat_n) {
             if (_stack.empty() || _stack.top().first != _it) {
                 try {
-                    vertex res = eval_throws(_it.begin(), this, _vu);
+                    vertex res = eval_anything(_it.begin());
                     OC_ASSERT(is_contin(res));
                     _stack.push(make_pair(_it, get_contin(res)));
                 } catch (...) {
@@ -324,7 +294,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 bool tostop = false;
                 for (sib_it sib = _it.begin();sib != _it.end();++sib) {
                     //first evaluate the children
-                    *sib = eval_throws(sib, this, _vu);
+                    *sib = eval_anything(sib);
                     if (*sib == id::null_obj) { //just fail
                         logger().error("RunningComboProc - Sibling is null_obj.");
 
@@ -352,18 +322,19 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
             }
             bool execed =
                 ( (_tr.is_valid(parent) && *parent == id::sequential_and) ?
-                  execSeq(_it, std::find_if(_it, parent.end(),
-                                            !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)), _vu)
-                  : exec(_it, _vu) );
+                  execSeq(_it, std::find_if(_it, parent.end(), !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)) )
+                  : exec(_it) );
             if (execed) {
                 moveOn();
                 return;
             }
 
         } else if (is_procedure_call(*_it)) { //an action procedure
+            // This probably shouldn't be handled here...
+            OC_ASSERT(false, "RunningComboProcedure does not support function calls inside a combo expression");
             try {
 
-                expand_procedure_call(_it);
+                //expand_procedure_call(_it);
                 continue;
 
             } catch (ComboException& e) {
@@ -373,9 +344,6 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 _it = _tr.end();
                 return;
             }
-
-        } else if (is_argument(*_it)) {
-            OC_ASSERT(false);
 
         } else {
 
@@ -389,11 +357,10 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                 _it = _tr.end();
                 return;
 
-            } else {
-                //try passing it off to the regular combo interpreter - evaluation
-                //without actions will get done in a single cycle
-                _tr = combo::combo_tree(eval_throws(_it, this, _vu));
-                _it = _tr.begin();
+            } else {          
+                // use the general evaluator and modify this tree (which seems ugly but that's how cycle() seems to work) -- Jade      
+                vertex result = eval_anything(_it);
+                *_it = result;
                 moveOn();
             }
         }
@@ -401,7 +368,7 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
     //logger().error("popl");
 }
 
-bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unifier& vu)
+bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
 {
     //debug print
     //std::cout << "EXECSEQ FROM : "
@@ -415,14 +382,16 @@ bool RunningComboProcedure::execSeq(sib_it from, sib_it to, combo::variable_unif
     }
     _hasBegun = true; //since we're going to send a plan
     _failed = boost::logic::indeterminate;
-    std::for_each(make_counting_iterator(from),
-                  make_counting_iterator(to),
-                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, vu));
+    //! @todo evaluate subtrees correctly
+//    std::for_each(make_counting_iterator(from),
+//                  make_counting_iterator(to),
+//                  boost::bind(&RunningComboProcedure::expand_and_evaluate_subtree, this, _1, combo::variable_unifier::DEFAULT_VU()));
 
     if (_doesSendDefinitePlan) {
         for (sib_it sib = from; sib != to; ++sib) {
             for (sib_it arg = sib.begin(); arg != sib.end();++arg) {
-                *arg = eval_throws(arg, this, vu);
+                vertex_seq empty;
+                *arg = eval_anything(arg);
 
                 if (*arg == id::null_obj) {
                     //will definitely fail at this point..
@@ -546,10 +515,5 @@ void RunningComboProcedure::moveOn()
     ++_it;
 }
 
-
-void RunningComboProcedure::init(const std::vector<vertex>& args)
-{
-    combo::set_bindings(_tr, args);
-}
 
 }} // ~namespace opencog::Procedure

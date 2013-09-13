@@ -36,6 +36,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -80,6 +83,7 @@ namespace opencog
         }; //class
 
     } // spatial
+/** @}*/
 } // opencog
 
 

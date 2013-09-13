@@ -28,6 +28,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
 
@@ -112,7 +115,7 @@ namespace opencog
             virtual inline ENTITY_TYPE getType( void ) const 
             {
                 return Entity::MOVABLE;
-            };
+            }
 
             virtual inline EntityPtr clone( void ) const 
             {
@@ -129,6 +132,7 @@ namespace opencog
         }; // MovableEntity
 
     } // spatial
+/** @}*/
 } // opencog
 
 #endif // _SPATIAL_MOVABLEENTITY_H_

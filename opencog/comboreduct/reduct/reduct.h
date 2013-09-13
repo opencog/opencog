@@ -32,7 +32,7 @@
 namespace opencog { namespace reduct {
 
 using namespace opencog::combo;
-    
+
 struct rule
 {
     typedef combo_tree argument_type;
@@ -43,7 +43,7 @@ struct rule
     virtual rule* clone() const=0;
 
     void operator()(combo_tree& tr) const
-    { 
+    {
         if (!tr.empty())
             (*this)(tr, tr.begin());
     }
@@ -57,6 +57,8 @@ protected:
     std::string name;
 };
 
+// new_clone() is needed by boost ptr_vector in struct sequential
+// (and other places) but is not otherwise used anywhere.
 reduct::rule* new_clone(const reduct::rule& r);
 
 template<typename T>
@@ -75,21 +77,23 @@ const rule& ann_reduction();
 struct logical_reduction
 {
     logical_reduction();
+    logical_reduction(const logical_reduction&);
     logical_reduction(const vertex_set& ignore_ops);
+    logical_reduction& operator=(const logical_reduction&);
     ~logical_reduction();
 
     const rule& operator()(int effort = 2);
 private:
     void do_init();
-    const rule *p_medium;
-    const rule *p_complexe;
+    const rule* p_medium;
+    const rule* p_complexe;
 public:
-    static rule *p_extra_simple;
-    static rule *p_simple;
+    static rule* p_extra_simple;
+    static rule* p_simple;
 };
 
 // @ignore_ops is the set of operators to ignore
-const rule& contin_reduction(int reduct_effort, 
+const rule& contin_reduction(int reduct_effort,
                              const vertex_set& ignore_ops);
 
 const rule& fold_reduction();
@@ -103,9 +107,9 @@ const rule& clean_reduction();
 
 /**
  * reduce trees containing logical operators, boolean constants
- * and boolean-typed literals. 
+ * and boolean-typed literals.
  *
- * For effort==2 and creater, this will also recurse down into
+ * For effort==2 and greater, this will also recurse down into
  * predicates, and reduce those. Currently, only the greater-than-zero
  * predicate is supported; when such a predicate is encountered,
  * the contin terms inside of it are reduced.
@@ -136,17 +140,17 @@ inline void logical_reduce(int effort, combo_tree& tr)
  * constants and contin-typed literals.
  */
 inline void contin_reduce(combo_tree& tr, combo_tree::iterator it,
-                          int reduct_effort, 
+                          int reduct_effort,
                           const vertex_set& ignore_ops)
 {
     contin_reduction(reduct_effort, ignore_ops)(tr, it);
 }
 
-inline void contin_reduce(combo_tree& tr, 
+inline void contin_reduce(combo_tree& tr,
                           int reduct_effort,
                           const vertex_set& ignore_ops)
 {
-    contin_reduction(reduct_effort, ignore_ops)(tr); 
+    contin_reduction(reduct_effort, ignore_ops)(tr);
 }
 
 inline void fold_reduce(combo_tree& tr, combo_tree::iterator it)
@@ -171,7 +175,7 @@ inline void mixed_reduce(combo_tree& tr)
 
 /**
  * reduce trees containing mixtures of logical operators, boolean
- * constants, boolean-valued predicates, boolean-valued literals, 
+ * constants, boolean-valued predicates, boolean-valued literals,
  * arithmetic operators, contin-typed constants, and contin-valued
  * literals.  (Elsewhere, we call these "predicate trees").
  */
@@ -212,8 +216,8 @@ inline void clean_and_full_reduce(combo_tree& tr,
 }
 
 inline void clean_and_full_reduce(combo_tree& tr)
-{ 
-    // clean_and_full_reduction()(tr,tr.begin()); 
+{
+    // clean_and_full_reduction()(tr,tr.begin());
     clean_reduce(tr);
     full_reduce(tr);
 }
@@ -257,7 +261,7 @@ inline void replace_without_changing_it(combo_tree& tr,
         // it is assumed (for now) that dst and src have the same
         // number of children
         tr.replace(dst.begin(), dst.end(), src.begin(), src.end());
-    }    
+    }
 }
 
 } // ~namespace reduct

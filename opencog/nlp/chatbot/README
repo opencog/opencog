@@ -50,9 +50,10 @@ The chatbot requires some additional Scheme modules to be loaded into
 opencog before starting the OpenCog Server. Furthermore, these modules
 are to be loaded in a particular order so that there won't be any
 dependency violations.
-Here is the proper order as of writing this:
+Here is the proper order as of this time:
 
-SCM_PRELOAD           = scm/type_constructors.scm, 
+SCM_PRELOAD           = atomspace/core_types.scm, 
+                        nlp/types/nlp_types.scm,
                         scm/persistence.scm,
                         scm/utilities.scm,
                         scm/file-utils.scm, 

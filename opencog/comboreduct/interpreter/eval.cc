@@ -30,7 +30,7 @@ namespace opencog { namespace combo {
 
 using namespace std;
 
-combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it, Evaluator * pe)
+combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterator it)
 {
     // sanity checks
     if (!is_procedure_call(*it)) {
@@ -68,170 +68,24 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterat
 
     // evaluate the arguments to the function (their variables are in the current scope, i.e. bmap)
     for (combo_tree::sibling_iterator arg_it = it.begin(); arg_it != it.end(); arg_it++) {
-        combo_tree arg_result(eval_throws_tree(bmap, arg_it, pe));
+        combo_tree arg_result(eval_throws_tree(bmap, arg_it));
 
         OC_ASSERT(arg_it.number_of_children() == 0, "functions cannot have list arguments");
         args.push_back(*arg_result.begin());
         cout << (*arg_result.begin()) << endl;
     }
 
-    combo_tree ret(eval_throws_tree(args, body.begin(), pe));
+    combo_tree ret(eval_throws_tree(args, body.begin()));
     return ret;
 }
-
-#if ALMOST_DEAD_EVAL_CODE
-// @todo all users of the code below should switch to using
-// eval_throws_binding() instead.
-//
-// Right now, as far as I can tell, only embodiment code uses this.
-//
-void set_bindings(combo_tree& tr, combo_tree::iterator it,
-                  const std::vector<vertex>& args, arity_t explicit_arity)
-{
-    combo_tree::iterator end = it;
-    end.skip_children();
-    ++end;
-    arity_t implicit_idx = explicit_arity;
-    arity_t ap_args = args.size();
-    for (combo_tree::iterator at = it;at != end;++at) {
-        if (at.is_childless()) {
-
-            //if argument #idx then substitute it by
-            //args[idx-1]
-            if (is_argument(*at)) {
-                argument& arg = get_argument(*at);
-                if (arg.is_negated()) {
-                    tr.append_child(at, *at);
-                    *at = id::logical_not;
-                    at = at.begin();
-                    arg.negate();
-                }
-                *at = args[arg.idx-1];
-            } else {
-                arity_t a = get_arity(*at);
-                if (a != 0) {
-                    arity_t ama = abs_min_arity(a);
-                    arity_t rest_ap_arg = ap_args - implicit_idx;
-                    if (ama <= rest_ap_arg) {
-                        arity_t idx_bound;
-                        if (a > 0) //that is the arity is fixed
-                            idx_bound = implicit_idx + ama;
-                        else //that is at uses arg_list
-                            idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; ++implicit_idx)
-                            tr.append_child(at, args[implicit_idx]);
-                    } else { //raise an assert
-                        std::stringstream ss;
-                        ss << *at;
-                        OC_ASSERT(false,
-                                  "There is not enough arguments given"
-                                  " in input, %s needs at least %d"
-                                  " arguments and only %d are provided",
-                                  ss.str().c_str(),
-                                  static_cast<int>(ama),
-                                  static_cast<int>(rest_ap_arg));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void set_bindings(combo_tree& tr, combo_tree::iterator it,
-                  combo_tree::iterator arg_parent, arity_t explicit_arity)
-{
-    std::vector<combo_tree::iterator>
-    args(boost::make_counting_iterator(arg_parent.begin()),
-         boost::make_counting_iterator(arg_parent.end()));
-    combo_tree::iterator end = it;
-    end.skip_children();
-    ++end;
-    arity_t implicit_idx = explicit_arity;
-    arity_t ap_args = args.size();
-    for (combo_tree::iterator at = it;at != end;++at) {
-        if (at.is_childless()) {
-            //if argument #idx then substitute it by
-            //args[idx-1]
-            if (is_argument(*at)) {
-                argument& arg = get_argument(*at);
-                if (arg.is_negated()) {
-                    tr.append_child(at, *at);
-                    *at = id::logical_not;
-                    at = at.begin();
-                    arg.negate();
-                }
-                combo_tree tmp(args[arg.idx-1]);
-                at = tr.move_ontop(at, tmp.begin());
-                at.skip_children();
-            } else {
-                arity_t a = get_arity(*at);
-                if (a != 0) {
-                    arity_t ama = abs_min_arity(a);
-                    arity_t rest_ap_arg = ap_args - implicit_idx;
-                    if (ama <= rest_ap_arg) {
-                        arity_t idx_bound;
-                        if (a > 0) //that is the arity is fixed
-                            idx_bound = implicit_idx + ama;
-                        else //that is at uses arg_list
-                            idx_bound = ap_args;
-                        for (; implicit_idx < idx_bound; ++implicit_idx) {
-                            combo_tree tmp(args[implicit_idx]);
-                            tr.move_ontop(tr.append_child(at), tmp.begin());
-                        }
-                        at.skip_children();
-                    } else { //raise an assert
-                        std::stringstream ss;
-                        ss << *at;
-                        OC_ASSERT(false,
-                                  "There is not enough arguments given"
-                                  " in input, %s needs at least %d"
-                                  " arguments and only %d are provided",
-                                  ss.str().c_str(),
-                                  static_cast<int>(ama),
-                                  static_cast<int>(rest_ap_arg));
-                    }
-                }
-            }
-        }
-    }
-}
-
-void set_bindings(combo_tree& tr, const std::vector<vertex>& args)
-{
-    if (!tr.empty())
-        set_bindings(tr, tr.begin(), args, explicit_arity(tr));
-}
-
-void set_bindings(combo_tree& tr, combo_tree::iterator arg_parent)
-{
-    if (!tr.empty())
-        set_bindings(tr, tr.begin(), arg_parent, explicit_arity(tr));
-}
-
-// debug printing
-void print_binding_map(const binding_map& bmap) {
-    std::cout << "bmap = {";
-    for (const binding_map::value_type& vt : bmap) {
-        std::cout << vt.first << ":";
-        if (const vertex* v = boost::get<const vertex>(&vt.second))
-            std::cout << *v;
-        else
-            std::cout << boost::get<combo_tree::iterator>(&vt.second);
-        std::cout << ",";
-    }
-    std::cout << "}" << std::endl;
-}
-#endif /* ALMOST_DEAD_EVAL_CODE */
 
 /// eval_throws_binding -- evaluate a combo tree, using the argument
 /// values supplied in the vertex_seq list.
 ///
 /// This proceedure does not do any type-checking; the static type-checker
 /// should be used for this purpose.
-/// The Evaluator is currently unused; we're waiting for variable unification
-/// to be made obsolete (!?)
 vertex eval_throws_binding(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe)
+                           combo_tree::iterator it)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
@@ -247,7 +101,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
     //     logger().fine(ss.str());
     // }
 
-    combo_tree ret(eval_throws_tree(bmap, it, pe));
+    combo_tree ret(eval_throws_tree(bmap, it));
     // Make sure it has no children.
     OC_ASSERT(ret.number_of_children(ret.begin()) == 0, "Invalid use of eval_throws_binding:"
         "expression evaluates to a whole combo_tree, not just one vertex");
@@ -256,7 +110,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 }
 
 vertex eval_throws_vertex(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe)
+                           combo_tree::iterator it)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
@@ -283,7 +137,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             if (it.begin() == it.end()) // For correct foldr behaviour
                 return id::logical_and;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-                if (eval_throws_binding(bmap, sib, pe) == id::logical_false)
+                if (eval_throws_binding(bmap, sib) == id::logical_false)
                     return id::logical_false;
             return id::logical_true;
         }
@@ -292,12 +146,12 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             if (it.begin() == it.end())  // For correct foldr behaviour
                 return id::logical_or;
             for (sib_it sib = it.begin(); sib != it.end(); ++sib)
-                if (eval_throws_binding(bmap, sib, pe) == id::logical_true)
+                if (eval_throws_binding(bmap, sib) == id::logical_true)
                     return id::logical_true;
             return id::logical_false;
         }
         case id::logical_not :
-            return negate_vertex(eval_throws_binding(bmap, it.begin(), pe));
+            return negate_vertex(eval_throws_binding(bmap, it.begin()));
 
         // Mixed operators
 
@@ -309,7 +163,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
                 // to return a boolean in this case, anyway.  Values
                 // might be +inf -inf or nan and we can still get a
                 // sign bit off two of these cases...
-                x = eval_throws_binding(bmap, sib, pe);
+                x = eval_throws_binding(bmap, sib);
             } catch (EvalException e) {
                 x = e.get_vertex();
             }
@@ -318,7 +172,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
 
         case id::impulse : {
             vertex i;
-            i = eval_throws_binding(bmap, it.begin(), pe);
+            i = eval_throws_binding(bmap, it.begin());
             return (i == id::logical_true ? 1.0 : 0.0);
         }
 
@@ -331,7 +185,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             contin_t res = 0;
             //assumption : plus can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws_binding(bmap, sib, pe);
+                vertex vres = eval_throws_binding(bmap, sib);
                 res += get_contin(vres);
             }
             return res;
@@ -345,7 +199,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             contin_t res = 1;
             //assumption : times can have 1 or more arguments
             for (sib_it sib = it.begin(); sib != it.end(); ++sib) {
-                vertex vres = eval_throws_binding(bmap, sib, pe);
+                vertex vres = eval_throws_binding(bmap, sib);
                 res *= get_contin(vres);
                 if (0.0 == res) return res;  // avoid pointless evals
             }
@@ -355,11 +209,11 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         case id::div : {
             contin_t x, y;
             sib_it sib = it.begin();
-            vertex vx = eval_throws_binding(bmap, sib, pe);
+            vertex vx = eval_throws_binding(bmap, sib);
             x = get_contin(vx);
             if (0.0 == x) return x;  // avoid pointless evals
             ++sib;
-            vertex vy = eval_throws_binding(bmap, sib, pe);
+            vertex vy = eval_throws_binding(bmap, sib);
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
@@ -368,7 +222,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         }
 
         case id::log : {
-            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin());
 #ifdef ABS_LOG
             contin_t res = log(std::abs(get_contin(vx)));
 #else
@@ -380,7 +234,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         }
 
         case id::exp : {
-            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin());
             contin_t res = exp(get_contin(vx));
             // this may happen in case the argument is too high, then
             // exp will be infty
@@ -389,7 +243,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         }
 
         case id::sin : {
-            vertex vx = eval_throws_binding(bmap, it.begin(), pe);
+            vertex vx = eval_throws_binding(bmap, it.begin());
             return sin(get_contin(vx));
         }
 
@@ -418,31 +272,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
     // enums are constants too
     else if (is_enum_type(v)) {
         return v;
-    }
 
-    // PetBrain stuff
-    // action
-    else if (is_action(v) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_action(it, combo::variable_unifier::DEFAULT_VU());
-    }
-    // perception
-    else if (is_perception(v) && pe) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_percept(it, combo::variable_unifier::DEFAULT_VU());
-    }
-    // indefinite objects are evaluated by the pe
-    else if (const indefinite_object* io = boost::get<indefinite_object>(&v)) {
-        OC_ASSERT(pe, "Non null Evaluator must be provided");
-        return pe->eval_indefinite_object(*io, combo::variable_unifier::DEFAULT_VU());
-    }
-    // definite objects evaluate to themselves
-    else if (is_definite_object(v)) {
-        return v;
-    }
-    // action symbol
-    else if (is_action_symbol(v)) {
-        return v;
     } else {
         std::cerr << "unrecognized expression " << v << std::endl;
         throw EvalException(v);
@@ -473,7 +303,7 @@ vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap,
-                           combo_tree::iterator it, Evaluator* pe)
+                           combo_tree::iterator it)
     throw(EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
@@ -498,8 +328,8 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             pre_it loc = tr.begin();
 
             for (sib_it sib = it.begin(); sib != it.end(); sib++) {
-                // tr.append_child(loc, eval_throws_tree(bmap, sib, pe).begin());
-                combo_tree rr = eval_throws_tree(bmap, sib, pe);
+                // tr.append_child(loc, eval_throws_tree(bmap, sib).begin());
+                combo_tree rr = eval_throws_tree(bmap, sib);
                 tr.append_child(loc, rr.begin());
              }
 
@@ -512,7 +342,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
 
             combo_tree evo;
             if (*lp != id::list) {
-                evo = eval_throws_tree(bmap, lp, pe);
+                evo = eval_throws_tree(bmap, lp);
                 lp = evo.begin();
             }
             if (*lp != id::list)
@@ -522,7 +352,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             // That is, use an empty list to represent nil.
             if (lp.begin() == lp.end())
                 return combo_tree(id::list);
-            return eval_throws_tree(bmap, lp.begin(), pe);
+            return eval_throws_tree(bmap, lp.begin());
         }
 
         // cdr takes a list and returns the tail of the list
@@ -531,7 +361,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
 
             combo_tree evo;
             if (*top != id::list) {
-                evo = eval_throws_tree(bmap, top, pe);
+                evo = eval_throws_tree(bmap, top);
                 top = evo.begin();
             }
             if (*top != id::list)
@@ -545,7 +375,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             combo_tree tr(id::list);
             pre_it loc = tr.begin();
             for (; sib != top.end(); sib++) {
-                combo_tree rest = eval_throws_tree(bmap, sib, pe);
+                combo_tree rest = eval_throws_tree(bmap, sib);
                 tr.append_child(loc, rest.begin());
             }
 
@@ -562,15 +392,15 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
               return combo_tree(vx);
             }
             sib_it head = it.begin();
-            combo_tree ht = eval_throws_tree(bmap, head, pe);
+            combo_tree ht = eval_throws_tree(bmap, head);
             tr.append_child(loc, ht.begin());
 
             head++;
-            combo_tree rest = eval_throws_tree(bmap, head, pe);
+            combo_tree rest = eval_throws_tree(bmap, head);
 
             sib_it lst = rest.begin();
             for (sib_it sib = lst.begin(); sib != lst.end(); sib++)
-                // tr.append_child(loc, eval_throws_tree(bmap, sib, pe).begin());
+                // tr.append_child(loc, eval_throws_tree(bmap, sib).begin());
                 tr.append_child(loc, (pre_it) sib);
 
             return tr;
@@ -585,7 +415,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             itend--;
             if (itend.begin() == itend.end()) {
                 itend--;
-                return eval_throws_tree(bmap, itend, pe);
+                return eval_throws_tree(bmap, itend);
             }
 
             // main case: foldr(f v l) = f(car foldr(f v cdr))
@@ -600,7 +430,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             combo_tree car_lst(id::car); 
             sib_it car_lst_it = car_lst.begin();
             car_lst.append_child(car_lst_it, itend);
-            car_lst = eval_throws_tree(bmap,car_lst_it,pe);
+            car_lst = eval_throws_tree(bmap,car_lst_it);
             car_lst_it = car_lst.begin();
 
             // cb_tr == f(<x>)
@@ -615,16 +445,16 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             sib_it tr_it = tr.begin();
 
             // let cdr_result = the result of the call to cdr
-            combo_tree cdr_result(eval_throws_tree(bmap, cdr_call_it,pe));
+            combo_tree cdr_result(eval_throws_tree(bmap, cdr_call_it));
             sib_it cdr_result_it = cdr_result.begin();
             tr.append_child(tr_it, cdr_result_it);
 
-            tr = eval_throws_tree(bmap, tr_it, pe);
+            tr = eval_throws_tree(bmap, tr_it);
             tr_it = tr.begin();
 
             cb_tr.append_child(loc, tr_it);
 
-            return eval_throws_tree(bmap, loc, pe);
+            return eval_throws_tree(bmap, loc);
         }
 
         case id::foldl : {
@@ -636,12 +466,12 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             itend--;
             if (itend.begin() == itend.end()) {
                 itend--;
-                return eval_throws_tree(bmap, itend, pe);
+                return eval_throws_tree(bmap, itend);
             }
 
             // new tree: foldl(f f(v car) cdr)
             sib_it f = it.begin();
-            combo_tree lst = eval_throws_tree(bmap, itend, pe);
+            combo_tree lst = eval_throws_tree(bmap, itend);
             sib_it lst_it = lst.begin();
             sib_it tr_it = tr.begin();
             tr.erase(itend);
@@ -655,7 +485,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             combo_tree car_lst(id::car);
             sib_it car_lst_it = car_lst.begin();
             car_lst.append_child(car_lst_it, lst_it);
-            car_lst = eval_throws_tree(bmap, car_lst_it, pe);
+            car_lst = eval_throws_tree(bmap, car_lst_it);
             car_lst_it = car_lst.begin();
             rec.append_child(rec_it, car_lst_it);  //f(v car)
             tr.append_child(tr_it, rec_it);
@@ -663,11 +493,11 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             combo_tree cdr_lst(id::cdr);
             sib_it cdr_lst_it = cdr_lst.begin();
             cdr_lst.append_child(cdr_lst_it, lst_it);
-            cdr_lst = eval_throws_tree(bmap, cdr_lst_it, pe);
+            cdr_lst = eval_throws_tree(bmap, cdr_lst_it);
             cdr_lst_it = cdr_lst.begin();
             tr.append_child(tr_it, cdr_lst_it);
 
-            return eval_throws_tree(bmap, tr_it , pe); 
+            return eval_throws_tree(bmap, tr_it ); 
         }
 
         // lambda constructor
@@ -676,7 +506,10 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return tr;
         }
 
+        // The apply() operator is a sensible thing to have, but this code is bad so I disabled it.
+        // It shouldn't use set_bindings; if we want lambda functions then we should use scopes properly -- Jade
         case id::apply : {
+            OC_ASSERT(false, "apply() is not implemented");
             combo_tree tr(it);
             sib_it tr_it = tr.begin().begin();
             sib_it lambda_it = tr_it.end();
@@ -688,7 +521,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             for(; tr_it!=tr.begin().end(); tr_it++){
                 al.push_back(*tr_it);
             }
-            set_bindings(exp_tr, exp_tr.begin(), al, explicit_arity(exp_tr));
+            //set_bindings(exp_tr, exp_tr.begin(), al, explicit_arity(exp_tr));
             return eval_throws_tree(bmap, exp_tr);
         }
 
@@ -700,7 +533,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 OC_ASSERT (sib != it.end(), "Error: mal-formed cond statement");
 
                 /// @todo tree copy
-                combo_tree trcond(eval_throws_tree(bmap, sib, pe));
+                combo_tree trcond(eval_throws_tree(bmap, sib));
                 ++sib;  // move past the condition
 
                 // The very last value is the universal "else" clause,
@@ -713,7 +546,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
                 // the consequent, and loop around again.
                 vertex vcond = *trcond.begin();
                 if (vcond == id::logical_true)
-                    return eval_throws_tree(bmap, sib, pe);
+                    return eval_throws_tree(bmap, sib);
 
                 ++sib;  // move past the consequent
             }
@@ -730,11 +563,11 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
             return combo_tree(it);
 
         //return pe->eval_procedure(it, combo::variable_unifier::DEFAULT_VU());
-        return eval_procedure_tree(bmap, it, pe);
+        return eval_procedure_tree(bmap, it);
     }
 
     // Operators which only return a single vertex
-    vertex retv(eval_throws_vertex(bmap, it, pe));
+    vertex retv(eval_throws_vertex(bmap, it));
     /// @todo copying
     combo_tree ret(retv);
     return ret;
@@ -744,7 +577,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
 //
 //    // If we got the here, its not a list operator, so just return
 //    // a tree with a lone, simple type in it.
-//    return combo_tree(eval_throws_binding(bmap, it, pe));
+//    return combo_tree(eval_throws_binding(bmap, it));
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)

@@ -45,6 +45,9 @@
 
 namespace opencog
 {
+/** \addtogroup grp_persist
+ *  @{
+ */
 
 /**
  * This class provides saving and loading services based on binary images of
@@ -275,6 +278,7 @@ public:
     void addSavableRepository(SavableRepository *) throw (RuntimeException);
 };
 
+/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_SAVING_LOADING_H

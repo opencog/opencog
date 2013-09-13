@@ -1,0 +1,69 @@
+namespace opencog {
+/**
+
+\page libattention attention library
+
+The library (<em>opencog/dynamics/attention</em>) carry out the functions required for attention
+allocation among atoms within OpenCog.
+To build it, use:
+@code
+make attention
+@endcode
+
+Dependencies:
+- \ref libserver "server"
+
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_attention "the comprehensive overview".
+
+Library provides an Module: AttentionModule.
+
+\ref Agent "Agents":
+- ForgettingAgent: carries out the forgetting process based on LTI of Atoms.
+- HebbianUpdatingAgent updates  
+<a href="http://wiki.opencog.org/w/HebbianLink">HebbianLinks</a>; it deals with
+atoms that are likely to be important at the same time.
+- ImportanceDiffusionAgent spreads short term importance along 
+<a href="http://wiki.opencog.org/w/HebbianLink">HebbianLinks</a>
+using a diffusion approach
+- ImportanceSpreadingAgent Spreads short term importance along
+<a href="http://wiki.opencog.org/w/HebbianLink">HebbianLinks</a>
+- ImportantUpdatingAgent updates the AttentionValues of atoms (see
+<a href="See http://www.opencog.org/wiki/ImportanceUpdatingAgent">wiki page</a>;
+this Agent carries out:
+    - stimulus to STI and LTI conversion
+    - rent collection
+    - rent adjustment and taxing when AtomSpace funds go out of homeostatic bounds.
+- STIDecayingAgent implements a simple forgetting mechanism that doesn't rely on the
+complexities of the full Economic attention allocation system
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libspacetime "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libsmob "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+
+
+/**
+\defgroup grp_attention attention library
+
+This library (<em>opencog/dynamics/attention</em>) carry out the functions required for attention
+allocation among atoms within OpenCog.
+To build it type:
+@code
+make attention
+@endcode
+
+To read a high level overview of this library head to 
+\ref libattention "dedicated page".
+*/
+} //~namespace opencog

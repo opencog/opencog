@@ -32,6 +32,9 @@ using boost::asio::ip::tcp;
 
 namespace opencog
 {
+/** \addtogroup grp_server
+ *  @{
+ */
 
 /**
  * This class defines the minimal set of methods a server socket must
@@ -103,6 +106,7 @@ public:
 
 }; // class
 
+/** @}*/
 }  // namespace
 
 #endif // _OPENCOG_SERVER_SOCKET_H

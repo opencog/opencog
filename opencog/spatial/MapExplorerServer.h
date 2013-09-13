@@ -31,6 +31,9 @@
 
 namespace opencog 
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial 
     {
 
@@ -123,7 +126,8 @@ namespace opencog
             size_t latestMapHash;
             
         };
-    }; // spatial
-}; // opencog
+    } // spatial
+/** @}*/
+} // opencog
 
 #endif // MAPEXPLORERSERVER_H

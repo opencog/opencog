@@ -45,6 +45,9 @@ using namespace std;
 
 namespace opencog
 {
+/** \addtogroup grp_spatial
+ *  @{
+ */
     namespace spatial
     {
         class Entity3D;
@@ -376,6 +379,7 @@ namespace opencog
         };
 
     }
+/** @}*/
 }
 
 #endif // _SPATIAL_OCTREE3DMAPMANAGER_H

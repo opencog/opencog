@@ -1,0 +1,177 @@
+namespace opencog {
+/**
+
+\page libserver server library
+
+This library (<em>opencog/server</em>) is the active core of the project.
+It is used by \ref progcogserver "cogserver" program to do most
+of its functions.  To build it use:
+@code
+make server
+@endcode
+Note that same directory contains the sources for another related library - 
+\ref sect_builtinreqs "builtinreqs" - described in a section below.
+
+This page is a high level overview of the library; to dig into the details 
+read \ref grp_server "the comprehensive overview".
+
+Dependencies:
+- nlp-types
+- \ref libatomspace "atomspace"
+- boost filesystem
+- boost thread
+- dl
+- \ref libsmob "smob" - Guile (if available)
+- persist (if available)
+
+
+The basic requirements for a server are grouped in BaseServer class. It only
+provides \ref BaseServer::getAtomSpace "getAtomSpace()" and 
+\ref BaseServer::createInstance "createInstance()". There are also
+two global functions: server() to get the one and only instance and
+atomspace() that returns the AtomSpace associated with the server.
+
+CogServer class, derived from BaseServer, implements the official server used
+by the opencog framework. It is responsible for managing 4 base structures
+(cycles, modules, agents and requests) and a NetworkServer for external access
+to the server.
+
+The types of agents and requests known to the server are managed using Registry
+templated with Agent and Request. Registry helps to register, unregister and
+list classes, create, destroy and other management tasks.
+
+An Agent (or mind agent 
+<a href="http://wiki.opencog.org/w/MindAgent">in wiki</a>) is a 
+base abstract class that should be extended by all opencog agents. To write a 
+custom agent, all one has to do is to derive from
+the Agent class and implement the desired behavior inside the 
+\ref Agent::run "run()" method. See 
+<a href="http://wiki.opencog.org/w/Creating_a_new_Mind_Agent_in_C">Creating a new Mind Agent in C</a> and 
+<a href="http://wiki.opencog.org/w/Creating_a_Mind_Agent_that_does_something_in_C">Creating a Mind Agent that does something in C</a>
+
+Extening the repertoire of known commands is done using either modules containing
+commands or with shells.
+
+A module is first declared using DECLARE_MODULE, then implemented, maybe using
+TRIVIAL_MODULE or subclassing a class from Module. A Request is them
+added to module class using DECLARE_CMD_REQUEST that expects, among others, the routine
+that will be fired when that command is entered.
+
+A NetworkServer has a list of listeners; the base class for SocketListener is
+SocketPort.
+
+ConsoleSocket handles primary interface of the cogserver: the plain text command line.
+ConsoleSocket has a pointer to a GenericShell instance and is based on:
+- ServerSocket that defines the minimal set of methods a server socket must
+have to handle the primary interface of the cogserver
+- RequestResult, so that the class may be associated with a Request; it derives from
+IHasMimeType and IRequestComplete interfaces.
+
+The server also logs the Activity of agents  using SystemActivityTable. 
+This forms the base for 
+<a href="http://opencog.org/wiki/OpenCogPrime:AttentionalDataMining">Attentional Data Mining</a>.
+
+
+\section sect_builtinreqs   builtinreqs library
+
+This library contains build-in requests.
+To build it use:
+@code
+make builtinreqs
+@endcode
+
+Dependencies:
+- \ref libatomspace "atomspace"
+- \ref libcogutil "cogutil"
+
+The module to implement the requests is BuiltinRequestsModule and it
+uses following \ref Factory "factories": ListRequest, SleepRequest
+ShutdownRequest, LoadModuleRequest, UnloadModuleRequest and ListModulesRequest.
+These provide a basic system where the user is able to close the connection,
+list available commands, start, stop, advance and list agents. 
+A comprehensive list is available in 
+<a href="http://wiki.opencog.org/w/CogServer_Commands">the wiki</a>.
+
+\section sect_shells   Shells
+
+Two libraries are provided that implement GenericShell interface:
+
+\subsection ssect_schemeshell  Scheme shell
+
+To build it use:
+@code
+make scheme-shell
+@endcode
+
+Dependencies:
+- \ref libsmob "smob"
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+- \ref libcogutil "cogutil"
+- boost system
+
+The command to enter this shell (provided by SchemeShellModule) is 
+@code
+scm
+@endcode
+Executing <a href="http://en.wikipedia.org/wiki/Scheme_%28programming_language%29">Scheme</a>
+code without actually entering the shell is also possible:
+@code
+scm-eval <scheme code>
+@endcode
+
+\subsection ssect_pythonshell  Python shell
+
+To build it use:
+@code
+make py-shell
+@endcode
+
+Dependencies:
+- \ref libsmob "smob"
+- \ref libserver "server"
+- \ref libatomspace "atomspace"
+- \ref libcogutil "cogutil"
+- boost system
+- python library
+
+The command to enter this shell (provided by PythonShellModule) is 
+@code
+py
+@endcode
+Executing <a href="http://www.python.org/">Python</a>
+code without actually entering the shell is also possible:
+@code
+py-eval <scheme code>
+@endcode
+
+
+\if MARKER_TREE_START
+ignored by doxygen; used as markers for update-links.py;
+\endif
+
+<TABLE width="100%" border="0"><TR>
+<TD>\ref libatomspace "Previous"</TD>
+<TD width="100%"></TD>
+<TD>\ref libspatial "Next"</TD>
+</TR></TABLE>
+\if MARKER_TREE_END
+ignored by doxygen; used as markers for update-links.py;
+\endif
+*/
+
+/**
+\defgroup grp_server server library
+
+This library (<em>opencog/server</em>) is the active core of the project.
+It is used by \ref progcogserver "cogserver" program to do most
+of its functions.  To build it use:
+@code
+make server
+make builtinreqs
+@endcode
+
+To read a high level overview of this library head to 
+\ref libserver "dedicated page".
+*/
+} //~namespace opencog

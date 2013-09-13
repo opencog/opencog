@@ -55,6 +55,7 @@ void run_moses(metapopulation& metapop,
 /// Print metapopulation results to stdout, logfile, etc.
 struct metapop_printer
 {
+    metapop_printer() {}
     metapop_printer(long _result_count,
                     bool _output_score,
                     bool _output_penalty,
@@ -152,7 +153,9 @@ private:
     bool output_only_best;
     bool output_eval_number;
     bool output_with_labels;
-    const vector<string>& ilabels;
+public:
+    vector<string> ilabels;
+private:
     string output_file;
     bool output_python;
     bool is_mpi;

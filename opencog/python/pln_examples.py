@@ -50,9 +50,9 @@ bc/plus_test.conf
 #bc/new/pathfinding_test.conf
 #bc/new/before_test.conf
 bc/new/subset_test.conf
+temporal_before_test.conf
+temporal_deduction_test.conf
 ''')
-
-files_list = '''tempTest.conf'''
 
 #files_list = '''psi/psi_planning_one_step_test.conf'''
 

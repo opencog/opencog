@@ -321,6 +321,7 @@ def subset_rules(atomspace):
     return rules
 
 def planning_rules(atomspace):
+    '''A bunch of dubious hacks for using PLN as a STRIPS-style planner. Which isn't a great idea anyway'''
     rules = []
     # Used by planning. An ExecutionLink indicates an action being performed, so we can
     # assume that the action will be performed as part of the plan (i.e. if any action
@@ -458,6 +459,15 @@ def temporal_rules(atomspace):
                         match = create_temporal_matching_function(temporalFormulas.finished_byFormula)
                         )
                 )
+
+    # This Rule is important but the TV formula is wrong
+    rules.append(Rule(T('BeforeLink', 1, 3),
+                        [ T('BeforeLink', 1, 2), T('BeforeLink', 2, 3), Var(1), Var(2), Var(3) ],
+                        name='BeforeTransitivityRule',
+                        formula = formulas.deductionSimpleFormula
+                        )
+                )
+
     return rules
 
 def lookup_times(tree, atomspace):
@@ -482,8 +492,9 @@ def lookup_times(tree, atomspace):
 def create_temporal_matching_function(formula):
     def match_temporal_relationship(space,target):
         assert isinstance(target, Tree)
-        assert not target.args[0].is_variable()
-        assert not target.args[1].is_variable()
+        # awkward technical limitation - can't look up (Before $x MyBirth) for example - all things that happened before i was born
+        if target.args[0].is_variable() or target.args[1].is_variable():
+            return []
         
         distribution_event1 = lookup_times(target.args[0], space)
         distribution_event2 = lookup_times(target.args[1], space)
@@ -491,7 +502,7 @@ def create_temporal_matching_function(formula):
         missing_data = (len(distribution_event1) == 0 or len(distribution_event2) == 0)
         error_message = "unable to find distribution for targets", target.args[0], distribution_event1, target.args[1], distribution_event2
 
-        assert not missing_data, error_message
+        #assert not missing_data, error_message
         # Enable this instead of the assert after you finish debugging the rules.
         # For real-world use the assert is wrong - if you don't have the right data you should just not apply that Rule.
         if missing_data:
