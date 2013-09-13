@@ -373,6 +373,8 @@ public:
      */
     bool isActionDone(ActionID actionId, unsigned long sinceTimestamp) const;
 
+    bool isActionDone(ActionPlanID planId, unsigned int seqNumber) const;
+
     /**
      * Check if the action with the given id failed since the given timestamp.
      *
@@ -386,6 +388,8 @@ public:
      * method.
      */
     bool isActionFailed(ActionID actionId, unsigned long sinceTimestamp) const;
+
+    bool isActionFailed(ActionPlanID planId, unsigned int seqNumber) const;
 
     /**
      * Check if the action with the given id was already tried since the given

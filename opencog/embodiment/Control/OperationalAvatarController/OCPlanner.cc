@@ -535,7 +535,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     if (unsatisfiedStateNodes.size() == 0)
     {
         std::cout << "The goal is already satisfied! There is no need to do planning!" << std::endl;
-        return 0;
+        return "";
     }
 
     int tryStepNum = 0;
@@ -550,7 +550,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         if (tryStepNum > 999)
         {
             std::cout << "Planning failed! Has tried more than 999 steps of planning, cannot find a plan!" << std::endl;
-            return 0;
+            return "";
         }
 
         // decide which state should be chosed to achieved first
@@ -1272,6 +1272,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
         stepNum ++;
     }
+
+    std::cout<<std::endl;
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();

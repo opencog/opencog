@@ -152,13 +152,13 @@ void OCPlanningAgent::run()
     if (this->currentOCPlanID != "") // Currently , there is one plan being executed
     {
         // check if current action failed
-        if ( oac->getPAI().isActionFailed(this->current_action, oac->getPAI().getLatestSimWorldTimestamp()))
+        if ( oac->getPAI().isActionFailed(this->currentOCPlanID, current_step))
         {
             std::cout<<"Current action "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
                      << " failed! [PlanId = "
                      <<this->currentOCPlanID<<", cycle = "<<this->cycleCount<<"] ... " <<std::endl;
         }
-        else if ( oac->getPAI().isActionDone( this->current_action, oac->getPAI().getLatestSimWorldTimestamp()) )
+        else if ( oac->getPAI().isActionDone( this->currentOCPlanID, current_step) )
         {
             // the current action has been done successfully!
             std::cout<<"OCPlanningAgent::Action execution success! "<< oac->getAtomSpace().atomAsString(this->current_action).c_str()
