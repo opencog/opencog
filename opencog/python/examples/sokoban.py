@@ -131,6 +131,9 @@ class Level:
     '''
     def __init__(self, xml_tag): # xml_tag specs at:
                                 # http://epydoc.sourceforge.net/stdlib/xml.dom.minidom.Element-class.html
+        '''
+        Constructor
+        '''
         self.Height = int(xml_tag.getAttribute('Height'))
         self.Width = int(xml_tag.getAttribute('Width'))
         self.Rows = []
