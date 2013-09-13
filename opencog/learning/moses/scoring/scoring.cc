@@ -22,9 +22,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "scoring.h"
-
 #include <cmath>
+#include <values.h>
 
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -44,6 +43,8 @@
 #include <opencog/util/KLD.h>
 #include <opencog/util/MannWhitneyU.h>
 #include <opencog/comboreduct/table/table_io.h>
+
+#include "scoring.h"
 
 namespace opencog { namespace moses {
 
@@ -2053,11 +2054,12 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
     }
     std::sort(centers.begin(), centers.end());
 
-    vector<score_t> edges(nclusters-1);
+    vector<score_t> edges(nclusters);
     for (i=0; i<nclusters-1; i++)
     {
         edges[i] = 0.5 * (centers[i] + centers[i+1]);
     }
+    edges[nclusters-1] = FLT_MAX;
 
 for (i=0; i<nclusters-1; i++)
 {
@@ -2072,35 +2074,28 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
     std::sort(vals.begin(), vals.end());
 
     // One-dimensional k-means algorithm (LLoyd's algorithm)
-    vector<size_t> assign(oned.size());
+    vector<size_t> edge_idx(nclusters-1);
     bool changed = true;
     while (changed) {
         vector<score_t> cnt(nclusters);
         vector<score_t> sum(nclusters);
         changed = false;
-        j=0;
-        for (auto val : oned)
+        i = 0;
+        for (j=0; j<numvals; j++)
         {
-            score_t sc = get_contin(val);
+            score_t sc = vals[j];
 
-            // Assign values to clusters
-            for (i=0; i<nclusters-1; i++)
-            {
-                if (sc < edges[i])
-                {
-                    cnt[i] += 1.0;
-                    sum[i] += sc;
-                    if (i != assign[j]) changed = true;
-                    assign[j] = i;
-                    break;
-                }
-            }
-            if (nclusters - 1 == i)
+            if (sc < edges[i])
             {
                 cnt[i] += 1.0;
                 sum[i] += sc;
             }
-            j++;
+            else
+            {
+                if (j != edge_idx[i]) changed = true;
+                edge_idx[i] = j;
+                i++;
+            }
         }
 
         // Compute cluster centers.
@@ -2112,7 +2107,7 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
 printf("duuude fail, cluster %d is empty\n", i);
 for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges[k]);
                 penalized_bscore pbs;
-                pbs.first.push_back(-1.0e150);
+                pbs.first.push_back(-FLT_MAX);
                 return pbs;
             }
             sum[i] /= cnt[i];
@@ -2122,30 +2117,34 @@ for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges
 
 
     // Compute the RMS width of each cluster.
-    vector<score_t> cnt(nclusters);
-    vector<score_t> sum(nclusters);
-    vector<score_t> squ(nclusters);
-    j = 0;
-    for (auto val : oned)
-    {
-        score_t sc = get_contin(val);
-        i = assign[j];
-        cnt[i] += 1.0;
-        sum[i] += sc;
-        squ[i] += sc*sc;
-        j++;
-    }
-
     score_t final = 0.0;
-    for (i=0; i<nclusters; i++)
+    score_t cnt = 0.0;
+    score_t sum = 0.0;
+    score_t squ = 0.0;
+    i = 0;
+    for (j=0; j<numvals; j++)
     {
-        sum[i] /= cnt[i];
-        squ[i] /= cnt[i];
-
-        final += squ[i] - sum[i]*sum[i];
+        score_t sc = vals[j];
+        if (sc < edges[i])
+        {
+            cnt += 1.0;
+            sum += sc;
+            squ += sc*sc;
+        }
+        else
+        {
+            sum /= cnt;
+            squ /= cnt;
+            final += squ - sum * sum;
+            i++;
+            cnt = 0.0;
+            sum = 0.0;
+            squ = 0.0;
+        }
     }
+
     penalized_bscore pbs;
-    pbs.first.push_back(final);
+    pbs.first.push_back(-final);
 std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
 
     // Add the Complexity penalty
