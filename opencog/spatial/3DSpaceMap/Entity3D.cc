@@ -43,6 +43,12 @@ Entity3D::Entity3D(BlockVector _centerPosition, int _width, int _lenght, int _he
     is_obstacle =  _is_obstacle;
 }
 
+Entity3D* Entity3D::clone()
+{
+    Entity3D* clonedEntity = new Entity3D(mCenterPosition,mBoundingBox.size_x,mBoundingBox.size_y,mBoundingBox.size_z,mYaw,mName,mEntityClass,is_obstacle);
+    return clonedEntity;
+}
+
 Entity3D::~Entity3D()
 {
 
