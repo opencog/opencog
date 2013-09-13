@@ -2045,18 +2045,31 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
     OC_ASSERT(nclusters < oned.size());
 
     // Initial guess for the centroids
-    vector<score_t> edges(nclusters-1);
+    vector<score_t> centers(nclusters);
     size_t i;
+    for (i=0; i<nclusters; i++)
+    {
+        centers[i] = get_contin(oned[i]);
+    }
+    std::sort(centers.begin(), centers.end());
+
+    vector<score_t> edges(nclusters-1);
     for (i=0; i<nclusters-1; i++)
     {
-        edges[i] = 0.5 * (get_contin(oned[i]) + get_contin(oned[i+1]));
+        edges[i] = 0.5 * (centers[i] + centers[i+1]);
     }
-    std::sort(edges.begin(), edges.end());
 
 for (i=0; i<nclusters-1; i++)
 {
 printf("duuude initially its this: %d %f\n", i, edges[i]);
 }
+    // sort the values. This makes assignment easier.
+    size_t numvals = oned.size();
+    vector<score_t> vals(numvals);
+    size_t j;
+    for (j=0; j<numvals; j++)
+        vals[j] = get_contin(oned[j]);
+    std::sort(vals.begin(), vals.end());
 
     // One-dimensional k-means algorithm (LLoyd's algorithm)
     vector<size_t> assign(oned.size());
@@ -2065,7 +2078,7 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
         vector<score_t> cnt(nclusters);
         vector<score_t> sum(nclusters);
         changed = false;
-        int j=0;
+        j=0;
         for (auto val : oned)
         {
             score_t sc = get_contin(val);
@@ -2087,22 +2100,24 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
                 cnt[i] += 1.0;
                 sum[i] += sc;
             }
-
-            // Compute cluster centers.
-            for (i=0; i<nclusters; i++)
-            {
-                // If one of the clusters is empty, that's bad....
-                if (cnt[i] < 0.9)
-                {
-                    penalized_bscore pbs;
-                    pbs.first.push_back(-1.0e150);
-                    return pbs;
-                }
-                sum[i] /= cnt[i];
-            }
-            for (i=0; i<nclusters-1; i++) edges[i] = 0.5 * (sum[i] + sum[i+1]);
             j++;
         }
+
+        // Compute cluster centers.
+        for (i=0; i<nclusters; i++)
+        {
+            // If one of the clusters is empty, that's bad....
+            if (cnt[i] < 0.9)
+            {
+printf("duuude fail, cluster %d is empty\n", i);
+for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges[k]);
+                penalized_bscore pbs;
+                pbs.first.push_back(-1.0e150);
+                return pbs;
+            }
+            sum[i] /= cnt[i];
+        }
+        for (i=0; i<nclusters-1; i++) edges[i] = 0.5 * (sum[i] + sum[i+1]);
     }
 
 
@@ -2110,7 +2125,7 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
     vector<score_t> cnt(nclusters);
     vector<score_t> sum(nclusters);
     vector<score_t> squ(nclusters);
-    size_t j = 0;
+    j = 0;
     for (auto val : oned)
     {
         score_t sc = get_contin(val);
