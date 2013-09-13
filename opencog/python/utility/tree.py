@@ -229,6 +229,8 @@ class DAG(Tree):
         return any(p.any_path_up_contains(targets) for p in self.parents)
     
 def tree_from_atom(atom, dic = {}):
+    assert type(atom) == Atom
+
     if atom.is_node():
         if atom.t in [types.VariableNode]:
             try:
@@ -244,6 +246,9 @@ def tree_from_atom(atom, dic = {}):
         return Tree(atom.type_name, args)
 
 def atom_from_tree(tree, a):
+    assert type(tree) == Atom
+    assert type(a) == AtomSpace
+
     if tree.is_variable():
         return a.add(types.VariableNode, name='$'+str(tree.op))
     elif tree.is_leaf():
@@ -258,6 +263,8 @@ def atom_from_tree(tree, a):
         return a.add(get_type(tree.op), out=out)
 
 def find(template, atoms):
+    assert(isinstance(atoms, (list, tuple)))
+
     return [a for a in atoms if unify(tree_from_atom(a), template, {}) != None]
 
 def find_tree(template, atoms):

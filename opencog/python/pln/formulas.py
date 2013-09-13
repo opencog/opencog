@@ -5,7 +5,7 @@ except ImportError:
 
 import operator, functools, itertools
 
-from util import concat_lists
+from utility.util import concat_lists
 
 DEDUCTION_TERM_WEIGHT = 1.0
 INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
