@@ -2031,6 +2031,20 @@ score_t interesting_predicate_bscore::min_improv() const
 
 // ====================================================================
 
+/// Cluster scoring.
+/// Experimental attempt at using moses for cluster discovery. 
+/// When this scorer is presented with a combo tree, it attempts
+/// to see if the tree, when applied to the input table, naturally
+/// clusters scores into disparate groups.  Since the combo tree,
+/// applied to the input table, results in a 1-d array of values,
+/// the clustering is judged by using the one-dimensional k-means
+/// clustering algo.
+///
+/// This is considered experimental because it doesn't yet work
+/// very well, is likely to be redisigned, and finally, doesn't
+/// even output all the data that is required to use the resulting
+/// formula (the edges, with are printed by hand, below).
+
 cluster_bscore::cluster_bscore(const ITable& itable)
     : _itable(itable)
 {
