@@ -2105,8 +2105,9 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
         // Compute cluster centers.
         for (i=0; i<nclusters; i++)
         {
-            // If one of the clusters is empty, that's bad....
-            if (cnt[i] < 0.9)
+            // A cluster must have at least two points in it,
+            // as otherwise the RMS would be zero.  Heck, lets make it three.
+            if (cnt[i] < 3.5)
             {
                 penalized_bscore pbs;
                 pbs.first.push_back(-INFINITY);
@@ -2148,7 +2149,8 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
 
     // normalize by bind-width
     final = sqrt(final);
-    score_t binwidth = edges[nclusters-2] - edges[0];
+    // score_t binwidth = edges[nclusters-2] - edges[0];
+    score_t binwidth = vals[numvals-1] - vals[0];
     final /= binwidth;
     // The narrower the peaks, the higher the score.
     // This way of doing it works better with the complexity penalty
@@ -2156,16 +2158,15 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
 
     penalized_bscore pbs;
     pbs.first.push_back(final);
-if (final > 11500) {
-std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
-for (i=0; i<nclusters-1; i++)
-{
-printf("duuude finally edges: this: %d %f\n", i, edges[i]);
-}
- for (j=0; j<numvals; j++) { score_t sc = vals[j]; printf("%f ", sc); }
-printf("\n");
-}
-
+#if 0
+    if (final > 80) {
+        logger().debug() << "cluster tr="<<tr<< "\ncluster final score=" << final << std::endl;
+        for (i=0; i<nclusters-1; i++)
+            logger().debug("cluster edges:  %d %f", i, edges[i]);
+        for (j=0; j<numvals; j++) 
+            logger().debug("cluster point: %f", vals[j]);
+    }
+#endif
     // Add the Complexity penalty
     if (_occam)
         pbs.second = tree_complexity(tr) * _complexity_coef;
