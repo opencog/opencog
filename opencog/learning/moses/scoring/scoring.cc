@@ -2059,12 +2059,8 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
     {
         edges[i] = 0.5 * (centers[i] + centers[i+1]);
     }
-    edges[nclusters-1] = FLT_MAX;
+    edges[nclusters-1] = INFINITY;
 
-for (i=0; i<nclusters-1; i++)
-{
-printf("duuude initially its this: %d %f\n", i, edges[i]);
-}
     // sort the values. This makes assignment easier.
     size_t numvals = oned.size();
     vector<score_t> vals(numvals);
@@ -2085,13 +2081,21 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
         {
             score_t sc = vals[j];
 
-            if (sc < edges[i])
+            if (isinf(sc) || isnan(sc))
+            {
+                penalized_bscore pbs;
+                pbs.first.push_back(-INFINITY);
+                return pbs;
+            }
+
+            if (sc <= edges[i])
             {
                 cnt[i] += 1.0;
                 sum[i] += sc;
             }
             else
             {
+                OC_ASSERT(i<nclusters-1);
                 if (j != edge_idx[i]) changed = true;
                 edge_idx[i] = j;
                 i++;
@@ -2105,9 +2109,10 @@ printf("duuude initially its this: %d %f\n", i, edges[i]);
             if (cnt[i] < 0.9)
             {
 printf("duuude fail, cluster %d is empty\n", i);
+std::cout << "fai tree=" << tr << endl;
 for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges[k]);
                 penalized_bscore pbs;
-                pbs.first.push_back(-FLT_MAX);
+                pbs.first.push_back(-INFINITY);
                 return pbs;
             }
             sum[i] /= cnt[i];
@@ -2125,7 +2130,7 @@ for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges
     for (j=0; j<numvals; j++)
     {
         score_t sc = vals[j];
-        if (sc < edges[i])
+        if (sc <= edges[i])
         {
             cnt += 1.0;
             sum += sc;
@@ -2135,6 +2140,7 @@ for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges
         {
             sum /= cnt;
             squ /= cnt;
+
             final += squ - sum * sum;
             i++;
             cnt = 0.0;
@@ -2143,9 +2149,17 @@ for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges
         }
     }
 
+    // normalize by bind-width
+    score_t binwidth = edges[nclusters-2] - edges[0];
+    final /= binwidth * binwidth;
+
     penalized_bscore pbs;
     pbs.first.push_back(-final);
 std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
+for (i=0; i<nclusters-1; i++)
+{
+printf("duuude finally edges: this: %d %f\n", i, edges[i]);
+}
 
     // Add the Complexity penalty
     if (_occam)
@@ -2166,7 +2180,7 @@ behavioral_score cluster_bscore::best_possible_bscore() const
 
 score_t cluster_bscore::min_improv() const 
 {
-    return 0.01;
+    return 1e-10;
 }
     
 // ====================================================================
