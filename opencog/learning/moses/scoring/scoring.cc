@@ -2108,9 +2108,6 @@ penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
             // If one of the clusters is empty, that's bad....
             if (cnt[i] < 0.9)
             {
-printf("duuude fail, cluster %d is empty\n", i);
-std::cout << "fai tree=" << tr << endl;
-for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges[k]);
                 penalized_bscore pbs;
                 pbs.first.push_back(-INFINITY);
                 return pbs;
@@ -2150,15 +2147,23 @@ for (size_t k=0; k<nclusters-1; k++) printf("duuude orig eges %d %f\n", k, edges
     }
 
     // normalize by bind-width
+    final = sqrt(final);
     score_t binwidth = edges[nclusters-2] - edges[0];
-    final /= binwidth * binwidth;
+    final /= binwidth;
+    // The narrower the peaks, the higher the score.
+    // This way of doing it works better with the complexity penalty
+    final = 1.0 / final;
 
     penalized_bscore pbs;
-    pbs.first.push_back(-final);
+    pbs.first.push_back(final);
+if (final > 11500) {
 std::cout << "duuude tr="<<tr<< "  final=" << final << std::endl;
 for (i=0; i<nclusters-1; i++)
 {
 printf("duuude finally edges: this: %d %f\n", i, edges[i]);
+}
+ for (j=0; j<numvals; j++) { score_t sc = vals[j]; printf("%f ", sc); }
+printf("\n");
 }
 
     // Add the Complexity penalty
@@ -2174,13 +2179,12 @@ printf("duuude finally edges: this: %d %f\n", i, edges[i]);
 // termination conditions (when the best bscore is reached).
 behavioral_score cluster_bscore::best_possible_bscore() const
 {
-    // return behavioral_score(_table.size(), 0.0);
-    return behavioral_score(1, 0.0);
+    return behavioral_score(1, 1.0e37);
 }
 
 score_t cluster_bscore::min_improv() const 
 {
-    return 1e-10;
+    return 0.1;
 }
     
 // ====================================================================
