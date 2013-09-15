@@ -57,3 +57,9 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm
     ${PROJECT_BINARY_DIR}/tests/query/unordered-more.scm)
 CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
     ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-o.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-u.scm
+    ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-u.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-o.scm
+    ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-o.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-u-u.scm
+    ${PROJECT_BINARY_DIR}/tests/query/stackmore-u-u.scm)
