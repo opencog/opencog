@@ -49,7 +49,7 @@ add_custom_command(OUTPUT scheme_wrapper.cpp
   DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
 list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
-# opencog.moses Python bindings
+# opencog.pymoses Python bindings
 ADD_LIBRARY(moses_cython SHARED
     opencog/pymoses.cpp
 )
