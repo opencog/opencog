@@ -22,9 +22,8 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "scoring.h"
-
 #include <cmath>
+#include <values.h>
 
 #include <boost/range/irange.hpp>
 #include <boost/range/algorithm/sort.hpp>
@@ -44,6 +43,8 @@
 #include <opencog/util/KLD.h>
 #include <opencog/util/MannWhitneyU.h>
 #include <opencog/comboreduct/table/table_io.h>
+
+#include "scoring.h"
 
 namespace opencog { namespace moses {
 
@@ -2028,6 +2029,180 @@ score_t interesting_predicate_bscore::min_improv() const
                                 // backwards-compatible behavior
 }
 
+// ====================================================================
+
+/// Cluster scoring.
+/// Experimental attempt at using moses for cluster discovery. 
+/// When this scorer is presented with a combo tree, it attempts
+/// to see if the tree, when applied to the input table, naturally
+/// clusters scores into disparate groups.  Since the combo tree,
+/// applied to the input table, results in a 1-d array of values,
+/// the clustering is judged by using the one-dimensional k-means
+/// clustering algo.
+///
+/// This is considered experimental because it doesn't yet work
+/// very well, is likely to be redisigned, and finally, doesn't
+/// even output all the data that is required to use the resulting
+/// formula (the edges, with are printed by hand, below).
+
+cluster_bscore::cluster_bscore(const ITable& itable)
+    : _itable(itable)
+{
+}
+
+penalized_bscore cluster_bscore::operator()(const combo_tree& tr) const
+{
+    // evaluate the tree on the table
+    OTable oned(tr, _itable);
+
+    size_t nclusters = 3;
+
+    OC_ASSERT(nclusters < oned.size());
+
+    // Initial guess for the centroids
+    vector<score_t> centers(nclusters);
+    size_t i;
+    for (i=0; i<nclusters; i++)
+    {
+        centers[i] = get_contin(oned[i]);
+    }
+    std::sort(centers.begin(), centers.end());
+
+    vector<score_t> edges(nclusters);
+    for (i=0; i<nclusters-1; i++)
+    {
+        edges[i] = 0.5 * (centers[i] + centers[i+1]);
+    }
+    edges[nclusters-1] = INFINITY;
+
+    // sort the values. This makes assignment easier.
+    size_t numvals = oned.size();
+    vector<score_t> vals(numvals);
+    size_t j;
+    for (j=0; j<numvals; j++)
+        vals[j] = get_contin(oned[j]);
+    std::sort(vals.begin(), vals.end());
+
+    // One-dimensional k-means algorithm (LLoyd's algorithm)
+    vector<size_t> edge_idx(nclusters-1);
+    bool changed = true;
+    while (changed) {
+        vector<score_t> cnt(nclusters);
+        vector<score_t> sum(nclusters);
+        changed = false;
+        i = 0;
+        for (j=0; j<numvals; j++)
+        {
+            score_t sc = vals[j];
+
+            if (isinf(sc) || isnan(sc))
+            {
+                penalized_bscore pbs;
+                pbs.first.push_back(-INFINITY);
+                return pbs;
+            }
+
+            if (sc <= edges[i])
+            {
+                cnt[i] += 1.0;
+                sum[i] += sc;
+            }
+            else
+            {
+                OC_ASSERT(i<nclusters-1);
+                if (j != edge_idx[i]) changed = true;
+                edge_idx[i] = j;
+                i++;
+            }
+        }
+
+        // Compute cluster centers.
+        for (i=0; i<nclusters; i++)
+        {
+            // A cluster must have at least two points in it,
+            // as otherwise the RMS would be zero.  Heck, lets make it three.
+            if (cnt[i] < 3.5)
+            {
+                penalized_bscore pbs;
+                pbs.first.push_back(-INFINITY);
+                return pbs;
+            }
+            sum[i] /= cnt[i];
+        }
+        for (i=0; i<nclusters-1; i++) edges[i] = 0.5 * (sum[i] + sum[i+1]);
+    }
+
+
+    // Compute the RMS width of each cluster.
+    score_t final = 0.0;
+    score_t cnt = 0.0;
+    score_t sum = 0.0;
+    score_t squ = 0.0;
+    i = 0;
+    for (j=0; j<numvals; j++)
+    {
+        score_t sc = vals[j];
+        if (sc <= edges[i])
+        {
+            cnt += 1.0;
+            sum += sc;
+            squ += sc*sc;
+        }
+        else
+        {
+            sum /= cnt;
+            squ /= cnt;
+
+            final += squ - sum * sum;
+            i++;
+            cnt = 0.0;
+            sum = 0.0;
+            squ = 0.0;
+        }
+    }
+
+    // normalize by bind-width
+    final = sqrt(final);
+    // score_t binwidth = edges[nclusters-2] - edges[0];
+    score_t binwidth = vals[numvals-1] - vals[0];
+    final /= binwidth;
+    // The narrower the peaks, the higher the score.
+    // This way of doing it works better with the complexity penalty
+    final = 1.0 / final;
+
+    penalized_bscore pbs;
+    pbs.first.push_back(final);
+#if 0
+    if (final > 80) {
+        logger().debug() << "cluster tr="<<tr<< "\ncluster final score=" << final << std::endl;
+        for (i=0; i<nclusters-1; i++)
+            logger().debug("cluster edges:  %d %f", i, edges[i]);
+        for (j=0; j<numvals; j++) 
+            logger().debug("cluster point: %f", vals[j]);
+    }
+#endif
+    // Add the Complexity penalty
+    if (_occam)
+        pbs.second = tree_complexity(tr) * _complexity_coef;
+
+    log_candidate_pbscore(tr, pbs);
+
+    return pbs;
+}
+
+// Return the best possible bscore. Used as one of the
+// termination conditions (when the best bscore is reached).
+behavioral_score cluster_bscore::best_possible_bscore() const
+{
+    return behavioral_score(1, 1.0e37);
+}
+
+score_t cluster_bscore::min_improv() const 
+{
+    return 0.1;
+}
+    
+// ====================================================================
 //////////////////////////////
 // multibscore_based_bscore //
 //////////////////////////////

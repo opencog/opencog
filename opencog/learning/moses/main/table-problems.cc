@@ -583,6 +583,29 @@ void it_table_problem::run(problem_params& pms)
 
 // ==================================================================
 
+/// Perform clusterering
+class cluster_table_problem : public table_problem_base
+{
+    public:
+        virtual const std::string name() const { return "cluster"; }
+        virtual const std::string description() const {
+             return "Discover clustering function"; }
+        virtual void run(problem_params&);
+};
+
+void cluster_table_problem::run(problem_params& pms)
+{
+    common_setup(pms);
+    common_type_setup(pms);
+
+    REGRESSION(output_type,
+               *pms.contin_reduct, *pms.contin_reduct,
+               tables, cluster_bscore,
+               (table.itable));
+}
+
+// ==================================================================
+
 void register_table_problems()
 {
 	register_problem(new ip_problem());
@@ -594,6 +617,7 @@ void register_table_problems()
 	register_problem(new bep_table_problem());
 	register_problem(new f_one_table_problem());
 	register_problem(new it_table_problem());
+	register_problem(new cluster_table_problem());
 }
 
 } // ~namespace moses
