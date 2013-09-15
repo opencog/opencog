@@ -1,26 +1,6 @@
 """
 Wrapper for MOSES. Uses the C++ moses_exec function to access MOSES functionality.
 
-*** run:
-Parameters:
-    input (list of lists) - training data for regression [optional]
-        Example: input=[[0, 0, 0], [1, 1, 0], [1, 0, 1], [0, 1, 1]]
-    args (string) - arguments for MOSES (see MOSES documentation) [optional]
-    python (bool) - if True, return Python instead of Combo [optional]
-Either input or args must be provided, otherwise, MOSES would have no input
-
-Output:
-Returns a collection of candidates as MosesCandidate objects.
-Each MosesCandidate contains:
-    score (int)
-    program (string)
-    program_type (string - Enumeration: python, combo)
-    eval (Runnable method - Only valid for program_type python) Run this method to evaluate the model on new data.
-
-*** run_manually:
-The run_manually method invokes MOSES without any extra integration.
-Useful for interacting with MOSES non-programatically via stdout.
-
 Options for using the pymoses wrapper:
 1. Within the CogServer, from an embedded MindAgent
 2. Within the CogServer, from the interactive Python shell
@@ -92,6 +72,24 @@ class MosesCandidate(object):
 
 cdef class moses:
     def run(self, input = None, args = "", python = False):
+        """
+        Invokes MOSES in supervised learning mode to learn candidate solutions for a given training set.
+
+        Parameters:
+            input (list of lists) - training data for regression [optional]
+                Example: input=[[0, 0, 0], [1, 1, 0], [1, 0, 1], [0, 1, 1]]
+            args (string) - arguments for MOSES (see MOSES documentation) [optional]
+            python (bool) - if True, return Python instead of Combo [optional]
+        Either input or args must be provided, otherwise, MOSES would have no input
+
+        Output:
+        Returns a collection of candidates as MosesCandidate objects.
+        Each MosesCandidate contains:
+            score (int)
+            program (string)
+            program_type (string - Enumeration: python, combo)
+            eval (Runnable method - Only valid for program_type python) Run this method to evaluate the model on new data.
+        """
         if (input is None or input == "") and args == "":
             raise MosesException('Error: input and args cannot both be empty. You should pass your input using the ' +
                                  'input parameter, or refer to it in the args parameter.')
@@ -154,6 +152,10 @@ cdef class moses:
         return candidates
 
     def run_manually(self, args=""):
+        """
+        Invokes MOSES without any extra integration.
+        Useful for interacting with MOSES non-programatically via stdout.
+        """
         if args == "":
             raise MosesException('Error: No arguments provided')
         self._run_args_list(shlex.split(args))

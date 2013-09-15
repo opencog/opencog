@@ -1,4 +1,4 @@
-__author__ = 'cosmo'
+__author__ = 'Cosmo Harrigan'
 
 from unittest import TestCase
 from opencog.pymoses import moses, MosesException, MosesCandidate

@@ -45,3 +45,15 @@ IF (HAVE_GUILE)
 	)
 ENDIF (HAVE_GUILE)
 
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/buggy-stack.scm
+    ${PROJECT_BINARY_DIR}/tests/query/buggy-stack.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/var-type-not.scm
+    ${PROJECT_BINARY_DIR}/tests/query/var-type-not.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/match-link.scm
+    ${PROJECT_BINARY_DIR}/tests/query/match-link.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/unordered-more.scm
+    ${PROJECT_BINARY_DIR}/tests/query/unordered-more.scm)
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/tests/query/stackmore-o-o.scm
+    ${PROJECT_BINARY_DIR}/tests/query/stackmore-o-o.scm)
