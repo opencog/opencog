@@ -66,3 +66,6 @@ ENDIF (HAVE_EXPAT OR HAVE_GUILE)
 
 ADD_SUBDIRECTORY(formulas)
 ADD_SUBDIRECTORY(rules)
+
+CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/pln-test.conf
+    ${PROJECT_BINARY_DIR}/lib/pln-test.conf)
