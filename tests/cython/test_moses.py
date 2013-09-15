@@ -48,3 +48,4 @@ class MosesTest(TestCase):
 
     def test_run_manually_raise(self):
         self.assertRaises(MosesException, self.moses.run_manually, args="-c")
+

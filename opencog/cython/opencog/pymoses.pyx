@@ -173,3 +173,4 @@ cdef class moses:
             raise MosesException('Error: exception occurred when calling C++ MOSES. Exception message:\n' + ex.message)
         finally:
             free(c_argv)
+
