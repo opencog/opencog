@@ -91,7 +91,7 @@ void eval_constants::operator()(combo_tree& tr, combo_tree::iterator it) const
     vertex_seq empty;
     try {
         *it = eval_throws_binding(empty, it);
-    } catch (EvalException e) {
+    } catch (OverflowException& e) {
         *it = e.get_vertex();
     };
     tr.erase_children(it);

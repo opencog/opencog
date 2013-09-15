@@ -690,7 +690,7 @@ istream& istreamITable(istream& in, ITable& tab,
     try {
         istreamRawITable(in, tab);
     }
-    catch (std::exception e) {
+    catch (std::exception& e) {
         istreamSparseITable(in, tab);
         // Get rid of the unwanted columns.
         tab.delete_columns(ignore_features);
