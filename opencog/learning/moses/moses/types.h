@@ -450,8 +450,7 @@ Out& ostream_combo_tree_composite_pbscore_python(Out& out,
                                                  bool output_penalty = false,
                                                  bool output_bscore = false)
 {
-    out << std::endl
-        << "#!/usr/bin/python" << std::endl
+    out << "#!/usr/bin/env python" << std::endl
         << "from operator import *" << std::endl
         << std::endl
         << "#These functions allow multiple args instead of lists." << std::endl
