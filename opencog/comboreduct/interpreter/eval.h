@@ -52,7 +52,7 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo_tree::iterator it);
 /// should be used for this purpose.
 vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it)
-    throw(EvalException, ComboException,
+    throw(OverflowException, EvalException, ComboException,
           AssertionException, std::bad_exception);
 
 vertex eval_throws_vertex(const vertex_seq& bmap,
@@ -61,7 +61,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
           AssertionException, std::bad_exception);
 
 vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
-     throw(EvalException, ComboException, AssertionException,
+     throw(OverflowException, EvalException, ComboException, AssertionException,
            std::bad_exception);
 
 // As above, but returns combo tree instead ov vertex.  The above,

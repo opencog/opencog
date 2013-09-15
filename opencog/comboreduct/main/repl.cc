@@ -38,13 +38,13 @@ int main()
             //pe->
             trv = eval_throws_tree(empty, it);
         }
-        catch (StandardException e) {
+        catch (StandardException& e) {
             cout << "Exception: " << e.what() << endl;
         }
-        catch (OverflowException e) {
+        catch (OverflowException& e) {
             cout << "Exception: " << e.get_message() << endl;
         }
-        catch (EvalException e) {
+        catch (EvalException& e) {
             cout << "Exception: " << e.get_message() << endl;
         }
         cout << trv << endl;

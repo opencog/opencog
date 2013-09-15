@@ -86,7 +86,7 @@ combo_tree eval_procedure_tree(const vertex_seq& bmap, combo::combo_tree::iterat
 /// should be used for this purpose.
 vertex eval_throws_binding(const vertex_seq& bmap,
                            combo_tree::iterator it)
-    throw(EvalException, ComboException,
+    throw(OverflowException, EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
     // {
@@ -164,7 +164,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
                 // might be +inf -inf or nan and we can still get a
                 // sign bit off two of these cases...
                 x = eval_throws_binding(bmap, sib);
-            } catch (OverflowException e) {
+            } catch (OverflowException& e) {
                 x = e.get_vertex();
             }
             return bool_to_vertex(0 < get_contin(x));
@@ -274,21 +274,17 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
         return v;
     }
     else {
-        // WTF!?  throw EvalException if its a user error,
-        // but throw ComboException if its an internal error 
-        // ... which one is this?
-        // throw EvalException(v, "unrecognized expression");
-        std::stringstream ss;
-        ss << v;
-        throw ComboException(TRACE_INFO,
-              "Unrecognized expression: %s",
-              ss.str().c_str());
+        // Don't know what to do with this.  It might just be some
+        // un-interpreted string, such as those used in listUTest.
+        // If so, then the list functions should catch this exception.
+        // Everyone else should be surprised by this.
+        throw EvalException(v, "unrecognized expression");
         return v;
     }
 }
 
 vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
-    throw (EvalException, ComboException, AssertionException, std::bad_exception)
+    throw (OverflowException, EvalException, ComboException, AssertionException, std::bad_exception)
 {
     return eval_throws_binding(bmap, tr.begin());
 }
@@ -298,7 +294,9 @@ vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
 {
     try {
         return eval_throws_binding(bmap, it);
-    } catch (OverflowException e) {
+    } catch (OverflowException& e) {
+        return e.get_vertex();
+    } catch (EvalException& e) {
         return e.get_vertex();
     }
 }
@@ -318,13 +316,16 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     typedef combo_tree::iterator pre_it;
     const vertex& v = *it;
 
-    /// @todo there should be a general way to distinguish between "f" (the function f, being passed to fold)
-    /// vs "f" (the function f being called with no arguments). If you don't handle that you get weird errors
-    /// (because fold or other higher-order functions will attempt to evaluate the argument too soon).
+    // @todo FIXME there should be a general way to distinguish between
+    // "f" (the function f, being passed to fold) vs "f" (the function f
+    // being called with no arguments). If you don't handle that you get
+    // weird errors (because fold or other higher-order functions will
+    // attempt to evaluate the argument too soon). (??? bugt fold shouldn't
+    // do this.. ??? Can we have examples of this?)
 
-    /// First handle the operators that allow/require returning a combo_tree
-    /// (which can represent a combo list or combo lambda expression).
-    /// Then handle the operators that can only return a single combo vertex.
+    // First handle the operators that allow/require returning a combo_tree
+    // (which can represent a combo list or combo lambda expression).
+    // Then handle the operators that can only return a single combo vertex.
     if (const builtin* b = boost::get<builtin>(&v)) {
         switch (*b) {
 
@@ -574,17 +575,20 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
     }
 
     // Operators which only return a single vertex
-    vertex retv(eval_throws_vertex(bmap, it));
-    /// @todo copying
-    combo_tree ret(retv);
-    return ret;
+    try {
+        vertex retv(eval_throws_vertex(bmap, it));
+        /// @todo FIXME avoid copying !?
+        combo_tree ret(retv);
+        return ret;
+    }
+    catch (EvalException& e) {
+        vertex retv = e.get_vertex();
+        /// @todo FIXME avoid copying !?
+        combo_tree ret(retv);
+        return ret;
+    }
 
-//    OC_ASSERT(false, "That case is not handled");
-//    return v;
-//
-//    // If we got the here, its not a list operator, so just return
-//    // a tree with a lone, simple type in it.
-//    return combo_tree(eval_throws_binding(bmap, it));
+    return combo_tree();
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)

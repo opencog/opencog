@@ -303,7 +303,7 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
                 // might be +inf -inf or nan and we can still get a
                 // sign bit off two of these cases...
                 x = mixed_eval(sib);
-            } catch (OverflowException e) {
+            } catch (OverflowException& e) {
                 x = e.get_vertex();
             }
             return bool_to_vertex(0 < get_contin(x));

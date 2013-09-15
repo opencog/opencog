@@ -86,7 +86,6 @@ int main()
             }
         } catch (OverflowException& e) {
             cout << e.get_message() << " : " << e.get_vertex() << endl;
-        }
         } catch (EvalException& e) {
             cout << e.get_message() << " : " << e.get_vertex() << endl;
         }
