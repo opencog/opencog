@@ -231,7 +231,8 @@ vertex negate_vertex(const vertex& v)
     return negate_builtin(get_builtin(v));
 }
 
-builtin negate_builtin(builtin b) {
+builtin negate_builtin(builtin b)
+{
     if (b == id::logical_true)
         return id::logical_false;
     else if (b == id::logical_false)
