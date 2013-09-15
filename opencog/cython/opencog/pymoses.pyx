@@ -120,7 +120,7 @@ cdef class moses:
 
         candidates = []
         # Python header declared in opencog/learning/moses/moses/types.h (ostream_combo_tree_composite_pbscore_python)
-        python_header = "#!/usr/bin/python"
+        python_header = "#!/usr/bin/env python"
 
         if len(output) == 0:
             raise MosesException('Error: No output file was obtained from MOSES. ' +
