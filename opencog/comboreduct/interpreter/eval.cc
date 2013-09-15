@@ -111,7 +111,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
 vertex eval_throws_vertex(const vertex_seq& bmap,
                            combo_tree::iterator it)
-    throw(EvalException, ComboException,
+    throw(OverflowException, EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
     typedef combo_tree::sibling_iterator sib_it;
@@ -164,7 +164,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
                 // might be +inf -inf or nan and we can still get a
                 // sign bit off two of these cases...
                 x = eval_throws_binding(bmap, sib);
-            } catch (EvalException e) {
+            } catch (OverflowException e) {
                 x = e.get_vertex();
             }
             return bool_to_vertex(0 < get_contin(x));
@@ -217,7 +217,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             y = get_contin(vy);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
+                throw OverflowException(vertex(res));
             return res;
         }
 
@@ -229,7 +229,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             contin_t res = log(get_contin(vx));
 #endif
             if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
+                throw OverflowException(vertex(res));
             return res;
         }
 
@@ -238,7 +238,7 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
             contin_t res = exp(get_contin(vx));
             // this may happen in case the argument is too high, then
             // exp will be infty
-            if (isinf(res)) throw EvalException(vertex(res));
+            if (isinf(res)) throw OverflowException(vertex(res));
             return res;
         }
 
@@ -265,17 +265,24 @@ vertex eval_throws_vertex(const vertex_seq& bmap,
     // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
         if (isnan(*c) || isinf(*c))
-            throw EvalException(vertex(*c));
+            throw OverflowException(vertex(*c));
         return v;
     }
 
     // enums are constants too
     else if (is_enum_type(v)) {
         return v;
-
-    } else {
-        std::cerr << "unrecognized expression " << v << std::endl;
-        throw EvalException(v);
+    }
+    else {
+        // WTF!?  throw EvalException if its a user error,
+        // but throw ComboException if its an internal error 
+        // ... which one is this?
+        // throw EvalException(v, "unrecognized expression");
+        std::stringstream ss;
+        ss << v;
+        throw ComboException(TRACE_INFO,
+              "Unrecognized expression: %s",
+              ss.str().c_str());
         return v;
     }
 }
@@ -291,7 +298,7 @@ vertex eval_binding(const vertex_seq& bmap, combo_tree::iterator it)
 {
     try {
         return eval_throws_binding(bmap, it);
-    } catch (EvalException e) {
+    } catch (OverflowException e) {
         return e.get_vertex();
     }
 }
@@ -304,7 +311,7 @@ vertex eval_binding(const vertex_seq& bmap, const combo_tree& tr)
 
 combo_tree eval_throws_tree(const vertex_seq& bmap,
                            combo_tree::iterator it)
-    throw(EvalException, ComboException,
+    throw(OverflowException, EvalException, ComboException,
           AssertionException, std::bad_exception)
 {
     typedef combo_tree::sibling_iterator sib_it;
@@ -581,7 +588,7 @@ combo_tree eval_throws_tree(const vertex_seq& bmap,
 }
 
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
-    throw (EvalException, ComboException, AssertionException, std::bad_exception)
+    throw (OverflowException, EvalException, ComboException, AssertionException, std::bad_exception)
 {
     return eval_throws_tree(bmap, tr.begin());
 }

@@ -41,6 +41,9 @@ int main()
         catch (StandardException e) {
             cout << "Exception: " << e.what() << endl;
         }
+        catch (OverflowException e) {
+            cout << "Exception: " << e.get_message() << endl;
+        }
         catch (EvalException e) {
             cout << "Exception: " << e.get_message() << endl;
         }

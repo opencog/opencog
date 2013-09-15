@@ -57,7 +57,7 @@ vertex eval_throws_binding(const vertex_seq& bmap,
 
 vertex eval_throws_vertex(const vertex_seq& bmap,
                            combo_tree::iterator it)
-    throw(EvalException, ComboException,
+    throw(OverflowException, EvalException, ComboException,
           AssertionException, std::bad_exception);
 
 vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
@@ -68,12 +68,12 @@ vertex eval_throws_binding(const vertex_seq& bmap, const combo_tree& tr)
 // non-tree variants cannot be used when using lists, since the only
 // way to represent a list is as a tree.
 combo_tree eval_throws_tree(const vertex_seq& bmap, const combo_tree& tr)
-     throw(EvalException, ComboException, AssertionException,
+     throw(OverflowException, EvalException, ComboException, AssertionException,
            std::bad_exception);
 
 combo_tree eval_throws_tree(const vertex_seq& bmap,
                            combo_tree::iterator it)
-     throw(EvalException, ComboException, AssertionException,
+     throw(OverflowException, EvalException, ComboException, AssertionException,
            std::bad_exception);
 
 // As above, but EvalException is never thrown.

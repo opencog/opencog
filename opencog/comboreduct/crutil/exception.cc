@@ -27,13 +27,25 @@ namespace opencog { namespace combo {
 
 ComboReductException::ComboReductException(std::string m)
   : _message(m) {}
-std::string ComboReductException::get_message() const {
+
+std::string ComboReductException::get_message() const
+{
     return _message;
 }
 
-EvalException::EvalException(vertex v)
-    : ComboReductException("Eval Exception"), _vertex(v) {}
-vertex EvalException::get_vertex() const {
+OverflowException::OverflowException(vertex v)
+    : ComboReductException("Overflow Exception"), _vertex(v) {}
+
+vertex OverflowException::get_vertex() const
+{
+    return _vertex;
+}
+
+EvalException::EvalException(vertex v, std::string m)
+    : ComboReductException(m), _vertex(v) {}
+
+vertex EvalException::get_vertex() const
+{
     return _vertex;
 }
 
