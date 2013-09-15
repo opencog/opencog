@@ -27,6 +27,7 @@
 #define _OPENCOG_EXCEPTIONS_H
 
 #include <string>
+#include <iostream>
 
 #include <stdarg.h>
 #include <string.h>
@@ -303,6 +304,12 @@ public:
     AssertionException(const char*, ...) throw();
     AssertionException(const char* fmt, va_list ap) throw();
 };
+
+inline std::ostream& operator<<(std::ostream& out, const StandardException& ex)
+{
+    out << ex.what();
+    return out;
+}
 
 /** @}*/
 } // namespace opencog

@@ -1177,6 +1177,27 @@ private:
     score_t get_activation_penalty(score_t activation) const;
 };
 
+// ============================================================================    
+
+struct cluster_bscore : public bscore_base
+{
+    cluster_bscore(const ITable&);
+
+    penalized_bscore operator()(const combo_tree& tr) const;
+
+    // Return the best possible bscore. Used as one of the
+    // termination conditions (when the best bscore is reached).
+    behavioral_score best_possible_bscore() const;
+
+    score_t min_improv() const;
+
+protected:
+    ITable _itable;
+};
+
+
+// ============================================================================    
+
 struct iscorer_base : public unary_function<instance, composite_score>
 {
     virtual composite_score operator()(const instance&) const = 0;

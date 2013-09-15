@@ -301,7 +301,7 @@ vertex token_to_vertex(const type_node &tipe, const string& token)
 
     default:
         stringstream ss;
-        ss << "Unable to handle input type=" << tipe << endl;
+        ss << "Unable to convert token \"" << token << "\" to type=" << tipe << endl;
         OC_ASSERT(0, ss.str().c_str());
     }
 
@@ -1035,7 +1035,7 @@ static istream&
 istreamDenseTable_noHeader(istream& in, Table& tab,
                                     unsigned target_idx,
                                     const vector<unsigned>& ignore_idxs,
-                                    const type_tree& tt)
+                                    const type_tree& tt, bool has_header)
 {
     // Get the entire dataset into memory (cleaning weird stuff)
     string line;
@@ -1070,7 +1070,9 @@ istreamDenseTable_noHeader(istream& in, Table& tab,
                 tab.otable[i] = token_to_vertex(otype, tokenIO.second);
         }
         catch (AssertionException& ex) {
-            OC_ASSERT(false, "Parsing error occurred on line %d", i);
+            unsigned lineno = has_header? i+1 : i;
+            OC_ASSERT(false, "Parsing error occurred on line %d of input file\n"
+                             "Exception: %s", lineno, ex.what());
         }
     };
 
@@ -1119,7 +1121,7 @@ istream& istreamDenseTable(istream& in, Table& tab,
         tab.otable.set_label(iolabels.second);
     }
 
-    return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt);
+    return istreamDenseTable_noHeader(in, tab, target_idx, ignore_idxs, tt, has_header);
 }
 
 // ==================================================================
