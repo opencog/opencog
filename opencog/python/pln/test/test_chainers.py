@@ -1,7 +1,10 @@
 from unittest import TestCase
 
+from pprint import pprint
+
 from opencog.atomspace import AtomSpace, types, Atom
 from pln.chainers import Chainer, get_attentional_focus
+
 
 class BackwardChainerTest(TestCase):
 
@@ -76,35 +79,37 @@ class BackwardChainerTest(TestCase):
         atoms = self._simple_atoms_1()
         
         # test it on lots of simple made up rules that include the edge cases
+        # [] => []
         generic_inputs = []
         generic_outputs = []
         (inputs, outputs) = apply(generic_inputs, generic_outputs)
-        print inputs, outputs
         self.assertEquals( inputs, [] )
         self.assertEquals( outputs, [] )
 
+        # [animal] => []
         atoms[0].av = {'sti': 1}
-        #from nose.tools import set_trace; set_trace()
+
         generic_inputs = [atoms[0]]
         generic_outputs = []
         (inputs, outputs) = apply(generic_inputs, generic_outputs)
-        print inputs, outputs
         self.assertEquals( inputs, [atoms[0]] )
         self.assertEquals( outputs, [] )
 
         v1 = self.atomspace.add_node(types.VariableNode, "$v1")
-
+        # [v1] => []
         generic_inputs = [v1]
         generic_outputs = []
         (inputs, outputs) = apply(generic_inputs, generic_outputs)
-        print inputs, outputs
         self.assertEquals( len(inputs), 1 )
         self.assertEquals( outputs, [] )
 
+        #from nose.tools import set_trace; set_trace()
+        # [v1] => [v1]
         generic_inputs = [v1]
         generic_outputs = [v1]
         (inputs, outputs) = apply(generic_inputs, generic_outputs)
-        print inputs, outputs
+        print str(inputs[0])
+        print str(outputs[0])
         self.assertEquals( len(inputs), 1 )
         self.assertEquals( len(outputs), 1 )
 

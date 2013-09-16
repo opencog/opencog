@@ -100,7 +100,8 @@ class Chainer(AbstractChainer):
         # base case of recursion
         if len(remaining_inputs) == 0:
             # set the outputs after you've found all the inputs
-            return_outputs = self.substitute_list(subst_so_far, generic_outputs)
+            # mustn't use '=' because it will discard the original reference and thus have no effect
+            return_outputs += self.substitute_list(subst_so_far, generic_outputs)
             return
 
         # normal case of recursion
