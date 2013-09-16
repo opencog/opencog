@@ -1,4 +1,4 @@
-from opencog.atomspace import types
+from opencog.atomspace import types, TruthValue
 
 import pln.formulas as formulas
 import pln.temporalFormulas
@@ -22,8 +22,14 @@ class Rule(object):
         self._outputs = outputs
         self._inputs = inputs
 
+        self.formula = formula
         self.name = self.__class__.__name__
     
+    def calculate(self, tvs):
+        tv_tuples = [(tv.mean, tv.count) for tv in tvs]
+        (mean, count) = self.formula(tv_tuples)
+        return TruthValue(mean, count)
+
     def standardize_apart_input_output(self, chainer):
         new_inputs = []
         new_outputs = []
@@ -31,7 +37,6 @@ class Rule(object):
 
         for template in self._inputs:
             new_template = chainer.standardize_apart(template, dic)
-            print template, new_template
             new_inputs.append(new_template)
 
         for template in self._outputs:
@@ -48,7 +53,8 @@ class InversionRule(Rule):
 
         Rule.__init__(self,
             outputs= [chainer.link(types.InheritanceLink, [B, A])],
-            inputs=  [chainer.link(types.InheritanceLink, [A, B])],
+            inputs=  [chainer.link(types.InheritanceLink, [A, B]),
+                      A, B],
             formula= formulas.inversionFormula)
 
 class DeductionRule(Rule):

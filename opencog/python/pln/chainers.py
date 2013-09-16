@@ -54,6 +54,16 @@ class AbstractChainer(Logic):
     def _select_rule(self):
         return random.choice(self.rules)
 
+    def valid_structure(self, atom):
+        '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
+           It rejects crazy things like (Inheritance $1 (Inheritance $2 $3)).
+           The forward chainer is very creative and will come up with anything allowed by the Rules
+           otherwise.'''
+        if atom.type == types.InheritanceLink:
+            return atom.out[0].is_node() and atom.out[1].is_node()
+        else:
+            return True
+
 class Chainer(AbstractChainer):
     def __init__(self, atomspace):
         AbstractChainer.__init__(self, atomspace)
@@ -82,14 +92,14 @@ class Chainer(AbstractChainer):
         return self._apply_rule(rule, specific_inputs, specific_outputs)
 
     def _apply_rule(self, rule, inputs, outputs):
-        input_tvs = [i.tv for tv in inputs]
+        input_tvs = [i.tv for i in inputs]
         
         # support Rules with multiple outputs later
         assert len(outputs) == 1
         output_atom = outputs[0]
         assert type(output_atom) == Atom
 
-        output_tv = rule.formula(input_tvs)
+        output_tv = rule.calculate(input_tvs)
 
         output_atom.tv = output_tv
 
@@ -108,6 +118,8 @@ class Chainer(AbstractChainer):
         template = remaining_inputs[0]
         atom = self._select_one_matching(template)
         
+        if atom is None:
+            print 'unable to match:',template
         assert(atom != None)
 
         # Find the substitution that would change 'template' to 'atom'

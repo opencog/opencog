@@ -40,7 +40,7 @@ def deductionSimpleFormula(tvs, U):
     
     return (sAC, nAC)
 
-def inversionFormula(tvs, U):
+def inversionFormula(tvs):
     (sAB, nAB), (sA, nA), (sB, nB) = tvs
     
     sBA = sAB * sA / low(sB)
