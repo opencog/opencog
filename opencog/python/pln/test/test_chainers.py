@@ -26,15 +26,15 @@ class BackwardChainerTest(TestCase):
         atoms = self._simple_atoms_1()
         atoms[0].av = {'sti': 1}
 
-        atom = self.chainer._selectOne(atoms, self.atomspace)
-        assert atom != None
-        assert atom == atoms[0]
+        result_tree = self.chainer._selectOne(atoms, self.atomspace)
+        self.assertNotEquals(result_tree, None)
+        self.assertEqual(result_tree, tree.T(atoms[0]))
 
         atoms[1].av = {'sti': 1}
         atoms[2].av = {'sti': 1}
 
         atom = self.chainer._selectOne(atoms, self.atomspace)
-        assert atom in atoms
+        self.assertTrue(atom in atoms)
 
     def test_find(self):
         atoms = self._simple_atoms_1()
@@ -54,7 +54,7 @@ class BackwardChainerTest(TestCase):
 
         contents = get_attentional_focus(self.atomspace)
         print contents
-        assert len(contents) == 1
+        self.assertEqual( len(contents), 1 )
 
     def test__select_one_matching(self):
         atoms = self._simple_atoms_1()
@@ -64,11 +64,11 @@ class BackwardChainerTest(TestCase):
         assert type(template) == tree.Tree
 
         result = self.chainer._select_one_matching(template)
-        assert result != None
+        self.assertNotEqual( result, None )
         print result
         print type(result)
-        assert type(result) == Atom
-        assert result == atoms[2]
+        assert type(result) == tree.Tree
+        self.assertEqual( result, atoms[2] )
 
         
 
@@ -79,5 +79,48 @@ class BackwardChainerTest(TestCase):
         template = tree.Tree(1)
         result = self.chainer._select_one_matching(template)
         print result
-        assert result != None        
+        self.assertNotEqual( result, None )
+
+    def test__find_inputs_recursive(self):
+        def apply(generic_inputs, generic_outputs):
+            inputs = []
+            outputs = []
+            empty_substitution = {}
+            status = self.chainer._find_inputs_recursive(inputs, outputs, generic_inputs, generic_outputs, empty_substitution)
+
+            return (inputs, outputs)
+
+        atoms = self._simple_atoms_1()
+        
+        # test it on lots of simple made up rules that include the edge cases
+        generic_inputs = []
+        generic_outputs = []
+        (inputs, outputs) = apply(generic_inputs, generic_outputs)
+        print inputs, outputs
+        self.assertEquals( inputs, [] )
+        self.assertEquals( outputs, [] )
+
+        atoms[0].av = {'sti': 1}
+        #from nose.tools import set_trace; set_trace()
+        generic_inputs = [tree.T(atoms[0])]
+        generic_outputs = []
+        (inputs, outputs) = apply(generic_inputs, generic_outputs)
+        print inputs, outputs
+        self.assertEquals( inputs, [tree.T(atoms[0])] )
+        self.assertEquals( outputs, [] )
+
+        generic_inputs = [tree.new_var()]
+        generic_outputs = []
+        (inputs, outputs) = apply(generic_inputs, generic_outputs)
+        print inputs, outputs
+        self.assertEquals( len(inputs), 1 )
+        self.assertEquals( outputs, [] )
+
+        A = tree.new_var()
+        generic_inputs = [A]
+        generic_outputs = [A]
+        (inputs, outputs) = apply(generic_inputs, generic_outputs)
+        print inputs, outputs
+        self.assertEquals( len(inputs), 1 )
+        self.assertEquals( len(outputs), 1 )
 

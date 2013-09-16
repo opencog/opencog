@@ -38,12 +38,14 @@ class AbstractChainer(object):
         assert type(links[0]) != tree.Tree
 
         max = sum([link.av['sti'] for link in links])
-        pick = random.uniform(0, max)
+        pick = random.randrange(0, max)
         current = 0
         for link in links:
             current += link.av['sti']
             if current >= pick:
-                return link
+                return tree.tree_from_atom(link)
+
+        assert False
 
     def _select_rule(self):
         return random.choice(self.rules)
@@ -68,7 +70,9 @@ class Chainer(AbstractChainer):
         generic_inputs = tree.standardize_apart(rule.inputs)
         specific_inputs = []
         specific_outputs = []
-        self._find_inputs_recursive(specific_inputs, specific_outputs, generic_inputs)
+        empty_substitution = {}
+        self._find_inputs_recursive(specific_inputs, specific_outputs, 
+                                    generic_inputs, generic_outputs, empty_substitution)
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
@@ -89,26 +93,31 @@ class Chainer(AbstractChainer):
 
         return output_atom
 
-    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs):
+    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
+        # base case of recursion
+        if len(remaining_inputs) == 0:
+            # set the outputs after you've found all the inputs
+            return_outputs = tree.subst_conjunction(subst_so_far, generic_outputs)
+            return
+
+        # normal case of recursion
+
         template = remaining_inputs[0]
         atom = self._select_one_matching(template)
         
-        if atom == None:
-            return None
+        assert(atom != None)
 
         # Find the substitution that would change 'template' to 'atom'
-        substitution = tree.unify(template, atom, {})
+        substitution = tree.unify(template, atom, subst_so_far)
         assert(substitution != None)
 
         remaining_inputs = remaining_inputs[1:]
-        if len(remaining_inputs) == 0:
-            return [] # no more inputs to be added
 
         remaining_inputs = tree.subst_conjunction(substitution, remaining_inputs)
 
         return_inputs.append(atom)
 
-        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs)
+        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution)
         
     def forward_step(self):
         rule = self._select_rule()

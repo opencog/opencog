@@ -1,6 +1,7 @@
-import pln.formulas
+import pln.formulas as formulas
 import pln.temporalFormulas
 import utility.tree
+from utility.tree import new_var, T # Tree constructor
 
 import math
 
@@ -40,4 +41,26 @@ class Rule(object):
         new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv,
                         formula = self.formula, match = self.match)
         return new_rule
+
+class InversionRule(Rule):
+    def __init__(self):
+        A = new_var()
+        B = new_var()
+
+        Rule.__init__(self,
+            outputs= [T('InheritanceLink', B, A)],
+            inputs=  [T('InheritanceLink', A, B)],
+            formula= formulas.inversionFormula)
+
+class DeductionRule(Rule):
+    def __init__(self):
+        A = new_var()
+        B = new_var()
+        C = new_var()
+
+        Rule.__init__(self,
+            formula= formulas.deductionFormula,
+            outputs= [T('InheritanceLink', A, C)],
+            inputs=  [T('InheritanceLink', A, B),
+                      T('InheirtanceLink', B, C)])
 
