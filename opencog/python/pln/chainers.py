@@ -2,8 +2,9 @@ __author__ = 'ramin'
 
 from pln.rules.rules import Rule
 import utility.tree as tree
+from pln.logic import Logic
 
-from opencog.atomspace import types
+from opencog.atomspace import types, Atom
 
 import random
 
@@ -17,7 +18,11 @@ def get_attentional_focus(atomspace, attentional_focus_boundary=0):
     return attentional_focus
 
 
-class AbstractChainer(object):
+class AbstractChainer(Logic):
+    def __init__(self, atomspace):
+        Logic.__init__(self, atomspace)
+        self.rules = []
+
     def add_rule(self, rule):
         assert isinstance(rule, Rule)
         assert type(rule) != Rule
@@ -25,25 +30,25 @@ class AbstractChainer(object):
         self.rules.append(rule)
 
     def _select_one_matching(self, template):
-        attentional_focus = get_attentional_focus(self.atomspace)
+        attentional_focus = get_attentional_focus(self._atomspace)
 
-        matching_atoms = tree.find(template, attentional_focus)
+        matching_atoms = self.find(template, attentional_focus)
 
         if len(matching_atoms) == 0:
             return None
         else:
-            return self._selectOne(matching_atoms, self.atomspace)
+            return self._selectOne(matching_atoms)
 
-    def _selectOne(self, links, atomspace):
-        assert type(links[0]) != tree.Tree
+    def _selectOne(self, atoms):
+        assert type(atoms[0]) == Atom
 
-        max = sum([link.av['sti'] for link in links])
+        max = sum([atom.av['sti'] for atom in atoms])
         pick = random.randrange(0, max)
         current = 0
-        for link in links:
-            current += link.av['sti']
+        for atom in atoms:
+            current += atom.av['sti']
             if current >= pick:
-                return tree.tree_from_atom(link)
+                return atom
 
         assert False
 
@@ -52,8 +57,7 @@ class AbstractChainer(object):
 
 class Chainer(AbstractChainer):
     def __init__(self, atomspace):
-        self.atomspace = atomspace
-        self.rules = []
+        AbstractChainer.__init__(self, atomspace)
 
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs

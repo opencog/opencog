@@ -25,14 +25,14 @@ class BackwardChainerTest(TestCase):
         atoms = self._simple_atoms_1()
         atoms[0].av = {'sti': 1}
 
-        atom = self.chainer._selectOne(atoms, self.atomspace)
+        atom = self.chainer._selectOne(atoms)
         self.assertNotEquals(atom, None)
         self.assertEqual(atom, atoms[0])
 
         atoms[1].av = {'sti': 1}
         atoms[2].av = {'sti': 1}
 
-        atom = self.chainer._selectOne(atoms, self.atomspace)
+        atom = self.chainer._selectOne(atoms)
         self.assertTrue(atom in atoms)
 
     def test_get_attentional_focus(self):
