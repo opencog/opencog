@@ -36,16 +36,6 @@ class BackwardChainerTest(TestCase):
         atom = self.chainer._selectOne(atoms, self.atomspace)
         self.assertTrue(atom in atoms)
 
-    def test_find(self):
-        atoms = self._simple_atoms_1()
-
-        template = tree.tree_from_atom(atoms[2])
-        assert type(template) == tree.Tree
-
-        result = tree.find(template, self.atomspace.get_atoms_by_type(types.Atom))
-        assert type(result) == list
-        assert type(result[0] == Atom)
-
     def test_get_attentional_focus(self):
         atoms = self._simple_atoms_1()
         atoms[2].av = {'sti': 1}
