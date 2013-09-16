@@ -28,15 +28,22 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
-    def _select_one_matching(self, template):
+    def _select_one_matching(self, template, require_nonzero_tv = True):
         attentional_focus = get_attentional_focus(self._atomspace)
 
         matching_atoms = self.find(template, attentional_focus)
 
-        if len(matching_atoms) == 0:
-            return None
-        else:
+        if len(matching_atoms) > 0:
             return self._selectOne(matching_atoms)
+        else:
+            # if it can't find anything in the attentional focus, try the whole atomspace.
+
+            atoms = self._atomspace.get_atoms_by_type(types.Atom)
+            if require_nonzero_tv:
+                atoms = [atom for atom in atoms if atom.tv.count > 0]
+
+            matching_atoms = self.find(template, atoms)
+            return random.choice(matching_atoms)
 
     def _selectOne(self, atoms):
         assert type(atoms[0]) == Atom
@@ -65,8 +72,10 @@ class AbstractChainer(Logic):
             return True
 
 class Chainer(AbstractChainer):
-    def __init__(self, atomspace):
+    def __init__(self, atomspace, stimulateAtoms=False):
         AbstractChainer.__init__(self, atomspace)
+
+        self._stimulateAtoms = stimulateAtoms
 
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
@@ -103,7 +112,16 @@ class Chainer(AbstractChainer):
 
         output_atom.tv = output_tv
 
-        return output_atom
+        if self._stimulateAtoms:
+            self._give_stimulus(output_atom)
+            for i in inputs:
+                self._give_stimulus(i)
+
+        return (output_atom, inputs)
+
+    def _give_stimulus(self, atom):
+        # TODO hack - it should use the actual stimulus system to be compatible with ECAN
+        atom.av = {'sti':atom.av['sti']+1}
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
         # base case of recursion
@@ -137,7 +155,7 @@ class Chainer(AbstractChainer):
     def forward_step(self):
         rule = self._select_rule()
 
-        results = self.apply_forward(rule, inputs)
+        results = self._apply_forward(rule)
 
         return results
 

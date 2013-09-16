@@ -41,7 +41,6 @@ class Rule(object):
 
         for template in self._outputs:
             new_template = chainer.standardize_apart(template, dic)
-            print template, new_template
             new_outputs.append(new_template)
 
         return (new_inputs, new_outputs)
@@ -64,8 +63,9 @@ class DeductionRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
-            formula= formulas.deductionFormula,
+            formula= formulas.deductionSimpleFormula,
             outputs= [chainer.link(types.InheritanceLink, [A, C])],
             inputs=  [chainer.link(types.InheritanceLink, [A, B]),
-                      chainer.link(types.InheirtanceLink, [B, C])])
+                      chainer.link(types.InheritanceLink, [B, C]),
+                      A, B, C])
 

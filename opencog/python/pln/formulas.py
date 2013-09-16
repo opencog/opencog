@@ -23,7 +23,7 @@ def identityFormula(tvs, U):
 #    
 #    return (1.0, confidence_to_count(1.0))
 
-def deductionSimpleFormula(tvs, U):
+def deductionSimpleFormula(tvs):
     (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tvs
 
     # Temporary filtering fix to make sure that nAB >= nA

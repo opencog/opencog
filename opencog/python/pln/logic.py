@@ -116,8 +116,8 @@ class Logic(object):
 
     def _unify_variable(self, variable, atom, substitution):
         if variable in substitution:
-            binding = substitution[variable]
-            return unify(binding, atom, substitution)
+            value = substitution[variable]
+            return self.unify(value, atom, substitution)
         elif self._occurs_check(variable, atom, substitution):
             return None
         else:
