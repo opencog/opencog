@@ -36,6 +36,7 @@ class Logic(object):
 
     def standardize_apart(self, atom, dic=None):
         '''Create a new link where all the variables in the link are replaced with new variables'''
+        assert isinstance(atom, Atom)
 
         # every time $v1 appears in the original expression, it must be replaced with the SAME $v1001
         if dic == None:
@@ -47,10 +48,10 @@ class Logic(object):
                     return dic[atom]
                 else:
                     var = self.new_variable()
-                    dic[tr] = var
-                    return v
+                    dic[atom] = var
+                    return var
             else:
-                return v
+                return atom
         else: # atom is a link
             outgoing = [self.standardize_apart(a, dic) for a in atom.out]
             return self.change_outgoing(atom, outgoing)
@@ -154,3 +155,10 @@ class Logic(object):
 
     def is_variable(self, atom):
         return atom.is_a(types.VariableNode)
+
+    def link(self, type, out):
+        return self._atomspace.add_link(type, out)
+
+    def node(self, type, name):
+        return self._atomspace.add_node(type, name)
+

@@ -1,7 +1,6 @@
-__author__ = 'ramin'
+__author__ = 'jade'
 
 from pln.rules.rules import Rule
-import utility.tree as tree
 from pln.logic import Logic
 
 from opencog.atomspace import types, Atom
@@ -71,7 +70,7 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
-        generic_inputs = tree.standardize_apart(rule.inputs)
+        (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
         specific_inputs = []
         specific_outputs = []
         empty_substitution = {}

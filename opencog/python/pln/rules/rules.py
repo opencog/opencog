@@ -1,7 +1,7 @@
+from opencog.atomspace import types
+
 import pln.formulas as formulas
 import pln.temporalFormulas
-import utility.tree
-from utility.tree import new_var, T # Tree constructor
 
 import math
 
@@ -19,48 +19,47 @@ class Rule(object):
     You can use either @formula or @tv. You specify a formula method from formulas.py;
     it will be called with the TVs of the relevant Atoms, to calculate the TruthValue for
     the resulting Atom.'''
-        self.outputs = outputs
-        self.inputs = inputs
+        self._outputs = outputs
+        self._inputs = inputs
 
         self.name = self.__class__.__name__
     
-    def standardize_apart(self):
-        '''Create a new version of the Rule where both the head and goals use new
-        variables. Important for unification.'''
-        head_goals = (self.head,)+tuple(self.goals)
-        tmp = standardize_apart(head_goals)
-        new_version = Rule(tmp[0], tmp[1:], name=self.name, tv = self.tv,
-                           formula=self.formula, match = self.match)
+    def standardize_apart_input_output(self, chainer):
+        new_inputs = []
+        new_outputs = []
+        dic = {}
 
-        return new_version
+        for template in self._inputs:
+            new_template = chainer.standardize_apart(template, dic)
+            print template, new_template
+            new_inputs.append(new_template)
 
-    def subst(self, s):
-	'''Create a new Rule where substitution s has been substituted into both the head and goals.'''
-        new_head = subst(s, self.head)
-        new_goals = list(subst_conjunction(s, self.goals))
-        new_rule = Rule(new_head, new_goals, name=self.name, tv = self.tv,
-                        formula = self.formula, match = self.match)
-        return new_rule
+        for template in self._outputs:
+            new_template = chainer.standardize_apart(template, dic)
+            print template, new_template
+            new_outputs.append(new_template)
+
+        return (new_inputs, new_outputs)
 
 class InversionRule(Rule):
-    def __init__(self):
-        A = new_var()
-        B = new_var()
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
 
         Rule.__init__(self,
-            outputs= [T('InheritanceLink', B, A)],
-            inputs=  [T('InheritanceLink', A, B)],
+            outputs= [chainer.link(types.InheritanceLink, [B, A])],
+            inputs=  [chainer.link(types.InheritanceLink, [A, B])],
             formula= formulas.inversionFormula)
 
 class DeductionRule(Rule):
-    def __init__(self):
-        A = new_var()
-        B = new_var()
-        C = new_var()
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+        C = chainer.new_variable()
 
         Rule.__init__(self,
             formula= formulas.deductionFormula,
-            outputs= [T('InheritanceLink', A, C)],
-            inputs=  [T('InheritanceLink', A, B),
-                      T('InheirtanceLink', B, C)])
+            outputs= [chainer.link(types.InheritanceLink, [A, C])],
+            inputs=  [chainer.link(types.InheritanceLink, [A, B]),
+                      chainer.link(types.InheirtanceLink, [B, C])])
 
