@@ -86,13 +86,12 @@ class Chainer(AbstractChainer):
         input_tvs = [i.tv for tv in inputs]
         
         # support Rules with multiple outputs later
-        assert len(rule.outputs) == 1
-        output_tree = rule.outputs[0]
-        assert type(output_tree) == tree.Tree
+        assert len(outputs) == 1
+        output_atom = outputs[0]
+        assert type(output_atom) == Atom
 
         output_tv = rule.formula(input_tvs)
 
-        output_atom = tree.atom_from_tree(output_tree)
         output_atom.tv = output_tv
 
         return output_atom
@@ -101,7 +100,7 @@ class Chainer(AbstractChainer):
         # base case of recursion
         if len(remaining_inputs) == 0:
             # set the outputs after you've found all the inputs
-            return_outputs = tree.subst_conjunction(subst_so_far, generic_outputs)
+            return_outputs = self.substitute_list(subst_so_far, generic_outputs)
             return
 
         # normal case of recursion
@@ -112,12 +111,12 @@ class Chainer(AbstractChainer):
         assert(atom != None)
 
         # Find the substitution that would change 'template' to 'atom'
-        substitution = tree.unify(template, atom, subst_so_far)
+        substitution = self.unify(template, atom, subst_so_far)
         assert(substitution != None)
 
         remaining_inputs = remaining_inputs[1:]
 
-        remaining_inputs = tree.subst_conjunction(substitution, remaining_inputs)
+        remaining_inputs = self.substitute_list(substitution, remaining_inputs)
 
         return_inputs.append(atom)
 

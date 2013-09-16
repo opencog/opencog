@@ -73,6 +73,12 @@ class Logic(object):
             outgoing = [self.substitute(substitution, o) for o in atom.out]
             return self.change_outgoing(atom, outgoing)
 
+    def substitute_list(self, substitution, atoms):
+        result = []
+        for atom in atoms:
+            result.append(self.substitute(substitution, atom))
+        return result
+
     def unify(self, x, y, substitution = {}):
         '''Unify atoms x,y with substitution s; return a substitution that
         would make x,y equal, or None if x,y can not unify.'''
