@@ -2226,7 +2226,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     // this variable has not been grouned , call its BestNumericVariableInquery to ground it
     // first, ground the state required by bestNumericVariableinqueryStateFun
     BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
-    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings);
+    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings,false);
     if (groundedState == 0)
     {
         // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
