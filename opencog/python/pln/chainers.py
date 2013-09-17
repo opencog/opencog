@@ -73,7 +73,7 @@ class AbstractChainer(Logic):
             return True
 
     def log_failed_inference(self,message):
-        print 'Attempted invalid inference',message
+        print 'Attempted invalid inference:',message
 
 class Chainer(AbstractChainer):
     def __init__(self, atomspace, stimulateAtoms=False):
@@ -86,6 +86,7 @@ class Chainer(AbstractChainer):
         # Map from Atom -> set(Atom)
         # Default value is the empty set
         self.trails = defaultdict(set)
+        self.produced_from = defaultdict(set)
 
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
@@ -117,6 +118,10 @@ class Chainer(AbstractChainer):
         # TODO only supporting one output
         if self._compute_trail(specific_outputs[0], specific_inputs) is None:
             self.log_failed_inference('cycle detected')
+            return None
+
+        if self._is_repeated(rule, specific_outputs[0], specific_inputs):
+            self.log_failed_inference('repeated inference')
             return None
 
         return self._apply_rule(rule, specific_inputs, specific_outputs)
@@ -170,6 +175,21 @@ class Chainer(AbstractChainer):
             trail |= input_trail
 
         return trail
+
+    def _is_repeated(self, rule, output, inputs):
+        # Record the exact list of atoms used to produce an output one time. (Any atom can be
+        # produced multiple ways using different Rules and inputs.)
+        # Return True if this exact inference has been applied before
+
+        # In future this should record to the Inference History Repository atomspace
+        # convert the inputs to a tuple so they can be stored in a set.
+        inputs = tuple(inputs)
+        productions = self.produced_from[output]
+        if inputs in productions:
+            return True
+        else:
+            productions.add(inputs)
+            return False
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
         # base case of recursion
