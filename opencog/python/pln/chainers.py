@@ -16,7 +16,6 @@ def get_attentional_focus(atomspace, attentional_focus_boundary=0):
             attentional_focus.append(node)
     return attentional_focus
 
-
 class AbstractChainer(Logic):
     def __init__(self, atomspace):
         Logic.__init__(self, atomspace)
@@ -63,11 +62,12 @@ class AbstractChainer(Logic):
 
     def valid_structure(self, atom):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
-           It rejects crazy things like (Inheritance $1 (Inheritance $2 $3)).
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
         if atom.type == types.InheritanceLink:
-            return atom.out[0].is_node() and atom.out[1].is_node()
+            is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
+            not_self_link    = atom.out[0] != atom.out[1]
+            return is_between_nodes and not_self_link
         else:
             return True
 
@@ -97,6 +97,9 @@ class Chainer(AbstractChainer):
                                     generic_inputs, generic_outputs, empty_substitution)
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
+
+        if not self.valid_structure(specific_outputs[0]):
+            return None
 
         return self._apply_rule(rule, specific_inputs, specific_outputs)
 

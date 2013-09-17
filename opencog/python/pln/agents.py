@@ -5,7 +5,7 @@ from pln.rules import rules
 
 class ForwardInferenceAgent(MindAgent):
     def run(self, atomspace):
-        chainer = Chainer(atomspace, stimulateAtoms=True)
+        chainer = Chainer(atomspace, stimulateAtoms=False)
 
         chainer.add_rule(rules.InversionRule(chainer))
         chainer.add_rule(rules.DeductionRule(chainer))
@@ -15,6 +15,7 @@ class ForwardInferenceAgent(MindAgent):
         #os.system('cls' if os.name=='nt' else 'clear')
 
         (output, inputs) = chainer.forward_step()
+        print '==== Inference ===='
         print output,str(output.av),'<=',' '.join(str(i)+str(output.av) for i in inputs)
 
         print
