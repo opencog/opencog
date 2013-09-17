@@ -121,7 +121,7 @@ class Chainer(AbstractChainer):
 
     def _give_stimulus(self, atom):
         # TODO hack - it should use the actual stimulus system to be compatible with ECAN
-        atom.av = {'sti':atom.av['sti']+1}
+        atom.av = {'sti':atom.av['sti']+10, 'lti':atom.av['lti']+3}
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
         # base case of recursion
