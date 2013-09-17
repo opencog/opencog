@@ -997,7 +997,7 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             if (paramMapIt != groundings.end())
                 groundedState->stateVariable->assignValue(paramMapIt->second);
             else if (ifRealTimeQueryStateValue)
-                groundedState->stateVariable->assignValue(s->getParamValue());
+                groundedState->stateVariable->assignValue(groundedState->getParamValue());
             else
             {
                 delete groundedState;
