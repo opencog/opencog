@@ -181,7 +181,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
 }
 
 
-double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,float nearestDis,BlockVector& nearestPos)
+double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,float& nearestDis,BlockVector& nearestPos)
 {
     // return (target - pos) * 2.0 + (begin - pos);
     float dis = target - pos;
