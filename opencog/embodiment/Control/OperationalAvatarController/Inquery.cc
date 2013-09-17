@@ -320,8 +320,10 @@ ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
     ParamValue var2 = stateOwnerList.back();
 
     Entity* entity1 = boost::get<Entity>(&var1);
+    Vector* vector1 = boost::get<Vector>(&var1);
     Entity* entity2 = boost::get<Entity>(&var2);
     Vector* vector2 = boost::get<Vector>(&var2);
+
     if (entity1 && entity2)
     {
         d = spaceMap->distanceBetween(entity1->id, entity2->id);
@@ -329,6 +331,19 @@ ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
     else if (entity1 && vector2)
     {
         d = spaceMap->distanceBetween(entity1->id, SpaceServer::SpaceMapPoint(vector2->x,vector2->y,vector2->z));
+    }
+    else if (entity2 && vector1)
+    {
+        d = spaceMap->distanceBetween(entity2->id, SpaceServer::SpaceMapPoint(vector1->x,vector1->y,vector1->z));
+    }
+    else if (vector2 && vector1)
+    {
+        d = spaceMap->distanceBetween(SpaceServer::SpaceMapPoint(vector1->x,vector1->y,vector1->z), SpaceServer::SpaceMapPoint(vector2->x,vector2->y,vector2->z));
+    }
+    else
+    {
+        std::cout<<"Debug error: inqueryDistance : cannot find:" << std::endl
+                << ActionParameter::ParamValueToString(var1) << " and " << ActionParameter::ParamValueToString(var2) <<std::endl;
     }
 
     return (opencog::toString(d));
