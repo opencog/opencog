@@ -6,6 +6,7 @@ from pln.logic import Logic
 from opencog.atomspace import types, Atom
 
 import random
+from collections import defaultdict
 
 # @todo opencog/atomspace/AttentionBank.h defines a getAttentionalFocusBoundary method, which should eventually be used instead of this
 def get_attentional_focus(atomspace, attentional_focus_boundary=0):
@@ -71,11 +72,20 @@ class AbstractChainer(Logic):
         else:
             return True
 
+    def log_failed_inference(self,message):
+        print 'Attempted invalid inference',message
+
 class Chainer(AbstractChainer):
     def __init__(self, atomspace, stimulateAtoms=False):
         AbstractChainer.__init__(self, atomspace)
 
         self._stimulateAtoms = stimulateAtoms
+
+        # For every atom, store the atoms used to produce it (including the atoms used to produce them).
+        # This prevents cycles (very important) as well as repeating the same inference.
+        # Map from Atom -> set(Atom)
+        # Default value is the empty set
+        self.trails = defaultdict(set)
 
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
@@ -98,7 +108,15 @@ class Chainer(AbstractChainer):
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
+        # Sanity checks
+
         if not self.valid_structure(specific_outputs[0]):
+            self.log_failed_inference('invalid structure')
+            return None
+
+        # TODO only supporting one output
+        if self._compute_trail(specific_outputs[0], specific_inputs) is None:
+            self.log_failed_inference('cycle detected')
             return None
 
         return self._apply_rule(rule, specific_inputs, specific_outputs)
@@ -125,6 +143,33 @@ class Chainer(AbstractChainer):
     def _give_stimulus(self, atom):
         # TODO hack - it should use the actual stimulus system to be compatible with ECAN
         atom.av = {'sti':atom.av['sti']+10, 'lti':atom.av['lti']+3}
+
+    def _compute_trail(self, output, inputs):
+        ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return None.
+            Otherwise return the trail as a set of Atoms.'''
+        trail = self.trails[output]
+
+        # Check for cycles before adding anything into the trails
+        if output in inputs:
+            return None
+        for atom in inputs:
+            input_trail = self.trails[atom]
+
+            if output in input_trail:
+                return None
+
+        for atom in inputs:
+            # Reusing the same Atom more than once is bad
+            # (maybe? What if you're combining it with a different atom to produce a new TV for the same result?)
+            #if atom in trail:
+            #    return None
+            trail.add(atom)
+
+        for atom in inputs:
+            input_trail = self.trails[atom]
+            trail |= input_trail
+
+        return trail
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
         # base case of recursion
