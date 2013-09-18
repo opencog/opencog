@@ -9,7 +9,7 @@ class ForwardInferenceAgent(MindAgent):
 
     def run(self, atomspace):
         if self.chainer is None:
-            self.chainer = Chainer(atomspace, stimulateAtoms=True)
+            self.chainer = Chainer(atomspace, stimulateAtoms=False)
 
             self.chainer.add_rule(rules.InversionRule(self.chainer))
             self.chainer.add_rule(rules.DeductionRule(self.chainer))

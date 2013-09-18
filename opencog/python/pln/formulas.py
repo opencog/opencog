@@ -1,7 +1,4 @@
-try:
-    from opencog.atomspace import count_to_confidence, confidence_to_count
-except ImportError:
-    from atomspace_remote import count_to_confidence, confidence_to_count
+from opencog.atomspace import count_to_confidence, confidence_to_count, TruthValue
 
 import operator, functools, itertools
 
@@ -139,14 +136,16 @@ def inheritance2SimilarityFormula(tvs, U):
 
     return (s, n)
 
-def revisionFormula(tvs, U):
+def revisionFormula(tvs):
+    x, y = tvs
     # revise two truth values
-    [(s1, n1), (s2, n2)] = tvs
 
-    s = (s1+s2)/2.0
-    n = n1+n2
-
-    return (s, n)
+    n = x.count+y.count
+    weight_1 = x.count*1.0/n
+    weight_2 = y.count*1.0/n
+    # TODO maybe check for overlap
+#    s = (weight_1*x.mean+y.mean)/2.0
+    return TruthValue(s, n)
 
 def low(n):
     return max(n, 0.00001)

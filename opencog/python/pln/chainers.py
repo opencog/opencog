@@ -2,6 +2,7 @@ __author__ = 'jade'
 
 from pln.rules.rules import Rule
 from pln.logic import Logic
+from pln.formulas import revisionFormula
 
 from opencog.atomspace import types, Atom
 
@@ -138,7 +139,7 @@ class Chainer(AbstractChainer):
 
         output_tv = rule.calculate(input_tvs)
 
-        output_atom.tv = output_tv
+        self._revise_tvs(output_atom, output_tv)
 
         if self._stimulateAtoms:
             self._give_stimulus(output_atom)
@@ -146,6 +147,12 @@ class Chainer(AbstractChainer):
                 self._give_stimulus(i)
 
         return (output_atom, inputs)
+
+    def _revise_tvs(self, atom, new_tv):
+        old_tv = atom.tv
+
+        revised_tv = revisionFormula([old_tv, new_tv])
+        atom.tv = revised_tv
 
     def _give_stimulus(self, atom):
         # TODO hack - it should use the actual stimulus system to be compatible with ECAN
