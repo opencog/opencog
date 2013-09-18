@@ -240,7 +240,7 @@ namespace opencog
 
             // is this UnitBlock inside this AxisAlignedBox
             // @ point is the nearleftbottom point of the block
-            inline bool isUnitBlockInsideMe(BlockVector& point) const
+            inline bool isUnitBlockInsideMe(const BlockVector& point) const
             {
 
                 if ((point.x >= nearLeftBottomConer.x) &&
@@ -258,7 +258,7 @@ namespace opencog
             }
 
             // is other AxisAlignedBox insidAxisAlignedBoxAxisAlignedBox
-            inline bool isInsideMe(AxisAlignedBox& other)
+            inline bool isInsideMe(const AxisAlignedBox& other)
             {
                 if ((other.nearLeftBottomConer.x >= nearLeftBottomConer.x) &&
                     (other.nearLeftBottomConer.y >= nearLeftBottomConer.y) &&

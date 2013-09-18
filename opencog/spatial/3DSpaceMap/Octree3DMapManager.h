@@ -200,7 +200,7 @@ namespace opencog
             BlockVector getNearFreePointAtDistance( const BlockVector& position, int distance, const BlockVector& startDirection, bool toBeStandOn = true ) const;
 
             // check whether people can stand on this position or not, which means first there is not any obstacle or block here and there is a block under it.
-            bool checkStandable(BlockVector& pos) const;
+            bool checkStandable(const BlockVector &pos) const;
             bool checkStandable(int x, int y, int z) const;
 
             bool containsObject(const Handle objectNode) const;

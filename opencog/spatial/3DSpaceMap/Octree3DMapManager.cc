@@ -745,7 +745,7 @@ bool Octree3DMapManager::isTwoPositionsAdjacent(const BlockVector &pos1, const B
     return false;
 }
 
-bool Octree3DMapManager::checkStandable(BlockVector& pos) const
+bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 {
 
     Block3D* block;
