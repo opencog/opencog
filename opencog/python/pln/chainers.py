@@ -43,6 +43,8 @@ class AbstractChainer(Logic):
                 atoms = [atom for atom in atoms if atom.tv.count > 0]
 
             matching_atoms = self.find(template, atoms)
+            if len(matching_atoms) == 0:
+                return None
             return random.choice(matching_atoms)
 
     def _selectOne(self, atoms):
@@ -116,7 +118,7 @@ class Chainer(AbstractChainer):
             return None
 
         # TODO only supporting one output
-        if self._compute_trail(specific_outputs[0], specific_inputs) is None:
+        if self._compute_trail_and_check_cycles(specific_outputs[0], specific_inputs):
             self.log_failed_inference('cycle detected')
             return None
 
@@ -149,14 +151,14 @@ class Chainer(AbstractChainer):
         # TODO hack - it should use the actual stimulus system to be compatible with ECAN
         atom.av = {'sti':atom.av['sti']+10, 'lti':atom.av['lti']+3}
 
-    def _compute_trail(self, output, inputs):
-        ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return None.
-            Otherwise return the trail as a set of Atoms.'''
+    def _compute_trail_and_check_cycles(self, output, inputs):
+        ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.
+            Otherwise return False'''
         trail = self.trails[output]
 
         # Check for cycles before adding anything into the trails
         if output in inputs:
-            return None
+            return True
         for atom in inputs:
             input_trail = self.trails[atom]
 
@@ -174,7 +176,7 @@ class Chainer(AbstractChainer):
             input_trail = self.trails[atom]
             trail |= input_trail
 
-        return trail
+        return False
 
     def _is_repeated(self, rule, output, inputs):
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
