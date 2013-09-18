@@ -476,7 +476,7 @@ vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamV
 
     spatial::BlockVector nearestPos;
     vector<spatial::BlockVector> path;
-    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos);
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,true);
 
     if (nearestPos != pos1)
     {
@@ -489,10 +489,25 @@ vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamV
 
 vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList)
 {
+    vector<ParamValue> values;
     ParamValue var1 = stateOwnerList.front();
 
+    if (Rule::isParamValueUnGrounded(var1) && (stateOwnerList.size() > 1))
+    {
+        var1 = stateOwnerList[1];
+        if (Rule::isParamValueUnGrounded(var1))
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+    }
+    else
+    {
+        cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
+        return values; // return empty value list
+    }
+
     spatial::BlockVector pos1;
-    vector<ParamValue> values;
 
     Entity* entity1 = boost::get<Entity>(&var1);
     if (entity1)
@@ -500,13 +515,18 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
     else
     {
         Vector* v1 = boost::get<Vector>(&var1);
+        if (! v1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got wrong type of variable!"<<std::endl;
+            return values; // return empty value list
+        }
         pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
     }
 
     // return 24 adjacent neighbour locations (26 neighbours except the pos above and below)
     int x,y,z;
     for (x = -1; x <= 1; x ++)
-        for (y = -1; x <= 1; x ++)
+        for (y = -1; y <= 1; y ++)
             for (z = -1; z <= 1; z ++)
             {
                 if ( (x == 0) && (y == 0))
