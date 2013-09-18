@@ -566,7 +566,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
 
         // out put selected subgoal debug info:
-        cout<<"Debug planning step " << tryStepNum <<": Selected subgoal :"<< curStateNode->state->name() << std::endl;
+        cout<< std::endl << "Debug planning step " << tryStepNum <<": Selected subgoal :";
+        outputStateInfo(curStateNode->state,true);
+        cout<<std::endl;
 
         SpaceServer::SpaceMap* curImaginaryMap;
         if (curStateNode->backwardRuleNode == 0)
@@ -880,7 +882,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         // Till now have selected one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
         // out put selected rule debug info:
-        cout<<"Debug planning step " << tryStepNum <<": Selected rule :"<< selectedRule->action->getName() << std::endl;
+        cout<<"Debug planning step " << tryStepNum <<": Selected rule :"<< selectedRule->ruleName << std::endl;
 
         // create a new RuleNode to apply this selected rule
         RuleNode* ruleNode = new RuleNode(selectedRule);
@@ -909,7 +911,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         ruleNode->updateCurrentAllBindings();
 
         // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
-        selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode);
+        if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
+        {
+            cout << "SelectValueForGroundingNumericState failded!"<< std::endl;
+            // todo
+        }
 
         // out put all the bindings:
         cout<<"Debug planning step " << tryStepNum <<": All Variable bindings for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
@@ -1065,7 +1071,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         vector<State*>::iterator itpre;
         float satisfiedDegree;
         // out put all the effects debug info:
-        cout<<"Debug planning step " << tryStepNum <<": All preconditions for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
+        cout<<"Debug planning step " << tryStepNum <<": All preconditions for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         int preConNum = 1;
         for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre, ++preConNum)
         {
@@ -1669,7 +1675,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
     {
         e = effectIt->second;
         s = e->state;
-        State* unifiedState = Rule::groundAStateByRuleParamMap(s,currentBindingsFromForwardState);
+        State* unifiedState = Rule::groundAStateByRuleParamMap(s,currentBindingsFromForwardState,false);
         if (unifiedState == 0)
             return 0;
 
@@ -1696,7 +1702,7 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
     for (; beIt != toBeUnifiedRule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
     {
         BestNumericVariableInqueryStruct& bs = beIt->second;
-        State* unifiedState = Rule::groundAStateByRuleParamMap(bs.goalState,currentBindingsFromForwardState);
+        State* unifiedState = Rule::groundAStateByRuleParamMap(bs.goalState,currentBindingsFromForwardState,false);
         if (unifiedState == 0)
             return 0;
 
@@ -1739,7 +1745,7 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
     Effect* e;
     State* s;
 
-    std::cout << "Debug: Begin grounding variables for rule: "<< ruleNode->originalRule->action->getName().c_str()
+    std::cout << "Debug: Begin grounding variables for rule: "<< ruleNode->originalRule->ruleName
               << " from its forward state " << forwardStateNode->state->name().c_str() << std::endl;
 
     // Todo:  need to check if all the non-variables/consts are the same to find the exact state rather than just check the state name()
@@ -1790,7 +1796,7 @@ bool OCPlanner::groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode,
         }
     }
 
-    std::cout << "Debug: End grounding variables for rule: "<< ruleNode->originalRule->action->getName().c_str()
+    std::cout << "Debug: End grounding variables for rule: "<< ruleNode->originalRule->ruleName
               << " from its forward state " << forwardStateNode->state->name().c_str() << std::endl;
 
     return true;
@@ -2213,7 +2219,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     map<string,BestNumericVariableInqueryStruct>::iterator beIt = rule->bestNumericVariableinqueryStateFuns.begin();
     for (; beIt != rule->bestNumericVariableinqueryStateFuns.end(); ++ beIt)
     {
-        // find in the currentAllBindings to check if this variable has been grounded or not
+        string varName = (string)(beIt->first);
+        // find in the currentAllBindings to find an ungrounded variable
         if (currentbindings.find(beIt->first) != currentbindings.end())
             continue;
 
@@ -2221,12 +2228,12 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     }
 
     if (beIt == rule->bestNumericVariableinqueryStateFuns.end())
-        return false;
+        return true;
 
     // this variable has not been grouned , call its BestNumericVariableInquery to ground it
     // first, ground the state required by bestNumericVariableinqueryStateFun
     BestNumericVariableInqueryStruct& bs = (BestNumericVariableInqueryStruct&)(beIt->second);
-    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings,false);
+    State* groundedState = Rule::groundAStateByRuleParamMap( bs.goalState,currentbindings,false,false,UNDEFINED_VALUE,false);
     if (groundedState == 0)
     {
         // todo: Currently we cannot solve such problem that this state cannot be grouded by previous grouding steps
@@ -2274,16 +2281,14 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         if (unrecursiveRule == 0)
             return false; // cannot find a unrecursiveRule to borrow from
 
-        // ground this unrecursiveRule by the effectStateNode
-        /* Effect* e = */ rule->effectList.begin()->second;
-
-        // ToBeImproved: currently only apply the borrowed rule in the first precondition of recursiveRule
-        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList.front());
+        // ToBeImproved: currently only apply the borrowed rule in the second precondition of recursiveRule
+        // ToBeImproved: need to find out if the numeric variable this unrecursive rule try to ground is applied in the first or second  precondition of this recursiveRule
+        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList[1]);
         if (borrowedRule == 0)
             return false; // cannot unify the borrowed rule
 
         // because we have unified the rules, so the borrowed rule can use the same grounding map with
-        if (! selectValueForGroundingNumericState(borrowedRule,currentbindings))
+        if (! selectValueForGroundingNumericState(borrowedRule,currentbindings,ruleNode))
              return false; // cannot find a proper value from the borrowed rule
 
         //  check if this variable has been grounded by selectValueForGroundingNumericState from the borrowed rule
@@ -2312,8 +2317,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     }
     else
     {
-        logger().error("OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation!" );
-        return false;
+        cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
+        bestValue = values.front();
     }
 
 
@@ -2499,6 +2504,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // rule: increasing energy by eat an edible object held in hand
     Rule* eatRule = new Rule(eatAction,boost::get<Entity>(var_avatar),0.2f);
+    eatRule->ruleName = "eatFoodtoAchieveEnergyDemand";
     eatRule->addPrecondition(existState);
     eatRule->addPrecondition(edibleState);
     eatRule->addPrecondition(holderState);
@@ -2547,6 +2553,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // rule:  pick up an object if closed enough, to hold it
     Rule* pickupRule = new Rule(pickupAction,boost::get<Entity>(varAvatar),0.1f);
+    pickupRule->ruleName = "pickupObjecttoHoldIt";
     pickupRule->addPrecondition(pickupableState);
     pickupRule->addPrecondition(closedState);
 
@@ -2589,6 +2596,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // rule:   Move_to an object to get closed to it
     Rule* movetoObjRule = new Rule(moveToObjectAction,boost::get<Entity>(var_avatar) ,0.01f);
+    movetoObjRule->ruleName = "movetoObjectTogetClosedToIt";
     movetoObjRule->addPrecondition(existPathState);
 
     movetoObjRule->addEffect(EffectPair(0.9f,getClosedEffect));
@@ -2630,6 +2638,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // rule:   Move_to an object to get closed to it
     Rule* walkRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
+    walkRule->ruleName = "waldToPositionToGetClosedToItAndStandOnIt";
     walkRule->addPrecondition(existPathState2);
 
     walkRule->addEffect(EffectPair(0.9f,getClosedEffect2));
@@ -2678,6 +2687,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // rule:   Move_to an object to get closed to it
     Rule* walkclosedRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
+    walkclosedRule->ruleName = "waldToPositionToGetClosedToItButNotStandOnIt";
     walkclosedRule->addPrecondition(existPathState7);
     walkclosedRule->addPrecondition(adjacentState0);
 
@@ -2751,6 +2761,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // add rule:
     Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,0.5f);
+    buildBlockRule->ruleName = "buildABlockToEnableThisPositionStandable";
     buildBlockRule->addPrecondition(solidState);
     buildBlockRule->addPrecondition(closedState4);
     buildBlockRule->addPrecondition(atLocationState3);
@@ -2792,6 +2803,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // add rule:
     Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
+    accessAdjacentRule->ruleName = "adjacentPositionsExistingPath";
     accessAdjacentRule->addPrecondition(standableState2);
     accessAdjacentRule->addPrecondition(adjacentState);
 
@@ -2833,6 +2845,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // add rule:
     Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
+    pathTransmitRule->ruleName = "IfExistpathAtoBandBtoCthenExistpathAtoC";
     pathTransmitRule->addPrecondition(existPathState4);
     pathTransmitRule->addPrecondition(existPathState5);
 
