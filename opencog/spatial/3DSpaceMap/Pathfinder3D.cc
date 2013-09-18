@@ -29,7 +29,7 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path, BlockVector& nearestPos)
+bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path, BlockVector& nearestPos, bool getNearestPos)
 {
     BlockVector end = target;
     map<BlockVector,double> costMap;
@@ -37,6 +37,15 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
     int searchTimes = 0;
     float nearestDis = begin - target;
     nearestPos = begin;
+    bool nostandable = false;
+
+    // check if the begin and target pos standable first
+    if ((! mapManager->checkStandable(begin)) || (! mapManager->checkStandable(target)))
+    {
+        nostandable = true;
+        if (! getNearestPos)
+        return false;
+    }
 
     while(true)
     {
@@ -150,7 +159,10 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
         if ((currentPath.size() < 21) || (searchTimes > 4))
         {
             path.insert(path.begin(), currentPath.begin(), currentPath.end());
-            return true;
+            if (nostandable)
+                return false;
+            else
+                return true;
         }
 
         // find the farthest pos in this currrentPath from the end position
@@ -171,7 +183,10 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
         // The shortest way found!
         if (farPosIter == currentPath.begin())
         {
-            return true;
+            if (nostandable)
+                return false;
+            else
+                return true;
         }
 
         end = *(--farPosIter);
