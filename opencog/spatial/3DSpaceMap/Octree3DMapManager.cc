@@ -753,8 +753,8 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
         return false;
 
     // check if there is any non-block obstacle in this pos
-    if (mPosToNoneBlockEntityMap.count(pos) != 0 )
-    return false;
+    /*if (mPosToNoneBlockEntityMap.count(pos) != 0 )
+    return false;*/
 
     if (mRootOctree->checkIsSolid(pos,block))
         return false;
