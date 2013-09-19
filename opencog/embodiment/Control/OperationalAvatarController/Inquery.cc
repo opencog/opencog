@@ -433,6 +433,11 @@ ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
         pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
     }
 
+    if ( (!spaceMap->checkStandable(pos1)) || (!spaceMap->checkStandable(pos2)) )
+    {
+        return "false";
+    }
+
     if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
     {
         if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
