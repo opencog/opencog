@@ -605,7 +605,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
                 bool isNegativeGoal, isDiffStateOwnerType;
-                checkNegativeStateNumBythisRule(r,curStateNode,isNegativeGoal, isDiffStateOwnerType);
+                int negativeNum,satisfiedPreconNum;
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,true);
 
                 if (isNegativeGoal || isDiffStateOwnerType) // if this rule will negative this goal, we should not choose to apply it.
                     continue;
@@ -626,14 +627,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // Generate a score for each rules based on above criterions:
                 // score = probability (50%) + lowest cost (50%)
                 // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
+                // will also check the fitness of this rule , see checkRuleFitnessRoughly
 
                 multimap<float,Rule*> ::iterator ruleIt;
 
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {
                     Rule* r = ruleIt->second;
-
-                    // TODO: check if this rule is positive or negative for the current state
 
                     // Because grounding every rule fully is time consuming, but some cost of rule requires the calculation of grounded variables.
                     // So here we just use the basic cost of every rule as the cost value.
@@ -648,12 +648,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
                     bool isNegativeGoal, isDiffStateOwnerType;
-                    int negativeNum = checkNegativeStateNumBythisRule(r,curStateNode,isNegativeGoal,isDiffStateOwnerType);
+                    int negativeNum,satisfiedPreconNum;
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType);
 
                     if (isNegativeGoal || isDiffStateOwnerType)
                         continue; //  its effect will negative this current selected goal state, it's a opposite rule, should not add it into candidate rules
 
                     curRuleScore -= negativeNum;
+                    curRuleScore += satisfiedPreconNum;
 
                     while(true)
                     {
@@ -918,7 +920,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         // out put all the bindings:
-        cout<<"Debug planning step " << tryStepNum <<": All Variable bindings for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
+        cout<<"Debug planning step " << tryStepNum <<": All Variable bindings for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         ParamGroundedMapInARule::iterator curparamit = ruleNode->currentAllBindings.begin();
         for (; curparamit != ruleNode->currentAllBindings.end(); ++ curparamit)
         {
@@ -932,7 +934,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         vector<ParamValue>::iterator oldValItor = ruleNode->orginalGroundedParamValues.begin();
 
         // out put all the effects debug info:
-        cout<<"Debug planning step " << tryStepNum <<": All effects for rule :"<< ruleNode->originalRule->action->getName() << std::endl;
+        cout<<"Debug planning step " << tryStepNum <<": All effects for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         int effectNum = 1;
         for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor, ++ oldValItor, ++effectNum)
         {
@@ -1299,15 +1301,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-// return how many states in the temporaryStateNodes will be Negatived by this rule
-int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool& negativeGoal, bool &isDiffStateOwnerType)
+void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,bool onlyCheckIfNegativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
 
     groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
 
-    int num = 0;
+    negateveStateNum = 0;
+    satisfiedPreconNum = 0;
     negativeGoal = false;
     isDiffStateOwnerType = false;
 
@@ -1322,7 +1324,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
         {
             if (! e->state->isStateOwnerTypeTheSameWithMe( *(fowardState->state)) )
             isDiffStateOwnerType = true;
-            return 10000;
+            return;
         }
 
         State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState, true,false);
@@ -1343,7 +1345,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
             {
                 negativeGoal = true;
                 delete effState;
-                return 10000;
+                return;
             }
         }
 
@@ -1366,7 +1368,7 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
                 StateNode* satStateNode = (StateNode*)(*sait);
                 if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
                 {
-                    num ++;
+                    negateveStateNum ++;
 
                 }
                 else
@@ -1380,9 +1382,54 @@ int OCPlanner::checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardStat
         delete effState;
     }
 
-    delete tmpRuleNode;
+    if (onlyCheckIfNegativeGoal)
+    {
+        delete tmpRuleNode;
+        return;
+    }
 
-    return num;
+    // check how many preconditions will be satisfied
+    vector<State*>::iterator itpre;
+    for (itpre = tmpRuleNode->originalRule->preconditionList.begin(); itpre != tmpRuleNode->originalRule->preconditionList.end(); ++ itpre)
+    {
+        State* ps = *itpre;
+        State* groundPs = Rule::groundAStateByRuleParamMap(ps, tmpRuleNode->currentBindingsFromForwardState);
+        if (! groundPs)
+            continue;
+
+        // first check if this state has beed satisfied by the previous state nodes
+        bool found = false;
+
+        StateNode* satStateNode;
+
+        bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode,tmpRuleNode,true);
+
+        // if it's found in the temporaryStateNodes
+        if (found)
+        {
+            if (satByTemp)
+                ++ satisfiedPreconNum;
+
+            delete groundPs;
+            continue;
+
+        }
+        else
+        {
+            // cannot find this state in the temporaryStateNodes list, need to check it in real time
+            // check real time
+            float satisfiedDegree;
+            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+                 ++ satisfiedPreconNum;
+
+            delete groundPs;
+            continue;
+
+        }
+
+    }
+
+    delete tmpRuleNode;
 
 }
 

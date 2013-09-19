@@ -311,10 +311,12 @@ protected:
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
-     // return how many states in the temporaryStateNodes will be Negatived by this rule
-     // bool &negativeGoal return if this rule after grounded will negative this forward goal state
-     // bool &isDiffStateOwnerType return if the effect state owner types are differnt from its fowardState
-     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal, bool &isDiffStateOwnerType);
+     // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
+     // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
+     // @ negativeGoal: return if this rule after grounded will negative this forward goal state
+     // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
+     // onlyCheckIfNegativeGoal is not to check preconditions
+     void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,bool onlyCheckIfNegativeGoal=false);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
