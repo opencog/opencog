@@ -129,7 +129,7 @@ struct composite_score:
     /// anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
-    /// useful for testing (probably not in practice)
+    /// used in test cases -- compare equality to 7 decimal places.
     bool operator==(const composite_score& r) const;
 
     // EXPERIMENTAL: if multiply_diversity is set to true then the
