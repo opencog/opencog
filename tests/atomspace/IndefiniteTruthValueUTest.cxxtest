@@ -353,7 +353,15 @@ public:
                 TS_ASSERT(isApproxEq(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
                 float expectedCount = count(l, us[i]);
                 float expectedConfidence = confidence(l, us[i]);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
+
+                // Some of the expectedCount are small (e.g. 0.222...)
+                // and some are large (e.g. 19999998) so take care with diff.
+                // ... and sometimes expected count is zero ... 
+                if (1.0 < expectedCount) {
+                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                } else {
+                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                }
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
@@ -373,7 +381,11 @@ public:
 
                 // Some of the expectedCount are small (e.g. 0.222...)
                 // and some are large (e.g. 19999998) so take care with diff.
-                TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                if (1.0 < expectedCount) {
+                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                } else {
+                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                }
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
