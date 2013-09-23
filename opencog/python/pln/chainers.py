@@ -159,7 +159,7 @@ class Chainer(AbstractChainer):
     def _give_stimulus(self, atom):
         # Arbitrary
         STIMULUS_PER_ATOM = 10
-        self._agent.stimulateAtom(atom, STIMULUS_PER_ATOM)
+        self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
 
     def _compute_trail_and_check_cycles(self, output, inputs):
         ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.
