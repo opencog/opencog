@@ -163,7 +163,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
             y = contin_eval(sib);
             contin_t res = x / y;
             if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
+                throw OverflowException(vertex(res));
             return res;
         }
 
@@ -175,7 +175,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
             contin_t res = log(x);
 #endif
             if (isnan(res) || isinf(res))
-                throw EvalException(vertex(res));
+                throw OverflowException(vertex(res));
             return res;
         }
 
@@ -183,7 +183,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
             contin_t res = exp(contin_eval(it.begin()));
             // This may happen when the argument is too large, then
             // exp will be infty
-            if (isinf(res)) throw EvalException(vertex(res));
+            if (isinf(res)) throw OverflowException(vertex(res));
             return res;
         }
 
@@ -207,7 +207,7 @@ contin_t contin_interpreter::contin_eval(combo_tree::iterator it) const
     // contin constant
     else if (const contin_t* c = boost::get<contin_t>(&v)) {
         if (isnan(*c) || isinf(*c))
-            throw EvalException(vertex(*c));
+            throw OverflowException(vertex(*c));
         return *c;
     }
     else {
@@ -303,7 +303,7 @@ vertex mixed_interpreter::mixed_eval(combo_tree::iterator it) const
                 // might be +inf -inf or nan and we can still get a
                 // sign bit off two of these cases...
                 x = mixed_eval(sib);
-            } catch (EvalException e) {
+            } catch (OverflowException& e) {
                 x = e.get_vertex();
             }
             return bool_to_vertex(0 < get_contin(x));

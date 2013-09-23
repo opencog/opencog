@@ -27,8 +27,6 @@
 #include "moses-framework.h"
 
 using namespace opencog::moses;
-using std::cout;
-using std::endl;
 
 const string MOSESUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
 

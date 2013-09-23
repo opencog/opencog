@@ -20,14 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-
 #ifndef _OPENCOG_MOSES_EXEC_DEF_H
 #define _OPENCOG_MOSES_EXEC_DEF_H
 
-#include <boost/program_options.hpp>
-#include <boost/lexical_cast.hpp>
-
-#include <opencog/util/iostreamContainer.h>
+#include <string>
 
 namespace opencog { namespace moses {
 

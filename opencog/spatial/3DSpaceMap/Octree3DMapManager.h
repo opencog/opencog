@@ -99,7 +99,7 @@ namespace opencog
              * @_offSet: how many unit per edge in this space, indicating the size of the whole space
              */
             Octree3DMapManager(std::string _mapName, int _xMin, int _yMin, int _zMin, int _xDim, int _yDim, int _zDim, int _floorHeight);
-            ~Octree3DMapManager(){};
+            ~Octree3DMapManager();
 
             //deep clone this octree3DMapManager and return the new instance
             // the cloned octree3DMapManager will have the same octress,blocks and entities,
@@ -356,12 +356,10 @@ namespace opencog
             Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
                                int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                               Entity3D*>& _AllNoneBlockEntities,multimap<BlockVector, Entity3D*>& _PosToNoneBlockEntityMap,
-                               map< Handle, vector< pair<unsigned long,BlockVector> > > _nonBlockEntitieshistoryLocations);
+                               Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations);
 
 
-
-
+/*
 #ifdef HAVE_ZMQ
             // using zmq to communicate with the learning server
             string fromLSIP;
@@ -376,6 +374,7 @@ namespace opencog
 #endif // HAVE_ZMQ
 
             bool enableStaticsMapLearning;
+ */
 
         };
 

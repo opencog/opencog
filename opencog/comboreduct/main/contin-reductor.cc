@@ -73,6 +73,8 @@ int main()
                 cerr << "contin tables don't match!" << endl;
                 //return 1;
             }
+        } catch (OverflowException& e) {
+            cout << e.get_message() << " : " << e.get_vertex() << endl;
         } catch (EvalException& e) {
             cout << e.get_message() << " : " << e.get_vertex() << endl;
         }

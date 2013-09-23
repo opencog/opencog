@@ -129,7 +129,7 @@ struct composite_score:
     /// anything (including -inf) except nan
     bool operator<(const composite_score &r) const;
 
-    /// useful for testing (probably not in practice)
+    /// used in test cases -- compare equality to 7 decimal places.
     bool operator==(const composite_score& r) const;
 
     // EXPERIMENTAL: if multiply_diversity is set to true then the
@@ -450,8 +450,7 @@ Out& ostream_combo_tree_composite_pbscore_python(Out& out,
                                                  bool output_penalty = false,
                                                  bool output_bscore = false)
 {
-    out << std::endl
-        << "#!/usr/bin/python" << std::endl
+    out << "#!/usr/bin/env python" << std::endl
         << "from operator import *" << std::endl
         << std::endl
         << "#These functions allow multiple args instead of lists." << std::endl

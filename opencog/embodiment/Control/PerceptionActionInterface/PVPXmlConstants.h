@@ -104,6 +104,7 @@
 #define PET_HOME_ATTRIBUTE                   "petHome"
 #define FOOD_BOWL_ATTRIBUTE                  "foodBowl"
 #define WATER_BOWL_ATTRIBUTE                 "waterBowl"
+#define PICK_UP_ABLE_ATTRIBUTE               "pickupable"
 #define SENSOR_ATTRIBUTE           "sensor"
 #define SUBJECT_ATTRIBUTE          "subject"
 #define SIGNAL_ATTRIBUTE           "signal"

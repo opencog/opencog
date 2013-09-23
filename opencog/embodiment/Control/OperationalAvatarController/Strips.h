@@ -76,6 +76,8 @@ namespace opencog { namespace oac {
         STATE_LESS_THAN     // LessThanLink
     };
 
+    extern const char* STATE_TYPE_NAME[5];
+
     // some kind of state values cannot directly get from the Atomspace.see inquery.h
     // so each of the state value need a coresponding funciton to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
@@ -102,6 +104,7 @@ namespace opencog { namespace oac {
     class State
     {
     public:
+
         ActionParameter* stateVariable;
 
         // whose feature this state describes. e.g. the robot's energy
@@ -116,6 +119,7 @@ namespace opencog { namespace oac {
 
         // see the enum StateType
         StateType stateType;
+
 
         // some kinds of state is not apparent, need real-time inquery from the system
         // e.g.: Distance(a,b) - the distance between a and b, it's usually not apparent, need to call corresponding funciton to calcuate
@@ -156,7 +160,15 @@ namespace opencog { namespace oac {
 
         inline bool isSameState(const State& other) const
         {
-            return ((name() == other.name())&&(stateOwnerList == other.stateOwnerList));
+            if (name() == other.name())
+            {
+                if (std::equal(stateOwnerList.begin(),stateOwnerList.end(),other.stateOwnerList.begin()))
+                    return true;
+            }
+
+            return false;
+
+            // return ((name() == other.name())&&(stateOwnerList == other.stateOwnerList));
         }
 
         // @ satisfiedDegree is a return value between (-infinity,1.0], which shows how many percentage has this goal been achieved,
@@ -178,6 +190,8 @@ namespace opencog { namespace oac {
         float getFloatValueFromNumbericState();
 
         bool isNumbericState() const;
+
+        bool isStateOwnerTypeTheSameWithMe(const State& other) const;
 
         // About the calculation of Satisfie Degree
         // compare 3 ParamValue for a same state: the original ParamValue, the current ParamValue and the goal ParamValue
@@ -214,6 +228,16 @@ namespace opencog { namespace oac {
 
     };
 
+    // map to save grounded values for one rule:
+    // map<parameter name, grounded value>
+    // e.g.: <$Entity0,Robot001>
+    //       <$Vector0,Vector(45,82,29)>
+    //       <$Entity1,Battery83483>
+    typedef map<string, ParamValue> ParamGroundedMapInARule;
+
+    // pair<the state this varaible belongs to, one address of this variable>
+    typedef pair<State*,ParamValue*> paramIndex;
+
 
     class Effect
     {
@@ -226,11 +250,25 @@ namespace opencog { namespace oac {
         EFFECT_OPERATOR_TYPE effectOp;
         ParamValue opParamValue;
 
-        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue);
+        // if the StateOwner Type matter or not. Some rules are applied for all kind of state owners, some rules only apply for the assigned state owenr types.
+        // e.g.: the recursive rule: if there exists a path from a to b, and there exists a path from b to c, so there should exitst a path from a to c,
+        //       in this rule a,b,c can be vectors and also entities.
+        bool ifCheckStateOwnerType;
 
+        Effect(State* _state, EFFECT_OPERATOR_TYPE _op, ParamValue _OPValue,bool _ifCheckStateOwnerType = true);
+
+        // get the target state type that this effect will change to , according to the effectOp
+        StateType getTargetStateType();
+
+        // execute the effect to a grounded state. will change this state.
+        // will look up the value from groundings if the opParamValue is ungrouned
         // only when there are misusge of the value type of opParamValue, it will return false,
         // e.g. if assign a string to a bool state, it will return false
-        bool executeEffectOp();
+        static bool executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARule &groundings);
+
+        // if the effect operator is to make the operator opposite, e.g. change from STATE_EQUAL_TO to STATE_NOT_EQUAL_TO
+        // then just need to change the state type, don't need to change the value
+        static bool isEffectOpOpposite(Effect* effect);
 
         // make sure the value type of the operater value is the same with the value type of the state
         // and also this value type can be the parameter of this operator
@@ -254,16 +292,6 @@ namespace opencog { namespace oac {
     // the float in this pair is the probability of the happenning of this Effect
     typedef pair<float,Effect*> EffectPair;
 
-
-    // map to save grounded values for one rule:
-    // map<parameter name, grounded value>
-    // e.g.: <$Entity0,Robot001>
-    //       <$Vector0,Vector(45,82,29)>
-    //       <$Entity1,Battery83483>
-    typedef map<string, ParamValue> ParamGroundedMapInARule;
-
-    // pair<the state this varaible belongs to, one address of this variable>
-    typedef pair<State*,ParamValue*> paramIndex;
 
     // ToBeImproved, in fact,there should rules for selecting values as well,
     // so that the variable grounding process can be also consided as the same reasoning process as the main planning process.
@@ -384,7 +412,8 @@ namespace opencog { namespace oac {
         // in some planning step, need to ground some state to calculate the cost or others
         // return a new state which is the grounded version of s, by a parameter value map
         // if the "groundings" cannot ground all the variables in this state, return 0
-       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings);
+       static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings,bool toGroundStateValue = true,
+                                                bool ifRealTimeQueryStateValue = true, ParamValue knownStateVal = UNDEFINED_VALUE);
 
         bool static isRuleUnGrounded( Rule* rule);
 

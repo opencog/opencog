@@ -153,7 +153,9 @@ private:
     bool output_only_best;
     bool output_eval_number;
     bool output_with_labels;
+public:
     vector<string> ilabels;
+private:
     string output_file;
     bool output_python;
     bool is_mpi;

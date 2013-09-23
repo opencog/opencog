@@ -48,7 +48,7 @@ PredicatesUpdater::PredicatesUpdater(AtomSpace &_atomSpace, const std::string &_
     updaters.push_back(new IsSmallPredicateUpdater(atomSpace));
     updaters.push_back(new IsNoisyPredicateUpdater(atomSpace));
     updaters.push_back(new IsMovablePredicateUpdater(atomSpace));
-    updaters.push_back(new IsPickupablePredicateUpdater(atomSpace));
+//    updaters.push_back(new IsPickupablePredicateUpdater(atomSpace));
     updaters.push_back(new IsPooPlacePredicateUpdater(atomSpace));
     updaters.push_back(new IsPeePlacePredicateUpdater(atomSpace));
 
