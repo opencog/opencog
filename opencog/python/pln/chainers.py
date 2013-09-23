@@ -79,10 +79,12 @@ class AbstractChainer(Logic):
         print 'Attempted invalid inference:',message
 
 class Chainer(AbstractChainer):
-    def __init__(self, atomspace, stimulateAtoms=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None):
         AbstractChainer.__init__(self, atomspace)
 
+        # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
+        self._agent = agent
 
         # For every atom, store the atoms used to produce it (including the atoms used to produce them).
         # This prevents cycles (very important) as well as repeating the same inference.
@@ -155,8 +157,9 @@ class Chainer(AbstractChainer):
         atom.tv = revised_tv
 
     def _give_stimulus(self, atom):
-        # TODO hack - it should use the actual stimulus system to be compatible with ECAN
-        atom.av = {'sti':atom.av['sti']+10, 'lti':atom.av['lti']+3}
+        # Arbitrary
+        STIMULUS_PER_ATOM = 10
+        self._agent.stimulateAtom(atom, STIMULUS_PER_ATOM)
 
     def _compute_trail_and_check_cycles(self, output, inputs):
         ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.

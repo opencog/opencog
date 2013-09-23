@@ -9,7 +9,7 @@ class ForwardInferenceAgent(MindAgent):
 
     def run(self, atomspace):
         if self.chainer is None:
-            self.chainer = Chainer(atomspace, stimulateAtoms=False)
+            self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
 
             self.chainer.add_rule(rules.InversionRule(self.chainer))
             self.chainer.add_rule(rules.DeductionRule(self.chainer))
@@ -23,18 +23,18 @@ class ForwardInferenceAgent(MindAgent):
             if result:
                 (output, inputs) = result
 
-                #print '==== Inference ===='
-                #print output,str(output.av),'<=',' '.join(str(i)+str(output.av) for i in inputs)
+                print '==== Inference ===='
+                print output,str(output.av),'<=',' '.join(str(i)+str(output.av) for i in inputs)
 
-                #print
-                #print '==== Attentional Focus ===='
-                #for atom in get_attentional_focus(atomspace)[0:30]:
-                #    print str(atom), atom.av
+                print
+                print '==== Attentional Focus ===='
+                for atom in get_attentional_focus(atomspace)[0:30]:
+                    print str(atom), atom.av
 
-                print '==== Result ===='
-                print output
-                print '==== Trail ===='
-                print_atoms( self.chainer.trails[output] )
+                #print '==== Result ===='
+                #print output
+                #print '==== Trail ===='
+                #print_atoms( self.chainer.trails[output] )
             else:
                 print 'Invalid inference attempted'
         except Exception, e:
