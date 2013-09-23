@@ -1,83 +1,165 @@
-__author__ = 'ramin'
+from opencog.atomspace import count_to_confidence, confidence_to_count, TruthValue
 
-from opencog.atomspace import TruthValue
+import operator, functools, itertools
+
+from utility.util import concat_lists
 
 DEDUCTION_TERM_WEIGHT = 1.0
 INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
+EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
+INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
 
-REVISION_STRENGTH_DEPENDENCY = 0.0
-REVISION_COUNT_DEPENDENCY = 0.0
+def identityFormula(tvs, U):
+    [(sA, nA)] = tvs
+    
+    return (sA, nA)
 
+# Won't work with the current control
+#def trueFormula(tvs, U):
+#    [] = tvs
+#    
+#    return (1.0, confidence_to_count(1.0))
 
-def denominator(value):
-    """
+def deductionSimpleFormula(tvs):
+    (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tvs
 
-    :param value:
-    :return:
-    """
-    return max(value, 0.00001)
+    # Temporary filtering fix to make sure that nAB >= nA
+    nA = min(nA, nAB)
+    sDenominator = low(1 - sB)
+    nDenominator = low(nB)
+    
+    w1 = DEDUCTION_TERM_WEIGHT # strength
+    w2 = 2 - w1 # strength
+    sAC = (w1 * sAB * sBC
+               + w2 * (1 - sAB) * (sC - sB * sBC) / sDenominator)
+    
+    nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT * nA * nBC / nDenominator
+    
+    return (sAC, nAC)
 
+def inversionFormula(tvs):
+    (sAB, nAB), (sA, nA), (sB, nB) = tvs
+    
+    sBA = sAB * sA / low(sB)
+    nBA = nAB * nB / low(nA)
+    
+    return (sBA, nBA)
 
-def deduction(tvA, tvB, tvC, tvAB, tvBC):
-    """
+def crispModusPonensFormula(tvs, U):
+    (sAB, nAB), (sA, nA) = tvs
 
-    :param tvA:
-    :param tvB:
-    :param tvC:
-    :param tvAB:
-    :param tvBC:
-    :return:
-    """
-    (sA, nA) = (tvA.mean, tvA.count)
-    (sB, nB) = (tvB.mean, tvB.count)
-    (sC, nC) = (tvC.mean, tvC.count)
-    (sAB, nAB) = (tvAB.mean, tvAB.count)
-    (sBC, nBC) = (tvBC.mean, tvBC.count)
+    true = 0.1
+    if all(x > true for x in [sAB, nAB, sA, nA]):
+        return (1, confidence_to_count(1))
+    else:
+        return (0, 0)
 
-    w1 = DEDUCTION_TERM_WEIGHT
-    w2 = 2 - w1
+def modusPonensFormula(tvs, U):
+    (sAB, nAB), (sA, nA) = tvs
 
-    sAC = w1*sAB*sBC + (w2*(1-sAB)*(sC-sB*sBC) / denominator(1-sB))
-    nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT*nA*nBC / denominator(nB)
+    # P(B|not A) -- how should we find this?
+    #BNA = TruthValue(0.5, 0.01)
+    sBNA, nBNA = (0.5, 0.01)
+    
+    n2 = min(nAB, nA)
+    if n2 + nBNA > 0:
+        s2 = ((sAB * sA * n2 + nBNA +
+                 sBNA * (1 - sA) * nBNA) /
+                 low(n2 + nBNA))
+    else:
+        raise NotImplementedError
+        s2 = BNA.confidence
+    
+    return (s2, n2)
 
-    return TruthValue(sAC, nAC)
+def notFormula(tvs, U):
+    [(sA, nA)]  = tvs
+    return (1.0 - sA, nA)
 
+def andSymmetricFormula(tvs, U):
+    total_strength = 1.0
+    total_confidence = 1.0
+    
+    for (s, n) in tvs:
+        total_strength *= s
+        total_confidence *= count_to_confidence(n)
+    
+    return (total_strength, confidence_to_count(total_confidence))
 
-def inversion(tvA, tvB, tvAB):
-    """
+def orFormula(tvs, U):
+    N = len(tvs)
+    
+    if N == 1:
+        return tvs[0]
+    
+    if N > 2:
+        # TODO handle via divide-and-conquer or something
+        raise NotImplementedError("OR calculation not supported for arity > 2")
 
-    :param tvA:
-    :param tvB:
-    :param tvAB:
-    :return:
-    """
-    (sA, nA) = (tvA.mean, tvA.count)
-    (sB, nB) = (tvB.mean, tvB.count)
-    (sAB, nAB) = (tvAB.mean, tvAB.count)
+    (sA, nA), (sB, nB) = tvs
+    
+    A = sA * nB
+    B = sB * nA
+    
+    s_tot = sA + sB
+    n_tot = nA + nB - (A + B) / 2
+    
+    return (s_tot, n_tot)
 
-    sBA = sAB * sA / denominator(sB)
-    nBA = nAB * nB / denominator(nA)
+def andPartitionFormula(tvs, U):
+    [(sAndA, nAndA), (sAndB, nAndB)] = tvs
 
-    return TruthValue(sBA, nBA)
+    s = sAndA * sAndB
+    n = nAndA + nAndB
+    return (s, n)
 
+def ext2InhFormula(tvs, U):
+    [(sAB, nAB)] = tvs
+    
+    sABint = sAB
+    nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR
+    return (sABint, nABint)
 
-def revision(tvA, tvB):
-    """
+def inheritanceFormula(tvs, U):
+    [(sExt, nExt), (sInt, nInt)] = tvs
 
-    :param tvA:
-    :param tvB:
-    :return:
-    """
-    (sA, nA) = (tvA.mean, tvA.count)
-    (sB, nB) = (tvB.mean, tvB.count)
+    s = (sExt + sInt) / 2.0
+    n = (nExt + nInt) / 2.0
 
-    wA = nA / denominator(nA + nB)
-    wB = nB / denominator(nA + nB)
+    return (s, n)
 
-    c_strength = REVISION_STRENGTH_DEPENDENCY
-    c_count = REVISION_COUNT_DEPENDENCY
+def inheritance2SimilarityFormula(tvs, U):
+    [(sAB, nAB), (sBA, nBA)] = tvs
 
-    s3 = (wA * sA + wB * sB - c_strength * sA * sB)
-    n3 = max(nA, nB) + c_count * min(nA, nB)
+    s = 1.0/ ( 1.0/sAB + 1.0/sBA -1)
+    n = (nAB + nBA) / (1 + s)
 
-    return TruthValue(s3, n3)
+    return (s, n)
+
+def revisionFormula(tvs):
+    x, y = tvs
+    # revise two truth values
+
+    n = x.count+y.count
+    ## it should be a confidence-weighted average
+    #weight_1 = x.count*1.0/n
+    #weight_2 = y.count*1.0/n
+    # TODO maybe check for overlap
+#    s = (weight_1*x.mean+y.mean)/2.0
+    s = (x.mean+y.mean)/2.0
+    return TruthValue(s, n)
+
+def low(n):
+    return max(n, 0.00001)
+
+# temporal formulas
+def beforeFormula(dist1, dist2):
+    times_event1 = [int(t) for t in dist1.keys()]
+    times_event2 = [int(t) for t in dist2.keys()]
+    
+    if all(t_event1 < t_event2 for t_event1 in times_event1 for t_event2 in times_event2):
+        strength = 1
+    else:
+        strength = 0
+    
+    return strength
