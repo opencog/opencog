@@ -141,10 +141,12 @@ def revisionFormula(tvs):
     # revise two truth values
 
     n = x.count+y.count
-    weight_1 = x.count*1.0/n
-    weight_2 = y.count*1.0/n
+    ## it should be a confidence-weighted average
+    #weight_1 = x.count*1.0/n
+    #weight_2 = y.count*1.0/n
     # TODO maybe check for overlap
 #    s = (weight_1*x.mean+y.mean)/2.0
+    s = (x.mean+y.mean)/2.0
     return TruthValue(s, n)
 
 def low(n):
