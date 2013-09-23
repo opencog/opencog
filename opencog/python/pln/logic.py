@@ -95,7 +95,7 @@ class Logic(object):
             return self._unify_variable(x, y, substitution)
         elif self.is_variable(y):
             return self._unify_variable(y, x, substitution)
-        elif x.is_link() and y.is_link():
+        elif (not x.is_node()) and (not y.is_node()):
             if x.type != y.type:
                 return None
             elif len(x.out) != len(y.out):    
