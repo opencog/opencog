@@ -224,7 +224,8 @@ bool SuperEntity::rebuild( void )
                         // corner overlap counter
                         for ( it3 = it2->second->edges.begin( ); it3 != it2->second->edges.end( ); ++it3 ) {
                             for ( it4 = it1->second->edges.begin( ); it4 != it1->second->edges.end( ); ++it4 ) {
-                                if ( it3->pointA == it4->pointA ) {
+                                // if ( it3->pointA == it4->pointA ) {
+                                if ( (it3->pointA - it4->pointA).length() < math::LineSegment::TOLERANCE_DISTANCE ) {
                                     ++overlapCorners;
                                 } // if
                             } // for
