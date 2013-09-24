@@ -71,7 +71,7 @@ bool Rectangle::isInside( const Vector3& point )
     double dot2 = v1.dotProduct( v1);
     double dot3 = v.dotProduct( v2);
     double dot4 = v2.dotProduct( v2);
-    return ( dot1 > 0 && dot2 > dot1 && dot3 > 0 && dot4 > dot3 );
+    return ( dot1 > 0.0 && dot2 > dot1 && dot3 > 0.0 && dot4 > dot3 );
 }
 
 Rectangle& Rectangle::operator=( const Rectangle & o )

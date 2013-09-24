@@ -113,9 +113,9 @@ public:
 
         TS_ASSERT_THROWS_ANYTHING( SuperEntity spe0( petAgent, humanoidAgent ) )
         
-//        std::cout << std::endl << s1->getBoundingBox().getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ).toString() << std::endl;
-//        std::cout << s1->getDimension().toString( ) << std::endl;
-//        std::cout << s1->getPosition().toString( ) << std::endl;
+        std::cout << std::endl << "s1 bbox corner: " << s1->getBoundingBox().getCorner( math::BoundingBox::FAR_RIGHT_BOTTOM ).toString() << std::endl;
+        std::cout << "s1 dimension: " << s1->getDimension().toString( ) << std::endl;
+        std::cout << "s1 position: " << s1->getPosition().toString( ) << std::endl;
 
         SuperEntity spe( s1, s2 );
         spe.merge( s3 );
@@ -127,12 +127,14 @@ public:
         unsigned int cornersCounter = 0;
         std::list<math::LineSegment>::const_iterator it;
         for ( it = edges.begin( ); it != edges.end( ); ++it ) {
-            //std::cout << it->toString( ) << std::endl;
-//            std::printf( "%.20f %.20f %.20f\n%.20f %.20f %.20f\n", it->pointA.x, it->pointA.y, it->pointA.z, it->pointB.x, it->pointB.y, it->pointB.z );
-//            std::cout << corners[cornersCounter].toString( ) << std::endl;
-//            std::cout << corners[cornersCounter+1].toString( ) << std::endl;
-//            std::cout << "length to pointA = " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
-//            std::cout << "length to pointB = " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
+            std::cout << "edge as string: " << it->toString( ) << std::endl;
+            std::printf( "first endpoint of edge: %.12f %.12f %.12f\n"
+                         "second endpoint of edge: %.12f %.12f %.12f\n",
+                 it->pointA.x, it->pointA.y, it->pointA.z, it->pointB.x, it->pointB.y, it->pointB.z );
+            std::cout << "expected first endpoint: " << corners[cornersCounter].toString( ) << std::endl;
+            std::cout << "expected second endpoint: " << corners[cornersCounter+1].toString( ) << std::endl;
+            std::cout << "distance from expected, A: " << ( corners[cornersCounter] - it->pointA ).length( ) << std::endl;
+            std::cout << "distance from expected, B: " << ( corners[cornersCounter+1] - it->pointB ).length( ) << std::endl;
             TS_ASSERT( ( corners[cornersCounter++] - it->pointA ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
             TS_ASSERT( ( corners[cornersCounter++] - it->pointB ).length( ) < math::LineSegment::TOLERANCE_DISTANCE );
         } // for
