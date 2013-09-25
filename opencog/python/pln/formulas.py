@@ -9,7 +9,7 @@ INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
 
-def identityFormula(tvs, U):
+def identityFormula(tvs):
     [(sA, nA)] = tvs
     
     return (sA, nA)
@@ -20,8 +20,11 @@ def identityFormula(tvs, U):
 #    
 #    return (1.0, confidence_to_count(1.0))
 
+def tv_seq_to_tv_tuple_seq(tvs):
+    return [(tv.mean, tv.count) for tv in tvs]
+
 def deductionSimpleFormula(tvs):
-    (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tvs
+    (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tv_seq_to_tv_tuple_seq(tvs)
 
     # Temporary filtering fix to make sure that nAB >= nA
     nA = min(nA, nAB)
@@ -35,15 +38,15 @@ def deductionSimpleFormula(tvs):
     
     nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT * nA * nBC / nDenominator
     
-    return (sAC, nAC)
+    return TruthValue(sAC, nAC)
 
 def inversionFormula(tvs):
-    (sAB, nAB), (sA, nA), (sB, nB) = tvs
+    (sAB, nAB), (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
     
     sBA = sAB * sA / low(sB)
     nBA = nAB * nB / low(nA)
     
-    return (sBA, nBA)
+    return TruthValue(sBA, nBA)
 
 def crispModusPonensFormula(tvs, U):
     (sAB, nAB), (sA, nA) = tvs
@@ -72,21 +75,21 @@ def modusPonensFormula(tvs, U):
     
     return (s2, n2)
 
-def notFormula(tvs, U):
-    [(sA, nA)]  = tvs
-    return (1.0 - sA, nA)
+def notFormula(tvs):
+    tv = tvs[0]
+    return (1.0 - tv.mean, tv.count)
 
-def andSymmetricFormula(tvs, U):
+def andSymmetricFormula(tvs):
     total_strength = 1.0
     total_confidence = 1.0
     
-    for (s, n) in tvs:
-        total_strength *= s
-        total_confidence *= count_to_confidence(n)
+    for tv in tvs:
+        total_strength *= tv.mean
+        total_confidence *= count_to_confidence(tv.count)
     
     return (total_strength, confidence_to_count(total_confidence))
 
-def orFormula(tvs, U):
+def orFormula(tvs):
     N = len(tvs)
     
     if N == 1:

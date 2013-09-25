@@ -49,3 +49,22 @@ class RulesTest(TestCase):
         result = self.chainer._apply_forward(rule)
         print result
 
+    def disabled_test_rules_generically(self):
+        '''See what happens if you give a rule the generic inputs. This makes sure that the rule and formula don't have any basic code errors, but doesn't check that they do the right thing.'''
+        def apply_rule(rule):
+            generic_inputs = rule.inputs
+            generic_outpus = rule.outputs
+
+            # Take the generic required input atoms and give them boring TVs
+            for atom in generic_inputs:
+                atom.av = {'sti':1}
+                atom.tv = TruthValue(1, 1)
+
+            status = self.chainer._apply_forward(rule)
+
+            self.assertNotEquals(status, None)
+
+            return None
+
+        for rule in self.chainer.rules:
+            apply_rule(rule)

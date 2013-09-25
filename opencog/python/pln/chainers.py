@@ -109,8 +109,10 @@ class Chainer(AbstractChainer):
         specific_inputs = []
         specific_outputs = []
         empty_substitution = {}
-        self._find_inputs_recursive(specific_inputs, specific_outputs, 
+        found = self._find_inputs_recursive(specific_inputs, specific_outputs, 
                                     generic_inputs, generic_outputs, empty_substitution)
+        if not found:
+            return None
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
@@ -131,24 +133,49 @@ class Chainer(AbstractChainer):
 
         return self._apply_rule(rule, specific_inputs, specific_outputs)
 
-    def _apply_rule(self, rule, inputs, outputs):
-        input_tvs = [i.tv for i in inputs]
+    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
+        '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
+        # base case of recursion
+        if len(remaining_inputs) == 0:
+            # set the outputs after you've found all the inputs
+            # mustn't use '=' because it will discard the original reference and thus have no effect
+            return_outputs += self.substitute_list(subst_so_far, generic_outputs)
+            return True
+
+        # normal case of recursion
+
+        template = remaining_inputs[0]
+        atom = self._select_one_matching(template)
         
-        # support Rules with multiple outputs later
-        assert len(outputs) == 1
-        output_atom = outputs[0]
-        assert type(output_atom) == Atom
+        if atom is None:
+            print 'unable to match:',template
+        return False
 
-        output_tv = rule.calculate(input_tvs)
+        # Find the substitution that would change 'template' to 'atom'
+        substitution = self.unify(template, atom, subst_so_far)
+        assert(substitution != None)
 
-        self._revise_tvs(output_atom, output_tv)
+        remaining_inputs = remaining_inputs[1:]
+
+        remaining_inputs = self.substitute_list(substitution, remaining_inputs)
+
+        return_inputs.append(atom)
+
+        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution)
+
+    def _apply_rule(self, rule, inputs, outputs):
+        output_tvs = rule.compute(inputs)
+
+        for (atom, new_tv) in zip(outputs, output_tvs):
+            self._revise_tvs(atom, atom.tv, new_tv)
 
         if self._stimulateAtoms:
-            self._give_stimulus(output_atom)
-            for i in inputs:
-                self._give_stimulus(i)
+            for atom in outputs:
+                self._give_stimulus(atom)
+            for atom in inputs:
+                self._give_stimulus(atom)
 
-        return (output_atom, inputs)
+        return (output_atoms, inputs)
 
     def _revise_tvs(self, atom, new_tv):
         old_tv = atom.tv
@@ -189,6 +216,9 @@ class Chainer(AbstractChainer):
         return False
 
     def _is_repeated(self, rule, output, inputs):
+        # TODO fixme - it doesn't handle UnorderedLinks properly (such as AndLinks).
+        # Such as And(A B) or And(B A)
+
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
         # produced multiple ways using different Rules and inputs.)
         # Return True if this exact inference has been applied before
@@ -203,35 +233,6 @@ class Chainer(AbstractChainer):
             productions.add(inputs)
             return False
 
-    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
-        # base case of recursion
-        if len(remaining_inputs) == 0:
-            # set the outputs after you've found all the inputs
-            # mustn't use '=' because it will discard the original reference and thus have no effect
-            return_outputs += self.substitute_list(subst_so_far, generic_outputs)
-            return
-
-        # normal case of recursion
-
-        template = remaining_inputs[0]
-        atom = self._select_one_matching(template)
-        
-        if atom is None:
-            print 'unable to match:',template
-        assert(atom != None)
-
-        # Find the substitution that would change 'template' to 'atom'
-        substitution = self.unify(template, atom, subst_so_far)
-        assert(substitution != None)
-
-        remaining_inputs = remaining_inputs[1:]
-
-        remaining_inputs = self.substitute_list(substitution, remaining_inputs)
-
-        return_inputs.append(atom)
-
-        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution)
-        
     def forward_step(self):
         rule = self._select_rule()
 

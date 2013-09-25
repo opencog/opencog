@@ -1,4 +1,5 @@
 from opencog.cogserver import MindAgent
+from opencog.atomspace import types
 
 from pln.chainers import Chainer, get_attentional_focus
 from pln.rules import rules
@@ -7,38 +8,56 @@ class ForwardInferenceAgent(MindAgent):
     def __init__(self):
         self.chainer = None
 
+    def create_chainer(self, atomspace):
+        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
+
+        deduction_link_types = [types.InheritanceLink,
+            types.SubsetLink, types.IntensionalInheritanceLink]
+        for link_type in deduction_link_types:
+            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+
+        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
+        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
+
+        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
+            self.chainer.add_rule(rule)
+
     def run(self, atomspace):
-        if self.chainer is None:
-            self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
-
-            self.chainer.add_rule(rules.InversionRule(self.chainer))
-            self.chainer.add_rule(rules.DeductionRule(self.chainer))
-
         # incredibly exciting futuristic display!
         #import os
         #os.system('cls' if os.name=='nt' else 'clear')
 
-        try:
-            result = self.chainer.forward_step()
-            if result:
-                (output, inputs) = result
+        def show_atoms(atoms):
+            return ' '.join(str(i)+str(output.av) for atom in atoms)
 
-                print '==== Inference ===='
-                print output,str(output.av),'<=',' '.join(str(i)+str(output.av) for i in inputs)
+#        try:
+        if self.chainer is None:
+            self.create_chainer(atomspace)
 
-                print
-                print '==== Attentional Focus ===='
-                for atom in get_attentional_focus(atomspace)[0:30]:
-                    print str(atom), atom.av
+        result = self.chainer.forward_step()
+        if result:
+            (outputs, inputs) = result
 
-                #print '==== Result ===='
-                #print output
-                #print '==== Trail ===='
-                #print_atoms( self.chainer.trails[output] )
-            else:
-                print 'Invalid inference attempted'
-        except Exception, e:
-            print e
+            print '==== Inference ===='
+            print show_atoms(output), str(output.av), '<=',show_atoms(input)
+
+            print
+            print '==== Attentional Focus ===='
+            for atom in get_attentional_focus(atomspace)[0:30]:
+                print str(atom), atom.av
+
+            #print '==== Result ===='
+            #print output
+            #print '==== Trail ===='
+            #print_atoms( self.chainer.trails[output] )
+        else:
+            print 'Invalid inference attempted'
+#        except Exception, e:
+#            print e
+#            print e.args
+#            if hasattr(e, 'print_traceback'):
+#                e.print_traceback()
 
 def print_atoms(atoms):
     for atom in atoms:
