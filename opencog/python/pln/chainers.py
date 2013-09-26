@@ -114,6 +114,12 @@ class Chainer(AbstractChainer):
         if not found:
             return None
 
+        # handle rules that create their output in a custom way, not just using templates
+        if hasattr(rule, 'custom_compute'):
+            (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
+        else:
+            output_tvs = rule.compute(inputs)
+
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
         # Sanity checks
@@ -163,9 +169,7 @@ class Chainer(AbstractChainer):
 
         return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution)
 
-    def _apply_rule(self, rule, inputs, outputs):
-        output_tvs = rule.compute(inputs)
-
+    def _apply_rule(self, rule, inputs, outputs, output_tvs):
         for (atom, new_tv) in zip(outputs, output_tvs):
             self._revise_tvs(atom, atom.tv, new_tv)
 

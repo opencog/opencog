@@ -23,6 +23,8 @@ class ForwardInferenceAgent(MindAgent):
         for rule in rules.create_and_or_rules(self.chainer, 1, 5):
             self.chainer.add_rule(rule)
 
+        self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
+
     def run(self, atomspace):
         # incredibly exciting futuristic display!
         #import os
