@@ -315,8 +315,10 @@ protected:
      // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
      // @ negativeGoal: return if this rule after grounded will negative this forward goal state
      // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
+     // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // onlyCheckIfNegativeGoal is not to check preconditions
-     void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,bool onlyCheckIfNegativeGoal=false);
+     void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
+                                  bool &preconImpossible, bool onlyCheckIfNegativeGoal =false );
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 

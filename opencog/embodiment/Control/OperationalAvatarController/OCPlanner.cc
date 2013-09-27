@@ -604,9 +604,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // if there is one rule related to this goal,
                 // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
-                bool isNegativeGoal, isDiffStateOwnerType;
+                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible;
                 int negativeNum,satisfiedPreconNum;
-                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,true);
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,true);
 
                 if (isNegativeGoal || isDiffStateOwnerType) // if this rule will negative this goal, we should not choose to apply it.
                     continue;
@@ -647,12 +647,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
-                    bool isNegativeGoal, isDiffStateOwnerType;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible;
                     int negativeNum,satisfiedPreconNum;
-                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType);
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible);
 
-                    if (isNegativeGoal || isDiffStateOwnerType)
-                        continue; //  its effect will negative this current selected goal state, it's a opposite rule, should not add it into candidate rules
+                    //  its effect will negative this current selected goal state, or it has any unsatisfied precondition which is impossible to achieve,
+                    //  then it should not add it into candidate rules
+                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType)
+                        continue;
 
                     curRuleScore -= negativeNum;
                     curRuleScore += satisfiedPreconNum;
@@ -1301,7 +1303,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,bool onlyCheckIfNegativeGoal)
+void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
+                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool onlyCheckIfNegativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -1312,6 +1315,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     satisfiedPreconNum = 0;
     negativeGoal = false;
     isDiffStateOwnerType = false;
+    preconImpossible = false;
 
     // check all the effects:
     vector<EffectPair>::iterator effectItor;
@@ -1409,6 +1413,15 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
         {
             if (satByTemp)
                 ++ satisfiedPreconNum;
+            else
+            {
+                // check if there is any rule related to achieve this unsatisfied precondition
+                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                {
+                    preconImpossible = true;
+                    return;
+                }
+            }
 
             delete groundPs;
             continue;
@@ -1421,6 +1434,15 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
             float satisfiedDegree;
             if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
                  ++ satisfiedPreconNum;
+            else
+            {
+                // check if there is any rule related to achieve this unsatisfied precondition
+                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                {
+                    preconImpossible = true;
+                    return;
+                }
+            }
 
             delete groundPs;
             continue;
@@ -2307,17 +2329,21 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         if (ruleNode == 0)
             return false;
 
-        StateNode* effectStateNode = *(ruleNode->forwardLinks.begin());
-
         // find the first unrecursive rule
         // you can also find it by ruleEffectIndexes
         // ToBeImproved: currently we only borrow from the first unrecursive rule found
-        list< pair<float,Rule*> >::iterator canIt;
         Rule* unrecursiveRule = 0;
 
-        for (canIt = effectStateNode->candidateRules.begin(); canIt != effectStateNode->candidateRules.end(); ++ canIt)
+        map<string,multimap<float,Rule*> >::iterator it;
+        it = ruleEffectIndexes.find(bs.goalState->name());
+
+        multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
+
+        multimap<float,Rule*> ::iterator ruleIt;
+
+        for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
         {
-            Rule* r = canIt->second;
+            Rule* r = ruleIt->second;
             if (! r->IsRecursiveRule)
             {
                 unrecursiveRule = r;
