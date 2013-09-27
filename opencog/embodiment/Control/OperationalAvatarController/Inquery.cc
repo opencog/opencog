@@ -601,14 +601,34 @@ ParamValue Inquery::inqueryIsAdjacent(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();
     ParamValue var2 = stateOwnerList.back();
+    Entity* entity1;
+    Entity* entity2;
+    SpaceServer::SpaceMapPoint pos1,pos2;
+
     Vector* v1 = boost::get<Vector>(&var1);
+    if (! v1)
+    {
+        entity1 = boost::get<Entity>(&var1);
+        if (! entity1)
+            return "false";
+
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    }
+    else
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+
     Vector* v2 = boost::get<Vector>(&var2);
+    if (! v2)
+    {
+        entity2 = boost::get<Entity>(&var2);
+        if (! entity2)
+            return "false";
 
-    if ((!v1)||(!v2))
-        return "false";
+        pos2 = spaceMap->getObjectLocation(entity2->id);
+    }
+    else
+        pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
 
-    SpaceServer::SpaceMapPoint pos1(v1->x,v1->y,v1->z);
-    SpaceServer::SpaceMapPoint pos2(v2->x,v2->y,v2->z);
 
     if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
         return "true";
