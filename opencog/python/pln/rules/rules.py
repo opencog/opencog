@@ -249,6 +249,17 @@ class EvaluationToMemberRule(Rule):
 
         return ([member_link], [tv])
 
+class MemberToInheritanceRule(Rule):
+    '''MemberLink(A B) => InheritanceLink(A B)'''
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            formula= formulas.mem2InhFormula,
+            outputs= [chainer.link(types.InheritanceLink, [A, B])],
+            inputs=  [chainer.link(types.MemberLink, [A, B])])
+
 class SubsetEvaluationRule(Rule):
     '''Creates Subset(A, B).
        Defined as P(x in B | x in A).

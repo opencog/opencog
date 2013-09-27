@@ -139,6 +139,12 @@ def inheritance2SimilarityFormula(tvs, U):
 
     return (s, n)
 
+def mem2InhFormula(tvs):
+    [mem_tv] = tvs
+    count = mem_tv.count * MembershipToExtensionalInheritanceCountDiscountFactor
+
+    return TruthValue(mem_tv.mean, count)
+
 def revisionFormula(tvs):
     x, y = tvs
     # revise two truth values
