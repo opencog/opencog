@@ -2830,12 +2830,17 @@ void OCPlanner::loadTestRulesFromCodes()
     ParamValue var_pos_to = vector_var[1];
     ParamValue var_exist_path = bool_var[0];
 
-    // precondition 1: this position is standable
+    // precondition 1: the end position is standable
     vector<ParamValue> standableStateOwnerList2;
     standableStateOwnerList2.push_back(var_pos_to);
     State* standableState2 = new State("is_standable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", standableStateOwnerList2, true, &Inquery::inqueryIsStandable);
 
-    // precondition 2: this position is adjacent to
+    // precondition 2: the start position is standable
+    vector<ParamValue> standableStateOwnerList3;
+    standableStateOwnerList3.push_back(var_pos_from);
+    State* standableState3 = new State("is_standable",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", standableStateOwnerList3, true, &Inquery::inqueryIsStandable);
+
+    // precondition 3: the two positions are adjacent
     vector<ParamValue> adjacentStateOwnerList;
     adjacentStateOwnerList.push_back(var_pos_to);
     adjacentStateOwnerList.push_back(var_pos_from);
@@ -2852,6 +2857,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Rule* accessAdjacentRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
     accessAdjacentRule->ruleName = "adjacentPositionsExistingPath";
     accessAdjacentRule->addPrecondition(standableState2);
+    accessAdjacentRule->addPrecondition(standableState3);
     accessAdjacentRule->addPrecondition(adjacentState);
 
     accessAdjacentRule->addEffect(EffectPair(0.7f,becomeExistPathEffect));

@@ -400,10 +400,20 @@ ParamValue Inquery::inqueryIsStandable(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
+    bool standable;
     if (! pos)
-        return "false";
+    {
+        Entity* entity = boost::get<Entity>(&var);
+        if (! entity)
+            return "false";
 
-    if (spaceMap->checkStandable((int)pos->x,(int)pos->y,(int)pos->z))
+        standable = spaceMap->checkStandable(spaceMap->getObjectLocation(entity->id));
+    }
+    else
+        standable = spaceMap->checkStandable((int)pos->x,(int)pos->y,(int)pos->z);
+
+
+    if (standable)
         return "true";
     else
         return "false";
