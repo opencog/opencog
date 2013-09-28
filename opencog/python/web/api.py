@@ -1,5 +1,6 @@
 """
 REST API for OpenCog
+
 Implemented using the Flask micro-framework and flask-restful extension
 """
 
@@ -31,8 +32,8 @@ tv_fields = {
 }
 
 av_fields = {
-    'sti': fields.Float(attribute='sti'),
-    'lti': fields.Float(attribute='lti'),
+    'sti': fields.Integer(attribute='sti'),
+    'lti': fields.Integer(attribute='lti'),
     'vlti': fields.Boolean(attribute='vlti')
 }
 
@@ -51,14 +52,16 @@ atom_fields = {
 class AtomListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('type', type=str, location='args')
+        self.reqparse.add_argument('type', type=str, location='args', choices=types.__dict__.keys())
         super(AtomListAPI, self).__init__()
 
     def get(self):
         args = self.reqparse.parse_args()
-        # @todo: Find how to retrieve all atoms of all types
-        # @todo: Find how to retrieve atoms of a specific type using the 'type' arg
-        atoms = atomspace.get_atoms_by_type(types.ConceptNode)
+        type_lookup = args.get('type')
+        if type_lookup is None:
+            atoms = atomspace.get_atoms_by_type(types.Atom)
+        else:
+            atoms = atomspace.get_atoms_by_type(types.__dict__.get(type_lookup))
 
         # @todo: Implement pagination with 'complete', 'skipped', 'total', 'result' attributes
         return {'atoms': map(lambda t: marshal(t, atom_fields), atoms)}
@@ -68,7 +71,7 @@ class AtomAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         # @todo: do we need to specify location='json'?
-        self.reqparse.add_argument('type', type=str)
+        self.reqparse.add_argument('type', type=str, choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str)
         super(AtomAPI, self).__init__()
 
@@ -77,13 +80,6 @@ class AtomAPI(Resource):
             atom = atomspace[Handle(id)]
         except IndexError:
             abort(404)
-
-        '''
-        # Test how to convert a type in the query string into an object of type 'atom.type'
-        args = self.reqparse.parse_args()
-        test_type = args.get('type', atom.type)
-        print test_type
-        '''
 
         return {'atom': marshal(atom, atom_fields)}
 
@@ -95,12 +91,15 @@ class AtomAPI(Resource):
         print args.get('type')
         print 'Name:'
         print args.get('name')
-        # @todo: Convert 'type' string arg to 'type' object
+
         # @todo: Convert 'truthvalue' arg to TruthValue
-        # @todo: Convert add_node method to add method, supporting nodes & links
         # @todo: During testing, if you add a node twice, using the same name, both nodes receive the same handle. That might be a bug in the API.
-        atom = atomspace.add_node(types.ConceptNode, args.get('name'), TruthValue(.5, .6))
-        #atom = atomspace.add_node(args.get('type'), args.get('name'), TruthValue(.5, .6))
+        # @todo: Document how to test the API using curl and Python 'request'
+
+        type_lookup = types.__dict__.get(args.get('type'))
+
+        atom = atomspace.add(type_lookup, args.get('name'), TruthValue(.5, .6))
+
         print 'Atom created:'
         print atom
         return {'atom': marshal(atom, atom_fields)}
@@ -112,28 +111,33 @@ class AtomAPI(Resource):
             abort(404)
 
         success = atomspace.remove(atom)
-        return { 'result': success }
+        return {'result': success}
 
-######### For testing purposes, populate an AtomSpace with nodes & links:
-# @todo: Move the atomspace into a parameter of the RESTApi class instanciation and allow the API classes to access it
-atomspace = AtomSpace()
-animal = atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .9))
-bird = atomspace.add_node(types.ConceptNode, 'bird', TruthValue(.01, .9))
-swan = atomspace.add_node(types.ConceptNode, 'swan', TruthValue(.001, .9))
-swan_bird = atomspace.add_link(types.InheritanceLink, [swan, bird], TruthValue(1, 1))
-bird_animal = atomspace.add_link(types.InheritanceLink, [bird, animal], TruthValue(1, 1))
-#bird_animal.setav(AttentionValue(1, 1)) Why isn't this working? Maybe because the Cython test isn't passing after #305
 
 class RESTApi(object):
-    def __init__(self):
+    def __init__(self, atomspace):
+        ######### For testing purposes, populate an AtomSpace with nodes & links:
+        self.atomspace = atomspace
+        animal = self.atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .9))
+        bird = self.atomspace.add_node(types.ConceptNode, 'bird', TruthValue(.01, .9))
+        swan = self.atomspace.add_node(types.ConceptNode, 'swan', TruthValue(.001, .9))
+        swan_bird = self.atomspace.add_link(types.InheritanceLink, [swan, bird], TruthValue(1, 1))
+        bird_animal = self.atomspace.add_link(types.InheritanceLink, [bird, animal], TruthValue(1, 1))
+        bird.av = {'sti': 9}
+
+        # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = Api(self.app)
-        self.api.add_resource(AtomListAPI, '/api/v1.0/atoms', '/api/v1.0/atoms/', endpoint = 'atoms')
+        self.api.add_resource(AtomListAPI, '/api/v1.0/atoms', '/api/v1.0/atoms/', endpoint='atoms')
         self.api.add_resource(AtomAPI, '/api/v1.0/atoms/<int:id>', '/api/v1.0/atoms/', endpoint='atom')
+
     def run(self):
-        self.app.run(debug = True)
+        self.app.run(debug=True)
 
 if __name__ == '__main__':
-    api = RESTApi()
+    atomspace = AtomSpace()
+    api = RESTApi(atomspace)
     api.run()
+
+# @todo: Return JSON errors
 
