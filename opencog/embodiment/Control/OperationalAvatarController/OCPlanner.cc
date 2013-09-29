@@ -921,6 +921,19 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             // todo
         }
 
+        // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
+        // so we just simply ground it as the self agent.
+        if (Rule::isParamValueUnGrounded(ruleNode->originalRule->actor))
+        {
+            // look for the value of this variable in the parameter map
+            string varName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+            ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentAllBindings.find(varName);
+            if (paramMapIt == ruleNode->currentAllBindings.end())
+            {
+                ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,selfEntityParamValue));
+            }
+        }
+
         // out put all the bindings:
         cout<<"Debug planning step " << tryStepNum <<": All Variable bindings for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         ParamGroundedMapInARule::iterator curparamit = ruleNode->currentAllBindings.begin();
@@ -2792,6 +2805,11 @@ void OCPlanner::loadTestRulesFromCodes()
     solidStateOwnerList.push_back(var_pos);
     State* solidState = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList, true, &Inquery::inqueryIsSolid);
 
+    // precondition 2: The0 pos on it should be empty, if it has a block in it, you cannot stand in it
+    vector<ParamValue> solidStateOwnerList2;
+    solidStateOwnerList2.push_back(var_pos_on);
+    State* solidState2 = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList2, true, &Inquery::inqueryIsSolid);
+
     // precondition 2: The agent should be closed enough to the position to build the block ( < 2.0)
     vector<ParamValue> closedStateOwnerList4;
     closedStateOwnerList4.push_back(varAvatar);
@@ -2836,6 +2854,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Rule* buildBlockRule = new Rule(buildBlockAction,boost::get<Entity>(varAvatar) ,0.5f);
     buildBlockRule->ruleName = "buildABlockToEnableThisPositionStandable";
     buildBlockRule->addPrecondition(solidState);
+    buildBlockRule->addPrecondition(solidState2);
     buildBlockRule->addPrecondition(closedState4);
     buildBlockRule->addPrecondition(atLocationState3);
     buildBlockRule->addPrecondition(IsBelowState);
@@ -2843,6 +2862,11 @@ void OCPlanner::loadTestRulesFromCodes()
 
     buildBlockRule->addEffect(EffectPair(0.8f,becomeStandableEffect2));
     buildBlockRule->addEffect(EffectPair(1.0f,becomeSolidEffect));
+
+    BestNumericVariableInqueryStruct bs3;
+    bs3.bestNumericVariableInqueryFun = &Inquery::inqueryUnderPosition; // the function to get the position just under the var_pos_on, so is to get var_pos given var_pos_on is grounded.
+    bs3.goalState = solidState2;
+    buildBlockRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos), bs3));
 
     this->AllRules.push_back(buildBlockRule);
 
