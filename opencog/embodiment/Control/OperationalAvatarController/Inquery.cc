@@ -607,6 +607,27 @@ vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
     return values;
 }
 
+vector<ParamValue> Inquery::inqueryUnderPosition(const vector<ParamValue>& stateOwnerList)
+{
+    vector<ParamValue> values;
+
+    ParamValue var = stateOwnerList.front();
+    Vector* v = boost::get<Vector>(&var);
+    if (! v)
+    {
+        Entity* entity = boost::get<Entity>(&var);
+        if (! entity)
+            return values;
+
+        spatial::BlockVector pos = spaceMap->getObjectLocation(entity->id);
+        values.push_back(Vector(pos.x, pos.y, pos.z - 1));
+    }
+    else
+        values.push_back(Vector(v->x, v->y, v->z - 1));
+
+    return values;
+}
+
 ParamValue Inquery::inqueryIsAdjacent(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();

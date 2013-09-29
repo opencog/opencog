@@ -81,6 +81,7 @@ public:
     static vector<ParamValue> inqueryNearestAccessiblePosition(const vector<ParamValue>& stateOwnerList);
     static vector<ParamValue> inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList);
     static vector<ParamValue> inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList);
+    static vector<ParamValue> inqueryUnderPosition(const vector<ParamValue>& stateOwnerList);// get the position just under the input pos
 
 
     // inquery the spatial relationships
