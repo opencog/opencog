@@ -300,6 +300,8 @@ namespace opencog { namespace oac {
     // but the right way, we should define 26 rules to tell the planner what is "Adjacent location"
     struct BestNumericVariableInqueryStruct
     {
+        // in fact, we just use the stateownerlist of this state, this state only need to provide the right state owners to the InqueryVariableFun
+        // the state name and state variable doesn't really matter
         State* goalState;
         InqueryVariableFun bestNumericVariableInqueryFun;
     };
