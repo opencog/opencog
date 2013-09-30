@@ -99,9 +99,9 @@ ADD_LIBRARY(cogserver_cython SHARED
 
 ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
-# cogserver just has the MindAgent template class at the moment
-#TARGET_LINK_LIBRARIES(cogserver_cython
-#)
+TARGET_LINK_LIBRARIES(cogserver_cython
+    server
+)
 
 SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
     PREFIX ""
