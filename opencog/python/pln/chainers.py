@@ -30,32 +30,58 @@ class AbstractChainer(Logic):
         self.rules.append(rule)
 
     def _select_one_matching(self, template, require_nonzero_tv = True):
+        # If the template is a specific atom, just return that!
+        if len(self.variables(template)) == 0:
+            return template
+
+        # TODO backward chaining doesn't work, because this method will pick up Atoms
+        # that have variables in them (including the queries left over from other inferences)!!!
+
         attentional_focus = get_attentional_focus(self._atomspace)
 
-        matching_atoms = self.find(template, attentional_focus)
+        atom = self._select_from(template, attentional_focus, require_nonzero_tv, useAF=True)
 
-        if len(matching_atoms) > 0:
+        if not atom:
+            # if it can't find anything in the attentional focus, try the whole atomspace.
+            root_type = template.type
+            all_atoms = self._atomspace.get_atoms_by_type(root_type)
+            atom = self._select_from(template, all_atoms, require_nonzero_tv, useAF=False)
+
+        return atom
+
+    def _select_from(self, template, atoms, require_nonzero_tv, useAF):
+
+        matching_atoms = self.find(template, atoms)
+
+        if require_nonzero_tv:
+            atoms = [atom for atom in atoms if atom.tv.count > 0]
+
+        if len(matching_atoms) == 0:
+            return None
+
+        if useAF:
             return self._selectOne(matching_atoms)
         else:
-            # if it can't find anything in the attentional focus, try the whole atomspace.
-
-            atoms = self._atomspace.get_atoms_by_type(types.Atom)
-            if require_nonzero_tv:
-                atoms = [atom for atom in atoms if atom.tv.count > 0]
-
-            matching_atoms = self.find(template, atoms)
-            if len(matching_atoms) == 0:
-                return None
+            # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
             return random.choice(matching_atoms)
 
     def _selectOne(self, atoms):
+        # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
+        def sti_score(atom):
+            return atom.av['sti']
+
+        def mixed_score(atom):
+            return int(sti_score(atom)*atom.tv.mean*atom.tv.confidence)
+
+        score = sti_score
+
         assert type(atoms[0]) == Atom
 
-        max = sum([atom.av['sti'] for atom in atoms])
+        max = sum([score(atom) for atom in atoms])
         pick = random.randrange(0, max)
         current = 0
         for atom in atoms:
-            current += atom.av['sti']
+            current += score(atom)
             if current >= pick:
                 return atom
 
@@ -93,6 +119,20 @@ class Chainer(AbstractChainer):
         self.trails = defaultdict(set)
         self.produced_from = defaultdict(set)
 
+    def forward_step(self):
+        rule = self._select_rule()
+
+        results = self._apply_forward(rule)
+
+        return results
+
+    def backward_step(self):
+        rule = self._select_rule()
+
+        results = self._apply_backward(rule)
+
+        return results
+
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
             # choose a random atom matching the first input to the rule
@@ -118,17 +158,17 @@ class Chainer(AbstractChainer):
         if hasattr(rule, 'custom_compute'):
             (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
         else:
-            output_tvs = rule.compute(inputs)
+            output_tvs = rule.calculate(specific_inputs)
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
         # Sanity checks
 
+        # TODO only supporting one output
         if not self.valid_structure(specific_outputs[0]):
             self.log_failed_inference('invalid structure')
             return None
 
-        # TODO only supporting one output
         if self._compute_trail_and_check_cycles(specific_outputs[0], specific_inputs):
             self.log_failed_inference('cycle detected')
             return None
@@ -137,10 +177,12 @@ class Chainer(AbstractChainer):
             self.log_failed_inference('repeated inference')
             return None
 
-        return self._apply_rule(rule, specific_inputs, specific_outputs)
+        return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
 
-    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far):
+    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far, require_nonzero_tv=True):
         '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
+        remaining_inputs = self.substitute_list(subst_so_far, remaining_inputs)
+
         # base case of recursion
         if len(remaining_inputs) == 0:
             # set the outputs after you've found all the inputs
@@ -151,11 +193,11 @@ class Chainer(AbstractChainer):
         # normal case of recursion
 
         template = remaining_inputs[0]
-        atom = self._select_one_matching(template)
+        atom = self._select_one_matching(template, require_nonzero_tv)
         
-        if atom is None:
+        if require_nonzero_tv and atom is None:
             print 'unable to match:',template
-        return False
+            return False
 
         # Find the substitution that would change 'template' to 'atom'
         substitution = self.unify(template, atom, subst_so_far)
@@ -163,15 +205,13 @@ class Chainer(AbstractChainer):
 
         remaining_inputs = remaining_inputs[1:]
 
-        remaining_inputs = self.substitute_list(substitution, remaining_inputs)
-
         return_inputs.append(atom)
 
-        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution)
+        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution, require_nonzero_tv)
 
     def _apply_rule(self, rule, inputs, outputs, output_tvs):
         for (atom, new_tv) in zip(outputs, output_tvs):
-            self._revise_tvs(atom, atom.tv, new_tv)
+            self._revise_tvs(atom, new_tv)
 
         if self._stimulateAtoms:
             for atom in outputs:
@@ -237,20 +277,78 @@ class Chainer(AbstractChainer):
             productions.add(inputs)
             return False
 
-    def forward_step(self):
-        rule = self._select_rule()
+    def _apply_backward(self, rule):
+        # randomly choose suitable atoms for this rule's inputs
+            # choose a random atom matching the first input to the rule
+            # choose a random atom matching the second input to the rule, compatible with the first input
+            # etc
+            # it can fail if there are no compatible atoms
+        # if all inputs are found, then
+            # apply the rule and create the output
+            # give it an appropriate TV (using the formula and possibly revision)
+            # give it an STI boost
+            # record this inference in the InferenceHistoryRepository
 
-        results = self._apply_forward(rule)
+        (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
+        specific_inputs = []
+        specific_outputs = []
+        empty_substitution = {}
+        found = self._choose_outputs_inputs_recursive(specific_inputs, specific_outputs, 
+                                    generic_inputs, generic_outputs, empty_substitution)
+        if not found:
+            print rule, map(str,specific_outputs), map(str,specific_inputs)
+            return None
 
-        return results
+        # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
+        # Stimulating the inputs makes it more likely to find them in future.
 
-    def backward_step(self):
-        rule = self._select_rule()
+        if self._all_nonzero_tvs(specific_inputs):
+            output_tvs = rule.calculate(specific_inputs)
 
-        outputs = self.select_outputs(rule)
+            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
+        else:
+            if self._stimulateAtoms:
+#                for atom in specific_outputs:
+#                    self._give_stimulus(atom)
+                for atom in specific_inputs:
+                    self._give_stimulus(atom)
+            return None
 
-        if outputs != None:
-            requirements = self.evaluate_backward(rule, outputs)
+    def _all_nonzero_tvs(self, atom_list):
+        return all(atom.tv.count > 0 for atom in atom_list)
 
-        return results
+    def _choose_outputs_inputs_recursive(self, return_inputs, return_outputs, all_inputs, remaining_outputs, subst_so_far):
+        '''Choose some outputs for a Rule, and then choose suitable inputs. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms).'''
+        # base case of recursion
+        # After choosing outputs, use the other helper function to choose inputs.
+        # If you pass it subst_so_far, it will choose inputs compatible with the
+        # outputs we've already chosen!
+        if len(remaining_outputs) == 0:
+            inputs_found = self._find_inputs_recursive(return_inputs, return_outputs=[], remaining_inputs=all_inputs, generic_outputs=[], subst_so_far=subst_so_far, require_nonzero_tv=False)
+            return inputs_found
+
+        # normal case of recursion
+        # First choose the outputs, then the inputs.
+        # The outputs are atoms already in the AtomSpace (but sometimes without a TruthValue)
+        # The inputs can be existing atoms. They will be created with 0TV otherwise.
+        # You can use find_inputs_recursive to choose the inputs after choosing outputs
+
+        template = remaining_outputs[0]
+        atom = self._select_one_matching(template, require_nonzero_tv=False)
+    
+        if atom is None:
+            self.log_failed_inference('backward chainer: unable to find target atom matching:'+str(template))
+            return False
+
+        # Find the substitution that would change 'template' to 'atom'
+        substitution = self.unify(template, atom, subst_so_far)
+        assert(substitution != None)
+
+        remaining_outputs = remaining_outputs[1:]
+
+        remaining_outputs = self.substitute_list(substitution, remaining_outputs)
+
+        return_outputs.append(atom)
+
+        return self._choose_outputs_inputs_recursive(return_inputs, return_outputs, all_inputs, remaining_outputs, substitution)
 

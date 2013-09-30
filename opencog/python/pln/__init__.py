@@ -1,1 +1,1 @@
-from agents import ForwardInferenceAgent#, AtomspacePopulatorAgent
+from agents import ForwardInferenceAgent, BackwardInferenceAgent

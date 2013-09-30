@@ -24,7 +24,7 @@ def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
 
 def deductionSimpleFormula(tvs):
-    (sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _) = tv_seq_to_tv_tuple_seq(tvs)
+    [(sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
 
     # Temporary filtering fix to make sure that nAB >= nA
     nA = min(nA, nAB)
@@ -38,15 +38,15 @@ def deductionSimpleFormula(tvs):
     
     nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT * nA * nBC / nDenominator
     
-    return TruthValue(sAC, nAC)
+    return [TruthValue(sAC, nAC)]
 
 def inversionFormula(tvs):
-    (sAB, nAB), (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
+    [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
     
     sBA = sAB * sA / low(sB)
     nBA = nAB * nB / low(nA)
     
-    return TruthValue(sBA, nBA)
+    return [TruthValue(sBA, nBA)]
 
 def crispModusPonensFormula(tvs, U):
     (sAB, nAB), (sA, nA) = tvs

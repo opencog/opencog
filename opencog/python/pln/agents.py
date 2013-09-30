@@ -23,8 +23,8 @@ class ForwardInferenceAgent(MindAgent):
 #        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
 #            self.chainer.add_rule(rule)
 
-        self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
-        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
+#        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
+#        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!
@@ -38,6 +38,7 @@ class ForwardInferenceAgent(MindAgent):
         if self.chainer is None:
             self.create_chainer(atomspace)
 
+        import pdb; pdb.set_trace()
         result = self.chainer.forward_step()
         if result:
             (outputs, inputs) = result
@@ -65,6 +66,65 @@ class ForwardInferenceAgent(MindAgent):
 def print_atoms(atoms):
     for atom in atoms:
         print atom
+
+def show_atoms(atoms):
+    return ' '.join(str(i)+str(output.av) for atom in atoms)
+
+class BackwardInferenceAgent(MindAgent):
+    def __init__(self):
+        self.chainer = None
+
+    def create_chainer(self, atomspace):
+        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
+
+        deduction_link_types = [types.InheritanceLink]
+#            types.SubsetLink, types.IntensionalInheritanceLink]
+        for link_type in deduction_link_types:
+            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+
+#        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
+#        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
+
+#        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
+#            self.chainer.add_rule(rule)
+
+#        self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
+#        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
+
+    def run(self, atomspace):
+        # incredibly exciting futuristic display!
+        #import os
+        #os.system('cls' if os.name=='nt' else 'clear')
+
+#        try:
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+
+        result = self.chainer.backward_step()
+        if result:
+            (outputs, inputs) = result
+
+            print '==== Inference ===='
+            print show_atoms(outputs), str(output.av), '<=',show_atoms(inputs)
+
+            print
+            print '==== Attentional Focus ===='
+            for atom in get_attentional_focus(atomspace)[0:30]:
+                print str(atom), atom.av
+
+            #print '==== Result ===='
+            #print output
+            #print '==== Trail ===='
+            #print_atoms( self.chainer.trails[output] )
+        else:
+            print 'Invalid inference attempted'
+#        except Exception, e:
+#            print e
+#            print e.args
+#            if hasattr(e, 'print_traceback'):
+#                e.print_traceback()
+
 
 '''
 # test it with forgetting, updating and diffusion

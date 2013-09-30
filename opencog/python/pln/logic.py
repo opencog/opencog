@@ -17,7 +17,7 @@ class Logic(object):
         else:
             result = []
             for o in atom.out:
-                result += self.variables(atom)
+                result += self.variables(o)
             return result
 
     def new_variable(self):

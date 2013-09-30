@@ -86,10 +86,10 @@ class InductionRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
-            outputs= [chainer.link(link_type, [B, C]),
+            outputs= [chainer.link(link_type, [B, C])],
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [A, C])],
-            formula= None
+            formula= None)
             
     def compute(inputs):
         pass
@@ -234,7 +234,7 @@ class EvaluationToMemberRule(Rule):
         self._chainer = chainer
         Rule.__init__(self,
                       formula= None,
-                      inputs=  chainer.link(types.EvaluationLink, [P, ARG]),
+                      inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
 
     def custom_compute(self, inputs):
