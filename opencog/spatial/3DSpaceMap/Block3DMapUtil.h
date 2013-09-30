@@ -177,6 +177,19 @@ namespace opencog
                 nearLeftBottomConer = BlockVector(_neaLeftBottomPos);
             }
 
+            BlockVector getCenterPoint() const
+            {
+                return BlockVector( (nearLeftBottomConer.x + size_x/2), (nearLeftBottomConer.y + size_y/2), (nearLeftBottomConer.z + size_z/2) );
+            }
+
+            float getRadius() const
+            {
+                if (size!=0)
+                    return size;
+                else
+                    return (size_x + size_y + size_z)/3.0f;
+            }
+
             inline bool operator==(const AxisAlignedBox& other) const
             {
                 if((nearLeftBottomConer == other.nearLeftBottomConer) &&
