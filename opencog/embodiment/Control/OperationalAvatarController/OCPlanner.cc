@@ -2805,23 +2805,23 @@ void OCPlanner::loadTestRulesFromCodes()
     solidStateOwnerList.push_back(var_pos);
     State* solidState = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList, true, &Inquery::inqueryIsSolid);
 
-    // precondition 2: The0 pos on it should be empty, if it has a block in it, you cannot stand in it
+    // precondition 2: The pos on it should be empty, if it has a block in it, you cannot stand in it
     vector<ParamValue> solidStateOwnerList2;
     solidStateOwnerList2.push_back(var_pos_on);
     State* solidState2 = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList2, true, &Inquery::inqueryIsSolid);
 
-    // precondition 2: The agent should be closed enough to the position to build the block ( < 2.0)
+    // precondition 3: The agent should be closed enough to the position to build the block ( < 2.0)
     vector<ParamValue> closedStateOwnerList4;
     closedStateOwnerList4.push_back(varAvatar);
     closedStateOwnerList4.push_back(var_pos);
     State* closedState4 = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedStateOwnerList4, true, &Inquery::inqueryDistance);
 
-    // precondition 3: The agent should not stand on the position to build the block
+    // precondition 4: The agent should not stand on the position to build the block
     vector<ParamValue> atLocationStateOwnerList3;
     atLocationStateOwnerList3.push_back(varAvatar);
     State* atLocationState3 = new State("AtLocation",ActionParamType::VECTOR(),STATE_NOT_EQUAL_TO, var_pos, atLocationStateOwnerList3, true, &Inquery::inqueryAtLocation);
 
-    // precondition 4: The position to bulid a block should be just on the desired position to stand on
+    // precondition 5: The position to bulid a block should be just on the desired position to stand on
     vector<ParamValue> IsBelowStateOwnerList;
     IsBelowStateOwnerList.push_back(var_pos);
     IsBelowStateOwnerList.push_back(var_pos_on);
