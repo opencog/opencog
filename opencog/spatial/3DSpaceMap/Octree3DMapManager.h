@@ -285,6 +285,11 @@ namespace opencog
                                                                    string observerName = ""
                                                                    ) const;
 
+            std::set<SPATIAL_RELATION> computeSpatialRelations( const AxisAlignedBox& boundingboxA,
+                                                                const AxisAlignedBox& boundingboxB,
+                                                                const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
+                                                                const Entity3D* observer = 0 ) const;
+
             /**
              * Return a string description of the relation
              */
