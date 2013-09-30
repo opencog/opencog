@@ -777,23 +777,105 @@ ParamValue Inquery::inqueryIsInFrontOf(const vector<ParamValue>& stateOwnerList)
 
 set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<ParamValue>& stateOwnerList)
 {
-//    set<spatial::SPATIAL_RELATION> empty;
-    Entity entity1 = boost::get<Entity>( stateOwnerList.front());
-    Entity entity2 = boost::get<Entity>( stateOwnerList[1]);
-    Entity entity3 = boost::get<Entity>( stateOwnerList[2]);
-/*
-    if ((entity1 == 0)||(entity2 == 0))
+    set<spatial::SPATIAL_RELATION> empty;
+    if (stateOwnerList.size() < 2)
+    {
+        cout<< "Debug:Error:Inquery::getSpatialRelations! Required at least 2 input parameters!" << std::endl;
         return empty;
-*/
+    }
 
-    string entity3ID = "";
-    if (stateOwnerList.size() == 3)
-     {
-         Entity entity3 = boost::get<Entity>( stateOwnerList.back());
-         entity3ID = entity3.id;
-     }
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList[1];
 
-    return  spaceMap->computeSpatialRelations(entity1.id, entity2.id, entity3.id);
+    Entity* entity1 = boost::get<Entity>( &var1);
+    Entity* entity2 = boost::get<Entity>( &var2);
+
+    spatial::AxisAlignedBox box1, box2, box3;
+
+    if (entity1 != 0)
+    {
+        const spatial::Entity3D* e1 = spaceMap->getEntity(entity1->id);
+        if (e1 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity1->id << std::endl;
+            return empty;
+        }
+        else
+            box1 = e1->getBoundingBox();
+    }
+    else
+    {
+        Vector* v1 = boost::get<Vector>( &var1);
+        if (v1 == 0)
+            cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+        else
+        {
+            spatial::BlockVector vec(v1->x,v1->y,v1->z);
+            box1 = spatial::AxisAlignedBox(vec);
+        }
+    }
+
+    if (entity2 != 0)
+    {
+        const spatial::Entity3D* e2 = spaceMap->getEntity(entity2->id);
+        if (e2 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity2->id << std::endl;
+            return empty;
+        }
+        else
+            box2 = e2->getBoundingBox();
+    }
+    else
+    {
+        Vector* v2 = boost::get<Vector>( &var2);
+        if (v2 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+            return empty;
+        }
+        else
+        {
+            spatial::BlockVector vec(v2->x,v2->y,v2->z);
+            box2 = spatial::AxisAlignedBox(vec);
+        }
+    }
+
+    if (stateOwnerList.size() > 2)
+    {
+        ParamValue var3 = stateOwnerList[2];
+        Entity* entity3 = boost::get<Entity>( &var3);
+
+        if (entity3 != 0)
+        {
+            const spatial::Entity3D* e3 = spaceMap->getEntity(entity3->id);
+            if (e3 == 0)
+            {
+                cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity3->id << std::endl;
+                return empty;
+            }
+            else
+                box3 = e3->getBoundingBox();
+        }
+        else
+        {
+            Vector* v3 = boost::get<Vector>( &var3);
+            if (v3 == 0)
+            {
+                cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+                return empty;
+            }
+            else
+            {
+                spatial::BlockVector vec(v3->x,v3->y,v3->z);
+                box3 = spatial::AxisAlignedBox(vec);
+            }
+        }
+    }
+    else
+        box3 = spatial::AxisAlignedBox::ZERO;
+
+    return  spaceMap->computeSpatialRelations(box1,box2,box3);
 }
 
 // find atoms by given condition, by patern mactcher.
