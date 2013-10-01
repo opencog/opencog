@@ -323,22 +323,22 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-boost::shared_ptr<Atom> AtomSpaceImpl::cloneAtom(const Handle& h) const
+AtomPtr AtomSpaceImpl::cloneAtom(const Handle& h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
     // Need to use the newly added clone methods as the copy constructors for
     // Node and Link don't copy incoming set.
     Atom * a = atomTable.getAtom(h);
-    boost::shared_ptr<Atom> dud;
+    AtomPtr dud;
     if (!a) return dud;
     const Node *node = dynamic_cast<const Node *>(a);
     if (!node) {
         const Link *l = dynamic_cast<const Link *>(a);
         if (!l) return dud;
-        boost::shared_ptr<Atom> clone_link(l->clone());
+        AtomPtr clone_link(l->clone());
         return clone_link;
     } else {
-        boost::shared_ptr<Atom> clone_node(node->clone());
+        AtomPtr clone_node(node->clone());
         return clone_node;
     }
 }

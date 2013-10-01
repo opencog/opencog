@@ -400,7 +400,7 @@ public:
      * AtomSpace::commitAtom for them to be merged with the AtomSpace.
      * Otherwise changes are lost.
      */
-    boost::shared_ptr<Atom> cloneAtom(const Handle& h) const;
+    AtomPtr cloneAtom(const Handle& h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
