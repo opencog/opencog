@@ -243,7 +243,7 @@ throw (RuntimeException, InconsistenceException)
             AtomPtr currentAtom = top(ud->stack);
             if (currentAtom) {
                 logger().fine("Getting link element inside currentAtom = %p", currentAtom.get());
-                LinkPtr link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                LinkPtr link(LinkCast(currentAtom));
                 if (link) {
                     if (r) {
                         NMXmlParser::addOutgoingAtom(link,Handle::UNDEFINED);
@@ -293,7 +293,7 @@ throw (RuntimeException, InconsistenceException)
             logger().fine(" => h = %p", h.value());
             if (ud->atomSpace->isValidHandle(h)) {
                 logger().fine(ud->atomSpace->atomAsString(h).c_str());
-                LinkPtr link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                LinkPtr link(LinkCast(currentAtom));
                 if (link) {
                     logger().fine("adding atom %s to link %s", ud->atomSpace->atomAsString(h,true).c_str(), link->toShortString().c_str());
                     NMXmlParser::addOutgoingAtom(link,h);
@@ -343,7 +343,7 @@ throw (InconsistenceException)
                     if (classserver().isA(type, UNORDERED_LINK)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
-                        LinkPtr link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                        LinkPtr link(LinkCast(currentAtom));
                         if (link) {
                             std::vector<Handle> outgoing = link->getOutgoingSet();
                             NMXmlParser::setOutgoingSet(link, outgoing);
@@ -381,7 +381,7 @@ throw (InconsistenceException)
                         logger().fine("(3) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
 
-                        LinkPtr nextlink = boost::dynamic_pointer_cast<Link>(nextUd);
+                        LinkPtr nextlink(LinkCast(nextUd));
                         if (nextlink) {
                             int arity = nextlink->getArity();
                             std::vector<Handle> outgoingSet = nextlink->getOutgoingSet();
@@ -429,7 +429,7 @@ NMXmlParser::~NMXmlParser()
 
 void NMXmlParser::setNodeName(AtomPtr node, const char* name)
 {
-    NodePtr n(boost::dynamic_pointer_cast<Node>(node));
+    NodePtr n(NodeCast(node));
     n->setName(name);
 }
 

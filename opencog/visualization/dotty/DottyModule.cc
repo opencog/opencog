@@ -59,7 +59,7 @@ public:
         if (compact)
         {
             // don't make nodes for binary links with no incoming
-            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l(LinkCast(a));
             if (l and l->getOutgoingSet().size() == 2 and
                      space->getIncoming(h).size() == 0)
                 return false;
@@ -71,8 +71,7 @@ public:
             ost << "shape=\"diamond\" ";
         ost << "label=\"[" << classserver().getTypeName(a->getType()) << "]";
         if (classserver().isNode(a->getType())) {
-            NodePtr n = boost::dynamic_pointer_cast<Node>(a);
-            //Node *n = (Node*)a;
+            NodePtr n(NodeCast(a));
             ost << " " << n->getName();
         } //else {
             // TODO: anything to output for links?
@@ -92,7 +91,7 @@ public:
         std::ostringstream ost;
 
         //const Link *l = dynamic_cast<const Link *>(a);
-        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l(LinkCast(a));
         if (l)
         {
             const std::vector<Handle> &out = l->getOutgoingSet();

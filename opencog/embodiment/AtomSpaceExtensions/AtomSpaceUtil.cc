@@ -726,13 +726,13 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
     HandleSeq incomingSet = atomSpace.getIncoming(sizePredicate);
     foreach(Handle incomingHandle, incomingSet) {
         AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-        LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == EVALUATION_LINK &&  incomingLink->getArity() == 2 && 
                 incomingLink->getOutgoingHandle(0) == sizePredicate) {
             Handle targetHandle = incomingLink->getOutgoingHandle(1);
             AtomPtr targetAtom = atomSpace.cloneAtom(targetHandle);
             if (targetAtom->getType() == LIST_LINK) {
-                LinkPtr listLink = boost::dynamic_pointer_cast<Link>(targetAtom);
+                LinkPtr listLink(LinkCast(targetAtom));
                 if (listLink->getArity() == 4 && listLink->getOutgoingHandle(0) == object) {
                     length = atof(atomSpace.getName(listLink->getOutgoingHandle(1)).c_str());
                     width = atof(atomSpace.getName(listLink->getOutgoingHandle(2)).c_str());
@@ -2307,7 +2307,7 @@ Handle AtomSpaceUtil::getMostRecentAgentActionLink( AtomSpace& atomSpace,
     HandleSeq incomingSet = atomSpace.getIncoming(agentHandle);
     foreach(Handle incomingHandle, incomingSet) {
         AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-        LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == LIST_LINK &&
                 incomingLink->getArity() == 3 && 
                 incomingLink->getOutgoingHandle(0) == agentHandle && 
@@ -3221,7 +3221,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
 
         foreach(Handle incomingHandle, incomingSet) {
             AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-            LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr incomingLink(LinkCast(a));
 
             if (incomingLink->getType() == FRAME_ELEMENT_LINK &&  
                 incomingLink->getArity() == 2 && 
@@ -3327,7 +3327,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                 HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
                 foreach(Handle incomingHandle, incomingSet) {
                     AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-                    LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+                    LinkPtr incomingLink(LinkCast(a));
                     if (incomingLink->getType() == EVALUATION_LINK &&  
                         incomingLink->getArity() == 2 && 
                         incomingLink->getOutgoingHandle(0) == frameElementInstance) {
@@ -3371,7 +3371,7 @@ Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const 
                     HandleSeq incomingSet = atomSpace.getIncoming(frameElementInstance);
                     foreach(Handle incomingHandle, incomingSet) {
                         AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-                        LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+                        LinkPtr incomingLink(LinkCast(a));
                         if (incomingLink->getArity() == 2 && 
                            ((incomingLink->getType() == INHERITANCE_LINK &&   
                              incomingLink->getOutgoingHandle(0) == frameElementInstance) || 
@@ -3640,7 +3640,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
         foreach(Handle incomingHandle, incomingSet) { 
             AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-            LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr incomingLink(LinkCast(a));
             if (incomingLink->getType() == INHERITANCE_LINK) {
                 if (incomingLink->getArity() == 2 && incomingLink->getOutgoingHandle(0) == frameInstance) {
                     Handle targetHandle = incomingLink->getOutgoingHandle(1);
@@ -3677,7 +3677,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
     HandleSeq incomingSet = atomSpace.getIncoming(frameInstance);
     foreach(Handle incomingHandle, incomingSet) {
         AtomPtr a = atomSpace.cloneAtom(incomingHandle);
-        LinkPtr incomingLink = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr incomingLink(LinkCast(a));
         if (incomingLink->getType() == FRAME_ELEMENT_LINK) {
             if (incomingLink->getArity() == 2 && incomingLink->getOutgoingHandle(0) == frameInstance) {
                 Handle targetHandle = incomingLink->getOutgoingHandle(1);
@@ -3712,7 +3712,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         HandleSeq elemIncomingSet = atomSpace.getIncoming(elementPredicate);
         foreach (Handle elemIncomingHandle, elemIncomingSet) {
             AtomPtr a = atomSpace.cloneAtom(elemIncomingHandle);
-            LinkPtr elemIncomingLink = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr elemIncomingLink(LinkCast(a));
             if (elemIncomingLink->getType() == INHERITANCE_LINK) {
                 if (elemIncomingLink->getArity() == 2 && elemIncomingLink->getOutgoingHandle(0) == elementPredicate) {
                     Handle targetHandle = elemIncomingLink->getOutgoingHandle(1);
@@ -3750,7 +3750,7 @@ void AtomSpaceUtil::deleteFrameInstance( AtomSpace& atomSpace, Handle frameInsta
         Handle valueHandle = Handle::UNDEFINED;
         foreach (Handle elemIncomingHandle, elemIncomingSet) {
             AtomPtr a = atomSpace.cloneAtom(elemIncomingHandle);
-            LinkPtr elemIncomingLink = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr elemIncomingLink(LinkCast(a));
             if (elemIncomingLink->getType() == EVALUATION_LINK) {
                 if (elemIncomingLink->getArity() == 2 && elemIncomingLink->getOutgoingHandle(0) == elementPredicate) {
                     valueHandle = elemIncomingHandle;

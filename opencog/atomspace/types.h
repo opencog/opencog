@@ -31,7 +31,6 @@
 #define _OPENCOG_TYPES_H
 
 #include <memory>  // for std::shared_pointer
-#include <boost/shared_ptr.hpp>
 #include <boost/variant.hpp>
 
 #include <opencog/atomspace/Handle.h>
@@ -45,11 +44,11 @@ namespace opencog
 class Atom;
 class Node;
 class Link;
-// typedef std::shared_ptr<Atom> AtomPtr;
-// typedef std::shared_ptr<Link> LinkPtr;
-typedef boost::shared_ptr<Atom> AtomPtr;
-typedef boost::shared_ptr<Link> LinkPtr;
-typedef boost::shared_ptr<Node> NodePtr;
+typedef std::shared_ptr<Atom> AtomPtr;
+typedef std::shared_ptr<Node> NodePtr;
+typedef std::shared_ptr<Link> LinkPtr;
+#define NodeCast std::dynamic_pointer_cast<Node>
+#define LinkCast std::dynamic_pointer_cast<Link>
 
 //! type of Atoms, represented as short integer (16 bits)
 typedef unsigned short Type;

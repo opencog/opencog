@@ -162,7 +162,7 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l(LinkCast(a));
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
                 return addEdges(h);
@@ -183,7 +183,7 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l(LinkCast(a));
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
                 return removeEdges(h);
@@ -210,7 +210,7 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
     }
     ost << baseline + scaler;
     AtomPtr a = space.cloneAtom(h);
-    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+    LinkPtr l(LinkCast(a));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -283,7 +283,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
     }
 
     AtomPtr a = space.cloneAtom(h);
-    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+    LinkPtr l(LinkCast(a));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -351,7 +351,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
         }
         if (okToApply) {
             AtomPtr a = space.cloneAtom(h);
-            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l(LinkCast(a));
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
                 if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -371,7 +371,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     foreach (Handle h, hs) {
         AtomPtr a = space.cloneAtom(h);
         if (!a) continue;
-        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l(LinkCast(a));
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
             if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -399,7 +399,7 @@ bool Ubigrapher::addVertex(Handle h)
             logger().error("Status was %d", status);
         ubigraph_change_vertex_style(id, nodeStyle);
     } else {
-        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l(LinkCast(a));
         if (l && compact && l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
             return false;
         int status = ubigraph_new_vertex_w_id(id);
@@ -418,10 +418,10 @@ bool Ubigrapher::addVertex(Handle h)
         }
         
         if (isNode) {
-            NodePtr n = boost::dynamic_pointer_cast<Node>(a);
+            NodePtr n(NodeCast(a));
             ost << " " << n->getName();
         } /*else {
-            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l(LinkCast(a));
             l = l; // TODO: anything to output for links?
         }*/
         ost << ":" << space.getMean(h);
@@ -439,7 +439,7 @@ bool Ubigrapher::addEdges(Handle h)
     AtomPtr a = space.cloneAtom(h);
 
     usleep(pushDelay);
-    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+    LinkPtr l(LinkCast(a));
     if (l)
     {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -497,7 +497,7 @@ bool Ubigrapher::removeVertex(Handle h)
     if (compact)
     {
         // Won't have made a node for a binary link with no incoming
-        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l(LinkCast(a));
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
             return false;
@@ -522,7 +522,7 @@ bool Ubigrapher::removeEdges(Handle h)
     // vertexes are deleted.
     if (compact)
     {
-        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l(LinkCast(a));
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
         {                     
