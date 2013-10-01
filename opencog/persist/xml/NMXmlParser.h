@@ -28,8 +28,6 @@
 
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
@@ -126,7 +124,7 @@ public:
      * @param Node to have its name set.
      * @param Node name.
      */
-    static void setNodeName(boost::shared_ptr<Atom>, const char* name);
+    static void setNodeName(AtomPtr, const char* name);
 
     /**
      * Adds a handle to the outgoing set of an atom . This method exists because
@@ -136,17 +134,17 @@ public:
      * @param Atom to have its outgoing set changed.
      * @param Handle to be added to the outgoing set.
      */
-    static void addOutgoingAtom(boost::shared_ptr<Link>, Handle);
+    static void addOutgoingAtom(LinkPtr, Handle);
 
     /**
       * Sets the outgoing set of the given atom using the given const reference to a vector of handles.
       * This method can be called only if the atom is not inserted in an AtomTable yet.
       * Otherwise, it throws a RuntimeException.
       */
-    static void setOutgoingSet(boost::shared_ptr<Link>, const std::vector<Handle>&);
+    static void setOutgoingSet(LinkPtr, const std::vector<Handle>&);
 
 
-    static Handle holdsHandle(const boost::shared_ptr<Atom> a) { return a->getHandle(); } 
+    static Handle holdsHandle(const AtomPtr a) { return a->getHandle(); } 
 };
 
 /** @}*/

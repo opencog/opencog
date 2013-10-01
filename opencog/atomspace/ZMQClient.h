@@ -53,7 +53,7 @@ public:
     ZMQClient(string networkAddres="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
     ~ZMQClient();
 
-    boost::shared_ptr<Atom> getAtom(Handle& h);
+    AtomPtr getAtom(Handle& h);
     
     /** @todo add other functions as needed */
 };

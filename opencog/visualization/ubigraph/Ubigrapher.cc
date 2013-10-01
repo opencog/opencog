@@ -30,8 +30,6 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include <boost/shared_ptr.hpp>
-
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -157,14 +155,14 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = as->cloneAtom(h);
+    AtomPtr a = as->cloneAtom(h);
     usleep(pushDelay);
     if (classserver().isA(a->getType(),NODE))
         return addVertex(h);
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
                 return addEdges(h);
@@ -178,14 +176,14 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = as->cloneAtom(h);
+    AtomPtr a = as->cloneAtom(h);
     usleep(pushDelay);
     if (classserver().isA(a->getType(),NODE))
         return removeVertex(h);
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
                 return removeEdges(h);
@@ -211,8 +209,8 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
             * multiplier;
     }
     ost << baseline + scaler;
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
-    boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+    AtomPtr a = space.cloneAtom(h);
+    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -284,8 +282,8 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         }
     }
 
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
-    boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+    AtomPtr a = space.cloneAtom(h);
+    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -352,8 +350,8 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
             if (space.getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
         }
         if (okToApply) {
-            boost::shared_ptr<Atom> a = space.cloneAtom(h);
-            boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+            AtomPtr a = space.cloneAtom(h);
+            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
                 if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -371,9 +369,9 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     if (!isConnected()) return;
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        boost::shared_ptr<Atom> a = space.cloneAtom(h);
+        AtomPtr a = space.cloneAtom(h);
         if (!a) continue;
-        boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
             if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -390,7 +388,7 @@ bool Ubigrapher::addVertex(Handle h)
 	// if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
+    AtomPtr a = space.cloneAtom(h);
     bool isNode = classserver().isA(a->getType(),NODE);
 
     int id = (int)h.value();
@@ -401,7 +399,7 @@ bool Ubigrapher::addVertex(Handle h)
             logger().error("Status was %d", status);
         ubigraph_change_vertex_style(id, nodeStyle);
     } else {
-        boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
         if (l && compact && l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
             return false;
         int status = ubigraph_new_vertex_w_id(id);
@@ -420,10 +418,10 @@ bool Ubigrapher::addVertex(Handle h)
         }
         
         if (isNode) {
-            boost::shared_ptr<Node> n = boost::dynamic_pointer_cast<Node>(a);
+            NodePtr n = boost::dynamic_pointer_cast<Node>(a);
             ost << " " << n->getName();
         } /*else {
-            boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+            LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
             l = l; // TODO: anything to output for links?
         }*/
         ost << ":" << space.getMean(h);
@@ -438,10 +436,10 @@ bool Ubigrapher::addVertex(Handle h)
 bool Ubigrapher::addEdges(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
+    AtomPtr a = space.cloneAtom(h);
 
     usleep(pushDelay);
-    boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+    LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
     if (l)
     {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -494,12 +492,12 @@ bool Ubigrapher::addEdges(Handle h)
 bool Ubigrapher::removeVertex(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
+    AtomPtr a = space.cloneAtom(h);
 
     if (compact)
     {
         // Won't have made a node for a binary link with no incoming
-        boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
             return false;
@@ -516,7 +514,7 @@ bool Ubigrapher::removeVertex(Handle h)
 bool Ubigrapher::removeEdges(Handle h)
 {
     if (!isConnected()) return false;
-    boost::shared_ptr<Atom> a = space.cloneAtom(h);
+    AtomPtr a = space.cloneAtom(h);
 
     // This method is only relevant to binary Links with no incoming.
     // Any other atoms will be represented by vertexes, and the edges
@@ -524,7 +522,7 @@ bool Ubigrapher::removeEdges(Handle h)
     // vertexes are deleted.
     if (compact)
     {
-        boost::shared_ptr<Link> l = boost::dynamic_pointer_cast<Link>(a);
+        LinkPtr l = boost::dynamic_pointer_cast<Link>(a);
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
         {                     
