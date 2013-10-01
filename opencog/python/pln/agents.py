@@ -9,10 +9,10 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self)
 
-        deduction_link_types = [types.InheritanceLink,
-            types.SubsetLink, types.IntensionalInheritanceLink]
+        deduction_link_types = [types.InheritanceLink]
+#            types.SubsetLink, types.IntensionalInheritanceLink]
         for link_type in deduction_link_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
@@ -32,36 +32,42 @@ class ForwardInferenceAgent(MindAgent):
         #os.system('cls' if os.name=='nt' else 'clear')
 
         def show_atoms(atoms):
-            return ' '.join(str(i)+str(output.av) for atom in atoms)
+            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
 
-#        try:
-        if self.chainer is None:
-            self.create_chainer(atomspace)
+        try:
+            if self.chainer is None:
+                self.create_chainer(atomspace)
 
-        import pdb; pdb.set_trace()
-        result = self.chainer.forward_step()
-        if result:
-            (outputs, inputs) = result
+            result = self.chainer.forward_step()
+            if result:
+                (outputs, inputs) = result
 
-            print '==== Inference ===='
-            print show_atoms(output), str(output.av), '<=',show_atoms(input)
+                print '==== Inference ===='
+                print show_atoms(outputs), '<=', show_atoms(inputs)
 
-            print
-            print '==== Attentional Focus ===='
-            for atom in get_attentional_focus(atomspace)[0:30]:
-                print str(atom), atom.av
+                print
+                print '==== Attentional Focus ===='
+                for atom in get_attentional_focus(atomspace)[0:30]:
+                    print str(atom), atom.av
 
-            #print '==== Result ===='
-            #print output
-            #print '==== Trail ===='
-            #print_atoms( self.chainer.trails[output] )
-        else:
-            print 'Invalid inference attempted'
-#        except Exception, e:
-#            print e
-#            print e.args
-#            if hasattr(e, 'print_traceback'):
-#                e.print_traceback()
+                #print '==== Result ===='
+                #print output
+                #print '==== Trail ===='
+                #print_atoms( self.chainer.trails[output] )
+            else:
+                print 'Invalid inference attempted'
+        except AssertionError:
+            import sys,traceback
+            _,_,tb = sys.exc_info()
+            traceback.print_tb(tb) # Fixed format
+
+            tbInfo = traceback.extract_tb(tb)
+            filename,line,func,text = tbInfo[-1]
+            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
+            exit(1)
+        except Exception, e:
+            print e
+            print e.args
 
 def print_atoms(atoms):
     for atom in atoms:
@@ -75,7 +81,7 @@ class BackwardInferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self)
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self)
 
         deduction_link_types = [types.InheritanceLink]
 #            types.SubsetLink, types.IntensionalInheritanceLink]

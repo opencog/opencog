@@ -43,7 +43,10 @@ class AbstractChainer(Logic):
 
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
-            root_type = template.type
+            if template.type == types.VariableNode:
+                root_type = types.Atom
+            else:
+                root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
             atom = self._select_from(template, all_atoms, require_nonzero_tv, useAF=False)
 
@@ -51,19 +54,19 @@ class AbstractChainer(Logic):
 
     def _select_from(self, template, atoms, require_nonzero_tv, useAF):
 
-        matching_atoms = self.find(template, atoms)
+        atoms = self.find(template, atoms)
 
         if require_nonzero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]
 
-        if len(matching_atoms) == 0:
+        if len(atoms) == 0:
             return None
 
         if useAF:
-            return self._selectOne(matching_atoms)
+            return self._selectOne(atoms)
         else:
             # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
-            return random.choice(matching_atoms)
+            return random.choice(atoms)
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
@@ -150,7 +153,7 @@ class Chainer(AbstractChainer):
         specific_outputs = []
         empty_substitution = {}
         found = self._find_inputs_recursive(specific_inputs, specific_outputs, 
-                                    generic_inputs, generic_outputs, empty_substitution)
+                                    generic_inputs, generic_outputs, empty_substitution, require_nonzero_tv=True)
         if not found:
             return None
 
@@ -199,6 +202,7 @@ class Chainer(AbstractChainer):
             print 'unable to match:',template
             return False
 
+        assert atom != None
         # Find the substitution that would change 'template' to 'atom'
         substitution = self.unify(template, atom, subst_so_far)
         assert(substitution != None)
@@ -219,7 +223,7 @@ class Chainer(AbstractChainer):
             for atom in inputs:
                 self._give_stimulus(atom)
 
-        return (output_atoms, inputs)
+        return (outputs, inputs)
 
     def _revise_tvs(self, atom, new_tv):
         old_tv = atom.tv
@@ -324,7 +328,7 @@ class Chainer(AbstractChainer):
         # If you pass it subst_so_far, it will choose inputs compatible with the
         # outputs we've already chosen!
         if len(remaining_outputs) == 0:
-            inputs_found = self._find_inputs_recursive(return_inputs, return_outputs=[], remaining_inputs=all_inputs, generic_outputs=[], subst_so_far=subst_so_far, require_nonzero_tv=False)
+            inputs_found = self._find_inputs_recursive(return_inputs, return_outputs=[], remaining_inputs=all_inputs, generic_outputs=[], subst_so_far=subst_so_far, require_nonzero_tv=True)
             return inputs_found
 
         # normal case of recursion
@@ -334,7 +338,7 @@ class Chainer(AbstractChainer):
         # You can use find_inputs_recursive to choose the inputs after choosing outputs
 
         template = remaining_outputs[0]
-        atom = self._select_one_matching(template, require_nonzero_tv=False)
+        atom = self._select_one_matching(template, require_nonzero_tv=True)
     
         if atom is None:
             self.log_failed_inference('backward chainer: unable to find target atom matching:'+str(template))
