@@ -250,7 +250,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
+AtomPtr AtomSpace::cloneAtom(const Handle& h) const
 {
     return atomSpaceAsync->getAtom(h)->get_result();
 }

@@ -41,8 +41,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 
-#include <boost/shared_ptr.hpp>
-
 using namespace opencog;
 using namespace Hypertable;
 
