@@ -299,8 +299,9 @@ class Chainer(AbstractChainer):
         empty_substitution = {}
         found = self._choose_outputs_inputs_recursive(specific_inputs, specific_outputs, 
                                     generic_inputs, generic_outputs, empty_substitution)
+
+        print rule, map(str,specific_outputs), map(str,specific_inputs)
         if not found:
-            print rule, map(str,specific_outputs), map(str,specific_inputs)
             return None
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
@@ -316,7 +317,7 @@ class Chainer(AbstractChainer):
 #                    self._give_stimulus(atom)
                 for atom in specific_inputs:
                     self._give_stimulus(atom)
-            return None
+            return (specific_outputs, specific_inputs)
 
     def _all_nonzero_tvs(self, atom_list):
         return all(atom.tv.count > 0 for atom in atom_list)
@@ -329,6 +330,7 @@ class Chainer(AbstractChainer):
         # outputs we've already chosen!
         if len(remaining_outputs) == 0:
             inputs_found = self._find_inputs_recursive(return_inputs, return_outputs=[], remaining_inputs=all_inputs, generic_outputs=[], subst_so_far=subst_so_far, require_nonzero_tv=True)
+
             return inputs_found
 
         # normal case of recursion
@@ -338,7 +340,7 @@ class Chainer(AbstractChainer):
         # You can use find_inputs_recursive to choose the inputs after choosing outputs
 
         template = remaining_outputs[0]
-        atom = self._select_one_matching(template, require_nonzero_tv=True)
+        atom = self._select_one_matching(template, require_nonzero_tv=False)
     
         if atom is None:
             self.log_failed_inference('backward chainer: unable to find target atom matching:'+str(template))

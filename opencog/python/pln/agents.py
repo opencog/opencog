@@ -74,7 +74,7 @@ def print_atoms(atoms):
         print atom
 
 def show_atoms(atoms):
-    return ' '.join(str(i)+str(output.av) for atom in atoms)
+    return ' '.join(str(atom)+str(atom.av) for atom in atoms)
 
 class BackwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -111,18 +111,23 @@ class BackwardInferenceAgent(MindAgent):
         if result:
             (outputs, inputs) = result
 
-            print '==== Inference ===='
-            print show_atoms(outputs), str(output.av), '<=',show_atoms(inputs)
+            if False:
+                print '==== Inference ===='
+                print show_atoms(outputs), '<=', show_atoms(inputs)
 
-            print
-            print '==== Attentional Focus ===='
-            for atom in get_attentional_focus(atomspace)[0:30]:
-                print str(atom), atom.av
+                print
+                print '==== Attentional Focus ===='
+                for atom in get_attentional_focus(atomspace)[0:30]:
+                    print str(atom), atom.av
 
-            #print '==== Result ===='
-            #print output
-            #print '==== Trail ===='
-            #print_atoms( self.chainer.trails[output] )
+                #print '==== Result ===='
+                #print output
+                #print '==== Trail ===='
+                #print_atoms( self.chainer.trails[output] )
+
+            if self.chainer._all_nonzero_tvs(inputs):
+                raw_input()
+
         else:
             print 'Invalid inference attempted'
 #        except Exception, e:
