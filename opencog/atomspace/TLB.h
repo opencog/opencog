@@ -93,7 +93,7 @@ class TLB
     friend class AtomStorage;
     friend class SenseSimilaritySQL;
 
-    typedef std::unordered_map< Handle, Atom*, handle_hash > map_t;
+    typedef std::unordered_map< Handle, AtomPtr, handle_hash > map_t;
 private:
 
     static map_t handle_map;
@@ -112,7 +112,7 @@ private:
      * @return Corresponding atom for the given handle. Returns NULL if handle
      * isn't found.
      */
-    static inline Atom* getAtom(const Handle& handle);
+    static inline AtomPtr getAtom(const Handle& handle);
 
     /** Adds a new atom to the TLB.
      * If the atom has already be added then an exception is thrown.
@@ -120,7 +120,7 @@ private:
      * @param Atom to be added.
      * @return Handle of the newly added atom.
      */
-    static inline const Handle& addAtom(Atom* atom,
+    static inline const Handle& addAtom(AtomPtr atom,
                                  const Handle &handle = Handle::UNDEFINED);
 
     /**
@@ -132,7 +132,7 @@ private:
      * @param handle of atom to be removed.
      * @return Removed atom.
      */
-    static inline Atom* removeAtom(const Handle& h);
+    static inline AtomPtr removeAtom(const Handle& h);
 
     static inline bool isInvalidHandle(const Handle& h);
 
@@ -159,7 +159,7 @@ inline bool TLB::isValidHandle(const Handle& h)
     return !isInvalidHandle(h);
 }
 
-inline const Handle& TLB::addAtom(Atom* atom, const Handle &handle)
+inline const Handle& TLB::addAtom(AtomPtr atom, const Handle &handle)
 {
     const Handle &h = atom->handle;
     if (h != Handle::UNDEFINED) {
@@ -177,18 +177,18 @@ inline const Handle& TLB::addAtom(Atom* atom, const Handle &handle)
     return atom->handle;
 }
 
-inline Atom* TLB::getAtom(const Handle& handle)
+inline AtomPtr TLB::getAtom(const Handle& handle)
 {
     map_t::iterator it = handle_map.find(handle);
     if (it == handle_map.end()) return NULL;
     else return it->second;
 }
 
-inline Atom* TLB::removeAtom(const Handle& h)
+inline AtomPtr TLB::removeAtom(const Handle& h)
 {
     if (h == Handle::UNDEFINED) return NULL;
 
-    Atom* atom = TLB::getAtom(h);
+    AtomPtr atom = TLB::getAtom(h);
     if (NULL == atom) return NULL;
 
     // Remove from the map

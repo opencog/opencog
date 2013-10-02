@@ -193,6 +193,8 @@ public:
     }
 };
 
+typedef std::shared_ptr<AttentionValueHolder> AttentionValueHolderPtr;
+
 /** @}*/
 } // namespace opencog 
 

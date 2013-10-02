@@ -220,16 +220,16 @@ public:
     const std::string& getName(Handle h) const
     {
         static std::string emptyName;
-        Node* nnn = atomTable.getNode(h);
+        NodePtr nnn(atomTable.getNode(h));
         if (nnn) return nnn->getName();
         return emptyName;
     }
 
     /** Retrieve the outgoing set of a given link */
-    const HandleSeq& getOutgoing(Handle h) const
+    const HandleSeq getOutgoing(Handle h) const
     {
         static HandleSeq hs;
-        Link* link = atomTable.getLink(h);
+        LinkPtr link(atomTable.getLink(h));
         if (link) return link->getOutgoingSet();
         return hs;
     }
@@ -241,7 +241,7 @@ public:
     /** Retrieve the arity of a given link */
     size_t getArity(Handle h) const
     {
-        Link* link = atomTable.getLink(h);
+        LinkPtr link(atomTable.getLink(h));
         if (link) return link->getArity();
         return 0;
     }
@@ -249,7 +249,7 @@ public:
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const
     {
-        Atom* a = atomTable.getAtom(h);
+        AtomPtr a(atomTable.getAtom(h));
         if (a) return a->getType();
         else return NOTYPE;
     }
@@ -259,7 +259,7 @@ public:
      */ 
     bool isSource(Handle source, Handle link) const
     {
-        const Link *l = atomTable.getLink(link);
+        LinkPtr l(atomTable.getLink(link));
         if (l) return l->isSource(source);
         return false;
     }
@@ -268,10 +268,10 @@ public:
     HandleSeq getIncoming(Handle);
 
     /** Convenience functions... */
-    bool isNode(const Handle& h) const
+    bool isNode(Handle h) const
         { return classserver().isA(getType(h), NODE); }
 
-    bool isLink(const Handle& h) const
+    bool isLink(Handle h) const
         { return classserver().isA(getType(h), LINK); }
 
     /** Retrieve the TruthValue of a given Handle */
@@ -296,7 +296,7 @@ public:
      * range can be return if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+    float getNormalisedSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValueHolder.
@@ -308,14 +308,14 @@ public:
      * range can be return if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+    float getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
+    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the Very-Long-Term Importance of a given
      * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
+    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
@@ -400,16 +400,16 @@ public:
      * AtomSpace::commitAtom for them to be merged with the AtomSpace.
      * Otherwise changes are lost.
      */
-    AtomPtr cloneAtom(const Handle& h) const;
+    AtomPtr cloneAtom(Handle h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
      * @param a Atom to commit
      * @return whether the commit was successful
      */
-    bool commitAtom(const Atom& a);
+    bool commitAtom(AtomPtr a);
 
-    bool isValidHandle(const Handle h) const
+    bool isValidHandle(Handle h) const
         { return atomTable.holds(h); }
 
     /**

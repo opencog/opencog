@@ -52,8 +52,8 @@ class IncomingIndex
 		HandleSetIndex idx;
 	public:
 		IncomingIndex(void);
-		void insertAtom(const Atom* a);
-		void removeAtom(const Atom* a);
+		void insertAtom(AtomPtr a);
+		void removeAtom(AtomPtr a);
 		void remove(bool (*)(Handle));
 		void resize();
 

@@ -59,7 +59,7 @@ private:
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
     /** @todo cloning atoms is a fundamental violation oft he architecture. */
-    virtual Atom* clone() const;
+    virtual AtomPtr clone() const;
 public:
 
     /**

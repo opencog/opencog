@@ -40,7 +40,7 @@ PredicateIndex::PredicateIndex(void)
 	numberOfPredicateIndices = 0;
 }
 
-void PredicateIndex::insertAtom(const Atom* atom)
+void PredicateIndex::insertAtom(AtomPtr atom)
 {
 	// Checks Atom against predicate indices and insert it if needed
 	// That is, the atom is inserted only if the predicate says "yes"
@@ -54,7 +54,7 @@ void PredicateIndex::insertAtom(const Atom* atom)
 	}
 }
 
-void PredicateIndex::removeAtom(const Atom* atom)
+void PredicateIndex::removeAtom(AtomPtr atom)
 {
 	Handle h = atom->getHandle();
 	// Erase the handle from each set ... there is a set per index.

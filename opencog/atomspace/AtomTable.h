@@ -248,11 +248,11 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(const std::string&, Type) const;
-    Handle getHandle(const Node*) const;
+    Handle getHandle(NodePtr) const;
 
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const Link*) const;
-    Handle getHandle(const Atom*) const;
+    Handle getHandle(LinkPtr) const;
+    Handle getHandle(AtomPtr) const;
 
 protected:
     /* Some basic predicates */
@@ -273,9 +273,9 @@ protected:
     }
     bool hasNullName(Handle h) const
     {
-        Atom* a = getAtom(h);
-        if (dynamic_cast<Link*>(a)) return true;
-        if (dynamic_cast<Node*>(a)->getName().c_str()[0] == 0) return true;
+        AtomPtr a(getAtom(h));
+        if (LinkCast(a)) return true;
+        if (NodeCast(a)->getName().c_str()[0] == 0) return true;
         return false;
     }
 
@@ -653,9 +653,9 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportanceIndex(Atom* a, int bin)
+    void updateImportanceIndex(AtomPtr a, int bin)
     {
-        importanceIndex.updateImportance(a,bin);
+        importanceIndex.updateImportance(a, bin);
     }
 
     /**
@@ -664,7 +664,7 @@ public:
      * @param h     Handle of the Atom to be merged
      * @param tvn   TruthValue to be merged to current atom's truth value.  
      */
-    void merge(Handle h, const TruthValue& tvn);
+    void merge(Handle, const TruthValue&);
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
@@ -676,12 +676,12 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(Atom*) throw (RuntimeException);
+    Handle add(AtomPtr) throw (RuntimeException);
 
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(const Handle& h) const { return (NULL != getAtom(h)); }
+    bool holds(Handle h) const { return (NULL != getAtom(h)); }
 
     /** Get Atom object already in the AtomTable.
      *
@@ -689,9 +689,9 @@ public:
      * @return pointer to Atom object, NULL if no atom within this AtomTable is
      * associated with handle.
      */
-    inline Atom* getAtom(const Handle& h) const {
+    inline AtomPtr getAtom(Handle h) const {
         if (h == Handle::UNDEFINED) return NULL;
-        Atom *atom = TLB::getAtom(h);
+        AtomPtr atom(TLB::getAtom(h));
         if (atom)
             // if the atom isn't linked to this AtomTable
             // then blank pointer
@@ -705,8 +705,8 @@ public:
      * @return pointer to Node object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a link.
      */
-    inline Node* getNode(const Handle& h) const {
-        return dynamic_cast<Node*>(getAtom(h));
+    inline NodePtr getNode(Handle h) const {
+        return NodeCast(getAtom(h));
     }
 
     /** Get Link object already in the AtomTable.
@@ -715,8 +715,8 @@ public:
      * @return pointer to Link object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a node.
      */
-    inline Link* getLink(const Handle& h) const {
-        return dynamic_cast<Link*>(getAtom(h));
+    inline LinkPtr getLink(Handle h) const {
+        return LinkCast(getAtom(h));
     }
 
     /**

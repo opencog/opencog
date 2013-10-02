@@ -183,7 +183,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
 
     // Maybe the backing store knows about this atom.
     if (backing_store) {
-        Node *n = backing_store->getNode(t, name.c_str());
+        NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
             result = atomTable.add(n);
             atomTable.merge(result,tvn);
@@ -193,9 +193,9 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         }
     }
 
-    Handle newNodeHandle = atomTable.add(new Node(t, name, tvn));
+    Handle newNodeHandle = atomTable.add(NodePtr(new Node(t, name, tvn)));
     // emit add atom signal
-    _addAtomSignal(this,newNodeHandle);
+    _addAtomSignal(this, newNodeHandle);
     return newNodeHandle;
 }
 
@@ -219,7 +219,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
-        Link *l = backing_store->getLink(t, outgoing);
+        LinkPtr l(backing_store->getLink(t, outgoing));
         if (l) {
             // register the atom with the atomtable (so it gets placed in
             // indices)
@@ -231,7 +231,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    Handle newLinkHandle = atomTable.add(new Link(t, outgoing, tvn));
+    Handle newLinkHandle = atomTable.add(LinkPtr(new Link(t, outgoing, tvn)));
     // emit add atom signal
     _addAtomSignal(this,newLinkHandle);
     return newLinkHandle;
@@ -247,13 +247,13 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
-        Atom *a = backing_store->getAtom(h);
+        AtomPtr a(backing_store->getAtom(h));
 
         // For links, must perform a recursive fetch, as otherwise
         // the atomtable.add below will throw an error.
-        Link *l = dynamic_cast<Link *>(a);
+        LinkPtr l(LinkCast(a));
         if (l) {
-           const std::vector<Handle>& ogs = l->getOutgoingSet();
+           const HandleSeq& ogs = l->getOutgoingSet();
            size_t arity = ogs.size();
            for (size_t i=0; i<arity; i++)
            {
@@ -275,7 +275,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 
     // Get everything from the backing store.
     if (backing_store) {
-        std::vector<Handle> iset = backing_store->getIncomingSet(h);
+        HandleSeq iset = backing_store->getIncomingSet(h);
         size_t isz = iset.size();
         for (size_t i=0; i<isz; i++) {
             Handle hi = iset[i];
@@ -323,18 +323,17 @@ Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-AtomPtr AtomSpaceImpl::cloneAtom(const Handle& h) const
+AtomPtr AtomSpaceImpl::cloneAtom(Handle h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
     // Need to use the newly added clone methods as the copy constructors for
     // Node and Link don't copy incoming set.
-    Atom * a = atomTable.getAtom(h);
-    AtomPtr dud;
-    if (!a) return dud;
-    const Node *node = dynamic_cast<const Node *>(a);
+    AtomPtr a(atomTable.getAtom(h));
+    if (!a) return a;
+    NodePtr node(NodeCast(a));
     if (!node) {
-        const Link *l = dynamic_cast<const Link *>(a);
-        if (!l) return dud;
+        LinkPtr l(LinkCast(a));
+        if (!l) return a;
         AtomPtr clone_link(l->clone());
         return clone_link;
     } else {
@@ -345,7 +344,7 @@ AtomPtr AtomSpaceImpl::cloneAtom(const Handle& h) const
 
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 {
-    Atom* a = atomTable.getAtom(h);
+    AtomPtr a(atomTable.getAtom(h));
     if (a) {
         if (terse) return a->toShortString();
         else return a->toString();
@@ -356,7 +355,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         bool fanout, Type desiredLinkType, bool subClasses) const 
 {
-    Atom* a = atomTable.getAtom(h);
+    AtomPtr a(atomTable.getAtom(h));
     if (a == NULL) {
         throw InvalidParamException(TRACE_INFO,
             "Handle %d doesn't refer to a Atom", h.value());
@@ -367,12 +366,12 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     for (UnorderedHandleSet::const_iterator it = iset.begin();
          it != iset.end(); it++)
     {
-        Link *link = atomTable.getLink(*it);
+        LinkPtr link(atomTable.getLink(*it));
         Type linkType = link->getType();
         DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
-            int linkArity = link->getArity();
-            for (int i = 0; i < linkArity; i++) {
+            Arity linkArity = link->getArity();
+            for (Arity i = 0; i < linkArity; i++) {
                 Handle handle = link->getOutgoingSet()[i];
                 if (handle == h) continue;
                 if (!fanout && link->isSource(h)) continue;
@@ -384,12 +383,12 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     return answer;
 }
 
-bool AtomSpaceImpl::commitAtom(const Atom& a)
+bool AtomSpaceImpl::commitAtom(AtomPtr a)
 {
     // TODO: Check for differences and abort if timestamp is out of date
 
-    Handle h = atomTable.getHandle(&a);
-    Atom* original = atomTable.getAtom(h);
+    Handle h = atomTable.getHandle(a);
+    AtomPtr original(atomTable.getAtom(h));
     if (original == NULL)
         // TODO: allow committing a new atom?
         return false;
@@ -397,8 +396,8 @@ bool AtomSpaceImpl::commitAtom(const Atom& a)
     // TODO: this isn't correct, trails, flags and other things might change
     // too... XXX the AtomTable already has a merge function; shouldn't we
     // be using that?
-    original->setTruthValue(a.getTruthValue());
-    original->setAttentionValue(a.getAttentionValue());
+    original->setTruthValue(a->getTruthValue());
+    original->setAttentionValue(a->getAttentionValue());
     return true;
 }
 
@@ -423,7 +422,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
 
 bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 {
-    Atom *a = atomTable.getAtom(h);
+    AtomPtr a(atomTable.getAtom(h));
     if (!a) return false;
     const TruthValue& currentTv = a->getTruthValue();
     if (!isNullVersionHandle(vh))
@@ -449,7 +448,7 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
 {
-    Atom* a = atomTable.getAtom(h);
+    AtomPtr a(atomTable.getAtom(h));
     if (!a) return TruthValue::NULL_TV();
 
     const TruthValue& tv = a->getTruthValue();
@@ -494,7 +493,7 @@ void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
     delete newTv;
 }
 
-float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolder *avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
     int normaliser;
@@ -520,7 +519,7 @@ float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolder *avh, bool average, b
     }
 }
 
-float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
 {
     int normaliser;
     float val;
