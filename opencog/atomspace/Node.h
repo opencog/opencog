@@ -84,11 +84,6 @@ public:
     }
 
     /**
-     * Destructor for this class.
-     */
-    virtual ~Node();
-
-    /**
      * Gets the name of the node.
      *
      * @return The name of the node.

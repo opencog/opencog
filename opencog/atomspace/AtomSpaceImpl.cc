@@ -193,9 +193,11 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         }
     }
 
-    Handle newNodeHandle = atomTable.add(NodePtr(new Node(t, name, tvn)));
+    NodePtr n(new Node(t, name, tvn));
+    Handle newNodeHandle = atomTable.add(n);
     // emit add atom signal
     _addAtomSignal(this, newNodeHandle);
+
     return newNodeHandle;
 }
 

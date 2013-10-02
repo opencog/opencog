@@ -42,10 +42,6 @@ throw (InvalidParamException, AssertionException)
     name = cname;
 }
 
-Node::~Node()
-{
-}
-
 const std::string& Node::getName() const
 {
     return name;
