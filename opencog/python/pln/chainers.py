@@ -53,11 +53,16 @@ class AbstractChainer(Logic):
         return atom
 
     def _select_from(self, template, atoms, require_nonzero_tv, useAF):
+        # never allow inputs with variables?
+        ground_results = True
 
         atoms = self.find(template, atoms)
 
         if require_nonzero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]
+
+        if ground_results:
+            atoms = [atom for atom in atoms if len(self.variables(atom)) == 0]
 
         if len(atoms) == 0:
             return None
@@ -205,7 +210,8 @@ class Chainer(AbstractChainer):
         assert atom != None
         # Find the substitution that would change 'template' to 'atom'
         substitution = self.unify(template, atom, subst_so_far)
-        assert(substitution != None)
+        if substitution == None:
+            import pdb; pdb.set_trace()
 
         remaining_inputs = remaining_inputs[1:]
 
