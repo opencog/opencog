@@ -31,7 +31,6 @@
 #define _OPENCOG_TYPES_H
 
 #include <memory>  // for std::shared_pointer
-#include <boost/variant.hpp>
 
 #include <opencog/atomspace/Handle.h>
 
@@ -56,11 +55,6 @@ typedef unsigned short Type;
 typedef unsigned short Arity;
 //! stimulus
 typedef short stim_t;
-
-typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
-                       unsigned char, char, short int> Vertex;
-
-typedef std::vector<Vertex> VertexSeq;
 
 class HandlePredicate {
 public:

@@ -55,7 +55,7 @@ Temporal* HandleTemporalPair::getTemporal() const
 
 std::string HandleTemporalPair::toString() const
 {
-    Atom* atom = TLB::getAtom(handle);
+    AtomPtr atom = TLB::getAtom(handle);
     std::string  answer;
     answer += "(" + atom->toShortString() + "," + time->toString() + ")";
     return answer;

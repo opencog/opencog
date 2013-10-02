@@ -217,10 +217,9 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
-
-
-
 }; // class
+
+typedef std::shared_ptr<Agent> AgentPtr;
 
 /** @}*/
 }  // namespace

@@ -106,7 +106,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadNodes(FILE *, HandleMap<Atom *> *, AtomTable&, const std::vector<Type>& );
+    void loadNodes(FILE *, HandleMap<AtomPtr> *, AtomTable&, const std::vector<Type>& );
 
     /**
      * This method loads links from a given file.
@@ -115,7 +115,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadLinks(FILE *, HandleMap<Atom *> *, AtomTable&, const std::vector<Type>& );
+    void loadLinks(FILE*, HandleMap<AtomPtr>*, AtomTable&, const std::vector<Type>& );
 
     /**
      * This post-loading method translates all occurrences of old handles
@@ -124,7 +124,7 @@ private:
      * @param Atom whose handles references will be translated.
      * @param Table that maps from old to new handles.
      */
-    void updateHandles(Atom *, HandleMap<Atom *> *);
+    void updateHandles(AtomPtr, HandleMap<AtomPtr> *);
 
     /**
      * This method writes all atom members to a given file.
@@ -132,7 +132,7 @@ private:
      * @param File where the atom will be written.
      * @param Atom to be written.
      */
-    void writeAtom(FILE *, Atom *);
+    void writeAtom(FILE *, AtomPtr);
 
     /**
      * This method writes all node members to a given file. This does not
@@ -141,7 +141,7 @@ private:
      * @param File where the node will be written.
      * @param Node to be written.
      */
-    void writeNode(FILE *, Node *);
+    void writeNode(FILE *, NodePtr);
 
     /**
      * This method writes all link members to a given file. This does not
@@ -150,7 +150,7 @@ private:
      * @param File where the link will be written.
      * @param Link to be written.
      */
-    void writeLink(FILE *, Link *);
+    void writeLink(FILE*, LinkPtr);
 
     /**
      * This method writes all TruthValue members to a given file.
@@ -158,7 +158,7 @@ private:
      * @param File where the TruthValue will be written.
      * @param TruthValue to be written.
      */
-    void writeTruthValue(FILE *, const TruthValue&);
+    void writeTruthValue(FILE*, const TruthValue&);
 
     /**
      * This method writes all AttentionValue members to a given file.
@@ -167,7 +167,7 @@ private:
      * @param AttentionValue to be written.
      * @return Number of bytes written to file.
      */
-    void writeAttentionValue(FILE *, const AttentionValue&);
+    void writeAttentionValue(FILE*, const AttentionValue&);
 
 
     /**
@@ -177,7 +177,7 @@ private:
      * @param Table to be filled with mappings from old to new handles.
      * @param Location where the read atom will be placed.
      */
-    void readAtom(FILE *, HandleMap<Atom *> *, Atom *);
+    Handle readAtom(FILE*, AtomPtr);
 
     /**
      * This method reads all node members from a given file, and uses
@@ -187,17 +187,17 @@ private:
      * @param Newly read node.
      * @param Table to be filled with mappings from old to new handles.
      */
-    void readNode(FILE *, Node *, HandleMap<Atom *> *);
+    NodePtr readNode(FILE*, Type, HandleMap<AtomPtr>*);
 
     /**
      * This method reads all link members from a given file, and uses
      * readAtom() to read superclass members.
      *
      * @param File from where the link will be read.
-     * @param Newly read link.
      * @param Table to be filled with mappings from old to new handles.
      */
-    void readLink(FILE *, Link *, HandleMap<Atom *> *);
+    LinkPtr readLink(FILE*, Type, HandleMap<AtomPtr>*);
+    void readTrail(FILE*, Trail*);
 
     /**
      * This method reads all TruthValue members from a given file.
@@ -205,7 +205,7 @@ private:
      * @param File from where the TruthValue will be read.
      * @return Newly read TruthValue.
      */
-    TruthValue *readTruthValue(FILE *);
+    TruthValue *readTruthValue(FILE*);
 
     /**
      * This method reads all AttentionValue members from a given file.
@@ -213,7 +213,7 @@ private:
      * @param File from where the AttentionValue will be read.
      * @return The newly AttentionValue read from the file.
      */
-    AttentionValue* readAttentionValue(FILE *f);
+    AttentionValue* readAttentionValue(FILE* f);
 
 
     /**
@@ -232,7 +232,7 @@ private:
      * @param File from where the repositories will be read.
      * @param Table filled with mappings from old to new handles.
      */
-    void loadRepositories(FILE *, HandleMap<Atom *> *) throw (RuntimeException);
+    void loadRepositories(FILE *, HandleMap<AtomPtr> *) throw (RuntimeException);
 
 
     /**
