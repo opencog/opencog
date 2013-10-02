@@ -170,22 +170,26 @@ class Chainer(AbstractChainer):
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
 
+        if self._validate(rule, specific_inputs, specific_outputs):
+            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
+        else:
+            return None
+
+    def _validate(self, rule, inputs, outputs):
         # Sanity checks
-
-        # TODO only supporting one output
-        if not self.valid_structure(specific_outputs[0]):
+        if not self.valid_structure(outputs[0]):
             self.log_failed_inference('invalid structure')
-            return None
+            return False
 
-        if self._compute_trail_and_check_cycles(specific_outputs[0], specific_inputs):
+        if self._compute_trail_and_check_cycles(outputs[0], inputs):
             self.log_failed_inference('cycle detected')
-            return None
+            return False
 
-        if self._is_repeated(rule, specific_outputs[0], specific_inputs):
+        if self._is_repeated(rule, outputs[0], inputs):
             self.log_failed_inference('repeated inference')
-            return None
+            return False
 
-        return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
+        return True
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far, require_nonzero_tv=True):
         '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
@@ -312,6 +316,9 @@ class Chainer(AbstractChainer):
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
+
+        if not self._validate(rule, specific_inputs, specific_outputs):
+            return None
 
         if self._all_nonzero_tvs(specific_inputs):
             output_tvs = rule.calculate(specific_inputs)
