@@ -49,7 +49,7 @@ public:
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            Node *n = new Node(NUMBER_NODE, name);
+            NodePtr n(new Node(NUMBER_NODE, name));
             handles[i] = TLB::addAtom(n);
         }
     }
@@ -57,8 +57,7 @@ public:
     ~TemporalTableUTest() {
         for (int i = 0; i < N_TIMES; i++) {
             delete times[i];
-            Atom *a = TLB::removeAtom(handles[i]);
-            delete a;
+            AtomPtr a(TLB::removeAtom(handles[i]));
         }
     }
 

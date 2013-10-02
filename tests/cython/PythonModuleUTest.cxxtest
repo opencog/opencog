@@ -138,15 +138,15 @@ public:
         cogserver.runLoopStep();
 
         // create agent
-        Agent* pythonTestAgent = cogserver.createAgent("test_agent_w_run_exception.TestRunExceptionAgent",true);
+        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent_w_run_exception.TestRunExceptionAgent",true);
         TS_ASSERT(pythonTestAgent != NULL);
 
         cogserver.runLoopStep();
 
         // check that the exception was reported
-        TS_ASSERT_DIFFERS( ((PyMindAgent*)pythonTestAgent)->last_result.find("IndexError"),
+        PyMindAgentPtr pta = std::dynamic_pointer_cast<PyMindAgent>(pythonTestAgent);
+        TS_ASSERT_DIFFERS( pta->last_result.find("IndexError"),
                 std::string::npos );
-
 
     }
 
@@ -154,9 +154,8 @@ public:
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
         // agent is actually loaded from python module in test constructor
         // just check it actually can be created though
-        Agent* pythonTestAgent = cogserver.createAgent("preload_test.PreloadTestAgent");
+        AgentPtr pythonTestAgent = cogserver.createAgent("preload_test.PreloadTestAgent");
         TS_ASSERT(pythonTestAgent != NULL);
-        delete pythonTestAgent;
     }
 
     void testProcessAgents() {
@@ -170,7 +169,7 @@ public:
         cogserver.runLoopStep();
 
         // create agent
-        Agent* pythonTestAgent = cogserver.createAgent("test_agent.TestAgent",true);
+        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent.TestAgent",true);
         TS_ASSERT(pythonTestAgent != NULL);
 
         cogserver.runLoopStep();

@@ -88,7 +88,7 @@ private:
 
     Factory<ImportanceDiffusionAgent, Agent> factory;
     CogServer& cogserver;
-    ImportanceDiffusionAgent* agent;
+    ImportanceDiffusionAgentPtr agent;
     std::vector<Handle> atoms;
 
 public:
@@ -98,7 +98,7 @@ public:
 
     ImportanceDiffusionAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(ImportanceDiffusionAgent::info().id, &factory);
-        agent = static_cast<ImportanceDiffusionAgent*>(cogserver.createAgent(ImportanceDiffusionAgent::info().id, true));
+        agent = cogserver.createAgent<ImportanceDiffusionAgent>(true);
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
     }

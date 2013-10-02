@@ -419,6 +419,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ImportanceUpdatingAgent> ImportanceUpdatingAgentPtr;
+
 /** @}*/
 }  // namespace
 

@@ -30,8 +30,6 @@
 
 namespace opencog { namespace oac {
 
-using namespace std;
-
 class ActionSelectionAgent : public opencog::Agent
 {
 
@@ -56,6 +54,8 @@ public:
     virtual void run();
 
 }; // class
+
+typedef std::shared_ptr<ActionSelectionAgent> ActionSelectionAgentPtr;
 
 } } // namespace opencog::oac
 

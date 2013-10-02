@@ -244,6 +244,12 @@ public:
      *  of scheduled agents. */
     virtual AgentPtr createAgent(const std::string& id, const bool start = false);
 
+    /// Same as above, but returns the correct type.
+    template <typename T>
+    std::shared_ptr<T> createAgent(const bool start = false) {
+        return std::dynamic_pointer_cast<T>(createAgent(T::info().id, start));
+    }
+
     /** Adds agent 'a' to the list of scheduled agents. */
     virtual void startAgent(AgentPtr a);
 

@@ -90,6 +90,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<OCPlanningAgent> OCPlanningAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

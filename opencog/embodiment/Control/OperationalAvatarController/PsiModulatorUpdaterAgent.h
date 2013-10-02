@@ -171,6 +171,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PsiModulatorUpdaterAgent> PsiModulatorUpdaterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif
