@@ -231,20 +231,22 @@ class EvaluationToMemberRule(Rule):
         P = chainer.new_variable()
         ARG = chainer.new_variable()
 
-        self._chainer = chainer
+        self.chainer = chainer
         Rule.__init__(self,
                       formula= None,
                       inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
 
     def custom_compute(self, inputs):
+        import pdb; pdb.set_trace()
+
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
 
         concept_name = 'SatisfyingSet(%s)' % (predicate.name,)
-        set_node = chainer.link(types.ConceptNode, concept_name)
+        set_node = self.chainer.node(types.ConceptNode, concept_name)
 
-        member_link = chainer.link(types.MemberLink, [arg, set_node])
+        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
 
         return ([member_link], [tv])

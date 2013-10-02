@@ -86,9 +86,9 @@ class Logic(object):
 
         if substitution == None:
             return None
-        elif x.is_node() != y.is_node():
-            # One is a Node and the other is a Link
-            return None
+#        elif x.is_node() != y.is_node():
+#            # One is a Node and the other is a Link
+#            return None
         elif x == y:
             return substitution
         elif self.is_variable(x):

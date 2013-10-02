@@ -11,11 +11,11 @@ class ForwardInferenceAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self)
 
-        deduction_link_types = [types.InheritanceLink]
-#            types.SubsetLink, types.IntensionalInheritanceLink]
-        for link_type in deduction_link_types:
-            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
-            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+#        deduction_link_types = [types.InheritanceLink]
+##            types.SubsetLink, types.IntensionalInheritanceLink]
+#        for link_type in deduction_link_types:
+#            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
+#            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
 
 #        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
 #        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
@@ -23,7 +23,7 @@ class ForwardInferenceAgent(MindAgent):
 #        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
 #            self.chainer.add_rule(rule)
 
-#        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
+        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
 #        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
 
     def run(self, atomspace):
@@ -40,10 +40,10 @@ class ForwardInferenceAgent(MindAgent):
 
             result = self.chainer.forward_step()
             if result:
-                (outputs, inputs) = result
+                (rule, inputs, outputs) = result
 
                 print '==== Inference ===='
-                print show_atoms(outputs), '<=', show_atoms(inputs)
+                print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
 
                 print
                 print '==== Attentional Focus ===='

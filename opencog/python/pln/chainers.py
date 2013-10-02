@@ -233,7 +233,7 @@ class Chainer(AbstractChainer):
             for atom in inputs:
                 self._give_stimulus(atom)
 
-        return (outputs, inputs)
+        return (rule, inputs, outputs)
 
     def _revise_tvs(self, atom, new_tv):
         old_tv = atom.tv
