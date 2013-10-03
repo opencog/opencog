@@ -72,12 +72,7 @@ Trail* Link::getTrail(void)
 
 AtomPtr Link::getOutgoingAtom(Arity pos) const
 {
-    if (!atomTable) {
-        throw RuntimeException(TRACE_INFO,
-            "Link is not embedded in AtomTable, so can't resolve "
-            "outgoing handles to Atom pointers.");
-    }
-    return atomTable->getAtom(getOutgoingHandle(pos));
+    return TLB::getAtom(getOutgoingHandle(pos));
 }
 
 std::string Link::toShortString(void) const

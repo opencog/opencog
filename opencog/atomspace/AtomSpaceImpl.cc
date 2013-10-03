@@ -559,7 +559,8 @@ void AtomSpaceImpl::decayShortTermImportance()
 
     // Send signals  -- emit remove atom signal
     AtomPtrSet::const_iterator it;
-    for (it = oldAtoms.begin(); it != oldAtoms.end(); it++)
+    AtomPtrSet::const_iterator end = oldAtoms.end();
+    for (it = oldAtoms.begin(); it != end; it++)
         _removeAtomSignal(this, (*it));
 }
 

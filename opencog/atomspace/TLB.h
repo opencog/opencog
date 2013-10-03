@@ -74,6 +74,7 @@ class TLB
     friend class HandleTemporalPair;
     friend class HandleToTemporalEntryMap;
     friend class ImportanceIndex;
+    friend class Link;
     friend class LinkIndex;
     friend class NameIndex;
     friend class NodeIndex;
