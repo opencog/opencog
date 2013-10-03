@@ -4,7 +4,7 @@ from pln.rules.rules import Rule
 from pln.logic import Logic
 from pln.formulas import revisionFormula
 
-from opencog.atomspace import types, Atom
+from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 
 import random
 from collections import defaultdict
@@ -127,6 +127,9 @@ class Chainer(AbstractChainer):
         self.trails = defaultdict(set)
         self.produced_from = defaultdict(set)
 
+        self.trail_atomspace = AtomSpace()
+        # TODO actually load and save these. When loading it, rebuild the indexes above.
+
     def forward_step(self):
         rule = self._select_rule()
 
@@ -186,7 +189,7 @@ class Chainer(AbstractChainer):
             self.log_failed_inference('cycle detected')
             return False
 
-        if self._is_repeated(rule, outputs[0], inputs):
+        if self._is_repeated(rule, outputs, inputs):
             self.log_failed_inference('repeated inference')
             return False
 
@@ -274,7 +277,7 @@ class Chainer(AbstractChainer):
 
         return False
 
-    def _is_repeated(self, rule, output, inputs):
+    def _is_repeated(self, rule, outputs, inputs):
         # TODO fixme - it doesn't handle UnorderedLinks properly (such as AndLinks).
         # Such as And(A B) or And(B A)
 
@@ -285,12 +288,28 @@ class Chainer(AbstractChainer):
         # In future this should record to the Inference History Repository atomspace
         # convert the inputs to a tuple so they can be stored in a set.
         inputs = tuple(inputs)
-        productions = self.produced_from[output]
+        outputs = tuple(outputs)
+        productions = self.produced_from[outputs]
         if inputs in productions:
             return True
         else:
             productions.add(inputs)
+            self._add_to_inference_repository(rule, outputs, inputs)
             return False
+
+    def _add_to_inference_repository(self, rule, outputs, inputs):
+        TA = self.trail_atomspace
+        L = TA.add_link
+        N = TA.add_node
+
+        # create new lists of inputs and outputs for the separate trails atomspace
+        inputs  = [self.transfer_atom(TA, a) for a in inputs]
+        outputs = [self.transfer_atom(TA, a) for a in outputs]
+
+        print L(types.ExecutionLink, [
+            N(types.GroundedSchemaNode, rule.name),
+            L(types.ListLink, inputs),
+            L(types.ListLink, outputs)])
 
     def _apply_backward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
@@ -333,9 +352,6 @@ class Chainer(AbstractChainer):
                     self._give_stimulus(atom)
             return (specific_outputs, specific_inputs)
 
-    def _all_nonzero_tvs(self, atom_list):
-        return all(atom.tv.count > 0 for atom in atom_list)
-
     def _choose_outputs_inputs_recursive(self, return_inputs, return_outputs, all_inputs, remaining_outputs, subst_so_far):
         '''Choose some outputs for a Rule, and then choose suitable inputs. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms).'''
         # base case of recursion
@@ -371,4 +387,5 @@ class Chainer(AbstractChainer):
         return_outputs.append(atom)
 
         return self._choose_outputs_inputs_recursive(return_inputs, return_outputs, all_inputs, remaining_outputs, substitution)
+
 
