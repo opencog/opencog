@@ -49,12 +49,12 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().getAttentionBank().setSTI(AttentionValueHolderPtr(this), 0);
-    _cogserver.getAtomSpace().getAttentionBank().setLTI(AttentionValueHolderPtr(this), 0);
+    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(getAttentionValue().getSTI());
+    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(getAttentionValue().getLTI());
 
     resetUtilizedHandleSets();
-    delete stimulatedAtoms;
     conn.disconnect();
+    delete stimulatedAtoms;
 }
 
 void Agent::setParameters(const std::string* params)
