@@ -51,8 +51,7 @@ void LSMocky::init(const std::string &myId, const std::string &ip,
 {
     setNetworkElement(new NetworkElement(myId, ip, portNumber));
     registerAgent(SleepAgent::info().id, &sleepAgentFactory);
-    SleepAgent* sleepAgent = static_cast<SleepAgent*>(
-                                 createAgent(SleepAgent::info().id, &sleepAgentFactory));
+    SleepAgentPtr sleepAgent = createAgent<SleepAgent>();
     startAgent(sleepAgent);
 }
 

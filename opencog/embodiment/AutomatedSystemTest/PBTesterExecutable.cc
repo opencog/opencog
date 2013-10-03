@@ -64,8 +64,7 @@ int main(int argc, char *argv[])
     Factory<GoldStdReaderAgent, Agent> goldStdReaderAgentFactory;
 
     pbTester.registerAgent(GoldStdReaderAgent::info().id, &goldStdReaderAgentFactory);
-    GoldStdReaderAgent* goldStdReaderAgent = static_cast<GoldStdReaderAgent*>(
-                pbTester.createAgent(GoldStdReaderAgent::info().id, false));
+    GoldStdReaderAgentPtr goldStdReaderAgent = pbTester.createAgent<GoldStdReaderAgent>();
     goldStdReaderAgent->init(filename);
     pbTester.startAgent(goldStdReaderAgent);
 

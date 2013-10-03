@@ -53,6 +53,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<SleepAgent> SleepAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

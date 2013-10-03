@@ -72,6 +72,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PyMindAgent> PyMindAgentPtr;
+
 }  // namespace
 
 #endif // _OPENCOG_AGENT_H

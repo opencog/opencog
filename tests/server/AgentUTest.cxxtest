@@ -126,6 +126,8 @@ public:
     }
 };
 
+typedef std::shared_ptr<MyAgentWithDefaults> MyAgentWithDefaultsPtr;
+
 class AgentUTest :  public CxxTest::TestSuite
 {
 
@@ -163,9 +165,8 @@ public:
         CogServer& cogserver = static_cast<CogServer&>(server());
 
         // create a MyAgentWithDefaults instance
-        MyAgentWithDefaults* agent;
-        agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent;
+        agent = cogserver.createAgent<MyAgentWithDefaults>();
         
         logger().debug(config().to_string());
         // the first endl is to put this on a line after "Running 2 tests"
@@ -211,9 +212,8 @@ public:
         TS_ASSERT(config()["MYAGENT_MOOD"] == "sad");
 
         // create a MyAgentWithDefaults instance
-        MyAgentWithDefaults* agent;
-        agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent;
+        agent = cogserver.createAgent<MyAgentWithDefaults>();
 
         logger().debug(config().to_string());
         cout << endl << agent->to_string() << endl;
@@ -247,8 +247,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: stimulateAtom");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent =
+                    cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_atom\0");
 
@@ -277,8 +277,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: stimulateList");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent = 
+                cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_list");
         stimValue = 100;
@@ -306,8 +306,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: resetStimulus");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent = 
+                cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_reset");
 

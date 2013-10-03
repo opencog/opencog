@@ -196,8 +196,8 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 	Handle h = as->getHandle(t, nodename);
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h));
 
-	Atom *a = TLB::getAtom(h);
-	Node *n = static_cast<Node *>(a);
+	AtomPtr a(TLB::getAtom(h));
+	NodePtr n = NodeCast(a);
 	TSM_ASSERT("Failed to find node", n != NULL);
 
 	if (n)
@@ -303,16 +303,16 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	Handle h1 = as->getHandle(t1, value1);
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	AtomPtr a1(TLB::getAtom(h1));
+	NodePtr n1 = NodeCast(a1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->getHandle(t2, value2 );
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	AtomPtr a2(TLB::getAtom(h2));
+	NodePtr n2 = NodeCast(a2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 }
 
@@ -446,8 +446,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	Handle h1 = as->getHandle(t1, value1);
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	AtomPtr a1(TLB::getAtom(h1));
+	NodePtr n1 = NodeCast(a1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	if (n1)
@@ -463,8 +463,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	Handle h2 = as->getHandle(t2, value2 );
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	AtomPtr a2(TLB::getAtom(h2));
+	NodePtr n2 = NodeCast(a2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 }
 
@@ -517,16 +517,16 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	Handle h1 = as->getHandle(t1, value1);
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	AtomPtr a1(TLB::getAtom(h1));
+	NodePtr n1 = NodeCast(a1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->getHandle(t2, value2 );
 	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	AtomPtr a2(TLB::getAtom(h2));
+	NodePtr n2 = NodeCast(a2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 
 }

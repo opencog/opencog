@@ -36,14 +36,14 @@ void NodeIndex::resize()
 	this->idx.resize(classserver().getNumberOfClasses());
 }
 
-void NodeIndex::insertAtom(Atom *a)
+void NodeIndex::insertAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	NameIndex &ni = idx[t];
 	ni.insertAtom(a);
 }
 
-void NodeIndex::removeAtom(Atom *a)
+void NodeIndex::removeAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	NameIndex &ni = idx[t];

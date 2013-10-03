@@ -67,6 +67,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ImportanceDecayAgent> ImportanceDecayAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

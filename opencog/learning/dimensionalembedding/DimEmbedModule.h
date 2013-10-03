@@ -316,7 +316,7 @@ namespace opencog
          * the embedding vector of any nodes. Does nothing if removed
          * atom is a link.
          */
-        void handleRemoveSignal(AtomSpaceImpl* a, Handle h);
+        void atomRemoveSignal(AtomSpaceImpl* a, AtomPtr h);
     }; // class
 } //namespace
 

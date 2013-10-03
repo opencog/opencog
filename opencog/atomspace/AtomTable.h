@@ -26,8 +26,8 @@
 #define _OPENCOG_ATOMTABLE_H
 
 #include <iostream>
+#include <set>
 #include <vector>
-#include <unordered_set>
 
 #include <boost/signal.hpp>
 
@@ -59,6 +59,8 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+typedef std::set<AtomPtr> AtomPtrSet;
 
 class SavingLoading;
 
@@ -103,33 +105,6 @@ private:
     void typeAdded(Type);
 
     static bool decayed(Handle h);
-
-    /** \warning this should only be called by decayShortTermImportance */
-    void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
-
-    /**
-     * Extracts atoms from the table. Table will not contain the
-     * extracted atoms anymore, but they will not be deleted.
-     * Instead, they are returned by this method.
-     *
-     * Note: The caller is responsible for releasing the memory of
-     * both the returned list and the refered Atoms inside it.
-     *
-     * @param handle The atom to be extracted.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set will also be extracted.
-     * @return A list with the Handles of all extracted Atoms.
-     */
-    UnorderedHandleSet extract(Handle handle, bool recursive = false);
-
-    /**
-     * Removes the previously extracted Handles (using the extract
-     * method) from this table.
-     * @param The list of the Handles previously extracted.
-     *
-     * \note This method also frees the memory of the Atom objects!
-     */
-    void removeExtractedHandles(const UnorderedHandleSet&);
 
     // JUST FOR TESTS:
     bool isCleared() const;
@@ -248,11 +223,11 @@ public:
      * @return The handle of the desired atom if found.
      */
     Handle getHandle(const std::string&, Type) const;
-    Handle getHandle(const Node*) const;
+    Handle getHandle(NodePtr) const;
 
     Handle getHandle(Type, const HandleSeq&) const;
-    Handle getHandle(const Link*) const;
-    Handle getHandle(const Atom*) const;
+    Handle getHandle(LinkPtr) const;
+    Handle getHandle(AtomPtr) const;
 
 protected:
     /* Some basic predicates */
@@ -273,9 +248,9 @@ protected:
     }
     bool hasNullName(Handle h) const
     {
-        Atom* a = getAtom(h);
-        if (dynamic_cast<Link*>(a)) return true;
-        if (dynamic_cast<Node*>(a)->getName().c_str()[0] == 0) return true;
+        AtomPtr a(getAtom(h));
+        if (LinkCast(a)) return true;
+        if (NodeCast(a)->getName().c_str()[0] == 0) return true;
         return false;
     }
 
@@ -642,9 +617,7 @@ public:
      * below the "LOWER_STI_VALUE" threshold.
      * @return the list of the handles that should be removed.
      */
-    UnorderedHandleSet decayShortTermImportance()
-        { return importanceIndex.decayShortTermImportance(this); }
-
+    AtomPtrSet decayShortTermImportance();
 
     /**
      * Updates the importance index for the given atom. According to the
@@ -653,9 +626,9 @@ public:
      * @param The atom whose importance index will be updated.
      * @param The old importance bin where the atom originally was.
      */
-    void updateImportanceIndex(Atom* a, int bin)
+    void updateImportanceIndex(AtomPtr a, int bin)
     {
-        importanceIndex.updateImportance(a,bin);
+        importanceIndex.updateImportance(a, bin);
     }
 
     /**
@@ -664,7 +637,7 @@ public:
      * @param h     Handle of the Atom to be merged
      * @param tvn   TruthValue to be merged to current atom's truth value.  
      */
-    void merge(Handle h, const TruthValue& tvn);
+    void merge(Handle, const TruthValue&);
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
@@ -676,12 +649,12 @@ public:
      * @param The new atom to be added.
      * @return The handle of the newly added atom.
      */
-    Handle add(Atom*) throw (RuntimeException);
+    Handle add(AtomPtr) throw (RuntimeException);
 
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(const Handle& h) const { return (NULL != getAtom(h)); }
+    bool holds(Handle h) const { return (NULL != getAtom(h)); }
 
     /** Get Atom object already in the AtomTable.
      *
@@ -689,9 +662,9 @@ public:
      * @return pointer to Atom object, NULL if no atom within this AtomTable is
      * associated with handle.
      */
-    inline Atom* getAtom(const Handle& h) const {
+    inline AtomPtr getAtom(Handle h) const {
         if (h == Handle::UNDEFINED) return NULL;
-        Atom *atom = TLB::getAtom(h);
+        AtomPtr atom(TLB::getAtom(h));
         if (atom)
             // if the atom isn't linked to this AtomTable
             // then blank pointer
@@ -705,8 +678,8 @@ public:
      * @return pointer to Node object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a link.
      */
-    inline Node* getNode(const Handle& h) const {
-        return dynamic_cast<Node*>(getAtom(h));
+    inline NodePtr getNode(Handle h) const {
+        return NodeCast(getAtom(h));
     }
 
     /** Get Link object already in the AtomTable.
@@ -715,20 +688,26 @@ public:
      * @return pointer to Link object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a node.
      */
-    inline Link* getLink(const Handle& h) const {
-        return dynamic_cast<Link*>(getAtom(h));
+    inline LinkPtr getLink(Handle h) const {
+        return LinkCast(getAtom(h));
     }
 
     /**
-     * Removes atom from the table.
+     * Extracts atoms from the table. Table will not contain the
+     * extracted atoms anymore. 
      *
-     * @param The atom to be removed.
-     * @param Recursive-removal flag; if set, the links in the incoming
-     *        set will also be removed.
-     * @return True if the removal operation was successful. False, otherwise.
+     * Note that if the recursive flag is set to false, and the atom
+     * appears in the incoming set of some other atom, then extraction
+     * will fail.  Thus, it is generally recommended that extraction
+     * be recursive, unless you can guarentee that the atom is not in
+     * someone else's outgoing set.
+     *
+     * @param handle The atom to be extracted.
+     * @param recursive Recursive-removal flag; if set, the links in the
+     *        incoming set will also be extracted.
+     * @return A set of the extracted atoms.
      */
-    bool remove(Handle, bool recursive = false);
-
+    AtomPtrSet extract(Handle handle, bool recursive = true);
 
     /**
      * Return a random atom in the AtomTable.

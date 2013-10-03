@@ -53,6 +53,9 @@ public:
     virtual void run();
 
 }; // class
+
+typedef std::shared_ptr<SleepAgent> SleepAgentPtr;
+
 } } // namespace opencog::learningserver
 
 #endif

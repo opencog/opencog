@@ -57,13 +57,13 @@ public:
     }
 
     void testAdd() {
-        Node* n = new Node(CONCEPT_NODE, "test");
+        NodePtr n(new Node(CONCEPT_NODE, "test"));
         TLB::addAtom(n);
         TS_ASSERT_THROWS(TLB::addAtom(n),InvalidParamException);
     }
 
     void testRemove() {
-        Node* n = new Node(CONCEPT_NODE, "test");
+        NodePtr n(new Node(CONCEPT_NODE, "test"));
         Handle h = TLB::addAtom(n);
         TS_ASSERT_EQUALS(TLB::removeAtom(h),n);
         TS_ASSERT(TLB::removeAtom(h) == NULL);

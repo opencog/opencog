@@ -242,10 +242,10 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
 
 std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::string> args)
 {
-    std::vector<Agent*> agents = _cogserver.runningAgents();
+    AgentSeq agents = _cogserver.runningAgents();
 
     if (args.size() == 0) {
-        for (std::vector<Agent*>::const_iterator it = agents.begin();
+        for (AgentSeq::const_iterator it = agents.begin();
              it != agents.end(); ++it) {
             (*it)->run();
         }
@@ -259,13 +259,13 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
             std::string agent_type = *it;
 
             // try to find an already started agent with that name
-            std::vector<Agent*>::const_iterator tmp = agents.begin();
-            for ( ; tmp!=agents.end() ; tmp++ ) if ( *it == (*tmp)->classinfo().id ) break;
+            AgentSeq::const_iterator tmp = agents.begin();
+            for ( ; tmp != agents.end() ; tmp++ ) if ( *it == (*tmp)->classinfo().id ) break;
 
-            Agent* agent;
+            AgentPtr agent;
             if (agents.end() == tmp) {
                 // construct a temporary agent
-                agent = _cogserver.createAgent(*it, false);
+                agent = AgentPtr(_cogserver.createAgent(*it, false));
                 if (agent) {
                     agent->run();
                     _cogserver.destroyAgent(agent);
@@ -318,10 +318,10 @@ std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::
 
 std::string BuiltinRequestsModule::do_activeAgents(Request *dummy, std::list<std::string> args)
 {
-    std::vector<Agent*> agents = _cogserver.runningAgents();
+    AgentSeq agents = _cogserver.runningAgents();
     std::ostringstream oss;
 
-    for (std::vector<Agent*>::const_iterator it = agents.begin();
+    for (AgentSeq::const_iterator it = agents.begin();
          it != agents.end(); ++it) {
         oss << (*it)->to_string() << std::endl;
     }

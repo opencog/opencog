@@ -63,6 +63,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<STIDecayingAgent> STIDecayingAgentPtr;
+
 /** @}*/
 } // namespace
 

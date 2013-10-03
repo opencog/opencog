@@ -81,7 +81,7 @@ private:
 
     Factory<ImportanceUpdatingAgent, Agent>  factory;
     CogServer& cogserver;
-    opencog::ImportanceUpdatingAgent* agent;
+    opencog::ImportanceUpdatingAgentPtr agent;
 
 public:
 
@@ -97,7 +97,7 @@ public:
     }
 
 	void setUp() {
-	    agent = (ImportanceUpdatingAgent*) cogserver.createAgent(ImportanceUpdatingAgent::info().id);
+	    agent = cogserver.createAgent<ImportanceUpdatingAgent>();
 
 	    agent->getLogger()->setLevel(opencog::Logger::FINE);
 	    //agent->getLogger()->setPrintToStdoutFlag(true);
@@ -111,7 +111,6 @@ public:
 	    if (!CxxTest::TestTracker::tracker().suiteFailed())
             std::remove(agent->getLogger()->getFilename().c_str());
 	    cogserver.stopAgent(agent);
-	    delete agent;
     }
 
 	void testRun() {

@@ -43,7 +43,7 @@ TemporalTableFile::~TemporalTableFile()
 {
 }
 
-void TemporalTableFile::load(FILE *fp, TemporalTable *tbl, HandleMap<Atom *> *conv)
+void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandleMap<AtomPtr> *conv)
 {
     int size;
     bool b_read = true;
@@ -69,7 +69,7 @@ void TemporalTableFile::load(FILE *fp, TemporalTable *tbl, HandleMap<Atom *> *co
                      "Temporal TableFile - Couldn't load TemporalRepository, "
                      "address incosistency.");
             }
-            const Atom* conv_atom = (const Atom *) conv->get(oldHandle);
+            AtomPtr conv_atom(conv->get(oldHandle));
             tbl->add(conv_atom->getHandle(), t);
         }
     }

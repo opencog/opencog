@@ -51,21 +51,21 @@ class AtomStorage
 		class Outgoing;
 
 		void init(const char *, const char *, const char *);
-		Atom * makeAtom (Response &, Handle);
-		Atom * getAtom (const char *, int);
+		AtomPtr makeAtom (Response &, Handle);
+		AtomPtr getAtom (const char *, int);
 
-		int get_height(const Atom *);
+		int get_height(AtomPtr);
 		int max_height;
 		void setMaxHeight(int);
 		int getMaxHeight(void);
 
-		int do_store_atom(const Atom *, Handle);
-		void do_store_single_atom(const Atom *, Handle, int);
+		int do_store_atom(AtomPtr, Handle);
+		void do_store_single_atom(AtomPtr, Handle, int);
 
-		std::string oset_to_string(const std::vector<Handle>&, int);
-		void storeOutgoing(const Atom *, Handle);
-		void getOutgoing(std::vector<Handle> &, Handle);
-		bool store_cb(const Atom *);
+		std::string oset_to_string(const HandleSeq&, int);
+		void storeOutgoing(AtomPtr, Handle);
+		void getOutgoing(HandleSeq&, Handle);
+		bool store_cb(AtomPtr);
 		unsigned long load_count;
 		unsigned long store_count;
 
@@ -96,7 +96,7 @@ class AtomStorage
 
 #ifdef OUT_OF_LINE_TVS
 		bool tvExists(int);
-		int storeTruthValue(Atom *, Handle);
+		int storeTruthValue(AtomPtr, Handle);
 		int  TVID(const TruthValue &);
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
@@ -114,21 +114,21 @@ class AtomStorage
 		void kill_data(void); // destroy DB contents
 
 		// Store atoms to DB
-		void storeSingleAtom(const Atom *);
+		void storeSingleAtom(AtomPtr);
 		void storeAtom(Handle);
-		void storeAtom(const Atom *);
+		void storeAtom(AtomPtr);
 
 		// Fetch atoms from DB
 		bool atomExists(Handle);
-		Atom * getAtom(Handle);
+		AtomPtr getAtom(Handle);
 		std::vector<Handle> getIncomingSet(Handle);
-		Node * getNode(Type, const char *);
-		Node * getNode(const Node &n)
+		NodePtr getNode(Type, const char *);
+		NodePtr getNode(const Node &n)
 		{
 			return getNode(n.getType(), n.getName().c_str());
 		}
-		Link * getLink(Type, const std::vector<Handle>&);
-		Link * getLink(const Link &l)
+		LinkPtr getLink(Type, const std::vector<Handle>&);
+		LinkPtr getLink(const Link &l)
 		{
 			return getLink(l.getType(), l.getOutgoingSet());
 		}
