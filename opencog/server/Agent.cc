@@ -81,8 +81,9 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomSpaceImpl* a, Handle h)
+void Agent::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         _utilizedHandleSets[i].erase(h);
     removeAtomStimulus(h);

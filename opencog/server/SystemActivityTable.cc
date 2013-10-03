@@ -73,8 +73,9 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
     seq.resize(max);
 }
 
-void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, Handle h)
+void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); it++) {
         ActivitySeq &seq = it->second;

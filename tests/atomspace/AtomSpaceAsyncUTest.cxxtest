@@ -95,17 +95,17 @@ public:
         __testSignalsCounter += 1000;
     }
 
-    void atomRemoved1(opencog::AtomSpaceImpl* a, Handle h) {
+    void atomRemoved1(opencog::AtomSpaceImpl* a, AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
         TS_ASSERT(a->getSize() == 0);
-        logger().debug("atomRemoved1: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
-    void atomRemoved2(opencog::AtomSpaceImpl* a, Handle h) {
+    void atomRemoved2(opencog::AtomSpaceImpl* a, AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
         TS_ASSERT(a->getSize() == 0);
-        logger().debug("atomRemoved2: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
 

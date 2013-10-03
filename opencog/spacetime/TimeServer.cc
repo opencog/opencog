@@ -233,23 +233,24 @@ void TimeServer::atomAdded(AtomSpaceImpl* a, Handle h)
     }
 }
 
-void TimeServer::atomRemoved(AtomSpaceImpl* a, Handle h)
+void TimeServer::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
 {
-    Type type = a->getType(h);
+    Type type = atom->getType();
     if (type == AT_TIME_LINK)
     {
-        OC_ASSERT(a->getArity(h) == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", a->getArity(h));
-        Handle timeNode = a->getOutgoing(h, 0);
+        LinkPtr lll(LinkCast(atom));
+        OC_ASSERT(lll->getArity() == 2, "AtomSpace::atomRemoved: Got invalid arity for removed AtTimeLink = %d\n", lll->getArity());
+        Handle timeNode = lll->getOutgoingHandle(0);
         
         // If it's not a TimeNode, then it's a VariableNode which can stand in for a TimeNode. So we can ignore it here.
         if (a->getType(timeNode) == TIME_NODE) {
-            Handle timedAtom = a->getOutgoing(h, 1);
+            Handle timedAtom = lll->getOutgoingHandle(1);
     
 #if DOES_NOT_COMPILE_RIGHT_NOW
             // We have to do the check here instead of in the spaceServer
             // if outgoingSet[1] is a SpaceMap concept node, remove related map from SpaceServer
             if (a->getHandle(CONCEPT_NODE, SpaceServer::SPACE_MAP_NODE_NAME) == timedAtom)
-               spaceServer->removeMap(h);
+               spaceServer->removeMap(atom->getHandle());
 #endif
             remove(timedAtom, Temporal::getFromTimeNodeName(a->getName(timeNode).c_str()));
         }
