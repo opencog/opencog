@@ -101,7 +101,7 @@ ParamValue State::getParamValue()
 // I am the goal, I want to check if this @param value is satisfied me
 bool State::isSatisfiedMe( ParamValue& value, float &satisfiedDegree,  State *original_state)
 {
-    State other(this->name(),this->getActionParamType(),this->stateType,value,this->stateOwnerList);
+    State other(this->name(),this->getActionParamType(),STATE_EQUAL_TO,value,this->stateOwnerList);
     return other.isSatisfied(*this,satisfiedDegree,original_state);
 }
 
@@ -118,14 +118,30 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
     // For non-numberic ParamValues,  the satisfiedDegree is always 0.0 or 1.0
     if (! ActionParamType::isNumbericValueType( goal.getActionParamType().getCode()))
     {
-       if (goal.stateType == STATE_EQUAL_TO)
+       if (stateType == STATE_EQUAL_TO)
        {
-           satisfiedDegree = 0.0f;
-           return false;
+           if ( goal.stateType == STATE_EQUAL_TO)
+           {
+               satisfiedDegree = 0.0f;
+               return false;
+           }
+           else if (goal.stateType == STATE_NOT_EQUAL_TO)
+           {
+               if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+               {
+                   satisfiedDegree = 1.0f;
+                   return true;
+               }
+               else
+               {
+                   satisfiedDegree = 0.0f;
+                   return false;
+               }
+           }
        }
-       else if (goal.stateType == STATE_NOT_EQUAL_TO)
+       else if ((stateType == STATE_NOT_EQUAL_TO) && (goal.getActionParamType().getCode() == BOOLEAN_CODE))
        {
-           if (!(stateVariable == goal.stateVariable))
+           if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
            {
                satisfiedDegree = 1.0f;
                return true;
@@ -135,6 +151,11 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
                satisfiedDegree = 0.0f;
                return false;
            }
+       }
+       else
+       {
+           satisfiedDegree = 0.0f;
+           return false;
        }
 
     }
@@ -609,7 +630,7 @@ bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARu
         }
     }
 
-    if (effect->effectOp != OP_ASSIGN_NOT_EQUAL_TO)
+ /*   if (effect->effectOp != OP_ASSIGN_NOT_EQUAL_TO)
     {
         if (state->stateType != STATE_EQUAL_TO)
             state->changeStateType(STATE_EQUAL_TO);
@@ -619,14 +640,21 @@ bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARu
         if (state->stateType != STATE_NOT_EQUAL_TO)
             state->changeStateType(STATE_NOT_EQUAL_TO);
     }
+    */
 
     if (effect->effectOp == OP_ASSIGN)
     {
+        if (state->stateType != STATE_EQUAL_TO)
+            state->changeStateType(STATE_EQUAL_TO);
+
         state->assignValue(opParamValue);
 
     }
     else if (effect->effectOp == OP_ASSIGN_NOT_EQUAL_TO)
     {
+        if (state->stateType != STATE_NOT_EQUAL_TO)
+            state->changeStateType(STATE_NOT_EQUAL_TO);
+
         state->assignValue(opParamValue);
 
     }
@@ -639,6 +667,20 @@ bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARu
             state->assignValue(ParamValue(string("true")));
         else
             return false;
+    }
+    else if (effect->effectOp == OP_ASSIGN_GREATER_THAN)
+    {
+        state->assignValue(opParamValue);
+
+        if (state->stateType != STATE_GREATER_THAN)
+            state->changeStateType(STATE_GREATER_THAN);
+    }
+    else if(effect->effectOp == OP_ASSIGN_LESS_THAN)
+    {
+        state->assignValue(opParamValue);
+
+        if (state->stateType != STATE_LESS_THAN)
+            state->changeStateType(STATE_LESS_THAN);
     }
     else
     {
@@ -661,16 +703,6 @@ bool Effect::executeEffectOp(State* state, Effect* effect, ParamGroundedMapInARu
             break;
         case OP_DIV:
             newV = oldv / opv;
-            break;
-        case OP_ASSIGN_GREATER_THAN:
-            newV = opv;
-            if (state->stateType != STATE_GREATER_THAN)
-                state->changeStateType(STATE_GREATER_THAN);
-            break;
-        case OP_ASSIGN_LESS_THAN:
-            newV = opv;
-            if (state->stateType != STATE_LESS_THAN)
-                state->changeStateType(STATE_LESS_THAN);
             break;
         default:
             return false;
