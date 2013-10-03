@@ -1135,8 +1135,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 }
                 else
                 {
-                    // add it to unsatisfied list
-                    unsatisfiedStateNodes.push_front(newStateNode);
                     if (newStateNode->backwardRuleNode)
                         newStateNode->backwardRuleNode->negativeForwardLinks.insert(newStateNode);
 
@@ -1150,10 +1148,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // check real time
                 if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
                 {
-                    // add it to unsatisfied list
-                    unsatisfiedStateNodes.push_front(newStateNode);
                     isSat = false;
-
                 }
                 else
                 {
@@ -1165,9 +1160,16 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             cout<<"Precondition  " << preConNum <<": ";
             outputStateInfo(groundPs, true);
             if(isSat)
+            {
+                temporaryStateNodes.push_front(newStateNode);
                 cout << " is satisfied :)" << std::endl;
+            }
             else
+            {
+                // add it to unsatisfied list
+                unsatisfiedStateNodes.push_front(newStateNode);
                 cout << " is unsatisfied :(" << std::endl;
+            }
 
         }
 
@@ -1324,6 +1326,19 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
     groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
 
+    // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
+    // so we just simply ground it as the self agent.
+    if (Rule::isParamValueUnGrounded(rule->actor))
+    {
+        // look for the value of this variable in the parameter map
+        string varName = ActionParameter::ParamValueToString(rule->actor);
+        ParamGroundedMapInARule::iterator paramMapIt = tmpRuleNode->currentBindingsFromForwardState.find(varName);
+        if (paramMapIt == tmpRuleNode->currentAllBindings.end())
+        {
+            tmpRuleNode->currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(varName,selfEntityParamValue));
+        }
+    }
+
     negateveStateNum = 0;
     satisfiedPreconNum = 0;
     negativeGoal = false;
@@ -1337,14 +1352,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     {
         Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-        if (e->ifCheckStateOwnerType )
-        {
-            if (! e->state->isStateOwnerTypeTheSameWithMe( *(fowardState->state)) )
-            isDiffStateOwnerType = true;
-            return;
-        }
-
-        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState, true,false);
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState, false,false);
 
         if (! effState)
             continue;
@@ -1357,6 +1365,15 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
         if (effState->isSameState(*(fowardState->state)))
         {
+            if (e->ifCheckStateOwnerType )
+            {
+                if (! e->state->isStateOwnerTypeTheSameWithMe( *(fowardState->state)) )
+                {
+                    isDiffStateOwnerType = true;
+                    return;
+                }
+            }
+
             float satDegree;
             if (! effState->isSatisfied(*(fowardState->state),satDegree))
             {
@@ -1368,16 +1385,23 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
         list<StateNode*>::iterator sait;
 
-        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); )
+        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
         {
+            // skip the current state node
+            if (fowardState == (StateNode*)(*sait))
+                continue;
+
+            // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+            if ((StateNode*)(*sait)->forwardRuleNode == 0)
+               continue;
+ /*
             // only check the state nodes without backward rule node,
             // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
             if (((StateNode*)(*sait))->backwardRuleNode == 0)
             {
-                 ++ sait;
                 continue;
             }
-
+*/
             if (effState->isSameState( *((StateNode*)(*sait))->state ))
             {
                 // check if this effect unsatisfy this state
@@ -1386,13 +1410,10 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
                 if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
                 {
                     negateveStateNum ++;
-
                 }
                 else
-                    ++ sait;
+                    continue;
             }
-            else
-                ++ sait;
 
         }
 
