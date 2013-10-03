@@ -1208,13 +1208,13 @@ private:
      */
     void removeStimulus(Handle h);
 
-    bool handleAddSignal(AtomSpaceImpl *as, Handle h);
+    bool handleAddSignal(AtomSpaceImpl *, Handle);
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     /** For monitoring removals to the AtomSpace so that cache entries can be
      * invalidated as necessary
      */
-    bool handleRemoveSignal(AtomSpaceImpl *as, Handle h);
+    bool atomRemoveSignal(AtomSpaceImpl *, AtomPtr);
 
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     bool watchingAtomSpace;

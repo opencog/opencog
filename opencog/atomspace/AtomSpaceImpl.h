@@ -51,6 +51,7 @@ namespace opencog
 class AtomSpaceImpl;
 
 typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
+typedef boost::signal<void (AtomSpaceImpl*,AtomPtr)> AtomPtrSignal;
 
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
@@ -68,8 +69,8 @@ class AtomSpaceImpl
 
     /** Provided signals */
     AtomSignal _addAtomSignal;
-    AtomSignal _removeAtomSignal;
     AtomSignal _mergeAtomSignal;
+    AtomPtrSignal _removeAtomSignal;
 
     AttentionBank bank;
 
@@ -1069,7 +1070,7 @@ private:
     /**
      * Handler of the 'atom removed' signal from self
      */
-    void atomRemoved(AtomSpaceImpl*, Handle);
+    void atomRemoved(AtomSpaceImpl*, AtomPtr);
 
     /**
      * Handler of the 'atom added' signal from self
@@ -1080,7 +1081,7 @@ public:
     // pass on the signals from the Atom Table
     AtomSignal& addAtomSignal()
         { return _addAtomSignal; }
-    AtomSignal& removeAtomSignal()
+    AtomPtrSignal& removeAtomSignal()
         { return _removeAtomSignal; }
     AtomSignal& mergeAtomSignal()
         { return _mergeAtomSignal; }

@@ -106,12 +106,6 @@ private:
 
     static bool decayed(Handle h);
 
-    /** \warning this should only be called by decayShortTermImportance 
-     * This is extremely dangerous and almost surely buggy.  It has the
-     * potential of leaving behind dangling incoming sets.  and other badness.
-     */
-    void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
-
     // JUST FOR TESTS:
     bool isCleared() const;
 
@@ -623,9 +617,7 @@ public:
      * below the "LOWER_STI_VALUE" threshold.
      * @return the list of the handles that should be removed.
      */
-    UnorderedHandleSet decayShortTermImportance()
-        { return importanceIndex.decayShortTermImportance(this); }
-
+    AtomPtrSet decayShortTermImportance();
 
     /**
      * Updates the importance index for the given atom. According to the

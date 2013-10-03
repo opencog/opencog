@@ -593,26 +593,18 @@ bool AtomTable::decayed(Handle h)
     return a->getFlag(REMOVED_BY_DECAY);
 }
 
-// XXX FIXME  This method is almost surely very buggy.
-// It is assuming that the atoms have been corretly ordered, and that 
-// all incoming sets have also been properly dealt with.
-// This is going to fail in a multithreaded environment. This needs fixing.
-void AtomTable::clearIndexesAndRemoveAtoms(const UnorderedHandleSet& exh)
+AtomPtrSet AtomTable::decayShortTermImportance()
 {
-    importanceIndex.remove(decayed);
-    targetTypeIndex.remove(decayed);
-    predicateIndex.remove(decayed);
-    incomingIndex.remove(decayed);
-    nodeIndex.remove(decayed);
-    linkIndex.remove(decayed);
-    typeIndex.remove(decayed);
+    UnorderedHandleSet exh = importanceIndex.decayShortTermImportance(this);
 
+    AtomPtrSet aps;
     // update the AtomTable's size
     UnorderedHandleSet::const_iterator it;
     for (it = exh.begin(); it != exh.end(); it++) {
-        AtomPtr atom(getAtom(*it));
-        size--;
+        AtomPtrSet exa = extract(*it);
+        aps.insert(exa.begin(), exa.end());
     }
+    return aps;
 }
 
 void AtomTable::typeAdded(Type t)

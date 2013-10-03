@@ -103,17 +103,20 @@ void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
     }
 }
 
-void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, Handle h)
+void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, AtomPtr atom)
 {
-    Type type = getType(h);
+    Type type = atom->getType();
     if (type == CONTEXT_LINK) {
         // Remove corresponding VersionedTV to the contextualized atom
         // Note that when a VersionedTV is removed from a
         // CompositeTruthValue it will not automatically remove the
         // corresponding ContextLink
-        OC_ASSERT(getArity(h) == 2, "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n", getArity(h));
-        Handle cx = getOutgoing(h, 0); // context
-        Handle ca = getOutgoing(h, 1); // contextualized atom
+        LinkPtr lll(LinkCast(atom));
+        OC_ASSERT(lll->getArity() == 2,
+            "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n",
+            lll->getArity());
+        Handle cx = lll->getOutgoingHandle(0); // context
+        Handle ca = lll->getOutgoingHandle(1); // contextualized atom
         const TruthValue& tv = getTV(ca);
         OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
         CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));
@@ -152,14 +155,13 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
     AtomPtrSet::const_iterator it;
     for (it = extractedAtoms.begin(); it != extractedAtoms.end(); it++) {
         AtomPtr a = *it;
-        Handle h = a->getHandle();
 
         // Also refund sti/lti to AtomSpace funds pool
         bank.updateSTIFunds(bank.getSTI(a));
         bank.updateLTIFunds(bank.getLTI(a));
 
         // emit remove atom signal
-        _removeAtomSignal(this, h);
+        _removeAtomSignal(this, a);
     }
 
     return true;
@@ -553,16 +555,14 @@ size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
 void AtomSpaceImpl::decayShortTermImportance()
 {
     DPRINTF("AtomSpaceImpl::decayShortTermImportance Atom space address: %p\n", this);
-    UnorderedHandleSet oldAtoms = atomTable.decayShortTermImportance();
-
-    // Remove from indexes
-    atomTable.clearIndexesAndRemoveAtoms(oldAtoms);
+    AtomPtrSet oldAtoms = atomTable.decayShortTermImportance();
 
     // Send signals  -- emit remove atom signal
-    UnorderedHandleSet::const_iterator it;
+    AtomPtrSet::const_iterator it;
     for (it = oldAtoms.begin(); it != oldAtoms.end(); it++)
-        _removeAtomSignal(this, *it);
+        _removeAtomSignal(this, (*it));
 }
+
 
 size_t AtomSpaceImpl::Links(VersionHandle vh) const
 {
