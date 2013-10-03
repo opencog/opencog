@@ -118,7 +118,7 @@ void removeAll(AtomSpace* atomSpace)
     server().getAtomSpace().getHandleSet(outputI, ATOM, true);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        server().getAtomSpace().removeAtom(*i,false);
+        server().getAtomSpace().removeAtom(*i);
     }
 }
 
@@ -127,7 +127,7 @@ class HebbianUpdatingAgentUTest :  public CxxTest::TestSuite {
 private:
 
     Factory<HebbianUpdatingAgent, Agent> factory;
-    HebbianUpdatingAgent* agent;
+    HebbianUpdatingAgentPtr agent;
     CogServer& cogserver;
     std::vector<Handle> atoms;
 
@@ -138,7 +138,7 @@ public:
 
     HebbianUpdatingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(HebbianUpdatingAgent::info().id, &factory);
-        agent = static_cast<HebbianUpdatingAgent*>(cogserver.createAgent(HebbianUpdatingAgent::info().id, true));
+        agent = cogserver.createAgent<HebbianUpdatingAgent>(true);
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
     }

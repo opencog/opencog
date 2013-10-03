@@ -124,6 +124,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<HebbianUpdatingAgent> HebbianUpdatingAgentPtr;
+
 /** @}*/
 } // namespace
 

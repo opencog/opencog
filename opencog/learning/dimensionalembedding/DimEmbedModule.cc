@@ -52,7 +52,7 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));
     removedAtomConnection = as->atomSpaceAsync->
-        removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
+        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal,
                                      this, _1, _2));
 }
 
@@ -71,7 +71,7 @@ void DimEmbedModule::init()
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal,
                                   this, _1, _2));
     removedAtomConnection = as->atomSpaceAsync->
-        removeAtomSignal(boost::bind(&DimEmbedModule::handleRemoveSignal,
+        removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal,
                                      this, _1, _2));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell
@@ -1041,8 +1041,9 @@ void DimEmbedModule::handleAddSignal(AtomSpaceImpl* a, Handle h)
     }
 }
 
-void DimEmbedModule::handleRemoveSignal(AtomSpaceImpl* a, Handle h)
+void DimEmbedModule::atomRemoveSignal(AtomSpaceImpl* a, AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     if (a->isNode(h)) {
         //for each link type embedding that exists, remove the node
         AtomEmbedMap::iterator it;

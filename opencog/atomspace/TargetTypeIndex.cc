@@ -31,17 +31,17 @@ TargetTypeIndex::TargetTypeIndex(void)
     resize();
 }
 
-void TargetTypeIndex::insertAtom(const Atom* a)
+void TargetTypeIndex::insertAtom(AtomPtr a)
 {
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (!l) return;
 
-	int arity = l->getArity();
+	Arity arity = l->getArity();
 	if (0 == arity) return;
 
-	const std::vector<Handle>& oset = l->getOutgoingSet();
+	const HandleSeq& oset = l->getOutgoingSet();
 	std::set<Type> done_already;
-	for (int i = 0; i < arity; i++)
+	for (Arity i = 0; i < arity; i++)
 	{
 		Type type = TLB::getAtom(oset[i])->getType();
 		if (done_already.find(type) == done_already.end())
@@ -52,17 +52,17 @@ void TargetTypeIndex::insertAtom(const Atom* a)
 	}
 }
 
-void TargetTypeIndex::removeAtom(const Atom* a)
+void TargetTypeIndex::removeAtom(AtomPtr a)
 {
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (!l) return;
 
-	int arity = l->getArity();
+	Arity arity = l->getArity();
 	if (0 == arity) return;
 
-	const std::vector<Handle>& oset = l->getOutgoingSet();
+	const HandleSeq& oset = l->getOutgoingSet();
 	std::set<Type> done_already;
-	for (int i = 0; i < arity; i++)
+	for (Arity i = 0; i < arity; i++)
 	{
 		Type type = TLB::getAtom(oset[i])->getType();
 		if (done_already.find(type) == done_already.end())

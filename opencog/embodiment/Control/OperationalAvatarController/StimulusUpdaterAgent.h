@@ -179,6 +179,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<StimulusUpdaterAgent> StimulusUpdaterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

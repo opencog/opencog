@@ -59,7 +59,7 @@ private:
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
     /** @todo cloning atoms is a fundamental violation oft he architecture. */
-    virtual Atom* clone() const;
+    virtual AtomPtr clone() const;
 public:
 
     /**
@@ -82,11 +82,6 @@ public:
         : Atom(n.getType(),n.getTruthValue(),n.getAttentionValue()) {
         init(n.name);
     }
-
-    /**
-     * Destructor for this class.
-     */
-    virtual ~Node();
 
     /**
      * Gets the name of the node.
@@ -127,6 +122,9 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+// XXX temporary hack ... 
+#define createNode std::make_shared<Node>
 
 /** @}*/
 } // namespace opencog

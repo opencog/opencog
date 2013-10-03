@@ -62,16 +62,9 @@ Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 
 Atom::~Atom()
 {
-    // In a garbage-collected environment, we do NOT want the TLB to be
-    // visible to the garbage collector -- because if it was, then it
-    // would result in circular references that cannot be garage collectted.
-    // The same idea applies to smart pointers: using smart pointers in
-    // the TLB would result in loops.  Thus, all TLB pointers must be
-    // dumb, and we protect these by explicitly letting the TLB know
-    // when these go bad.
-    TLB::removeAtom(handle);
-
     if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
+    truthValue = NULL;
+    atomTable = NULL;
 }
 
 const AttentionValue& Atom::getAttentionValue() const
@@ -114,7 +107,8 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
-            atomTable->updateImportanceIndex(this, oldBin);
+            AtomPtr a(std::static_pointer_cast<Atom>(shared_from_this()));
+            atomTable->updateImportanceIndex(a, oldBin);
         }
     }
 }

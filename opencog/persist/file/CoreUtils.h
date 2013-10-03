@@ -54,7 +54,7 @@ public:
      * @param Handle which will be translated.
      * @param Table that maps from old to new handles.
      */
-    static void updateHandle(Handle *, HandleMap<Atom *> *) throw (RuntimeException);
+    static void updateHandle(Handle*, HandleMap<AtomPtr>*) throw (RuntimeException);
 };
 
 /** @}*/

@@ -43,8 +43,8 @@ class TargetTypeIndex:
 {
 	public:
 		TargetTypeIndex(void);
-		void insertAtom(const Atom*);
-		void removeAtom(const Atom*);
+		void insertAtom(AtomPtr);
+		void removeAtom(AtomPtr);
 };
 
 /** @}*/

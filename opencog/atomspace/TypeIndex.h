@@ -55,8 +55,8 @@ class TypeIndex:
 		size_t num_types;
 	public:
 		TypeIndex(void);
-		void insertAtom(const Atom*);
-		void removeAtom(const Atom*);
+		void insertAtom(AtomPtr);
+		void removeAtom(AtomPtr);
 		void resize(void);
 
 		class iterator

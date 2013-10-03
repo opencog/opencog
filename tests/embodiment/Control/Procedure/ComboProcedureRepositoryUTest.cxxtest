@@ -117,7 +117,7 @@ public:
         rep1.saveRepository(file);
         fclose(file);
 
-        HandleMap<Atom *> handles;
+        HandleMap<AtomPtr> handles;
         ComboProcedureRepository rep2;
         file = fopen(DUMP_FILE_NAME, "rb");
         TS_ASSERT(file);

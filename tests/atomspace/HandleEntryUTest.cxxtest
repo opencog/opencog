@@ -41,15 +41,15 @@ class HandleEntryUTest :  public CxxTest::TestSuite
 {
 
 private:
-    Atom *a1;
-    Atom *a2;
+    AtomPtr a1;
+    AtomPtr a2;
     Handle h1;
     Handle h2;
 
 public:
     HandleEntryUTest() {
-        a1 = new Node(CONCEPT_NODE, "atom one");
-        a2 = new Node(CONCEPT_NODE, "atom two");
+        a1 = NodePtr(new Node(CONCEPT_NODE, "atom one"));
+        a2 = NodePtr(new Node(CONCEPT_NODE, "atom two"));
         h1 = TLB::addAtom(a1);
         h2 = TLB::addAtom(a2);
     }
@@ -76,13 +76,13 @@ public:
     }
 
     void testFilterSetVersionHandle() {
-        Node* n1 = new Node(CONCEPT_NODE, "TEST1");
-        Node* n2 = new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE));
-        Node* n3 = new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
+        NodePtr n1(new Node(CONCEPT_NODE, "TEST1"));
+        NodePtr n2(new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE)));
+        NodePtr n3(new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1)));
         CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
         tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
-        Node* n4 = new Node(PREDICATE_NODE, "TEST4", tv);
-        Node* n5 = new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        NodePtr n4(new Node(PREDICATE_NODE, "TEST4", tv));
+        NodePtr n5(new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2)));
 
         HandleEntry* he = new HandleEntry(TLB::addAtom(n1));
         he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n2)));

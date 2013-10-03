@@ -1,5 +1,5 @@
 /*
- * src/util/misc-test.h
+ * misc-test.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008-2010 OpenCog Foundation
@@ -28,6 +28,8 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
+
+#include "makeVirtualAtom.h"
 
 namespace opencog
 {

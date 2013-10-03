@@ -169,34 +169,34 @@ public:
     void updateMaxSTI(AttentionValue::sti_t m);
 
     /** Retrieve the AttentionValue of an attention value holder */
-    const AttentionValue& getAV(AttentionValueHolder *avh) const;
+    const AttentionValue& getAV(AttentionValueHolderPtr avh) const;
 
     /** Change the AttentionValue of an attention value holder */
-    void setAV(AttentionValueHolder *avh, const AttentionValue &av);
+    void setAV(AttentionValueHolderPtr avh, const AttentionValue &av);
 
     /** Change the Short-Term Importance of an attention value holder */
-    void setSTI(AttentionValueHolder *avh, AttentionValue::sti_t);
+    void setSTI(AttentionValueHolderPtr avh, AttentionValue::sti_t);
 
     /** Change the Long-term Importance of an attention value holder */
-    void setLTI(AttentionValueHolder *avh, AttentionValue::lti_t);
+    void setLTI(AttentionValueHolderPtr avh, AttentionValue::lti_t);
 
     /** Change the Very-Long-Term Importance of an attention value holder */
-    //void setVLTI(AttentionValueHolder *avh, AttentionValue::vlti_t);
+    //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
 
     /** Incr the Very-Long-Term Importance of an attention value holder by 1*/
-    void incVLTI(AttentionValueHolder *avh);
+    void incVLTI(AttentionValueHolderPtr avh);
 
     /** Decr the Very-Long-Term Importance of an attention value holder by 1*/
-    void decVLTI(AttentionValueHolder *avh);
+    void decVLTI(AttentionValueHolderPtr avh);
 
     /** Retrieve the Short-Term Importance of an attention value holder */
-    AttentionValue::sti_t getSTI(AttentionValueHolder *avh) const;
+    AttentionValue::sti_t getSTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
+    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
+    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
 
 };
 

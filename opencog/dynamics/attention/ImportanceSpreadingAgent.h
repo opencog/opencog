@@ -135,6 +135,8 @@ public:
     };
 }; // class
 
+typedef std::shared_ptr<ImportanceSpreadingAgent> ImportanceSpreadingAgentPtr;
+
 /** @}*/
 } // namespace opencog
 

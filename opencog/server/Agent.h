@@ -132,7 +132,7 @@ protected:
     boost::signals::connection conn;
 
     /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl* a, Handle h);
+    void atomRemoved(AtomSpaceImpl*, AtomPtr);
 
 public:
 
@@ -217,10 +217,9 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
-
-
-
 }; // class
+
+typedef std::shared_ptr<Agent> AgentPtr;
 
 /** @}*/
 }  // namespace
