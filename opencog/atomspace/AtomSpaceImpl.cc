@@ -146,12 +146,13 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 
 bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
 {
-    UnorderedHandleSet extractedHandles = atomTable.extract(h, recursive);
-    if (extractedHandles.size() == 0) return false;
+    AtomPtrSet extractedAtoms = atomTable.extract(h, recursive);
+    if (extractedAtoms.size() == 0) return false;
 
-    UnorderedHandleSet::const_iterator it;
-    for (it = extractedHandles.begin(); it != extractedHandles.end(); it++) {
-        Handle h = *it;
+    AtomPtrSet::const_iterator it;
+    for (it = extractedAtoms.begin(); it != extractedAtoms.end(); it++) {
+        AtomPtr a = *it;
+        Handle h = a->getHandle();
 
         // Also refund sti/lti to AtomSpace funds pool
         bank.updateSTIFunds(getSTI(h));
@@ -192,7 +193,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
         }
     }
 
-    NodePtr n(new Node(t, name, tvn));
+    NodePtr n(createNode(t, name, tvn));
     Handle newNodeHandle = atomTable.add(n);
     // emit add atom signal
     _addAtomSignal(this, newNodeHandle);
@@ -232,7 +233,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    Handle newLinkHandle = atomTable.add(LinkPtr(new Link(t, outgoing, tvn)));
+    Handle newLinkHandle = atomTable.add(LinkPtr(createLink(t, outgoing, tvn)));
     // emit add atom signal
     _addAtomSignal(this,newLinkHandle);
     return newLinkHandle;

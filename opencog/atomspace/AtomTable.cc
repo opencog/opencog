@@ -505,11 +505,9 @@ Handle AtomTable::getRandom(RandGen *rng) const
     return randy;
 }
 
-UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
+AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
 {
-    // TODO: Check if this atom is really inserted in this AtomTable and get the
-    // exact Atom object
-    UnorderedHandleSet result;
+    AtomPtrSet result;
 
     // AtomPtr atom = TLB::getAtom(handle);
     AtomPtr atom(getAtom(handle));
@@ -533,7 +531,7 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
             if (not getAtom(*is_it)->isMarkedForRemoval()) {
                 DPRINTF("[AtomTable::extract] marked for removal is false");
 
-                UnorderedHandleSet ex = extract(*is_it, true);
+                AtomPtrSet ex = extract(*is_it, true);
                 result.insert(ex.begin(), ex.end());
             }
         }
@@ -542,22 +540,13 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
     const UnorderedHandleSet& is = getIncomingSet(handle);
     if (0 < is.size())
     {
-        // XXX TODO this should probably just throw an exception ...
-        Logger::Level save = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::NONE);
-        logger().warn("AtomTable.extract(): "
-           "attempting to extract atom with non-empty incoming set: %s\n",
-           atom->toShortString().c_str());
-        UnorderedHandleSet::const_iterator it;
-        for (it = is.begin(); it != is.end(); it++)
-        {
-            logger().warn("\tincoming: %s\n", 
-                 getAtom(*it)->toShortString().c_str());
-        }
-        logger().setBackTraceLevel(save);
-        logger().warn("AtomTable.extract(): stack trace for previous error follows");
+        // XXX well, I guess we could/should check to see if any atoms 
+        // in the incoming set belong to this atomspace. Because if
+        // none of them do, then it would be ok to extract...
+        throw RuntimeException(TRACE_INFO,
+            "Cannot extract an atom with a non-trivial incoming set!");
         atom->unsetRemovalFlag();
-        return result;
+        return AtomPtrSet();
     }
 
     // decrements the size of the table
@@ -573,7 +562,7 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
 
     atom->atomTable = NULL;
 
-    result.insert(handle);
+    result.insert(atom);
     return result;
 }
 

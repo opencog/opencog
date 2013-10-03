@@ -322,6 +322,9 @@ public:
     virtual bool operator!=(const Atom&) const;
 };
 
+// XXX temporary hack ... 
+#define createLink std::make_shared<Link>
+
 /** @}*/
 } // namespace opencog
 

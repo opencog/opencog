@@ -26,8 +26,8 @@
 #define _OPENCOG_ATOMTABLE_H
 
 #include <iostream>
+#include <set>
 #include <vector>
-#include <unordered_set>
 
 #include <boost/signal.hpp>
 
@@ -59,6 +59,8 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+typedef std::set<AtomPtr> AtomPtrSet;
 
 class SavingLoading;
 
@@ -700,18 +702,20 @@ public:
 
     /**
      * Extracts atoms from the table. Table will not contain the
-     * extracted atoms anymore, but they will not be deleted.
-     * Instead, they are returned by this method.
+     * extracted atoms anymore. 
      *
-     * Note: The caller is responsible for releasing the memory of
-     * both the returned list and the refered Atoms inside it.
+     * Note that if the recursive flag is set to false, and the atom
+     * appears in the incoming set of some other atom, then extraction
+     * will fail.  Thus, it is generally recommended that extraction
+     * be recursive, unless you can guarentee that the atom is not in
+     * someone else's outgoing set.
      *
      * @param handle The atom to be extracted.
      * @param recursive Recursive-removal flag; if set, the links in the
      *        incoming set will also be extracted.
-     * @return A list with the Handles of all extracted Atoms.
+     * @return A set of the extracted atoms.
      */
-    UnorderedHandleSet extract(Handle handle, bool recursive = false);
+    AtomPtrSet extract(Handle handle, bool recursive = true);
 
     /**
      * Return a random atom in the AtomTable.
