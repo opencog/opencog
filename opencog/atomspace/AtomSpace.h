@@ -349,13 +349,15 @@ public:
      * Removes an atom from the atomspace
      *
      * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set of the atom to be removed will also be
-     *        removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = false) {
+    bool removeAtom(Handle h, bool recursive = true) {
         return atomSpaceAsync->removeAtom(h,recursive)->get_result();
     }
 
