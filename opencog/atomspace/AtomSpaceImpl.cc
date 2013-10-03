@@ -155,8 +155,8 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
         Handle h = a->getHandle();
 
         // Also refund sti/lti to AtomSpace funds pool
-        bank.updateSTIFunds(getSTI(h));
-        bank.updateLTIFunds(getLTI(h));
+        bank.updateSTIFunds(bank.getSTI(a));
+        bank.updateLTIFunds(bank.getLTI(a));
 
         // emit remove atom signal
         _removeAtomSignal(this, h);
