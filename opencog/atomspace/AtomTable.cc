@@ -63,19 +63,21 @@ AtomTable::~AtomTable()
     //disconnect signals
     addedTypeConnection.disconnect();
 
+#if DONT_BOTHER_WITH_THIS
+    // WTF!? XXX TODO why are we removing these one by one? Lets
+    // just blow away all the indexes. That would be more efficeient,
+    // right!?
     // Make a copy.
     HandleSeq all;
     getHandlesByType(back_inserter(all), ATOM, true);
 
     // remove all atoms from AtomTable
-    // WTF!? XXX TODO why are we removing these one by one? Lets
-    // just blow away all the indexes. That would be more efficeient,
-    // right!?
     for (HandleSeq::const_iterator it = all.begin(); it != all.end(); it++)
     {
         DPRINTF("Removing atom %s\n", (*it)->toString().c_str());
         remove(*it, true);
     }
+#endif
 }
 
 bool AtomTable::isCleared(void) const
@@ -540,6 +542,7 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
     const UnorderedHandleSet& is = getIncomingSet(handle);
     if (0 < is.size())
     {
+        // XXX TODO this should probably just throw an exception ...
         Logger::Level save = logger().getBackTraceLevel();
         logger().setBackTraceLevel(Logger::NONE);
         logger().warn("AtomTable.extract(): "
@@ -568,32 +571,28 @@ UnorderedHandleSet AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
+    atom->atomTable = NULL;
+
     result.insert(handle);
     return result;
 }
 
+#if 0
+// Nothing to do here, he shared pointers handle it all for us.
 bool AtomTable::remove(Handle handle, bool recursive)
 {
-    UnorderedHandleSet extractedHandles = extract(handle, recursive);
-    if (0 < extractedHandles.size()) {
-        removeExtractedHandles(extractedHandles);
+    UnorderedHandleSet exh = extract(handle, recursive);
+    if (0 < exh.size()) {
+        UnorderedHandleSet::const_iterator it;
+        for (it = exh.begin(); it != exh.end(); ++it) {
+            AtomPtr atom = getAtom(*it);
+            // delete atom;  shared_pointer will do this for us.
+        }
         return true;
     }
     return false;
 }
-
-void AtomTable::removeExtractedHandles(const UnorderedHandleSet& exh)
-{
-    if (0 == exh.size()) return;
-
-    UnorderedHandleSet::const_iterator it;
-    for (it = exh.begin(); it != exh.end(); ++it) {
-        AtomPtr atom(getAtom(*it));
-        if (logger().isFineEnabled())
-            logger().fine("Atom removed: %d => %s", it->value(), atom->toString().c_str());
-        // delete atom;
-    }
-}
+#endif
 
 bool AtomTable::decayed(Handle h)
 {
@@ -605,6 +604,10 @@ bool AtomTable::decayed(Handle h)
     return a->getFlag(REMOVED_BY_DECAY);
 }
 
+// XXX FIXME  This method is almost surely very buggy.
+// It is assuming that the atoms have been corretly ordered, and that 
+// all incoming sets have also been properly dealt with.
+// This is going to fail in a multithreaded environment. This needs fixing.
 void AtomTable::clearIndexesAndRemoveAtoms(const UnorderedHandleSet& exh)
 {
     importanceIndex.remove(decayed);

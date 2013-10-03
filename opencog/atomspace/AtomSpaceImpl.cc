@@ -160,8 +160,7 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
         // emit remove atom signal
         _removeAtomSignal(this, h);
     }
-    atomTable.removeExtractedHandles(extractedHandles);
-        
+
     return true;
 }
 
@@ -562,9 +561,6 @@ void AtomSpaceImpl::decayShortTermImportance()
     UnorderedHandleSet::const_iterator it;
     for (it = oldAtoms.begin(); it != oldAtoms.end(); it++)
         _removeAtomSignal(this, *it);
-
-    // actually remove atoms from AtomTable
-    atomTable.removeExtractedHandles(oldAtoms);
 }
 
 size_t AtomSpaceImpl::Links(VersionHandle vh) const

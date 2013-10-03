@@ -104,32 +104,11 @@ private:
 
     static bool decayed(Handle h);
 
-    /** \warning this should only be called by decayShortTermImportance */
+    /** \warning this should only be called by decayShortTermImportance 
+     * This is extremely dangerous and almost surely buggy.  It has the
+     * potential of leaving behind dangling incoming sets.  and other badness.
+     */
     void clearIndexesAndRemoveAtoms(const UnorderedHandleSet&);
-
-    /**
-     * Extracts atoms from the table. Table will not contain the
-     * extracted atoms anymore, but they will not be deleted.
-     * Instead, they are returned by this method.
-     *
-     * Note: The caller is responsible for releasing the memory of
-     * both the returned list and the refered Atoms inside it.
-     *
-     * @param handle The atom to be extracted.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set will also be extracted.
-     * @return A list with the Handles of all extracted Atoms.
-     */
-    UnorderedHandleSet extract(Handle handle, bool recursive = false);
-
-    /**
-     * Removes the previously extracted Handles (using the extract
-     * method) from this table.
-     * @param The list of the Handles previously extracted.
-     *
-     * \note This method also frees the memory of the Atom objects!
-     */
-    void removeExtractedHandles(const UnorderedHandleSet&);
 
     // JUST FOR TESTS:
     bool isCleared() const;
@@ -720,15 +699,19 @@ public:
     }
 
     /**
-     * Removes atom from the table.
+     * Extracts atoms from the table. Table will not contain the
+     * extracted atoms anymore, but they will not be deleted.
+     * Instead, they are returned by this method.
      *
-     * @param The atom to be removed.
-     * @param Recursive-removal flag; if set, the links in the incoming
-     *        set will also be removed.
-     * @return True if the removal operation was successful. False, otherwise.
+     * Note: The caller is responsible for releasing the memory of
+     * both the returned list and the refered Atoms inside it.
+     *
+     * @param handle The atom to be extracted.
+     * @param recursive Recursive-removal flag; if set, the links in the
+     *        incoming set will also be extracted.
+     * @return A list with the Handles of all extracted Atoms.
      */
-    bool remove(Handle, bool recursive = false);
-
+    UnorderedHandleSet extract(Handle handle, bool recursive = false);
 
     /**
      * Return a random atom in the AtomTable.
