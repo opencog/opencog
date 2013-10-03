@@ -40,15 +40,23 @@
 
 using namespace opencog;
 
+struct HandleComparison
+{
+    bool operator()(const Handle& h1, const Handle& h2) const {
+        return (Handle::compare(h1, h2) < 0);
+    }
+};
+
 void Link::init(const std::vector<Handle>& outgoingVector)
 	throw (InvalidParamException)
 {
-    if (!classserver().isA(type, LINK)) {
-        throw InvalidParamException(TRACE_INFO,
-             "Link -  invalid link type: %d", type);
-    }
     trail = new Trail();
-    setOutgoingSet(outgoingVector);
+    _outgoing = outgoingVector;
+    // if the link is unordered, it will be normalized by sorting the elements in the outgoing
+    // list.
+    if (classserver().isA(type, UNORDERED_LINK)) {
+        std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+    }
 }
 
 Link::~Link()
@@ -276,35 +284,6 @@ bool Link::operator==(const Atom& other) const
 bool Link::operator!=(const Atom& other) const
 {
     return !(*this == other);
-}
-
-class HandleComparison
-{
-    public:
-        bool operator()(const Handle& h1, const Handle& h2) const {
-            return (Handle::compare(h1, h2) < 0);
-        }
-};
-
-void Link::setOutgoingSet(const HandleSeq& outgoingVector)
-   throw (RuntimeException)
-{
-    DPRINTF("Atom::setOutgoingSet\n");
-    if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO, 
-           "Cannot change the OutgoingSet of an atom already "
-           "inserted into an AtomTable\n");
-    }
-    _outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
-    if (classserver().isA(type, UNORDERED_LINK)) {
-        std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
-    }
-}
-
-void Link::addOutgoingAtom(Handle h)
-{
-    _outgoing.push_back(h);
 }
 
 // This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
