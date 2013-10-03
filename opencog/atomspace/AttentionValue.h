@@ -168,7 +168,8 @@ public:
 };
 
 //! envelope for an AttentionValue
-class AttentionValueHolder
+class AttentionValueHolder 
+    : public std::enable_shared_from_this<AttentionValueHolder> 
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;

@@ -107,7 +107,8 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
-            atomTable->updateImportanceIndex(AtomPtr(this), oldBin);
+            AtomPtr a(std::static_pointer_cast<Atom>(shared_from_this()));
+            atomTable->updateImportanceIndex(a, oldBin);
         }
     }
 }
