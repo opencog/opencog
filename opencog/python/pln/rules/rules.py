@@ -238,8 +238,6 @@ class EvaluationToMemberRule(Rule):
                       outputs= [])
 
     def custom_compute(self, inputs):
-        import pdb; pdb.set_trace()
-
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
 

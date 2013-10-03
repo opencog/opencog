@@ -8,6 +8,7 @@ DEDUCTION_TERM_WEIGHT = 1.0
 INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
+MembershipToExtensionalInheritanceCountDiscountFactor = 1.0
 
 def identityFormula(tvs):
     [(sA, nA)] = tvs
@@ -143,7 +144,7 @@ def mem2InhFormula(tvs):
     [mem_tv] = tvs
     count = mem_tv.count * MembershipToExtensionalInheritanceCountDiscountFactor
 
-    return TruthValue(mem_tv.mean, count)
+    return [TruthValue(mem_tv.mean, count)]
 
 def revisionFormula(tvs):
     x, y = tvs

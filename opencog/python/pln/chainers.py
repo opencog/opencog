@@ -103,9 +103,9 @@ class AbstractChainer(Logic):
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
         if atom.type == types.InheritanceLink:
-            is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
+            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
             not_self_link    = atom.out[0] != atom.out[1]
-            return is_between_nodes and not_self_link
+            return not_self_link
         else:
             return True
 
@@ -176,6 +176,7 @@ class Chainer(AbstractChainer):
             return None
 
     def _validate(self, rule, inputs, outputs):
+        print rule, map(str,inputs), map(str,outputs)
         # Sanity checks
         if not self.valid_structure(outputs[0]):
             self.log_failed_inference('invalid structure')
