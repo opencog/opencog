@@ -78,7 +78,7 @@ void removeAll(AtomSpace* atomSpace)
     server().getAtomSpace().getHandleSet(outputI, ATOM, true);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
-        server().getAtomSpace().removeAtom(*i,false);
+        server().getAtomSpace().removeAtom(*i);
     }
 }
 
