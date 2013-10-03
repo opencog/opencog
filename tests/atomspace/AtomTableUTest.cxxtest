@@ -485,7 +485,7 @@ public:
         LinkPtr l1(new Link(LIST_LINK, os));
         Handle hl1 = atomTable.add(l1);
 
-        atomTable.remove(hn1, true);
+        atomTable.extract(hn1, true);
     }
 
     void testMerge() {
