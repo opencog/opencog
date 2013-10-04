@@ -507,19 +507,20 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
     vector<ParamValue> values;
     ParamValue var1 = stateOwnerList.front();
 
-    if (Rule::isParamValueUnGrounded(var1) && (stateOwnerList.size() > 1))
+    if (Rule::isParamValueUnGrounded(var1)  )
     {
+        if (stateOwnerList.size() == 1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+
         var1 = stateOwnerList[1];
         if (Rule::isParamValueUnGrounded(var1))
         {
             cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
             return values; // return empty value list
         }
-    }
-    else
-    {
-        cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
-        return values; // return empty value list
     }
 
     spatial::BlockVector pos1;
@@ -552,7 +553,7 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
 
     return values;
 }
-
+/*
 vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();
@@ -577,35 +578,32 @@ vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
             for (z = -1; z <= 1; z ++)
             {
                 if ( (x == 0) && (y == 0))
-                {
                     continue;
 
-                    SpaceServer::SpaceMapPoint curPos(pos2.x + x,pos2.y + y,pos2.z + z);
+                SpaceServer::SpaceMapPoint curPos(pos2.x + x,pos2.y + y,pos2.z + z);
 
-                    // check if it's standable
-                    if (! spaceMap->checkStandable(curPos))
-                        continue;
-                    // check if there is a path from the avatar to this position
-                    if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
-                    {
-                        if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
-                        {
-                            values.push_back(Vector(curPos.x,curPos.y,curPos.z));
-                        }
-
-                        continue;
-                    }
-
-                    vector<spatial::BlockVector> path;
-                    spatial::BlockVector nearestPos;
-                    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+                // check if there is a path from the avatar to this position
+                if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
+                {
+                    if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
+                        values.insert(values.begin(),Vector(curPos.x,curPos.y,curPos.z));
+                    else
                         values.push_back(Vector(curPos.x,curPos.y,curPos.z));
 
+                    continue;
                 }
+
+                vector<spatial::BlockVector> path;
+                spatial::BlockVector nearestPos;
+                if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+                    values.push_back(Vector(curPos.x,curPos.y,curPos.z));
+
+
             }
 
     return values;
 }
+*/
 
 vector<ParamValue> Inquery::inqueryUnderPosition(const vector<ParamValue>& stateOwnerList)
 {
