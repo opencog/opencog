@@ -363,7 +363,6 @@ void CogServer::destroyAgent(AgentPtr agent)
 {
     stopAgent(agent);
     logger().debug("[CogServer] deleting agent \"%s\"", agent->to_string().c_str());
-    // delete agent;
 }
 
 void CogServer::destroyAllAgents(const std::string& id)

@@ -71,7 +71,9 @@ Logger* ImprintAgent::getLogger()
 }
 
 void ImprintAgent::setPattern(Pattern _epsilon)
-{ epsilon = _epsilon; }
+{
+    epsilon = _epsilon;
+}
 
 void ImprintAgent::run()
 {
@@ -82,7 +84,7 @@ void ImprintAgent::run()
     assert(n == epsilon.size());
     stim_t stimulusAmount = 1;
     if (epsilon.activity() > 0) {
-        stimulusAmount = a.getAttentionBank().getSTI(this) / epsilon.activity(); 
+        stimulusAmount = a.getAttentionBank().getSTI(shared_from_this()) / epsilon.activity(); 
         if (stimulusAmount == 0) stimulusAmount++;
     }
     for (int i = 0; i < n; i++) {

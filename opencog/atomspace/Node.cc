@@ -47,16 +47,6 @@ const std::string& Node::getName() const
     return name;
 }
 
-void Node::setName(const std::string& cname) throw (RuntimeException)
-{
-    if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO,
-            "Node - Cannot change the name of a node already "
-            "inserted into an AtomTable.");
-    }
-    name = cname;
-}
-
 std::string Node::toShortString() const
 {
 #define BUFSZ 1024
