@@ -171,7 +171,7 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     }
 }
 
-bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
+bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
