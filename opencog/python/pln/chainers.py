@@ -96,7 +96,20 @@ class AbstractChainer(Logic):
         assert False
 
     def _select_rule(self):
-        return random.choice(self.rules)
+        if not self.learnRuleFrequencies:
+            return random.choice(self.rules)
+        else:
+            def score(rule):
+                return self.rule_count[rule]
+
+            max = sum([score(rule) for rule in self.rules])
+            pick = random.randrange(0, max)
+            current = 0
+            for rule in self.rules:
+                current += score(rule)
+                if current >= pick:
+                    self.rule_count[rule] += 1
+                    return rule
 
     def valid_structure(self, atom):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
@@ -113,7 +126,7 @@ class AbstractChainer(Logic):
         print 'Attempted invalid inference:',message
 
 class Chainer(AbstractChainer):
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
@@ -129,6 +142,17 @@ class Chainer(AbstractChainer):
 
         self.trail_atomspace = AtomSpace()
         # TODO actually load and save these. When loading it, rebuild the indexes above.
+
+        # Record how often each Rule is used. To bias the Rule frequencies.
+        # It will take longer to adapt if you set this higher (this is important so it won't
+        # get a crazy feedback loop).
+        initial_frequency = 100
+
+        def constant_factory():
+            return initial_frequency
+        if learnRuleFrequencies:
+            self.learnRuleFrequencies = True
+            self.rule_count = defaultdict(constant_factory)
 
     def forward_step(self):
         rule = self._select_rule()
