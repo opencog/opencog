@@ -91,16 +91,6 @@ public:
     const std::string& getName() const;
 
     /**
-     * @param name A reference to a std::string with the name
-     *             of the node.  Use empty string for unamed node.
-     * @exception RuntimeException is thrown if this method is
-     *             called for an Node already inserted into
-     *             AtomSpace. Otherwise, internal index structures
-     *              would become inconsistent.
-     */
-    void  setName(const std::string& name) throw (RuntimeException);
-
-    /**
      * Returns a string representation of the node.
      *
      * @return A string representation of the node.

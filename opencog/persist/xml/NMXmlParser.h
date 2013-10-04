@@ -117,16 +117,6 @@ public:
     static HandleSeq loadXML(const std::vector<XMLBufferReader*>&, AtomSpace*,  bool = true, bool = false);
 
     /**
-     * Sets a node name. This method exists because Parser is friends with
-     * Node, and the standard C portions of the parser need to access
-     * nodes directly.
-     *
-     * @param Node to have its name set.
-     * @param Node name.
-     */
-    static void setNodeName(AtomPtr, const char* name);
-
-    /**
      * Adds a handle to the outgoing set of an atom . This method exists because
      * Parser is friends with Atom, and the standard C portions of the
      * parser need to access atoms directly.
@@ -141,10 +131,8 @@ public:
       * This method can be called only if the atom is not inserted in an AtomTable yet.
       * Otherwise, it throws a RuntimeException.
       */
-    static void setOutgoingSet(LinkPtr, const std::vector<Handle>&);
+    static void setOutgoingSet(LinkPtr, const HandleSeq&);
 
-
-    static Handle holdsHandle(const AtomPtr a) { return a->getHandle(); } 
 };
 
 /** @}*/
