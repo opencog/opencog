@@ -517,7 +517,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         if (found)
         {
-            unsatisfiedStateNodes.push_front(newStateNode);
+            unsatisfiedStateNodes.push_back(newStateNode);
         }
         else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
         {
@@ -526,7 +526,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
         else
         {
-            unsatisfiedStateNodes.push_front(newStateNode);
+            unsatisfiedStateNodes.push_back(newStateNode);
         }
 
     }
@@ -560,7 +560,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             ((StateNode*)(*stateNodeIter))->calculateNodeDepth();
         }
 
-        unsatisfiedStateNodes.sort();
+        // unsatisfiedStateNodes.sort();
 
         // the state node with deeper depth will be solved first
         StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
@@ -743,7 +743,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                         // only when there is any rule node need this state node as a prediction, put it to the unsatisfed list
                         if ((StateNode*)(*forwardStateIt)->forwardRuleNode != 0)
-                            unsatisfiedStateNodes.push_front(*forwardStateIt);
+                            unsatisfiedStateNodes.push_back(*forwardStateIt);
                     }
 
                     deleteRuleNodeRecursively(forwardRuleNode);
@@ -869,7 +869,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                             // now affectedStateNode is a new node after being rebinded
                             // only when there is other rule node used it as a predition , we need to put it into the unsatisfiedStateNodes list
                             if (affectedStateNode->forwardRuleNode != 0)
-                                unsatisfiedStateNodes.push_front(affectedStateNode);
+                                unsatisfiedStateNodes.push_back(affectedStateNode);
 
                             // the affectedStateNode has been rebinded, should not delete it as well
                             deleteRuleNodeRecursively(affectedStateNode->backwardRuleNode,affectedStateNode, false);
@@ -914,13 +914,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         ruleNode->updateCurrentAllBindings();
 
-        // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
-        if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
-        {
-            cout << "SelectValueForGroundingNumericState failded!"<< std::endl;
-            // todo
-        }
-
         // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
         // so we just simply ground it as the self agent.
         if (Rule::isParamValueUnGrounded(ruleNode->originalRule->actor))
@@ -932,6 +925,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 ruleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,selfEntityParamValue));
             }
+        }
+
+        // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
+        if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
+        {
+            cout << "SelectValueForGroundingNumericState failded!"<< std::endl;
+            // todo
         }
 
         // out put all the bindings:
@@ -1040,7 +1040,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                         // put it into the unsatisfied node list
                         if (satStateNode->forwardRuleNode != 0)
                         {
-                            unsatisfiedStateNodes.push_front(satStateNode);
+                            unsatisfiedStateNodes.push_back(satStateNode);
                         }
 
                         // remove it from the already satisfied node list
@@ -1067,7 +1067,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     if (! effState->isSatisfied(*(goalNode->state) ,satDegree))
                     {                        
                         // This effect dissatisfied this goal, put this goal into the unsatisfied state node list and remove it from goal list
-                        unsatisfiedStateNodes.push_front(goalNode);
+                        unsatisfiedStateNodes.push_back(goalNode);
                         goalStateNodes.erase(goIt);
                     }
                     else
@@ -1167,7 +1167,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             else
             {
                 // add it to unsatisfied list
-                unsatisfiedStateNodes.push_front(newStateNode);
+                unsatisfiedStateNodes.push_back(newStateNode);
                 cout << " is unsatisfied :(" << std::endl;
             }
 
@@ -1657,7 +1657,7 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
         deleteStateNodeInTemporaryList(curStateNode);
 
         if (curStateNode->forwardRuleNode != 0)
-            unsatisfiedStateNodes.push_front(curStateNode);
+            unsatisfiedStateNodes.push_back(curStateNode);
     }
 
     if (forwardStateNode && deleteThisforwardStateNode)
@@ -2792,7 +2792,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* atLocationState7 = new State("AtLocation",ActionParamType::VECTOR(),STATE_EQUAL_TO, var_oldpos, atLocationStateOwnerList7, true, &Inquery::inqueryAtLocation);
     Effect* changedLocationEffect7 = new Effect(atLocationState7, OP_ASSIGN, nearby_pos);
 
-    // rule:   Move_to an object to get closed to it
+    // rule:  walk to a position to get closed to it, but not stand on it
     Rule* walkclosedRule = new Rule(walkAction,boost::get<Entity>(var_avatar) ,0.01f);
     walkclosedRule->ruleName = "waldToPositionToGetClosedToItButNotStandOnIt";
     walkclosedRule->addPrecondition(existPathState7);
@@ -2809,8 +2809,8 @@ void OCPlanner::loadTestRulesFromCodes()
     walkclosedRule->addCostHeuristic(CostHeuristic(closedState8, 0.01f));
 
     BestNumericVariableInqueryStruct bs2;
-    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryStandableNearbyAccessablePosition;
-    bs2.goalState = closedState7;
+    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs2.goalState = adjacentState0;
     walkclosedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(nearby_pos), bs2));
 
     this->AllRules.push_back(walkclosedRule);
