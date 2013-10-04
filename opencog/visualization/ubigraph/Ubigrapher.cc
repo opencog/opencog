@@ -177,6 +177,7 @@ bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
     usleep(pushDelay);
+    Handle h = a->getHandle();
     if (classserver().isA(a->getType(),NODE))
         return removeVertex(h);
     else {
@@ -185,9 +186,9 @@ bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
             LinkPtr l(LinkCast(a));
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
-                return removeEdges(a->getHandle());
+                return removeEdges(h);
         }
-        return removeVertex(a->getHandle());
+        return removeVertex(h);
     }
 }
 
