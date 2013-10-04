@@ -306,7 +306,7 @@ class Chainer(AbstractChainer):
         inputs  = [self.transfer_atom(TA, a) for a in inputs]
         outputs = [self.transfer_atom(TA, a) for a in outputs]
 
-        print L(types.ExecutionLink, [
+        L(types.ExecutionLink, [
             N(types.GroundedSchemaNode, rule.name),
             L(types.ListLink, inputs),
             L(types.ListLink, outputs)])

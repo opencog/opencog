@@ -11,9 +11,13 @@ class ForwardInferenceAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self)
 
-        deduction_link_types = [types.InheritanceLink]
-#            types.SubsetLink, types.IntensionalInheritanceLink]
-        for link_type in deduction_link_types:
+        # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
+        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+#            types.EquivalenceLink]
+        conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink,
+            types.ImplicationLink]
+        # Hack: use the conditional-probability formulas for similarity-based links
+        for link_type in conditional_probability_types + similarity_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
 
@@ -34,28 +38,30 @@ class ForwardInferenceAgent(MindAgent):
         def show_atoms(atoms):
             return ' '.join(str(atom)+str(atom.av) for atom in atoms)
 
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+
+        result = self.chainer.forward_step()
+        if result:
+            (rule, inputs, outputs) = result
+
+            print '==== Inference ===='
+            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
+
+            print
+            print '==== Attentional Focus ===='
+            for atom in get_attentional_focus(atomspace)[0:30]:
+                print str(atom), atom.av
+
+            #print '==== Result ===='
+            #print output
+            #print '==== Trail ===='
+            #print_atoms( self.chainer.trails[output] )
+        else:
+            print 'Invalid inference attempted'
+
         try:
-            if self.chainer is None:
-                self.create_chainer(atomspace)
-
-            result = self.chainer.forward_step()
-            if result:
-                (rule, inputs, outputs) = result
-
-                print '==== Inference ===='
-                print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
-
-                print
-                print '==== Attentional Focus ===='
-                for atom in get_attentional_focus(atomspace)[0:30]:
-                    print str(atom), atom.av
-
-                #print '==== Result ===='
-                #print output
-                #print '==== Trail ===='
-                #print_atoms( self.chainer.trails[output] )
-            else:
-                print 'Invalid inference attempted'
+            pass
         except AssertionError:
             import sys,traceback
             _,_,tb = sys.exc_info()
@@ -68,6 +74,16 @@ class ForwardInferenceAgent(MindAgent):
         except Exception, e:
             print e
             print e.args
+            e.print_traceback()
+
+            import sys,traceback
+            _,_,tb = sys.exc_info()
+            traceback.print_tb(tb) # Fixed format
+
+            tbInfo = traceback.extract_tb(tb)
+            filename,line,func,text = tbInfo[-1]
+            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
+            exit(1)
 
 def print_atoms(atoms):
     for atom in atoms:

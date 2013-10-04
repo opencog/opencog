@@ -167,13 +167,14 @@ class Logic(object):
     def transfer_atom(self, new_atomspace, atom):
         '''transfer (or rather copy) an atom from one atomspace to another. Assumes that both AtomSpaces have the same list of Atom types!
         returns the equivalent of atom in new_atomspace. creates it if necessary, including the outgoing set of links.'''
-        tv = TruthValue(atom.tv.mean, atom.tv.count)
+        # The AtomSpace probably clones the TV objects, and it wouldn't matter much anyway
+        #tv = TruthValue(atom.tv.mean, atom.tv.count)
 
         if atom.is_node():
-            return new_atomspace.add_node(atom.type, atom.name, tv=tv)
+            return new_atomspace.add_node(atom.type, atom.name, tv=atom.tv)
         else:
             outgoing = [self.transfer_atom(new_atomspace, out) for out in atom.out]
-            return new_atomspace.add_link(atom.type, outgoing, tv=tv)
+            return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
     def _all_nonzero_tvs(self, atom_list):
         return all(atom.tv.count > 0 for atom in atom_list)
