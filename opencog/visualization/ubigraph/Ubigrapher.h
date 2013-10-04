@@ -70,8 +70,8 @@ private:
      */
     bool removeEdges(Handle h);
 
-    bool handleAddSignal(AtomSpaceImpl* as, Handle h); //! Signal handler for atom adds.
-    bool handleRemoveSignal(AtomSpaceImpl* as, Handle h); //! Signal handler for atom removals.
+    bool handleAddSignal(AtomSpaceImpl*, Handle); //! Signal handler for atom adds.
+    bool atomRemoveSignal(AtomSpaceImpl*, AtomPtr); //! Signal handler for atom removals.
 
     bool listening; //! Whether the Ubigrapher is listening for AtomSpace signals.
     boost::signals::connection c_add; //! Connection to add atom signals
