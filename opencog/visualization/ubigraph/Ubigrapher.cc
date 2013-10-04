@@ -96,7 +96,7 @@ void Ubigrapher::watchSignals()
             c_add = space.atomSpaceAsync->addAtomSignal(
                     boost::bind(&Ubigrapher::handleAddSignal, this, _1, _2));
             c_remove = space.atomSpaceAsync->removeAtomSignal(
-                    boost::bind(&Ubigrapher::handleRemoveSignal, this, _1, _2));
+                    boost::bind(&Ubigrapher::atomRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
         } else {
@@ -171,12 +171,11 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     }
 }
 
-bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
+bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    AtomPtr a = as->cloneAtom(h);
     usleep(pushDelay);
     if (classserver().isA(a->getType(),NODE))
         return removeVertex(h);
@@ -186,11 +185,10 @@ bool Ubigrapher::handleRemoveSignal(AtomSpaceImpl* as, Handle h)
             LinkPtr l(LinkCast(a));
             if (l && l->getOutgoingSet().size() == 2 &&
                      as->getIncoming(h).size() == 0)
-                return removeEdges(h);
+                return removeEdges(a->getHandle());
         }
-        return removeVertex(h);
+        return removeVertex(a->getHandle());
     }
-
 }
 
 void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, float baseline)
