@@ -9,12 +9,10 @@ LINK_LIBRARIES(
 	${Boost_SIGNALS_LIBRARY}
 )
 
-# AtomTableUTest requires the XML libraries
-IF (HAVE_EXPAT)
+IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
-	TARGET_LINK_LIBRARIES(AtomTableUTest xml ${EXPAT_LIBRARIES})
-ENDIF (HAVE_EXPAT)
-
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob server)
+ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(ClassServerUTest)
 ADD_CXXTEST(AtomUTest)

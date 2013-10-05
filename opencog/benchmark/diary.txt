@@ -318,3 +318,29 @@ Rerun benchmarks:
 Intel(R) Xeon(R)  X5650  @ 2.67GHz  12MB cache per core, 12 cores.
 76GB RAM
 
+1 October 2013
+--------------
+Remeasure, just for grins. Not expecting any change from above; hardware
+is the same, compiler is gcc-4.7.4 instead of gcc 4.6.2 as above.
+
+Surprisingly, there is a 20%-40% drop for addNode, addLink !!
+Performance of getHandleSet halved!
+Performance of getNodeHandles is 5x faster!
+I think this change is compiler-related.
+
+
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop             1428       
+  addNode           222         
+  addLink            75.7      
+  getType          1429       
+  getTV            1429      
+  setTV            1666     
+  getHandleSet        0.693  
+  getNodeHandles    101     
+  getOutgoingSet   1111    
+  getIncomingSet   1000   
+
+

@@ -67,8 +67,8 @@ class PredicateIndex:
 		const UnorderedHandleSet& getHandleSet(int) const;
 	public:
 		PredicateIndex(void);
-		void insertAtom(const Atom*);
-		void removeAtom(const Atom*);
+		void insertAtom(AtomPtr);
+		void removeAtom(AtomPtr);
 
 		void addPredicateIndex(Handle, PredicateEvaluator*)
 			throw (InvalidParamException);

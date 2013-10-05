@@ -62,6 +62,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<SingleAgentModule> SingleAgentModulePtr;
+
 } // namespace opencog
 
 #endif // _OPENCOG_SINGLE_AGENT_MODULE_H

@@ -81,7 +81,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
     if (asp->isNode(h)) {
-        Node* n = dynamic_cast<Node*>(TLB::getAtom(h));
+        NodePtr n(NodeCast(TLB::getAtom(h)));
         total = sizeof(Node);
         if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (n->getTruthValue().getType()) {
@@ -102,7 +102,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             }
         }
     } else {
-        Link* l = dynamic_cast<Link*>(TLB::getAtom(h));
+        LinkPtr l(LinkCast(TLB::getAtom(h)));
         total = sizeof(Link);
         if (&(l->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (l->getTruthValue().getType()) {
@@ -386,7 +386,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         }
         case BENCH_TABLE: {
             clock_t t_begin = clock();
-            atab->add(new Node(t,s));
+            atab->add(NodePtr(new Node(t,s)));
             return clock() - t_begin;
         }
         case BENCH_AS: {
@@ -449,7 +449,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         }
         case BENCH_TABLE: {
             clock_t t_begin = clock();
-            atab->add(new Node(t, oss.str()));
+            atab->add(NodePtr(new Node(t, oss.str())));
             return clock() - t_begin;
         }
         case BENCH_AS: {
@@ -519,7 +519,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
     case BENCH_TABLE: {
         tAddLinkStart = clock();
-        atab->add(new Link(t, outgoing));
+        atab->add(LinkPtr(new Link(t, outgoing)));
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {
@@ -876,7 +876,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        Link* l = atab->getLink(h);
+        LinkPtr l(atab->getLink(h));
         if (l) l->getOutgoingSet();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);

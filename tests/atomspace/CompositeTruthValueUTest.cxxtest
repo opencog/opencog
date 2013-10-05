@@ -56,7 +56,7 @@ private:
     float counts[NUM_TVS];
     float confidences[NUM_TVS];
     VersionHandle versionHandles[NUM_TVS];
-    Atom * atoms[NUM_TVS];
+    AtomPtr atoms[NUM_TVS];
     Handle atomhand[NUM_TVS];
 
 public:
@@ -79,9 +79,9 @@ public:
         counts[0] = TV1_COUNT;
         counts[1] = TV2_COUNT;
         counts[2] = TV3_COUNT;
-        atoms[0] = new Node(CONCEPT_NODE, "zero");
-        atoms[1] = new Node(CONCEPT_NODE, "one");
-        atoms[2] = new Node(CONCEPT_NODE, "two");
+        atoms[0] = NodePtr(new Node(CONCEPT_NODE, "zero"));
+        atoms[1] = NodePtr(new Node(CONCEPT_NODE, "one"));
+        atoms[2] = NodePtr(new Node(CONCEPT_NODE, "two"));
         atomhand[0] = TLB::addAtom(atoms[0]);
         atomhand[1] = TLB::addAtom(atoms[1]);
         atomhand[2] = TLB::addAtom(atoms[2]);
@@ -514,7 +514,7 @@ public:
     void testUpdateVersionHandles() {
         logger().debug("testUpdateVersionHandles()");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
-        HandleMap<Atom *>* handles = new HandleMap<Atom *>();
+        HandleMap<AtomPtr>* handles = new HandleMap<AtomPtr>();
         handles->add(atomhand[0], atoms[1]);
         handles->add(atomhand[1], atoms[2]);
         handles->add(atomhand[2], atoms[0]);

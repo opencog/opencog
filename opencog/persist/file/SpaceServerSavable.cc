@@ -112,7 +112,7 @@ void SpaceServerSavable::saveRepository(FILE * fp) const
     */
 }
 
-void SpaceServerSavable::loadRepository(FILE *fp, opencog::HandleMap<opencog::Atom*> *conv)
+void SpaceServerSavable::loadRepository(FILE* fp, opencog::HandleMap<opencog::AtomPtr> *conv)
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
 

@@ -168,7 +168,8 @@ public:
 };
 
 //! envelope for an AttentionValue
-class AttentionValueHolder
+class AttentionValueHolder 
+    : public std::enable_shared_from_this<AttentionValueHolder> 
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;
@@ -192,6 +193,8 @@ public:
         return attentionValue;
     }
 };
+
+typedef std::shared_ptr<AttentionValueHolder> AttentionValueHolderPtr;
 
 /** @}*/
 } // namespace opencog 

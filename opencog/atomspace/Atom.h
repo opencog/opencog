@@ -78,7 +78,7 @@ private:
 
 protected:
     /** @todo atoms fundamentally must not be clonable! Yeah? */
-    virtual Atom* clone() const = 0;
+    virtual AtomPtr clone() const = 0;
 
     Handle handle;
     AtomTable *atomTable;

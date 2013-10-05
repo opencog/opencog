@@ -66,7 +66,7 @@ AtomSpace::AtomSpace(void)
     atomSpaceAsync = new AtomSpaceAsync();
     ownsAtomSpaceAsync = true;
     c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
     c_add = atomSpaceAsync->addAtomSignal(
             boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
@@ -80,7 +80,7 @@ AtomSpace::AtomSpace(const AtomSpace& other)
     this->atomSpaceAsync = other.atomSpaceAsync;
     ownsAtomSpaceAsync = false;
     c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
     c_add = atomSpaceAsync->addAtomSignal(
             boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
@@ -123,10 +123,10 @@ bool AtomSpace::handleAddSignal(AtomSpaceImpl *as, Handle h)
     return false;
 }
 
-bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
+bool AtomSpace::atomRemoveSignal(AtomSpaceImpl *as, AtomPtr a)
 {
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    getTypeCached->remove(h);
+    getTypeCached->remove(a->getHandle());
 #endif
     return false;
 }
@@ -250,7 +250,7 @@ Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
     return result;
 }
 
-boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
+AtomPtr AtomSpace::cloneAtom(const Handle& h) const
 {
     return atomSpaceAsync->getAtom(h)->get_result();
 }

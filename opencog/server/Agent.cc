@@ -49,15 +49,16 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().getAttentionBank().setSTI(this, 0);
-    _cogserver.getAtomSpace().getAttentionBank().setLTI(this, 0);
+    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(getAttentionValue().getSTI());
+    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(getAttentionValue().getLTI());
 
     resetUtilizedHandleSets();
-    delete stimulatedAtoms;
     conn.disconnect();
+    delete stimulatedAtoms;
 }
 
-void Agent::setParameters(const std::string* params) {
+void Agent::setParameters(const std::string* params)
+{
     PARAMETERS = params;
 
     for (unsigned int i = 0; params[i] != ""; i += 2) {
@@ -80,8 +81,9 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomSpaceImpl* a, Handle h)
+void Agent::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         _utilizedHandleSets[i].erase(h);
     removeAtomStimulus(h);

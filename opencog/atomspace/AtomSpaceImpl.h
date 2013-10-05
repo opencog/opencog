@@ -51,6 +51,7 @@ namespace opencog
 class AtomSpaceImpl;
 
 typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
+typedef boost::signal<void (AtomSpaceImpl*,AtomPtr)> AtomPtrSignal;
 
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
@@ -68,8 +69,8 @@ class AtomSpaceImpl
 
     /** Provided signals */
     AtomSignal _addAtomSignal;
-    AtomSignal _removeAtomSignal;
     AtomSignal _mergeAtomSignal;
+    AtomPtrSignal _removeAtomSignal;
 
     AttentionBank bank;
 
@@ -183,17 +184,15 @@ public:
      * Removes an atom from the atomspace
      *
      * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set of the atom to be removed will also be
-     *        removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
-     *
-     * When the atom is removed from the atomspace, all memory associated
-     * with it is also deleted; in particular, the atom is removed from
-     * the TLB as well, so that future TLB lookups will be invalid. 
      */
-    bool removeAtom(Handle h, bool recursive = false);
+    bool removeAtom(Handle h, bool recursive = true);
 
     /**
      * Retrieve from the Atom Table the Handle of a given node
@@ -220,16 +219,16 @@ public:
     const std::string& getName(Handle h) const
     {
         static std::string emptyName;
-        Node* nnn = atomTable.getNode(h);
+        NodePtr nnn(atomTable.getNode(h));
         if (nnn) return nnn->getName();
         return emptyName;
     }
 
     /** Retrieve the outgoing set of a given link */
-    const HandleSeq& getOutgoing(Handle h) const
+    const HandleSeq getOutgoing(Handle h) const
     {
         static HandleSeq hs;
-        Link* link = atomTable.getLink(h);
+        LinkPtr link(atomTable.getLink(h));
         if (link) return link->getOutgoingSet();
         return hs;
     }
@@ -241,7 +240,7 @@ public:
     /** Retrieve the arity of a given link */
     size_t getArity(Handle h) const
     {
-        Link* link = atomTable.getLink(h);
+        LinkPtr link(atomTable.getLink(h));
         if (link) return link->getArity();
         return 0;
     }
@@ -249,7 +248,7 @@ public:
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const
     {
-        Atom* a = atomTable.getAtom(h);
+        AtomPtr a(atomTable.getAtom(h));
         if (a) return a->getType();
         else return NOTYPE;
     }
@@ -259,7 +258,7 @@ public:
      */ 
     bool isSource(Handle source, Handle link) const
     {
-        const Link *l = atomTable.getLink(link);
+        LinkPtr l(atomTable.getLink(link));
         if (l) return l->isSource(source);
         return false;
     }
@@ -268,10 +267,10 @@ public:
     HandleSeq getIncoming(Handle);
 
     /** Convenience functions... */
-    bool isNode(const Handle& h) const
+    bool isNode(Handle h) const
         { return classserver().isA(getType(h), NODE); }
 
-    bool isLink(const Handle& h) const
+    bool isLink(Handle h) const
         { return classserver().isA(getType(h), LINK); }
 
     /** Retrieve the TruthValue of a given Handle */
@@ -296,7 +295,7 @@ public:
      * range can be return if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+    float getNormalisedSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
      * for a given AttentionValueHolder.
@@ -308,14 +307,14 @@ public:
      * range can be return if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(AttentionValueHolder *avh, bool average=true, bool clip=false) const;
+    float getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValueHolder *avh) const;
+    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the Very-Long-Term Importance of a given
      * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolder *avh) const;
+    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
@@ -400,16 +399,16 @@ public:
      * AtomSpace::commitAtom for them to be merged with the AtomSpace.
      * Otherwise changes are lost.
      */
-    boost::shared_ptr<Atom> cloneAtom(const Handle& h) const;
+    AtomPtr cloneAtom(Handle h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
      * @param a Atom to commit
      * @return whether the commit was successful
      */
-    bool commitAtom(const Atom& a);
+    bool commitAtom(AtomPtr a);
 
-    bool isValidHandle(const Handle h) const
+    bool isValidHandle(Handle h) const
         { return atomTable.holds(h); }
 
     /**
@@ -1069,7 +1068,7 @@ private:
     /**
      * Handler of the 'atom removed' signal from self
      */
-    void atomRemoved(AtomSpaceImpl*, Handle);
+    void atomRemoved(AtomSpaceImpl*, AtomPtr);
 
     /**
      * Handler of the 'atom added' signal from self
@@ -1080,7 +1079,7 @@ public:
     // pass on the signals from the Atom Table
     AtomSignal& addAtomSignal()
         { return _addAtomSignal; }
-    AtomSignal& removeAtomSignal()
+    AtomPtrSignal& removeAtomSignal()
         { return _removeAtomSignal; }
     AtomSignal& mergeAtomSignal()
         { return _mergeAtomSignal; }

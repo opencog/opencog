@@ -34,12 +34,12 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc-test.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
 #include "HandleEntry.h"
 #include "makeVirtualAtom.h"
+#include "misc-test.h"
 
 using namespace opencog;
 using namespace std;
@@ -437,7 +437,7 @@ public:
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
         TS_ASSERT(!Handle::compare(h1_, h1));
-        Atom* atom = TLB::getAtom(h1_);
+        AtomPtr atom = TLB::getAtom(h1_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
@@ -750,7 +750,7 @@ public:
 
     void testCloneAndCommit() {
         Handle h1 = atomSpace->addNode(NODE, "test1");
-        boost::shared_ptr<Atom> a = atomSpace->cloneAtom(h1);
+        AtomPtr a = atomSpace->cloneAtom(h1);
         a->setTruthValue(SimpleTruthValue(0.001f, 0.00001f));
         atomSpace->commitAtom(*a);
         TS_ASSERT(atomSpace->getMean(h1) == 0.001f);

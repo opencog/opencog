@@ -55,6 +55,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ProcedureInterpreterAgent> ProcedureInterpreterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

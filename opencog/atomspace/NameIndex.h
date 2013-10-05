@@ -22,11 +22,11 @@
 #ifndef _OPENCOG_NAMEINDEX_H
 #define _OPENCOG_NAMEINDEX_H
 
+#include <opencog/atomspace/types.h>
 #include <opencog/atomspace/StringIndex.h>
 
 namespace opencog
 {
-class Atom;
 
 /**
  * Implements an atom name index as an RB-tree (C++ map)
@@ -39,8 +39,8 @@ class NameIndex:
     public StringIndex
 {
     public:
-        void insertAtom(const Atom* a);
-        void removeAtom(const Atom* a);
+        void insertAtom(AtomPtr a);
+        void removeAtom(AtomPtr a);
 };
 
 /** @}*/

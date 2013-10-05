@@ -31,11 +31,27 @@ const ClassInfo& PyMindAgent::classinfo() const
     return _ci;
 }
 
+static bool in_fini = false;
+#if __GNUC__
+static __attribute__ ((destructor (65535))) void pyagent_fini(void)
+{
+    in_fini = true;
+}
+#endif
+
 PyMindAgent::~PyMindAgent()
 {
-    PyGILState_STATE gstate;
-    gstate = PyGILState_Ensure(); 
+    // Do nothing if we are in finalizer ... because at this point,
+    // python is probably already dead, and doing the below will just
+    // segfault.
+    if (in_fini) return;
+
+    // Still fails XXX don't know how to fix this...
+    // Maybe we can ask python if its been finalized?
+    return;
+
     // decrement python object reference counter
+    PyGILState_STATE gstate = PyGILState_Ensure(); 
     Py_DECREF(pyagent);
     PyGILState_Release(gstate); 
 }

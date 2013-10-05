@@ -50,7 +50,6 @@ namespace opencog
  */
 class Link : public Atom
 {
-    friend class NMXmlParser;  // needs access to addOutgoingAtom()
     friend class SavingLoading;  // needs access to setOutgoingSet()
     friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
@@ -62,36 +61,20 @@ private:
 #ifdef ZMQ_EXPERIMENT
     Link() {};
 #endif
-    void init(const std::vector<Handle>&) throw (InvalidParamException);
-
-    /**
-     * Adds a new handle to the outgoing set. Note that this is
-     * used only in the NMXmlParser friend class. The parser should
-     * be fixed not to need this, and this should be removed.
-     * Actually, the NMXml parser is obsolete, and should be retired.
-     */
-    void addOutgoingAtom(Handle h);
-
-    /**
-      * Sets the outgoing set of the atom. This method can be
-      * called only if the atom is not inserted in an AtomTable yet.
-      * Otherwise, it throws a RuntimeException.  This is used only
-      * by the SavingLoading file reader. That reader should be fixed.
-      * Actually, that reader is obsolete and should be retired.
-      */
-    void setOutgoingSet(const std::vector<Handle>& o)
-    throw (RuntimeException);
+    void init(const HandleSeq&) throw (InvalidParamException);
 
     /**
      * @todo cloning atoms is a fundamental violation of the architecture.
      * this method should be removed.
      */
-    virtual Atom* clone() const;
+    virtual AtomPtr clone() const;
 
 protected:
 
     //! Array that does not change during atom lifespan.
-    std::vector<Handle> outgoing;
+    // Should be const, but we need to fix the initializers to get this correct.
+    // const HandleSeq _outgoing;
+    HandleSeq _outgoing;
 
 public:
     /**
@@ -102,7 +85,7 @@ public:
      * @return A specific atom in the outgoing set. NULL if no AtomTable is
      * connected.
      */
-    Atom * getOutgoingAtom(int pos) const;
+    AtomPtr getOutgoingAtom(Arity pos) const;
 
 
     /**
@@ -114,7 +97,7 @@ public:
      * @param Link truthvalue, which will be cloned before being
      *        stored in this Link.
      */
-    Link(Type t, const std::vector<Handle>& oset,
+    Link(Type t, const HandleSeq& oset,
          const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
@@ -125,7 +108,7 @@ public:
          const TruthValue& tv = TruthValue::NULL_TV()) 
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(h);
         init(oset);
     }
@@ -134,7 +117,7 @@ public:
          const TruthValue& tv = TruthValue::NULL_TV()) 
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         init(oset);
@@ -144,7 +127,7 @@ public:
          const TruthValue& tv = TruthValue::NULL_TV()) 
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
@@ -154,7 +137,7 @@ public:
          const TruthValue& tv = TruthValue::NULL_TV()) 
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
@@ -175,7 +158,7 @@ public:
     ~Link();
 
     inline Arity getArity() const {
-        return outgoing.size();
+        return _outgoing.size();
     }
 
     /**
@@ -184,8 +167,9 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const std::vector<Handle>& getOutgoingSet() const {
-        return outgoing;
+    inline const HandleSeq& getOutgoingSet() const
+	 {
+        return _outgoing;
     }
     /**
      * Returns a specific Handle in the outgoing set.
@@ -193,11 +177,11 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingHandle(int pos) const throw (RuntimeException)
+    inline Handle getOutgoingHandle(Arity pos) const throw (RuntimeException)
     {
         // Checks for a valid position
-        if ((0 <= pos) && (pos < getArity())) {
-            return outgoing[pos];
+        if (pos < getArity()) {
+            return _outgoing[pos];
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
         }
@@ -318,6 +302,9 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+// XXX temporary hack ... 
+#define createLink std::make_shared<Link>
 
 /** @}*/
 } // namespace opencog

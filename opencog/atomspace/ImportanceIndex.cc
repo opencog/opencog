@@ -40,7 +40,7 @@ unsigned int ImportanceIndex::importanceBin(short importance)
 	return (importance + 32768) / IMPORTANCE_INDEX_SIZE;
 }
 
-void ImportanceIndex::updateImportance(Atom* atom, int bin)
+void ImportanceIndex::updateImportance(AtomPtr atom, int bin)
 {
 	Handle h = atom->getHandle();
 	int newbin = importanceBin(atom->getAttentionValue().getSTI());
@@ -50,14 +50,14 @@ void ImportanceIndex::updateImportance(Atom* atom, int bin)
 	insert(newbin, h);
 }
 
-void ImportanceIndex::insertAtom(const Atom* atom)
+void ImportanceIndex::insertAtom(AtomPtr atom)
 {
 	int sti = atom->getAttentionValue().getSTI();
 	int bin = importanceBin(sti);
 	insert(bin, atom->getHandle());
 }
 
-void ImportanceIndex::removeAtom(const Atom* atom)
+void ImportanceIndex::removeAtom(AtomPtr atom)
 {
 	int sti = atom->getAttentionValue().getSTI();
 	int bin = importanceBin(sti);
@@ -76,7 +76,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
             UnorderedHandleSet::iterator hit;
             for (hit = band.begin(); hit != band.end(); ++hit) {
                 Handle h = *hit;
-                Atom *atom = atomtable->getAtom(h);
+                AtomPtr atom(atomtable->getAtom(h));
 
                 atom->attentionValue.decaySTI();
                 unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
@@ -101,7 +101,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
         UnorderedHandleSet & band = idx[1];
         for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
             Handle h = *hit;
-            Atom *atom = atomtable->getAtom(h);
+            AtomPtr atom(atomtable->getAtom(h));
             atom->attentionValue.decaySTI();
         }
         idx[0].insert(idx[1].begin(), idx[1].end());
@@ -111,7 +111,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
             UnorderedHandleSet & band = idx[bin];
             for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
                 Handle h = *hit;
-                Atom *atom = atomtable->getAtom(h);
+                AtomPtr atom(atomtable->getAtom(h));
                 atom->attentionValue.decaySTI();
             }
         }
@@ -124,9 +124,9 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
 	for (bin = 0; bin <= lowerStiBand; bin++)
 	{
 		UnorderedHandleSet::iterator hit;
-		UnorderedHandleSet & band = idx[bin];
+		UnorderedHandleSet& band = idx[bin];
 		for (hit = band.begin(); hit != band.end(); ++hit) {
-			Atom *atom = atomtable->getAtom(*hit);
+			AtomPtr atom(atomtable->getAtom(*hit));
 
 			// Remove it if too old.
 			if (isOld(atom,minSTI)) {
@@ -139,7 +139,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
 	return oldAtoms;
 }
 
-bool ImportanceIndex::isOld(const Atom* atom,
+bool ImportanceIndex::isOld(AtomPtr atom,
         const AttentionValue::sti_t threshold)
 {
     return ((atom->getAttentionValue().getSTI() < threshold) &&
@@ -151,7 +151,7 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
                                          Handle handle, bool recursive)
 {
    UnorderedHandleSet result;
-	Atom *atom = atomtable->getAtom(handle);
+	AtomPtr atom(atomtable->getAtom(handle));
 
 	if (atom->getFlag(REMOVED_BY_DECAY)) return result;
 	else atom->setFlag(REMOVED_BY_DECAY, true);
@@ -163,7 +163,7 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 		for (UnorderedHandleSet::const_iterator it = iset.begin();
 		     it != iset.end(); it++)
 		{
-			Atom* a = atomtable->getAtom(*it);
+			AtomPtr a(atomtable->getAtom(*it));
 
 			// XXX a should never be NULL; however, someone somewhere is
 			// removing atoms from the TLB, although they forgot to remove
@@ -183,7 +183,7 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 	for (UnorderedHandleSet::const_iterator it = iset.begin();
 	        it != iset.end(); it++)
 	{
-		Atom* a = atomtable->getAtom(*it);
+		AtomPtr a(atomtable->getAtom(*it));
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove
 		// them from the atomTable, and so they are still showing up

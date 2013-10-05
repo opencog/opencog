@@ -105,6 +105,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<StorkeyAgent> StorkeyAgentPtr;
+
 } // namespace
 
 #endif // _OPENCOG_STORKEY_AGENT_H

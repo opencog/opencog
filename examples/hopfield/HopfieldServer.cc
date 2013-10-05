@@ -229,8 +229,6 @@ HopfieldServer::HopfieldServer()
 HopfieldServer::~HopfieldServer()
 {
     unloadModule("libattention.so");
-    //delete importUpdateAgent;
-    //delete hebUpdateAgent;
     delete rng;
 }
 
@@ -239,25 +237,21 @@ void HopfieldServer::init(int width, int height, int numLinks)
     loadModule("libattention.so");
 
     //CogServer& cogserver = static_cast<CogServer&>(server());
-    importUpdateAgent = static_cast<ImportanceUpdatingAgent*>(
-            this->createAgent(ImportanceUpdatingAgent::info().id, true));
+    importUpdateAgent = createAgent<ImportanceUpdatingAgent>(true);
     if (options->updateMethod == HopfieldOptions::CONJUNCTION) {
-        hebUpdateAgent = static_cast<HebbianUpdatingAgent*>(
-                this->createAgent(HebbianUpdatingAgent::info().id, true));
+        hebUpdateAgent = createAgent<HebbianUpdatingAgent>(true);
     } else {
-        storkeyAgent = new StorkeyAgent(*this);
+        storkeyAgent = std::make_shared<StorkeyAgent>(*this);
     }
-    imprintAgent = new ImprintAgent(*this);
+    imprintAgent = std::make_shared<ImprintAgent>(*this);
     startAgent(imprintAgent);
-    diffuseAgent = static_cast<ImportanceDiffusionAgent*>(
-            this->createAgent(ImportanceDiffusionAgent::info().id, true));
+    diffuseAgent = createAgent<ImportanceDiffusionAgent>(true);
     diffuseAgent->setDiffusionThreshold(options->diffusionThreshold);
     diffuseAgent->setMaxSpreadPercentage(options->maxSpreadPercentage);
     diffuseAgent->setSpreadDecider(ImportanceDiffusionAgent::HYPERBOLIC,
             options->deciderFunctionShape);
-//    spreadAgent       = static_cast<ImportanceSpreadingAgent*>(this->createAgent(ImportanceSpreadingAgent::info().id, true));
-    forgetAgent = static_cast<ForgettingAgent*>(
-            this->createAgent(ForgettingAgent::info().id, true));
+//    spreadAgent       = createAgent<ImportanceSpreadingAgent>(true);
+    forgetAgent = createAgent<ForgettingAgent>(true);
 
     if (options->verboseLevel) {
         importUpdateAgent->getLogger()->setPrintToStdoutFlag (true);
