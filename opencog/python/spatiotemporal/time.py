@@ -2,8 +2,8 @@ __author__ = 'keyvan'
 from calendar import timegm
 from datetime import datetime
 from random import randrange
-from scipy.stats import t #, rv_frozen
-import matplotlib.pyplot as plt
+from scipy.stats import t
+from scipy.stats.distributions import rv_frozen
 
 
 def is_unix_time(time):
@@ -30,7 +30,7 @@ def random_time(start, end=None,
     end = convert_to_unix_time(end)
     if probability_distribution is None:
         return randrange(start, end)
-        #assert isinstance(probability_distribution, rv_frozen)
+        assert isinstance(probability_distribution, rv_frozen)
     assert end is not None
     random_value = probability_distribution.rvs()
     if random_value < start:
@@ -69,37 +69,92 @@ class Period(object):
     def __len__(self):
         return float(self.end - self.start)
 
+TEMPORAL_RELATION_NAMES = {
+    'p': 'precedes',
+    'm': 'meets',
+    'o': 'overlaps',
+    'F': 'finished by',
+    'D': 'contains',
+    's': 'starts',
+    'e': 'equals',
+    'S': 'started by',
+    'd': 'during',
+    'f': 'finishes',
+    'O': 'overlapped by',
+    'M': 'met by',
+    'P': 'preceded by'
+}
+
+
+class TemporalRelation(list):
+    def __init__(self, constituent_string):
+        self.append(constituent_string)
+
+    def append(self, string):
+        for char in string:
+            assert isinstance(char, str) and len(char) is 1 and char in TEMPORAL_RELATION_NAMES
+            list.append(self, char)
+
+    def __eq__(self, other):
+        assert isinstance(other, TemporalRelation) or isinstance(other, str)
+        for char in other:
+            if char not in self:
+                return False
+        return True
+
+    def __str__(self):
+        if len(self) is 13:
+            return 'temporal_relation_full'
+        result = 'temporal_relation_'
+        result += ''.join(self)
+        result += '(' + ', '.join([TEMPORAL_RELATION_NAMES[char] for char in self]) + ')'
+        return result
+
+    def __repr__(self):
+        return str(self)
+
+TEMPORAL_RELATION_FULL = TemporalRelation('pmoFDseSdfOMP')
+
+
+def probability_of_relation(temporal_event_1, temporal_event_2, temporal_relation):
+    pass
+
 
 class TemporalEvent(object):
     beginning_factor = 5
     ending_factor = 5
 
-    def __init__(self, start, end, **kwargs):
+    def __init__(self, start, end, beginning_factor=None, ending_factor=None):
         """
         start and end can be in either datetime or unix time
         """
         self.period = Period(start, end)
 
-        if 'beginning_factor' in kwargs:
-            self.beginning_factor = kwargs['beginning_factor']
-        if 'ending_factor' in kwargs:
-            self.ending_factor = kwargs['ending_factor']
+        if beginning_factor is not None:
+            assert beginning_factor > 0
+            self.beginning_factor = beginning_factor
+        if ending_factor is not None:
+            assert ending_factor > 0
+            self.ending_factor = ending_factor
 
-        self.beginning = self.period.random(
-            probability_distribution=t(
-                4, # df
-                self.period.start + len(self) / self.beginning_factor, # mean
-                len(self) / self.beginning_factor                       # variance
-            )
-        )
+        self.beginning, self.ending = 0, 0
 
-        self.ending = self.period.random(
-            probability_distribution=t(
-                4, # df
-                self.period.end - len(self) / self.ending_factor, # mean
-                len(self) / self.ending_factor                          # variance
+        while not self.period.start < self.beginning < self.ending < self.period.end:
+            self.beginning = self.period.random(
+                probability_distribution=t(
+                    4,                                                      # df
+                    self.period.start + len(self) / self.beginning_factor,  # mean
+                    len(self) / self.beginning_factor                       # variance
+                )
             )
-        )
+
+            self.ending = self.period.random(
+                probability_distribution=t(
+                    4,                                                  # df
+                    self.period.end - len(self) / self.ending_factor,   # mean
+                    len(self) / self.ending_factor                      # variance
+                )
+            )
 
     def _fuzzy_membership_single_point(self, time_step):
         assert is_unix_time(time_step)
@@ -116,6 +171,9 @@ class TemporalEvent(object):
         return 1
 
     def fuzzy_membership(self, time):
+        """
+        time can either be a single value or a collection
+        """
         result = []
         try:
             for time_step in time:
@@ -128,11 +186,11 @@ class TemporalEvent(object):
         return len(self.period)
 
 
-def generate_random_events():
+def generate_random_events(size=100):
     events = []
     year_2010 = Period(datetime(2010, 1, 1), datetime(2011, 1, 1))
 
-    for i in xrange(10):
+    for i in xrange(size):
         start = year_2010.random()
         end = year_2010.random(start)
         event = TemporalEvent(start, end)
@@ -142,9 +200,8 @@ def generate_random_events():
 
 
 if __name__ == '__main__':
-    #print dist.rvs(2)
     events = generate_random_events()
-
+    import matplotlib.pyplot as plt
     for event in events:
         x = range(event.period.start, event.period.end, 100)
         y = event.fuzzy_membership(x)
