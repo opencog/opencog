@@ -13,10 +13,12 @@ from flask.views import MethodView
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from opencog.atomspace import *
 
+
 # Define classes for parsing object values for serialization
 class FormatHandleValue(fields.Raw):
     def format(self, value):
         return value.value()
+
 
 class FormatHandleList(fields.Raw):
     def format(self, value):
@@ -25,16 +27,17 @@ class FormatHandleList(fields.Raw):
             handles.append(elem.h.value())
         return handles
 
-class FormatAtomList(fields.Raw):
-    def format(self, value):
 
-        {
+class FormatAtomList(object):
+    @staticmethod
+    def format(atoms):
+        return {
+            # @todo: Add pagination (http://flask.pocoo.org/snippets/44/)
             'complete': True,
-            'skipped':
-"skipped":0,
-"total":10,
+            'skipped': 0,
+            'total': len(atoms),
+            'result': map(lambda t: marshal(t, atom_fields), atoms)
         }
-        'complete', 'skipped', 'total', 'result'
 
 tv_fields = {
     'strength': fields.Float(attribute='mean'),
@@ -58,19 +61,13 @@ atom_fields = {
     'truthvalue': fields.Nested(tv_fields, attribute='tv'),
     'attentionvalue': fields.Nested(av_fields, attribute='av')
 }
-'''
->>> resource_fields = {'name': fields.String}
->>> resource_fields['address'] = {}
->>> resource_fields['address']['line 1'] = fields.String(attribute='addr1')
-atom_list_fields = {
-    'complete': fields.String
-}
-'''
+
 
 class AtomListAPI(Resource):
     @classmethod
-    def set_atomspace(cls, atomspace):
+    def new(cls, atomspace):
         cls.atomspace = atomspace
+        return cls
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -87,13 +84,15 @@ class AtomListAPI(Resource):
 
         # @todo: Implement pagination
         # 'complete', 'skipped', 'total', 'result'
-        return {'atoms': map(lambda t: marshal(t, atom_fields), atoms)}
+        #return {'atoms': map(lambda t: marshal(t, atom_fields), atoms)}
+        return {'atoms': FormatAtomList.format(atoms)}
 
 
 class AtomAPI(Resource):
     @classmethod
-    def set_atomspace(cls, atomspace):
+    def new(cls, atomspace):
         cls.atomspace = atomspace
+        return cls
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
@@ -126,7 +125,8 @@ class AtomAPI(Resource):
     @todo POST
     "Usage: json-create-atom<CRLF>JSON<CRLF><Ctrl-D><CRLF>\n\n"
             "   Create an atom based on the JSON format:\n"
-            "   { \"type\": TYPENAME, \"name\": NAME, \n"
+            "   { \"type\": TYPENAME,
+            \"name\": NAME, \n"
             "     \"outgoing\": [ UUID1, UUID2 ... ], \n"
             "     \"truthvalue\": {\"simple|composite|count|indefinite\":\n"
             "          [truthvalue details] } \n",
@@ -140,19 +140,31 @@ class AtomAPI(Resource):
     def post(self):
         data = reqparse.request.get_json()
         type_data = types.__dict__.get(data['type'])
-        truthvalue_data = TruthValue(data['truthvalue']['strength'], data['truthvalue']['count'])
+        tv_type = data['truthvalue']['type']
+        tv_data = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
 
-        if type_data is None or truthvalue_data is None or data['name'] is None:
+        # @todo: links can't have names. Check if it's a link and make sure it doesn't. Nodes must have names. Revise below.
+        if type_data is None or tv_data is None or data['name'] is None:
             # @todo: check what is the proper error type
             abort(500)
 
+        # @todo: Cython bindings don't support other TruthValue types yet
+        if tv_type != 'simple':
+            if tv_type in ['composite', 'count', 'indefinite']:
+                # @todo: check error type
+                abort(500)  # say we don't support those yet
+            else:
+                # @todo: check error type
+                abort(500)
+
         try:
-            atom = self.atomspace.add(t=type_data, name=data['name'], tv=truthvalue_data)
+            atom = self.atomspace.add(t=type_data, name=data['name'], tv=tv_data)
         except TypeError:
             # @todo: check what is the proper error type
             print "Debug: TypeError - check your parameters"
             abort(500)
 
+        # @todo: or merged
         print 'Atom created:'
         print atom
         return {'atom': marshal(atom, atom_fields)}
@@ -175,10 +187,10 @@ class RESTApi(object):
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = Api(self.app)
-        AtomListAPI.set_atomspace(self.atomspace)
-        AtomAPI.set_atomspace(self.atomspace)
-        self.api.add_resource(AtomListAPI, '/api/v1.0/atoms', endpoint='atoms')
-        self.api.add_resource(AtomAPI, '/api/v1.0/atoms/<int:id>', '/api/v1.0/atoms', endpoint='atom')
+        atom_api = AtomAPI.new(self.atomspace)
+        atom_list_api = AtomListAPI.new(self.atomspace)
+        self.api.add_resource(atom_list_api, '/api/v1.0/atoms', endpoint='atoms')
+        self.api.add_resource(atom_api, '/api/v1.0/atoms/<int:id>', '/api/v1.0/atoms', endpoint='atom')
 
     def run(self):
         self.app.run(debug=True)
@@ -245,6 +257,13 @@ print json.dumps(g.json(), indent=2)
 payload = {'type': 'ConceptNode', 'name': 'ugly_frog'}
 headers = {'content-type': 'application/json'}
 r = post('http://localhost:5000/api/v1.0/atoms/', data=json.dumps(payload), headers=headers)
+print json.dumps(r.json(), indent=2)
+
+
+truthvalue = {'type': 'simple', 'details': {'strength': 0.8, 'count': 0.2}}
+payload = {'type': 'ConceptNode', 'name': 'ugly_frog_prince4', 'truthvalue': truthvalue}
+headers = {'content-type': 'application/json'}
+r = post('http://localhost:5000/api/v1.0/atoms', data=json.dumps(payload), headers=headers)
 print json.dumps(r.json(), indent=2)
 
 """
