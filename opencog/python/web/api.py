@@ -28,6 +28,14 @@ class FormatHandleList(fields.Raw):
         return handles
 
 
+class FormatTruthValue(fields.Raw):
+    def format(self, value):
+        return {
+            'type': 'simple',
+            'details': marshal(value, tv_fields)
+        }
+
+
 class FormatAtomList(object):
     @staticmethod
     def format(atoms):
@@ -58,7 +66,7 @@ atom_fields = {
     'name': fields.String,
     'outgoing': FormatHandleList(attribute='outgoing'),
     'incoming': FormatHandleList(attribute='incoming'),
-    'truthvalue': fields.Nested(tv_fields, attribute='tv'),
+    'truthvalue': FormatTruthValue(attribute='tv'),
     'attentionvalue': fields.Nested(av_fields, attribute='av')
 }
 
@@ -82,9 +90,6 @@ class AtomListAPI(Resource):
         else:
             atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type_lookup))
 
-        # @todo: Implement pagination
-        # 'complete', 'skipped', 'total', 'result'
-        #return {'atoms': map(lambda t: marshal(t, atom_fields), atoms)}
         return {'atoms': FormatAtomList.format(atoms)}
 
 
@@ -116,10 +121,9 @@ class AtomAPI(Resource):
     "   { \"sti\": STI } \n"
     "   { \"lti\": LTI } \n"
     "   { \"tv\": {tv details} } \n",
-    '''
-
     # @todo: support PATCH for partial update
     #def put(self, id):
+    '''
 
     '''
     @todo POST
@@ -135,20 +139,91 @@ class AtomAPI(Resource):
             TruthValue: See opencog/web/JsonUtil.cc JSONToTV method
     '''
 
-    # @todo what happens if i post to an existing atom
+    # @todo what happens if i post to an existing atom -- check!
 
     def post(self):
-        data = reqparse.request.get_json()
-        type_data = types.__dict__.get(data['type'])
-        tv_type = data['truthvalue']['type']
-        tv_data = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+        """
+        Creates a new atom. If the atom already exists, it updates the atom.
+        Post a JSON object as data with the following format:
 
-        # @todo: links can't have names. Check if it's a link and make sure it doesn't. Nodes must have names. Revise below.
-        if type_data is None or tv_data is None or data['name'] is None:
+        type (required) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
+        name (required for Node types, not allowed for Link types) Atom name
+        truthvalue (required) Truth value, formatted as follows:
+            type Truth value type (only 'simple' is currently available), see http://wiki.opencog.org/w/TruthValue
+            details Truth value parameters, formatted as follows:
+                strength
+                count
+        outgoing (optional) The set of arguments of the relation, formatted as a list of Atom handles
+            (only valid for Links, not nodes), see http://wiki.opencog.org/w/Link#Incoming_and_Outgoing_Sets
+
+        Examples:
+
+        Node:
+            {
+                "type": "ConceptNode",
+                "name": "Frog",
+                "truthvalue": {
+                    "type": "simple",
+                    "details": {
+                        "strength": 0.8,
+                        "count": 0.2
+                    }
+                }
+            }
+
+        Link:
+        @todo
+            "outgoing": [
+                            2,
+                            3
+                        ]
+
+        Returns a JSON representation of the Atom
+
+        Example: @todo
+
+        """
+
+        # Prepare the atom data
+        data = reqparse.request.get_json()
+
+        try:
+            type = types.__dict__.get(data['type'])
+        except KeyError:
+            abort(500)  # @todo: check what is the proper error type
+
+        try:
+            tv_type = data['truthvalue']['type']
+            tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+        except KeyError:
+            abort(500)  # @todo: check what is the proper error type
+
+        try:
+            outgoing = data['outgoing']
+        except KeyError:
+            outgoing = None
+
+        try:
+            name = data['name']
+        except KeyError:
+            name = None
+
+        # Perform validation on the atom creation data
+        if type is None or tv_details is None:
             # @todo: check what is the proper error type
             abort(500)
 
-        # @todo: Cython bindings don't support other TruthValue types yet
+        if is_a(type, types.Node):
+            if name is None:
+                # @todo nodes must have names
+                abort(500)
+        else:
+            if name is not None:
+                # @todo links can't have names
+                abort(500)
+
+        # @todo: Cython bindings don't provide support for other TruthValue types yet
+        #        (see: opencog\cython\opencog\atomspace_details.pyx, opencog\cython\opencog\atomspace.pxd)
         if tv_type != 'simple':
             if tv_type in ['composite', 'count', 'indefinite']:
                 # @todo: check error type
@@ -158,15 +233,12 @@ class AtomAPI(Resource):
                 abort(500)
 
         try:
-            atom = self.atomspace.add(t=type_data, name=data['name'], tv=tv_data)
+            atom = self.atomspace.add(t=type, name=name, tv=tv_details, out=outgoing)
         except TypeError:
             # @todo: check what is the proper error type
             print "Debug: TypeError - check your parameters"
             abort(500)
 
-        # @todo: or merged
-        print 'Atom created:'
-        print atom
         return {'atom': marshal(atom, atom_fields)}
 
     def delete(self, id):
@@ -175,8 +247,8 @@ class AtomAPI(Resource):
         except IndexError:
             abort(404)
 
-        success = self.atomspace.remove(atom)
-        return {'result': success}
+        succeeded = self.atomspace.remove(atom)
+        return {'result': succeeded}
 
 
 class RESTApi(object):
@@ -210,22 +282,14 @@ if __name__ == '__main__':
 
 '''
 now
-# @todo: Return JSON errors\
+# @todo: Return JSON errors
 
-Specify the type of the TruthValue returned in the JSON
-Specify the type of the TruthValue passed in the JSON
         # @todo: ? Linas says handle isn't supposed to be the only id - how about a get method using name/type pair?
         # @todo: support setting outgoing links (and incoming?)
-        # @todo: Verify that the 'strength' and 'count' terms are proper for TruthValue
         # @todo: Document how to test the API using curl and Python 'request'
+        # @todo: check if the truth value type enumeration is complete
 
-Wrap the results as if there were pagination, even though there isn't with 'complete', 'skipped', 'total', 'result' attributes
 '''
-
-# Later:
-# @todo: support multiple TruthValue types in the get and post and update
-# @todo: create an enumeration of valid TruthValue types
-# @todo: get methods for TruthValue: see opencog\web\GetAtomRequest.cc tvToJSON method
 
 '''
 Types:
@@ -252,6 +316,8 @@ print json.dumps(g.json(), indent=2)
 #  ONE ATOM
 g = get('http://localhost:5000/api/v1.0/atoms/1')
 print json.dumps(g.json(), indent=2)
+
+@todo: UPDATE THIS WITH OUTGOING SET examples
 
 # POST
 payload = {'type': 'ConceptNode', 'name': 'ugly_frog'}
