@@ -92,53 +92,6 @@ class AtomListAPI(Resource):
 
         return {'atoms': FormatAtomList.format(atoms)}
 
-
-class AtomAPI(Resource):
-    @classmethod
-    def new(cls, atomspace):
-        cls.atomspace = atomspace
-        return cls
-
-    def __init__(self):
-        self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('type', type=str, choices=types.__dict__.keys())
-        self.reqparse.add_argument('name', type=str)
-        super(AtomAPI, self).__init__()
-
-    def get(self, id):
-        try:
-            atom = self.atomspace[Handle(id)]
-        except IndexError:
-            abort(404)
-
-        return {'atom': marshal(atom, atom_fields)}
-
-    '''
-    @todo PUT
-    "update the STI, LTI, or TV of an atom with JSON message",
-    "Usage: json-update-atom handle {JSON}\n\n"
-    "   Update an atom based on a JSON message with format:\n"
-    "   { \"sti\": STI } \n"
-    "   { \"lti\": LTI } \n"
-    "   { \"tv\": {tv details} } \n",
-    # @todo: support PATCH for partial update
-    #def put(self, id):
-    '''
-
-    '''
-    @todo POST
-    "Usage: json-create-atom<CRLF>JSON<CRLF><Ctrl-D><CRLF>\n\n"
-            "   Create an atom based on the JSON format:\n"
-            "   { \"type\": TYPENAME,
-            \"name\": NAME, \n"
-            "     \"outgoing\": [ UUID1, UUID2 ... ], \n"
-            "     \"truthvalue\": {\"simple|composite|count|indefinite\":\n"
-            "          [truthvalue details] } \n",
-            true, false
-
-            TruthValue: See opencog/web/JsonUtil.cc JSONToTV method
-    '''
-
     # @todo what happens if i post to an existing atom -- check!
 
     def post(self):
@@ -184,43 +137,53 @@ class AtomAPI(Resource):
 
         """
 
-        # Prepare the atom data
+        # Prepare the atom data and validate it
         data = reqparse.request.get_json()
 
-        try:
-            type = types.__dict__.get(data['type'])
-        except KeyError:
-            abort(500)  # @todo: check what is the proper error type
+        if 'type' in data:
+            if type in types.__dict__:
+                type = types.__dict__.get(data['type'])
+            else:
+                abort(400, 'Invalid request: type \'' + data['type'] + '\' is not a valid type')
+        else:
+            abort(400, 'Invalid request: required parameter type is missing')
 
-        try:
-            tv_type = data['truthvalue']['type']
-            tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
-        except KeyError:
-            abort(500)  # @todo: check what is the proper error type
+        # TruthValue
+        if 'truthvalue' in data:
+            if 'type' in data['truthvalue']:
+                tv_type = data['truthvalue']['type']
+            else:
+                abort(400, 'Invalid request: truthvalue object requires a type parameter')
+            if 'details' in data['truthvalue']:
+                if 'strength' in data['truthvalue']['details'] and 'count' in data['truthvalue']['details']:
+                    tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+                else:
+                    abort(400, 'Invalid request: truthvalue details object requires both a strength and count parameter')
+            else:
+                abort(400, 'Invalid request: truthvalue object requires a details parameter')
+        else:
+            abort(400, 'Invalid request: required parameter truthvalue is missing')
 
-        try:
+        # Outgoing set
+        if 'outgoing' in data:
             outgoing = data['outgoing']
-        except KeyError:
+        else:
             outgoing = None
 
-        try:
+        # Name
+        if 'name' in data:
             name = data['name']
-        except KeyError:
+        else:
             name = None
 
-        # Perform validation on the atom creation data
-        if type is None or tv_details is None:
-            # @todo: check what is the proper error type
-            abort(500)
-
+        # Nodes must have names
         if is_a(type, types.Node):
             if name is None:
-                # @todo nodes must have names
-                abort(500)
+                abort(400, 'Invalid request: node type specified and required parameter name is missing')
+        # Links can't have names
         else:
             if name is not None:
-                # @todo links can't have names
-                abort(500)
+                abort(400, 'Invalid request: parameter name is not allowed for link types')
 
         # @todo: Cython bindings don't provide support for other TruthValue types yet
         #        (see: opencog\cython\opencog\atomspace_details.pyx, opencog\cython\opencog\atomspace.pxd)
@@ -251,6 +214,71 @@ class AtomAPI(Resource):
         return {'result': succeeded}
 
 
+class AtomAPI(Resource):
+    @classmethod
+    def new(cls, atomspace):
+        cls.atomspace = atomspace
+        return cls
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('type', type=str, choices=types.__dict__.keys())
+        self.reqparse.add_argument('name', type=str)
+        super(AtomAPI, self).__init__()
+
+    def get(self, id):
+        try:
+            atom = self.atomspace[Handle(id)]
+        except IndexError:
+            abort(404)
+
+        return {'atom': marshal(atom, atom_fields)}
+
+    '''
+    @todo PUT
+    "update the STI, LTI, or TV of an atom with JSON message",
+    "Usage: json-update-atom handle {JSON}\n\n"
+    "   Update an atom based on a JSON message with format:\n"
+    "   { \"sti\": STI } \n"
+    "   { \"lti\": LTI } \n"
+    "   { \"tv\": {tv details} } \n",
+    # @todo: support PATCH for partial update
+    #def put(self, id):
+    '''
+
+    def put(self, id):
+        """
+        Update the STI, LTI or TruthValue of an atom
+        """
+
+        # Prepare the atom data
+        data = reqparse.request.get_json()
+
+        try:
+            tv_type = data['truthvalue']['type']
+            tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+        except KeyError:
+            tv_type = None
+
+        try:
+            sti = data['attentionvalue']['sti']
+
+            print marshal(data['attentionvalue'], av_fields)
+        except KeyError:
+            av = None
+
+        # Perform validation on the atom data
+        if tv_type != 'simple' and tv_type is not None:
+            if tv_type in ['composite', 'count', 'indefinite']:
+                # @todo: check error type
+                abort(500)  # say we don't support those yet
+            else:
+                # @todo: check error type
+                abort(500)
+
+
+
+
 class RESTApi(object):
     def __init__(self, atomspace):
         ######### For testing purposes, populate an AtomSpace with nodes & links:
@@ -262,7 +290,9 @@ class RESTApi(object):
         atom_api = AtomAPI.new(self.atomspace)
         atom_list_api = AtomListAPI.new(self.atomspace)
         self.api.add_resource(atom_list_api, '/api/v1.0/atoms', endpoint='atoms')
-        self.api.add_resource(atom_api, '/api/v1.0/atoms/<int:id>', '/api/v1.0/atoms', endpoint='atom')
+        self.api.add_resource(atom_api, '/api/v1.0/atoms/<int:id>', endpoint='atom')
+
+        #, '/api/v1.0/atoms'
 
     def run(self):
         self.app.run(debug=True)
