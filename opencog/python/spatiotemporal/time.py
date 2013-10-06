@@ -4,6 +4,7 @@ from datetime import datetime
 from random import randrange
 from scipy.stats import t
 from scipy.stats.distributions import rv_frozen
+from scipy import integrate
 
 TEMPORAL_RELATIONS = {
     'p': 'precedes',
@@ -86,6 +87,29 @@ class Period(object):
         return float(self.end - self.start)
 
 
+def _interpolation_start_to_beginning(t, start, beginning):
+    a = 1 / (beginning - start)
+    b = -1 * a * start
+    return a * t + b
+
+
+def _interpolation_ending_to_end(t, ending, end):
+    a = -1 / (end - ending)
+    b = -1 * a * end
+    return a * t + b
+
+
+def _interpolation_temporal_event(t, temporal_event):
+    assert is_unix_time(t)
+    if t <= temporal_event.period.start or t >= temporal_event.period.end:
+        return 0
+    if temporal_event.period.start < t < temporal_event.beginning:
+        return _interpolation_start_to_beginning(t, temporal_event.period.start, temporal_event.beginning)
+    if temporal_event.ending < t < temporal_event.period.end:
+        return _interpolation_ending_to_end(t, temporal_event.ending, temporal_event.period.end)
+    return 1
+
+
 class TemporalEvent(object):
     beginning_factor = 5
     ending_factor = 5
@@ -124,20 +148,6 @@ class TemporalEvent(object):
                 )
             )
 
-    def _fuzzy_membership_single_point(self, time_step):
-        assert is_unix_time(time_step)
-        if time_step <= self.period.start or time_step >= self.period.end:
-            return 0
-        if self.period.start < time_step < self.beginning:
-            a = 1 / (self.beginning - self.period.start)
-            b = -1 * a * self.period.start
-            return a * time_step + b
-        if self.ending < time_step < self.period.end:
-            a = -1 / (self.period.end - self.ending)
-            b = -1 * a * self.period.end
-            return a * time_step + b
-        return 1
-
     def fuzzy_membership(self, time):
         """
         time can either be a single value or a collection
@@ -145,10 +155,19 @@ class TemporalEvent(object):
         result = []
         try:
             for time_step in time:
-                result.append(self._fuzzy_membership_single_point(time_step))
+                result.append(_interpolation_temporal_event(time_step, self))
         except:
-            return self._fuzzy_membership_single_point(time)
+            return _interpolation_temporal_event(time, self)
         return result
+
+    def probability_in_period(self, period, closed_start=True, closed_end=True):
+        start, end = period.start, period.end
+        if not closed_start:
+            start += 1
+        if not closed_end:
+            end -= 1
+        area = integrate.quad(_interpolation_temporal_event, start, end, self)[0]
+        return area / float(end - start)
 
     def __str__(self):
         return 'TemporalEvent(start:{0} , beginning:{1}, ending:{2}, end:{3})'.format(self.period.start,
