@@ -13,7 +13,6 @@ from flask.views import MethodView
 from flask.ext.restful import Api, Resource, reqparse, fields, marshal
 from opencog.atomspace import *
 
-
 # Define classes for parsing object values for serialization
 class FormatHandleValue(fields.Raw):
     def format(self, value):
@@ -35,6 +34,48 @@ class FormatTruthValue(fields.Raw):
             'details': marshal(value, tv_fields)
         }
 
+
+class ParseTruthValue(object):
+    @staticmethod
+    def parse(data):
+        if 'truthvalue' in data:
+            if 'type' in data['truthvalue']:
+                tv_type = data['truthvalue']['type']
+            else:
+                abort(400, 'Invalid request: truthvalue object requires a type parameter')
+        else:
+            abort(400, 'Invalid request: required parameter truthvalue is missing')
+
+        # @todo: Cython bindings implementation does not provide support for other TruthValue types yet
+        #        (see: opencog\cython\opencog\atomspace_details.pyx, opencog\cython\opencog\atomspace.pxd)
+        if tv_type != 'simple':
+            if tv_type in ['composite', 'count', 'indefinite']:
+                # @todo: check error type
+                abort(400, 'Invalid request: truthvalue type \'' + tv_type + '\' is not supported')
+            else:
+                # @todo: check error type
+                abort(400, 'Invalid request: type \'' + tv_type + '\' is not a valid truthvalue type')
+
+        if 'details' in data['truthvalue']:
+            if 'strength' in data['truthvalue']['details'] and 'count' in data['truthvalue']['details']:
+                tv = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
+            else:
+                abort(400, 'Invalid request: truthvalue details object requires both a strength and count parameter')
+        else:
+            abort(400, 'Invalid request: truthvalue object requires a details parameter')
+
+        return tv
+
+
+class ParseAttentionValue(object):
+    @staticmethod
+    def parse(data):
+        av = data['attentionvalue']
+        sti = av['sti'] if 'sti' in av else None
+        lti = av['lti'] if 'lti' in av else None
+        vlti = av['vlti'] if 'vlti' in av else None
+
+        return sti, lti, vlti
 
 class FormatAtomList(object):
     @staticmethod
@@ -141,40 +182,22 @@ class AtomListAPI(Resource):
         data = reqparse.request.get_json()
 
         if 'type' in data:
+            type = data['type']
             if type in types.__dict__:
                 type = types.__dict__.get(data['type'])
             else:
-                abort(400, 'Invalid request: type \'' + data['type'] + '\' is not a valid type')
+                abort(400, 'Invalid request: type \'' + type + '\' is not a valid type')
         else:
             abort(400, 'Invalid request: required parameter type is missing')
 
         # TruthValue
-        if 'truthvalue' in data:
-            if 'type' in data['truthvalue']:
-                tv_type = data['truthvalue']['type']
-            else:
-                abort(400, 'Invalid request: truthvalue object requires a type parameter')
-            if 'details' in data['truthvalue']:
-                if 'strength' in data['truthvalue']['details'] and 'count' in data['truthvalue']['details']:
-                    tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
-                else:
-                    abort(400, 'Invalid request: truthvalue details object requires both a strength and count parameter')
-            else:
-                abort(400, 'Invalid request: truthvalue object requires a details parameter')
-        else:
-            abort(400, 'Invalid request: required parameter truthvalue is missing')
+        tv = ParseTruthValue.parse(data)
 
         # Outgoing set
-        if 'outgoing' in data:
-            outgoing = data['outgoing']
-        else:
-            outgoing = None
+        outgoing = data['outgoing'] if 'outgoing' in data else None
 
         # Name
-        if 'name' in data:
-            name = data['name']
-        else:
-            name = None
+        name = data['name'] if 'name' in data else None
 
         # Nodes must have names
         if is_a(type, types.Node):
@@ -185,22 +208,10 @@ class AtomListAPI(Resource):
             if name is not None:
                 abort(400, 'Invalid request: parameter name is not allowed for link types')
 
-        # @todo: Cython bindings don't provide support for other TruthValue types yet
-        #        (see: opencog\cython\opencog\atomspace_details.pyx, opencog\cython\opencog\atomspace.pxd)
-        if tv_type != 'simple':
-            if tv_type in ['composite', 'count', 'indefinite']:
-                # @todo: check error type
-                abort(500)  # say we don't support those yet
-            else:
-                # @todo: check error type
-                abort(500)
-
         try:
-            atom = self.atomspace.add(t=type, name=name, tv=tv_details, out=outgoing)
+            atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
         except TypeError:
-            # @todo: check what is the proper error type
-            print "Debug: TypeError - check your parameters"
-            abort(500)
+            abort(500, 'Error while processing your request. Check your parameters.')
 
         return {'atom': marshal(atom, atom_fields)}
 
@@ -234,49 +245,26 @@ class AtomAPI(Resource):
 
         return {'atom': marshal(atom, atom_fields)}
 
-    '''
-    @todo PUT
-    "update the STI, LTI, or TV of an atom with JSON message",
-    "Usage: json-update-atom handle {JSON}\n\n"
-    "   Update an atom based on a JSON message with format:\n"
-    "   { \"sti\": STI } \n"
-    "   { \"lti\": LTI } \n"
-    "   { \"tv\": {tv details} } \n",
-    # @todo: support PATCH for partial update
-    #def put(self, id):
-    '''
-
     def put(self, id):
         """
         Update the STI, LTI or TruthValue of an atom
         """
 
+        # @todo: check if handle exists
+
         # Prepare the atom data
         data = reqparse.request.get_json()
 
-        try:
-            tv_type = data['truthvalue']['type']
-            tv_details = TruthValue(data['truthvalue']['details']['strength'], data['truthvalue']['details']['count'])
-        except KeyError:
-            tv_type = None
+        if 'truthvalue' not in data and 'attentionvalue' not in data:
+            abort(400, 'Invalid request: you must include a truthvalue or attentionvalue parameter')
 
-        try:
-            sti = data['attentionvalue']['sti']
+        if 'truthvalue' in data:
+            tv = ParseTruthValue.parse(data)
+            self.atomspace.set_tv(h=Handle(id), val=tv)
 
-            print marshal(data['attentionvalue'], av_fields)
-        except KeyError:
-            av = None
-
-        # Perform validation on the atom data
-        if tv_type != 'simple' and tv_type is not None:
-            if tv_type in ['composite', 'count', 'indefinite']:
-                # @todo: check error type
-                abort(500)  # say we don't support those yet
-            else:
-                # @todo: check error type
-                abort(500)
-
-
+        if 'attentionvalue' in data:
+            (sti, lti, vlti) = ParseAttentionValue.parse(data)
+            self.atomspace.set_av(h=Handle(id), sti=sti, lti=lti, vlti=vlti)
 
 
 class RESTApi(object):
@@ -312,6 +300,10 @@ if __name__ == '__main__':
 
 '''
 now
+@todo separate the parsing and main api into separate files
+@todo use named tuples in the parsing
+@todo see if the atomspace throws when giving weird values as tv or av updates
+@todo handle put of invalid handle
 # @todo: Return JSON errors
 
         # @todo: ? Linas says handle isn't supposed to be the only id - how about a get method using name/type pair?
@@ -361,5 +353,17 @@ payload = {'type': 'ConceptNode', 'name': 'ugly_frog_prince4', 'truthvalue': tru
 headers = {'content-type': 'application/json'}
 r = post('http://localhost:5000/api/v1.0/atoms', data=json.dumps(payload), headers=headers)
 print json.dumps(r.json(), indent=2)
+
+
+# PUT
+g = get('http://localhost:5000/api/v1.0/atoms/1')
+print json.dumps(g.json(), indent=4)
+truthvalue = {'type': 'simple', 'details': {'strength': 0.6, 'count': 0.5}}
+payload = {'truthvalue': truthvalue, 'attentionvalue': {'sti': 9, 'lti': 2}}
+p = put('http://localhost:5000/api/v1.0/atoms/1', data=json.dumps(payload), headers=headers)
+print json.dumps(p.json(), indent=4)
+g = get('http://localhost:5000/api/v1.0/atoms/1')
+print json.dumps(g.json(), indent=4)
+
 
 """
