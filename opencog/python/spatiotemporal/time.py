@@ -1,9 +1,11 @@
-__author__ = 'keyvan'
+import math
 from calendar import timegm
 from datetime import datetime
 from random import random
 from scipy.stats import t
 from scipy.stats.distributions import rv_frozen
+
+__author__ = 'keyvan'
 
 TEMPORAL_RELATIONS = {
     'p': 'precedes',
@@ -77,8 +79,17 @@ class Period(object):
             assert self.a <= stop <= self.b, "'stop' should be within the interval of the period"
         return random_time(start, stop, probability_distribution)
 
+    @property
+    def integer_range(self):
+        int_a = int(math.ceil(self.a))
+        if isinstance(self.b, int):
+            int_b = self.b + 1
+        else:
+            int_b = int(math.ceil(self.b))
+        return xrange(int_a, int_b, self.iter_step)
+
     def __iter__(self):
-        return xrange(self.a, self.b, self.iter_step)
+        return iter(self.integer_range)
 
     def __len__(self):
         return float(self.b - self.a)
@@ -120,14 +131,24 @@ class BaseTemporalEvent(object):
         period = self._period_pre_check(period)
         return max(self.pdf(period))
 
-    def __str__(self):
-        return 'TemporalEvent(a:{0}, b:{3})'.format(self.period.a, self.period.b)
+    @property
+    def iter_step(self):
+        return self.period.iter_step
 
-    def __repr__(self):
-        return str(self)
+    @iter_step.setter
+    def iter_step(self, value):
+        self.period.iter_step = value
+
+    def __iter__(self):
+        return iter(self.period)
 
     def __len__(self):
         return len(self.period)
+
+    def __repr__(self):
+        return 'spatiotemporal.time.TemporalEvent(a:{0}, b:{1})'.format(self.period.a, self.period.b)
+
+    __str__ = __repr__
 
 
 class TemporalEvent(BaseTemporalEvent):
@@ -182,7 +203,7 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
             assert ending_factor > 0
             self.ending_factor = ending_factor
 
-        if beginning, ending != (None, None):
+        if (beginning, ending) != (None, None):
             assert self.period.a < beginning < ending < self.period.b, "'beginning' and 'ending' should be " \
                                                                        "within the interval of event's period and " \
                                                                        "'ending' should be greater than 'beginning'"
@@ -215,11 +236,9 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
         period = self._period_pre_check(period)
         return max(self._pdf_specialised(period.a), self._pdf_specialised(period.b))
 
-    def __str__(self):
-        return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(self.period.a,
-                                                                                         self.beginning,
-                                                                                         self.ending,
-                                                                                         self.period.b)
+    def __repr__(self):
+        return 'spatiotemporal.time.PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
+            self.period.a, self.beginning, self.ending, self.period.b)
 
 
 class TemporalRelation(list):
@@ -263,11 +282,13 @@ class TemporalRelation(list):
 def generate_random_events(size=100):
     events = []
     year_2010 = Period(datetime(2010, 1, 1), datetime(2011, 1, 1))
+    iter_step = 100
 
     for i in xrange(size):
         start = year_2010.random_time()
         end = year_2010.random_time(start)
         event = PiecewiseTemporalEvent(start, end)
+        event.iter_step = iter_step
         events.append(event)
 
     return events
@@ -297,33 +318,15 @@ def create_event_relation_hashtable(temporal_events):
 
 
 if __name__ == '__main__':
-    #events = generate_random_events()
-    #import matplotlib.pyplot as plt
-    #
-    #for event in events:
-    #    x = range(event.period.start, event.period.end, 100)
-    #    y = event.fuzzy_membership(x)
-    #    plt.plot(x, y)
-    #
-    #plt.show()
+    events = generate_random_events()
+    import matplotlib.pyplot as plt
 
-    events = generate_random_events(10)
-    table = create_event_relation_hashtable(events)
-    print table
+    for event in events:
+        y = event.pdf(event)
+        plt.plot(event.period.integer_range, y)
 
-    #from random import random
-    #size = 100000
-    #happened = float(0)
-    #for i in xrange(size):
-    #    a, b, c = False, False, False
-    #    r = random()
-    #    if r < 0.3:
-    #        a = True
-    #    if r < 0.5:
-    #        b = True
-    #    if r < 0.7:
-    #        c = True
-    #    if a or b or c:
-    #        happened += 1
-    #
-    #print happened / size
+    plt.show()
+
+    #events = generate_random_events(10)
+    #table = create_event_relation_hashtable(events)
+    #print table
