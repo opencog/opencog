@@ -27,6 +27,9 @@
 #ifndef _OPENCOG_ATOM_H
 #define _OPENCOG_ATOM_H
 
+#include <memory>
+#include <mutex>
+#include <set>
 #include <string>
 
 #include <opencog/atomspace/TruthValue.h>
@@ -77,15 +80,13 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
-    /** @todo atoms fundamentally must not be clonable! Yeah? */
-    virtual AtomPtr clone() const = 0;
-
     Handle handle;
     AtomTable *atomTable;
 
     Type type;
     char flags;
 
+    // XXX TODO: this should be a std::shared_ptr not a raw pointer.
     TruthValue *truthValue;
 
     /**
@@ -99,6 +100,27 @@ protected:
      */
     Atom(Type, const TruthValue& = TruthValue::NULL_TV(),
             const AttentionValue& = AttentionValue::DEFAULT_AV());
+
+    struct IncomingSet
+    {
+        // Just right now, we will use a single shared mutex for all
+        // locking on the incoming set.  If this causes too much
+        // contention, then we can fall back to a non-global lock,
+        // at the cost of 40 additional bytes per atom.
+        static std::mutex _mtx;
+        // incoming set is not tracked by garbage collector,
+        // to avoid cyclic references.
+        // std::set<ptr> uses 48 bytes (per atom).
+        std::set<LinkPtr> _iset;
+    };
+    typedef std::shared_ptr<IncomingSet> IncomingSetPtr;
+    IncomingSetPtr _incoming_set;
+    void keep_incoming_set();
+    void drop_incoming_set();
+
+    // Insert and remove links from the incoming set.
+    void insert_atom(LinkPtr);
+    void remove_atom(LinkPtr);
 
 public:
 

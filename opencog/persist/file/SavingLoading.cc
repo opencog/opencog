@@ -522,7 +522,7 @@ NodePtr SavingLoading::readNode(FILE* f, Type t, HandleMap<AtomPtr>* handles)
     logger().fine("SavingLoading::readNode()");
 
     // the atom properties of the node is read from the file
-    AtomPtr junk(new Node(t, ""));
+    AtomPtr junk(createNode(t, ""));
     Handle h = readAtom(f, junk);
 
     // the node's name is read from the file
@@ -540,7 +540,7 @@ NodePtr SavingLoading::readNode(FILE* f, Type t, HandleMap<AtomPtr>* handles)
 
     CHECK_FREAD;
 
-    NodePtr n(new Node(t, nam));
+    NodePtr n(createNode(t, nam));
     n->setAttentionValue(junk->getAttentionValue());
     n->setTruthValue(junk->getTruthValue());
 
@@ -644,7 +644,7 @@ LinkPtr SavingLoading::readLink(FILE* f, Type t, HandleMap<AtomPtr>* handles)
 {
     logger().fine("SavingLoading::readLink()");
 
-    AtomPtr junk(new Link(t, HandleSeq()));
+    AtomPtr junk(createLink(t, HandleSeq()));
     Handle h = readAtom(f, junk);
 
     // the link's arity is read from the file
@@ -659,7 +659,7 @@ LinkPtr SavingLoading::readLink(FILE* f, Type t, HandleMap<AtomPtr>* handles)
         FREAD_CK(&h, sizeof(Handle), 1, f);
         oset.push_back( handles->get(h)->getHandle() );
     }
-    LinkPtr link(new Link(t, oset));
+    LinkPtr link(createLink(t, oset));
     link->setAttentionValue(junk->getAttentionValue());
     link->setTruthValue(junk->getTruthValue());
     handles->add(h, link);

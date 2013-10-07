@@ -162,25 +162,6 @@ public:
                    const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * DEPRECATED!
-     *
-     * Add an atom an optional TruthValue object to the Atom Table
-     * This is a deprecated function; do not use it in new code,
-     * if at all possible.
-     *
-     * @param atom the handle of the Atom to be added
-     * @param tvn the TruthValue object to be associated to the added
-     *        atom. NULL if the own atom's tv must be used.
-     * @deprecated This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink (which is a bit faster too).
-     */
-    Handle addRealAtom(const Atom& atom,
-                       const TruthValue& tvn = TruthValue::NULL_TV());
-
-    /**
      * Removes an atom from the atomspace
      *
      * @param h The Handle of the atom to be removed.

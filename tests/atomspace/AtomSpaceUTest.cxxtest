@@ -752,7 +752,7 @@ public:
         Handle h1 = atomSpace->addNode(NODE, "test1");
         AtomPtr a = atomSpace->cloneAtom(h1);
         a->setTruthValue(SimpleTruthValue(0.001f, 0.00001f));
-        atomSpace->commitAtom(*a);
+        atomSpace->commitAtom(a);
         TS_ASSERT(atomSpace->getMean(h1) == 0.001f);
 
     }

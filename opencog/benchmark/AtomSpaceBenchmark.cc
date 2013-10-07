@@ -386,7 +386,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         }
         case BENCH_TABLE: {
             clock_t t_begin = clock();
-            atab->add(NodePtr(new Node(t,s)));
+            atab->add(createNode(t,s));
             return clock() - t_begin;
         }
         case BENCH_AS: {
@@ -449,7 +449,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
         }
         case BENCH_TABLE: {
             clock_t t_begin = clock();
-            atab->add(NodePtr(new Node(t, oss.str())));
+            atab->add(createNode(t, oss.str()));
             return clock() - t_begin;
         }
         case BENCH_AS: {
@@ -519,7 +519,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
     case BENCH_TABLE: {
         tAddLinkStart = clock();
-        atab->add(LinkPtr(new Link(t, outgoing)));
+        atab->add(createLink(t, outgoing));
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {

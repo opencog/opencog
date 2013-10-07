@@ -36,8 +36,10 @@ using namespace opencog;
 void Node::init( const std::string& cname)
 throw (InvalidParamException, AssertionException)
 {
-    if (!classserver().isA(type, NODE)) {
-        throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
+    if (not classserver().isA(type, NODE)) {
+        throw InvalidParamException(TRACE_INFO,
+        "Node - Invalid node type '%d' %s.", 
+        type, classserver().getTypeName(type).c_str());
     }
     name = cname;
 }
@@ -85,12 +87,4 @@ bool Node::operator!=(const Atom& other) const
 {
     return !(*this == other);
 }
-
-// XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
-// the concept is invalid!
-AtomPtr Node::clone() const
-{
-    return AtomPtr(new Node(*this));
-}
-
 
