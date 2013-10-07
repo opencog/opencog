@@ -304,12 +304,13 @@ now
 @todo use named tuples in the parsing
 @todo see if the atomspace throws when giving weird values as tv or av updates
 @todo handle put of invalid handle
+@todo write unit tests
+@todo add dependencies to ocpkg, detect dependency existence in cmake
 # @todo: Return JSON errors
 
-        # @todo: ? Linas says handle isn't supposed to be the only id - how about a get method using name/type pair?
-        # @todo: support setting outgoing links (and incoming?)
-        # @todo: Document how to test the API using curl and Python 'request'
-        # @todo: check if the truth value type enumeration is complete
+@todo: ? Linas says handle isn't supposed to be the only id - how about a get method using name/type pair?
+@todo: Document how to test the API using curl and Python 'request'
+@todo: check if the truth value type enumeration is complete
 
 '''
 
