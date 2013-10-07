@@ -50,6 +50,12 @@ struct HandleComparison
 void Link::init(const std::vector<Handle>& outgoingVector)
 	throw (InvalidParamException)
 {
+    if (not classserver().isA(type, LINK)) {
+        throw InvalidParamException(TRACE_INFO,
+            "Link - Invalid node type '%d' %s.",
+            type, classserver().getTypeName(type).c_str());
+    }
+
     trail = new Trail();
     _outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing

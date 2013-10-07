@@ -235,9 +235,9 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    Handle newLinkHandle = atomTable.add(LinkPtr(createLink(t, outgoing, tvn)));
+    Handle newLinkHandle = atomTable.add(createLink(t, outgoing, tvn));
     // emit add atom signal
-    _addAtomSignal(this,newLinkHandle);
+    _addAtomSignal(this, newLinkHandle);
     return newLinkHandle;
 }
 
