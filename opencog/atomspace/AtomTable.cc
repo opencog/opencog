@@ -540,11 +540,32 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     const UnorderedHandleSet& is = getIncomingSet(handle);
     if (0 < is.size())
     {
+        // It is very tempting to just throw, here, but apparently,
+        // someone somewhere thinks that it is more appropriate to
+        // log a warning, instead.  Not clear to my why this is a
+        // wise decision .. perhaps there is some race condition
+        // removal due to attention value miscalculation? ???
+        // XXX TODO Review the policy here and rationalize it.
+        // throw RuntimeException(TRACE_INFO,
+        //   "Cannot extract an atom with a non-trivial incoming set!");
+
         // XXX well, I guess we could/should check to see if any atoms 
         // in the incoming set belong to this atomspace. Because if
         // none of them do, then it would be ok to extract...
-        throw RuntimeException(TRACE_INFO,
-            "Cannot extract an atom with a non-trivial incoming set!");
+        Logger::Level save = logger().getBackTraceLevel();
+        logger().setBackTraceLevel(Logger::NONE);
+        logger().warn("AtomTable.extract(): "
+           "attempting to extract atom with non-empty incoming set: %s\n",
+           atom->toShortString().c_str());
+        UnorderedHandleSet::const_iterator it;
+        for (it = is.begin(); it != is.end(); it++)
+        {
+            logger().warn("\tincoming: %s\n", 
+                 getAtom(*it)->toShortString().c_str());
+        }
+        logger().setBackTraceLevel(save);
+        logger().warn("AtomTable.extract(): stack trace for previous error follows");
+
         atom->unsetRemovalFlag();
         return AtomPtrSet();
     }
