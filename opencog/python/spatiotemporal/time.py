@@ -1,10 +1,9 @@
 __author__ = 'keyvan'
 from calendar import timegm
 from datetime import datetime
-from random import randrange
+from random import random
 from scipy.stats import t
 from scipy.stats.distributions import rv_frozen
-from scipy import integrate
 
 TEMPORAL_RELATIONS = {
     'p': 'precedes',
@@ -24,156 +23,105 @@ TEMPORAL_RELATIONS = {
 
 
 def is_unix_time(time):
-    return (isinstance(time, int) or isinstance(time, float)) and time > 0
+    return isinstance(time, (int, float, long)) and time > 0
 
 
 def convert_to_unix_time(time):
-    if time is None:
-        return None
     if isinstance(time, datetime):
         return timegm(time.utctimetuple())
-    assert is_unix_time(time)
+    assert is_unix_time(time), 'passed parameter is not a valid unix time'
     return time
 
 
-def random_time(start, end=None,
-                probability_distribution=None):
+def random_time(start, stop, probability_distribution=None):
     """
-    start and end can be in either datetime or unix time
+    start and stop can be in either datetime or unix time
     return value is in unix time
     """
-    assert start is not None
     start = convert_to_unix_time(start)
-    end = convert_to_unix_time(end)
+    stop = convert_to_unix_time(stop)
+    assert start < stop, "'stop' should be greater than start"
     if probability_distribution is None:
-        return randrange(start, end)
-    assert isinstance(probability_distribution, rv_frozen)
-    assert end is not None
+        return random() * (stop - start) + start
+    assert isinstance(probability_distribution,
+                      rv_frozen), "'probability_distribution' should be a scipy frozen distribution"
     random_value = probability_distribution.rvs()
     if random_value < start:
         return start
-    if random_value > end:
-        return end
+    if random_value > stop:
+        return stop
     return random_value
 
 
 class Period(object):
-    def __init__(self, start, end):
-        """
-        start and end can be in either datetime or unix time
-        """
-        self.start = convert_to_unix_time(start)
-        self.end = convert_to_unix_time(end)
-        assert self.start <= self.end
+    iter_step = 1
 
-    def random(self, start=None, end=None,
-               probability_distribution=None):
+    def __init__(self, a, b):
+        """
+        a and b can be in either datetime or unix time
+        """
+        self.a = convert_to_unix_time(a)
+        self.b = convert_to_unix_time(b)
+        assert self.a < self.b, "'b' should be greater than 'a'"
+
+    def random_time(self, start=None, stop=None, probability_distribution=None):
         if start is None:
-            start = self.start
+            start = self.a
         else:
             start = convert_to_unix_time(start)
-            assert start >= self.start
-        if end is None:
-            end = self.end
+            assert self.a <= start <= self.b, "'start' should be within the interval of the period"
+        if stop is None:
+            stop = self.b
         else:
-            end = convert_to_unix_time(end)
-            assert end <= self.end
-        return random_time(start, end, probability_distribution)
+            stop = convert_to_unix_time(stop)
+            assert self.a <= stop <= self.b, "'stop' should be within the interval of the period"
+        return random_time(start, stop, probability_distribution)
 
     def __iter__(self):
-        return xrange(self.start, self.end)
+        return xrange(self.a, self.b, self.iter_step)
 
     def __len__(self):
-        return float(self.end - self.start)
+        return float(self.b - self.a)
 
 
-def _interpolation_start_to_beginning(t, start, beginning):
-    a = 1 / (beginning - start)
-    b = -1 * a * start
-    return a * t + b
+class BaseTemporalEvent(object):
+    def __init__(self, a, b):
+        self.a = convert_to_unix_time(a)
+        self.b = convert_to_unix_time(b)
+        self.period = Period(a, b)
 
-
-def _interpolation_ending_to_end(t, ending, end):
-    a = -1 / (end - ending)
-    b = -1 * a * end
-    return a * t + b
-
-
-def _interpolation_temporal_event(t, temporal_event):
-    assert is_unix_time(t)
-    if t <= temporal_event.period.start or t >= temporal_event.period.end:
-        return 0
-    if temporal_event.period.start < t < temporal_event.beginning:
-        return _interpolation_start_to_beginning(t, temporal_event.period.start, temporal_event.beginning)
-    if temporal_event.ending < t < temporal_event.period.end:
-        return _interpolation_ending_to_end(t, temporal_event.ending, temporal_event.period.end)
-    return 1
-
-
-class TemporalEvent(object):
-    beginning_factor = 5
-    ending_factor = 5
-
-    def __init__(self, start, end, beginning_factor=None, ending_factor=None):
+    def _pdf_specialised(self, time_step):
         """
-        start and end can be in either datetime or unix time
+        to override, default pdf calls to it
+        alternatively one can directly override pdf
         """
-        self.period = Period(start, end)
+        pass
 
-        if beginning_factor is not None:
-            assert beginning_factor > 0
-            self.beginning_factor = beginning_factor
-        if ending_factor is not None:
-            assert ending_factor > 0
-            self.ending_factor = ending_factor
-
-        self.beginning, self.ending = 0, 0
-
-        while not self.period.start < self.beginning < self.ending < self.period.end:
-            self.beginning = self.period.random(
-                probability_distribution=t(
-                    # df, mean, variance
-                    4,
-                    self.period.start + len(self) / self.beginning_factor,
-                    len(self) / self.beginning_factor
-                )
-            )
-
-            self.ending = self.period.random(
-                probability_distribution=t(
-                    # df, mean, variance
-                    4,
-                    self.period.end - len(self) / self.ending_factor,
-                    len(self) / self.ending_factor
-                )
-            )
-
-    def fuzzy_membership(self, time):
+    def pdf(self, x):
         """
         time can either be a single value or a collection
         """
         result = []
         try:
-            for time_step in time:
-                result.append(_interpolation_temporal_event(time_step, self))
+            for time_step in x:
+                result.append(self._pdf_specialised(time_step))
         except:
-            return _interpolation_temporal_event(time, self)
+            return self._pdf_specialised(x)
         return result
 
-    def probability_in_period(self, period, closed_start=True, closed_end=True):
-        start, end = period.start, period.end
-        if not closed_start:
-            start += 1
-        if not closed_end:
-            end -= 1
-        area = integrate.quad(_interpolation_temporal_event, start, end, self)[0]
-        return area / float(end - start)
+    def _period_pre_check(self, period):
+        if period is None:
+            period = self.period
+        else:
+            assert isinstance(period, Period), "'period' should be of type 'spatiotemporal.time.Period'"
+        return period
+
+    def probability_in_period(self, period=None):
+        period = self._period_pre_check(period)
+        return max(self.pdf(period))
 
     def __str__(self):
-        return 'TemporalEvent(start:{0} , beginning:{1}, ending:{2}, end:{3})'.format(self.period.start,
-                                                                                      self.beginning,
-                                                                                      self.ending,
-                                                                                      self.period.end)
+        return 'TemporalEvent(a:{0}, b:{3})'.format(self.period.a, self.period.b)
 
     def __repr__(self):
         return str(self)
@@ -182,10 +130,102 @@ class TemporalEvent(object):
         return len(self.period)
 
 
+class TemporalEvent(BaseTemporalEvent):
+    def __init__(self, a, b, pdf):
+        BaseTemporalEvent.__init__(self, a, b)
+        assert callable(pdf), "'pdf' should be callable"
+        self.pdf = pdf
+        self._pdf_specialised = pdf
+
+
+def _interpolation_a_to_beginning(t, a, beginning):
+    _a = 1 / (beginning - a)
+    _b = -1 * _a * a
+    return _a * t + _b
+
+
+def _interpolation_ending_to_b(t, ending, b):
+    _a = -1 / (b - ending)
+    _b = -1 * _a * b
+    return _a * t + _b
+
+
+def _interpolation_a_to_b(t, a, beginning, ending, b):
+    t = convert_to_unix_time(t)
+    if t <= a or t >= b:
+        return 0
+    if a < t < beginning:
+        return _interpolation_a_to_beginning(t, a, beginning)
+    if ending < t < b:
+        return _interpolation_ending_to_b(t, ending, b)
+    return 1
+
+
+class PiecewiseTemporalEvent(BaseTemporalEvent):
+    beginning_factor = 5
+    ending_factor = 5
+
+    def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None):
+        """
+        start and end can be in either datetime or unix time
+        """
+        if (beginning, ending) != (None, None):
+            assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent init only accepts " \
+                                                                      "either 'beginning_factor' and 'ending_factor' " \
+                                                                      "or 'beginning' and 'ending'"
+        BaseTemporalEvent.__init__(self, a, b)
+
+        if beginning_factor is not None:
+            assert beginning_factor > 0
+            self.beginning_factor = beginning_factor
+        if ending_factor is not None:
+            assert ending_factor > 0
+            self.ending_factor = ending_factor
+
+        if beginning, ending != (None, None):
+            assert self.period.a < beginning < ending < self.period.b, "'beginning' and 'ending' should be " \
+                                                                       "within the interval of event's period and " \
+                                                                       "'ending' should be greater than 'beginning'"
+            self.beginning, self.ending = beginning, ending
+        else:
+            self.beginning, self.ending = 0, 0
+            while not self.period.a < self.beginning < self.ending < self.period.b:
+                self.beginning = self.period.random_time(
+                    probability_distribution=t(
+                        # df, mean, variance
+                        4,
+                        self.period.a + len(self) / self.beginning_factor,
+                        len(self) / self.beginning_factor
+                    )
+                )
+
+                self.ending = self.period.random_time(
+                    probability_distribution=t(
+                        # df, mean, variance
+                        4,
+                        self.period.b - len(self) / self.ending_factor,
+                        len(self) / self.ending_factor
+                    )
+                )
+
+    def _pdf_specialised(self, time_step):
+        return _interpolation_a_to_b(time_step, self.a, self.beginning, self.ending, self.b)
+
+    def probability_in_period(self, period=None):
+        period = self._period_pre_check(period)
+        return max(self._pdf_specialised(period.a), self._pdf_specialised(period.b))
+
+    def __str__(self):
+        return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(self.period.a,
+                                                                                         self.beginning,
+                                                                                         self.ending,
+                                                                                         self.period.b)
+
+
 class TemporalRelation(list):
     def __init__(self, constituent_string, temporal_event_1, temporal_event_2):
+        assert isinstance(temporal_event_1, BaseTemporalEvent) and isinstance(temporal_event_2, BaseTemporalEvent)
         self.append(constituent_string)
-        assert isinstance(temporal_event_1, TemporalEvent) and isinstance(temporal_event_2, TemporalEvent)
         self.temporal_event_1 = temporal_event_1
         self.temporal_event_2 = temporal_event_2
 
@@ -225,9 +265,9 @@ def generate_random_events(size=100):
     year_2010 = Period(datetime(2010, 1, 1), datetime(2011, 1, 1))
 
     for i in xrange(size):
-        start = year_2010.random()
-        end = year_2010.random(start)
-        event = TemporalEvent(start, end)
+        start = year_2010.random_time()
+        end = year_2010.random_time(start)
+        event = PiecewiseTemporalEvent(start, end)
         events.append(event)
 
     return events
@@ -270,3 +310,20 @@ if __name__ == '__main__':
     events = generate_random_events(10)
     table = create_event_relation_hashtable(events)
     print table
+
+    #from random import random
+    #size = 100000
+    #happened = float(0)
+    #for i in xrange(size):
+    #    a, b, c = False, False, False
+    #    r = random()
+    #    if r < 0.3:
+    #        a = True
+    #    if r < 0.5:
+    #        b = True
+    #    if r < 0.7:
+    #        c = True
+    #    if a or b or c:
+    #        happened += 1
+    #
+    #print happened / size
