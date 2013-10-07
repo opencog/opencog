@@ -275,19 +275,20 @@ class MemberToInheritanceRule(Rule):
             outputs= [chainer.link(types.InheritanceLink, [A, B])],
             inputs=  [chainer.link(types.MemberLink, [A, B])])
 
-class AttractionEvaluationRule(Rule):
+class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
-       s = Subset(A, B).s - Subset(Not(A), B).
-       Attraction founder rich = % of founders who are rich - % normal people who are rich'''
+       P(Attr A B) = P(B|A) - P(B). (If it's a negative number just say 0)
+       It should be P(B|Not A) rather than P(B) but that would be more expensive/annoying.'''
     def __init__(self, chainer):
         self._chainer = chainer
         A = chainer.new_variable()
         B = chainer.new_variable()
 
         Rule.__init__(self,
-            formula= None,
+            formula= formulas.attractionFormula,
             outputs= [chainer.link(types.AttractionLink, [A, B])],
-            inputs= None)
+            inputs=  [chainer.link(types.SubsetLink, [A, B]),
+                      B])
 
 class ASSOCEvaluationRule(Rule):
     '''Creates the extensional association set of ConceptNode C (called ASSOC_ext(C).

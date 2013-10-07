@@ -163,6 +163,14 @@ def subsetEvaluationFormula(tvs):
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
 
+def attractionFormula(tvs):
+    [ab, b] = tvs
+
+    mean = ab.mean + b.mean
+    count = ab.count
+
+    return [TruthValue(mean, count)]
+
 def revisionFormula(tvs):
     x, y = tvs
     # revise two truth values
