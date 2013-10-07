@@ -43,7 +43,6 @@ namespace opencog
  */
 class Node : public Atom
 {
-    friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -58,8 +57,6 @@ private:
 #endif
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
-    /** @todo cloning atoms is a fundamental violation oft he architecture. */
-    virtual AtomPtr clone() const;
 public:
 
     /**
@@ -78,7 +75,7 @@ public:
     }
 
     /** Copy constructor, does not copy atom table membership! */
-    Node(const Node &n) 
+    Node(const Node &n)
         : Atom(n.getType(),n.getTruthValue(),n.getAttentionValue()) {
         init(n.name);
     }
@@ -113,7 +110,7 @@ public:
     virtual bool operator!=(const Atom&) const;
 };
 
-// XXX temporary hack ... 
+// XXX temporary hack ...
 #define createNode std::make_shared<Node>
 
 /** @}*/

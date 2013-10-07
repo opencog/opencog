@@ -87,7 +87,7 @@ AtomSpace::AtomSpace(const AtomSpace& other)
 
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-void AtomSpace::setUpCaching() 
+void AtomSpace::setUpCaching()
 {
     // Initialise lru cache for getType
     __getType = new _getType(this);
@@ -174,7 +174,7 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
 
@@ -229,12 +229,12 @@ AtomPtr AtomSpace::cloneAtom(const Handle& h) const
     return atomSpaceAsync->getAtom(h)->get_result();
 }
 
-bool AtomSpace::isValidHandle(const Handle& h) const 
+bool AtomSpace::isValidHandle(const Handle& h) const
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
 }
 
-bool AtomSpace::commitAtom(const Atom& a)
+bool AtomSpace::commitAtom(const AtomPtr a)
 {
     return atomSpaceAsync->commitAtom(a)->get_result();
 }

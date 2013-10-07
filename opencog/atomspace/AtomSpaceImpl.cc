@@ -125,7 +125,7 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, AtomPtr atom)
         // the CompositeTV into a simple or indefinite TV when it has
         // no more VersionedTV
         setTV(ca, new_ctv);
-    } 
+    }
 }
 
 // ====================================================================
@@ -137,13 +137,13 @@ void AtomSpaceImpl::print(std::ostream& output, Type type, bool subclass) const
 
 AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
 AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpaceImpl - Cannot copy an object of this class");
 }
 
@@ -173,7 +173,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
     Handle result = getHandle(t, name);
     if (atomTable.holds(result)) {
-        atomTable.merge(result, tvn); 
+        atomTable.merge(result, tvn);
         // emit "merge atom" signal
         _mergeAtomSignal(this,result);
         return result;
@@ -210,8 +210,8 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
     Handle result = getHandle(t, outgoing);
     if (atomTable.holds(result)) {
-        // If the node already exists, it must be merged properly 
-        atomTable.merge(result, tvn); 
+        // If the node already exists, it must be merged properly
+        atomTable.merge(result, tvn);
         _mergeAtomSignal(this,result);
         return result;
     }
@@ -268,7 +268,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
         }
         if (a) return atomTable.add(a);
     }
-    
+
     return Handle::UNDEFINED;
 }
 
@@ -296,20 +296,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 AtomPtr AtomSpaceImpl::cloneAtom(Handle h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
-    // Need to use the newly added clone methods as the copy constructors for
-    // Node and Link don't copy incoming set.
-    AtomPtr a(atomTable.getAtom(h));
-    if (!a) return a;
-    NodePtr node(NodeCast(a));
-    if (!node) {
-        LinkPtr l(LinkCast(a));
-        if (!l) return a;
-        AtomPtr clone_link(l->clone());
-        return clone_link;
-    } else {
-        AtomPtr clone_node(node->clone());
-        return clone_node;
-    }
+    return atomTable.getAtom(h);
 }
 
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
@@ -323,7 +310,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
-        bool fanout, Type desiredLinkType, bool subClasses) const 
+        bool fanout, Type desiredLinkType, bool subClasses) const
 {
     AtomPtr a(atomTable.getAtom(h));
     if (a == NULL) {
@@ -373,12 +360,12 @@ bool AtomSpaceImpl::commitAtom(AtomPtr a)
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)
 {
-    // It is possible that the incoming set that we currently 
+    // It is possible that the incoming set that we currently
     // hold is much smaller than what is in storage. In this case,
     // we would like to automatically pull all of those other atoms
     // into here (using fetchIncomingSet(h,true) to do so). However,
-    // maybe the incoming set is up-to-date, in which case polling 
-    // storage over and over is a huge waste of time.  What to do? 
+    // maybe the incoming set is up-to-date, in which case polling
+    // storage over and over is a huge waste of time.  What to do?
     //
     // h = fetchIncomingSet(h, true);
     //

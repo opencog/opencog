@@ -496,7 +496,7 @@ public:
      * @param a Atom to commit
      * @return whether the commit was successful
      */
-    bool commitAtom(const Atom& a);
+    bool commitAtom(const AtomPtr a);
 
     bool isValidHandle(const Handle& h) const;
 

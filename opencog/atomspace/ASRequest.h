@@ -351,9 +351,9 @@ public:
 class CommitAtomASR : public GenericASR <bool> {
     AtomPtr _atom;
 public:
-    CommitAtomASR(AtomSpaceImpl *a, const Atom& atom) :
+    CommitAtomASR(AtomSpaceImpl *a, AtomPtr atom) :
        GenericASR<bool>(a) {
-           _atom = AtomPtr((&atom)->clone());
+           _atom = atom;
        };
     
     virtual void do_work() {

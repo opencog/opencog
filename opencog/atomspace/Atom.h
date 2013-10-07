@@ -80,9 +80,6 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
-    /** @todo atoms fundamentally must not be clonable! Yeah? */
-    virtual AtomPtr clone() const = 0;
-
     Handle handle;
     AtomTable *atomTable;
 

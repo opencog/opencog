@@ -86,11 +86,3 @@ bool Node::operator!=(const Atom& other) const
     return !(*this == other);
 }
 
-// XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
-// the concept is invalid!
-AtomPtr Node::clone() const
-{
-    return AtomPtr(new Node(*this));
-}
-
-

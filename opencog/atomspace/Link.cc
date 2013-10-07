@@ -286,10 +286,3 @@ bool Link::operator!=(const Atom& other) const
     return !(*this == other);
 }
 
-// This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
-AtomPtr Link::clone() const
-{
-    return AtomPtr(createLink(*this));
-}
-
-

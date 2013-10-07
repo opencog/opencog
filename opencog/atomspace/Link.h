@@ -50,8 +50,6 @@ namespace opencog
  */
 class Link : public Atom
 {
-    friend class SavingLoading;  // needs access to setOutgoingSet()
-    friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -62,12 +60,6 @@ private:
     Link() {};
 #endif
     void init(const HandleSeq&) throw (InvalidParamException);
-
-    /**
-     * @todo cloning atoms is a fundamental violation of the architecture.
-     * this method should be removed.
-     */
-    virtual AtomPtr clone() const;
 
 protected:
 
@@ -105,7 +97,7 @@ public:
     }
 
     Link(Type t, Handle& h,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -114,7 +106,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -124,7 +116,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -134,7 +126,7 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -303,7 +295,7 @@ public:
     virtual bool operator!=(const Atom&) const;
 };
 
-// XXX temporary hack ... 
+// XXX temporary hack ...
 #define createLink std::make_shared<Link>
 
 /** @}*/
