@@ -26,11 +26,11 @@
 
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <unordered_set>
 #include <vector>
-
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -41,8 +41,10 @@ namespace opencog
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
 
+
 //! contains an unique identificator
-class Handle
+class Atom;
+class Handle : public std::shared_ptr<Atom>
 {
 
 friend class TLB;
