@@ -33,13 +33,46 @@
 
 namespace opencog
 {
-/** \addtogroup grp_cogutil
- *  @{
- */
+
+Handle addRealAtom(AtomSpace& as, const Atom& atom,
+                   const TruthValue& tvn = TruthValue::NULL_TV())
+{
+    const TruthValue& newTV = (tvn.isNullTv()) ? atom.getTruthValue() : tvn;
+    // Check if the given Atom reference is of an atom
+    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
+    // result to the correct/valid handle.
+   
+    Handle result;
+    const Node *node = dynamic_cast<const Node *>(&atom);
+    if (node) {
+        result = as.getHandle(node->getType(), node->getName());
+        if (result == Handle::UNDEFINED) {
+            return as.addNode(node->getType(), node->getName(), newTV);
+        }
+    } else {
+        const Link *link = dynamic_cast<const Link *>(&atom);
+        result = as.getHandle(link->getType(), link->getOutgoingSet());
+        if (result == Handle::UNDEFINED) {
+            return as.addLink(link->getType(), link->getOutgoingSet(), newTV);
+        }
+    }
+    const TruthValuePtr currentTV = as.getTV(result);
+    if (currentTV->isNullTv()) {
+        as.setTV(result, newTV);
+    } else {
+        TruthValue* mergedTV = currentTV->merge(newTV);
+        as.setTV(result, *mergedTV);
+        delete mergedTV;
+    }
+    return result;
+}
+
+
+
 
 /*
  * These functions appear to be used only by four test cases, and 
- * no-where else.  This should probably be moved to some test directory.
+ * no-where else.  
  */
 static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
 {
@@ -59,7 +92,7 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         Handle *h_ptr = boost::get<Handle>(&*i);
 
         if (h_ptr) {
-            handles.push_back(as.addRealAtom(*as.cloneAtom(*h_ptr), TruthValue::NULL_TV()));
+            handles.push_back(addRealAtom(as, *as.cloneAtom(*h_ptr), TruthValue::NULL_TV()));
         } else {
             handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
         }
@@ -74,7 +107,6 @@ static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& t
 }
 
 
-/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MISC_TEST_H

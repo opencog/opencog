@@ -293,40 +293,6 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
     return base;
 }
 
-Handle AtomSpaceImpl::addRealAtom(const Atom& atom, const TruthValue& tvn)
-{
-    DPRINTF("AtomSpaceImpl::addRealAtom\n");
-    const TruthValue& newTV = (tvn.isNullTv()) ? atom.getTruthValue() : tvn;
-    // Check if the given Atom reference is of an atom
-    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
-    // result to the correct/valid handle.
-    Handle result;
-    const Node *node = dynamic_cast<const Node *>(&atom);
-    if (node) {
-        result = getHandle(node->getType(), node->getName());
-        if (result == Handle::UNDEFINED) {
-            return addNode(node->getType(), node->getName(), newTV);
-        }
-    } else {
-        const Link *link = dynamic_cast<const Link *>(&atom);
-        result = getHandle(link->getType(), link->getOutgoingSet());
-        if (result == Handle::UNDEFINED) {
-            return addLink(link->getType(), link->getOutgoingSet(), newTV);
-        }
-    }
-    const TruthValue& currentTV = getTV(result);
-    if (currentTV.isNullTv()) {
-        setTV(result, newTV);
-    } else {
-        TruthValue* mergedTV = currentTV.merge(newTV);
-        setTV(result, *mergedTV);
-        delete mergedTV;
-    }
-
-    // XXX Should also merge Attention values and trails, right?
-    return result;
-}
-
 AtomPtr AtomSpaceImpl::cloneAtom(Handle h) const
 {
     // TODO: Add timestamp to atoms and add vector clock to AtomSpace
