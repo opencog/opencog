@@ -154,22 +154,37 @@ class OrCreationRule(Rule):
             inputs=  atoms)
 
 class IntersectionRule(Rule):
-    '''Compute AndLink(concepts) based on set theory. And(A B) is defined as
+    '''Compute the membership of AndLink(concepts) based on set theory. And(A B) is defined as
        the set of things that are members of both A and B (set intersection).
        Inputs: MemberLink(x, A) or MemberLink(x, B) for many objects/etc.'''
     def __init__(self, chainer, N):
         x = chainer.new_variable()
         variables = make_n_variables(chainer, N)
 
-        req = [chainer.link(types.MemberLink, [x, var]) for var in variables]
+        inputs = [chainer.link(types.MemberLink, [x, var]) for var in variables]
+        and_link = chainer.link(types.AndLink, variables)
 
         Rule.__init__(self,
             formula= None,
-            outputs= [chainer.link(types.AndLink, atoms)],
-            inputs= [],
-            multi_inputs = req)
+            outputs= [chainer.link(types.MemberLink, [x, and_link])],
+            inputs=  inputs)
 
-#    def compute
+class SubsetEvaluationRule(Rule):
+    '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(types.MemberLink, [x, A]),
+                 chainer.link(types.MemberLink, [x, B])]
+
+        Rule.__init__(self,
+            formula= formulas.subsetEvaluationFormula,
+            outputs= [chainer.link(types.SubsetLink, [A, B])],
+            inputs=  inputs)
+
+# Elimination Rules
 
 class AbstractEliminationRule(Rule):
     def __init__(self, chainer, N, link_type):
@@ -260,28 +275,6 @@ class MemberToInheritanceRule(Rule):
             outputs= [chainer.link(types.InheritanceLink, [A, B])],
             inputs=  [chainer.link(types.MemberLink, [A, B])])
 
-class SubsetEvaluationRule(Rule):
-    '''Creates Subset(A, B).
-       Defined as P(x in B | x in A).
-       i.e. find the set of MemberLink x A,
-       then find what % of those x have MemberLink x B.'''
-    def __init__(self, chainer):
-        self._chainer = chainer
-        A = chainer.new_variable()
-        B = chainer.new_variable()
-        x = chainer.new_variable()
-
-        Rule.__init__(self, formula= None,
-            outputs= [chainer.link(types.SubsetLink, [A, B])],
-            inputs=  [chainer.link(types.MemberLink, [x, A]),
-                      chainer.link(types.MemberLink, [x, B])]
-            )
-
-    def custom_compute(self, inputs):
-        # Find every MemberLink(x, B). Then for all x, find the TV of MemberLink(x, B).
-        # Sometimes it won't explicitly exist.
-        pass
-        
 class AttractionEvaluationRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
        s = Subset(A, B).s - Subset(Not(A), B).

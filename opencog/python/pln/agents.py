@@ -21,14 +21,16 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
 
-#        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
-#        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
+        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
+        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
 
-#        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
-#            self.chainer.add_rule(rule)
+        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
+            self.chainer.add_rule(rule)
 
         self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
         self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
+
+        self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!

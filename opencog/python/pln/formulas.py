@@ -146,6 +146,23 @@ def mem2InhFormula(tvs):
 
     return [TruthValue(mem_tv.mean, count)]
 
+def subsetEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean > 0.5
+    mem_b = mem_b_tv.mean > 0.5
+
+    # P(x in B | x in A)
+
+    if not mem_a:
+        # Irrelevant
+        return [TruthValue(0, 0)]
+    elif mem_b:
+        # A and B => 1 observation of B|A
+        return [TruthValue(1, 1)]
+    else:
+        # A and NOTB => 1 observation of NOTB|A
+        return [TruthValue(0, 1)]
+
 def revisionFormula(tvs):
     x, y = tvs
     # revise two truth values
