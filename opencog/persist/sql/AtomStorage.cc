@@ -1103,7 +1103,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		    ((-1 == rp.height) &&
 		      classserver().isA(realtype, NODE)))
 		{
-			atom = AtomPtr(new Node(realtype, rp.name));
+			atom = createNode(realtype, rp.name);
 		}
 		else
 		{
@@ -1119,7 +1119,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 				outvec.push_back(hout);
 			}
 #endif /* USE_INLINE_EDGES */
-			atom = AtomPtr(new Link(realtype, outvec));
+			atom = createLink(realtype, outvec);
 		}
 
 		// Make sure that the handle in the TLB is synced with

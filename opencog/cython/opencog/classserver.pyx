@@ -7,7 +7,10 @@ cdef c_get_type_name(Type t):
     #cdef cClassServer cs
     #cs=classserver()
     cdef string s
-    s=classserver().getTypeName(t)
+    s = classserver().getTypeName(t)
+
+    if s.__eq__(string("*** Unknown Type! ***")) :
+        s = ""
     return s.c_str()
 
 cdef c_get_type(char *type_name):

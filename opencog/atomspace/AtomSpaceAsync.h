@@ -122,7 +122,7 @@ public:
         return r;
     }
 
-    BoolRequest commitAtom(const Atom& a) {
+    BoolRequest commitAtom(AtomPtr a) {
         BoolRequest r(new CommitAtomASR(&atomspace,a));
         requestQueue.push(r);
         return r;
