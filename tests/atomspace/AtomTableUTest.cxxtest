@@ -316,30 +316,31 @@ public:
 
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
-        handles1[0] = table->getHandle("00065349", CONCEPT_NODE);
-        handles1[1] = table->getHandle("12", NUMBER_NODE);
+#define getHandlex(N,T) getHandle(T,N)
+        handles1[0] = table->getHandlex("00065349", CONCEPT_NODE);
+        handles1[1] = table->getHandlex("12", NUMBER_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles2(2);
-        handles2[0] = table->getHandle("12", NUMBER_NODE);
-        handles2[1] = table->getHandle("00065349", CONCEPT_NODE);
+        handles2[0] = table->getHandlex("12", NUMBER_NODE);
+        handles2[1] = table->getHandlex("00065349", CONCEPT_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
-        handles3[1] = table->getHandle("12", NUMBER_NODE);
+        handles3[1] = table->getHandlex("12", NUMBER_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles4(2);
-        handles4[0] = table->getHandle("12", NUMBER_NODE);
+        handles4[0] = table->getHandlex("12", NUMBER_NODE);
         handles4[1] = Handle::UNDEFINED;
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, types4, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
@@ -487,7 +488,7 @@ public:
         NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
 
-        Handle h = atomTable.getHandle("1", NUMBER_NODE);
+        Handle h = atomTable.getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
         TS_ASSERT_DELTA(h->getTruthValue().getMean(), 0.3f, 0.000001);
         TS_ASSERT_DELTA(h->getTruthValue().getCount(), 0.4f, 0.000001);
@@ -509,8 +510,8 @@ public:
         LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);
         Handle lh = atomTable.add(lp);
 
-        TS_ASSERT(atomTable.getHandle("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(atomTable.getHandle("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(atomTable.getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
     }
 };
