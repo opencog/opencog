@@ -1,4 +1,3 @@
-import math
 from calendar import timegm
 from datetime import datetime
 from random import random
@@ -81,18 +80,31 @@ class Period(object):
 
     @property
     def integer_range(self):
-        int_a = int(math.ceil(self.a))
-        if isinstance(self.b, int):
+        int_a = int(self.a)
+        if not isinstance(self.a, (int, long)):
+            int_a += 1
+        if isinstance(self.b, (int, long)):
             int_b = self.b + 1
         else:
-            int_b = int(math.ceil(self.b))
+            int_b = int(self.b) + 1
         return xrange(int_a, int_b, self.iter_step)
+
+    def __contains__(self, item):
+        return self.a <= item.a and self.b >= item.b
 
     def __iter__(self):
         return iter(self.integer_range)
 
     def __len__(self):
         return float(self.b - self.a)
+
+    def __repr__(self):
+        return 'spatiotemporal.time.Period([{0} : {1}])'.format(self.a, self.b)
+
+    def __str__(self):
+        return 'from {0} to {1}'.format(
+            datetime.fromtimestamp(int(self.a)).strftime('%Y-%m-%d %H:%M:%S'),
+            datetime.fromtimestamp(int(self.b)).strftime('%Y-%m-%d %H:%M:%S'))
 
 
 class BaseTemporalEvent(object):
@@ -101,7 +113,7 @@ class BaseTemporalEvent(object):
         self.b = convert_to_unix_time(b)
         self.period = Period(a, b)
 
-    def _pdf_specialised(self, time_step):
+    def _pdf_single_point(self, time_step):
         """
         to override, default pdf calls to it
         alternatively one can directly override pdf
@@ -115,9 +127,9 @@ class BaseTemporalEvent(object):
         result = []
         try:
             for time_step in x:
-                result.append(self._pdf_specialised(time_step))
+                result.append(self._pdf_single_point(time_step))
         except:
-            return self._pdf_specialised(x)
+            return self._pdf_single_point(x)
         return result
 
     def _period_pre_check(self, period):
@@ -128,6 +140,7 @@ class BaseTemporalEvent(object):
         return period
 
     def probability_in_period(self, period=None):
+        #TODO replace by CalculateCenterOfMass
         period = self._period_pre_check(period)
         return max(self.pdf(period))
 
@@ -148,7 +161,8 @@ class BaseTemporalEvent(object):
     def __repr__(self):
         return 'spatiotemporal.time.TemporalEvent(a:{0}, b:{1})'.format(self.period.a, self.period.b)
 
-    __str__ = __repr__
+    def __str__(self):
+        return repr(self)
 
 
 class TemporalEvent(BaseTemporalEvent):
@@ -156,7 +170,7 @@ class TemporalEvent(BaseTemporalEvent):
         BaseTemporalEvent.__init__(self, a, b)
         assert callable(pdf), "'pdf' should be callable"
         self.pdf = pdf
-        self._pdf_specialised = pdf
+        self._pdf_single_point = pdf
 
 
 def _interpolation_a_to_beginning(t, a, beginning):
@@ -229,12 +243,14 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
                     )
                 )
 
-    def _pdf_specialised(self, time_step):
+    def _pdf_single_point(self, time_step):
         return _interpolation_a_to_b(time_step, self.a, self.beginning, self.ending, self.b)
 
     def probability_in_period(self, period=None):
         period = self._period_pre_check(period)
-        return max(self._pdf_specialised(period.a), self._pdf_specialised(period.b))
+        if self.a < period.a < self.beginning and self.ending < period.b < self.b:
+            return 1
+        return max(self._pdf_single_point(period.a), self._pdf_single_point(period.b))
 
     def __repr__(self):
         return 'spatiotemporal.time.PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
@@ -243,21 +259,28 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
 
 class TemporalRelation(list):
     def __init__(self, constituent_string, temporal_event_1, temporal_event_2):
-        assert isinstance(temporal_event_1, BaseTemporalEvent) and isinstance(temporal_event_2, BaseTemporalEvent)
+        assert isinstance(
+            temporal_event_1, BaseTemporalEvent
+        ) and isinstance(
+            temporal_event_2, BaseTemporalEvent
+        ), "'temporal_event_1' and 'temporal_event_2' should be of type 'BaseTemporalEvent' or of a subclass thereof"
+        list.__init__(self)
         self.append(constituent_string)
         self.temporal_event_1 = temporal_event_1
         self.temporal_event_2 = temporal_event_2
 
-    def append(self, other):
-        for char in other:
-            assert isinstance(char, str) and len(char) is 1 and char in TEMPORAL_RELATIONS
+    def append(self, item):
+        for char in item:
+            assert isinstance(
+                char, str
+            ) and len(char) is 1 and char in TEMPORAL_RELATIONS, "'item' should be an iterable of characters"
             list.append(self, char)
 
     def degree(self):
         return 0.5
 
     def __eq__(self, other):
-        assert isinstance(other, TemporalRelation) or isinstance(other, str)
+        assert isinstance(other, (TemporalRelation, str)), "'other' should be of type 'TemporalRelation' or 'str'"
         if isinstance(other, TemporalRelation):
             if (other.temporal_event_1, other.temporal_event_2) != (self.temporal_event_1, self.temporal_event_2):
                 return False
@@ -279,7 +302,7 @@ class TemporalRelation(list):
         return str(self)
 
 
-def generate_random_events(size=100):
+def generate_random_events(size=20):
     events = []
     year_2010 = Period(datetime(2010, 1, 1), datetime(2011, 1, 1))
     iter_step = 100
