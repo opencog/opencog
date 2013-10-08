@@ -3,6 +3,8 @@ from opencog.cogserver cimport cAgent, stim_t, string
 
 from opencog.atomspace cimport cHandle, Atom
 
+from cython.operator cimport dereference as deref
+
 cdef class MindAgent:
 
     def __cinit__(self):
@@ -18,8 +20,7 @@ cdef class MindAgent:
         cdef cHandle ch
         ch = cHandle(atom.h.value())
         
-        return self.c_obj.stimulateAtom(ch, amount)
-
+        return deref(self.c_obj).stimulateAtom(ch, amount)
 
 # These methods are not available until we have support for MindAgents running
 # continuously in their own threads
