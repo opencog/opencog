@@ -29,7 +29,6 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 
@@ -76,7 +75,7 @@ bool Trail::isInTrail(Handle link)
 {
     if (trail == NULL) return false;
     for (size_t i = 0; i < trail->size(); i++) {
-        if (TLB::getAtom(link) == TLB::getAtom((*trail)[i]))
+        if (link == (*trail)[i])
             return(true);
     }
     return false;
@@ -145,7 +144,7 @@ void Trail::print()
     } else {
         logger().debug("trailSize %d\n", (int)trail->size());
         for (int i = 0; i < (int)trail->size(); i++) {
-            logger().info("%d. %s\n", i, (LinkPtr(LinkCast(TLB::getAtom((*trail)[i]))))->toShortString().c_str());
+            logger().info("%d. %s\n", i, (*trail)[i]->toShortString().c_str());
         }
     }
 
@@ -159,7 +158,7 @@ void Trail::print(FILE* fp)
     if (trail == NULL) return;
 
     for (int i = 0; i < (int)trail->size(); i++) {
-        fprintf(fp, "\t%d. %s\n", i, (LinkPtr(LinkCast(TLB::getAtom((*trail)[i]))))->toShortString().c_str());
+        fprintf(fp, "\t%d. %s\n", i, (*trail)[i]->toShortString().c_str());
     }
 }
 
