@@ -327,6 +327,16 @@ public:
     
 };
 
+class GetHandleASR : public OneParamASR <Handle, Handle> {
+public:
+    GetHandleASR(AtomSpaceImpl *a, Handle h) :
+        OneParamASR<Handle, Handle>(a,h) {};
+    
+    virtual void do_work() {
+        set_result(atomspace->getHandle(p1));
+    };
+};
+
 class GetNameASR : public OneParamASR <std::string, Handle> {
 public:
     GetNameASR(AtomSpaceImpl *a, Handle h) :
@@ -334,16 +344,6 @@ public:
     
     virtual void do_work() {
         set_result(atomspace->getName(p1));
-    };
-};
-
-class GetAtomASR : public OneParamASR <AtomPtr, Handle> {
-public:
-    GetAtomASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<AtomPtr, Handle>(a,h) {};
-    
-    virtual void do_work() {
-        set_result(p1);
     };
 };
 

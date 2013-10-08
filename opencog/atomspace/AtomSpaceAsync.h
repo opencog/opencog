@@ -93,6 +93,15 @@ public:
     }
 
     /**
+     * Retrieve from the Atom Table the Atom of the Handle.
+    */
+    HandleRequest getHandle(Handle h) {
+        HandleRequest hr(new GetHandleASR(&atomspace,h));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
@@ -114,12 +123,6 @@ public:
         HandleRequest hr(new GetLinkHandleASR(&atomspace,t,outgoing));
         requestQueue.push(hr);
         return hr;
-    }
-
-    AtomRequest getAtom(const Handle& h) {
-        AtomRequest r(new GetAtomASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
     }
 
     /**

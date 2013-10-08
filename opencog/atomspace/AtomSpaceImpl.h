@@ -195,6 +195,12 @@ public:
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const;
 
+    /** Retrieve the atom pointer of a given Handle */
+    Handle getHandle(Handle h) const
+    {
+        return atomTable.getHandle(h);
+    }
+
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const
     {
@@ -228,6 +234,7 @@ public:
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const
     {
+        h = atomTable.getHandle(h);
         if (h) return h->getType();
         else return NOTYPE;
     }
