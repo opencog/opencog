@@ -16,26 +16,29 @@ class ForwardInferenceAgent(MindAgent):
 #            types.EquivalenceLink]
         conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink,
             types.ImplicationLink]
-        # Hack: use the conditional-probability formulas for similarity-based links
-        for link_type in conditional_probability_types + similarity_types:
+
+        for link_type in conditional_probability_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))
 
-#        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
-#        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
+        self.chainer.add_rule(rules.SimilarityRule(self.chainer))
 
-#        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
-#            self.chainer.add_rule(rule)
+        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
+        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
 
-        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
-#        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
-#        self.chainer.add_rule(rules.MemberToSubsetRule(self.chainer))
+        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
+            self.chainer.add_rule(rule)
 
         self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.InheritanceEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
+
+        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
+        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
+        self.chainer.add_rule(rules.MemberToSubsetRule(self.chainer))
 
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
 

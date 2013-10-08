@@ -172,6 +172,33 @@ def subsetEvaluationFormula(tvs):
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
 
+def similarityEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean > 0.5
+    mem_b = mem_b_tv.mean > 0.5
+
+    # tv = |A and B| / |A or B|
+
+    if not (mem_a or mem_b):
+        # not an observation of (A or B)
+        return [TruthValue(0, 0)]
+    elif mem_a and mem_b:
+        # increment |A and B| as well as |A or B|
+        return [TruthValue(1, 1)]
+    else:
+        # increment |A or B| without changing |A and B|
+        return [TruthValue(0, 1)]
+
+def extensionalSimilarityFormula(tvs):
+    [and_tv, or_tv] = tvs
+
+    # calculate the size of the two sets A AND B vs A OR B
+    and_size = 1.0*and_tv.mean*and_tv.count
+    or_size  = 1.0*or_tv.mean*or_v.count
+
+    P = and_size / or_size
+    N = and_tv.count + or_tv.count
+
 def attractionFormula(tvs):
     [ab, b] = tvs
 

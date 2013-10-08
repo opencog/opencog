@@ -5,6 +5,9 @@ import pln.temporalFormulas
 
 import math
 
+'''Some Rules evaluate various kinds of logical links based explicitly on set membership. A set = a ConceptNode.
+Other Rules calculate them heuristically, based on set probabilities and logical links.'''
+
 class Rule(object):
 
     def __init__ (self, outputs, inputs, formula, multi_inputs=None):
@@ -95,6 +98,23 @@ class InductionRule(Rule):
     def compute(inputs):
         pass
 
+# TODO implement transitiveSimilarityFormula
+class TransitiveSimilarityRule(Rule):
+    '''Similarity A B, Similarity B C => Similarity A C'''
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+        C = chainer.new_variable()
+
+        link_type = types.SimilarityLink
+
+        Rule.__init__(self,
+            formula= formulas.transitiveSimilarityFormula,
+            outputs= [chainer.link(link_type, [A, C])],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      chainer.link(link_type, [B, C]),
+                      A, B, C])
+
 class ModusPonensRule(Rule):
     '''A->B, A entails B'''
     def __init__(self, chainer, link_type):
@@ -119,7 +139,18 @@ def InheritanceRule(Rule):
                       chainer.link(types.IntensionalInheritanceLink, [A, B])],
             formula= formulas.inheritanceFormula)
 
-# And/Or/Not Rules
+def SimilarityRule(Rule):
+    '''SimilarityLink A B
+       |A and B| / |A or B|'''
+    def __init__(self,
+        outputs= [chainer.link(types.SimilarityLink, [A, B])],
+        inputs=  [chainer.link(types.AndLink, [A, B]),
+                  chainer.link(types.OrLink, [A, B])],
+        formula= formulas.extensionalSimilarityFormula)
+                
+
+# Boolean link creation Rules
+# An EliminationRule uses a logical link to produce its arguments
 
 class NotCreationRule(Rule):
     '''A => NotLink(A)'''
@@ -176,46 +207,6 @@ class OrCreationRule(Rule):
             outputs= [chainer.link(types.OrLink, atoms)],
             inputs=  atoms)
 
-# abandoned
-class AndEvaluationRule(Rule):
-    '''Compute the membership of AndLink(concepts) based on set theory. And(A B) is defined as
-       the set of things that are members of both A and B (set intersection).
-       Inputs: MemberLink(x, A) or MemberLink(x, B) for many objects/etc.'''
-    def __init__(self, chainer, N):
-        x = chainer.new_variable()
-        variables = make_n_variables(chainer, N)
-
-        inputs = [chainer.link(types.MemberLink, [x, var]) for var in variables]
-        and_link = chainer.link(types.AndLink, variables)
-
-        Rule.__init__(self,
-            formula= None,
-            outputs= [chainer.link(types.MemberLink, [x, and_link])],
-            inputs=  inputs)
-
-class SubsetEvaluationRule(Rule):
-    '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
-    def __init__(self, chainer, member_type = types.MemberLink, subset_type=types.SubsetLink):
-        x = chainer.new_variable()
-        A = chainer.new_variable()
-        B = chainer.new_variable()
-
-        inputs= [chainer.link(member_type, [x, A]),
-                 chainer.link(member_type, [x, B])]
-
-        Rule.__init__(self,
-            formula= formulas.subsetEvaluationFormula,
-            outputs= [chainer.link(subset_type, [A, B])],
-            inputs=  inputs)
-
-class InheritanceEvaluationRule(SubsetEvaluationRule):
-    '''Evaluates Inheritance(A B) from the definition.
-       (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
-       ASSOC(A) is the set of x where AttractionLink(x, A)'''
-    # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
-    def __init__(self, chainer):
-        SubsetEvaluationRule.__init__(self, chainer, types.AttractionLink, types.InheritanceLink)
-
 # Elimination Rules
 
 class AbstractEliminationRule(Rule):
@@ -266,9 +257,57 @@ class OrEliminationRule(AbstractEliminationRule):
 
         return output_tvs
 
-class NotEliminationRule(AbstractEliminationRule):
-    '''NotLink(NotLink(A)) => A'''
+# Direct evaluation Rules
+
+class MembershipBasedEvaluationRule(Rule):
+    '''Base class for Rules that evaluate various kinds of logical links based (explicitly) on set membership. They can also be calculated based on the set probabilities and logical links.'''
+    def __init__(self, chainer, member_type, output_type, formula):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(member_type, [x, A]),
+                 chainer.link(member_type, [x, B])]
+
+        Rule.__init__(self,
+            formula= formula,
+            outputs= [chainer.link(output_type, [A, B])],
+            inputs=  inputs)
+
+class SubsetEvaluationRule(MembershipBasedEvaluationRule):
+    '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer,
+            member_type = types.MemberLink,
+            output_type=types.SubsetLink
+            formula=formulas.subsetEvaluationFormula)
+
+class InheritanceEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates Inheritance(A B) from the definition.
+       (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
+       ASSOC(A) is the set of x where AttractionLink(x, A)'''
+    # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
+    # Reuses the subset formula. because intensional inheritance = subset based on intension rather than extension
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer, 
+            member_type = types.AttractionLink,
+            output_type = types.InheritanceLink,
+            formula= formulas.subsetEvaluationFormula)
+
+# abandoned for now because you have to estimate the number of objects (maybe an arbitrary setting?)
+class AndEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluate And(A B) from the definition.
+       |A and B| = |x in A and x in B|
+       P(A and B) = |A and B| / universe (gulp)'''
     pass
+
+class ExtensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates ExtensionalSimilarity from the definition.'''
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer,
+            member_type = types.MemberLink,
+            output_type = types.ExtensionalSimilarityLink,
+            formula= formulas.similarityEvaluationFormula)        
 
 class EvaluationToMemberRule(Rule):
     '''Turns EvaluationLink(PredicateNode P, argument) into 
