@@ -9,7 +9,8 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-# @todo opencog/atomspace/AttentionBank.h defines a getAttentionalFocusBoundary method, which should eventually be used instead of this
+# @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
+# every Atom's STI (in the whole AtomSpace)
 def get_attentional_focus(atomspace, attentional_focus_boundary=0):
     nodes = atomspace.get_atoms_by_type(types.Atom)
     attentional_focus = []
@@ -19,6 +20,7 @@ def get_attentional_focus(atomspace, attentional_focus_boundary=0):
     return attentional_focus
 
 class AbstractChainer(Logic):
+    '''Has important utility methods for chainers.'''
     def __init__(self, atomspace):
         Logic.__init__(self, atomspace)
         self.rules = []
@@ -29,6 +31,8 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
+    # Finds a list of candidate atoms and then matches all of them against the template.
+    # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
     def _select_one_matching(self, template, require_nonzero_tv = True):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
@@ -126,6 +130,19 @@ class AbstractChainer(Logic):
         print 'Attempted invalid inference:',message
 
 class Chainer(AbstractChainer):
+    '''PLN forward/backward chainer. It chooses Atoms randomly based on STI. It can do a single
+       backward or forward step. By running the step repeatedly it can simulate chaining, without
+       needing a messy specialized chaining algorithm. It can do a mixture of forward and backward
+       chaining and easily interoperate with other OpenCog processes.
+
+       It lets you use any Rule frequencies (and can learn them). You should set stimulateAtoms=True
+       if you want it to create chains (otherwise it will just make shallow inferences based on a whole bunch
+       of Atoms, which is sometimes good too).
+
+       It can check for repeated inferences and cycles. PLN truth value revision is supported.'''
+
+    ### public interface
+
     def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False):
         AbstractChainer.__init__(self, atomspace)
 
@@ -168,6 +185,8 @@ class Chainer(AbstractChainer):
 
         return results
 
+    ### forward chaining implementation
+
     def _apply_forward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
             # choose a random atom matching the first input to the rule
@@ -202,23 +221,6 @@ class Chainer(AbstractChainer):
         else:
             return None
 
-    def _validate(self, rule, inputs, outputs):
-        print rule, map(str,inputs), map(str,outputs)
-        # Sanity checks
-        if not self.valid_structure(outputs[0]):
-            self.log_failed_inference('invalid structure')
-            return False
-
-        if self._compute_trail_and_check_cycles(outputs[0], inputs):
-            self.log_failed_inference('cycle detected')
-            return False
-
-        if self._is_repeated(rule, outputs, inputs):
-            self.log_failed_inference('repeated inference')
-            return False
-
-        return True
-
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far, require_nonzero_tv=True):
         '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
         remaining_inputs = self.substitute_list(subst_so_far, remaining_inputs)
@@ -251,95 +253,7 @@ class Chainer(AbstractChainer):
 
         return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution, require_nonzero_tv)
 
-    def _apply_rule(self, rule, inputs, outputs, output_tvs):
-        for (atom, new_tv) in zip(outputs, output_tvs):
-            self._revise_tvs(atom, new_tv)
-
-        if self._stimulateAtoms:
-            for atom in outputs:
-                self._give_stimulus(atom)
-            for atom in inputs:
-                self._give_stimulus(atom)
-
-        return (rule, inputs, outputs)
-
-    def _revise_tvs(self, atom, new_tv):
-        old_tv = atom.tv
-
-        revised_tv = revisionFormula([old_tv, new_tv])
-        atom.tv = revised_tv
-
-    def _give_stimulus(self, atom):
-        # Arbitrary
-        STIMULUS_PER_ATOM = 10
-        self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
-
-    def _compute_trail_and_check_cycles(self, output, inputs):
-        ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.
-            Otherwise return False'''
-        trail = self.trails[output]
-
-        # Check for cycles before adding anything into the trails
-        if output in inputs:
-            return True
-        for atom in inputs:
-            input_trail = self.trails[atom]
-
-            if output in input_trail:
-                return None
-
-        for atom in inputs:
-            # Reusing the same Atom more than once is bad
-            # (maybe? What if you're combining it with a different atom to produce a new TV for the same result?)
-            #if atom in trail:
-            #    return None
-            trail.add(atom)
-
-        for atom in inputs:
-            input_trail = self.trails[atom]
-            trail |= input_trail
-
-        return False
-
-    def _is_repeated(self, rule, outputs, inputs):
-        # Record the exact list of atoms used to produce an output one time. (Any atom can be
-        # produced multiple ways using different Rules and inputs.)
-        # Return True if this exact inference has been applied before
-
-        # In future this should record to the Inference History Repository atomspace
-        # convert the inputs to a tuple so they can be stored in a set.
-
-        # About unordered links
-        # Such as And(A B) or And(B A)
-        # The AtomSpace will create only one representation of each unordered link.
-        # So this algorithm should still work okay for unordered links.
-
-        # TODO it should work for Rules where the input order doesn't matter (e.g. AndRule)
-        # currently it won't notice repetition for different input orders
-
-        inputs = tuple(inputs)
-        outputs = tuple(outputs)
-        productions = self.produced_from[outputs]
-        if inputs in productions:
-            return True
-        else:
-            productions.add(inputs)
-            self._add_to_inference_repository(rule, outputs, inputs)
-            return False
-
-    def _add_to_inference_repository(self, rule, outputs, inputs):
-        TA = self.trail_atomspace
-        L = TA.add_link
-        N = TA.add_node
-
-        # create new lists of inputs and outputs for the separate trails atomspace
-        inputs  = [self.transfer_atom(TA, a) for a in inputs]
-        outputs = [self.transfer_atom(TA, a) for a in outputs]
-
-        L(types.ExecutionLink, [
-            N(types.GroundedSchemaNode, rule.name),
-            L(types.ListLink, inputs),
-            L(types.ListLink, outputs)])
+    ### backward chaining implementation
 
     def _apply_backward(self, rule):
         # randomly choose suitable atoms for this rule's inputs
@@ -418,4 +332,114 @@ class Chainer(AbstractChainer):
 
         return self._choose_outputs_inputs_recursive(return_inputs, return_outputs, all_inputs, remaining_outputs, substitution)
 
+    ### stuff used by both forward and backward chaining
+
+    def _apply_rule(self, rule, inputs, outputs, output_tvs):
+        for (atom, new_tv) in zip(outputs, output_tvs):
+            self._revise_tvs(atom, new_tv)
+
+        if self._stimulateAtoms:
+            for atom in outputs:
+                self._give_stimulus(atom)
+            for atom in inputs:
+                self._give_stimulus(atom)
+
+        return (rule, inputs, outputs)
+
+    def _revise_tvs(self, atom, new_tv):
+        old_tv = atom.tv
+
+        revised_tv = revisionFormula([old_tv, new_tv])
+        atom.tv = revised_tv
+
+    def _give_stimulus(self, atom):
+        # Arbitrary
+        STIMULUS_PER_ATOM = 10
+        self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
+
+    ### automatically reject some inferences based on various problems
+
+    def _validate(self, rule, inputs, outputs):
+        print rule, map(str,inputs), map(str,outputs)
+        # Sanity checks
+        if not self.valid_structure(outputs[0]):
+            self.log_failed_inference('invalid structure')
+            return False
+
+        if self._compute_trail_and_check_cycles(outputs[0], inputs):
+            self.log_failed_inference('cycle detected')
+            return False
+
+        if self._is_repeated(rule, outputs, inputs):
+            self.log_failed_inference('repeated inference')
+            return False
+
+        return True
+
+    def _compute_trail_and_check_cycles(self, output, inputs):
+        ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.
+            Otherwise return False'''
+        trail = self.trails[output]
+
+        # Check for cycles before adding anything into the trails
+        if output in inputs:
+            return True
+        for atom in inputs:
+            input_trail = self.trails[atom]
+
+            if output in input_trail:
+                return None
+
+        for atom in inputs:
+            # Reusing the same Atom more than once is bad
+            # (maybe? What if you're combining it with a different atom to produce a new TV for the same result?)
+            #if atom in trail:
+            #    return None
+            trail.add(atom)
+
+        for atom in inputs:
+            input_trail = self.trails[atom]
+            trail |= input_trail
+
+        return False
+
+    def _is_repeated(self, rule, outputs, inputs):
+        # Record the exact list of atoms used to produce an output one time. (Any atom can be
+        # produced multiple ways using different Rules and inputs.)
+        # Return True if this exact inference has been applied before
+
+        # In future this should record to the Inference History Repository atomspace
+        # convert the inputs to a tuple so they can be stored in a set.
+
+        # About unordered links
+        # Such as And(A B) or And(B A)
+        # The AtomSpace will create only one representation of each unordered link.
+        # So this algorithm should still work okay for unordered links.
+
+        # TODO it should work for Rules where the input order doesn't matter (e.g. AndRule)
+        # currently it won't notice repetition for different input orders
+
+        inputs = tuple(inputs)
+        outputs = tuple(outputs)
+        productions = self.produced_from[outputs]
+        if inputs in productions:
+            return True
+        else:
+            productions.add(inputs)
+            self._add_to_inference_repository(rule, outputs, inputs)
+            return False
+
+    def _add_to_inference_repository(self, rule, outputs, inputs):
+        TA = self.trail_atomspace
+        L = TA.add_link
+        N = TA.add_node
+
+        # create new lists of inputs and outputs for the separate trails atomspace
+        inputs  = [self.transfer_atom(TA, a) for a in inputs]
+        outputs = [self.transfer_atom(TA, a) for a in outputs]
+
+        L(types.ExecutionLink, [
+            N(types.GroundedSchemaNode, rule.name),
+            L(types.ListLink, inputs),
+            L(types.ListLink, outputs)])
 
