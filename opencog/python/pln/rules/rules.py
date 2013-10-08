@@ -78,6 +78,7 @@ class DeductionRule(Rule):
                       A, B, C])
 
 # TODO add macro-rules for Abduction and Induction based on Deduction and Inversion
+# abandoned
 class InductionRule(Rule):
     '''A->B, A->C entails B->C'''
     def __init__(self, chainer, link_type):
@@ -94,7 +95,17 @@ class InductionRule(Rule):
     def compute(inputs):
         pass
 
-# TODO MemberToInheritanceRule
+class ModusPonensRule(Rule):
+    '''A->B, A entails B'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [B],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      A],
+            formula= formulas.modusPonensFormula)
 
 # And/Or/Not Rules
 
