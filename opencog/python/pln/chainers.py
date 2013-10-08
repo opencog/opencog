@@ -302,15 +302,21 @@ class Chainer(AbstractChainer):
         return False
 
     def _is_repeated(self, rule, outputs, inputs):
-        # TODO fixme - it doesn't handle UnorderedLinks properly (such as AndLinks).
-        # Such as And(A B) or And(B A)
-
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
         # produced multiple ways using different Rules and inputs.)
         # Return True if this exact inference has been applied before
 
         # In future this should record to the Inference History Repository atomspace
         # convert the inputs to a tuple so they can be stored in a set.
+
+        # About unordered links
+        # Such as And(A B) or And(B A)
+        # The AtomSpace will create only one representation of each unordered link.
+        # So this algorithm should still work okay for unordered links.
+
+        # TODO it should work for Rules where the input order doesn't matter (e.g. AndRule)
+        # currently it won't notice repetition for different input orders
+
         inputs = tuple(inputs)
         outputs = tuple(outputs)
         productions = self.produced_from[outputs]
