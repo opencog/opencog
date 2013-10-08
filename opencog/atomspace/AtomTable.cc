@@ -110,7 +110,7 @@ AtomTable::AtomTable(const AtomTable& other)
             "AtomTable - Cannot copy an object of this class");
 }
 
-Handle AtomTable::getHandle(const std::string& name, Type t) const
+Handle AtomTable::getHandle(Type t, const std::string& name) const
 {
     return nodeIndex.getHandle(t, name.c_str());
 }
@@ -120,7 +120,7 @@ Handle AtomTable::getHandle(const std::string& name, Type t) const
 /// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
-    return getHandle(n->getName(), n->getType());
+    return getHandle(n->getType(), n->getName());
 }
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const

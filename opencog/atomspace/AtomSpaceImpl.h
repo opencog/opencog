@@ -181,7 +181,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const
-        { return atomTable.getHandle(str.c_str(), t); }
+        { return atomTable.getHandle(t, str); }
 
     /**
      * Retrieve from the Atom Table the Handle of a given link

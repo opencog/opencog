@@ -203,7 +203,7 @@ public:
                     const std::string& gpnNodeName,
                     VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        Handle gpnHandle = getHandle(gpnNodeName, GROUNDED_PREDICATE_NODE);
+        Handle gpnHandle = getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName);
         return getHandlesByGPN(result, gpnHandle, vh);
     }
 
@@ -233,7 +233,7 @@ public:
      * @param The type of the desired atom.
      * @return The handle of the desired atom if found.
      */
-    Handle getHandle(const std::string&, Type) const;
+    Handle getHandle(Type, const std::string&) const;
     Handle getHandle(NodePtr) const;
 
     Handle getHandle(Type, const HandleSeq&) const;
@@ -466,7 +466,7 @@ public:
                          bool subclass = true) const
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetName, targetType);
+        Handle targh = getHandle(targetType, targetName);
         return getIncomingSetByType(result, targh, type, subclass);
     }
 
@@ -480,7 +480,7 @@ public:
                            VersionHandle targetVh) const
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetName, targetType);
+        Handle targh = getHandle(targetType, targetName);
         // XXX TODO what the heck with targetVH ?? Are we supposed to
         // check if targh above has it ?? And if not, I guess return
         // empty set ... Who needs this stuff, anyway?
