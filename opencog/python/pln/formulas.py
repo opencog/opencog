@@ -58,8 +58,8 @@ def crispModusPonensFormula(tvs, U):
     else:
         return (0, 0)
 
-def modusPonensFormula(tvs, U):
-    (sAB, nAB), (sA, nA) = tvs
+def modusPonensFormula(tvs):
+    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     # P(B|not A) -- how should we find this?
     #BNA = TruthValue(0.5, 0.01)
@@ -74,7 +74,16 @@ def modusPonensFormula(tvs, U):
         raise NotImplementedError
         s2 = BNA.confidence
     
-    return (s2, n2)
+    return [TruthValue(s2, n2)]
+
+def inheritanceFormula(tvs):
+    tv_subset, tv_inh = tvs
+
+    # simple average of subset and inheritance
+    mean = (tv_subset.mean + tv_inh.mean) /2.0
+    count = (tv_subset.count + tv_inh.count) / 2.0
+
+    return [TruthValue(mean, count)]
 
 def notFormula(tvs):
     tv = tvs[0]
@@ -166,7 +175,8 @@ def subsetEvaluationFormula(tvs):
 def attractionFormula(tvs):
     [ab, b] = tvs
 
-    mean = ab.mean + b.mean
+    mean = min(0, ab.mean - b.mean)
+
     count = ab.count
 
     return [TruthValue(mean, count)]

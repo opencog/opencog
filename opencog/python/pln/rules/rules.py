@@ -107,6 +107,18 @@ class ModusPonensRule(Rule):
                       A],
             formula= formulas.modusPonensFormula)
 
+def InheritanceRule(Rule):
+    '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [chainer.link(types.InheritanceLink, [A, B])],
+            inputs=  [chainer.link(types.SubsetLink, [A, B]),
+                      chainer.link(types.IntensionalInheritanceLink, [A, B])],
+            formula= formulas.inheritanceFormula)
+
 # And/Or/Not Rules
 
 class NotCreationRule(Rule):
@@ -164,7 +176,8 @@ class OrCreationRule(Rule):
             outputs= [chainer.link(types.OrLink, atoms)],
             inputs=  atoms)
 
-class IntersectionRule(Rule):
+# abandoned
+class AndEvaluationRule(Rule):
     '''Compute the membership of AndLink(concepts) based on set theory. And(A B) is defined as
        the set of things that are members of both A and B (set intersection).
        Inputs: MemberLink(x, A) or MemberLink(x, B) for many objects/etc.'''
@@ -182,18 +195,26 @@ class IntersectionRule(Rule):
 
 class SubsetEvaluationRule(Rule):
     '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
-    def __init__(self, chainer):
+    def __init__(self, chainer, member_type = types.MemberLink, subset_type=types.SubsetLink):
         x = chainer.new_variable()
         A = chainer.new_variable()
         B = chainer.new_variable()
 
-        inputs= [chainer.link(types.MemberLink, [x, A]),
-                 chainer.link(types.MemberLink, [x, B])]
+        inputs= [chainer.link(member_type, [x, A]),
+                 chainer.link(member_type, [x, B])]
 
         Rule.__init__(self,
             formula= formulas.subsetEvaluationFormula,
-            outputs= [chainer.link(types.SubsetLink, [A, B])],
+            outputs= [chainer.link(subset_type, [A, B])],
             inputs=  inputs)
+
+class InheritanceEvaluationRule(SubsetEvaluationRule):
+    '''Evaluates Inheritance(A B) from the definition.
+       (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
+       ASSOC(A) is the set of x where AttractionLink(x, A)'''
+    # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
+    def __init__(self, chainer):
+        SubsetEvaluationRule.__init__(self, chainer, types.AttractionLink, types.InheritanceLink)
 
 # Elimination Rules
 
@@ -275,16 +296,30 @@ class EvaluationToMemberRule(Rule):
 
         return ([member_link], [tv])
 
-class MemberToInheritanceRule(Rule):
-    '''MemberLink(A B) => InheritanceLink(A B)'''
-    def __init__(self, chainer):
+class LinkToLinkRule(Rule):
+    '''Base class for Rules that convert one link type to another'''
+    def __init__(self, chainer, from_type, to_type, formula):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
         Rule.__init__(self,
-            formula= formulas.mem2InhFormula,
-            outputs= [chainer.link(types.InheritanceLink, [A, B])],
-            inputs=  [chainer.link(types.MemberLink, [A, B])])
+            formula= formula,
+            outputs= [chainer.link(to_type, [A, B])],
+            inputs=  [chainer.link(from_type, [A, B])])
+
+
+class MemberToInheritanceRule(LinkToLinkRule):
+    '''MemberLink(A B) => InheritanceLink(A B)'''
+    def __init__(self, chainer):
+        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.MemberLink,
+            formula= formulas.mem2InhFormula)
+
+# Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
+class MemberToSubsetRule(LinkToLinkRule):
+    '''MemberLink(A B) => SubsetLink(A B)'''
+    def __init__(self, chainer):
+        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.SubsetLink,
+            formula= formulas.mem2InhFormula)
 
 class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
@@ -301,8 +336,12 @@ class AttractionRule(Rule):
             inputs=  [chainer.link(types.SubsetLink, [A, B]),
                       B])
 
+# redundant now
 class ASSOCEvaluationRule(Rule):
     '''Creates the extensional association set of ConceptNode C (called ASSOC_ext(C).
-    MemberLink(e, ASSOC(C)).tv = Func(Subset(e, C), Subset(Not(e), C)).'''
+    MemberLink(e, ASSOC_ext(C)).tv = Func(Subset(e, C), Subset(Not(e), C)).
+
+    Or now that we have AttractionLink
+    MemberLink(e, ASSOC(C)).tv = AttractionLink e C'''
     pass
 
