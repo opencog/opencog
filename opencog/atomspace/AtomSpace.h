@@ -1131,7 +1131,7 @@ public:
 
     struct TruePredicate : public AtomPredicate {
         TruePredicate(){}
-        virtual bool test(const Atom& atom) { return true; }
+        virtual bool test(AtomPtr atom) { return true; }
     };
 
     template<typename InputIterator>
@@ -1143,8 +1143,8 @@ public:
     struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getSTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1152,8 +1152,8 @@ public:
     struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getLTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
