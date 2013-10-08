@@ -115,8 +115,8 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, AtomPtr atom)
         OC_ASSERT(lll->getArity() == 2,
             "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n",
             lll->getArity());
-        Handle cx = lll->getOutgoingHandle(0); // context
-        Handle ca = lll->getOutgoingHandle(1); // contextualized atom
+        Handle cx = lll->getOutgoingAtom(0); // context
+        Handle ca = lll->getOutgoingAtom(1); // contextualized atom
         const TruthValue& tv = getTV(ca);
         OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
         CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));

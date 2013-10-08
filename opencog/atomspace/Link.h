@@ -70,17 +70,6 @@ protected:
 
 public:
     /**
-     * Returns a specific atom in the outgoing set (using the connected
-     * AtomTable).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set. NULL if no AtomTable is
-     * connected.
-     */
-    AtomPtr getOutgoingAtom(Arity pos) const;
-
-
-    /**
      * Constructor for this class.
      *
      * @param Link type.
@@ -169,7 +158,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingHandle(Arity pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
     {
         // Checks for a valid position
         if (pos < getArity()) {

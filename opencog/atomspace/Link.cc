@@ -84,11 +84,6 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-AtomPtr Link::getOutgoingAtom(Arity pos) const
-{
-    return TLB::getAtom(getOutgoingHandle(pos));
-}
-
 std::string Link::toShortString(void) const
 {
     std::stringstream answer;

@@ -563,7 +563,7 @@ void SavingLoading::writeLink(FILE *f, LinkPtr link)
     // the link's outgoing set is written on the file
     for (Arity i = 0; i < arity; i++) {
         //logger().fine("writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
-        Handle h = link->getOutgoingHandle(i);
+        Handle h = link->getOutgoingAtom(i);
         fwrite(&h, sizeof(Handle), 1, f);
     }
 
