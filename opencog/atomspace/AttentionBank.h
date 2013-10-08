@@ -25,10 +25,8 @@
 #ifndef _OPENCOG_ATTENTION_BANK_H
 #define _OPENCOG_ATTENTION_BANK_H
 
-#include "AttentionValue.h"
 #include <opencog/util/recent_val.h>
-
-#include <boost/thread/mutex.hpp>
+#include <opencog/atomspace/AttentionValue.h>
 
 namespace opencog
 {
@@ -49,8 +47,8 @@ class AttentionBank
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
     opencog::recent_val<AttentionValue::sti_t> minSTI;
 
-    mutable boost::mutex lock_maxSTI;
-    mutable boost::mutex lock_minSTI;
+    mutable std::mutex lock_maxSTI;
+    mutable std::mutex lock_minSTI;
 
     /* These indicate the amount importance funds available in the
      * AtomSpace */
@@ -60,7 +58,7 @@ class AttentionBank
     long startingFundsSTI;
     long startingFundsLTI;
 
-    mutable boost::mutex lock_funds;
+    mutable std::mutex lock_funds;
 
     /**
      * Remove stimulus from atom, only should be used when Atom is deleted.

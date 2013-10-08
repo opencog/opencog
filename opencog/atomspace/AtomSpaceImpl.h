@@ -30,7 +30,6 @@
 #include <set>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/AtomTable.h>

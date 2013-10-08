@@ -2,15 +2,13 @@
 #define _OPENCOG_ATOMSPACE_REQUEST_H
 
 #include <iostream>
-#include <pthread.h>
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread.hpp>
+#include <condition_variable>
 
 #include <opencog/util/foreach.h>
 
-#include "AtomSpaceImpl.h"
-#include "Handle.h"
-#include "types.h"
+#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>
 
 using namespace std;
 
@@ -33,29 +31,30 @@ namespace opencog {
 class ASRequest {
 
 protected:
-	//! Overkill, but doing atomic operations on bool is not technically threadsafe
-    mutable boost::mutex complete_mutex;
+    //! Overkill, but doing atomic operations on bool is not technically threadsafe
+    //! Whaaaat ?? In what way?? why not ?? Huh? 
+    mutable std::mutex complete_mutex;
     bool completed;
 
     //! For signalling that the request has been completed
-    boost::condition_variable complete_cond;
+    std::condition_variable complete_cond;
     //! For blocking while fulfilling the request
-    mutable boost::mutex the_mutex;
+    mutable std::mutex the_mutex;
 
     AtomSpaceImpl* atomspace;
 public:
     ASRequest() : completed(false) {};
 
     void set_atomspace(AtomSpaceImpl* as) {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::lock_guard<std::mutex> lock(the_mutex);
         atomspace = as;
     }
     //! We wrap the actual do_work thread so that it doesn't have
     //! to worry about obtaining the lock or notifying of completion
     void run() {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::lock_guard<std::mutex> lock(the_mutex);
         do_work();
-        boost::mutex::scoped_lock lock2(complete_mutex);
+        std::lock_guard<std::mutex> lock2(complete_mutex);
         completed = true;
         complete_cond.notify_all();
     }
@@ -64,7 +63,7 @@ public:
     bool is_complete() {
         // Rely on separate mutex for complete, since we don't want to stall
         // if the do_work method takes a while.
-        boost::mutex::scoped_lock lock(complete_mutex);
+        std::lock_guard<std::mutex> lock(complete_mutex);
         return completed;
     }
 };
@@ -88,7 +87,7 @@ public:
     virtual void do_work() = 0;
 
     T get_result() {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::unique_lock<std::mutex> lock(the_mutex);
         if (!is_complete()) complete_cond.wait(lock);
         return result;
     }
@@ -1000,23 +999,23 @@ public:
 };
 
 // Requests are based on their parent class that defines the return type
-typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;
-typedef boost::shared_ptr< GenericASR<AtomPtr > > AtomRequest;
-typedef boost::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
-typedef boost::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
-typedef boost::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
-typedef boost::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
-typedef boost::shared_ptr< GenericASR<tv_summary_t> > TruthValueRequest;
-typedef boost::shared_ptr< GenericASR<TruthValue*> > TruthValueCompleteRequest;
-typedef boost::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
-typedef boost::shared_ptr< GenericASR<Type> > TypeRequest;
-typedef boost::shared_ptr< GenericASR<int> > IntRequest;
-typedef boost::shared_ptr< GenericASR<float> > FloatRequest;
-typedef boost::shared_ptr< GenericASR<bool> > BoolRequest;
-typedef boost::shared_ptr< GenericASR<size_t> > HashRequest;
-typedef boost::shared_ptr< GenericASR<std::string> > StringRequest;
+typedef std::shared_ptr< GenericASR<Handle> > HandleRequest;
+typedef std::shared_ptr< GenericASR<AtomPtr > > AtomRequest;
+typedef std::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
+typedef std::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
+typedef std::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
+typedef std::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
+typedef std::shared_ptr< GenericASR<tv_summary_t> > TruthValueRequest;
+typedef std::shared_ptr< GenericASR<TruthValue*> > TruthValueCompleteRequest;
+typedef std::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
+typedef std::shared_ptr< GenericASR<Type> > TypeRequest;
+typedef std::shared_ptr< GenericASR<int> > IntRequest;
+typedef std::shared_ptr< GenericASR<float> > FloatRequest;
+typedef std::shared_ptr< GenericASR<bool> > BoolRequest;
+typedef std::shared_ptr< GenericASR<size_t> > HashRequest;
+typedef std::shared_ptr< GenericASR<std::string> > StringRequest;
 // Can't actually init template with void, so use bool as stand-in.
-typedef boost::shared_ptr< GenericASR<bool> > VoidRequest;
+typedef std::shared_ptr< GenericASR<bool> > VoidRequest;
 
 /** @}*/
 /** @}*/

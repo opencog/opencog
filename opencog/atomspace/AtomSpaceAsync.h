@@ -2,15 +2,14 @@
 #define _OPENCOG_ATOMSPACE_ASYNC_H
 
 #include <iostream>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
 #include <opencog/util/concurrent_queue.h>
 
-#include "AtomSpaceImpl.h"
-#include "ASRequest.h"
-#include "Handle.h"
-#include "types.h"
+#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/atomspace/ASRequest.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>
 
 class AtomSpaceAsyncUTest;
 
@@ -41,7 +40,8 @@ class AtomSpaceAsync {
     void startEventLoop();
     void stopEventLoop();
 
-    concurrent_queue< boost::shared_ptr<ASRequest> > requestQueue;
+    typedef std::shared_ptr<ASRequest> ASRequestPtr;
+    concurrent_queue<ASRequestPtr> requestQueue;
 
     void eventLoop();
 

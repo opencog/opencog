@@ -52,9 +52,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-typedef boost::shared_ptr<TruthValue> TruthValuePtr;
-
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
  * provide standard functions that return results immediately.

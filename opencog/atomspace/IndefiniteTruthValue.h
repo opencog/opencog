@@ -26,10 +26,10 @@
 #ifndef _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 #define _OPENCOG_INDEFINITE_TRUTH_VALUE_H
 
+#include <memory>
 #include <vector>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <boost/shared_ptr.hpp>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
@@ -135,7 +135,7 @@ public:
     }
 };
 
-typedef boost::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
+typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 /** @}*/
 } // namespace opencog
