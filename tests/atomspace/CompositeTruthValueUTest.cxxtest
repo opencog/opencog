@@ -24,6 +24,7 @@
 
 #include <math.h>
 
+#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
@@ -50,6 +51,7 @@ class CompositeTruthValueUTest :  public CxxTest::TestSuite
 {
 private:
 
+    AtomTable atomTable;
     CompositeTruthValue* tvs[NUM_TVS];
     float means[NUM_TVS];
     float counts[NUM_TVS];
@@ -78,12 +80,17 @@ public:
         counts[0] = TV1_COUNT;
         counts[1] = TV2_COUNT;
         counts[2] = TV3_COUNT;
-        atoms[0] = NodePtr(new Node(CONCEPT_NODE, "zero"));
-        atoms[1] = NodePtr(new Node(CONCEPT_NODE, "one"));
-        atoms[2] = NodePtr(new Node(CONCEPT_NODE, "two"));
-        atomhand[0] = atoms[0]->getHandle();
-        atomhand[1] = atoms[1]->getHandle();
-        atomhand[2] = atoms[2]->getHandle();
+        atoms[0] = NodePtr(createNode(CONCEPT_NODE, "zero"));
+        atoms[1] = NodePtr(createNode(CONCEPT_NODE, "one"));
+        atoms[2] = NodePtr(createNode(CONCEPT_NODE, "two"));
+
+        // Composite truth values require valid handle uuid's to
+        // function correctly, and the only way to get those is to
+        // insert them into an atom table.
+        atomhand[0] = atomTable.add(atoms[0]);
+        atomhand[1] = atomTable.add(atoms[1]);
+        atomhand[2] = atomTable.add(atoms[2]);
+
         versionHandles[0] = VersionHandle(HYPOTHETICAL, atomhand[0]);
         versionHandles[1] = VersionHandle(CONTEXTUAL, atomhand[1]);
         versionHandles[2] = VersionHandle(UNKNOWN, atomhand[2]);
