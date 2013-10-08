@@ -901,7 +901,7 @@ bool HandleEntry::matchesFilterCriteria(AtomPtr atom, const char* targetName, Ty
                 DPRINTF("Node name = %s\n", (NodeCast(target))->getName().c_str());
             }
 
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
+            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE and
                     !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
                 if (targetType == target->getType()) {
                     const char* nodeName = (NodeCast(target))->getName().c_str();
@@ -936,7 +936,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* targetName, Ty
             atom = set->getAtom();
             match = matchesFilterCriteria(atom, targetName, targetType, vh);
         }
-        while ((set != NULL) and match)
+        while ((set != NULL) and not match)
         {
             buffer = set;
             set = set->next;
@@ -952,7 +952,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* targetName, Ty
 
         head = set;
         while (set->next != NULL) {
-            if (!matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
+            if (not matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
                 buffer = set->next;
                 set->next = set->next->next;
                 buffer->next = NULL;
