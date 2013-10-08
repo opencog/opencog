@@ -137,13 +137,13 @@ public:
     }
 
     struct mean : public AtomPredicate {
-        virtual bool test(const Atom& h) {
-            return h.getTruthValue().getMean() > 0.8;
+        virtual bool test(AtomPtr h) {
+            return h->getTruthValue().getMean() > 0.8;
         }
     };
 
     struct everything : public AtomPredicate {
-        virtual bool test(const Atom& h) {
+        virtual bool test(AtomPtr h) {
             return true;
         }
     };
