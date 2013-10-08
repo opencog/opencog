@@ -25,6 +25,8 @@
 #ifndef _OPENCOG_ATTENTION_BANK_H
 #define _OPENCOG_ATTENTION_BANK_H
 
+#include <mutex>
+
 #include <opencog/util/recent_val.h>
 #include <opencog/atomspace/AttentionValue.h>
 
