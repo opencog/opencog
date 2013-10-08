@@ -330,35 +330,6 @@ public:
         return bank.getSTI(h);
     }
 
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given Handle. STI above and below threshold normalised separately
-     * and linearly.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between -1..1
-     */
-    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedSTI(h, average, clip);
-    }
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given Handle.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between 0..1
-     */
-    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedZeroToOneSTI(h, average, clip);
-    }
-
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
         return bank.getLTI(h);
