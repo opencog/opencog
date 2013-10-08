@@ -49,7 +49,7 @@ public:
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            NodePtr n(new Node(NUMBER_NODE, name));
+            NodePtr n(createNode(NUMBER_NODE, name));
             handles[i] = TLB::addAtom(n);
         }
     }
