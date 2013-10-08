@@ -323,7 +323,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                         if (l->getArity() != arity) return false;
                         Handle oh = l->getOutgoingSet()[i];
                         if (not isType(oh, types[i], sub)) return false;
-                        AtomPtr oa = l->getOutgoingAtom(i);
+                        AtomPtr oa = TLB::getAtom(l->getOutgoingAtom(i));
                         if (LinkCast(oa))
                             return (NULL == names[i]) or (0 == names[i][0]);
                         NodePtr on(NodeCast(oa));
@@ -430,7 +430,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // Increment the size of the table
     size++;
 
-    // Checks for null outgoing set members.
+    // Checks for bad outgoing set members.
+    // Make sure the outgoing set is in the table! (recursive call)
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         const HandleSeq ogs = lll->getOutgoingSet();
@@ -440,6 +441,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                 throw RuntimeException(TRACE_INFO,
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
+            }
+            if (NULL == ogs[i]) {
+                add(TLB::getAtom(ogs[i]));
             }
         }
     }
