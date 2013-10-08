@@ -665,7 +665,10 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle h) const { return (NULL != h) and h->getAtomTable() == this; }
+    bool holds(Handle h) const {
+        h = getHandle(h);
+        return (NULL != h) and h->getAtomTable() == this; 
+    }
 
     /** Get Node object already in the AtomTable.
      *
@@ -674,6 +677,7 @@ public:
      * associated with handle or if the atom is a link.
      */
     inline NodePtr getNode(Handle h) const {
+        h = getHandle(h);
         return NodeCast(h);
     }
 
@@ -684,6 +688,7 @@ public:
      * associated with handle or if the atom is a node.
      */
     inline LinkPtr getLink(Handle h) const {
+        h = getHandle(h);
         return LinkCast(h);
     }
 
