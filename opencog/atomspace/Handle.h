@@ -44,7 +44,8 @@ typedef unsigned long UUID;
 
 //! contains an unique identificator
 class Atom;
-class Handle : public std::shared_ptr<Atom>
+typedef std::shared_ptr<Atom> AtomPtr;
+class Handle : public AtomPtr
 {
 
 friend class TLB;
@@ -60,6 +61,7 @@ public:
 
     static const Handle UNDEFINED;
 
+    explicit Handle(AtomPtr atom);
     explicit Handle(const UUID u) : uuid(u) {}
     Handle(const Handle& h) : uuid(h.uuid) {}
     explicit Handle() : uuid(UNDEFINED.uuid) {}

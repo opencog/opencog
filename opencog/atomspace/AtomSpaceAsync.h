@@ -122,12 +122,6 @@ public:
         return r;
     }
 
-    BoolRequest commitAtom(AtomPtr a) {
-        BoolRequest r(new CommitAtomASR(&atomspace,a));
-        requestQueue.push(r);
-        return r;
-    }
-
     /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms

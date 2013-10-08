@@ -25,8 +25,10 @@
 
 #include <climits>
 #include "Handle.h"
+#include "Atom.h"
 
 using namespace opencog;
 
 const Handle Handle::UNDEFINED(ULONG_MAX);
 
+Handle::Handle(AtomPtr atom) : AtomPtr(atom), uuid(atom->_uuid) {}

@@ -54,6 +54,8 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/platform.h>
 
+class AtomTableUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -80,7 +82,13 @@ class AtomTable
 
 private:
 
+    // Single, global mutex for locking the indexes.
+    static std::mutex _mtx;
+
     int size;
+
+    // temporary hack -- holds all atoms in the table.
+    std::set<AtomPtr> _atom_set;
 
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
@@ -234,23 +242,22 @@ protected:
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
     bool isType(Handle h, Type t, bool subclass) const
     {
-        Type at = getAtom(h)->getType();
+        Type at = h->getType();
         if (not subclass) return t == at;
         return classserver().isA(at, t);
     }
     bool containsVersionedTV(Handle h, VersionHandle vh) const
     {
         if (isNullVersionHandle(vh)) return true;
-        const TruthValue& tv = getAtom(h)->getTruthValue();
+        const TruthValue& tv = h->getTruthValue();
         return (not tv.isNullTv())
                and (tv.getType() == COMPOSITE_TRUTH_VALUE)
                and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
     }
     bool hasNullName(Handle h) const
     {
-        AtomPtr a(getAtom(h));
-        if (LinkCast(a)) return true;
-        if (NodeCast(a)->getName().c_str()[0] == 0) return true;
+        if (LinkCast(h)) return true;
+        if (NodeCast(h)->getName().c_str()[0] == 0) return true;
         return false;
     }
 
@@ -331,7 +338,7 @@ public:
                             result,
              [&](Handle h)->bool { 
                   return isDefined(h)
-                      and (*pred)(*getAtom(h))
+                      and (*pred)(h)
                       and containsVersionedTV(h, vh);
              });
     }
@@ -654,23 +661,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle h) const { return (NULL != getAtom(h)); }
-
-    /** Get Atom object already in the AtomTable.
-     *
-     * @param h Handle of the atom to retrieve.
-     * @return pointer to Atom object, NULL if no atom within this AtomTable is
-     * associated with handle.
-     */
-    inline AtomPtr getAtom(Handle h) const {
-        if (h == Handle::UNDEFINED) return NULL;
-        AtomPtr atom(TLB::getAtom(h));
-        if (atom)
-            // if the atom isn't linked to this AtomTable
-            // then blank pointer
-            if (this != atom->getAtomTable()) atom = NULL;
-        return atom;
-    }
+    bool holds(Handle h) const { return (NULL != h) and h->getAtomTable() == this; }
 
     /** Get Node object already in the AtomTable.
      *
@@ -679,7 +670,7 @@ public:
      * associated with handle or if the atom is a link.
      */
     inline NodePtr getNode(Handle h) const {
-        return NodeCast(getAtom(h));
+        return NodeCast(h);
     }
 
     /** Get Link object already in the AtomTable.
@@ -689,7 +680,7 @@ public:
      * associated with handle or if the atom is a node.
      */
     inline LinkPtr getLink(Handle h) const {
-        return LinkCast(getAtom(h));
+        return LinkCast(h);
     }
 
     /**

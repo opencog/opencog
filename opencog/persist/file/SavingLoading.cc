@@ -157,7 +157,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     atomTable.foreachHandleByType(
         [&](Handle atomHandle)->void
         {
-            NodePtr node(NodeCast(atomTable.getAtom(atomHandle)));
+            NodePtr node(NodeCast(atomHandle));
             if ( node == NULL ) {
                 logger().error( "Trying to save a node which isn't in atomTable "
                         "(%p). Handle %d", &atomTable, atomHandle.value() );
@@ -226,7 +226,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     std::set<Handle>::iterator itLinks;
     for (itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
             ++itLinks ) {
-        LinkPtr link(LinkCast(atomTable.getAtom(*itLinks)));
+        LinkPtr link(LinkCast(*itLinks));
         logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
         writeLink(f, link);
         numLinks++;

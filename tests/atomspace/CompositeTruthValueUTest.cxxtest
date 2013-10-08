@@ -29,7 +29,6 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/persist/file/CompositeRenumber.h>
 #include <opencog/util/Config.h>
@@ -82,9 +81,9 @@ public:
         atoms[0] = NodePtr(new Node(CONCEPT_NODE, "zero"));
         atoms[1] = NodePtr(new Node(CONCEPT_NODE, "one"));
         atoms[2] = NodePtr(new Node(CONCEPT_NODE, "two"));
-        atomhand[0] = TLB::addAtom(atoms[0]);
-        atomhand[1] = TLB::addAtom(atoms[1]);
-        atomhand[2] = TLB::addAtom(atoms[2]);
+        atomhand[0] = atoms[0]->getHandle();
+        atomhand[1] = atoms[1]->getHandle();
+        atomhand[2] = atoms[2]->getHandle();
         versionHandles[0] = VersionHandle(HYPOTHETICAL, atomhand[0]);
         versionHandles[1] = VersionHandle(CONTEXTUAL, atomhand[1]);
         versionHandles[2] = VersionHandle(UNKNOWN, atomhand[2]);

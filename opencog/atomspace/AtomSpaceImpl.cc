@@ -293,18 +293,11 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
     return base;
 }
 
-AtomPtr AtomSpaceImpl::cloneAtom(Handle h) const
-{
-    // TODO: Add timestamp to atoms and add vector clock to AtomSpace
-    return atomTable.getAtom(h);
-}
-
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 {
-    AtomPtr a(atomTable.getAtom(h));
-    if (a) {
-        if (terse) return a->toShortString();
-        else return a->toString();
+    if (h) {
+        if (terse) return h->toShortString();
+        else return h->toString();
     }
     return std::string("ERROR: Bad handle");
 }
@@ -312,8 +305,7 @@ std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         bool fanout, Type desiredLinkType, bool subClasses) const
 {
-    AtomPtr a(atomTable.getAtom(h));
-    if (a == NULL) {
+    if (h == NULL) {
         throw InvalidParamException(TRACE_INFO,
             "Handle %d doesn't refer to a Atom", h.value());
     }
@@ -323,7 +315,7 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     for (UnorderedHandleSet::const_iterator it = iset.begin();
          it != iset.end(); it++)
     {
-        LinkPtr link(atomTable.getLink(*it));
+        LinkPtr link(LinkCast(*it));
         Type linkType = link->getType();
         DPRINTF("Atom::getNeighbors(): linkType = %d desiredLinkType = %d\n", linkType, desiredLinkType);
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
@@ -338,24 +330,6 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         }
     }
     return answer;
-}
-
-bool AtomSpaceImpl::commitAtom(AtomPtr a)
-{
-    // TODO: Check for differences and abort if timestamp is out of date
-
-    Handle h = atomTable.getHandle(a);
-    AtomPtr original(atomTable.getAtom(h));
-    if (original == NULL)
-        // TODO: allow committing a new atom?
-        return false;
-    // The only mutable properties of atoms are the TV and AttentionValue
-    // TODO: this isn't correct, trails, flags and other things might change
-    // too... XXX the AtomTable already has a merge function; shouldn't we
-    // be using that?
-    original->setTruthValue(a->getTruthValue());
-    original->setAttentionValue(a->getAttentionValue());
-    return true;
 }
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)
@@ -379,24 +353,23 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
 
 bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 {
-    AtomPtr a(atomTable.getAtom(h));
-    if (!a) return false;
-    const TruthValue& currentTv = a->getTruthValue();
+    if (!h) return false;
+    const TruthValue& currentTv = h->getTruthValue();
     if (!isNullVersionHandle(vh))
     {
         CompositeTruthValue ctv = (currentTv.getType() == COMPOSITE_TRUTH_VALUE) ?
                                   CompositeTruthValue((const CompositeTruthValue&) currentTv) :
                                   CompositeTruthValue(currentTv, NULL_VERSION_HANDLE);
         ctv.setVersionedTV(tv, vh);
-        a->setTruthValue(ctv); // always call setTruthValue to update indices
+        h->setTruthValue(ctv); // always call setTruthValue to update indices
     } else {
         if (currentTv.getType() == COMPOSITE_TRUTH_VALUE &&
                 tv.getType() != COMPOSITE_TRUTH_VALUE) {
             CompositeTruthValue ctv((const CompositeTruthValue&) currentTv);
             ctv.setVersionedTV(tv, vh);
-            a->setTruthValue(ctv);
+            h->setTruthValue(ctv);
         } else {
-            a->setTruthValue(tv);
+            h->setTruthValue(tv);
         }
     }
 
@@ -405,10 +378,9 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
 {
-    AtomPtr a(atomTable.getAtom(h));
-    if (!a) return TruthValue::NULL_TV();
+    if (!h) return TruthValue::NULL_TV();
 
-    const TruthValue& tv = a->getTruthValue();
+    const TruthValue& tv = h->getTruthValue();
     if (isNullVersionHandle(vh)) {
         return tv;
     }

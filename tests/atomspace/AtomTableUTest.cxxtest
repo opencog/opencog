@@ -40,7 +40,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -162,7 +161,7 @@ public:
             int matchCount = 0;
             while (indexedHandles != NULL) {
                 matchCount++;
-                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, indexedHandles->handle->getType());
                 indexedHandles = indexedHandles->next;
             }
             //logger().debug("\ncount = %d, expected count = %d", matchCount, numberOfExpectedMatches[index]);
@@ -179,7 +178,7 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, indexedHandles->handle->getType());
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
             }
@@ -194,7 +193,7 @@ public:
             while (expectedEntry != NULL) {
                 if (count < numberOfExpectedMatchesWithVH1[index]) {
                     //logger().debug("adding versioned tv with VH1");
-                    AtomPtr atom(TLB::getAtom(expectedEntry->handle));
+                    AtomPtr atom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
@@ -202,7 +201,7 @@ public:
                 }
                 if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
                     //logger().debug("adding versioned tv with VH2");
-                    AtomPtr atom(TLB::getAtom(expectedEntry->handle));
+                    AtomPtr atom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
@@ -223,8 +222,8 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue().toString().c_str());
-                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue().toString().c_str());
+                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -255,8 +254,8 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue()->toString().c_str());
-                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue()->toString().c_str());
+                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -455,9 +454,9 @@ public:
             atomTable.decayShortTermImportance();
 
         // test the updated STIs
-        TS_ASSERT(TLB::getAtom(wnHandle)->getAttentionValue().getSTI()   == -20);
-        TS_ASSERT(TLB::getAtom(snHandle)->getAttentionValue().getSTI()   ==  20);
-        TS_ASSERT(TLB::getAtom(linkHandle)->getAttentionValue().getSTI() == 490);
+        TS_ASSERT(wnHandle->getAttentionValue().getSTI()   == -20);
+        TS_ASSERT(snHandle->getAttentionValue().getSTI()   ==  20);
+        TS_ASSERT(linkHandle->getAttentionValue().getSTI() == 490);
     }
 
     /* test the fix for the bug triggered whenever we had a link pointing to the
@@ -490,8 +489,8 @@ public:
 
         Handle h = atomTable.getHandle("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
-        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getMean(), 0.3f, 0.000001);
-        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getCount(), 0.4f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue().getMean(), 0.3f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue().getCount(), 0.4f, 0.000001);
     }
 
     void testSimpleWithCustomAtomTypes() {

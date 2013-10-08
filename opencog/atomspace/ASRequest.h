@@ -343,22 +343,8 @@ public:
         OneParamASR<AtomPtr, Handle>(a,h) {};
     
     virtual void do_work() {
-        set_result(atomspace->cloneAtom(p1));
+        set_result(p1);
     };
-};
-
-class CommitAtomASR : public GenericASR <bool> {
-    AtomPtr _atom;
-public:
-    CommitAtomASR(AtomSpaceImpl *a, AtomPtr atom) :
-       GenericASR<bool>(a) {
-           _atom = atom;
-       };
-    
-    virtual void do_work() {
-        set_result(atomspace->commitAtom(_atom));
-    };
-    
 };
 
 class AtomAsStringASR : public TwoParamASR <std::string, Handle, bool> {
@@ -678,7 +664,7 @@ public:
         HandleSeq hs;
         atomspace->getHandleSet(back_inserter(hs), t, subclass, vh);
         foreach (Handle h, hs) {
-            if ((*p)(atomspace->getAtom(h)) && atomspace->containsVersionedTV(h, vh))
+            if ((*p)(h) && atomspace->containsVersionedTV(h, vh))
                 _result.push_back(h);
         }
         set_result(_result);

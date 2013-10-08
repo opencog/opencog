@@ -25,7 +25,6 @@
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;
@@ -45,8 +44,6 @@ public:
     void testEquals() {
         NodePtr n1(new Node(CONCEPT_NODE, "TEST"));
         NodePtr n2(new Node(CONCEPT_NODE, "TEST"));
-        TLB::addAtom(n1);
-        TLB::addAtom(n2);
         std::vector<Handle> out1;
         LinkPtr l1(createLink(LIST_LINK, out1));
         LinkPtr l2(createLink(LIST_LINK, out1));

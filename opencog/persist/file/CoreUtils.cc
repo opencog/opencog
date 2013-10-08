@@ -36,11 +36,11 @@ void CoreUtils::updateHandle(Handle* handle, HandleMap<AtomPtr>* handles) throw 
     AtomPtr a(handles->get(*handle));
     // Assume that the HandleMap stores <Handle, Atom *> pairs ....
     Handle newH = a->getHandle();
-    if (TLB::isValidHandle(newH)) {
+    if (Handle::UNDEFINED != newH) {
         *handle = newH;
     } else {
-        newH = TLB::addAtom(a);
-        if (TLB::isValidHandle(newH)) {
+        newH = a->getHandle();
+        if (Handle::UNDEFINED != newH) {
             *handle = newH;
         } else {
             throw RuntimeException(TRACE_INFO, "CoreUtils::updateHandle: "

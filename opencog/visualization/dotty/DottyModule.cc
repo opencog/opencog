@@ -54,7 +54,7 @@ public:
      */
     bool do_nodes(Handle h)
     {
-        AtomPtr a = space->cloneAtom(h);
+        AtomPtr a(h);
 
         if (compact)
         {
@@ -87,7 +87,7 @@ public:
      */
     bool do_links(Handle h)
     {
-        AtomPtr a = space->cloneAtom(h);
+        AtomPtr a(h);
         std::ostringstream ost;
 
         //const Link *l = dynamic_cast<const Link *>(a);

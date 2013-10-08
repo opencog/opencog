@@ -26,7 +26,6 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -50,8 +49,8 @@ public:
     HandleEntryUTest() {
         a1 = NodePtr(new Node(CONCEPT_NODE, "atom one"));
         a2 = NodePtr(new Node(CONCEPT_NODE, "atom two"));
-        h1 = TLB::addAtom(a1);
-        h2 = TLB::addAtom(a2);
+        h1 = a1->getHandle();
+        h2 = a2->getHandle();
     }
 
     void setUp() {
@@ -84,11 +83,11 @@ public:
         NodePtr n4(new Node(PREDICATE_NODE, "TEST4", tv));
         NodePtr n5(new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2)));
 
-        HandleEntry* he = new HandleEntry(TLB::addAtom(n1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n3)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n4)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n5)));
+        HandleEntry* he = new HandleEntry(n1->getHandle());
+        he  = HandleEntry::concatenation(he, new HandleEntry(n2->getHandle()));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n3->getHandle()));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n4->getHandle()));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n5->getHandle()));
         TS_ASSERT(he->getSize() == 5);
 
         // Now filter

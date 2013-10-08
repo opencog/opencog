@@ -478,23 +478,6 @@ public:
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
 
-    /** Clone an atom from the AtomSpace, replaces the public access to TLB::getAtom
-     * that many modules were doing.
-     * @param h Handle of atom to clone
-     * @return A smart pointer to the atom
-     * @note Any changes to the atom object must be committed using
-     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
-     * Otherwise changes are lost.
-     */
-    AtomPtr cloneAtom(const Handle& h) const;
-
-    /** Commit an atom that has been cloned from the AtomSpace.
-     *
-     * @param a Atom to commit
-     * @return whether the commit was successful
-     */
-    bool commitAtom(const AtomPtr a);
-
     bool isValidHandle(const Handle& h) const;
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
@@ -1128,7 +1111,7 @@ public:
         HandleSeq result;
         for (; begin != end; begin++) {
             //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
-            if ((*compare)(*cloneAtom(*begin))) {
+            if ((*compare)(*begin)) {
                 //std::cout << "passed! " <<  std::endl;
                 result.push_back(*begin);
             }
