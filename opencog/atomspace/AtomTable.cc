@@ -114,8 +114,9 @@ Handle AtomTable::getHandle(const std::string& name, Type t) const
 {
     return nodeIndex.getHandle(t, name.c_str());
 }
-// XXX why aren't we just returning the handle in the atom ???
-// XXX FIXME above... 
+
+/// This is used to find an equivalent atom that has exactly the same 
+/// name and type.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
     return getHandle(n->getName(), n->getType());
@@ -387,21 +388,21 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
 
 void AtomTable::merge(Handle h, const TruthValue& tvn)
 {
-    if (TLB::isValidHandle(h)) {
-        // Merge the TVs
-        if (!tvn.isNullTv()) {
-            const TruthValue& currentTV = h->getTruthValue();
-            if (currentTV.isNullTv()) {
-                h->setTruthValue(tvn);
-            } else {
-                TruthValue* mergedTV = currentTV.merge(tvn);
-                h->setTruthValue(*mergedTV);
-                delete mergedTV;
-            }
+    if (NULL == h) return;
+
+    // Merge the TVs
+    if (!tvn.isNullTv()) {
+        const TruthValue& currentTV = h->getTruthValue();
+        if (currentTV.isNullTv()) {
+            h->setTruthValue(tvn);
+        } else {
+            TruthValue* mergedTV = currentTV.merge(tvn);
+            h->setTruthValue(*mergedTV);
+            delete mergedTV;
         }
-        if (logger().isFineEnabled()) 
-            logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
-    } 
+    }
+    if (logger().isFineEnabled()) 
+        logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
 }
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
@@ -416,20 +417,20 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
 
-#if LATER
-    // We need to perform uniqueness checks:
-    // If its a link, is it already in the table?
-    // if its a node .. ?
-    Handle existingHandle = atom->handle;
-    if (TLB::isValidHandle(existingHandle)) {
-        DPRINTF("Merging existing Atom with the Atom being added ...\n");
-        merge(existingHandle, atom->getTruthValue());
-        // XXX TODO -- should merege attention value, should also
-        // merge trails, right?
-        // delete atom;
-        return existingHandle;
+    // Is the equivalent of this atom already in the table?
+    // If so, then we merge the truth values.
+    NodePtr nnn(NodeCast(atom));
+    if (nnn) {
+        Handle h = getHandle(nnn->getName(), nnn->getType());
+        if (h) {
+            DPRINTF("Merging existing Atom with the Atom being added ...\n");
+            merge(h, atom->getTruthValue());
+            // XXX TODO -- should merege attention value too, right ???
+            return h;
+        }
     }
 
+#if LATER
     // Its possible that the atom is already in the TLB -- 
     // e.g. if it was fetched from persistent storage; this
     // was done to preserve handle consistency.
@@ -437,7 +438,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 #endif
 
-    // Check for bad outgoing set members.
+    // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         const HandleSeq ogs = lll->getOutgoingSet();
