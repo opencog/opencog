@@ -54,7 +54,7 @@ def random_time(start, stop, probability_distribution=None):
     return random_value
 
 
-class Period(object):
+class Interval(object):
     iter_step = 1
 
     def __init__(self, a, b):
@@ -70,12 +70,12 @@ class Period(object):
             start = self.a
         else:
             start = convert_to_unix_time(start)
-            assert self.a <= start <= self.b, "'start' should be within the interval of the period"
+            assert self.a <= start <= self.b, "'start' should be within the interval of the interval"
         if stop is None:
             stop = self.b
         else:
             stop = convert_to_unix_time(stop)
-            assert self.a <= stop <= self.b, "'stop' should be within the interval of the period"
+            assert self.a <= stop <= self.b, "'stop' should be within the interval of the interval"
         return random_time(start, stop, probability_distribution)
 
     @property
@@ -90,6 +90,11 @@ class Period(object):
         return xrange(int_a, int_b, self.iter_step)
 
     def __contains__(self, item):
+        """
+        item can either be unix time or any object with 'a' and 'b' unix time attributes (e.g. a Interval)
+        """
+        if is_unix_time(item):
+            return self.a <= item <= self.b
         return self.a <= item.a and self.b >= item.b
 
     def __iter__(self):
@@ -99,7 +104,7 @@ class Period(object):
         return float(self.b - self.a)
 
     def __repr__(self):
-        return 'spatiotemporal.time.Period([{0} : {1}])'.format(self.a, self.b)
+        return 'spatiotemporal.time.Interval([{0} : {1}])'.format(self.a, self.b)
 
     def __str__(self):
         return 'from {0} to {1}'.format(
@@ -109,9 +114,7 @@ class Period(object):
 
 class BaseTemporalEvent(object):
     def __init__(self, a, b):
-        self.a = convert_to_unix_time(a)
-        self.b = convert_to_unix_time(b)
-        self.period = Period(a, b)
+        self.interval = Interval(a, b)
 
     def _pdf_single_point(self, time_step):
         """
@@ -132,34 +135,52 @@ class BaseTemporalEvent(object):
             return self._pdf_single_point(x)
         return result
 
-    def _period_pre_check(self, period):
-        if period is None:
-            period = self.period
+    def _interval_pre_check(self, interval):
+        if interval is None:
+            interval = self.interval
         else:
-            assert isinstance(period, Period), "'period' should be of type 'spatiotemporal.time.Period'"
-        return period
+            assert isinstance(interval, Interval), "'interval' should be of type 'spatiotemporal.time.Interval'"
+        return interval
 
-    def probability_in_period(self, period=None):
+    def probability_in_interval(self, interval=None):
         #TODO replace by CalculateCenterOfMass
-        period = self._period_pre_check(period)
-        return max(self.pdf(period))
+        interval = self._interval_pre_check(interval)
+        return max(self.pdf(interval))
+
+    @property
+    def a(self):
+        return self.interval.a
+
+    @a.setter
+    def a(self, value):
+        assert is_unix_time(value), "'a' should be unix time"
+        self.interval.a = value
+
+    @property
+    def b(self):
+        return self.interval.b
+
+    @b.setter
+    def b(self, value):
+        assert is_unix_time(value), "'b' should be unix time"
+        self.interval.b = value
 
     @property
     def iter_step(self):
-        return self.period.iter_step
+        return self.interval.iter_step
 
     @iter_step.setter
     def iter_step(self, value):
-        self.period.iter_step = value
+        self.interval.iter_step = value
 
     def __iter__(self):
-        return iter(self.period)
+        return iter(self.interval)
 
     def __len__(self):
-        return len(self.period)
+        return len(self.interval)
 
     def __repr__(self):
-        return 'spatiotemporal.time.TemporalEvent(a:{0}, b:{1})'.format(self.period.a, self.period.b)
+        return 'spatiotemporal.time.TemporalEvent(a:{0}, b:{1})'.format(self.interval.a, self.interval.b)
 
     def __str__(self):
         return repr(self)
@@ -199,6 +220,8 @@ def _interpolation_a_to_b(t, a, beginning, ending, b):
 class PiecewiseTemporalEvent(BaseTemporalEvent):
     beginning_factor = 5
     ending_factor = 5
+    _beginning = 0
+    _ending = 0
 
     def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None):
         """
@@ -218,27 +241,26 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
             self.ending_factor = ending_factor
 
         if (beginning, ending) != (None, None):
-            assert self.period.a < beginning < ending < self.period.b, "'beginning' and 'ending' should be " \
-                                                                       "within the interval of event's period and " \
+            assert self.interval.a < beginning < ending < self.interval.b, "'beginning' and 'ending' should be " \
+                                                                       "within the interval of event's interval and " \
                                                                        "'ending' should be greater than 'beginning'"
-            self.beginning, self.ending = beginning, ending
+            self._beginning, self._ending = beginning, ending
         else:
-            self.beginning, self.ending = 0, 0
-            while not self.period.a < self.beginning < self.ending < self.period.b:
-                self.beginning = self.period.random_time(
+            while not self.interval.a < self._beginning < self._ending < self.interval.b:
+                self._beginning = self.interval.random_time(
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.period.a + len(self) / self.beginning_factor,
+                        self.interval.a + len(self) / self.beginning_factor,
                         len(self) / self.beginning_factor
                     )
                 )
 
-                self.ending = self.period.random_time(
+                self._ending = self.interval.random_time(
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.period.b - len(self) / self.ending_factor,
+                        self.interval.b - len(self) / self.ending_factor,
                         len(self) / self.ending_factor
                     )
                 )
@@ -246,15 +268,39 @@ class PiecewiseTemporalEvent(BaseTemporalEvent):
     def _pdf_single_point(self, time_step):
         return _interpolation_a_to_b(time_step, self.a, self.beginning, self.ending, self.b)
 
-    def probability_in_period(self, period=None):
-        period = self._period_pre_check(period)
-        if self.a < period.a < self.beginning and self.ending < period.b < self.b:
+    def probability_in_interval(self, interval=None):
+        interval = self._interval_pre_check(interval)
+        if self.a <= interval.a <= self.beginning and self.ending <= interval.b <= self.b:
             return 1
-        return max(self._pdf_single_point(period.a), self._pdf_single_point(period.b))
+        return max(self._pdf_single_point(interval.a), self._pdf_single_point(interval.b))
+
+    @property
+    def beginning(self):
+        return self._beginning
+
+    @beginning.setter
+    def beginning(self, value):
+        if self._ending == 0:
+            assert self.interval.a < value < self.interval.b, "'beginning' should be within ['a' : 'b'] interval"
+        else:
+            assert self.interval.a < value < self._ending, "'beginning' should be within ['a' : 'ending'] interval"
+        self._beginning = value
+
+    @property
+    def ending(self):
+        return self._ending
+
+    @ending.setter
+    def ending(self, value):
+        if self._beginning == 0:
+            assert self.interval.a < value < self.interval.b, "'ending' should be within ['a' : 'b'] interval"
+        else:
+            assert self._beginning < value < self.interval.b, "'ending' should be within ['beginning' : 'b'] interval"
+        self._ending = value
 
     def __repr__(self):
         return 'spatiotemporal.time.PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
-            self.period.a, self.beginning, self.ending, self.period.b)
+            self.interval.a, self.beginning, self.ending, self.interval.b)
 
 
 class TemporalRelation(list):
@@ -304,7 +350,7 @@ class TemporalRelation(list):
 
 def generate_random_events(size=20):
     events = []
-    year_2010 = Period(datetime(2010, 1, 1), datetime(2011, 1, 1))
+    year_2010 = Interval(datetime(2010, 1, 1), datetime(2011, 1, 1))
     iter_step = 100
 
     for i in xrange(size):
@@ -341,12 +387,12 @@ def create_event_relation_hashtable(temporal_events):
 
 
 if __name__ == '__main__':
-    events = generate_random_events()
+    events = generate_random_events(1)
     import matplotlib.pyplot as plt
 
     for event in events:
         y = event.pdf(event)
-        plt.plot(event.period.integer_range, y)
+        plt.plot(event.interval.integer_range, y)
 
     plt.show()
 
