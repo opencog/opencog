@@ -478,13 +478,13 @@ public:
     void testMerge() {
         AtomTable atomTable;
 
-        NodePtr n1(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f)));
+        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f)));
         Handle hn1 = atomTable.add(n1);
 
-        NodePtr n2(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f)));
+        NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
 
-        NodePtr n3(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
+        NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
 
         Handle h = atomTable.getHandle("1", NUMBER_NODE);
