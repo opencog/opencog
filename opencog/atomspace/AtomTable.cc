@@ -152,6 +152,18 @@ Handle AtomTable::getHandle(AtomPtr a) const
     return Handle::UNDEFINED;
 }
 
+Handle AtomTable::getHandle(Handle h) const
+{
+    // If we have an atom, but don't know the uuid, find uuid.
+    if (Handle::UNDEFINED.value() == h.value())
+        return getHandle(AtomPtr(h));
+
+    // If we have a uuid but no atom pointer, find the atom pointer.
+    auto hit = _atom_set.find(h);
+    if (hit != _atom_set.end())
+        return *hit;
+    return Handle::UNDEFINED;
+}
 
 UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                                      Type* types,

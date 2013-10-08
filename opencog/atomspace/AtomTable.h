@@ -239,6 +239,7 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(LinkPtr) const;
     Handle getHandle(AtomPtr) const;
+    Handle getHandle(Handle) const;
 
 protected:
     /* Some basic predicates */
