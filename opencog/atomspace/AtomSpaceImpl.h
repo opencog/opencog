@@ -962,8 +962,8 @@ public:
     struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& a) {
-            return a.getAttentionValue().getSTI() > threshold;
+        virtual bool test(AtomPtr a) {
+            return a->getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -971,8 +971,8 @@ public:
     struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& a) {
-            return a.getAttentionValue().getLTI() > threshold;
+        virtual bool test(AtomPtr a) {
+            return a->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
