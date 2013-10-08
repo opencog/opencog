@@ -1,5 +1,7 @@
 from opencog.atomspace import types, Atom
 
+from itertools import permutations
+
 class Logic(object):
     '''A base class for chainers or other logical sytems. Contains various logical functions
        inspired by the AIMA chapter on first-order logic. They all operate directly on Atoms.'''
@@ -86,9 +88,6 @@ class Logic(object):
 
         if substitution == None:
             return None
-#        elif x.is_node() != y.is_node():
-#            # One is a Node and the other is a Link
-#            return None
         elif x == y:
             return substitution
         elif self.is_variable(x):
@@ -106,6 +105,12 @@ class Logic(object):
             return None
 
     def _unify_outgoing(self, x, y, substitution):
+        if x.is_a(types.OrderedLink):
+            return self._unify_outgoing_ordered(x, y, substitution)
+        else:
+            return self._unify_outgoing_unordered(x, y, substitution)
+
+    def _unify_outgoing_ordered(self, x, y, substitution):
         # Try to unify the first argument of x with the first argument of y, then recursively
         # do the rest.
         if len(x) == 0:
@@ -113,6 +118,20 @@ class Logic(object):
         else:
             s_one_arg = self.unify(x[0], y[0], substitution)
             return self._unify_outgoing(x[1:], y[1:], s_one_arg)
+
+    def _unify_outgoing_unordered(self, x, y, substitution):
+        # A simple way to unify two UnorderedLinks
+        # Try to unify x with every permutation of y.
+        # Choose the first permutation that works (if there is one).
+        # TODO handle this case: there is more than one permutation compatible with this expression,
+        # but only some of them (because of variables) can be used anywhere else
+        # That could only be handled by backtracking in the rest of the unify algorithm (but that's too complex)
+        # TODO this may not be the most efficient way. Shouldn't matter for small links though...
+        for new_y in permutations(y):
+            s = self._unify_outgoing_ordered(x, new_y, substitution)
+            if s != None:
+                return s
+        return None
 
     def _unify_variable(self, variable, atom, substitution):
         if variable in substitution:
