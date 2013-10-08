@@ -2,6 +2,7 @@
  * opencog/atomspace/AtomTable.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -436,14 +437,24 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
 #endif
 
-    // Checks for bad outgoing set members.
-    // Make sure the outgoing set is in the table! (recursive call)
+    // Check for bad outgoing set members.
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         const HandleSeq ogs = lll->getOutgoingSet();
         size_t arity = ogs.size();
-        for (int i = arity - 1; i >= 0; i--) {
-            if (TLB::isInvalidHandle(ogs[i])) {
+        for (size_t i = 0; i < arity; i++) {
+            Handle h = ogs[i];
+            // It can happen that the uuid is assigned, but the pointer
+            // is NULL. In that case, we should at least know about this
+            // uuid.
+            if (NULL == h and Handle::UNDEFINED != h) {
+                auto it = _atom_set.find(h);
+                if (it != _atom_set.end()) {
+                    h = *it;
+                    continue;
+                }
+            }
+            if (Handle::UNDEFINED == h) {
                 throw RuntimeException(TRACE_INFO,
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
@@ -451,12 +462,12 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         }
     }
 
-    // New atom, its Handle will be stored in the AtomTable
-    // Increment the size of the table
+    // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
+    // to issue a valid uuid.  And then memorize it.
     TLB::addAtom(atom);
+    Handle h = atom->getHandle();
     size++;
-    _atom_set.insert(atom);
-
+    _atom_set.insert(h);
 
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);

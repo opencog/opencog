@@ -85,10 +85,13 @@ private:
     // Single, global mutex for locking the indexes.
     static std::mutex _mtx;
 
-    int size;
+    size_t size;
 
-    // temporary hack -- holds all atoms in the table.
-    std::set<AtomPtr> _atom_set;
+    // Holds all atoms in the table.  Provides lookup between numeric
+    // handle uuid and the actual atom pointer (since they are stored
+    // together).  To some degree, this info is duplicated in the Node
+    // and LinkIndex below; we have this here for convenience.
+    std::set<Handle, handle_less> _atom_set;
 
     //!@{
     //! Index for quick retreival of certain kinds of atoms.
