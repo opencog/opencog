@@ -47,9 +47,8 @@ using namespace std;
 
 
 // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
-// the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
-// it its forward rule node has multiple forward state node, using the deepest one
-int StateNode::calculateNodeDepth()
+// it its forward rule node has multiple forward state nodes, using the deepest one
+string StateNode::calculateNodeDepth()
 {
     if (this->depth == 0)
     {

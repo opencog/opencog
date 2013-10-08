@@ -180,9 +180,9 @@ public:
     RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    int depth; // depth = -1 means no rule node need this state node as a precondition
+    string depth; // depth = -1 means no rule node need this state node as a precondition
 
-    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1";}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
@@ -193,17 +193,25 @@ public:
     list< Rule*> ruleHistory;
 
     // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
-    // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
+    // the root state node (goals) depth is 1~9, the sub state nodes of node 1 will be 10~19, the sub state nodes of node 12 will be 120~129...etc
     // it its forward rule node has multiple forward state node, using the deepest one
     // return depth
-    int calculateNodeDepth();
+    string calculateNodeDepth();
 
     // have tried to find candidateRules
     bool hasFoundCandidateRules;
 
     bool operator < (const StateNode& other) const
     {
-        return ( depth < other.depth);
+        if (sizeof(depth) < sizeof(other.depth) )
+            return true;
+        else if (sizeof(depth) == sizeof(other.depth) )
+        {
+            // get the last digit
+            char last
+        }
+        else
+            return false;
     }
 
     ~StateNode()
@@ -352,7 +360,7 @@ protected:
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      // @ RuleNode* forwardRuleNode : the state's forward rule node
      // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode, int depth);
+     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode, string depth);
 
      bool findStateInStartStateNodes(State& state, StateNode* &stateNode);
 
