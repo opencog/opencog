@@ -397,9 +397,8 @@ public:
      * @param the tree of Vertex representation of the atom to be added
      * @param the TruthValue object to be associated to the added atom
      * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable.
-     * @param managed ???
      *
-     * virtual Handle addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh=false, bool managed=true);
+     * virtual Handle addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh=false);
      */
 #define mva makeVirtualAtom
     void testAddAtomVtreeTruthValueBool() {
@@ -460,7 +459,7 @@ public:
      * @param name  Name of the node
      * @param tvn   TruthValue of the node
      *
-     * virtual Handle addNode(Type t,const string& name,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     * virtual Handle addNode(Type t,const string& name,const TruthValue& tvn,bool fresh=false)=0;
      *
      */
     void testAddNode() {
@@ -528,7 +527,7 @@ public:
      * @param outgoing  HandleSeq containing the outgoing set of the link
      * @param tvn       TruthValue of the link
      *
-     * virtual Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     * virtual Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn,bool fresh=false)=0;
      */
     void testAddLink() {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
