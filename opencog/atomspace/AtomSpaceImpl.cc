@@ -357,6 +357,7 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
     // with a null atom pointer; only the uuid is valid. So first,
     // go fetch the actual atom out of the table.
     h = atomTable.getHandle(h);
+
     if (!h) return false;
     const TruthValue& currentTv = h->getTruthValue();
     if (!isNullVersionHandle(vh))
@@ -382,6 +383,10 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 const TruthValue& AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
 {
+    // Due to the way AsyncRequest is designed, we are being called
+    // with a null atom pointer; only the uuid is valid. So first,
+    // go fetch the actual atom out of the table.
+    h = atomTable.getHandle(h);
     if (!h) return TruthValue::NULL_TV();
 
     const TruthValue& tv = h->getTruthValue();
