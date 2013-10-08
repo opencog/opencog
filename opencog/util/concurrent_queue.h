@@ -25,9 +25,9 @@
 #ifndef _OC_CONCURRENT_QUEUE_H
 #define _OC_CONCURRENT_QUEUE_H
 
-#include "boost/thread.hpp"
+#include <condition_variable>
 #include <deque>
-#include <stdio.h>
+#include <mutex>
 
 /** \addtogroup grp_cogutil
  *  @{
@@ -39,8 +39,8 @@ class concurrent_queue
 {
 private:
     std::deque<Data> the_queue;
-    mutable boost::mutex the_mutex;
-    boost::condition_variable the_condition_variable;
+    mutable std::mutex the_mutex;
+    std::condition_variable the_condition_variable;
     bool is_canceled;
 
 public:
@@ -48,7 +48,7 @@ public:
     struct Canceled{};
     void push(Data const& data)
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::unique_lock<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
         the_queue.push_back(data);
         lock.unlock();
@@ -57,20 +57,20 @@ public:
 
     bool empty() const
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
         return the_queue.empty();
     }
 
     unsigned int approx_size() const
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::lock_guard<std::mutex> lock(the_mutex);
         return the_queue.size();
     }
 
     bool try_get(Data& value)
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
         if (the_queue.empty())
         {
@@ -89,15 +89,14 @@ public:
     // function to correctly report the state of the work queue.
     void wait_and_get(Data& value)
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::unique_lock<std::mutex> lock(the_mutex);
 
         while(the_queue.empty() && !is_canceled)
         {
             the_condition_variable.wait(lock);
         }
-        if (is_canceled) {
-            throw Canceled();
-        }
+        if (is_canceled) throw Canceled();
+
         value = the_queue.front();
     }
 
@@ -108,7 +107,7 @@ public:
 
     std::deque<Data> wait_and_take_all()
     {
-        boost::mutex::scoped_lock lock(the_mutex);
+        std::unique_lock<std::mutex> lock(the_mutex);
 
         while(the_queue.empty() && !is_canceled)
         {
@@ -121,17 +120,31 @@ public:
         return retval;
     }
 
+    /// A weak barrier. Its racy and thus unreliable across multiple
+    /// threads, but should work just fine to serialize a single
+    /// thread.
+    void barrier()
+    {
+        std::unique_lock<std::mutex> lock(the_mutex);
+
+        while(the_queue.empty() && !is_canceled)
+        {
+            the_condition_variable.wait(lock);
+        }
+        if (is_canceled) throw Canceled();
+    }
+
     void cancel_reset()
     {
        // this doesn't lose data, but it instead allows new calls
        // to not throw Canceled exceptions
-       boost::mutex::scoped_lock lock(the_mutex);
+       std::lock_guard<std::mutex> lock(the_mutex);
        is_canceled = false;
     }
 
     void cancel()
     {
-       boost::mutex::scoped_lock lock(the_mutex);
+       std::unique_lock<std::mutex> lock(the_mutex);
        if (is_canceled) throw Canceled();
        is_canceled = true;
        lock.unlock();
