@@ -171,13 +171,13 @@ public:
     }
 
     struct mean : public AtomPredicate {
-        virtual bool test(const Atom& h) {
-            return h.getTruthValue().getMean() > 0.8;
+        virtual bool test(AtomPtr h) {
+            return h->getTruthValue().getMean() > 0.8;
         }
     };
 
     struct everything : public AtomPredicate {
-        virtual bool test(const Atom& h) { return true; }
+        virtual bool test(AtomPtr h) { return true; }
     };
 
     void testMiscellaneous() {
@@ -481,7 +481,7 @@ public:
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
-        TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
+        TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
         atomSpace->getHandleSet(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
@@ -491,20 +491,20 @@ public:
         Handle hn = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
         tr = mva(hn, NULL);
         Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue(0.5f, 0.5f));
-        TS_ASSERT(Handle::compare(h1_, Handle::UNDEFINED));
+        TS_ASSERT(h1_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
-        TS_ASSERT(!Handle::compare(h1_, h1));
+        TS_ASSERT(h1_ == h1);
         AtomPtr atom(h1_);
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
         tr = mva(evalLink, NULL);
         Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue(0.5f, 0.5f));
-        TS_ASSERT(Handle::compare(evalLink_, Handle::UNDEFINED));
+        TS_ASSERT(evalLink_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
-        TS_ASSERT(!Handle::compare(evalLink_, evalLink));
+        TS_ASSERT(evalLink_ == evalLink);
         atom = evalLink_;
         TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
@@ -536,15 +536,15 @@ public:
         Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2_);
         Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
 
-        TS_ASSERT(!Handle::compare(h1, h1_));
+        TS_ASSERT(h1 == h1_);
         const TruthValue& h1tv = h1->getTruthValue();
         TS_ASSERT(h1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(h2, h2_));
+        TS_ASSERT(h2 == h2_);
         const TruthValue& h2tv = h2->getTruthValue();
         TS_ASSERT(h2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(h3, h3_));
+        TS_ASSERT(h3 == h3_);
         const TruthValue& h3tv = h3->getTruthValue();
         TS_ASSERT(h3tv.getMean() - tv3.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(h3tv.getCount() - tv3.getCount() < FLOAT_ACCEPTABLE_ERROR);
@@ -618,11 +618,11 @@ public:
         SimpleTruthValue tv2_(0.1f, 0.0f);
         Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2_);
 
-        TS_ASSERT(!Handle::compare(l1, l1_));
+        TS_ASSERT(l1 == l1_);
         const TruthValue& l1tv = l1->getTruthValue();
         TS_ASSERT(l1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(l2, l2_));
+        TS_ASSERT(l2 == l2_);
         const TruthValue& l2tv = l2->getTruthValue();
         TS_ASSERT(l2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(l2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
@@ -679,10 +679,10 @@ public:
         AtomSpaceImpl atomSpace;
         HandleSeq emptyOutgoing;
         Handle result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
-        TS_ASSERT(!Handle::compare(result, Handle::UNDEFINED));
+        TS_ASSERT(result == Handle::UNDEFINED);
         atomSpace.addLink(LIST_LINK, emptyOutgoing);
         result = atomSpace.getHandle(LIST_LINK, emptyOutgoing);
-        TS_ASSERT(Handle::compare(result, Handle::UNDEFINED));
+        TS_ASSERT(result != Handle::UNDEFINED);
     }
 
 
