@@ -227,6 +227,8 @@ public:
     float getDiffusionThreshold() const;
 }; // class
 
+typedef std::shared_ptr<ImportanceDiffusionAgent> ImportanceDiffusionAgentPtr;
+
 /** @}*/
 } // namespace
 

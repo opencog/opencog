@@ -48,6 +48,10 @@
 
 using namespace opencog;
 
+// Single, global mutex for locking the incoming set.
+std::mutex Atom::IncomingSet::_mtx;
+
+
 Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 {
     handle = Handle::UNDEFINED;
@@ -58,20 +62,21 @@ Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
     truthValue = NULL;
     setTruthValue(tv);
     setAttentionValue(av);
+
+    // XXX FIXME for right now, all atoms will always keep their
+    // incoming sets.  In the future, this should only be set by
+    // the user, or by the atomtable, when an atom is added to
+    // the atomtable.
+    keep_incoming_set();
 }
 
 Atom::~Atom()
 {
-    // In a garbage-collected environment, we do NOT want the TLB to be
-    // visible to the garbage collector -- because if it was, then it
-    // would result in circular references that cannot be garage collectted.
-    // The same idea applies to smart pointers: using smart pointers in
-    // the TLB would result in loops.  Thus, all TLB pointers must be
-    // dumb, and we protect these by explicitly letting the TLB know
-    // when these go bad.
-    TLB::removeAtom(handle);
-
     if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
+    truthValue = NULL;
+    atomTable = NULL;
+
+    drop_incoming_set();
 }
 
 const AttentionValue& Atom::getAttentionValue() const
@@ -114,7 +119,8 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
         // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
-            atomTable->updateImportanceIndex(this, oldBin);
+            AtomPtr a(std::static_pointer_cast<Atom>(shared_from_this()));
+            atomTable->updateImportanceIndex(a, oldBin);
         }
     }
 }
@@ -146,5 +152,50 @@ void Atom::markForRemoval(void)
 void Atom::setAtomTable(AtomTable *tb)
 {
     atomTable = tb;
+}
+
+
+/// Start tracking the incoming set for this atom.
+/// An atom can't know what it's incoming set is, until this method
+/// is called.  If this atom is added to any links before this call
+/// is made, those links won't show up in the incoming set.
+///
+/// We don't automatically track incoming sets for two reasons:
+/// 1) std::set takes up 48 bytes
+/// 2) adding and remoiving uses up cpu cycles.
+/// Thus, if the incoming set isn't needed, then don't bother
+/// tracking it.
+void Atom::keep_incoming_set()
+{
+    if (_incoming_set) return;
+    _incoming_set = std::make_shared<IncomingSet>();
+}
+
+/// Stop tracking the incoming set for this atom.
+/// After this call, the incoming set for this atom can no longer
+/// be queried; it si erased.
+void Atom::drop_incoming_set()
+{
+    if (NULL == _incoming_set) return;
+    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    _incoming_set->_iset.clear();
+    // delete _incoming_set;
+    _incoming_set = NULL;
+}
+
+/// Add an atom to the incoming set.
+void Atom::insert_atom(LinkPtr a)
+{
+    if (NULL == _incoming_set) return;
+    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    _incoming_set->_iset.insert(a);
+}
+
+/// Remove an atom from the incoming set.
+void Atom::remove_atom(LinkPtr a)
+{
+    if (NULL == _incoming_set) return;
+    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    _incoming_set->_iset.erase(a);
 }
 

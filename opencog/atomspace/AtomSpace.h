@@ -165,25 +165,6 @@ public:
     inline int getSize() const { return atomSpaceAsync->getSize()->get_result(); }
 
     /**
-     * DEPRECATED! Add an atom an optional TruthValue object to the Atom Table
-     * This is a deprecated function; do not use it in new code,
-     * if at all possible.
-     *
-     * @param atom the handle of the Atom to be added
-     * @param tvn the TruthValue object to be associated to the added
-     *        atom. NULL if the own atom's tv must be used.
-     * @return Handle referring to atom after it's been added.
-     * @deprecated This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink (which is a bit faster too) which is actually called
-     * internally by this wrapper.
-     */
-    Handle addRealAtom(const Atom& atom,
-                       const TruthValue& tvn = TruthValue::NULL_TV());
-
-    /**
      * Prints atoms of this AtomSpace to the given output stream.
      * @param output  the output stream where the atoms will be printed.
      * @param type  the type of atoms that should be printed.
@@ -349,13 +330,15 @@ public:
      * Removes an atom from the atomspace
      *
      * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set of the atom to be removed will also be
-     *        removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = false) {
+    bool removeAtom(Handle h, bool recursive = true) {
         return atomSpaceAsync->removeAtom(h,recursive)->get_result();
     }
 
@@ -506,14 +489,14 @@ public:
      * AtomSpace::commitAtom for them to be merged with the AtomSpace.
      * Otherwise changes are lost.
      */
-    boost::shared_ptr<Atom> cloneAtom(const Handle& h) const;
+    AtomPtr cloneAtom(const Handle& h) const;
 
     /** Commit an atom that has been cloned from the AtomSpace.
      *
      * @param a Atom to commit
      * @return whether the commit was successful
      */
-    bool commitAtom(const Atom& a);
+    bool commitAtom(const AtomPtr a);
 
     bool isValidHandle(const Handle& h) const;
 
@@ -1208,13 +1191,13 @@ private:
      */
     void removeStimulus(Handle h);
 
-    bool handleAddSignal(AtomSpaceImpl *as, Handle h);
+    bool handleAddSignal(AtomSpaceImpl *, Handle);
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     /** For monitoring removals to the AtomSpace so that cache entries can be
      * invalidated as necessary
      */
-    bool handleRemoveSignal(AtomSpaceImpl *as, Handle h);
+    bool atomRemoveSignal(AtomSpaceImpl *, AtomPtr);
 
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     bool watchingAtomSpace;

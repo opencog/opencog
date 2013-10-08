@@ -47,7 +47,7 @@ namespace opencog
 class CogServer;
 
 /** ImportantUpdatingAgent updates the AttentionValues of atoms.
- * 
+ *
  * This Agent carries out:
  *   - stimulus to STI and LTI conversion
  *   - rent collection
@@ -66,10 +66,10 @@ class CogServer;
  * to an atom is in the form of both STI and LTI. The amount of STI and LTI
  * conferred is based both on the total stimulus of the atom, and two internal
  * multipliers that indicate the rate that stimulus is converted into STI and
- * LTI. If an Agent has insufficient funds to pay at these rates, the Agent's 
- * available funds is divided proportionately among that Atoms it has 
+ * LTI. If an Agent has insufficient funds to pay at these rates, the Agent's
+ * available funds is divided proportionately among that Atoms it has
  * stimulated.  As such, the global multipliers for stimulus act as a "cap", so
- * Agents need not go broke providing stimulus. Atoms also have to pay LTI rent 
+ * Agents need not go broke providing stimulus. Atoms also have to pay LTI rent
  * to exist in the the AtomSpace and STI rent to exist in the Attentional focus.
  *
  * STI rent is charged from atoms that are above the Attentional focus boundary
@@ -80,7 +80,7 @@ class CogServer;
  * are in the attention span of the OpenCog instance, then for our atom A1, it
  * would be charged both STI and LTI rent. If STI was < 0 then atom A1 would not
  * be charged STI rent, but would still be charged LTI rent regardless of the
- * STI or LTI of A1. 
+ * STI or LTI of A1.
  *
  * Since both STI and LTI currency are conserved, the funds that the
  * ImportanceUpdatingAgent uses to pay wages has to come from somewhere. In an
@@ -116,12 +116,12 @@ class ImportanceUpdatingAgent : public Agent
     friend class ::ImportanceUpdatingAgentUTest;
 
 public:
-    
-    /** The different ways rent can be calculated 
+
+    /** The different ways rent can be calculated
      * for atoms in the attentional focus.
      */
     enum rentType_t {
-        RENT_FLAT, //!< Use a flat rent 
+        RENT_FLAT, //!< Use a flat rent
         RENT_EXP, //!< Use a exponential rent
         RENT_LOG //!< Use a logarithmic rent
     };
@@ -131,7 +131,7 @@ private:
     AttentionValue::sti_t STIAtomRent; //!< Current atom STI rent.
     opencog::recent_val<AttentionValue::sti_t> STITransitionalAtomRent; //!< Decaying rent
     AttentionValue::lti_t LTIAtomRent; //!< Current atom LTI rent.
-    
+
     AttentionValue::sti_t amnesty; //!< Amnesty is used in calculating rent.
 
     enum rentType_t rentType; //!< Current method for calculating rent.
@@ -145,7 +145,7 @@ private:
      * @param c The STI of the atom to calculate rent for.
      */
     AttentionValue::sti_t calculateSTIRent(AtomSpace* a, AttentionValue::sti_t c);
-    
+
     AttentionValue::sti_t STIAtomWage; //!< Max atom STI wage per stimulus
     AttentionValue::lti_t LTIAtomWage; //!< Max atom LTI wage per stimulus
     std::vector<float> STIAtomWageForAgent; //!< Atom STI wage per stimulus for each Agent
@@ -172,7 +172,7 @@ private:
      * @param AtomSpace
      * @param Agent to act upon
      */
-    void randomStimulation(AtomSpace *a, Agent *agent);
+    void randomStimulation(AtomSpace *a, AgentPtr agent);
 
     bool noiseOn;     //!< Randomly stimulate atoms?
     float noiseOdds;  //!< Chance of randomly introduced stimulus
@@ -197,7 +197,7 @@ private:
      * @param a The AtomSpace the Agent is working on.
      * @param agent The Agent to update.
      */
-    void updateAgentSTI(AtomSpace* a, Agent *agent);
+    void updateAgentSTI(AtomSpace* a, AgentPtr agent);
 
     /** Collect LTI rent for Agents based on processor time they utilize,
      * and pay wages based on how well they acheive system goals.
@@ -205,16 +205,16 @@ private:
      * @param a The AtomSpace the Agent is working on.
      * @param agent The Agent to update.
      */
-    void updateAgentLTI(AtomSpace* a, Agent *agent);
+    void updateAgentLTI(AtomSpace* a, AgentPtr agent);
 
-    /** Collect STI rent for atoms within attentional focus 
+    /** Collect STI rent for atoms within attentional focus
      * and pay wages based on amount of stimulus.
      *
      * @param a The AtomSpace the Agent is working on.
      * @param agents The list of running agents.
      * @param h The Handle of the atom to update.
      */
-    void updateAtomSTI(AtomSpace* a, const AgentSeq &agents, Handle h);
+    void updateAtomSTI(AtomSpace* a, const AgentSeq& agents, Handle h);
 
     /** Collect LTI rent for all atoms and pay wages based on stimulation
      *
@@ -418,6 +418,8 @@ public:
         { return rentFunctionParams; }
 
 }; // class
+
+typedef std::shared_ptr<ImportanceUpdatingAgent> ImportanceUpdatingAgentPtr;
 
 /** @}*/
 }  // namespace

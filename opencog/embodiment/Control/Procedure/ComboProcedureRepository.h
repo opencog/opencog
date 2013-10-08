@@ -63,7 +63,7 @@ public:
     // Methods from SavableRepository interface
     const char* getId() const;
     void saveRepository(FILE*) const;
-    void loadRepository(FILE*, HandleMap<Atom *>*);
+    void loadRepository(FILE*, HandleMap<AtomPtr>*);
     void clear();
 };
 

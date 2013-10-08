@@ -60,14 +60,14 @@ public:
      * This method stores this repository in the file specified.
      * @param the file pointer where the TimeServer must be saved.
      */
-    void saveRepository(FILE *) const;
+    void saveRepository(FILE*) const;
 
     /**
      * This method loads a repository stored in the file specified.
      * @param the file pointer where the TimeServer is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void loadRepository(FILE *, HandleMap<Atom *> *);
+    void loadRepository(FILE*, HandleMap<AtomPtr>*);
 
     /**
      * This method is used to clear the whole TimeServer repository.

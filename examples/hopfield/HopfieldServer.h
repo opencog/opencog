@@ -93,13 +93,13 @@ public:
     //! Amount of stimulus to apply across a pattern
     stim_t patternStimulus;
 
-    ForgettingAgent *forgetAgent;
-    HebbianUpdatingAgent *hebUpdateAgent;
-    StorkeyAgent *storkeyAgent;
-    ImprintAgent *imprintAgent;
-    ImportanceDiffusionAgent *diffuseAgent;
-    ImportanceSpreadingAgent *spreadAgent;
-    ImportanceUpdatingAgent *importUpdateAgent;
+    ForgettingAgentPtr forgetAgent;
+    HebbianUpdatingAgentPtr hebUpdateAgent;
+    StorkeyAgentPtr storkeyAgent;
+    ImprintAgentPtr imprintAgent;
+    ImportanceDiffusionAgentPtr diffuseAgent;
+    ImportanceSpreadingAgentPtr spreadAgent;
+    ImportanceUpdatingAgentPtr importUpdateAgent;
     HopfieldOptions *options;
 
     int width, height, links;

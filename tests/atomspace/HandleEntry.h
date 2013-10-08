@@ -87,7 +87,7 @@ public:
      *
      * @return Atom referred by this HandleEntry using the TLB.
      */
-    Atom* getAtom();
+    AtomPtr getAtom();
 
     /**
      * Clones the list that starts in this handle entry cell, preserving
@@ -134,7 +134,7 @@ public:
      *
      * @return a vector of handles.
      */
-    std::vector<Handle> toHandleVector(void);
+    HandleSeq toHandleVector(void);
 
     /**
      * Returns a HandlEntry containing all data in the array passed
@@ -404,10 +404,10 @@ public:
      */
     static HandleEntry* filterSet(HandleEntry*, const char*, Type, VersionHandle);
 
-    static bool matchesFilterCriteria(Atom* atom, Type targetType,
+    static bool matchesFilterCriteria(AtomPtr atom, Type targetType,
             bool targetSubclasses, VersionHandle vh);
 
-    static bool matchesFilterCriteria(Atom* atom, const char* targetName,
+    static bool matchesFilterCriteria(AtomPtr atom, const char* targetName,
             Type targetType, VersionHandle vh);
 };
 

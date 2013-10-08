@@ -338,10 +338,10 @@ public:
     };
 };
 
-class GetAtomASR : public OneParamASR <boost::shared_ptr<Atom>, Handle> {
+class GetAtomASR : public OneParamASR <AtomPtr, Handle> {
 public:
     GetAtomASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<boost::shared_ptr<Atom>, Handle>(a,h) {};
+        OneParamASR<AtomPtr, Handle>(a,h) {};
     
     virtual void do_work() {
         set_result(atomspace->cloneAtom(p1));
@@ -349,15 +349,15 @@ public:
 };
 
 class CommitAtomASR : public GenericASR <bool> {
-    boost::shared_ptr<Atom> atom;
+    AtomPtr _atom;
 public:
-    CommitAtomASR(AtomSpaceImpl *a, const Atom& _atom) :
+    CommitAtomASR(AtomSpaceImpl *a, AtomPtr atom) :
        GenericASR<bool>(a) {
-           atom = boost::shared_ptr<Atom>((&_atom)->clone());
+           _atom = atom;
        };
     
     virtual void do_work() {
-        set_result(atomspace->commitAtom(*atom));
+        set_result(atomspace->commitAtom(_atom));
     };
     
 };
@@ -1001,7 +1001,7 @@ public:
 
 // Requests are based on their parent class that defines the return type
 typedef boost::shared_ptr< GenericASR<Handle> > HandleRequest;
-typedef boost::shared_ptr< GenericASR<boost::shared_ptr<Atom> > > AtomRequest;
+typedef boost::shared_ptr< GenericASR<AtomPtr > > AtomRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef boost::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;

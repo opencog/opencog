@@ -92,7 +92,7 @@ private:
 
     Factory<ForgettingAgent, Agent> factory;
     CogServer& cogserver;
-    ForgettingAgent* agent;
+    ForgettingAgentPtr agent;
 
 public:
 
@@ -101,7 +101,7 @@ public:
 
     ForgettingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);
-        agent = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
+        agent = cogserver.createAgent<ForgettingAgent>(true);
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
     }

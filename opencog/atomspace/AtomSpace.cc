@@ -66,7 +66,7 @@ AtomSpace::AtomSpace(void)
     atomSpaceAsync = new AtomSpaceAsync();
     ownsAtomSpaceAsync = true;
     c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
     c_add = atomSpaceAsync->addAtomSignal(
             boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
@@ -80,14 +80,14 @@ AtomSpace::AtomSpace(const AtomSpace& other)
     this->atomSpaceAsync = other.atomSpaceAsync;
     ownsAtomSpaceAsync = false;
     c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::handleRemoveSignal, this, _1, _2));
+            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
     c_add = atomSpaceAsync->addAtomSignal(
             boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
 }
 
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-void AtomSpace::setUpCaching() 
+void AtomSpace::setUpCaching()
 {
     // Initialise lru cache for getType
     __getType = new _getType(this);
@@ -123,10 +123,10 @@ bool AtomSpace::handleAddSignal(AtomSpaceImpl *as, Handle h)
     return false;
 }
 
-bool AtomSpace::handleRemoveSignal(AtomSpaceImpl *as, Handle h)
+bool AtomSpace::atomRemoveSignal(AtomSpaceImpl *as, AtomPtr a)
 {
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    getTypeCached->remove(h);
+    getTypeCached->remove(a->getHandle());
 #endif
     return false;
 }
@@ -174,7 +174,7 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
 
@@ -224,43 +224,17 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     return addNode(t, name, tvn);
 }
 
-Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
-{
-    DPRINTF("AtomSpace::addRealAtom\n");
-    const TruthValue& newTV = (tvn.isNullTv()) ? atom.getTruthValue() : tvn;
-    // Check if the given Atom reference is of an atom
-    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
-    // result to the correct/valid handle.
-    Handle result;
-    const Node *node = dynamic_cast<const Node *>(&atom);
-    if (node) {
-        result = getHandle(node->getType(), node->getName());
-        if (result == Handle::UNDEFINED) {
-            return addNode(node->getType(), node->getName(), newTV);
-        }
-    } else {
-        const Link *link = dynamic_cast<const Link *>(&atom);
-        result = getHandle(link->getType(), link->getOutgoingSet());
-        if (result == Handle::UNDEFINED) {
-            return addLink(link->getType(), link->getOutgoingSet(), newTV);
-        }
-    }
-    do_merge_tv(result,newTV);
-    // XXX TODO should also merge Attention values, and also trails, right?
-    return result;
-}
-
-boost::shared_ptr<Atom> AtomSpace::cloneAtom(const Handle& h) const
+AtomPtr AtomSpace::cloneAtom(const Handle& h) const
 {
     return atomSpaceAsync->getAtom(h)->get_result();
 }
 
-bool AtomSpace::isValidHandle(const Handle& h) const 
+bool AtomSpace::isValidHandle(const Handle& h) const
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
 }
 
-bool AtomSpace::commitAtom(const Atom& a)
+bool AtomSpace::commitAtom(const AtomPtr a)
 {
     return atomSpaceAsync->commitAtom(a)->get_result();
 }

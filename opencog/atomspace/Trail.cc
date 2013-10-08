@@ -145,7 +145,7 @@ void Trail::print()
     } else {
         logger().debug("trailSize %d\n", (int)trail->size());
         for (int i = 0; i < (int)trail->size(); i++) {
-            logger().info("%d. %s\n", i, ((Link*)(TLB::getAtom((*trail)[i])))->toShortString().c_str());
+            logger().info("%d. %s\n", i, (LinkPtr(LinkCast(TLB::getAtom((*trail)[i]))))->toShortString().c_str());
         }
     }
 
@@ -159,7 +159,7 @@ void Trail::print(FILE* fp)
     if (trail == NULL) return;
 
     for (int i = 0; i < (int)trail->size(); i++) {
-        fprintf(fp, "\t%d. %s\n", i, ((Link*)(TLB::getAtom((*trail)[i])))->toShortString().c_str());
+        fprintf(fp, "\t%d. %s\n", i, (LinkPtr(LinkCast(TLB::getAtom((*trail)[i]))))->toShortString().c_str());
     }
 }
 

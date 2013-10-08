@@ -30,7 +30,7 @@
 #ifndef _OPENCOG_TYPES_H
 #define _OPENCOG_TYPES_H
 
-#include <boost/variant.hpp>
+#include <memory>  // for std::shared_pointer
 
 #include <opencog/atomspace/Handle.h>
 
@@ -41,6 +41,13 @@ namespace opencog
  */
 
 class Atom;
+class Node;
+class Link;
+typedef std::shared_ptr<Atom> AtomPtr;
+typedef std::shared_ptr<Node> NodePtr;
+typedef std::shared_ptr<Link> LinkPtr;
+#define NodeCast std::dynamic_pointer_cast<Node>
+#define LinkCast std::dynamic_pointer_cast<Link>
 
 //! type of Atoms, represented as short integer (16 bits)
 typedef unsigned short Type;
@@ -48,11 +55,6 @@ typedef unsigned short Type;
 typedef unsigned short Arity;
 //! stimulus
 typedef short stim_t;
-
-typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
-                       unsigned char, char, short int> Vertex;
-
-typedef std::vector<Vertex> VertexSeq;
 
 class HandlePredicate {
 public:

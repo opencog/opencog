@@ -134,6 +134,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PsiRelationUpdaterAgent> PsiRelationUpdaterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

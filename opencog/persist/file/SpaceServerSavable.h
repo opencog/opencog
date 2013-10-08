@@ -55,8 +55,8 @@ public:
     void setServer(SpaceServer *s) { server = s; }
 
     const char* getId() const;
-    void saveRepository(FILE *) const;
-    void loadRepository(FILE *fp, opencog::HandleMap<opencog::Atom*> *conv);
+    void saveRepository(FILE*) const;
+    void loadRepository(FILE*, opencog::HandleMap<opencog::AtomPtr>*);
     void clear();
 
 };

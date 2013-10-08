@@ -67,7 +67,7 @@ void LS::init(const std::string &myId, const std::string &ip,
     this->busy = false;
 
     this->registerAgent(ImitationLearningAgent::info().id, &factory);
-    ILAgent = static_cast<ImitationLearningAgent*>(this->createAgent(ImitationLearningAgent::info().id, true));
+    ILAgent = createAgent<ImitationLearningAgent>(true);
 }
 
 bool LS::processNextMessage(opencog::messaging::Message *msg)

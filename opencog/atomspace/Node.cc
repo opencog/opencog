@@ -36,29 +36,17 @@ using namespace opencog;
 void Node::init( const std::string& cname)
 throw (InvalidParamException, AssertionException)
 {
-    if (!classserver().isA(type, NODE)) {
-        throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
+    if (not classserver().isA(type, NODE)) {
+        throw InvalidParamException(TRACE_INFO,
+        "Node - Invalid node type '%d' %s.", 
+        type, classserver().getTypeName(type).c_str());
     }
     name = cname;
-}
-
-Node::~Node()
-{
 }
 
 const std::string& Node::getName() const
 {
     return name;
-}
-
-void Node::setName(const std::string& cname) throw (RuntimeException)
-{
-    if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO,
-            "Node - Cannot change the name of a node already "
-            "inserted into an AtomTable.");
-    }
-    name = cname;
 }
 
 std::string Node::toShortString() const
@@ -99,13 +87,4 @@ bool Node::operator!=(const Atom& other) const
 {
     return !(*this == other);
 }
-
-// XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
-// the concept is invalid!
-Atom* Node::clone() const
-{
-    Atom *a = new Node(*this);
-    return a;
-}
-
 

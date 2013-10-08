@@ -177,149 +177,83 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     //            if they must be executed sequencially.
 
 //    this->registerAgent(ActionSelectionAgent::info().id, &actionSelectionAgentFactory);
-//    actionSelectionAgent = static_cast<ActionSelectionAgent*>(
+//    actionSelectionAgent = 
 //                               this->createAgent(ActionSelectionAgent::info().id, false));
 
 //    this->registerAgent(ImportanceDecayAgent::info().id, &importanceDecayAgentFactory);
-//    importanceDecayAgent = static_cast<ImportanceDecayAgent*>(
+//    importanceDecayAgent = 
 //                               this->createAgent(ImportanceDecayAgent::info().id, false));
 //    importanceDecayAgent->connectSignals(*atomSpace);
 
 //    this->registerAgent(EntityExperienceAgent::info().id, &entityExperienceAgentFactory);
-//    entityExperienceAgent = static_cast<EntityExperienceAgent*>(
+//    entityExperienceAgent = 
 //                               this->createAgent(EntityExperienceAgent::info().id, false));
 
     // Three steps to run a MindAgent
     // registerAgent, createAgent and startAgent
-    this->registerAgent( PsiDemandUpdaterAgent::info().id, 
-                         &psiDemandUpdaterAgentFactory
-                       );
-    psiDemandUpdaterAgent = static_cast<PsiDemandUpdaterAgent*>(
-                                this->createAgent( PsiDemandUpdaterAgent::info().id,
-                                                   false
-                                                 )
-                                                               );
+    registerAgent(PsiDemandUpdaterAgent::info().id, 
+                  &psiDemandUpdaterAgentFactory);
+    psiDemandUpdaterAgent = createAgent<PsiDemandUpdaterAgent>();
 
-    this->registerAgent( PsiModulatorUpdaterAgent::info().id, 
-                         &psiModulatorUpdaterAgentFactory
-                       );
-    psiModulatorUpdaterAgent = static_cast<PsiModulatorUpdaterAgent*>(
-                                   this->createAgent( PsiModulatorUpdaterAgent::info().id,
-                                                      false
-                                                    )
-                                                                     );
+    registerAgent(PsiModulatorUpdaterAgent::info().id, 
+                  &psiModulatorUpdaterAgentFactory);
+    psiModulatorUpdaterAgent = createAgent<PsiModulatorUpdaterAgent>();
 
     // OCPlanningAgent and PsiActionSelectionAgent cannot be enabled at the same time
     if (config().get_bool("OCPLANNING_AGENT_ENABLED"))
     {
-        this->registerAgent( OCPlanningAgent::info().id,
-                             &ocPlanningAgentAgentFactory
-                           );
-        ocPlanningAgent = static_cast<OCPlanningAgent*>(
-                                      this->createAgent( OCPlanningAgent::info().id,
-                                                         false
-                                                       )
-                                                                       );
+        registerAgent(OCPlanningAgent::info().id,
+                             &ocPlanningAgentAgentFactory);
+        ocPlanningAgent = createAgent<OCPlanningAgent>();
 
         psiActionSelectionAgent = 0;
     }
     else
     {
-        this->registerAgent( PsiActionSelectionAgent::info().id,
-                             &psiActionSelectionAgentFactory
-                           );
-        psiActionSelectionAgent = static_cast<PsiActionSelectionAgent*>(
-                                      this->createAgent( PsiActionSelectionAgent::info().id,
-                                                         false
-                                                       )
-                                                                       );
+        registerAgent(PsiActionSelectionAgent::info().id,
+                             &psiActionSelectionAgentFactory);
+        psiActionSelectionAgent = createAgent<PsiActionSelectionAgent>();
         ocPlanningAgent = 0;
     }
 
-    this->registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
-    procedureInterpreterAgent = static_cast<ProcedureInterpreterAgent*>(
-                                    this->createAgent(ProcedureInterpreterAgent::info().id, false));
+    registerAgent(ProcedureInterpreterAgent::info().id, &procedureInterpreterAgentFactory);
+    procedureInterpreterAgent = createAgent<ProcedureInterpreterAgent>();
     procedureInterpreterAgent->setInterpreter(procedureInterpreter);
 
-    this->registerAgent( PsiRelationUpdaterAgent::info().id, 
-                         &psiRelationUpdaterAgentFactory
-                       );
-    psiRelationUpdaterAgent = static_cast<PsiRelationUpdaterAgent*>(
-                                  this->createAgent( PsiRelationUpdaterAgent::info().id,
-                                                     false
-                                                   )
-                                                                   );
+    registerAgent( PsiRelationUpdaterAgent::info().id, 
+                         &psiRelationUpdaterAgentFactory);
+    psiRelationUpdaterAgent = createAgent<PsiRelationUpdaterAgent>();
 
-    this->registerAgent( PsiFeelingUpdaterAgent::info().id, 
-                         &psiFeelingUpdaterAgentFactory
-                       );
-    psiFeelingUpdaterAgent = static_cast<PsiFeelingUpdaterAgent*>(
-                                 this->createAgent( PsiFeelingUpdaterAgent::info().id,
-                                                    false
-                                                  )
-                                                                 );
-    this->registerAgent( StimulusUpdaterAgent::info().id, 
-                         &stimulusUpdaterAgentFactory
-                       );
-    stimulusUpdaterAgent = static_cast<StimulusUpdaterAgent*>(
-                                 this->createAgent( StimulusUpdaterAgent::info().id,
-                                                    false
-                                                  )
-                                                                 );
+    registerAgent( PsiFeelingUpdaterAgent::info().id, 
+                         &psiFeelingUpdaterAgentFactory);
+    psiFeelingUpdaterAgent = createAgent<PsiFeelingUpdaterAgent>();
 
-    this->registerAgent( ForgettingAgent::info().id, 
-                         &forgettingAgentFactory
-                       );
-    forgettingAgent = static_cast<ForgettingAgent*>(
-                          this->createAgent( ForgettingAgent::info().id,
-                                             false
-                                           )
-                                                   );
+    registerAgent( StimulusUpdaterAgent::info().id, 
+                         &stimulusUpdaterAgentFactory);
+    stimulusUpdaterAgent = createAgent<StimulusUpdaterAgent>();
 
-    this->registerAgent( HebbianUpdatingAgent::info().id, 
-                         &hebbianUpdatingAgentFactory
-                       );
-    hebbianUpdatingAgent = static_cast<HebbianUpdatingAgent*>(
-                               this->createAgent( HebbianUpdatingAgent::info().id,
-                                                  false
-                                                )
-                                                             );
+    registerAgent( ForgettingAgent::info().id, 
+                         &forgettingAgentFactory);
+    forgettingAgent = createAgent<ForgettingAgent>();
 
-//    this->registerAgent( ImportanceDiffusionAgent::info().id, 
-//                         &importanceDiffusionAgentFactory
-//                       );
-//    importanceDiffusionAgent = static_cast<ImportanceDiffusionAgent*>(
-//                                   this->createAgent( ImportanceDiffusionAgent::info().id,
-//                                                      false
-//                                                    )
-//                                                                     );
+    registerAgent( HebbianUpdatingAgent::info().id, 
+                         &hebbianUpdatingAgentFactory);
+    hebbianUpdatingAgent = createAgent<HebbianUpdatingAgent>();
 
-    this->registerAgent( ImportanceSpreadingAgent::info().id, 
-                         &importanceSpreadingAgentFactory
-                       );
-    importanceSpreadingAgent = static_cast<ImportanceSpreadingAgent*>(
-                                   this->createAgent( ImportanceSpreadingAgent::info().id,
-                                                      false
-                                                    )
-                                                                     );
+//    registerAgent( ImportanceDiffusionAgent::info().id, 
+//                         &importanceDiffusionAgentFactory);
+//    importanceDiffusionAgent = createAgent<ImportanceDiffusionAgent>();
 
-    this->registerAgent( ImportanceUpdatingAgent::info().id, 
-                         &importanceUpdatingAgentFactory
-                       );
-    importanceUpdatingAgent = static_cast<ImportanceUpdatingAgent*>(
-                                  this->createAgent( ImportanceUpdatingAgent::info().id,
-                                                     false
-                                                   )
-                                                                   );
+    registerAgent( ImportanceSpreadingAgent::info().id, 
+                         &importanceSpreadingAgentFactory);
+    importanceSpreadingAgent = createAgent<ImportanceSpreadingAgent>();
 
-    this->registerAgent( STIDecayingAgent::info().id, 
-                         &stiDecayingAgentFactory
-                       );
-    stiDecayingAgent = static_cast<STIDecayingAgent*>(
-                           this->createAgent( STIDecayingAgent::info().id,
-                                              false
-                                            )
-                                                     );
+    registerAgent( ImportanceUpdatingAgent::info().id, 
+                         &importanceUpdatingAgentFactory);
+    importanceUpdatingAgent = createAgent<ImportanceUpdatingAgent>();
+
+    registerAgent( STIDecayingAgent::info().id, &stiDecayingAgentFactory);
+    stiDecayingAgent = createAgent<STIDecayingAgent>();
 
 //    if (config().get_bool("PROCEDURE_INTERPRETER_ENABLED")) {
         // adds the same procedure interpreter agent to schedule again
@@ -425,7 +359,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
 #ifdef HAVE_CYTHON
     if ( config().get_bool("FISHGRAM_ENABLED") ) {
-        this->fishgramAgent = new PyMindAgent(*this, "fishgram", "FishgramMindAgent"); 
+        this->fishgramAgent = PyMindAgentPtr(new PyMindAgent(*this, "fishgram", "FishgramMindAgent"));
         this->fishgramAgent->setFrequency( config().get_int("FISHGRAM_CYCLE_PERIOD") ); 
         this->startAgent(this->fishgramAgent); 
     }
@@ -433,7 +367,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
         this->fishgramAgent = NULL; 
 
     if ( config().get_bool("MONITOR_CHANGES_ENABLED") ) {
-        this->monitorChangesAgent = new PyMindAgent(*this, "monitor_changes", "MonitorChangesMindAgent"); 
+        this->monitorChangesAgent = PyMindAgentPtr(new PyMindAgent(*this, "monitor_changes", "MonitorChangesMindAgent"));
         this->monitorChangesAgent->setFrequency( config().get_int("MONITOR_CHANGES_CYCLE_PERIOD") ); 
         this->startAgent(this->monitorChangesAgent); 
     }
@@ -663,6 +597,7 @@ OAC::~OAC()
     delete (pet);
 
     // agents
+#if 0
     delete (procedureInterpreterAgent);
 //    delete (importanceDecayAgent);
     delete (psiModulatorUpdaterAgent);
@@ -688,6 +623,7 @@ OAC::~OAC()
 #ifdef HAVE_CYTHON
     delete (fishgramAgent); 
     delete (monitorChangesAgent); 
+#endif
 #endif
 
     // ZeroMQ 

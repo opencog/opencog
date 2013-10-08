@@ -156,7 +156,7 @@ Type ClassServer::getType(const std::string& typeName)
 const std::string& ClassServer::getTypeName(Type type)
 {
     boost::mutex::scoped_lock l(type_mutex);
-    static std::string nullString = "";
+    static std::string nullString = "*** Unknown Type! ***";
     std::unordered_map<Type, const std::string*>::iterator it;
     if ((it = code2NameMap.find(type)) != code2NameMap.end())
         return *(it->second);

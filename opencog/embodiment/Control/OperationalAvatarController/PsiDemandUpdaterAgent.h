@@ -214,6 +214,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PsiDemandUpdaterAgent> PsiDemandUpdaterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

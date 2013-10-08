@@ -34,9 +34,9 @@ void IncomingIndex::resize()
 {
 }
 
-void IncomingIndex::insertAtom(const Atom* a)
+void IncomingIndex::insertAtom(AtomPtr a)
 {
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
 	Handle hin = a->getHandle();
@@ -67,9 +67,9 @@ void IncomingIndex::insertAtom(const Atom* a)
 	}
 }
 
-void IncomingIndex::removeAtom(const Atom* a)
+void IncomingIndex::removeAtom(AtomPtr a)
 {
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
 	Handle hin = a->getHandle();

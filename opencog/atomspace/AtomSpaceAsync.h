@@ -122,7 +122,7 @@ public:
         return r;
     }
 
-    BoolRequest commitAtom(const Atom& a) {
+    BoolRequest commitAtom(AtomPtr a) {
         BoolRequest r(new CommitAtomASR(&atomspace,a));
         requestQueue.push(r);
         return r;
@@ -708,7 +708,7 @@ public:
     boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.addAtomSignal().connect(function);
     }
-    boost::signals::connection removeAtomSignal(const AtomSignal::slot_type& function) {
+    boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function) {
         return atomspace.removeAtomSignal().connect(function);
     }
     boost::signals::connection mergeAtomSignal(const AtomSignal::slot_type& function) {

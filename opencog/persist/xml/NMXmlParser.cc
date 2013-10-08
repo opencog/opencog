@@ -26,10 +26,8 @@
 #include <stack>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
-#include <math.h>
 #include <expat.h>
+#include <math.h>
 
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -80,7 +78,7 @@ unsigned processNodes: 1;
 unsigned processRelationships: 1;
 } Status;
 
-typedef std::stack< boost::shared_ptr<Atom> > ParserStack;
+typedef std::stack< AtomPtr > ParserStack;
 // TODO: CREATE AN ABSTRACT CLASS "Stackable" for check for subclasses
 // when poping elements from stack.
 
@@ -93,21 +91,21 @@ typedef struct {
     XML_Parser parser;
 } UserData;
 
-static void push(ParserStack& ps, boost::shared_ptr<Atom> p)
+static void push(ParserStack& ps, AtomPtr p)
 {
     ps.push(p);
 }
 
-static boost::shared_ptr<Atom> top(ParserStack& ps)
+static AtomPtr top(ParserStack& ps)
 {
-    if (!ps.size()) return boost::shared_ptr<Atom>();
+    if (!ps.size()) return NULL;
     return ps.top();
 }
 
-static boost::shared_ptr<Atom> pop(ParserStack& ps)
+static AtomPtr pop(ParserStack& ps)
 {
-    if (!ps.size()) return boost::shared_ptr<Atom>();
-    boost::shared_ptr<Atom> ret = ps.top();
+    if (!ps.size()) return NULL;
+    AtomPtr ret = ps.top();
     ps.pop();
     return ret;
 }
@@ -136,7 +134,7 @@ static Type getTypeFromString(const char *name, bool onlyClassName)
  * Handle attributes that are common to both Nodes and Links.
  * In other words, handle "confidence" and "strength" attributes.
  */
-static const char ** scan_common_attrs (boost::shared_ptr<Atom> r, const char **atts)
+static const char ** scan_common_attrs (AtomPtr r, const char **atts)
 {
     float buffer;
     if (strcmp(*atts, CONFIDENCE_TOKEN) == 0) {
@@ -158,9 +156,6 @@ static const char ** scan_common_attrs (boost::shared_ptr<Atom> r, const char **
 static void nativeStartElement(void *userData, const char *name, const char **atts)
 throw (RuntimeException, InconsistenceException)
 {
-    boost::shared_ptr<Atom> r;
-    Type typeFound;
-
     UserData* ud = (UserData*) userData;
 
     // processes head tags (list, tagdescription, etc)
@@ -176,7 +171,7 @@ throw (RuntimeException, InconsistenceException)
     if ((!ud->status.enabled) || ud->status.ignoring)
         return;
 
-    typeFound = getTypeFromString(name, false);
+    Type typeFound = getTypeFromString(name, false);
     if (NOTYPE == typeFound) return;
 
     // processes nodes
@@ -186,21 +181,15 @@ throw (RuntimeException, InconsistenceException)
 
         if (classserver().isA(typeFound, NODE)) {
             //cprintf(5,"Processing Node: %d (%s)\n",  typeFound, name);
-            r = boost::shared_ptr<Atom>(new Node(typeFound, "", NMXmlParser::DEFAULT_TV()));
-            logger().fine("Pushing r = %p", r.get());
-            push(ud->stack, r);
 
-            const TruthValue& t = r->getTruthValue();
-            if (typeid(t) != typeid(SimpleTruthValue)) {
-                throw InconsistenceException(TRACE_INFO,
-                                             "DefaultTruthValue is not SimpleTruthValue.");
-            }
+            std::string sname;
+            AtomPtr junk = createNode(typeFound, "", NMXmlParser::DEFAULT_TV());
             while (*atts != NULL) {
                 if (strcmp(*atts, NAME_TOKEN) == 0) {
                     atts++;
-                    NMXmlParser::setNodeName(r, *atts);
+                    sname = *atts;
                 } else {
-                    const char **natts = scan_common_attrs(r, atts);
+                    const char **natts = scan_common_attrs(junk, atts);
                     if (atts == natts) {
                         logger().error("unrecognized Node token: %s\n", *atts);
                     }
@@ -208,6 +197,9 @@ throw (RuntimeException, InconsistenceException)
                 }
                 atts++;
             }
+            AtomPtr r = createNode(typeFound, sname, junk->getTruthValue());
+            logger().fine("Pushing r = %p", r.get());
+            push(ud->stack, r);
         }
 //        timeval e;
 //        gettimeofday(&e, NULL);
@@ -225,16 +217,10 @@ throw (RuntimeException, InconsistenceException)
 //            timeval s;
 //            gettimeofday(&s, NULL);
             logger().fine("Processing Link: %d (%s)\n", typeFound, name);
-            r = boost::shared_ptr<Atom>(new Link(typeFound, std::vector<Handle>(), NMXmlParser::DEFAULT_TV()));
 
-            const TruthValue& t = r->getTruthValue();
-            if (typeid(t) != typeid(SimpleTruthValue)) {
-                throw InconsistenceException(TRACE_INFO,
-                                             "DefaultTruthValue is not SimpleTruthValue");
-            }
-
+            AtomPtr junk = createLink(typeFound, HandleSeq(), NMXmlParser::DEFAULT_TV());
             while (*atts != NULL) {
-                const char **natts = scan_common_attrs(r, atts);
+                const char **natts = scan_common_attrs(junk, atts);
                 if (atts == natts) {
                     logger().error("unrecognized Link token: %s\n", *atts);
                 }
@@ -242,19 +228,17 @@ throw (RuntimeException, InconsistenceException)
                 atts++;
             }
 
-            boost::shared_ptr<Atom> currentAtom = top(ud->stack);
+            AtomPtr currentAtom = top(ud->stack);
             if (currentAtom) {
                 logger().fine("Getting link element inside currentAtom = %p", currentAtom.get());
-                boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                LinkPtr link(LinkCast(currentAtom));
                 if (link) {
-                    if (r) {
-                        NMXmlParser::addOutgoingAtom(link,Handle::UNDEFINED);
-                    } else {
-                        throw RuntimeException(TRACE_INFO, "fatal error: NULL inner link");
-                    }
+/// I don't get it .. when is this ever fixed with the correct handle value ... ???
+                    NMXmlParser::addOutgoingAtom(link, Handle::UNDEFINED);
                 }
             }
 
+            AtomPtr r = createLink(typeFound, std::vector<Handle>(), junk->getTruthValue());
             logger().fine("Pushing r = %p", r.get());
             push(ud->stack, r);
 //            timeval e;
@@ -264,14 +248,6 @@ throw (RuntimeException, InconsistenceException)
         } else if (strcmp(name, ELEMENT_TOKEN) == 0) {
             // processes elements of other relationships, and inserts them in
             // the link previously defined;
-
-            boost::shared_ptr<Atom> currentAtom = top(ud->stack);
-            if (!currentAtom) {
-                logger().error("error: this token (%s) is expected to be nested\n", name);
-                return;
-            }
-            logger().fine("Getting node element inside currentAtom = %p", currentAtom.get());
-
 
             const char *n = NULL, *t = NULL;
             while (*atts != NULL) {
@@ -287,18 +263,22 @@ throw (RuntimeException, InconsistenceException)
                 atts++;
             }
 
-            Handle h;
-            //r = getRelationshipByNameAndType(n, getTypeFromString(t, true));
+            AtomPtr currentAtom = top(ud->stack);
+            if (!currentAtom) {
+                logger().error("error: this token (%s) is expected to be nested\n", name);
+                return;
+            }
+            logger().fine("Getting node element inside currentAtom = %p", currentAtom.get());
 
             logger().fine("Getting existing node (%s,%s)", n, t);
-            h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
+            Handle h = ud->atomSpace->getHandle(getTypeFromString(t, true), n);
             logger().fine(" => h = %p", h.value());
             if (ud->atomSpace->isValidHandle(h)) {
                 logger().fine(ud->atomSpace->atomAsString(h).c_str());
-                boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                LinkPtr link(LinkCast(currentAtom));
                 if (link) {
                     logger().fine("adding atom %s to link %s", ud->atomSpace->atomAsString(h,true).c_str(), link->toShortString().c_str());
-                    NMXmlParser::addOutgoingAtom(link,h);
+                    NMXmlParser::addOutgoingAtom(link, h);
                 }
             } else {
 #ifdef THROW_EXCEPTIONS
@@ -329,7 +309,7 @@ throw (InconsistenceException)
     } else if (strcmp(name, TAG_DESCRIPTION_TOKEN) == 0) {
         ud->status.ignoring = 0;
     } else {
-        boost::shared_ptr<Atom> currentAtom = top(ud->stack);
+        AtomPtr currentAtom = top(ud->stack);
         if (currentAtom) {
             //timeval s;
             //gettimeofday(&s, NULL);
@@ -345,13 +325,13 @@ throw (InconsistenceException)
                     if (classserver().isA(type, UNORDERED_LINK)) {
                         // Forces the sorting of outgoing by calling setOutgoingSet
                         // TODO: implement a sortOutgoingSet for doing the same thing more efficiently...
-                        boost::shared_ptr<Link> link = boost::dynamic_pointer_cast<Link>(currentAtom);
+                        LinkPtr link(LinkCast(currentAtom));
                         if (link) {
-                            std::vector<Handle> outgoing = link->getOutgoingSet();
+                            const HandleSeq& outgoing = link->getOutgoingSet();
                             NMXmlParser::setOutgoingSet(link, outgoing);
                         }
                     }
-                    Handle oldHandle =  NMXmlParser::holdsHandle(currentAtom);
+                    Handle oldHandle =  currentAtom->getHandle();
                     //timeval s1;
                     //gettimeofday(&s1, NULL);
                     logger().fine("currentAtom => %s", currentAtom->toString().c_str());
@@ -364,7 +344,7 @@ throw (InconsistenceException)
                     // Updates last inserted/merged atom handle
                     ud->lastInsertedHandle = newHandle;
                     if (Handle::compare(oldHandle, newHandle)) {
-                        // already existed
+                        // already existed -- replace old with new
                         logger().fine("Already existed");
                         currentAtom = ud->atomSpace->cloneAtom(newHandle);
                         pop(ud->stack);
@@ -378,16 +358,16 @@ throw (InconsistenceException)
                     if (classserver().isA(currentAtom->getType(), LINK)) {
                         //KMI -- find out if this is a nested link
                         pop(ud->stack);
-                        boost::shared_ptr<Atom> nextUd = top(ud->stack);
+                        AtomPtr nextUd = top(ud->stack);
                         logger().fine("Getting link element inside nextUd = %p", nextUd.get());
                         logger().fine("(3) Pushing currentAtom = %p", currentAtom.get());
                         push(ud->stack, currentAtom);
 
-                        boost::shared_ptr<Link> nextlink = boost::dynamic_pointer_cast<Link>(nextUd);
+                        LinkPtr nextlink(LinkCast(nextUd));
                         if (nextlink) {
-                            int arity = nextlink->getArity();
-                            std::vector<Handle> outgoingSet = nextlink->getOutgoingSet();
-                            for (int i = 0; i < arity; i++) {
+                            Arity arity = nextlink->getArity();
+                            HandleSeq outgoingSet = nextlink->getOutgoingSet();
+                            for (Arity i = 0; i < arity; i++) {
                                 if (!ud->atomSpace->isValidHandle(outgoingSet[i])) {
                                     outgoingSet[i] = newHandle;
                                     break;
@@ -412,7 +392,7 @@ throw (InconsistenceException)
             //unsigned long spentTime = (e.tv_sec -  s.tv_sec)*1000000+(e.tv_usec -  s.tv_usec);
             //cumulativeParseEnd += spentTime;
             else {
-                logger().fine("WARNING: Got NULL boost::shared_ptr<Atom> from the parser stack!");
+                logger().fine("WARNING: Got NULL AtomPtr from the parser stack!");
             }
         }
     }
@@ -429,21 +409,16 @@ NMXmlParser::~NMXmlParser()
 {
 }
 
-void NMXmlParser::setNodeName(boost::shared_ptr<Atom> node, const char* name)
-{
-    boost::shared_ptr<Node> n = boost::dynamic_pointer_cast<Node>(node);
-    n->setName(name);
-}
-
-void NMXmlParser::addOutgoingAtom(boost::shared_ptr<Link> link, Handle h)
+void NMXmlParser::addOutgoingAtom(LinkPtr link, Handle h)
 {
     link->addOutgoingAtom(h);
 }
 
-void NMXmlParser::setOutgoingSet(boost::shared_ptr<Link> link, const std::vector<Handle>& outgoing)
+void NMXmlParser::setOutgoingSet(LinkPtr link, const HandleSeq& outgoing)
 {
     link->setOutgoingSet(outgoing);
 }
+
 
 HandleSeq
 NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
@@ -503,7 +478,7 @@ NMXmlParser::loadXML(const std::vector<XMLBufferReader*>& xmlReaders,
         if (classserver().isNode(atomSpace->getType(e->handle)))
         {
             if (atomSpace->getName(e->handle)[0] == '#') {
-                n->setName("");
+                xxxxx n->setName(""); xxxx
             }
         }
     }*/

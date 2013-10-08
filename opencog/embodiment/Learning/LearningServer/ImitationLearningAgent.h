@@ -115,6 +115,8 @@ private:
     std::string _trick_name;
 };
 
+typedef std::shared_ptr<ImitationLearningAgent> ImitationLearningAgentPtr;
+
 }} // ~namespace opencog::messaging
 
 

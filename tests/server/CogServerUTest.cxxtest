@@ -71,6 +71,8 @@ public:
     }
 };
 
+typedef std::shared_ptr<MyAgent> MyAgentPtr;
+
 class CustomCogServer : public CogServer
 {
     int tickCount;
@@ -133,9 +135,9 @@ public:
         cogserver.setMaxCount(50);
         cogserver.registerAgent(MyAgent::info().id, &factory);
 
-        MyAgent* a[5];
+        MyAgentPtr a[5];
         for (int i = 0; i < 5; ++i) {
-            a[i] = static_cast<MyAgent*>(cogserver.createAgent(MyAgent::info().id));
+            a[i] = cogserver.createAgent<MyAgent>();
             std::ostringstream oss; oss << "Agent" << i;
             a[i]->setName(oss.str());
             a[i]->setFrequency(i+1);

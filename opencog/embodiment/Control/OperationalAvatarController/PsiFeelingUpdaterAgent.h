@@ -134,6 +134,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PsiFeelingUpdaterAgent> PsiFeelingUpdaterAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

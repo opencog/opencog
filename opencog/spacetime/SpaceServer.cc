@@ -87,11 +87,11 @@ void SpaceServer::atomAdded(AtomSpaceImpl* a, Handle h)
 {
 }
 
-void SpaceServer::atomRemoved(AtomSpaceImpl* a, Handle h)
+void SpaceServer::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
 {
-    Type type = a->getType(h);
+    Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
-        removeSpaceInfo(h);
+        removeSpaceInfo(atom->getHandle());
     }
 }
 
