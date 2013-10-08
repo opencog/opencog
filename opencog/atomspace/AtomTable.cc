@@ -115,8 +115,9 @@ Handle AtomTable::getHandle(const std::string& name, Type t) const
     return nodeIndex.getHandle(t, name.c_str());
 }
 
-/// This is used to find an equivalent atom that has exactly the same 
-/// name and type.
+/// Find an equivalent atom that has exactly the same name and type.
+/// That is, if there is an atom with this name and type already in
+/// the table, then return that; else return undefined.
 Handle AtomTable::getHandle(const NodePtr n) const
 {
     return getHandle(n->getName(), n->getType());
@@ -126,11 +127,18 @@ Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
     return linkIndex.getHandle(t, seq);
 }
+
+/// Find an equivalent atom that has exactly the same type and outgoing
+/// set.  That is, if there is an atom with this ype and outset already
+/// in the table, then return that; else return undefined.
 Handle AtomTable::getHandle(LinkPtr l) const
 {
     return getHandle(l->getType(), l->getOutgoingSet());
 }
 
+/// Find an equivalent atom that is exactly the same as the arg. If
+/// such an atom is in the table, it is returned, else the return
+/// is the bad handle.
 Handle AtomTable::getHandle(AtomPtr a) const
 {
     NodePtr nnn(NodeCast(a));
@@ -419,15 +427,12 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 
     // Is the equivalent of this atom already in the table?
     // If so, then we merge the truth values.
-    NodePtr nnn(NodeCast(atom));
-    if (nnn) {
-        Handle h = getHandle(nnn->getName(), nnn->getType());
-        if (h) {
-            DPRINTF("Merging existing Atom with the Atom being added ...\n");
-            merge(h, atom->getTruthValue());
-            // XXX TODO -- should merege attention value too, right ???
-            return h;
-        }
+    Handle hexist = getHandle(atom);
+    if (hexist) {
+        DPRINTF("Merging existing Atom with the Atom being added ...\n");
+        merge(hexist, atom->getTruthValue());
+        // XXX TODO -- should merege attention value too, right ???
+        return hexist;
     }
 
 #if LATER
