@@ -33,9 +33,9 @@
 #include "ProtocolBufferSerializer.h"
 #endif
 
-class HandleEntry;
 namespace opencog
 {
+class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -50,6 +50,7 @@ namespace opencog
  */
 class Link : public Atom
 {
+    friend class AtomTable;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -63,9 +64,8 @@ private:
 
 protected:
 
-    //! Array that does not change during atom lifespan.
-    // Should be const, but we need to fix the initializers to get this correct.
-    // const HandleSeq _outgoing;
+    //! Array holding actual outgoing set of the link.
+    //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
 public:

@@ -451,6 +451,18 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
                     h = *it;
+
+                    // OK, here's the deal. We really need to fixup
+                    // link so that it holds a valid atom pointer. We
+                    // do that here. Unfortunately, this is not really
+                    // thread-safe, and there is no particularly elegant
+                    // way to lock. So we punt.  This makes sense,
+                    // because it is unlikely that one threa is going to
+                    // be winging on the outgoing set, whille another
+                    // thread is performing an atom-table add.  I'm pretty
+                    // sure its a user error if the user fails to serialize
+                    // atom table adds appropriately for their app.
+                    lll->_outgoing[i] = h;
                     continue;
                 }
             }
