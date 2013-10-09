@@ -1,4 +1,5 @@
 from atomspace cimport cClassServer, classserver, NOTYPE, string, Type
+from classserver cimport strcmp
 
 # dynamically construct a "types" module
 # this should also listen to "addtype" signals in case new types are
@@ -9,7 +10,11 @@ cdef c_get_type_name(Type t):
     cdef string s
     s = classserver().getTypeName(t)
 
-    if str("*** Unknown Type! ***") == str(s) :
+    # Attempt to do a string compare. Either of the two commented-out
+    # lines below work for me, but break to build bot.  So I dunno.
+    # if s.__eq__(string("*** Unknown Type! ***") :
+    # if str("*** Unknown Type! ***") == str(s) :
+    if 0 == strcmp(s.c_str(), "*** Unknown Type! ***") :
         s = ""
     return s.c_str()
 
