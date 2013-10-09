@@ -520,7 +520,7 @@ public:
     void testUpdateVersionHandles() {
         logger().debug("testUpdateVersionHandles()");
         //void CompositeTruthValue::updateVersionHandles(HandleMap *handles) {
-        HandleMap<AtomPtr>* handles = new HandleMap<AtomPtr>();
+        HandleMap<AtomPtr>::MapPtr handles = std::make_shared<HandleMap<AtomPtr>>();
         handles->add(atomhand[0], atoms[1]);
         handles->add(atomhand[1], atoms[2]);
         handles->add(atomhand[2], atoms[0]);

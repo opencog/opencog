@@ -31,7 +31,7 @@
 using namespace opencog;
 
 /* Module for including any core-specific common utilities */
-void CoreUtils::updateHandle(Handle* handle, HandleMap<AtomPtr>* handles) throw (RuntimeException)
+void CoreUtils::updateHandle(Handle* handle, HandMapPtr handles) throw (RuntimeException)
 {
     AtomPtr a(handles->get(*handle));
     // Assume that the HandleMap stores <Handle, Atom *> pairs ....

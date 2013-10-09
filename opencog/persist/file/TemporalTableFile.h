@@ -53,7 +53,8 @@ public:
      * @param the file pointer where the TemporalTable is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void load(FILE*, TemporalTable*, HandleMap<AtomPtr>*);
+    typedef std::shared_ptr<HandleMap<AtomPtr>> HandMapPtr;
+    void load(FILE*, TemporalTable*, HandMapPtr);
 
 };
 

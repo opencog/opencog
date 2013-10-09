@@ -58,6 +58,7 @@ class SavingLoading
 
 private:
 
+    typedef std::shared_ptr<HandleMap<AtomPtr>> HandMapPtr;
     typedef std::unordered_map<std::string, SavableRepository*> RepositoryHash;
 
     /**
@@ -106,7 +107,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadNodes(FILE *, HandleMap<AtomPtr> *, AtomTable&, const std::vector<Type>& );
+    void loadNodes(FILE *, HandMapPtr, AtomTable&, const std::vector<Type>& );
 
     /**
      * This method loads links from a given file.
@@ -115,7 +116,7 @@ private:
      * @param Table that maps from old to new handles, necessary during
      * loading.
      */
-    void loadLinks(FILE*, HandleMap<AtomPtr>*, AtomTable&, const std::vector<Type>& );
+    void loadLinks(FILE*, HandMapPtr, AtomTable&, const std::vector<Type>& );
 
     /**
      * This post-loading method translates all occurrences of old handles
@@ -124,7 +125,7 @@ private:
      * @param Atom whose handles references will be translated.
      * @param Table that maps from old to new handles.
      */
-    void updateHandles(AtomPtr, HandleMap<AtomPtr> *);
+    void updateHandles(AtomPtr, HandMapPtr);
 
     /**
      * This method writes all atom members to a given file.
@@ -187,7 +188,7 @@ private:
      * @param Newly read node.
      * @param Table to be filled with mappings from old to new handles.
      */
-    NodePtr readNode(FILE*, Type, HandleMap<AtomPtr>*);
+    NodePtr readNode(FILE*, Type, HandMapPtr);
 
     /**
      * This method reads all link members from a given file, and uses
@@ -196,7 +197,7 @@ private:
      * @param File from where the link will be read.
      * @param Table to be filled with mappings from old to new handles.
      */
-    LinkPtr readLink(FILE*, Type, HandleMap<AtomPtr>*);
+    LinkPtr readLink(FILE*, Type, HandMapPtr);
     void readTrail(FILE*, Trail*);
 
     /**
@@ -232,7 +233,7 @@ private:
      * @param File from where the repositories will be read.
      * @param Table filled with mappings from old to new handles.
      */
-    void loadRepositories(FILE *, HandleMap<AtomPtr> *) throw (RuntimeException);
+    void loadRepositories(FILE *, HandMapPtr) throw (RuntimeException);
 
 
     /**

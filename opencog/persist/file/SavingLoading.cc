@@ -287,7 +287,7 @@ void SavingLoading::load(const char *fileName,
     }
 
     // creates a hash map from old handles to new ones
-    HandleMap<AtomPtr> *handles = new HandleMap<AtomPtr>();
+    HandMapPtr handles = std::make_shared<HandleMap<AtomPtr>>();
 
     processed = 0;
     total = atomCount;
@@ -317,8 +317,6 @@ void SavingLoading::load(const char *fileName,
     sss.loadRepository(f, handles);
 
     loadRepositories(f, handles);
-
-    delete handles;
 
     fclose(f);
 
@@ -357,7 +355,7 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
     CHECK_FREAD;
 }
 
-void SavingLoading::loadNodes(FILE *f, HandleMap<AtomPtr> *handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore )
+void SavingLoading::loadNodes(FILE *f, HandMapPtr handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore )
 {
     logger().fine("SavingLoading::loadNodes");
 
@@ -388,7 +386,7 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<AtomPtr> *handles, AtomTable& a
     CHECK_FREAD;
 }
 
-void SavingLoading::loadLinks(FILE* f, HandleMap<AtomPtr>* handles,
+void SavingLoading::loadLinks(FILE* f, HandMapPtr handles,
         AtomTable& atomTable, const std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadLinks");
@@ -422,7 +420,7 @@ void SavingLoading::loadLinks(FILE* f, HandleMap<AtomPtr>* handles,
     CHECK_FREAD;
 }
 
-void SavingLoading::updateHandles(AtomPtr atom, HandleMap<AtomPtr>* handles)
+void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles)
 {
     logger().fine("SavingLoading::updateHandles: type = %d", atom->getType());
 
@@ -518,7 +516,7 @@ void SavingLoading::writeNode(FILE *f, NodePtr node)
     }
 }
 
-NodePtr SavingLoading::readNode(FILE* f, Type t, HandleMap<AtomPtr>* handles)
+NodePtr SavingLoading::readNode(FILE* f, Type t, HandMapPtr handles)
 {
     logger().fine("SavingLoading::readNode()");
 
@@ -642,7 +640,7 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
     return result;
 }
 
-LinkPtr SavingLoading::readLink(FILE* f, Type t, HandleMap<AtomPtr>* handles)
+LinkPtr SavingLoading::readLink(FILE* f, Type t, HandMapPtr handles)
 {
     logger().fine("SavingLoading::readLink()");
 
@@ -726,7 +724,7 @@ void SavingLoading::saveRepositories(FILE *f)
     }
 }
 
-void SavingLoading::loadRepositories(FILE *f, HandleMap<AtomPtr> *conv) throw (RuntimeException)
+void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv) throw (RuntimeException)
 {
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;

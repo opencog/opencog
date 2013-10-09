@@ -24,15 +24,15 @@
 #ifndef COMBO_PROCEDURE_REPOSITORY_H
 #define COMBO_PROCEDURE_REPOSITORY_H
 
-#include "ComboProcedure.h"
-#include <opencog/persist/file/SavableRepository.h>
-#include <opencog/comboreduct/combo/vertex.h>
-#include <opencog/comboreduct/combo/procedure_repository.h>
-
 #include <string>
 #include <map>
 #include <boost/noncopyable.hpp>
-#include <opencog/atomspace/HandleMap.h>
+
+#include <opencog/persist/file/SavableRepository.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/combo/procedure_repository.h>
+#include "ComboProcedure.h"
+
 
 namespace opencog { namespace Procedure {
 
@@ -63,7 +63,7 @@ public:
     // Methods from SavableRepository interface
     const char* getId() const;
     void saveRepository(FILE*) const;
-    void loadRepository(FILE*, HandleMap<AtomPtr>*);
+    void loadRepository(FILE*, HandMapPtr);
     void clear();
 };
 
