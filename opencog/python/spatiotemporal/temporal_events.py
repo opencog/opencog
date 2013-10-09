@@ -1,100 +1,52 @@
 from datetime import datetime
-
 from scipy.stats import t
-
-from spatiotemporal.interval import Interval
-from spatiotemporal.time import is_unix_time, UnixTime
-
+from spatiotemporal.interval import Interval, assert_is_interval
+from spatiotemporal.time import UnixTime, is_unix_time
 
 __author__ = 'keyvan'
 
 
-class BaseTemporalEvent(object):
-    def __init__(self, a, b, iter_step=1):
-        self.interval = Interval(a, b, iter_step)
-
+class BaseTemporalEvent(Interval):
     def pdf_single_point(self, time_step):
         """
         to override, default pdf calls to it
         alternatively one can directly override pdf
         """
-        if self.interval.a <= time_step <= self.interval.b:
-            return 1
         return 0
 
-    def pdf(self, x):
+    def pdf(self, x=None):
         """
-        time can either be a single value or a collection
+        x can either be a single time value or a collection
+        if x is None, return value is the probability distribution for the length of the event
         """
-        if type(x) is TemporalEventPiecewise:
-            pass
+        if x is None:
+            x = self
 
         result = []
         try:
             for time_step in x:
                 result.append(self.pdf_single_point(time_step))
         except:
-            assert is_unix_time(x), "'x' should be unix time when 'pdf' is invoked by a singular argument"
+            assert is_unix_time(x), "'x' should be unix time when 'pdf' is invoked by a singular 'x'"
             return self.pdf_single_point(x)
         return result
 
     def _interval_from_self_if_none(self, a, b, interval):
         if interval is None:
             if (a, b) == (None, None):
-                interval = self.interval
+                interval = self
             else:
                 interval = Interval(a, b)
         else:
-            assert hasattr(interval, 'a') and hasattr(interval, 'b') and is_unix_time(
-                interval.a) and is_unix_time(interval.b) and interval.a < interval.b, "passed 'interval' should have " \
-                                                                                      "'a' and 'b' attributes, both " \
-                                                                                      "of which should be in unix " \
-                                                                                      "time, and 'b' has to be " \
-                                                                                      "greater than 'a'"
+            assert_is_interval(interval)
         return interval
 
     def probability_in_interval(self, a=None, b=None, interval=None):
         """
         use either 'a' and 'b' or 'interval'
         """
-        #TODO replace by CalculateCenterOfMass
         interval = self._interval_from_self_if_none(a, b, interval)
         return max(self.pdf(interval))
-
-    @property
-    def a(self):
-        return self.interval.a
-
-    @a.setter
-    def a(self, value):
-        assert is_unix_time(value), "'a' should be unix time"
-        self.interval.a = value
-
-    @property
-    def b(self):
-        return self.interval.b
-
-    @b.setter
-    def b(self, value):
-        assert is_unix_time(value), "'b' should be unix time"
-        self.interval.b = value
-
-    @property
-    def iter_step(self):
-        return self.interval.iter_step
-
-    @iter_step.setter
-    def iter_step(self, value):
-        self.interval.iter_step = value
-
-    def x_axis(self):
-        return self.interval.x_axis()
-
-    def __iter__(self):
-        return iter(self.interval)
-
-    def __len__(self):
-        return len(self.interval)
 
     def __repr__(self):
         return 'spatiotemporal.temporal_events.{0}(a:{1}, b:{2})'.format(
@@ -105,7 +57,10 @@ class BaseTemporalEvent(object):
 
 
 class TemporalEventSimple(BaseTemporalEvent):
-    pass
+    def pdf_single_point(self, time_step):
+        if self.interval.a <= time_step <= self.interval.b:
+            return 1
+        return 0
 
 
 class TemporalEventDistributional(BaseTemporalEvent):
@@ -166,21 +121,21 @@ class TemporalEventPiecewise(BaseTemporalEvent):
             self.beginning = beginning
             self.ending = ending
         else:
-            while not self.interval.a < self._beginning < self._ending < self.interval.b:
-                self._beginning = self.interval.random_time(
+            while not self.a < self._beginning < self._ending < self.b:
+                self._beginning = self.random_time(
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.interval.a + len(self) / self.beginning_factor,
+                        self.a + len(self) / self.beginning_factor,
                         len(self) / self.beginning_factor
                     )
                 )
 
-                self._ending = self.interval.random_time(
+                self._ending = self.random_time(
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.interval.b - len(self) / self.ending_factor,
+                        self.b - len(self) / self.ending_factor,
                         len(self) / self.ending_factor
                     )
                 )
@@ -233,17 +188,16 @@ def generate_random_events(size=20):
         end = year_2010.random_time(start)
         event = TemporalEventPiecewise(start, end, iter_step=100)
         events.append(event)
-        print event.probability_in_interval()
 
     return events
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    events = generate_random_events(1)
+    events = generate_random_events(10)
 
     for event in events:
-        y = event.pdf(event)
+        y = event.pdf()
         plt.plot(event.x_axis(), y)
 
     plt.show()
