@@ -344,3 +344,26 @@ I think this change is compiler-related.
   getIncomingSet   1000   
 
 
+9 October 2013
+--------------
+Remeasure. This is after removing most of the TLB, and using
+std::shared_ptr atoms and handles.  This is a rather large
+change, and I expect performance to be slightly degraded
+(other changes needed for perf improvement haven't yet done).
+
+
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop            10000       
+  addNode           208         
+  addLink            60.6
+  getType          5000       
+  getTV             909      
+  setTV             769
+  getHandleSet        0.195  
+  getNodeHandles     83.3
+  getOutgoingSet    625
+  getIncomingSet   5000   
+
+
