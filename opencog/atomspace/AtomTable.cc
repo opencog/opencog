@@ -157,6 +157,9 @@ Handle AtomTable::getHandle(Handle h) const
     if (Handle::UNDEFINED.value() == h.value())
         return getHandle(AtomPtr(h));
 
+    // If we have both a uuid and pointer, there's nothing to do.
+    if (NULL != h.get()) return h;
+
     // If we have a uuid but no atom pointer, find the atom pointer.
     auto hit = _atom_set.find(h);
     if (hit != _atom_set.end())
@@ -472,14 +475,17 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // do that here. Unfortunately, this is not really
                     // thread-safe, and there is no particularly elegant
                     // way to lock. So we punt.  This makes sense,
-                    // because it is unlikely that one threa is going to
-                    // be winging on the outgoing set, whille another
+                    // because it is unlikely that one thread is going to
+                    // be winging on the outgoing set, while another
                     // thread is performing an atom-table add.  I'm pretty
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
                     continue;
                 }
+                throw RuntimeException(TRACE_INFO,
+                    "AtomTable - Atom in outogin set must have been "
+                    "previously inserted into the atom table!");
             }
             if (Handle::UNDEFINED == h) {
                 throw RuntimeException(TRACE_INFO,
