@@ -56,7 +56,7 @@ public:
 
     const char* getId() const;
     void saveRepository(FILE*) const;
-    void loadRepository(FILE*, opencog::HandleMap<opencog::AtomPtr>*);
+    void loadRepository(FILE*, HandMapPtr);
     void clear();
 
 };
