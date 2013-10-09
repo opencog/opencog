@@ -30,9 +30,8 @@
 #ifndef _OPENCOG_HANDLE_MAP_H
 #define _OPENCOG_HANDLE_MAP_H
 
-#include <pthread.h>
-
 #include <map>
+#include <mutex>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
@@ -63,74 +62,29 @@ private:
     typedef typename InternalMap::iterator InternalIterator;
 
     /**
-     * initializes the HandleMap.
-     */
-    void init(bool use_mutex)
-    {
-        handle_map = new InternalMap();
-        useMutex = use_mutex;
-        if (useMutex) pthread_mutex_init(&plock, NULL);
-    }
-
-    /**
      * The Map where the elements will be stored.
      */
     InternalMap *handle_map;
 
     /**
-     * Indicates whether a mutex for concurrent acces is to be used or not.
-     */
-    bool useMutex;
-
-    /**
      * The mutex used to control access to the HashMap.
      */
-    pthread_mutex_t plock;
+    std::mutex _mtx;
 
 public:
 
-    /**
-     * Constructor for this class.
-     *
-     * @param Whether a concurrent access control mechanism should be
-     * used. Notice that this will introduce a considerable overhead to
-     * all operations in the table.
-     */
-    HandleMap(bool use_mutex = false)
+    /** Constructor for this class.  */
+    HandleMap()
     {
-        init(use_mutex);
+        handle_map = new InternalMap();
     }
 
-
-    /**
-     * Destructor for this class
-     */
+    /** Destructor for this class */
     ~HandleMap()
     {
-        lock();
-
-        delete(handle_map);
-
-        unlock();
+        std::lock_guard<std::mutex> lck(_mtx);
+        delete handle_map;
     }
-
-
-    /**
-     * Locks the hash map for concurrent access.
-     */
-    void lock()
-    {
-        if (useMutex) pthread_mutex_lock(&plock);
-    }
-
-    /**
-     * Unlocks the hash map for concurrent access.
-     */
-    void unlock()
-    {
-        if (useMutex) pthread_mutex_unlock(&plock);
-    }
-
 
     /**
      * Adds a new entry to the hash table.
@@ -140,17 +94,17 @@ public:
      */
     void add(Handle key, T element) throw (RuntimeException)
     {
-        lock();
+        std::lock_guard<std::mutex> lck(_mtx);
 
         // check if the element is already in the hash table. If not, it
         // is added to the head of the list for that position
         if (!contains(key)) {
             (*handle_map)[key] = element;
         } else {
-            throw RuntimeException(TRACE_INFO, "attempting to insert duplicated key %d in hash map", key.value());
+            throw RuntimeException(TRACE_INFO,
+                "attempting to insert duplicated key %d in hash map",
+                key.value());
         }
-
-        unlock();
     }
 
     /**
@@ -161,22 +115,17 @@ public:
      */
     T get(Handle key)
     {
-        T ret;
-
-        lock();
-
-        InternalIterator ti = handle_map->find(key);
+        std::lock_guard<std::mutex> lck(_mtx);
 
         // assert the key exists. Otherwise throws an exception.
+        InternalIterator ti = handle_map->find(key);
         if (ti == handle_map->end())
-       	{
-            unlock();
-            throw AssertionException("HandleMap: key (%d) does not exist in this map", key.value());  
+        {
+            throw AssertionException(
+                "HandleMap: key (%d) does not exist in this map",
+                key.value());  
         }
-        ret = ti->second;
-
-        unlock();
-        return ret;
+        return ti->second;
     }
 
 
@@ -188,18 +137,10 @@ public:
      */
     bool contains(Handle key)
     {
-        bool ret;
-
-        // lock and call private contains()
-        lock();
+        std::lock_guard<std::mutex> lck(_mtx);
 
         InternalIterator ti = handle_map->find(key);
-
-        ret = ti != handle_map->end();
-
-        unlock();
-
-        return ret;
+        return (ti != handle_map->end());
     }
 
     /**
@@ -211,18 +152,14 @@ public:
      */
     T remove(Handle key)
     {
+        std::lock_guard<std::mutex> lck(_mtx);
+
         T ret = NULL;
-
-        lock();
-
         InternalIterator ti = handle_map->find(key);
-
         if (ti != handle_map->end()) {
             ret = ti->second;
             handle_map->erase(ti);
         }
-
-        unlock();
 
         // returns the removed element.
         return ret;
@@ -235,11 +172,8 @@ public:
      */
     void resize(int newSize)
     {
-        lock();
-
+        std::lock_guard<std::mutex> lck(_mtx);
         handle_map->resize(newSize);
-
-        unlock();
     }
 
     /**
@@ -249,42 +183,23 @@ public:
      */
     int getCount()
     {
-        int size;
-        lock();
-
-        size = handle_map->size();
-
-        unlock();
-        return(size);
+        std::lock_guard<std::mutex> lck(_mtx);
+        return handle_map->size();
     }
 
     /**
      * Returns the size of the hash table (number of possible collision
-     * lists).
+     * lists).  XXX No not any more XXX.
      *
      * @return Size of the hash table (number of possible collision lists).
      */
     int getSize()
     {
-        int max_size;
-        lock();
+        std::lock_guard<std::mutex> lck(_mtx);
 
         // max_size = handle_map->bucket_count();
-        max_size = handle_map->size();
-
-        unlock();
-
-        return max_size;
+        return  handle_map->size();
     }
-
-    /**
-     * Returns whether the hash table is set for concurrent access
-     * control.
-     *
-     * @return Whether the hash table is set for concurrent access
-     * control.
-     */
-    bool getUseMutex();
 
     /**
      * Returns an iterator through all keys stored in the hash table.
@@ -293,6 +208,7 @@ public:
      */
     HandleMapIterator<T> *keys()
     {
+        std::lock_guard<std::mutex> lck(_mtx);
         return new HandleMapIterator<T>(this);
     }
 
@@ -324,6 +240,7 @@ private:
     HandleMapIterator(HandleMap<T> *m)
     {
         map = m;
+        std::lock_guard<std::mutex> lck(map->_mtx);
         current = map->handle_map->begin();
     }
 
@@ -336,8 +253,8 @@ public:
      */
     bool hasNext()
     {
-        iter_type e = map->handle_map->end();
-        return current != e;
+        std::lock_guard<std::mutex> lck(map->_mtx);
+        return current != map->handle_map->end();
     }
 
 
@@ -352,14 +269,10 @@ public:
             throw IndexErrorException(TRACE_INFO, "HandleMapIterator out of bounds");
         }
 
-        map->lock();
+        std::lock_guard<std::mutex> lck(map->_mtx);
 
         Handle ret = current->first;
-
         ++current;
-
-        map->unlock();
-
         return ret;
     }
 

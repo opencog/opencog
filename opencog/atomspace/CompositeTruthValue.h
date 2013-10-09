@@ -33,7 +33,6 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
 
 #ifdef ZMQ_EXPERIMENT
