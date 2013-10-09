@@ -31,6 +31,7 @@
 #define _OPENCOG_HANDLE_MAP_H
 
 #include <map>
+#include <memory>
 #include <mutex>
 
 #include <opencog/atomspace/types.h>
@@ -50,6 +51,7 @@ template<class T> class HandleMapIterator;
  */
 template<class T>
 class HandleMap
+    : public std::enable_shared_from_this<HandleMap<T>>
 {
     friend class HandleMapIterator<T>;
 
@@ -64,7 +66,7 @@ private:
     /**
      * The Map where the elements will be stored.
      */
-    InternalMap *handle_map;
+    InternalMap _handle_map;
 
     /**
      * The mutex used to control access to the HashMap.
@@ -73,18 +75,8 @@ private:
 
 public:
 
-    /** Constructor for this class.  */
-    HandleMap()
-    {
-        handle_map = new InternalMap();
-    }
-
-    /** Destructor for this class */
-    ~HandleMap()
-    {
-        std::lock_guard<std::mutex> lck(_mtx);
-        delete handle_map;
-    }
+    typedef std::shared_ptr<HandleMap<T>> MapPtr;
+    HandleMap() {} 
 
     /**
      * Adds a new entry to the hash table.
@@ -98,12 +90,12 @@ public:
 
         // check if the element is already in the hash table. If not, it
         // is added to the head of the list for that position
-        InternalIterator ti = handle_map->find(key);
-        if (ti != handle_map->end()) {
-            (*handle_map)[key] = element;
+        InternalIterator ti = _handle_map.find(key);
+        if (ti == _handle_map.end()) {
+            (_handle_map)[key] = element;
         } else {
             throw RuntimeException(TRACE_INFO,
-                "attempting to insert duplicated key %d in hash map",
+                "attempting to insert duplicated key %ld in hash map",
                 key.value());
         }
     }
@@ -119,11 +111,11 @@ public:
         std::lock_guard<std::mutex> lck(_mtx);
 
         // assert the key exists. Otherwise throws an exception.
-        InternalIterator ti = handle_map->find(key);
-        if (ti == handle_map->end())
+        InternalIterator ti = _handle_map.find(key);
+        if (ti == _handle_map.end())
         {
             throw AssertionException(
-                "HandleMap: key (%d) does not exist in this map",
+                "HandleMap: key (%ld) does not exist in this map",
                 key.value());  
         }
         return ti->second;
@@ -139,9 +131,7 @@ public:
     bool contains(Handle key)
     {
         std::lock_guard<std::mutex> lck(_mtx);
-
-        InternalIterator ti = handle_map->find(key);
-        return (ti != handle_map->end());
+        return _handle_map.find(key) != _handle_map.end();
     }
 
     /**
@@ -156,10 +146,10 @@ public:
         std::lock_guard<std::mutex> lck(_mtx);
 
         T ret = NULL;
-        InternalIterator ti = handle_map->find(key);
-        if (ti != handle_map->end()) {
+        InternalIterator ti = _handle_map.find(key);
+        if (ti != _handle_map.end()) {
             ret = ti->second;
-            handle_map->erase(ti);
+            _handle_map.erase(ti);
         }
 
         // returns the removed element.
@@ -174,7 +164,7 @@ public:
     void resize(int newSize)
     {
         std::lock_guard<std::mutex> lck(_mtx);
-        handle_map->resize(newSize);
+        _handle_map.resize(newSize);
     }
 
     /**
@@ -185,7 +175,7 @@ public:
     int getCount()
     {
         std::lock_guard<std::mutex> lck(_mtx);
-        return handle_map->size();
+        return _handle_map.size();
     }
 
     /**
@@ -199,7 +189,7 @@ public:
         std::lock_guard<std::mutex> lck(_mtx);
 
         // max_size = handle_map->bucket_count();
-        return  handle_map->size();
+        return  _handle_map.size();
     }
 
     /**
@@ -207,10 +197,10 @@ public:
      *
      * @return An iterator through all keys stored in the hash table.
      */
-    HandleMapIterator<T> *keys()
+    HandleMapIterator<T>* keys()
     {
-        std::lock_guard<std::mutex> lck(_mtx);
-        return new HandleMapIterator<T>(this);
+        MapPtr mp = std::enable_shared_from_this<HandleMap<T>>::shared_from_this();
+        return new HandleMapIterator<T>(mp);
     }
 
 };
@@ -231,18 +221,19 @@ private:
     /**
      * Stores the handleMap.
      */
-    HandleMap<T> *map;
+    typedef std::shared_ptr<HandleMap<T>> MapPtr;
+    MapPtr map;
 
     /**
      * Constructor for this class.
      *
      * @param HandleMap object to be iterated.
      */
-    HandleMapIterator(HandleMap<T> *m)
+    HandleMapIterator(MapPtr m)
     {
         map = m;
         std::lock_guard<std::mutex> lck(map->_mtx);
-        current = map->handle_map->begin();
+        current = map->_handle_map.begin();
     }
 
 public:
@@ -255,7 +246,7 @@ public:
     bool hasNext()
     {
         std::lock_guard<std::mutex> lck(map->_mtx);
-        return current != map->handle_map->end();
+        return current != map->_handle_map.end();
     }
 
 
