@@ -42,8 +42,8 @@ public:
     void tearDown() {}
 
     void testEquals() {
-        NodePtr n1(new Node(CONCEPT_NODE, "TEST"));
-        NodePtr n2(new Node(CONCEPT_NODE, "TEST"));
+        NodePtr n1(createNode(CONCEPT_NODE, "TEST"));
+        NodePtr n2(createNode(CONCEPT_NODE, "TEST"));
         std::vector<Handle> out1;
         LinkPtr l1(createLink(LIST_LINK, out1));
         LinkPtr l2(createLink(LIST_LINK, out1));

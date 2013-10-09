@@ -435,11 +435,11 @@ public:
         AtomTable atomTable;
 
         /* add a simple set of links & nodes */
-        NodePtr wordNode(new Node(NUMBER_NODE, "1"));
+        NodePtr wordNode(createNode(NUMBER_NODE, "1"));
         wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) - 10));
         Handle wnHandle = atomTable.add(wordNode);
 
-        NodePtr senseNode(new Node(CONCEPT_NODE, "28675194"));
+        NodePtr senseNode(createNode(CONCEPT_NODE, "28675194"));
         senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) 30));
         Handle snHandle = atomTable.add(senseNode);
 
@@ -464,8 +464,8 @@ public:
      * same atom twice (or more) */
     void testDoubleLink() {
         AtomTable atomTable;
-        NodePtr n1(new Node(NUMBER_NODE, "1"));
-        NodePtr n2(new Node(NUMBER_NODE, "2"));
+        NodePtr n1(createNode(NUMBER_NODE, "1"));
+        NodePtr n2(createNode(NUMBER_NODE, "2"));
         Handle hn1 = atomTable.add(n1);
         Handle hn2 = atomTable.add(n2);
 
