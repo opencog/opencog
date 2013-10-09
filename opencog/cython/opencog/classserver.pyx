@@ -15,7 +15,7 @@ cdef c_get_type_name(Type t):
     # if s.__eq__(string("*** Unknown Type! ***") :
     # if str("*** Unknown Type! ***") == str(s) :
     if 0 == strcmp(s.c_str(), "*** Unknown Type! ***") :
-        s = ""
+        s = string("")
     return s.c_str()
 
 cdef c_get_type(char *type_name):
