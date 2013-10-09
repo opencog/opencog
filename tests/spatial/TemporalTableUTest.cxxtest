@@ -49,8 +49,7 @@ public:
             times[i] = new Temporal(i*2, i*2);
             char name[16];
             sprintf(name, "%d", i);
-            NodePtr n(createNode(NUMBER_NODE, name));
-            handles[i] = n->getHandle();
+            handles[i] = as.addNode(NUMBER_NODE, name);
         }
     }
 
