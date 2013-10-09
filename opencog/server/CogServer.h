@@ -34,8 +34,6 @@
 
 #include <pthread.h>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
 #include <opencog/server/Module.h>
@@ -51,7 +49,6 @@ namespace opencog
  */
 
 typedef std::vector<AgentPtr> AgentSeq;
-class Request;
 
 /**
  * This class implements the official server used by the opencog framework. It
