@@ -25,8 +25,11 @@
  */
 
 #include <climits>
-#include "Handle.h"
-#include "Atom.h"
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/server/BaseServer.h>
 
 using namespace opencog;
 
@@ -34,3 +37,9 @@ const Handle Handle::UNDEFINED(ULONG_MAX);
 
 Handle::Handle(AtomPtr atom) : AtomPtr(atom), uuid(atom->_uuid) {}
 
+const AtomTable* Handle::_resolver = NULL;
+
+Atom* Handle::resolve() const noexcept
+{
+    return _resolver->getHandle(*this).get();
+}

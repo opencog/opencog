@@ -45,6 +45,7 @@ typedef unsigned long UUID;
 
 //! contains an unique identificator
 class Atom;
+class AtomTable;
 typedef std::shared_ptr<Atom> AtomPtr;
 class Handle : public AtomPtr
 {
@@ -58,6 +59,8 @@ private:
 
     UUID uuid;
 
+    Atom* resolve() const noexcept;
+    static const AtomTable* _resolver;
 public:
 
     static const Handle UNDEFINED;
@@ -78,6 +81,12 @@ public:
         base->operator=(h);
         this->uuid = h.uuid;
         return *this;
+    }
+
+    inline Atom* operator->() const noexcept {
+        Atom* ptr = get();
+        if (ptr) return ptr;
+        return resolve();
     }
 
     inline bool operator==(const Handle& h) const { return uuid == h.uuid; }
@@ -105,6 +114,8 @@ public:
         if (h1 > h2) return 1;
         return 0;
     }
+
+    static void set_resolver(const AtomTable* tab) { _resolver = tab; }
 };
  
 //! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
