@@ -76,8 +76,9 @@ public:
      * Loads the repository from a file.
      *
      * @param The file from where the repository should be loaded.
-     */
-    virtual void loadRepository(FILE*, HandleMap<AtomPtr>*) = 0;
+     **/
+    typedef std::shared_ptr<HandleMap<AtomPtr>> HandMapPtr;
+    virtual void loadRepository(FILE*, HandMapPtr) = 0;
 
 
     /**

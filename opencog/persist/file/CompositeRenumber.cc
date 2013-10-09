@@ -32,7 +32,7 @@
 using namespace opencog;
 
 void CompositeRenumber::updateVersionHandles(CompositeTruthValue &ctv,
-                                             HandleMap<AtomPtr> *handles)
+                                             HandMapPtr handles)
 {
     VersionedTruthValueMap newVersionedTVs;
     for (VersionedTruthValueMap::const_iterator itr = ctv.versionedTVs.begin();

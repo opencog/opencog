@@ -43,7 +43,7 @@ TemporalTableFile::~TemporalTableFile()
 {
 }
 
-void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandleMap<AtomPtr> *conv)
+void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandMapPtr conv)
 {
     int size;
     bool b_read = true;

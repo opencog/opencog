@@ -67,7 +67,7 @@ public:
      * @param the file pointer where the TimeServer is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void loadRepository(FILE*, HandleMap<AtomPtr>*);
+    void loadRepository(FILE*, HandMapPtr);
 
     /**
      * This method is used to clear the whole TimeServer repository.
