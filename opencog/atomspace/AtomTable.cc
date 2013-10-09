@@ -433,9 +433,15 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     }
 
     std::lock_guard<std::mutex> lck(_mtx);
+
+#if LATER
+    // XXX FIXME -- technically, this throw is correct, except
+    // thatSavingLoading gives us atoms with handles preset.
+    // So we have to accept that, and hope its correct and consistent.
     if (atom->_uuid != Handle::UNDEFINED.value())
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
+#endif
 
     // Is the equivalent of this atom already in the table?
     // If so, then we merge the truth values.
@@ -446,14 +452,6 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         // XXX TODO -- should merege attention value too, right ???
         return hexist;
     }
-
-#if LATER
-    // Its possible that the atom is already in the TLB -- 
-    // e.g. if it was fetched from persistent storage; this
-    // was done to preserve handle consistency.
-    Handle handle = atom->handle;
-    if (TLB::isInvalidHandle(handle)) handle = TLB::addAtom(atom);
-#endif
 
     // Check for bad outgoing set members; fix them up if needed.
     LinkPtr lll(LinkCast(atom));
@@ -492,9 +490,17 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         }
     }
 
-    // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
-    // to issue a valid uuid.  And then memorize it.
-    TLB::addAtom(atom);
+    // Its possible that the atom already has a UUID assigned,
+    // e.g. if it was fetched from persistent storage; this
+    // was done to preserve handle consistency. SavingLoading does
+    // this too.  XXX Review for corrrectness...
+    if (atom->_uuid == Handle::UNDEFINED.value()) {
+       // Atom doesn't yet have a valid uuid assigned to it. Ask the TLB
+       // to issue a valid uuid.  And then memorize it.
+       TLB::addAtom(atom);
+    } else {
+       TLB::reserve_range(0, atom->_uuid);
+    }
     Handle h = atom->getHandle();
     size++;
     _atom_set.insert(h);
