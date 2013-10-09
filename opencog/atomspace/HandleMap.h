@@ -98,7 +98,8 @@ public:
 
         // check if the element is already in the hash table. If not, it
         // is added to the head of the list for that position
-        if (!contains(key)) {
+        InternalIterator ti = handle_map->find(key);
+        if (ti != handle_map->end()) {
             (*handle_map)[key] = element;
         } else {
             throw RuntimeException(TRACE_INFO,
