@@ -150,6 +150,8 @@ class Chainer(AbstractChainer):
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
 
+        self.atomspace = atomspace
+
         # For every atom, store the atoms used to produce it (including the atoms used to produce them).
         # This prevents cycles (very important) as well as repeating the same inference.
         # Map from Atom -> set(Atom)
