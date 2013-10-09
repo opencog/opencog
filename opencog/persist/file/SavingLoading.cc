@@ -157,7 +157,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     atomTable.foreachHandleByType(
         [&](Handle atomHandle)->void
         {
-            NodePtr node(NodeCast(atomTable.getAtom(atomHandle)));
+            NodePtr node(NodeCast(atomHandle));
             if ( node == NULL ) {
                 logger().error( "Trying to save a node which isn't in atomTable "
                         "(%p). Handle %d", &atomTable, atomHandle.value() );
@@ -226,7 +226,7 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     std::set<Handle>::iterator itLinks;
     for (itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
             ++itLinks ) {
-        LinkPtr link(LinkCast(atomTable.getAtom(*itLinks)));
+        LinkPtr link(LinkCast(*itLinks));
         logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
         writeLink(f, link);
         numLinks++;
@@ -464,8 +464,8 @@ void SavingLoading::writeAtom(FILE *f, AtomPtr atom)
     fwrite(&flags, sizeof(char), 1, f);
 
     // writes the atom handle
-    Handle handle = atom->getHandle();
-    fwrite(&handle, sizeof(Handle), 1, f);
+    UUID uuid = atom->getHandle().value();
+    fwrite(&uuid, sizeof(UUID), 1, f);
 
     // incoming references will be re-created during the loading process
 
@@ -487,8 +487,9 @@ Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
     atom->flags = flags;
 
     // reads the atom handle
-    Handle atomHandle;
-    FREAD_CK(&atomHandle, sizeof(Handle), 1, f);
+    UUID uuid;
+    FREAD_CK(&uuid, sizeof(UUID), 1, f);
+    atom->_uuid = uuid;
 
     // reads AttentionValue
     AttentionValue *av = readAttentionValue(f);
@@ -501,7 +502,7 @@ Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
 
     CHECK_FREAD;
 
-    return atomHandle;
+    return Handle(atom);
 }
 
 void SavingLoading::writeNode(FILE *f, NodePtr node)
@@ -543,6 +544,7 @@ NodePtr SavingLoading::readNode(FILE* f, Type t, HandleMap<AtomPtr>* handles)
     NodePtr n(createNode(t, nam));
     n->setAttentionValue(junk->getAttentionValue());
     n->setTruthValue(junk->getTruthValue());
+    n->_uuid = junk->_uuid;
 
     handles->add(h, n);
     return n;
@@ -563,8 +565,8 @@ void SavingLoading::writeLink(FILE *f, LinkPtr link)
     // the link's outgoing set is written on the file
     for (Arity i = 0; i < arity; i++) {
         //logger().fine("writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
-        Handle h = link->getOutgoingHandle(i);
-        fwrite(&h, sizeof(Handle), 1, f);
+        UUID uuid = link->getOutgoingAtom(i).value();
+        fwrite(&uuid, sizeof(UUID), 1, f);
     }
 
     // the trail
@@ -573,8 +575,8 @@ void SavingLoading::writeLink(FILE *f, LinkPtr link)
     int trailSize = trail->getSize();
     fwrite(&trailSize, sizeof(int), 1, f);
     for (int i = 0; i < trailSize; i++) {
-        Handle handle = trail->getElement(i);
-        fwrite(&handle, sizeof(Handle), 1, f);
+        UUID uuid = trail->getElement(i).value();
+        fwrite(&uuid, sizeof(UUID), 1, f);
     }
 
 }
@@ -655,13 +657,15 @@ LinkPtr SavingLoading::readLink(FILE* f, Type t, HandleMap<AtomPtr>* handles)
     // the link's outgoing set is read from the file
     HandleSeq oset;
     for (Arity i = 0; i < arity; i++) {
-        Handle h;
-        FREAD_CK(&h, sizeof(Handle), 1, f);
+        UUID uuid;
+        FREAD_CK(&uuid, sizeof(UUID), 1, f);
+        Handle h(uuid);
         oset.push_back( handles->get(h)->getHandle() );
     }
     LinkPtr link(createLink(t, oset));
     link->setAttentionValue(junk->getAttentionValue());
     link->setTruthValue(junk->getTruthValue());
+    link->_uuid = junk->_uuid;
     handles->add(h, link);
     return link;
 }
@@ -673,8 +677,9 @@ void SavingLoading::readTrail(FILE* f, Trail* trail)
     bool b_read = true;
     FREAD_CK(&trailSize, sizeof(int), 1, f);
     for (int i = 0; i < trailSize; i++) {
-        Handle handle;
-        FREAD_CK(&handle, sizeof(Handle), 1, f);
+        UUID uuid;
+        FREAD_CK(&uuid, sizeof(UUID), 1, f);
+        Handle handle(uuid);
         trail->insert( handle, false);
     }
     CHECK_FREAD;

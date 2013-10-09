@@ -148,7 +148,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 
     SCM suuid = SCM_SMOB_OBJECT(sh);
     UUID uuid = scm_to_ulong(suuid);
-    return Handle(uuid);
+    return atomspace->getHandle(Handle(uuid));
 }
 
 /* ============================================================== */

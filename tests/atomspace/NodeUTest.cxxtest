@@ -23,8 +23,8 @@
  */
 #include <opencog/util/platform.h>
 
+#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;

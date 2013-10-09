@@ -25,7 +25,6 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/spacetime/TimeServer.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/util/Config.h>
@@ -277,7 +276,7 @@ public:
                     int numberOfReturnedEntries = ret.size();
                     if (numberOfReturnedEntries != expectedNumberOfEntries[h][t][c]) {
                         logger().debug("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
-                                       TLB::getAtom(handles[h])->toString().c_str(),
+                                       handles[h]->toString().c_str(),
                                        search_intervals[t].toString().c_str(),
                                        TemporalTable::getTemporalRelationshipStr(criteria[c]),
                                        expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, toString(ret).c_str());
@@ -288,7 +287,7 @@ public:
                             if (*(ret.front().getTemporal()) != expectedNextAfterStartOf[h][t]) {
                                 logger().debug("Next after start of t %s for h (%s) does not match\nExpected %s, but got %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                expectedNextAfterStartOf[h][t].toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
@@ -297,7 +296,7 @@ public:
                             if (*(ret.front().getTemporal()) != expectedNextAfterEndOf[h][t]) {
                                 logger().debug("Next after end of t %s for h (%s) does not match\nExpected %s, but got %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                expectedNextAfterEndOf[h][t].toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
@@ -306,7 +305,7 @@ public:
                             if (*(ret.front().getTemporal()) != expectedPreviousBeforeStartOf[h][t]) {
                                 logger().debug("Previous after start of t %s for h (%s) does not match\nExpected %s, but got %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                expectedPreviousBeforeStartOf[h][t].toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
@@ -315,7 +314,7 @@ public:
                             if (*(ret.front().getTemporal()) != expectedPreviousBeforeEndOf[h][t]) {
                                 logger().debug("Previous after end of t %s for h (%s) does not match\nExpected %s, but got %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                expectedPreviousBeforeEndOf[h][t].toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
@@ -1062,7 +1061,7 @@ public:
                     unsigned int numberOfReturnedEntries = ret.size();
                     if (numberOfReturnedEntries != (totalNumberOfEntries - expectedNumberOfEntries[h][t][c])) {
                         logger().debug("\nWrong number of entries returned for h=%s, t=%s, c=%s\nExpected %d, but got %d => %s",
-                                       TLB::getAtom(handles[h])->toString().c_str(),
+                                       handles[h]->toString().c_str(),
                                        search_intervals[t].toString().c_str(),
                                        TemporalTable::getTemporalRelationshipStr(criteria[c]),
                                        expectedNumberOfEntries[h][t][c], numberOfReturnedEntries, toString(ret).c_str());
@@ -1074,7 +1073,7 @@ public:
                             if (*(ret.front().getTemporal()) == expectedNextAfterStartOf[h][t]) {
                                 logger().debug("Next after start of t %s for h (%s), that should have been removed is still there: %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(ret.front().getTemporal()) != expectedNextAfterStartOf[h][t]);
@@ -1082,7 +1081,7 @@ public:
                             if (*(ret.front().getTemporal()) == expectedNextAfterEndOf[h][t]) {
                                 logger().debug("Next after end of t %s for h (%s), that should have been removed is still there: %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(ret.front().getTemporal()) != expectedNextAfterEndOf[h][t]);
@@ -1090,7 +1089,7 @@ public:
                             if (*(ret.front().getTemporal()) == expectedPreviousBeforeStartOf[h][t]) {
                                 logger().debug("Next after start of t %s for h (%s), that should have been removed is still there: %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(ret.front().getTemporal()) != expectedPreviousBeforeStartOf[h][t]);
@@ -1098,7 +1097,7 @@ public:
                             if (*(ret.front().getTemporal()) == expectedPreviousBeforeEndOf[h][t]) {
                                 logger().debug("Next after end of t %s for h (%s), that should have been removed is still there: %s",
                                                search_intervals[t].toString().c_str(),
-                                               TLB::getAtom(handles[h])->toString().c_str(),
+                                               handles[h]->toString().c_str(),
                                                ret.front().getTemporal()->toString().c_str());
                             }
                             TS_ASSERT(*(ret.front().getTemporal()) != expectedPreviousBeforeEndOf[h][t]);
@@ -1551,13 +1550,13 @@ public:
         //printf("After add\n");
 
         Handle atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t1));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t1));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
 
         //printf("After gets\n");
         Handle timeInfo = timeServer().addTimeInfo(h1, *t1);
@@ -1566,46 +1565,46 @@ public:
         //atomSpace.print();
 
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t1));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
 
         timeServer().addTimeInfo(h1, *t2);
 
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t2));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t1));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
 
         timeServer().addTimeInfo(h2, *t1);
 
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t2));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t2));
-        TS_ASSERT(TLB::isInvalidHandle(atTimeLink));
+        TS_ASSERT((NULL == atTimeLink));
 
         timeServer().addTimeInfo(h2, *t2);
 
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h1, t2));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t1));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         atTimeLink = timeServer().getAtTimeLink(HandleTemporalPair(h2, t2));
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
 
         delete t1;
         delete t2;
@@ -1617,7 +1616,7 @@ public:
 
         Handle node = atomSpace.addNode(CONCEPT_NODE, "test");
         Handle atTimeLink = timeServer().addTimeInfo(node, 1000);
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
 
         vector<HandleTemporalPair> res;
         timeServer().getTimeInfo(back_inserter(res), node);
@@ -1646,12 +1645,12 @@ public:
         TS_ASSERT(!timeServer().removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
 
         Handle atTimeLink = timeServer().addTimeInfo(node1, 1000);
-        TS_ASSERT(TLB::isValidHandle(atTimeLink));
+        TS_ASSERT((NULL != atTimeLink));
         TS_ASSERT(timeServer().removeTimeInfo(node1, 1000, TemporalTable::EXACT, false));
 
         // Check if the TimeNode was removed from AtomTable. I should not, since removeDisconnectedTimeNodes flag is false.
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
-        TS_ASSERT(TLB::isValidHandle(timeNode));
+        TS_ASSERT((NULL != timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq outgoing;
         outgoing.push_back(timeNode);
@@ -1669,7 +1668,7 @@ public:
 
         // Since the removeDisconnectedTimeNodes flag is true, TimeNode should have been removed too
         timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000).c_str());
-        TS_ASSERT(TLB::isInvalidHandle(timeNode));
+        TS_ASSERT((NULL == timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq atTimeLinks;
         atomSpace.getHandleSet(back_inserter(atTimeLinks), AT_TIME_LINK, false);

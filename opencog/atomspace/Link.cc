@@ -84,11 +84,6 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-AtomPtr Link::getOutgoingAtom(Arity pos) const
-{
-    return TLB::getAtom(getOutgoingHandle(pos));
-}
-
 std::string Link::toShortString(void) const
 {
     std::stringstream answer;
@@ -103,7 +98,7 @@ std::string Link::toShortString(void) const
     for (Arity i = 0; i < arity; i++) {
         if (i > 0) answer << ",";
         if (atomTable) {
-            AtomPtr a(atomTable->getAtom(_outgoing[i]));
+            AtomPtr a(_outgoing[i]);
             if (classserver().isA(a->getType(), NODE))
                 answer << NodeCast(a)->getName();
             else 
@@ -147,16 +142,15 @@ std::string Link::toString(void) const
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        Handle h = _outgoing[i];
+        AtomPtr a(_outgoing[i]);
         if (atomTable) {
-            AtomPtr a(atomTable->getAtom(h));
             if (a) {
                 NodePtr nnn(NodeCast(a));
                 if (nnn) {
                     snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
                     answer += buf;
                     if (nnn->getName() == "")
-                        answer += "#" + h;
+                        answer += "#" + _outgoing[i];
                     else
                         answer += nnn->getName();
                     answer += "]";
@@ -166,12 +160,12 @@ std::string Link::toString(void) const
                 }
             } else {
                 logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
-                               h.value(), i);
+                               _outgoing[i].value(), i);
                 answer += "INVALID_HANDLE!";
             }
         } else {
             // No AtomTable connected so just print handles in outgoing set
-            answer += "#" + h;
+            answer += "#" + _outgoing[i];
         }
     }
     answer += ">]";

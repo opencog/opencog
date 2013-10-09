@@ -60,8 +60,7 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
-cdef extern from "boost/shared_ptr.hpp":
-    cdef cppclass tv_ptr "boost::shared_ptr<opencog::TruthValue>":
+    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
         tv_ptr()
         tv_ptr(cTruthValue* fun)
         tv_ptr(cSimpleTruthValue* fun)

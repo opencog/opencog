@@ -40,10 +40,8 @@ namespace opencog
  *  @{
  */
 
-class Atom;
 class Node;
 class Link;
-typedef std::shared_ptr<Atom> AtomPtr;
 typedef std::shared_ptr<Node> NodePtr;
 typedef std::shared_ptr<Link> LinkPtr;
 #define NodeCast std::dynamic_pointer_cast<Node>
@@ -63,13 +61,13 @@ public:
 };
 class AtomPredicate {
 public:
-    inline bool operator()(const Atom& a) { return this->test(a); }
-    virtual bool test(const Atom&) { return true; }
+    inline bool operator()(AtomPtr a) { return this->test(a); }
+    virtual bool test(AtomPtr) { return true; }
 };
 class AtomComparator {
 public:
-    inline bool operator()(const Atom& a,const Atom& b) { return this->test(a,b); }
-    virtual bool test(const Atom&,const Atom&) { return true; }
+    inline bool operator()(AtomPtr a, AtomPtr b) { return this->test(a,b); }
+    virtual bool test(AtomPtr, const AtomPtr) { return true; }
 };
 
 

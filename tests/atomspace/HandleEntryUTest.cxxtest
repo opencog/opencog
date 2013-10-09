@@ -26,7 +26,6 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -41,6 +40,7 @@ class HandleEntryUTest :  public CxxTest::TestSuite
 {
 
 private:
+    AtomSpace _as;
     AtomPtr a1;
     AtomPtr a2;
     Handle h1;
@@ -48,10 +48,10 @@ private:
 
 public:
     HandleEntryUTest() {
-        a1 = NodePtr(new Node(CONCEPT_NODE, "atom one"));
-        a2 = NodePtr(new Node(CONCEPT_NODE, "atom two"));
-        h1 = TLB::addAtom(a1);
-        h2 = TLB::addAtom(a2);
+        h1 = _as.addNode(CONCEPT_NODE, "atom one");
+        h2 = _as.addNode(CONCEPT_NODE, "atom two");
+        a1 = h1;
+        a2 = h2;
     }
 
     void setUp() {
@@ -76,19 +76,20 @@ public:
     }
 
     void testFilterSetVersionHandle() {
-        NodePtr n1(new Node(CONCEPT_NODE, "TEST1"));
-        NodePtr n2(new Node(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE)));
-        NodePtr n3(new Node(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1)));
+        AtomSpace as(_as);
+        Handle n1(as.addNode(CONCEPT_NODE, "TEST1"));
+        Handle n2(as.addNode(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE)));
+        Handle n3(as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1)));
         CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
         tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
-        NodePtr n4(new Node(PREDICATE_NODE, "TEST4", tv));
-        NodePtr n5(new Node(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2)));
+        Handle n4(as.addNode(PREDICATE_NODE, "TEST4", tv));
+        Handle n5(as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2)));
 
-        HandleEntry* he = new HandleEntry(TLB::addAtom(n1));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n2)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n3)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n4)));
-        he  = HandleEntry::concatenation(he, new HandleEntry(TLB::addAtom(n5)));
+        HandleEntry* he = new HandleEntry(n1);
+        he  = HandleEntry::concatenation(he, new HandleEntry(n2));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n3));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n4));
+        he  = HandleEntry::concatenation(he, new HandleEntry(n5));
         TS_ASSERT(he->getSize() == 5);
 
         // Now filter
@@ -165,7 +166,7 @@ public:
     }
 
     void testFilterSetCharPtrTypeVersionHandle() {
-        AtomSpace as;
+        AtomSpace as(_as);
         Handle n1 = as.addNode(CONCEPT_NODE, "TEST1");
         Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
         CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);

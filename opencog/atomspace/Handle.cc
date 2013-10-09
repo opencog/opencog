@@ -2,6 +2,7 @@
  * opencog/atomspace/Handle.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linas@linas.org>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -25,8 +26,11 @@
 
 #include <climits>
 #include "Handle.h"
+#include "Atom.h"
 
 using namespace opencog;
 
 const Handle Handle::UNDEFINED(ULONG_MAX);
+
+Handle::Handle(AtomPtr atom) : AtomPtr(atom), uuid(atom->_uuid) {}
 

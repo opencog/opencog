@@ -59,10 +59,10 @@ class AtomTable;
  */
 class Atom : public AttentionValueHolder
 {
-    friend class CommitAtomASR;   // needs access to clone
     friend class SavingLoading;   // needs to set flags diectly
     friend class AtomTable;
     friend class TLB;
+    friend class Handle;
     friend class ::AtomUTest;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
@@ -80,7 +80,7 @@ private:
     AtomTable *getAtomTable() const { return atomTable; }
 
 protected:
-    Handle handle;
+    UUID _uuid;
     AtomTable *atomTable;
 
     Type type;
@@ -136,7 +136,9 @@ public:
      *
      * @return The handle of the atom.
      */
-    inline Handle getHandle() const { return handle; }
+    inline Handle getHandle() {
+        return Handle(std::static_pointer_cast<Atom>(shared_from_this()));
+    }
 
     /** Returns the AttentionValue object of the atom.
      *

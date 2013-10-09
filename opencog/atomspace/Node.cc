@@ -55,7 +55,7 @@ std::string Node::toShortString() const
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
-        tmpname = "#" + handle;
+        tmpname = "#" + _uuid;
     snprintf(buf, BUFSZ, "node[%s:%s%s]",
              classserver().getTypeName(type).c_str(), tmpname.c_str(),
                     (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
@@ -67,7 +67,7 @@ std::string Node::toString() const
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
-        tmpname = "#" + handle;
+        tmpname = "#" + _uuid;
     //activation here at 0: can be replace with LTI
     snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%s)",
              classserver().getTypeName(type).c_str(), tmpname.c_str(),

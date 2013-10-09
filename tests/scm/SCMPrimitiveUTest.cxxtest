@@ -83,11 +83,10 @@ class MyExampleClass
 		// with a ListLink.
 		Handle my_func(Handle h)
 		{
-			Handle hlist = Handle::UNDEFINED;
 			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
-			hlist = as->addLink(LIST_LINK, h);
+			Handle hlist = as->addLink(LIST_LINK, h);
 			return hlist;
 		}
 
