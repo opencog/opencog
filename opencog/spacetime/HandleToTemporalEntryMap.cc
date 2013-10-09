@@ -31,17 +31,16 @@ using namespace opencog;
 
 HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 {
-    internalMap = new HandleMap<TemporalEntry *>();
+    internalMap = std::make_shared<HandleMap<TemporalEntry*>>();
 }
 
 HandleToTemporalEntryMap::~HandleToTemporalEntryMap()
 {
-    HandleMapIterator<TemporalEntry *>* keys = internalMap->keys();
+    HandleMapIterator<TemporalEntry*>* keys = internalMap->keys();
     while (keys->hasNext()) {
         delete (internalMap->get(keys->next()));
     }
     delete keys;
-    delete(internalMap);
 }
 
 void HandleToTemporalEntryMap::add(Handle key, TemporalEntry* obj)

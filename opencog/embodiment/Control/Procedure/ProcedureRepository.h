@@ -57,7 +57,7 @@ public:
 
     int loadComboFromStream(std::istream& in);
 
-    void loadRepository(FILE*, HandleMap<AtomPtr>*);
+    void loadRepository(FILE*, HandMapPtr);
     void clear();
 };
 

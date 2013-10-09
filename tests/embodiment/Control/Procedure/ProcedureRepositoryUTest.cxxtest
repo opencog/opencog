@@ -177,7 +177,7 @@ public:
 
         int loadComboFromStream(istream& in);
 
-        void loadRepository(FILE*, HandleMap*);
+        void loadRepository(FILE*, HandMapPtr);
         void clear();
     */
 
