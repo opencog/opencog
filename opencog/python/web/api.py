@@ -105,7 +105,7 @@ atom_fields = {
     'handle': FormatHandleValue(attribute='h'),
     'type': fields.String(attribute='type_name'),
     'name': fields.String,
-    'outgoing': FormatHandleList(attribute='outgoing'),
+    'outgoing': FormatHandleList(attribute='out'),
     'incoming': FormatHandleList(attribute='incoming'),
     'truthvalue': FormatTruthValue(attribute='tv'),
     'attentionvalue': fields.Nested(av_fields, attribute='av')
@@ -121,15 +121,21 @@ class AtomListAPI(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('type', type=str, location='args', choices=types.__dict__.keys())
+        self.reqparse.add_argument('name', type=str, location='args')
         super(AtomListAPI, self).__init__()
 
     def get(self):
         args = self.reqparse.parse_args()
-        type_lookup = args.get('type')
-        if type_lookup is None:
+        type = args.get('type')
+        name = args.get('name')
+        if type is None and name is None:
             atoms = self.atomspace.get_atoms_by_type(types.Atom)
+        elif name is None:
+            atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
         else:
-            atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type_lookup))
+            if type is None:
+                type = 'Node' # Default to Node if a name is provided without specifying a type
+            atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
 
         return {'atoms': FormatAtomList.format(atoms)}
 
@@ -194,7 +200,11 @@ class AtomListAPI(Resource):
         tv = ParseTruthValue.parse(data)
 
         # Outgoing set
-        outgoing = data['outgoing'] if 'outgoing' in data else None
+        if 'outgoing' in data:
+            if len(data['outgoing']) > 0:
+                outgoing = [Handle(h) for h in data['outgoing']]
+        else:
+            outgoing = None
 
         # Name
         name = data['name'] if 'name' in data else None
@@ -210,10 +220,11 @@ class AtomListAPI(Resource):
 
         try:
             atom = self.atomspace.add(t=type, name=name, tv=tv, out=outgoing)
+
         except TypeError:
             abort(500, 'Error while processing your request. Check your parameters.')
 
-        return {'atom': marshal(atom, atom_fields)}
+        return {'atoms': marshal(atom, atom_fields)}
 
     def delete(self, id):
         try:
@@ -243,7 +254,7 @@ class AtomAPI(Resource):
         except IndexError:
             abort(404)
 
-        return {'atom': marshal(atom, atom_fields)}
+        return {'atoms': marshal(atom, atom_fields)}
 
     def put(self, id):
         """
@@ -285,6 +296,10 @@ class RESTApi(object):
     def run(self):
         self.app.run(debug=True)
 
+    def test(self):
+        return self.app.test_client()
+
+# @todo: remove this test code
 if __name__ == '__main__':
     test_atomspace = AtomSpace()
 
@@ -302,14 +317,18 @@ if __name__ == '__main__':
 now
 @todo separate the parsing and main api into separate files
 @todo use named tuples in the parsing
+
 @todo see if the atomspace throws when giving weird values as tv or av updates
 @todo handle put of invalid handle
+@todo check get invalid type, get invalid name
+
 @todo write unit tests
 @todo add dependencies to ocpkg, detect dependency existence in cmake
-# @todo: Return JSON errors
+@todo add get by name, get by type
+@todo search by incoming or outgoing set
+@todo finish fixing the errors
 
-@todo: ? Linas says handle isn't supposed to be the only id - how about a get method using name/type pair?
-@todo: Document how to test the API using curl and Python 'request'
+@todo: Document how to access the API using curl and Python 'request'
 @todo: check if the truth value type enumeration is complete
 
 '''
