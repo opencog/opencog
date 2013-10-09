@@ -23,15 +23,45 @@ TEMPORAL_RELATIONS = {
 }
 
 
+class UnixTime(float):
+    def __new__(cls, date_or_number):
+        if type(date_or_number) is UnixTime:
+            return date_or_number
+        assert isinstance(
+            date_or_number, (datetime, int, float, long)), "UnixTime() argument must be a datetime or a number, " \
+                                                           "not '{0}'".format(date_or_number.__class__.__name__)
+        if isinstance(date_or_number, datetime):
+            value = timegm(date_or_number.utctimetuple())
+        else:
+            value = date_or_number
+
+        return float.__new__(cls, value)
+
+    def __repr__(self):
+        return 'spatiotemporal.time.UnixTime({0}:{1})'.format(float(self), str(self))
+
+    def __str__(self):
+        return datetime.fromtimestamp(self).strftime('%Y-%m-%d %H:%M:%S')
+
+
+class _iterator_unix_time(object):
+    def __init__(self, start, stop, step=1):
+        self.current = start - step
+        self.stop = stop
+        self.step = step
+
+    def next(self):
+        self.current += self.step
+        if self.current >= self.stop:
+            raise StopIteration
+        return UnixTime(self.current)
+
+    def __iter__(self):
+        return self
+
+
 def is_unix_time(time):
-    return isinstance(time, (int, float, long)) and time > 0
-
-
-def convert_to_unix_time(time):
-    if isinstance(time, datetime):
-        return timegm(time.utctimetuple())
-    assert is_unix_time(time), 'passed parameter is not a valid unix time'
-    return time
+    return isinstance(time, (UnixTime, int, float, long)) and time >= 0
 
 
 def random_time(start, stop, probability_distribution=None):
@@ -39,11 +69,11 @@ def random_time(start, stop, probability_distribution=None):
     start and stop can be in either datetime or unix time
     return value is in unix time
     """
-    start = convert_to_unix_time(start)
-    stop = convert_to_unix_time(stop)
+    start = UnixTime(start)
+    stop = UnixTime(stop)
     assert start < stop, "'stop' should be greater than start"
     if probability_distribution is None:
-        return random() * (stop - start) + start
+        return UnixTime(random() * (stop - start) + start)
     assert isinstance(probability_distribution,
                       rv_frozen), "'probability_distribution' should be a scipy frozen distribution"
     random_value = probability_distribution.rvs()
@@ -51,7 +81,7 @@ def random_time(start, stop, probability_distribution=None):
         return start
     if random_value > stop:
         return stop
-    return random_value
+    return UnixTime(random_value)
 
 
 class Interval(object):
@@ -61,33 +91,22 @@ class Interval(object):
         """
         a and b can be in either datetime or unix time
         """
-        self.a = convert_to_unix_time(a)
-        self.b = convert_to_unix_time(b)
+        self.a = UnixTime(a)
+        self.b = UnixTime(b)
         assert self.a < self.b, "'b' should be greater than 'a'"
 
     def random_time(self, start=None, stop=None, probability_distribution=None):
         if start is None:
             start = self.a
         else:
-            start = convert_to_unix_time(start)
+            start = UnixTime(start)
             assert self.a <= start <= self.b, "'start' should be within the interval of the interval"
         if stop is None:
             stop = self.b
         else:
-            stop = convert_to_unix_time(stop)
+            stop = UnixTime(stop)
             assert self.a <= stop <= self.b, "'stop' should be within the interval of the interval"
         return random_time(start, stop, probability_distribution)
-
-    @property
-    def integer_range(self):
-        int_a = int(self.a)
-        if not isinstance(self.a, (int, long)):
-            int_a += 1
-        if isinstance(self.b, (int, long)):
-            int_b = self.b + 1
-        else:
-            int_b = int(self.b) + 1
-        return xrange(int_a, int_b, self.iter_step)
 
     def __contains__(self, item):
         """
@@ -98,7 +117,7 @@ class Interval(object):
         return self.a <= item.a and self.b >= item.b
 
     def __iter__(self):
-        return iter(self.integer_range)
+        return _iterator_unix_time(self.a, self.b, self.iter_step)
 
     def __len__(self):
         return float(self.b - self.a)
@@ -127,6 +146,9 @@ class BaseTemporalEvent(object):
         """
         time can either be a single value or a collection
         """
+        if type(x) is PiecewiseTemporalEvent:
+            pass
+
         result = []
         try:
             for time_step in x:
@@ -146,6 +168,12 @@ class BaseTemporalEvent(object):
         #TODO replace by CalculateCenterOfMass
         interval = self._interval_pre_check(interval)
         return max(self.pdf(interval))
+
+    def x_axis(self):
+        axis = []
+        for time_step in self:
+            axis.append(time_step)
+        return axis
 
     @property
     def a(self):
@@ -207,7 +235,7 @@ def _interpolation_ending_to_b(t, ending, b):
 
 
 def _interpolation_a_to_b(t, a, beginning, ending, b):
-    t = convert_to_unix_time(t)
+    t = UnixTime(t)
     if t <= a or t >= b:
         return 0
     if a < t < beginning:
@@ -350,6 +378,7 @@ class TemporalRelation(list):
 
 def generate_random_events(size=20):
     events = []
+
     year_2010 = Interval(datetime(2010, 1, 1), datetime(2011, 1, 1))
     iter_step = 100
 
@@ -387,12 +416,12 @@ def create_event_relation_hashtable(temporal_events):
 
 
 if __name__ == '__main__':
-    events = generate_random_events(1)
+    events = generate_random_events()
     import matplotlib.pyplot as plt
 
     for event in events:
         y = event.pdf(event)
-        plt.plot(event.interval.integer_range, y)
+        plt.plot(event.x_axis(), y)
 
     plt.show()
 
