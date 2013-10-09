@@ -102,6 +102,7 @@ public:
 
     void pop()
     {
+        std::lock_guard<std::mutex> lock(the_mutex);
         the_queue.pop_front();
     }
 
