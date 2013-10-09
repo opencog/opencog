@@ -295,6 +295,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 
 std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
 {
+    h = atomTable.getHandle(h);
     if (h) {
         if (terse) return h->toShortString();
         else return h->toString();

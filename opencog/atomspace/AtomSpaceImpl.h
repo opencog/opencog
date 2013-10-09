@@ -304,51 +304,62 @@ public:
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
+        h = atomTable.getHandle(h);
         return bank.getAV(h);
     }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle h, const AttentionValue &av) {
+        h = atomTable.getHandle(h);
         bank.setAV(h, av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
+        h = atomTable.getHandle(h);
         bank.setSTI(h, stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
+        h = atomTable.getHandle(h);
         bank.setLTI(h, ltiValue);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
     void incVLTI(Handle h) {
+        h = atomTable.getHandle(h);
         bank.incVLTI(h);
     }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {
+        h = atomTable.getHandle(h);
         bank.decVLTI(h);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
+        h = atomTable.getHandle(h);
         return bank.getSTI(h);
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
+        h = atomTable.getHandle(h);
         return bank.getLTI(h);
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
+        h = atomTable.getHandle(h);
         return bank.getVLTI(h);
     }
 
-    bool isValidHandle(Handle h) const
-        { return atomTable.holds(h); }
+    bool isValidHandle(Handle h) const {
+        h = atomTable.getHandle(h);
+        return atomTable.holds(h);
+    }
 
     /**
      * Returns neighboring atoms, following links and returning their
