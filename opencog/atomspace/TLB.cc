@@ -31,13 +31,4 @@ using std::endl;
 UUID TLB::_brk_uuid = 1;
 
 std::mutex TLB::_mtx;
-TLB::map_t TLB::_handle_map;
-
-void TLB::print()
-{
-    map_t::iterator it = _handle_map.begin();
-    for (; it != _handle_map.end(); ++it) {
-        cout << it->first << ": " << it->second->toString() << endl;
-    }
-}
 

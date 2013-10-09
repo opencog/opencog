@@ -36,8 +36,10 @@ using namespace opencog;
 void Node::init( const std::string& cname)
 throw (InvalidParamException, AssertionException)
 {
-    if (!classserver().isA(type, NODE)) {
-        throw InvalidParamException(TRACE_INFO, "Node - Invalid node type '%d'.", type);
+    if (not classserver().isA(type, NODE)) {
+        throw InvalidParamException(TRACE_INFO,
+        "Node - Invalid node type '%d' %s.", 
+        type, classserver().getTypeName(type).c_str());
     }
     name = cname;
 }
@@ -53,7 +55,7 @@ std::string Node::toShortString() const
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
-        tmpname = "#" + handle;
+        tmpname = "#" + _uuid;
     snprintf(buf, BUFSZ, "node[%s:%s%s]",
              classserver().getTypeName(type).c_str(), tmpname.c_str(),
                     (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
@@ -65,7 +67,7 @@ std::string Node::toString() const
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
-        tmpname = "#" + handle;
+        tmpname = "#" + _uuid;
     //activation here at 0: can be replace with LTI
     snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%s)",
              classserver().getTypeName(type).c_str(), tmpname.c_str(),
@@ -85,12 +87,4 @@ bool Node::operator!=(const Atom& other) const
 {
     return !(*this == other);
 }
-
-// XXX WTF it makes no sense to "clone" an atom!  That's fucking nuts, 
-// the concept is invalid!
-AtomPtr Node::clone() const
-{
-    return AtomPtr(new Node(*this));
-}
-
 

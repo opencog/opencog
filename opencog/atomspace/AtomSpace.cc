@@ -87,7 +87,7 @@ AtomSpace::AtomSpace(const AtomSpace& other)
 
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-void AtomSpace::setUpCaching() 
+void AtomSpace::setUpCaching()
 {
     // Initialise lru cache for getType
     __getType = new _getType(this);
@@ -174,7 +174,7 @@ void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
 
@@ -224,45 +224,9 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     return addNode(t, name, tvn);
 }
 
-Handle AtomSpace::addRealAtom(const Atom& atom, const TruthValue& tvn)
-{
-    DPRINTF("AtomSpace::addRealAtom\n");
-    const TruthValue& newTV = (tvn.isNullTv()) ? atom.getTruthValue() : tvn;
-    // Check if the given Atom reference is of an atom
-    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
-    // result to the correct/valid handle.
-    Handle result;
-    const Node *node = dynamic_cast<const Node *>(&atom);
-    if (node) {
-        result = getHandle(node->getType(), node->getName());
-        if (result == Handle::UNDEFINED) {
-            return addNode(node->getType(), node->getName(), newTV);
-        }
-    } else {
-        const Link *link = dynamic_cast<const Link *>(&atom);
-        result = getHandle(link->getType(), link->getOutgoingSet());
-        if (result == Handle::UNDEFINED) {
-            return addLink(link->getType(), link->getOutgoingSet(), newTV);
-        }
-    }
-    do_merge_tv(result,newTV);
-    // XXX TODO should also merge Attention values, and also trails, right?
-    return result;
-}
-
-AtomPtr AtomSpace::cloneAtom(const Handle& h) const
-{
-    return atomSpaceAsync->getAtom(h)->get_result();
-}
-
-bool AtomSpace::isValidHandle(const Handle& h) const 
+bool AtomSpace::isValidHandle(const Handle& h) const
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
-}
-
-bool AtomSpace::commitAtom(const Atom& a)
-{
-    return atomSpaceAsync->commitAtom(a)->get_result();
 }
 
 AttentionValue AtomSpace::getAV(Handle h) const

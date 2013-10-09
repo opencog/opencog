@@ -155,7 +155,7 @@ bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    AtomPtr a = as->cloneAtom(h);
+    AtomPtr a = as->getHandle(h);
     usleep(pushDelay);
     if (classserver().isA(a->getType(),NODE))
         return addVertex(h);
@@ -208,7 +208,7 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
             * multiplier;
     }
     ost << baseline + scaler;
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
     LinkPtr l(LinkCast(a));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -281,7 +281,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         }
     }
 
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
     LinkPtr l(LinkCast(a));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -349,7 +349,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
             if (space.getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
         }
         if (okToApply) {
-            AtomPtr a = space.cloneAtom(h);
+            AtomPtr a = space.getHandle(h);
             LinkPtr l(LinkCast(a));
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
@@ -368,7 +368,7 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     if (!isConnected()) return;
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        AtomPtr a = space.cloneAtom(h);
+        AtomPtr a = space.getHandle(h);
         if (!a) continue;
         LinkPtr l(LinkCast(a));
         if (l) {
@@ -387,7 +387,7 @@ bool Ubigrapher::addVertex(Handle h)
 	// if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
     bool isNode = classserver().isA(a->getType(),NODE);
 
     int id = (int)h.value();
@@ -435,7 +435,7 @@ bool Ubigrapher::addVertex(Handle h)
 bool Ubigrapher::addEdges(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
 
     usleep(pushDelay);
     LinkPtr l(LinkCast(a));
@@ -491,7 +491,7 @@ bool Ubigrapher::addEdges(Handle h)
 bool Ubigrapher::removeVertex(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
 
     if (compact)
     {
@@ -513,7 +513,7 @@ bool Ubigrapher::removeVertex(Handle h)
 bool Ubigrapher::removeEdges(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.cloneAtom(h);
+    AtomPtr a = space.getHandle(h);
 
     // This method is only relevant to binary Links with no incoming.
     // Any other atoms will be represented by vertexes, and the edges

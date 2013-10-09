@@ -554,8 +554,7 @@ int AtomStorage::get_height(AtomPtr atom)
 	for (int i=0; i<arity; i++)
 	{
 		Handle h = out[i];
-		AtomPtr a = TLB::getAtom(h);
-		int d = get_height(a);
+		int d = get_height(h);
 		if (maxd < d) maxd = d;
 	}
 	return maxd +1;
@@ -591,25 +590,24 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 void AtomStorage::storeAtom(AtomPtr atom)
 {
 	get_ids();
-	do_store_atom(atom, atom->getHandle());
+	do_store_atom(atom);
 }
 
 void AtomStorage::storeAtom(Handle h)
 {
 	get_ids();
-	AtomPtr atom = TLB::getAtom(h);
-	do_store_atom(atom, h);
+	do_store_atom(h);
 }
 
 /**
  * Returns the height of the atom.
  */
-int AtomStorage::do_store_atom(AtomPtr atom, Handle h)
+int AtomStorage::do_store_atom(AtomPtr atom)
 {
 	LinkPtr l(LinkCast(atom));
 	if (NULL == l)
 	{
-		do_store_single_atom(atom, h, 0);
+		do_store_single_atom(atom, 0);
 		return 0;
 	}
 
@@ -618,18 +616,15 @@ int AtomStorage::do_store_atom(AtomPtr atom, Handle h)
 	const HandleSeq& out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
 	{
-		Handle ho = out[i];
-		AtomPtr ao = TLB::getAtom(ho);
-
 		// Recurse.
-		int heig = do_store_atom(ao, ho);
+		int heig = do_store_atom(out[i]);
 		if (lheight < heig) lheight = heig;
 	}
 
 	// Height of this link is, by definition, one more than tallest
 	// atom in outgoing set.
 	lheight ++;
-	do_store_single_atom(atom, h, lheight);
+	do_store_single_atom(atom, lheight);
 	return lheight;
 }
 
@@ -641,12 +636,11 @@ int AtomStorage::do_store_atom(AtomPtr atom, Handle h)
 void AtomStorage::storeSingleAtom(AtomPtr atom)
 {
 	get_ids();
-	Handle h = atom->getHandle();
 	int height = get_height(atom);
-	do_store_single_atom(atom, h, height);
+	do_store_single_atom(atom, height);
 }
 
-void AtomStorage::do_store_single_atom(AtomPtr atom, Handle h, int aheight)
+void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 {
 	setup_typemap();
 
@@ -657,10 +651,11 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, Handle h, int aheight)
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
-	UUID uuid = h.value();
+	// UUID uuid = atom->_uuid;
+	UUID uuid = atom->getHandle().value();  // XXX cheesy hack, fixme
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = atomExists(h);
+	bool update = atomExists(atom->getHandle());
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -770,12 +765,12 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, Handle h, int aheight)
 	// outgoing set has been determined, it cannot be changed.
 	if (false == update)
 	{
-		storeOutgoing(atom, h);
+		storeOutgoing(atom);
 	}
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	local_id_cache.insert(h);
+	local_id_cache.insert(atom->getHandle());
 }
 
 /* ================================================================ */
@@ -1083,7 +1078,7 @@ LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 {
 	// Now that we know everything about an atom, actually construct one.
-	AtomPtr atom(TLB::getAtom(h));
+	AtomPtr atom(h);
 	Type realtype = loading_typemap[rp.itype];
 
 	if (NOTYPE == realtype)
@@ -1103,7 +1098,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		    ((-1 == rp.height) &&
 		      classserver().isA(realtype, NODE)))
 		{
-			atom = AtomPtr(new Node(realtype, rp.name));
+			atom = createNode(realtype, rp.name);
 		}
 		else
 		{
@@ -1119,12 +1114,13 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 				outvec.push_back(hout);
 			}
 #endif /* USE_INLINE_EDGES */
-			atom = AtomPtr(new Link(realtype, outvec));
+			atom = createLink(realtype, outvec);
 		}
 
 		// Make sure that the handle in the TLB is synced with
 		// the handle we use in the database.
-		TLB::addAtom(atom, h);
+		// TLB::addAtom(atom, h);
+// XXX FIXME borken
 	}
 	else
 	{
@@ -1272,7 +1268,7 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	table.foreachHandleByType(
-       [&](Handle h)->void { store_cb(table.getAtom(h)); }, ATOM, true);
+       [&](Handle h)->void { store_cb(h); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
 	// Create indexes

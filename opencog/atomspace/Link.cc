@@ -50,6 +50,12 @@ struct HandleComparison
 void Link::init(const std::vector<Handle>& outgoingVector)
 	throw (InvalidParamException)
 {
+    if (not classserver().isA(type, LINK)) {
+        throw InvalidParamException(TRACE_INFO,
+            "Link - Invalid node type '%d' %s.",
+            type, classserver().getTypeName(type).c_str());
+    }
+
     trail = new Trail();
     _outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing
@@ -78,11 +84,6 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-AtomPtr Link::getOutgoingAtom(Arity pos) const
-{
-    return TLB::getAtom(getOutgoingHandle(pos));
-}
-
 std::string Link::toShortString(void) const
 {
     std::stringstream answer;
@@ -97,7 +98,7 @@ std::string Link::toShortString(void) const
     for (Arity i = 0; i < arity; i++) {
         if (i > 0) answer << ",";
         if (atomTable) {
-            AtomPtr a(atomTable->getAtom(_outgoing[i]));
+            AtomPtr a(_outgoing[i]);
             if (classserver().isA(a->getType(), NODE))
                 answer << NodeCast(a)->getName();
             else 
@@ -141,16 +142,15 @@ std::string Link::toString(void) const
     answer += "<";
     for (int i = 0; i < getArity(); i++) {
         if (i > 0) answer += ",";
-        Handle h = _outgoing[i];
+        AtomPtr a(_outgoing[i]);
         if (atomTable) {
-            AtomPtr a(atomTable->getAtom(h));
             if (a) {
                 NodePtr nnn(NodeCast(a));
                 if (nnn) {
                     snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
                     answer += buf;
                     if (nnn->getName() == "")
-                        answer += "#" + h;
+                        answer += "#" + _outgoing[i];
                     else
                         answer += nnn->getName();
                     answer += "]";
@@ -160,12 +160,12 @@ std::string Link::toString(void) const
                 }
             } else {
                 logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
-                               h.value(), i);
+                               _outgoing[i].value(), i);
                 answer += "INVALID_HANDLE!";
             }
         } else {
             // No AtomTable connected so just print handles in outgoing set
-            answer += "#" + h;
+            answer += "#" + _outgoing[i];
         }
     }
     answer += ">]";
@@ -285,11 +285,4 @@ bool Link::operator!=(const Atom& other) const
 {
     return !(*this == other);
 }
-
-// This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
-AtomPtr Link::clone() const
-{
-    return AtomPtr(createLink(*this));
-}
-
 

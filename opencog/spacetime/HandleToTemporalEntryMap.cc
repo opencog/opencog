@@ -24,8 +24,8 @@
 
 #include "HandleToTemporalEntryMap.h"
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/HandleMap.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -104,7 +104,7 @@ std::string HandleToTemporalEntryMap::toString()
         Handle key = it->next();
         TemporalEntry* value = get(key);
         /* append key */
-        AtomPtr atom = TLB::getAtom(key);
+        AtomPtr atom(key);
         answer += atom->toShortString();
         answer += ":";
         /* append value */

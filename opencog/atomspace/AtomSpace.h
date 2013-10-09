@@ -52,9 +52,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-typedef boost::shared_ptr<TruthValue> TruthValuePtr;
-
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
  * provide standard functions that return results immediately.
@@ -163,25 +160,6 @@ public:
      * Return the number of atoms contained in the space.
      */
     inline int getSize() const { return atomSpaceAsync->getSize()->get_result(); }
-
-    /**
-     * DEPRECATED! Add an atom an optional TruthValue object to the Atom Table
-     * This is a deprecated function; do not use it in new code,
-     * if at all possible.
-     *
-     * @param atom the handle of the Atom to be added
-     * @param tvn the TruthValue object to be associated to the added
-     *        atom. NULL if the own atom's tv must be used.
-     * @return Handle referring to atom after it's been added.
-     * @deprecated This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink (which is a bit faster too) which is actually called
-     * internally by this wrapper.
-     */
-    Handle addRealAtom(const Atom& atom,
-                       const TruthValue& tvn = TruthValue::NULL_TV());
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -362,6 +340,13 @@ public:
     }
 
     /**
+     * Retrieve from the Atom Table the actual atom for this handle.
+    */
+    Handle getHandle(Handle h) const {
+        return atomSpaceAsync->getHandle(h)->get_result();
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
@@ -499,23 +484,6 @@ public:
     void setMean(Handle h, float mean) {
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
-
-    /** Clone an atom from the AtomSpace, replaces the public access to TLB::getAtom
-     * that many modules were doing.
-     * @param h Handle of atom to clone
-     * @return A smart pointer to the atom
-     * @note Any changes to the atom object must be committed using
-     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
-     * Otherwise changes are lost.
-     */
-    AtomPtr cloneAtom(const Handle& h) const;
-
-    /** Commit an atom that has been cloned from the AtomSpace.
-     *
-     * @param a Atom to commit
-     * @return whether the commit was successful
-     */
-    bool commitAtom(const Atom& a);
 
     bool isValidHandle(const Handle& h) const;
 
@@ -1150,7 +1118,7 @@ public:
         HandleSeq result;
         for (; begin != end; begin++) {
             //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
-            if ((*compare)(*cloneAtom(*begin))) {
+            if ((*compare)(*begin)) {
                 //std::cout << "passed! " <<  std::endl;
                 result.push_back(*begin);
             }
@@ -1170,7 +1138,7 @@ public:
 
     struct TruePredicate : public AtomPredicate {
         TruePredicate(){}
-        virtual bool test(const Atom& atom) { return true; }
+        virtual bool test(AtomPtr atom) { return true; }
     };
 
     template<typename InputIterator>
@@ -1182,8 +1150,8 @@ public:
     struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getSTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1191,8 +1159,8 @@ public:
     struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getLTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };

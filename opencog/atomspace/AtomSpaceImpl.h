@@ -30,7 +30,6 @@
 #include <set>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/AtomTable.h>
@@ -162,25 +161,6 @@ public:
                    const TruthValue& tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * DEPRECATED!
-     *
-     * Add an atom an optional TruthValue object to the Atom Table
-     * This is a deprecated function; do not use it in new code,
-     * if at all possible.
-     *
-     * @param atom the handle of the Atom to be added
-     * @param tvn the TruthValue object to be associated to the added
-     *        atom. NULL if the own atom's tv must be used.
-     * @deprecated This is a legacy code left-over from when one could
-     * have non-real atoms, i.e. those whose handles were
-     * less than 500, and indicated types, not atoms.
-     * Instead of using that method, one should use
-     * addNode or addLink (which is a bit faster too).
-     */
-    Handle addRealAtom(const Atom& atom,
-                       const TruthValue& tvn = TruthValue::NULL_TV());
-
-    /**
      * Removes an atom from the atomspace
      *
      * @param h The Handle of the atom to be removed.
@@ -201,7 +181,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const
-        { return atomTable.getHandle(str.c_str(), t); }
+        { return atomTable.getHandle(t, str); }
 
     /**
      * Retrieve from the Atom Table the Handle of a given link
@@ -214,6 +194,12 @@ public:
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const;
+
+    /** Retrieve the atom pointer of a given Handle */
+    Handle getHandle(Handle h) const
+    {
+        return atomTable.getHandle(h);
+    }
 
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const
@@ -248,8 +234,8 @@ public:
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const
     {
-        AtomPtr a(atomTable.getAtom(h));
-        if (a) return a->getType();
+        h = atomTable.getHandle(h);
+        if (h) return h->getType();
         else return NOTYPE;
     }
 
@@ -318,98 +304,62 @@ public:
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
-        return bank.getAV(atomTable.getAtom(h));
+        h = atomTable.getHandle(h);
+        return bank.getAV(h);
     }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle h, const AttentionValue &av) {
-        bank.setAV(atomTable.getAtom(h), av);
+        h = atomTable.getHandle(h);
+        bank.setAV(h, av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        bank.setSTI(atomTable.getAtom(h), stiValue);
+        h = atomTable.getHandle(h);
+        bank.setSTI(h, stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        bank.setLTI(atomTable.getAtom(h), ltiValue);
+        h = atomTable.getHandle(h);
+        bank.setLTI(h, ltiValue);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
     void incVLTI(Handle h) {
-        bank.incVLTI(atomTable.getAtom(h));
+        h = atomTable.getHandle(h);
+        bank.incVLTI(h);
     }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {
-        bank.decVLTI(atomTable.getAtom(h));
+        h = atomTable.getHandle(h);
+        bank.decVLTI(h);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return bank.getSTI(atomTable.getAtom(h));
-    }
-
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given Handle. STI above and below threshold normalised separately
-     * and linearly.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between -1..1
-     */
-    float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedSTI(atomTable.getAtom(h), average, clip);
-    }
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given Handle.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between 0..1
-     */
-    float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getNormalisedZeroToOneSTI(atomTable.getAtom(h), average, clip);
+        h = atomTable.getHandle(h);
+        return bank.getSTI(h);
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return bank.getLTI(atomTable.getAtom(h));
+        h = atomTable.getHandle(h);
+        return bank.getLTI(h);
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return bank.getVLTI(atomTable.getAtom(h));
+        h = atomTable.getHandle(h);
+        return bank.getVLTI(h);
     }
 
-    /** Clone an atom from the AtomSpace.
-     * Threads outside of the AtomSpace thread can safely use this pointer and modify
-     * the atom.
-     * @param h Handle of atom to clone
-     * @return A smart pointer to the atom
-     * @note Any changes to the atom object must be committed using
-     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
-     * Otherwise changes are lost.
-     */
-    AtomPtr cloneAtom(Handle h) const;
-
-    /** Commit an atom that has been cloned from the AtomSpace.
-     *
-     * @param a Atom to commit
-     * @return whether the commit was successful
-     */
-    bool commitAtom(AtomPtr a);
-
-    bool isValidHandle(Handle h) const
-        { return atomTable.holds(h); }
+    bool isValidHandle(Handle h) const {
+        h = atomTable.getHandle(h);
+        return atomTable.holds(h);
+    }
 
     /**
      * Returns neighboring atoms, following links and returning their
@@ -885,8 +835,8 @@ public:
         const AtomTable* table;
         compareAtom(const AtomTable* _table, Compare* _c) : c(_c), table(_table) {}
 
-        bool operator()(const Handle& h1,const Handle& h2) {
-            return (*c)(*table->getAtom(h1),*table->getAtom(h2));
+        bool operator()(const Handle& h1, const Handle& h2) {
+            return (*c)(h1, h2);
         }
     };
 
@@ -897,7 +847,7 @@ public:
         filterAtom(const AtomTable* _table, Compare *_c) : c(_c), table(_table) {}
 
         bool operator()(const Handle& h1) {
-            return (*c)(*table->getAtom(h1));
+            return (*c)(h1);
         }
     };
 
@@ -1001,8 +951,8 @@ public:
     struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& a) {
-            return a.getAttentionValue().getSTI() > threshold;
+        virtual bool test(AtomPtr a) {
+            return a->getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1010,17 +960,11 @@ public:
     struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& a) {
-            return a.getAttentionValue().getLTI() > threshold;
+        virtual bool test(AtomPtr a) {
+            return a->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
-
-    // AtomSpaceRequests are not allowed to access the TLB, but they may get
-    // references to specific atoms.
-    inline const Atom& getAtom(Handle h) {
-        return *atomTable.getAtom(h);
-    }
 
 private:
 

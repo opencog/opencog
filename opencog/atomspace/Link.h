@@ -33,9 +33,9 @@
 #include "ProtocolBufferSerializer.h"
 #endif
 
-class HandleEntry;
 namespace opencog
 {
+class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -50,8 +50,7 @@ namespace opencog
  */
 class Link : public Atom
 {
-    friend class SavingLoading;  // needs access to setOutgoingSet()
-    friend class AtomSpaceImpl;  // needs acces to clone()
+    friend class AtomTable;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -63,31 +62,13 @@ private:
 #endif
     void init(const HandleSeq&) throw (InvalidParamException);
 
-    /**
-     * @todo cloning atoms is a fundamental violation of the architecture.
-     * this method should be removed.
-     */
-    virtual AtomPtr clone() const;
-
 protected:
 
-    //! Array that does not change during atom lifespan.
-    // Should be const, but we need to fix the initializers to get this correct.
-    // const HandleSeq _outgoing;
+    //! Array holding actual outgoing set of the link.
+    //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
 public:
-    /**
-     * Returns a specific atom in the outgoing set (using the connected
-     * AtomTable).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set. NULL if no AtomTable is
-     * connected.
-     */
-    AtomPtr getOutgoingAtom(Arity pos) const;
-
-
     /**
      * Constructor for this class.
      *
@@ -105,7 +86,7 @@ public:
     }
 
     Link(Type t, Handle& h,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -114,7 +95,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -124,7 +105,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -134,7 +115,7 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         const TruthValue& tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -177,7 +158,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingHandle(Arity pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
     {
         // Checks for a valid position
         if (pos < getArity()) {
@@ -303,7 +284,7 @@ public:
     virtual bool operator!=(const Atom&) const;
 };
 
-// XXX temporary hack ... 
+// XXX temporary hack ...
 #define createLink std::make_shared<Link>
 
 /** @}*/

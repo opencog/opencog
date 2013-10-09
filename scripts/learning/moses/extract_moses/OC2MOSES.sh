@@ -59,7 +59,7 @@ cp "$OC_PATH/CMakeLists.txt" "$ABS_MOSES_DIR/CMakeLists.txt.orig"
 cp "$OC_PATH/lib/Summary.cmake" "$ABS_MOSES_DIR/lib"
 
 # libUtil
-UTIL_FILES=(algorithm.h based_variant.h concurrent_queue.h Config.cc Config.h Counter.h digraph.h dorepeat.h exceptions.cc exceptions.h foreach.h functional.h hashing.h iostreamContainer.h KLD.h lazy_normal_selector.cc lazy_normal_selector.h lazy_random_selector.cc lazy_random_selector.h lazy_selector.cc lazy_selector.h Logger.cc Logger.h log_prog_name.h log_prog_name.cc lru_cache.h MannWhitneyU.h mt19937ar.cc mt19937ar.h numeric.h oc_assert.cc oc_assert.h oc_omp.cc oc_omp.h platform.cc platform.h pool.h RandGen.h random.h ranking.h selection.h tree.cc tree.h comprehension.h)
+UTIL_FILES=(algorithm.h based_variant.h concurrent_queue.h Config.cc Config.h Counter.h digraph.h dorepeat.h exceptions.cc exceptions.h foreach.h functional.h hashing.h iostreamContainer.h KLD.h lazy_normal_selector.cc lazy_normal_selector.h lazy_random_selector.cc lazy_random_selector.h lazy_selector.cc lazy_selector.h Logger.cc Logger.h log_prog_name.h log_prog_name.cc lru_cache.h macros.h MannWhitneyU.h mt19937ar.cc mt19937ar.h numeric.h oc_assert.cc oc_assert.h oc_omp.cc oc_omp.h platform.cc platform.h pool.h RandGen.h random.h ranking.h selection.h tree.cc tree.h comprehension.h)
 # copy all files but replace all instances of opencog by moses
 for f in ${UTIL_FILES[@]}; do
     sed s/opencog/"$PROJECT"/g "$OC_PATH"/opencog/util/$f > "$ABS_MOSES_DIR/$PROJECT/util/$f"
@@ -159,7 +159,7 @@ echo "ADD_SUBDIRECTORY(feature-selection)" >> "$ABS_MOSES_DIR/$PROJECT/learning/
 
 # ----------
 # util CMakeLists.txt
-echo "ADD_LIBRARY(cogutil STATIC algorithm based_variant digraph dorepeat exceptions functional.h iostreamContainer lazy_normal_selector lazy_random_selector lazy_selector random oc_assert Config Logger log_prog_name lru_cache mt19937ar platform tree oc_omp Counter KLD MannWhitneyU ranking)" > "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
+echo "ADD_LIBRARY(cogutil STATIC algorithm based_variant digraph dorepeat exceptions functional.h iostreamContainer lazy_normal_selector lazy_random_selector lazy_selector random oc_assert Config Logger log_prog_name lru_cache macros mt19937ar platform tree oc_omp Counter KLD MannWhitneyU ranking)" > "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
 echo "TARGET_LINK_LIBRARIES(cogutil \${Boost_FILESYSTEM_LIBRARY} \${Boost_SYSTEM_LIBRARY} \${Boost_REGEX_LIBRARY} \${Boost_THREAD_LIBRARY})" >> "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
 echo "INSTALL(FILES ${UTIL_FILES[@]} DESTINATION \"include/\${PROJECT_NAME}/util\")" >> "$ABS_MOSES_DIR/$PROJECT/util/CMakeLists.txt"
 

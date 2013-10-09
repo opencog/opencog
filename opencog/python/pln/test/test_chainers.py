@@ -6,7 +6,7 @@ from opencog.atomspace import AtomSpace, types, Atom
 from pln.chainers import Chainer, get_attentional_focus
 
 
-class BackwardChainerTest(TestCase):
+class ForwardChainerTest(TestCase):
 
     def setUp(self):
         self.atomspace = AtomSpace()
