@@ -562,6 +562,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
 {
     AtomPtrSet result;
 
+    handle = getHandle(handle);
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
