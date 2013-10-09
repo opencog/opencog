@@ -40,7 +40,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
@@ -162,7 +161,7 @@ public:
             int matchCount = 0;
             while (indexedHandles != NULL) {
                 matchCount++;
-                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, indexedHandles->handle->getType());
                 indexedHandles = indexedHandles->next;
             }
             //logger().debug("\ncount = %d, expected count = %d", matchCount, numberOfExpectedMatches[index]);
@@ -179,7 +178,7 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("%p (%d)\t", indexedHandles->handle, TLB::getAtom(indexedHandles->handle)->getType());
+                //logger().debug("%p (%d)\t", indexedHandles->handle, indexedHandles->handle->getType());
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
             }
@@ -194,7 +193,7 @@ public:
             while (expectedEntry != NULL) {
                 if (count < numberOfExpectedMatchesWithVH1[index]) {
                     //logger().debug("adding versioned tv with VH1");
-                    AtomPtr atom(TLB::getAtom(expectedEntry->handle));
+                    AtomPtr atom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
@@ -202,7 +201,7 @@ public:
                 }
                 if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
                     //logger().debug("adding versioned tv with VH2");
-                    AtomPtr atom(TLB::getAtom(expectedEntry->handle));
+                    AtomPtr atom(expectedEntry->handle);
                     TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
                     atom->setTruthValue(*tv);
                     delete tv;
@@ -223,8 +222,8 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue().toString().c_str());
-                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue().toString().c_str());
+                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -255,8 +254,8 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", TLB::getAtom(indexedHandles->handle)->getTruthValue()->toString().c_str());
-                TS_ASSERT(TLB::getAtom(indexedHandles->handle)->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue()->toString().c_str());
+                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -317,30 +316,31 @@ public:
 
         //== getHandleSet(Handle*, Type*, bool*, Arity, Type = ATOM, bool = true) ==/
         std::vector<Handle> handles1(2);
-        handles1[0] = table->getHandle("00065349", CONCEPT_NODE);
-        handles1[1] = table->getHandle("12", NUMBER_NODE);
+#define getHandlex(N,T) getHandle(T,N)
+        handles1[0] = table->getHandlex("00065349", CONCEPT_NODE);
+        handles1[1] = table->getHandlex("12", NUMBER_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles1, types1, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles2(2);
-        handles2[0] = table->getHandle("12", NUMBER_NODE);
-        handles2[1] = table->getHandle("00065349", CONCEPT_NODE);
+        handles2[0] = table->getHandlex("12", NUMBER_NODE);
+        handles2[1] = table->getHandlex("00065349", CONCEPT_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles2, types2, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
         //logger().debug("result = %s", result->toString().c_str());
 
         std::vector<Handle> handles3(2);
         handles3[0] = Handle::UNDEFINED;
-        handles3[1] = table->getHandle("12", NUMBER_NODE);
+        handles3[1] = table->getHandlex("12", NUMBER_NODE);
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles3, types3, NULL, 2, LIST_LINK, false));
         TS_ASSERT(result);
         //logger().debug("result = %s", result->toString().c_str());
         delete(result);
 
         std::vector<Handle> handles4(2);
-        handles4[0] = table->getHandle("12", NUMBER_NODE);
+        handles4[0] = table->getHandlex("12", NUMBER_NODE);
         handles4[1] = Handle::UNDEFINED;
         result = HandleEntry::fromHandleSet(table->getHandlesByOutgoing(handles4, types4, NULL, 2, LIST_LINK, false));
         TS_ASSERT(!result);
@@ -435,11 +435,11 @@ public:
         AtomTable atomTable;
 
         /* add a simple set of links & nodes */
-        NodePtr wordNode(new Node(NUMBER_NODE, "1"));
+        NodePtr wordNode(createNode(NUMBER_NODE, "1"));
         wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) - 10));
         Handle wnHandle = atomTable.add(wordNode);
 
-        NodePtr senseNode(new Node(CONCEPT_NODE, "28675194"));
+        NodePtr senseNode(createNode(CONCEPT_NODE, "28675194"));
         senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) 30));
         Handle snHandle = atomTable.add(senseNode);
 
@@ -455,17 +455,17 @@ public:
             atomTable.decayShortTermImportance();
 
         // test the updated STIs
-        TS_ASSERT(TLB::getAtom(wnHandle)->getAttentionValue().getSTI()   == -20);
-        TS_ASSERT(TLB::getAtom(snHandle)->getAttentionValue().getSTI()   ==  20);
-        TS_ASSERT(TLB::getAtom(linkHandle)->getAttentionValue().getSTI() == 490);
+        TS_ASSERT(wnHandle->getAttentionValue().getSTI()   == -20);
+        TS_ASSERT(snHandle->getAttentionValue().getSTI()   ==  20);
+        TS_ASSERT(linkHandle->getAttentionValue().getSTI() == 490);
     }
 
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
     void testDoubleLink() {
         AtomTable atomTable;
-        NodePtr n1(new Node(NUMBER_NODE, "1"));
-        NodePtr n2(new Node(NUMBER_NODE, "2"));
+        NodePtr n1(createNode(NUMBER_NODE, "1"));
+        NodePtr n2(createNode(NUMBER_NODE, "2"));
         Handle hn1 = atomTable.add(n1);
         Handle hn2 = atomTable.add(n2);
 
@@ -479,19 +479,19 @@ public:
     void testMerge() {
         AtomTable atomTable;
 
-        NodePtr n1(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f)));
+        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f)));
         Handle hn1 = atomTable.add(n1);
 
-        NodePtr n2(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f)));
+        NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
 
-        NodePtr n3(new Node(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
+        NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
 
-        Handle h = atomTable.getHandle("1", NUMBER_NODE);
+        Handle h = atomTable.getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
-        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getMean(), 0.3f, 0.000001);
-        TS_ASSERT_DELTA(TLB::getAtom(h)->getTruthValue().getCount(), 0.4f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue().getMean(), 0.3f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue().getCount(), 0.4f, 0.000001);
     }
 
     void testSimpleWithCustomAtomTypes() {
@@ -510,8 +510,8 @@ public:
         LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);
         Handle lh = atomTable.add(lp);
 
-        TS_ASSERT(atomTable.getHandle("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(atomTable.getHandle("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(atomTable.getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
         TS_ASSERT(atomTable.getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
     }
 };

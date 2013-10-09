@@ -76,10 +76,9 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
             UnorderedHandleSet::iterator hit;
             for (hit = band.begin(); hit != band.end(); ++hit) {
                 Handle h = *hit;
-                AtomPtr atom(atomtable->getAtom(h));
 
-                atom->attentionValue.decaySTI();
-                unsigned int newbin = importanceBin(atom->attentionValue.getSTI());
+                h->attentionValue.decaySTI();
+                unsigned int newbin = importanceBin(h->attentionValue.getSTI());
                 if (newbin != bin) {
                     insert(newbin, h);
                     move_it.insert(h);
@@ -101,8 +100,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
         UnorderedHandleSet & band = idx[1];
         for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
             Handle h = *hit;
-            AtomPtr atom(atomtable->getAtom(h));
-            atom->attentionValue.decaySTI();
+            h->attentionValue.decaySTI();
         }
         idx[0].insert(idx[1].begin(), idx[1].end());
         for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
@@ -111,8 +109,7 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
             UnorderedHandleSet & band = idx[bin];
             for (UnorderedHandleSet::iterator hit = band.begin(); hit != band.end(); hit++) {
                 Handle h = *hit;
-                AtomPtr atom(atomtable->getAtom(h));
-                atom->attentionValue.decaySTI();
+                h->attentionValue.decaySTI();
             }
         }
         idx[bin].clear();
@@ -126,10 +123,9 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
 		UnorderedHandleSet::iterator hit;
 		UnorderedHandleSet& band = idx[bin];
 		for (hit = band.begin(); hit != band.end(); ++hit) {
-			AtomPtr atom(atomtable->getAtom(*hit));
 
 			// Remove it if too old.
-			if (isOld(atom,minSTI)) {
+			if (isOld(*hit, minSTI)) {
 				UnorderedHandleSet un = extractOld(atomtable, minSTI, *hit, true);
             oldAtoms.insert(un.begin(), un.end());
          }
@@ -151,10 +147,9 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
                                          Handle handle, bool recursive)
 {
    UnorderedHandleSet result;
-	AtomPtr atom(atomtable->getAtom(handle));
 
-	if (atom->getFlag(REMOVED_BY_DECAY)) return result;
-	else atom->setFlag(REMOVED_BY_DECAY, true);
+	if (handle->getFlag(REMOVED_BY_DECAY)) return result;
+	else handle->setFlag(REMOVED_BY_DECAY, true);
 
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
@@ -163,7 +158,7 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 		for (UnorderedHandleSet::const_iterator it = iset.begin();
 		     it != iset.end(); it++)
 		{
-			AtomPtr a(atomtable->getAtom(*it));
+			AtomPtr a(*it);
 
 			// XXX a should never be NULL; however, someone somewhere is
 			// removing atoms from the TLB, although they forgot to remove
@@ -183,14 +178,14 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 	for (UnorderedHandleSet::const_iterator it = iset.begin();
 	        it != iset.end(); it++)
 	{
-		AtomPtr a(atomtable->getAtom(*it));
+		AtomPtr a(*it);
 		// XXX a should never be NULL; however, someone somewhere is
 		// removing atoms from the TLB, although they forgot to remove
 		// them from the atomTable, and so they are still showing up
 		// i the incoming set. XXX TODO uncomment the assert below.
 		// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
 		if (a and a->getFlag(REMOVED_BY_DECAY) == false) {
-			atom->setFlag(REMOVED_BY_DECAY, false);
+			handle->setFlag(REMOVED_BY_DECAY, false);
 			return result;
 		}
 	}
@@ -219,7 +214,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	std::copy_if(sl.begin(), sl.end(), inserter(set),
 		[&](Handle h)->bool {
 			AttentionValue::sti_t sti = 
-				atomtable->getAtom(h)->getAttentionValue().getSTI();
+				h->getAttentionValue().getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
 		});
   
@@ -240,8 +235,7 @@ UnorderedHandleSet ImportanceIndex::getHandleSet(
 	const UnorderedHandleSet &uset = idx[upperBin];
 	std::copy_if(uset.begin(), uset.end(), inserter(set),
 		[&](Handle h)->bool {
-			AttentionValue::sti_t sti = 
-				atomtable->getAtom(h)->getAttentionValue().getSTI();
+			AttentionValue::sti_t sti = h->getAttentionValue().getSTI();
 			return (lowerBound <= sti and sti <= upperBound);
 		});
 

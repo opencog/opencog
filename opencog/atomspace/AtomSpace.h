@@ -52,9 +52,6 @@ namespace opencog
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-typedef boost::shared_ptr<TruthValue> TruthValuePtr;
-
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
  * provide standard functions that return results immediately.
@@ -343,6 +340,13 @@ public:
     }
 
     /**
+     * Retrieve from the Atom Table the actual atom for this handle.
+    */
+    Handle getHandle(Handle h) const {
+        return atomSpaceAsync->getHandle(h)->get_result();
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
@@ -480,23 +484,6 @@ public:
     void setMean(Handle h, float mean) {
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
-
-    /** Clone an atom from the AtomSpace, replaces the public access to TLB::getAtom
-     * that many modules were doing.
-     * @param h Handle of atom to clone
-     * @return A smart pointer to the atom
-     * @note Any changes to the atom object must be committed using
-     * AtomSpace::commitAtom for them to be merged with the AtomSpace.
-     * Otherwise changes are lost.
-     */
-    AtomPtr cloneAtom(const Handle& h) const;
-
-    /** Commit an atom that has been cloned from the AtomSpace.
-     *
-     * @param a Atom to commit
-     * @return whether the commit was successful
-     */
-    bool commitAtom(const AtomPtr a);
 
     bool isValidHandle(const Handle& h) const;
 
@@ -1131,7 +1118,7 @@ public:
         HandleSeq result;
         for (; begin != end; begin++) {
             //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
-            if ((*compare)(*cloneAtom(*begin))) {
+            if ((*compare)(*begin)) {
                 //std::cout << "passed! " <<  std::endl;
                 result.push_back(*begin);
             }
@@ -1151,7 +1138,7 @@ public:
 
     struct TruePredicate : public AtomPredicate {
         TruePredicate(){}
-        virtual bool test(const Atom& atom) { return true; }
+        virtual bool test(AtomPtr atom) { return true; }
     };
 
     template<typename InputIterator>
@@ -1163,8 +1150,8 @@ public:
     struct STIAboveThreshold : public AtomPredicate {
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getSTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1172,8 +1159,8 @@ public:
     struct LTIAboveThreshold : public AtomPredicate {
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
-        virtual bool test(const Atom& atom) {
-            return atom.getAttentionValue().getLTI() > threshold;
+        virtual bool test(AtomPtr atom) {
+            return atom->getAttentionValue().getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };

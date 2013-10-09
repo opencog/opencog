@@ -25,7 +25,6 @@
 #include "HandleTemporalPair.h"
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -55,9 +54,8 @@ Temporal* HandleTemporalPair::getTemporal() const
 
 std::string HandleTemporalPair::toString() const
 {
-    AtomPtr atom = TLB::getAtom(handle);
     std::string  answer;
-    answer += "(" + atom->toShortString() + "," + time->toString() + ")";
+    answer += "(" + handle->toShortString() + "," + time->toString() + ")";
     return answer;
 }
 

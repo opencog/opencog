@@ -33,9 +33,9 @@
 #include "ProtocolBufferSerializer.h"
 #endif
 
-class HandleEntry;
 namespace opencog
 {
+class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -50,6 +50,7 @@ namespace opencog
  */
 class Link : public Atom
 {
+    friend class AtomTable;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -63,23 +64,11 @@ private:
 
 protected:
 
-    //! Array that does not change during atom lifespan.
-    // Should be const, but we need to fix the initializers to get this correct.
-    // const HandleSeq _outgoing;
+    //! Array holding actual outgoing set of the link.
+    //! Should not change during atom lifespan.
     HandleSeq _outgoing;
 
 public:
-    /**
-     * Returns a specific atom in the outgoing set (using the connected
-     * AtomTable).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set. NULL if no AtomTable is
-     * connected.
-     */
-    AtomPtr getOutgoingAtom(Arity pos) const;
-
-
     /**
      * Constructor for this class.
      *
@@ -169,7 +158,7 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingHandle(Arity pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
     {
         // Checks for a valid position
         if (pos < getArity()) {

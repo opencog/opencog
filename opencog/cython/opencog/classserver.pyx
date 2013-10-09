@@ -9,7 +9,7 @@ cdef c_get_type_name(Type t):
     cdef string s
     s = classserver().getTypeName(t)
 
-    if s.__eq__(string("*** Unknown Type! ***")) :
+    if str("*** Unknown Type! ***") == str(s) :
         s = ""
     return s.c_str()
 

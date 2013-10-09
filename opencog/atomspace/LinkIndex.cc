@@ -22,7 +22,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
 //#define DPRINTF printf
@@ -94,7 +93,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
                         "Index out of bounds for atom type (s = %lu)", s);
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);
-				if (TLB::isValidHandle(h))
+				if (Handle::UNDEFINED != h)
 					hs.insert(h);
 			}
 		}

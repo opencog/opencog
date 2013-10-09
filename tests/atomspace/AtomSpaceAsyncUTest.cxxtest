@@ -30,7 +30,6 @@
 #include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/mt19937ar.h>
