@@ -27,6 +27,7 @@
 
 #include <condition_variable>
 #include <deque>
+#include <exception>
 #include <mutex>
 
 /** \addtogroup grp_cogutil
@@ -45,7 +46,10 @@ private:
 
 public:
     concurrent_queue() : the_queue(), the_mutex(), the_condition_variable(), is_canceled(false) {}
-    struct Canceled{};
+    struct Canceled : public std::exception
+    {
+        const char * what() { return "Cancellation of wait on concurrent_queue"; }
+    };
     void push(Data const& data)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
