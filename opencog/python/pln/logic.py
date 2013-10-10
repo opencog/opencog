@@ -100,15 +100,17 @@ class Logic(object):
             elif len(x.out) != len(y.out):    
                 return None
             else:
-                return self._unify_outgoing(x.out, y.out, substitution)
+                return self._unify_outgoing(x, y, substitution)
         else:
             return None
 
     def _unify_outgoing(self, x, y, substitution):
+        assert isinstance(x, Atom)
+        assert isinstance(y, Atom)
         if x.is_a(types.OrderedLink):
-            return self._unify_outgoing_ordered(x, y, substitution)
+            return self._unify_outgoing_ordered(x.out, y.out, substitution)
         else:
-            return self._unify_outgoing_unordered(x, y, substitution)
+            return self._unify_outgoing_unordered(x.out, y.out, substitution)
 
     def _unify_outgoing_ordered(self, x, y, substitution):
         # Try to unify the first argument of x with the first argument of y, then recursively
@@ -117,7 +119,7 @@ class Logic(object):
             return substitution
         else:
             s_one_arg = self.unify(x[0], y[0], substitution)
-            return self._unify_outgoing(x[1:], y[1:], s_one_arg)
+            return self._unify_outgoing_ordered(x[1:], y[1:], s_one_arg)
 
     def _unify_outgoing_unordered(self, x, y, substitution):
         # A simple way to unify two UnorderedLinks

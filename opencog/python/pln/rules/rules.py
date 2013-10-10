@@ -142,12 +142,12 @@ def InheritanceRule(Rule):
 def SimilarityRule(Rule):
     '''SimilarityLink A B
        |A and B| / |A or B|'''
-    def __init__(self,
-        outputs= [chainer.link(types.SimilarityLink, [A, B])],
-        inputs=  [chainer.link(types.AndLink, [A, B]),
-                  chainer.link(types.OrLink, [A, B])],
-        formula= formulas.extensionalSimilarityFormula)
-                
+    def __init__(self, chainer):
+        Rule.__init__(self,
+            outputs= [chainer.link(types.SimilarityLink, [A, B])],
+            inputs=  [chainer.link(types.AndLink, [A, B]),
+                      chainer.link(types.OrLink, [A, B])],
+            formula= formulas.extensionalSimilarityFormula)
 
 # Boolean link creation Rules
 # An EliminationRule uses a logical link to produce its arguments
@@ -279,7 +279,7 @@ class SubsetEvaluationRule(MembershipBasedEvaluationRule):
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer,
             member_type = types.MemberLink,
-            output_type=types.SubsetLink
+            output_type=types.SubsetLink,
             formula=formulas.subsetEvaluationFormula)
 
 class InheritanceEvaluationRule(MembershipBasedEvaluationRule):

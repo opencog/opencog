@@ -148,7 +148,7 @@ class InferenceHistoryIndex(object):
         if inputs in input_tuple_set:
             return False
         else:
-            input_tuple_set.insert(inputs)
+            input_tuple_set.add(inputs)
 
     def lookup_all_applications(self, rule, outputs):
         try:
@@ -244,7 +244,7 @@ class Chainer(AbstractChainer):
         if hasattr(rule, 'custom_compute'):
             (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
-        elife hasattr(rule, 'temporal_compute'):
+        elif hasattr(rule, 'temporal_compute'):
             # All inputs ever, and then use the special temporal computation instead of revision.
             all_input_tuples = self.history.lookup_all_applications(rule, specific_outputs)
             (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)

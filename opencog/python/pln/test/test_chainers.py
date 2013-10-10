@@ -26,21 +26,16 @@ class ForwardChainerTest(TestCase):
 
     def test__selectOne(self):
         atoms = self._simple_atoms_1()
-        atoms[0].av = {'sti': 1}
 
         atom = self.chainer._selectOne(atoms)
         self.assertNotEquals(atom, None)
         self.assertEqual(atom, atoms[0])
-
-        atoms[1].av = {'sti': 1}
-        atoms[2].av = {'sti': 1}
 
         atom = self.chainer._selectOne(atoms)
         self.assertTrue(atom in atoms)
 
     def test_get_attentional_focus(self):
         atoms = self._simple_atoms_1()
-        atoms[2].av = {'sti': 1}
 
         print atoms[2]
 
@@ -50,16 +45,11 @@ class ForwardChainerTest(TestCase):
 
     def test__select_one_matching(self):
         atoms = self._simple_atoms_1()
-        atoms[2].av = {'sti': 1}
 
         template = atoms[2]
 
         result = self.chainer._select_one_matching(template)
         self.assertEqual( result, atoms[2] )
-
-        
-
-        atoms[0].av = {'sti': 1}
 
         print get_attentional_focus(self.atomspace)
 
@@ -87,7 +77,6 @@ class ForwardChainerTest(TestCase):
         self.assertEquals( outputs, [] )
 
         # [animal] => []
-        atoms[0].av = {'sti': 1}
 
         generic_inputs = [atoms[0]]
         generic_outputs = []
