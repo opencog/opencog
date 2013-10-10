@@ -26,6 +26,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+
+#include <opencog/util/functional.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
@@ -58,13 +61,13 @@ void PredicateIndex::removeAtom(AtomPtr atom)
 {
 	Handle h = atom->getHandle();
 	// Erase the handle from each set ... there is a set per index.
-	std::vector<UnorderedHandleSet>::iterator s;
+	std::vector<UnorderedUUIDSet>::iterator s;
 	for (s = idx.begin(); s != idx.end(); ++s) {
-		s->erase(h);
+		s->erase(h.value());
 	}
 }
 
-const UnorderedHandleSet& PredicateIndex::getHandleSet(int index) const
+const UnorderedUUIDSet& PredicateIndex::getHandleSet(int index) const
 {
 	return idx.at(index);
 }
@@ -138,7 +141,7 @@ PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) cons
  * @param VersionHandle for filtering the resulting atoms by
  *       context. NULL_VERSION_HANDLE indicates no filtering
  **/
-const UnorderedHandleSet& PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
+UnorderedHandleSet PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
 {
 	static UnorderedHandleSet emptySet;
 	if (Handle::UNDEFINED == gpnHandle) return emptySet;
@@ -147,7 +150,11 @@ const UnorderedHandleSet& PredicateIndex::findHandlesByGPN(Handle gpnHandle) con
 	it = predicateHandles2Indices.find(gpnHandle);
 	if (it == predicateHandles2Indices.end()) return emptySet;
 
-	return getHandleSet(it->second);
+	UnorderedUUIDSet set = getHandleSet(it->second);
+   UnorderedHandleSet ret;
+	std::transform(set.begin(), set.end(), inserter(ret),
+		[](UUID uuid)->Handle { return Handle(uuid); });
+	return ret;
 }
 
 // ================================================================

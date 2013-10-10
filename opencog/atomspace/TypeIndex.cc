@@ -103,7 +103,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 Handle TypeIndex::iterator::operator*(void)
 {
 	if (s == send) return Handle::UNDEFINED;
-	return *se;
+	return Handle(*se);
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

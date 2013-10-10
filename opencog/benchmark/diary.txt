@@ -246,7 +246,7 @@ HandleEntry is now extinct.  The nature of the benchmark changed
 as well: instead of creating 65536 atoms initially, the new bnechmark
 creates 256K atoms: four times more than before. This has an overall
 negative impact on addLink, getHandleSet and getNodeHandles.  However,
-the new size is more realistic, so the actuall perf is more realistic
+the new size is more realistic, so the actual perf is more realistic
 too.
 
 Added a no-op test. The no-op makes no calls to the atom-anything at
@@ -324,8 +324,8 @@ Remeasure, just for grins. Not expecting any change from above; hardware
 is the same, compiler is gcc-4.7.4 instead of gcc 4.6.2 as above.
 
 Surprisingly, there is a 20%-40% drop for addNode, addLink !!
-Performance of getHandleSet halved!
-Performance of getNodeHandles is 5x faster!
+Performance of getHandleSet halved!          Is this a compiler thing???
+Performance of getNodeHandles is 5x faster!  Is this a compiler thing???
 I think this change is compiler-related.
 
 
@@ -350,20 +350,26 @@ Remeasure. This is after removing most of the TLB, and using
 std::shared_ptr atoms and handles.  This is a rather large
 change, and I expect performance to be slightly degraded
 (other changes needed for perf improvement haven't yet done).
+The slowdown compared to above is almost surely due to the
+more complex form that Handle now has, resulting in more copying.
+(results in first column).
 
 
-   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   test           AtomTable     AtomTable II
    name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
-   ----           ---------    -------------    ---------   ---------
-  noop            10000       
-  addNode           208         
-  addLink            60.6
-  getType          5000       
-  getTV             909      
-  setTV             769
-  getHandleSet        0.195  
-  getNodeHandles     83.3
-  getOutgoingSet    625
-  getIncomingSet   5000   
+   ----           ---------     ----------      ---------   ---------
+  noop            10000          3333
+  addNode           208           238
+  addLink            60.6          58.8
+  getType          5000           833
+  getTV             909          1000
+  setTV             769           588
+  getHandleSet        0.195         0.438
+  getNodeHandles     83.3          91.7
+  getOutgoingSet    625           833
+  getIncomingSet   5000           769
+
+
+The second column replaces Handle by UUID in the TypeIndex.
 
 

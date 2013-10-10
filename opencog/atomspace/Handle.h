@@ -41,6 +41,7 @@ namespace opencog
 
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
+typedef std::unordered_set<UUID> UnorderedUUIDSet;
 
 
 //! contains an unique identificator
