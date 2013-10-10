@@ -14,22 +14,17 @@
 
 namespace opencog {
 
-class AtomSpace;
-
 class ParseRank
 {
 	private:
 		Handle top;
 		double top_rank;
 		bool lookat_parse(Handle);
-        AtomSpace* as;
 
 	public:
 		ParseRank(void);
 		~ParseRank();
-        void set_atom_space(AtomSpace* _as) { as = _as; }
 		Handle get_top_ranked_parse(Handle);
-
 };
 
 } // namespace opencog
