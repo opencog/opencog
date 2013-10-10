@@ -473,6 +473,30 @@ class Chainer(AbstractChainer):
 
         L(types.ExecutionLink, [
             N(types.GroundedSchemaNode, rule.name),
-            L(types.ListLink, inputs),
-            L(types.ListLink, outputs)])
+            L(types.ListLink, [
+                L(types.ListLink, inputs),
+                L(types.ListLink, outputs)
+            ])
+        ])
+
+    def load_inference_repository(self):
+        # TODO fill the history atomspace
+        TA = self.history_atomspace
+
+        for link in TA.get_atoms_by_type(types.ExecutionLink):
+            rule_name = link.out[0]
+            list_link = link.out[1]
+            inputs= list_link.out[0]
+            outputs= list_link.out[1]
+
+            rule = self.lookup_rule(rule_name)
+            inputs  = [self.transfer_atom(self.atomspace, a) for a in inputs]
+            outputs = [self.transfer_atom(self.atomspace, a) for a in outputs]
+
+    def lookup_rule(self, rule_name):
+        for rule in self.rules:
+            if rule.name == rule_name:
+                return rule
+
+        raise ValueError("lookup_rule: rule doesn't exist "+rule_name)
 
