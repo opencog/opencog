@@ -12,7 +12,7 @@
 
 #include <deque>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 

@@ -28,12 +28,14 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
+
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
+
 /** \addtogroup grp_atomspace
  *  @{
  */

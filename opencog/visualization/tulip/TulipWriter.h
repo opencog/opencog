@@ -21,10 +21,11 @@
 #ifndef _TULIP_WRITER_H
 #define _TULIP_WRITER_H
 
-#include <opencog/atomspace/types.h>
-
-#include <iostream>
 #include <fstream>
+#include <iostream>
+#include <string>
+
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 // Caution, will generate invalid tulip files if edges have arity > 2

@@ -34,7 +34,7 @@
 #include <memory>
 #include <mutex>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
 
 namespace opencog

@@ -35,11 +35,25 @@ using namespace opencog;
 
 const Handle Handle::UNDEFINED(ULONG_MAX);
 
-Handle::Handle(AtomPtr atom) : AtomPtr(atom), uuid(atom->_uuid) {}
+Handle::Handle(AtomPtr atom) : _uuid(atom->_uuid), _ptr(atom) {}
 
 const AtomTable* Handle::_resolver = NULL;
 
-Atom* Handle::resolve() const noexcept
+Atom* Handle::resolve()
 {
-    return _resolver->getHandle(*this).get();
+    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    _ptr.swap(a);
+    return _ptr.get();
+}
+
+Atom* Handle::cresolve() const
+{
+    return _resolver->getHandle(*this)._ptr.get();
+}
+
+AtomPtr Handle::resolve_ptr()
+{
+    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    _ptr.swap(a);
+    return _ptr;
 }

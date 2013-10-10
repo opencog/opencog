@@ -198,14 +198,14 @@ public:
     /** Retrieve the atom pointer of a given Handle */
     Handle getHandle(Handle h) const
     {
-        return atomTable.getHandle(h);
+        return h;
     }
 
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const
     {
         static std::string emptyName;
-        NodePtr nnn(atomTable.getNode(h));
+        NodePtr nnn(NodeCast(h));
         if (nnn) return nnn->getName();
         return emptyName;
     }
@@ -214,19 +214,23 @@ public:
     const HandleSeq getOutgoing(Handle h) const
     {
         static HandleSeq hs;
-        LinkPtr link(atomTable.getLink(h));
+        LinkPtr link(LinkCast(h));
         if (link) return link->getOutgoingSet();
         return hs;
     }
 
     /** Retrieve a single Handle from the outgoing set of a given link */
     Handle getOutgoing(Handle h, int idx) const
-        { return getOutgoing(h)[idx]; }
+    {
+        LinkPtr link(LinkCast(h));
+        if (link) return link->getOutgoingSet()[idx];
+        return Handle::UNDEFINED;
+    }
 
     /** Retrieve the arity of a given link */
     size_t getArity(Handle h) const
     {
-        LinkPtr link(atomTable.getLink(h));
+        LinkPtr link(LinkCast(h));
         if (link) return link->getArity();
         return 0;
     }
@@ -234,7 +238,6 @@ public:
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const
     {
-        h = atomTable.getHandle(h);
         if (h) return h->getType();
         else return NOTYPE;
     }
@@ -244,7 +247,7 @@ public:
      */ 
     bool isSource(Handle source, Handle link) const
     {
-        LinkPtr l(atomTable.getLink(link));
+        LinkPtr l(LinkCast(link));
         if (l) return l->isSource(source);
         return false;
     }
@@ -304,60 +307,50 @@ public:
 
     /** Retrieve the AttentionValue of a given Handle */
     const AttentionValue& getAV(Handle h) const {
-        h = atomTable.getHandle(h);
-        return bank.getAV(h);
+        return bank.getAV(AtomPtr(h));
     }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle h, const AttentionValue &av) {
-        h = atomTable.getHandle(h);
-        bank.setAV(h, av);
+        bank.setAV(AtomPtr(h), av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        h = atomTable.getHandle(h);
-        bank.setSTI(h, stiValue);
+        bank.setSTI(AtomPtr(h), stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        h = atomTable.getHandle(h);
-        bank.setLTI(h, ltiValue);
+        bank.setLTI(AtomPtr(h), ltiValue);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
     void incVLTI(Handle h) {
-        h = atomTable.getHandle(h);
-        bank.incVLTI(h);
+        bank.incVLTI(AtomPtr(h));
     }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {
-        h = atomTable.getHandle(h);
-        bank.decVLTI(h);
+        bank.decVLTI(AtomPtr(h));
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        h = atomTable.getHandle(h);
-        return bank.getSTI(h);
+        return bank.getSTI(AtomPtr(h));
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        h = atomTable.getHandle(h);
-        return bank.getLTI(h);
+        return bank.getLTI(AtomPtr(h));
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        h = atomTable.getHandle(h);
-        return bank.getVLTI(h);
+        return bank.getVLTI(AtomPtr(h));
     }
 
     bool isValidHandle(Handle h) const {
-        h = atomTable.getHandle(h);
         return atomTable.holds(h);
     }
 
@@ -835,7 +828,7 @@ public:
         const AtomTable* table;
         compareAtom(const AtomTable* _table, Compare* _c) : c(_c), table(_table) {}
 
-        bool operator()(const Handle& h1, const Handle& h2) {
+        bool operator()(Handle h1, Handle h2) {
             return (*c)(h1, h2);
         }
     };

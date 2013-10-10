@@ -25,8 +25,10 @@
 #ifndef _OPENCOG_HANDLE_H
 #define _OPENCOG_HANDLE_H
 
+#include <cstddef>
 #include <cstdio>
 #include <iostream>
+#include <climits>
 #include <memory>
 #include <string>
 #include <sstream>
@@ -44,11 +46,12 @@ typedef unsigned long UUID;
 typedef std::unordered_set<UUID> UnorderedUUIDSet;
 
 
-//! contains an unique identificator
 class Atom;
-class AtomTable;
 typedef std::shared_ptr<Atom> AtomPtr;
-class Handle : public AtomPtr
+
+//! contains an unique identificator
+class AtomTable;
+class Handle
 {
 
 friend class TLB;
@@ -58,44 +61,65 @@ friend class AtomspaceHTabler;
 
 private:
 
-    UUID uuid;
+    UUID _uuid;
+    AtomPtr _ptr;
 
-    Atom* resolve() const noexcept;
+    Atom* resolve();
+    Atom* cresolve() const;
     static const AtomTable* _resolver;
 public:
 
     static const Handle UNDEFINED;
 
     explicit Handle(AtomPtr atom);
-    explicit Handle(const UUID u) : uuid(u) {}
-    explicit Handle() : uuid(UNDEFINED.uuid) {}
-    Handle(const Handle& h) : AtomPtr(h), uuid(h.uuid) {}
+    explicit Handle(const UUID u) : _uuid(u) {}
+    explicit Handle() : _uuid(ULONG_MAX) {}
+    Handle(const Handle& h) : _uuid(h._uuid), _ptr(h._ptr) {}
     ~Handle() {}
 
     inline UUID value(void) const {
-        return uuid;
+        return _uuid;
     }
 
     inline Handle& operator=(const Handle& h) {
         if (this == &h) return *this;
-        AtomPtr* base = static_cast<AtomPtr*>(this);
-        base->operator=(h);
-        this->uuid = h.uuid;
+        this->_uuid = h._uuid;
+        this->_ptr = h._ptr;
         return *this;
     }
 
-    inline Atom* operator->() const noexcept {
-        Atom* ptr = get();
+    inline Atom* operator->() {
+        Atom* ptr = _ptr.get();
         if (ptr) return ptr;
+        if (ULONG_MAX == _uuid) return NULL;
         return resolve();
     }
 
-    inline bool operator==(const Handle& h) const { return uuid == h.uuid; }
-    inline bool operator!=(const Handle& h) const { return uuid != h.uuid; }
-    inline bool operator< (const Handle& h) const { return uuid <  h.uuid; }
-    inline bool operator> (const Handle& h) const { return uuid >  h.uuid; }
-    inline bool operator<=(const Handle& h) const { return uuid <= h.uuid; }
-    inline bool operator>=(const Handle& h) const { return uuid >= h.uuid; }
+    inline Atom* operator->() const {
+        Atom* ptr = _ptr.get();
+        if (ptr) return ptr;
+        if (ULONG_MAX == _uuid) return NULL;
+        return cresolve();
+    }
+
+    // Allows expressions like "if(h)..." to work when h has a non-null pointer.
+    explicit inline operator bool() const noexcept {
+        return NULL != _ptr;
+    }
+
+    inline bool operator==(std::nullptr_t) const noexcept { return _ptr == NULL; } 
+    inline bool operator!=(std::nullptr_t) const noexcept { return _ptr != NULL; } 
+
+    // Handles are equivalent when their uuid's compare. It may happen
+    // that one has a null pointer, and the other one doesn't; we don't
+    // care about that. It should never ever happen that we have two
+    // identical uuid's but inequivalent pointers!!
+    inline bool operator==(const Handle& h) const noexcept { return _uuid == h._uuid; }
+    inline bool operator!=(const Handle& h) const noexcept { return _uuid != h._uuid; }
+    inline bool operator< (const Handle& h) const noexcept { return _uuid <  h._uuid; }
+    inline bool operator> (const Handle& h) const noexcept { return _uuid >  h._uuid; }
+    inline bool operator<=(const Handle& h) const noexcept { return _uuid <= h._uuid; }
+    inline bool operator>=(const Handle& h) const noexcept { return _uuid >= h._uuid; }
 
 
     /**
@@ -116,9 +140,46 @@ public:
         return 0;
     }
 
+    AtomPtr resolve_ptr();
     static void set_resolver(const AtomTable* tab) { _resolver = tab; }
+    static void clear_resolver(const AtomTable* tab) { _resolver = NULL; }
+
+    operator AtomPtr() const {
+        if (_ptr.get()) return _ptr;
+        if (ULONG_MAX == _uuid) return AtomPtr();
+        Handle h(*this);
+        return h.resolve_ptr();
+    }
+    operator AtomPtr() {
+        if (_ptr.get()) return _ptr;
+        if (ULONG_MAX == _uuid) return AtomPtr();
+        return resolve_ptr();
+    }
 };
- 
+
+static inline bool operator== (std::nullptr_t, const Handle& rhs) noexcept
+    { return rhs == NULL; }
+
+static inline bool operator!= (std::nullptr_t, const Handle& rhs) noexcept
+    { return rhs != NULL; }
+
+class HandlePredicate {
+public:
+    inline bool operator()(const Handle& h) { return this->test(h); }
+    virtual bool test(const Handle& h) { return true; }
+};
+class AtomPredicate {
+public:
+    inline bool operator()(AtomPtr a) { return this->test(a); }
+    virtual bool test(AtomPtr) { return true; }
+};
+class AtomComparator {
+public:
+    inline bool operator()(AtomPtr a, AtomPtr b) { return this->test(a,b); }
+    virtual bool test(AtomPtr, const AtomPtr) { return true; }
+};
+
+
 //! gcc-4.7.2 needs this, because std::hash<opencog::Handle> no longer works.
 //! (See very bottom of this file).
 struct handle_hash : public std::unary_function<Handle, size_t>

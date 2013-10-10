@@ -10,7 +10,7 @@
 #ifndef _OPENCOG_PARSE_RANK_H
 #define _OPENCOG_PARSE_RANK_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 

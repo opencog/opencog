@@ -9,8 +9,6 @@
 
 #include <boost/tuple/tuple_io.hpp>
 
-#include "AtomSpaceBenchmark.h"
-
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/random.h>
 
@@ -22,6 +20,8 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
+
+#include "AtomSpaceBenchmark.h"
 
 namespace opencog {
 

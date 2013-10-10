@@ -31,9 +31,13 @@
 #include <opencog/util/functional.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/PredicateIndex.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 
 using namespace opencog;
+
+//! This can be made orders of magnitude larger, if desired,
+//! with relatively little cost.
+#define MAX_PREDICATE_INDICES   32
+
 
 PredicateIndex::PredicateIndex(void)
 {

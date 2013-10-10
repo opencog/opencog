@@ -22,13 +22,17 @@
 
 #include <algorithm>
 
-#include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/Config.h>
 
+#include <opencog/atomspace/ImportanceIndex.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomTable.h>
+
 using namespace opencog;
+
+//! 4092 importance bins means each bin has STI range of 32
+#define IMPORTANCE_INDEX_SIZE   (1 << 11)
 
 ImportanceIndex::ImportanceIndex(void)
 {

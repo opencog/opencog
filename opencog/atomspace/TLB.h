@@ -29,7 +29,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 class TLBUTest;
 

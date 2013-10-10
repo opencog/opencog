@@ -66,7 +66,7 @@ AtomTable::~AtomTable()
 {
     //disconnect signals
     addedTypeConnection.disconnect();
-    Handle::set_resolver(NULL);
+    Handle::clear_resolver(this);
 
 #if DONT_BOTHER_WITH_THIS
     // WTF!? XXX TODO why are we removing these one by one? Lets
@@ -161,7 +161,7 @@ Handle AtomTable::getHandle(Handle h) const
         return getHandle(AtomPtr(h));
 
     // If we have both a uuid and pointer, there's nothing to do.
-    if (NULL != h.get()) return h;
+    if (NULL != h) return h;
 
     // If we have a uuid but no atom pointer, find the atom pointer.
     auto hit = _atom_set.find(h);
@@ -622,8 +622,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         UnorderedHandleSet::const_iterator it;
         for (it = is.begin(); it != is.end(); it++)
         {
-            logger().warn("\tincoming: %s\n", 
-                 (*it)->toShortString().c_str());
+            logger().warn("\tincoming: %s\n", (*it)->toShortString().c_str());
         }
         logger().setBackTraceLevel(save);
         logger().warn("AtomTable.extract(): stack trace for previous error follows");
