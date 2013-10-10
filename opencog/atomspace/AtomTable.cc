@@ -58,12 +58,15 @@ AtomTable::AtomTable()
     addedTypeConnection =
         classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
                     this, _1));
+
+    Handle::set_resolver(this);
 }
 
 AtomTable::~AtomTable()
 {
     //disconnect signals
     addedTypeConnection.disconnect();
+    Handle::set_resolver(NULL);
 
 #if DONT_BOTHER_WITH_THIS
     // WTF!? XXX TODO why are we removing these one by one? Lets

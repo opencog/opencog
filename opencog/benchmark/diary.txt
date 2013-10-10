@@ -367,9 +367,10 @@ more complex form that Handle now has, resulting in more copying.
   getHandleSet        0.195         0.438
   getNodeHandles     83.3          91.7
   getOutgoingSet    625           833
-  getIncomingSet   5000           769
+  getIncomingSet   5000          1429
 
 
-The second column replaces Handle by UUID in the TypeIndex.
+The second column replaces Handle by UUID in the TypeIndex. This improves
+performance by avoiding excess copying during ahndle manipulations.
 
 

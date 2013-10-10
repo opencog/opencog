@@ -109,7 +109,6 @@ CogServer::CogServer() : cycleCount(1)
 {
     if (atomSpace) delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
-    Handle::set_resolver(&atomSpace->atomSpaceAsync->getAtomTable());
     _systemActivityTable.init(this);
 
     pthread_mutex_init(&messageQueueLock, NULL);
