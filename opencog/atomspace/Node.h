@@ -92,8 +92,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString() const;
-    std::string toShortString() const;
+    std::string toString(std::string indent = "") const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given atom is equal to the current node.

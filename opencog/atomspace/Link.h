@@ -223,7 +223,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString() const;
+    std::string toString(std::string indent = "") const;
 
     /**
      * Returns a short string representation of the link.
@@ -233,7 +233,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString() const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given handle is a source of this link.

@@ -194,8 +194,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    virtual std::string toString(void) const = 0;
-    virtual std::string toShortString(void) const = 0;
+    virtual std::string toString(std::string indent = "") const = 0;
+    virtual std::string toShortString(std::string indent = "") const = 0;
 
     /** Returns whether two atoms are equal.
      *

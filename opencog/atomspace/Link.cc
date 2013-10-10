@@ -84,91 +84,46 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-std::string Link::toShortString(void) const
+std::string Link::toShortString(std::string indent) const
 {
     std::stringstream answer;
+    std::string more_indent = indent + "  ";
 
-    answer << "[" << classserver().getTypeName(type) << " ";
-    answer << (getFlag(HYPOTETHICAL_FLAG) ? "h " : "");
+    answer << indent << "(" << classserver().getTypeName(type) << "\n";
 
-    // Here the targets string is made. If a target is a node, its name is
+    // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    answer << "<";
     Arity arity = getArity();
     for (Arity i = 0; i < arity; i++) {
-        if (i > 0) answer << ",";
-        if (atomTable) {
-            AtomPtr a(_outgoing[i]);
-            if (classserver().isA(a->getType(), NODE))
-                answer << NodeCast(a)->getName();
-            else 
-                answer << LinkCast(a)->toShortString();
-        } else {
-            // No AtomTable connected so just print handles
-            answer << "#" << _outgoing[i];
-        }
+        AtomPtr a(_outgoing[i]);
+        answer << a->toShortString(more_indent);
     }
-    answer << ">";
     float mean = this->getTruthValue().getMean();
     float confidence = this->getTruthValue().getConfidence();
-    if (mean == 0.0f) {
-        answer << " 0.0";
-    } else {
-        answer << " " << mean;
-    }
-    if (confidence == 0.0f) {
-        answer << " 0.0";
-    } else {
-        answer << " " << confidence;
-    }
-    answer << "]";
+    answer << indent << "(stv " << mean << " " << confidence << "))\n";
     return answer.str();
 }
 
-std::string Link::toString(void) const
+std::string Link::toString(std::string indent) const
 {
     std::string answer;
+    std::string more_indent = indent + "  ";
 #define BUFSZ 1024
     static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%s) ",
+    snprintf(buf, BUFSZ, "(%s (av %d %d) %s \n",
              classserver().getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().toString().c_str());
-    answer += buf;
+    answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    answer += "<";
     for (int i = 0; i < getArity(); i++) {
-        if (i > 0) answer += ",";
         AtomPtr a(_outgoing[i]);
-        if (atomTable) {
-            if (a) {
-                NodePtr nnn(NodeCast(a));
-                if (nnn) {
-                    snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
-                    answer += buf;
-                    if (nnn->getName() == "")
-                        answer += "#" + _outgoing[i];
-                    else
-                        answer += nnn->getName();
-                    answer += "]";
-                } else {
-                    LinkPtr lll(LinkCast(a));
-                    answer += lll->toString();
-                }
-            } else {
-                logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
-                               _outgoing[i].value(), i);
-                answer += "INVALID_HANDLE!";
-            }
-        } else {
-            // No AtomTable connected so just print handles in outgoing set
-            answer += "#" + _outgoing[i];
-        }
+        answer += a->toString(more_indent);
     }
-    answer += ">]";
+    answer += indent + ")\n";
     return answer;
 }
 

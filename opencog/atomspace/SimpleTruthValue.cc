@@ -94,13 +94,8 @@ float SimpleTruthValue::toFloat() const
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
-    // TODO: confidence is not needed for Saving&Loading.
-    // (Only count is saved). So, for saving memory space
-    // in dump files, it should be removed. However, toString
-    // is being used for debug purposes, so both need to be shown...
-    sprintf(buf, "[%f,%f=%f]",
+    sprintf(buf, "(stv %f %f)",
             static_cast<float>(getMean()),
-            static_cast<float>(getCount()),
             static_cast<float>(getConfidence()));
     return buf;
 }
