@@ -223,7 +223,7 @@ public:
     Handle getOutgoing(Handle h, int idx) const
     {
         LinkPtr link(LinkCast(h));
-        if (link) return link->getOutgoingSet()[idx];
+        if (link) return link->getOutgoingAtom(idx);
         return Handle::UNDEFINED;
     }
 
