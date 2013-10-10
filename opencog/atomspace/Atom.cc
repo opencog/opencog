@@ -54,7 +54,7 @@ std::mutex Atom::IncomingSet::_mtx;
 
 Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 {
-    handle = Handle::UNDEFINED;
+    _uuid = Handle::UNDEFINED.value();
     flags = 0;
     atomTable = NULL;
     type = t;

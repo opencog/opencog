@@ -117,11 +117,11 @@ public:
         rep1.saveRepository(file);
         fclose(file);
 
-        HandleMap<AtomPtr> handles;
+        HandleMap<AtomPtr>::MapPtr handles(std::make_shared<HandleMap<AtomPtr>>());
         ComboProcedureRepository rep2;
         file = fopen(DUMP_FILE_NAME, "rb");
         TS_ASSERT(file);
-        rep2.loadRepository(file, &handles);
+        rep2.loadRepository(file, handles);
         for (int i = 0; i < NUMBER_OF_COMBO_TREES; i++) {
             TS_ASSERT(rep2.contains(names[i]));
             combo_tree tr = rep2.get(names[i]).getComboTree();

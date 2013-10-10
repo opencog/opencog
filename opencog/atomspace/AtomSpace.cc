@@ -224,19 +224,9 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue
     return addNode(t, name, tvn);
 }
 
-AtomPtr AtomSpace::cloneAtom(const Handle& h) const
-{
-    return atomSpaceAsync->getAtom(h)->get_result();
-}
-
 bool AtomSpace::isValidHandle(const Handle& h) const
 {
     return atomSpaceAsync->isValidHandle(h)->get_result();
-}
-
-bool AtomSpace::commitAtom(const AtomPtr a)
-{
-    return atomSpaceAsync->commitAtom(a)->get_result();
 }
 
 AttentionValue AtomSpace::getAV(Handle h) const

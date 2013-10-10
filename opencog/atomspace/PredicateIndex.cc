@@ -26,9 +26,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
@@ -141,7 +141,7 @@ PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) cons
 const UnorderedHandleSet& PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
 {
 	static UnorderedHandleSet emptySet;
-	if (!TLB::isValidHandle(gpnHandle)) return emptySet;
+	if (Handle::UNDEFINED == gpnHandle) return emptySet;
 
 	std::map<Handle, int>::const_iterator it;
 	it = predicateHandles2Indices.find(gpnHandle);

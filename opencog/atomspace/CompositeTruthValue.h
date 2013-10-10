@@ -26,15 +26,13 @@
 #define _OPENCOG__COMPOSITE_TRUTH_VALUE_H_
 
 #include <functional>
-
+#include <memory>
 #include <unordered_map>
-#include <boost/shared_ptr.hpp>
 
 #include <opencog/util/functional.h>
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/VersionHandle.h>
 
 #ifdef ZMQ_EXPERIMENT
@@ -223,7 +221,7 @@ public:
     VersionHandle getVersionHandle(int) const;
 };
 
-typedef boost::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
+typedef std::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
 
 /** @}*/
 } // namespace opencog

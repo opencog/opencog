@@ -23,13 +23,13 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
+#include <mutex>
 #include <unordered_map>
 #include <vector>
 
 #include <stdlib.h>
 
 #include <boost/signal.hpp>
-#include <boost/thread.hpp>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/atom_types.h>
@@ -57,8 +57,8 @@ private:
     /** Private default constructor for this class to make it a singleton. */
     ClassServer();
 
-    mutable boost::mutex type_mutex;
-    mutable boost::mutex signal_mutex;
+    mutable std::mutex type_mutex;
+    mutable std::mutex signal_mutex;
 
     Type nTypes;
 

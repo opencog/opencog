@@ -59,8 +59,8 @@ class AtomStorage
 		void setMaxHeight(int);
 		int getMaxHeight(void);
 
-		int do_store_atom(AtomPtr, Handle);
-		void do_store_single_atom(AtomPtr, Handle, int);
+		int do_store_atom(AtomPtr);
+		void do_store_single_atom(AtomPtr, int);
 
 		std::string oset_to_string(const HandleSeq&, int);
 		void storeOutgoing(AtomPtr, Handle);

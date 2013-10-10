@@ -26,7 +26,7 @@ long AttentionBank::getTotalLTI() const {
 
 void AttentionBank::setAV(AttentionValueHolderPtr avh, const AttentionValue& av)
 {
-    boost::mutex::scoped_lock lock(lock_funds);
+    std::lock_guard<std::mutex> lock(lock_funds);
     const AttentionValue& oldAV = avh->getAttentionValue();
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds
@@ -80,45 +80,45 @@ AttentionValue::vlti_t AttentionBank::getVLTI(AttentionValueHolderPtr avh) const
 
 long AttentionBank::getSTIFunds() const
 {
-    boost::mutex::scoped_lock lock(lock_funds);
+    std::lock_guard<std::mutex> lock(lock_funds);
     return fundsSTI;
 }
 
 long AttentionBank::getLTIFunds() const
 {
-    boost::mutex::scoped_lock lock(lock_funds);
+    std::lock_guard<std::mutex> lock(lock_funds);
     return fundsLTI;
 }
 
 long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
 {
-    boost::mutex::scoped_lock lock(lock_funds);
+    std::lock_guard<std::mutex> lock(lock_funds);
     fundsSTI+=diff;
     return fundsSTI;
 }
 
 long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
 {
-    boost::mutex::scoped_lock lock(lock_funds);
+    std::lock_guard<std::mutex> lock(lock_funds);
     fundsLTI+=diff;
     return fundsLTI;
 }
 
 void AttentionBank::updateMaxSTI(AttentionValue::sti_t m)
 {
-    boost::mutex::scoped_lock lock(lock_maxSTI);
+    std::lock_guard<std::mutex> lock(lock_maxSTI);
     maxSTI.update(m);
 }
 
 void AttentionBank::updateMinSTI(AttentionValue::sti_t m)
 {
-    boost::mutex::scoped_lock lock(lock_minSTI);
+    std::lock_guard<std::mutex> lock(lock_minSTI);
     minSTI.update(m);
 }
 
 AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 {
-    boost::mutex::scoped_lock lock(lock_maxSTI);
+    std::lock_guard<std::mutex> lock(lock_maxSTI);
     if (average) {
         return (AttentionValue::sti_t) maxSTI.recent;
     } else {
@@ -128,7 +128,7 @@ AttentionValue::sti_t AttentionBank::getMaxSTI(bool average) const
 
 AttentionValue::sti_t AttentionBank::getMinSTI(bool average) const
 {
-    boost::mutex::scoped_lock lock(lock_minSTI);
+    std::lock_guard<std::mutex> lock(lock_minSTI);
     if (average) {
         return (AttentionValue::sti_t) minSTI.recent;
     } else {

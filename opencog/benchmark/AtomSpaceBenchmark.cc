@@ -81,7 +81,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
 {
     size_t total = 0;
     if (asp->isNode(h)) {
-        NodePtr n(NodeCast(TLB::getAtom(h)));
+        NodePtr n(NodeCast(h));
         total = sizeof(Node);
         if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (n->getTruthValue().getType()) {
@@ -102,7 +102,7 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             }
         }
     } else {
-        LinkPtr l(LinkCast(TLB::getAtom(h)));
+        LinkPtr l(LinkCast(h));
         total = sizeof(Link);
         if (&(l->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
             switch (l->getTruthValue().getType()) {
@@ -640,7 +640,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        atab->getAtom(h)->getType();
+        h->getType();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -686,7 +686,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        atab->getAtom(h)->getTruthValue();
+        h->getTruthValue();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -754,7 +754,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     case BENCH_TABLE: {
         t_begin = clock();
         SimpleTruthValue stv(strength, conf); 
-        atab->getAtom(h)->setTruthValue(stv);
+        h->setTruthValue(stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }

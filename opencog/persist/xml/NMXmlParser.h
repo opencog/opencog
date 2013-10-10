@@ -29,7 +29,6 @@
 #include <vector>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/HandleMap.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>

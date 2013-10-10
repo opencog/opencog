@@ -3,6 +3,7 @@
  *
  * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,11 +27,11 @@
 
 #include <cstdio>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <sstream>
 #include <unordered_set>
 #include <vector>
-
 
 /** \addtogroup grp_atomspace
  *  @{
@@ -41,8 +42,11 @@ namespace opencog
 //! UUID == Universally Unique Identifier
 typedef unsigned long UUID;
 
+
 //! contains an unique identificator
-class Handle
+class Atom;
+typedef std::shared_ptr<Atom> AtomPtr;
+class Handle : public AtomPtr
 {
 
 friend class TLB;
@@ -58,9 +62,10 @@ public:
 
     static const Handle UNDEFINED;
 
+    explicit Handle(AtomPtr atom);
     explicit Handle(const UUID u) : uuid(u) {}
-    Handle(const Handle& h) : uuid(h.uuid) {}
     explicit Handle() : uuid(UNDEFINED.uuid) {}
+    Handle(const Handle& h) : AtomPtr(h), uuid(h.uuid) {}
     ~Handle() {}
 
     inline UUID value(void) const {
@@ -68,7 +73,10 @@ public:
     }
 
     inline Handle& operator=(const Handle& h) {
-        uuid = h.uuid;
+        if (this == &h) return *this;
+        AtomPtr* base = static_cast<AtomPtr*>(this);
+        base->operator=(h);
+        this->uuid = h.uuid;
         return *this;
     }
 
@@ -91,7 +99,7 @@ public:
      * argument is respectively smaller than, equal to, or larger then the
      * second argument.
      */
-    static int compare(Handle h1, Handle h2)
+    static int compare(const Handle& h1, const Handle& h2)
     {
         if (h1 < h2) return -1;
         if (h1 > h2) return 1;
@@ -103,7 +111,7 @@ public:
 //! (See very bottom of this file).
 struct handle_hash : public std::unary_function<Handle, size_t>
 {
-   size_t operator()(const Handle&h ) const
+   size_t operator()(const Handle& h) const
    {
        return static_cast<std::size_t>(h.value());
    }
@@ -115,6 +123,16 @@ inline std::size_t hash_value(Handle const& h)
     return static_cast<std::size_t>(h.value());
 }
 
+/// Compare handle uuid's ONLY. Do not compare atom pointers
+/// (as one might be null, and the other one not null.)
+struct handle_less
+{
+   bool operator()(const Handle& hl, const Handle& hr) const
+   {
+       return hl.value() < hr.value();
+   }
+};
+ 
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
 //! a list of lists of handles

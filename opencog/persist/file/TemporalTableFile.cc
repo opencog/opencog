@@ -43,7 +43,7 @@ TemporalTableFile::~TemporalTableFile()
 {
 }
 
-void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandleMap<AtomPtr> *conv)
+void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandMapPtr conv)
 {
     int size;
     bool b_read = true;
@@ -62,8 +62,9 @@ void TemporalTableFile::load(FILE* fp, TemporalTable* tbl, HandleMap<AtomPtr> *c
         FREAD_CK(&setSize, sizeof(int), 1 , fp);
         for (int j = 0; j < setSize; j++) {
             // reads each associated handle
-            Handle oldHandle;
-            FREAD_CK(&oldHandle, sizeof(Handle), 1, fp);
+            UUID uuid;
+            FREAD_CK(&uuid, sizeof(UUID), 1, fp);
+            Handle oldHandle(uuid);
             if ((!conv->contains(oldHandle))) {
                 throw InconsistenceException(TRACE_INFO,
                      "Temporal TableFile - Couldn't load TemporalRepository, "
@@ -100,7 +101,8 @@ void TemporalTableFile::save(FILE *fp, TemporalTable *tbl)
             // writes each associated handle
             Handle handle = *itr;
             itr++;
-            fwrite(&handle, sizeof(Handle), 1, fp);
+            UUID uuid = handle.value();
+            fwrite(&uuid, sizeof(UUID), 1, fp);
         }
         currentEntry = currentEntry->next;
     }

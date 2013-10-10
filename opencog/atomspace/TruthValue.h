@@ -26,6 +26,7 @@
 #ifndef _OPENCOG_TRUTH_VALUE_H
 #define _OPENCOG_TRUTH_VALUE_H
 
+#include <memory>
 #include <string>
 
 #include <opencog/atomspace/types.h>
@@ -220,6 +221,8 @@ protected:
     static void DeleteAndSetDefaultTVIfPertinent(TruthValue** tv);
 
 };
+
+typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 } // namespace opencog
 

@@ -82,7 +82,7 @@ void ProcedureRepository::saveRepository(FILE* dump) const
     comboRepository.saveRepository(dump);
 }
 
-void ProcedureRepository::loadRepository(FILE* dump, HandleMap<AtomPtr>* conv)
+void ProcedureRepository::loadRepository(FILE* dump, HandMapPtr conv)
 {
     comboRepository.loadRepository(dump, conv);
 }

@@ -24,24 +24,23 @@
 
 #include "HandleToTemporalEntryMap.h"
 
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/HandleMap.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 
 HandleToTemporalEntryMap::HandleToTemporalEntryMap()
 {
-    internalMap = new HandleMap<TemporalEntry *>();
+    internalMap = std::make_shared<HandleMap<TemporalEntry*>>();
 }
 
 HandleToTemporalEntryMap::~HandleToTemporalEntryMap()
 {
-    HandleMapIterator<TemporalEntry *>* keys = internalMap->keys();
+    HandleMapIterator<TemporalEntry*>* keys = internalMap->keys();
     while (keys->hasNext()) {
         delete (internalMap->get(keys->next()));
     }
     delete keys;
-    delete(internalMap);
 }
 
 void HandleToTemporalEntryMap::add(Handle key, TemporalEntry* obj)
@@ -104,7 +103,7 @@ std::string HandleToTemporalEntryMap::toString()
         Handle key = it->next();
         TemporalEntry* value = get(key);
         /* append key */
-        AtomPtr atom = TLB::getAtom(key);
+        AtomPtr atom(key);
         answer += atom->toShortString();
         answer += ":";
         /* append value */

@@ -31,7 +31,6 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
 
 //#define DPRINTF printf
@@ -70,7 +69,7 @@ HandleEntry::~HandleEntry()
 
 AtomPtr HandleEntry::getAtom()
 {
-    return TLB::getAtom(handle);
+    return handle;
 }
 
 HandleEntry* HandleEntry::clone()
@@ -820,14 +819,15 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 }
 #endif
 
-bool HandleEntry::matchesFilterCriteria(AtomPtr atom, Type targetType, bool targetSubclasses, VersionHandle vh)
+bool HandleEntry::matchesFilterCriteria(AtomPtr atom, Type targetType,
+                                        bool targetSubclasses, VersionHandle vh)
 {
     bool result = false;
     LinkPtr link = LinkCast(atom);
-    int larry = 0;
+    size_t larry = 0;
     if (link) {
         larry = link->getArity();
-        for (int i = 0; i < larry && !result; i++) {
+        for (size_t i = 0; i < larry && !result; i++) {
             AtomPtr target(link->getOutgoingAtom(i));
             DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
             if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
@@ -891,17 +891,17 @@ bool HandleEntry::matchesFilterCriteria(AtomPtr atom, const char* targetName, Ty
 {
     bool result = false;
     LinkPtr link(LinkCast(atom));
-    int larry = 0;
+    size_t larry = 0;
     if (link) {
         larry = link->getArity();
-        for (int i = 0; i < larry && !result; i++) {
-            AtomPtr target = link->getOutgoingAtom(i);
+        for (size_t i = 0; i < larry && !result; i++) {
+            AtomPtr target(link->getOutgoingAtom(i));
             DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
             if (classserver().isA(target->getType(), NODE)) {
                 DPRINTF("Node name = %s\n", (NodeCast(target))->getName().c_str());
             }
 
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
+            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE and
                     !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
                 if (targetType == target->getType()) {
                     const char* nodeName = (NodeCast(target))->getName().c_str();
@@ -922,27 +922,37 @@ bool HandleEntry::matchesFilterCriteria(AtomPtr atom, const char* targetName, Ty
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* targetName, Type targetType, VersionHandle vh)
 {
-
     HandleEntry* head = set;
-    if (!isNullVersionHandle(vh)) {
+    if (not isNullVersionHandle(vh)) {
         HandleEntry* buffer;
 
         // The search for invalid elements need to be done in two steps because
         // invalid elements found in the middle of the list need to be treated
         // differently from invalid elements found in its begining.
 
-        while ( (set != NULL) && !matchesFilterCriteria(set->getAtom(), targetName, targetType, vh)) {
+        AtomPtr atom;
+        bool match = false;
+        if (set != NULL) {
+            atom = set->getAtom();
+            match = matchesFilterCriteria(atom, targetName, targetType, vh);
+        }
+        while ((set != NULL) and not match)
+        {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
             delete buffer;
+            if (set != NULL) {
+                atom = set->getAtom();
+                match = matchesFilterCriteria(atom, targetName, targetType, vh);
+            }
         }
 
         if (set == NULL) return NULL;
 
         head = set;
         while (set->next != NULL) {
-            if (!matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
+            if (not matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
                 buffer = set->next;
                 set->next = set->next->next;
                 buffer->next = NULL;
@@ -962,7 +972,7 @@ std::string HandleEntry::toString(void)
     std::string answer;
 
     for (HandleEntry* current = this; current != NULL; current = current->next) {
-        AtomPtr atom = TLB::getAtom(current->handle);
+        AtomPtr atom(current->handle);
         if (atom != NULL) {
             if (classserver().isA(atom->getType(), NODE)) {
                 answer += (NodeCast(atom))->getName();
