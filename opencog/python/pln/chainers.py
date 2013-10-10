@@ -129,6 +129,35 @@ class AbstractChainer(Logic):
     def log_failed_inference(self,message):
         print 'Attempted invalid inference:',message
 
+class InferenceHistoryIndex(object):
+    def __init__(self):
+        self.rule_to_io = {}
+
+    def record_new_application(self, rule, inputs, outputs):
+        outputs = tuple(outputs)
+        inputs = tuple(inputs)
+
+        try:
+            output_to_inputs = self.rule_to_io[rule]
+        except KeyError:
+            output_to_inputs = self.rule_to_io[rule] = defaultdict(set)
+            assert output_to_inputs != None
+
+        input_tuple_set = output_to_inputs[outputs]
+
+        if inputs in input_tuple_set:
+            return False
+        else:
+            input_tuple_set.insert(inputs)
+
+    def lookup_all_applications(self, rule, outputs):
+        try:
+            output_to_inputs = self.rule_to_io[rule]
+        except KeyError:
+            return []
+        input_tuple_set = output_to_inputs[outputs]
+        return input_tuple_set
+
 class Chainer(AbstractChainer):
     '''PLN forward/backward chainer. It chooses Atoms randomly based on STI. It can do a single
        backward or forward step. By running the step repeatedly it can simulate chaining, without
@@ -157,9 +186,10 @@ class Chainer(AbstractChainer):
         # Map from Atom -> set(Atom)
         # Default value is the empty set
         self.trails = defaultdict(set)
-        self.produced_from = defaultdict(set)
+        #self.produced_from = defaultdict(set)
+        self.history_index = InferenceHistoryIndex()
 
-        self.trail_atomspace = AtomSpace()
+        self.history_atomspace = AtomSpace()
         # TODO actually load and save these. When loading it, rebuild the indexes above.
 
         # Record how often each Rule is used. To bias the Rule frequencies.
@@ -213,15 +243,19 @@ class Chainer(AbstractChainer):
         # handle rules that create their output in a custom way, not just using templates
         if hasattr(rule, 'custom_compute'):
             (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
+            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
+        elife hasattr(rule, 'temporal_compute'):
+            # All inputs ever, and then use the special temporal computation instead of revision.
+            all_input_tuples = self.history.lookup_all_applications(rule, specific_outputs)
+            (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
+            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
         else:
+            if not self._validate(rule, specific_inputs, specific_outputs):
+                return None
             output_tvs = rule.calculate(specific_inputs)
+            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
-
-        if self._validate(rule, specific_inputs, specific_outputs):
-            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
-        else:
-            return None
 
     def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far, require_nonzero_tv=True):
         '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
@@ -336,9 +370,10 @@ class Chainer(AbstractChainer):
 
     ### stuff used by both forward and backward chaining
 
-    def _apply_rule(self, rule, inputs, outputs, output_tvs):
-        for (atom, new_tv) in zip(outputs, output_tvs):
-            self._revise_tvs(atom, new_tv)
+    def _apply_rule(self, rule, inputs, outputs, output_tvs, revise=True):
+        if revise:
+            for (atom, new_tv) in zip(outputs, output_tvs):
+                self._revise_tvs(atom, new_tv)
 
         if self._stimulateAtoms:
             for atom in outputs:
@@ -421,22 +456,18 @@ class Chainer(AbstractChainer):
         # TODO it should work for Rules where the input order doesn't matter (e.g. AndRule)
         # currently it won't notice repetition for different input orders
 
-        inputs = tuple(inputs)
-        outputs = tuple(outputs)
-        productions = self.produced_from[outputs]
-        if inputs in productions:
-            return True
-        else:
-            productions.add(inputs)
-            self._add_to_inference_repository(rule, outputs, inputs)
+        new = self.history_index.record_new_application(rule, inputs=inputs, outputs=outputs)
+        if not new:
             return False
+        else:
+            self._add_to_inference_repository(rule, outputs, inputs)
 
     def _add_to_inference_repository(self, rule, outputs, inputs):
-        TA = self.trail_atomspace
+        TA = self.history_atomspace
         L = TA.add_link
         N = TA.add_node
 
-        # create new lists of inputs and outputs for the separate trails atomspace
+        # create new lists of inputs and outputs for the separate history atomspace
         inputs  = [self.transfer_atom(TA, a) for a in inputs]
         outputs = [self.transfer_atom(TA, a) for a in outputs]
 

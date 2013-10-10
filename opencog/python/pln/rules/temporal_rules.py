@@ -7,7 +7,8 @@ import math
 
 class TemporalRule(Rule):
     '''Base class for temporal Rules. They evaluate a time relation such as BeforeLink, based on some AtTimeLinks.'''
-    # TODO it can't use the formulas directly. They require some preprocessing to create a temporal-distribution-dictionary out of some AtTimeLinks. And how to find all of the AtTimeLinks for an Atom?...
+    # TODO it can't use the formulas directly. They require some preprocessing to create a temporal-distribution-dictionary out of some AtTimeLinks. And how to find all of the AtTimeLinks for an Atom?
+    # Easy way: the inputs here will eventually find every element of A and B, so just recalculate every time.
     def __init__(self, chainer, link_type, formula):
         A = chainer.new_variable()
         B = chainer.new_variable()
@@ -21,6 +22,30 @@ class TemporalRule(Rule):
                       chainer.link(types.AtTimeLink(tb, B))]
 
         name = link_type + 'EvaluationRule'
+
+    def temporal_compute(self, input_tuples):
+        links_a, links_b = unzip(input_tuples)
+
+        dist1 = self.make_distribution(links_a)
+        dist2 = self.make_distribution(links_b)
+
+        strength = formula(dist1, dist2)
+        
+        # I'm not sure what to choose for this
+        count = len(input_tuples)
+        tv = TruthValue(strength, count)
+        
+        return [(target,tv)]
+
+    def make_distribution(self, time_links):
+        dist = {}
+        for link in time_links:
+            time = int(link.out[0].name)
+            fuzzy_tv = link.tv.mean
+            dist[time] = fuzzy_tv
+        
+        return dist
+
 
 class TemporalTransitivityRule(Rule):
     # Hackily infer transitive temporal relationships using the deduction formula
@@ -61,50 +86,4 @@ def create_temporal_rules(chainer):
 
     # There are lots of reverse links, (like (After x y) = (Before y x)
     # It seems like those would just make it dumber though?
-
-
-# old hack that might not be relevant to the new chainer
-
-def lookup_times(atom, chainer):
-    '''Search for all AtTimeLinks containing that atom. Return a dictionary from timestamp (as an int) to a float, representing the fuzzy truth value. (Ignore confidence which is probably OK.)'''
-    template = chainer.link(types.AtTimeLink,
-                 chainer.new_variable(),
-                 atom)
-    candidate_atoms = chainer.atomspace.get_atoms_by_type(types.AtTimeLink)
-    attimes = chainer.find(template, candidate_atoms)
-    
-    dist = {}
-    for link in attimes:
-        time = int(link.out[0].name)
-        fuzzy_tv = link.tv.mean
-        dist[time] = fuzzy_tv
-    
-    return dist
-
-def create_temporal_matching_function(formula):
-    def match_temporal_relationship(space,target):
-        
-        distribution_event1 = lookup_times(target.args[0], space)
-        distribution_event2 = lookup_times(target.args[1], space)
-        
-        missing_data = (len(distribution_event1) == 0 or len(distribution_event2) == 0)
-        error_message = "unable to find distribution for targets", target.args[0], distribution_event1, target.args[1], distribution_event2
-
-        #assert not missing_data, error_message
-        # Enable this instead of the assert after you finish debugging the rules.
-        # For real-world use the assert is wrong - if you don't have the right data you should just not apply that Rule.
-        if missing_data:
-            print error_message
-            # No info available for those events. So return no results
-            return []
-
-        strength = formula(distribution_event1, distribution_event2)
-        
-        # I'm not sure what to choose for this
-        count = 1
-        tv = TruthValue(strength, count)
-        
-        return [(target,tv)]
-
-    return match_temporal_relationship
 
