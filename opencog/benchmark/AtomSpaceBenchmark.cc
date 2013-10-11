@@ -9,8 +9,6 @@
 
 #include <boost/tuple/tuple_io.hpp>
 
-#include "AtomSpaceBenchmark.h"
-
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/random.h>
 
@@ -22,6 +20,8 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
+
+#include "AtomSpaceBenchmark.h"
 
 namespace opencog {
 
@@ -176,7 +176,8 @@ void AtomSpaceBenchmark::showMethods() {
 
 }
 
-void AtomSpaceBenchmark::setMethod(std::string _methodName) {
+void AtomSpaceBenchmark::setMethod(std::string _methodName)
+{
     if (_methodName == "noop") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_noop);
     } else if (_methodName == "addNode") {
@@ -268,7 +269,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         if (i % diff == 0) cerr << "." << flush;
     }
     Handle rh = getRandomHandle();
-    // This spurious line is to ensure the whole queue is complete
+    // This spurious line is to ensure the AtomSpaceAsyc queue is empty
     if (not testKind == BENCH_TABLE)
         asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
@@ -295,7 +296,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 void AtomSpaceBenchmark::startBenchmark(int numThreads)
 {
     // Make sure we are using the correct link mean!
-    delete prg;
+    if (prg) delete prg;
     prg = new std::poisson_distribution<unsigned>(linkSize_mean);
 
     // num threads does nothing at the moment;
@@ -303,16 +304,22 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
     for (unsigned int i = 0; i < methodNames.size(); i++) {
         UUID_begin = TLB::getMaxUUID();
-        if (testKind == BENCH_TABLE)
+        UUID_end = TLB::getMaxUUID();
+        if (testKind == BENCH_TABLE) {
             atab = new AtomTable();
-        else
+            Handle::set_resolver(atab);
+        }
+        else {
             asp = new AtomSpace();
+            Handle::set_resolver(&asp->atomSpaceAsync->getAtomTable());
 #if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
 #endif
+        }
 
         //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
+        UUID_end = TLB::getMaxUUID();
 
         doBenchmark(methodNames[i],methodsToTest[i]);
 
@@ -554,10 +561,11 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
         makeRandomNode("");
         if (display && i % diff == 0) cerr << "." << flush;
     }
+    UUID_end = TLB::getMaxUUID();
 
     // Add links
-    if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links ";
-    diff = ((atomspaceSize - nodeCount)/PROGRESS_BAR_LENGTH);
+    if (display) cout << endl << "Adding " << atomspaceSize - nodeCount << " links " << flush;
+    diff = ((atomspaceSize - nodeCount) / PROGRESS_BAR_LENGTH);
     if (!diff) diff = 1;
     for (; i < atomspaceSize; i++) {
         makeRandomLink();
@@ -571,6 +579,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
         cout << DIVIDER_LINE << endl;
     }
 
+    UUID_end = TLB::getMaxUUID();
     testKind = saveKind;
 }
 
@@ -604,13 +613,7 @@ Handle AtomSpaceBenchmark::getRandomHandle()
     // (... plus we are not allowed access to the AtomTable either)
     //Handle h = asp->getAtomTable().getRandom(rng);
     //tRandomEnd = clock();
-    if (testKind == BENCH_TABLE)
-        OC_ASSERT(atab->getSize() != 0,
-                "AtomTable is emtpy, perhaps try using the -b option");
-    else
-        OC_ASSERT(asp->getSize() != 0,
-                "AtomSpace is emtpy, perhaps try using the -b option");
-    return Handle(UUID_begin + rng->randint((TLB::getMaxUUID()-1)-UUID_begin));
+    return Handle(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
 }
 
 timepair_t AtomSpaceBenchmark::bm_getType()

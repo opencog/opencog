@@ -29,13 +29,14 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/Request.h>
 
-#include "mongoose.h"
-#include <opencog/web/GetListRequest.h>
-#include <opencog/web/CreateAtomRequest.h>
-#include <opencog/web/UpdateAtomRequest.h>
-#include <opencog/web/ListURLHandler.h>
 #include <opencog/web/AtomURLHandler.h>
+#include <opencog/web/CreateAtomRequest.h>
+#include <opencog/web/GetListRequest.h>
+#include <opencog/web/ListURLHandler.h>
 #include <opencog/web/ServerRequestWrapper.h>
+#include <opencog/web/UpdateAtomRequest.h>
+
+#include "mongoose.h"
 
 #define REST_PATH_PREFIX "/rest/0.2"
 #define UI_PATH_PREFIX "/opencog"

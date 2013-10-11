@@ -6,8 +6,8 @@
 #include "AtomSpaceBenchmark.h"
 
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
     const char* benchmark_desc = "Benchmark tool OpenCog AtomSpace\n"
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
@@ -119,5 +119,5 @@ int main(int argc, char** argv) {
     }
 
     benchmarker.startBenchmark();
-
+    return 0;
 }
