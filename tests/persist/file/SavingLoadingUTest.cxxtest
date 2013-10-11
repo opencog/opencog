@@ -51,6 +51,10 @@ using namespace opencog;
 #define TV3_MEAN 0.75f
 #define TV3_COUNT 2.0f
 
+// Converting from confidence to count and back again using single-prcision
+// float is a real accuracy killer.  In particular, 1/801 = 0.001248 but
+// converting back gives 800*0.001248/(1.0-0.001248) = 2.000352 and so
+// comparison tests can only be accurate to about 0.000352 or thereabouts.
 #define FLOAT_ACCEPTABLE_ERROR 0.001
 
 #define NODE1_NAME "node1"
@@ -197,8 +201,8 @@ public:
 
         TruthValuePtr tv3 = atomSpace.getTV(h3);
         TS_ASSERT(tv3->getType() == tvs[2]->getType());
-        TS_ASSERT(tv3->getMean() == tvs[2]->getMean());
-        TS_ASSERT(tv3->getCount() == tvs[2]->getCount());
+        TS_ASSERT(fabs(tv3->getMean() - tvs[2]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv3->getCount() - tvs[2]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv3->getConfidence() - tvs[2]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(((const CompositeTruthValue&)*(tv3.get())).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[2])->getNumberOfVersionedTVs());
 
@@ -211,8 +215,8 @@ public:
 
         TruthValuePtr tv4 = atomSpace.getTV(h4);
         TS_ASSERT(tv4->getType() == tvs[3]->getType());
-        TS_ASSERT(tv4->getMean() == tvs[3]->getMean());
-        TS_ASSERT(tv4->getCount() == tvs[3]->getCount());
+        TS_ASSERT(fabs(tv4->getMean() - tvs[3]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv4->getCount() - tvs[3]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv4->getConfidence() - tvs[3]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(((const CompositeTruthValue&)*(tv4.get())).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[3])->getNumberOfVersionedTVs());
 
@@ -232,8 +236,8 @@ public:
 
         TruthValuePtr tv5 = atomSpace.getTV(h5);
         TS_ASSERT(tv5->getType() == tvs[4]->getType());
-        TS_ASSERT(tv5->getMean() == tvs[4]->getMean());
-        TS_ASSERT(tv5->getCount() == tvs[4]->getCount());
+        TS_ASSERT(fabs(tv5->getMean() - tvs[4]->getMean()) < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(fabs(tv5->getCount() - tvs[4]->getCount()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(tv5->getConfidence() - tvs[4]->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(((const CompositeTruthValue&)*tv5.get()).getNumberOfVersionedTVs() == ((CompositeTruthValue*)tvs[4])->getNumberOfVersionedTVs());
 

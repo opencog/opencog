@@ -9,6 +9,7 @@
 #ifndef _OPENCOG_SENSE_SIMILARITY_H
 #define _OPENCOG_SENSE_SIMILARITY_H
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 namespace opencog {

@@ -28,10 +28,9 @@
 
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/RequestClassInfo.h>

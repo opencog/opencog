@@ -40,8 +40,11 @@ using namespace opencog;
 #define TV2_COUNT 1.0f
 #define TV3_COUNT 2.0f
 
-//Exact float comparison is not working due to float representation issues...
-#define FLOAT_ACCEPTABLE_ERROR 0.000001
+// Converting from confidence to count and back again using single-prcision
+// float is a real accuracy killer.  In particular, 1/801 = 0.001248 but
+// converting back gives 800*0.001248/(1.0-0.001248) = 2.000352 and so
+// comparison tests can only be accurate to about 0.000352 or thereabouts.
+#define FLOAT_ACCEPTABLE_ERROR 0.0004
 
 class SimpleTruthValueUTest : public CxxTest::TestSuite
 {

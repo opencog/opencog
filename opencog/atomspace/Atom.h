@@ -32,11 +32,12 @@
 #include <set>
 #include <string>
 
+#include <opencog/util/exceptions.h>
+
+#include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/util/exceptions.h>
+
 #ifdef ZMQ_EXPERIMENT
 	#include "ProtocolBufferSerializer.h"
 #endif
@@ -45,11 +46,14 @@ class AtomUTest;
 
 namespace opencog
 {
+
 /** \addtogroup grp_atomspace
  *  @{
  */
 
 class AtomTable;
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -163,10 +167,7 @@ public:
      *
      * @return Whether this atom is marked for removal.
      */
-    bool isMarkedForRemoval() const
-    {
-        return (flags & MARKED_FOR_REMOVAL) != 0;
-    }
+    bool isMarkedForRemoval() const;
 
     /** Returns an atom flag.
      * A byte represents all flags. Each bit is one of them.
@@ -193,8 +194,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    virtual std::string toString(void) const = 0;
-    virtual std::string toShortString(void) const = 0;
+    virtual std::string toString(std::string indent = "") const = 0;
+    virtual std::string toShortString(std::string indent = "") const = 0;
 
     /** Returns whether two atoms are equal.
      *

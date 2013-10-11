@@ -49,32 +49,32 @@ const std::string& Node::getName() const
     return name;
 }
 
-std::string Node::toShortString() const
+std::string Node::toShortString(std::string indent) const
 {
 #define BUFSZ 1024
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
         tmpname = "#" + _uuid;
-    snprintf(buf, BUFSZ, "node[%s:%s%s]",
-             classserver().getTypeName(type).c_str(), tmpname.c_str(),
-                    (getFlag(HYPOTETHICAL_FLAG) ? ":h" : ""));
-    return buf;
+    snprintf(buf, BUFSZ, "(%s \"%s\")\n",
+             classserver().getTypeName(type).c_str(),
+             tmpname.c_str());
+    return indent + buf;
 }
 
-std::string Node::toString() const
+std::string Node::toString(std::string indent) const
 {
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
         tmpname = "#" + _uuid;
-    //activation here at 0: can be replace with LTI
-    snprintf(buf, BUFSZ, "node[%s:%s] av:(%d,%d) tv:(%s)",
-             classserver().getTypeName(type).c_str(), tmpname.c_str(),
+    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d) %s)\n",
+             classserver().getTypeName(type).c_str(),
+             tmpname.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
              getTruthValue().toString().c_str());
-    return buf;
+    return indent + buf;
 }
 
 bool Node::operator==(const Atom& other) const

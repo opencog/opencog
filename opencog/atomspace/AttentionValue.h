@@ -30,6 +30,7 @@
 #include <limits.h>
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 #ifdef ZMQ_EXPERIMENT
 	#include "ProtocolBufferSerializer.h"
