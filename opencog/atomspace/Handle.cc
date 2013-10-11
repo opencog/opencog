@@ -27,9 +27,7 @@
 #include <climits>
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
-#include <opencog/server/BaseServer.h>
 
 using namespace opencog;
 
