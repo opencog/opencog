@@ -30,25 +30,25 @@ def write_file(cn_assertion, context): # assertion is a list
 	DEFAULT_TV2 = TruthValue()     # used for nodes
 	
 	if cn_assertion[0] == "/r/IsA":					
-		return	'(ContextLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  +  ' \n\t' +\
-					'(ConceptNode  ' + '"' + str(context) + '"' + ' (stv ' + str(set_TV(context).mean) +' ' +str(set_TV(context).count)  +')' + ')\n\t' +\
+		return	('(ContextLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  +  ' \n\t' +\
+					'(ConceptNode  ' + '"' + str(context) + '"' + ' (stv {context_TV.mean} {context_TV.count})' + ')\n\t' +\
 					'(InheritanceLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  + '\n\t\t' +\
-						'(ConceptNode  ' + '"' + cn_assertion[1][6:] + '"' + ' (stv '+ str(set_TV(cn_assertion[1][6:]).mean) +' ' +str(set_TV(cn_assertion[1][6:]).count)  +')' + ')\n\t\t' +\
-						'(ConceptNode  ' + '"' + cn_assertion[2][6:] + '"' + ' (stv '+ str(set_TV(cn_assertion[2][6:]).mean) +' ' +str(set_TV(cn_assertion[2][6:]).count)  +')' + ')\n\t' +\
+						'(ConceptNode  ' + '"' + cn_assertion[1][6:] + '"' + ' (stv {cn_assertion1.mean} {cn_assertion1.count})' + ')\n\t\t' +\
+						'(ConceptNode  ' + '"' + cn_assertion[2][6:] + '"' + ' (stv {cn_assertion2.mean} {cn_assertion2.count})' + ')\n\t' +\
 					')\n'	+\
-				')'
+				')').format(context_TV = set_TV(context), cn_assertion1 = set_TV(cn_assertion[1][6:]), cn_assertion2 = set_TV(cn_assertion[2][6:]) )
 		
 	else:
-		return	'(ContextLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count)  +')' +  ' \n\t'  +\
-					'(ConceptNode  ' + '"' + str(context)+ '"' + ' '  + '(stv '+ str(set_TV(context).mean) +' ' +str(set_TV(context).count)  +')' + ')\n\t' +\
+		return	('(ContextLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count)  +')' +  ' \n\t'  +\
+					'(ConceptNode  ' + '"' + str(context) + '"' + ' (stv {context_TV.mean} {context_TV.count})' + ')\n\t' +\
 					'(EvaluationLink  ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  + '\n\t\t' +\
 						'(PredicateNode  ' + '"' + cn_assertion[0][3:] + '"' +' ' + ' (stv '+ str(set_TV(cn_assertion[0][3:]).mean) +' ' +str(set_TV(cn_assertion[0][3:]).count)+ ')' + ')\n\t\t' +\
 						'(ListLink  '	+ '\n\t\t\t' +\
-								'(ConceptNode  ' + '"' + cn_assertion[1][6:] + '"' + ' (stv '+ str(set_TV(cn_assertion[1][6:]).mean) +' ' +str(set_TV(cn_assertion[1][6:]).count)  +')' + ')\n\t\t\t' +\
-								'(ConceptNode  ' + '"' + cn_assertion[2][6:] + '"' +' (stv '+ str(set_TV(cn_assertion[2][6:]).mean) +' ' +str(set_TV(cn_assertion[2][6:]).count)  +')' + ')\n\t\t' +\
+								'(ConceptNode  ' + '"' + cn_assertion[1][6:] + '"' + ' (stv {cn_assertion1.mean} {cn_assertion1.count})' + ')\n\t\t\t' +\
+								'(ConceptNode  ' + '"' + cn_assertion[2][6:] + '"' + ' (stv {cn_assertion2.mean} {cn_assertion2.count})' + ')\n\t\t' +\
 						')\n\t'	 +\
 					')\n' +\
-				')'
+				')').format(context_TV = set_TV(context), cn_assertion1 = set_TV(cn_assertion[1][6:]), cn_assertion2 = set_TV(cn_assertion[2][6:]) )
 
 
 def from_file(cn_path, scm_name):
