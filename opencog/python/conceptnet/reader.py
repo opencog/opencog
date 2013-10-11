@@ -3,7 +3,6 @@ __author__ = 'Amen Belayneh'
 # This code is used to read the relations from a coceptnet dump, and 
 # return a container containing a list of lists of the relations
   
-
 def csv(csv_file_path):
 	''' Reads from csv dump of conceptnet.'''
 	container = [] # container for edges in conceptnet
