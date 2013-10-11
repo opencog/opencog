@@ -161,7 +161,9 @@ Handle AtomTable::getHandle(Handle h) const
         return getHandle(AtomPtr(h));
 
     // If we have both a uuid and pointer, there's nothing to do.
-    if (NULL != h) return h;
+    // Note: we access the naked pointer itself; that's because
+    // Handle itself calls this method to resolve null pointers.
+    if (h._ptr) return h;
 
     // If we have a uuid but no atom pointer, find the atom pointer.
     auto hit = _atom_set.find(h);

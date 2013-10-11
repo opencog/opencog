@@ -54,10 +54,9 @@ class AtomTable;
 class Handle
 {
 
-friend class TLB;
-friend class AtomStorage;
-friend class SchemeSmob;
-friend class AtomspaceHTabler;
+friend class AtomTable;
+friend class AtomStorage;         // persistance
+friend class AtomspaceHTabler;    // persistance
 
 private:
 
@@ -104,11 +103,19 @@ public:
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
-        return NULL != _ptr;
+        if (_ptr) return true;
+        return NULL != cresolve(); // might be null because we haven't resolved it yet!
     }
 
-    inline bool operator==(std::nullptr_t) const noexcept { return _ptr == NULL; } 
-    inline bool operator!=(std::nullptr_t) const noexcept { return _ptr != NULL; } 
+    inline bool operator==(std::nullptr_t) const noexcept {
+        if (_ptr) return false;
+        return NULL == cresolve(); // might be null because we haven't resolved it yet!
+    }
+
+    inline bool operator!=(std::nullptr_t) const noexcept {
+        if (_ptr) return true;
+        return NULL != cresolve(); // might be null because we haven't resolved it yet!
+    }
 
     // Handles are equivalent when their uuid's compare. It may happen
     // that one has a null pointer, and the other one doesn't; we don't
@@ -189,7 +196,7 @@ struct handle_hash : public std::unary_function<Handle, size_t>
        return static_cast<std::size_t>(h.value());
    }
 };
- 
+
 //! Boost needs this function to be called by exactly this name.
 inline std::size_t hash_value(Handle const& h)
 {
@@ -205,7 +212,7 @@ struct handle_less
        return hl.value() < hr.value();
    }
 };
- 
+
 //! a list of handles
 typedef std::vector<Handle> HandleSeq;
 //! a list of lists of handles
@@ -232,7 +239,7 @@ static inline std::string operator+ (const std::string &lhs, Handle h)
 
 } // namespace opencog
 
-namespace std { 
+namespace std {
 inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
 {
     out << h.value();
@@ -245,7 +252,7 @@ inline std::ostream& operator<<(std::ostream& out, const opencog::Handle& h)
 
 template<>
 inline std::size_t std::hash<opencog::Handle>::operator()(opencog::Handle h) const
-{  
+{
     return static_cast<std::size_t>(h.value());
 }
 #endif // THIS_USED_TO_WORK_GREAT_BUT_IS_BROKEN_IN_GCC472
