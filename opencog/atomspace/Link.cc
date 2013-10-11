@@ -112,7 +112,7 @@ std::string Link::toString(std::string indent) const
 #define BUFSZ 1024
     static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "(%s (av %d %d) %s \n",
+    snprintf(buf, BUFSZ, "(%s (av %d %d) %s\n",
              classserver().getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
