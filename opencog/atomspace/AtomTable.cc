@@ -165,6 +165,9 @@ Handle AtomTable::getHandle(Handle h) const
     // Handle itself calls this method to resolve null pointers.
     if (h._ptr) return h;
 
+    // Read-lock for the _atom_set.
+    std::lock_guard<std::mutex> lck(_mtx);
+
     // If we have a uuid but no atom pointer, find the atom pointer.
     auto hit = _atom_set.find(h);
     if (hit != _atom_set.end())
