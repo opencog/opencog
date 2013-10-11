@@ -355,22 +355,25 @@ more complex form that Handle now has, resulting in more copying.
 (results in first column).
 
 
-   test           AtomTable     AtomTable II
+   test           AtomTable     AtomTable II       III
    name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
    ----           ---------     ----------      ---------   ---------
-  noop            10000          3333
-  addNode           208           238
-  addLink            60.6          58.8
-  getType          5000           833
-  getTV             909          1000
-  setTV             769           588
-  getHandleSet        0.195         0.438
-  getNodeHandles     83.3          91.7
-  getOutgoingSet    625           833
-  getIncomingSet   5000          1429
+  noop            10000          3333           10000
+  addNode           208           238             222
+  addLink            60.6          58.8            57.8
+  getType          5000           833             833
+  getTV             909          1000             909
+  setTV             769           588             625
+  getHandleSet        0.195         0.438           0.487
+  getNodeHandles     83.3          91.7            80.0
+  getOutgoingSet    625           833             909
+  getIncomingSet   5000          1429            2000
 
 
 The second column replaces Handle by UUID in the TypeIndex. This improves
 performance by avoiding excess copying during ahndle manipulations.
 
+Column III shows the profile after two significant changes: rejiggering
+the way the AtomPtr is held by the handle, and by adding locks to the
+AtomTable.  Looks like no change (the numbers are rather noisy).
 
