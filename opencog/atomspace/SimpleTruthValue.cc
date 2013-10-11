@@ -37,7 +37,7 @@
 using namespace opencog;
 
 // If you change this, make sure to update atomspace_details.pyx!
-#define KKK 800.0
+#define KKK 800.0f
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
 {
@@ -143,28 +143,26 @@ TruthValueType SimpleTruthValue::getType() const
     return SIMPLE_TRUTH_VALUE;
 }
 
-float SimpleTruthValue::confidenceToCount(confidence_t c)
+count_t SimpleTruthValue::confidenceToCount(confidence_t cf)
 {
-    c = std::min(c, 0.9999999f);
-    return static_cast<count_t>(KKK * c / (1.0 - c));
+    // There are not quite 16 digits in double precision
+    // not quite 7 in single-precision float
+    cf = std::min(cf, 0.9999998f);
+    return static_cast<count_t>(KKK * cf / (1.0f - cf));
 }
 
-float SimpleTruthValue::countToConfidence(count_t c)
+confidence_t SimpleTruthValue::countToConfidence(count_t cn)
 {
-    return static_cast<confidence_t>(c / (c + KKK));
+    return static_cast<confidence_t>(cn / (cn + KKK));
 }
 
 SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
 {
-    float mean, count, conf;
-    // TODO: confidence is not needed for Saving&Loading.
-    // (Only count is saved). So, for saving memory space
-    // in dump files, it should be removed. However, toString
-    // is being used for debug purposes, so both need to be shown...
-    sscanf(tvStr, "[%f,%f=%f]", &mean, &count, &conf);
-    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
+    float mean, conf;
+    sscanf(tvStr, "(stv %f %f)", &mean, &conf);
+    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, conf = %f\n", tvStr, mean, conf);
     return new SimpleTruthValue(static_cast<strength_t>(mean),
-                                static_cast<count_t>(count));
+                                static_cast<count_t>(confidenceToCount(conf)));
 }
 
 
