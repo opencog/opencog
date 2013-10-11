@@ -37,11 +37,11 @@ namespace opencog
 /**
  * Implements an integer index as an RB-tree (C++ map)
  */
-class FixedIntegerIndex:
-	public AtomIndex<int,Handle>
+class FixedIntegerIndex
+	: public AtomIndex<int, Handle>
 {
 	protected:
-		std::vector<UnorderedHandleSet> idx; 
+		std::vector<UnorderedUUIDSet> idx; 
 		void resize(size_t);
 
 	public:

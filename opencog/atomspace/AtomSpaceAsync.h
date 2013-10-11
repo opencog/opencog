@@ -45,8 +45,6 @@ class AtomSpaceAsync {
 
     void eventLoop();
 
-    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
-
 public: 
 
     AtomSpaceAsync();
@@ -716,6 +714,7 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 
+    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 };
 
 /** @}*/

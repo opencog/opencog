@@ -25,6 +25,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 

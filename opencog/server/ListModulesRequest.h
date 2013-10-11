@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/RequestClassInfo.h>
 

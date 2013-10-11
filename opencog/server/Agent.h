@@ -26,6 +26,7 @@
 #define _OPENCOG_AGENT_H
 
 #include <string>
+#include <unordered_map>
 
 #include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -37,7 +38,8 @@ namespace opencog
  *  @{
  */
 
-typedef boost::unordered_map<Handle, stim_t> AtomStimHashMap;
+typedef short stim_t;
+typedef std::unordered_map<Handle, stim_t, handle_hash> AtomStimHashMap;
 
 class CogServer;
 class AtomSpaceImpl;
