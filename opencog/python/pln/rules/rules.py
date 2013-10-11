@@ -35,7 +35,11 @@ class Rule(object):
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
         tvs = [atom.tv for atom in input_atoms]
-        return self.formula(tvs)
+        result_tvs = self.formula(tvs)
+        if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs):
+            return None
+        else:
+            return result_tvs
 
     def standardize_apart_input_output(self, chainer):
         new_inputs = []
@@ -127,7 +131,7 @@ class ModusPonensRule(Rule):
                       A],
             formula= formulas.modusPonensFormula)
 
-def InheritanceRule(Rule):
+class InheritanceRule(Rule):
     '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''
     def __init__(self, chainer):
         A = chainer.new_variable()
@@ -139,10 +143,13 @@ def InheritanceRule(Rule):
                       chainer.link(types.IntensionalInheritanceLink, [A, B])],
             formula= formulas.inheritanceFormula)
 
-def SimilarityRule(Rule):
+class SimilarityRule(Rule):
     '''SimilarityLink A B
        |A and B| / |A or B|'''
     def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
         Rule.__init__(self,
             outputs= [chainer.link(types.SimilarityLink, [A, B])],
             inputs=  [chainer.link(types.AndLink, [A, B]),
@@ -223,7 +230,7 @@ class AndEliminationRule(AbstractEliminationRule):
     def __init__(self, chainer, N):
         AbstractEliminationRule.__init__(self, chainer, N, link_type= types.AndLink)
 
-    def compute(self, atoms):
+    def calculate(self, atoms):
         [and_atom] = atoms
         outputs = and_atom.out
         N = len(outputs)
@@ -231,9 +238,10 @@ class AndEliminationRule(AbstractEliminationRule):
         # assume independence, i.e. P(A^B^C...) = P(A)P(B)P(C)...
         # therefore P(A) = Nth root of P(AndLink)
         # same for P(B) etc
-        individual_tv = math.pow(and_atom.tv, 1.0/N)
+        individual_frequency = math.pow(and_atom.tv.mean, 1.0/N)
+        individual_count = and_atom.tv.count/1.42
 
-        output_tvs = [individual_tv for out in outputs]
+        output_tvs = [TruthValue(individual_frequency, individual_count) for out in outputs]
 
         return output_tvs
 
@@ -242,7 +250,7 @@ class OrEliminationRule(AbstractEliminationRule):
     def __init__(self, chainer, N):
         AbstractEliminationRule.__init__(self, chainer, N, link_type= types.OrLink)
 
-    def compute(self, atoms):
+    def calculate(self, atoms):
         [or_atom] = atoms
         outputs = or_atom.out
         N = len(outputs)

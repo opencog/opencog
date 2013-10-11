@@ -251,8 +251,11 @@ class Chainer(AbstractChainer):
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
         else:
             if not self._validate(rule, specific_inputs, specific_outputs):
+                self.log_failed_inference('bogus truth value or 0 count')
                 return None
             output_tvs = rule.calculate(specific_inputs)
+            if output_tvs is None:
+                return None
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
 
         # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
@@ -372,6 +375,8 @@ class Chainer(AbstractChainer):
 
     def _apply_rule(self, rule, inputs, outputs, output_tvs, revise=True):
         if revise:
+            assert isinstance(output_tvs, list)
+
             for (atom, new_tv) in zip(outputs, output_tvs):
                 self._revise_tvs(atom, new_tv)
 

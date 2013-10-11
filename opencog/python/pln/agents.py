@@ -29,7 +29,7 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer.add_rule(rules.NotCreationRule(self.chainer))
         self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
 
-        for rule in rules.create_and_or_rules(self.chainer, 1, 5):
+        for rule in rules.create_and_or_rules(self.chainer, 1, 2):
             self.chainer.add_rule(rule)
 
         self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
