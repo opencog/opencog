@@ -107,12 +107,12 @@ public:
     ParamGroundedMapInARule currentAllBindings; // currentBindingsFromForwardState + currentBindingsViaSelecting
 
     // all state nodes connected to this nodes that have been satisfied by this rulenode according to the currently applying rule: the effect state nodes of this rule
-    set<StateNode*> forwardLinks;
+    vector<StateNode*> forwardLinks;
 
     // all state nodes connected to this nodes that are negatived by this rule node according to the currently applying rule: the effect state nodes of this rule
     set<StateNode*> negativeForwardLinks;
 
-    set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
+    vector<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
 
     SpaceServer::SpaceMap* curMap; // to store an imaginary cloned 3D space map after execute the effects of this rule node
 
@@ -170,6 +170,12 @@ public:
         return ( RuleNode::getDepthOfRuleNode(this) > RuleNode::getDepthOfRuleNode(&other));
     }
 
+    // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
+    StateNode* getMostClosedBackwardStateNode();
+
+    // get the ForwardStateNode with the deepest depth, which is the most closed forward state node to me
+    StateNode* getMostClosedForwardStateNode();
+
 };
 
 class StateNode
@@ -180,7 +186,7 @@ public:
     RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    string depth; // depth = -1 means no rule node need this state node as a precondition
+    string depth; // depth = -1 means no rule node need this state node as a precondition, depth string composed of 0~9, A~Z, a~z, see calculateNodeDepth()
 
     StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1";}
 
@@ -192,27 +198,41 @@ public:
     // the rules have been tried on this state node
     list< Rule*> ruleHistory;
 
-    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
-    // the root state node (goals) depth is 1~9, the sub state nodes of node 1 will be 10~19, the sub state nodes of node 12 will be 120~129...etc
-    // it its forward rule node has multiple forward state node, using the deepest one
-    // return depth
-    string calculateNodeDepth();
-
     // have tried to find candidateRules
     bool hasFoundCandidateRules;
 
+    // if this node < the other node, it means this node is more closed to the goal than the other node, the other node is deeper than this node
     bool operator < (const StateNode& other) const
     {
-        if (sizeof(depth) < sizeof(other.depth) )
+        // A node that is Deepest is the orginal starting state, it's the deepest in our backward planning network, the most far away from the goal state
+        if ( (depth == "Deepest") && (other.depth != "Deepest"))
+            return false;
+        else if ( (other.depth == "Deepest") && (depth != "Deepest"))
             return true;
-        else if (sizeof(depth) == sizeof(other.depth) )
+
+        int size = (sizeof(depth) < sizeof(other.depth)) ? sizeof(depth) :  sizeof(other.depth);
+        for (int i =0; i < size; i ++)
         {
-            // get the last digit
-            char last
+            if ( depth[i] < (other.depth)[i] )
+                return true;
+            else if  ((other.depth)[i] < depth[i] )
+                return false;
         }
+
+        // all the fist size digits are equal
+        if (sizeof(depth) < sizeof(other.depth))
+            return true;
         else
             return false;
+
     }
+
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // the root state node (goals) depth is 0~z, the sub state nodes of node 1 will be 10~1z, the sub state nodes of node 12 will be 120~12z...etc
+    // it its forward rule node has multiple forward state node, using the deepest one
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // it its forward rule node has multiple forward state nodes, using the deepest one
+    void calculateNodesDepth();
 
     ~StateNode()
     {
@@ -279,6 +299,8 @@ protected:
      // so that we can quickly find what rules have effect on a specific state during planning
      // map<float,Rule*> is map<probability, rule>
      map<string,multimap<float,Rule*> > ruleEffectIndexes;
+
+     vector<StateNode*> satisfiedGoalStateNodes;
 
      list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
 
@@ -360,7 +382,7 @@ protected:
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      // @ RuleNode* forwardRuleNode : the state's forward rule node
      // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode, string depth);
+     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode);
 
      bool findStateInStartStateNodes(State& state, StateNode* &stateNode);
 

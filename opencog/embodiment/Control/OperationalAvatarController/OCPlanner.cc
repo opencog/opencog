@@ -36,9 +36,10 @@
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
 
+#include <stdlib.h>
 #include <map>
 #include <math.h>
-#include <stdio.h>
+#include <cstdio>
 #include <sstream>
 #include "OAC.h"
 
@@ -46,34 +47,6 @@ using namespace opencog::oac;
 using namespace std;
 
 
-// this function need to be call after its forward rule node assigned, to calculate the depth of this state node
-// it its forward rule node has multiple forward state nodes, using the deepest one
-string StateNode::calculateNodeDepth()
-{
-    if (this->depth == 0)
-    {
-        return 0; // it's the goal state nodes
-    }
-    else if (! this->forwardRuleNode)
-    {
-        this->depth = -1;
-        return -1;
-    }
-
-    set<StateNode*>::iterator it;
-
-    int deepest = 0;
-    for ( it = this->forwardRuleNode->forwardLinks.begin(); it != this->forwardRuleNode->forwardLinks.end();  ++ it)
-    {
-        int d = ((StateNode*)(*it))->depth;
-        if (d > deepest)
-            deepest = d;
-    }
-
-    this->depth = deepest + 1;
-    return this->depth;
-
-}
 
 void RuleNode::updateCurrentAllBindings()
 {
@@ -96,24 +69,61 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
     return false;
 }
 
+// this should be called after its forward node is assigned or changed
+void StateNode::calculateNodesDepth()
+{
+/*
+    if (sizeof(this->depth) == 1)
+    {
+        return; // it's the goal state nodes
+    }
+    else if (! this->forwardRuleNode)
+    {
+        this->depth = "-1";
+        return;
+    }
+
+    vector<StateNode*>::iterator it;
+
+    int deepest = 0;
+    for ( it = this->forwardRuleNode->forwardLinks.begin(); it != this->forwardRuleNode->forwardLinks.end();  ++ it)
+    {
+        int d = ((StateNode*)(*it))->depth;
+        if (d > deepest)
+            deepest = d;
+    }
+
+    this->depth = deepest + 1;
+    return this->depth;
+*/
+}
+
+StateNode* RuleNode::getMostClosedBackwardStateNode()
+{
+    // get the BackwardStateNode with the least depth
+    vector<StateNode*>::iterator it = backwardLinks.begin();
+    StateNode* lastedStateNode = 0;
+
+    for (; it != backwardLinks.end(); ++ it)
+    {
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
+
+        if ( ((StateNode*)(*it)) <  lastedStateNode)
+        {
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+}
+
+
 SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode)
 {
     // first , get the BackwardStateNodes
     if (ruleNode->backwardLinks.size() == 0)
         return &(spaceServer().getLatestMap());
 
-    set<StateNode*>::iterator it = ruleNode->backwardLinks.begin();
-    StateNode* lastedStateNode;
-    int smallestDepth = 99999;
-    for (; it != ruleNode->backwardLinks.end(); ++ it)
-    {
-        int depth = ((StateNode*)(*it))->calculateNodeDepth();
-        if ( depth <  smallestDepth)
-        {
-            smallestDepth = depth;
-            lastedStateNode = (StateNode*)(*it);
-        }
-    }
+    StateNode* lastedStateNode = ruleNode->getMostClosedBackwardStateNode();
 
     // get the curMap of the backward rule of this state node
     if (lastedStateNode->backwardRuleNode != 0)
@@ -134,7 +144,7 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
     if ( (curStateNode != 0) && (curStateNode->backwardRuleNode != 0))
     {
         // find this state in temporaryStateNodes
-        if (findStateInTempStates(goalState,forwardRuleNode,satstateNode,ifCheckSameRuleNode,RuleNode::getDepthOfRuleNode(curStateNode->backwardRuleNode)))
+        if (findStateInTempStates(goalState,forwardRuleNode,satstateNode,ifCheckSameRuleNode))
         {
             //  check if this state has beed satisfied by the previous state nodes
             float satisfiedDegree;
@@ -185,22 +195,27 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
 
 //  return if this same state is found in temporaryStateNodes
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
-bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,StateNode* &stateNode,bool ifCheckSameRuleNode, int depth)
+bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,StateNode* &stateNode,bool ifCheckSameRuleNode)
 {
     //  check if this state has beed satisfied by the previous state nodes
     list<StateNode*>::const_iterator vit = temporaryStateNodes.begin();
 
     // most closed state node, describing the same state of the input state
     stateNode = 0;
-    int smallestDepth = depth;
+    StateNode* mostClosedNode;
+
+    if (forwardRuleNode)
+        mostClosedNode = forwardRuleNode->getMostClosedBackwardStateNode();
 
     for (;vit != temporaryStateNodes.end(); vit ++)
     {
-        // only check the states backward then the input depth
+        // only check the states more backward (deeper) then the mostClosedNode
         // cuz the forward state won't affect the current state
-        int sdepth = ((StateNode*)(*vit))->calculateNodeDepth();
-        if (sdepth < depth)
-            continue;
+        if (mostClosedNode)
+        {
+            if (((StateNode*)(*vit)) < mostClosedNode)
+                continue;
+        }
 
         // toBeImproved: there is some messy logic order problem in backward reasoning,
         // sometimes need to add the effect states of a rulenode into temporaryStateNodes, before check the precondition states of this rule node
@@ -211,7 +226,11 @@ bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,St
         State* vState = ((StateNode*)(*vit))->state;
         if (vState->isSameState(state))
         {
-            if (sdepth < smallestDepth ) // get the most closed state node to the input depth
+            if (stateNode == 0)
+            {
+                stateNode = (StateNode*)(*vit);
+            }
+            else if (((StateNode*)(*vit)) < stateNode) // get the most closed state node backward from the forwardRuleNode
             {
                 stateNode = ((StateNode*)(*vit));
             }
@@ -254,7 +273,7 @@ bool OCPlanner::findStateInStartStateNodes(State& state, StateNode* &stateNode)
 int RuleNode::getDepthOfRuleNode(const RuleNode* r)
 {
      // check the depth of the effect state nodes of this rule, get the deepest state node.
-    set<StateNode*>::iterator it;
+/*    vector<StateNode*>::iterator it;
 
     int deepest = 0;
     for ( it = r->forwardLinks.begin(); it != r->forwardLinks.end();  ++ it)
@@ -264,7 +283,7 @@ int RuleNode::getDepthOfRuleNode(const RuleNode* r)
             deepest = d;
     }
 
-    return deepest;
+    return deepest;*/
 }
 
 OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
@@ -470,6 +489,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     unsatisfiedStateNodes.clear();
     temporaryStateNodes.clear();
     imaginaryHandles.clear(); // TODO: Create imaginary atoms
+    satisfiedGoalStateNodes.clear();
 
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
@@ -484,7 +504,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         newStateNode->backwardRuleNode = 0;
         newStateNode->forwardRuleNode = 0;
-        newStateNode->depth = 999;
+        // A node that is Deepest is the orginal starting state, it's the deepest in our backward planning network, the most far away from the goal state
+        newStateNode->depth = "Deepest";
 
         startStateNodes.push_front(newStateNode);
 
@@ -492,25 +513,26 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // And then, we construct the original unsatisfiedStateNodes and temporaryStateNodes from the input goals
 
-    // this is to store the already satisfied goal states before beginning planning, in case some planning steps  will change them into unsatisfied
-    // Everytime it's changed into unsatisfied, it should be put into the unsatisfiedStateNodes list and removed from goalStateNodes list
-    vector<StateNode*> goalStateNodes;
+    // satisfiedGoalStateNodes is to store the already satisfied goal states before beginning planning, in case some planning steps  will change them into unsatisfied
+    // Everytime when it's changed into unsatisfied, it should be put into the unsatisfiedStateNodes list and removed from satisfiedGoalStateNodes list
+
     vector<State*>::const_iterator it;
-    for (it = goal.begin(); it != goal.end(); ++ it)
+    int goalNum = 0;
+    for (it = goal.begin(); it != goal.end(); ++ it, ++ goalNum)
     {
         float satisfiedDegree;
         StateNode* newStateNode = new StateNode(*it);
 
         newStateNode->backwardRuleNode = 0;
         newStateNode->forwardRuleNode = 0;
-        newStateNode->depth = 0;
+        newStateNode->depth = opencog::toString(goalNum);
 
         bool found;
         StateNode* knownStateNode;
 
         if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode, 0,false))
         {
-            goalStateNodes.push_back(newStateNode);
+            satisfiedGoalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
         }
 
@@ -520,7 +542,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
         else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
         {
-            goalStateNodes.push_back(newStateNode);
+            satisfiedGoalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
         }
         else
@@ -551,14 +573,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             std::cout << "Planning failed! Has tried more than 999 steps of planning, cannot find a plan!" << std::endl;
             return "";
         }
-
+/*
         // decide which state should be chosed to achieved first
         list<StateNode*>::iterator stateNodeIter;
         for (stateNodeIter = unsatisfiedStateNodes.begin(); stateNodeIter != unsatisfiedStateNodes.end();++stateNodeIter)
         {
             ((StateNode*)(*stateNodeIter))->calculateNodeDepth();
         }
-
+*/
         // unsatisfiedStateNodes.sort();
 
         // the state node with deeper depth will be solved first
@@ -579,7 +601,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         Inquery::setSpaceMap(curImaginaryMap);
 
         // if the deepest state node has a depth of -1, it means all the required states have been satisfied
-        if (curStateNode->depth == -1)
+        if (curStateNode->depth == "-1")
             break;
 
         // if we have not tried to achieve this state node before, find all the candidate rules first
@@ -720,7 +742,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // Remove this rule from the candidate rules of all its foward state nodes
                     // and move all its foward state nodes from temporaryStateNodes to unsatisfiedStateNodes
-                    set<StateNode*>::iterator forwardStateIt;
+                    vector<StateNode*>::iterator forwardStateIt;
                     for (forwardRuleNode->forwardLinks.begin(); forwardStateIt != forwardRuleNode->forwardLinks.end(); ++ forwardStateIt)
                     {
                         if (((StateNode*)(*forwardStateIt))->candidateRules.size() > 0)
@@ -753,7 +775,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     // There are still Candidate bindings for this rule node to try.
 
                     // check which states of the preconditions of this forwardRuleNode have been sovled , which still remand unsloved.
-                    set<StateNode*>::iterator preconItor;
+                    vector<StateNode*>::iterator preconItor;
                     map<State*,StateNode*> solvedStateNodes; // all the state nodes in forwardRuleNode's preditions that have been solved by previous planning steps
                     for (preconItor = forwardRuleNode->backwardLinks.begin(); preconItor != forwardRuleNode->backwardLinks.end(); ++ preconItor)
                     {
@@ -890,7 +912,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // create a new RuleNode to apply this selected rule
         RuleNode* ruleNode = new RuleNode(selectedRule);
         ruleNode->number = ruleNodeCount ++;
-        ruleNode->forwardLinks.insert(curStateNode);
+        ruleNode->forwardLinks.push_back(curStateNode);
         curStateNode->backwardRuleNode = ruleNode;
 
         allRuleNodeInThisPlan.push_front(ruleNode);
@@ -999,7 +1021,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     StateNode* unsatStateNode = (StateNode*)(*unsait);
                     if (effState->isSatisfied(*(unsatStateNode->state ),satDegree))
                     {
-                        ruleNode->forwardLinks.insert(unsatStateNode);
+                        ruleNode->forwardLinks.push_back(unsatStateNode);
                         unsatisfiedStateNodes.erase(unsait);
 
                         unsatStateNode->backwardRuleNode = ruleNode;
@@ -1056,7 +1078,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             // need to check in the goal state node list, if this effect change the already satisfied states in the goal list
             vector<StateNode*>::iterator goIt;
-            for (goIt = goalStateNodes.begin(); goIt != goalStateNodes.end();)
+            for (goIt = satisfiedGoalStateNodes.begin(); goIt != satisfiedGoalStateNodes.end();)
             {
                 StateNode* goalNode = (StateNode*)(*goIt);
                 if (effState->isSameState( *(goalNode->state) ))
@@ -1064,10 +1086,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     float satDegree;
 
                     if (! effState->isSatisfied(*(goalNode->state) ,satDegree))
-                    {                        
+                    {
                         // This effect dissatisfied this goal, put this goal into the unsatisfied state node list and remove it from goal list
                         unsatisfiedStateNodes.push_back(goalNode);
-                        goalStateNodes.erase(goIt);
+                        satisfiedGoalStateNodes.erase(goIt);
                     }
                     else
                          ++ goIt;
@@ -1119,7 +1141,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     RuleNode* backwardRuleNode = satStateNode->backwardRuleNode;
                     if (backwardRuleNode)
                     {
-                        satStateNode->backwardRuleNode->forwardLinks.insert(newStateNode);
+                        satStateNode->backwardRuleNode->forwardLinks.push_back(newStateNode);
                         newStateNode->backwardRuleNode =  satStateNode->backwardRuleNode;
                     }
 
@@ -1646,7 +1668,7 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     // does not belong to the main branch of this given forwardStateNode
     // so don't need to delete such state nodes, only need to remove them from the temporaryStateNodes ,
     // and put them into the unsatisfied list if there is any other rule node used them as preconditions
-    set<StateNode*>::iterator forwardStateIt;
+    vector<StateNode*>::iterator forwardStateIt;
     for (forwardStateIt = ruleNode->forwardLinks.begin(); forwardStateIt != ruleNode->forwardLinks.end(); ++ forwardStateIt)
     {
         StateNode* curStateNode = (StateNode*)(*forwardStateIt);
@@ -1664,7 +1686,7 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
     // check all its backward state nodes
     // delete them recursively
-    set<StateNode*>::iterator backwardStateIt;
+    vector<StateNode*>::iterator backwardStateIt;
     for (backwardStateIt = ruleNode->backwardLinks.begin(); backwardStateIt != ruleNode->backwardLinks.end(); ++ backwardStateIt)
     {
         StateNode* curStateNode = (StateNode*)(*backwardStateIt);
@@ -2303,7 +2325,7 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     // we won't ground the numeric states here, because it's too time-consuming,
     // we won't give all the possible combinations of numeric values and non-numeric values for candidates
 
-	return true;
+    return true;
 }
 
 // this should be called only after the currentAllBindings has been chosen
@@ -2491,7 +2513,7 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
                     s->name().c_str());
 
         StateNode* stateNode;
-        if (findStateInTempStates(*s, 0, stateNode, false, RuleNode::getDepthOfRuleNode(ruleNode)))
+        if (findStateInTempStates(*s, 0, stateNode, false))
         {
             ruleNode->orginalGroundedParamValues.push_back(stateNode->state->getParamValue());
         }
@@ -2984,7 +3006,6 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
 
 }
-
 
 
 
