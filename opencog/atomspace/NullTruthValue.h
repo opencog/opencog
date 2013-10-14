@@ -54,6 +54,7 @@ public:
     std::string toString() const;
     TruthValueType getType() const throw (RuntimeException);
     TruthValuePtr clone() const;
+    TruthValue* rawclone() const;
 
     virtual bool operator==(const TruthValue& rhs) const;
 

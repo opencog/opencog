@@ -59,7 +59,7 @@ void IsMovablePredicateUpdater::update(Handle object, Handle pet, unsigned long 
                        objectType == HUMANOID_NODE || 
                        objectType == ACCESSORY_NODE );    
 
-    SimpleTruthValue tv( isMovable ? 1.0 : 0.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV( isMovable ? 1.0 : 0.0, 1.0));
 
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_movable", tv, object);
 }

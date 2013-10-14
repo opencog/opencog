@@ -191,6 +191,11 @@ public:
         return std::make_shared<CompositeTruthValue>(*this);
     }
 
+    TruthValue* rawclone() const
+    {
+        return new CompositeTruthValue(*this);
+    }
+
     static CompositeTruthValuePtr createCTV(TruthValuePtr tv, VersionHandle vh)
     {
         return std::make_shared<CompositeTruthValue>(tv, vh);

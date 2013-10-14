@@ -103,6 +103,10 @@ public:
     {
         return std::make_shared<SimpleTruthValue>(*this);
     }
+    TruthValue* rawclone() const
+    {
+        return new SimpleTruthValue(*this);
+    }
 };
 
 /** @}*/

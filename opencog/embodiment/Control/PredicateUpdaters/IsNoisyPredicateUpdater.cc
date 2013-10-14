@@ -56,14 +56,14 @@ void IsNoisyPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
     // truth value - mean equals 0.0 --> not noisy
     //               mean equals 1.0 --> is  noisy
-    SimpleTruthValue tv(0.0, 1.0);
+    TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
 
     // 1. agents (pet, humanoid or avatar) are noisy since they can produce sounds
     if ( atomSpace.getType(object) == AVATAR_NODE ||
          atomSpace.getType(object) == PET_NODE ||
          atomSpace.getType(object) == HUMANOID_NODE) {
         
-        tv.setMean(1.0);
+        tv = SimpleTruthValue::createTV(1.0, 1.0);
         
         std::string objectName = atomSpace.getName( object );
 

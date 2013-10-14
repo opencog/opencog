@@ -78,3 +78,8 @@ TruthValuePtr NullTruthValue::clone() const
     return nullo;
 }
 
+TruthValue* NullTruthValue::rawclone() const
+{
+    return new NullTruthValue();
+}
+

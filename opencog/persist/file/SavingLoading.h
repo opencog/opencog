@@ -159,7 +159,7 @@ private:
      * @param File where the TruthValue will be written.
      * @param TruthValue to be written.
      */
-    void writeTruthValue(FILE*, const TruthValue&);
+    void writeTruthValue(FILE*, TruthValuePtr);
 
     /**
      * This method writes all AttentionValue members to a given file.
@@ -206,7 +206,7 @@ private:
      * @param File from where the TruthValue will be read.
      * @return Newly read TruthValue.
      */
-    TruthValue *readTruthValue(FILE*);
+    TruthValuePtr readTruthValue(FILE*);
 
     /**
      * This method reads all AttentionValue members from a given file.

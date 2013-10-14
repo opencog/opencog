@@ -70,7 +70,7 @@ SenseSimilarityLCH::~SenseSimilarityLCH()
  * Note that currently, only the "mean" is used to nindicate similarity;
  * whereas teh confidence is set to the arbitrary 0.9
  */
-SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
+SimpleTruthValuePtr SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 {
 	first_sense = fs;
 	second_sense = ss;
@@ -84,8 +84,7 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 	    (0 == first_pos.compare("adj")) ||
 	    (0 == first_pos.compare("adv")))
 	{
-		SimpleTruthValue stv(0.0, 0.5);
-		return stv;
+		return SimpleTruthValue::createSTV(0.0, 0.5);
 	}
 
 	// As of wordnet-3.0, the depth of verb taxonomy is 14, noun is 20.
@@ -138,8 +137,7 @@ SimpleTruthValue SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 	// printf("----\n");
 #endif
 
-	SimpleTruthValue stv((float) sim, 0.9f);
-	return stv;
+	return SimpleTruthValue::createSTV((float) sim, 0.9f);
 }
 
 bool SenseSimilarityLCH::up_first(Handle up)

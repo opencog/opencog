@@ -169,15 +169,15 @@ std::string SchemeSmob::tv_to_string(const TruthValue *tv)
 		{
 			const CompositeTruthValue *mtv = static_cast<const CompositeTruthValue *>(tv);
 			ret += "(mtv ";
-			ret += tv_to_string(&mtv->getPrimaryTV());
+			ret += tv_to_string(mtv->getPrimaryTV().get());
 
 			foreach(VersionHandle vh, mtv->vh_range())
 			{
 				ret += "(";
 				ret += vh_to_string(&vh);
-				const TruthValue& vtv = mtv->getVersionedTV(vh);
+				const TruthValuePtr vtv = mtv->getVersionedTV(vh);
 				ret += " ";
-				ret += tv_to_string(&vtv);
+				ret += tv_to_string(vtv.get());
 				ret += ")";
 			}
 			ret += ")";
@@ -239,24 +239,24 @@ SCM SchemeSmob::ss_new_itv (SCM slower, SCM supper, SCM sconfidence)
 
 SCM SchemeSmob::ss_new_mtv (SCM svh, SCM stv)
 {
-    VersionHandle *vh = verify_vh(svh, "cog-new-mtv");
-    TruthValue *tv = verify_tv(stv, "cog-new-mtv", 2);
+	VersionHandle *vh = verify_vh(svh, "cog-new-mtv");
+	TruthValue *tv = verify_tv(stv, "cog-new-mtv", 2);
 
-    CompositeTruthValue *mtv = new CompositeTruthValue(*tv, *vh);
+	CompositeTruthValue *mtv = new CompositeTruthValue(tv->clone(), *vh);
 	return take_tv(mtv);
 }
 
 SCM SchemeSmob::ss_set_vtv (SCM smtv, SCM svh, SCM stv)
 {
-    CompositeTruthValue *mtv = 
-        dynamic_cast<CompositeTruthValue*>(verify_tv(smtv, "cog-set-vtv!"));
-    if(!mtv)
-        scm_wrong_type_arg_msg("cog-set-vtv!", 1, smtv, "opencog composite truth value");
+	CompositeTruthValue *mtv = 
+		dynamic_cast<CompositeTruthValue*>(verify_tv(smtv, "cog-set-vtv!"));
+	if (!mtv)
+		scm_wrong_type_arg_msg("cog-set-vtv!", 1, smtv, "opencog composite truth value");
 
-    VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 2);
-    TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 3);
+	VersionHandle *vh = verify_vh(svh, "cog-set-vtv!", 2);
+	TruthValue *tv = verify_tv(stv, "cog-set-vtv!", 3);
 
-    mtv->setVersionedTV(*tv, *vh);
+	mtv->setVersionedTV(tv->clone(), *vh);
 	return smtv;
 }
 
@@ -386,8 +386,8 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 		case COMPOSITE_TRUTH_VALUE:
 		{
 			CompositeTruthValue *mtv = static_cast<CompositeTruthValue *>(tv);
-			const TruthValue &ptv = mtv->getPrimaryTV();
-			TruthValue *nptv = ptv.clone();
+			TruthValuePtr ptv = mtv->getPrimaryTV();
+			TruthValue *nptv = ptv->rawclone();
 			SCM sptv = take_tv(nptv);
 
 			SCM sprimary = scm_from_locale_symbol("primary");
@@ -405,8 +405,8 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 				SCM svh = take_vh(nvh);
 				one = scm_acons(svhandle, svh, one);
 
-				const TruthValue& vtv = mtv->getVersionedTV(vh);
-				TruthValue *nvtv = vtv.clone();
+				TruthValuePtr vtv = mtv->getVersionedTV(vh);
+				TruthValue *nvtv = vtv->rawclone();
 				SCM svtv = take_tv(nvtv);
 				one = scm_acons(stvalue, svtv, one);
 

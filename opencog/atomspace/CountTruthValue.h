@@ -78,9 +78,19 @@ public:
 
     virtual TruthValuePtr merge(TruthValuePtr) const;
 
+    static TruthValuePtr createTV(strength_t s, confidence_t f, count_t c)
+    {
+        return std::static_pointer_cast<TruthValue>(
+            std::make_shared<CountTruthValue>(s, f, c));
+    }
+
     TruthValuePtr clone() const
     {
         return std::make_shared<CountTruthValue>(*this);
+    }
+    TruthValue* rawclone() const
+    {
+        return new CountTruthValue(*this);
     }
 };
 

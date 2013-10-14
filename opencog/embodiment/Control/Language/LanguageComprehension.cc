@@ -667,7 +667,7 @@ void LanguageComprehension::answerQuestion()
     HandleSeq sentences; 
     sentences.push_back( atomSpace.addNode( ANCHOR_NODE, "# Possible Sentences" ) );
     sentences.push_back( atomSpace.addNode( SENTENCE_NODE, answer_sentence) ); 
-    atomSpace.addLink( LIST_LINK, sentences, SimpleTruthValue( 1, 1 ) );
+    atomSpace.addLink( LIST_LINK, sentences, SimpleTruthValue::createTV( 1, 1 ) );
 
     answer = SchemeEval::instance().eval( "(choose-sentence)");
     logger().debug( "LanguageComprehension::%s - (choose-sentence) answer: %s",
@@ -686,7 +686,7 @@ void LanguageComprehension::answerQuestion()
 
     // now set to false all heard sentences and set as answered all heard questions
     for( unsigned int i = 0; i < heardSentences.size(); ++i ) {
-        atomSpace.setTV( heardSentences[i], SimpleTruthValue( 0, 1) );
+        atomSpace.setTV( heardSentences[i], SimpleTruthValue::createTV( 0, 1) );
 
         Handle listLink = atomSpace.getOutgoing( heardSentences[i], 1 );
         Handle sentenceNode = atomSpace.getOutgoing( listLink, 0 );
@@ -879,7 +879,7 @@ void LanguageComprehension::createFrameInstancesFromRelations(
         resultingFrames.push_back(
             AtomSpaceUtil::setPredicateFrameFromHandles(
                 atomSpace, "#Locative_relation", instanceName.str( ), 
-                    elements, SimpleTruthValue(1.0, 1.0), false ) );
+                    elements, SimpleTruthValue::createTV(1.0, 1.0), false ) );
     } // for
 }
 

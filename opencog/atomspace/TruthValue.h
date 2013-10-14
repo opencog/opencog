@@ -145,6 +145,7 @@ public:
     virtual std::string toString() const  = 0;
     virtual TruthValueType getType() const  = 0;
     virtual TruthValuePtr clone() const  = 0;
+    virtual TruthValue* rawclone() const  = 0;
 
     /**
      * Equality. Used to determine if two truth values are the
