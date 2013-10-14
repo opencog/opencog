@@ -972,8 +972,11 @@ penalized_bscore precision_bscore::operator()(const combo_tree& tr) const
         if (active > 0) {
             // normalize all components by active
             score_t iac = 1.0 / active; // inverse of activity to be faster
-            boost::transform(pbs.first, pbs.first.begin(), arg1 * iac);
-
+            for (auto& v : pbs.first) v *= iac;
+            
+            // tp = true positive
+            // fp = false positive
+            //
             // By using (tp-fp)/2 the sum of all the per-row contributions
             // is offset by -1/2 from the precision, as proved below
             //

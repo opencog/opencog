@@ -92,8 +92,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString() const;
-    std::string toShortString() const;
+    std::string toString(std::string indent = "") const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given atom is equal to the current node.
@@ -109,6 +109,11 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+typedef std::shared_ptr<Node> NodePtr;
+static inline NodePtr NodeCast(const Handle& h)
+    { AtomPtr a(h); return std::dynamic_pointer_cast<Node>(a); }
+static inline NodePtr NodeCast(AtomPtr a) { return std::dynamic_pointer_cast<Node>(a); }
 
 // XXX temporary hack ...
 #define createNode std::make_shared<Node>

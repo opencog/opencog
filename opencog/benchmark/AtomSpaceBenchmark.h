@@ -84,6 +84,7 @@ public:
     BenchType testKind;
 
     UUID UUID_begin;
+    UUID UUID_end;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;
 

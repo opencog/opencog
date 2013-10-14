@@ -48,7 +48,7 @@
 
 using namespace opencog;
 
-std::mutex AtomTable::_mtx;
+std::recursive_mutex AtomTable::_mtx;
 
 AtomTable::AtomTable()
 {
@@ -58,12 +58,15 @@ AtomTable::AtomTable()
     addedTypeConnection =
         classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
                     this, _1));
+
+    Handle::set_resolver(this);
 }
 
 AtomTable::~AtomTable()
 {
     //disconnect signals
     addedTypeConnection.disconnect();
+    Handle::clear_resolver(this);
 
 #if DONT_BOTHER_WITH_THIS
     // WTF!? XXX TODO why are we removing these one by one? Lets
@@ -89,6 +92,7 @@ bool AtomTable::isCleared(void) const
         return false;
     }
 
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     // if (nameIndex.size() != 0) return false;
     if (typeIndex.size() != 0) return false;
     if (importanceIndex.size() != 0) return false;
@@ -111,6 +115,7 @@ AtomTable::AtomTable(const AtomTable& other)
 
 Handle AtomTable::getHandle(Type t, const std::string& name) const
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     return nodeIndex.getHandle(t, name.c_str());
 }
 
@@ -124,6 +129,7 @@ Handle AtomTable::getHandle(const NodePtr n) const
 
 Handle AtomTable::getHandle(Type t, const HandleSeq &seq) const
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     return linkIndex.getHandle(t, seq);
 }
 
@@ -156,6 +162,14 @@ Handle AtomTable::getHandle(Handle h) const
     // If we have an atom, but don't know the uuid, find uuid.
     if (Handle::UNDEFINED.value() == h.value())
         return getHandle(AtomPtr(h));
+
+    // If we have both a uuid and pointer, there's nothing to do.
+    // Note: we access the naked pointer itself; that's because
+    // Handle itself calls this method to resolve null pointers.
+    if (h._ptr) return h;
+
+    // Read-lock for the _atom_set.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     // If we have a uuid but no atom pointer, find the atom pointer.
     auto hit = _atom_set.find(h);
@@ -431,8 +445,6 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         return atom->getHandle();
     }
 
-    std::lock_guard<std::mutex> lck(_mtx);
-
 #if LATER
     // XXX FIXME -- technically, this throw is correct, except
     // thatSavingLoading gives us atoms with handles preset.
@@ -441,6 +453,11 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         throw RuntimeException(TRACE_INFO,
           "AtomTable - Attempting to insert atom with handle already set!");
 #endif
+
+    // Lock before checking to see if this kind of atom can already
+    // be found in the atomspace.  We need to lock here, to avoid two
+    // different threads from trying to add exactly the same atom.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
 
     // Is the equivalent of this atom already in the table?
     // If so, then we merge the truth values.
@@ -472,14 +489,17 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // do that here. Unfortunately, this is not really
                     // thread-safe, and there is no particularly elegant
                     // way to lock. So we punt.  This makes sense,
-                    // because it is unlikely that one threa is going to
-                    // be winging on the outgoing set, whille another
+                    // because it is unlikely that one thread is going to
+                    // be winging on the outgoing set, while another
                     // thread is performing an atom-table add.  I'm pretty
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
                     continue;
                 }
+                throw RuntimeException(TRACE_INFO,
+                    "AtomTable - Atom in outogin set must have been "
+                    "previously inserted into the atom table!");
             }
             if (Handle::UNDEFINED == h) {
                 throw RuntimeException(TRACE_INFO,
@@ -566,6 +586,12 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     if (!atom || atom->isMarkedForRemoval()) return result;
     atom->markForRemoval();
 
+    // lock before fetching the incoming set. Since getting the
+    // incoming set also grabs a lock, we need this mutex to be
+    // recurisve. We need to lock here to avoid confusion if multiple
+    // threads are trying to delete the same atom.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
     if (recursive) {
@@ -613,8 +639,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         UnorderedHandleSet::const_iterator it;
         for (it = is.begin(); it != is.end(); it++)
         {
-            logger().warn("\tincoming: %s\n", 
-                 (*it)->toShortString().c_str());
+            logger().warn("\tincoming: %s\n", (*it)->toShortString().c_str());
         }
         logger().setBackTraceLevel(save);
         logger().warn("AtomTable.extract(): stack trace for previous error follows");
@@ -650,6 +675,7 @@ bool AtomTable::decayed(Handle h)
 
 AtomPtrSet AtomTable::decayShortTermImportance()
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     UnorderedHandleSet exh = importanceIndex.decayShortTermImportance(this);
 
     AtomPtrSet aps;
@@ -664,6 +690,7 @@ AtomPtrSet AtomTable::decayShortTermImportance()
 
 void AtomTable::typeAdded(Type t)
 {
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     //resize all Type-based indexes
     nodeIndex.resize();
     linkIndex.resize();

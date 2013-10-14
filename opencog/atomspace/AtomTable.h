@@ -83,7 +83,10 @@ class AtomTable
 private:
 
     // Single, global mutex for locking the indexes.
-    static std::mutex _mtx;
+    // Its recursive because we need to lock twice during atom insertion
+    // and removal: we need to keep the indexes stable while we search
+    // them during add/remove.
+    static std::recursive_mutex _mtx;
 
     size_t size;
 
@@ -178,6 +181,7 @@ public:
      */
     void addPredicateIndex(Handle h, PredicateEvaluator *pe)
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         predicateIndex.addPredicateIndex(h,pe);
     }
 
@@ -188,6 +192,7 @@ public:
      */
     PredicateEvaluator* getPredicateEvaluator(Handle h) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return predicateIndex.getPredicateEvaluator(h);
     }
 
@@ -219,6 +224,7 @@ public:
                     Handle h,
                     VersionHandle vh = NULL_VERSION_HANDLE) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         const UnorderedHandleSet& hs = predicateIndex.findHandlesByGPN(h);
         return std::copy_if(hs.begin(), hs.end(), result,
                  [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
@@ -278,6 +284,7 @@ public:
                        Type type,
                        bool subclass = false) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
@@ -290,6 +297,7 @@ public:
                        bool subclass,
                        VersionHandle vh) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
@@ -304,6 +312,7 @@ public:
                         Type type,
                         bool subclass = false) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void { 
@@ -318,6 +327,7 @@ public:
                         bool subclass,
                         VersionHandle vh) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
              [&](Handle h)->void { 
@@ -337,6 +347,7 @@ public:
                            AtomPredicate* pred,
                            VersionHandle vh = NULL_VERSION_HANDLE) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
@@ -375,6 +386,7 @@ public:
                              VersionHandle vh = NULL_VERSION_HANDLE,
                              VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
                             targetTypeIndex.end(),
                             result,
@@ -396,6 +408,7 @@ public:
     getIncomingSet(OutputIterator result,
                    Handle h) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy(incomingIndex.begin(h),
                          incomingIndex.end(),
                          result);
@@ -420,6 +433,7 @@ public:
                          Type type,
                          bool subclass = false) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
                             result,
@@ -435,6 +449,7 @@ public:
                            bool subclass,
                            VersionHandle vh) const
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
                             result,
@@ -539,6 +554,7 @@ public:
         if (name.c_str()[0] == 0)
             return getHandlesByType(result, type, subclass);
 
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
@@ -553,6 +569,7 @@ public:
         if (name.c_str()[0] == 0)
             return getHandlesByTypeVH(result, type, subclass, vh);
 
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
         return std::copy_if(hs.begin(), hs.end(), result,
              [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
@@ -620,7 +637,10 @@ public:
      */
     UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
                               AttentionValue::sti_t upperBound = 32767) const
-        { return importanceIndex.getHandleSet(this, lowerBound, upperBound); }
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        return importanceIndex.getHandleSet(this, lowerBound, upperBound);
+    }
 
     /**
      * Decays importance of all atoms in the table, reindexing
@@ -639,6 +659,7 @@ public:
      */
     void updateImportanceIndex(AtomPtr a, int bin)
     {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
         importanceIndex.updateImportance(a, bin);
     }
 

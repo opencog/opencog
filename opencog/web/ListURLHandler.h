@@ -29,7 +29,6 @@
 #include <vector>
 #include <string>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/RequestResult.h>
 

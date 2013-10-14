@@ -24,22 +24,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Atom.h"
-
 #include <set>
 
 #ifndef WIN32
 #include <unistd.h>
 #endif
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -123,6 +123,11 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
             atomTable->updateImportanceIndex(a, oldBin);
         }
     }
+}
+
+bool Atom::isMarkedForRemoval() const
+{
+    return (flags & MARKED_FOR_REMOVAL) != 0;
 }
 
 bool Atom::getFlag(int flag) const

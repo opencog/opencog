@@ -38,7 +38,6 @@ print combo_program  # Prints: and(or(!$1 !$2) or($1 $2))
 
 Example usage of run_manually:
 
-moses.run_manually("--version")
 moses.run_manually("-i input.txt -o output.txt")
 
 @todo Implement an option to use a Python function as the MOSES scoring function
@@ -133,7 +132,8 @@ cdef class moses:
             for candidate in output_list:
                 program = candidate
                 # @todo Fix opencog/comboreduct/combo/iostream_combo.h (ostream_combo_it) to remove the unneeded trailing comma that is inserted by the Python formatter
-                program = program.rpartition(',')[0]
+                if ',' in program:
+                    program = program.rpartition(',')[0]
                 if "#score: " in program:
                     score = int(program.split("#score: ")[1].splitlines()[0])
                 else:
@@ -145,7 +145,7 @@ cdef class moses:
             output_list = [element[:-1] for element in output.splitlines()]
 
             for candidate in output_list:
-                score = candidate.partition(' ')[0]
+                score = int(candidate.partition(' ')[0])
                 program = candidate.partition(' ')[2]
                 candidates.append(MosesCandidate(score = score, program = program, program_type = "combo"))
 
@@ -170,6 +170,8 @@ cdef class moses:
         try:
             moses_exec(len(args_list), c_argv)
         except RuntimeError, ex:
+            if ex is None:
+                ex = ""
             raise MosesException('Error: exception occurred when calling C++ MOSES. Exception message:\n' + ex.message)
         finally:
             free(c_argv)

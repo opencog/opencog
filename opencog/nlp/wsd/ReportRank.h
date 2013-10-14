@@ -12,11 +12,9 @@
 
 #include <deque>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
-
-class AtomSpace;
 
 class ReportRank
 {
@@ -37,16 +35,12 @@ class ReportRank
 		double hi_score;
 		const char *hi_sense;
 
-        AtomSpace *as;
-
 	public:
 		ReportRank(void);
 		~ReportRank();
-        void set_atom_space(AtomSpace *_as) { as=_as; };
 		void report_sentence(Handle);
 		void report_parse(Handle);
 		void report_document(const std::deque<Handle> &);
-
 };
 
 } // namespace opencog

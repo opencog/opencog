@@ -30,46 +30,14 @@
 #ifndef _OPENCOG_TYPES_H
 #define _OPENCOG_TYPES_H
 
-#include <memory>  // for std::shared_pointer
-
-#include <opencog/atomspace/Handle.h>
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
 
-class Node;
-class Link;
-typedef std::shared_ptr<Node> NodePtr;
-typedef std::shared_ptr<Link> LinkPtr;
-#define NodeCast std::dynamic_pointer_cast<Node>
-#define LinkCast std::dynamic_pointer_cast<Link>
-
 //! type of Atoms, represented as short integer (16 bits)
 typedef unsigned short Type;
-//! arity of Atoms, represented as short integer (16 bits)
-typedef unsigned short Arity;
-//! stimulus
-typedef short stim_t;
-
-class HandlePredicate {
-public:
-    inline bool operator()(const Handle& h) { return this->test(h); }
-    virtual bool test(const Handle& h) { return true; }
-};
-class AtomPredicate {
-public:
-    inline bool operator()(AtomPtr a) { return this->test(a); }
-    virtual bool test(AtomPtr) { return true; }
-};
-class AtomComparator {
-public:
-    inline bool operator()(AtomPtr a, AtomPtr b) { return this->test(a,b); }
-    virtual bool test(AtomPtr, const AtomPtr) { return true; }
-};
-
 
 /** @}*/
 } // namespace opencog

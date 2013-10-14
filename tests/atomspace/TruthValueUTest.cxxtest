@@ -49,7 +49,11 @@ using namespace opencog;
 #define TV3_U 0.5f
 
 
-#define FLOAT_ACCEPTABLE_ERROR 0.000001
+// converting from confidence to count and back again using single-prcision
+// float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
+// converting back gives 800*0.002494/(1.0-0.002494) = 2.000188 and so
+// comparison tests can only be accurate to about 0.000188 or thereabouts.
+#define FLOAT_ACCEPTABLE_ERROR 0.0002
 
 class TruthValueUTest :  public CxxTest::TestSuite
 {
