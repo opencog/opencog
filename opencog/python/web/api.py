@@ -1,7 +1,7 @@
 """
 REST API for OpenCog
 
-Implemented using the Flask micro-framework and flask-restful extension
+Implemented using the Flask micro-framework and Flask-RESTful extension
 """
 
 __author__ = 'Cosmo Harrigan'

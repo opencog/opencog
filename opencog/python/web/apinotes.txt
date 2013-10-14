@@ -1,0 +1,88 @@
+Check Stack Overflow:
+@todo should the POST method require an {'atom': [stuff]} object that contains the rest of the stuff? - NO
+@todo should responses always be encapsulated in an object like DeleteAtomResponse? - NO, but you could add type info...
+@todo when retrieving one entity, should you return a list type or a unary type, and should it have the same response name as a list type from the list api? 'atoms' or 'atom'?
+ - varies depending on who I look at
+--> these don't have to be finished...
+
+Documentation:
+@todo cleanup the docstrings so that the request and response each have strongly typed descriptions, and an example is provided for both, cleanup the formatting of the JSON in the docstrings
+@todo: Document how to access the API (using curl or Python 'request' or JavaScript (...)) - or just refactor the test cases into the requests library or JavaScript
+
+Checking edge cases:
+@todo what happens if you get an AtomList that is empty?
+@todo see if the atomspace throws when giving weird values as tv or av updates
+@todo handle put of invalid handle
+@todo check get invalid type, get invalid name
+
+Architecture:
+****Make it run inside the CogServer (as a module?) - maybe use C++ pthread line 1358 from mongoose.c
+
+Packaging:
+****add dependencies to ocpkg, detect dependency existence in cmake
+
+Miscellaneous:
+@todo: check if the truth value type enumeration is complete
+Change debug from true to false in the run method
+SIMPLE_TRUTH_VALUE
+COUNT_TRUTH_VALUE
+INDEFINITE_TRUTH_VALUE
+COMPOSITE_TRUTH_VALUE
+
+Organizing:
+@todo separate each API into a different file
+
+Possible:
+@todo use named tuples in the parsing
+@todo search by incoming or outgoing set
+sort: by sti (...)
+rename handle as id in public api?
+
+
+
+
+
+"""
+Testing:
+
+import json
+from opencog.atomspace import *
+from requests import *
+
+# GET
+#  LIST
+g = get('http://localhost:5000/api/v1.0/atoms')
+print json.dumps(g.json(), indent=2)
+
+#  ONE ATOM
+g = get('http://localhost:5000/api/v1.0/atoms/1')
+print json.dumps(g.json(), indent=2)
+
+@todo: UPDATE THIS WITH OUTGOING SET examples
+
+# POST
+payload = {'type': 'ConceptNode', 'name': 'ugly_frog'}
+headers = {'content-type': 'application/json'}
+r = post('http://localhost:5000/api/v1.0/atoms/', data=json.dumps(payload), headers=headers)
+print json.dumps(r.json(), indent=2)
+
+
+truthvalue = {'type': 'simple', 'details': {'strength': 0.8, 'count': 0.2}}
+payload = {'type': 'ConceptNode', 'name': 'ugly_frog_prince4', 'truthvalue': truthvalue}
+headers = {'content-type': 'application/json'}
+r = post('http://localhost:5000/api/v1.0/atoms', data=json.dumps(payload), headers=headers)
+print json.dumps(r.json(), indent=2)
+
+
+# PUT
+g = get('http://localhost:5000/api/v1.0/atoms/1')
+print json.dumps(g.json(), indent=4)
+truthvalue = {'type': 'simple', 'details': {'strength': 0.6, 'count': 0.5}}
+payload = {'truthvalue': truthvalue, 'attentionvalue': {'sti': 9, 'lti': 2}}
+p = put('http://localhost:5000/api/v1.0/atoms/1', data=json.dumps(payload), headers=headers)
+print json.dumps(p.json(), indent=4)
+g = get('http://localhost:5000/api/v1.0/atoms/1')
+print json.dumps(g.json(), indent=4)
+
+
+"""
