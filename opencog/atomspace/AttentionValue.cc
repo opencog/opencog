@@ -139,8 +139,8 @@ bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
     lti_t lti1, lti2;
     float tv1, tv2;
 
-    tv1 = fabs(h1->getTruthValue().getMean());
-    tv2 = fabs(h2->getTruthValue().getMean());
+    tv1 = fabs(h1->getTruthValue()->getMean());
+    tv2 = fabs(h2->getTruthValue()->getMean());
 
     lti1 = h1->getAttentionValue().getLTI();
     lti2 = h2->getAttentionValue().getLTI();
@@ -167,8 +167,8 @@ bool AttentionValue::LTIThenTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
     if (lti1 != lti2) return lti1 < lti2;
 
     float tv1, tv2;
-    tv1 = h1->getTruthValue().getMean();
-    tv2 = h2->getTruthValue().getMean();
+    tv1 = h1->getTruthValue()->getMean();
+    tv2 = h2->getTruthValue()->getMean();
     return tv1 < tv2;
 }
 

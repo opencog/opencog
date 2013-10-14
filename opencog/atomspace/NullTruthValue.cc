@@ -62,28 +62,19 @@ float NullTruthValue::getConfidence() const throw (RuntimeException)
     throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
 }
 
-float NullTruthValue::toFloat() const throw (RuntimeException)
-{
-    throw RuntimeException(TRACE_INFO, "Cannot call toFloat() method of a NullTruthvalue");
-}
-
 TruthValueType NullTruthValue::getType() const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call getType() method of a NullTruthvalue");
 }
 
-TruthValue* NullTruthValue::merge(TruthValue*) throw (RuntimeException)
+TruthValuePtr NullTruthValue::merge(TruthValuePtr) throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call merge() method of a NullTruthvalue");
 }
 
-TruthValue* NullTruthValue::clone() const throw (RuntimeException)
+TruthValuePtr NullTruthValue::clone() const
 {
-    return new NullTruthValue();
-}
-
-NullTruthValue& NullTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)
-{
-    throw RuntimeException(TRACE_INFO, "Cannot call operator= of a NullTruthvalue");
+    const TruthValuePtr nullo(new NullTruthValue());
+    return nullo;
 }
 

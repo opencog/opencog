@@ -38,6 +38,9 @@ namespace opencog
  *  @{
  */
 
+class CountTruthValue;
+typedef std::shared_ptr<CountTruthValue> CountTruthValuePtr;
+
 //! a TruthValue that stores a mean, a confidence and the number of observations
 class CountTruthValue : public TruthValue
 {
@@ -54,24 +57,16 @@ protected:
     confidence_t confidence;
     count_t count;
 
-    void init(strength_t, confidence_t, count_t);
-
 public:
 
     CountTruthValue(strength_t, confidence_t, count_t);
     CountTruthValue(const TruthValue&);
     CountTruthValue(CountTruthValue const&);
 
-    CountTruthValue* clone() const;
-    CountTruthValue& operator=(const TruthValue& rhs)
-        throw (RuntimeException);
-
     virtual bool operator==(const TruthValue& rhs) const;
 
-    static CountTruthValue* fromString(const char*);
-
-    float toFloat() const;
     std::string toString() const;
+    static TruthValuePtr fromString(const char*);
     TruthValueType getType() const;
 
     strength_t getMean() const;
@@ -81,8 +76,12 @@ public:
     void setCount(count_t);
     void setConfidence(confidence_t);
 
-    virtual TruthValue* merge(const TruthValue&) const;
+    virtual TruthValuePtr merge(TruthValuePtr) const;
 
+    TruthValuePtr clone() const
+    {
+        return std::make_shared<CountTruthValue>(*this);
+    }
 };
 
 /** @}*/

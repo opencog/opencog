@@ -73,7 +73,7 @@ std::string Node::toString(std::string indent) const
              tmpname.c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
-             getTruthValue().toString().c_str());
+             getTruthValue()->toString().c_str());
     return indent + buf;
 }
 

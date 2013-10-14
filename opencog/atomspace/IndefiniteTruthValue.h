@@ -40,6 +40,9 @@ namespace opencog
  *  @{
  */
 
+class IndefiniteTruthValue;
+typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
+
 /**
  * Indefinite probabilities are in the form ([L,U],b,N). In practical work,
  * N will be hold constant and thus we have only ([L,U],b).
@@ -91,13 +94,10 @@ public:
                          confidence_t c = DEFAULT_CONFIDENCE_LEVEL);
     IndefiniteTruthValue(IndefiniteTruthValue const&);
 
-    IndefiniteTruthValue* clone() const;
-    IndefiniteTruthValue& operator=(const TruthValue& rhs) throw (RuntimeException);
-
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
-    static IndefiniteTruthValue* fromString(const char*);
+    static TruthValuePtr fromString(const char*);
 
     strength_t getMean() const;
     strength_t getU() const;
@@ -119,9 +119,27 @@ public:
     strength_t getL_() const;
     bool isSymmetric() const;
 
-    float toFloat() const;
     std::string toString() const;
     TruthValueType getType() const;
+
+    // clone method
+    static IndefiniteTruthValuePtr createITV(TruthValuePtr tv)
+    {
+        if (tv->getType() != INDEFINITE_TRUTH_VALUE)
+            throw RuntimeException(TRACE_INFO, "Cannot clone non-indefinite TV");
+        return std::make_shared<IndefiniteTruthValue>(
+            static_cast<const IndefiniteTruthValue&>(*tv));
+    }
+
+    static TruthValuePtr createTV(TruthValuePtr tv)
+    {
+        return std::static_pointer_cast<TruthValue>(createITV(tv));
+    }
+
+    TruthValuePtr clone() const
+    {
+        return std::make_shared<IndefiniteTruthValue>(*this);
+    }
 
     static confidence_t DEFAULT_CONFIDENCE_LEVEL;
     static count_t DEFAULT_K;
@@ -134,8 +152,6 @@ public:
         DEFAULT_K = k;
     }
 };
-
-typedef std::shared_ptr<IndefiniteTruthValue> IndefiniteTruthValuePtr;
 
 /** @}*/
 } // namespace opencog
