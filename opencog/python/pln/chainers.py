@@ -33,7 +33,7 @@ class AbstractChainer(Logic):
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
-    def _select_one_matching(self, template, require_nonzero_tv = True):
+    def _select_one_matching(self, template, s = {}, require_nonzero_tv = True):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
             return template
@@ -43,7 +43,7 @@ class AbstractChainer(Logic):
 
         attentional_focus = get_attentional_focus(self._atomspace)
 
-        atom = self._select_from(template, attentional_focus, require_nonzero_tv, useAF=True)
+        atom = self._select_from(template, s, attentional_focus, require_nonzero_tv, useAF=True)
 
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
@@ -52,15 +52,15 @@ class AbstractChainer(Logic):
             else:
                 root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
-            atom = self._select_from(template, all_atoms, require_nonzero_tv, useAF=False)
+            atom = self._select_from(template, s, all_atoms, require_nonzero_tv, useAF=False)
 
         return atom
 
-    def _select_from(self, template, atoms, require_nonzero_tv, useAF):
+    def _select_from(self, template, substitution, atoms, require_nonzero_tv, useAF):
         # never allow inputs with variables?
         ground_results = True
 
-        atoms = self.find(template, atoms)
+        atoms = self.find(template, atoms, substitution)
 
         if require_nonzero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]

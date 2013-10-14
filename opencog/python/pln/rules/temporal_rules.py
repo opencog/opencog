@@ -61,6 +61,18 @@ class TemporalTransitivityRule(Rule):
 
         name = link_type + 'TransitivityRule'
 
+class PredictiveAttractionRule(Rule):
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+        Rule.__init__(self, chainer, formula=formulas.identityFormula,
+            outputs= [chainer.link(types.PredictiveAttractionLink, [A, B])],
+            inputs= [chainer.link(types.AndLink, [
+                chainer.link(types.AttractionLink, [A, B])
+                chainer.link(types.BeforeLink, [A, B])
+                ])
+            ])
+
 def create_temporal_rules(chainer):
     rules = []
 

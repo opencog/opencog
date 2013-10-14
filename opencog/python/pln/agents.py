@@ -41,6 +41,8 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer.add_rule(rules.MemberToSubsetRule(self.chainer))
 
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
+        self.chainer.add_rule(rules.PredictiveAttractionRule
+(self.chainer))
 
         #for rule in temporal_rules.create_temporal_rules(self.chainer):
         #    self.chainer.add_rule(rule)
