@@ -33,7 +33,7 @@ class AbstractChainer(Logic):
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
-    def _select_one_matching(self, template, s = {}, require_nonzero_tv = True):
+    def _select_one_matching(self, template, s = {}, allow_zero_tv = False):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
             return template
@@ -43,7 +43,7 @@ class AbstractChainer(Logic):
 
         attentional_focus = get_attentional_focus(self._atomspace)
 
-        atom = self._select_from(template, s, attentional_focus, require_nonzero_tv, useAF=True)
+        atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
 
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
@@ -52,17 +52,17 @@ class AbstractChainer(Logic):
             else:
                 root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
-            atom = self._select_from(template, s, all_atoms, require_nonzero_tv, useAF=False)
+            atom = self._select_from(template, s, all_atoms, allow_zero_tv, useAF=False)
 
         return atom
 
-    def _select_from(self, template, substitution, atoms, require_nonzero_tv, useAF):
-        # never allow inputs with variables?
+    def _select_from(self, template, substitution, atoms, allow_zero_tv, useAF):
+        # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
         atoms = self.find(template, atoms, substitution)
 
-        if require_nonzero_tv:
+        if not allow_zero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]
 
         if ground_results:
@@ -233,12 +233,13 @@ class Chainer(AbstractChainer):
 
         (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
         specific_inputs = []
-        specific_outputs = []
         empty_substitution = {}
-        found = self._find_inputs_recursive(specific_inputs, specific_outputs, 
-                                    generic_inputs, generic_outputs, empty_substitution, require_nonzero_tv=True)
+        subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
         if not found:
             return None
+        # set the outputs after you've found all the inputs
+        # mustn't use '=' because it will discard the original reference and thus have no effect
+        specific_outputs = self.substitute_list(subst, generic_outputs)
 
         # handle rules that create their output in a custom way, not just using templates
         if hasattr(rule, 'custom_compute'):
@@ -258,39 +259,34 @@ class Chainer(AbstractChainer):
                 return None
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
 
-        # TODO sometimes finding input 2 will bind a variable in input 1 - don't handle that yet
+    def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
+        '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
+        return_inputs = [x for x in input_templates]
 
-    def _find_inputs_recursive(self, return_inputs, return_outputs, remaining_inputs, generic_outputs, subst_so_far, require_nonzero_tv=True):
-        '''Recursively find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return True if inputs were found, False otherwise.'''
-        remaining_inputs = self.substitute_list(subst_so_far, remaining_inputs)
+        for i in xrange(0, len(generic_inputs)):
+            template = input_templates[i]
 
-        # base case of recursion
-        if len(remaining_inputs) == 0:
-            # set the outputs after you've found all the inputs
-            # mustn't use '=' because it will discard the original reference and thus have no effect
-            return_outputs += self.substitute_list(subst_so_far, generic_outputs)
-            return True
+            atom = self._select_one_matching(template, subst_so_far)
+            
+            if atom != None:
+                # Find the substitution that would change 'template' to 'atom'
+                # Alternatively this could be returned by _select_one_matching
+                subst_so_far = self.unify(template, atom, subst_so_far)
+                if subst_so_far == None:
+                    import pdb; pdb.set_trace()
 
-        # normal case of recursion
+                return_inputs[i] = atom
+            else:
+                if not allow_zero_tv:
+                    print 'unable to match:',template
+                    return None
+                # find a more specific template and just continue the backward chaining search
+                # this means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
+                # this "input" will actually just be a 0-tv atom, and it can become a BC target later.
+                query = self.substitute(subst_so_far, template)
+                return_inputs[i] = query
 
-        template = remaining_inputs[0]
-        atom = self._select_one_matching(template, require_nonzero_tv)
-        
-        if require_nonzero_tv and atom is None:
-            print 'unable to match:',template
-            return False
-
-        assert atom != None
-        # Find the substitution that would change 'template' to 'atom'
-        substitution = self.unify(template, atom, subst_so_far)
-        if substitution == None:
-            import pdb; pdb.set_trace()
-
-        remaining_inputs = remaining_inputs[1:]
-
-        return_inputs.append(atom)
-
-        return self._find_inputs_recursive(return_inputs, return_outputs, remaining_inputs, generic_outputs, substitution, require_nonzero_tv)
+        return subst_so_far
 
     ### backward chaining implementation
 
@@ -307,15 +303,19 @@ class Chainer(AbstractChainer):
             # record this inference in the InferenceHistoryRepository
 
         (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
-        specific_inputs = []
         specific_outputs = []
         empty_substitution = {}
-        found = self._choose_outputs_inputs_recursive(specific_inputs, specific_outputs, 
-                                    generic_inputs, generic_outputs, empty_substitution)
+        subst = self._choose_outputs(specific_outputs, generic_outputs, empty_substitution)
+
+        if not subst:
+            return None
+
+        specific_inputs = []
+        subst = self._choose_inputs(specific_inputs, generic_outputs, subst, allow_zero_tv = True)
+        if not subst:
+            return None
 
         print rule, map(str,specific_outputs), map(str,specific_inputs)
-        if not found:
-            return None
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
@@ -335,41 +335,26 @@ class Chainer(AbstractChainer):
                     self._give_stimulus(atom)
             return (specific_outputs, specific_inputs)
 
-    def _choose_outputs_inputs_recursive(self, return_inputs, return_outputs, all_inputs, remaining_outputs, subst_so_far):
-        '''Choose some outputs for a Rule, and then choose suitable inputs. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms).'''
-        # base case of recursion
-        # After choosing outputs, use the other helper function to choose inputs.
-        # If you pass it subst_so_far, it will choose inputs compatible with the
-        # outputs we've already chosen!
-        if len(remaining_outputs) == 0:
-            inputs_found = self._find_inputs_recursive(return_inputs, return_outputs=[], remaining_inputs=all_inputs, generic_outputs=[], subst_so_far=subst_so_far, require_nonzero_tv=True)
+    def _choose_outputs(self, return_outputs, output_templates, subst_so_far):
+        return_inputs = [x for x in output_templates]
 
-            return inputs_found
+        for i in xrange(0, len(output_templates)):
+            template = output_templates[i]
 
-        # normal case of recursion
-        # First choose the outputs, then the inputs.
-        # The outputs are atoms already in the AtomSpace (but sometimes without a TruthValue)
-        # The inputs can be existing atoms. They will be created with 0TV otherwise.
-        # You can use find_inputs_recursive to choose the inputs after choosing outputs
+            atom = self._select_one_matching(template, subst_so_far, allow_zero_tv=True)
+            if atom is None:
+                self.log_failed_inference('backward chainer: unable to find target atom matching:'+str(template))
+                return None
 
-        template = remaining_outputs[0]
-        atom = self._select_one_matching(template, require_nonzero_tv=False)
-    
-        if atom is None:
-            self.log_failed_inference('backward chainer: unable to find target atom matching:'+str(template))
-            return False
+            # Find the substitution that would change 'template' to 'atom'
+            # Alternatively this could be returned by _select_one_matching
+            subst_so_far = self.unify(template, atom, subst_so_far)
+            if subst_so_far == None:
+                import pdb; pdb.set_trace()
 
-        # Find the substitution that would change 'template' to 'atom'
-        substitution = self.unify(template, atom, subst_so_far)
-        assert(substitution != None)
+            return_outputs[i] = atom
 
-        remaining_outputs = remaining_outputs[1:]
-
-        remaining_outputs = self.substitute_list(substitution, remaining_outputs)
-
-        return_outputs.append(atom)
-
-        return self._choose_outputs_inputs_recursive(return_inputs, return_outputs, all_inputs, remaining_outputs, substitution)
+        return subst_so_far
 
     ### stuff used by both forward and backward chaining
 

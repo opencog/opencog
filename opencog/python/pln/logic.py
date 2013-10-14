@@ -28,13 +28,13 @@ class Logic(object):
         var_name = '$pln_var_'+str(self._new_var_counter)
         return self._atomspace.add_node(types.VariableNode, var_name)
 
-    def find(self, template, atoms):
+    def find(self, template, atoms, s={}):
         assert(isinstance(atoms, list))
 
-        return [atom for atom in atoms if self.unify_together(atom, template)]
+        return [atom for atom in atoms if self.unify_together(atom, template, s)]
 
-    def unify_together(self, x, y):
-        return self.unify(x, y) != None
+    def unify_together(self, x, y, s):
+        return self.unify(x, y, s) != None
 
     def standardize_apart(self, atom, dic=None):
         '''Create a new link where all the variables in the link are replaced with new variables'''
