@@ -261,7 +261,7 @@ class Chainer(AbstractChainer):
 
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
-        return_inputs = [x for x in input_templates]
+        return_inputs += [x for x in input_templates]
 
         for i in xrange(0, len(generic_inputs)):
             template = input_templates[i]
@@ -280,11 +280,12 @@ class Chainer(AbstractChainer):
                 if not allow_zero_tv:
                     print 'unable to match:',template
                     return None
-                # find a more specific template and just continue the backward chaining search
-                # this means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
-                # this "input" will actually just be a 0-tv atom, and it can become a BC target later.
-                query = self.substitute(subst_so_far, template)
-                return_inputs[i] = query
+                # This means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
+                # Just specialize the rest of the inputs. These "input" will actually just be 0-tv atoms, and it can become a BC target later.
+                #query = self.substitute(subst_so_far, template)
+                #return_inputs[i] = query
+                return_inputs[i:] = self.substitute_list(subst_so_far, input_templates[i:])
+                return subst_so_far
 
         return subst_so_far
 
@@ -312,14 +313,13 @@ class Chainer(AbstractChainer):
 
         specific_inputs = []
         subst = self._choose_inputs(specific_inputs, generic_outputs, subst, allow_zero_tv = True)
-        if not subst:
-            return None
 
         print rule, map(str,specific_outputs), map(str,specific_inputs)
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
 
+        # some of the validations might not make sense for backward chaining
         if not self._validate(rule, specific_inputs, specific_outputs):
             return None
 
