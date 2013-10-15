@@ -41,6 +41,7 @@ class Daemon:
                         if pid > 0:
                                 # exit from second parent
                                 sys.exit(0)
+                                print 'frog'
                 except OSError, e:
                         sys.stderr.write("fork #2 failed: %d (%s)\n" % (e.errno, e.strerror))
                         sys.exit(1)

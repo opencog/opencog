@@ -25,7 +25,7 @@ class RESTApi(object):
         self.api.add_resource(atom_api, '/api/v1.0/atoms/<int:id>', endpoint='atom')
 
     def run(self):
-        self.app.run(debug=True)
+        self.app.run(debug=False)
 
     def test(self):
         return self.app.test_client()

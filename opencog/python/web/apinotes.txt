@@ -1,3 +1,16 @@
+Dependencies:
+sudo easy_install Flask
+sudo easy_install -U mock
+sudo easy_install flask-restful
+sudo easy_install six
+
+the cython build directory has to be in the PYTHONPATH
+sys.path.extend(['/home/cosmo/opencog/build/opencog/cython'])
+
+Optional:
+sudo easy_install requests
+
+
 Check Stack Overflow:
 @todo should the POST method require an {'atom': [stuff]} object that contains the rest of the stuff? - NO
 @todo should responses always be encapsulated in an object like DeleteAtomResponse? - NO, but you could add type info...
@@ -38,7 +51,14 @@ Possible:
 sort: by sti (...)
 rename handle as id in public api?
 
+Make sure the path to the module works
 
+procedure:
+loadpy web
+loadpy web/apiloader
+agents-start web/apiloader.MyMindAgent
+agents-step
+then the frog appeared...
 
 
 
