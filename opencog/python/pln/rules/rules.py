@@ -354,19 +354,35 @@ class LinkToLinkRule(Rule):
             outputs= [chainer.link(to_type, [A, B])],
             inputs=  [chainer.link(from_type, [A, B])])
 
-
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(A B) => InheritanceLink(A B)'''
+    '''MemberLink(Ben American) => MemberLink Ben {Ben}, InheritanceLink({Ben} American).
+       {Ben} is the set containing only Ben.'''
     def __init__(self, chainer):
-        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.MemberLink,
-            formula= formulas.mem2InhFormula)
+        # use link2link rule so that backward chaining will know approximately the right target.
+        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
+            formula= None)
+
+    def custom_compute(self, inputs):
+        [mem_link] = inputs
+        [object, superset] = mem_link.out
+
+        singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
+        singleton_set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
+        tvs = [TruthValue(1, formulas.confidence_to_count(1))]
+
+        self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
+        tvs += formulas.mem2InhFormula([mem_link]) # use mem2inh formula
+
+        return ([member_link], tvs)
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
-class MemberToSubsetRule(LinkToLinkRule):
-    '''MemberLink(A B) => SubsetLink(A B)'''
-    def __init__(self, chainer):
-        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.SubsetLink,
-            formula= formulas.mem2InhFormula)
+#class MemberToSubsetRule(LinkToLinkRule):
+#    '''MemberLink(A B) => SubsetLink(A B)'''
+#    def __init__(self, chainer):
+#        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.SubsetLink,
+#            formula= formulas.mem2InhFormula)
 
 class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
