@@ -109,7 +109,7 @@ void TimeServer::clear()
     init();
 }
 
-Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, const TruthValue& tv)
+Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, TruthValuePtr tv)
 {
     OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
@@ -117,7 +117,7 @@ Handle TimeServer::addTimeInfo(Handle h, unsigned long timestamp, const TruthVal
     return addTimeInfo(h, nodeName, tv);
 }
 
-Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv)
+Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, TruthValuePtr tv)
 {
     OC_ASSERT(atomspace->isValidHandle(h),
             "TimeServer::addTimeInfo: Got an invalid handle as argument\n");
@@ -125,7 +125,7 @@ Handle TimeServer::addTimeInfo(Handle h, const Temporal& t, const TruthValue& tv
     return addTimeInfo(h, t.getTimeNodeName(), tv);
 }
 
-Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, const TruthValue& tv)
+Handle TimeServer::addTimeInfo(Handle h, const std::string& timeNodeName, TruthValuePtr tv)
 {
     DPRINTF("TimeServer::addTimeInfo - start\n");
     Handle timeNode = atomspace->addNode(TIME_NODE, timeNodeName);

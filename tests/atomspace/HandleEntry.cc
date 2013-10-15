@@ -789,9 +789,10 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
         // differently from invalid elements found in its begining.
 
         while ( (set != NULL) &&
-                (set->getAtom()->getTruthValue().getType() != COMPOSITE_TRUTH_VALUE ||
-                 ((const CompositeTruthValue&) set->getAtom()->getTruthValue()).getVersionedTV(vh).isNullTv())
-              ) {
+                (set->getAtom()->getTruthValue()->getType() != COMPOSITE_TRUTH_VALUE ||
+                 (CompositeTVCast(set->getAtom()->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+              )
+        {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -802,8 +803,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 
         head = set;
         while (set->next != NULL) {
-            if (set->next->getAtom()->getTruthValue().getType() != COMPOSITE_TRUTH_VALUE ||
-                    ((const CompositeTruthValue&) set->next->getAtom()->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (set->next->getAtom()->getTruthValue()->getType() != COMPOSITE_TRUTH_VALUE ||
+                    (CompositeTVCast(set->next->getAtom()->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 buffer = set->next;
                 set->next = set->next->next;
                 buffer->next = NULL;
@@ -830,8 +832,9 @@ bool HandleEntry::matchesFilterCriteria(AtomPtr atom, Type targetType,
         for (size_t i = 0; i < larry && !result; i++) {
             AtomPtr target(link->getOutgoingAtom(i));
             DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
-                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (target->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE and
+                not (CompositeTVCast(target->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 if (targetSubclasses) {
                     result = classserver().isA(target->getType(), targetType);
                 } else {
@@ -901,11 +904,12 @@ bool HandleEntry::matchesFilterCriteria(AtomPtr atom, const char* targetName, Ty
                 DPRINTF("Node name = %s\n", (NodeCast(target))->getName().c_str());
             }
 
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE and
-                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (target->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE and
+                 not (CompositeTVCast(target->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 if (targetType == target->getType()) {
                     const char* nodeName = (NodeCast(target))->getName().c_str();
-                    result = !strcmp(targetName, nodeName);
+                    result = not strcmp(targetName, nodeName);
                 }
             }
         }

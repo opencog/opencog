@@ -41,7 +41,7 @@ vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int numbe
 
     for (int i = 0; i < number; i++) {
         std::ostringstream buf;
-        SimpleTruthValue tv1(0.5f, 0.99f);
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
         buf << baseName << i;
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str(), tv1);
         //printf("add atom %d: %s\n", i, buf.str().c_str());
@@ -60,7 +60,7 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     baseNameLength = strlen(baseName);
     strcpy(buf,baseName);
 
-    SimpleTruthValue tv1(0.5f, 0.99f);
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     buf[baseNameLength] = '2';

@@ -38,7 +38,7 @@ class SenseSimilarityLCH :
 		SenseSimilarityLCH(AtomSpace* _as);
 		virtual ~SenseSimilarityLCH();
 
-		virtual SimpleTruthValue similarity(Handle, Handle);
+		virtual SimpleTruthValuePtr similarity(Handle, Handle);
 };
 
 } // namespace opencog

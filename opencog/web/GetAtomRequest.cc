@@ -74,11 +74,11 @@ bool GetAtomRequest::execute()
         }
     }
     if (!as.isValidHandle(handle)) {
-	if(output_format!=json_format){
-	    _output << "Invalid handle: " << handle.value() << std::endl;
-	}else{
-	    _output << "{\"error\": \"Invalid handle "<<handle.value()<<"\"}"<<std::endl;
-	}
+    if (output_format != json_format){
+        _output << "Invalid handle: " << handle.value() << std::endl;
+    }else{
+        _output << "{\"error\": \"Invalid handle "<<handle.value()<<"\"}"<<std::endl;
+    }
         send(_output.str());
         return false;
     }
@@ -121,29 +121,27 @@ std::string GetAtomRequest::json_makeOutput(CogServer& cs, Handle h)
     output << "\"lti\":" << as.getLTI(h) << ",";// <<std::endl;
 
     TruthValuePtr tvp = as.getTV(h);
-    output << "\"truthvalue\":" << tvToJSON(tvp.get());// << std::endl;
+    output << "\"truthvalue\":" << tvToJSON(tvp);// << std::endl;
     output << "}";
 
     return output.str();
 }
 
-std::string GetAtomRequest::tvToJSON(const TruthValue* tv)
+std::string GetAtomRequest::tvToJSON(TruthValuePtr tv)
 {
     std::ostringstream jtv;
     if (tv->getType() == SIMPLE_TRUTH_VALUE) {
-        const SimpleTruthValue* stv = dynamic_cast<const SimpleTruthValue*>(tv);
         jtv << "{\"simple\":{";
-        jtv << "\"str\":" << stv->getMean() << ",";
-        jtv << "\"count\":" << stv->getCount() << ",";
-        jtv << "\"conf\":" << stv->getConfidence() << "}}";
+        jtv << "\"str\":" << tv->getMean() << ",";
+        jtv << "\"count\":" << tv->getCount() << ",";
+        jtv << "\"conf\":" << tv->getConfidence() << "}}";
     } else if (tv->getType() == COUNT_TRUTH_VALUE) {
-        const CountTruthValue* ctv = dynamic_cast<const CountTruthValue*>(tv);
         jtv << "{\"count\":{";
-        jtv << "\"str\":" << ctv->getMean() << ",";
-        jtv << "\"conf\":" << ctv->getConfidence() << ",";
-        jtv << "\"count\":" << ctv->getCount() << "}}";
+        jtv << "\"str\":" << tv->getMean() << ",";
+        jtv << "\"conf\":" << tv->getConfidence() << ",";
+        jtv << "\"count\":" << tv->getCount() << "}}";
     } else if (tv->getType() == INDEFINITE_TRUTH_VALUE) {
-        const IndefiniteTruthValue* itv = dynamic_cast<const IndefiniteTruthValue*>(tv);
+        IndefiniteTruthValuePtr itv = IndefiniteTVCast(tv);
         jtv << "{\"indefinite\":{";
         jtv << "\"str\":" << itv->getMean() << ",";
         jtv << "\"L\":" << itv->getL() << ",";
@@ -152,14 +150,14 @@ std::string GetAtomRequest::tvToJSON(const TruthValue* tv)
         //jtv << "\"diff\":" << itv->getDiff() << ",";
         jtv << "\"symmetric\":" << itv->isSymmetric() << "}}";
     } else if (tv->getType() == COMPOSITE_TRUTH_VALUE) {
-        const CompositeTruthValue* ctv = dynamic_cast<const CompositeTruthValue*>(tv);
+        CompositeTruthValuePtr ctv = CompositeTVCast(tv);
         jtv << "{\"composite\":";
         jtv << "{\"primary\":" <<
-            tvToJSON(&ctv->getPrimaryTV());
+            tvToJSON(ctv->getPrimaryTV());
         foreach(VersionHandle vh, ctv->vh_range()) {
             jtv << "\"" << VersionHandle::indicatorToStr(vh.indicator) << "\":" << std::endl;
             jtv << "[" << vh.substantive << ",";
-            jtv << tvToJSON(&ctv->getVersionedTV(vh));
+            jtv << tvToJSON(ctv->getVersionedTV(vh));
             jtv << "]";
         }
         jtv << "}}";

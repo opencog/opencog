@@ -505,8 +505,8 @@ void DimEmbedModule::symAddLink(Handle h,
     CoverTree<CoverTreePoint>& cTree = treeMapIt->second;
     int dim = dimensionMap[linkType];
     AtomEmbedding& aE = atomMaps[linkType];
-    const TruthValue& linkTV = a->getTV(h);
-    double weight = linkTV.getConfidence()*linkTV.getMean();
+    TruthValuePtr linkTV = a->getTV(h);
+    double weight = linkTV->getConfidence() * linkTV->getMean();
     HandleSeq nodes = a->getOutgoing(h);
     for (HandleSeq::iterator it=nodes.begin();it!=nodes.end();++it) {
         AtomEmbedding::iterator aEit = aE.find(*it);
@@ -538,11 +538,11 @@ void DimEmbedModule::asymAddLink(Handle h,
     int dim = dimensionMap[linkType];
     AtomEmbedding& aEForw = asymAtomMaps[linkType].first;
     AtomEmbedding& aEBackw = asymAtomMaps[linkType].second;
-    const TruthValue& linkTV = a->getTV(h);
-    double weight = linkTV.getConfidence()*linkTV.getMean();
+    TruthValuePtr linkTV = a->getTV(h);
+    double weight = linkTV->getConfidence() * linkTV->getMean();
     HandleSeq nodes = a->getOutgoing(h);
     Handle source = nodes.front();
-    HandleSeq::iterator it=nodes.begin();
+    HandleSeq::iterator it = nodes.begin();
     ++it;
     std::vector<double>& sourceVecForw = aEForw[source];
     const std::vector<double>& sourceVecBackw = aEBackw[source];
@@ -849,8 +849,8 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             double dist = euclidDist(centroid,embedVec);
             //TODO: we should do some normalizing of this probably...
             double strength = sqrt(std::pow(2.0, -dist));
-            SimpleTruthValue tv(strength,
-                                SimpleTruthValue::confidenceToCount(strength));
+            TruthValuePtr tv(SimpleTruthValue::createTV(strength,
+                                SimpleTruthValue::confidenceToCount(strength)));
             as->addLink(INHERITANCE_LINK, *it2, newNode, tv);
             for (int i=0; i<numDims; ++i) {
                 strNumer[i]+=strength*embedVec[i];
@@ -861,8 +861,8 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
             //the link between a clusterNode and an attribute (pivot) is
             //a weighted average of the cluster's members' links to the pivot
             double attrStrength = sqrt(strNumer[i]/strDenom[i]);
-            SimpleTruthValue tv(attrStrength,
-                                SimpleTruthValue::confidenceToCount(attrStrength));
+            TruthValuePtr tv(SimpleTruthValue::createTV(attrStrength,
+                                SimpleTruthValue::confidenceToCount(attrStrength)));
             as->addLink(l, newNode, pivots[i], tv);
         }
     }
@@ -970,8 +970,8 @@ Handle DimEmbedModule::blendNodes(Handle n1,
 
     for (unsigned int i=0; i<numDims; i++) {
         double strength = sqrt(newVec[i]);
-        SimpleTruthValue tv(strength,
-                            SimpleTruthValue::confidenceToCount(strength));
+        TruthValuePtr tv(SimpleTruthValue::createTV(strength,
+                            SimpleTruthValue::confidenceToCount(strength)));
         as->addLink(l, newNode, pivots[i], tv);
     }
     return newNode;

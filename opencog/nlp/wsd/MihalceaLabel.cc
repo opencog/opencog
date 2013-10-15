@@ -136,7 +136,7 @@ bool MihalceaLabel::annotate_word_sense(Handle word_sense)
 	out.push_back(word_sense);
 
 	// Give it a true truth value; but no confidence.
-	CountTruthValue ctv(1.0f, 0.0f, 1.0f);
+	TruthValuePtr ctv(CountTruthValue::createTV(1.0f, 0.0f, 1.0f));
 	atom_space->addLink(INHERITANCE_LINK, out, ctv);
 
 	return false;

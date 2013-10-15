@@ -97,7 +97,7 @@ class AtomSpace
      */
     AtomSpace& operator=(const AtomSpace&);
 public:
-    void do_merge_tv(Handle, const TruthValue&);
+    void do_merge_tv(Handle, TruthValuePtr);
 
     /** 
      * The AtomSpace class is essentially just be a wrapper of the asynchronous
@@ -179,9 +179,9 @@ public:
      * \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) 
      * @deprecated New code should directly use the AtomSpaceAsync::addNode method.
      */
-    inline Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV())
+    inline Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
-        return atomSpaceAsync->addNode(t,name,tvn)->get_result();
+        return atomSpaceAsync->addNode(t, name, tvn)->get_result();
     }
 
     /**
@@ -190,7 +190,7 @@ public:
      * @todo: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
-    Handle addPrefixedNode(Type t, const std::string& prefix = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    Handle addPrefixedNode(Type t, const std::string& prefix = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
      * Add a new link to the Atom Table
@@ -204,13 +204,13 @@ public:
      * @deprecated New code should directly use the AtomSpaceAsync::addLink method.
      */
     inline Handle addLink(Type t, const HandleSeq& outgoing,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     { 
         return atomSpaceAsync->addLink(t,outgoing,tvn)->get_result();
     }
 
     inline Handle addLink(Type t, Handle h,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(h);
@@ -218,7 +218,7 @@ public:
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -227,7 +227,7 @@ public:
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -237,7 +237,7 @@ public:
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -248,7 +248,7 @@ public:
     }
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc, Handle hd, Handle he,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -261,7 +261,7 @@ public:
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -275,7 +275,7 @@ public:
 
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -291,7 +291,7 @@ public:
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
                           Handle hh,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -308,7 +308,7 @@ public:
     inline Handle addLink(Type t, Handle ha, Handle hb, Handle hc,
                           Handle hd, Handle he, Handle hf, Handle hg,
                           Handle hh, Handle hi,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV())
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -474,7 +474,7 @@ public:
     confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE);
+    void setTV(Handle, TruthValuePtr, VersionHandle vh = NULL_VERSION_HANDLE);
 
     /** Change the primary TV's mean of a given Handle
      * @note By Joel: this makes no sense to me, how can you generally set a mean

@@ -46,9 +46,9 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     baseNameLength = strlen(baseName);
     strcpy(buf,baseName);
 
-    SimpleTruthValue tv1(0.001f, 0.00001f);
-    SimpleTruthValue tv2(0.001f, 0.00001f);
-    SimpleTruthValue tv3(0.5f, 0.99f);
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     buf[baseNameLength] = '2';

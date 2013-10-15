@@ -35,9 +35,9 @@ namespace opencog
 {
 
 Handle addRealAtom(AtomSpace& as, AtomPtr atom,
-                   const TruthValue& tvn = TruthValue::NULL_TV())
+                   TruthValuePtr tvn = TruthValue::NULL_TV())
 {
-    const TruthValue& newTV = (tvn.isNullTv()) ? atom->getTruthValue() : tvn;
+    TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
     // Check if the given Atom reference is of an atom
     // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
     // result to the correct/valid handle.
@@ -60,9 +60,8 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
     if (currentTV->isNullTv()) {
         as.setTV(result, newTV);
     } else {
-        TruthValue* mergedTV = currentTV->merge(newTV);
-        as.setTV(result, *mergedTV);
-        delete mergedTV;
+        TruthValuePtr mergedTV = currentTV->merge(newTV);
+        as.setTV(result, mergedTV);
     }
     return result;
 }
@@ -74,7 +73,7 @@ Handle addRealAtom(AtomSpace& as, AtomPtr atom,
  * These functions appear to be used only by four test cases, and 
  * no-where else.  
  */
-static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
+static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
 {
     Handle* head_handle_ptr = boost::get<Handle>(&(*it));
     Type* head_type_ptr = boost::get<Type>(&(*it));
@@ -101,7 +100,7 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
     return as.addLink(*head_type_ptr, handles, tvn);
 }
 
-static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& tvn)
+static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
 {
     return addAtomIter(as, a, a.begin(), tvn);
 }

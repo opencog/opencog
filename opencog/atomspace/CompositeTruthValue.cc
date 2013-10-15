@@ -33,68 +33,42 @@
 
 using namespace opencog;
 
-void CompositeTruthValue::init(const TruthValue& tv, VersionHandle vh)
-{
-    primaryTV = NULL;
-    setVersionedTV(tv, vh);
-    if (primaryTV == NULL) {
-        primaryTV = (TruthValue*) & (TruthValue::DEFAULT_TV());
-    }
-}
-
-void CompositeTruthValue::clear()
-{
-    if (primaryTV != &(TruthValue::DEFAULT_TV())) {
-        delete primaryTV;
-    }
-    for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-            itr != versionedTVs.end(); ++itr) {
-        TruthValue* tv = itr->second;
-        if (tv != &(TruthValue::DEFAULT_TV())) {
-            delete tv;
-        }
-    }
-    versionedTVs.clear();
-}
-
-void CompositeTruthValue::copy(CompositeTruthValue const& source)
-{
-    primaryTV = (source.primaryTV == &(TruthValue::DEFAULT_TV())) ?
-        (TruthValue*) & (TruthValue::DEFAULT_TV()) :
-        source.primaryTV->clone();
-    for (VersionedTruthValueMap::const_iterator itr = source.versionedTVs.begin();
-            itr != source.versionedTVs.end(); ++itr) {
-        VersionHandle vh = itr->first;
-        TruthValue* tv = itr->second;
-        versionedTVs[vh] = (tv == &(TruthValue::DEFAULT_TV())) ?
-            (TruthValue*) & (TruthValue::DEFAULT_TV()) :
-            tv->clone();
-    }
-}
-
 CompositeTruthValue::CompositeTruthValue()
 {
     primaryTV = NULL;
 }
 
-CompositeTruthValue::CompositeTruthValue(const TruthValue& tv, VersionHandle vh)
+CompositeTruthValue::CompositeTruthValue(TruthValuePtr tv, VersionHandle vh)
 {
-    init(tv, vh);
+    primaryTV = TruthValue::DEFAULT_TV();
+    setVersionedTV(tv, vh);
 }
 
 CompositeTruthValue::CompositeTruthValue(CompositeTruthValue const& source)
 {
-    copy(source);
+    primaryTV = (source.primaryTV == TruthValue::DEFAULT_TV()) ?
+        TruthValue::DEFAULT_TV() :
+        source.primaryTV->clone();
+    for (VersionedTruthValueMap::const_iterator itr = source.versionedTVs.begin();
+            itr != source.versionedTVs.end(); ++itr)
+    {
+        VersionHandle vh = itr->first;
+        TruthValuePtr tv = itr->second;
+        versionedTVs[vh] = (tv == TruthValue::DEFAULT_TV()) ?
+            TruthValue::DEFAULT_TV() :
+            tv->clone();
+    }
 }
 
 CompositeTruthValue::~CompositeTruthValue()
 {
-    clear();
+    primaryTV = NULL;
+    versionedTVs.clear();
 }
 
-const TruthValue& CompositeTruthValue::getPrimaryTV() const
+TruthValuePtr CompositeTruthValue::getPrimaryTV() const
 {
-    return *primaryTV;
+    return primaryTV;
 }
 
 strength_t CompositeTruthValue::getMean() const
@@ -111,13 +85,6 @@ count_t CompositeTruthValue::getCount() const
 confidence_t CompositeTruthValue::getConfidence() const
 {
     return primaryTV->getConfidence();
-}
-
-// Canonical methods
-float CompositeTruthValue::toFloat() const
-{
-    // TODO: review this to consider versioned TVs as well?
-    return primaryTV->toFloat();
 }
 
 /*
@@ -142,9 +109,10 @@ std::string CompositeTruthValue::toString() const
             primaryTV->toString().c_str());
     result += buffer;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
-         itr != versionedTVs.end(); ++itr) {
+         itr != versionedTVs.end(); ++itr)
+    {
         VersionHandle key = itr->first;
-        TruthValue* tv = itr->second;
+        TruthValuePtr tv = itr->second;
         DPRINTF("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
         sprintf(buffer, "{%lu;%s;%s;%s}",
                 key.substantive.value(),
@@ -155,6 +123,13 @@ std::string CompositeTruthValue::toString() const
 
     DPRINTF("\n%s\n", result.c_str());
     return result;
+}
+
+TruthValuePtr CompositeTruthValue::SetDefaultTVIfPertinent(TruthValuePtr tv)
+{
+    if (tv->isDefaultTV())
+        return DEFAULT_TV();
+    return tv;
 }
 
 /**
@@ -170,7 +145,8 @@ std::string CompositeTruthValue::toString() const
  * UUID wackinesss is just potential for bugs.  In general, all of 
  * the file-persistence code should be removed from this directory.
  */
-CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (InvalidParamException)
+CompositeTruthValuePtr CompositeTruthValue::fromString(const char* tvStr)
+    throw (InvalidParamException)
 {
     char* buff;
     char* s = strdup(tvStr);
@@ -182,7 +158,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
             "missing primary TV!");
     }
     // Creates the new instance.
-    CompositeTruthValue* result = new CompositeTruthValue();
+    CompositeTruthValuePtr result(new CompositeTruthValue());
     // Now, separate internal tokens
     char* internalBuff;
     char* primaryTvTypeStr = __strtok_r(tvToken, ";", &internalBuff);
@@ -190,7 +166,7 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
     char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
     DPRINTF("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
     result->primaryTV = TruthValue::factory(primaryTvType, primaryTvStr);
-    DeleteAndSetDefaultTVIfPertinent(&(result->primaryTV));
+    result->primaryTV = SetDefaultTVIfPertinent(result->primaryTV);
 
     // Get the versioned tvs
     while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
@@ -210,47 +186,12 @@ CompositeTruthValue* CompositeTruthValue::fromString(const char* tvStr) throw (I
         char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
         DPRINTF("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
         VersionHandle vh(indicator, substantive);
-        TruthValue* tv = TruthValue::factory(versionedTvType, versionedTvStr);
-        DeleteAndSetDefaultTVIfPertinent(&tv);
+        TruthValuePtr tv = TruthValue::factory(versionedTvType, versionedTvStr);
+        tv = SetDefaultTVIfPertinent(tv);
         result->versionedTVs[vh] = tv;
     }
     free(s);
     return result;
-}
-
-
-CompositeTruthValue* CompositeTruthValue::clone() const
-{
-    return new CompositeTruthValue(*this);
-}
-
-CompositeTruthValue& CompositeTruthValue::operator=(const TruthValue & rhs) throw (RuntimeException)
-{
-    DPRINTF("CompositeTruthValue::operator=()\n");
-    const CompositeTruthValue* tv = dynamic_cast<const CompositeTruthValue*>(&rhs);
-    if (tv) {
-        if (tv != this) { // check if this is the same object first.
-            DPRINTF("operator=() calling clear()\n");
-            clear();
-            DPRINTF("operator=() calling copy()\n");
-            copy((const CompositeTruthValue&) rhs);
-        }
-    } else {
-#ifndef WIN32
-        // The following line was causing a compilation error on MSVC...
-        throw RuntimeException(TRACE_INFO, "Cannot assign a TV of type '%s' to one of type '%s'\n",
-                               typeid(rhs).name(), typeid(*this).name());
-#else
-        throw RuntimeException(TRACE_INFO, "Invalid assignment of a CompositeTV object\n");
-#endif
-    }
-    return *this;
-}
-
-CompositeTruthValue& CompositeTruthValue::operator=(const CompositeTruthValue & rhs) throw (RuntimeException)
-{
-    DPRINTF("CompositeTruthValue::operator=(const CompositeTruthValue&)\n");
-    return operator=((const TruthValue&) rhs);
 }
 
 
@@ -278,8 +219,8 @@ bool CompositeTruthValue::operator==(const TruthValue& rhs) const
         VersionedTruthValueMap::const_iterator oitr;
         oitr = crhs.versionedTVs.find(key);
         if (oitr == crhs.versionedTVs.end()) return false;
-        TruthValue* tv = itr->second;
-        TruthValue* otv = oitr->second;
+        TruthValuePtr tv = itr->second;
+        TruthValuePtr otv = oitr->second;
         if (*tv != *otv) return false;
     }
 
@@ -293,32 +234,26 @@ TruthValueType CompositeTruthValue::getType() const
 }
 
 
-TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
+TruthValuePtr CompositeTruthValue::merge(TruthValuePtr other) const
 {
-    CompositeTruthValue* result = clone();
-#if 1
-    // TODO: Use the approach with dynamic cast below if we're going
-    // to have subclasses of CompositeTruthValue. For now, this approach
-    // using getType() is more efficient.
-    if (other.getType() == COMPOSITE_TRUTH_VALUE) {
-        const CompositeTruthValue* otherCTv = (CompositeTruthValue*) & other;
-#else
-    const CompositeTruthValue *otherCTv = dynamic_cast<const CompositeTruthValue *>(&other);
-    if (otherCTv) {
-#endif
+    CompositeTruthValuePtr result = CompositeTVCast(clone());
+
+    if (other->getType() == COMPOSITE_TRUTH_VALUE) {
+        CompositeTruthValuePtr otherCTv = CompositeTVCast(other);
+
         if (otherCTv->getConfidence() > result->getConfidence()) {
-            result->setVersionedTV(*(otherCTv->primaryTV), NULL_VERSION_HANDLE);
+            result->setVersionedTV(otherCTv->primaryTV, NULL_VERSION_HANDLE);
         }
         // merge the common versioned TVs
         for (VersionedTruthValueMap::const_iterator itr = result->versionedTVs.begin();
                 itr != result->versionedTVs.end(); ++itr) {
             VersionHandle key = itr->first;
-            TruthValue* tv = itr->second;
+            TruthValuePtr tv = itr->second;
             VersionedTruthValueMap::const_iterator otherItr = otherCTv->versionedTVs.find(key);
             if (otherItr != otherCTv->versionedTVs.end()) {
-                TruthValue* otherTv = otherItr->second;
+                TruthValuePtr otherTv = otherItr->second;
                 if (otherTv->getConfidence() > tv->getConfidence()) {
-                    result->setVersionedTV(*otherTv, key);
+                    result->setVersionedTV(otherTv, key);
                 }
             }
         }
@@ -326,14 +261,14 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
         for (VersionedTruthValueMap::const_iterator otherItr = otherCTv->versionedTVs.begin();
                 otherItr != otherCTv->versionedTVs.end(); ++otherItr) {
             VersionHandle key = otherItr->first;
-            TruthValue* otherTv = otherItr->second;
+            TruthValuePtr otherTv = otherItr->second;
             VersionedTruthValueMap::const_iterator itr = result->versionedTVs.find(key);
             if (itr == result->versionedTVs.end()) {
-                result->setVersionedTV(*otherTv, key);
+                result->setVersionedTV(otherTv, key);
             }
         }
     } else {
-        if (other.getConfidence() > result->getConfidence()) {
+        if (other->getConfidence() > result->getConfidence()) {
             result->setVersionedTV(other, NULL_VERSION_HANDLE);
         }
     }
@@ -341,11 +276,11 @@ TruthValue* CompositeTruthValue::merge(const TruthValue& other) const
 }
 
 
-void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh) {
-
-    TruthValue* newTv = (TruthValue*) & (TruthValue::DEFAULT_TV());
-    if (!tv.isNullTv() && &tv != &(TruthValue::DEFAULT_TV())) {
-        newTv = tv.clone();
+void CompositeTruthValue::setVersionedTV(TruthValuePtr tv, VersionHandle vh)
+{
+    TruthValuePtr newTv = DEFAULT_TV();
+    if (not tv->isNullTv() and tv != DEFAULT_TV()) {
+        newTv = tv->clone();
     }
     VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
     if (itr == versionedTVs.end()) {
@@ -354,33 +289,26 @@ void CompositeTruthValue::setVersionedTV(const TruthValue& tv, VersionHandle vh)
             versionedTVs[vh] = newTv;
         } else {
             // null version handle. Set the primary TV
-            if (primaryTV != NULL && primaryTV != &(TruthValue::DEFAULT_TV())) {
-                delete primaryTV;
-            }
             primaryTV = newTv;
         }
     }
     else {
-        TruthValue* versionedTv = itr->second;
-        if (versionedTv != &(TruthValue::DEFAULT_TV())) {
-            delete versionedTv;
-        }
         versionedTVs[vh] = newTv;
-
     }
 }
 
 
-const TruthValue& CompositeTruthValue::getVersionedTV(VersionHandle vh) const {
+TruthValuePtr CompositeTruthValue::getVersionedTV(VersionHandle vh) const
+{
     if (!isNullVersionHandle(vh)) {
         VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
         if (itr == versionedTVs.end()) {
             return TruthValue::NULL_TV();
         } else {
-            return *(itr->second);
+            return (itr->second);
         }
     } else {
-        return *primaryTV;
+        return primaryTV;
     }
 }
 
@@ -388,11 +316,8 @@ void CompositeTruthValue::removeVersionedTV(VersionHandle vh)
 {
     VersionedTruthValueMap::const_iterator itr = versionedTVs.find(vh);
     if (itr != versionedTVs.end()) {
-        TruthValue* versionedTv = itr->second;
+        TruthValuePtr versionedTv = itr->second;
         versionedTVs.erase(vh);
-        if (versionedTv != &(TruthValue::DEFAULT_TV())) {
-            delete versionedTv;
-        }
     }
 }
 
@@ -408,12 +333,6 @@ void CompositeTruthValue::removeVersionedTVs(const Handle &substantive)
         if (key.substantive == substantive)
         {
             toBeRemovedEntries[key] = NULL;
-
-            // Free TruthValue object at once
-            TruthValue* versionedTv = itr->second;
-            if (versionedTv != &(TruthValue::DEFAULT_TV())) {
-                delete versionedTv;
-            }
         }
     }
     for (itr = toBeRemovedEntries.begin();
@@ -439,11 +358,6 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace* atomspace)
         if (!atomspace->isValidHandle(key.substantive))
         {
             toBeRemovedEntries[key] = NULL;
-            // Free TruthValue object at once
-            TruthValue* versionedTv = itr->second;
-            if (versionedTv != &(TruthValue::DEFAULT_TV())) {
-                delete versionedTv;
-            }
         }
     }
     for (itr = toBeRemovedEntries.begin();
@@ -455,11 +369,13 @@ void CompositeTruthValue::removeInvalidTVs(AtomSpace* atomspace)
 }
 
 
-int CompositeTruthValue::getNumberOfVersionedTVs() const {
+int CompositeTruthValue::getNumberOfVersionedTVs() const
+{
     return versionedTVs.size();
 }
 
-VersionHandle CompositeTruthValue::getVersionHandle(int i) const {
+VersionHandle CompositeTruthValue::getVersionHandle(int i) const
+{
     int index = 0;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
             itr != versionedTVs.end(); ++itr) {

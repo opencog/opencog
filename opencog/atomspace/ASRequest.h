@@ -134,21 +134,18 @@ public:
     }
 };
 
-class AddNodeASR : public ThreeParamASR <Handle,Type,std::string,const TruthValue*> {
+class AddNodeASR : public ThreeParamASR <Handle, Type, std::string, TruthValuePtr> {
 public:
-    AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, const TruthValue* tvn) :
-        ThreeParamASR<Handle,Type,std::string,const TruthValue*>(a,type,name,tvn)
+    AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, TruthValuePtr tv) :
+        ThreeParamASR<Handle, Type, std::string, TruthValuePtr>(a,type,name,tv)
         { return; };
     ~AddNodeASR() {
-        // clean up TruthValue as we are responsible for any passed parameters.
-        if (!p3->isNullTv())
-            delete p3;
     }
     
     virtual void do_work() {
         Handle r;
         try {
-            r = atomspace->addNode(p1, p2, *p3);
+            r = atomspace->addNode(p1, p2, p3);
             set_result(r);
         } catch (InvalidParamException &e) {
             logger().error(e.what());
@@ -158,21 +155,18 @@ public:
     
 };
 
-class AddLinkASR : public ThreeParamASR <Handle,Type,HandleSeq,const TruthValue*> {
+class AddLinkASR : public ThreeParamASR <Handle,Type, HandleSeq, TruthValuePtr> {
 public:
-    AddLinkASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing, const TruthValue* tvn) :
-        ThreeParamASR<Handle,Type,HandleSeq,const TruthValue*>(a,type,outgoing,tvn)
+    AddLinkASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing, TruthValuePtr tv) :
+        ThreeParamASR<Handle, Type, HandleSeq, TruthValuePtr>(a, type, outgoing, tv)
         {};
     ~AddLinkASR() {
-        // clean up TruthValue as we are responsible for any passed parameters.
-        if (!p3->isNullTv())
-            delete p3;
     }
     
     virtual void do_work() {
         Handle r;
         try {
-            r = atomspace->addLink(p1, p2, *p3);
+            r = atomspace->addLink(p1, p2, p3);
         } catch (InvalidParamException &e) {
             logger().error(e.what());
         }
@@ -181,14 +175,14 @@ public:
     
 };
 
-class GetNodeHandleASR : public TwoParamASR <Handle,Type,std::string> {
+class GetNodeHandleASR : public TwoParamASR <Handle, Type, std::string> {
 public:
     GetNodeHandleASR(AtomSpaceImpl *a, Type type, const std::string& name) :
-        TwoParamASR<Handle,Type,std::string>(a,type,name)
+        TwoParamASR<Handle, Type, std::string>(a, type, name)
         {};
     
     virtual void do_work() {
-        set_result(atomspace->getHandle(p1,p2));
+        set_result(atomspace->getHandle(p1, p2));
     };
     
 };
@@ -434,8 +428,8 @@ public:
     };
     
     virtual void do_work() {
-        const TruthValue& tv = atomspace->getTV(h,vh);
-        set_result(tv.getMean());
+        TruthValuePtr tv = atomspace->getTV(h,vh);
+        set_result(tv->getMean());
     };
     
 };
@@ -450,49 +444,47 @@ public:
     };
     
     virtual void do_work() {
-        const TruthValue& tv = atomspace->getTV(h,vh);
-        set_result(tv.getConfidence());
+        TruthValuePtr tv = atomspace->getTV(h,vh);
+        set_result(tv->getConfidence());
     };
     
 };
 
-class GetCompleteTruthValueASR : public GenericASR <TruthValue*> {
+class GetCompleteTruthValueASR : public GenericASR <TruthValuePtr> {
     Handle h;
     VersionHandle vh;
 public:
     GetCompleteTruthValueASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<TruthValue*> (a)  {
+        GenericASR<TruthValuePtr> (a)  {
         h=_h; vh=_vh;
         result = NULL;
     };
     ~GetCompleteTruthValueASR() {
-        if (result) delete result;
     }
     
     virtual void do_work() {
-        set_result(atomspace->getTV(h,vh).clone());
+        set_result(atomspace->getTV(h,vh));
     };
     
 };
 
 class SetTruthValueASR : public GenericASR <bool> {
     Handle h;
-    TruthValue* tv;
+    TruthValuePtr tv;
     VersionHandle vh;
 public:
-    SetTruthValueASR(AtomSpaceImpl *a, Handle _h, const TruthValue& _tv, const VersionHandle& _vh) :
+    SetTruthValueASR(AtomSpaceImpl *a, Handle _h, TruthValuePtr _tv, const VersionHandle& _vh) :
             GenericASR<bool>(a) {
         tv = NULL;
         h = _h;
-        tv = _tv.clone();
+        tv = _tv;
         vh = _vh;
     }
     ~SetTruthValueASR() {
-        if (tv) delete tv;
     }
     
     virtual void do_work() {
-        atomspace->setTV(h,*tv,vh);
+        atomspace->setTV(h, tv, vh);
         set_result(true);
     };
     
@@ -991,8 +983,7 @@ typedef std::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
-typedef std::shared_ptr< GenericASR<tv_summary_t> > TruthValueRequest;
-typedef std::shared_ptr< GenericASR<TruthValue*> > TruthValueCompleteRequest;
+typedef std::shared_ptr< GenericASR<TruthValuePtr> > TruthValueCompleteRequest;
 typedef std::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 typedef std::shared_ptr< GenericASR<Type> > TypeRequest;
 typedef std::shared_ptr< GenericASR<int> > IntRequest;

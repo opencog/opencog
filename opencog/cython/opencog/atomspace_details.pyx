@@ -87,6 +87,9 @@ cdef class TruthValue:
     cdef cTruthValue* _ptr(self):
         return self.cobj.get()
 
+    cdef tv_ptr* _tvptr(self):
+        return self.cobj
+
     def __str__(self):
         return self._ptr().toString().c_str()
 
@@ -175,13 +178,13 @@ cdef class AtomSpace:
                 # get handle
                 result = self.atomspace.addPrefixedNode(t,deref(name))
             else:
-                result = self.atomspace.addPrefixedNode(t,deref(name),deref(<cTruthValue*>(tv._ptr())))
+                result = self.atomspace.addPrefixedNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
         else:
             if tv is None:
                 # get handle
                 result = self.atomspace.addNode(t,deref(name))
             else:
-                result = self.atomspace.addNode(t,deref(name),deref(tv._ptr()))
+                result = self.atomspace.addNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
@@ -203,9 +206,9 @@ cdef class AtomSpace:
         cdef cHandle result
         if tv is None:
             # get handle
-            result = self.atomspace.addLink(t,o_vect)
+            result = self.atomspace.addLink(t, o_vect)
         else:
-            result = self.atomspace.addLink(t,o_vect,deref(tv._ptr()))
+            result = self.atomspace.addLink(t, o_vect, deref(<tv_ptr*>(tv._tvptr())))
         if result == result.UNDEFINED: return None
         #return Handle(result.value());
         return Atom(Handle(result.value()), self);
@@ -275,9 +278,9 @@ cdef class AtomSpace:
         tv = self.atomspace.getTV(deref(h.h))
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
-    def set_tv(self,Handle h,TruthValue val):
+    def set_tv(self,Handle h, TruthValue tv):
         """ Set the TruthValue of an Atom in the AtomSpace """
-        self.atomspace.setTV(deref(h.h),deref(val._ptr()))
+        self.atomspace.setTV(deref(h.h), deref(<tv_ptr*>(tv._tvptr())))
 
     def get_type(self,Handle h):
         """ Get the Type of an Atom in the AtomSpace """

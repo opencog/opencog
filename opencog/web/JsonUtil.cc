@@ -79,9 +79,9 @@ bool assertJsonMapContains(const Object& o, std::vector<std::string> keys,
     return true;
 }
 
-TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
+TruthValuePtr JSONToTV(const Value& v, std::ostringstream& _output )
 {
-    TruthValue* tv = NULL;
+    TruthValuePtr tv = NULL;
     const Object& tv_obj = v.get_obj();
     if (tv_obj.size() != 1) return NULL;
     const Pair& pair = tv_obj[0];
@@ -99,7 +99,7 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
             else if (stv_obj[i].name_ == "count")
                 count = stv_obj[i].value_.get_real();
         }
-        tv = new SimpleTruthValue(str,count);
+        tv = SimpleTruthValue::createTV(str,count);
     } else if (tv_type_str == "count") {
         const Object& stv_obj = pair.value_.get_obj();
         float str=0.0f, conf=0.0f, count=0.0f;
@@ -116,7 +116,7 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
             else if (stv_obj[i].name_ == "conf")
                 conf = stv_obj[i].value_.get_real();
         }
-        tv = new CountTruthValue(str,conf,count);
+        tv = CountTruthValue::createTV(str,conf,count);
     } else if (tv_type_str == "indefinite") {
         //! @todo Allow asymmetric Indefinite TVs
         const Object& stv_obj = pair.value_.get_obj();
@@ -134,18 +134,17 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
             else if (stv_obj[i].name_ == "conf")
                 conf = stv_obj[i].value_.get_real();
         }
-        tv = new IndefiniteTruthValue(l, u, conf);
+        tv = IndefiniteTruthValue::createTV(l, u, conf);
     } else if (tv_type_str == "composite") {
         const Object& stv_obj = pair.value_.get_obj();
         if (stv_obj.size() == 0) return NULL;
         if (!assertJSONTVCorrect("primary",stv_obj[0].name_, _output)) return NULL;
-        TruthValue* primary_tv = JSONToTV(stv_obj[0].value_, _output);
+        TruthValuePtr primary_tv = JSONToTV(stv_obj[0].value_, _output);
         if (primary_tv == NULL) return NULL;
-        CompositeTruthValue* ctv = new CompositeTruthValue(*primary_tv,
+        CompositeTruthValuePtr ctv = CompositeTruthValue::createCTV(primary_tv,
                 NULL_VERSION_HANDLE);
-        delete primary_tv;
         for( Object::size_type i = 1; i < stv_obj.size(); ++i ) {
-            TruthValue* ctxt_tv = NULL;
+            TruthValuePtr ctxt_tv = NULL;
             std::string indicatorStr;
             try {
                 const Pair& pair = stv_obj[i];
@@ -156,29 +155,23 @@ TruthValue* JSONToTV(const Value& v, std::ostringstream& _output )
                 Handle context = Handle(vharray[0].get_uint64());
                 ctxt_tv = JSONToTV(vharray[1], _output);
                 if (ctxt_tv == NULL) {
-                    delete ctv;
                     return NULL;
                 }
                 IndicatorType indicator =
                     VersionHandle::strToIndicator(indicatorStr.c_str());
-                ctv->setVersionedTV(*ctxt_tv,VersionHandle(indicator,context));
-                delete ctxt_tv; // Composite clones TV
+                ctv->setVersionedTV(ctxt_tv, VersionHandle(indicator, context));
             } catch (InvalidParamException& e) {
                 _output << "{\"error\":\"bad indicator for version handle: '" <<
                     indicatorStr << "'\"}" << std::endl;
-                delete ctv;
-                delete ctxt_tv;
                 return NULL;
             } catch (std::runtime_error& e) {
                 _output << "{\"error\":\"bad json in truth value\"}" << std::endl;
-                delete ctv;
                 return NULL;
             }
         }
         tv = ctv;
     }
     return tv;
-
 }
 
 } // namespace

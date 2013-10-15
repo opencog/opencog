@@ -48,9 +48,16 @@ namespace opencog
 class AtomSpace;
 
 typedef std::unordered_map<VersionHandle, 
-                             TruthValue*,
+                             TruthValuePtr,
                              hashVersionHandle,
                              eqVersionHandle> VersionedTruthValueMap;
+
+class CompositeTruthValue;
+typedef std::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
+
+static inline CompositeTruthValuePtr CompositeTVCast(TruthValuePtr tv)
+    { return std::dynamic_pointer_cast<CompositeTruthValue>(tv); }
+
 
 class Atom;
 class CompositeRenumber;
@@ -64,16 +71,12 @@ class CompositeTruthValue: public TruthValue
 #endif
 
 private:
-    TruthValue* primaryTV;
+    TruthValuePtr primaryTV;
     VersionedTruthValueMap versionedTVs;
+    static TruthValuePtr SetDefaultTVIfPertinent(TruthValuePtr);
 
     //! Special constructor for use by the fromString() method.
     CompositeTruthValue();
-
-protected:
-    void init(const TruthValue&, VersionHandle);
-    void clear();
-    void copy(const CompositeTruthValue&);
 
 public:
     /**
@@ -88,12 +91,10 @@ public:
      *        TruthValue object passed as argument to this method. So,
      *        the caller should not delete it outside.
      */
-    CompositeTruthValue(const TruthValue&, VersionHandle);
+    CompositeTruthValue(TruthValuePtr, VersionHandle);
     CompositeTruthValue(CompositeTruthValue const&);
 
     ~CompositeTruthValue();
-
-    CompositeTruthValue* clone() const;
 
     /**
      * Merge this TV object with the given TV object argument.
@@ -107,22 +108,10 @@ public:
      * tv2, and for each versionedTV that is both in tv1 and tv2, then only
      * the one with the highest confidence is retained.
      */
-    TruthValue* merge(const TruthValue&) const;
-
-    CompositeTruthValue& operator=(const TruthValue& rhs)
-        throw (RuntimeException);
-
-    // The following operator method was created because when a tv is
-    // assigned to a variable declared as CompositeTruthValue, it
-    // does not match the operator method above (that receives a
-    // "const TruthValue&" argument).
-    // Strangely, this does not happen with other TruthValue
-    // subclasses (Simple and Indefinite, for instance...)
-    CompositeTruthValue& operator=(const CompositeTruthValue& rhs)
-        throw (RuntimeException);
+    TruthValuePtr merge(TruthValuePtr) const;
 
     virtual bool operator==(const TruthValue& rhs) const;
-    static CompositeTruthValue* fromString(const char*)
+    static CompositeTruthValuePtr fromString(const char*)
         throw (InvalidParamException);
     
     /**
@@ -138,7 +127,6 @@ public:
      */
     confidence_t getConfidence() const;
 
-    float toFloat() const;
     std::string toString() const;
     TruthValueType getType() const;
 
@@ -151,16 +139,16 @@ public:
      *        Handle::UNDEFINED (you can use NULL_VERSION_HANDLE constant).
      *        In this case its indicator component does not matter.
      */
-    void setVersionedTV(const TruthValue&, VersionHandle);
+    void setVersionedTV(TruthValuePtr, VersionHandle);
 
     /**
      * Gets the versioned TruthValue object associated with the given
      * VersionHandle. If NULL_VERSION_HANDLE is given as argument,
      * returns the primaryTV.
      */
-    const TruthValue& getVersionedTV(VersionHandle) const;
+    TruthValuePtr getVersionedTV(VersionHandle) const;
 
-    const TruthValue& getPrimaryTV() const;
+    TruthValuePtr getPrimaryTV() const;
 
     /**
      * Removes the versioned TruthValue object associated with the
@@ -183,6 +171,41 @@ public:
      * @param atomspace The AtomSpace to check the handles against
      */
     void removeInvalidTVs(AtomSpace*);
+
+    // clone method
+    static CompositeTruthValuePtr createCTV(TruthValuePtr tv)
+    {
+        if (tv->getType() != COMPOSITE_TRUTH_VALUE)
+            throw RuntimeException(TRACE_INFO, "Cannot clone non-composite TV");
+        return std::make_shared<CompositeTruthValue>(
+            static_cast<const CompositeTruthValue&>(*tv));
+    }
+
+    static TruthValuePtr createTV(TruthValuePtr tv)
+    {
+        return std::static_pointer_cast<TruthValue>(createCTV(tv));
+    }
+
+    TruthValuePtr clone() const
+    {
+        return std::make_shared<CompositeTruthValue>(*this);
+    }
+
+    TruthValue* rawclone() const
+    {
+        return new CompositeTruthValue(*this);
+    }
+
+    static CompositeTruthValuePtr createCTV(TruthValuePtr tv, VersionHandle vh)
+    {
+        return std::make_shared<CompositeTruthValue>(tv, vh);
+    }
+
+    static TruthValuePtr createTV(TruthValuePtr tv, VersionHandle vh)
+    {
+        return std::static_pointer_cast<TruthValue>(createCTV(tv, vh));
+    }
+
 
     // iterator over VersionHandles
 private:
@@ -220,8 +243,6 @@ public:
      */
     VersionHandle getVersionHandle(int) const;
 };
-
-typedef std::shared_ptr<CompositeTruthValue> CompositeTruthValuePtr;
 
 /** @}*/
 } // namespace opencog
