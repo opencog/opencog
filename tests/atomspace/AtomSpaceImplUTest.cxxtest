@@ -858,7 +858,7 @@ public:
         atomSpace->setTV(h, ctv);
         ctv->setVersionedTV(SimpleTruthValue::createTV(0.6,0.5),vh1);
         atomSpace->setTV(h, ctv);
-        TS_ASSERT(atomSpace->getTV(h, vh1) == SimpleTruthValue::createTV(0.6,0.5));
+        TS_ASSERT(*atomSpace->getTV(h, vh1) == SimpleTruthValue(0.6,0.5));
     }
 
     void testGetNormalisedSTI() {
