@@ -47,6 +47,26 @@ using namespace opencog::oac;
 using namespace std;
 
 
+string RuleNode::getDepthOfRuleNode()
+{
+     // check the depth of the effect state nodes of this rule, get the deepest state node.
+
+    vector<StateNode*>::iterator it = forwardLinks.begin();
+    StateNode* deepestStateNode = 0;
+
+    for (; it != forwardLinks.end(); ++ it)
+    {
+        if (deepestStateNode == 0)
+            deepestStateNode = (StateNode*)(*it);
+
+        if ( deepestStateNode < ((StateNode*)(*it)) )
+        {
+            deepestStateNode = (StateNode*)(*it);
+        }
+    }
+
+    return deepestStateNode->depth;
+}
 
 void RuleNode::updateCurrentAllBindings()
 {
@@ -72,15 +92,20 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
 {
-/*
-    if (sizeof(this->depth) == 1)
+    if (this->depth == "Deepest")
+        return; // this the orginal state
+
+    if (! this->forwardRuleNode)
     {
-        return; // it's the goal state nodes
-    }
-    else if (! this->forwardRuleNode)
-    {
-        this->depth = "-1";
-        return;
+        if ( sizeof(this->depth) == 1)
+        {
+            return; // it's the goal state nodes
+        }
+        else
+        {
+            this->depth = "-1"; // this a state node that there is not any rule node need it currently
+            return;
+        }
     }
 
     vector<StateNode*>::iterator it;
@@ -95,7 +120,7 @@ void StateNode::calculateNodesDepth()
 
     this->depth = deepest + 1;
     return this->depth;
-*/
+
 }
 
 StateNode* RuleNode::getMostClosedBackwardStateNode()
@@ -267,23 +292,6 @@ bool OCPlanner::findStateInStartStateNodes(State& state, StateNode* &stateNode)
 
     return false;
 
-}
-
-
-int RuleNode::getDepthOfRuleNode(const RuleNode* r)
-{
-     // check the depth of the effect state nodes of this rule, get the deepest state node.
-/*    vector<StateNode*>::iterator it;
-
-    int deepest = 0;
-    for ( it = r->forwardLinks.begin(); it != r->forwardLinks.end();  ++ it)
-    {
-        int d = ((StateNode*)(*it))->depth;
-        if (d > deepest)
-            deepest = d;
-    }
-
-    return deepest;*/
 }
 
 OCPlanner::OCPlanner(AtomSpace *_atomspace, string _selfID, string _selfType)
