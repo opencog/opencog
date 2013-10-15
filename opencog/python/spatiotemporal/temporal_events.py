@@ -1,35 +1,20 @@
 from datetime import datetime
 from scipy.stats import t
 from spatiotemporal.interval import Interval, assert_is_interval
-from spatiotemporal.time import UnixTime, is_unix_time
+from spatiotemporal.membership_function import FuzzyMembershipFunction
+from spatiotemporal.unix_time import UnixTime
+from utility.geometric import LinearFunction
 
 __author__ = 'keyvan'
 
 
 class BaseTemporalEvent(Interval):
-    def pdf_single_point(self, time_step):
-        """
-        to override, default pdf calls to it
-        alternatively one can directly override pdf
-        """
+    def __init__(self, a, b, iter_step=1):
+        Interval.__init__(self, a, b, iter_step=iter_step)
+        self.membership_function = FuzzyMembershipFunction(self, self.membership_function_single_point)
+
+    def membership_function_single_point(self, time_step):
         return 0
-
-    def pdf(self, x=None):
-        """
-        x can either be a single time value or a collection
-        if x is None, return value is the probability distribution for the length of the event
-        """
-        if x is None:
-            x = self
-
-        result = []
-        try:
-            for time_step in x:
-                result.append(self.pdf_single_point(time_step))
-        except:
-            assert is_unix_time(x), "'x' should be unix time when 'pdf' is invoked by a singular 'x'"
-            return self.pdf_single_point(x)
-        return result
 
     def _interval_from_self_if_none(self, a, b, interval):
         if interval is None:
@@ -46,52 +31,28 @@ class BaseTemporalEvent(Interval):
         use either 'a' and 'b' or 'interval'
         """
         interval = self._interval_from_self_if_none(a, b, interval)
-        return max(self.pdf(interval))
+        return max(self.membership_function(interval))
 
     def __repr__(self):
         return 'spatiotemporal.temporal_events.{0}(a:{1}, b:{2})'.format(
-            self.__class__.__name__,  self.interval.a, self.interval.b)
+            self.__class__.__name__, self.interval.a, self.interval.b)
 
     def __str__(self):
         return repr(self)
 
 
 class TemporalEventSimple(BaseTemporalEvent):
-    def pdf_single_point(self, time_step):
-        if self.interval.a <= time_step <= self.interval.b:
+    def membership_function_single_point(self, time_step):
+        if self.a <= time_step <= self.b:
             return 1
         return 0
 
 
 class TemporalEventDistributional(BaseTemporalEvent):
     def __init__(self, a, b, pdf, iter_step=1):
-        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
         assert callable(pdf), "'pdf' should be callable"
-        self.pdf = pdf
+        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
         self.pdf_single_point = pdf
-
-
-def _interpolation_a_to_beginning(t, a, beginning):
-    _a = 1 / (beginning - a)
-    _b = -1 * _a * a
-    return _a * t + _b
-
-
-def _interpolation_ending_to_b(t, ending, b):
-    _a = -1 / (b - ending)
-    _b = -1 * _a * b
-    return _a * t + _b
-
-
-def _interpolation_a_to_b(t, a, beginning, ending, b):
-    t = UnixTime(t)
-    if t <= a or t >= b:
-        return 0
-    if a < t < beginning:
-        return _interpolation_a_to_beginning(t, a, beginning)
-    if ending < t < b:
-        return _interpolation_ending_to_b(t, ending, b)
-    return 1
 
 
 class TemporalEventPiecewise(BaseTemporalEvent):
@@ -99,6 +60,8 @@ class TemporalEventPiecewise(BaseTemporalEvent):
     ending_factor = 5
     _beginning = -1
     _ending = -1
+    _linear_function_a_to_beginning = None
+    _linear_function_ending_to_b = None
 
     def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None, iter_step=1):
         """
@@ -126,8 +89,8 @@ class TemporalEventPiecewise(BaseTemporalEvent):
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.a + len(self) / self.beginning_factor,
-                        len(self) / self.beginning_factor
+                        self.a + self.duration / self.beginning_factor,
+                        self.duration / self.beginning_factor
                     )
                 )
 
@@ -135,19 +98,36 @@ class TemporalEventPiecewise(BaseTemporalEvent):
                     probability_distribution=t(
                         # df, mean, variance
                         4,
-                        self.b - len(self) / self.ending_factor,
-                        len(self) / self.ending_factor
+                        self.b - self.duration / self.ending_factor,
+                        self.duration / self.ending_factor
                     )
                 )
 
-    def pdf_single_point(self, time_step):
-        return _interpolation_a_to_b(time_step, self.a, self.beginning, self.ending, self.b)
+    def membership_function_single_point(self, time_step):
+        time_step = UnixTime(time_step)
+        if time_step <= self.a or time_step >= self.b:
+            return 0
+        if self.a < time_step < self.beginning:
+            return self.linear_function_a_to_beginning(time_step)
+        if self.ending < time_step < self.b:
+            return self.linear_function_ending_to_b(time_step)
+        return 1
 
     def probability_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
         if self.a <= interval.a <= self.beginning and self.ending <= interval.b <= self.b:
             return 1
-        return max(self.pdf_single_point(interval.a), self.pdf_single_point(interval.b))
+        return max(self.membership_function_single_point(interval.a), self.membership_function_single_point(interval.b))
+
+    @Interval.a.setter
+    def a(self, value):
+        self._linear_function_a_to_beginning = None
+        Interval.a.fset(self, value)
+
+    @Interval.b.setter
+    def b(self, value):
+        self._linear_function_ending_to_b = None
+        Interval.b.fset(self, value)
 
     @property
     def beginning(self):
@@ -159,6 +139,7 @@ class TemporalEventPiecewise(BaseTemporalEvent):
             assert self.interval.a < value < self.interval.b, "'beginning' should be within ['a' : 'b'] interval"
         else:
             assert self.interval.a < value < self._ending, "'beginning' should be within ['a' : 'ending'] interval"
+        self._linear_function_a_to_beginning = None
         self._beginning = value
 
     @property
@@ -171,7 +152,24 @@ class TemporalEventPiecewise(BaseTemporalEvent):
             assert self.interval.a < value < self.interval.b, "'ending' should be within ['a' : 'b'] interval"
         else:
             assert self._beginning < value < self.interval.b, "'ending' should be within ['beginning' : 'b'] interval"
+        self._linear_function_ending_to_b = None
         self._ending = value
+
+    @property
+    def linear_function_a_to_beginning(self):
+        if self._linear_function_a_to_beginning is None:
+            _a = 1 / (self.beginning - self.a)
+            _b = -1 * _a * self.a
+            self._linear_function_a_to_beginning = LinearFunction(_a, _b)
+        return self._linear_function_a_to_beginning
+
+    @property
+    def linear_function_ending_to_b(self):
+        if self._linear_function_ending_to_b is None:
+            _a = -1 / (self.b - self.ending)
+            _b = -1 * _a * self.b
+            self._linear_function_ending_to_b = LinearFunction(_a, _b)
+        return self._linear_function_ending_to_b
 
     def __repr__(self):
         return 'spatiotemporal.temporal_events.PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
@@ -194,10 +192,29 @@ def generate_random_events(size=20):
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
-    events = generate_random_events(10)
+    import time
+
+    #event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1), iter_step=100)
+    #event = plt.plot(event.to_list(), event.membership_function())
+    #plt.show()
+
+    events = generate_random_events(5)
+
+    start = time.time()
 
     for event in events:
-        y = event.pdf()
-        plt.plot(event.x_axis(), y)
+        plt.plot(event.to_list(), event.membership_function())
+
+    list_performance = time.time() - start
 
     plt.show()
+    #plt.clf()
+    #
+    #start = time.time()
+    #
+    #for event in events:
+    #    plt.plot(event, event.pdf)
+    #
+    #print list_performance, 'vs', time.time() - start
+    #
+    #plt.show()

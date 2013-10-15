@@ -1,4 +1,4 @@
-from spatiotemporal.time import UnixTime, random_time, is_unix_time, IteratorUnixTime
+from spatiotemporal.unix_time import UnixTime, random_time, is_unix_time
 
 __author__ = 'keyvan'
 
@@ -40,11 +40,15 @@ class Interval(object):
             assert self.a <= stop <= self.b, "'stop' should be within the interval of the interval"
         return random_time(start, stop, probability_distribution)
 
-    def x_axis(self):
-        axis = []
+    def to_list(self):
+        result = []
         for time_step in self:
-            axis.append(time_step)
-        return axis
+            result.append(time_step)
+        return result
+
+    @property
+    def duration(self):
+        return self.b - self.a
 
     @property
     def a(self):
@@ -72,23 +76,70 @@ class Interval(object):
             assert isinstance(value, (int, float, long)), value > 0
             self._iter_step = value
 
+    def __getitem__(self, index):
+        value = self.a + index * self.iter_step
+        if value > self.b:
+            raise IndexError
+        return UnixTime(value)
+
+    def __len__(self):
+        return int(self.b - self.a)/int(self.iter_step) + 1
+
     def __contains__(self, item):
         """
         item can either be unix time or any object with 'a' and 'b' unix time attributes (e.g. a Interval)
         """
         if is_unix_time(item):
             return self.a <= item <= self.b
+        return self.a <= item.a and item.b >= self.b
 
-        return self.a <= item.a and self.b >= item.b
+    def __eq__(self, other):
+        return other.a == self.a and other.b == self.b
 
     def __iter__(self):
-        return IteratorUnixTime(self.a, self.b, self.iter_step)
-
-    def __len__(self):
-        return self.b - self.a
+        return (self[t] for t in xrange(len(self)))
 
     def __repr__(self):
         return 'spatiotemporal.time.Interval([{0} : {1}])'.format(self.a, self.b)
 
     def __str__(self):
         return 'from {0} to {1}'.format(self.a, self.b)
+
+if __name__ == '__main__':
+    import time
+    a = Interval(1, 1000000)
+    b = []
+
+    start = time.time()
+    ls = a.to_list()
+
+    for t in xrange(len(a)):
+        b.append(ls[t])
+
+    list_performance = time.time() - start
+
+    start = time.time()
+    for t in xrange(len(a)):
+        b.append(a[t])
+
+    print 'time:', list_performance, 'vs.', time.time() - start
+
+
+
+    #from temporal_events import generate_random_events
+    #
+    #events = generate_random_events(3)
+    #start = time.time()
+    #for event in events:
+    #    for t in event.to_list():
+    #        pass
+    #
+    #print '------------------------------'
+    #list_performance = time.time() - start
+    #start = time.time()
+    #
+    #for event in events:
+    #    for t in event:
+    #        pass
+    #
+    #print 'time:', list_performance, 'vs.', time.time() - start

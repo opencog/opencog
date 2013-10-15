@@ -27,22 +27,6 @@ class UnixTime(float):
         return datetime.fromtimestamp(self).strftime('%Y-%m-%d %H:%M:%S')
 
 
-class IteratorUnixTime(object):
-    def __init__(self, start, stop, step=1):
-        self.current = start - step
-        self.stop = stop
-        self.step = step
-
-    def next(self):
-        self.current += self.step
-        if self.current >= self.stop:
-            raise StopIteration
-        return UnixTime(self.current)
-
-    def __iter__(self):
-        return self
-
-
 def is_unix_time(time):
     return isinstance(time, (UnixTime, int, float, long)) and time >= 0
 
