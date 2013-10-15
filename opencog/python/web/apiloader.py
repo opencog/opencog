@@ -4,42 +4,19 @@ import opencog.cogserver
 from web.api import RESTApi
 from threading import Thread
 
-class RESTApiThread(object):
-    @classmethod
-    def configure(cls, atomspace):
-        cls.atomspace = atomspace
-        return cls
-
-    def run(self):
-        api = RESTApi(self.atomspace)
-        print 'Starting API...'
-        api.run()
 
 class RESTApiLoader(opencog.cogserver.Request): #opencog.cogserver.MindAgent):
     def run(self, args, atomspace):
-        RESTApiThread.configure(atomspace)
-        #daemon = ApiDaemon('/tmp/daemon-opencog-rest.pid')
-        #daemon.start()
-        api = RESTApiThread()
-        thread = Thread(target=api.run)
+        """
+        Load the REST Api into a separate thread so that it will continue serving requests in the background
+        after the Request that loads it has terminated
+        """
+        self.atomspace = atomspace
+        thread = Thread(target=self.invoke)
         thread.start()
         print "REST API is now running in a separate thread."
 
-'''
-    def invoke(self, atomspace):
-        api = RESTApi(atomspace)
+    def invoke(self):
+        api = RESTApi(self.atomspace)
         api.run()
-'''
 
-
-
-
-
-
-
-'''
-aspace = AtomSpace()
-animal = aspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .9))
-a = RESTApiLoader()
-a.run(args=None, atomspace=aspace)
-'''
