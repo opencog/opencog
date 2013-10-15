@@ -103,70 +103,19 @@ public:
         }
     }
 
-    void testAssignmentOperator() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            SimpleTruthValue tv(0, 0);
-            tv = (const SimpleTruthValue&) * (tvs[i]);
-            //tv = *(tvs[i]);
-            TS_ASSERT(fabs(tv.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tv.getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-        for (int i = 0; i < NUM_TVS; i++) {
-            SimpleTruthValue tv(0, 0);
-            tv = (const TruthValue&) * (tvs[i]);
-            TS_ASSERT(fabs(tv.getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tv.getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-        const TruthValue& indefiniteTv = IndefiniteTruthValue();
-        const TruthValue& compositeTv = CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
-        SimpleTruthValue tv(0, 0);
-        TS_ASSERT_THROWS(tv = TruthValue::NULL_TV(), RuntimeException&);
-        TS_ASSERT_THROWS(tv = indefiniteTv, RuntimeException&);
-        TS_ASSERT_THROWS(tv = compositeTv, RuntimeException&);
-    }
-
     void testToAndFromString() {
         char tvStr[1024];
         for (int i = 0; i < NUM_TVS; i++) {
             std::string tvToStringValue = tvs[i]->toString();
             sprintf(tvStr, "%s %s", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            TruthValue* tv = TruthValue::factory(tvStr);
+            TruthValuePtr tv = TruthValue::factory(tvStr);
             TS_ASSERT(tv != NULL);
             TS_ASSERT(tv->getType() == tvs[i]->getType());
-            delete tv;
-            SimpleTruthValue* stv = SimpleTruthValue::fromString(tvToStringValue.c_str());
+            TruthValuePtr stv = SimpleTruthValue::fromString(tvToStringValue.c_str());
             TS_ASSERT(stv != NULL);
             TS_ASSERT(fabs(stv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(stv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(stv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-    void testSetAndGetMean() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            int j = (i + 1) % NUM_TVS;
-            tvs[i]->setMean(means[j]);
-            TS_ASSERT(fabs(tvs[i]->getMean()  - means[j]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tvs[i]->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tvs[i]->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-    void testSetAndGetCount() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            int j = (i + 1) % NUM_TVS;
-            tvs[i]->setCount(counts[j]);
-            TS_ASSERT(fabs(tvs[i]->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tvs[i]->getCount()  - counts[j]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tvs[i]->getConfidence() - confidences[j] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-    void testToFloat() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(fabs(tvs[i]->toFloat()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
         }
     }
 
@@ -178,7 +127,7 @@ public:
             //logger().debug("%s", tvToStringValue.c_str());
             sprintf(tvStr, "%s %s", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
             //logger().debug("tvStr = %s", tvStr);
-            TruthValue* tv = TruthValue::factory(tvStr);
+            TruthValuePtr tv = TruthValue::factory(tvStr);
             TS_ASSERT(tv != NULL);
             TS_ASSERT(tv->getType() == tvs[i]->getType());
             //logger().debug("rebuiltTvStr = %s", tv->toString().c_str());
@@ -188,23 +137,12 @@ public:
         }
     }
 
-    void testSetAndGetConfidence() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            int j = (i + 1) % NUM_TVS;
-            tvs[i]->setConfidence(confidences[j]);
-            TS_ASSERT(fabs(tvs[i]->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tvs[i]->getCount()  - counts[j]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(tvs[i]->getConfidence() - confidences[j] < FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
     void testClone() {
         for (int i = 0; i < NUM_TVS; i++) {
-            SimpleTruthValue* clonedTv = tvs[i]->clone();
+            TruthValuePtr clonedTv = tvs[i]->clone();
             TS_ASSERT(fabs(clonedTv->getMean()  - means[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getCount()  - counts[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(clonedTv->getConfidence() - confidences[i] < FLOAT_ACCEPTABLE_ERROR);
-            delete clonedTv;
         }
     }
 

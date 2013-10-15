@@ -52,7 +52,7 @@ TruthValuePtr SenseCache::similarity(Handle sense_a, Handle sense_b)
 	bool found = foreach_unordered_binary_link(sense_a, SIMILARITY_LINK,
 	                         &SenseCache::find_sense, this);
 
-	if (!found) return TruthValuePtr(TruthValue::DEFAULT_TV().clone());
+	if (!found) return TruthValue::DEFAULT_TV();
 	return atom_space->getTV(found_link);
 }
 
@@ -70,7 +70,7 @@ bool SenseCache::find_sense(Handle sense, Handle link)
  * senses.  This link is *not* a part of any atom space; it must be
  * aded to an atom space if desired.
  */
-void SenseCache::set_similarity(Handle sense_a, Handle sense_b, const TruthValue &tv)
+void SenseCache::set_similarity(Handle sense_a, Handle sense_b, TruthValuePtr tv)
 {
 	// Create a link connecting the two senses.
 	atom_space->addLink(SIMILARITY_LINK, sense_a, sense_b, tv);

@@ -142,7 +142,7 @@ public:
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
     Handle addTimeInfo(Handle atom, unsigned long timestamp,
-                       const TruthValue& tv = TruthValue::TRUE_TV());
+                       TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
      * Adds both the AtTime(TimeNode <t>, atom) atom representation
@@ -155,7 +155,7 @@ public:
      * @return the Handle of the AtTimeLink added into AtomSpace.
      */
     Handle addTimeInfo(Handle atom, const Temporal& t,
-                       const TruthValue& tv = TruthValue::TRUE_TV());
+                       TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
      * Adds both the AtTime(TimeNode <timeNodeName>, atom) atom representation into the AtomTable and the
@@ -166,7 +166,7 @@ public:
      * @return the Handle of the AtTimeLink added into the AtomSpace.
      */
     Handle addTimeInfo(Handle h, const std::string& timeNodeName,
-            const TruthValue& tv = TruthValue::TRUE_TV());
+            TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
      * Removes both the AtTime(TimeNode <timestamp>, atom) atom

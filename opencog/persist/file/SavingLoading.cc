@@ -425,9 +425,9 @@ void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles)
     logger().fine("SavingLoading::updateHandles: type = %d", atom->getType());
 
     // if atom uses a CompositeTruthValue, updates the version handles inside it
-    if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
+    if (atom->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE) {
         //logger().fine("SavingLoading::updateHandles: CTV");
-        CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
+        CompositeTruthValuePtr ctv(CompositeTVCast(atom->getTruthValue()));
         CompositeRenumber::updateVersionHandles(ctv, handles);
         atom->setTruthValue(ctv);
     }
@@ -494,9 +494,8 @@ Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
     atom->setAttentionValue(*av);
     delete (av);
 
-    TruthValue *tv = readTruthValue(f);
-    atom->setTruthValue(*tv);
-    delete (tv);
+    TruthValuePtr tv = readTruthValue(f);
+    atom->setTruthValue(tv);
 
     CHECK_FREAD;
 
@@ -590,11 +589,11 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
     fwrite(&tempVLTI, sizeof(AttentionValue::vlti_t), 1, f);
 }
 
-void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
+void SavingLoading::writeTruthValue(FILE *f, TruthValuePtr tv)
 {
-    std::string tvStr = tv.toString();
+    std::string tvStr = tv->toString();
     logger().fine( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
-    TruthValueType type = tv.getType();
+    TruthValueType type = tv->getType();
     int length = tvStr.size();
 
     fwrite(&type, sizeof(TruthValueType), 1, f);
@@ -618,7 +617,7 @@ AttentionValue *SavingLoading::readAttentionValue(FILE *f)
 }
 
 
-TruthValue *SavingLoading::readTruthValue(FILE *f)
+TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 {
     //logger().fine("SavingLoading::readTruthValue()");
     TruthValueType type;
@@ -634,7 +633,7 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     logger().info("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
-    TruthValue* result = TruthValue::factory(type, tvStr);
+    TruthValuePtr result = TruthValue::factory(type, tvStr);
     delete[] tvStr;
     CHECK_FREAD;
     return result;

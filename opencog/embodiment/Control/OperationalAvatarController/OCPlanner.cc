@@ -104,7 +104,7 @@ SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNo
         return &(spaceServer().getLatestMap());
 
     set<StateNode*>::iterator it = ruleNode->backwardLinks.begin();
-    StateNode* lastedStateNode;
+    StateNode* lastedStateNode = NULL;
     int smallestDepth = 99999;
     for (; it != ruleNode->backwardLinks.end(); ++ it)
     {

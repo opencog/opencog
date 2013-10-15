@@ -23,8 +23,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TruthValue.h"
-
 #include <typeinfo>
 
 #include <stdio.h>
@@ -36,6 +34,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/NullTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/platform.h>
 
 //#define DPRINTF printf
@@ -43,56 +42,44 @@
 
 using namespace opencog;
 
-const TruthValue& TruthValue::NULL_TV()
+const strength_t MAX_TRUTH  = 1.0f;
+
+TruthValuePtr TruthValue::NULL_TV()
 {
-    static TruthValue* instance = new NullTruthValue();
-    return *instance;
+    static TruthValuePtr instance(std::make_shared<NullTruthValue>());
+    return instance;
 }
 
-const TruthValue& TruthValue::DEFAULT_TV()
+TruthValuePtr TruthValue::DEFAULT_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(0, 0);
-    return *instance;
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0, 0));
+    return instance;
 }
 
-const TruthValue& TruthValue::TRUE_TV()
+TruthValuePtr TruthValue::TRUE_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, 1.0e35);
-    return *instance;
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 1.0e35));
+    return instance;
 }
 
-const TruthValue& TruthValue::FALSE_TV()
+TruthValuePtr TruthValue::FALSE_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(0.0f, 1.0e35);
-    return *instance;
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0f, 1.0e35));
+    return instance;
 }
 
-const TruthValue& TruthValue::TRIVIAL_TV()
+TruthValuePtr TruthValue::TRIVIAL_TV()
 {
-    static TruthValue* instance = new SimpleTruthValue(MAX_TRUTH, 0.0f);
-    return *instance;
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+    return instance;
 }
 
-TruthValue& TruthValue::operator=(const TruthValue & rhs)
+TruthValuePtr TruthValue::merge(TruthValuePtr other) const
 {
-    return *this;
-}
-
-TruthValue* TruthValue::merge(const TruthValue& other) const
-{
-#if 1
-    // TODO: Use the approach with dynamic cast below
-    // if we're going to have subclasses of CompositeTruthValue.
-    // For now, this approach using getType() is more efficient.
-    if (other.getType() == COMPOSITE_TRUTH_VALUE) {
-#else
-    const CompositeTruthValue *otherCTv =
-        dynamic_cast<const CompositeTruthValue *>(&other);
-    if (otherCTv) {
-#endif
-        return other.merge(*this);
-    } else if (other.getConfidence() > getConfidence()) {
-        return other.clone();
+    if (other->getType() == COMPOSITE_TRUTH_VALUE) {
+        return other->merge(clone());
+    } else if (other->getConfidence() > getConfidence()) {
+        return other->clone();
     }
     return clone();
 }
@@ -104,11 +91,12 @@ bool TruthValue::isNullTv() const
 
 bool TruthValue::isDefaultTV() const
 {
-    const TruthValue& dtv = TruthValue::DEFAULT_TV();
-    if (this == &(dtv)) return true;
-    if (getType() == dtv.getType() &&
-        getMean() == dtv.getMean() &&
-        getCount() == dtv.getCount()) {
+    TruthValuePtr dtv = DEFAULT_TV();
+    if (dtv.get() == this) return true;
+    if (getType() == dtv->getType() and
+        getMean() == dtv->getMean() and
+        getCount() == dtv->getCount())
+    {
         return true;
     }
     return false;
@@ -147,16 +135,19 @@ TruthValueType TruthValue::strToType(const char* str) throw (InvalidParamExcepti
                                 "TruthValue - Invalid Truth Value type string: '%s'.", str);
 }
 
-TruthValue* TruthValue::factory(const char* fullTvStr)
+TruthValuePtr TruthValue::factory(const char* fullTvStr)
 {
     DPRINTF("TruthValue::factory(): fullTvStr = %s\n", fullTvStr);
-    char typeStr[MAX_TRUTH_VALUE_NAME_LEN];
-    sscanf(fullTvStr, "%s", typeStr);
+    char* tvs = strdup(fullTvStr);
+    char* typeStr = strtok(tvs, " \t\v\n");
     TruthValueType type = strToType(typeStr);
-    return factory(type, fullTvStr + strlen(typeStr) + 1);
+    size_t off = strlen(typeStr) + 1;
+    free(tvs);
+    return factory(type, fullTvStr + off);
 }
 
-TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (InvalidParamException)
+TruthValuePtr TruthValue::factory(TruthValueType type, const char* tvStr)
+    throw (InvalidParamException)
 {
     DPRINTF("TruthValue::factory(): type = %s tvStr = %s\n", TruthValue::typeToStr(type), tvStr);
     switch (type) {
@@ -180,13 +171,3 @@ TruthValue* TruthValue::factory(TruthValueType type, const char* tvStr) throw (I
     return NULL;
 }
 
-	void TruthValue::DeleteAndSetDefaultTVIfPertinent(TruthValue** tv)
-{
-    if (*tv != &(TruthValue::DEFAULT_TV()) &&
-            (*tv)->getType() == DEFAULT_TV().getType() &&
-            (*tv)->getMean() == DEFAULT_TV().getMean() &&
-            (*tv)->getCount() == DEFAULT_TV().getCount()) {
-        delete *tv;
-        *tv = (TruthValue*) & (DEFAULT_TV());
-    }
-}

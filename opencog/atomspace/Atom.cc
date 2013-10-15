@@ -52,14 +52,13 @@ using namespace opencog;
 std::mutex Atom::IncomingSet::_mtx;
 
 
-Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
+Atom::Atom(Type t, TruthValuePtr tv, const AttentionValue& av)
 {
     _uuid = Handle::UNDEFINED.value();
     flags = 0;
     atomTable = NULL;
     type = t;
 
-    truthValue = NULL;
     setTruthValue(tv);
     setAttentionValue(av);
 
@@ -72,32 +71,13 @@ Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 
 Atom::~Atom()
 {
-    if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
-    truthValue = NULL;
     atomTable = NULL;
-
     drop_incoming_set();
 }
 
-const AttentionValue& Atom::getAttentionValue() const
+void Atom::setTruthValue(TruthValuePtr tv)
 {
-    return attentionValue;
-}
-
-const TruthValue& Atom::getTruthValue() const
-{
-    return *truthValue;
-}
-
-void Atom::setTruthValue(const TruthValue& tv)
-{
-    if (truthValue != NULL && &tv != truthValue && truthValue != &(TruthValue::DEFAULT_TV())) {
-        delete truthValue;
-    }
-    truthValue = (TruthValue*) & (TruthValue::DEFAULT_TV());
-    if (!tv.isNullTv() && (&tv != &(TruthValue::DEFAULT_TV()))) {
-        truthValue = tv.clone();
-    }
+    if (!tv->isNullTv()) truthValue = tv;
 }
 
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)

@@ -333,7 +333,7 @@ IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
    ADD_DEFINITIONS(-DHAVE_CYTHON)
    SET(HAVE_CYTHON 1)
    EXECUTE_PROCESS(
-	   COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
+       COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
 		OUTPUT_VARIABLE PYTHON_DEST
    )
 

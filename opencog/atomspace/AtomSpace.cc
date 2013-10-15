@@ -167,7 +167,7 @@ TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
     return x;
 }
 
-void AtomSpace::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
+void AtomSpace::setTV(Handle h, TruthValuePtr tv, VersionHandle vh)
 {
     atomSpaceAsync->setTV(h, tv, vh)->get_result();
 }
@@ -192,19 +192,19 @@ bool AtomSpace::isLink(const Handle& h) const
     return classserver().isA(t, LINK);
 }
 
-void AtomSpace::do_merge_tv(Handle h, const TruthValue& tvn)
+void AtomSpace::do_merge_tv(Handle h, TruthValuePtr tvn)
 {
     TruthValuePtr currentTV(getTV(h));
     if (currentTV->isNullTv()) {
         setTV(h, tvn);
     } else {
-        TruthValue* mergedTV = currentTV->merge(tvn);
-        setTV(h, *mergedTV);
-        delete mergedTV;
+        TruthValuePtr mergedTV(currentTV->merge(tvn));
+        setTV(h, mergedTV);
     }
 }
 
-Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, const TruthValue& tvn) {
+Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tvn)
+{
     static const char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"

@@ -146,7 +146,7 @@ bool ReportRank::renorm_word(Handle h)
 bool ReportRank::count_sense(Handle word_sense_h,
                              Handle sense_link_h)
 {
-	normalization += sense_link_h->getTruthValue().getCount();
+	normalization += sense_link_h->getTruthValue()->getCount();
 	sense_count += 1.0;
 	return false;
 }
@@ -154,7 +154,7 @@ bool ReportRank::count_sense(Handle word_sense_h,
 bool ReportRank::renorm_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
-	double score = sense_link_h->getTruthValue().getCount();
+	double score = sense_link_h->getTruthValue()->getCount();
 
 	score *= normalization;
 	score -= 1.0;
@@ -168,7 +168,7 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	// go negative, likely scores will go positive.  "Typical"
 	// distributions seem to go from -0.8 to +3.5 or there-abouts.
 	//
-	CountTruthValue stv(1.0f, 0.0f, (float) score);
+	TruthValuePtr stv(CountTruthValue::createTV(1.0f, 0.0f, (float) score));
 	sense_link_h->setTruthValue(stv);
 
 #ifdef DEBUG

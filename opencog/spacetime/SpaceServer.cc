@@ -735,7 +735,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
         HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
         foreach(Handle blockNode, unitBlockNodes)
         {
-            SimpleTruthValue tv(1.0, 1.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
             Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);
             timeser->addTimeInfo(evalLink,timeStamp);
         }
@@ -782,7 +782,7 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
 
     // add the primary properties
 
-    SimpleTruthValue tv(1.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     Handle evalLink;
     Handle numberNode;
@@ -829,7 +829,7 @@ Handle SpaceServer::addPropertyPredicate(
         std::string predicateName,
         Handle a,
         Handle b,
-        const TruthValue &tv)
+        TruthValuePtr tv)
 {
     Handle ph = atomspace->addNode(PREDICATE_NODE, predicateName);
 

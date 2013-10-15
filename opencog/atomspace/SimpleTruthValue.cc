@@ -56,21 +56,6 @@ SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
     count = source.count;
 }
 
-void SimpleTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-void SimpleTruthValue::setCount(count_t c)
-{
-    count = c;
-}
-
-void SimpleTruthValue::setConfidence(confidence_t c)
-{
-    count = confidenceToCount(c);
-}
-
 strength_t SimpleTruthValue::getMean() const
 {
     return mean;
@@ -86,11 +71,6 @@ confidence_t SimpleTruthValue::getConfidence() const
     return countToConfidence(count);
 }
 
-float SimpleTruthValue::toFloat() const
-{
-    return static_cast<float>(getMean());
-}
-
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
@@ -98,35 +78,6 @@ std::string SimpleTruthValue::toString() const
             static_cast<float>(getMean()),
             static_cast<float>(getConfidence()));
     return buf;
-}
-
-SimpleTruthValue* SimpleTruthValue::clone() const
-{
-    return new SimpleTruthValue(*this);
-}
-
-SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue & rhs)
-    throw (RuntimeException)
-{
-    const SimpleTruthValue* tv = dynamic_cast<const SimpleTruthValue*>(&rhs);
-    if (tv) {
-        if (tv != this) { // check if this is the same object first.
-            mean = tv->mean;
-            count = tv->count;
-        }
-    } else {
-#ifndef WIN32
-        // The following line was causing a compilation error on MSVC...
-        throw RuntimeException(TRACE_INFO,
-              "Cannot assign a TV of type '%s' to one of type '%s'\n",
-              typeid(rhs).name(), typeid(*this).name());
-#else
-        throw RuntimeException(TRACE_INFO,
-              "SimpleTruthValue - Invalid assignment of a SimpleTV object.");
-#endif
-
-    }
-    return *this;
 }
 
 bool SimpleTruthValue::operator==(const TruthValue& rhs) const
@@ -156,12 +107,12 @@ confidence_t SimpleTruthValue::countToConfidence(count_t cn)
     return static_cast<confidence_t>(cn / (cn + KKK));
 }
 
-SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
+TruthValuePtr SimpleTruthValue::fromString(const char* tvStr)
 {
     float mean, conf;
     sscanf(tvStr, "(stv %f %f)", &mean, &conf);
     DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, conf = %f\n", tvStr, mean, conf);
-    return new SimpleTruthValue(static_cast<strength_t>(mean),
+    return std::make_shared<SimpleTruthValue>(static_cast<strength_t>(mean),
                                 static_cast<count_t>(confidenceToCount(conf)));
 }
 

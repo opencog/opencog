@@ -96,6 +96,7 @@ int ImportanceSpreadingAgent::sumTotalDifference(Handle source, HandleSeq& links
     return totalDifference;
 }
 
+#define toFloat getMean
 // For one link
 int ImportanceSpreadingAgent::sumDifference(Handle source, Handle link)
 {

@@ -84,7 +84,7 @@ public:
     void setUp() {
         tvs[0] = new SimpleTruthValue(means[0], counts[0]);
         tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
-        tvs[2] = new CompositeTruthValue(SimpleTruthValue(means[2], counts[2]), NULL_VERSION_HANDLE);
+        tvs[2] = new CompositeTruthValue(SimpleTruthValue::createTV(means[2], counts[2]), NULL_VERSION_HANDLE);
     }
 
     void tearDown() {
@@ -118,7 +118,7 @@ public:
             tvStr = TruthValue::typeToStr(tvs[i]->getType());
             tvStr += " ";
             tvStr += tvs[i]->toString();
-            TruthValue* tv = TruthValue::factory(tvStr.c_str());
+            TruthValuePtr tv = TruthValue::factory(tvStr.c_str());
             TS_ASSERT(tv->getType() == tvs[i]->getType());
             TS_ASSERT(fabs(tv->getMean()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getCount()  - tvs[i]->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
@@ -130,7 +130,7 @@ public:
     void testFactoryTruthValueTypeCharPtr() {
         //logger().debug("testFactoryTruthValueTypeCharPtr()");
         for (int i = 0; i < NUM_TVS; i++) {
-            TruthValue* tv = TruthValue::factory(tvs[i]->getType(), tvs[i]->toString().c_str());
+            TruthValuePtr tv = TruthValue::factory(tvs[i]->getType(), tvs[i]->toString().c_str());
             TS_ASSERT(tv->getType() == tvs[i]->getType());
             TS_ASSERT(fabs(tv->getMean()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getCount()  - tvs[i]->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
@@ -140,8 +140,8 @@ public:
 
     void testMerge() {
         //logger().debug("testMerge()");
-        TruthValue* mergedTv;
-        TruthValue* simpleTvs[NUM_TVS];
+        TruthValuePtr mergedTv;
+        TruthValuePtr simpleTvs[NUM_TVS];
         float simpleMeans[NUM_TVS];
         float simpleCounts[NUM_TVS];
         simpleMeans[0] = TV1_MEAN;
@@ -152,13 +152,13 @@ public:
         simpleCounts[2] = TV3_COUNT;
         float simpleConfidences[NUM_TVS];
         for (int i = 0; i < NUM_TVS; i++) {
-            simpleTvs[i] = new SimpleTruthValue(simpleMeans[i], simpleCounts[i]);
+            simpleTvs[i] = SimpleTruthValue::createTV(simpleMeans[i], simpleCounts[i]);
             simpleConfidences[i] = SimpleTruthValue::countToConfidence(simpleCounts[i]);
         }
         // Merge between SimpleTruthValue objects
         for (int i = 0; i < NUM_TVS; i++) {
             for (int j = 0; j < NUM_TVS; j++) {
-                mergedTv = simpleTvs[i]->merge(*(simpleTvs[j]));
+                mergedTv = simpleTvs[i]->merge(simpleTvs[j]);
                 if (i < j) {
                     TS_ASSERT(mergedTv != simpleTvs[i]);
                     TS_ASSERT(mergedTv != simpleTvs[j]);
@@ -166,7 +166,6 @@ public:
                     //logger().debug("mergedTv->getCount() = %f, simpleCounts[j] = %f", mergedTv->getCount(), simpleCounts[j]);
                     TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[j] ) <= FLOAT_ACCEPTABLE_ERROR);
-                    delete mergedTv;
                 } else {
                     TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
                     //logger().debug("mergedTv->getCount() = %f, simpleCounts[i] = %f", mergedTv->getCount(), simpleCounts[i]);
@@ -179,34 +178,27 @@ public:
         // Merge with other types of TV
         float lowerConfidence = simpleConfidences[1] - 0.01f;
         float upperConfidence = simpleConfidences[1] + 0.01f;
-        TruthValue* otherTypeTv;
+        TruthValuePtr otherTypeTv;
         // Merging SimpleTruthValue and CompositeTruthValue objects
-        otherTypeTv = new CompositeTruthValue(SimpleTruthValue(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence)), NULL_VERSION_HANDLE);
-        mergedTv = simpleTvs[1]->merge(*otherTypeTv);
+        otherTypeTv = CompositeTruthValue::createTV(SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence)), NULL_VERSION_HANDLE);
+        mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);
         TS_ASSERT(mergedTv->getType() == otherTypeTv->getType());
         TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[1]) < FLOAT_ACCEPTABLE_ERROR);
-        delete otherTypeTv;
-        delete mergedTv;
-        otherTypeTv = new CompositeTruthValue(SimpleTruthValue(0.333f, SimpleTruthValue::confidenceToCount(upperConfidence)), NULL_VERSION_HANDLE);
-        mergedTv = simpleTvs[1]->merge(*otherTypeTv);
+        otherTypeTv = CompositeTruthValue::createTV(SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(upperConfidence)), NULL_VERSION_HANDLE);
+        mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);
         TS_ASSERT(mergedTv->getType() == otherTypeTv->getType());
         TS_ASSERT(fabs(mergedTv->getMean()  - otherTypeTv->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - otherTypeTv->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - otherTypeTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-        delete otherTypeTv;
-        delete mergedTv;
-        for (int i = 0; i < NUM_TVS; i++) {
-            delete simpleTvs[i];
-        }
 
         // Merge calling merge() of all types of TVs.
-        TruthValue* indefiniteTvs[NUM_TVS];
+        TruthValuePtr indefiniteTvs[NUM_TVS];
         float indefiniteLs[NUM_TVS];
         float indefiniteUs[NUM_TVS];
         indefiniteLs[0] = TV1_L;
@@ -219,7 +211,7 @@ public:
         float indefiniteCounts[NUM_TVS];
         float indefiniteConfidences[NUM_TVS];
         for (int i = 0; i < NUM_TVS; i++) {
-            indefiniteTvs[i] = new IndefiniteTruthValue(indefiniteLs[i], indefiniteUs[i]);
+            indefiniteTvs[i] = IndefiniteTruthValue::createTV(indefiniteLs[i], indefiniteUs[i]);
             indefiniteMeans[i] = indefiniteTvs[i]->getMean();
             indefiniteCounts[i] = indefiniteTvs[i]->getCount();
             indefiniteConfidences[i] = indefiniteTvs[i]->getConfidence();
@@ -227,8 +219,8 @@ public:
         for (int i = 0; i < NUM_TVS; i++) {
             //logger().debug("calling indefiniteTvs[%d]->merge(...)", i);
             TruthValue* tv = tvs[i];
-            TruthValue* indefiniteTv = indefiniteTvs[i];
-            TruthValue* mergedTv = tv->merge(*indefiniteTv);
+            TruthValuePtr indefiniteTv = indefiniteTvs[i];
+            TruthValuePtr mergedTv = tv->merge(indefiniteTv);
             if (indefiniteConfidences[i] > confidences[i]) {
                 TS_ASSERT(mergedTv != indefiniteTv);
                 TS_ASSERT(fabs(mergedTv->getMean()  - indefiniteMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
@@ -236,9 +228,8 @@ public:
                 TS_ASSERT(fabs(mergedTv->getCount() - indefiniteCounts[i]) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 if (tvs[i]->getType() != COMPOSITE_TRUTH_VALUE) {
-                    TS_ASSERT(mergedTv != tv);
+                    TS_ASSERT(mergedTv.get() != tv);
                     TS_ASSERT(mergedTv->getType() == INDEFINITE_TRUTH_VALUE);
-                    delete mergedTv;
                 } else {
                     TS_ASSERT(mergedTv->getType() == COMPOSITE_TRUTH_VALUE);
                 }
@@ -250,29 +241,16 @@ public:
                 TS_ASSERT(fabs(mergedTv->getConfidence() - confidences[i]) < FLOAT_ACCEPTABLE_ERROR);
             }
         }
-        for (int i = 0; i < NUM_TVS; i++) {
-            delete indefiniteTvs[i];
-        }
     }
 
     void testIsNullTv() {
         for (int i = 0; i < NUM_TVS; i++) {
             TS_ASSERT(!(tvs[i]->isNullTv()));
         }
-        TS_ASSERT(TruthValue::NULL_TV().isNullTv());
-        TS_ASSERT(!TruthValue::DEFAULT_TV().isNullTv());
-        TS_ASSERT(!TruthValue::TRUE_TV().isNullTv());
-        TS_ASSERT(!TruthValue::FALSE_TV().isNullTv());
-        TS_ASSERT(!TruthValue::TRIVIAL_TV().isNullTv());
+        TS_ASSERT(TruthValue::NULL_TV()->isNullTv());
+        TS_ASSERT(not TruthValue::DEFAULT_TV()->isNullTv());
+        TS_ASSERT(not TruthValue::TRUE_TV()->isNullTv());
+        TS_ASSERT(not TruthValue::FALSE_TV()->isNullTv());
+        TS_ASSERT(not TruthValue::TRIVIAL_TV()->isNullTv());
     }
-
-    void testDeleteAndSetDefaultTVIfPertinent() {
-        TruthValue* tv = (TruthValue*) & (TruthValue::DEFAULT_TV());
-        TruthValue::DeleteAndSetDefaultTVIfPertinent(&tv);
-        TS_ASSERT(tv == &(TruthValue::DEFAULT_TV()));
-        tv = TruthValue::DEFAULT_TV().clone();
-        TruthValue::DeleteAndSetDefaultTVIfPertinent(&tv);
-        TS_ASSERT(tv == &(TruthValue::DEFAULT_TV()));
-    }
-
 };

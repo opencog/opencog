@@ -194,17 +194,15 @@ public:
                 if (count < numberOfExpectedMatchesWithVH1[index]) {
                     //logger().debug("adding versioned tv with VH1");
                     AtomPtr atom(expectedEntry->handle);
-                    TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
-                    atom->setTruthValue(*tv);
-                    delete tv;
+                    TruthValuePtr tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
+                    atom->setTruthValue(tv);
                     //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
                 }
                 if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
                     //logger().debug("adding versioned tv with VH2");
                     AtomPtr atom(expectedEntry->handle);
-                    TruthValue* tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
-                    atom->setTruthValue(*tv);
-                    delete tv;
+                    TruthValuePtr tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
+                    atom->setTruthValue(tv);
                     //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
                 }
                 expectedEntry = expectedEntry->next;
@@ -223,7 +221,7 @@ public:
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
                 //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue().toString().c_str());
-                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                TS_ASSERT(indexedHandles->handle->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -255,7 +253,7 @@ public:
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
                 //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue()->toString().c_str());
-                TS_ASSERT(indexedHandles->handle->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE);
+                TS_ASSERT(indexedHandles->handle->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -479,19 +477,19 @@ public:
     void testMerge() {
         AtomTable atomTable;
 
-        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.1f, 0.2f)));
+        NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
         Handle hn1 = atomTable.add(n1);
 
-        NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.3f, 0.4f)));
+        NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.3f, 0.4f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
 
-        NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue(0.8f, 0.3f)));
+        NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.8f, 0.3f)));
         TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
 
         Handle h = atomTable.getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
-        TS_ASSERT_DELTA(h->getTruthValue().getMean(), 0.3f, 0.000001);
-        TS_ASSERT_DELTA(h->getTruthValue().getCount(), 0.4f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue()->getMean(), 0.3f, 0.000001);
+        TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.4f, 0.000001);
     }
 
     void testSimpleWithCustomAtomTypes() {
