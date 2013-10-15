@@ -236,9 +236,10 @@ public:
         }
     }
 
-    void testToAndFromString() {
+    void testToAndFromString()
+    {
         logger().debug("testToAndFromString()");
-        char tvStr[1024];
+        char tvStr[4096];
         for (int i = 0; i < NUM_TVS; i++) {
             std::string tvToStringValue = tvs[i]->toString();
             //logger().debug("%s", tvToStringValue.c_str());
@@ -261,9 +262,10 @@ public:
                     //logger().debug("************ found versionedTv for tv[%d] => %s", i, versionedTv->toString().c_str());
                 }
                 if (j != i) {
-                    TS_ASSERT(versionedTv == NULL);
+                    TS_ASSERT((versionedTv == NULL) or (versionedTv->isNullTv()));
                 } else {
                     TS_ASSERT(versionedTv != NULL);
+                    TS_ASSERT(not versionedTv->isNullTv());
                     TS_ASSERT(fabs(versionedTv->getMean()  - means[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(versionedTv->getCount()  - counts[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(versionedTv->getConfidence() - confidences[j]) <= FLOAT_ACCEPTABLE_ERROR);
@@ -287,9 +289,10 @@ public:
             for (int j = 0; j < NUM_TVS; j++) {
                 TruthValuePtr versionedTv = mergedTv->getVersionedTV(versionHandles[j]);
                 if (j > i) {
-                    TS_ASSERT(versionedTv == NULL);
+                    TS_ASSERT((versionedTv == NULL) or (versionedTv->isNullTv()));
                 } else {
                     TS_ASSERT(versionedTv != NULL);
+                    TS_ASSERT(not versionedTv->isNullTv());
                     TS_ASSERT(fabs(versionedTv->getMean()  - means[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(versionedTv->getCount()  - counts[j]) <= FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(versionedTv->getConfidence() - confidences[j]) <= FLOAT_ACCEPTABLE_ERROR);
