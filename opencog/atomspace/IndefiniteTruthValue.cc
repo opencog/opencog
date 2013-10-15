@@ -313,7 +313,7 @@ std::string IndefiniteTruthValue::toString() const
     return buf;
 }
 
-TruthValuePtr IndefiniteTruthValue::fromString(const char* tvStr)
+IndefiniteTruthValuePtr IndefiniteTruthValue::fromString(const char* tvStr)
 {
     float m, l, u, c, d;
     int s;

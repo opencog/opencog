@@ -100,7 +100,7 @@ public:
     //! it is a strict equality comparison, without error interval tolerance
     virtual bool operator==(const TruthValue& rhs) const;
 
-    static TruthValuePtr fromString(const char*);
+    static IndefiniteTruthValuePtr fromString(const char*);
 
     strength_t getMean() const;
     strength_t getU() const;
