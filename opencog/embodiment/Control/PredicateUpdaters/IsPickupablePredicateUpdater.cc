@@ -58,16 +58,17 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
 
     // truth value - mean equals 0.0 --> not smaller than pet
     //               mean equals 1.0 --> is  smaller than pet
-    SimpleTruthValue tv(0.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(0.0, 1.0));
 
     // 1. to be pickupable an object must be movable and
     //    small. If these requeriments aren't satisfied then
     //    they are not moveable
-    if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) &&
-        AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) &&
-        atomSpace.getType(object) == ACCESSORY_NODE &&
-        !AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object)) {
-        tv.setMean(1.0);
+    if (AtomSpaceUtil::isPredicateTrue(atomSpace, "is_movable", object) and
+        AtomSpaceUtil::isPredicateTrue(atomSpace, "is_small", object) and
+        atomSpace.getType(object) == ACCESSORY_NODE and
+        not AtomSpaceUtil::isPredicateTrue(atomSpace, "is_drinkable", object))
+    {
+        tv = SimpleTruthValue::createTV(1.0, 1.0);
 
         std::string objectName = atomSpace.getName( object );
         std::string agentName = atomSpace.getName( pet );
@@ -122,5 +123,5 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
     
     logger().debug("IsPickupablePredicateUpdater - Is element %s pickupable: %s",
                  atomSpace.getName(object).c_str(),
-                 ( tv.getMean( ) ? "t" : "f" ) );
+                 ( tv->getMean( ) ? "t" : "f" ) );
 }

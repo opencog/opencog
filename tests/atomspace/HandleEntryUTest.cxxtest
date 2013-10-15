@@ -75,15 +75,16 @@ public:
         */
     }
 
-    void testFilterSetVersionHandle() {
+    void testFilterSetVersionHandle()
+    {
         AtomSpace as(_as);
         Handle n1(as.addNode(CONCEPT_NODE, "TEST1"));
-        Handle n2(as.addNode(CONCEPT_NODE, "TEST2", CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE)));
-        Handle n3(as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1)));
-        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
-        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Handle n2(as.addNode(CONCEPT_NODE, "TEST2", CompositeTruthValue::createTV(TruthValue::NULL_TV(), NULL_VERSION_HANDLE)));
+        Handle n3(as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1)));
+        CompositeTruthValuePtr tv = CompositeTVCast(CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1));
+        tv->setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
         Handle n4(as.addNode(PREDICATE_NODE, "TEST4", tv));
-        Handle n5(as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2)));
+        Handle n5(as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH2)));
 
         HandleEntry* he = new HandleEntry(n1);
         he  = HandleEntry::concatenation(he, new HandleEntry(n2));
@@ -112,11 +113,11 @@ public:
     void testFilterSetTypeBoolVersionHandle() {
         AtomSpace as;
         Handle n1 = as.addNode(CONCEPT_NODE, "TEST1");
-        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
-        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
-        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1));
+        CompositeTruthValuePtr tv = CompositeTVCast(CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1));
+        tv->setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
         Handle n4 = as.addNode(PREDICATE_NODE, "TEST4", tv);
-        Handle n5 = as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        Handle n5 = as.addNode(CONCEPT_NODE, "TEST5", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH2));
 
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and
         // 1 target whose type is PREDICATE_NODE
@@ -165,14 +166,15 @@ public:
         TS_ASSERT(he->getSize() == 0);
     }
 
-    void testFilterSetCharPtrTypeVersionHandle() {
+    void testFilterSetCharPtrTypeVersionHandle()
+    {
         AtomSpace as(_as);
         Handle n1 = as.addNode(CONCEPT_NODE, "TEST1");
-        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue(TruthValue::NULL_TV(), VH1));
-        CompositeTruthValue tv(TruthValue::NULL_TV(), VH1);
-        tv.setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
+        Handle n3 = as.addNode(PREDICATE_NODE, "TEST3", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1));
+        CompositeTruthValuePtr tv = CompositeTVCast(CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH1));
+        tv->setVersionedTV(TruthValue::DEFAULT_TV(), VH2);
         Handle n4 = as.addNode(PREDICATE_NODE, "TEST4", tv);
-        Handle n5 = as.addNode(CONCEPT_NODE, "TEST4", CompositeTruthValue(TruthValue::NULL_TV(), VH2));
+        Handle n5 = as.addNode(CONCEPT_NODE, "TEST4", CompositeTruthValue::createTV(TruthValue::NULL_TV(), VH2));
 
         // Create links that contains at least 1 target whose type is CONCEPT_NODE and
         // 1 target whose type is PREDICATE_NODE

@@ -161,7 +161,7 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
     // Store the result and update TruthValue of EvaluationLinkDemandGoal and EvaluationLinkFuzzyWithin
     // TODO: Use PLN forward chainer to handle this?
-    SimpleTruthValue demand_satisfaction = SimpleTruthValue(atof(scheme_return_value.c_str()), 1.0f);
+    TruthValuePtr demand_satisfaction = SimpleTruthValue::createTV(atof(scheme_return_value.c_str()), 1.0f);
 
     atomSpace.setTV(this->hDemandGoal, demand_satisfaction);
 

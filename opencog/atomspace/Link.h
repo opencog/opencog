@@ -81,14 +81,14 @@ public:
      *        stored in this Link.
      */
     Link(Type t, const HandleSeq& oset,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         init(oset);
     }
 
     Link(Type t, Handle& h,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -97,7 +97,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -107,7 +107,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -117,7 +117,7 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -210,13 +210,6 @@ public:
      * @param Trail to be set.
      */
     void setTrail(Trail *);
-
-    /**
-     * Returns the weight value of the link.
-     *
-     * @return Weight value of the link.
-     */
-    float getWeight();
 
     /**
      * Returns a string representation of the link.

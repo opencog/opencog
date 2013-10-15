@@ -419,19 +419,18 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
-void AtomTable::merge(Handle h, const TruthValue& tvn)
+void AtomTable::merge(Handle h, TruthValuePtr tvn)
 {
     if (NULL == h) return;
 
     // Merge the TVs
-    if (!tvn.isNullTv()) {
-        const TruthValue& currentTV = h->getTruthValue();
-        if (currentTV.isNullTv()) {
+    if (!tvn->isNullTv()) {
+        TruthValuePtr currentTV = h->getTruthValue();
+        if (currentTV->isNullTv()) {
             h->setTruthValue(tvn);
         } else {
-            TruthValue* mergedTV = currentTV.merge(tvn);
-            h->setTruthValue(*mergedTV);
-            delete mergedTV;
+            TruthValuePtr mergedTV = currentTV->merge(tvn);
+            h->setTruthValue(mergedTV);
         }
     }
     if (logger().isFineEnabled()) 

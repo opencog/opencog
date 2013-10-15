@@ -31,15 +31,15 @@
 
 using namespace opencog;
 
-void CompositeRenumber::updateVersionHandles(CompositeTruthValue &ctv,
+void CompositeRenumber::updateVersionHandles(CompositeTruthValuePtr ctv,
                                              HandMapPtr handles)
 {
     VersionedTruthValueMap newVersionedTVs;
-    for (VersionedTruthValueMap::const_iterator itr = ctv.versionedTVs.begin();
-            itr != ctv.versionedTVs.end(); itr++) {
+    for (VersionedTruthValueMap::const_iterator itr = ctv->versionedTVs.begin();
+            itr != ctv->versionedTVs.end(); itr++) {
         VersionHandle key = itr->first;
         CoreUtils::updateHandle(&(key.substantive), handles);
         newVersionedTVs[key] = itr->second;
     }
-    ctv.versionedTVs = newVersionedTVs;
+    ctv->versionedTVs = newVersionedTVs;
 }

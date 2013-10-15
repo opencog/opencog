@@ -53,9 +53,9 @@ protected:
 
     bool doSTIChanges(AtomSpace* as, Handle h, AttentionValue::sti_t sti_x );
     bool doLTIChanges(AtomSpace* as, Handle h, AttentionValue::lti_t lti_x );
-    bool doTVChanges(AtomSpace* as, Handle h, TruthValue* tv);
+    bool doTVChanges(AtomSpace* as, Handle h, TruthValuePtr tv);
 
-    TruthValue *tv;
+    TruthValuePtr tv;
 public:
 
     static inline const RequestClassInfo& info() {

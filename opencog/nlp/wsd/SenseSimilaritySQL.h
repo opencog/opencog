@@ -36,7 +36,7 @@ public:
     SenseSimilaritySQL(AtomSpace* _as);
     virtual ~SenseSimilaritySQL();
     
-    virtual SimpleTruthValue similarity(Handle, Handle);
+    virtual SimpleTruthValuePtr similarity(Handle, Handle);
 };
 
 } // namespace opencog

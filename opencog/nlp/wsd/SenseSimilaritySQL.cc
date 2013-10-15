@@ -127,7 +127,7 @@ SenseSimilaritySQL::~SenseSimilaritySQL()
 	delete db_conn;
 }
 
-SimpleTruthValue SenseSimilaritySQL::similarity(Handle first_sense,
+SimpleTruthValuePtr SenseSimilaritySQL::similarity(Handle first_sense,
         Handle second_sense)
 {
 	std::string fk = as->getName(first_sense);
@@ -152,8 +152,7 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle first_sense,
 	// data, and maybe try to gather some.
 	if (!rp.have_data)
 	{
-		SimpleTruthValue stv(0.0f, 0.9f);
-		return stv;
+		return SimpleTruthValue::createSTV(0.0f, 0.9f);
 	}
 
 	std::string first_pos = get_part_of_speech(first_sense);
@@ -189,8 +188,7 @@ SimpleTruthValue SenseSimilaritySQL::similarity(Handle first_sense,
 	}
 #endif
 
-	SimpleTruthValue stv((float) sim, 0.9f);
-	return stv;
+	return SimpleTruthValue::createSTV((float) sim, 0.9f);
 }
 
 #endif /* HAVE_SQL_STORAGE */

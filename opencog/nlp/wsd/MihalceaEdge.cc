@@ -261,11 +261,11 @@ bool MihalceaEdge::sense_of_second_inst(Handle second_word_sense_h,
 		sense_cache.set_similarity(first_word_sense, second_word_sense_h, stv);
 	}
 #else
-	const SimpleTruthValue &stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
+	TruthValuePtr stv = sen_sim->similarity(first_word_sense, second_word_sense_h);
 #endif
 
 	// Skip making edges between utterly unrelated nodes.
-	if (stv.getMean() < 0.01) return false;
+	if (stv->getMean() < 0.01) return false;
 
 	// Create a link connecting the first pair to the second pair.
 	std::vector<Handle> out;

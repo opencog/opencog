@@ -31,7 +31,6 @@
 
 #include <boost/signal.hpp>
 
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -39,7 +38,6 @@
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
-#include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -259,10 +257,10 @@ protected:
     bool containsVersionedTV(Handle h, VersionHandle vh) const
     {
         if (isNullVersionHandle(vh)) return true;
-        const TruthValue& tv = h->getTruthValue();
-        return (not tv.isNullTv())
-               and (tv.getType() == COMPOSITE_TRUTH_VALUE)
-               and (not (((const CompositeTruthValue&) tv).getVersionedTV(vh).isNullTv()));
+        TruthValuePtr tv = h->getTruthValue();
+        return (not tv->isNullTv())
+               and (tv->getType() == COMPOSITE_TRUTH_VALUE)
+               and (not CompositeTVCast(tv)->getVersionedTV(vh)->isNullTv());
     }
     bool hasNullName(Handle h) const
     {
@@ -669,7 +667,7 @@ public:
      * @param h     Handle of the Atom to be merged
      * @param tvn   TruthValue to be merged to current atom's truth value.  
      */
-    void merge(Handle, const TruthValue&);
+    void merge(Handle, TruthValuePtr);
 
     /**
      * Adds an atom to the table, checking for duplicates and merging

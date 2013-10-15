@@ -200,9 +200,9 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	if (n)
 	{
-		const TruthValue &tv = n->getTruthValue();
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = n->getTruthValue();
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
@@ -447,9 +447,9 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 
 	if (n1)
 	{
-		const TruthValue &tv = n1->getTruthValue();
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = n1->getTruthValue();
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 	}

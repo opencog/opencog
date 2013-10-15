@@ -145,7 +145,7 @@ public:
      *  @param tvn   Optional TruthValue of the node. If not provided, uses the
      *  DEFAULT_TV (see TruthValue.h)
      */
-    Handle addNode(Type t, const std::string& name = "", const TruthValue& tvn = TruthValue::DEFAULT_TV());
+    Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
      * Add a new link to the Atom Table
@@ -158,7 +158,7 @@ public:
      *                  provided, uses the DEFAULT_TV (see TruthValue.h)
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
-                   const TruthValue& tvn = TruthValue::DEFAULT_TV());
+                   TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
      * Removes an atom from the atomspace
@@ -263,12 +263,12 @@ public:
         { return classserver().isA(getType(h), LINK); }
 
     /** Retrieve the TruthValue of a given Handle */
-    const TruthValue& getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
+    TruthValuePtr getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
 
     /** Change the TruthValue of a given Handle
      * @return whether TV was successfully set
      */
-    bool setTV(Handle, const TruthValue&, VersionHandle = NULL_VERSION_HANDLE);
+    bool setTV(Handle, TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
 
     /** Change the primary TV's mean of a given Handle */
     void setMean(Handle, float mean) throw (InvalidParamException);

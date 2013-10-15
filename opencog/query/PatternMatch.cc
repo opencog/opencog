@@ -291,7 +291,7 @@ bool Instantiator::walk_tree(Handle expr)
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
 	TruthValuePtr tv = as->getTV(expr);
-	Handle sh = as->addLink(t, oset, *tv);
+	Handle sh = as->addLink(t, oset, tv);
 
 	oset = save_oset;
 	oset.push_back(sh);
@@ -830,9 +830,8 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 		result_list.push_back(h);
 
 		// Set truth value to true+confident
-		SimpleTruthValue stv(1,0);
-		stv.setConfidence(1);
-		pme->get_atomspace()->setTV(h,stv);
+		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
+		pme->get_atomspace()->setTV(h, stv);
 	}
 	return false;
 }

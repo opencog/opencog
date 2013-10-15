@@ -18,6 +18,7 @@
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -83,19 +84,19 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     if (asp->isNode(h)) {
         NodePtr n(NodeCast(h));
         total = sizeof(Node);
-        if (&(n->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
-            switch (n->getTruthValue().getType()) {
+        if (n->getTruthValue() != TruthValue::DEFAULT_TV()) {
+            switch (n->getTruthValue()->getType()) {
             case SIMPLE_TRUTH_VALUE:
-                total+=sizeof(SimpleTruthValue);
+                total += sizeof(SimpleTruthValue);
                 break;
             case COUNT_TRUTH_VALUE:
-                total+=sizeof(CountTruthValue);
+                total += sizeof(CountTruthValue);
                 break;
             case INDEFINITE_TRUTH_VALUE:
-                total+=sizeof(IndefiniteTruthValue);
+                total += sizeof(IndefiniteTruthValue);
                 break;
             case COMPOSITE_TRUTH_VALUE:
-                total+=sizeof(CompositeTruthValue);
+                total += sizeof(CompositeTruthValue);
                 break;
             default:
                 break;
@@ -104,19 +105,19 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
     } else {
         LinkPtr l(LinkCast(h));
         total = sizeof(Link);
-        if (&(l->getTruthValue()) != &(TruthValue::DEFAULT_TV())) {
-            switch (l->getTruthValue().getType()) {
+        if (l->getTruthValue() != TruthValue::DEFAULT_TV()) {
+            switch (l->getTruthValue()->getType()) {
             case SIMPLE_TRUTH_VALUE:
-                total+=sizeof(SimpleTruthValue);
+                total += sizeof(SimpleTruthValue);
                 break;
             case COUNT_TRUTH_VALUE:
-                total+=sizeof(CountTruthValue);
+                total += sizeof(CountTruthValue);
                 break;
             case INDEFINITE_TRUTH_VALUE:
-                total+=sizeof(IndefiniteTruthValue);
+                total += sizeof(IndefiniteTruthValue);
                 break;
             case COMPOSITE_TRUTH_VALUE:
-                total+=sizeof(CompositeTruthValue);
+                total += sizeof(CompositeTruthValue);
                 break;
             default:
                 break;
@@ -756,21 +757,21 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        SimpleTruthValue stv(strength, conf); 
+        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
         h->setTruthValue(stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
         t_begin = clock();
-        SimpleTruthValue stv(strength, conf); 
-        asp->atomSpaceAsync->atomspace.setTV(h,stv);
+        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
+        asp->atomSpaceAsync->atomspace.setTV(h, stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
         t_begin = clock();
-        SimpleTruthValue stv(strength, conf); 
+        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
         asp->setTV(h,stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);

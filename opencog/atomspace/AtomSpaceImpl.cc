@@ -117,10 +117,9 @@ void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, AtomPtr atom)
             lll->getArity());
         Handle cx = lll->getOutgoingAtom(0); // context
         Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-        const TruthValue& tv = getTV(ca);
-        OC_ASSERT(tv.getType() == COMPOSITE_TRUTH_VALUE);
-        CompositeTruthValue new_ctv(static_cast<const CompositeTruthValue&>(tv));
-        new_ctv.removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
+        TruthValuePtr tv = getTV(ca);
+        CompositeTruthValuePtr new_ctv(CompositeTruthValue::createCTV(tv));
+        new_ctv->removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
         // @todo: one may want improve that code by converting back
         // the CompositeTV into a simple or indefinite TV when it has
         // no more VersionedTV
@@ -167,7 +166,7 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
     return true;
 }
 
-Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
+Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 {
     DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
@@ -204,7 +203,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, const TruthValue& tvn)
 }
 
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
-                          const TruthValue& tvn)
+                              TruthValuePtr tvn)
 {
     DPRINTF("AtomSpaceImpl::addLink AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
@@ -352,7 +351,7 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     return hs;
 }
 
-bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
+bool AtomSpaceImpl::setTV(Handle h, TruthValuePtr tv, VersionHandle vh)
 {
     // Due to the way AsyncRequest is designed, we are being called
     // with a null atom pointer; only the uuid is valid. So first,
@@ -360,19 +359,20 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
     h = atomTable.getHandle(h);
 
     if (!h) return false;
-    const TruthValue& currentTv = h->getTruthValue();
+    TruthValuePtr currentTv = h->getTruthValue();
     if (!isNullVersionHandle(vh))
     {
-        CompositeTruthValue ctv = (currentTv.getType() == COMPOSITE_TRUTH_VALUE) ?
-                                  CompositeTruthValue((const CompositeTruthValue&) currentTv) :
-                                  CompositeTruthValue(currentTv, NULL_VERSION_HANDLE);
-        ctv.setVersionedTV(tv, vh);
+        CompositeTruthValuePtr ctv = (currentTv->getType() == COMPOSITE_TRUTH_VALUE) ?
+                            CompositeTruthValue::createCTV(currentTv) :
+                            CompositeTruthValue::createCTV(currentTv, NULL_VERSION_HANDLE);
+        ctv->setVersionedTV(tv, vh);
         h->setTruthValue(ctv); // always call setTruthValue to update indices
     } else {
-        if (currentTv.getType() == COMPOSITE_TRUTH_VALUE &&
-                tv.getType() != COMPOSITE_TRUTH_VALUE) {
-            CompositeTruthValue ctv((const CompositeTruthValue&) currentTv);
-            ctv.setVersionedTV(tv, vh);
+        if (currentTv->getType() == COMPOSITE_TRUTH_VALUE &&
+                tv->getType() != COMPOSITE_TRUTH_VALUE)
+        {
+            CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(currentTv));
+            ctv->setVersionedTV(tv, vh);
             h->setTruthValue(ctv);
         } else {
             h->setTruthValue(tv);
@@ -382,7 +382,7 @@ bool AtomSpaceImpl::setTV(Handle h, const TruthValue& tv, VersionHandle vh)
     return true;
 }
 
-const TruthValue& AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
+TruthValuePtr AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
 {
     // Due to the way AsyncRequest is designed, we are being called
     // with a null atom pointer; only the uuid is valid. So first,
@@ -390,46 +390,49 @@ const TruthValue& AtomSpaceImpl::getTV(Handle h, VersionHandle vh) const
     h = atomTable.getHandle(h);
     if (!h) return TruthValue::NULL_TV();
 
-    const TruthValue& tv = h->getTruthValue();
+    TruthValuePtr tv = h->getTruthValue();
     if (isNullVersionHandle(vh)) {
         return tv;
     }
-    else if (tv.getType() == COMPOSITE_TRUTH_VALUE)
+    else if (tv->getType() == COMPOSITE_TRUTH_VALUE)
     {
-        return ((const CompositeTruthValue&) tv).getVersionedTV(vh);
+        return std::dynamic_pointer_cast<CompositeTruthValue>(tv)->getVersionedTV(vh);
     }
     return TruthValue::NULL_TV();
 }
 
 void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
 {
-    TruthValue* newTv = getTV(h).clone();
+    TruthValuePtr newTv = getTV(h);
     if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
         // Since CompositeTV has no setMean() method, we must handle it differently
-        CompositeTruthValue* ctv = (CompositeTruthValue*) newTv;
-        TruthValue* primaryTv = ctv->getPrimaryTV().clone();
+        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(newTv));
+
+        TruthValuePtr primaryTv = ctv->getPrimaryTV();
         if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
-            ((SimpleTruthValue*)primaryTv)->setMean(mean);
+            primaryTv = SimpleTruthValue::createTV(mean, primaryTv->getCount());
         } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            ((IndefiniteTruthValue*)primaryTv)->setMean(mean);
+            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(primaryTv);
+            itv->setMean(mean);
+            primaryTv = itv;
         } else {
             throw InvalidParamException(TRACE_INFO,
-                                        "AtomSpaceImpl - Got a primaryTV with an invalid or unknown type");
+               "AtomSpaceImpl - Got a primaryTV with an invalid or unknown type");
         }
-        ctv->setVersionedTV(*primaryTv, NULL_VERSION_HANDLE);
-        delete primaryTv;
+        ctv->setVersionedTV(primaryTv, NULL_VERSION_HANDLE);
     } else {
         if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
-            ((SimpleTruthValue*)newTv)->setMean(mean);
+            newTv = SimpleTruthValue::createTV(mean, newTv->getCount());
         } else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            ((IndefiniteTruthValue*)newTv)->setMean(mean);
+            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(newTv);
+            itv->setMean(mean);
+            newTv = itv;
         } else {
             throw InvalidParamException(TRACE_INFO,
-                                        "AtomSpaceImpl - Got a TV with an invalid or unknown type");
+               "AtomSpaceImpl - Got a TV with an invalid or unknown type");
         }
     }
-    setTV(h, *newTv);
-    delete newTv;
+    setTV(h, newTv);
 }
 
 float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average, bool clip) const

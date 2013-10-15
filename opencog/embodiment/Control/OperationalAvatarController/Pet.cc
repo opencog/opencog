@@ -145,7 +145,7 @@ void Pet::initTraitsAndFeelings()
     }
 
     // feelings
-    SimpleTruthValue tv(0.5f, 0.0f);
+    TruthValuePtr tv = SimpleTruthValue::createTV(0.5f, 0.0f);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("fear"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
@@ -159,7 +159,7 @@ void Pet::initTraitsAndFeelings()
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("gratitude"), tv, petHandle), 1);
 
-    tv.setMean(0.51f);
+    tv = SimpleTruthValue::createTV(0.51f, 0.0f);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("happiness"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
@@ -238,9 +238,9 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
                     exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
         }
 
-        SimpleTruthValue tv(0.0, 1.0);
+        TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
         if (active) {
-            tv.setMean(1.0);
+            tv = SimpleTruthValue::createTV(1.0, 1.0);
         }
 
         Handle atTimeLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace,

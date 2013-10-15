@@ -90,8 +90,8 @@ std::string Link::toShortString(std::string indent) const
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(type);
-    float mean = this->getTruthValue().getMean();
-    float confidence = this->getTruthValue().getConfidence();
+    float mean = this->getTruthValue()->getMean();
+    float confidence = this->getTruthValue()->getConfidence();
     answer << " (stv " << mean << " " << confidence << ")\n";
 
     // Here the target string is made. If a target is a node, its name is
@@ -116,7 +116,7 @@ std::string Link::toString(std::string indent) const
              classserver().getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
-             getTruthValue().toString().c_str());
+             getTruthValue()->toString().c_str());
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
@@ -126,11 +126,6 @@ std::string Link::toString(std::string indent) const
     }
     answer += indent + ")\n";
     return answer;
-}
-
-float Link::getWeight(void)
-{
-    return getTruthValue().toFloat();
 }
 
 bool Link::isSource(Handle handle) const throw (InvalidParamException)

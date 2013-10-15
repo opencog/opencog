@@ -72,7 +72,7 @@ void StimulusUpdaterAgent::Stimulus::initStimulus (AtomSpace & atomSpace, const 
 {
     std::string predicateName = this->stimulusName + "Stimulus";
     Handle stimulusPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str());
-    SimpleTruthValue stv = SimpleTruthValue(0.5, 1);
+    TruthValuePtr stv = SimpleTruthValue::createTV(0.5, 1);
 
     std::vector<Handle> outgoings;
     Handle listLink = atomSpace.addLink(LIST_LINK, outgoings);
@@ -93,7 +93,7 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
     // Update LatestLink containig latest stimulus level
     std::string predicateName = this->stimulusName + "Stimulus";
     Handle stimulusPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str());
-    SimpleTruthValue stv = SimpleTruthValue(this->currentStimulusValue, 1);
+    TruthValuePtr stv = SimpleTruthValue::createTV(this->currentStimulusValue, 1);
 
     std::vector <Handle> outgoings;
     Handle listLink = atomSpace.addLink(LIST_LINK, outgoings);
