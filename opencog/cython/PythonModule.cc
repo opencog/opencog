@@ -140,7 +140,7 @@ void PythonModule::init()
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath))
-            PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+            PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
     }
 
     // Add custom paths for python modules from the config file if available
@@ -152,7 +152,7 @@ void PythonModule::init()
              it != pythonpaths.end(); ++it) {
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
-                PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+                PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
             } else {
                 logger().warn("PythonEval::%s Could not find custom python extension directory: %s ",
                                __FUNCTION__,

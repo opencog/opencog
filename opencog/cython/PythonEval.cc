@@ -107,7 +107,7 @@ void PythonEval::init(void)
     }
 
     // Add ATOMSPACE to __main__ module
-    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
 
     // These are needed for calling Python/C API functions, definnes them once and for all
     pyGlobal = PyDict_New();
@@ -154,7 +154,7 @@ void PythonEval::printDict(PyObject* obj) {
     keys = PyDict_Keys(obj);
     for (int i = 0; i < PyList_GET_SIZE(keys); i++) {
         k = PyList_GET_ITEM(keys, i);
-        char* c_name = PyString_AsString(k);
+        char* c_name = PyBytes_AsString(k);
         printf("%s\n", c_name);
     }
 }
@@ -232,7 +232,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
-    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyString_FromString(funcName.c_str()));
+    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyBytes_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
     if(!PyCallable_Check(pFunc))
@@ -242,7 +242,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
 
     // Get a refrence to our executer function
-    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("execute_user_defined_function"));
+    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("execute_user_defined_function"));
     OC_ASSERT(pExecFunc != NULL);
 
     // Create the argument list
@@ -259,7 +259,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     if(pError){
         PyErr_Print();
-        logger().error() << PyString_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
         return Handle::UNDEFINED;
     }
 
@@ -300,7 +300,7 @@ std::string PythonEval::apply_script(const std::string& script)
 //    }
 //    else
 //    {
-        result = PyString_AsString(output);
+        result = PyBytes_AsString(output);
 //    }
 
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
@@ -313,7 +313,7 @@ std::string PythonEval::apply_script(const std::string& script)
 
 void PythonEval::addSysPath(std::string path)
 {
-    PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
+    PyList_Append(this->sys_path, PyBytes_FromString(path.c_str()));
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
@@ -344,7 +344,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &p)
         mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
 
         if(mod){
-            PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+            PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
             PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
             this->modules[name] = mod;
         }
@@ -373,9 +373,9 @@ void PythonEval::add_module_file(const boost::filesystem::path &p)
     name = name.substr(0, name.length()-3);
     mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
 
-    PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
     if(mod){
-        PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+        PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
         PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
         this->modules[name] = mod;
     }
