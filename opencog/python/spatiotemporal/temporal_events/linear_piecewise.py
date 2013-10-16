@@ -1,67 +1,24 @@
-from datetime import datetime
 from scipy.stats import t
-from spatiotemporal.interval import Interval, assert_is_interval
-from spatiotemporal.membership_function import FuzzyMembershipFunction
+from spatiotemporal.interval import Interval
+from spatiotemporal.temporal_events.generic import BaseTemporalEvent
 from spatiotemporal.unix_time import UnixTime
-from utility.geometric import LinearFunction
+from utility.geometric import HorizontalLinearFunction, CompositeFunction, LinearFunction
+from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
 
 __author__ = 'keyvan'
 
 
-class BaseTemporalEvent(Interval):
-    def __init__(self, a, b, iter_step=1):
-        Interval.__init__(self, a, b, iter_step=iter_step)
-        self.membership_function = FuzzyMembershipFunction(self, self.membership_function_single_point)
-
-    def membership_function_single_point(self, time_step):
-        return 0
-
-    def _interval_from_self_if_none(self, a, b, interval):
-        if interval is None:
-            if (a, b) == (None, None):
-                interval = self
-            else:
-                interval = Interval(a, b)
-        else:
-            assert_is_interval(interval)
-        return interval
-
-    def probability_in_interval(self, a=None, b=None, interval=None):
-        """
-        use either 'a' and 'b' or 'interval'
-        """
-        interval = self._interval_from_self_if_none(a, b, interval)
-        return max(self.membership_function(interval))
-
-    def __repr__(self):
-        return 'spatiotemporal.temporal_events.{0}(a:{1}, b:{2})'.format(
-            self.__class__.__name__, self.interval.a, self.interval.b)
-
-    def __str__(self):
-        return repr(self)
-
-
-class TemporalEventSimple(BaseTemporalEvent):
-    def membership_function_single_point(self, time_step):
-        if self.a <= time_step <= self.b:
-            return 1
-        return 0
-
-
-class TemporalEventDistributional(BaseTemporalEvent):
-    def __init__(self, a, b, pdf, iter_step=1):
-        assert callable(pdf), "'pdf' should be callable"
-        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
-        self.pdf_single_point = pdf
-
-
-class TemporalEventPiecewise(BaseTemporalEvent):
+class TemporalEventLinearPiecewise(BaseTemporalEvent):
     beginning_factor = 5
     ending_factor = 5
     _beginning = -1
     _ending = -1
     _linear_function_a_to_beginning = None
     _linear_function_ending_to_b = None
+    linear_function_beginning_to_ending = HorizontalLinearFunction(1)
+    linear_function_minus_inf_to_a = HorizontalLinearFunction(0)
+    linear_function_b_to_plus_inf = linear_function_minus_inf_to_a
+    _composite_function = None
 
     def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None, iter_step=1):
         """
@@ -81,8 +38,8 @@ class TemporalEventPiecewise(BaseTemporalEvent):
             self.ending_factor = ending_factor
 
         if (beginning, ending) != (None, None):
-            self.beginning = beginning
-            self.ending = ending
+            self.beginning = UnixTime(beginning)
+            self.ending = UnixTime(ending)
         else:
             while not self.a < self._beginning < self._ending < self.b:
                 self._beginning = self.random_time(
@@ -105,28 +62,36 @@ class TemporalEventPiecewise(BaseTemporalEvent):
 
     def membership_function_single_point(self, time_step):
         time_step = UnixTime(time_step)
-        if time_step <= self.a or time_step >= self.b:
-            return 0
-        if self.a < time_step < self.beginning:
-            return self.linear_function_a_to_beginning(time_step)
-        if self.ending < time_step < self.b:
-            return self.linear_function_ending_to_b(time_step)
-        return 1
+        return self.composite_function(time_step)
 
-    def probability_in_interval(self, a=None, b=None, interval=None):
+    def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
-        if self.a <= interval.a <= self.beginning and self.ending <= interval.b <= self.b:
-            return 1
-        return max(self.membership_function_single_point(interval.a), self.membership_function_single_point(interval.b))
+        return self.composite_function.integrate(interval.a, interval.b) / (interval.b - interval.a)
+
+    def temporal_relation_with(self, other):
+        pass
+
+    def _update_composite_function(self):
+        self._composite_function = CompositeFunction(
+            {
+                (MINUS_INFINITY, self.a): self.linear_function_minus_inf_to_a,
+                (self.a, self.beginning): self.linear_function_a_to_beginning,
+                (self.beginning, self.ending): self.linear_function_beginning_to_ending,
+                (self.ending, self.b): self.linear_function_ending_to_b,
+                (self.b, PLUS_INFINITY): self.linear_function_b_to_plus_inf
+            }
+        )
 
     @Interval.a.setter
     def a(self, value):
         self._linear_function_a_to_beginning = None
+        self._composite_function = None
         Interval.a.fset(self, value)
 
     @Interval.b.setter
     def b(self, value):
         self._linear_function_ending_to_b = None
+        self._composite_function = None
         Interval.b.fset(self, value)
 
     @property
@@ -136,10 +101,11 @@ class TemporalEventPiecewise(BaseTemporalEvent):
     @beginning.setter
     def beginning(self, value):
         if self._ending < 0:
-            assert self.interval.a < value < self.interval.b, "'beginning' should be within ['a' : 'b'] interval"
+            assert self.a < value < self.b, "'beginning' should be within ['a' : 'b'] interval"
         else:
-            assert self.interval.a < value < self._ending, "'beginning' should be within ['a' : 'ending'] interval"
+            assert self.a < value < self._ending, "'beginning' should be within ['a' : 'ending'] interval"
         self._linear_function_a_to_beginning = None
+        self._composite_function = None
         self._beginning = value
 
     @property
@@ -149,10 +115,11 @@ class TemporalEventPiecewise(BaseTemporalEvent):
     @ending.setter
     def ending(self, value):
         if self._beginning < 0:
-            assert self.interval.a < value < self.interval.b, "'ending' should be within ['a' : 'b'] interval"
+            assert self.a < value < self.b, "'ending' should be within ['a' : 'b'] interval"
         else:
-            assert self._beginning < value < self.interval.b, "'ending' should be within ['beginning' : 'b'] interval"
+            assert self._beginning < value < self.b, "'ending' should be within ['beginning' : 'b'] interval"
         self._linear_function_ending_to_b = None
+        self._composite_function = None
         self._ending = value
 
     @property
@@ -171,12 +138,19 @@ class TemporalEventPiecewise(BaseTemporalEvent):
             self._linear_function_ending_to_b = LinearFunction(_a, _b)
         return self._linear_function_ending_to_b
 
+    @property
+    def composite_function(self):
+        if self._composite_function is None:
+            self._update_composite_function()
+        return self._composite_function
+
     def __repr__(self):
-        return 'spatiotemporal.temporal_events.PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
-            self.interval.a, self.beginning, self.ending, self.interval.b)
+        return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
+            self.a, self.beginning, self.ending, self.b)
 
 
 def generate_random_events(size=20):
+    from datetime import datetime
     events = []
 
     year_2010 = Interval(datetime(2010, 1, 1), datetime(2011, 1, 1))
@@ -184,7 +158,7 @@ def generate_random_events(size=20):
     for i in xrange(size):
         start = year_2010.random_time()
         end = year_2010.random_time(start)
-        event = TemporalEventPiecewise(start, end, iter_step=100)
+        event = TemporalEventLinearPiecewise(start, end, iter_step=100)
         events.append(event)
 
     return events
@@ -194,10 +168,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
     import time
 
-    #event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1), iter_step=100)
-    #event = plt.plot(event.to_list(), event.membership_function())
-    #plt.show()
-
+    #------------------
     events = generate_random_events(5)
 
     start = time.time()
@@ -208,6 +179,7 @@ if __name__ == '__main__':
     list_performance = time.time() - start
 
     plt.show()
+    #------------------
     #plt.clf()
     #
     #start = time.time()
@@ -218,3 +190,14 @@ if __name__ == '__main__':
     #print list_performance, 'vs', time.time() - start
     #
     #plt.show()
+    #------------------
+
+    #------------------
+    #e = TemporalEventLinearPiecewise(1, 10, 3, 8)
+    #mf = e.membership_function()
+    #d = e.degree_in_interval(1, 3)
+    #d = e.degree_in_interval(3, 4)
+    #d = e.degree_in_interval(8, 9)
+    #d = e.degree_in_interval(2, 9)
+    #d = e.degree_in_interval()
+    #------------------

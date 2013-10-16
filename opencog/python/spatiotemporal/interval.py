@@ -48,7 +48,7 @@ class Interval(object):
 
     @property
     def duration(self):
-        return self.b - self.a
+        return float(self.b - self.a)
 
     @property
     def a(self):
