@@ -20,6 +20,9 @@ class UnixTime(float):
 
         return float.__new__(cls, value)
 
+    def to_datetime(self):
+        return datetime.fromtimestamp(int(self))
+
     def __repr__(self):
         return 'UnixTime({0}: {1})'.format(float(self), str(self))
 

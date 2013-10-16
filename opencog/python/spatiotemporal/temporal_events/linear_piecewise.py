@@ -168,19 +168,16 @@ def generate_random_events(size=20):
 
 
 if __name__ == '__main__':
-    import matplotlib.pyplot as plt
     import time
 
-    #------------------
     #events = generate_random_events(800)
     events = generate_random_events(5)
 
     start = time.time()
 
     for event in events:
-        plt.plot(event, event.membership_function)
+        plt = event.plot()
 
     print 'Performance:', time.time() - start, 'seconds'
 
     plt.show()
-

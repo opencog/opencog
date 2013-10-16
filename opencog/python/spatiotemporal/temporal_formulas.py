@@ -201,4 +201,3 @@ def started_byFormula(dist1, dist2):
 def finished_byFormula(dist1, dist2):
 #finishes(Y,X)
     return finishesFormula(dist2, dist1)
-

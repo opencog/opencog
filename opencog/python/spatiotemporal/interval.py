@@ -122,24 +122,4 @@ if __name__ == '__main__':
     for t in xrange(len(a)):
         b.append(a[t])
 
-    print 'time:', list_performance, 'vs.', time.time() - start
-
-
-
-    #from temporal_events import generate_random_events
-    #
-    #events = generate_random_events(3)
-    #start = time.time()
-    #for event in events:
-    #    for t in event.to_list():
-    #        pass
-    #
-    #print '------------------------------'
-    #list_performance = time.time() - start
-    #start = time.time()
-    #
-    #for event in events:
-    #    for t in event:
-    #        pass
-    #
-    #print 'time:', list_performance, 'vs.', time.time() - start
+    print 'time:', list_performance, 'for list vs.', time.time() - start, 'direct'

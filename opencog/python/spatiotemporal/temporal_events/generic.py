@@ -42,6 +42,13 @@ class BaseTemporalEvent(Interval):
             result[time_step] = self.membership_function(time_step)
         return result
 
+    def plot(self):
+        import matplotlib.pyplot as plt
+        from spatiotemporal.unix_time import UnixTime
+        x_axis = [UnixTime(time).to_datetime() for time in self]
+        plt.plot(x_axis, self.membership_function)
+        return plt
+
     def __repr__(self):
         return '{0}(a: {1}, b: {2})'.format(self.__class__.__name__, self.a, self.b)
 
@@ -88,5 +95,4 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1))
-    event = plt.plot(event.to_list(), event.membership_function())
-    plt.show()
+    event.plot().show()
