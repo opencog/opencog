@@ -74,8 +74,9 @@ class CompositeFunction(Function):
     def __call__(self, x):
         for function_bounds in self.functions:
             (a, b) = function_bounds
-            if a <= x <= b:
-                return self.functions[function_bounds](x)
+            if a <= x:
+                if b >= x:
+                    return self.functions[function_bounds](x)
         return 'undefined'
 
     def integrate(self, start, end):

@@ -3,7 +3,7 @@ from spatiotemporal.interval import Interval
 from spatiotemporal.temporal_events.generic import BaseTemporalEvent
 from spatiotemporal.unix_time import UnixTime
 from utility.geometric import HorizontalLinearFunction, CompositeFunction, LinearFunction
-from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
+from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
 
 __author__ = 'keyvan'
 
@@ -20,7 +20,7 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
     linear_function_b_to_plus_inf = linear_function_minus_inf_to_a
     _composite_function = None
 
-    def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None, iter_step=1):
+    def __init__(self, a, b, beginning=None, ending=None, beginning_factor=None, ending_factor=None):
         """
         start and end can be in either datetime or unix time
         """
@@ -28,7 +28,7 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
             assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent() only accepts " \
                                                                       "either 'beginning_factor' and 'ending_factor' " \
                                                                       "or 'beginning' and 'ending'"
-        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
+        BaseTemporalEvent.__init__(self, a, b, iter_step=1)
 
         if beginning_factor is not None:
             assert beginning_factor > 0
@@ -81,6 +81,9 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
                 (self.b, PLUS_INFINITY): self.linear_function_b_to_plus_inf
             }
         )
+
+    def to_list(self):
+        return [self.a, self.a + EPSILON, self.beginning, self.ending, self.b - EPSILON, self.b]
 
     @Interval.a.setter
     def a(self, value):
@@ -144,6 +147,15 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
             self._update_composite_function()
         return self._composite_function
 
+    def __getitem__(self, index):
+        return self.to_list().__getitem__(index)
+
+    def __len__(self):
+        return 6
+
+    def __iter__(self):
+        return iter(self.to_list())
+
     def __repr__(self):
         return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
             self.a, self.beginning, self.ending, self.b)
@@ -158,7 +170,7 @@ def generate_random_events(size=20):
     for i in xrange(size):
         start = year_2010.random_time()
         end = year_2010.random_time(start)
-        event = TemporalEventLinearPiecewise(start, end, iter_step=100)
+        event = TemporalEventLinearPiecewise(start, end)
         events.append(event)
 
     return events
@@ -169,28 +181,17 @@ if __name__ == '__main__':
     import time
 
     #------------------
+    #events = generate_random_events(800)
     events = generate_random_events(5)
 
     start = time.time()
 
     for event in events:
-        plt.plot(event.to_list(), event.membership_function())
+        plt.plot(event, event.membership_function)
 
     list_performance = time.time() - start
 
     plt.show()
-    #------------------
-    #plt.clf()
-    #
-    #start = time.time()
-    #
-    #for event in events:
-    #    plt.plot(event, event.pdf)
-    #
-    #print list_performance, 'vs', time.time() - start
-    #
-    #plt.show()
-    #------------------
 
     #------------------
     #e = TemporalEventLinearPiecewise(1, 10, 3, 8)

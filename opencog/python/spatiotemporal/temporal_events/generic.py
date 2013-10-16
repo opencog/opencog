@@ -7,14 +7,10 @@ __author__ = 'keyvan'
 
 
 class BaseTemporalEvent(Interval):
-    _membership_function = None
 
     def __init__(self, a, b, iter_step=1):
         Interval.__init__(self, a, b, iter_step=iter_step)
-        self._membership_function = FuzzyMembershipFunction(self, self.membership_function_single_point)
-
-    def membership_function(self, time=None):
-        return self._membership_function(time)
+        self.membership_function = FuzzyMembershipFunction(self, self.membership_function_single_point)
 
     def membership_function_single_point(self, time_step):
         """
@@ -39,6 +35,12 @@ class BaseTemporalEvent(Interval):
         """
         interval = self._interval_from_self_if_none(a, b, interval)
         return integrate.quad(self.membership_function, interval.a, interval.b) / interval.duration
+
+    def to_dict(self):
+        result = {}
+        for time_step in self:
+            result[time_step] = self.membership_function(time_step)
+        return result
 
     def __repr__(self):
         return '{0}(a:{1}, b:{2})'.format(self.__class__.__name__, self.a, self.b)
