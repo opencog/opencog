@@ -92,35 +92,54 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
 {
-    if (this->depth == "Deepest")
+    if (depth == "Deepest")
         return; // this the orginal state
 
-    if (! this->forwardRuleNode)
+    if (! forwardRuleNode)
     {
-        if ( sizeof(this->depth) == 1)
+        if ( sizeof(depth) == 1)
         {
             return; // it's the goal state nodes
         }
         else
         {
-            this->depth = "-1"; // this a state node that there is not any rule node need it currently
+            depth = "-1"; // this a state node that there is not any rule node need it currently
             return;
         }
     }
 
-    vector<StateNode*>::iterator it;
+    string fowardRuleNodeDepth = forwardRuleNode->getDepthOfRuleNode();
 
-    int deepest = 0;
-    for ( it = this->forwardRuleNode->forwardLinks.begin(); it != this->forwardRuleNode->forwardLinks.end();  ++ it)
+    // find the index of this StateNode in its forward rule node
+    int index = 0;
+    vector<StateNode*>::iterator it = forwardLinks.begin();
+
+    for (; it != forwardLinks.end(); ++ it, ++ index)
     {
-        int d = ((StateNode*)(*it))->depth;
-        if (d > deepest)
-            deepest = d;
+
+        if (this == (StateNode*)(*it))
+            break;
     }
 
-    this->depth = deepest + 1;
-    return this->depth;
+    if (it == forwardLinks.end())
+    {
+        cout<< "Debug Error: the this state node cannot be found in its forward rule node!"<<std::endl;
+        return;
+    }
 
+    // To be improved: currently the index is only 0 ~ 9, need to support A~Z , a~z
+    depth = fowardRuleNodeDepth + opencog::toString(index);
+
+    if ((backwardRuleNode == 0) || (backwardRuleNode->backwardLinks.size() == 0))
+        return;
+
+    // this state node has backward nodes, calculate all of their depth recursively
+    vector<StateNode*>::iterator bit = backwardRuleNode->backwardLinks.begin();
+
+    for (; bit != backwardRuleNode->backwardLinks.end(); ++ bit)
+    {
+        ((StateNode*)(*bit))->calculateNodesDepth();
+    }
 }
 
 StateNode* RuleNode::getMostClosedBackwardStateNode()
@@ -140,7 +159,6 @@ StateNode* RuleNode::getMostClosedBackwardStateNode()
         }
     }
 }
-
 
 SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode)
 {

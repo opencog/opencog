@@ -162,13 +162,13 @@ public:
     // after rebinding , add currentBindingsFromForwardState and currentBindingsViaSelecting together to CurrentAllBindings
     void updateCurrentAllBindings();
 
-    static int getDepthOfRuleNode(const RuleNode* r);
+    string getDepthOfRuleNode();
 
-    bool operator < (const RuleNode& other) const
-    {
-        // so , the deeper rule node will be put front
-        return ( RuleNode::getDepthOfRuleNode(this) > RuleNode::getDepthOfRuleNode(&other));
-    }
+//    bool operator < (const RuleNode& other) const
+//    {
+//        // so , the deeper rule node will be put front
+//        return ( getDepthOfRuleNode() > other.getDepthOfRuleNode());
+//    }
 
     // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
     StateNode* getMostClosedBackwardStateNode();
