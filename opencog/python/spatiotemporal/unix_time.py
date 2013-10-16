@@ -21,7 +21,7 @@ class UnixTime(float):
         return float.__new__(cls, value)
 
     def __repr__(self):
-        return 'spatiotemporal.time.UnixTime({0}:{1})'.format(float(self), str(self))
+        return 'UnixTime({0}: {1})'.format(float(self), str(self))
 
     def __str__(self):
         return datetime.fromtimestamp(self).strftime('%Y-%m-%d %H:%M:%S')

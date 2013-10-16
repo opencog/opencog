@@ -148,7 +148,7 @@ class TemporalEventLinearPiecewise(BaseTemporalEventWithCustomListImplementation
         return self._composite_function
 
     def __repr__(self):
-        return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
+        return 'PiecewiseTemporalEvent(a: {0} , beginning: {1}, ending: {2}, b: {3})'.format(
             self.a, self.beginning, self.ending, self.b)
 
 
@@ -184,12 +184,3 @@ if __name__ == '__main__':
 
     plt.show()
 
-    #------------------
-    #e = TemporalEventLinearPiecewise(1, 10, 3, 8)
-    #mf = e.membership_function()
-    #d = e.degree_in_interval(1, 3)
-    #d = e.degree_in_interval(3, 4)
-    #d = e.degree_in_interval(8, 9)
-    #d = e.degree_in_interval(2, 9)
-    #d = e.degree_in_interval()
-    #------------------

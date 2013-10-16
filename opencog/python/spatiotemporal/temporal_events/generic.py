@@ -43,7 +43,7 @@ class BaseTemporalEvent(Interval):
         return result
 
     def __repr__(self):
-        return '{0}(a:{1}, b:{2})'.format(self.__class__.__name__, self.a, self.b)
+        return '{0}(a: {1}, b: {2})'.format(self.__class__.__name__, self.a, self.b)
 
     def __str__(self):
         return repr(self)
@@ -53,6 +53,9 @@ class BaseTemporalEventWithCustomListImplementation(BaseTemporalEvent):
     """
     override to_list and use this class
     """
+    def __init__(self, a, b):
+        BaseTemporalEvent.__init__(self, a, b)
+
     def to_list(self):
         return [self.a, self.b]
 
@@ -80,9 +83,10 @@ class TemporalEventDistributional(BaseTemporalEvent):
         self.membership_function = pdf
         self.membership_function_single_point = pdf
 
+
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-    event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1), iter_step=100)
+    event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1))
     event = plt.plot(event.to_list(), event.membership_function())
     plt.show()

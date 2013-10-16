@@ -101,3 +101,14 @@ class CompositeFunction(Function):
                 a = start
             result += self.functions[function_bounds].integrate(a, b)
         return result
+
+if __name__ == '__main__':
+    from spatiotemporal.temporal_events import TemporalEventLinearPiecewise
+    e = TemporalEventLinearPiecewise(1, 10, 3, 8)
+    mf = e.membership_function()
+    d = e.degree_in_interval(1, 3)
+    d = e.degree_in_interval(3, 4)
+    d = e.degree_in_interval(8, 9)
+    d = e.degree_in_interval(2, 9)
+    d = e.degree_in_interval()
+    pass
