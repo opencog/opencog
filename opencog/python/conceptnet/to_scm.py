@@ -1,7 +1,9 @@
 __author__ = 'Amen Belayneh'
 
 # This code creates a scheme file after inputing the address to a conceptnet csv file dump
+# The conceptnet csv file should be in the same folder as this script.
 # Make sure you add .scm when inputting the name for the scheme output file
+# The output file will be in the same folder as the script
  
 
 
@@ -10,26 +12,39 @@ import reader
 import term
 
 corpus_path = ""
+corpus_dict = {}
+conceptnet_dict = {}
+twf = 0
 
 def set_TV(word):
-	stv = TruthValue() 
-	term_list = term.freq(word,corpus_path)
-	if term_list[0] == 0:
-		stv.mean = 1/(term_list[1] + 1)
-		stv.count = .432  # have no reason for this value
-		return stv
-	else:
-		stv.mean = term_list[0]/term_list[1]
-		stv.count = .765 # have no reason for this value 
-		return stv
+	global corpus_dict, conceptnet_dict, twf
+	stv = TruthValue()
+	if not(corpus_dict):
+		term_lists = term.read_frequencies(corpus_path)
+		corpus_dict = dict(term_lists)
+		twf = term.total_freq(term_lists)
 	
-
+	try:
+		stv = conceptnet_dict[word]
+		return stv
+	except KeyError:
+		if ("  "+ word.upper()) in  corpus_dict:
+			stv.mean = float(corpus_dict[("  "+ word.upper())])/twf
+			stv.count = .765 # have no reason for this value 
+			conceptnet_dict[word] = stv
+			return stv
+		else:	
+			stv.mean = 1/(twf + 1)
+			stv.count = .043  # have no reason for this value
+			conceptnet_dict[word] = stv
+			return stv
+		
 
 def write_file(cn_assertion, context): # assertion is a list
 	DEFAULT_TV = TruthValue(1,0.5) # 0.5 confidence is used(for links) because that is the weight given to most of the assertions on ConceptNet
 	DEFAULT_TV2 = TruthValue()     # used for nodes
 	
-	if cn_assertion[0] == "/r/IsA":					
+	if cn_assertion[0] == "/r/IsA":		
 		return	('(ContextLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  +  ' \n\t' +\
 					'(ConceptNode  ' + '"' + str(context) + '"' + ' (stv {context_TV.mean} {context_TV.count})' + ')\n\t' +\
 					'(InheritanceLink ' + '(stv '+ str(DEFAULT_TV.mean) +' ' +str(DEFAULT_TV.count) +')'  + '\n\t\t' +\
@@ -65,7 +80,6 @@ def from_file(cn_path, scm_name):
 	
 			
 if __name__ == '__main__':
-	#global corpus_path
 	cn_url= raw_input("Enter ConceptNet csv file address: ")
 	corpus_path = raw_input("Enter corpus address: ")
 	name_of_scm_file = raw_input("Enter name for the Scheme Output file: ")
