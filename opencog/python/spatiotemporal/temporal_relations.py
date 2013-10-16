@@ -23,24 +23,19 @@ TEMPORAL_RELATIONS = {
 
 def temporal_relation_between(temporal_event_1, temporal_event_2):
     temporal_event_1 = TemporalEventLinearPiecewise(1, 10, 3, 8)
-    temporal_event_2 = TemporalEventLinearPiecewise(8, 16, 10, 14)
+    temporal_event_2 = TemporalEventLinearPiecewise(9, 16, 10, 14)
 
-    ls_te1_times = temporal_event_1.to_list()
-    ls_te2_times = temporal_event_2.to_list()
-    ls_te1_certainties = temporal_event_1.membership_function()
-    ls_te2_certainties = temporal_event_2.membership_function()
-
-    ls_sum_times = ls_te1_times + ls_te2_times
-    ls_sum_certainties = []
-    for time_step in ls_sum_times:
-        ls_sum_certainties.append(
+    sum_times = sorted(set(temporal_event_1.to_list() + temporal_event_2.to_list()))
+    sum_certainties = []
+    for time_step in sum_times:
+        sum_certainties.append(
             temporal_event_1.membership_function(time_step) + temporal_event_2.membership_function(time_step))
 
     import matplotlib.pyplot as plt
 
-    plt.plot(ls_te1_times, ls_te1_certainties)
-    plt.plot(ls_te2_times, ls_te2_certainties)
-    plt.plot(ls_sum_times, ls_sum_certainties)
+    plt.plot(temporal_event_1, temporal_event_1.membership_function)
+    plt.plot(temporal_event_2, temporal_event_2.membership_function)
+    plt.plot(sum_times, sum_certainties)
     plt.show()
 
     result = {}

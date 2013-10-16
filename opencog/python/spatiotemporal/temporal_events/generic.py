@@ -49,7 +49,24 @@ class BaseTemporalEvent(Interval):
         return repr(self)
 
 
-class TemporalEventSimple(BaseTemporalEvent):
+class BaseTemporalEventWithCustomListImplementation(BaseTemporalEvent):
+    """
+    override to_list and use this class
+    """
+    def to_list(self):
+        return [self.a, self.b]
+
+    def __getitem__(self, index):
+        return self.to_list().__getitem__(index)
+
+    def __len__(self):
+        return len(self.to_list())
+
+    def __iter__(self):
+        return iter(self.to_list())
+
+
+class TemporalEventSimple(BaseTemporalEventWithCustomListImplementation):
     def membership_function_single_point(self, time_step):
         if self.a <= time_step <= self.b:
             return 1

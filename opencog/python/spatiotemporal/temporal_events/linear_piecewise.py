@@ -1,6 +1,6 @@
 from scipy.stats import t
 from spatiotemporal.interval import Interval
-from spatiotemporal.temporal_events.generic import BaseTemporalEvent
+from spatiotemporal.temporal_events.generic import BaseTemporalEventWithCustomListImplementation
 from spatiotemporal.unix_time import UnixTime
 from utility.geometric import HorizontalLinearFunction, CompositeFunction, LinearFunction
 from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
@@ -8,7 +8,7 @@ from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
 __author__ = 'keyvan'
 
 
-class TemporalEventLinearPiecewise(BaseTemporalEvent):
+class TemporalEventLinearPiecewise(BaseTemporalEventWithCustomListImplementation):
     beginning_factor = 5
     ending_factor = 5
     _beginning = -1
@@ -28,7 +28,7 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
             assert (beginning_factor, ending_factor) == (None, None), "PiecewiseTemporalEvent() only accepts " \
                                                                       "either 'beginning_factor' and 'ending_factor' " \
                                                                       "or 'beginning' and 'ending'"
-        BaseTemporalEvent.__init__(self, a, b, iter_step=1)
+        BaseTemporalEventWithCustomListImplementation.__init__(self, a, b)
 
         if beginning_factor is not None:
             assert beginning_factor > 0
@@ -147,15 +147,6 @@ class TemporalEventLinearPiecewise(BaseTemporalEvent):
             self._update_composite_function()
         return self._composite_function
 
-    def __getitem__(self, index):
-        return self.to_list().__getitem__(index)
-
-    def __len__(self):
-        return 6
-
-    def __iter__(self):
-        return iter(self.to_list())
-
     def __repr__(self):
         return 'PiecewiseTemporalEvent(a:{0} , beginning:{1}, ending:{2}, b:{3})'.format(
             self.a, self.beginning, self.ending, self.b)
@@ -189,7 +180,7 @@ if __name__ == '__main__':
     for event in events:
         plt.plot(event, event.membership_function)
 
-    list_performance = time.time() - start
+    print 'Performance:', time.time() - start, 'seconds'
 
     plt.show()
 
