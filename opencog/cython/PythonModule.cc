@@ -121,9 +121,9 @@ void PythonModule::init()
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
-    if (!Py_IsInitialized())
+    if (not Py_IsInitialized())
         Py_InitializeEx(0);
-    if (!PyEval_ThreadsInitialized()) {
+    if (not PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
         // Without this, pyFinalize() crashes
         _mainstate = PyThreadState_Get();

@@ -21,6 +21,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
 #include "AtomSpaceBenchmark.h"
 
@@ -314,13 +315,18 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             Handle::set_resolver(atab);
         }
         else {
+#if HAVE_CYTHON
+            CogServer& srv = cogserver();
+            pymo = new PythonModule(srv);
+            pymo->init();
+            pyev = &PythonEval::instance();
+            asp = &srv.getAtomSpace();
+#else
             asp = new AtomSpace();
+#endif
             Handle::set_resolver(&asp->atomSpaceAsync->getAtomTable());
 #if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
-#endif
-#if HAVE_CYTHON
-            pyev = &PythonEval::instance(asp);
 #endif
         }
 
@@ -331,9 +337,13 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
         if (testKind == BENCH_TABLE)
             delete atab;
-        else
+        else {
+#if HAVE_CYTHON
+            delete pymo;
+#else
             delete asp;
-        //delete asBackend;
+#endif
+        }
     }
 
     //cout << estimateOfAtomSize(Handle(2)) << endl;

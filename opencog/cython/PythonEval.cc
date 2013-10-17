@@ -122,7 +122,8 @@ void PythonEval::init(void)
     logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
 }
 
-PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
+PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
+{
     PyObject * pAtomSpace;
 
     if (atomspace)
@@ -146,7 +147,8 @@ PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
     return pAtomSpace;
 }
 
-void PythonEval::printDict(PyObject* obj) {
+void PythonEval::printDict(PyObject* obj)
+{
     if (!PyDict_Check(obj))
         return;
 
@@ -177,11 +179,11 @@ PythonEval::~PythonEval()
 */
 PythonEval& PythonEval::instance(AtomSpace * atomspace)
 {
-    if(!Py_IsInitialized()){
+    if (not Py_IsInitialized()){
         logger().error() << "Python Interpreter isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
     }
-    if(!PyEval_ThreadsInitialized()){
+    if (not PyEval_ThreadsInitialized()){
         logger().error() << "Python Threads isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
     }

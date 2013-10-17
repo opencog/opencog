@@ -8,6 +8,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/cython/PythonModule.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 
@@ -53,6 +54,7 @@ class AtomSpaceBenchmark
     SchemeEval* scm;
 #endif
 #if HAVE_CYTHON
+    PythonModule* pymo;
     PythonEval* pyev;
 #endif
 
