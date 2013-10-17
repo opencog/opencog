@@ -864,10 +864,6 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 timepair_t AtomSpaceBenchmark::bm_getHandleSet()
 {
     Type t = randomType(ATOM);
-    HandleSeq results;
-    HandleSeq results2;
-    clock_t t_begin;
-    clock_t time_taken;
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
@@ -886,21 +882,24 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     }
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
-        t_begin = clock();
-        atab->getHandlesByType(back_inserter(results2), t, true);
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        HandleSeq results;
+        atab->getHandlesByType(back_inserter(results), t, true);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), t, true);
-        time_taken = clock() - t_begin;
+        HandleSeq results;
+        clock_t t_begin = clock();
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results), t, true);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
-        t_begin = clock();
+        HandleSeq results;
+        clock_t t_begin = clock();
         asp->getHandleSet(back_inserter(results), t, true);
-        time_taken = clock() - t_begin;
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
     return timepair_t(0,0);
