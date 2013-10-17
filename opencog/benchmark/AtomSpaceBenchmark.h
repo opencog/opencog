@@ -8,9 +8,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/cython/PythonModule.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
 
 using boost::tuple;
 
@@ -18,6 +15,11 @@ namespace opencog
 {
 
 typedef boost::tuple<clock_t,clock_t> timepair_t;
+
+class CogServer;
+class PythonModule;
+class PythonEval;
+class SchemeEval;
 
 class AtomSpaceBenchmark
 {
@@ -54,6 +56,7 @@ class AtomSpaceBenchmark
     SchemeEval* scm;
 #endif
 #if HAVE_CYTHON
+    CogServer* cogs;
     PythonModule* pymo;
     PythonEval* pyev;
 #endif

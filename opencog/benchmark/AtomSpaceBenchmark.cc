@@ -20,6 +20,8 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/cython/PythonModule.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
@@ -66,6 +68,10 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     asp = NULL;
     atab = NULL;
+#if HAVE_CYTHON
+    cogs = NULL;
+    pymo = NULL;
+#endif
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
 
@@ -75,6 +81,8 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark() {
     // We don't delete the AtomSpace as we assume termination of the benchmark
     // program here and cleanup of large AtomSpaces takes a while.
 
+    // deleting the PyhtonModule currently results in a deadlock in python.
+    // XXX python needs fixing.
 }
 
 // This is wrong, because it failes to also count the amount of RAM
@@ -316,11 +324,11 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         }
         else {
 #if HAVE_CYTHON
-            CogServer& srv = cogserver();
-            pymo = new PythonModule(srv);
+            cogs = new CogServer();
+            if (pymo == NULL) pymo = new PythonModule(*cogs);
             pymo->init();
             pyev = &PythonEval::instance();
-            asp = &srv.getAtomSpace();
+            asp = &cogs->getAtomSpace();
 #else
             asp = new AtomSpace();
 #endif
@@ -339,7 +347,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             delete atab;
         else {
 #if HAVE_CYTHON
-            delete pymo;
+            delete cogs;
 #else
             delete asp;
 #endif
