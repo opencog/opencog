@@ -222,6 +222,9 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 #if HAVE_GUILE
         case BENCH_SCM:  cout << "Scheme's "; break;
 #endif /* HAVE_GUILE */
+#if HAVE_CYTHON
+        case BENCH_PYTHON: cout << "Python's "; break;
+#endif /* HAVE_CYTHON */
     }
     cout << methodName << " method " << Nreps << " times ";
     std::ofstream myfile;
@@ -316,9 +319,11 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
 #endif
+#if HAVE_CYTHON
+            pyev = &PythonEval::instance(asp);
+#endif
         }
 
-        //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
         UUID_end = TLB::getMaxUUID();
 
@@ -345,7 +350,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     return randomType;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
+clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 {
 #ifdef FIXME_LATER
     // Some faction of the time, we create atoms with non-default
@@ -364,108 +369,67 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     Type t = defaultNodeType;
     if (p < chanceOfNonDefaultNode)
         t = randomType(NODE);
-    if (s.size() > 0) {
-        switch (testKind) {
-#if HAVE_GUILE
-        case BENCH_SCM: {
-#if ALL_AT_ONCE
-            std::ostringstream ss;
-            ss << "(cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << s << "\")\n";
-            std::string gs = ss.str();
-#else
-            std::ostringstream dss;
-            dss << "(define (mk) (cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << s << "\"))\n";
-            scm->eval(dss.str());
-            std::string gs = "(mk)\n";
-#endif
-            clock_t t_begin = clock();
-            scm->eval_h(gs);
-            return clock() - t_begin;
-        }
-#endif /* HAVE_GUILE */
-        case BENCH_IMPL: {
-            clock_t t_begin = clock();
-            asp->atomSpaceAsync->atomspace.addNode(t,s); 
-            return clock() - t_begin;
-        }
-        case BENCH_TABLE: {
-            clock_t t_begin = clock();
-            atab->add(createNode(t,s));
-            return clock() - t_begin;
-        }
-        case BENCH_AS: {
-            clock_t t_begin = clock();
-            asp->addNode(t,s); 
-            return clock() - t_begin;
-        }}
-    } else {
+
+    std::string scp(csi);
+    if (csi.size() ==  0) {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
-
-        switch (testKind) {
-#if HAVE_GUILE
-        case BENCH_SCM: {
-#if ALL_AT_ONCE
-            std::ostringstream ss;
-            ss << "(cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << oss.str() << "\")\n";
-            std::string gs = ss.str();
-#else
-#define ONE_SHOT
-#ifdef ONE_SHOT
-            std::ostringstream dss;
-            dss << "(define (mk) (cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << oss.str() << "\"))\n";
-            scm->eval(dss.str());
-            std::string gs = "(mk)\n";
-#else
-            std::ostringstream dss;
-            dss << "(define (crea n) "
-                << "  (if (not (eq? n 0))"
-                << "    (let ()"
-                << "      (cog-new-node '"
-                <<          classserver().getTypeName(t)
-                << "        (string-join (list \""
-                <<            oss.str() << " \" (number->string n))))"
-                << "      (crea (- n 1))"
-                << "    )"
-                << "  )"
-                << ")\n";
-            scm->eval(dss.str());
-            std::string gs = "(crea 100)\n";
-            clock_t begin = clock();
-            scm->eval(gs);
-            return clock() - begin;
-#endif
-#endif
-            clock_t t_begin = clock();
-            scm->eval_h(gs);
-            return clock() - t_begin;
-        }
-#endif /* HAVE_GUILE */
-        case BENCH_IMPL: {
-            clock_t t_begin = clock();
-            asp->atomSpaceAsync->atomspace.addNode(t,oss.str()); 
-            return clock() - t_begin;
-        }
-        case BENCH_TABLE: {
-            clock_t t_begin = clock();
-            atab->add(createNode(t, oss.str()));
-            return clock() - t_begin;
-        }
-        case BENCH_AS: {
-            clock_t t_begin = clock();
-            asp->addNode(t, oss.str()); 
-            return clock() - t_begin;
-        }}
+        scp = oss.str();
     }
+
+    switch (testKind) {
+    case BENCH_IMPL: {
+        clock_t t_begin = clock();
+        asp->atomSpaceAsync->atomspace.addNode(t, scp); 
+        return clock() - t_begin;
+    }
+    case BENCH_TABLE: {
+        clock_t t_begin = clock();
+        atab->add(createNode(t, scp));
+        return clock() - t_begin;
+    }
+    case BENCH_AS: {
+        clock_t t_begin = clock();
+        asp->addNode(t, scp); 
+        return clock() - t_begin;
+    }
+#if HAVE_GUILE
+    case BENCH_SCM: {
+#if ALL_AT_ONCE
+        std::ostringstream ss;
+        ss << "(cog-new-node '"
+           << classserver().getTypeName(t) 
+           << " \"" << scp << "\")\n";
+        std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (mk) (cog-new-node '"
+           << classserver().getTypeName(t) 
+           << " \"" << scp << "\"))\n";
+        scm->eval(dss.str());
+        std::string gs = "(mk)\n";
+#endif
+        clock_t t_begin = clock();
+        scm->eval_h(gs);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_GUILE */
+
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "addNode ("
+           << classserver().getTypeName(t) 
+           << " \"" << scp << "\")\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
+    }
+
     return 0;
 }
 
@@ -484,6 +448,12 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
 
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
+
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -539,6 +509,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
+#if HAVE_CYTHON
+    if (testKind == BENCH_PYTHON)
+       testKind = BENCH_AS;
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     if (testKind == BENCH_SCM)
        testKind = BENCH_AS;
@@ -621,6 +595,11 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -667,6 +646,11 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -730,6 +714,11 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -789,6 +778,11 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
@@ -824,6 +818,11 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
@@ -857,6 +856,11 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -904,6 +908,11 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        return 0;   // XXX FIXME
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
