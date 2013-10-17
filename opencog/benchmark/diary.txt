@@ -355,19 +355,19 @@ more complex form that Handle now has, resulting in more copying.
 (results in first column).
 
 
-   test           AtomTable     AtomTable II       III
+   test           AtomTable     AtomTable II      III          IV
    name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
    ----           ---------     ----------      ---------   ---------
-  noop            10000          3333           10000
-  addNode           208           238             222
-  addLink            60.6          58.8            57.8
-  getType          5000           833             833
-  getTV             909          1000             909
-  setTV             769           588             625
-  getHandleSet        0.195         0.438           0.487
-  getNodeHandles     83.3          91.7            80.0
-  getOutgoingSet    625           833             909
-  getIncomingSet   5000          1429            2000
+  noop            10000          3333           10000          inf
+  addNode           208           238             222         204
+  addLink            60.6          58.8            57.8        56.8
+  getType          5000           833             833         769
+  getTV             909          1000             909         666
+  setTV             769           588             625         625
+  getHandleSet        0.195         0.438           0.487       0.428
+  getNodeHandles     83.3          91.7            80.0        91.7
+  getOutgoingSet    625           833             909         769
+  getIncomingSet   5000          1429            2000         909
 
 
 The second column replaces Handle by UUID in the TypeIndex. This improves
@@ -377,3 +377,115 @@ Column III shows the profile after two significant changes: rejiggering
 the way the AtomPtr is held by the handle, and by adding locks to the
 AtomTable.  Looks like no change (the numbers are rather noisy).
 
+Column IV shows the profile after a massive conversion to use std::shared_ptr
+for truth values.
+
+
+Repeat measurements for current code (IV) for all interfaces:
+
+                   -A -X         -A -x            -A          -A -g
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop              inf         1111            1250         1250
+  addNode           204           79.4            29.7          4.87
+  addLink            56.8         31.4            18.9          4.90
+  getType           769          357              32.7          4.36
+  getTV             666          400              52.6          5.87
+  setTV             625          400              51.3          3.64
+  getHandleSet        0.428        0.420           0.187         -
+  getNodeHandles     91.7         49.3            23.8           -
+  getOutgoingSet    769          370              55.6          3.73
+  getIncomingSet    909          434              52.6          2.29
+
+
+Hmm. A net overall slowdown in AtomSpaceImpl. This is presumably due to
+excessive pointer mainuplation (resulting in excess shared_ptr count
+increments & ctor/dtor ops).
+
+AtomSpace perf is neutral: some things got faster, some got slower.
+Some didn't change. Unclear what that's about -- a mixed effect, I guess.
+
+Curiously, Scheme perf improved across the board ... even when atomspace
+perf went down. Perhaps this has to do with truth-value pointer managment?
+
+--------------
+Remeasure, after bugfix: WOW! WHAT A HUGE DIFFERENCE!
+Removed a single line of code:
+
+--- a/opencog/atomspace/AtomTable.h
++++ b/opencog/atomspace/AtomTable.h
+@@ -685,7 +685,6 @@ public:
+      * Return true if the atom table holds this handle, else return false.
+      */
+     bool holds(Handle h) const {
+-        h = getHandle(h);
+         return (NULL != h) and h->getAtomTable() == this; 
+     }
+
+This was previously needed to resolve the shared_ptr for the handle.
+It seems that the AtomSpace uses this holds() call a lot, and it was
+paying a huge price for this (since resolution involved a search of
+the indexes, among other things).  So remeasure:
+
+
+                   -A -X         -A -x            -A          -A -g
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop              inf         2500            3333         3333
+  addNode           204          156.0            69.4          6.46
+  addLink            56.8         46.1            34.1          5.31
+  getType           769          588             110            4.83
+  getTV             666          556             238            8.13
+  setTV             625          909             167            4.37
+  getHandleSet        0.428        0.420           0.221         -
+  getNodeHandles     91.7         82.6            50.7           -
+  getOutgoingSet    769          476             204            4.87
+  getIncomingSet    909          909             250            4.11
+
+
+AtomSpaceImpl perf changes are neutral. Some things got faster, some got
+slower. There's a huge amount of measurement noise; these numbers can be
+hard to repeat (everything in this diary shows best of three).
+
+AtomSpace perf: Wow! Huge improvement!  
+
+XXX FIXME: There seems to be a benchmark bug somewhere ... the AtomSpace
+figures are high ONLY if I'm doing something else CPU intensive at the 
+same tie (e.g. compiling).  Even watching youtube helps a little, but not
+as much. This alone reslts in a 2x or 3x performance improvement.
+Theorize:
+   -- Some cache or TLB effect, with other CPU causing different chache line
+      alignments, thus avoiding contention.
+   -- Some kerne context-swtiching effect: perhaps the clock() timer calls
+      stall in the kernel, until some other context swithc event forces
+      a return?
+
+This is bad. It makes the measurements untrustworthy...
+
+Plowing on anyway ... scheme and python, head-to-head.
+
+                   -A -g          -A -c
+   test            Scheme         Python
+   name           K-ops/sec      K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop             3333          2500
+  addNode             6.46          3.65
+  addLink             5.31          3.37
+  getType             4.83          3.63
+  getTV               8.13          3.53
+  setTV               4.37          3.47
+  getHandleSet         -            3.87
+  getNodeHandles       -            3.21
+  getOutgoingSet      4.87          3.64
+  getIncomingSet      4.11          3.54
+
+
+Looks like the python bottleneck, whatever it is, dominates everything else.
+
+I don't understand why getNodeHandles and getHandleSet have the performance
+that they do for python.  There's something wrong with either the C++ API
+for these, or something wrong with the python impl ... reviewed both, both
+seem to be OK.  in fact, the python impl seems to use exactly the same C++
+API as the benchmark ... WTF I don't get it.

@@ -15,6 +15,7 @@ int main(int argc, char** argv)
      "-x        \tTest the AtomSpaceImpl instead of the public AtomSpace API\n"
      "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
      "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
+     "-c        \tTest the Python API instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to call the method in the measurement loop\n" 
@@ -43,7 +44,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAxXgm:ln:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAxXgcm:ln:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -58,10 +59,10 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getTV");
 //             benchmarker.setMethod("getTVZmq");
              benchmarker.setMethod("setTV");
-             benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
+             benchmarker.setMethod("getHandleSet");
              break;
            case 'x':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;
@@ -74,6 +75,14 @@ int main(int argc, char** argv)
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM;
 #else
              cerr << "Fatal Error: Benchmark not compiled with scheme support!" << endl;
+             exit(1);
+#endif
+             break;
+           case 'c':
+#ifdef HAVE_CYTHON
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_PYTHON;
+#else
+             cerr << "Fatal Error: Benchmark not compiled with cython support!" << endl;
              exit(1);
 #endif
              break;

@@ -685,7 +685,6 @@ public:
      * Return true if the atom table holds this handle, else return false.
      */
     bool holds(Handle h) const {
-        h = getHandle(h);
         return (NULL != h) and h->getAtomTable() == this; 
     }
 
