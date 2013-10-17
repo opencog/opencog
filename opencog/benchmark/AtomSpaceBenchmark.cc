@@ -441,9 +441,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.add_node ("
-           << classserver().getTypeName(t) 
-           << " \"" << scp << "\")\n";
+        dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -472,7 +470,17 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.add_link (" << t << ", [";
+        for (size_t j=0; j < arity; j++) {
+            dss << "Handle( " << outgoing[j].value() << ")";
+            if (j < arity-1) dss  << ", ";
+        }
+        dss << " ] )\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 
@@ -619,7 +627,12 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_type(" << h.value() << ")\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -670,7 +683,12 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_tv(" << h.value() << ")\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -738,7 +756,13 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.set_tv(" << h.value()
+            << ", TruthValue(" << strength << ", " << conf << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -802,7 +826,12 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_atoms_by_name(" << NODE << ", " << oss.str() << ", True)\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -842,7 +871,12 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_atoms_by_type(" << t << ", True)\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -880,7 +914,12 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_outgoing(" << h.value() << ")\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
@@ -932,7 +971,12 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
-        return 0;   // XXX FIXME
+        std::ostringstream dss;
+        dss << "aspace.get_incoming(" << h.value() << ")\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
     }
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE

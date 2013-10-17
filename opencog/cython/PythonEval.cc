@@ -411,7 +411,7 @@ void PythonEval::addModuleFromPath(std::string path)
 std::string PythonEval::eval(std::string expr)
 {
     std::string result = "";
-    if(expr == "\n")
+    if (expr == "\n")
     {
         this->pending = false;
         result = this->apply_script(this->expr);
@@ -421,17 +421,16 @@ std::string PythonEval::eval(std::string expr)
     {
         size_t size = expr.size();
         size_t colun = expr.find_last_of(':');
-        if(size-2 == colun)
+        if (size-2 == colun)
             pending = true;
 
         this->expr += expr;
 
-        if(!pending)
+        if (not pending)
         {
             result = this->apply_script(this->expr);
             this->expr = "";
         }
     }
     return result;
-
 }

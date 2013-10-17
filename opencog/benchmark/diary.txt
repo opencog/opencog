@@ -463,3 +463,29 @@ Theorize:
       a return?
 
 This is bad. It makes the measurements untrustworthy...
+
+Plowing on anyway ... scheme and python, head-to-head.
+
+                   -A -g          -A -c
+   test            Scheme         Python
+   name           K-ops/sec      K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop             3333          2500
+  addNode             6.46          3.65
+  addLink             5.31          3.37
+  getType             4.83          3.63
+  getTV               8.13          3.53
+  setTV               4.37          3.47
+  getHandleSet         -            3.87
+  getNodeHandles       -            3.21
+  getOutgoingSet      4.87          3.64
+  getIncomingSet      4.11          3.54
+
+
+Looks like the python bottleneck, whatever it is, dominates everything else.
+
+I don't understand why getNodeHandles and getHandleSet have the performance
+that they do for python.  There's something wrong with either the C++ API
+for these, or something wrong with the python impl ... reviewed both, both
+seem to be OK.  in fact, the python impl seems to use exactly the same C++
+API as the benchmark ... WTF I don't get it.
