@@ -408,3 +408,58 @@ Some didn't change. Unclear what that's about -- a mixed effect, I guess.
 
 Curiously, Scheme perf improved across the board ... even when atomspace
 perf went down. Perhaps this has to do with truth-value pointer managment?
+
+--------------
+Remeasure, after bugfix: WOW! WHAT A HUGE DIFFERENCE!
+Removed a single line of code:
+
+--- a/opencog/atomspace/AtomTable.h
++++ b/opencog/atomspace/AtomTable.h
+@@ -685,7 +685,6 @@ public:
+      * Return true if the atom table holds this handle, else return false.
+      */
+     bool holds(Handle h) const {
+-        h = getHandle(h);
+         return (NULL != h) and h->getAtomTable() == this; 
+     }
+
+This was previously needed to resolve the shared_ptr for the handle.
+It seems that the AtomSpace uses this holds() call a lot, and it was
+paying a huge price for this (since resolution involved a search of
+the indexes, among other things).  So remeasure:
+
+
+                   -A -X         -A -x            -A          -A -g
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop              inf         2500            3333         3333
+  addNode           204          156.0            69.4          6.46
+  addLink            56.8         46.1            34.1          5.31
+  getType           769          588             110            4.83
+  getTV             666          556             238            8.13
+  setTV             625          909             167            4.37
+  getHandleSet        0.428        0.420           0.221         -
+  getNodeHandles     91.7         82.6            50.7           -
+  getOutgoingSet    769          476             204            4.87
+  getIncomingSet    909          909             250            4.11
+
+
+AtomSpaceImpl perf changes are neutral. Some things got faster, some got
+slower. There's a huge amount of measurement noise; these numbers can be
+hard to repeat (everything in this diary shows best of three).
+
+AtomSpace perf: Wow! Huge improvement!  
+
+XXX FIXME: There seems to be a benchmark bug somewhere ... the AtomSpace
+figures are high ONLY if I'm doing something else CPU intensive at the 
+same tie (e.g. compiling).  Even watching youtube helps a little, but not
+as much. This alone reslts in a 2x or 3x performance improvement.
+Theorize:
+   -- Some cache or TLB effect, with other CPU causing different chache line
+      alignments, thus avoiding contention.
+   -- Some kerne context-swtiching effect: perhaps the clock() timer calls
+      stall in the kernel, until some other context swithc event forces
+      a return?
+
+This is bad. It makes the measurements untrustworthy...
