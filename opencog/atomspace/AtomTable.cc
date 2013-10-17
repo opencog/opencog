@@ -424,7 +424,7 @@ void AtomTable::merge(Handle h, TruthValuePtr tvn)
     if (NULL == h) return;
 
     // Merge the TVs
-    if (!tvn->isNullTv()) {
+    if (tvn and not tvn->isNullTv()) {
         TruthValuePtr currentTV = h->getTruthValue();
         if (currentTV->isNullTv()) {
             h->setTruthValue(tvn);
@@ -433,8 +433,8 @@ void AtomTable::merge(Handle h, TruthValuePtr tvn)
             h->setTruthValue(mergedTV);
         }
     }
-    if (logger().isFineEnabled()) 
-        logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
+    // if (logger().isFineEnabled()) 
+    //    logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
 }
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)

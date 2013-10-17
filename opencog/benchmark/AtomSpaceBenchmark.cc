@@ -473,15 +473,13 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 {
     Type t = defaultLinkType;
     double p = rng->randdouble();
-    HandleSeq outgoing;
-    //clock_t tRandomStart, tRandomEnd;
-    clock_t tAddLinkStart;
     if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
-    int arity = (*prg)(randgen);
+    size_t arity = (*prg)(randgen);
     if (arity == 0) { ++arity; };
 
-    for (int j=0; j < arity; j++) {
+    HandleSeq outgoing;
+    for (size_t j=0; j < arity; j++) {
         outgoing.push_back(getRandomHandle());
     }
 
@@ -497,7 +495,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         std::ostringstream ss;
         ss << "(cog-new-link '"
            << classserver().getTypeName(t) << " ";
-        for (int j=0; j < arity; j++) {
+        for (size_t j=0; j < arity; j++) {
             ss << "(cog-atom " << outgoing[j].value() << ") ";
         }
         ss << ")\n";
@@ -507,7 +505,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         std::ostringstream dss;
         dss << "(define (mk) (cog-new-link '"
            << classserver().getTypeName(t) << " ";
-        for (int j=0; j < arity; j++) {
+        for (size_t j=0; j < arity; j++) {
             dss << "(cog-atom " << outgoing[j].value() << ") ";
         }
         dss << "))\n";
@@ -521,17 +519,17 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
 #endif /* HAVE_GUILE */
     case BENCH_IMPL: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         asp->atomSpaceAsync->atomspace.addLink(t, outgoing);
         return clock() - tAddLinkStart;
     }
     case BENCH_TABLE: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         atab->add(createLink(t, outgoing));
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         asp->addLink(t, outgoing);
         return clock() - tAddLinkStart;
     }}
