@@ -329,6 +329,10 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             pymo->init();
             pyev = &PythonEval::instance();
             asp = &cogs->getAtomSpace();
+
+            // And now ... create an instance of the atomspace.
+            std::string ps = "aspace = AtomSpace()\n";
+            pyev->eval(ps);
 #else
             asp = new AtomSpace();
 #endif
@@ -437,7 +441,7 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "addNode ("
+        dss << "aspace.add_node ("
            << classserver().getTypeName(t) 
            << " \"" << scp << "\")\n";
         std::string ps = dss.str();

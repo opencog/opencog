@@ -44,7 +44,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAxXgm:ln:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAxXgcm:ln:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
