@@ -58,10 +58,10 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getTV");
 //             benchmarker.setMethod("getTVZmq");
              benchmarker.setMethod("setTV");
-             benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
+             benchmarker.setMethod("getHandleSet");
              break;
            case 'x':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;

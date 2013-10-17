@@ -355,19 +355,19 @@ more complex form that Handle now has, resulting in more copying.
 (results in first column).
 
 
-   test           AtomTable     AtomTable II       III
+   test           AtomTable     AtomTable II      III          IV
    name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
    ----           ---------     ----------      ---------   ---------
-  noop            10000          3333           10000
-  addNode           208           238             222
-  addLink            60.6          58.8            57.8
-  getType          5000           833             833
-  getTV             909          1000             909
-  setTV             769           588             625
-  getHandleSet        0.195         0.438           0.487
-  getNodeHandles     83.3          91.7            80.0
-  getOutgoingSet    625           833             909
-  getIncomingSet   5000          1429            2000
+  noop            10000          3333           10000          inf
+  addNode           208           238             222         204
+  addLink            60.6          58.8            57.8        56.8
+  getType          5000           833             833         769
+  getTV             909          1000             909         666
+  setTV             769           588             625         625
+  getHandleSet        0.195         0.438           0.487       0.428
+  getNodeHandles     83.3          91.7            80.0        91.7
+  getOutgoingSet    625           833             909         769
+  getIncomingSet   5000          1429            2000         909
 
 
 The second column replaces Handle by UUID in the TypeIndex. This improves
@@ -377,3 +377,34 @@ Column III shows the profile after two significant changes: rejiggering
 the way the AtomPtr is held by the handle, and by adding locks to the
 AtomTable.  Looks like no change (the numbers are rather noisy).
 
+Column IV shows the profile after a massive conversion to use std::shared_ptr
+for truth values.
+
+
+Repeat measurements for current code (IV) for all interfaces:
+
+                   -A -X         -A -x            -A          -A -g
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop              inf         1111            1250         1250
+  addNode           204           79.4            29.7          4.87
+  addLink            56.8         31.4            18.9          4.90
+  getType           769          357              32.7          4.36
+  getTV             666          400              52.6          5.87
+  setTV             625          400              51.3          3.64
+  getHandleSet        0.428        0.420           0.187         -
+  getNodeHandles     91.7         49.3            23.8           -
+  getOutgoingSet    769          370              55.6          3.73
+  getIncomingSet    909          434              52.6          2.29
+
+
+Hmm. A net overall slowdown in AtomSpaceImpl. This is presumably due to
+excessive pointer mainuplation (resulting in excess shared_ptr count
+increments & ctor/dtor ops).
+
+AtomSpace perf is neutral: some things got faster, some got slower.
+Some didn't change. Unclear what that's about -- a mixed effect, I guess.
+
+Curiously, Scheme perf improved across the board ... even when atomspace
+perf went down. Perhaps this has to do with truth-value pointer managment?
