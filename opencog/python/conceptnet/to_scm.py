@@ -30,12 +30,12 @@ def set_TV(word):
 	except KeyError:
 		if ("  "+ word.upper()) in  corpus_dict:
 			stv.mean = float(corpus_dict[("  "+ word.upper())])/twf
-			stv.count = .765 # have no reason for this value 
+			stv.count = .95 # have no reason for this value 
 			conceptnet_dict[word] = stv
 			return stv
 		else:	
 			stv.mean = 1/(twf + 1)
-			stv.count = .043  # have no reason for this value
+			stv.count = .95  # have no reason for this value
 			conceptnet_dict[word] = stv
 			return stv
 		
