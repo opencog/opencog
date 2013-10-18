@@ -129,7 +129,7 @@ PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
     if (atomspace)
         pAtomSpace = py_atomspace(atomspace);
     else
-        pAtomSpace = py_atomspace(this->atomspace);
+        pAtomSpace = py_atomspace(this->_atomspace);
 
     if (pAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
@@ -198,7 +198,7 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         }
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (atomspace and singletonInstance->atomspace->atomSpaceAsync !=
+    else if (atomspace and singletonInstance->_atomspace->atomSpaceAsync !=
              atomspace->atomSpaceAsync)
     {
         // Someone is trying to initialize the Python

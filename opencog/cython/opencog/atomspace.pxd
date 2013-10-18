@@ -178,3 +178,7 @@ cdef class Atom:
     cdef object _name
     cdef object _outgoing
 
+
+# Tacky hack to pass atomspace pointer to AtomSpace ctor
+cdef extern from "Python.h":
+    cdef void* PyLong_AsVoidPtr(object)

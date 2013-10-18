@@ -162,7 +162,8 @@ void PythonModule::init()
         }
     }
 
-    PythonEval::instance();
+    // The eval instance should use the provided cogserver!
+    PythonEval::instance(&_cogserver.getAtomSpace());
 
     if (import_agent_finder() == -1) {
         PyErr_Print();
