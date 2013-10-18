@@ -235,7 +235,7 @@ class Chainer(AbstractChainer):
         specific_inputs = []
         empty_substitution = {}
         subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
-        if not found:
+        if subst is None:
             return None
         # set the outputs after you've found all the inputs
         # mustn't use '=' because it will discard the original reference and thus have no effect
@@ -263,7 +263,7 @@ class Chainer(AbstractChainer):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
         return_inputs += [x for x in input_templates]
 
-        for i in xrange(0, len(generic_inputs)):
+        for i in xrange(0, len(input_templates)):
             template = input_templates[i]
 
             atom = self._select_one_matching(template, subst_so_far)
