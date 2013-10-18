@@ -232,7 +232,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_SCM:  cout << "Scheme's "; break;
 #endif /* HAVE_GUILE */
 #if HAVE_CYTHON
-        case BENCH_PYTHON: cout << "Python's "; break;
+        case BENCH_PYTHON: cout << "XXX Python's XXX is currently broken; atomspace is empty! XXX"; break;
 #endif /* HAVE_CYTHON */
     }
     cout << methodName << " method " << Nreps << " times ";
@@ -327,11 +327,22 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             cogs = new CogServer();
             if (pymo == NULL) pymo = new PythonModule(*cogs);
             pymo->init();
-            pyev = &PythonEval::instance();
             asp = &cogs->getAtomSpace();
+            pyev = &PythonEval::instance(asp);
+            // pyev->getPyAtomspace(asp);
+
+            // FIXME TODO XXX Python is currently broken.
+            // There's a bug somewhere and I can't find it ... 
+            // Basically, we fill the atomspace with lots of atoms, but
+            // then the python wrapper decides to use some other, empty
+            // atomspace, and so all the measured values are incorrect.
+            // in particular, getHandleSet runs to fast (because the
+            // atomspace is empty).  I tried, I can't figure out WTF 
+            // is going on in that code.  Maybe later.
+            printf("WTF Python atomspace should be %p !!\n", asp);
 
             // And now ... create an instance of the atomspace.
-            std::string ps = 
+            std::string ps =
                 "from opencog.atomspace import AtomSpace, types, Handle, TruthValue\n"
                 "aspace = AtomSpace()\n";
             pyev->eval(ps);
@@ -869,6 +880,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     switch (testKind) {
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
+printf("duuude atsompace should be %p\n", asp);
         std::ostringstream dss;
         dss << "aspace.get_atoms_by_type(" << t << ", True)\n"; 
         std::string ps = dss.str();
