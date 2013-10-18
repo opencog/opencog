@@ -456,13 +456,17 @@ figures are high ONLY if I'm doing something else CPU intensive at the
 same tie (e.g. compiling).  Even watching youtube helps a little, but not
 as much. This alone reslts in a 2x or 3x performance improvement.
 Theorize:
-   -- Some cache or TLB effect, with other CPU causing different chache line
+   -- Some cache or TLB effect, with other CPU causing different cache line
       alignments, thus avoiding contention.
    -- Some kerne context-swtiching effect: perhaps the clock() timer calls
-      stall in the kernel, until some other context swithc event forces
-      a return?
+      stall in the kernel, until some other context switch event forces
+      a return?  Noop. Stub out the calls to clock(), but perf does not
+      improve. (based on total elapsed time, which uses gettimeofday())
    -- Some kind of thread-dispatching effect: the AtomSpaceAsync threads
-      stall. Perhaps a yeild is needed?
+      stall. Perhaps a sched_yield() is needed in ASRequest?  No... tried
+      that and it didn't work.
+   -- It may still be a kernel-context wtiching thing; its just not
+      cureable with sched_yield() or disabling clock()...
 
 This is bad. It makes the measurements untrustworthy...
 
