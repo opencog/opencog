@@ -461,6 +461,8 @@ Theorize:
    -- Some kerne context-swtiching effect: perhaps the clock() timer calls
       stall in the kernel, until some other context swithc event forces
       a return?
+   -- Some kind of thread-dispatching effect: the AtomSpaceAsync threads
+      stall. Perhaps a yeild is needed?
 
 This is bad. It makes the measurements untrustworthy...
 
@@ -470,21 +472,20 @@ Plowing on anyway ... scheme and python, head-to-head.
    test            Scheme         Python
    name           K-ops/sec      K-ops/sec
    ----           ---------    -------------    ---------   ---------
-  noop             3333          2500
-  addNode             6.46          4.35     These python
-  addLink             5.31          3.72     are incorrect.
-  getType             4.83          4.10     See below;
-  getTV               8.13          4.59     there's a bug somwhere!
-  setTV               4.37          4.35     
-  getHandleSet         -             -         XXX
-  getNodeHandles       -            4.40       XXX  
-  getOutgoingSet      4.87          4.65       XXX
-  getIncomingSet      4.11          4.63
+  noop             3333          4000
+  addNode             6.46          7.62
+  addLink             5.31          6.32
+  getType             4.83          7.30
+  getTV               8.13          7.87
+  setTV               4.37          7.40
+  getHandleSet         -            0.057
+  getNodeHandles       -            7.25
+  getOutgoingSet      4.87          7.59
+  getIncomingSet      4.11          7.68
 
 
 Looks like the python bottleneck, whatever it is, dominates everything else.
+Again: a 1.7x perf improvement when running a concurrent compile on other
+CPU; without that, the python numbers would be in the 3.8-4.3 range.
 
-The python version of getHandleSet is broken somehow ... it always returns
-zero handles.  Ahh .. looks like thye python bindings are using a different
-atomspace than the becnhmark, so the bench atomspace is always empty.
 
