@@ -1,16 +1,42 @@
+Remaining items to check:
+
+#1 - Determine why Control-C doesn't work when the API is running
+
+#2 - How do you add requirements to the "Project Requirements" like PyCharm is suggesting?
+
 Dependencies:
 sudo easy_install Flask
 sudo easy_install -U mock
 sudo easy_install flask-restful
 sudo easy_install six
 
+Notes for cosmist.org:
 the cython build directory has to be in the PYTHONPATH
 sys.path.extend(['/home/cosmo/opencog/build/opencog/cython'])
 
 Optional:
 sudo easy_install requests
 
+#3 - Documentation:
+Document how to access the API (using curl or Python 'request' or JavaScript (...)) - or just refactor the test cases into the requests library or JavaScript
 
+#4 - Packaging:
+****add dependencies to ocpkg - line 164 of ocpkg, how to add, if we're using easy_install
+detect dependency existence in cmake
+
+What will happen if you try to load the .conf file on a system that doens't have the prereqs? I could test by removing one of them, and running the cogserver.
+
+#5 - check if the truth value type enumeration is complete
+
+#6 - Make sure the different documentations of the files refer to the new clientexample
+
+done:
+add docstrings to the restapi.py for opencog shell
+cleanup the docstrings so that the request and response each have strongly typed descriptions, and an example is provided for both,
+cleanup the formatting of the JSON in the docstrings
+
+
+Done:
 Check Stack Overflow:
 @todo should the POST method require an {'atom': [stuff]} object that contains the rest of the stuff? - NO
 @todo should responses always be encapsulated in an object like DeleteAtomResponse? - NO, but you could add type info...
@@ -18,49 +44,15 @@ Check Stack Overflow:
  - varies depending on who I look at
 --> these don't have to be finished...
 
-Documentation:
-@todo cleanup the docstrings so that the request and response each have strongly typed descriptions, and an example is provided for both, cleanup the formatting of the JSON in the docstrings
-@todo: Document how to access the API (using curl or Python 'request' or JavaScript (...)) - or just refactor the test cases into the requests library or JavaScript
-
 Checking edge cases:
-@todo what happens if you get an AtomList that is empty?
-@todo see if the atomspace throws when giving weird values as tv or av updates
-@todo handle put of invalid handle
-@todo check get invalid type, get invalid name
+@todo see if the atomspace throws when giving weird values as tv or av updates - it doesn't - should validation happen both in the API and in the library?
 
-Architecture:
-****Make it run inside the CogServer (as a module?) - maybe use C++ pthread line 1358 from mongoose.c
 
-Packaging:
-****add dependencies to ocpkg, detect dependency existence in cmake
-
-Miscellaneous:
-@todo: check if the truth value type enumeration is complete
-Change debug from true to false in the run method
-SIMPLE_TRUTH_VALUE
-COUNT_TRUTH_VALUE
-INDEFINITE_TRUTH_VALUE
-COMPOSITE_TRUTH_VALUE
-
-Organizing:
-@todo separate each API into a different file
 
 Possible:
 @todo use named tuples in the parsing
-@todo search by incoming or outgoing set
-sort: by sti (...)
-rename handle as id in public api?
-
-Make sure the path to the module works
-
-procedure:
-loadpy web
-loadpy web/apiloader
-agents-start web/apiloader.MyMindAgent
-agents-step
-then the frog appeared...
-
-
+Search by incoming or outgoing set
+Sort results by STI
 
 """
 Testing:

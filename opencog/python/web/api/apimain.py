@@ -1,9 +1,3 @@
-"""
-REST API for OpenCog
-
-Implemented using the Flask micro-framework and Flask-RESTful extension
-"""
-
 __author__ = 'Cosmo Harrigan'
 
 from flask import Flask, abort
@@ -12,7 +6,24 @@ from apiatom import *
 from apiatomcollection import *
 
 
-class RESTApi(object):
+class RESTAPI(object):
+    """
+    REST API for OpenCog
+
+    Implemented using the Flask micro-framework and Flask-RESTful extension
+
+    Default endpoint: http://127.0.0.1:5000/api/v1.0/
+    (Replace 127.0.0.1 with the IP address of the server)
+
+    Example request: http://127.0.0.1:5000/api/v1.0/atoms?type=ConceptNode
+
+    See: tests/python/test_restapi.py for extensive examples, and review
+    the method definitions in each resource for request/response specifications.
+
+    If accessing the API from Python, you may find it convenient to install
+    the 'requests' module to easily perform requests and responses.
+    """
+
     def __init__(self, atomspace):
         self.atomspace = atomspace
 

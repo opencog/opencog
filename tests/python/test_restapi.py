@@ -6,10 +6,20 @@ import json
 #from flask.ext.testing import TestCase
 #from flask import *
 from opencog.atomspace import *
-from web.api import RESTApi
+from web.api.apimain import RESTAPI
 
 
 class TestRESTApi():
+    """
+    Unit tests for the OpenCog REST API.
+    See: opencog/python/web/api/apimain.py for the class definitions
+
+    This file also provides examples of how to interact programatically with the API. If accessing the API from
+    Python, you may find it convenient to install the 'requests' module to easily perform requests and responses.
+
+    Review the method definitions defined in each resource for request/response specifications.
+    """
+
     def setUp(self):
         self.uri = '/api/v1.0/'
         self.headers = {'content-type': 'application/json'}
@@ -23,7 +33,7 @@ class TestRESTApi():
         self.bird_animal = self.atomspace.add_link(types.InheritanceLink, [self.bird, self.animal], TruthValue(1, .9))
         self.bird.av = {'sti': 9}
 
-        self.api = RESTApi(self.atomspace)
+        self.api = RESTAPI(self.atomspace)
         self.client = self.api.test()
 
     def tearDown(self):
@@ -35,7 +45,7 @@ class TestRESTApi():
         truthvalue = {'type': 'simple', 'details': {'strength': 0.08, 'count': 0.2}}
         atom = {'type': 'ConceptNode', 'name': 'giant_frog', 'truthvalue': truthvalue}
 
-        post_response = self.client.post('/api/v1.0/atoms', data=json.dumps(atom), headers=self.headers)
+        post_response = self.client.post(self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
@@ -79,7 +89,7 @@ class TestRESTApi():
         atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue, 'outgoing':\
             [self.swan.h.value(), self.animal.h.value()]}
 
-        post_response = self.client.post('/api/v1.0/atoms', data=json.dumps(atom), headers=self.headers)
+        post_response = self.client.post(self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
@@ -137,7 +147,7 @@ class TestRESTApi():
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
-        get_response = self.client.get('http://localhost:5000/api/v1.0/atoms/' + str(atom.h.value()))
+        get_response = self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
         get_result = json.loads(get_response.data)['atoms']
         assert put_result == get_result
 
@@ -169,7 +179,7 @@ class TestRESTApi():
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
-        get_response = self.client.get('http://localhost:5000/api/v1.0/atoms/' + str(atom.h.value()))
+        get_response = self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
         get_result = json.loads(get_response.data)['atoms']
         assert put_result == get_result
 
@@ -180,7 +190,7 @@ class TestRESTApi():
         truthvalue = {'type': 'simple', 'details': {'strength': 0.1, 'count': 0.95}}
         atom = {'type': 'ConceptNode', 'name': 'bird', 'truthvalue': truthvalue}
 
-        post_response = self.client.post('/api/v1.0/atoms', data=json.dumps(atom), headers=self.headers)
+        post_response = self.client.post(self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
@@ -202,7 +212,7 @@ class TestRESTApi():
         outgoing = [a.h.value() for a in existing_atom.out]
         atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue, 'outgoing': outgoing}
 
-        post_response = self.client.post('/api/v1.0/atoms', data=json.dumps(atom), headers=self.headers)
+        post_response = self.client.post(self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
