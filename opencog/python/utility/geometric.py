@@ -10,9 +10,10 @@ class Function(object):
         return 0
 
 
-class HorizontalLinearFunction(Function):
+class FunctionHorizontalLinear(Function):
     def __init__(self, y_intercept):
         self.y_intercept = y_intercept
+        self.a = 0
 
     def __call__(self, x):
         return self.y_intercept
@@ -21,11 +22,18 @@ class HorizontalLinearFunction(Function):
         Function.integrate(self, start, end)
         return float(self.y_intercept) * (end - start)
 
+    @property
+    def b(self):
+        return self.y_intercept
 
-class LinearFunction(Function):
-    def __init__(self, a, b):
-            self.a = a
-            self.b = b
+
+class FunctionLinear(Function):
+    def __init__(self, a=None, b=None, x_0=None, x_1=None, y_0=None, y_1=None):
+        if (a, b) == (None, None):
+            a = (float(y_1) - y_0) / (x_1 - x_0)
+            b = y_0 - a * x_0
+        self.a = a
+        self.b = b
 
     def __call__(self, x):
         return float(self.a * x + self.b)
@@ -36,6 +44,9 @@ class LinearFunction(Function):
 
     def integrate(self, start, end):
         Function.integrate(self, start, end)
+        if self.a == 0:
+            return self.b * (end - start)
+
         x_intercept = self.x_intercept
 
         if start >= x_intercept:
@@ -61,7 +72,7 @@ class LinearFunction(Function):
         return self(0)
 
 
-class CompositeFunction(Function):
+class FunctionComposite(Function):
     def __init__(self, bounds_function_dictionary):
         assert isinstance(bounds_function_dictionary, dict)
         for bounds in bounds_function_dictionary:
@@ -103,8 +114,8 @@ class CompositeFunction(Function):
         return result
 
 if __name__ == '__main__':
-    from spatiotemporal.temporal_events import TemporalEventLinearPiecewise
-    e = TemporalEventLinearPiecewise(1, 10, 3, 8)
+    from spatiotemporal.temporal_events import TemporalEventTrapezium
+    e = TemporalEventTrapezium(1, 10, 3, 8)
     mf = e.membership_function()
     d = e.degree_in_interval(1, 3)
     d = e.degree_in_interval(3, 4)

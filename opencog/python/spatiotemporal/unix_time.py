@@ -1,5 +1,5 @@
-from calendar import timegm
 from datetime import datetime
+from calendar import timegm
 from random import random
 from scipy.stats.distributions import rv_frozen
 
@@ -14,20 +14,20 @@ class UnixTime(float):
             datetime_or_number, (datetime, int, float, long)), "UnixTime() argument must be a datetime or a number, " \
                                                                "not '{0}'".format(datetime_or_number.__class__.__name__)
         if isinstance(datetime_or_number, datetime):
-            value = timegm(datetime_or_number.utctimetuple())
+            value = timegm(datetime_or_number.timetuple())
         else:
             value = datetime_or_number
 
         return float.__new__(cls, value)
 
     def to_datetime(self):
-        return datetime.fromtimestamp(int(self))
+        return datetime.fromtimestamp(self)
 
     def __repr__(self):
         return 'UnixTime({0}: {1})'.format(float(self), str(self))
 
     def __str__(self):
-        return datetime.fromtimestamp(self).strftime('%Y-%m-%d %H:%M:%S')
+        return str(self.to_datetime())
 
 
 def is_unix_time(time):
@@ -52,3 +52,13 @@ def random_time(start, stop, probability_distribution=None):
     if random_value > stop:
         return stop
     return UnixTime(random_value)
+
+if __name__ == '__main__':
+    a = datetime(2010, 1, 1)
+    print a
+    a = UnixTime(a)
+    print a
+    print a.to_datetime()
+    a = UnixTime(1.25)
+    print a
+    print a.to_datetime()

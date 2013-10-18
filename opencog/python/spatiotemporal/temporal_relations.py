@@ -1,4 +1,5 @@
-from spatiotemporal.temporal_events import TemporalEventLinearPiecewise
+from spatiotemporal.temporal_events import TemporalEventPiecewiseLinear
+from spatiotemporal.unix_time import UnixTime
 
 __author__ = 'keyvan'
 
@@ -22,19 +23,19 @@ TEMPORAL_RELATIONS = {
 
 
 def temporal_relation_between(temporal_event_1, temporal_event_2):
-    temporal_event_1 = TemporalEventLinearPiecewise(1, 10, 3, 8)
-    temporal_event_2 = TemporalEventLinearPiecewise(9, 16, 10, 14)
+    temporal_event_1 = TemporalEventPiecewiseLinear(1, 10, 3, 8)
+    temporal_event_2 = TemporalEventPiecewiseLinear(9, 16, 10, 14)
 
-    sum_times = sorted(set(temporal_event_1.to_list() + temporal_event_2.to_list()))
+    sum_times = sorted(
+        [UnixTime(time).to_datetime() for time in set(temporal_event_1.to_list() + temporal_event_2.to_list())]
+    )
     sum_certainties = []
     for time_step in sum_times:
-        sum_certainties.append(
-            temporal_event_1.membership_function(time_step) + temporal_event_2.membership_function(time_step))
+        sum_certainties.append(temporal_event_1.membership_function(time_step) +
+                               temporal_event_2.membership_function(time_step))
 
-    import matplotlib.pyplot as plt
-
-    plt.plot(temporal_event_1, temporal_event_1.membership_function)
-    plt.plot(temporal_event_2, temporal_event_2.membership_function)
+    temporal_event_1.plot()
+    plt = temporal_event_2.plot()
     plt.plot(sum_times, sum_certainties)
     plt.show()
 

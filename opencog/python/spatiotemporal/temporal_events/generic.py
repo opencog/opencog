@@ -1,16 +1,29 @@
 from datetime import datetime
 from scipy import integrate
-from spatiotemporal.interval import Interval, assert_is_interval
-from spatiotemporal.membership_function import FuzzyMembershipFunction
+from spatiotemporal.time_intervals import TimeIntervalIterBased, assert_is_time_interval, TimeIntervalListBased
+from fuzzy.membership_function import MembershipFunctionPiecewiseLinear
+from spatiotemporal.unix_time import UnixTime
 
 __author__ = 'keyvan'
 
 
-class BaseTemporalEvent(Interval):
+class BaseTemporalEvent(object):
+    _input_list = None
 
-    def __init__(self, a, b, iter_step=1):
-        Interval.__init__(self, a, b, iter_step=iter_step)
-        self.membership_function = FuzzyMembershipFunction(self, self.membership_function_single_point)
+    def __init__(self, input_list):
+        self._input_list = input_list
+
+    def membership_function(self, time=None):
+        if time is None:
+            time = self
+
+        result = []
+        try:
+            for point in time:
+                result.append(self.membership_function_single_point(point))
+        except:
+            return self.membership_function_single_point(time)
+        return result
 
     def membership_function_single_point(self, time_step):
         """
@@ -24,9 +37,9 @@ class BaseTemporalEvent(Interval):
             if (a, b) == (None, None):
                 interval = self
             else:
-                interval = Interval(a, b)
+                interval = TimeIntervalIterBased(a, b)
         else:
-            assert_is_interval(interval)
+            assert_is_time_interval(interval)
         return interval
 
     def degree_in_interval(self, a=None, b=None, interval=None):
@@ -45,48 +58,72 @@ class BaseTemporalEvent(Interval):
     def plot(self):
         import matplotlib.pyplot as plt
         from spatiotemporal.unix_time import UnixTime
+
         x_axis = [UnixTime(time).to_datetime() for time in self]
         plt.plot(x_axis, self.membership_function)
         return plt
 
-    def __repr__(self):
-        return '{0}(a: {1}, b: {2})'.format(self.__class__.__name__, self.a, self.b)
-
-    def __str__(self):
-        return repr(self)
-
-
-class BaseTemporalEventWithCustomListImplementation(BaseTemporalEvent):
-    """
-    override to_list and use this class
-    """
-    def __init__(self, a, b):
-        BaseTemporalEvent.__init__(self, a, b)
-
-    def to_list(self):
-        return [self.a, self.b]
-
     def __getitem__(self, index):
-        return self.to_list().__getitem__(index)
+        return self._input_list.__getitem__(index)
 
     def __len__(self):
-        return len(self.to_list())
+        return len(self._input_list)
 
     def __iter__(self):
-        return iter(self.to_list())
+        return iter(self._input_list)
 
 
-class TemporalEventSimple(BaseTemporalEventWithCustomListImplementation):
-    def membership_function_single_point(self, time_step):
-        if self.a <= time_step <= self.b:
-            return 1
-        return 0
+class BaseTemporalEventIterBased(TimeIntervalIterBased, BaseTemporalEvent):
+    pass
 
 
-class TemporalEventDistributional(BaseTemporalEvent):
+class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
+    def __init__(self, input_list, output_list):
+        TimeIntervalListBased.__init__(self, input_list)
+        self.membership_function = MembershipFunctionPiecewiseLinear(self, output_list)
+        self.membership_function_single_point = self.membership_function
+
+    def degree_in_interval(self, a=None, b=None, interval=None):
+        interval = self._interval_from_self_if_none(a, b, interval)
+        return self.membership_function_single_point.integrate(interval.a, interval.b) / (interval.b - interval.a)
+
+    @TimeIntervalListBased.a.setter
+    def a(self, value):
+        assert value > self[1]
+        self[0] = UnixTime(value)
+        self.membership_function_single_point.invalidate()
+
+    @TimeIntervalListBased.b.setter
+    def b(self, value):
+        assert value > self[-2]
+        self[-1] = UnixTime(value)
+        self.membership_function_single_point.invalidate()
+
+    # Every time that self as list changes, membership_function_single_point should be invalidated
+    # Here, only the two main methods that change the list content have been overridden
+    # One can add more later if needed...
+    def append(self, x):
+        TimeIntervalListBased.append(self, x)
+        self.membership_function_single_point.invalidate()
+
+    def __setitem__(self, index, value):
+        TimeIntervalListBased.__setitem__(self, index, value)
+        self.membership_function_single_point.invalidate()
+
+
+class TemporalEventSimple(BaseTemporalEventListBased):
+    def __init__(self, a, b):
+        BaseTemporalEventListBased.__init__(self, [a, b], [1, 1])
+
+
+class TemporalEventPiecewiseLinear(BaseTemporalEventListBased):
+    pass
+
+
+class TemporalEventDistributional(BaseTemporalEventIterBased):
     def __init__(self, a, b, pdf, iter_step=1):
         assert callable(pdf), "'pdf' should be callable"
-        Interval.__init__(self, a, b, iter_step=iter_step)
+        BaseTemporalEventIterBased.__init__(self, a, b, iter_step=iter_step)
         self.membership_function = pdf
         self.membership_function_single_point = pdf
 
@@ -95,4 +132,7 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1))
+    event.plot().show()
+
+    event = TemporalEventPiecewiseLinear([1, 2, 3], [4, 5, 6])
     event.plot().show()
