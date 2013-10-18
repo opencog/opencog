@@ -130,6 +130,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
+    instance.owns_atomspace = False
     return instance
 
 cdef class AtomSpace:
@@ -142,9 +143,17 @@ cdef class AtomSpace:
     def __cinit__(self):
         self.owns_atomspace = False
 
-    def __init__(self):
-        self.atomspace = new cAtomSpace()
-        self.owns_atomspace = True
+    # A tacky hack to pass in a pointer to an atomspace from C++-land.
+    # basically, pass an int, and cast it to the C++ pointer.  This
+    # works, but is not very safe, and has a certain feeling of "ick"
+    # about it.  But I can't find any better way.
+    def __init__(self, long addr = 0):
+        if (addr == 0) :
+            self.atomspace = new cAtomSpace()
+            self.owns_atomspace = True
+        else :
+            self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
+            self.owns_atomspace = False
 
     def __dealloc__(self):
         if self.owns_atomspace:
