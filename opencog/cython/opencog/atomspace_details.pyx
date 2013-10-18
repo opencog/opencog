@@ -276,6 +276,10 @@ cdef class AtomSpace:
         """ Return the TruthValue of an Atom in the AtomSpace """
         cdef tv_ptr tv
         tv = self.atomspace.getTV(deref(h.h))
+        if (not tv.get() or tv.get().isNullTv()):
+            pytv = TruthValue()
+            pytv.cobj = new tv_ptr(tv) # make copy of smart pointer
+            return pytv
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
     def set_tv(self,Handle h, TruthValue tv):
@@ -338,6 +342,9 @@ cdef class AtomSpace:
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype
         self.atomspace.getHandleSet(back_inserter(o_vect),t,subt)
+        # I don't get it ... something's broken ... this always returns 
+        # nothing at all, for me ... this needs fixing and a unit test.
+        # print "Aieee ... got this many", o_vect.size(), "  for type", t
         return convert_handle_seq_to_python_list(o_vect,self)
 
     def get_atoms_by_name(self, Type t, name, subtype = True):

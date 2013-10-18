@@ -42,6 +42,7 @@ ctypedef float strength_t
 cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
     cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
         tv_ptr()
+        tv_ptr(tv_ptr copy)
         tv_ptr(cTruthValue* fun)
         tv_ptr(cSimpleTruthValue* fun)
         cTruthValue* get()
@@ -51,6 +52,7 @@ cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
         confidence_t getConfidence()
         count_t getCount()
         tv_ptr DEFAULT_TV()
+        bint isNullTv()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)

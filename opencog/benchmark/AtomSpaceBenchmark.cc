@@ -331,7 +331,9 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             asp = &cogs->getAtomSpace();
 
             // And now ... create an instance of the atomspace.
-            std::string ps = "aspace = AtomSpace()\n";
+            std::string ps = 
+                "from opencog.atomspace import AtomSpace, types, Handle, TruthValue\n"
+                "aspace = AtomSpace()\n";
             pyev->eval(ps);
 #else
             asp = new AtomSpace();
@@ -628,7 +630,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_type(" << h.value() << ")\n";
+        dss << "aspace.get_type(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -684,7 +686,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_tv(" << h.value() << ")\n";
+        dss << "aspace.get_tv(Handle(" << h.value() << "))\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -757,8 +759,8 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.set_tv(" << h.value()
-            << ", TruthValue(" << strength << ", " << conf << "))\n";
+        dss << "aspace.set_tv(Handle(" << h.value()
+            << "), TruthValue(" << strength << ", " << conf << "))\n";
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -827,7 +829,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_atoms_by_name(" << NODE << ", " << oss.str() << ", True)\n"; 
+        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n"; 
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -914,7 +916,7 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_outgoing(" << h.value() << ")\n"; 
+        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n"; 
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -971,7 +973,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_incoming(" << h.value() << ")\n"; 
+        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n"; 
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);

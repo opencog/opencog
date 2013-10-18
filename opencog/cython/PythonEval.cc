@@ -310,6 +310,10 @@ std::string PythonEval::apply_script(const std::string& script)
                        "_opencog_output_stream.close()\n");
     //    PyGILState_Release(_state);
 
+    // XXX TODO FIXME: we should check for error, and throw.  Without
+    // this, python scripts can silently fail, and you'd never now it.
+
+    // printf("Python says that: %s\n", result.c_str());
     return result;
 }
 

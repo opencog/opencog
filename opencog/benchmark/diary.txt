@@ -471,21 +471,19 @@ Plowing on anyway ... scheme and python, head-to-head.
    name           K-ops/sec      K-ops/sec
    ----           ---------    -------------    ---------   ---------
   noop             3333          2500
-  addNode             6.46          3.65
-  addLink             5.31          3.37
-  getType             4.83          3.63
-  getTV               8.13          3.53
-  setTV               4.37          3.47
-  getHandleSet         -            3.87
-  getNodeHandles       -            3.21
-  getOutgoingSet      4.87          3.64
-  getIncomingSet      4.11          3.54
+  addNode             6.46          4.35
+  addLink             5.31          3.72
+  getType             4.83          4.10
+  getTV               8.13          4.59
+  setTV               4.37          4.35
+  getHandleSet         -             -
+  getNodeHandles       -            4.40
+  getOutgoingSet      4.87          4.65
+  getIncomingSet      4.11          4.63
 
 
 Looks like the python bottleneck, whatever it is, dominates everything else.
 
-I don't understand why getNodeHandles and getHandleSet have the performance
-that they do for python.  There's something wrong with either the C++ API
-for these, or something wrong with the python impl ... reviewed both, both
-seem to be OK.  in fact, the python impl seems to use exactly the same C++
-API as the benchmark ... WTF I don't get it.
+The python version of getHandleSet is broken somehow ... it always returns
+zero handles.  I couldn't figure out the bug ...
+
