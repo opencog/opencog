@@ -1,5 +1,5 @@
 from datetime import datetime
-from calendar import timegm
+from time import mktime
 from random import random
 from scipy.stats.distributions import rv_frozen
 
@@ -14,7 +14,9 @@ class UnixTime(float):
             datetime_or_number, (datetime, int, float, long)), "UnixTime() argument must be a datetime or a number, " \
                                                                "not '{0}'".format(datetime_or_number.__class__.__name__)
         if isinstance(datetime_or_number, datetime):
-            value = timegm(datetime_or_number.timetuple())
+            fraction = datetime_or_number.microsecond / float(10 ** 6)
+            value = mktime(datetime_or_number.timetuple())
+            value += fraction
         else:
             value = datetime_or_number
 
@@ -61,4 +63,5 @@ if __name__ == '__main__':
     print a.to_datetime()
     a = UnixTime(1.25)
     print a
-    print a.to_datetime()
+    print a.to_datetime().microsecond / float(10 ** 6)
+    print UnixTime(a.to_datetime()).to_datetime()

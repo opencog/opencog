@@ -1,3 +1,5 @@
+from datetime import datetime
+from spatiotemporal.unix_time import UnixTime
 from utility.geometric import FunctionComposite, FunctionLinear, FunctionHorizontalLinear
 from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
 
@@ -8,24 +10,28 @@ class MembershipFunctionPiecewiseLinear(FunctionComposite):
     _function_undefined = FunctionHorizontalLinear(0)
 
     def __init__(self, input_list, output_list):
-        assert len(input_list) == len(output_list) > 0
         self.input_list = input_list
         self.output_list = output_list
         self.invalidate()
 
-    def __call__(self, time=None):
-        if time is None:
-            time = self.input_list
+    def __call__(self, x=None):
+        if x is None:
+            x = self.input_list
 
         result = []
         try:
-            for point in time:
+            for point in x:
+                if type(point) is datetime:
+                    point = UnixTime(point)
                 result.append(FunctionComposite.__call__(self, point))
         except:
-            return FunctionComposite.__call__(self, time)
+            if type(x) is datetime:
+                x = UnixTime(x)
+            return FunctionComposite.__call__(self, x)
         return result
 
     def invalidate(self):
+        assert len(self.input_list) == len(self.output_list) >= 2
         bounds_function_dictionary = {}
         for i in xrange(1, len(self.input_list)):
             x_0, x_1 = self.input_list[i - 1], self.input_list[i]

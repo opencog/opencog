@@ -1,4 +1,4 @@
-from spatiotemporal.temporal_events import TemporalEventPiecewiseLinear
+from spatiotemporal.temporal_events import TemporalEventTrapezium
 from spatiotemporal.unix_time import UnixTime
 
 __author__ = 'keyvan'
@@ -23,8 +23,8 @@ TEMPORAL_RELATIONS = {
 
 
 def temporal_relation_between(temporal_event_1, temporal_event_2):
-    temporal_event_1 = TemporalEventPiecewiseLinear(1, 10, 3, 8)
-    temporal_event_2 = TemporalEventPiecewiseLinear(9, 16, 10, 14)
+    temporal_event_1 = TemporalEventTrapezium(1, 10, 3, 8)
+    temporal_event_2 = TemporalEventTrapezium(9, 16, 10, 14)
 
     sum_times = sorted(
         [UnixTime(time).to_datetime() for time in set(temporal_event_1.to_list() + temporal_event_2.to_list())]

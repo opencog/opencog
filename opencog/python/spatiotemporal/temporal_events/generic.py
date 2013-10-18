@@ -3,15 +3,16 @@ from scipy import integrate
 from spatiotemporal.time_intervals import TimeIntervalIterBased, assert_is_time_interval, TimeIntervalListBased
 from fuzzy.membership_function import MembershipFunctionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
+from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
 
 
 class BaseTemporalEvent(object):
-    _input_list = None
+    input_list = None
 
     def __init__(self, input_list):
-        self._input_list = input_list
+        self.input_list = input_list
 
     def membership_function(self, time=None):
         if time is None:
@@ -49,9 +50,12 @@ class BaseTemporalEvent(object):
         interval = self._interval_from_self_if_none(a, b, interval)
         return integrate.quad(self.membership_function, interval.a, interval.b) / interval.duration
 
+    def to_list(self):
+        return self.input_list
+
     def to_dict(self):
         result = {}
-        for time_step in self:
+        for time_step in self.to_list():
             result[time_step] = self.membership_function(time_step)
         return result
 
@@ -64,13 +68,13 @@ class BaseTemporalEvent(object):
         return plt
 
     def __getitem__(self, index):
-        return self._input_list.__getitem__(index)
+        return self.input_list.__getitem__(index)
 
     def __len__(self):
-        return len(self._input_list)
+        return len(self.input_list)
 
     def __iter__(self):
-        return iter(self._input_list)
+        return iter(self.input_list)
 
 
 class BaseTemporalEventIterBased(TimeIntervalIterBased, BaseTemporalEvent):
@@ -80,12 +84,24 @@ class BaseTemporalEventIterBased(TimeIntervalIterBased, BaseTemporalEvent):
 class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
     def __init__(self, input_list, output_list):
         TimeIntervalListBased.__init__(self, input_list)
+        BaseTemporalEvent.__init__(self, self)
+        self.output_list = output_list
         self.membership_function = MembershipFunctionPiecewiseLinear(self, output_list)
         self.membership_function_single_point = self.membership_function
 
     def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
         return self.membership_function_single_point.integrate(interval.a, interval.b) / (interval.b - interval.a)
+
+    def to_list(self):
+        result = []
+        for i, time_step in enumerate(self):
+            if i == len(self) - 1 and self.output_list[len(self) - 1] == 0:
+                result.append(UnixTime(time_step - EPSILON))
+            result.append(time_step)
+            if i == 0 and self.output_list[0] == 0:
+                result.append(UnixTime(time_step + EPSILON))
+        return result
 
     @TimeIntervalListBased.a.setter
     def a(self, value):
@@ -99,7 +115,8 @@ class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
         self[-1] = UnixTime(value)
         self.membership_function_single_point.invalidate()
 
-    # Every time that self as list changes, membership_function_single_point should be invalidated
+    # Every time that self as list changes, or output_list
+    # changes, membership_function_single_point should be invalidated
     # Here, only the two main methods that change the list content have been overridden
     # One can add more later if needed...
     def append(self, x):

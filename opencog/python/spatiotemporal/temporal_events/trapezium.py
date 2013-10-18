@@ -5,8 +5,6 @@ from spatiotemporal.unix_time import UnixTime, random_time
 
 __author__ = 'keyvan'
 
-EPSILON = 0.00001
-
 
 class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
     beginning_factor = 5
@@ -58,44 +56,37 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
                     )
                 )
         TemporalEventPiecewiseLinear.__init__(self, [a, beginning, ending, b], [0, 1, 1, 0])
-        self.insert(1, UnixTime(a + EPSILON))
-        self.insert(4, UnixTime(b - EPSILON))
-        self.membership_function_single_point.output_list.insert(1, self.membership_function_single_point(self[1]))
-        self.membership_function_single_point.output_list.insert(4, self.membership_function_single_point(self[4]))
-        self.membership_function_single_point.invalidate()
 
     @TemporalEventPiecewiseLinear.a.setter
     def a(self, value):
         assert value > self[1]
         self[0] = UnixTime(value)
-        self[1] = UnixTime(value + EPSILON)
         self.membership_function_single_point.invalidate()
 
     @TemporalEventPiecewiseLinear.b.setter
     def b(self, value):
         assert value > self[-2]
         self[-1] = UnixTime(value)
-        self[-2] = UnixTime(value - EPSILON)
         self.membership_function_single_point.invalidate()
 
     @property
     def beginning(self):
-        return self[2]
+        return self[1]
 
     @beginning.setter
     def beginning(self, value):
         assert self.a < value < self.ending, "'beginning' should be within ['a' : 'ending'] interval"
-        self[2] = value
+        self[1] = value
         self.membership_function_single_point.invalidate()
 
     @property
     def ending(self):
-        return self[-3]
+        return self[-2]
 
     @ending.setter
     def ending(self, value):
         assert self._beginning < value < self.b, "'ending' should be within ['beginning' : 'b'] interval"
-        self[-3] = value
+        self[-2] = value
         self.membership_function_single_point.invalidate()
 
     def __repr__(self):
