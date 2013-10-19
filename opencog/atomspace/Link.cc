@@ -40,15 +40,29 @@
 
 using namespace opencog;
 
+struct HandleComparison
+{
+    bool operator()(const Handle& h1, const Handle& h2) const {
+        return (Handle::compare(h1, h2) < 0);
+    }
+};
+
 void Link::init(const std::vector<Handle>& outgoingVector)
 	throw (InvalidParamException)
 {
-    if (!classserver().isA(type, LINK)) {
+    if (not classserver().isA(type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
-             "Link -  invalid link type: %d", type);
+            "Link - Invalid node type '%d' %s.",
+            type, classserver().getTypeName(type).c_str());
     }
+
     trail = new Trail();
-    setOutgoingSet(outgoingVector);
+    _outgoing = outgoingVector;
+    // if the link is unordered, it will be normalized by sorting the elements in the outgoing
+    // list.
+    if (classserver().isA(type, UNORDERED_LINK)) {
+        std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+    }
 }
 
 Link::~Link()
@@ -70,107 +84,48 @@ Trail* Link::getTrail(void)
     return trail;
 }
 
-Atom* Link::getOutgoingAtom(int pos) const
-{
-    if (!atomTable) {
-        throw RuntimeException(TRACE_INFO,
-            "Link is not embedded in AtomTable, so can't resolve "
-            "outgoing handles to Atom pointers.");
-    }
-    return atomTable->getAtom(getOutgoingHandle(pos));
-}
-
-std::string Link::toShortString(void) const
+std::string Link::toShortString(std::string indent) const
 {
     std::stringstream answer;
+    std::string more_indent = indent + "  ";
 
-    answer << "[" << classserver().getTypeName(type) << " ";
-    answer << (getFlag(HYPOTETHICAL_FLAG) ? "h " : "");
+    answer << indent << "(" << classserver().getTypeName(type);
+    float mean = this->getTruthValue()->getMean();
+    float confidence = this->getTruthValue()->getConfidence();
+    answer << " (stv " << mean << " " << confidence << ")\n";
 
-    // Here the targets string is made. If a target is a node, its name is
+    // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    answer << "<";
-    for (int i = 0; i < getArity(); i++) {
-        if (i > 0) answer << ",";
-        if (atomTable) {
-            Atom* a = atomTable->getAtom(outgoing[i]);
-            if (classserver().isA(a->getType(), NODE))
-                answer << ((Node*) a)->getName();
-            else 
-                answer << ((Link*) a)->toShortString();
-        } else {
-            // No AtomTable connected so just print handles
-            answer << "#" << outgoing[i];
-        }
+    Arity arity = getArity();
+    for (Arity i = 0; i < arity; i++) {
+        AtomPtr a(_outgoing[i]);
+        answer << a->toShortString(more_indent);
     }
-    answer << ">";
-    float mean = this->getTruthValue().getMean();
-    float confidence = this->getTruthValue().getConfidence();
-    if (mean == 0.0f) {
-        answer << " 0.0";
-    } else {
-        answer << " " << mean;
-    }
-    if (confidence == 0.0f) {
-        answer << " 0.0";
-    } else {
-        answer << " " << confidence;
-    }
-    answer << "]";
+    answer << indent << ")\n";
     return answer.str();
 }
 
-std::string Link::toString(void) const
+std::string Link::toString(std::string indent) const
 {
     std::string answer;
+    std::string more_indent = indent + "  ";
 #define BUFSZ 1024
     static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "link[%s sti:(%d,%d) tv:(%s) ",
+    snprintf(buf, BUFSZ, "(%s (av %d %d) %s\n",
              classserver().getTypeName(type).c_str(),
              (int)getAttentionValue().getSTI(),
              (int)getAttentionValue().getLTI(),
-             getTruthValue().toString().c_str());
-    answer += buf;
+             getTruthValue()->toString().c_str());
+    answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.
-    answer += "<";
     for (int i = 0; i < getArity(); i++) {
-        if (i > 0) answer += ",";
-        Handle h = outgoing[i];
-        if (atomTable) {
-            Atom *a = atomTable->getAtom(h);
-            if (a) {
-                Node *nnn = dynamic_cast<Node *>(a);
-                if (nnn) {
-                    snprintf(buf, BUFSZ, "[%s ", classserver().getTypeName(a->getType()).c_str());
-                    answer += buf;
-                    if (nnn->getName() == "")
-                        answer += "#" + h;
-                    else
-                        answer += nnn->getName();
-                    answer += "]";
-                } else {
-                    Link *lll = dynamic_cast<Link *>(a);
-                    answer += lll->toString();
-                }
-            } else {
-                logger().error("Link::toString() => invalid handle %lu in position %d of ougoing set!",
-                               h.value(), i);
-                answer += "INVALID_HANDLE!";
-            }
-        } else {
-            // No AtomTable connected so just print handles in outgoing set
-            answer += "#" + h;
-        }
+        AtomPtr a(_outgoing[i]);
+        answer += a->toString(more_indent);
     }
-    answer += ">]";
+    answer += indent + ")\n";
     return answer;
-}
-
-float Link::getWeight(void)
-{
-    return getTruthValue().toFloat();
 }
 
 bool Link::isSource(Handle handle) const throw (InvalidParamException)
@@ -178,13 +133,14 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     // On ordered links, only the first position in the outgoing set is a source
     // of this link. So, if the handle given is equal to the first position,
     // true is returned.
+    Arity arity = getArity();
     if (classserver().isA(type, ORDERED_LINK)) {
-        return getArity() > 0 && outgoing[0] == handle;
+        return arity > 0 && _outgoing[0] == handle;
     } else if (classserver().isA(type, UNORDERED_LINK)) {
         // if the links is unordered, the outgoing set is scanned, and the
         // method returns true if any position is equal to the handle given.
-        for (int i = 0; i < getArity(); i++) {
-            if (outgoing[i] == handle) {
+        for (Arity i = 0; i < arity; i++) {
+            if (_outgoing[i] == handle) {
                 return true;
             }
         }
@@ -192,6 +148,7 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     } else {
         throw InvalidParamException(TRACE_INFO, "Link::isSource(Handle) unknown link type %d", type);
     }
+    return false;
 }
 
 bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
@@ -220,17 +177,18 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     // source of the link. The other positions are targets. So, it scans the
     // outgoing set from the second position searching for the given handle. If
     // it is found, true is returned.
+    Arity arity = getArity();
     if (classserver().isA(type, ORDERED_LINK)) {
-        for (int i = 1; i < getArity(); i++) {
-            if (outgoing[i] == handle) {
+        for (Arity i = 1; i < arity; i++) {
+            if (_outgoing[i] == handle) {
                 return true;
             }
         }
         return false;
     } else if (classserver().isA(type, UNORDERED_LINK)) {
         // if the links is unordered, all the outgoing set is scanned.
-        for (int i = 0; i < getArity(); i++) {
-            if (outgoing[i] == handle) {
+        for (Arity i = 0; i < arity; i++) {
+            if (_outgoing[i] == handle) {
                 return true;
             }
         }
@@ -238,6 +196,7 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     } else {
         throw InvalidParamException(TRACE_INFO, "Link::isTarget(Handle) unknown link type %d", type);
     }
+    return false;
 }
 
 bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
@@ -258,15 +217,18 @@ bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
     } else {
         throw InvalidParamException(TRACE_INFO, "Link::isTarget(int) unkown link type");
     }
+    return false;
 }
 
 bool Link::operator==(const Atom& other) const
 {
     if (getType() != other.getType()) return false;
     const Link& olink = dynamic_cast<const Link&>(other);
-    if (getArity() != olink.getArity()) return false;
-    for (unsigned int i = 0; i < getArity(); i++)
-        if (outgoing[i] != olink.outgoing[i]) return false;
+
+    Arity arity = getArity();
+    if (arity != olink.getArity()) return false;
+    for (Arity i = 0; i < arity; i++)
+        if (_outgoing[i] != olink._outgoing[i]) return false;
     return true;
 }
 
@@ -274,41 +236,4 @@ bool Link::operator!=(const Atom& other) const
 {
     return !(*this == other);
 }
-
-class HandleComparison
-{
-    public:
-        bool operator()(const Handle& h1, const Handle& h2) const {
-            return (Handle::compare(h1, h2) < 0);
-        }
-};
-
-void Link::setOutgoingSet(const std::vector<Handle>& outgoingVector)
-   throw (RuntimeException)
-{
-    DPRINTF("Atom::setOutgoingSet\n");
-    if (atomTable != NULL) {
-        throw RuntimeException(TRACE_INFO, 
-           "Cannot change the OutgoingSet of an atom already "
-           "inserted into an AtomTable\n");
-    }
-    outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the elements in the outgoing list.
-    if (classserver().isA(type, UNORDERED_LINK)) {
-        std::sort(outgoing.begin(), outgoing.end(), HandleComparison());
-    }
-}
-
-void Link::addOutgoingAtom(Handle h)
-{
-    outgoing.push_back(h);
-}
-
-// This is Sir Lee Fugnuts cloning an atom makes no sense! XXX FIXME
-Atom* Link::clone() const
-{
-    Atom* a = new Link(*this);
-    return a;
-}
-
 

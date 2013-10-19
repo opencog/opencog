@@ -83,6 +83,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ImprintAgent> ImprintAgentPtr;
+
 } // namespace
 
 #endif // _OPENCOG_IMPRINT_AGENT_H

@@ -2,6 +2,7 @@
  * opencog/atomspace/Handle.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2013 Linas Vepstas <linas@linas.org>
  * All Rights Reserved
  *
  * Written by Thiago Maia <thiago@vettatech.com>
@@ -24,9 +25,33 @@
  */
 
 #include <climits>
-#include "Handle.h"
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomTable.h>
 
 using namespace opencog;
 
 const Handle Handle::UNDEFINED(ULONG_MAX);
 
+Handle::Handle(AtomPtr atom) : _uuid(atom->_uuid), _ptr(atom) {}
+
+const AtomTable* Handle::_resolver = NULL;
+
+Atom* Handle::resolve()
+{
+    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    _ptr.swap(a);
+    return _ptr.get();
+}
+
+Atom* Handle::cresolve() const
+{
+    return _resolver->getHandle(*this)._ptr.get();
+}
+
+AtomPtr Handle::resolve_ptr()
+{
+    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    _ptr.swap(a);
+    return _ptr;
+}

@@ -51,7 +51,6 @@ UpdateAtomRequest::UpdateAtomRequest(CogServer& cs) :
 
 UpdateAtomRequest::~UpdateAtomRequest()
 {
-    if (tv) delete tv;
     logger().debug("[UpdateAtomRequest] destructor");
 }
 
@@ -236,14 +235,13 @@ bool UpdateAtomRequest::doLTIChanges(AtomSpace* as, Handle h, AttentionValue::lt
     return true;
 }
 
-bool UpdateAtomRequest::doTVChanges(AtomSpace* as, Handle h, TruthValue* tv) {
+bool UpdateAtomRequest::doTVChanges(AtomSpace* as, Handle h, TruthValuePtr tv) {
     if (tv_mod == tv_replace) {
-        as->setTV(h,*tv);
+        as->setTV(h, tv);
     } else if (tv_mod == tv_merge) {
         TruthValuePtr oldTV = as->getTV(h);
-        TruthValue *newTV = oldTV->merge(*tv);
-        as->setTV(h,*newTV);
-        delete newTV;
+        TruthValuePtr newTV = oldTV->merge(tv);
+        as->setTV(h, newTV);
     }
     return true;
 

@@ -182,40 +182,40 @@ public:
         AttentionValue::STISort sSort;
         
         // an atom which has higher sti is strictly before one with lower sti
-        TS_ASSERT_EQUALS(sSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[0])), true);
+        TS_ASSERT_EQUALS(sSort(atoms[1], atoms[0]), true);
         // an atom which has lower sti is not strictly before one with higher sti
-        TS_ASSERT_EQUALS(sSort(*atomSpace->cloneAtom(atoms[0]), *atomSpace->cloneAtom(atoms[1])), false);
+        TS_ASSERT_EQUALS(sSort(atoms[0], atoms[1]), false);
         // two atoms with the same sti are not strictly before each other
-        TS_ASSERT_EQUALS(sSort(*atomSpace->cloneAtom(atoms[2]), *atomSpace->cloneAtom(atoms[1])), false);
-        TS_ASSERT_EQUALS(sSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[2])), false);
+        TS_ASSERT_EQUALS(sSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(sSort(atoms[1], atoms[2]), false);
         
         logger().debug("LTIAndTVAscendingSort");
 
         AttentionValue::LTIAndTVAscendingSort latvSort;
         
         // an atom which has higher LTI*TV is not strictly before one with lower LTI*TV
-        TS_ASSERT_EQUALS(latvSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[0])), false);
+        TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[0]), false);
         // an atom which has lower LTI*TV is strictly before one with higher LTI*TV
-        TS_ASSERT_EQUALS(latvSort(*atomSpace->cloneAtom(atoms[0]), *atomSpace->cloneAtom(atoms[1])), true);
+        TS_ASSERT_EQUALS(latvSort(atoms[0], atoms[1]), true);
         // two atoms with the same LTI*TV are not strictly before each other
-        TS_ASSERT_EQUALS(latvSort(*atomSpace->cloneAtom(atoms[2]), *atomSpace->cloneAtom(atoms[1])), false);
-        TS_ASSERT_EQUALS(latvSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[2])), false);
+        TS_ASSERT_EQUALS(latvSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(latvSort(atoms[1], atoms[2]), false);
 
         logger().debug("LTIThenTVAscendingSort");
         
         AttentionValue::LTIThenTVAscendingSort lttvSort;
 
         // an atom which has higher LTI is not strictly before one with lower LTI
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[0])), false);
+        TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[0]), false);
         // an atom which has lower LTI is strictly before one with higher LTI
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[0]), *atomSpace->cloneAtom(atoms[1])), true);
+        TS_ASSERT_EQUALS(lttvSort(atoms[0], atoms[1]), true);
         // two atoms with the same LTI and the same TV are not strictly before each other
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[2]), *atomSpace->cloneAtom(atoms[1])), false);
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[1]), *atomSpace->cloneAtom(atoms[2])), false);
+        TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[1]), false);
+        TS_ASSERT_EQUALS(lttvSort(atoms[1], atoms[2]), false);
         // two atoms with the same LTI: the one with lower TV is strictly before the one with higher TV
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[2]), *atomSpace->cloneAtom(atoms[3])), true);
+        TS_ASSERT_EQUALS(lttvSort(atoms[2], atoms[3]), true);
         // two atoms with the same LTI: the one with higher TV is not strictly before the one with lower TV
-        TS_ASSERT_EQUALS(lttvSort(*atomSpace->cloneAtom(atoms[3]), *atomSpace->cloneAtom(atoms[2])), false);
+        TS_ASSERT_EQUALS(lttvSort(atoms[3], atoms[2]), false);
         
         logger().debug("END TEST:");
     }
@@ -230,10 +230,10 @@ public:
         baseNameLength = strlen(baseName);
         strcpy(buf, baseName);
 
-        SimpleTruthValue tv1(0.001f, 0.00001f);
-        SimpleTruthValue tv2(0.05f, 0.005f);
-        SimpleTruthValue tv3(0.05f, 0.005f);
-        SimpleTruthValue tv4(0.5f, 0.05f);
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.05f, 0.005f);
+        TruthValuePtr tv3 = SimpleTruthValue::createTV(0.05f, 0.005f);
+        TruthValuePtr tv4 = SimpleTruthValue::createTV(0.5f, 0.05f);
         buf[baseNameLength] = '1';
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
         atomSpace->setSTI(h1, 0);

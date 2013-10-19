@@ -22,7 +22,6 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
 //#define DPRINTF printf
@@ -41,26 +40,26 @@ void LinkIndex::resize()
 	idx.resize(classserver().getNumberOfClasses());
 }
 
-void LinkIndex::insertAtom(const Atom* a)
+void LinkIndex::insertAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
 
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
-	hsi.insert(l->getOutgoingSet(),a->getHandle());
+	hsi.insert(l->getOutgoingSet(), a->getHandle());
 }
 
-void LinkIndex::removeAtom(const Atom* a)
+void LinkIndex::removeAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	HandleSeqIndex &hsi = idx[t];
 
-	const Link *l = dynamic_cast<const Link *>(a);
+	LinkPtr l(LinkCast(a));
 	if (NULL == l) return;
 
-	hsi.remove(l->getOutgoingSet(),a->getHandle());
+	hsi.remove(l->getOutgoingSet(), a->getHandle());
 }
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
@@ -94,7 +93,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
                         "Index out of bounds for atom type (s = %lu)", s);
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);
-				if (TLB::isValidHandle(h))
+				if (Handle::UNDEFINED != h)
 					hs.insert(h);
 			}
 		}

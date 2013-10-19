@@ -122,7 +122,7 @@ void EntityExperienceAgent::run()
         logger().debug("EntityExperienceAgent::%s - Entity '%s' now has strength '%f' and count '%f'", 
                        __FUNCTION__, name.c_str( ), mean, count );
 
-        atomSpace.setTV( semeNodes[i], SimpleTruthValue( mean, count ) );
+        atomSpace.setTV( semeNodes[i], SimpleTruthValue::createTV( mean, count ) );
 
 
         unsigned int j;
@@ -153,9 +153,8 @@ void EntityExperienceAgent::run()
         strength_t mean = 1;
         count_t count = 1;
         if ( tv->getType() == SIMPLE_TRUTH_VALUE ) {
-            const SimpleTruthValue& stv = *dynamic_cast<const SimpleTruthValue*>( tv.get() );
-            mean = stv.getMean();
-            count = stv.getCount();
+            mean = tv->getMean();
+            count = tv->getCount();
         } // if
 
         mean = static_cast<strength_t>( count ) / 
@@ -168,7 +167,7 @@ void EntityExperienceAgent::run()
         logger().debug("EntityExperienceAgent::%s - Class '%s' now has strength '%f' and count '%f'", 
                        __FUNCTION__, atomSpace.getName( it->first ).c_str( ), mean, count );
 
-        atomSpace.setTV( it->first, SimpleTruthValue( mean, count ) );
+        atomSpace.setTV( it->first, SimpleTruthValue::createTV( mean, count ) );
     } // for
     
 

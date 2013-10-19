@@ -46,12 +46,12 @@ public:
         Handle addedNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "test1");
         Handle gotNode = atomSpace.getHandle(CONCEPT_NODE, "test1");
         TS_ASSERT(addedNode == gotNode);
-        const TruthValue& tv1 = TLB::getAtom(gotNode)->getTruthValue();
+        const TruthValue& tv1 = gotNode->getTruthValue();
         TS_ASSERT_EQUALS(tv1.getMean(), TruthValue::DEFAULT_TV().getMean());
         TS_ASSERT_EQUALS(tv1.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
         addedNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "test1");
         TS_ASSERT(addedNode == gotNode);
-        const TruthValue& tv2 = TLB::getAtom(addedNode)->getTruthValue();
+        const TruthValue& tv2 = addedNode->getTruthValue();
         TS_ASSERT_EQUALS(tv2.getMean(), TruthValue::DEFAULT_TV().getMean());
         TS_ASSERT_EQUALS(tv2.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
     }
@@ -64,12 +64,12 @@ public:
         Handle addedLink =  AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
         Handle gotLink = atomSpace.getHandle(LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
-        const TruthValue& tv1 = TLB::getAtom(gotLink)->getTruthValue();
+        const TruthValue& tv1 = gotLink->getTruthValue();
         TS_ASSERT_EQUALS(tv1.getMean(), TruthValue::DEFAULT_TV().getMean());
         TS_ASSERT_EQUALS(tv1.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
         addedLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
-        const TruthValue& tv2 = TLB::getAtom(addedLink)->getTruthValue();
+        const TruthValue& tv2 = addedLink->getTruthValue();
         TS_ASSERT_EQUALS(tv2.getMean(), TruthValue::DEFAULT_TV().getMean());
         TS_ASSERT_EQUALS(tv2.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
     }

@@ -47,7 +47,7 @@ private:
     AtomSpace * atomSpace;
     PetMessageSender * lsMessageSender;
 
-    HCTestAgent* _HCTa;
+    HCTestAgentPtr _HCTa;
 
     //Handle to keep in memory for the second BD
     //fill the atomSpace with the initial scene

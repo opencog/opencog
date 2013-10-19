@@ -82,7 +82,7 @@ class AtomSpaceTest(TestCase):
         # test confidence
         self.assertAlmostEqual(tv.confidence,0.1111,places=4)
         # test string representation
-        self.assertEqual(str(tv),"[0.500000,100.000000=0.111111]")
+        self.assertEqual(str(tv),"(stv 0.500000 0.111111)")
 
         # check equality
         tv2 = TruthValue(0.5, 100)
@@ -186,7 +186,7 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(h3 in self.space)
 
         l = self.space.add_link(types.SimilarityLink,[h2,h3])
-        self.space.remove(h2) # won't remove it unless recursive is True
+        self.space.remove(h2, False) # won't remove it unless recursive is True
         self.assertTrue(h2 in self.space)
         self.space.remove(h2,True) # won't remove it unless recursive is True
         self.assertTrue(h2 not in self.space)
@@ -323,12 +323,15 @@ class AtomTest(TestCase):
         l = self.space.add_link(types.Link,[a1,a2])
 
         # test string representation
-        self.assertEqual(str(a2),"node[Node:test2]")
+        self.assertEqual(str(a2),"(Node \"test2\")\n")
         self.assertEqual(a2.long_string(),
-                "node[Node:test2] av:(10,1) tv:([0.100000,10.000000=0.012346])")
-        self.assertEqual(str(l),"[Link <test1,test2> 0.0 0.0]")
+                "(Node \"test2\" (av 10 1) (stv 0.100000 0.012346))\n")
+        self.assertEqual(str(l),
+                "(Link (stv 0 0)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
         self.assertEqual(l.long_string(),
-                "link[Link sti:(0,0) tv:([0.000000,0.000000=0.000000]) <[Node test1],[Node test2]>]")
+                "(Link (av 0 0) (stv 0.000000 0.000000)\n" +
+                "  (Node \"test1\" (av 0 0) (stv 0.500000 0.111111))\n" +
+                "  (Node \"test2\" (av 10 1) (stv 0.100000 0.012346))\n)\n")
 
 class TypeTest(TestCase):
 

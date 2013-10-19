@@ -655,8 +655,8 @@ const Entity3D* Octree3DMapManager::getEntity( std::string entityName) const
     {
         // debug
         Entity3D* e = (Entity3D*)(it->second);
-        if (((Entity3D*)(it->second))->getEntityName() == entityName)
-            return (it->second);
+        if (e->getEntityName() == entityName)
+            return e;
     } // for
 
     map<int,BlockEntity*>::const_iterator it2;

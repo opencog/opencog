@@ -31,7 +31,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
 using namespace std;
@@ -53,9 +52,9 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     baseNameLength = strlen(baseName);
     strcpy(buf, baseName);
 
-    SimpleTruthValue tv1(0.001f, 0.00001f);
-    SimpleTruthValue tv2(0.001f, 0.00001f);
-    SimpleTruthValue tv3(0.5f, 0.99f);
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     atomSpace->setSTI(h1, AV1_STI);
@@ -126,6 +125,8 @@ public:
     }
 };
 
+typedef std::shared_ptr<MyAgentWithDefaults> MyAgentWithDefaultsPtr;
+
 class AgentUTest :  public CxxTest::TestSuite
 {
 
@@ -163,9 +164,8 @@ public:
         CogServer& cogserver = static_cast<CogServer&>(server());
 
         // create a MyAgentWithDefaults instance
-        MyAgentWithDefaults* agent;
-        agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent;
+        agent = cogserver.createAgent<MyAgentWithDefaults>();
         
         logger().debug(config().to_string());
         // the first endl is to put this on a line after "Running 2 tests"
@@ -211,9 +211,8 @@ public:
         TS_ASSERT(config()["MYAGENT_MOOD"] == "sad");
 
         // create a MyAgentWithDefaults instance
-        MyAgentWithDefaults* agent;
-        agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent;
+        agent = cogserver.createAgent<MyAgentWithDefaults>();
 
         logger().debug(config().to_string());
         cout << endl << agent->to_string() << endl;
@@ -247,8 +246,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: stimulateAtom");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent =
+                    cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_atom\0");
 
@@ -277,8 +276,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: stimulateList");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent = 
+                cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_list");
         stimValue = 100;
@@ -306,8 +305,8 @@ public:
         vector<Handle> atoms;
         logger().debug("BEGIN TEST: resetStimulus");
         CogServer& cogserver = static_cast<CogServer&>(server());
-        MyAgentWithDefaults* agent = static_cast<MyAgentWithDefaults*>
-                (cogserver.createAgent(MyAgentWithDefaults::info().id));
+        MyAgentWithDefaultsPtr agent = 
+                cogserver.createAgent<MyAgentWithDefaults>();
         AtomSpace *atomSpace = &cogserver.getAtomSpace();
         atoms = createSimpleGraph(atomSpace, "stim_reset");
 

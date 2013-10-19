@@ -157,7 +157,7 @@ void SavingLoading::saveNodes(FILE *f, AtomTable& atomTable, int &atomCount)
     atomTable.foreachHandleByType(
         [&](Handle atomHandle)->void
         {
-            Node* node = dynamic_cast<Node*>(atomTable.getAtom(atomHandle));
+            NodePtr node(NodeCast(atomHandle));
             if ( node == NULL ) {
                 logger().error( "Trying to save a node which isn't in atomTable "
                         "(%p). Handle %d", &atomTable, atomHandle.value() );
@@ -226,12 +226,12 @@ void SavingLoading::saveLinks(FILE *f, AtomTable& atomTable, int &atomCount)
     std::set<Handle>::iterator itLinks;
     for (itLinks = linkHandles.begin( ); itLinks != linkHandles.end( );
             ++itLinks ) {
-        Link* link = dynamic_cast<Link*>(atomTable.getAtom(*itLinks));
+        LinkPtr link(LinkCast(*itLinks));
         logger().fine( "Saving Link handle %d name %s", itLinks->value(), link->toString().c_str() );
         writeLink(f, link);
         numLinks++;
         printf( "Memory dump: %d%% done.\r", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR))));
-        fflush(stdout);        
+        fflush(stdout);
     } // for
 
     // rewind to position where number of links must be written
@@ -287,7 +287,7 @@ void SavingLoading::load(const char *fileName,
     }
 
     // creates a hash map from old handles to new ones
-    HandleMap<Atom *> *handles = new HandleMap<Atom *>();
+    HandMapPtr handles = std::make_shared<HandleMap<AtomPtr>>();
 
     processed = 0;
     total = atomCount;
@@ -299,9 +299,9 @@ void SavingLoading::load(const char *fileName,
     loadNodes(f, handles, atomTable, dumpToCore);
     loadLinks(f, handles, atomTable, dumpToCore);
 
-    HandleMapIterator<Atom *> *it = handles->keys();
+    HandleMapIterator<AtomPtr> *it = handles->keys();
     while (it->hasNext()) {
-        Atom *element = (Atom *)handles->get(it->next());
+        AtomPtr element(handles->get(it->next()));
         updateHandles(element, handles);
     }
     delete(it);
@@ -318,8 +318,6 @@ void SavingLoading::load(const char *fileName,
 
     loadRepositories(f, handles);
 
-    delete handles;
-
     fclose(f);
 
     // calculates the total time that the process of loading has spent
@@ -335,7 +333,7 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
     char buffer[1 << 16];
     int numTypes = classserver().getNumberOfClasses();
     int numTypesDump;
-	bool b_read = true;
+    bool b_read = true;
     FREAD_CK(&numTypesDump, sizeof(int), 1, f);
 
     dumpToCore.resize(numTypesDump);
@@ -354,23 +352,23 @@ void SavingLoading::loadClassServerInfo(FILE *f, std::vector<Type>& dumpToCore)
             dumpToCore[typeDump] = classserver().getType(buffer);
         }
     }
-	CHECK_FREAD;
+    CHECK_FREAD;
 }
 
-void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore )
+void SavingLoading::loadNodes(FILE *f, HandMapPtr handles, AtomTable& atomTable, const std::vector<Type>& dumpToCore )
 {
     logger().fine("SavingLoading::loadNodes");
 
     int numNodes;
     bool b_read = true;
     // reads the total number of nodes
-    FREAD_CK(&numNodes, sizeof(int), 1, f);    
+    FREAD_CK(&numNodes, sizeof(int), 1, f);
 
     // reads each node from the file
     for (int i = 0; i < numNodes; i++) {
-        
-        Type oldType;     
-        size_t rc = FREAD_CK(&oldType, sizeof(Type), 1, f); 
+
+        Type oldType;
+        size_t rc = FREAD_CK(&oldType, sizeof(Type), 1, f);
         if (rc < 0)
             throw InconsistenceException(TRACE_INFO,
                                          "SavingLoading - Failed read.");
@@ -379,17 +377,16 @@ void SavingLoading::loadNodes(FILE *f, HandleMap<Atom *> *handles, AtomTable& at
                                          "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
         Type newtype = dumpToCore[oldType];
-        Node *node = new Node(newtype, "");
-        readNode(f, node, handles);
+        NodePtr node(readNode(f, newtype, handles));
 
         atomTable.add( node );
         printProgress("load", (int) (100 * ((float) ++processed / (total * INDEX_REPORT_FACTOR * POST_PROCESSING_REPORT_FACTOR))));
         fflush(stdout);
     }
-	CHECK_FREAD;
+    CHECK_FREAD;
 }
 
-void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles,
+void SavingLoading::loadLinks(FILE* f, HandMapPtr handles,
         AtomTable& atomTable, const std::vector<Type>& dumpToCore)
 {
     logger().fine("SavingLoading::loadLinks");
@@ -407,38 +404,37 @@ void SavingLoading::loadLinks(FILE *f, HandleMap<Atom *> *handles,
     // first reads each link from the file
     for (int i = 0; i < numLinks; i++) {
         // a new link is created
-        Link *link = new Link(LINK, std::vector<Handle>());
 
         Type oldType;
-        FREAD_CK(&oldType, sizeof(Type), 1, f);        
+        FREAD_CK(&oldType, sizeof(Type), 1, f);
         if (dumpToCore[oldType] > classserver().getNumberOfClasses()) {
             throw InconsistenceException(TRACE_INFO,
                  "SavingLoading - Type inconsistence clash '%d'.", oldType );
         }
-        link->type = dumpToCore[oldType];
-        readLink( f, link, handles );
+        Type t = dumpToCore[oldType];
+        LinkPtr link(readLink(f, t, handles));
+        readTrail(f, link->getTrail());
 
         atomTable.add(link);
     }
-	CHECK_FREAD;
+    CHECK_FREAD;
 }
 
-void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
+void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles)
 {
-    logger().fine("SavingLoading::updateHandles: atom = %p, type = %d",
-            atom, atom->getType());
+    logger().fine("SavingLoading::updateHandles: type = %d", atom->getType());
 
     // if atom uses a CompositeTruthValue, updates the version handles inside it
-    if (atom->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE) {
+    if (atom->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE) {
         //logger().fine("SavingLoading::updateHandles: CTV");
-        CompositeTruthValue ctv((const CompositeTruthValue&) atom->getTruthValue());
+        CompositeTruthValuePtr ctv(CompositeTVCast(atom->getTruthValue()));
         CompositeRenumber::updateVersionHandles(ctv, handles);
-        atom->setTruthValue(ctv);        
+        atom->setTruthValue(ctv);
     }
-    
+
     // updates handles for trail
     if (classserver().isA(atom->getType(), LINK)) {
-        Trail *t = ((Link *)atom)->getTrail();
+        Trail *t = (LinkPtr(LinkCast(atom)))->getTrail();
         if (t->getSize()) {
             //logger().fine("SavingLoading::updateHandles: trails");
             Trail *newTrail = new Trail();
@@ -447,16 +443,16 @@ void SavingLoading::updateHandles(Atom *atom, HandleMap<Atom *> *handles)
                 CoreUtils::updateHandle(&handle, handles);
                 newTrail->insert(handle);
             }
-            ((Link *)atom)->setTrail(newTrail);
+            (LinkPtr(LinkCast(atom)))->setTrail(newTrail);
             //newTrail->print();
         }
     }
-    
+
 }
 
-void SavingLoading::writeAtom(FILE *f, Atom *atom)
+void SavingLoading::writeAtom(FILE *f, AtomPtr atom)
 {
-    logger().fine("SavingLoading::writeAtom: %p (type = %d) (handle = %d)", atom, atom->getType(), atom->getHandle().value());
+    logger().fine("SavingLoading::writeAtom: (type = %d) (handle = %d)", atom->getType(), atom->getHandle().value());
 
     // writes the atom type
     Type type = atom->getType();
@@ -466,8 +462,8 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     fwrite(&flags, sizeof(char), 1, f);
 
     // writes the atom handle
-    Handle handle = atom->getHandle();
-    fwrite(&handle, sizeof(Handle), 1, f);
+    UUID uuid = atom->getHandle().value();
+    fwrite(&uuid, sizeof(UUID), 1, f);
 
     // incoming references will be re-created during the loading process
 
@@ -478,10 +474,9 @@ void SavingLoading::writeAtom(FILE *f, Atom *atom)
     writeTruthValue(f, atom->getTruthValue());
 }
 
-void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
+Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
 {
     logger().fine("SavingLoading::readAtom()");
-
 
     // reads the atom flags
     char flags;
@@ -490,30 +485,24 @@ void SavingLoading::readAtom(FILE *f, HandleMap<Atom *> *handles, Atom *atom)
     atom->flags = flags;
 
     // reads the atom handle
-    Handle atomHandle;
-    FREAD_CK(&atomHandle, sizeof(Handle), 1, f);
-
-    if (handles != NULL) {
-        handles->add(atomHandle, atom);
-        logger().fine("Added handles in map: %p => %p (type = %d)", atomHandle.value(), atom, atom->getType());
-    } else {
-        logger().warn("No HandleMap while reading atom from file: %p (type = %d)", atom, atom->getType());
-    }
+    UUID uuid;
+    FREAD_CK(&uuid, sizeof(UUID), 1, f);
+    atom->_uuid = uuid;
 
     // reads AttentionValue
     AttentionValue *av = readAttentionValue(f);
     atom->setAttentionValue(*av);
     delete (av);
 
-    TruthValue *tv = readTruthValue(f);
-    atom->setTruthValue(*tv);
-    delete (tv);
-    
-	CHECK_FREAD;
+    TruthValuePtr tv = readTruthValue(f);
+    atom->setTruthValue(tv);
 
+    CHECK_FREAD;
+
+    return Handle(atom);
 }
 
-void SavingLoading::writeNode(FILE *f, Node *node)
+void SavingLoading::writeNode(FILE *f, NodePtr node)
 {
 
     writeAtom(f, node);
@@ -526,14 +515,16 @@ void SavingLoading::writeNode(FILE *f, Node *node)
     }
 }
 
-void SavingLoading::readNode(FILE *f, Node* node, HandleMap<Atom *> *handles) 
+NodePtr SavingLoading::readNode(FILE* f, Type t, HandMapPtr handles)
 {
     logger().fine("SavingLoading::readNode()");
 
     // the atom properties of the node is read from the file
-    readAtom(f, handles, node);
+    AtomPtr junk(createNode(t, ""));
+    Handle h = readAtom(f, junk);
 
     // the node's name is read from the file
+    std::string nam;
     int nameSize;
     bool b_read = true;
     FREAD_CK(&nameSize, sizeof(int), 1, f);
@@ -541,14 +532,22 @@ void SavingLoading::readNode(FILE *f, Node* node, HandleMap<Atom *> *handles)
         char *name = new char[nameSize+1];
         FREAD_CK(name, sizeof(char), nameSize, f);
         name[nameSize] = '\0';
-        node->setName(name);
+        nam = name;
         delete[](name);
     }
 
-	CHECK_FREAD;
+    CHECK_FREAD;
+
+    NodePtr n(createNode(t, nam));
+    n->setAttentionValue(junk->getAttentionValue());
+    n->setTruthValue(junk->getTruthValue());
+    n->_uuid = junk->_uuid;
+
+    handles->add(h, n);
+    return n;
 }
 
-void SavingLoading::writeLink(FILE *f, Link *link)
+void SavingLoading::writeLink(FILE *f, LinkPtr link)
 {
     logger().fine("writeLink(): %s", link->toString().c_str());
 
@@ -561,10 +560,10 @@ void SavingLoading::writeLink(FILE *f, Link *link)
     fwrite(&arity, sizeof(Arity), 1, f);
 
     // the link's outgoing set is written on the file
-    for (int i = 0; i < arity; i++) {
+    for (Arity i = 0; i < arity; i++) {
         //logger().fine("writeLink(): outgoing[%d] => %p: %s", i, link->outgoing[i], link->outgoing[i]->toString().c_str());
-        Handle h = link->getOutgoingHandle(i);
-        fwrite(&h, sizeof(Handle), 1, f);
+        UUID uuid = link->getOutgoingAtom(i).value();
+        fwrite(&uuid, sizeof(UUID), 1, f);
     }
 
     // the trail
@@ -573,8 +572,8 @@ void SavingLoading::writeLink(FILE *f, Link *link)
     int trailSize = trail->getSize();
     fwrite(&trailSize, sizeof(int), 1, f);
     for (int i = 0; i < trailSize; i++) {
-        Handle handle = trail->getElement(i);
-        fwrite(&handle, sizeof(Handle), 1, f);
+        UUID uuid = trail->getElement(i).value();
+        fwrite(&uuid, sizeof(UUID), 1, f);
     }
 
 }
@@ -590,11 +589,11 @@ void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attention
     fwrite(&tempVLTI, sizeof(AttentionValue::vlti_t), 1, f);
 }
 
-void SavingLoading::writeTruthValue(FILE *f, const TruthValue& tv)
+void SavingLoading::writeTruthValue(FILE *f, TruthValuePtr tv)
 {
-    std::string tvStr = tv.toString();
+    std::string tvStr = tv->toString();
     logger().fine( "SavingLoading::writeTruthValue() tvStr = %s\n", tvStr.c_str());
-    TruthValueType type = tv.getType();
+    TruthValueType type = tv->getType();
     int length = tvStr.size();
 
     fwrite(&type, sizeof(TruthValueType), 1, f);
@@ -613,12 +612,12 @@ AttentionValue *SavingLoading::readAttentionValue(FILE *f)
     FREAD_CK(&tempLTI, sizeof(AttentionValue::lti_t), 1, f);
     FREAD_CK(&tempVLTI, sizeof(AttentionValue::vlti_t), 1, f);
 
-	CHECK_FREAD;
+    CHECK_FREAD;
     return(AttentionValue::factory(tempSTI, tempLTI, tempVLTI));
 }
 
 
-TruthValue *SavingLoading::readTruthValue(FILE *f)
+TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 {
     //logger().fine("SavingLoading::readTruthValue()");
     TruthValueType type;
@@ -634,16 +633,18 @@ TruthValue *SavingLoading::readTruthValue(FILE *f)
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     logger().info("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
-    TruthValue* result = TruthValue::factory(type, tvStr);
+    TruthValuePtr result = TruthValue::factory(type, tvStr);
     delete[] tvStr;
-	CHECK_FREAD;
+    CHECK_FREAD;
     return result;
 }
 
-void SavingLoading::readLink(FILE *f, Link *link, HandleMap<Atom *> *handles)
+LinkPtr SavingLoading::readLink(FILE* f, Type t, HandMapPtr handles)
 {
     logger().fine("SavingLoading::readLink()");
-    readAtom(f, handles, link);
+
+    AtomPtr junk(createLink(t, HandleSeq()));
+    Handle h = readAtom(f, junk);
 
     // the link's arity is read from the file
     Arity arity;
@@ -652,23 +653,33 @@ void SavingLoading::readLink(FILE *f, Link *link, HandleMap<Atom *> *handles)
 
     // the link's outgoing set is read from the file
     HandleSeq oset;
-    for (int i = 0; i < arity; i++) {
-        Handle h;
-        FREAD_CK(&h, sizeof(Handle), 1, f);
+    for (Arity i = 0; i < arity; i++) {
+        UUID uuid;
+        FREAD_CK(&uuid, sizeof(UUID), 1, f);
+        Handle h(uuid);
         oset.push_back( handles->get(h)->getHandle() );
     }
-    link->setOutgoingSet(oset);  // XXX FIXME bad design, this is a protected method
+    LinkPtr link(createLink(t, oset));
+    link->setAttentionValue(junk->getAttentionValue());
+    link->setTruthValue(junk->getTruthValue());
+    link->_uuid = junk->_uuid;
+    handles->add(h, link);
+    return link;
+}
 
+void SavingLoading::readTrail(FILE* f, Trail* trail)
+{
     // the trail
-    Trail *trail = link->getTrail();
     int trailSize;
+    bool b_read = true;
     FREAD_CK(&trailSize, sizeof(int), 1, f);
     for (int i = 0; i < trailSize; i++) {
-        Handle handle;
-        FREAD_CK(&handle, sizeof(Handle), 1, f);
+        UUID uuid;
+        FREAD_CK(&uuid, sizeof(UUID), 1, f);
+        Handle handle(uuid);
         trail->insert( handle, false);
     }
-	CHECK_FREAD;
+    CHECK_FREAD;
 }
 
 void SavingLoading::printProgress(const char *s, int n)
@@ -712,7 +723,7 @@ void SavingLoading::saveRepositories(FILE *f)
     }
 }
 
-void SavingLoading::loadRepositories(FILE *f, HandleMap<Atom *> *conv) throw (RuntimeException)
+void SavingLoading::loadRepositories(FILE *f, HandMapPtr conv) throw (RuntimeException)
 {
     logger().fine("SavingLoading::loadRepositories");
     unsigned int size;

@@ -30,13 +30,13 @@
 #include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/mt19937ar.h>
-#include <opencog/util/misc-test.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
+
+#include "misc-test.h"
 
 using namespace opencog;
 using namespace std;
@@ -94,17 +94,17 @@ public:
         __testSignalsCounter += 1000;
     }
 
-    void atomRemoved1(opencog::AtomSpaceImpl* a, Handle h) {
+    void atomRemoved1(opencog::AtomSpaceImpl* a, AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
         TS_ASSERT(a->getSize() == 0);
-        logger().debug("atomRemoved1: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
-    void atomRemoved2(opencog::AtomSpaceImpl* a, Handle h) {
+    void atomRemoved2(opencog::AtomSpaceImpl* a, AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
         TS_ASSERT(a->getSize() == 0);
-        logger().debug("atomRemoved2: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
 

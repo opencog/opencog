@@ -39,17 +39,15 @@ extern "C" const char* opencog_module_id()
 extern "C" Module* opencog_module_load(CogServer& cogserver)
 {
     cogserver.registerAgent(SingleAgentModule::info().id, &(SingleAgentModule::factory()));
-    SingleAgentModule* agent =
-        static_cast<SingleAgentModule*>(cogserver.createAgent(SingleAgentModule::info().id, true));
+    SingleAgentModulePtr agent = cogserver.createAgent<SingleAgentModule>(true);
     agent->name = "OriginalSingleAgentModule";
-    return agent;
+    return agent.get();
 }
 
 extern "C" void opencog_module_unload(Module* m)
 {
     SingleAgentModule* agent = static_cast<SingleAgentModule*>(m);
     agent->stopAgent();
-    delete m;
 }
 
 SingleAgentModule::SingleAgentModule(CogServer& cs) : Agent(cs, 100), Module(cs)
@@ -65,7 +63,8 @@ SingleAgentModule::~SingleAgentModule()
 
 void SingleAgentModule::stopAgent()
 {
-    Module::_cogserver.stopAgent(this);
+    AgentPtr age = std::dynamic_pointer_cast<Agent>(shared_from_this());
+    Module::_cogserver.stopAgent(age);
 }
 
 void SingleAgentModule::run()
@@ -77,13 +76,14 @@ void SingleAgentModule::init()
 {
     logger().info("[TestModule] init (%s)", name.c_str());
 
-    SingleAgentModule* a =
-        static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
+    // Use static global vars -- the egent is destroyed when these go 
+    // out of scope (during the C++ finalizer).
+    static SingleAgentModulePtr a = Module::_cogserver.createAgent<SingleAgentModule>(true);
     a->name = "SingleAgentModule1";
 
-    a = static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
-    a->name = "SingleAgentModule2";
+    static SingleAgentModulePtr b = Module::_cogserver.createAgent<SingleAgentModule>(true);
+    b->name = "SingleAgentModule2";
 
-    a = static_cast<SingleAgentModule*>(Module::_cogserver.createAgent(info().id, true));
-    a->name = "SingleAgentModule3";
+    static SingleAgentModulePtr c = Module::_cogserver.createAgent<SingleAgentModule>(true);
+    c->name = "SingleAgentModule3";
 }

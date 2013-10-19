@@ -37,14 +37,14 @@ try
     {
         while (processingRequests)
         {
-            boost::shared_ptr<ASRequest> req;
+            ASRequestPtr req;
             requestQueue.wait_and_get(req);
             counter++;
             req->run();
             requestQueue.pop();
         }
     }
-    catch (concurrent_queue< boost::shared_ptr<ASRequest> >::Canceled &e)
+    catch (concurrent_queue<ASRequestPtr>::Canceled &e)
     {
         //cout << "End AtomSpace event loop" << endl;
     }

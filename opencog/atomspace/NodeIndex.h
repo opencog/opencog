@@ -47,8 +47,8 @@ class NodeIndex
 	public:
 		NodeIndex();
 
-		void insertAtom(Atom* a);
-		void removeAtom(Atom* a);
+		void insertAtom(AtomPtr a);
+		void removeAtom(AtomPtr a);
 		void remove(bool (*)(Handle));
 		void resize();
 

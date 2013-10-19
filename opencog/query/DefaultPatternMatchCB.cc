@@ -28,6 +28,13 @@
 
 using namespace opencog;
 
+// #define DEBUG 1
+#if DEBUG
+   #define dbgprt(f, varargs...) printf(f, ##varargs)
+#else
+   #define dbgprt(f, varargs...)
+#endif
+
 /* ======================================================== */
 
 Handle DefaultPatternMatchCB::find_starter(Handle h)
@@ -52,8 +59,8 @@ Handle DefaultPatternMatchCB::find_starter(Handle h)
 
 bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
-	// printf("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-	// printf("Loop candidate: %s\n", pme->get_atomspace()->atomAsString(h).c_str());
+	dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
+	dbgprt("Loop candidate: %s\n", pme->get_atomspace()->atomAsString(h).c_str());
 	return pme->do_candidate(root, starter_pred, h);
 }
 
@@ -118,8 +125,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	Handle start = find_starter(h);
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
-		// printf("Search start node: %s\n", as->atomAsString(start).c_str());
-		// printf("Start pred is: %s\n", as->atomAsString(starter_pred).c_str());
+		dbgprt("Search start node: %s\n", pme->get_atomspace()->atomAsString(start).c_str());
+		dbgprt("Start pred is: %s\n", pme->get_atomspace()->atomAsString(starter_pred).c_str());
 		foreach_incoming_handle(start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
@@ -127,6 +134,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	{
 		starter_pred = root;
 
+		dbgprt("Start pred is: %s\n", pme->get_atomspace()->atomAsString(starter_pred).c_str());
 		// Get type of the first item in the predicate list.
 		AtomSpace *as = pme->get_atomspace();
 		Type ptype = as->getType(h);

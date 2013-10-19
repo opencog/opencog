@@ -1,5 +1,5 @@
 /*
- * src/util/misc-test.h
+ * misc-test.h
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * Copyright (C) 2008-2010 OpenCog Foundation
@@ -29,17 +29,51 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/oc_assert.h>
 
+#include "makeVirtualAtom.h"
+
 namespace opencog
 {
-/** \addtogroup grp_cogutil
- *  @{
- */
+
+Handle addRealAtom(AtomSpace& as, AtomPtr atom,
+                   TruthValuePtr tvn = TruthValue::NULL_TV())
+{
+    TruthValuePtr newTV = (tvn->isNullTv()) ? atom->getTruthValue() : tvn;
+    // Check if the given Atom reference is of an atom
+    // that was not inserted yet.  If so, adds the atom. Otherwise, just sets
+    // result to the correct/valid handle.
+   
+    Handle result;
+    NodePtr node(NodeCast(atom));
+    if (node) {
+        result = as.getHandle(node->getType(), node->getName());
+        if (result == Handle::UNDEFINED) {
+            return as.addNode(node->getType(), node->getName(), newTV);
+        }
+    } else {
+        LinkPtr link(LinkCast(atom));
+        result = as.getHandle(link->getType(), link->getOutgoingSet());
+        if (result == Handle::UNDEFINED) {
+            return as.addLink(link->getType(), link->getOutgoingSet(), newTV);
+        }
+    }
+    const TruthValuePtr currentTV = as.getTV(result);
+    if (currentTV->isNullTv()) {
+        as.setTV(result, newTV);
+    } else {
+        TruthValuePtr mergedTV = currentTV->merge(newTV);
+        as.setTV(result, mergedTV);
+    }
+    return result;
+}
+
+
+
 
 /*
  * These functions appear to be used only by four test cases, and 
- * no-where else.  This should probably be moved to some test directory.
+ * no-where else.  
  */
-static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, const TruthValue& tvn)
+static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
 {
     Handle* head_handle_ptr = boost::get<Handle>(&(*it));
     Type* head_type_ptr = boost::get<Type>(&(*it));
@@ -57,7 +91,7 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
         Handle *h_ptr = boost::get<Handle>(&*i);
 
         if (h_ptr) {
-            handles.push_back(as.addRealAtom(*as.cloneAtom(*h_ptr), TruthValue::NULL_TV()));
+            handles.push_back(addRealAtom(as, *h_ptr, TruthValue::NULL_TV()));
         } else {
             handles.push_back(addAtomIter(as, a, i, TruthValue::TRIVIAL_TV()));
         }
@@ -66,13 +100,12 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
     return as.addLink(*head_type_ptr, handles, tvn);
 }
 
-static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, const TruthValue& tvn)
+static inline Handle addAtom(AtomSpace& as, tree<Vertex>& a, TruthValuePtr tvn)
 {
     return addAtomIter(as, a, a.begin(), tvn);
 }
 
 
-/** @}*/
 } // namespace opencog
 
 #endif // _OPENCOG_MISC_TEST_H

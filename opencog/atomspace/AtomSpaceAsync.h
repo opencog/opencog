@@ -2,15 +2,14 @@
 #define _OPENCOG_ATOMSPACE_ASYNC_H
 
 #include <iostream>
-#include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
 
 #include <opencog/util/concurrent_queue.h>
 
-#include "AtomSpaceImpl.h"
-#include "ASRequest.h"
-#include "Handle.h"
-#include "types.h"
+#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/atomspace/ASRequest.h>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/atomspace/types.h>
 
 class AtomSpaceAsyncUTest;
 
@@ -41,11 +40,10 @@ class AtomSpaceAsync {
     void startEventLoop();
     void stopEventLoop();
 
-    concurrent_queue< boost::shared_ptr<ASRequest> > requestQueue;
+    typedef std::shared_ptr<ASRequest> ASRequestPtr;
+    concurrent_queue<ASRequestPtr> requestQueue;
 
     void eventLoop();
-
-    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 
 public: 
 
@@ -69,25 +67,24 @@ public:
     // hypergraph.
 
     HandleRequest addNode(Type t, const std::string& str = "",
-            const TruthValue& tvn = TruthValue::DEFAULT_TV() ) {
-        // We need to clone the TV as the caller's TV may go out of scope
-        // before the request is processed.
-        TruthValue* tv = tvn.clone();
+            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
         HandleRequest hr(new AddNodeASR(&atomspace,t,str,tv));
         requestQueue.push(hr);
         return hr;
     }
 
     HandleRequest addLink(Type t, const HandleSeq& outgoing,
-            const TruthValue& tvn = TruthValue::DEFAULT_TV() ) {
-        // We need to clone the TV as the caller's TV may go out of scope
-        // before the request is processed.
-        const TruthValue* tv;
-        if (!tvn.isNullTv()) tv = tvn.clone();
-        // Unless it is a NULL_TV as this can't be cloned
-        else tv = &TruthValue::NULL_TV();
-
+            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
         HandleRequest hr(new AddLinkASR(&atomspace,t,outgoing,tv));
+        requestQueue.push(hr);
+        return hr;
+    }
+
+    /**
+     * Retrieve from the Atom Table the Atom of the Handle.
+    */
+    HandleRequest getHandle(Handle h) {
+        HandleRequest hr(new GetHandleASR(&atomspace,h));
         requestQueue.push(hr);
         return hr;
     }
@@ -114,18 +111,6 @@ public:
         HandleRequest hr(new GetLinkHandleASR(&atomspace,t,outgoing));
         requestQueue.push(hr);
         return hr;
-    }
-
-    AtomRequest getAtom(const Handle& h) {
-        AtomRequest r(new GetAtomASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
-    BoolRequest commitAtom(const Atom& a) {
-        BoolRequest r(new CommitAtomASR(&atomspace,a));
-        requestQueue.push(r);
-        return r;
     }
 
     /**
@@ -335,7 +320,7 @@ public:
     }
 
     /** Change the TruthValue summary of a given Handle */
-    VoidRequest setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
+    VoidRequest setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
         VoidRequest r(new SetTruthValueASR(&atomspace,h,tv,vh));
         requestQueue.push(r);
         return r;
@@ -708,7 +693,7 @@ public:
     boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.addAtomSignal().connect(function);
     }
-    boost::signals::connection removeAtomSignal(const AtomSignal::slot_type& function) {
+    boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function) {
         return atomspace.removeAtomSignal().connect(function);
     }
     boost::signals::connection mergeAtomSignal(const AtomSignal::slot_type& function) {
@@ -719,6 +704,7 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 
+    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 };
 
 /** @}*/

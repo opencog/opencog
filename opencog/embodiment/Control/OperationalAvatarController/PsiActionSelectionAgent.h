@@ -218,6 +218,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<PsiActionSelectionAgent> PsiActionSelectionAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

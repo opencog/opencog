@@ -137,7 +137,7 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			Atom *atom = store->makeAtom(*this, handle);
+			AtomPtr atom(store->makeAtom(*this, handle));
 			table->add(atom);
 			return false;
 		}
@@ -320,7 +320,7 @@ class AtomStorage::Outgoing
  * Handle h must be the handle for the atom; its passed as an arg to
  * avoid having to look it up.
  */
-void AtomStorage::storeOutgoing(const Atom *atom, Handle h)
+void AtomStorage::storeOutgoing(AtomPtr atom, Handle h)
 {
 	Outgoing out(db_conn, h);
 
@@ -439,7 +439,7 @@ bool AtomStorage::tvExists(int tvid)
  * Handle h must be the handle for the atom; its passed as an arg to
  * avoid having to look it up.
  */
-int AtomStorage::storeTruthValue(Atom *atom, Handle h)
+int AtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 {
 	int notfirst = 0;
 	std::string cols;
@@ -542,20 +542,19 @@ TruthValue* AtomStorage::getTV(int tvid)
  * of the tallest atom in its outgoing set.
  * @note This can conversely be viewed as the depth of a tree.
  */
-int AtomStorage::get_height(const Atom *atom)
+int AtomStorage::get_height(AtomPtr atom)
 {
-	const Link *l = dynamic_cast<const Link *>(atom);
+	LinkPtr l(LinkCast(atom));
 	if (NULL == l) return 0;
 
 	int maxd = 0;
 	int arity = l->getArity();
 
-	std::vector<Handle> out = l->getOutgoingSet();
+	const HandleSeq& out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
 	{
 		Handle h = out[i];
-		Atom *a = TLB::getAtom(h);
-		int d = get_height(a);
+		int d = get_height(h);
 		if (maxd < d) maxd = d;
 	}
 	return maxd +1;
@@ -588,48 +587,44 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
  * its assumed that all sorts of underlying truuth values have changed, 
  * so that the whole thing needs to be stored.
  */
-void AtomStorage::storeAtom(const Atom *atom)
+void AtomStorage::storeAtom(AtomPtr atom)
 {
 	get_ids();
-	do_store_atom(atom, atom->getHandle());
+	do_store_atom(atom);
 }
 
 void AtomStorage::storeAtom(Handle h)
 {
 	get_ids();
-	const Atom *atom = TLB::getAtom(h);
-	do_store_atom(atom, h);
+	do_store_atom(h);
 }
 
 /**
  * Returns the height of the atom.
  */
-int AtomStorage::do_store_atom(const Atom *atom, Handle h)
+int AtomStorage::do_store_atom(AtomPtr atom)
 {
-	const Link *l = dynamic_cast<const Link *>(atom);
+	LinkPtr l(LinkCast(atom));
 	if (NULL == l)
 	{
-		do_store_single_atom(atom, h, 0);
+		do_store_single_atom(atom, 0);
 		return 0;
 	}
 
 	int lheight = 0;
 	int arity = l->getArity();
-	std::vector<Handle> out = l->getOutgoingSet();
+	const HandleSeq& out = l->getOutgoingSet();
 	for (int i=0; i<arity; i++)
 	{
-		Handle ho = out[i];
-		Atom *ao = TLB::getAtom(ho);
-
 		// Recurse.
-		int heig = do_store_atom(ao, ho);
+		int heig = do_store_atom(out[i]);
 		if (lheight < heig) lheight = heig;
 	}
 
 	// Height of this link is, by definition, one more than tallest
 	// atom in outgoing set.
 	lheight ++;
-	do_store_single_atom(atom, h, lheight);
+	do_store_single_atom(atom, lheight);
 	return lheight;
 }
 
@@ -638,15 +633,14 @@ int AtomStorage::do_store_atom(const Atom *atom, Handle h)
  * Store the single, indicated atom.
  * Store its truth values too.
  */
-void AtomStorage::storeSingleAtom(const Atom *atom)
+void AtomStorage::storeSingleAtom(AtomPtr atom)
 {
 	get_ids();
-	Handle h = atom->getHandle();
 	int height = get_height(atom);
-	do_store_single_atom(atom, h, height);
+	do_store_single_atom(atom, height);
 }
 
-void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
+void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 {
 	setup_typemap();
 
@@ -657,10 +651,11 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
-	UUID uuid = h.value();
+	// UUID uuid = atom->_uuid;
+	UUID uuid = atom->getHandle().value();  // XXX cheesy hack, fixme
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = atomExists(h);
+	bool update = atomExists(atom->getHandle());
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -690,7 +685,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 		STMTI("type", dbtype);
 	
 		// Store the node name, if its a node
-		const Node *n = dynamic_cast<const Node *>(atom);
+		NodePtr n(NodeCast(atom));
 		if (n)
 		{
 #if 0
@@ -716,7 +711,7 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 			STMTI("height", aheight);
 
 #ifdef USE_INLINE_EDGES
-			const Link *l = dynamic_cast<const Link *>(atom);
+			LinkPtr l(LinkCast(atom));
 			if (l)
 			{
 				int arity = l->getArity();
@@ -732,21 +727,21 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 	}
 
 	// Store the truth value
-	const TruthValue &tv = atom->getTruthValue();
-	TruthValueType tvt = tv.getType();
+	TruthValuePtr tv = atom->getTruthValue();
+	TruthValueType tvt = tv->getType();
 	STMTI("tv_type", tvt);
 
 	switch (tvt)
 	{
 		case SIMPLE_TRUTH_VALUE:
 		case COUNT_TRUTH_VALUE:
-			STMTF("stv_mean", tv.getMean());
-			STMTF("stv_confidence", tv.getConfidence());
-			STMTF("stv_count", tv.getCount());
+			STMTF("stv_mean", tv->getMean());
+			STMTF("stv_confidence", tv->getConfidence());
+			STMTF("stv_count", tv->getCount());
 			break;
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(&tv);
+			IndefiniteTruthValuePtr itv = static_pointer_cast<IndefiniteTruthValue>(tv);
 			STMTF("stv_mean", itv->getL());
 			STMTF("stv_count", itv->getU());
 			STMTF("stv_confidence", itv->getConfidenceLevel());
@@ -770,12 +765,12 @@ void AtomStorage::do_store_single_atom(const Atom *atom, Handle h, int aheight)
 	// outgoing set has been determined, it cannot be changed.
 	if (false == update)
 	{
-		storeOutgoing(atom, h);
+		storeOutgoing(atom);
 	}
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	local_id_cache.insert(h);
+	local_id_cache.insert(atom->getHandle());
 }
 
 /* ================================================================ */
@@ -956,7 +951,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* ================================================================ */
 
 /* One-size-fits-all atom fetcher */
-Atom * AtomStorage::getAtom(const char * query, int height)
+AtomPtr  AtomStorage::getAtom(const char * query, int height)
 {
 	Response rp;
 	rp.handle = Handle::UNDEFINED;
@@ -972,7 +967,7 @@ Atom * AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	Atom *atom = makeAtom(rp, rp.handle);
+	AtomPtr atom = makeAtom(rp, rp.handle);
 	rp.rs->release();
 	return atom;
 }
@@ -984,7 +979,7 @@ Atom * AtomStorage::getAtom(const char * query, int height)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-Atom * AtomStorage::getAtom(Handle h)
+AtomPtr  AtomStorage::getAtom(Handle h)
 {
 	setup_typemap();
 	char buff[BUFSZ];
@@ -1030,7 +1025,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-Node * AtomStorage::getNode(Type t, const char * str)
+NodePtr AtomStorage::getNode(Type t, const char * str)
 {
 	setup_typemap();
 	char buff[40*BUFSZ];
@@ -1047,8 +1042,7 @@ Node * AtomStorage::getNode(Type t, const char * str)
 		return NULL;
 	}
 
-	Atom *atom = getAtom(buff, 0);
-	return static_cast<Node *>(atom);
+	return NodeCast(getAtom(buff, 0));
 }
 
 /**
@@ -1061,7 +1055,7 @@ Node * AtomStorage::getNode(Type t, const char * str)
  * However, it does register with the TLB, as the SQL uuids and the
  * TLB Handles must be kept in sync, or all hell breaks loose.
  */
-Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
+LinkPtr AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 {
 	setup_typemap();
 
@@ -1074,17 +1068,17 @@ Link * AtomStorage::getLink(Type t, const std::vector<Handle>&oset)
 	ostr += oset_to_string(oset, oset.size());
 	ostr += ";";
 
-	Atom *atom = getAtom(ostr.c_str(), 1);
-	return static_cast<Link *>(atom);
+	AtomPtr atom = getAtom(ostr.c_str(), 1);
+	return LinkCast(atom);
 }
 
 /** 
  * Instantiate a new atom, from the response buffer contents
  */
-Atom * AtomStorage::makeAtom(Response &rp, Handle h)
+AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 {
 	// Now that we know everything about an atom, actually construct one.
-	Atom *atom = TLB::getAtom(h);
+	AtomPtr atom(h);
 	Type realtype = loading_typemap[rp.itype];
 
 	if (NOTYPE == realtype)
@@ -1104,7 +1098,7 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 		    ((-1 == rp.height) &&
 		      classserver().isA(realtype, NODE)))
 		{
-			atom = new Node(realtype, rp.name);
+			atom = createNode(realtype, rp.name);
 		}
 		else
 		{
@@ -1120,12 +1114,13 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 				outvec.push_back(hout);
 			}
 #endif /* USE_INLINE_EDGES */
-			atom = new Link(realtype, outvec);
+			atom = createLink(realtype, outvec);
 		}
 
 		// Make sure that the handle in the TLB is synced with
 		// the handle we use in the database.
-		TLB::addAtom(atom, h);
+		// TLB::addAtom(atom, h);
+// XXX FIXME borken
 	}
 	else
 	{
@@ -1145,19 +1140,19 @@ Atom * AtomStorage::makeAtom(Response &rp, Handle h)
 	{
 		case SIMPLE_TRUTH_VALUE:
 		{
-			SimpleTruthValue stv(rp.mean, rp.count);
+			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
 			atom->setTruthValue(stv);
 			break;
 		}
 		case COUNT_TRUTH_VALUE:
 		{
-			CountTruthValue ctv(rp.mean, rp.confidence, rp.count);
+			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
 			atom->setTruthValue(ctv);
 			break;
 		}
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			IndefiniteTruthValue itv(rp.mean, rp.count, rp.confidence);
+			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
 			atom->setTruthValue(itv);
 			break;
 		}
@@ -1233,7 +1228,7 @@ void AtomStorage::load(AtomTable &table)
 	fprintf(stderr, "Finished loading %lu atoms in total\n", load_count);
 }
 
-bool AtomStorage::store_cb(const Atom *atom)
+bool AtomStorage::store_cb(AtomPtr atom)
 {
 	storeSingleAtom(atom);
 	store_count ++;
@@ -1273,7 +1268,7 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	table.foreachHandleByType(
-       [&](Handle h)->void { store_cb(table.getAtom(h)); }, ATOM, true);
+       [&](Handle h)->void { store_cb(h); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
 	// Create indexes

@@ -40,7 +40,7 @@ SystemActivityTable::SystemActivityTable() : _maxAgentActivityTableSeqSize(100)
 SystemActivityTable::~SystemActivityTable()
 {
     logger().debug("[SystemActivityTable] enter destructor");
-    conn.disconnect();
+    _conn.disconnect();
     clearActivity();
     logger().debug("[SystemActivityTable] exit destructor");
 }
@@ -48,8 +48,8 @@ SystemActivityTable::~SystemActivityTable()
 void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
-    this->cogServer = cogServer;
-    conn = cogServer->getAtomSpace().atomSpaceAsync->removeAtomSignal(
+    _cogServer = cogServer;
+    _conn = cogServer->getAtomSpace().atomSpaceAsync->removeAtomSignal(
             boost::bind(&SystemActivityTable::atomRemoved, this, _1, _2));
 }
 
@@ -73,8 +73,9 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
     seq.resize(max);
 }
 
-void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, Handle h)
+void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); it++) {
         ActivitySeq &seq = it->second;
@@ -87,18 +88,18 @@ void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, Handle h)
     }
 }
 
-void SystemActivityTable::logActivity(Agent *agent, struct timeval &elapsedTime, 
+void SystemActivityTable::logActivity(AgentPtr agent, struct timeval &elapsedTime, 
                                       size_t memUsed, size_t atomsUsed)
 {
-    ActivitySeq &as = _agentActivityTable[agent];
+    ActivitySeq& as = _agentActivityTable[agent];
     as.insert(as.begin(), 
-        new Activity(cogServer->getCycleCount(), elapsedTime, memUsed,
+        new Activity(_cogServer->getCycleCount(), elapsedTime, memUsed,
                  atomsUsed,
                  agent->getUtilizedHandleSets()));
     trimActivitySeq(as, _maxAgentActivityTableSeqSize);
 }
 
-void SystemActivityTable::clearActivity(Agent *agent)
+void SystemActivityTable::clearActivity(AgentPtr agent)
 {
     AgentActivityTable::iterator it = _agentActivityTable.find(agent);
     if (it == _agentActivityTable.end())
@@ -113,7 +114,7 @@ void SystemActivityTable::clearActivity()
 {
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();
                                       it != _agentActivityTable.end(); it++) {
-        ActivitySeq &seq = it->second;
+        ActivitySeq& seq = it->second;
         for (size_t n = 0; n < seq.size(); n++)
             delete seq[n];
     }

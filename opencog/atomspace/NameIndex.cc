@@ -24,16 +24,16 @@
 
 using namespace opencog;
 
-void NameIndex::insertAtom(const Atom *a)
+void NameIndex::insertAtom(AtomPtr a)
 {
-	const Node *n = dynamic_cast<const Node *>(a);
+	NodePtr n(NodeCast(a));
 	if (NULL == n) return;
 	insert(n->getName().c_str(), a->getHandle());
 }
 
-void NameIndex::removeAtom(const Atom* a)
+void NameIndex::removeAtom(AtomPtr a)
 {
-	const Node *n = dynamic_cast<const Node *>(a);
+	NodePtr n(NodeCast(a));
 	if (NULL == n) return;
 	remove(n->getName().c_str(), a->getHandle());
 }

@@ -14,7 +14,8 @@ file       -- file-based storage
 hypertable -- experimental HyperTable support.
 memcache   -- experimental/broken, uses memcached for persistence.
 sql        -- works well for most uses -- with caveats
-xml        -- XML-based file storage
+
+xml        -- Obsolete XML-based file storage; will be removed soon.
 
 
 The hypertable, memcache and sql systems all support networked,

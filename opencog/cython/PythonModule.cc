@@ -121,9 +121,9 @@ void PythonModule::init()
     logger().info("[PythonModule] Initialising Python CogServer module.");
 
     // Start up Python (this init method skips registering signal handlers)
-    if (!Py_IsInitialized())
+    if (not Py_IsInitialized())
         Py_InitializeEx(0);
-    if (!PyEval_ThreadsInitialized()) {
+    if (not PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
         // Without this, pyFinalize() crashes
         _mainstate = PyThreadState_Get();
@@ -140,7 +140,7 @@ void PythonModule::init()
     for (int i = 0; config_paths[i] != NULL; ++i) {
         boost::filesystem::path modulePath(config_paths[i]);
         if (boost::filesystem::exists(modulePath))
-            PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+            PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
     }
 
     // Add custom paths for python modules from the config file if available
@@ -152,7 +152,7 @@ void PythonModule::init()
              it != pythonpaths.end(); ++it) {
             boost::filesystem::path modulePath(*it);
             if (boost::filesystem::exists(modulePath)) {
-                PyList_Append(sysPath, PyString_FromString(modulePath.string().c_str()));
+                PyList_Append(sysPath, PyBytes_FromString(modulePath.string().c_str()));
             } else {
                 logger().warn("PythonEval::%s Could not find custom python extension directory: %s ",
                                __FUNCTION__,
@@ -162,7 +162,8 @@ void PythonModule::init()
         }
     }
 
-    PythonEval::instance();
+    // The eval instance should use the provided cogserver!
+    PythonEval::instance(&_cogserver.getAtomSpace());
 
     if (import_agent_finder() == -1) {
         PyErr_Print();

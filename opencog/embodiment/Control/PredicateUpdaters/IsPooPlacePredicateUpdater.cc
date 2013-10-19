@@ -56,7 +56,7 @@ void IsPooPlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
 
     // truth value - mean equals 0.0 --> not poo place
     //     mean equals 1.0 --> is poo place
-    SimpleTruthValue tv(0.0, 1.0);
+    TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
 
     // only structures are considered poo place
     if (atomSpace.getType(object) == STRUCTURE_NODE) {
@@ -69,7 +69,7 @@ void IsPooPlacePredicateUpdater::update(Handle object, Handle pet, unsigned long
         inheritsFrom.push_back( staticObjectConceptNode );
         Handle link = atomSpace.addLink( INHERITANCE_LINK, inheritsFrom );
         
-        tv.setMean(1.0);
+        tv = SimpleTruthValue::createTV(1.0, 1.0);
         atomSpace.setLTI( link, 1);
         atomSpace.setTV( link, tv );
     }

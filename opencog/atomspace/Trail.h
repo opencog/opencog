@@ -28,7 +28,7 @@
 #include <deque>
 #include <exception>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"

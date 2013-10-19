@@ -34,8 +34,6 @@
 
 #include <pthread.h>
 
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
 #include <opencog/server/Module.h>
@@ -50,8 +48,7 @@ namespace opencog
  *  @{
  */
 
-typedef std::vector<Agent*> AgentSeq;
-class Request;
+typedef std::vector<AgentPtr> AgentSeq;
 
 /**
  * This class implements the official server used by the opencog framework. It
@@ -146,7 +143,7 @@ public:
     virtual ~CogServer(void);
 
     /** Run an Agent and log its activity. */
-    virtual void runAgent(Agent *agent);
+    virtual void runAgent(AgentPtr);
 
     /** Server's main loop. Executed while the 'running' flag is set to true. It
      *  first processes the request queue, then the scheduled agents and finally
@@ -155,12 +152,12 @@ public:
 
     /** Runs a single server loop step.
      *  Made public to be used in unit tests and for debug purposes only*/
-    virtual void runLoopStep(void); 
+    virtual void runLoopStep(void);
 
     /** Customized server loop run. This method is called inside serverLoop
-     *  (between processing request queue and scheduled agents) and can be 
-     *  overwritten by CogServer's subclasses in order to customize the 
-     *  server loop behavior. 
+     *  (between processing request queue and scheduled agents) and can be
+     *  overwritten by CogServer's subclasses in order to customize the
+     *  server loop behavior.
      *
      *  This method controls the execution of server cycles by returning
      *  'true' if the server must run a cycle and 'false' if it must not.
@@ -168,7 +165,7 @@ public:
      *
      *  If EXTERNAL_TICK_MODE config parameter is enabled, serverLoop will not
      *  go sleep at all. So, in this case, this method must be in charge of
-     *  going sleep when the server is idle to prevent excessive cpu 
+     *  going sleep when the server is idle to prevent excessive cpu
      *  consumption. */
     virtual bool customLoopRun(void);
 
@@ -242,17 +239,23 @@ public:
     /** Creates and returns a new instance of an agent of class 'id'. If
      *  'start' is true, then the agent will be automatically added to the list
      *  of scheduled agents. */
-    virtual Agent* createAgent(const std::string& id, const bool start = false);
+    virtual AgentPtr createAgent(const std::string& id, const bool start = false);
+
+    /// Same as above, but returns the correct type.
+    template <typename T>
+    std::shared_ptr<T> createAgent(const bool start = false) {
+        return std::dynamic_pointer_cast<T>(createAgent(T::info().id, start));
+    }
 
     /** Adds agent 'a' to the list of scheduled agents. */
-    virtual void startAgent(Agent* a);
+    virtual void startAgent(AgentPtr a);
 
     /** Removes agent 'a' from the list of scheduled agents. */
-    virtual void stopAgent(Agent* a);
+    virtual void stopAgent(AgentPtr a);
 
     /** Removes agent 'a' from the list of scheduled agents and destroys the
      * instance. This is just a short-cut to 'stopAgent(a); delete a'. */
-    virtual void destroyAgent(Agent*);
+    virtual void destroyAgent(AgentPtr);
 
     /** Destroys all agents from class 'id' */
     virtual void destroyAllAgents(const std::string& id);

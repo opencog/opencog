@@ -31,7 +31,7 @@ class SenseCache
 
 		void set_atom_space(AtomSpace *);
 		TruthValuePtr similarity(Handle, Handle);
-		void set_similarity(Handle, Handle, const TruthValue&);
+		void set_similarity(Handle, Handle, TruthValuePtr);
 };
 
 } // namespace opencog

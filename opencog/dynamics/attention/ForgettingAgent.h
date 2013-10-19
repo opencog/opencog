@@ -109,6 +109,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
+
 /**
  * Comparison operator for using qsort on a list of Handles.
  * Returns them with ascending LTI and if equal in LTI,

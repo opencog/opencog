@@ -44,7 +44,8 @@ public:
      * using the HandleMap passed as argument.
      * @param A HandleMap that maps old Handles to new ones.
      */
-    static void updateVersionHandles(CompositeTruthValue&, HandleMap<Atom *> *handles);
+    typedef std::shared_ptr<HandleMap<AtomPtr>> HandMapPtr;
+    static void updateVersionHandles(CompositeTruthValuePtr, HandMapPtr);
 };
 
 /** @}*/

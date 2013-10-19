@@ -149,7 +149,7 @@ void ComboProcedureRepository::saveRepository(FILE* dump) const
     }
 }
 
-void ComboProcedureRepository::loadRepository(FILE* dump, HandleMap<Atom *>* conv)
+void ComboProcedureRepository::loadRepository(FILE* dump, HandMapPtr)
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(dump));
     char buffer[1<<16];

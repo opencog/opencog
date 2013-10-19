@@ -30,6 +30,7 @@
 #include <limits.h>
 
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 #ifdef ZMQ_EXPERIMENT
 	#include "ProtocolBufferSerializer.h"
@@ -135,19 +136,19 @@ public:
 	//! functor for comparing atom's attention value
     struct STISort : public AtomComparator  {
         STISort() {};
-        virtual bool test(const Atom& h1, const Atom& h2);
+        virtual bool test(AtomPtr h1, AtomPtr h2);
     };
 
 	//! functor for comparing atom's attention value
     struct LTIAndTVAscendingSort : public AtomComparator  {
         LTIAndTVAscendingSort() {};
-        virtual bool test(const Atom& h1, const Atom& h2);
+        virtual bool test(AtomPtr h1, AtomPtr h2);
     };
 
 	//! functor for comparing atom's attention value
     struct LTIThenTVAscendingSort : public AtomComparator {
         LTIThenTVAscendingSort() {};
-        virtual bool test(const Atom& h1, const Atom& h2);
+        virtual bool test(AtomPtr h1, AtomPtr h2);
     };
 
 
@@ -168,7 +169,8 @@ public:
 };
 
 //! envelope for an AttentionValue
-class AttentionValueHolder
+class AttentionValueHolder 
+    : public std::enable_shared_from_this<AttentionValueHolder> 
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;
@@ -192,6 +194,8 @@ public:
         return attentionValue;
     }
 };
+
+typedef std::shared_ptr<AttentionValueHolder> AttentionValueHolderPtr;
 
 /** @}*/
 } // namespace opencog 

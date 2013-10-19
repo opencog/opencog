@@ -151,32 +151,32 @@ private:
     PredicatesUpdater * predicatesUpdater;
 
     /** opencog Agents */
-    ProcedureInterpreterAgent* procedureInterpreterAgent;
-//    ImportanceDecayAgent* importanceDecayAgent;
-//    EntityExperienceAgent* entityExperienceAgent;
+    ProcedureInterpreterAgentPtr procedureInterpreterAgent;
+//    ImportanceDecayAgentPtr importanceDecayAgent;
+//    EntityExperienceAgentPtr entityExperienceAgent;
 
-    PsiModulatorUpdaterAgent * psiModulatorUpdaterAgent;
-    PsiDemandUpdaterAgent * psiDemandUpdaterAgent;
-    PsiActionSelectionAgent * psiActionSelectionAgent;
-    PsiRelationUpdaterAgent * psiRelationUpdaterAgent; 
-    PsiFeelingUpdaterAgent * psiFeelingUpdaterAgent; 
+    PsiModulatorUpdaterAgentPtr psiModulatorUpdaterAgent;
+    PsiDemandUpdaterAgentPtr psiDemandUpdaterAgent;
+    PsiActionSelectionAgentPtr psiActionSelectionAgent;
+    PsiRelationUpdaterAgentPtr psiRelationUpdaterAgent; 
+    PsiFeelingUpdaterAgentPtr psiFeelingUpdaterAgent; 
 
-    OCPlanningAgent* ocPlanningAgent;
+    OCPlanningAgentPtr ocPlanningAgent;
 
 
 
-    StimulusUpdaterAgent * stimulusUpdaterAgent;
+    StimulusUpdaterAgentPtr stimulusUpdaterAgent;
 
-    ForgettingAgent * forgettingAgent; 
-    HebbianUpdatingAgent * hebbianUpdatingAgent; 
-//    ImportanceDiffusionAgent * importanceDiffusionAgent; 
-    ImportanceSpreadingAgent * importanceSpreadingAgent; 
-    ImportanceUpdatingAgent * importanceUpdatingAgent; 
-    STIDecayingAgent * stiDecayingAgent; 
+    ForgettingAgentPtr forgettingAgent; 
+    HebbianUpdatingAgentPtr hebbianUpdatingAgent; 
+//    ImportanceDiffusionAgentPtr importanceDiffusionAgent; 
+    ImportanceSpreadingAgentPtr importanceSpreadingAgent; 
+    ImportanceUpdatingAgentPtr importanceUpdatingAgent; 
+    STIDecayingAgentPtr stiDecayingAgent; 
 
 #ifdef HAVE_CYTHON
-    PyMindAgent * fishgramAgent; 
-    PyMindAgent * monitorChangesAgent; 
+    PyMindAgentPtr fishgramAgent; 
+    PyMindAgentPtr monitorChangesAgent; 
 #endif    
 
     /**
@@ -277,11 +277,11 @@ public:
 #endif // HAVE_ZMQ
 
 
-    const PsiModulatorUpdaterAgent * getPsiModulatorUpdaterAgent() {return psiModulatorUpdaterAgent; }
-    const PsiDemandUpdaterAgent * getPsiDemandUpdaterAgent() {return psiDemandUpdaterAgent; }
-    const PsiActionSelectionAgent * getPsiActionSelectionAgent() {return psiActionSelectionAgent ; }
-    const PsiRelationUpdaterAgent * getPsiRelationUpdaterAgent() {return psiRelationUpdaterAgent; }
-    const PsiFeelingUpdaterAgent * getPsiFeelingUpdaterAgent() {return psiFeelingUpdaterAgent; }
+    const PsiModulatorUpdaterAgentPtr getPsiModulatorUpdaterAgent() {return psiModulatorUpdaterAgent; }
+    const PsiDemandUpdaterAgentPtr getPsiDemandUpdaterAgent() {return psiDemandUpdaterAgent; }
+    const PsiActionSelectionAgentPtr getPsiActionSelectionAgent() {return psiActionSelectionAgent ; }
+    const PsiRelationUpdaterAgentPtr getPsiRelationUpdaterAgent() {return psiRelationUpdaterAgent; }
+    const PsiFeelingUpdaterAgentPtr getPsiFeelingUpdaterAgent() {return psiFeelingUpdaterAgent; }
 
     /* Get the Procedure Interpreter associated with the OAC.
      *

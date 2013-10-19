@@ -25,7 +25,6 @@
 
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/atom_types.h>
 
 using namespace opencog;
@@ -43,22 +42,20 @@ public:
     void tearDown() {}
 
     void testEquals() {
-        Node* n1 = new Node(CONCEPT_NODE, "TEST");
-        Node* n2 = new Node(CONCEPT_NODE, "TEST");
-        TLB::addAtom(n1);
-        TLB::addAtom(n2);
+        NodePtr n1(createNode(CONCEPT_NODE, "TEST"));
+        NodePtr n2(createNode(CONCEPT_NODE, "TEST"));
         std::vector<Handle> out1;
-        Link* l1 = new Link(LIST_LINK, out1);
-        Link* l2 = new Link(LIST_LINK, out1);
+        LinkPtr l1(createLink(LIST_LINK, out1));
+        LinkPtr l2(createLink(LIST_LINK, out1));
         TS_ASSERT(l1->getArity() == 0);
         TS_ASSERT(l2->getArity() == 0);
 
-        std::vector<Handle> out2;
+        HandleSeq out2;
         out2.push_back(n1->getHandle());
-        Link* l3 = new Link(LIST_LINK, out2);
-        Link* l4 = new Link(LIST_LINK, out2);
-        Link* l5 = new Link(INHERITANCE_LINK, out2);
-        Link* l6 = new Link(INHERITANCE_LINK, out2);
+        LinkPtr l3(createLink(LIST_LINK, out2));
+        LinkPtr l4(createLink(LIST_LINK, out2));
+        LinkPtr l5(createLink(INHERITANCE_LINK, out2));
+        LinkPtr l6(createLink(INHERITANCE_LINK, out2));
         TS_ASSERT(l3->getArity() == 1);
         TS_ASSERT(l4->getArity() == 1);
         TS_ASSERT(l5->getArity() == 1);
@@ -67,8 +64,8 @@ public:
         std::vector<Handle> out3;
         out3.push_back(n1->getHandle());
         out3.push_back(n2->getHandle());
-        Link* l7 = new Link(INHERITANCE_LINK, out3);
-        Link* l8 = new Link(INHERITANCE_LINK, out3);
+        LinkPtr l7(createLink(INHERITANCE_LINK, out3));
+        LinkPtr l8(createLink(INHERITANCE_LINK, out3));
         TS_ASSERT(l7->getArity() == 2);
         TS_ASSERT(l8->getArity() == 2);
 

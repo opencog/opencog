@@ -28,17 +28,19 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Trail.h>
-#include <opencog/atomspace/types.h>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
 
-class HandleEntry;
 namespace opencog
 {
+class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+//! arity of Links, represented as short integer (16 bits)
+typedef unsigned short Arity;
 
 /**
  * Nodes in OpenCog are connected to each other by links. Each link embodies
@@ -50,9 +52,7 @@ namespace opencog
  */
 class Link : public Atom
 {
-    friend class NMXmlParser;  // needs access to addOutgoingAtom()
-    friend class SavingLoading;  // needs access to setOutgoingSet()
-    friend class AtomSpaceImpl;  // needs acces to clone()
+    friend class AtomTable;
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -62,49 +62,15 @@ private:
 #ifdef ZMQ_EXPERIMENT
     Link() {};
 #endif
-    void init(const std::vector<Handle>&) throw (InvalidParamException);
-
-    /**
-     * Adds a new handle to the outgoing set. Note that this is
-     * used only in the NMXmlParser friend class. The parser should
-     * be fixed not to need this, and this should be removed.
-     * Actually, the NMXml parser is obsolete, and should be retired.
-     */
-    void addOutgoingAtom(Handle h);
-
-    /**
-      * Sets the outgoing set of the atom. This method can be
-      * called only if the atom is not inserted in an AtomTable yet.
-      * Otherwise, it throws a RuntimeException.  This is used only
-      * by the SavingLoading file reader. That reader should be fixed.
-      * Actually, that reader is obsolete and should be retired.
-      */
-    void setOutgoingSet(const std::vector<Handle>& o)
-    throw (RuntimeException);
-
-    /**
-     * @todo cloning atoms is a fundamental violation of the architecture.
-     * this method should be removed.
-     */
-    virtual Atom* clone() const;
+    void init(const HandleSeq&) throw (InvalidParamException);
 
 protected:
 
-    //! Array that does not change during atom lifespan.
-    std::vector<Handle> outgoing;
+    //! Array holding actual outgoing set of the link.
+    //! Should not change during atom lifespan.
+    HandleSeq _outgoing;
 
 public:
-    /**
-     * Returns a specific atom in the outgoing set (using the connected
-     * AtomTable).
-     *
-     * @param The position of the atom in the array.
-     * @return A specific atom in the outgoing set. NULL if no AtomTable is
-     * connected.
-     */
-    Atom * getOutgoingAtom(int pos) const;
-
-
     /**
      * Constructor for this class.
      *
@@ -114,47 +80,47 @@ public:
      * @param Link truthvalue, which will be cloned before being
      *        stored in this Link.
      */
-    Link(Type t, const std::vector<Handle>& oset,
-         const TruthValue& tv = TruthValue::NULL_TV())
+    Link(Type t, const HandleSeq& oset,
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         init(oset);
     }
 
     Link(Type t, Handle& h,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(h);
         init(oset);
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         init(oset);
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         const TruthValue& tv = TruthValue::NULL_TV()) 
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
-        std::vector<Handle> oset;
+        HandleSeq oset;
         oset.push_back(ha);
         oset.push_back(hb);
         oset.push_back(hc);
@@ -175,7 +141,7 @@ public:
     ~Link();
 
     inline Arity getArity() const {
-        return outgoing.size();
+        return _outgoing.size();
     }
 
     /**
@@ -184,8 +150,9 @@ public:
      *
      * @return A const reference to this atom's outgoing set.
      */
-    inline const std::vector<Handle>& getOutgoingSet() const {
-        return outgoing;
+    inline const HandleSeq& getOutgoingSet() const
+	 {
+        return _outgoing;
     }
     /**
      * Returns a specific Handle in the outgoing set.
@@ -193,11 +160,11 @@ public:
      * @param The position of the handle in the array.
      * @return A specific handle in the outgoing set.
      */
-    inline Handle getOutgoingHandle(int pos) const throw (RuntimeException)
+    inline Handle getOutgoingAtom(Arity pos) const throw (RuntimeException)
     {
         // Checks for a valid position
-        if ((0 <= pos) && (pos < getArity())) {
-            return outgoing[pos];
+        if (pos < getArity()) {
+            return _outgoing[pos];
         } else {
             throw RuntimeException(TRACE_INFO, "invalid outgoing set index %d", pos);
         }
@@ -245,18 +212,11 @@ public:
     void setTrail(Trail *);
 
     /**
-     * Returns the weight value of the link.
-     *
-     * @return Weight value of the link.
-     */
-    float getWeight();
-
-    /**
      * Returns a string representation of the link.
      *
      * @return A string representation of the link.
      */
-    std::string toString() const;
+    std::string toString(std::string indent = "") const;
 
     /**
      * Returns a short string representation of the link.
@@ -266,7 +226,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString() const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given handle is a source of this link.
@@ -318,6 +278,13 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+static inline LinkPtr LinkCast(const Handle& h)
+    { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
+static inline LinkPtr LinkCast(AtomPtr a) { return std::dynamic_pointer_cast<Link>(a); }
+
+// XXX temporary hack ...
+#define createLink std::make_shared<Link>
 
 /** @}*/
 } // namespace opencog

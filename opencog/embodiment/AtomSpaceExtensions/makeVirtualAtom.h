@@ -24,12 +24,19 @@
 #ifndef _OPENCOG_MAKEVIRTUALATOM_H
 #define _OPENCOG_MAKEVIRTUALATOM_H
 
+#include <boost/variant.hpp>
+
 #include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/util/tree.h>
 
 namespace opencog
 {
 
+typedef boost::variant<Handle, Type, int, unsigned int, float, bool,
+                       unsigned char, char, short int> Vertex;
+
+typedef std::vector<Vertex> VertexSeq;
 typedef tree<Vertex> atom_tree;
 typedef atom_tree::iterator atom_tree_it;
 

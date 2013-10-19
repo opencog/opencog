@@ -98,6 +98,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<HCTestAgent> HCTestAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif

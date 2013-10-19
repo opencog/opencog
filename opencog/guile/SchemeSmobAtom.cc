@@ -82,7 +82,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
 	TruthValuePtr tv = atomspace->getTV(h);
-	TruthValue *stv = tv->clone();
+	TruthValue *stv = tv->rawclone();
 	return take_tv(stv);
 }
 
@@ -91,7 +91,7 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	atomspace->setTV(h, *tv);
+	atomspace->setTV(h, tv->clone());
 	return satom;
 }
 

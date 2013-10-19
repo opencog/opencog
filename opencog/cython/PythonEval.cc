@@ -107,7 +107,7 @@ void PythonEval::init(void)
     }
 
     // Add ATOMSPACE to __main__ module
-    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
 
     // These are needed for calling Python/C API functions, definnes them once and for all
     pyGlobal = PyDict_New();
@@ -122,13 +122,14 @@ void PythonEval::init(void)
     logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
 }
 
-PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
+PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
+{
     PyObject * pAtomSpace;
 
     if (atomspace)
         pAtomSpace = py_atomspace(atomspace);
     else
-        pAtomSpace = py_atomspace(this->atomspace);
+        pAtomSpace = py_atomspace(this->_atomspace);
 
     if (pAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
@@ -146,7 +147,8 @@ PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
     return pAtomSpace;
 }
 
-void PythonEval::printDict(PyObject* obj) {
+void PythonEval::printDict(PyObject* obj)
+{
     if (!PyDict_Check(obj))
         return;
 
@@ -154,7 +156,7 @@ void PythonEval::printDict(PyObject* obj) {
     keys = PyDict_Keys(obj);
     for (int i = 0; i < PyList_GET_SIZE(keys); i++) {
         k = PyList_GET_ITEM(keys, i);
-        char* c_name = PyString_AsString(k);
+        char* c_name = PyBytes_AsString(k);
         printf("%s\n", c_name);
     }
 }
@@ -177,11 +179,11 @@ PythonEval::~PythonEval()
 */
 PythonEval& PythonEval::instance(AtomSpace * atomspace)
 {
-    if(!Py_IsInitialized()){
+    if (not Py_IsInitialized()){
         logger().error() << "Python Interpreter isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
     }
-    if(!PyEval_ThreadsInitialized()){
+    if (not PyEval_ThreadsInitialized()){
         logger().error() << "Python Threads isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
     }
@@ -196,7 +198,7 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         }
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (atomspace and singletonInstance->atomspace->atomSpaceAsync !=
+    else if (atomspace and singletonInstance->_atomspace->atomSpaceAsync !=
              atomspace->atomSpaceAsync)
     {
         // Someone is trying to initialize the Python
@@ -232,7 +234,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
-    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyString_FromString(funcName.c_str()));
+    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyBytes_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
     if(!PyCallable_Check(pFunc))
@@ -242,7 +244,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
 
     // Get a refrence to our executer function
-    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyString_FromString("execute_user_defined_function"));
+    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("execute_user_defined_function"));
     OC_ASSERT(pExecFunc != NULL);
 
     // Create the argument list
@@ -259,7 +261,7 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     if(pError){
         PyErr_Print();
-        logger().error() << PyString_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
         return Handle::UNDEFINED;
     }
 
@@ -300,7 +302,7 @@ std::string PythonEval::apply_script(const std::string& script)
 //    }
 //    else
 //    {
-        result = PyString_AsString(output);
+        result = PyBytes_AsString(output);
 //    }
 
     PyRun_SimpleString("sys.stdout = _python_output_stream\n"
@@ -308,12 +310,16 @@ std::string PythonEval::apply_script(const std::string& script)
                        "_opencog_output_stream.close()\n");
     //    PyGILState_Release(_state);
 
+    // XXX TODO FIXME: we should check for error, and throw.  Without
+    // this, python scripts can silently fail, and you'd never now it.
+
+    // printf("Python says that: %s\n", result.c_str());
     return result;
 }
 
 void PythonEval::addSysPath(std::string path)
 {
-    PyList_Append(this->sys_path, PyString_FromString(path.c_str()));
+    PyList_Append(this->sys_path, PyBytes_FromString(path.c_str()));
     //    PyRun_SimpleString(("sys.path += ['" + path + "']").c_str());
 }
 
@@ -344,7 +350,7 @@ void PythonEval::add_module_directory(const boost::filesystem::path &p)
         mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
 
         if(mod){
-            PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+            PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
             PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
             this->modules[name] = mod;
         }
@@ -373,9 +379,9 @@ void PythonEval::add_module_file(const boost::filesystem::path &p)
     name = name.substr(0, name.length()-3);
     mod = PyImport_ImportModuleLevel((char *)name.c_str(), pyGlobal, pyLocal, pyList, 0);
 
-    PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
     if(mod){
-        PyDict_SetItem(PyModule_GetDict(mod), PyString_FromString("ATOMSPACE"), this->getPyAtomspace());
+        PyDict_SetItem(PyModule_GetDict(mod), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
         PyModule_AddObject(this->pyRootModule, name.c_str(), mod);
         this->modules[name] = mod;
     }
@@ -409,7 +415,7 @@ void PythonEval::addModuleFromPath(std::string path)
 std::string PythonEval::eval(std::string expr)
 {
     std::string result = "";
-    if(expr == "\n")
+    if (expr == "\n")
     {
         this->pending = false;
         result = this->apply_script(this->expr);
@@ -419,17 +425,16 @@ std::string PythonEval::eval(std::string expr)
     {
         size_t size = expr.size();
         size_t colun = expr.find_last_of(':');
-        if(size-2 == colun)
+        if (size-2 == colun)
             pending = true;
 
         this->expr += expr;
 
-        if(!pending)
+        if (not pending)
         {
             result = this->apply_script(this->expr);
             this->expr = "";
         }
     }
     return result;
-
 }

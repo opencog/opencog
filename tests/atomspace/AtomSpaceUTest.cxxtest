@@ -32,14 +32,13 @@
 #include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/misc-test.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
 
 #include "HandleEntry.h"
 #include "makeVirtualAtom.h"
+#include "misc-test.h"
 
 using namespace opencog;
 using namespace std;
@@ -75,9 +74,9 @@ HandleSeq createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     baseNameLength = strlen(baseName);
     strcpy(buf, baseName);
 
-    SimpleTruthValue tv1(0.001f, 0.00001f);
-    SimpleTruthValue tv2(0.001f, 0.00001f);
-    SimpleTruthValue tv3(0.5f, 0.99f);
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+    TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     atomSpace->setSTI(h1, AV1_STI);
@@ -138,13 +137,13 @@ public:
     }
 
     struct mean : public AtomPredicate {
-        virtual bool test(const Atom& h) {
-            return h.getTruthValue().getMean() > 0.8;
+        virtual bool test(AtomPtr h) {
+            return h->getTruthValue()->getMean() > 0.8;
         }
     };
 
     struct everything : public AtomPredicate {
-        virtual bool test(const Atom& h) {
+        virtual bool test(AtomPtr h) {
             return true;
         }
     };
@@ -162,7 +161,7 @@ public:
         };
         Handle h[NUM_NODES];
         for (int i = 0; i < NUM_NODES; i++) {
-            h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
+            h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("Nodes created\n");
 
@@ -172,7 +171,7 @@ public:
             HandleSeq temp(2);
             temp[0] = h[i];
             temp[1] = h[4];
-            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("ForceUser links created\n");
 
@@ -182,7 +181,7 @@ public:
         for (int i = 0; i < 4; i++) {
             out[i].push_back(h[i]);
             out[i].push_back(h[5]);
-            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
+            H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
         //logger().debug("Human links created\n");
 
@@ -229,7 +228,7 @@ public:
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (vhIdx) {
-                const TruthValue* expectedTv = &(TruthValue::DEFAULT_TV());
+                TruthValuePtr expectedTv = TruthValue::DEFAULT_TV();
                 VersionHandle vh = VHs[vhIdx];
                 TruthValuePtr tv = atomSpace->getTV(h[i], vh);
                 TS_ASSERT(!tv->isNullTv());
@@ -371,7 +370,7 @@ public:
             atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, "", true, vh);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
-            //    logger().info("allInhLinks[x]: %s\n", TLB::getAtom(allInhLinks[x])->toString().c_str());
+            //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
@@ -397,15 +396,14 @@ public:
      * @param the tree of Vertex representation of the atom to be added
      * @param the TruthValue object to be associated to the added atom
      * @param a flag to indicate if it does not need to check for already existing atoms in AtomTable.
-     * @param managed ???
      *
-     * virtual Handle addAtom(tree<Vertex>& a, const TruthValue& tvn, bool fresh=false, bool managed=true);
+     * virtual Handle addAtom(tree<Vertex>& a, TruthValuePtr tvn, bool fresh=false);
      */
 #define mva makeVirtualAtom
     void testAddAtomVtreeTruthValueBool() {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue::createTV(0.5f, 0.99f));
 
 
         tree<Vertex>* tr = mva(EVALUATION_LINK,
@@ -423,7 +421,7 @@ public:
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
-        TS_ASSERT(Handle::compare(evalLink, Handle::UNDEFINED));
+        TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
         atomSpace->getHandleSet(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
@@ -432,23 +430,21 @@ public:
 
         Handle hn = atomSpace->addNode(PREDICATE_NODE, "barkingAt");
         tr = mva(hn, NULL);
-        Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue(0.5f, 0.5f));
-        TS_ASSERT(Handle::compare(h1_, Handle::UNDEFINED));
+        Handle h1_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
+        TS_ASSERT(h1_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
-        TS_ASSERT(!Handle::compare(h1_, h1));
-        Atom* atom = TLB::getAtom(h1_);
-        TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1_ == h1);
+        TS_ASSERT(h1_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
 
         tr = mva(evalLink, NULL);
-        Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue(0.5f, 0.5f));
-        TS_ASSERT(Handle::compare(evalLink_, Handle::UNDEFINED));
+        Handle evalLink_ = addAtom(*atomSpace, *tr, SimpleTruthValue::createTV(0.5f, 0.5f));
+        TS_ASSERT(evalLink_ != Handle::UNDEFINED);
         // In this case, the expected behavior is to perform a merge and return the
         // handle was inserted previously.
-        TS_ASSERT(!Handle::compare(evalLink_, evalLink));
-        atom = TLB::getAtom(evalLink_);
-        TS_ASSERT(atom->getTruthValue().getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(evalLink_ == evalLink);
+        TS_ASSERT(evalLink_->getTruthValue()->getMean() - 0.5f < FLOAT_ACCEPTABLE_ERROR);
         delete tr;
     }
 
@@ -460,47 +456,54 @@ public:
      * @param name  Name of the node
      * @param tvn   TruthValue of the node
      *
-     * virtual Handle addNode(Type t,const string& name,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     * virtual Handle addNode(Type t,const string& name,TruthValuePtr tvn,bool fresh=false)=0;
      *
      */
     void testAddNode() {
-        SimpleTruthValue tv1(0.001f, 0.00001f);
-        SimpleTruthValue tv2(0.001f, 0.00001f);
-        SimpleTruthValue tv3(0.5f, 0.99f);
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1);
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2);
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", tv3);
 
-        SimpleTruthValue tv1_(0.002f, 0.00002f);
-        SimpleTruthValue tv2_(0.1f, 0.0f);
-        SimpleTruthValue tv3_(0.6f, 0.90f);
+        TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
+        TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
+        TruthValuePtr tv3_ = SimpleTruthValue::createTV(0.6f, 0.90f);
         Handle h1_ = atomSpace->addNode(PREDICATE_NODE, "barkingAt", tv1_);
         Handle h2_ = atomSpace->addNode(CONCEPT_NODE, "dog1", tv2_);
         Handle h3_ = atomSpace->addNode(CONCEPT_NODE, "tree", tv3_);
 
-        TS_ASSERT(!Handle::compare(h1, h1_));
-        const TruthValue& h1tv = TLB::getAtom(h1)->getTruthValue();
-        TS_ASSERT(h1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(h2, h2_));
-        const TruthValue& h2tv = TLB::getAtom(h2)->getTruthValue();
-        TS_ASSERT(h2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(h3, h3_));
-        const TruthValue& h3tv = TLB::getAtom(h3)->getTruthValue();
-        TS_ASSERT(h3tv.getMean() - tv3.getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(h3tv.getCount() - tv3.getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1 == h1_);
+        TruthValuePtr h1tv = h1->getTruthValue();
+        TS_ASSERT(h1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2 == h2_);
+        TruthValuePtr h2tv = h2->getTruthValue();
+        TS_ASSERT(h2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3 == h3_);
+        TruthValuePtr h3tv = h3->getTruthValue();
+        TS_ASSERT(h3tv->getMean() - tv3->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(h3tv->getCount() - tv3->getCount() < FLOAT_ACCEPTABLE_ERROR);
 
         // test adding a node with no truth value
         Handle h4 = atomSpace->addNode(CONCEPT_NODE, "wood");
         TS_ASSERT(h4 != Handle::UNDEFINED);
     
 #if 0
-// The current design to support this leaks memory. So I plugged the
-// memory leak. But that means that this test fails.  So I am disabling
-// this test for now ... If someone wants to implement this correctly 
-// someday (so that id doesn't leak memory) then, whatever, go ahead.
-// (I still think its a bad idea, for all sorts of reasons)
+// Currently disabled. 
+//
+// Here's the core idea: there is this "philosophy" that is attempting
+// to support anonymous nodes (i.e. nodes with no name) and the idea that
+// any two nameless nodes are different (NOT the same).  This means that
+// any time anyone creates a nameless node, we create a new, unique node.
+//
+// The old design leaked memory in this scenario, so it was bad. The new
+// design (using std::shared_ptr) no longer leaks, and so this can work.
+//
+// Its still a somwhat questionable design, as the only way to access such
+// anonymous nodes is by knowning their Handle or uuid.  Should we support this?
 
         // test adding a node with no name or truth value
         Handle h5 = atomSpace->addNode(NODE);
@@ -528,14 +531,14 @@ public:
      * @param outgoing  HandleSeq containing the outgoing set of the link
      * @param tvn       TruthValue of the link
      *
-     * virtual Handle addLink(Type t,const HandleSeq& outgoing,const TruthValue& tvn,bool fresh=false,bool managed=true)=0;
+     * virtual Handle addLink(Type t,const HandleSeq& outgoing,TruthValuePtr tvn)=0;
      */
     void testAddLink() {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue(0.5f, 0.99f));
-        SimpleTruthValue tv1(0.001f, 0.00001f);
-        SimpleTruthValue tv2(0.001f, 0.00001f);
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "barkingAt", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(CONCEPT_NODE, "tree", SimpleTruthValue::createTV(0.5f, 0.99f));
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.001f, 0.00001f);
+        TruthValuePtr tv2 = SimpleTruthValue::createTV(0.001f, 0.00001f);
         HandleSeq outgoing1;
         outgoing1.push_back(h2);
         outgoing1.push_back(h3);
@@ -545,29 +548,29 @@ public:
         outgoing2.push_back(l1);
         Handle l2 = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2);
 
-        SimpleTruthValue tv1_(0.002f, 0.00002f);
+        TruthValuePtr tv1_ = SimpleTruthValue::createTV(0.002f, 0.00002f);
         Handle l1_ = atomSpace->addLink(LIST_LINK, outgoing1, tv1_);
-        SimpleTruthValue tv2_(0.1f, 0.0f);
+        TruthValuePtr tv2_ = SimpleTruthValue::createTV(0.1f, 0.0f);
         Handle l2_ = atomSpace->addLink(EVALUATION_LINK, outgoing2, tv2_);
 
-        TS_ASSERT(!Handle::compare(l1, l1_));
-        const TruthValue& l1tv = TLB::getAtom(l1)->getTruthValue();
-        TS_ASSERT(l1tv.getMean() - tv1_.getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(l1tv.getCount() - tv1_.getCount() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(!Handle::compare(l2, l2_));
-        const TruthValue& l2tv = TLB::getAtom(l2)->getTruthValue();
-        TS_ASSERT(l2tv.getMean() - tv2.getMean() < FLOAT_ACCEPTABLE_ERROR);
-        TS_ASSERT(l2tv.getCount() - tv2.getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1 == l1_);
+        TruthValuePtr l1tv = l1->getTruthValue();
+        TS_ASSERT(l1tv->getMean() - tv1_->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l1tv->getCount() - tv1_->getCount() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2 ==  l2_);
+        TruthValuePtr l2tv = l2->getTruthValue();
+        TS_ASSERT(l2tv->getMean() - tv2->getMean() < FLOAT_ACCEPTABLE_ERROR);
+        TS_ASSERT(l2tv->getCount() - tv2->getCount() < FLOAT_ACCEPTABLE_ERROR);
 
     }
 
     void testGetHandle_bugfix1() {
         HandleSeq emptyOutgoing;
         Handle result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
-        TS_ASSERT(!Handle::compare(result, Handle::UNDEFINED));
+        TS_ASSERT(result == Handle::UNDEFINED);
         atomSpace->addLink(LIST_LINK, emptyOutgoing);
         result = atomSpace->getHandle(LIST_LINK, emptyOutgoing);
-        TS_ASSERT(Handle::compare(result, Handle::UNDEFINED));
+        TS_ASSERT(result != Handle::UNDEFINED);
     }
 
     /**
@@ -605,8 +608,7 @@ public:
         TS_ASSERT(sAtoms.size() > 0);
         if (sAtoms.size() > 0) {
             for (unsigned int i = 0; i < sAtoms.size() - 1; i++) {
-                TS_ASSERT(sSort(*atomSpace->cloneAtom(sAtoms[i + 1]),
-                            *atomSpace->cloneAtom(sAtoms[i])) == false);
+                TS_ASSERT(sSort(sAtoms[i + 1], sAtoms[i]) == false);
             }
         }
 
@@ -618,8 +620,7 @@ public:
         TS_ASSERT(latvAtoms.size() > 0);
         if (latvAtoms.size() > 0) {
             for (unsigned int i = 0; i < latvAtoms.size() - 1; i++) {
-                TS_ASSERT(latvSort(*atomSpace->cloneAtom(latvAtoms[i + 1]),
-                            *atomSpace->cloneAtom(latvAtoms[i])) == false);
+                TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
             }
         }
         
@@ -631,8 +632,7 @@ public:
         TS_ASSERT(lttvAtoms.size() > 0);
         if (lttvAtoms.size() > 0) {
             for (unsigned int i = 0; i < lttvAtoms.size() - 1; i++) {
-                TS_ASSERT(lttvSort(*atomSpace->cloneAtom(lttvAtoms[i + 1]),
-                        *atomSpace->cloneAtom(lttvAtoms[i])) == false);
+                TS_ASSERT(lttvSort(lttvAtoms[i + 1], lttvAtoms[i]) == false);
             }
         }
 
@@ -671,7 +671,7 @@ public:
         AtomSpace::STIAboveThreshold sti_above(1000);
         atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &sti_above);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
-            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (*atomSpace->cloneAtom(highSTI[i])) );
+            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
@@ -682,7 +682,7 @@ public:
         AtomSpace::LTIAboveThreshold lti_above(800);
         atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &lti_above);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (*atomSpace->cloneAtom(highLTI[i])) );
+            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
@@ -718,7 +718,7 @@ public:
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             //std::cout << atomSpace->atomAsString(highSTI[i],false) << std::endl;
             //std::cout << atomSpace->getSTI(highSTI[i]) << std::endl;
-            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (*atomSpace->cloneAtom(highSTI[i])) );
+            TS_ASSERT(AtomSpace::STIAboveThreshold(1000) (highSTI[i]) );
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
@@ -728,7 +728,7 @@ public:
         AtomSpace::LTIAboveThreshold lti_above(800);
         HandleSeq highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &lti_above);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
-            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (*atomSpace->cloneAtom(highLTI[i])) );
+            TS_ASSERT(AtomSpace::LTIAboveThreshold(800) (highLTI[i]) );
         }
         TS_ASSERT(highLTI.size() == 1U);
         TS_ASSERT(highLTI[0] == atoms[1]);
@@ -748,20 +748,10 @@ public:
         TS_ASSERT_EQUALS(h1, h2);
     }
 
-    void testCloneAndCommit() {
-        Handle h1 = atomSpace->addNode(NODE, "test1");
-        boost::shared_ptr<Atom> a = atomSpace->cloneAtom(h1);
-        a->setTruthValue(SimpleTruthValue(0.001f, 0.00001f));
-        atomSpace->commitAtom(*a);
-        TS_ASSERT(atomSpace->getMean(h1) == 0.001f);
-
-    }
-
-
     void testGetHandleSetByName() {
-        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue(0.001f, 0.00001f));
-        Handle h3 = atomSpace->addNode(NODE, "dog1", SimpleTruthValue(0.5f, 0.99f));
+        Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
+        Handle h3 = atomSpace->addNode(NODE, "dog1", SimpleTruthValue::createTV(0.5f, 0.99f));
 
         HandleSeq namedAtoms;
         atomSpace->getHandleSet(back_inserter(namedAtoms), NODE, true);

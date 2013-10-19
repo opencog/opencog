@@ -3,5 +3,5 @@
 (define inh_ab (InheritanceLink a b (stv 0.2 0.78)))
 
 ; target for InversionRule
-(define inh_ba (InheritanceLink b a))
+(define inh_ba (InheritanceLink b a (av 1 1 0)))
 

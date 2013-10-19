@@ -221,7 +221,7 @@ private:
     boost::signals::connection removedAtomConnection;
     boost::signals::connection addedAtomConnection;
 
-    void atomRemoved(AtomSpaceImpl*, Handle);
+    void atomRemoved(AtomSpaceImpl*, AtomPtr);
     void atomAdded(AtomSpaceImpl*, Handle);
 
     // the current scene map, match the spaceMapNodeHandle
@@ -292,9 +292,9 @@ private:
 
     Handle addPropertyPredicate(
         std::string predicateName,
-        Handle a,
-        Handle b,
-        const TruthValue &tv);
+        Handle,
+        Handle,
+        TruthValuePtr);
 
 
 };
