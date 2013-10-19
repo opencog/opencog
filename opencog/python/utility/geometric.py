@@ -99,8 +99,9 @@ class FunctionComposite(Function):
         result = 0
         for function_bounds in self.functions:
             (a, b) = function_bounds
-            if a <= start and end <= b:
-                return self.functions[function_bounds].integrate(start, end)
+            if a <= start:
+                if b >= end:
+                    return self.functions[function_bounds].integrate(start, end)
             not_ordered = {
                 (start, 0): 's', (end, 0): 'e',
                 (a, 1): 'a', (b, 1): 'b'
@@ -152,5 +153,6 @@ if __name__ == '__main__':
     d = e.degree_in_interval(3, 4)
     d = e.degree_in_interval(8, 9)
     d = e.degree_in_interval(2, 9)
+    d = e.degree_in_interval(11, 17)
     d = e.degree_in_interval()
     pass
