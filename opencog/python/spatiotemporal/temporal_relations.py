@@ -23,8 +23,8 @@ TEMPORAL_RELATIONS = {
 
 
 def temporal_relation_between(temporal_event_1, temporal_event_2):
-    temporal_event_1 = TemporalEventTrapezium(1, 10, 3, 8)
-    temporal_event_2 = TemporalEventTrapezium(9, 16, 10, 14)
+    temporal_event_1 = TemporalEventTrapezium(1, 10)
+    temporal_event_2 = TemporalEventTrapezium(11, 16)
 
     sum_times = sorted(
         [UnixTime(time).to_datetime() for time in set(temporal_event_1.to_list() + temporal_event_2.to_list())]
@@ -34,17 +34,37 @@ def temporal_relation_between(temporal_event_1, temporal_event_2):
         sum_certainties.append(temporal_event_1.membership_function(time_step) +
                                temporal_event_2.membership_function(time_step))
 
+    result = {}
+
+    formulas = {
+        'p': beforeFormula,
+        'm': meetsFormula,
+        'o': overlapsFormula,
+        'F': finished_byFormula,
+        'D': containsFormula,
+        's': startsFormula,
+        'e': equalsFormula,
+        'S': started_byFormula,
+        'd': duringFormula,
+        'f': finishesFormula,
+        'O': overlapped_byFormula,
+        'M': met_byFormula,
+        'P': afterFormula
+    }
+
+    dist1, dist2 = temporal_event_1.to_dict(), temporal_event_2.to_dict()
+    for name in formulas:
+        degree = formulas[name](dist1, dist2)
+        if degree > 0:
+            result[name] = degree
+
+    print result
     temporal_event_1.plot()
     plt = temporal_event_2.plot()
     plt.plot(sum_times, sum_certainties)
     plt.show()
 
-    result = {}
-
-    a = temporal_event_1.to_dict()
-    b = temporal_event_2.to_dict()
-    result['p'] = beforeFormula(a, b)
-    print result['p']
+    return result
 
 
 def create_event_relation_hashtable(temporal_events):
@@ -77,4 +97,4 @@ if __name__ == '__main__':
     #table = create_event_relation_hashtable(events)
     #print table
 
-    temporal_relation_between(1, 2)
+    print temporal_relation_between(1, 2)

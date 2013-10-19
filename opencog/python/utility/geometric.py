@@ -3,13 +3,39 @@ from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
 __author__ = 'keyvan'
 
 
+def index_of_first_local_maximum(sequence):
+        first_time = True
+        index = 0
+        for element in sequence:
+            if first_time:
+                previous = element
+                first_time = False
+                continue
+            if element <= previous:
+                return index
+            previous = element
+            index += 1
+        return None
+
+
 class Function(object):
     def __call__(self, x):
         return 0
 
     def integrate(self, start, end):
-        assert end >= start, "'stop' should be greater than 'start'"
+        assert end >= start, "'stop' should be greater than 'end'"
         return 0
+
+
+class _function_undefined(Function):
+    def __call__(self, x):
+        return None
+
+    def integrate(self, start, end):
+        raise KeyError("no function is defined for '{0}' to '{1}'".format(start, end))
+
+
+FUNCTION_UNDEFINED = _function_undefined()
 
 
 class FunctionHorizontalLinear(Function):
@@ -75,7 +101,7 @@ class FunctionLinear(Function):
 
 
 class FunctionComposite(Function):
-    function_undefined = lambda x: None
+    function_undefined = FUNCTION_UNDEFINED
 
     def __init__(self, bounds_function_dictionary):
         assert isinstance(bounds_function_dictionary, dict)
@@ -148,11 +174,11 @@ class FunctionPiecewiseLinear(FunctionComposite):
 if __name__ == '__main__':
     from spatiotemporal.temporal_events import TemporalEventTrapezium
     e = TemporalEventTrapezium(1, 10, 3, 8)
+    print e
     mf = e.membership_function()
-    d = e.degree_in_interval(1, 3)
-    d = e.degree_in_interval(3, 4)
-    d = e.degree_in_interval(8, 9)
-    d = e.degree_in_interval(2, 9)
-    d = e.degree_in_interval(11, 17)
-    d = e.degree_in_interval()
-    pass
+    print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
+    print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
+    print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
+    print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
+    print 'degree in [1 : 10]:', e.degree_in_interval()
+    print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)

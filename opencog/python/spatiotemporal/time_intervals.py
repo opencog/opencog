@@ -5,7 +5,7 @@ __author__ = 'keyvan'
 
 def is_time_interval(item):
     return hasattr(item, 'a') and hasattr(
-        item, 'b') and is_unix_time(item.a) and is_unix_time(item.b) and item.a < item.b and hasattr(item, '__iter__')
+        item, 'b') and is_unix_time(item.a) and is_unix_time(item.b) and item.a < item.b
 
 
 def assert_is_time_interval(interval):
@@ -91,6 +91,9 @@ class TimeInterval(object):
     def __iter__(self):
         return (self[t] for t in xrange(len(self)))
 
+    def __reversed__(self):
+        return (self[t] for t in xrange(len(self) - 1, -1, -1))
+
     def __contains__(self, item):
         """
         item can either be unix time or any object with 'a' and 'b' unix time attributes (e.g. a Interval)
@@ -103,10 +106,10 @@ class TimeInterval(object):
         return '{0}([{1} : {2}])'.format(self.__class__.__name__, self.a, self.b)
 
     def __str__(self):
-        return 'from {0} to {1}'.format(self.a, self.b)
+        return repr(self)
 
 
-class TimeIntervalListBased(TimeInterval, list):
+class TimeIntervalListBased(list, TimeInterval):
     def __init__(self, iterable):
         assert len(iterable) >= 2
         iterable = sorted(iterable)
@@ -144,14 +147,14 @@ class TimeIntervalListBased(TimeInterval, list):
         assert value > self[-2]
         self[-1] = UnixTime(value)
 
-    def __getitem__(self, index):
-        return list.__getitem__(self, index)
+    def __contains__(self, item):
+        return TimeInterval.__contains__(self, item)
 
-    def __len__(self):
-        return list.__len__(self)
+    def __repr__(self):
+        return TimeInterval.__repr__(self)
 
-    def __iter__(self):
-        return list.__iter__(self)
+    def __str__(self):
+        return TimeInterval.__str__(self)
 
 
 if __name__ == '__main__':

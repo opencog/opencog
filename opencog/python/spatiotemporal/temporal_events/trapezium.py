@@ -60,13 +60,13 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
     def a(self, value):
         assert value > self[1]
         self[0] = UnixTime(value)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     @TemporalEventPiecewiseLinear.b.setter
     def b(self, value):
         assert value > self[-2]
         self[-1] = UnixTime(value)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     @property
     def beginning(self):
@@ -76,7 +76,7 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
     def beginning(self, value):
         assert self.a < value < self.ending, "'beginning' should be within ['a' : 'ending'] interval"
         self[1] = value
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     @property
     def ending(self):
@@ -86,7 +86,7 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
     def ending(self, value):
         assert self._beginning < value < self.b, "'ending' should be within ['beginning' : 'b'] interval"
         self[-2] = value
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     def __repr__(self):
         return 'PiecewiseTemporalEvent(a: {0} , beginning: {1}, ending: {2}, b: {3})'.format(

@@ -1,8 +1,9 @@
 from datetime import datetime
 from scipy import integrate
 from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval, TimeIntervalListBased
-from fuzzy.membership_function import MembershipFunctionPiecewiseLinear
+from fuzzy.membership_function import MembershipFunctionPiecewiseLinear, invoke_function_on
 from spatiotemporal.unix_time import UnixTime
+from utility.geometric import index_of_first_local_maximum
 from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
@@ -13,13 +14,7 @@ class BaseTemporalEvent(TimeInterval):
         if time is None:
             time = self
 
-        result = []
-        try:
-            for point in time:
-                result.append(self.membership_function_single_point(point))
-        except:
-            return self.membership_function_single_point(time)
-        return result
+        return invoke_function_on(self.membership_function_single_point, time)
 
     def membership_function_single_point(self, time_step):
         """
@@ -59,6 +54,14 @@ class BaseTemporalEvent(TimeInterval):
         plt.plot(x_axis, self.membership_function)
         return plt
 
+    @property
+    def beginning(self):
+        return self[index_of_first_local_maximum(self.membership_function())]
+
+    @property
+    def ending(self):
+        return self[index_of_first_local_maximum(reversed(self.membership_function()))]
+
 
 class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
     def __init__(self, input_list, output_list):
@@ -90,6 +93,10 @@ class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
     def b(self, value):
         TimeIntervalListBased.b.fset(value)
         self.membership_function_single_point.invalidate()
+
+    def __str__(self):
+        pairs = ['{0}: {1}'.format(self[i], self.output_list[i]) for i in xrange(len(self))]
+        return '{0}({1})'.format(self.__class__.__name__, ', '.join(pairs))
 
     # Every time that self as list changes, or output_list
     # changes, membership_function_single_point should be invalidated
