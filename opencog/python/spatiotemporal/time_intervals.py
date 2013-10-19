@@ -13,9 +13,19 @@ def assert_is_time_interval(interval):
                                        "both of which should be in unix time, and 'b' has to be greater than 'a'"
 
 
-class BaseTimeInterval(object):
+class TimeInterval(object):
     _a = None
     _b = None
+    _iter_step = 1
+
+    def __init__(self, a, b, iter_step=1):
+        """
+        a and b can be in either datetime or unix time
+        """
+        self.a = a
+        self.b = b
+        assert self.a < self.b, "'b' should be greater than 'a'"
+        self.iter_step = iter_step
 
     def random_time(self, start=None, stop=None, probability_distribution=None):
         if start is None:
@@ -59,11 +69,27 @@ class BaseTimeInterval(object):
     def b(self, value):
         self._b = UnixTime(value)
 
+    @property
+    def iter_step(self):
+        return self._iter_step
+
+    @iter_step.setter
+    def iter_step(self, value):
+        if value != self._iter_step:
+            assert isinstance(value, (int, float, long)), value > 0
+            self._iter_step = value
+
     def __getitem__(self, index):
-        pass
+        value = self.a + index * self.iter_step
+        if value > self.b:
+            raise IndexError
+        return UnixTime(value)
 
     def __len__(self):
-        pass
+        return int(self.b - self.a)/int(self.iter_step) + 1
+
+    def __iter__(self):
+        return (self[t] for t in xrange(len(self)))
 
     def __contains__(self, item):
         """
@@ -73,9 +99,6 @@ class BaseTimeInterval(object):
             return self.a <= item <= self.b
         return self.a <= item.a and self.b <= item.b
 
-    def __iter__(self):
-        return (self[t] for t in xrange(len(self)))
-
     def __repr__(self):
         return '{0}([{1} : {2}])'.format(self.__class__.__name__, self.a, self.b)
 
@@ -83,7 +106,7 @@ class BaseTimeInterval(object):
         return 'from {0} to {1}'.format(self.a, self.b)
 
 
-class TimeIntervalListBased(BaseTimeInterval, list):
+class TimeIntervalListBased(TimeInterval, list):
     def __init__(self, iterable):
         assert len(iterable) >= 2
         iterable = sorted(iterable)
@@ -131,44 +154,9 @@ class TimeIntervalListBased(BaseTimeInterval, list):
         return list.__iter__(self)
 
 
-class TimeIntervalIterBased(BaseTimeInterval):
-    _iter_step = 1
-
-    def __init__(self, a, b, iter_step=1):
-        """
-        a and b can be in either datetime or unix time
-        """
-        self.a = a
-        self.b = b
-        assert self.a < self.b, "'b' should be greater than 'a'"
-        self.iter_step = iter_step
-
-    @property
-    def iter_step(self):
-        return self._iter_step
-
-    @iter_step.setter
-    def iter_step(self, value):
-        if value != self._iter_step:
-            assert isinstance(value, (int, float, long)), value > 0
-            self._iter_step = value
-
-    def __getitem__(self, index):
-        value = self.a + index * self.iter_step
-        if value > self.b:
-            raise IndexError
-        return UnixTime(value)
-
-    def __len__(self):
-        return int(self.b - self.a)/int(self.iter_step) + 1
-
-    def __iter__(self):
-        return (self[t] for t in xrange(len(self)))
-
-
 if __name__ == '__main__':
     import time
-    a = TimeIntervalIterBased(1, 1000000)
+    a = TimeInterval(1, 100000)
     b = []
 
     start = time.time()

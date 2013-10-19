@@ -1,6 +1,6 @@
 from datetime import datetime
 from scipy import integrate
-from spatiotemporal.time_intervals import TimeIntervalIterBased, assert_is_time_interval, TimeIntervalListBased
+from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval, TimeIntervalListBased
 from fuzzy.membership_function import MembershipFunctionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.numeric.globals import EPSILON
@@ -8,12 +8,7 @@ from utility.numeric.globals import EPSILON
 __author__ = 'keyvan'
 
 
-class BaseTemporalEvent(object):
-    input_list = None
-
-    def __init__(self, input_list):
-        self.input_list = input_list
-
+class BaseTemporalEvent(TimeInterval):
     def membership_function(self, time=None):
         if time is None:
             time = self
@@ -38,7 +33,7 @@ class BaseTemporalEvent(object):
             if (a, b) == (None, None):
                 interval = self
             else:
-                interval = TimeIntervalIterBased(a, b)
+                interval = TimeInterval(a, b)
         else:
             assert_is_time_interval(interval)
         return interval
@@ -49,9 +44,6 @@ class BaseTemporalEvent(object):
         """
         interval = self._interval_from_self_if_none(a, b, interval)
         return integrate.quad(self.membership_function, interval.a, interval.b) / interval.duration
-
-    def to_list(self):
-        return self.input_list
 
     def to_dict(self):
         result = {}
@@ -67,24 +59,10 @@ class BaseTemporalEvent(object):
         plt.plot(x_axis, self.membership_function)
         return plt
 
-    def __getitem__(self, index):
-        return self.input_list.__getitem__(index)
 
-    def __len__(self):
-        return len(self.input_list)
-
-    def __iter__(self):
-        return iter(self.input_list)
-
-
-class BaseTemporalEventIterBased(TimeIntervalIterBased, BaseTemporalEvent):
-    pass
-
-
-class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
+class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
     def __init__(self, input_list, output_list):
         TimeIntervalListBased.__init__(self, input_list)
-        BaseTemporalEvent.__init__(self, self)
         self.output_list = output_list
         self.membership_function = MembershipFunctionPiecewiseLinear(self, output_list)
         self.membership_function_single_point = self.membership_function
@@ -105,14 +83,12 @@ class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
 
     @TimeIntervalListBased.a.setter
     def a(self, value):
-        assert value > self[1]
-        self[0] = UnixTime(value)
+        TimeIntervalListBased.a.fset(value)
         self.membership_function_single_point.invalidate()
 
     @TimeIntervalListBased.b.setter
     def b(self, value):
-        assert value > self[-2]
-        self[-1] = UnixTime(value)
+        TimeIntervalListBased.b.fset(value)
         self.membership_function_single_point.invalidate()
 
     # Every time that self as list changes, or output_list
@@ -128,19 +104,15 @@ class BaseTemporalEventListBased(TimeIntervalListBased, BaseTemporalEvent):
         self.membership_function_single_point.invalidate()
 
 
-class TemporalEventSimple(BaseTemporalEventListBased):
+class TemporalEventSimple(TemporalEventPiecewiseLinear):
     def __init__(self, a, b):
-        BaseTemporalEventListBased.__init__(self, [a, b], [1, 1])
+        TemporalEventPiecewiseLinear.__init__(self, [a, b], [1, 1])
 
 
-class TemporalEventPiecewiseLinear(BaseTemporalEventListBased):
-    pass
-
-
-class TemporalEventDistributional(BaseTemporalEventIterBased):
+class TemporalEventDistributional(BaseTemporalEvent):
     def __init__(self, a, b, pdf, iter_step=1):
         assert callable(pdf), "'pdf' should be callable"
-        BaseTemporalEventIterBased.__init__(self, a, b, iter_step=iter_step)
+        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
         self.membership_function = pdf
         self.membership_function_single_point = pdf
 

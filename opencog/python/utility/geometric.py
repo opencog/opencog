@@ -1,3 +1,5 @@
+from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
+
 __author__ = 'keyvan'
 
 
@@ -73,6 +75,8 @@ class FunctionLinear(Function):
 
 
 class FunctionComposite(Function):
+    function_undefined = lambda x: None
+
     def __init__(self, bounds_function_dictionary):
         assert isinstance(bounds_function_dictionary, dict)
         for bounds in bounds_function_dictionary:
@@ -88,7 +92,7 @@ class FunctionComposite(Function):
             if a <= x:
                 if b >= x:
                     return self.functions[function_bounds](x)
-        return 'undefined'
+        return self.function_undefined(x)
 
     def integrate(self, start, end):
         Function.integrate(self, start, end)
@@ -112,6 +116,33 @@ class FunctionComposite(Function):
                 a = start
             result += self.functions[function_bounds].integrate(a, b)
         return result
+
+
+class FunctionPiecewiseLinear(FunctionComposite):
+    def __init__(self, input_list, output_list):
+        self.input_list = input_list
+        self.output_list = output_list
+        self.invalidate()
+
+    def invalidate(self):
+        assert len(self.input_list) == len(self.output_list) >= 2
+        bounds_function_dictionary = {}
+        for i in xrange(1, len(self.input_list)):
+            x_0, x_1 = self.input_list[i - 1], self.input_list[i]
+            y_0, y_1 = self.output_list[i - 1], self.output_list[i]
+            bounds_function_dictionary[(x_0, x_1)] = FunctionLinear(x_0=x_0, x_1=x_1, y_0=y_0, y_1=y_1)
+        bounds_function_dictionary[(MINUS_INFINITY, self.input_list[0])] = self.function_undefined
+        bounds_function_dictionary[(self.input_list[-1], PLUS_INFINITY)] = self.function_undefined
+        FunctionComposite.__init__(self, bounds_function_dictionary)
+
+    def __getitem__(self, index):
+        return self.output_list.__getitem__(index)
+
+    def __len__(self):
+        return len(self.output_list)
+
+    def __iter__(self):
+        return iter(self.output_list)
 
 if __name__ == '__main__':
     from spatiotemporal.temporal_events import TemporalEventTrapezium

@@ -1,5 +1,4 @@
 from scipy.stats import t
-from spatiotemporal.time_intervals import TimeIntervalIterBased
 from spatiotemporal.temporal_events.generic import TemporalEventPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime, random_time
 
@@ -96,9 +95,10 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
 
 def generate_random_events(size=20):
     from datetime import datetime
+    from spatiotemporal.time_intervals import TimeInterval
     events = []
 
-    year_2010 = TimeIntervalIterBased(datetime(2010, 1, 1), datetime(2011, 1, 1))
+    year_2010 = TimeInterval(datetime(2010, 1, 1), datetime(2011, 1, 1))
 
     for i in xrange(size):
         start = year_2010.random_time()
