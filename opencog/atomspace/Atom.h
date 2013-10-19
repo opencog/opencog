@@ -32,11 +32,13 @@
 #include <set>
 #include <string>
 
+#include <opencog/util/exceptions.h>
+
+#include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/util/exceptions.h>
+
 #ifdef ZMQ_EXPERIMENT
 	#include "ProtocolBufferSerializer.h"
 #endif
@@ -45,11 +47,14 @@ class AtomUTest;
 
 namespace opencog
 {
+
 /** \addtogroup grp_atomspace
  *  @{
  */
 
 class AtomTable;
+class Link;
+typedef std::shared_ptr<Link> LinkPtr;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -86,8 +91,7 @@ protected:
     Type type;
     char flags;
 
-    // XXX TODO: this should be a std::shared_ptr not a raw pointer.
-    TruthValue *truthValue;
+    TruthValuePtr truthValue;
 
     /**
      * Constructor for this class.
@@ -98,7 +102,7 @@ protected:
      * @param The truthValue of the atom. note: This is not cloned as
      *        in setTruthValue.
      */
-    Atom(Type, const TruthValue& = TruthValue::NULL_TV(),
+    Atom(Type, TruthValuePtr = TruthValue::NULL_TV(),
             const AttentionValue& = AttentionValue::DEFAULT_AV());
 
     struct IncomingSet
@@ -145,7 +149,7 @@ public:
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
-    const AttentionValue& getAttentionValue() const;
+    const AttentionValue& getAttentionValue() const { return attentionValue; }
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(const AttentionValue&) throw (RuntimeException);
@@ -154,19 +158,19 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    const TruthValue& getTruthValue() const;
+    TruthValuePtr getTruthValue() const { return truthValue; }
 
     //! Sets the TruthValue object of the atom.
-    void setTruthValue(const TruthValue&);
+    void setTruthValue(TruthValuePtr);
+    void setTruthValue(CompositeTruthValuePtr ctv) {
+        setTruthValue(std::static_pointer_cast<TruthValue>(ctv));
+    }
 
     /** Returns whether this atom is marked for removal.
      *
      * @return Whether this atom is marked for removal.
      */
-    bool isMarkedForRemoval() const
-    {
-        return (flags & MARKED_FOR_REMOVAL) != 0;
-    }
+    bool isMarkedForRemoval() const;
 
     /** Returns an atom flag.
      * A byte represents all flags. Each bit is one of them.
@@ -193,8 +197,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    virtual std::string toString(void) const = 0;
-    virtual std::string toShortString(void) const = 0;
+    virtual std::string toString(std::string indent = "") const = 0;
+    virtual std::string toShortString(std::string indent = "") const = 0;
 
     /** Returns whether two atoms are equal.
      *

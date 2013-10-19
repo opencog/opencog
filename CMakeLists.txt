@@ -333,7 +333,7 @@ IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
    ADD_DEFINITIONS(-DHAVE_CYTHON)
    SET(HAVE_CYTHON 1)
    EXECUTE_PROCESS(
-	   COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
+       COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
 		OUTPUT_VARIABLE PYTHON_DEST
    )
 
@@ -593,9 +593,16 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
+
 IF (NOT WIN32)
 	ADD_CUSTOM_TARGET (examples
-		COMMAND ${CMAKE_BUILD_TOOL}
+		# using CMAKE_BUILD_TOOL results in teh cryptic error message
+		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+		# This is because make doesn't know how to pass jobserver args to
+		# the submake.  So, instead, just use $(MAKE) (with round parens)
+		# -- that will do the right thing.
+		# COMMAND ${CMAKE_BUILD_TOOL} 
+		COMMAND $(MAKE) 
 		WORKING_DIRECTORY examples
 		COMMENT "Building examples"
 	)

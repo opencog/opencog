@@ -87,6 +87,9 @@ cdef class TruthValue:
     cdef cTruthValue* _ptr(self):
         return self.cobj.get()
 
+    cdef tv_ptr* _tvptr(self):
+        return self.cobj
+
     def __str__(self):
         return self._ptr().toString().c_str()
 
@@ -127,6 +130,7 @@ cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomsp
 cdef AtomSpace_factory(cAtomSpace *to_wrap):
     cdef AtomSpace instance = AtomSpace.__new__(AtomSpace)
     instance.atomspace = to_wrap
+    instance.owns_atomspace = False
     return instance
 
 cdef class AtomSpace:
@@ -139,9 +143,17 @@ cdef class AtomSpace:
     def __cinit__(self):
         self.owns_atomspace = False
 
-    def __init__(self):
-        self.atomspace = new cAtomSpace()
-        self.owns_atomspace = True
+    # A tacky hack to pass in a pointer to an atomspace from C++-land.
+    # basically, pass an int, and cast it to the C++ pointer.  This
+    # works, but is not very safe, and has a certain feeling of "ick"
+    # about it.  But I can't find any better way.
+    def __init__(self, long addr = 0):
+        if (addr == 0) :
+            self.atomspace = new cAtomSpace()
+            self.owns_atomspace = True
+        else :
+            self.atomspace = <cAtomSpace*> PyLong_AsVoidPtr(addr)
+            self.owns_atomspace = False
 
     def __dealloc__(self):
         if self.owns_atomspace:
@@ -175,13 +187,13 @@ cdef class AtomSpace:
                 # get handle
                 result = self.atomspace.addPrefixedNode(t,deref(name))
             else:
-                result = self.atomspace.addPrefixedNode(t,deref(name),deref(<cTruthValue*>(tv._ptr())))
+                result = self.atomspace.addPrefixedNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
         else:
             if tv is None:
                 # get handle
                 result = self.atomspace.addNode(t,deref(name))
             else:
-                result = self.atomspace.addNode(t,deref(name),deref(tv._ptr()))
+                result = self.atomspace.addNode(t,deref(name), deref(<tv_ptr*>(tv._tvptr())))
         # delete temporary string
         del name
         if result == result.UNDEFINED: return None
@@ -203,9 +215,9 @@ cdef class AtomSpace:
         cdef cHandle result
         if tv is None:
             # get handle
-            result = self.atomspace.addLink(t,o_vect)
+            result = self.atomspace.addLink(t, o_vect)
         else:
-            result = self.atomspace.addLink(t,o_vect,deref(tv._ptr()))
+            result = self.atomspace.addLink(t, o_vect, deref(<tv_ptr*>(tv._tvptr())))
         if result == result.UNDEFINED: return None
         #return Handle(result.value());
         return Atom(Handle(result.value()), self);
@@ -273,11 +285,15 @@ cdef class AtomSpace:
         """ Return the TruthValue of an Atom in the AtomSpace """
         cdef tv_ptr tv
         tv = self.atomspace.getTV(deref(h.h))
+        if (not tv.get() or tv.get().isNullTv()):
+            pytv = TruthValue()
+            pytv.cobj = new tv_ptr(tv) # make copy of smart pointer
+            return pytv
         return TruthValue(tv.get().getMean(),tv.get().getCount())
 
-    def set_tv(self,Handle h,TruthValue val):
+    def set_tv(self,Handle h, TruthValue tv):
         """ Set the TruthValue of an Atom in the AtomSpace """
-        self.atomspace.setTV(deref(h.h),deref(val._ptr()))
+        self.atomspace.setTV(deref(h.h), deref(<tv_ptr*>(tv._tvptr())))
 
     def get_type(self,Handle h):
         """ Get the Type of an Atom in the AtomSpace """

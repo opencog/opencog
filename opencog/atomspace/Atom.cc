@@ -24,22 +24,22 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Atom.h"
-
 #include <set>
 
 #ifndef WIN32
 #include <unistd.h>
 #endif
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/AtomTable.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
+
+#include <opencog/atomspace/Atom.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
+#include <opencog/atomspace/AtomTable.h>
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/Link.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -52,16 +52,18 @@ using namespace opencog;
 std::mutex Atom::IncomingSet::_mtx;
 
 
-Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
+Atom::Atom(Type t, TruthValuePtr tv, const AttentionValue& av)
 {
     _uuid = Handle::UNDEFINED.value();
     flags = 0;
     atomTable = NULL;
     type = t;
 
-    truthValue = NULL;
-    setTruthValue(tv);
-    setAttentionValue(av);
+    if (not tv->isNullTv()) truthValue = tv;
+    if (atomTable != NULL)
+        setAttentionValue(av);
+    else
+        attentionValue = av;
 
     // XXX FIXME for right now, all atoms will always keep their
     // incoming sets.  In the future, this should only be set by
@@ -72,32 +74,13 @@ Atom::Atom(Type t, const TruthValue& tv, const AttentionValue& av)
 
 Atom::~Atom()
 {
-    if (truthValue != &(TruthValue::DEFAULT_TV())) delete truthValue;
-    truthValue = NULL;
     atomTable = NULL;
-
     drop_incoming_set();
 }
 
-const AttentionValue& Atom::getAttentionValue() const
+void Atom::setTruthValue(TruthValuePtr tv)
 {
-    return attentionValue;
-}
-
-const TruthValue& Atom::getTruthValue() const
-{
-    return *truthValue;
-}
-
-void Atom::setTruthValue(const TruthValue& tv)
-{
-    if (truthValue != NULL && &tv != truthValue && truthValue != &(TruthValue::DEFAULT_TV())) {
-        delete truthValue;
-    }
-    truthValue = (TruthValue*) & (TruthValue::DEFAULT_TV());
-    if (!tv.isNullTv() && (&tv != &(TruthValue::DEFAULT_TV()))) {
-        truthValue = tv.clone();
-    }
+    if (not tv->isNullTv()) truthValue = tv;
 }
 
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
@@ -123,6 +106,11 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
             atomTable->updateImportanceIndex(a, oldBin);
         }
     }
+}
+
+bool Atom::isMarkedForRemoval() const
+{
+    return (flags & MARKED_FOR_REMOVAL) != 0;
 }
 
 bool Atom::getFlag(int flag) const

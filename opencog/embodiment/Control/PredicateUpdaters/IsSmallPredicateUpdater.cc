@@ -81,7 +81,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
 
     // truth value - mean equals 0.0 --> not smaller than pet
     //                 mean equals 1.0 --> is  smaller than pet
-    SimpleTruthValue tv(0.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(0.0, 1.0));
 
     // while there are no size information some assumptions
     // will guide the is_small predicate
@@ -114,7 +114,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
     double agentVolume = getSize(pet);
     double objectVolume = getSize(object);
     if ( objectVolume/agentVolume < 0.9 ) {
-        tv.setMean(1.0);
+        tv = SimpleTruthValue::createTV(1.0, 1.0);
 
         std::string objectName = atomSpace.getName( object );
         std::string agentName = atomSpace.getName( pet );
@@ -152,7 +152,7 @@ void IsSmallPredicateUpdater::update(Handle object, Handle pet, unsigned long ti
             agentName + "_" + objectName + "_is_small", comparisonElements, tv );
 
     } else {
-        tv.setMean(0.0);
+        tv = SimpleTruthValue::createTV(0.0, 1.0);
     } // if
     AtomSpaceUtil::setPredicateValue(atomSpace, "is_small", tv, object);
 }

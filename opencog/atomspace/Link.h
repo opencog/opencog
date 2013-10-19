@@ -28,7 +28,6 @@
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Trail.h>
-#include <opencog/atomspace/types.h>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
@@ -39,6 +38,9 @@ class AtomTable;
 /** \addtogroup grp_atomspace
  *  @{
  */
+
+//! arity of Links, represented as short integer (16 bits)
+typedef unsigned short Arity;
 
 /**
  * Nodes in OpenCog are connected to each other by links. Each link embodies
@@ -79,14 +81,14 @@ public:
      *        stored in this Link.
      */
     Link(Type t, const HandleSeq& oset,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         init(oset);
     }
 
     Link(Type t, Handle& h,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -95,7 +97,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -105,7 +107,7 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -115,7 +117,7 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         const TruthValue& tv = TruthValue::NULL_TV())
+         TruthValuePtr tv = TruthValue::NULL_TV())
         : Atom(t, tv)
     {
         HandleSeq oset;
@@ -210,18 +212,11 @@ public:
     void setTrail(Trail *);
 
     /**
-     * Returns the weight value of the link.
-     *
-     * @return Weight value of the link.
-     */
-    float getWeight();
-
-    /**
      * Returns a string representation of the link.
      *
      * @return A string representation of the link.
      */
-    std::string toString() const;
+    std::string toString(std::string indent = "") const;
 
     /**
      * Returns a short string representation of the link.
@@ -231,7 +226,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString() const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given handle is a source of this link.
@@ -283,6 +278,10 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+static inline LinkPtr LinkCast(const Handle& h)
+    { AtomPtr a(h); return std::dynamic_pointer_cast<Link>(a); }
+static inline LinkPtr LinkCast(AtomPtr a) { return std::dynamic_pointer_cast<Link>(a); }
 
 // XXX temporary hack ...
 #define createLink std::make_shared<Link>

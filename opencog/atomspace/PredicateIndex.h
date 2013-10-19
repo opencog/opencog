@@ -64,7 +64,7 @@ class PredicateIndex:
 		int numberOfPredicateIndices;
 		// Map from each PredicateNode Handle to its corresponding index
 		std::map<Handle, int> predicateHandles2Indices;
-		const UnorderedHandleSet& getHandleSet(int) const;
+		const UnorderedUUIDSet& getHandleSet(int) const;
 	public:
 		PredicateIndex(void);
 		void insertAtom(AtomPtr);
@@ -74,7 +74,7 @@ class PredicateIndex:
 			throw (InvalidParamException);
 
 		PredicateEvaluator* getPredicateEvaluator(Handle gpnHandle) const;
-		const UnorderedHandleSet& findHandlesByGPN(Handle) const;
+		UnorderedHandleSet findHandlesByGPN(Handle) const;
 };
 
 /** @}*/

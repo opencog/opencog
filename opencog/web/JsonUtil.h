@@ -35,6 +35,6 @@ bool assertJSONTVCorrect(std::string expected, std::string actual,
         std::ostringstream& _output );
 bool assertJsonMapContains(const Object& o, std::vector<std::string> keys,
         std::ostringstream& _output );
-TruthValue* JSONToTV(const Value& v, std::ostringstream& _output );
+TruthValuePtr JSONToTV(const Value& v, std::ostringstream& _output );
 
 } // namespace

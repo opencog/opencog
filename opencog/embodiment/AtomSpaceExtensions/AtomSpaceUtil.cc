@@ -753,10 +753,10 @@ bool AtomSpaceUtil::getSizeInfo(AtomSpace& atomSpace,
 Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
         std::string predicateName,
         const HandleSeq& ll_out,
-        const TruthValue &tv, bool permanent, const Temporal &t)
+        TruthValuePtr tv, bool permanent, const Temporal &t)
 {
     bool predBool = true;
-    if (tv.getMean() >= 0.5) {
+    if (tv->getMean() >= 0.5) {
         predBool = false;
     }
 
@@ -793,7 +793,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
     } else {
         el = atomSpace.addLink(EVALUATION_LINK, hs2);
         logger().fine("AtomSpaceUtil - %s added with TV %f.",
-                     predicateName.c_str(), tv.getMean());
+                     predicateName.c_str(), tv->getMean());
     }
     atomSpace.setTV(el, tv);
 
@@ -1524,7 +1524,7 @@ void AtomSpaceUtil::getAllEvaluationLinks(const AtomSpace& atomSpace,
 
 Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
         std::string predicateName,
-        const TruthValue &tv,
+        TruthValuePtr tv,
         Handle object1,
         Handle object2,
         Handle object3 )
@@ -1568,7 +1568,7 @@ Handle AtomSpaceUtil::setPredicateValue( AtomSpace& atomSpace,
 Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
         std::string predicateName,
         Handle object,
-        const TruthValue &tv,
+        TruthValuePtr tv,
         bool permanent,
         const Temporal &t)
 {
@@ -1582,7 +1582,7 @@ Handle AtomSpaceUtil::addPropertyPredicate(AtomSpace& atomSpace,
         std::string predicateName,
         Handle a,
         Handle b,
-        const TruthValue& tv,
+        TruthValuePtr tv,
         const Temporal& t)
 {
 
@@ -1647,7 +1647,7 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
         }
         AtomSpaceUtil::setPredicateValue( atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
-                                          SimpleTruthValue( 0.0, 1.0 ),
+                                          SimpleTruthValue::createTV( 0.0, 1.0 ),
                                           holderHandle );
     } else {
         // grab: it is now holding an object
@@ -1659,14 +1659,14 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
                      currentTimestamp);
         AtomSpaceUtil::setPredicateValue( atomSpace,
                                           IS_HOLDING_SOMETHING_PREDICATE_NAME,
-                                          SimpleTruthValue( 1.0, 1.0 ),
+                                          SimpleTruthValue::createTV( 1.0, 1.0 ),
                                           holderHandle );
         Handle isHoldingAtTimeLink =
             AtomSpaceUtil::addPropertyPredicate( atomSpace,
                                                  IS_HOLDING_PREDICATE_NAME,
                                                  holderHandle,
                                                  objectHandle,
-                                                 SimpleTruthValue( 1.0, 1.0 ),
+                                                 SimpleTruthValue::createTV( 1.0, 1.0 ),
                                                  Temporal(currentTimestamp) );
         // Now, it cannot be forgotten (until the agent drop the object)
         // TODO: this is untrue, it should use VLTI
@@ -2912,7 +2912,7 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(const AtomSpace& atomSpace,
 
     // strength is given by link TruthValue
     return (atomSpace.getTV(implicationLink, VersionHandle( CONTEXTUAL,
-                            agentModeNode ) )->toFloat());
+                            agentModeNode ) )->getMean());
 }
 
 spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )
@@ -3255,7 +3255,7 @@ Handle AtomSpaceUtil::getFrameElements( AtomSpace& atomSpace, const std::string&
 Handle AtomSpaceUtil::setPredicateFrameFromHandles( AtomSpace& atomSpace, const std::string& frameName, 
                                                     const std::string& frameInstanceName, 
                                                     const std::map<std::string, Handle>& frameElementsValuesHandles, 
-                                                    const TruthValue& truthValue, bool permanent )
+                                                    TruthValuePtr truthValue, bool permanent )
 {
     Handle frameNode = atomSpace.getHandle( DEFINED_FRAME_NODE, frameName );
 

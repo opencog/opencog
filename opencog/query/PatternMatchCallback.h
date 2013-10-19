@@ -26,7 +26,7 @@
 
 #include <map>
 #include <set>
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 namespace opencog {
 class PatternMatchEngine;

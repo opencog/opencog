@@ -70,7 +70,7 @@ bool CreateAtomRequest::execute()
     Type t = NOTYPE;
     std::string atomName;
     HandleSeq outgoing;
-    TruthValue* tv = NULL;
+    TruthValuePtr tv;
     Value json_top;
 
     try {
@@ -113,7 +113,6 @@ bool CreateAtomRequest::execute()
         }
     } catch (std::runtime_error e) {
         // json spirit probably borked at parsing bad javascript
-        if (tv) delete tv;
         if (_output.str().size() == 0) {
             //_output << "{\"error\":\"parsing json\"}" << std::endl;
 	    logger().debug("json_spirit error: %s", e.what());
@@ -125,7 +124,6 @@ bool CreateAtomRequest::execute()
     if (t == NOTYPE) {
         _output << "{\"error\":\"no type\"}" << std::endl;
         send(_output.str());
-        if (tv) delete tv; // remember to clean up TV if it's around
         return false;
     }
     if (tv == NULL) {
@@ -139,18 +137,16 @@ bool CreateAtomRequest::execute()
         if (atomName != "") {
             _output << "{\"error\":\"links can't have name\"}" << std::endl;
             send(_output.str());
-            delete tv; // remember to clean up TV if it's around
             return false;
         }
         h = as.getHandle(t, outgoing);
         if (as.isValidHandle(h)) exists = true;
-        h = as.addLink(t, outgoing, *tv);
+        h = as.addLink(t, outgoing, tv);
     } else {
         h = as.getHandle(t, atomName);
         if (as.isValidHandle(h)) exists = true;
-        h = as.addNode(t,atomName, *tv);
+        h = as.addNode(t,atomName, tv);
     }
-    delete tv;
 
     if (!as.isValidHandle(h)) {
         _output << "{\"error\":\"invalid handle returned\"}" << std::endl;

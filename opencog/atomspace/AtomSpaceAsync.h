@@ -45,8 +45,6 @@ class AtomSpaceAsync {
 
     void eventLoop();
 
-    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
-
 public: 
 
     AtomSpaceAsync();
@@ -69,24 +67,14 @@ public:
     // hypergraph.
 
     HandleRequest addNode(Type t, const std::string& str = "",
-            const TruthValue& tvn = TruthValue::DEFAULT_TV() ) {
-        // We need to clone the TV as the caller's TV may go out of scope
-        // before the request is processed.
-        TruthValue* tv = tvn.clone();
+            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
         HandleRequest hr(new AddNodeASR(&atomspace,t,str,tv));
         requestQueue.push(hr);
         return hr;
     }
 
     HandleRequest addLink(Type t, const HandleSeq& outgoing,
-            const TruthValue& tvn = TruthValue::DEFAULT_TV() ) {
-        // We need to clone the TV as the caller's TV may go out of scope
-        // before the request is processed.
-        const TruthValue* tv;
-        if (!tvn.isNullTv()) tv = tvn.clone();
-        // Unless it is a NULL_TV as this can't be cloned
-        else tv = &TruthValue::NULL_TV();
-
+            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
         HandleRequest hr(new AddLinkASR(&atomspace,t,outgoing,tv));
         requestQueue.push(hr);
         return hr;
@@ -332,7 +320,7 @@ public:
     }
 
     /** Change the TruthValue summary of a given Handle */
-    VoidRequest setTV(Handle h, const TruthValue& tv, VersionHandle vh = NULL_VERSION_HANDLE) {
+    VoidRequest setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
         VoidRequest r(new SetTruthValueASR(&atomspace,h,tv,vh));
         requestQueue.push(r);
         return r;
@@ -716,6 +704,7 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
 
+    const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 };
 
 /** @}*/

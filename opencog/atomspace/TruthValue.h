@@ -28,12 +28,14 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/util/exceptions.h>
+
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
+
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -61,12 +63,6 @@ typedef std::vector<confidence_t> confidence_seq;
 typedef strength_seq::iterator confidence_seq_it;
 typedef strength_seq::const_iterator confidence_seq_const_it;
 
-/** @todo This variable was moved from reasoning/StdAfx.h as it was. Find a better
- * implementation for it... (???)
- */
-const strength_t MAX_TRUTH  = 1.0;
-const confidence_t MAX_CONFIDENCE = 1.0;
-
 //! TruthValue types
 // NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
 enum TruthValueType {
@@ -78,11 +74,8 @@ enum TruthValueType {
 };
 #define MAX_TRUTH_VALUE_NAME_LEN 120
 
-struct tv_summary_t {
-    strength_t mean;
-    confidence_t confidence;
-    count_t count;
-};
+class TruthValue;
+typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
 {
@@ -97,8 +90,12 @@ class TruthValue
     // TruthValue class, so we declare it as a friend class.
     friend class ::TruthValueUTest;
 
-public:
+    // Disallow assignment -- truth values are immutable!
+    TruthValue& operator=(const TruthValue& rhs) {
+        throw RuntimeException(TRACE_INFO, "Cannot modify truth values!");
+    }
 
+public:
     virtual ~TruthValue() {}
 
     // Special TVs
@@ -109,7 +106,7 @@ public:
      * it cannot be used as a normal TV object, as for setting the TV
      * object of an Atom, for example.
      */
-    static const TruthValue& NULL_TV();
+    static TruthValuePtr NULL_TV();
     /**
      * The shared reference to a special default (Simple) TruthValue
      * object with both mean and count set to default values
@@ -117,22 +114,22 @@ public:
      * temporary TV object (in Formulae and Rules internal
      * TV arrays, for instance).
      */
-    static const TruthValue& DEFAULT_TV();
+    static TruthValuePtr DEFAULT_TV();
     /**
      * The shared reference to a special TRUE (Simple) TruthValue
      * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count.
      */
-    static const TruthValue& TRUE_TV();
+    static TruthValuePtr TRUE_TV();
     /**
      * The shared reference to a special FALSE (Simple) TruthValue
      * object with 0 mean and MAX_TV_CONFIDENCE count.
      */
-    static const TruthValue& FALSE_TV();
+    static TruthValuePtr FALSE_TV();
     /**
      * The shared reference to a special TRIVIAL (Simple) TruthValue
      * object with 0 count.
      */
-    static const TruthValue& TRIVIAL_TV();
+    static TruthValuePtr TRIVIAL_TV();
 
     /**
      * Gets the name of a TruthValue type
@@ -145,22 +142,10 @@ public:
     virtual count_t getCount()  const = 0;
     virtual confidence_t getConfidence()  const = 0;
 
-    virtual float toFloat() const  = 0;
     virtual std::string toString() const  = 0;
     virtual TruthValueType getType() const  = 0;
-
-    /**
-     * Deep clone of this object. Returns a new object. .
-     */
-    virtual TruthValue* clone() const  = 0;
-
-    /**
-     * Assignment operator. Must be implemented by each subclass to
-     * allow correct assignment, according with the exact class of
-     * the TruthValue objects in the left and right sides of the
-     * operator.
-     */
-    virtual TruthValue& operator=(const TruthValue& rhs) = 0;
+    virtual TruthValuePtr clone() const  = 0;
+    virtual TruthValue* rawclone() const  = 0;
 
     /**
      * Equality. Used to determine if two truth values are the
@@ -168,7 +153,7 @@ public:
      * NULL_TV, TRUE_TV, FALSE_TV, etc.
      */
     virtual bool operator==(const TruthValue& rhs) const = 0;
-    inline bool operator!=(const TruthValue& rhs) const 
+    inline bool operator!=(const TruthValue& rhs) const
          { return !(*this == rhs); }
 
 // VIRTUAL METHODS:
@@ -186,7 +171,7 @@ public:
      * If tv2 is a CompositeTruthValue but not tv1,
      * then tv2.CompositeTruthValue::merge(tv1) is called.
      */
-    virtual TruthValue* merge(const TruthValue&) const;
+    virtual TruthValuePtr merge(TruthValuePtr) const;
 
     /**
      * Check if this TV is a null TV.
@@ -201,28 +186,16 @@ public:
 // STATIC METHODS:
 
     static const char* typeToStr(TruthValueType t)
-    throw (InvalidParamException);
+        throw (InvalidParamException);
     static TruthValueType strToType(const char* str)
-    throw (InvalidParamException);
+        throw (InvalidParamException);
 
     // Factories
     // former factory used by NMShell mkatom command
-    static TruthValue* factory(const char*);
-    static TruthValue* factory(TruthValueType, const char*)
-    throw (InvalidParamException);
-
-protected:
-
-    /**
-     * Special method that checks if the given TV is not the DefaultTV
-     * object, but its equal to it and, if so, delete this object
-     * and set it to the DefaultTV object.
-     */
-    static void DeleteAndSetDefaultTVIfPertinent(TruthValue** tv);
-
+    static TruthValuePtr factory(const char*);
+    static TruthValuePtr factory(TruthValueType, const char*)
+       throw (InvalidParamException);
 };
-
-typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 } // namespace opencog
 

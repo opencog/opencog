@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/RequestClassInfo.h>
@@ -68,7 +68,7 @@ public:
     std::string getHTMLHeader();
     void html_makeOutput(Handle);
     static std::string json_makeOutput(CogServer&, Handle);
-    static std::string tvToJSON(const TruthValue*);
+    static std::string tvToJSON(TruthValuePtr);
     void generateProcessingGraph(Handle);
 };
 

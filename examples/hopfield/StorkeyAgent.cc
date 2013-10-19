@@ -183,7 +183,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                 if (w[i][j] < 0.0f) {
                     a.removeAtom(heb, true);
                     a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
-                            SimpleTruthValue(-w[i][j],100));
+                            SimpleTruthValue::createTV(-w[i][j],100));
                 } else {
                     a.setMean(heb,w[i][j]);
                 }
@@ -193,7 +193,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                     if (w[i][j] > 0.0f) {
                         a.removeAtom(heb, true);
                         a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
-                                SimpleTruthValue(w[i][j],100));
+                                SimpleTruthValue::createTV(w[i][j],100));
                     } else {
                         a.setMean(heb,-w[i][j]);
                     }
@@ -206,7 +206,8 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
 
 }
 
-bool StorkeyAgent::checkWeightSymmetry(w_t& w) {
+bool StorkeyAgent::checkWeightSymmetry(w_t& w)
+{
     int n = w.size();
     float err = 0.001;
     for (int i = 0; i < n; i++) {

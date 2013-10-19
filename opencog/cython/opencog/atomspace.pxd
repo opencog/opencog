@@ -40,11 +40,19 @@ ctypedef float confidence_t
 ctypedef float strength_t
 
 cdef extern from "opencog/atomspace/TruthValue.h" namespace "opencog":
+    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
+        tv_ptr()
+        tv_ptr(tv_ptr copy)
+        tv_ptr(cTruthValue* fun)
+        tv_ptr(cSimpleTruthValue* fun)
+        cTruthValue* get()
+
     cdef cppclass cTruthValue "opencog::TruthValue":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
-        cTruthValue DEFAULT_TV()
+        tv_ptr DEFAULT_TV()
+        bint isNullTv()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
@@ -55,16 +63,10 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
-        cTruthValue DEFAULT_TV()
+        tv_ptr DEFAULT_TV()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
-
-    cdef cppclass tv_ptr "std::shared_ptr<opencog::TruthValue>":
-        tv_ptr()
-        tv_ptr(cTruthValue* fun)
-        tv_ptr(cSimpleTruthValue* fun)
-        cTruthValue* get()
 
 # ClassServer
 cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
@@ -102,13 +104,13 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         #cAtomSpaceAsync atomSpaceAsync
 
         cHandle addNode(Type t, string s)
-        cHandle addNode(Type t, string s, cTruthValue tvn)
+        cHandle addNode(Type t, string s, tv_ptr tvn)
 
         cHandle addPrefixedNode(Type t, string s)
-        cHandle addPrefixedNode(Type t, string s, cTruthValue tvn)
+        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn)
 
         cHandle addLink(Type t, vector[cHandle])
-        cHandle addLink(Type t, vector[cHandle], cTruthValue tvn)
+        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn)
 
         cHandle getHandle(Type t, string s)
         cHandle getHandle(Type t, vector[cHandle])
@@ -118,7 +120,7 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         string getName(cHandle h)
         Type getType(cHandle h)
         tv_ptr getTV(cHandle h)
-        void setTV(cHandle h, cTruthValue tvn)
+        void setTV(cHandle h, tv_ptr tvn)
 
         vector[cHandle] getOutgoing(cHandle h)
         bint isSource(cHandle h, cHandle source)
@@ -176,3 +178,7 @@ cdef class Atom:
     cdef object _name
     cdef object _outgoing
 
+
+# Tacky hack to pass atomspace pointer to AtomSpace ctor
+cdef extern from "Python.h":
+    cdef void* PyLong_AsVoidPtr(object)

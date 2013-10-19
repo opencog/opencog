@@ -292,9 +292,9 @@ private:
 
     Handle addPropertyPredicate(
         std::string predicateName,
-        Handle a,
-        Handle b,
-        const TruthValue &tv);
+        Handle,
+        Handle,
+        TruthValuePtr);
 
 
 };

@@ -9,6 +9,7 @@
 #ifndef _OPENCOG_SENSE_SIMILARITY_H
 #define _OPENCOG_SENSE_SIMILARITY_H
 
+#include <opencog/atomspace/Handle.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 namespace opencog {
@@ -19,7 +20,7 @@ class SenseSimilarity
 		SenseSimilarity(void) {};
 		virtual ~SenseSimilarity() {};
 
-		virtual SimpleTruthValue similarity(Handle, Handle) = 0;
+		virtual SimpleTruthValuePtr similarity(Handle, Handle) = 0;
 };
 
 } // namespace opencog

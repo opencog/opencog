@@ -1,5 +1,5 @@
 /*
- * opencog/atomspace/ClassServer.cc
+ * opencog/atomspace/AtomSpaceInit.cc
  *
  * Copyright (C) 2008 by OpenCog Foundation
  * All Rights Reserved

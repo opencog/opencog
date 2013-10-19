@@ -148,7 +148,7 @@ Handle SchemeSmob::scm_to_handle (SCM sh)
 
     SCM suuid = SCM_SMOB_OBJECT(sh);
     UUID uuid = scm_to_ulong(suuid);
-    return atomspace->getHandle(Handle(uuid));
+    return Handle(uuid);
 }
 
 /* ============================================================== */
@@ -303,11 +303,13 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
     Type t = verify_node_type(stype, "cog-new-node", 1);
     std::string name = verify_string (sname, "cog-new-node", 2, "string name for the node");
 
+    Handle h;
     // Now, create the actual node... in the actual atom space.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
-    if (!tv) tv = &TruthValue::DEFAULT_TV();
-    
-    Handle h = atomspace->addNode(t, name, *tv);
+    if (tv)
+        h = atomspace->addNode(t, name, tv->clone());
+    else   
+        h = atomspace->addNode(t, name);
 
     // Was an attention value explicitly specified?
     // If so, then we've got to set it.
@@ -337,13 +339,13 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
     if (tv) {
-        atomspace->setTV(h,*tv);
+        atomspace->setTV(h, tv->clone());
     }
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(kv_pairs);
     if (av) {
-        atomspace->setAV(h,*av);
+        atomspace->setAV(h, *av);
     }
     return handle_to_scm (h);
 }
@@ -447,7 +449,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     // method is too stupid to set the truth value correctly.
     const TruthValue *tv = get_tv_from_list(satom_list);
     if (tv) {
-        atomspace->setTV(h, *tv);
+        atomspace->setTV(h, tv->clone());
     }
 
     // Was an attention value explicitly specified?
@@ -477,11 +479,11 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(satom_list);
-    if (tv) atomspace->setTV(h,*tv);
+    if (tv) atomspace->setTV(h, tv->clone());
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(satom_list);
-    if (av) atomspace->setAV(h,*av);
+    if (av) atomspace->setAV(h, *av);
 
     return handle_to_scm (h);
 }

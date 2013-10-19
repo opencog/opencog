@@ -136,7 +136,7 @@ bool ReportRank::renorm_word(Handle h)
 
 #ifdef HISCORE_DEBUG
 	Handle wh = get_dict_word_of_word_instance(h);
-	const char *wd = as->getName(wh).c_str();
+	const char *wd = wh->getName().c_str();
 	printf("; hi score=%g word = %s sense=%s\n", hi_score, wd, hi_sense);
 	fflush (stdout);
 #endif
@@ -146,7 +146,7 @@ bool ReportRank::renorm_word(Handle h)
 bool ReportRank::count_sense(Handle word_sense_h,
                              Handle sense_link_h)
 {
-	normalization += as->getTV(sense_link_h)->getCount();
+	normalization += sense_link_h->getTruthValue()->getCount();
 	sense_count += 1.0;
 	return false;
 }
@@ -154,7 +154,7 @@ bool ReportRank::count_sense(Handle word_sense_h,
 bool ReportRank::renorm_sense(Handle word_sense_h,
                               Handle sense_link_h)
 {
-	double score = as->getTV(sense_link_h)->getCount();
+	double score = sense_link_h->getTruthValue()->getCount();
 
 	score *= normalization;
 	score -= 1.0;
@@ -168,19 +168,19 @@ bool ReportRank::renorm_sense(Handle word_sense_h,
 	// go negative, likely scores will go positive.  "Typical"
 	// distributions seem to go from -0.8 to +3.5 or there-abouts.
 	//
-	CountTruthValue stv(1.0f, 0.0f, (float) score);
-	as->setTV(sense_link_h,stv);
+	TruthValuePtr stv(CountTruthValue::createTV(1.0f, 0.0f, (float) score));
+	sense_link_h->setTruthValue(stv);
 
 #ifdef DEBUG
 	if (hi_score < score) {
-		hi_sense = as->getName(word_sense_h).c_str();
+		hi_sense = NodeCast(word_sense_h)->getName().c_str();
 		hi_score = score;
 	}
 	if (0.0 < score) {
 		choosen_sense_count += 1.0;
 	
 #if 0
-printf ("duu word sense=%s score=%f\n", as->getName(word_sense_h).c_str(), score);
+printf ("duu word sense=%s score=%f\n", NodePtr(word_sense_h)->getName().c_str(), score);
 fflush (stdout);
 #endif
 	}

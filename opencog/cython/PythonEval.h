@@ -94,7 +94,7 @@ class PythonEval
         // Make constructor, destructor private; force everyone to use the
         // singleton instance
         PythonEval(AtomSpace * atomspace) {
-            this->atomspace = atomspace;
+            this->_atomspace = atomspace;
             this->init();
         }
 
@@ -102,7 +102,7 @@ class PythonEval
 
         static PythonEval * singletonInstance;
 
-        AtomSpace *atomspace;
+        AtomSpace *_atomspace;
 
         PyThreadState * mainThreadState;
         PyInterpreterState * mainInterpreterState;

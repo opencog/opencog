@@ -727,21 +727,21 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	}
 
 	// Store the truth value
-	const TruthValue &tv = atom->getTruthValue();
-	TruthValueType tvt = tv.getType();
+	TruthValuePtr tv = atom->getTruthValue();
+	TruthValueType tvt = tv->getType();
 	STMTI("tv_type", tvt);
 
 	switch (tvt)
 	{
 		case SIMPLE_TRUTH_VALUE:
 		case COUNT_TRUTH_VALUE:
-			STMTF("stv_mean", tv.getMean());
-			STMTF("stv_confidence", tv.getConfidence());
-			STMTF("stv_count", tv.getCount());
+			STMTF("stv_mean", tv->getMean());
+			STMTF("stv_confidence", tv->getConfidence());
+			STMTF("stv_count", tv->getCount());
 			break;
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			const IndefiniteTruthValue *itv = static_cast<const IndefiniteTruthValue *>(&tv);
+			IndefiniteTruthValuePtr itv = static_pointer_cast<IndefiniteTruthValue>(tv);
 			STMTF("stv_mean", itv->getL());
 			STMTF("stv_count", itv->getU());
 			STMTF("stv_confidence", itv->getConfidenceLevel());
@@ -1140,19 +1140,19 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	{
 		case SIMPLE_TRUTH_VALUE:
 		{
-			SimpleTruthValue stv(rp.mean, rp.count);
+			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
 			atom->setTruthValue(stv);
 			break;
 		}
 		case COUNT_TRUTH_VALUE:
 		{
-			CountTruthValue ctv(rp.mean, rp.confidence, rp.count);
+			TruthValuePtr ctv(CountTruthValue::createTV(rp.mean, rp.confidence, rp.count));
 			atom->setTruthValue(ctv);
 			break;
 		}
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			IndefiniteTruthValue itv(rp.mean, rp.count, rp.confidence);
+			TruthValuePtr itv(IndefiniteTruthValue::createTV(rp.mean, rp.count, rp.confidence));
 			atom->setTruthValue(itv);
 			break;
 		}

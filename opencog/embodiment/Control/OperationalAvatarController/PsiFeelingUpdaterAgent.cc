@@ -314,7 +314,7 @@ void PsiFeelingUpdaterAgent::setUpdatedValues()
         updatedValue = iFeeling->second.updatedValue;
 
         // Set truth value of corresponding EvaluationLink
-        SimpleTruthValue stvFeeling = SimpleTruthValue(updatedValue, 1.0);
+        TruthValuePtr stvFeeling = SimpleTruthValue::createTV(updatedValue, 1.0);
         atomSpace.setTV(evaluationLink, stvFeeling);
 
         // Reset bUpdated
