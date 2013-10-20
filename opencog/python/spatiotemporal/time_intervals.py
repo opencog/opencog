@@ -32,12 +32,12 @@ class TimeInterval(object):
             start = self.a
         else:
             start = UnixTime(start)
-            assert self.a <= start <= self.b, "'start' should be within the interval of the interval"
+            assert self.a <= start <= self.b, "'start' should be within the interval of 'self'"
         if stop is None:
             stop = self.b
         else:
             stop = UnixTime(stop)
-            assert self.a <= stop <= self.b, "'stop' should be within the interval of the interval"
+            assert self.a <= stop <= self.b, "'stop' should be within the interval of 'self'"
         return random_time(start, stop, probability_distribution)
 
     def to_list(self):
@@ -106,7 +106,7 @@ class TimeInterval(object):
         return '{0}([{1} : {2}])'.format(self.__class__.__name__, self.a, self.b)
 
     def __str__(self):
-        return repr(self)
+        return 'from {0} to {1}'.format(self.a, self.b)
 
 
 class TimeIntervalListBased(list, TimeInterval):

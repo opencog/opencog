@@ -10,6 +10,8 @@ __author__ = 'keyvan'
 
 
 class BaseTemporalEvent(TimeInterval):
+    _precision = None
+    PRECISION_FACTOR = 100
     def membership_function(self, time=None):
         if time is None:
             time = self
@@ -62,6 +64,20 @@ class BaseTemporalEvent(TimeInterval):
     def ending(self):
         return self[index_of_first_local_maximum(reversed(self.membership_function()))]
 
+    @property
+    def precision(self):
+        if self._precision is None:
+            return self.duration / 100
+        return self._precision
+
+    @precision.setter
+    def precision(self, value):
+        assert value > 0
+        self._precision = value
+
+    def __str__(self):
+        return repr(self)
+
 
 class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
     def __init__(self, input_list, output_list):
@@ -87,28 +103,28 @@ class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
     @TimeIntervalListBased.a.setter
     def a(self, value):
         TimeIntervalListBased.a.fset(value)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     @TimeIntervalListBased.b.setter
     def b(self, value):
         TimeIntervalListBased.b.fset(value)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
-    def __str__(self):
+    def __repr__(self):
         pairs = ['{0}: {1}'.format(self[i], self.output_list[i]) for i in xrange(len(self))]
         return '{0}({1})'.format(self.__class__.__name__, ', '.join(pairs))
 
     # Every time that self as list changes, or output_list
-    # changes, membership_function_single_point should be invalidated
+    # changes, membership_function should be invalidated
     # Here, only the two main methods that change the list content have been overridden
     # One can add more later if needed...
     def append(self, x):
         TimeIntervalListBased.append(self, x)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
     def __setitem__(self, index, value):
         TimeIntervalListBased.__setitem__(self, index, value)
-        self.membership_function_single_point.invalidate()
+        self.membership_function.invalidate()
 
 
 class TemporalEventSimple(TemporalEventPiecewiseLinear):

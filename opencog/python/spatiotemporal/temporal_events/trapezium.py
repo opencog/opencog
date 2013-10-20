@@ -1,5 +1,5 @@
 from scipy.stats import t
-from spatiotemporal.temporal_events.generic import TemporalEventPiecewiseLinear
+from spatiotemporal.temporal_events.generic import TemporalEventPiecewiseLinear, TemporalEventSimple
 from spatiotemporal.unix_time import UnixTime, random_time
 
 __author__ = 'keyvan'
@@ -56,17 +56,10 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
                 )
         TemporalEventPiecewiseLinear.__init__(self, [a, beginning, ending, b], [0, 1, 1, 0])
 
-    @TemporalEventPiecewiseLinear.a.setter
-    def a(self, value):
-        assert value > self[1]
-        self[0] = UnixTime(value)
-        self.membership_function.invalidate()
-
-    @TemporalEventPiecewiseLinear.b.setter
-    def b(self, value):
-        assert value > self[-2]
-        self[-1] = UnixTime(value)
-        self.membership_function.invalidate()
+    def instance(self):
+        a = self.random_time(self.a, self.beginning)
+        b = self.random_time(self.ending, self.b)
+        return TemporalEventSimple(a, b)
 
     @property
     def beginning(self):
@@ -113,13 +106,15 @@ if __name__ == '__main__':
     import time
 
     #events = generate_random_events(1000)
-    events = generate_random_events(5)
+    events = generate_random_events(1)
 
     start = time.time()
 
     for event in events:
-        plt = event.plot()
+        event.plot()
+        plt = event.instance().plot()
 
     print 'Performance:', time.time() - start, 'seconds'
 
+    plt.ylim(ymax=1.1)
     plt.show()

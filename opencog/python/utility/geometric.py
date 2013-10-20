@@ -32,7 +32,7 @@ class _function_undefined(Function):
         return None
 
     def integrate(self, start, end):
-        raise KeyError("no function is defined for '{0}' to '{1}'".format(start, end))
+        return None
 
 
 FUNCTION_UNDEFINED = _function_undefined()
