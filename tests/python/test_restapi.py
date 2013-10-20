@@ -12,12 +12,9 @@ from web.api.apimain import RESTAPI
 class TestRESTApi():
     """
     Unit tests for the OpenCog REST API.
+
     See: opencog/python/web/api/apimain.py for the class definitions
-
-    This file also provides examples of how to interact programatically with the API. If accessing the API from
-    Python, you may find it convenient to install the 'requests' module to easily perform requests and responses.
-
-    Review the method definitions defined in each resource for request/response specifications.
+    Documentation: http://wiki.opencog.org/w/REST_API
     """
 
     def setUp(self):
@@ -128,7 +125,6 @@ class TestRESTApi():
         put_result = json.loads(put_response.data)['atoms']
 
         # Verify values returned by the PUT request
-        # @todo
         assert put_result['handle'] == atom.h.value()
         assert_almost_equals(\
             float(put_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
@@ -258,8 +254,4 @@ class TestRESTApi():
 
         # Confirm the atom isn't contained in the AtomSpace anymore
         assert_raises(self.atomspace[atom.h], IndexError)
-
-# @todo: test all the error codes
-# @todo: test all the invalid value sending
-
 

@@ -1,10 +1,20 @@
+"""
+Examples of how to consume the REST API from Python, using the 'requests' module:
+http://www.python-requests.org/
+
+From the wiki documentation located here:
+http://wiki.opencog.org/w/REST_API
+"""
+
 __author__ = 'Cosmo Harrigan'
 
 from requests import *
 import json
 
-# Define the API Endpoint - replace 127.0.0.1 with your server IP address if necessary
-uri = 'http://127.0.0.1:5000/api/v1.0/'
+# Define the API Endpoint - replace 127.0.0.1 with the server IP address if necessary
+IP_ADDRESS = '127.0.0.1'
+PORT = '5000'
+uri = 'http://' + IP_ADDRESS + ':' + PORT + '/api/v1.0/'
 headers = {'content-type': 'application/json'}
 
 # Pretty print function for displaying JSON request/response information
@@ -13,7 +23,7 @@ def pprint(call, contents):
     print json.dumps(contents, indent=2)
 
 ####################################################################
-# Example POST and GET requests to create and read Nodes and Links #
+# Example POST and GET requests to create and read nodes and links #
 ####################################################################
 # POST a new node
 truthvalue = {'type': 'simple', 'details': {'strength': 0.08, 'count': 0.2}}
@@ -76,7 +86,7 @@ GET /api/v1.0/atoms/57:
 
 # GET the newly created node by name
 name = post_result['name']
-get_response = get(uri + 'atoms?name=' + name)
+get_response = get(uri + 'atoms', params={'name': name})
 get_result = get_response.json()['result']['atoms'][0]
 pprint(get_response, get_result)
 '''
@@ -105,7 +115,8 @@ GET /api/v1.0/atoms?name=giant_frog:
 
 # GET the newly created node by name and type
 type = post_result['type']
-get_response = get(uri + 'atoms?name=' + name + '&type=' + type)
+#get_response = get(uri + 'atoms?name=' + name + '&type=' + type)
+get_response = get(uri + 'atoms', params={'name': name, 'type': type})
 get_result = get_response.json()['result']['atoms'][0]
 pprint(get_response, get_result)
 '''
@@ -199,18 +210,51 @@ POST /api/v1.0/atoms:
 #########################################
 # Example PUT request to update an atom #
 #########################################
-
-truthvalue = {'type': 'simple', 'details': {'strength': 0.005, 'count': 0.8}}
-attentionvalue = {'sti': 9, 'lti': 2, 'vlti': True}
+# Update the TruthValue and AttentionValue of an atom
+truthvalue = {'type': 'simple', 'details': {'strength': 0.006, 'count': 0.8}}
+attentionvalue = {'sti': 5, 'lti': 3, 'vlti': True}
 atom_update = {'truthvalue': truthvalue, 'attentionvalue': attentionvalue}
 put_response = put(uri + 'atoms/' + str(handle_node_1), data=json.dumps(atom_update), headers=headers)
 put_result = put_response.json()['atoms']
-pprint(post_response, post_result)
-
-# todo: see if the av was updated
+pprint(put_response, put_result)
+'''
+PUT /api/v1.0/atoms/76:
+{
+  "outgoing": [],
+  "incoming": [
+    77
+  ],
+  "name": "giant_frog",
+  "truthvalue": {
+    "type": "simple",
+    "details": {
+      "count": "0.800000011920929",
+      "confidence": "0.0009990009712055326",
+      "strength": "0.006000000052154064"
+    }
+  },
+  "attentionvalue": {
+    "lti": 3,
+    "sti": 5,
+    "vlti": true
+  },
+  "handle": 76,
+  "type": "ConceptNode"
+}
+'''
 
 ############################################
 # Example DELETE request to delete an atom #
 ############################################
+# Delete an atom
+delete_response = delete(uri + 'atoms/' + str(handle_node_1))
+delete_result = delete_response.json()['result']
+pprint(delete_response, delete_result)
+'''
+DELETE /api/v1.0/atoms/76:
+{
+  "handle": 76,
+  "success": true
+}
+'''
 
-# todo: if you delete a node, does the handle disappear from an associated link's outgoing set?

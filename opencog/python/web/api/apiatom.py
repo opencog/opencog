@@ -26,6 +26,7 @@ class AtomAPI(Resource):
         :param id: Atom handle
 
         :return atoms: Returns a JSON representation of an atom list containing the atom.
+
         Example:
 
         {
@@ -63,14 +64,13 @@ class AtomAPI(Resource):
 
         return {'atoms': marshal(atom, atom_fields)}
 
-    # @todo: add example & returns
     def put(self, id):
         """
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
         Uri: atoms/[id]
 
         :param id: Atom handle
-        Include data with the POST request providing a JSON representation of the updated attributes.
+        Include data with the PUT request providing a JSON representation of the updated attributes.
         Valid data elements:
 
         truthvalue (optional) TruthValue, formatted as follows:
@@ -146,7 +146,7 @@ class AtomAPI(Resource):
 
         if 'truthvalue' in data:
             tv = ParseTruthValue.parse(data)
-            self.atomspace.set_tv(h=Handle(id), val=tv)
+            self.atomspace.set_tv(h=Handle(id), tv=tv)
 
         if 'attentionvalue' in data:
             (sti, lti, vlti) = ParseAttentionValue.parse(data)

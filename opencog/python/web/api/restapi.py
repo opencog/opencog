@@ -4,15 +4,25 @@ import opencog.cogserver
 from web.api.apimain import RESTAPI
 from threading import Thread
 
+# Endpoint configuration
+# To allow public access, set to 0.0.0.0; for local access, set to 127.0.0.1
+IP_ADDRESS = '127.0.0.1'
+PORT = 5000
+
 
 class Start(opencog.cogserver.Request):
     """
-    Implements a CogServer Module to load upon startup that will load the REST API defined in apimain.py.
-    Requires the configuration file (opencog.conf) to contain the following parameters:
-        1) PYTHON_EXTENSION_DIRS must specify the relative location of the API scripts
-          Example: PYTHON_EXTENSION_DIRS = ../opencog/python/web/rest
-        2) PYTHON_PRELOAD must specify the restapi module
-          Example: PYTHON_PRELOAD = restapi
+    Implements a CogServer Module to load upon startup that will load the REST API defined in apimain.py
+
+    Prerequisites:
+        1) Requires installation of the Python dependencies by running:
+            sudo ./install_dependencies.sh
+
+        2) Requires the configuration file (opencog.conf) to contain the following parameters:
+            - PYTHON_EXTENSION_DIRS must specify the relative location of the API scripts
+                Example: PYTHON_EXTENSION_DIRS = ../opencog/python/web/api
+            - PYTHON_PRELOAD must specify the restapi module
+                Example: PYTHON_PRELOAD = restapi
 
     To start the REST API, type restapi.Start at the CogServer shell
     """
@@ -34,8 +44,8 @@ class Start(opencog.cogserver.Request):
         thread = Thread(target=self.invoke)
         thread.start()
         print "REST API is now running in a separate thread."
+        # @todo: detect Control-C to end the thread
 
     def invoke(self):
-        api = RESTAPI(self.atomspace)
-        api.run()
-
+        self.api = RESTAPI(self.atomspace)
+        self.api.run(host=IP_ADDRESS, port=PORT)

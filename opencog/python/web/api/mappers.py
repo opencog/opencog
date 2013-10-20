@@ -1,20 +1,17 @@
 """
-Utilities for the REST API for OpenCog
-Define mapping between object attributes and API requests and responses
-Validate input data, format output data
-Used by the classes in api.py
+Utilities used in the REST API for OpenCog
+
+Defines mapping between object attributes and API requests and responses
+Validates input data, formats output data
+Used by the classes in: apiatom.py, apiatomcollection.py
 """
 
 __author__ = 'Cosmo Harrigan'
 
-from flask import * # @todo remove
-from flask import Flask, abort
-from flask import request, make_response, url_for
-from flask.views import MethodView
-from flask.ext.restful import Api, Resource, reqparse, fields, marshal
+from flask import abort
+from flask.ext.restful import fields, marshal
 from opencog.atomspace import *
 
-#
 
 # TruthValue helpers
 class ParseTruthValue(object):
@@ -55,9 +52,6 @@ class FormatTruthValue(fields.Raw):
             'type': 'simple',
             'details': marshal(value, tv_fields)
         }
-# As noted in the cdef for TruthValue in opencog\cython\opencog\atomspace_details.pyx,
-# only SimpleTruthValue has been implemented so far in the Python bindings
-# @todo Implement other TruthValue types in the Cython bindings
 
 tv_fields = {
     'strength': fields.Float(attribute='mean'),
@@ -83,8 +77,8 @@ av_fields = {
     'vlti': fields.Boolean(attribute='vlti')
 }
 
-# Atom helpers
 
+# Atom helpers
 class FormatHandleValue(fields.Raw):
     def format(self, value):
         return value.value()
@@ -101,6 +95,7 @@ class FormatHandleList(fields.Raw):
 class AtomListResponse(object):
     def __init__(self, atoms):
         self.atoms = atoms
+
     def format(self):
         return {
             # @todo: Add pagination (http://flask.pocoo.org/snippets/44/)
@@ -115,6 +110,7 @@ class DeleteAtomResponse(object):
     def __init__(self, handle, status):
         self.handle = handle
         self.status = status
+
     def format(self):
         return {
             'handle': self.handle,
