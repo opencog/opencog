@@ -2,11 +2,15 @@ __author__ = 'Cosmo Harrigan'
 
 from nose.tools import *
 import json
-#from requests import get, put, post
-#from flask.ext.testing import TestCase
-#from flask import *
 from opencog.atomspace import *
-from web.api.apimain import RESTAPI
+
+# Only run the unit tests if the required dependencies have been installed
+# (see: https://github.com/opencog/opencog/issues/337)
+try:
+    from web.api.apimain import RESTAPI
+except ImportError:
+    import unittest
+    raise unittest.SkipTest("ImportError exception: make sure the required dependencies are installed.")
 
 
 class TestRESTApi():
