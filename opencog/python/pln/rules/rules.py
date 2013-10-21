@@ -31,6 +31,9 @@ class Rule(object):
         self.formula = formula
         self.name = self.__class__.__name__
     
+        for atom in self._inputs + self._outputs:
+            assert atom.type != 65535 # missing type bug (cython issue?)
+
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
         tvs = [atom.tv for atom in input_atoms]
