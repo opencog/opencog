@@ -10,7 +10,7 @@ Other Rules calculate them heuristically, based on set probabilities and logical
 
 class Rule(object):
 
-    def __init__ (self, outputs, inputs, formula, multi_inputs=None):
+    def __init__ (self, outputs, inputs, formula):
         '''@outputs is one or more Trees representing the structure of Atom (usually a Link)
     to be produced by this Rule. If it's a variable then any kind of Atom
     can be produced.
@@ -27,7 +27,6 @@ class Rule(object):
 
         self._outputs = outputs
         self._inputs = inputs
-        self._multi_inputs = multi_inputs
 
         self.formula = formula
         self.name = self.__class__.__name__
@@ -290,8 +289,8 @@ class SubsetEvaluationRule(MembershipBasedEvaluationRule):
             output_type=types.SubsetLink,
             formula=formulas.subsetEvaluationFormula)
 
-class InheritanceEvaluationRule(MembershipBasedEvaluationRule):
-    '''Evaluates Inheritance(A B) from the definition.
+class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates IntensionalInheritance(A B) from the definition.
        (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
        ASSOC(A) is the set of x where AttractionLink(x, A)'''
     # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
@@ -299,7 +298,7 @@ class InheritanceEvaluationRule(MembershipBasedEvaluationRule):
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer, 
             member_type = types.AttractionLink,
-            output_type = types.InheritanceLink,
+            output_type = types.IntensionalInheritanceLink,
             formula= formulas.subsetEvaluationFormula)
 
 # abandoned for now because you have to estimate the number of objects (maybe an arbitrary setting?)
@@ -315,6 +314,14 @@ class ExtensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
         MembershipBasedEvaluationRule.__init__(self, chainer,
             member_type = types.MemberLink,
             output_type = types.ExtensionalSimilarityLink,
+            formula= formulas.similarityEvaluationFormula)        
+
+class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates IntensionalSimilarity from the definition.'''
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer,
+            member_type = types.AttractionLink,
+            output_type = types.IntensionalSimilarityLink,
             formula= formulas.similarityEvaluationFormula)        
 
 class EvaluationToMemberRule(Rule):

@@ -1,9 +1,12 @@
 from opencog.atomspace import types, TruthValue
 
-import pln.formulas
-import pln.temporal_formulas
+from pln import formulas, temporal_formulas
+
+from opencog.atomspace import get_type_name
 
 import math
+
+from pln.rules.rules import Rule, ModusPonensRule
 
 class TemporalRule(Rule):
     '''Base class for temporal Rules. They evaluate a time relation such as BeforeLink, based on some AtTimeLinks.'''
@@ -18,10 +21,10 @@ class TemporalRule(Rule):
         Rule.__init__(self,
             formula= formula,
             outputs= [chainer.link(link_type, [A, B])],
-            inputs=  [chainer.link(types.AtTimeLink(ta, A)),
-                      chainer.link(types.AtTimeLink(tb, B))]
+            inputs=  [chainer.link(types.AtTimeLink, [ta, A]),
+                      chainer.link(types.AtTimeLink, [tb, B])])
 
-        name = link_type + 'EvaluationRule'
+        self.name = get_type_name(link_type) + 'EvaluationRule'
 
     def temporal_compute(self, input_tuples):
         links_a, links_b = unzip(input_tuples)
@@ -50,25 +53,29 @@ class TemporalRule(Rule):
 class TemporalTransitivityRule(Rule):
     # Hackily infer transitive temporal relationships using the deduction formula
     # This Rule is important but the TV formula is wrong
-    def __init__(self, chainer, link_type, formula= formulas.deductionFormula):
+    def __init__(self, chainer, link_type, formula= formulas.deductionSimpleFormula):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()
 
-        Rule.__init__(self, chainer, formula=formula,
+        Rule.__init__(self, formula=formula,
             outputs= [chainer.link(link_type, [A, C])],
-            inputs=  [chainer.link(link_type, [A, B]), chainer.link(link_type, [B, C])])
+            inputs=  [chainer.link(link_type, [A, B]),
+                      chainer.link(link_type, [B, C])]
+            )
 
-        name = link_type + 'TransitivityRule'
+        self.name = get_type_name(link_type) + 'TransitivityRule'
+
+# there should also be temporal modus ponens too (to predict that something will happen)
 
 class PredictiveAttractionRule(Rule):
     def __init__(self, chainer):
         A = chainer.new_variable()
         B = chainer.new_variable()
-        Rule.__init__(self, chainer, formula=formulas.identityFormula,
+        Rule.__init__(self, formula=formulas.identityFormula,
             outputs= [chainer.link(types.PredictiveAttractionLink, [A, B])],
             inputs= [chainer.link(types.AndLink, [
-                chainer.link(types.AttractionLink, [A, B])
+                chainer.link(types.AttractionLink, [A, B]),
                 chainer.link(types.BeforeLink, [A, B])
                 ])
             ])
@@ -80,11 +87,11 @@ def create_temporal_rules(chainer):
     combinations = [
         (types.BeforeLink, temporal_formulas.beforeFormula),
         (types.OverlapsLink, temporal_formulas.overlapsFormula),
-        (types.DuringLink, temporalFormulas.duringFormula),
-        (types.MeetsLink, temporalFormulas.meetsFormula),
-        (types.StartsLink, temporalFormulas.startsFormula),
-        (types.FinishesLink, temporalFormulas.finishesFormula),
-        (types.EqualsLink, temporalFormulas.equalsFormula),
+        (types.DuringLink, temporal_formulas.duringFormula),
+        (types.MeetsLink, temporal_formulas.meetsFormula),
+        (types.StartsLink, temporal_formulas.startsFormula),
+        (types.FinishesLink, temporal_formulas.finishesFormula),
+        (types.EqualsLink, temporal_formulas.equalsFormula),
         ]
 
     for (type, formula) in combinations:
@@ -93,6 +100,11 @@ def create_temporal_rules(chainer):
     for type, _ in combinations:
         # use temporal links to evaluate more temporal links
         rules.append(TemporalTransitivityRule(chainer, type))
+
+    # Use the wrong formula to predict events
+    rules.append(ModusPonensRule(chainer, types.BeforeLink))
+
+    rules.append(PredictiveAttractionRule(chainer))
 
     return rules 
 

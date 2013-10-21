@@ -2,7 +2,7 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
 from pln.chainers import Chainer, get_attentional_focus
-from pln.rules import rules
+from pln.rules import rules, temporal_rules
 
 class ForwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -12,40 +12,49 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=True)
 
         # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
-        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+#        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
 #            types.EquivalenceLink]
-        conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink,
-            types.ImplicationLink]
+#        conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.ImplicationLink]
+
+        # always use the mixed inheritance types, because human inference is normally a mix of intensional and extensional
+        conditional_probability_types = [types.InheritanceLink, types.ImplicationLink]
+        similarity_types = [types.SimilarityLink, types.EquivalenceLink]
 
         for link_type in conditional_probability_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
-        self.chainer.add_rule(rules.InheritanceRule(self.chainer))
+        # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
+        for link_type in similarity_types:
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
 
+        # These two Rules create mixed links out of intensional and extensional links
+        self.chainer.add_rule(rules.InheritanceRule(self.chainer))
         self.chainer.add_rule(rules.SimilarityRule(self.chainer))
 
+        # and/or/not
         self.chainer.add_rule(rules.NotCreationRule(self.chainer))
         self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
-
         for rule in rules.create_and_or_rules(self.chainer, 1, 2):
             self.chainer.add_rule(rule)
 
+        # create probabilistic logical links out of MemberLinks
         self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
-        self.chainer.add_rule(rules.InheritanceEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
+
         self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
         self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
         self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(rules.MemberToSubsetRule(self.chainer))
 
+        # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
-        self.chainer.add_rule(rules.PredictiveAttractionRule
-(self.chainer))
 
-        #for rule in temporal_rules.create_temporal_rules(self.chainer):
-        #    self.chainer.add_rule(rule)
+        for rule in temporal_rules.create_temporal_rules(self.chainer):
+            self.chainer.add_rule(rule)
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!
@@ -57,6 +66,8 @@ class ForwardInferenceAgent(MindAgent):
 
         if self.chainer is None:
             self.create_chainer(atomspace)
+
+        import pdb; pdb.set_trace()
 
         result = self.chainer.forward_step()
         if result:
