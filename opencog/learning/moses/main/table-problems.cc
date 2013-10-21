@@ -30,7 +30,6 @@
 #include "../moses/partial.h"
 
 #include "moses_exec_def.h"
-#include "problem.h"
 #include "table-problems.h"
 
 namespace opencog { namespace moses {
@@ -52,26 +51,6 @@ static void log_output_error_exit(string err_msg) {
 }
 
 // ==================================================================
-
-class table_problem_base : public problem_base
-{
-protected:
-    typedef boost::ptr_vector<bscore_base> BScorerSeq;
-
-    void common_setup(problem_params&);
-    void common_type_setup(problem_params&);
-
-    // Input data for table-based problems.
-    vector<Table> tables;
-    vector<CTable> ctables;
-    vector<string> ilabels;     // labels of the input table (table.itable)
-    combo::arity_t arity;
-
-    type_tree table_type_signature;
-    type_tree table_output_tt;
-    type_node table_output_tn;
-    type_node output_type;
-};
 
 void table_problem_base::common_setup(problem_params& pms)
 {
@@ -152,16 +131,6 @@ void table_problem_base::common_type_setup(problem_params& pms)
 
 // ==================================================================
 
-/// Find interesting predicates
-class ip_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "ip"; }
-        virtual const std::string description() const {
-             return "Find interesting patterns"; }
-        virtual void run(problem_params&);
-};
-
 void ip_problem::run(problem_params& pms)
 {
     common_setup(pms);
@@ -223,16 +192,6 @@ static combo_tree ann_exemplar(combo::arity_t arity)
     return ann_tr;
 }
 
-/// Regression based on combo program using ann
-class ann_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "ann-it"; }
-        virtual const std::string description() const {
-             return "ANN-based regression on input table"; }
-        virtual void run(problem_params&);
-};
-
 void ann_table_problem::run(problem_params& pms)
 {
     common_setup(pms);
@@ -287,20 +246,6 @@ void ann_table_problem::run(problem_params& pms)
                       pms.moses_params, pms.mmr_pa);                 \
 }
 
-// ==================================================================
-/// precision-based scoring
-// regression based on input table by maximizing precision (or negative
-// predictive value), holding activation const.
-
-class pre_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "pre"; }
-        virtual const std::string description() const {
-             return "Precision-Activation scoring"; }
-        virtual void run(problem_params&);
-};
-
 void pre_table_problem::run(problem_params& pms)
 {
     // Very nearly identical to the REGRESSION macro above,
@@ -349,17 +294,6 @@ void pre_table_problem::run(problem_params& pms)
 
 }
 
-// ==================================================================
-/// precision-based scoring (maximizing number of conjunctions)
-class pre_conj_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "pre-conj"; }
-        virtual const std::string description() const {
-             return "Precision-Conjunction-Maximization"; }
-        virtual void run(problem_params&);
-};
-
 void pre_conj_table_problem::run(problem_params& pms)
 {
     // Very nearly identical to the REGRESSION macro above,
@@ -396,17 +330,6 @@ void pre_conj_table_problem::run(problem_params& pms)
                           pms.moses_params, pms.mmr_pa);
 }
 
-// ==================================================================
-/// maximize precision, holding recall const.
-class prerec_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "prerec"; }
-        virtual const std::string description() const {
-             return "Precision Maximization (holding recall constant)"; }
-        virtual void run(problem_params&);
-};
-
 void prerec_table_problem::run(problem_params& pms)
 {
     common_setup(pms);
@@ -419,17 +342,6 @@ void prerec_table_problem::run(problem_params& pms)
                ctables, prerec_bscore,
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
-
-// ==================================================================
-/// maximize recall, holding precision const.
-class recall_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "recall"; }
-        virtual const std::string description() const {
-             return "Recall Maximization (holding precision constant)"; }
-        virtual void run(problem_params&);
-};
 
 void recall_table_problem::run(problem_params& pms)
 {
@@ -444,17 +356,6 @@ void recall_table_problem::run(problem_params& pms)
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
-// ==================================================================
-/// bep == beak-even point between bep and precision.
-class bep_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "bep"; }
-        virtual const std::string description() const {
-             return "Maximize Break-even Point"; }
-        virtual void run(problem_params&);
-};
-
 void bep_table_problem::run(problem_params& pms)
 {
     common_setup(pms);
@@ -468,17 +369,6 @@ void bep_table_problem::run(problem_params& pms)
                (table, pms.min_rand_input, pms.max_rand_input, fabs(pms.hardness)));
 }
 
-// ==================================================================
-/// f_one = F_1 harmonic mean of recall and precision
-class f_one_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "f_one"; }
-        virtual const std::string description() const {
-             return "Maximize F_1 score"; }
-        virtual void run(problem_params&);
-};
-
 void f_one_table_problem::run(problem_params& pms)
 {
     common_setup(pms);
@@ -489,18 +379,6 @@ void f_one_table_problem::run(problem_params& pms)
                ctables, f_one_bscore,
                (table));
 }
-
-// ==================================================================
-
-/// Maximize accuracy
-class it_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "it"; }
-        virtual const std::string description() const {
-             return "Maximize Accuracy"; }
-        virtual void run(problem_params&);
-};
 
 void it_table_problem::run(problem_params& pms)
 {
@@ -580,18 +458,6 @@ void it_table_problem::run(problem_params& pms)
         exit(1);
     }
 }
-
-// ==================================================================
-
-/// Perform clusterering
-class cluster_table_problem : public table_problem_base
-{
-    public:
-        virtual const std::string name() const { return "cluster"; }
-        virtual const std::string description() const {
-             return "Discover clustering function"; }
-        virtual void run(problem_params&);
-};
 
 void cluster_table_problem::run(problem_params& pms)
 {
