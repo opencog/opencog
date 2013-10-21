@@ -114,9 +114,11 @@ void table_problem_base::common_type_setup(problem_params& pms)
     // Determine the default exemplar to start with
     // problem == pre  precision-based scoring
     // precision combo trees always return booleans.
-    if (pms.exemplars.empty())
-        pms.exemplars.push_back(type_to_exemplar(
-            pms.problem == pre? id::boolean_type : table_output_tn));
+    if (pms.exemplars.empty()) {
+        type_node pbr_type = pms.problem == pre_table_problem().name() ?
+            id::boolean_type : table_output_tn;
+        pms.exemplars.push_back(type_to_exemplar(pbr_type));
+    }
 
     // XXX This seems strange to me .. when would the exemplar output
     // type ever differ from the table?  Well,, it could for pre problem,
