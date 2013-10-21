@@ -43,7 +43,11 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/types
 	moses/using
 
-	scoring/scoring
+	scoring/scoring_base
+	scoring/discriminating_bscore    
+	scoring/precision_bscore    
+    scoring/instance_scorer
+    scoring/bscores
 
 	metapopulation/metapopulation
 	metapopulation/metapop_params

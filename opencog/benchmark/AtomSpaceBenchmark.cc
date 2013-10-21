@@ -20,7 +20,10 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/cython/PythonModule.h>
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/server/CogServer.h>  // Ugh. Needed for python to work right.
 
 #include "AtomSpaceBenchmark.h"
 
@@ -65,6 +68,10 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 
     asp = NULL;
     atab = NULL;
+#if HAVE_CYTHON
+    cogs = NULL;
+    pymo = NULL;
+#endif
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
 
@@ -74,6 +81,8 @@ AtomSpaceBenchmark::~AtomSpaceBenchmark() {
     // We don't delete the AtomSpace as we assume termination of the benchmark
     // program here and cleanup of large AtomSpaces takes a while.
 
+    // deleting the PyhtonModule currently results in a deadlock in python.
+    // XXX python needs fixing.
 }
 
 // This is wrong, because it failes to also count the amount of RAM
@@ -222,6 +231,9 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
 #if HAVE_GUILE
         case BENCH_SCM:  cout << "Scheme's "; break;
 #endif /* HAVE_GUILE */
+#if HAVE_CYTHON
+        case BENCH_PYTHON: cout << "Python's "; break;
+#endif /* HAVE_CYTHON */
     }
     cout << methodName << " method " << Nreps << " times ";
     std::ofstream myfile;
@@ -311,14 +323,32 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             Handle::set_resolver(atab);
         }
         else {
+#if HAVE_CYTHON
+            cogs = new CogServer();
+            if (pymo == NULL) pymo = new PythonModule(*cogs);
+            pymo->init();
+            asp = &cogs->getAtomSpace();
+            pyev = &PythonEval::instance(asp);
+
+            // And now ... create an instance of the atomspace.
+            // Pass in the raw C++ atomspace address into cython.
+            // Kind-of tacky, but I don't see any better way.
+            // (We must do this because otherwise, the benchmark would
+            // run on a different atomspace, than the one containing
+            // all the atoms.  And that would give bad results.
+            std::ostringstream dss;
+            dss << "from opencog.atomspace import AtomSpace, types, Handle, TruthValue\n"
+                << "aspace = AtomSpace(" << asp << ")\n";
+            pyev->eval(dss.str());
+#else
             asp = new AtomSpace();
+#endif
             Handle::set_resolver(&asp->atomSpaceAsync->getAtomTable());
 #if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
 #endif
         }
 
-        //asBackend = new AtomSpaceImpl();
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
         UUID_end = TLB::getMaxUUID();
 
@@ -326,9 +356,13 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
         if (testKind == BENCH_TABLE)
             delete atab;
-        else
+        else {
+#if HAVE_CYTHON
+            delete cogs;
+#else
             delete asp;
-        //delete asBackend;
+#endif
+        }
     }
 
     //cout << estimateOfAtomSize(Handle(2)) << endl;
@@ -345,7 +379,7 @@ Type AtomSpaceBenchmark::randomType(Type t)
     return randomType;
 }
 
-clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
+clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
 {
 #ifdef FIXME_LATER
     // Some faction of the time, we create atoms with non-default
@@ -364,108 +398,65 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& s)
     Type t = defaultNodeType;
     if (p < chanceOfNonDefaultNode)
         t = randomType(NODE);
-    if (s.size() > 0) {
-        switch (testKind) {
-#if HAVE_GUILE
-        case BENCH_SCM: {
-#if ALL_AT_ONCE
-            std::ostringstream ss;
-            ss << "(cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << s << "\")\n";
-            std::string gs = ss.str();
-#else
-            std::ostringstream dss;
-            dss << "(define (mk) (cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << s << "\"))\n";
-            scm->eval(dss.str());
-            std::string gs = "(mk)\n";
-#endif
-            clock_t t_begin = clock();
-            scm->eval_h(gs);
-            return clock() - t_begin;
-        }
-#endif /* HAVE_GUILE */
-        case BENCH_IMPL: {
-            clock_t t_begin = clock();
-            asp->atomSpaceAsync->atomspace.addNode(t,s); 
-            return clock() - t_begin;
-        }
-        case BENCH_TABLE: {
-            clock_t t_begin = clock();
-            atab->add(createNode(t,s));
-            return clock() - t_begin;
-        }
-        case BENCH_AS: {
-            clock_t t_begin = clock();
-            asp->addNode(t,s); 
-            return clock() - t_begin;
-        }}
-    } else {
+
+    std::string scp(csi);
+    if (csi.size() ==  0) {
         std::ostringstream oss;
         counter++;
         oss << "node " << counter;
-
-        switch (testKind) {
-#if HAVE_GUILE
-        case BENCH_SCM: {
-#if ALL_AT_ONCE
-            std::ostringstream ss;
-            ss << "(cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << oss.str() << "\")\n";
-            std::string gs = ss.str();
-#else
-#define ONE_SHOT
-#ifdef ONE_SHOT
-            std::ostringstream dss;
-            dss << "(define (mk) (cog-new-node '"
-               << classserver().getTypeName(t) 
-               << " \"" << oss.str() << "\"))\n";
-            scm->eval(dss.str());
-            std::string gs = "(mk)\n";
-#else
-            std::ostringstream dss;
-            dss << "(define (crea n) "
-                << "  (if (not (eq? n 0))"
-                << "    (let ()"
-                << "      (cog-new-node '"
-                <<          classserver().getTypeName(t)
-                << "        (string-join (list \""
-                <<            oss.str() << " \" (number->string n))))"
-                << "      (crea (- n 1))"
-                << "    )"
-                << "  )"
-                << ")\n";
-            scm->eval(dss.str());
-            std::string gs = "(crea 100)\n";
-            clock_t begin = clock();
-            scm->eval(gs);
-            return clock() - begin;
-#endif
-#endif
-            clock_t t_begin = clock();
-            scm->eval_h(gs);
-            return clock() - t_begin;
-        }
-#endif /* HAVE_GUILE */
-        case BENCH_IMPL: {
-            clock_t t_begin = clock();
-            asp->atomSpaceAsync->atomspace.addNode(t,oss.str()); 
-            return clock() - t_begin;
-        }
-        case BENCH_TABLE: {
-            clock_t t_begin = clock();
-            atab->add(createNode(t, oss.str()));
-            return clock() - t_begin;
-        }
-        case BENCH_AS: {
-            clock_t t_begin = clock();
-            asp->addNode(t, oss.str()); 
-            return clock() - t_begin;
-        }}
+        scp = oss.str();
     }
+
+    switch (testKind) {
+    case BENCH_IMPL: {
+        clock_t t_begin = clock();
+        asp->atomSpaceAsync->atomspace.addNode(t, scp); 
+        return clock() - t_begin;
+    }
+    case BENCH_TABLE: {
+        clock_t t_begin = clock();
+        atab->add(createNode(t, scp));
+        return clock() - t_begin;
+    }
+    case BENCH_AS: {
+        clock_t t_begin = clock();
+        asp->addNode(t, scp); 
+        return clock() - t_begin;
+    }
+#if HAVE_GUILE
+    case BENCH_SCM: {
+#if ALL_AT_ONCE
+        std::ostringstream ss;
+        ss << "(cog-new-node '"
+           << classserver().getTypeName(t) 
+           << " \"" << scp << "\")\n";
+        std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (mk) (cog-new-node '"
+           << classserver().getTypeName(t) 
+           << " \"" << scp << "\"))\n";
+        scm->eval(dss.str());
+        std::string gs = "(mk)\n";
+#endif
+        clock_t t_begin = clock();
+        scm->eval_h(gs);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_GUILE */
+
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.add_node (" << t << ", \"" << scp << "\")\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
+    }
+
     return 0;
 }
 
@@ -473,19 +464,33 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 {
     Type t = defaultLinkType;
     double p = rng->randdouble();
-    HandleSeq outgoing;
-    //clock_t tRandomStart, tRandomEnd;
-    clock_t tAddLinkStart;
     if (p < chanceOfNonDefaultLink) t = randomType(LINK);
 
-    int arity = (*prg)(randgen);
+    size_t arity = (*prg)(randgen);
     if (arity == 0) { ++arity; };
 
-    for (int j=0; j < arity; j++) {
+    HandleSeq outgoing;
+    for (size_t j=0; j < arity; j++) {
         outgoing.push_back(getRandomHandle());
     }
 
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.add_link (" << t << ", [";
+        for (size_t j=0; j < arity; j++) {
+            dss << "Handle( " << outgoing[j].value() << ")";
+            if (j < arity-1) dss  << ", ";
+        }
+        dss << " ] )\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
+
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -497,7 +502,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         std::ostringstream ss;
         ss << "(cog-new-link '"
            << classserver().getTypeName(t) << " ";
-        for (int j=0; j < arity; j++) {
+        for (size_t j=0; j < arity; j++) {
             ss << "(cog-atom " << outgoing[j].value() << ") ";
         }
         ss << ")\n";
@@ -507,7 +512,7 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         std::ostringstream dss;
         dss << "(define (mk) (cog-new-link '"
            << classserver().getTypeName(t) << " ";
-        for (int j=0; j < arity; j++) {
+        for (size_t j=0; j < arity; j++) {
             dss << "(cog-atom " << outgoing[j].value() << ") ";
         }
         dss << "))\n";
@@ -521,17 +526,17 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     }
 #endif /* HAVE_GUILE */
     case BENCH_IMPL: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         asp->atomSpaceAsync->atomspace.addLink(t, outgoing);
         return clock() - tAddLinkStart;
     }
     case BENCH_TABLE: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         atab->add(createLink(t, outgoing));
         return clock() - tAddLinkStart;
     }
     case BENCH_AS: {
-        tAddLinkStart = clock();
+        clock_t tAddLinkStart = clock();
         asp->addLink(t, outgoing);
         return clock() - tAddLinkStart;
     }}
@@ -541,6 +546,10 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
 void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks, bool display)
 {
     BenchType saveKind = testKind;
+#if HAVE_CYTHON
+    if (testKind == BENCH_PYTHON)
+       testKind = BENCH_AS;
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     if (testKind == BENCH_SCM)
        testKind = BENCH_AS;
@@ -623,6 +632,16 @@ timepair_t AtomSpaceBenchmark::bm_getType()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_type(Handle(" << h.value() << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -669,6 +688,16 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_tv(Handle(" << h.value() << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -732,6 +761,17 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.set_tv(Handle(" << h.value()
+            << "), TruthValue(" << strength << ", " << conf << "))\n";
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -791,6 +831,16 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_atoms_by_name(types.Node, \"" << oss.str() << "\", True)\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
@@ -821,11 +871,17 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
 timepair_t AtomSpaceBenchmark::bm_getHandleSet()
 {
     Type t = randomType(ATOM);
-    HandleSeq results;
-    HandleSeq results2;
-    clock_t t_begin;
-    clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_atoms_by_type(" << t << ", True)\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
         // Currently not expose in the SCM API
@@ -833,21 +889,24 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     }
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
-        t_begin = clock();
-        atab->getHandlesByType(back_inserter(results2), t, true);
-        time_taken = clock() - t_begin;
+        clock_t t_begin = clock();
+        HandleSeq results;
+        atab->getHandlesByType(back_inserter(results), t, true);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), t, true);
-        time_taken = clock() - t_begin;
+        HandleSeq results;
+        clock_t t_begin = clock();
+        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results), t, true);
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
     case BENCH_AS: {
-        t_begin = clock();
+        HandleSeq results;
+        clock_t t_begin = clock();
         asp->getHandleSet(back_inserter(results), t, true);
-        time_taken = clock() - t_begin;
+        clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
     return timepair_t(0,0);
@@ -859,6 +918,16 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_outgoing(Handle(" << h.value() << "))\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE
@@ -906,6 +975,16 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     clock_t t_begin;
     clock_t time_taken;
     switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        dss << "aspace.get_incoming(Handle(" << h.value() << "))\n"; 
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
 #if ALL_AT_ONCE

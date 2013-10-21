@@ -8,7 +8,6 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/guile/SchemeEval.h>
 
 using boost::tuple;
 
@@ -16,6 +15,11 @@ namespace opencog
 {
 
 typedef boost::tuple<clock_t,clock_t> timepair_t;
+
+class CogServer;
+class PythonModule;
+class PythonEval;
+class SchemeEval;
 
 class AtomSpaceBenchmark
 {
@@ -49,8 +53,12 @@ class AtomSpaceBenchmark
     AtomSpace* asp;
     AtomTable* atab;
 #if HAVE_GUILE
-    //AtomSpaceImpl asBackend;
     SchemeEval* scm;
+#endif
+#if HAVE_CYTHON
+    CogServer* cogs;
+    PythonModule* pymo;
+    PythonEval* pyev;
 #endif
 
     MT19937RandGen* rng;
@@ -78,7 +86,10 @@ public:
 
     enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE,
 #ifdef HAVE_GUILE
-        BENCH_SCM
+        BENCH_SCM,
+#endif 
+#ifdef HAVE_CYTHON
+        BENCH_PYTHON,
 #endif 
     };
     BenchType testKind;

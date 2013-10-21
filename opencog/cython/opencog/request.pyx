@@ -6,7 +6,9 @@ cdef class Request:
         pass
 
     def run(self, args=[], atomspace=None):
-        self.send("This is the default python request.")
+        # Use the args and atomspace, as otherwise, we get compiler
+        # warnings about unused args.
+        self.send("This is the default python request. args=", args, " atomspace size=", atomspace.getSize())
 
     def send(self, msg):
         self.c_obj.send(string(msg))

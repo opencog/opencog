@@ -59,8 +59,11 @@ Atom::Atom(Type t, TruthValuePtr tv, const AttentionValue& av)
     atomTable = NULL;
     type = t;
 
-    setTruthValue(tv);
-    setAttentionValue(av);
+    if (not tv->isNullTv()) truthValue = tv;
+    if (atomTable != NULL)
+        setAttentionValue(av);
+    else
+        attentionValue = av;
 
     // XXX FIXME for right now, all atoms will always keep their
     // incoming sets.  In the future, this should only be set by
@@ -77,7 +80,7 @@ Atom::~Atom()
 
 void Atom::setTruthValue(TruthValuePtr tv)
 {
-    if (!tv->isNullTv()) truthValue = tv;
+    if (not tv->isNullTv()) truthValue = tv;
 }
 
 void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)

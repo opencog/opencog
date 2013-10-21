@@ -593,9 +593,16 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
+
 IF (NOT WIN32)
 	ADD_CUSTOM_TARGET (examples
-		COMMAND ${CMAKE_BUILD_TOOL}
+		# using CMAKE_BUILD_TOOL results in teh cryptic error message
+		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+		# This is because make doesn't know how to pass jobserver args to
+		# the submake.  So, instead, just use $(MAKE) (with round parens)
+		# -- that will do the right thing.
+		# COMMAND ${CMAKE_BUILD_TOOL} 
+		COMMAND $(MAKE) 
 		WORKING_DIRECTORY examples
 		COMMENT "Building examples"
 	)

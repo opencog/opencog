@@ -122,13 +122,14 @@ void PythonEval::init(void)
     logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
 }
 
-PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
+PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace)
+{
     PyObject * pAtomSpace;
 
     if (atomspace)
         pAtomSpace = py_atomspace(atomspace);
     else
-        pAtomSpace = py_atomspace(this->atomspace);
+        pAtomSpace = py_atomspace(this->_atomspace);
 
     if (pAtomSpace != NULL)
         logger().debug("PythonEval::%s Get atomspace wrapped with python object",
@@ -146,7 +147,8 @@ PyObject * PythonEval::getPyAtomspace(AtomSpace * atomspace) {
     return pAtomSpace;
 }
 
-void PythonEval::printDict(PyObject* obj) {
+void PythonEval::printDict(PyObject* obj)
+{
     if (!PyDict_Check(obj))
         return;
 
@@ -177,11 +179,11 @@ PythonEval::~PythonEval()
 */
 PythonEval& PythonEval::instance(AtomSpace * atomspace)
 {
-    if(!Py_IsInitialized()){
+    if (not Py_IsInitialized()){
         logger().error() << "Python Interpreter isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
     }
-    if(!PyEval_ThreadsInitialized()){
+    if (not PyEval_ThreadsInitialized()){
         logger().error() << "Python Threads isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
     }
@@ -196,7 +198,7 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         }
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (atomspace and singletonInstance->atomspace->atomSpaceAsync !=
+    else if (atomspace and singletonInstance->_atomspace->atomSpaceAsync !=
              atomspace->atomSpaceAsync)
     {
         // Someone is trying to initialize the Python
@@ -308,6 +310,10 @@ std::string PythonEval::apply_script(const std::string& script)
                        "_opencog_output_stream.close()\n");
     //    PyGILState_Release(_state);
 
+    // XXX TODO FIXME: we should check for error, and throw.  Without
+    // this, python scripts can silently fail, and you'd never now it.
+
+    // printf("Python says that: %s\n", result.c_str());
     return result;
 }
 
@@ -409,7 +415,7 @@ void PythonEval::addModuleFromPath(std::string path)
 std::string PythonEval::eval(std::string expr)
 {
     std::string result = "";
-    if(expr == "\n")
+    if (expr == "\n")
     {
         this->pending = false;
         result = this->apply_script(this->expr);
@@ -419,17 +425,16 @@ std::string PythonEval::eval(std::string expr)
     {
         size_t size = expr.size();
         size_t colun = expr.find_last_of(':');
-        if(size-2 == colun)
+        if (size-2 == colun)
             pending = true;
 
         this->expr += expr;
 
-        if(!pending)
+        if (not pending)
         {
             result = this->apply_script(this->expr);
             this->expr = "";
         }
     }
     return result;
-
 }
