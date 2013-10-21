@@ -89,6 +89,24 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
     return false;
 }
 
+StateNode* RuleNode::getLastForwardStateNode()
+{
+    // get the forwardStateNode with the deepest depth
+    vector<StateNode*>::iterator it = forwardLinks.begin();
+    StateNode* lastedStateNode = 0;
+
+    for (; it != forwardLinks.end(); ++ it)
+    {
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
+
+        if ( lastedStateNode < ((StateNode*)(*it)))
+        {
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+}
+
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
 {
@@ -101,45 +119,61 @@ void StateNode::calculateNodesDepth()
         {
             return; // it's the goal state nodes
         }
+        else if (backwardRuleNode != 0)
+        {
+            // the state node of its backwardRuleNode's forward state node , which with the deepest depth
+            StateNode* deepestNode = backwardRuleNode->getLastForwardStateNode();
+            // To be improved: currently the index is only 0 ~ 9, need to support A~Z , a~z
+            int index = (deepestNode->depth)[(deepestNode->depth).size() - 1];
+            index ++;
+            depth = (deepestNode->depth).substr(0,(deepestNode->depth).size() - 1) + opencog::toString(index);
+
+        }
         else
         {
-            depth = "-1"; // this a state node that there is not any rule node need it currently
+            cout << "Debug Error: StateNode::calculateNodesDepth: this state node is created out of nothing, it doesn't have any backward or forward rule node!"<<std::endl;
             return;
         }
     }
-
-    string fowardRuleNodeDepth = forwardRuleNode->getDepthOfRuleNode();
-
-    // find the index of this StateNode in its forward rule node
-    int index = 0;
-    vector<StateNode*>::iterator it = forwardLinks.begin();
-
-    for (; it != forwardLinks.end(); ++ it, ++ index)
+    else
     {
 
-        if (this == (StateNode*)(*it))
-            break;
+        string fowardRuleNodeDepth = forwardRuleNode->getDepthOfRuleNode();
+
+        // find the index of this StateNode in its forward rule node
+        int index = 0;
+        vector<StateNode*>::iterator it = forwardRuleNode->backwardLinks.begin();
+
+        for (; it != forwardRuleNode->backwardLinks.end(); ++ it, ++ index)
+        {
+
+            if (this == (StateNode*)(*it))
+                break;
+        }
+
+        if (it == forwardRuleNode->backwardLinks.end())
+        {
+            cout<< "Debug Error: the this state node cannot be found in its forward rule node!"<<std::endl;
+            return;
+        }
+
+        // To be improved: currently the index is only 0 ~ 9, need to support A~Z , a~z
+        depth = fowardRuleNodeDepth + opencog::toString(index);
+
+        if ((backwardRuleNode == 0) || (backwardRuleNode->backwardLinks.size() == 0))
+            return;
+
+        // this state node has backward nodes, calculate all of their depth recursively
+        vector<StateNode*>::iterator bit = backwardRuleNode->backwardLinks.begin();
+
+        for (; bit != backwardRuleNode->backwardLinks.end(); ++ bit)
+        {
+            ((StateNode*)(*bit))->calculateNodesDepth();
+        }
+
     }
 
-    if (it == forwardLinks.end())
-    {
-        cout<< "Debug Error: the this state node cannot be found in its forward rule node!"<<std::endl;
-        return;
-    }
 
-    // To be improved: currently the index is only 0 ~ 9, need to support A~Z , a~z
-    depth = fowardRuleNodeDepth + opencog::toString(index);
-
-    if ((backwardRuleNode == 0) || (backwardRuleNode->backwardLinks.size() == 0))
-        return;
-
-    // this state node has backward nodes, calculate all of their depth recursively
-    vector<StateNode*>::iterator bit = backwardRuleNode->backwardLinks.begin();
-
-    for (; bit != backwardRuleNode->backwardLinks.end(); ++ bit)
-    {
-        ((StateNode*)(*bit))->calculateNodesDepth();
-    }
 }
 
 StateNode* RuleNode::getMostClosedBackwardStateNode()
@@ -1147,6 +1181,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             newStateNode->forwardRuleNode = ruleNode;
             newStateNode->backwardRuleNode = 0;
             newStateNode->forwardEffectState = ps;
+            newStateNode->forwardRuleNode->backwardLinks.push_back(newStateNode);
+            newStateNode->calculateNodesDepth();
 
             // first check if this state has beed satisfied by the previous state nodes
             bool found = false;

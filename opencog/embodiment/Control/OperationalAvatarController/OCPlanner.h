@@ -174,7 +174,7 @@ public:
     StateNode* getMostClosedBackwardStateNode();
 
     // get the ForwardStateNode with the deepest depth, which is the most closed forward state node to me
-    StateNode* getMostClosedForwardStateNode();
+    StateNode* getLastForwardStateNode();
 
 };
 
