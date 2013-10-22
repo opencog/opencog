@@ -50,22 +50,27 @@ using namespace std;
 string RuleNode::getDepthOfRuleNode()
 {
      // check the depth of the effect state nodes of this rule, get the deepest state node.
+    StateNode* deepestStateNode = getLastForwardStateNode();
 
-    vector<StateNode*>::iterator it = forwardLinks.begin();
-    StateNode* deepestStateNode = 0;
+    return deepestStateNode->depth;
+}
+
+StateNode* RuleNode::getLastForwardStateNode() const
+{
+    // get the forwardStateNode with the deepest depth
+    vector<StateNode*>::const_iterator it = forwardLinks.begin();
+    StateNode* lastedStateNode = 0;
 
     for (; it != forwardLinks.end(); ++ it)
     {
-        if (deepestStateNode == 0)
-            deepestStateNode = (StateNode*)(*it);
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
 
-        if ( deepestStateNode < ((StateNode*)(*it)) )
+        if ( lastedStateNode < ((StateNode*)(*it)))
         {
-            deepestStateNode = (StateNode*)(*it);
+            lastedStateNode = (StateNode*)(*it);
         }
     }
-
-    return deepestStateNode->depth;
 }
 
 void RuleNode::updateCurrentAllBindings()
@@ -89,23 +94,6 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
     return false;
 }
 
-StateNode* RuleNode::getLastForwardStateNode()
-{
-    // get the forwardStateNode with the deepest depth
-    vector<StateNode*>::iterator it = forwardLinks.begin();
-    StateNode* lastedStateNode = 0;
-
-    for (; it != forwardLinks.end(); ++ it)
-    {
-        if (lastedStateNode == 0)
-            lastedStateNode = (StateNode*)(*it);
-
-        if ( lastedStateNode < ((StateNode*)(*it)))
-        {
-            lastedStateNode = (StateNode*)(*it);
-        }
-    }
-}
 
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
@@ -176,10 +164,10 @@ void StateNode::calculateNodesDepth()
 
 }
 
-StateNode* RuleNode::getMostClosedBackwardStateNode()
+StateNode* RuleNode::getMostClosedBackwardStateNode() const
 {
     // get the BackwardStateNode with the least depth
-    vector<StateNode*>::iterator it = backwardLinks.begin();
+    vector<StateNode*>::const_iterator it = backwardLinks.begin();
     StateNode* lastedStateNode = 0;
 
     for (; it != backwardLinks.end(); ++ it)
@@ -1173,7 +1161,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // out put all the effects debug info:
         cout<<"Debug planning step " << tryStepNum <<": All preconditions for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         int preConNum = 1;
-        for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre, ++preConNum)
+        itpre = ruleNode->originalRule->preconditionList.end();
+        itpre --;
+        for (; ; -- itpre, ++preConNum)
         {
             State* ps = *itpre;
             State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -1183,7 +1173,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             newStateNode->forwardRuleNode = ruleNode;
             newStateNode->backwardRuleNode = 0;
             newStateNode->forwardEffectState = ps;
-            newStateNode->forwardRuleNode->backwardLinks.push_back(newStateNode);
+            ruleNode->backwardLinks.push_back(newStateNode);
             newStateNode->calculateNodesDepth();
 
             // first check if this state has beed satisfied by the previous state nodes
@@ -1256,6 +1246,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 cout << " is unsatisfied :(" << std::endl;
             }
 
+            if (itpre == ruleNode->originalRule->preconditionList.begin())
+                break;
         }
 
         // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
@@ -1273,9 +1265,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
 
     // sort the list of rule node
-    allRuleNodeInThisPlan.end();
+    allRuleNodeInThisPlan.sort();
 
-    // and then encapsule the action plac for each step and send to PAI
+    // and then encapsule the action for each step and send to PAI
     list<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
     int stepNum = 1;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)

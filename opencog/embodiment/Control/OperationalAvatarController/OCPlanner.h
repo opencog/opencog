@@ -164,17 +164,17 @@ public:
 
     string getDepthOfRuleNode();
 
-//    bool operator < (const RuleNode& other) const
-//    {
-//        // so , the deeper rule node will be put front
-//        return ( getDepthOfRuleNode() > other.getDepthOfRuleNode());
-//    }
+    bool operator < (const RuleNode& other) const
+    {
+        // so , the deeper rule node will be put front
+        return !( other.getLastForwardStateNode() < getLastForwardStateNode());
+    }
 
     // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
-    StateNode* getMostClosedBackwardStateNode();
+    StateNode* getMostClosedBackwardStateNode() const;
 
     // get the ForwardStateNode with the deepest depth, which is the most closed forward state node to me
-    StateNode* getLastForwardStateNode();
+    StateNode* getLastForwardStateNode() const;
 
 };
 
