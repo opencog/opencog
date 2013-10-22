@@ -114,6 +114,9 @@ class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
         pairs = ['{0}: {1}'.format(self[i], self.output_list[i]) for i in xrange(len(self))]
         return '{0}({1})'.format(self.__class__.__name__, ', '.join(pairs))
 
+    def __str__(self):
+        return BaseTemporalEvent.__str__(self)
+
     # Every time that self as list changes, or output_list
     # changes, membership_function should be invalidated
     # Here, only the two main methods that change the list content have been overridden

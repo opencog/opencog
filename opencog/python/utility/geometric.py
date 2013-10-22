@@ -1,6 +1,13 @@
-from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
+from math import fabs
+from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
 
 __author__ = 'keyvan'
+
+
+def equals(a, b):
+    if fabs(a - b) < EPSILON:
+        return True
+    return False
 
 
 def index_of_first_local_maximum(sequence):
@@ -56,7 +63,8 @@ class FunctionHorizontalLinear(Function):
 
 
 class FunctionLinear(Function):
-    def __init__(self, a=None, b=None, x_0=None, x_1=None, y_0=None, y_1=None):
+    def __init__(self, a=None, b=None, x_0=None, y_0=None, x_1=None, y_1=None):
+        #(x_0, y_0), (x_1, y_1) = sorted([(x_0, y_0), (x_1, y_1)])
         if (a, b) == (None, None):
             a = (float(y_1) - y_0) / (x_1 - x_0)
             b = y_0 - a * x_0
@@ -77,12 +85,12 @@ class FunctionLinear(Function):
 
         x_intercept = self.x_intercept
 
-        if start >= x_intercept:
+        if start > x_intercept or equals(start, x_intercept):
             area_of_triangle = (end - start) * (self(end) - self(start)) / 2
             area_of_rectangle = (end - start) * self(start)
             return area_of_triangle + area_of_rectangle
 
-        if end <= x_intercept:
+        if end < x_intercept or equals(end, x_intercept):
             area_of_triangle = (end - start) * (self(start) - self(end)) / 2
             area_of_rectangle = (end - start) * self(end)
             return area_of_triangle + area_of_rectangle
@@ -144,9 +152,19 @@ class FunctionComposite(Function):
             result += self.functions[function_bounds].integrate(a, b)
         return result
 
+    def plot(self):
+        import matplotlib.pyplot as plt
+
+        x = sorted([x for x, y in self.functions if x != PLUS_INFINITY and x != MINUS_INFINITY])
+        y = [self(t) for t in x]
+        plt.plot(x, y)
+        return plt
+
 
 class FunctionPiecewiseLinear(FunctionComposite):
-    def __init__(self, input_list, output_list):
+    def __init__(self, input_list, output_list, function_undefined=None):
+        if function_undefined is not None:
+            self.function_undefined = function_undefined
         self.input_list = input_list
         self.output_list = output_list
         self.invalidate()
@@ -172,13 +190,18 @@ class FunctionPiecewiseLinear(FunctionComposite):
         return iter(self.output_list)
 
 if __name__ == '__main__':
-    from spatiotemporal.temporal_events import TemporalEventTrapezium
-    e = TemporalEventTrapezium(1, 10, 3, 8)
-    print e
-    mf = e.membership_function()
-    print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
-    print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
-    print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
-    print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
-    print 'degree in [1 : 10]:', e.degree_in_interval()
-    print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
+    #from spatiotemporal.temporal_events import TemporalEventTrapezium
+    #e = TemporalEventTrapezium(1, 10, 3, 8)
+    #print e
+    #mf = e.membership_function()
+    #print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
+    #print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
+    #print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
+    #print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
+    #print 'degree in [1 : 10]:', e.degree_in_interval()
+    #print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
+
+    a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
+    print (a(-0.25) + a(0.25))/4
+    print a(0.25) * 2.75 / 2
+
