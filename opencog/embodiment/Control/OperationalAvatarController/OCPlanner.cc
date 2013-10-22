@@ -973,7 +973,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         RuleNode* ruleNode = new RuleNode(selectedRule);
         ruleNode->number = ruleNodeCount ++;
         ruleNode->forwardLinks.push_back(curStateNode);
-        curStateNode->backwardRuleNode = ruleNode;
+        curStateNode->backwardRuleNode = ruleNode; // the depth of curStateNode has been calculated when it created as a precondition of its forward rule node
 
         allRuleNodeInThisPlan.push_front(ruleNode);
 
@@ -1157,6 +1157,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 else
                      ++ goIt;
             }
+
+            newStateNode->calculateNodesDepth();
 
         }
 
