@@ -46,10 +46,14 @@
 using namespace opencog::oac;
 using namespace std;
 
+RuleNode OCPlanner::goalRuleNode = RuleNode();
 
 string RuleNode::getDepthOfRuleNode()
 {
      // check the depth of the effect state nodes of this rule, get the deepest state node.
+    if (this == &(OCPlanner::goalRuleNode))
+        return "goalDepth";
+
     StateNode* deepestStateNode = getLastForwardStateNode();
 
     return deepestStateNode->depth;
@@ -65,12 +69,35 @@ StateNode* RuleNode::getLastForwardStateNode() const
     {
         if (lastedStateNode == 0)
             lastedStateNode = (StateNode*)(*it);
+        if ( lastedStateNode < ((StateNode*)(*it)))
+        {
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+
+    return lastedStateNode;
+}
+
+StateNode* RuleNode::getDeepestBackwardStateNode() const
+{
+    // get the backward StateNode with the deepest depth
+    if (backwardLinks.size() == 0)
+        return 0;
+
+    vector<StateNode*>::const_iterator it = backwardLinks.begin();
+    StateNode* lastedStateNode = 0;
+
+    for (; it != backwardLinks.end(); ++ it)
+    {
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
 
         if ( lastedStateNode < ((StateNode*)(*it)))
         {
             lastedStateNode = (StateNode*)(*it);
         }
     }
+    return lastedStateNode;
 }
 
 void RuleNode::updateCurrentAllBindings()
@@ -110,11 +137,16 @@ void StateNode::calculateNodesDepth()
         else if (backwardRuleNode != 0)
         {
             // the state node of its backwardRuleNode's forward state node , which with the deepest depth
-            StateNode* deepestNode = backwardRuleNode->getLastForwardStateNode();
+            StateNode* deepestNode0 = backwardRuleNode->getLastForwardStateNode();
+            StateNode* deepestNode = deepestNode0->forwardRuleNode->getDeepestBackwardStateNode();
             // To be improved: currently the index is only 0 ~ 9, need to support A~Z , a~z
-            int index = (deepestNode->depth)[(deepestNode->depth).size() - 1];
+            string deepestStr = deepestNode->depth;
+            int index = atoi((deepestStr.substr(deepestStr.size() - 1,1)).c_str());
             index ++;
-            depth = (deepestNode->depth).substr(0,(deepestNode->depth).size() - 1) + opencog::toString(index);
+            if (deepestStr.size() == 1)
+                depth = opencog::toString(index);
+            else
+                depth = deepestStr.substr(0,deepestStr.size() - 1) + opencog::toString(index);
 
         }
         else
@@ -538,6 +570,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     temporaryStateNodes.clear();
     imaginaryHandles.clear(); // TODO: Create imaginary atoms
     satisfiedGoalStateNodes.clear();
+    OCPlanner::goalRuleNode.backwardLinks.clear();
+
 
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
@@ -572,8 +606,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         StateNode* newStateNode = new StateNode(*it);
 
         newStateNode->backwardRuleNode = 0;
-        newStateNode->forwardRuleNode = 0;
+        newStateNode->forwardRuleNode = &(OCPlanner::goalRuleNode);
         newStateNode->depth = opencog::toString(goalNum);
+
+        OCPlanner::goalRuleNode.backwardLinks.push_back(newStateNode);
 
         bool found;
         StateNode* knownStateNode;

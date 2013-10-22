@@ -149,6 +149,14 @@ public:
         appliedTimes = 0;
     }
 
+    RuleNode()
+    {
+        originalRule = 0;
+        costHeuristics.clear();
+        still_useful = true;
+        appliedTimes = 0;
+    }
+
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
     {
         costHeuristics.push_back( CostHeuristic(cost_cal_state,cost_coefficient));
@@ -173,8 +181,11 @@ public:
     // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
     StateNode* getMostClosedBackwardStateNode() const;
 
-    // get the ForwardStateNode with the deepest depth, which is the most closed forward state node to me
+    // get the Forward StateNode with the deepest depth, which is the most closed forward state node to me
     StateNode* getLastForwardStateNode() const;
+
+    // get the backward StateNode with the deepest depth, which is the most closed forward state node to me
+    StateNode* getDeepestBackwardStateNode() const;
 
 };
 
@@ -209,6 +220,11 @@ public:
             return false;
         else if ( (other.depth == "Deepest") && (depth != "Deepest"))
             return true;
+
+        if ( (depth == "-1") && (other.depth != "-1"))
+            return true;
+        else if ( (other.depth == "-1") && (depth != "-1"))
+            return false;
 
         int size = (sizeof(depth) < sizeof(other.depth)) ? sizeof(depth) :  sizeof(other.depth);
         for (int i =0; i < size; i ++)
@@ -256,15 +272,14 @@ struct TmpParamCandidate
    }
 };
 
-// about node depth: both state nodes and rule nodes have depth, is to describe the relative position of these nodes;
-//                   the goal state node's depth is 0, the starting nodes (most backward nodes, original state nodes) is 999;
-//                   The max step number we do for a planning problem is 999 steps. If try 999 steps, still cannot find a solution, return planning fail.
 class OCPlanner
 {
 public:
      OCPlanner(AtomSpace* _atomspace,string _selfID, string _selfType);
 
      ~OCPlanner();
+
+     static RuleNode goalRuleNode;
 
      // TODO:
      // add a new rule from a implicationLink in the Atomspace
