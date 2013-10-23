@@ -1,7 +1,6 @@
 from opencog.atomspace import types, TruthValue
 
 import pln.formulas as formulas
-import pln.temporalFormulas
 
 import math
 
@@ -10,7 +9,7 @@ Other Rules calculate them heuristically, based on set probabilities and logical
 
 class Rule(object):
 
-    def __init__ (self, outputs, inputs, formula, multi_inputs=None):
+    def __init__ (self, outputs, inputs, formula):
         '''@outputs is one or more Trees representing the structure of Atom (usually a Link)
     to be produced by this Rule. If it's a variable then any kind of Atom
     can be produced.
@@ -27,15 +26,21 @@ class Rule(object):
 
         self._outputs = outputs
         self._inputs = inputs
-        self._multi_inputs = multi_inputs
 
         self.formula = formula
         self.name = self.__class__.__name__
     
+        for atom in self._inputs + self._outputs:
+            assert atom.type != 65535 # missing type bug (cython issue?)
+
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
         tvs = [atom.tv for atom in input_atoms]
-        return self.formula(tvs)
+        result_tvs = self.formula(tvs)
+        if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs):
+            return None
+        else:
+            return result_tvs
 
     def standardize_apart_input_output(self, chainer):
         new_inputs = []
@@ -127,7 +132,7 @@ class ModusPonensRule(Rule):
                       A],
             formula= formulas.modusPonensFormula)
 
-def InheritanceRule(Rule):
+class InheritanceRule(Rule):
     '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''
     def __init__(self, chainer):
         A = chainer.new_variable()
@@ -139,15 +144,18 @@ def InheritanceRule(Rule):
                       chainer.link(types.IntensionalInheritanceLink, [A, B])],
             formula= formulas.inheritanceFormula)
 
-def SimilarityRule(Rule):
+class SimilarityRule(Rule):
     '''SimilarityLink A B
        |A and B| / |A or B|'''
-    def __init__(self,
-        outputs= [chainer.link(types.SimilarityLink, [A, B])],
-        inputs=  [chainer.link(types.AndLink, [A, B]),
-                  chainer.link(types.OrLink, [A, B])],
-        formula= formulas.extensionalSimilarityFormula)
-                
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [chainer.link(types.SimilarityLink, [A, B])],
+            inputs=  [chainer.link(types.AndLink, [A, B]),
+                      chainer.link(types.OrLink, [A, B])],
+            formula= formulas.extensionalSimilarityFormula)
 
 # Boolean link creation Rules
 # An EliminationRule uses a logical link to produce its arguments
@@ -223,7 +231,7 @@ class AndEliminationRule(AbstractEliminationRule):
     def __init__(self, chainer, N):
         AbstractEliminationRule.__init__(self, chainer, N, link_type= types.AndLink)
 
-    def compute(self, atoms):
+    def calculate(self, atoms):
         [and_atom] = atoms
         outputs = and_atom.out
         N = len(outputs)
@@ -231,9 +239,10 @@ class AndEliminationRule(AbstractEliminationRule):
         # assume independence, i.e. P(A^B^C...) = P(A)P(B)P(C)...
         # therefore P(A) = Nth root of P(AndLink)
         # same for P(B) etc
-        individual_tv = math.pow(and_atom.tv, 1.0/N)
+        individual_frequency = math.pow(and_atom.tv.mean, 1.0/N)
+        individual_count = and_atom.tv.count/1.42
 
-        output_tvs = [individual_tv for out in outputs]
+        output_tvs = [TruthValue(individual_frequency, individual_count) for out in outputs]
 
         return output_tvs
 
@@ -242,7 +251,7 @@ class OrEliminationRule(AbstractEliminationRule):
     def __init__(self, chainer, N):
         AbstractEliminationRule.__init__(self, chainer, N, link_type= types.OrLink)
 
-    def compute(self, atoms):
+    def calculate(self, atoms):
         [or_atom] = atoms
         outputs = or_atom.out
         N = len(outputs)
@@ -279,11 +288,11 @@ class SubsetEvaluationRule(MembershipBasedEvaluationRule):
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer,
             member_type = types.MemberLink,
-            output_type=types.SubsetLink
+            output_type=types.SubsetLink,
             formula=formulas.subsetEvaluationFormula)
 
-class InheritanceEvaluationRule(MembershipBasedEvaluationRule):
-    '''Evaluates Inheritance(A B) from the definition.
+class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates IntensionalInheritance(A B) from the definition.
        (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
        ASSOC(A) is the set of x where AttractionLink(x, A)'''
     # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
@@ -291,7 +300,7 @@ class InheritanceEvaluationRule(MembershipBasedEvaluationRule):
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer, 
             member_type = types.AttractionLink,
-            output_type = types.InheritanceLink,
+            output_type = types.IntensionalInheritanceLink,
             formula= formulas.subsetEvaluationFormula)
 
 # abandoned for now because you have to estimate the number of objects (maybe an arbitrary setting?)
@@ -307,6 +316,14 @@ class ExtensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
         MembershipBasedEvaluationRule.__init__(self, chainer,
             member_type = types.MemberLink,
             output_type = types.ExtensionalSimilarityLink,
+            formula= formulas.similarityEvaluationFormula)        
+
+class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluates IntensionalSimilarity from the definition.'''
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer,
+            member_type = types.AttractionLink,
+            output_type = types.IntensionalSimilarityLink,
             formula= formulas.similarityEvaluationFormula)        
 
 class EvaluationToMemberRule(Rule):
@@ -346,19 +363,35 @@ class LinkToLinkRule(Rule):
             outputs= [chainer.link(to_type, [A, B])],
             inputs=  [chainer.link(from_type, [A, B])])
 
-
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(A B) => InheritanceLink(A B)'''
+    '''MemberLink(Ben American) => MemberLink Ben {Ben}, InheritanceLink({Ben} American).
+       {Ben} is the set containing only Ben.'''
     def __init__(self, chainer):
-        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.MemberLink,
-            formula= formulas.mem2InhFormula)
+        # use link2link rule so that backward chaining will know approximately the right target.
+        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
+            formula= None)
+
+    def custom_compute(self, inputs):
+        [mem_link] = inputs
+        [object, superset] = mem_link.out
+
+        singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
+        singleton_set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
+        tvs = [TruthValue(1, formulas.confidence_to_count(1))]
+
+        self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
+        tvs += formulas.mem2InhFormula([mem_link]) # use mem2inh formula
+
+        return ([member_link], tvs)
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
-class MemberToSubsetRule(LinkToLinkRule):
-    '''MemberLink(A B) => SubsetLink(A B)'''
-    def __init__(self, chainer):
-        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.SubsetLink,
-            formula= formulas.mem2InhFormula)
+#class MemberToSubsetRule(LinkToLinkRule):
+#    '''MemberLink(A B) => SubsetLink(A B)'''
+#    def __init__(self, chainer):
+#        LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.SubsetLink,
+#            formula= formulas.mem2InhFormula)
 
 class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
