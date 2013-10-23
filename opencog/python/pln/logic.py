@@ -7,7 +7,6 @@ class Logic(object):
        inspired by the AIMA chapter on first-order logic. They all operate directly on Atoms.'''
     def __init__(self, atomspace):
         self._atomspace = atomspace
-        self._new_var_counter = 10**6 # arbitrary
 
     def variables(self, atom):
         '''Find all the variables in an expression (which may be repeated)'''
@@ -23,10 +22,8 @@ class Logic(object):
             return result
 
     def new_variable(self):
-        self._new_var_counter += 1
-        
-        var_name = '$pln_var_'+str(self._new_var_counter)
-        return self._atomspace.add_node(types.VariableNode, var_name)
+        prefix = '$pln_var_'
+        return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
     def find(self, template, atoms, s={}):
         assert(isinstance(atoms, list))
