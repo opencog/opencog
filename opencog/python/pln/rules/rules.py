@@ -1,7 +1,6 @@
 from opencog.atomspace import types, TruthValue
 
 import pln.formulas as formulas
-import pln.temporal_formulas
 
 import math
 

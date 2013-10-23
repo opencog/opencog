@@ -1,6 +1,7 @@
 from opencog.atomspace import types, TruthValue
 
-from pln import formulas, temporal_formulas
+from pln import formulas
+from spatiotemporal import temporal_formulas
 
 from opencog.atomspace import get_type_name
 
