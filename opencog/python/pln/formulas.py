@@ -9,15 +9,10 @@ INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
 MembershipToExtensionalInheritanceCountDiscountFactor = 1.0
+CRISP_COUNT_THRESHOLD = 0.97
 
 def identityFormula(tvs):
     return tvs
-
-# Won't work with the current control
-#def trueFormula(tvs, U):
-#    [] = tvs
-#    
-#    return (1.0, confidence_to_count(1.0))
 
 def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
@@ -48,16 +43,19 @@ def inversionFormula(tvs):
     return [TruthValue(sBA, nBA)]
 
 def crispModusPonensFormula(tvs, U):
-    (sAB, nAB), (sA, nA) = tvs
+    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
-    true = 0.1
+    true = 0.5
     if all(x > true for x in [sAB, nAB, sA, nA]):
-        return (1, confidence_to_count(1))
+        return (1, confidence_to_count(0.99))
     else:
         return [TruthValue(0, 0)]
 
 def modusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+
+    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
+        return crispModusPonensFormula(tvs)
 
     # P(B|not A) -- how should we find this?
     #BNA = TruthValue(0.5, 0.01)

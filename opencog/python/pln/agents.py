@@ -48,7 +48,6 @@ class ForwardInferenceAgent(MindAgent):
 
         self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
         self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
-        self.chainer.add_rule(rules.MemberToSubsetRule(self.chainer))
 
         # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
