@@ -73,10 +73,10 @@ class ForwardInferenceAgent(MindAgent):
             print '==== Inference ===='
             print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
 
-            print
-            print '==== Attentional Focus ===='
-            for atom in get_attentional_focus(atomspace)[0:30]:
-                print str(atom), atom.av
+            #print
+            #print '==== Attentional Focus ===='
+            #for atom in get_attentional_focus(atomspace)[0:30]:
+            #    print str(atom), atom.av
 
             #print '==== Result ===='
             #print output

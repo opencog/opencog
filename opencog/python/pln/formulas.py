@@ -42,7 +42,7 @@ def inversionFormula(tvs):
     
     return [TruthValue(sBA, nBA)]
 
-def crispModusPonensFormula(tvs, U):
+def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     true = 0.5

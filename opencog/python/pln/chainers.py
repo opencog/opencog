@@ -44,7 +44,6 @@ class AbstractChainer(Logic):
         attentional_focus = get_attentional_focus(self._atomspace)
 
         atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
-
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
             if template.type == types.VariableNode:

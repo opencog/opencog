@@ -373,19 +373,20 @@ class MemberToInheritanceRule(LinkToLinkRule):
         # use link2link rule so that backward chaining will know approximately the right target.
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
             formula= None)
+        self.chainer=chainer
 
     def custom_compute(self, inputs):
         [mem_link] = inputs
         [object, superset] = mem_link.out
 
         singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
-        singleton_set_node = self.chainer.node(types.ConceptNode, concept_name)
+        singleton_set_node = self.chainer.node(types.ConceptNode, singleton_concept_name)
 
         member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
         tvs = [TruthValue(1, formulas.confidence_to_count(1))]
 
         self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
-        tvs += formulas.mem2InhFormula([mem_link]) # use mem2inh formula
+        tvs += formulas.mem2InhFormula([mem_link.tv]) # use mem2inh formula
 
         return ([member_link], tvs)
 
