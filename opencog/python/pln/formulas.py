@@ -9,17 +9,10 @@ INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
 MembershipToExtensionalInheritanceCountDiscountFactor = 1.0
+CRISP_COUNT_THRESHOLD = 0.97
 
 def identityFormula(tvs):
-    [(sA, nA)] = tvs
-    
-    return (sA, nA)
-
-# Won't work with the current control
-#def trueFormula(tvs, U):
-#    [] = tvs
-#    
-#    return (1.0, confidence_to_count(1.0))
+    return tvs
 
 def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
@@ -50,16 +43,19 @@ def inversionFormula(tvs):
     return [TruthValue(sBA, nBA)]
 
 def crispModusPonensFormula(tvs, U):
-    (sAB, nAB), (sA, nA) = tvs
+    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
-    true = 0.1
+    true = 0.5
     if all(x > true for x in [sAB, nAB, sA, nA]):
-        return (1, confidence_to_count(1))
+        return (1, confidence_to_count(0.99))
     else:
-        return (0, 0)
+        return [TruthValue(0, 0)]
 
 def modusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+
+    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
+        return crispModusPonensFormula(tvs)
 
     # P(B|not A) -- how should we find this?
     #BNA = TruthValue(0.5, 0.01)
@@ -87,7 +83,7 @@ def inheritanceFormula(tvs):
 
 def notFormula(tvs):
     tv = tvs[0]
-    return (1.0 - tv.mean, tv.count)
+    return [TruthValue(1.0 - tv.mean, tv.count)]
 
 def andSymmetricFormula(tvs):
     total_strength = 1.0
@@ -97,19 +93,19 @@ def andSymmetricFormula(tvs):
         total_strength *= tv.mean
         total_confidence *= count_to_confidence(tv.count)
     
-    return (total_strength, confidence_to_count(total_confidence))
+    return [TruthValue(total_strength, confidence_to_count(total_confidence))]
 
 def orFormula(tvs):
     N = len(tvs)
     
     if N == 1:
-        return tvs[0]
+        return [tvs[0]]
     
     if N > 2:
         # TODO handle via divide-and-conquer or something
         raise NotImplementedError("OR calculation not supported for arity > 2")
 
-    (sA, nA), (sB, nB) = tvs
+    (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
     
     A = sA * nB
     B = sB * nA
@@ -117,21 +113,21 @@ def orFormula(tvs):
     s_tot = sA + sB
     n_tot = nA + nB - (A + B) / 2
     
-    return (s_tot, n_tot)
+    return [TruthValue(s_tot, n_tot)]
 
 def andPartitionFormula(tvs, U):
     [(sAndA, nAndA), (sAndB, nAndB)] = tvs
 
     s = sAndA * sAndB
     n = nAndA + nAndB
-    return (s, n)
+    return [TruthValue(s, n)]
 
 def ext2InhFormula(tvs, U):
     [(sAB, nAB)] = tvs
     
     sABint = sAB
     nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR
-    return (sABint, nABint)
+    return [TruthValue(sABint, nABint)]
 
 def inheritanceFormula(tvs, U):
     [(sExt, nExt), (sInt, nInt)] = tvs
@@ -139,7 +135,7 @@ def inheritanceFormula(tvs, U):
     s = (sExt + sInt) / 2.0
     n = (nExt + nInt) / 2.0
 
-    return (s, n)
+    return [TruthValue(s, n)]
 
 def inheritance2SimilarityFormula(tvs, U):
     [(sAB, nAB), (sBA, nBA)] = tvs
@@ -147,7 +143,7 @@ def inheritance2SimilarityFormula(tvs, U):
     s = 1.0/ ( 1.0/sAB + 1.0/sBA -1)
     n = (nAB + nBA) / (1 + s)
 
-    return (s, n)
+    return [TruthValue(s, n)]
 
 def mem2InhFormula(tvs):
     [mem_tv] = tvs
@@ -194,10 +190,15 @@ def extensionalSimilarityFormula(tvs):
 
     # calculate the size of the two sets A AND B vs A OR B
     and_size = 1.0*and_tv.mean*and_tv.count
-    or_size  = 1.0*or_tv.mean*or_v.count
+    or_size  = 1.0*or_tv.mean*or_tv.count
+
+    if or_size == 0:
+        return [TruthValue(0, 0)]
 
     P = and_size / or_size
     N = and_tv.count + or_tv.count
+
+    return [TruthValue(P, N)]
 
 def attractionFormula(tvs):
     [ab, b] = tvs
@@ -235,3 +236,4 @@ def beforeFormula(dist1, dist2):
         strength = 0
     
     return strength
+
