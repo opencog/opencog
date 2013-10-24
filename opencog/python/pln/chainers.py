@@ -205,14 +205,17 @@ class Chainer(AbstractChainer):
     def forward_step(self):
         rule = self._select_rule()
 
+        print rule
         results = self._apply_forward(rule)
 
         return results
 
-    def backward_step(self):
-        rule = self._select_rule()
+    def backward_step(self, rule=None, target_atoms=None):
+        if rule is None:
+            rule = self._select_rule()
 
-        results = self._apply_backward(rule)
+        print rule
+        results = self._apply_backward(rule, target_outputs=target_atoms)
 
         return results
 
@@ -298,22 +301,21 @@ class Chainer(AbstractChainer):
 
     ### backward chaining implementation
 
-    def _apply_backward(self, rule):
-        # randomly choose suitable atoms for this rule's inputs
-            # choose a random atom matching the first input to the rule
-            # choose a random atom matching the second input to the rule, compatible with the first input
-            # etc
-            # it can fail if there are no compatible atoms
-        # if all inputs are found, then
-            # apply the rule and create the output
-            # give it an appropriate TV (using the formula and possibly revision)
-            # give it an STI boost
-            # record this inference in the InferenceHistoryRepository
+    def _apply_backward(self, rule, target_outputs=None):
+        # target outputs is the exact series of outputs to produce. If you don't specify, it will choose outputs for you
+
+        # choose outputs if needed, and then choose some inputs to apply this rule with.
 
         (generic_inputs, generic_outputs, created_atoms) = rule.standardize_apart_input_output(self)
         specific_outputs = []
-        empty_substitution = {}
-        subst = self._choose_outputs(specific_outputs, generic_outputs, empty_substitution)
+        subst = {}
+
+        if target_outputs is None:
+            subst = self._choose_outputs(specific_outputs, generic_outputs, subst)
+        else:
+            specific_outputs = target_outputs
+            for (template, atom) in zip(generic_outputs, target_outputs):
+                subst = self.unify(template, atom, subst)
 
         if not subst:
             return None
@@ -343,7 +345,6 @@ class Chainer(AbstractChainer):
             return (specific_outputs, specific_inputs)
 
     def _choose_outputs(self, return_outputs, output_templates, subst_so_far):
-        return_inputs = [x for x in output_templates]
 
         for i in xrange(0, len(output_templates)):
             template = output_templates[i]
