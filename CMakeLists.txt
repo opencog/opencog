@@ -709,6 +709,7 @@ SUMMARY_ADD("SQL persistance" "Interfaces for SQL persistance of the AtomSpace" 
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
+SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports" HAVE_ZMQ)
 SUMMARY_SHOW()
 
 

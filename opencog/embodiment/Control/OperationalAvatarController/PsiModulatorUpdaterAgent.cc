@@ -24,7 +24,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/spacetime/TimeServer.h>
 
-#include <opencog/web/json_spirit/json_spirit.h>
+#include <lib/json_spirit/json_spirit.h>
 
 #include "OAC.h"
 #include "PsiModulatorUpdaterAgent.h"

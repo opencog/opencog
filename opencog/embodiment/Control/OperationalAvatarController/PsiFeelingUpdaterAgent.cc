@@ -23,7 +23,7 @@
 
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/web/json_spirit/json_spirit.h>
+#include <lib/json_spirit/json_spirit.h>
 
 #include "OAC.h"
 #include "PsiFeelingUpdaterAgent.h"
