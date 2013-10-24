@@ -487,10 +487,6 @@ IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
 
-IF(HAVE_SERVER) # because web depends on server
-	SET(HAVE_WEB 1)
-ENDIF(HAVE_SERVER)
-
 IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
 ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
@@ -713,7 +709,6 @@ SUMMARY_ADD("SQL persistance" "Interfaces for SQL persistance of the AtomSpace" 
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("Web Interface" "Web server and REST API" HAVE_WEB)
 SUMMARY_SHOW()
 
 

@@ -27,15 +27,6 @@ IF (HAVE_SERVER)
     ADD_SUBDIRECTORY (server)
 ENDIF(HAVE_SERVER)
 
-IF (HAVE_WEB)
-    ADD_SUBDIRECTORY (web)
-ENDIF (HAVE_WEB)
-
-# There is nothing in this directory?
-#IF (NOT WIN32)
-#ADD_SUBDIRECTORY(modules)
-#ENDIF (NOT WIN32)
-
 # Extension language support
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	ADD_SUBDIRECTORY (guile)

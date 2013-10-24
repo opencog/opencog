@@ -17,7 +17,6 @@ query           -- Pattern matching, evaluation for the atomspace.
 
 guile, scm      -- Scheme language bindings.
 python,cython   -- Python langauge bindings.  
-web             -- RESTful web interface.
 shell           -- Command-line shell interface.
 
 server          -- CogServer main server.
@@ -33,7 +32,7 @@ embodiment      -- Avatars
 comboreduct     -- Combo language, term-rewriting system.
 learning        -- Supervised program learning, including MOSES
 
-ubigraph, dotty -- Visualization, graphics.
+visualization   -- Visualization, graphics.
 
 cycl-import     -- Import OpenCyc datasets
 
