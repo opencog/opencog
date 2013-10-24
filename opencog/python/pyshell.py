@@ -15,22 +15,21 @@ class shell(opencog.cogserver.Request):
         "Start an IPython shell in the terminal from which the cogserver "  \
         "was started.  This shell is a python read-evaluate-print loop " \
         "for running arbitrary python commands. The atomspace can be " \
-        "accessed as 'space' or 'a'; thus, for example: \n\n" \
-        "\th = a.add_node(t.ConceptNode, \"Hello, World!\")\n\tprint h\n\n" \
+        "accessed as 'atomspace'; thus, for example: \n\n" \
+        "\th = atomspace.add_node(types.ConceptNode, \"Hello, World!\")\n\tprint h\n\n" \
         "Use ctrl-D to exit the shell."
     is_shell = True
 
     def run(self,args,atomspace):
         self.run_shell(atomspace)
 
-    def run_shell(self,  space):
+    def run_shell(self,  atomspace):
         global ipshell
         
-        from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue
-        t = types
-        a = space
+        from opencog.atomspace import types, Atom, Handle, TruthValue
         namespace = locals().copy()
-        doc = """OpenCog Python Shell. Access the main AtomSpace as 'space' or 'a'."""
+        doc = """OpenCog Python Shell. Access the main AtomSpace as 'atomspace'."""
+        print doc
         try: 
             import sys; sys.argv = ['', '-noconfirm_exit', '-p', 'sh']
             from IPython import embed
