@@ -173,7 +173,7 @@ cdef class AtomSpace:
         """ Add Node to AtomSpace
         @todo support [0.5,0.5] format for TruthValue.
         @todo support type name for type.
-        @returns handle referencing the newly created Atom
+        @returns the newly created Atom
         """
         # convert to string
         py_byte_string = atom_name.encode('UTF-8')
