@@ -47,7 +47,7 @@ def crispModusPonensFormula(tvs):
 
     true = 0.5
     if all(x > true for x in [sAB, nAB, sA, nA]):
-        return (1, confidence_to_count(0.99))
+        return [TruthValue(1, confidence_to_count(0.99))]
     else:
         return [TruthValue(0, 0)]
 
