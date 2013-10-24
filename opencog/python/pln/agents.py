@@ -66,8 +66,6 @@ class ForwardInferenceAgent(MindAgent):
         if self.chainer is None:
             self.create_chainer(atomspace)
 
-        import pdb; pdb.set_trace()
-
         result = self.chainer.forward_step()
         if result:
             (rule, inputs, outputs) = result

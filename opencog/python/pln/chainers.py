@@ -189,7 +189,7 @@ class Chainer(AbstractChainer):
         #self.produced_from = defaultdict(set)
         self.history_index = InferenceHistoryIndex()
 
-        self.history_atomspace = AtomSpace()
+        #self.history_atomspace = AtomSpace()
         # TODO actually load and save these. When loading it, rebuild the indexes above.
 
         # Record how often each Rule is used. To bias the Rule frequencies.
@@ -456,7 +456,8 @@ class Chainer(AbstractChainer):
         if not new:
             return False
         else:
-            self._add_to_inference_repository(rule, outputs, inputs)
+            #self._add_to_inference_repository(rule, outputs, inputs)
+            return True
 
     def _add_to_inference_repository(self, rule, outputs, inputs):
         TA = self.history_atomspace
