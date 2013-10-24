@@ -28,12 +28,16 @@ class TemporalRule(Rule):
         self.name = get_type_name(link_type) + 'EvaluationRule'
 
     def temporal_compute(self, input_tuples):
-        links_a, links_b = unzip(input_tuples)
+        links_a = []
+        links_b = []
+        for (link_a, link_b) in input_tuples:
+            links_a.append(link_a)
+            links_b.append(link_b)
 
         dist1 = self.make_distribution(links_a)
         dist2 = self.make_distribution(links_b)
 
-        strength = formula(dist1, dist2)
+        strength = self.formula(dist1, dist2)
         
         # I'm not sure what to choose for this
         count = len(input_tuples)

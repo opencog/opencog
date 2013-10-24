@@ -332,7 +332,8 @@ class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
 class EvaluationToMemberRule(Rule):
     '''Turns EvaluationLink(PredicateNode P, argument) into 
        MemberLink(argument, ConceptNode "SatisfyingSet(P)".
-       The argument can either be a single Node/Link or a ListLink or arguments.'''
+       The argument must be a single Node.
+       #The argument can either be a single Node/Link or a ListLink or arguments.'''
     def __init__(self, chainer):
         P = chainer.new_variable()
         ARG = chainer.new_variable()
@@ -347,7 +348,55 @@ class EvaluationToMemberRule(Rule):
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
 
+        # Only support the case with 1 argument
+        if arg.type == types.ListLink:
+            return ([], [])
+
         concept_name = 'SatisfyingSet(%s)' % (predicate.name,)
+        set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+        tv = eval_link.tv
+
+        return ([member_link], [tv])
+
+def create_general_evaluation_to_member_rules(chainer):
+    rules = []
+    for argument_count in xrange(2, 3): # Bizarbitrary constant!
+        for index in xrange(0, argument_count):
+            rules.append(GeneralEvaluationToMemberRule(chainer, index, argument_count))
+    return rules
+
+class GeneralEvaluationToMemberRule(Rule):
+    '''An EvaluationLink with 2+ arguments has a satisfying set where every member is a ListLink. But there's another option which may be more useful. If you specify all but one of the arguments, you get a new predicate with only one variable left. And its satisfying set would just be normal objects.
+Given (EvaluationLink pred (ListLink $thing ...)), create
+sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
+(MemberLink $thing sat_set)''' 
+    def __init__(self, chainer, index, arg_count):
+        self.index = index
+        #self.arg_count= arg_count
+        self.chainer = chainer
+
+        pred = chainer.new_variable()
+        all_args = make_n_variables(chainer, arg_count)
+        list_link = chainer.link(types.ListLink, all_args)
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula= None,
+                      inputs=  [chainer.link(types.EvaluationLink, [pred, list_link])],
+                      outputs= [])
+
+    def custom_compute(self, inputs):
+        [eval_link] = inputs
+        [predicate, list_link] = eval_link.out
+
+        args = list_link.out
+        parameter_names = ['%s:%s' % (arg.name, arg.type) for arg in args]
+        parameter_names[self.index] = '_'
+        parameter_names = ' '.join(parameter_names)
+        concept_name = 'SatisfyingSet(%s %s)' % (predicate.name, parameter_names)
+
         set_node = self.chainer.node(types.ConceptNode, concept_name)
 
         member_link = self.chainer.link(types.MemberLink, [arg, set_node])
@@ -367,8 +416,8 @@ class LinkToLinkRule(Rule):
             inputs=  [chainer.link(from_type, [A, B])])
 
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(Ben American) => MemberLink Ben {Ben}, InheritanceLink({Ben} American).
-       {Ben} is the set containing only Ben.'''
+    '''MemberLink(Jade robot) => MemberLink Jade {Jade}, InheritanceLink({Jade} robot).
+       {Jade} is the set containing only Jade.'''
     def __init__(self, chainer):
         # use link2link rule so that backward chaining will know approximately the right target.
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
@@ -383,12 +432,12 @@ class MemberToInheritanceRule(LinkToLinkRule):
         singleton_set_node = self.chainer.node(types.ConceptNode, singleton_concept_name)
 
         member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
-        tvs = [TruthValue(1, formulas.confidence_to_count(1))]
+        tvs = [TruthValue(1, formulas.confidence_to_count(0.99))]
 
-        self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
+        inh_link = self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
         tvs += formulas.mem2InhFormula([mem_link.tv]) # use mem2inh formula
 
-        return ([member_link], tvs)
+        return ([member_link, inh_link], tvs)
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
 #class MemberToSubsetRule(LinkToLinkRule):
@@ -411,13 +460,4 @@ class AttractionRule(Rule):
             outputs= [chainer.link(types.AttractionLink, [A, B])],
             inputs=  [chainer.link(types.SubsetLink, [A, B]),
                       B])
-
-# redundant now
-class ASSOCEvaluationRule(Rule):
-    '''Creates the extensional association set of ConceptNode C (called ASSOC_ext(C).
-    MemberLink(e, ASSOC_ext(C)).tv = Func(Subset(e, C), Subset(Not(e), C)).
-
-    Or now that we have AttractionLink
-    MemberLink(e, ASSOC(C)).tv = AttractionLink e C'''
-    pass
 

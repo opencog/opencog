@@ -252,7 +252,9 @@ class Chainer(AbstractChainer):
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
         elif hasattr(rule, 'temporal_compute'):
             # All inputs ever, and then use the special temporal computation instead of revision.
-            all_input_tuples = self.history.lookup_all_applications(rule, specific_outputs)
+            past_input_tuples = self.history_index.lookup_all_applications(rule, specific_outputs)
+            all_input_tuples = [specific_inputs]+past_input_tuples
+
             (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
         else:
