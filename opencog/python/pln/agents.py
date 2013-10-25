@@ -130,8 +130,25 @@ def print_atoms(atoms):
 def show_atoms(atoms):
     return ' '.join(str(atom)+str(atom.av) for atom in atoms)
 
-class BackwardInferenceAgent(MindAgent):
-    pass
+class BackwardInferenceAgent(ForwardInferenceAgent):
+    def run(self, atomspace):
+        # incredibly exciting futuristic display!
+        #import os
+        #os.system('cls' if os.name=='nt' else 'clear')
+
+        def show_atoms(atoms):
+            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
+
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+
+        result = self.chainer.backward_step()
+        if result:
+            (rule, inputs, outputs) = result
+
+            print '==== Inference ===='
+            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
+
 
 '''
 # test it with forgetting, updating and diffusion

@@ -301,14 +301,24 @@ class Chainer(AbstractChainer):
 
     ### backward chaining implementation
 
+    def delete_queries(self, created_vars, subst):
+        # Delete any variables that have been bound to something (they're no longer required).
+        # Variables that haven't been bound become backward chaining queries
+        for var in created_vars:
+            if subst is None or (var in subst and subst[var] != var):
+                print 'removing', var
+                self.atomspace.remove(var, recursive=True)
+
     def _apply_backward(self, rule, target_outputs=None):
         # target outputs is the exact series of outputs to produce. If you don't specify, it will choose outputs for you
 
         # choose outputs if needed, and then choose some inputs to apply this rule with.
 
-        (generic_inputs, generic_outputs, created_atoms) = rule.standardize_apart_input_output(self)
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         specific_outputs = []
         subst = {}
+
+        print (generic_inputs, generic_outputs, created_vars)
 
         if target_outputs is None:
             subst = self._choose_outputs(specific_outputs, generic_outputs, subst)
@@ -317,13 +327,25 @@ class Chainer(AbstractChainer):
             for (template, atom) in zip(generic_outputs, target_outputs):
                 subst = self.unify(template, atom, subst)
 
+        print specific_outputs
+
         if not subst:
+            self.delete_queries(created_vars, subst)
             return None
 
         specific_inputs = []
         subst = self._choose_inputs(specific_inputs, generic_outputs, subst, allow_zero_tv = True)
+        found = len(subst) > 0
+
+        print specific_inputs
+
+        self.delete_queries(created_vars, subst)
+        if not found:
+            return None
 
         print rule, map(str,specific_outputs), map(str,specific_inputs)
+
+        # Delete any variables
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
@@ -360,7 +382,7 @@ class Chainer(AbstractChainer):
             if subst_so_far == None:
                 import pdb; pdb.set_trace()
 
-            return_outputs[i] = atom
+            return_outputs.append(atom)
 
         return subst_so_far
 
