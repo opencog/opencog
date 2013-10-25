@@ -198,7 +198,6 @@ private:
      * @param Table to be filled with mappings from old to new handles.
      */
     LinkPtr readLink(FILE*, Type, HandMapPtr);
-    void readTrail(FILE*, Trail*);
 
     /**
      * This method reads all TruthValue members from a given file.
