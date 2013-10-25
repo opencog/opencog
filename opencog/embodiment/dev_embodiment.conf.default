@@ -86,10 +86,10 @@ MAX_OAC_PORT                    = 16340
 #OPENCOG_LOG_LEVEL               = DEBUG
 
 LS_LOG_LEVEL                    = ERROR
-OAC_LOG_LEVEL  	                = DEBUG
-ROUTER_LOG_LEVEL                = ERROR
-SPAWNER_LOG_LEVEL               = ERROR
-PROXY_LOG_LEVEL                 = ERROR
+OAC_LOG_LEVEL  	                = ERROR
+ROUTER_LOG_LEVEL                = DEBUG
+SPAWNER_LOG_LEVEL               = DEBUG
+PROXY_LOG_LEVEL                 = DEBUG
 OPENCOG_LOG_LEVEL               = ERROR
 
 # Back trace log level. 
