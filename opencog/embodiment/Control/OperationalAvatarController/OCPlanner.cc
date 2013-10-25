@@ -1858,7 +1858,11 @@ Rule* OCPlanner::unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardStat
             string variableName = ActionParameter::ParamValueToString((ParamValue)(*r_ownerIt));
             map<string, ParamValue>::iterator paraIt = currentBindingsFromForwardState.find(variableName);
             if (paraIt == currentBindingsFromForwardState.end())
+            {
+                // debug:
+                string Forwardvalue =  ActionParameter::ParamValueToString((ParamValue)(*f_ownerIt));
                 currentBindingsFromForwardState.insert(std::pair<string, ParamValue>(variableName,*f_ownerIt));
+            }
         }
     }
 
@@ -2501,9 +2505,9 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         if (unrecursiveRule == 0)
             return false; // cannot find a unrecursiveRule to borrow from
 
-        // ToBeImproved: currently only apply the borrowed rule in the second precondition of recursiveRule
+        // ToBeImproved: currently only apply the borrowed rule in the first precondition of recursiveRule
         // ToBeImproved: need to find out if the numeric variable this unrecursive rule try to ground is applied in the first or second  precondition of this recursiveRule
-        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList[1]);
+        Rule* borrowedRule =  unifyRuleVariableName(unrecursiveRule, rule->preconditionList[0]);
         if (borrowedRule == 0)
             return false; // cannot unify the borrowed rule
 
@@ -2559,6 +2563,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 ParamValue OCPlanner::selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values)
 {
 
+    // todo: need to check how many preconditions satisfied
     vector<ParamValue>::iterator vit;
     float lowestcost = 999999.9;
     ParamValue bestValue = UNDEFINED_VALUE;
@@ -2944,7 +2949,7 @@ void OCPlanner::loadTestRulesFromCodes()
     solidStateOwnerList2.push_back(var_pos_on);
     State* solidState2 = new State("is_solid",ActionParamType::BOOLEAN(),STATE_EQUAL_TO, "false", solidStateOwnerList2, true, &Inquery::inqueryIsSolid);
 
-    // precondition 3: The agent should be closed enough to the position to build the block ( < 2.0)
+    // precondition 3: The agent should be closed enough to the position to build the block ( < 1.5)
     vector<ParamValue> closedStateOwnerList4;
     closedStateOwnerList4.push_back(varAvatar);
     closedStateOwnerList4.push_back(var_pos);
@@ -3049,7 +3054,7 @@ void OCPlanner::loadTestRulesFromCodes()
     BestNumericVariableInqueryStruct bs0;
     bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
     bs0.goalState = existPathState3;
-    accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_from), bs0));
+    accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_to), bs0));
 
 
     this->AllRules.push_back(accessAdjacentRule);
