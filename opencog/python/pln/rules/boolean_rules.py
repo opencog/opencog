@@ -56,13 +56,16 @@ class OrCreationRule(Rule):
             outputs= [chainer.link(types.OrLink, atoms)],
             inputs=  atoms)
 
+# This function can be called after each inference to simplify the resulting expression.
 def simplify_boolean(chainer, link):
+    # Not(Not(A)) => A
     if link.type == types.NotLink:
         arg = link.out[0]
         if arg.type == types.NotLink:
             deeply_nested_arg = arg.out[0]
             return chainer.link(types.NotLink, [deeply_nested_arg])
 
+    # And(A And(B, C) D) => And(A, B, C, D)
     elif link.type == types.AndLink:
         new_out = []
         for atom in link.out:
@@ -73,6 +76,7 @@ def simplify_boolean(chainer, link):
             else:
                 new_out.append(atom)
 
+    # likewise for OrLink
     elif link.type == types.OrLink:
         new_out = []
         for atom in link.out:
@@ -85,6 +89,44 @@ def simplify_boolean(chainer, link):
 
     else:
         return link
+
+def create_boolean_transformation_rules(chainer):
+    # P OR Q = Not(P) => Q
+    # P AND Q = Not(P => Not(Q))
+    # P <=> Q = P=>Q ^ Q => P
+
+    rules = []
+    def make_symmetric_rule(lhs, rhs):
+        rule = Rule(inputs=lhs, outputs=rhs, formula=formulas.identityFormula)
+        rule.name = 'BooleanTransformationRule'
+        rules.append(rule)
+
+        rule = Rule(inputs=rhs, outputs=lhs, formula=formulas.identityFormula)
+        rule.name = 'BooleanTransformationRule'
+        rules.append(rule)
+
+    P, Q = chainer.make_n_variables(2)
+    LHS= [chainer.link(types.OrLink, [P, Q])]
+    RHS= [chainer.link(types.SubsetLink, [chainer.link(types.NotLink, [P]), Q])]
+
+    make_symmetric_rule(LHS, RHS)
+
+    LHS= [chainer.link(types.AndLink, [P, Q])]
+    RHS= [chainer.link(types.NotLink, [
+        chainer.link(types.SubsetLink, [P, chainer.link(types.NotLink, [Q])])
+        ])]
+
+    make_symmetric_rule(LHS, RHS)
+
+    LHS= [chainer.link(types.ExtensionalSimilarityLink, [P, Q])]
+    RHS= [chainer.link(types.AndLink,
+        chainer.link(types.SubsetLink, [P, Q]),
+        chainer.link(types.SubsetLink, [Q, P])
+        )]
+
+    make_symmetric_rule(LHS, RHS)
+
+    return rules
 
 class AbstractEliminationRule(Rule):
     def __init__(self, chainer, N, link_type):
