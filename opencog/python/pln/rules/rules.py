@@ -294,7 +294,7 @@ sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
         self.chainer = chainer
 
         pred = chainer.new_variable()
-        all_args = make_n_variables(chainer, arg_count)
+        all_args = chainer.make_n_variables(arg_count)
         list_link = chainer.link(types.ListLink, all_args)
 
         self.chainer = chainer
