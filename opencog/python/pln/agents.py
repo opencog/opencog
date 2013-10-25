@@ -2,7 +2,7 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
 from pln.chainers import Chainer, get_attentional_focus
-from pln.rules import rules, temporal_rules
+from pln.rules import rules, temporal_rules, boolean_rules
 
 class ForwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -33,10 +33,8 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))
         self.chainer.add_rule(rules.SimilarityRule(self.chainer))
 
-        # and/or/not
-        self.chainer.add_rule(rules.NotCreationRule(self.chainer))
-        self.chainer.add_rule(rules.NotEliminationRule(self.chainer))
-        for rule in rules.create_and_or_rules(self.chainer, 1, 2):
+        # boolean links
+        for rule in boolean_rules.create_and_or_rules(self.chainer, 1, 2):
             self.chainer.add_rule(rule)
 
         # create probabilistic logical links out of MemberLinks

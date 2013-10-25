@@ -229,18 +229,23 @@ def revisionFormula(tvs):
     s = (weight_1*x.mean + weight_2*y.mean)
     return TruthValue(s, n)
 
+def andBreakdownFormula(tvs):
+    [A, AND_AB] = tvs
+
+    sB = AND_AB.mean / A.mean
+    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+
+    return [TruthValue(sB, nB)]
+
+def orBreakdownFormula(tvs):
+    [A, OR_AB] = tvs
+
+    sB = OR_AB.mean / (1-A.mean)
+    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+
+    return [TruthValue(sB, nB)]
+
 def low(n):
     return max(n, 0.00001)
 
-# temporal formulas
-def beforeFormula(dist1, dist2):
-    times_event1 = [int(t) for t in dist1.keys()]
-    times_event2 = [int(t) for t in dist2.keys()]
-    
-    if all(t_event1 < t_event2 for t_event1 in times_event1 for t_event2 in times_event2):
-        strength = 1
-    else:
-        strength = 0
-    
-    return strength
 
