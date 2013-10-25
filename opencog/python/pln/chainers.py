@@ -51,6 +51,10 @@ class AbstractChainer(Logic):
             else:
                 root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
+
+            if len(all_atoms) == 0:
+                return None
+
             atom = self._select_from(template, s, all_atoms, allow_zero_tv, useAF=False)
 
         return atom
@@ -74,17 +78,27 @@ class AbstractChainer(Logic):
             return self._selectOne(atoms)
         else:
             # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
-            return random.choice(atoms)
+            # after modifying the score function,, it does
+            return self._selectOne(atoms)
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
-            return atom.av['sti']
+            sti = atom.av['sti']
+            if sti < 1:
+                return 1
+            else:
+                return sti
 
         def mixed_score(atom):
-            return int(sti_score(atom)*atom.tv.mean*atom.tv.confidence)
+            s = int(100*sti_score(atom) + 100*atom.tv.mean + 100*atom.tv.confidence)
+            if s < 1:
+                return 1
+            else:
+                return s
 
-        score = sti_score
+        #score = sti_score
+        score = mixed_score
 
         assert type(atoms[0]) == Atom
 
@@ -94,6 +108,7 @@ class AbstractChainer(Logic):
         for atom in atoms:
             current += score(atom)
             if current >= pick:
+                print 'choosing atom based on score',score(atom), atom
                 return atom
 
         assert False
