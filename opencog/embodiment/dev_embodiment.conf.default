@@ -79,18 +79,18 @@ MAX_OAC_PORT                    = 16340
 # Log levels for each embodiment component
 # Values: ERROR, WARN, INFO, DEBUG, FINE
 #LS_LOG_LEVEL                    = INFO
-#OAC_LOG_LEVEL  	             = DEBUG
+#OAC_LOG_LEVEL  	         = DEBUG
 #ROUTER_LOG_LEVEL                = INFO
 #SPAWNER_LOG_LEVEL               = INFO
 #PROXY_LOG_LEVEL                 = DEBUG
 #OPENCOG_LOG_LEVEL               = DEBUG
 
-LS_LOG_LEVEL                    = ERROR
-OAC_LOG_LEVEL  	                = DEBUG
-ROUTER_LOG_LEVEL                = ERROR
-SPAWNER_LOG_LEVEL               = ERROR
-PROXY_LOG_LEVEL                 = ERROR
-OPENCOG_LOG_LEVEL               = ERROR
+LS_LOG_LEVEL                    = FINE
+OAC_LOG_LEVEL                   = FINE
+ROUTER_LOG_LEVEL                = FINE
+SPAWNER_LOG_LEVEL               = FINE
+PROXY_LOG_LEVEL                 = FINE
+OPENCOG_LOG_LEVEL               = FINE
 
 # Back trace log level. 
 # Note it is of string type: error, warn, info, debug or fine (case insensitive)

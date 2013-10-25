@@ -66,17 +66,21 @@ void ServerSocket::handle_connection(ServerSocket* ss)
     for (;;) 
     {
         try {
-        //logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
+        logger().debug("%p: ServerSocket::handle_connection(): Called read_until", ss);
         boost::asio::read_until(ss->getSocket(), b, '\n');
-        //logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
+        logger().debug("%p: ServerSocket::handle_connection(): returned from read_until", ss);
         std::istream is(&b);
         std::string line;
         std::getline(is, line); 
         if (!line.empty() && line[line.length()-1] == '\r') {
             line.erase(line.end()-1);
         }
-        //logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
-        ss->OnLine(line);
+        logger().debug("%p: ServerSocket::handle_connection(): Got new line: %s", ss, line.c_str());
+
+        // Don't attempt to process empty lines, because the processing logic blindly uses substrings:
+        if (!line.empty())
+            ss->OnLine(line);
+
         } catch (boost::system::system_error& e) {
             if (ss->master->isListenerThreadStopped()) {
                 break;
@@ -99,7 +103,7 @@ void ServerSocket::Send(const std::string& cmd)
 void ServerSocket::OnLine(const std::string& line)
 {
 
-//    logger().fine("ServerSocket - Received line: <%s>", line.c_str());
+    logger().debug("ServerSocket - Received line: <%s>", line.c_str());
     char selector = line[0];
     std::string contents = line.substr(1);
     std::string command;
@@ -115,17 +119,17 @@ void ServerSocket::OnLine(const std::string& line)
             command = contents.substr(0, pos1);
         }
 
-//        logger().debug("ServerSocket - Parsed command: <%s>",
-//                       command.c_str());
+        logger().debug("ServerSocket - Parsed command: <%s>",
+                       command.c_str());
 
         if (command == "NOTIFY_NEW_MESSAGE") {
-            //logger().debug("ServerSocket - Full line: <%s>", contents.c_str());
+            logger().debug("ServerSocket - Full line: <%s>", contents.c_str());
             std::string tmpStr = contents.substr(pos1 + 1);
             int numMessages = atoi(tmpStr.c_str());
             logger().debug("ServerSocket - Received notification of %u new message(s) from router", numMessages);
             master->newMessageInRouter(numMessages);
             if (!master->noAckMessages) {
-                //logger().debug("ServerSocket - Answering OK");
+                logger().debug("ServerSocket - Answering OK");
                 Send("OK\n");
             }
 
