@@ -118,9 +118,13 @@ class AbstractChainer(Logic):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
-        if atom.type in [types.InheritanceLink, types.SubsetLink]:
-            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
-            not_self_link    = atom.out[0] != atom.out[1]
+#        if atom.type in [types.InheritanceLink, types.SubsetLink, types.SimilarityLink]:
+#            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
+#            not_self_link    = atom.out[0] != atom.out[1]
+#            return not_self_link
+        if atom.arity == 2:
+            # heuristically assume that all selflinks are invalid!
+            not_self_link = atom.out[0] != atom.out[1]
             return not_self_link
         else:
             return True
