@@ -3,7 +3,7 @@
 #   sudo ./install_dependencies.sh
 #
 # Todo: After https://github.com/opencog/opencog/issues/337 is addressed, these dependencies will be
-#       handled automatically
+#       handled automatically using requirements.txt
 
 # Required:
 easy_install Flask
