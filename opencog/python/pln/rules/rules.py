@@ -74,7 +74,7 @@ class InversionRule(Rule):
                       A, B],
             formula= formulas.inversionFormula)
 
-class DeductionRule(Rule):
+class IndependenceBasedDeductionRule(Rule):
     '''A->B, B->C entails A->C'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
@@ -87,6 +87,19 @@ class DeductionRule(Rule):
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [B, C]),
                       A, B, C])
+
+class DeductionRule(Rule):
+    '''A->B, B->C entails A->C. Uses concept geometry.'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+        C = chainer.new_variable()
+
+        Rule.__init__(self,
+            formula= formulas.deductionGeometryFormula,
+            outputs= [chainer.link(link_type, [A, C])],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      chainer.link(link_type, [B, C])])
 
 # TODO add macro-rules for Abduction and Induction based on Deduction and Inversion
 # abandoned
@@ -311,7 +324,19 @@ class AndEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluate And(A B) from the definition.
        |A and B| = |x in A and x in B|
        P(A and B) = |A and B| / universe (gulp)'''
+    # count(a^b)
     pass
+
+# It's more useful to calculate Subset(context, AndLink(A B))
+# You could have a special subset evaluator that uses separate rules for and/or
+
+#        inputs= [chainer.link(member_type, [x, A]),
+#                 chainer.link(member_type, [x, B])]
+#
+# or generally, evaluate ANYTHING in subset (because you can just require that all of the premise nodes are Anded with context
+
+# or really, try to do contextual reasoning. maybe do it for small relationships first?
+# the above subset evaluation rule will 
 
 class ExtensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates ExtensionalSimilarity from the definition.'''

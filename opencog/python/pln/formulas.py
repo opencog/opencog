@@ -34,6 +34,15 @@ def deductionSimpleFormula(tvs):
     
     return [TruthValue(sAC, nAC)]
 
+# better deduction formula based on concept geometry
+def deductionGeometryFormula(tvs):
+    [AB, BC] = tvs
+
+    sAC = AB.mean*BC.mean / min(AB.mean+BC.mean, 1)
+    nAC = AB.count+BC.count
+
+    return [TruthValue(sAC, nAC)]
+
 def inversionFormula(tvs):
     [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
     
