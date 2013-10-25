@@ -31,7 +31,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/Trail.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
 
@@ -56,7 +55,6 @@ void Link::init(const std::vector<Handle>& outgoingVector)
             type, classserver().getTypeName(type).c_str());
     }
 
-    trail = new Trail();
     _outgoing = outgoingVector;
     // if the link is unordered, it will be normalized by sorting the elements in the outgoing
     // list.
@@ -68,20 +66,6 @@ void Link::init(const std::vector<Handle>& outgoingVector)
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
-    delete trail;
-}
-
-void Link::setTrail(Trail* t)
-{
-    if (trail) {
-        delete(trail);
-    }
-    trail = t;
-}
-
-Trail* Link::getTrail(void)
-{
-    return trail;
 }
 
 std::string Link::toShortString(std::string indent) const

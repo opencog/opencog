@@ -42,7 +42,6 @@ ADD_LIBRARY (atomspace SHARED
     StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
-    Trail.cc
     TruthValue.cc
     TypeIndex.cc
     VersionHandle.cc
@@ -117,7 +116,6 @@ INSTALL (FILES
     StringIndex.h
     TargetTypeIndex.h
     TLB.h
-    Trail.h
     TruthValue.h
     TypeIndex.h
     VersionHandle.h
