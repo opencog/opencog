@@ -33,7 +33,6 @@
 #include <pthread.h>
 #include <boost/bind.hpp>
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>

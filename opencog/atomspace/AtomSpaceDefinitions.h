@@ -37,7 +37,7 @@
 #define MARKED_FOR_REMOVAL      2  //BIT1
 // #define MULTIPLE_TRUTH_VALUES   4  //BIT2
 // #define FIRED_ACTIVATION        8  //BIT3
-#define HYPOTETHICAL_FLAG       16 //BIT4
+// #define HYPOTETHICAL_FLAG       16 //BIT4
 #define REMOVED_BY_DECAY        32 //BIT5
 //!@}
 

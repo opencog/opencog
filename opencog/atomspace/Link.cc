@@ -21,18 +21,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Link.h"
-
 #include <stdio.h>
 
-#include <opencog/util/platform.h>
-
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
+
+#include "Link.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
