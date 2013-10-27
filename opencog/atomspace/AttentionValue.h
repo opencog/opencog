@@ -45,10 +45,12 @@ namespace opencog
 class Atom;
 class AtomSpaceImpl;
 class AttentionBank;
-class ImportanceIndex;
 
 //! stores attention in three components: short-term, long-term and very long-term
-struct AttentionValue {
+class AttentionValue;
+typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
+class AttentionValue
+{
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -61,9 +63,9 @@ public:
     static const int DISPOSABLE = 0; //!< Status flag for vlti
 
     // CLASS CONSTANTS
-    static const sti_t DEFAULTATOMSTI = 0;   //!< short-term importance default
-    static const lti_t DEFAULTATOMLTI = 0;   //!< long-term importance default
-    static const vlti_t DEFAULTATOMVLTI = DISPOSABLE; //!< very long-term default
+    static const sti_t DEFAULTATOMSTI;   //!< short-term importance default
+    static const lti_t DEFAULTATOMLTI;   //!< long-term importance default
+    static const vlti_t DEFAULTATOMVLTI; //!< very long-term default
 
     static const sti_t MAXSTI = SHRT_MAX;
     static const lti_t MAXLTI = SHRT_MAX;
@@ -71,12 +73,12 @@ public:
     static const lti_t MINLTI = SHRT_MIN;
 
 	//! to be used as default attention value
-    static const AttentionValue& DEFAULT_AV() {
-        static AttentionValue* instance = 
-            new AttentionValue(DEFAULTATOMSTI, 
+    static AttentionValuePtr DEFAULT_AV() {
+        static AttentionValuePtr instance = 
+            std::make_shared<AttentionValue>(DEFAULTATOMSTI, 
                                DEFAULTATOMLTI, 
                                DEFAULTATOMVLTI);
-        return *instance;
+        return instance;
     }
 
 private:
@@ -86,7 +88,7 @@ private:
     lti_t m_LTI;   //!< long-term importance
     vlti_t m_VLTI; //!< represents the number of processes that currently need the
                    //!< atom as nondisposable. So it's only disposable if this is 0
-    static AttentionValue* m_defaultAV; //! default attention value
+    static AttentionValuePtr m_defaultAV; //! default attention value
 
 public:
     virtual ~AttentionValue() {}
@@ -124,7 +126,7 @@ public:
 
     //! Returns An AttentionValue* cloned from this AttentionValue
     // @param none
-    virtual AttentionValue* clone() const;
+    virtual AttentionValuePtr clone() const;
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
@@ -136,19 +138,19 @@ public:
 	//! functor for comparing atom's attention value
     struct STISort : public AtomComparator  {
         STISort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
 
 	//! functor for comparing atom's attention value
     struct LTIAndTVAscendingSort : public AtomComparator  {
         LTIAndTVAscendingSort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
 
 	//! functor for comparing atom's attention value
     struct LTIThenTVAscendingSort : public AtomComparator {
         LTIThenTVAscendingSort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
 
 
@@ -156,17 +158,19 @@ public:
 
     //! Returns a shared AttentionValue with default STI, LTI, VLTI values
     // @param none
-    static const AttentionValue& getDefaultAV();
+    static AttentionValuePtr getDefaultAV();
 
 	//!@{
     //! factory method
-    static AttentionValue* factory();
-    static AttentionValue* factory(sti_t sti);
-    static AttentionValue* factory(float scaledSti);
-    static AttentionValue* factory(sti_t sti, lti_t lti);
-    static AttentionValue* factory(sti_t sti, lti_t lti, vlti_t vlti);
+    static AttentionValuePtr factory();
+    static AttentionValuePtr factory(sti_t);
+    static AttentionValuePtr factory(float scaledSti);
+    static AttentionValuePtr factory(sti_t, lti_t);
+    static AttentionValuePtr factory(sti_t, lti_t, vlti_t);
     //!@}
 };
+#define createAV std::make_shared<AttentionValue>
+
 
 //! envelope for an AttentionValue
 class AttentionValueHolder 
@@ -174,7 +178,6 @@ class AttentionValueHolder
 {
     friend class AtomSpaceImpl;
     friend class AttentionBank;
-    friend class ImportanceIndex; // needs access attentionValue to directly change it.
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif

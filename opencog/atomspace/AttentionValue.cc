@@ -31,6 +31,10 @@
 
 using namespace opencog;
 
+const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
+const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
+const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
+
 AttentionValue::AttentionValue(sti_t STI, lti_t LTI, vlti_t VLTI)
 {
     m_STI = STI;
@@ -72,9 +76,9 @@ std::string AttentionValue::toString() const
     return buffer;
 }
 
-AttentionValue* AttentionValue::clone() const
+AttentionValuePtr AttentionValue::clone() const
 {
-    return new AttentionValue(m_STI, m_LTI, m_VLTI);
+    return createAV(m_STI, m_LTI, m_VLTI);
 }
 
 bool AttentionValue::operator==(const AttentionValue& av) const
@@ -83,26 +87,26 @@ bool AttentionValue::operator==(const AttentionValue& av) const
 }
 
 
-AttentionValue* AttentionValue::m_defaultAV = NULL;
+AttentionValuePtr AttentionValue::m_defaultAV = NULL;
 
-const AttentionValue& AttentionValue::getDefaultAV()
+AttentionValuePtr AttentionValue::getDefaultAV()
 {
     if (!m_defaultAV)
-        m_defaultAV = AttentionValue::factory();
-    return *m_defaultAV;
+        m_defaultAV = createAV();
+    return m_defaultAV;
 }
 
-AttentionValue* AttentionValue::factory()
+AttentionValuePtr AttentionValue::factory()
 {
-    return new AttentionValue(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return createAV(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
-AttentionValue* AttentionValue::factory(AttentionValue::sti_t sti)
+AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti)
 {
-    return new AttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return createAV(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
-AttentionValue* AttentionValue::factory(float scaledSti)
+AttentionValuePtr AttentionValue::factory(float scaledSti)
 {
 
     AttentionValue::sti_t sti;
@@ -115,23 +119,24 @@ AttentionValue* AttentionValue::factory(float scaledSti)
         sti = (AttentionValue::sti_t) ((65534 * scaledSti) - 32767);
     }
 
-    return new AttentionValue(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
+    return createAV(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
 }
 
-AttentionValue* AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti)
+AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti)
 {
-    return new AttentionValue(sti, lti, DEFAULTATOMVLTI);
+    return createAV(sti, lti, DEFAULTATOMVLTI);
 }
 
-AttentionValue* AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti, AttentionValue::vlti_t vlti)
+AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti, AttentionValue::vlti_t vlti)
 {
-    return new AttentionValue(sti, lti, vlti);
+    return createAV(sti, lti, vlti);
 }
 
 
 bool AttentionValue::STISort::test(AtomPtr h1, AtomPtr h2)
 {
-    return h1->getAttentionValue().getSTI() > h2->getAttentionValue().getSTI();
+    return h1->getAttentionValue()->getSTI() >
+           h2->getAttentionValue()->getSTI();
 }
 
 bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
@@ -142,8 +147,8 @@ bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
     tv1 = fabs(h1->getTruthValue()->getMean());
     tv2 = fabs(h2->getTruthValue()->getMean());
 
-    lti1 = h1->getAttentionValue().getLTI();
-    lti2 = h2->getAttentionValue().getLTI();
+    lti1 = h1->getAttentionValue()->getLTI();
+    lti2 = h2->getAttentionValue()->getLTI();
 
     if (lti1 < 0)
         tv1 = lti1 * (1.0f - tv1);
@@ -161,8 +166,8 @@ bool AttentionValue::LTIAndTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
 bool AttentionValue::LTIThenTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
 {
     lti_t lti1, lti2;
-    lti1 = h1->getAttentionValue().getLTI();
-    lti2 = h2->getAttentionValue().getLTI();
+    lti1 = h1->getAttentionValue()->getLTI();
+    lti2 = h2->getAttentionValue()->getLTI();
 
     if (lti1 != lti2) return lti1 < lti2;
 
@@ -171,4 +176,3 @@ bool AttentionValue::LTIThenTVAscendingSort::test(AtomPtr h1, AtomPtr h2)
     tv2 = h2->getTruthValue()->getMean();
     return tv1 < tv2;
 }
-

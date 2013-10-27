@@ -229,12 +229,12 @@ bool AtomSpace::isValidHandle(const Handle& h) const
     return atomSpaceAsync->isValidHandle(h)->get_result();
 }
 
-AttentionValue AtomSpace::getAV(Handle h) const
+AttentionValuePtr AtomSpace::getAV(Handle h) const
 {
     return atomSpaceAsync->getAV(h)->get_result();
 }
 
-void AtomSpace::setAV(Handle h, const AttentionValue &av)
+void AtomSpace::setAV(Handle h, AttentionValuePtr av)
 {
     atomSpaceAsync->setAV(h,av)->get_result();
 }

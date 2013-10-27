@@ -97,6 +97,7 @@ Type ClassServer::addType(Type parent, const std::string& name)
     l.unlock();
 
     // Emit add type signal.
+    // XXX TODO why are we locking here?  I don't get it ... 
     std::lock_guard<std::mutex> s(signal_mutex);
     _addTypeSignal(type);
 

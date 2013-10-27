@@ -516,10 +516,10 @@ public:
 
 };
 
-class GetAttentionValueASR : public OneParamASR <AttentionValue, Handle> {
+class GetAttentionValueASR : public OneParamASR <AttentionValuePtr, Handle> {
 public:
     GetAttentionValueASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<AttentionValue,Handle>(a,h) {};
+        OneParamASR<AttentionValuePtr, Handle>(a,h) {};
     
     virtual void do_work() {
         set_result(atomspace->getAV(p1));
@@ -527,10 +527,10 @@ public:
     
 };
 
-class SetAttentionValueASR : public TwoParamASR <bool, Handle, AttentionValue> {
+class SetAttentionValueASR : public TwoParamASR <bool, Handle, AttentionValuePtr> {
 public:
-    SetAttentionValueASR(AtomSpaceImpl *a, Handle h, const AttentionValue& av) :
-        TwoParamASR<bool,Handle,AttentionValue>(a,h,av) {};
+    SetAttentionValueASR(AtomSpaceImpl *a, Handle h, AttentionValuePtr av) :
+        TwoParamASR<bool, Handle, AttentionValuePtr>(a,h,av) {};
     
     virtual void do_work() {
         atomspace->setAV(p1,p2);
@@ -542,7 +542,7 @@ public:
 class GetAttentionValueSTIASR : public OneParamASR <AttentionValue::sti_t, Handle> {
 public:
     GetAttentionValueSTIASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<AttentionValue::sti_t,Handle>(a,h) {};
+        OneParamASR<AttentionValue::sti_t, Handle>(a,h) {};
     
     virtual void do_work() {
         set_result(atomspace->getSTI(p1));
@@ -560,9 +560,9 @@ public:
     
     virtual void do_work() {
         if (positive)
-            set_result(atomspace->getNormalisedZeroToOneSTI(AtomPtr(h),average,clip));
+            set_result(atomspace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip));
         else
-            set_result(atomspace->getNormalisedSTI(AtomPtr(h),average,clip));
+            set_result(atomspace->getNormalisedSTI(h->getAttentionValue(), average, clip));
     };
     
 };
@@ -570,7 +570,7 @@ public:
 class SetAttentionValueSTIASR : public TwoParamASR <bool, Handle, AttentionValue::sti_t> {
 public:
     SetAttentionValueSTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::sti_t sti) :
-        TwoParamASR<bool,Handle,AttentionValue::sti_t>(a,h,sti) {};
+        TwoParamASR<bool, Handle, AttentionValue::sti_t>(a,h,sti) {};
     
     virtual void do_work() {
         atomspace->setSTI(p1,p2);
@@ -979,7 +979,7 @@ public:
 // Requests are based on their parent class that defines the return type
 typedef std::shared_ptr< GenericASR<Handle> > HandleRequest;
 typedef std::shared_ptr< GenericASR<AtomPtr > > AtomRequest;
-typedef std::shared_ptr< GenericASR<AttentionValue> > AttentionValueRequest;
+typedef std::shared_ptr< GenericASR<AttentionValuePtr> > AttentionValueRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
 typedef std::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;

@@ -401,13 +401,12 @@ public:
         return atomSpaceAsync->getSTI(h)->get_result();
     }
 
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
+    /** Retrieve the Long-term Importance of a given atom */
     AttentionValue::lti_t getLTI(Handle h) const {
         return atomSpaceAsync->getLTI(h)->get_result();
     }
 
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
+    /** Retrieve the Very-Long-Term Importance of a given atom */
     AttentionValue::vlti_t getVLTI(Handle h) const {
         return atomSpaceAsync->getVLTI(h)->get_result();
     }
@@ -433,13 +432,13 @@ public:
     }
 
     /** Retrieve the AttentionValue of a given Handle */
-    AttentionValue getAV(Handle h) const;
+    AttentionValuePtr getAV(Handle) const;
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av);
+    void setAV(Handle, AttentionValuePtr);
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle h) const;
+    Type getType(Handle) const;
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
     // Experimental code for speeding up TV retrieval...
@@ -1151,7 +1150,7 @@ public:
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr atom) {
-            return atom->getAttentionValue().getSTI() > threshold;
+            return atom->getAttentionValue()->getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1160,7 +1159,7 @@ public:
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr atom) {
-            return atom->getAttentionValue().getLTI() > threshold;
+            return atom->getAttentionValue()->getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };

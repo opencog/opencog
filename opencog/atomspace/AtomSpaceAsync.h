@@ -292,7 +292,7 @@ public:
         return r;
     }
 
-    VoidRequest setAV(Handle h,const AttentionValue& av) {
+    VoidRequest setAV(Handle h, AttentionValuePtr av) {
         VoidRequest r(new SetAttentionValueASR(&atomspace,h,av));
         requestQueue.push(r);
         return r;
@@ -689,7 +689,7 @@ public:
         return r;
     }
 
-    // wrap these in a mutex
+    // TODO wrap these in a mutex
     boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.addAtomSignal().connect(function);
     }

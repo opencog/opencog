@@ -54,10 +54,10 @@ AtomTable::AtomTable()
 {
     size = 0;
 
-    //connect signals
+    // connect signal to find out about type additions
     addedTypeConnection =
-        classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
-                    this, _1));
+        classserver().addTypeSignal().connect(
+            boost::bind(&AtomTable::typeAdded, this, _1));
 
     Handle::set_resolver(this);
 }
@@ -658,7 +658,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
-    atom->atomTable = NULL;
+    atom->setAtomTable(NULL);
 
     result.insert(atom);
     return result;

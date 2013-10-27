@@ -62,7 +62,8 @@ typedef std::shared_ptr<Link> LinkPtr;
  * links are specialization of atoms, that is, they inherit all
  * properties from atoms.
  */
-class Atom : public AttentionValueHolder
+class Atom
+    : public std::enable_shared_from_this<Atom>
 {
     friend class SavingLoading;   // needs to set flags diectly
     friend class AtomTable;
@@ -92,6 +93,7 @@ protected:
     char flags;
 
     TruthValuePtr truthValue;
+    AttentionValuePtr _attentionValue;
 
     /**
      * Constructor for this class.
@@ -103,7 +105,7 @@ protected:
      *        in setTruthValue.
      */
     Atom(Type, TruthValuePtr = TruthValue::NULL_TV(),
-            const AttentionValue& = AttentionValue::DEFAULT_AV());
+            AttentionValuePtr = AttentionValue::DEFAULT_AV());
 
     struct IncomingSet
     {
@@ -149,10 +151,10 @@ public:
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
-    const AttentionValue& getAttentionValue() const { return attentionValue; }
+    AttentionValuePtr getAttentionValue() const { return _attentionValue; }
 
     //! Sets the AttentionValue object of the atom.
-    void setAttentionValue(const AttentionValue&) throw (RuntimeException);
+    void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
 
     /** Returns the TruthValue object of the atom.
      *

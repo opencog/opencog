@@ -27,6 +27,8 @@
 
 #include <mutex>
 
+#include <boost/signal.hpp>
+
 #include <opencog/util/recent_val.h>
 #include <opencog/atomspace/AttentionValue.h>
 
@@ -36,9 +38,14 @@ namespace opencog
  *  @{
  */
 
+class AtomTable;
+
 class AttentionBank
 {
-    AtomSpaceImpl *atomspace;
+    /** The connection by which we are notified of AV changes */
+    boost::signals::connection AVChangedConnection;
+    void AVChanged(Handle, AttentionValuePtr, AttentionValuePtr);
+
     /**
      * Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
@@ -68,7 +75,8 @@ class AttentionBank
     void removeStimulus(Handle h);
 
 public:
-    AttentionBank();
+    /** The table notifies us about AV changes */
+    AttentionBank(AtomTable*);
     ~AttentionBank();
 
     /**
@@ -168,36 +176,8 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m);
 
-    /** Retrieve the AttentionValue of an attention value holder */
-    const AttentionValue& getAV(AttentionValueHolderPtr avh) const;
-
-    /** Change the AttentionValue of an attention value holder */
-    void setAV(AttentionValueHolderPtr avh, const AttentionValue &av);
-
-    /** Change the Short-Term Importance of an attention value holder */
-    void setSTI(AttentionValueHolderPtr avh, AttentionValue::sti_t);
-
-    /** Change the Long-term Importance of an attention value holder */
-    void setLTI(AttentionValueHolderPtr avh, AttentionValue::lti_t);
-
     /** Change the Very-Long-Term Importance of an attention value holder */
     //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
-
-    /** Incr the Very-Long-Term Importance of an attention value holder by 1*/
-    void incVLTI(AttentionValueHolderPtr avh);
-
-    /** Decr the Very-Long-Term Importance of an attention value holder by 1*/
-    void decVLTI(AttentionValueHolderPtr avh);
-
-    /** Retrieve the Short-Term Importance of an attention value holder */
-    AttentionValue::sti_t getSTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
-
 };
 
 /** @}*/
