@@ -61,18 +61,6 @@ class AtomSpaceImpl
     friend class SavingLoading;
     friend class SaveRequest;
 
-    /**
-     * Used to fetch atoms from disk.
-     */
-    BackingStore *backing_store;
-
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomSignal _mergeAtomSignal;
-    AtomPtrSignal _removeAtomSignal;
-
-    AttentionBank bank;
-
 public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
@@ -274,7 +262,7 @@ public:
     void setMean(Handle, float mean) throw (InvalidParamException);
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValueHolder. STI above and below threshold
+     * for a given AttentionValue. STI above and below threshold
      * normalised separately and linearly.
      *
      * @param h The attention value holder to get STI for
@@ -284,10 +272,10 @@ public:
      * range can be return if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
+    float getNormalisedSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given AttentionValueHolder.
+     * for a given AttentionValue.
      *
      * @param h The attention value holder to get STI for
      * @param average Should the recent average max/min STI be used, or the
@@ -296,58 +284,74 @@ public:
      * range can be return if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
+    float getNormalisedZeroToOneSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the AttentionValue of a given Handle */
-    const AttentionValue& getAV(Handle h) const {
-        return bank.getAV(AtomPtr(h));
+    AttentionValuePtr getAV(Handle h) const {
+        return h->getAttentionValue();
     }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av) {
-        bank.setAV(AtomPtr(h), av);
+    void setAV(Handle h, AttentionValuePtr av) {
+        h->setAttentionValue(av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        bank.setSTI(AtomPtr(h), stiValue);
+        /* Make a copy */
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        bank.setLTI(AtomPtr(h), ltiValue);
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
     void incVLTI(Handle h) {
-        bank.incVLTI(AtomPtr(h));
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + 1);
+        h->setAttentionValue(new_av);
     }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {
-        bank.decVLTI(AtomPtr(h));
+        AttentionValuePtr old_av = h->getAttentionValue();
+        //we only want to decrement the vlti if it's not already disposable.
+        if (old_av->getVLTI() == AttentionValue::DISPOSABLE) return;
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() - 1);
+        h->setAttentionValue(new_av);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return bank.getSTI(AtomPtr(h));
+        return h->getAttentionValue()->getSTI();
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return bank.getLTI(AtomPtr(h));
+        return h->getAttentionValue()->getLTI();
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return bank.getVLTI(AtomPtr(h));
+        return h->getAttentionValue()->getVLTI();
     }
 
     bool isValidHandle(Handle h) const {
@@ -945,7 +949,7 @@ public:
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr a) {
-            return a->getAttentionValue().getSTI() > threshold;
+            return a->getAttentionValue()->getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -954,7 +958,7 @@ public:
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr a) {
-            return a->getAttentionValue().getLTI() > threshold;
+            return a->getAttentionValue()->getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
@@ -962,6 +966,17 @@ public:
 private:
 
     AtomTable atomTable;
+    AttentionBank bank;
+
+    /**
+     * Used to fetch atoms from disk.
+     */
+    BackingStore *backing_store;
+
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _mergeAtomSignal;
+    AtomPtrSignal _removeAtomSignal;
 
     /** The AtomSpace currently acts like event loop, but some legacy code (such as
      * saving/loading) might not like the AtomSpace changing while acting upon

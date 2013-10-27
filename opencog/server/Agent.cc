@@ -31,6 +31,8 @@ using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
+    _attentionValue = AttentionValue::DEFAULT_AV();
+
     // an empty set of parameters and defaults (so that various
     // methods will still work even if none are set in this or a derived
     // class)
@@ -49,8 +51,8 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(getAttentionValue().getSTI());
-    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(getAttentionValue().getLTI());
+    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(_attentionValue->getSTI());
+    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
     conn.disconnect();

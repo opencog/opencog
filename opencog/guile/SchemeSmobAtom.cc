@@ -98,8 +98,8 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 SCM SchemeSmob::ss_av (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-av");
-	const AttentionValue &av = atomspace->getAV(h);
-	AttentionValue *sav = av.clone();
+	AttentionValuePtr av = atomspace->getAV(h);
+	AttentionValue *sav = av->rawclone();
 	return take_av(sav);
 }
 
@@ -108,7 +108,7 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 	Handle h = verify_handle(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
 
-	atomspace->setAV(h, *av);
+	atomspace->setAV(h, av->clone());
 	return satom;
 }
 

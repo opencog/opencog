@@ -54,6 +54,7 @@ using namespace opencog;
 // ====================================================================
 
 AtomSpaceImpl::AtomSpaceImpl(void)
+    : bank(&atomTable)
 {
     backing_store = NULL;
 
@@ -141,6 +142,7 @@ AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 }
 
 AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
+    : bank(&atomTable)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpaceImpl - Cannot copy an object of this class");
@@ -154,10 +156,6 @@ bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
     AtomPtrSet::const_iterator it;
     for (it = extractedAtoms.begin(); it != extractedAtoms.end(); it++) {
         AtomPtr a = *it;
-
-        // Also refund sti/lti to AtomSpace funds pool
-        bank.updateSTIFunds(bank.getSTI(a));
-        bank.updateLTIFunds(bank.getLTI(a));
 
         // emit remove atom signal
         _removeAtomSignal(this, a);
@@ -435,12 +433,12 @@ void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
     setTV(h, newTv);
 }
 
-float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedSTI(AttentionValuePtr av, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
     int normaliser;
     float val;
-    AttentionValue::sti_t s = bank.getSTI(avh);
+    AttentionValue::sti_t s = av->getSTI();
     if (s > bank.getAttentionalFocusBoundary()) {
         normaliser = (int) bank.getMaxSTI(average) - bank.getAttentionalFocusBoundary();
         if (normaliser == 0) {
@@ -461,11 +459,11 @@ float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average,
     }
 }
 
-float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
 {
     int normaliser;
     float val;
-    AttentionValue::sti_t s = bank.getSTI(avh);
+    AttentionValue::sti_t s = av->getSTI();
     normaliser = bank.getMaxSTI(average) - bank.getMinSTI(average);
     if (normaliser == 0) {
         return 0.0f;

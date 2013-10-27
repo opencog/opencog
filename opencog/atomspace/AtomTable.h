@@ -64,6 +64,10 @@ typedef std::set<AtomPtr> AtomPtrSet;
 
 class SavingLoading;
 
+typedef boost::signal<void (Handle)> AtomSigl;
+typedef boost::signal<void (AtomPtr)> AtomPtrSigl;
+typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
+
 /**
  * This class provides mechanisms to store atoms and keep indices for
  * efficient lookups. It implements the local storage data structure of
@@ -106,15 +110,17 @@ private:
 	//!@}
 	
     /**
-     * signal connection used to keep track of atom type addition in the
+     * signal connection used to find out about atom type additions in the
      * ClassServer 
      */
     boost::signals::connection addedTypeConnection; 
 
-    /**
-     * Handler of the 'type added' signal from ClassServer
-     */
+    /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);
+
+    /** Signal emitted when the AV changes. */
+    AVCHSigl _AVChangedSignal;
+
 
     static bool decayed(Handle h);
 
@@ -731,6 +737,9 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
+
+    /** Provide ability for other to find out about AV changes */
+    AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
 };
 
 /** @}*/

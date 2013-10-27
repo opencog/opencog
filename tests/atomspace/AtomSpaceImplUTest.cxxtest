@@ -864,13 +864,13 @@ public:
     void testGetNormalisedSTI() {
         Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(atomSpace->getNormalisedZeroToOneSTI(AtomPtr(h), average, clip), 0.0f);
+        TS_ASSERT_EQUALS(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
         average = true;
         atomSpace->setSTI(h,10);
         atomSpace->getAttentionBank().updateMaxSTI(10);
-        TS_ASSERT(atomSpace->getNormalisedZeroToOneSTI(AtomPtr(h), average, clip) > 1.0f);
+        TS_ASSERT(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
         clip = true;
-        TS_ASSERT_DELTA(atomSpace->getNormalisedZeroToOneSTI(AtomPtr(h), average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
     }
 
 };

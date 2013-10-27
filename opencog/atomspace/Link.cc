@@ -98,8 +98,8 @@ std::string Link::toString(std::string indent) const
 
     snprintf(buf, BUFSZ, "(%s (av %d %d) %s\n",
              classserver().getTypeName(type).c_str(),
-             (int)getAttentionValue().getSTI(),
-             (int)getAttentionValue().getLTI(),
+             (int)getAttentionValue()->getSTI(),
+             (int)getAttentionValue()->getLTI(),
              getTruthValue()->toString().c_str());
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is

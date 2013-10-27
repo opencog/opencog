@@ -434,18 +434,18 @@ public:
 
         /* add a simple set of links & nodes */
         NodePtr wordNode(createNode(NUMBER_NODE, "1"));
-        wordNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) - 10));
+        wordNode->setAttentionValue(createAV((AttentionValue::sti_t) - 10));
         Handle wnHandle = atomTable.add(wordNode);
 
         NodePtr senseNode(createNode(CONCEPT_NODE, "28675194"));
-        senseNode->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) 30));
+        senseNode->setAttentionValue(createAV((AttentionValue::sti_t) 30));
         Handle snHandle = atomTable.add(senseNode);
 
         HandleSeq os;
         os.push_back(wnHandle);
         os.push_back(snHandle);
         LinkPtr inheritanceLink = createLink(INHERITANCE_LINK, os);
-        inheritanceLink->setAttentionValue(*AttentionValue::factory((AttentionValue::sti_t) 500));
+        inheritanceLink->setAttentionValue(createAV((AttentionValue::sti_t) 500));
         Handle linkHandle = atomTable.add(inheritanceLink);
 
         // force sti decaying
@@ -453,9 +453,9 @@ public:
             atomTable.decayShortTermImportance();
 
         // test the updated STIs
-        TS_ASSERT(wnHandle->getAttentionValue().getSTI()   == -20);
-        TS_ASSERT(snHandle->getAttentionValue().getSTI()   ==  20);
-        TS_ASSERT(linkHandle->getAttentionValue().getSTI() == 490);
+        TS_ASSERT(wnHandle->getAttentionValue()->getSTI()   == -20);
+        TS_ASSERT(snHandle->getAttentionValue()->getSTI()   ==  20);
+        TS_ASSERT(linkHandle->getAttentionValue()->getSTI() == 490);
     }
 
     /* test the fix for the bug triggered whenever we had a link pointing to the

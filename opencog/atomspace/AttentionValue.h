@@ -33,7 +33,7 @@
 #include <opencog/atomspace/Handle.h>
 
 #ifdef ZMQ_EXPERIMENT
-	#include "ProtocolBufferSerializer.h"
+   #include "ProtocolBufferSerializer.h"
 #endif
 
 namespace opencog
@@ -42,13 +42,13 @@ namespace opencog
  *  @{
  */
 
-class Atom;
-class AtomSpaceImpl;
-class AttentionBank;
-class ImportanceIndex;
-
 //! stores attention in three components: short-term, long-term and very long-term
-struct AttentionValue {
+class AttentionValue;
+typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
+#define createAV std::make_shared<AttentionValue>
+
+class AttentionValue
+{
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -61,22 +61,19 @@ public:
     static const int DISPOSABLE = 0; //!< Status flag for vlti
 
     // CLASS CONSTANTS
-    static const sti_t DEFAULTATOMSTI = 0;   //!< short-term importance default
-    static const lti_t DEFAULTATOMLTI = 0;   //!< long-term importance default
-    static const vlti_t DEFAULTATOMVLTI = DISPOSABLE; //!< very long-term default
+    static const sti_t DEFAULTATOMSTI;   //!< short-term importance default
+    static const lti_t DEFAULTATOMLTI;   //!< long-term importance default
+    static const vlti_t DEFAULTATOMVLTI; //!< very long-term default
 
     static const sti_t MAXSTI = SHRT_MAX;
     static const lti_t MAXLTI = SHRT_MAX;
     static const sti_t MINSTI = SHRT_MIN;
     static const lti_t MINLTI = SHRT_MIN;
 
-	//! to be used as default attention value
-    static const AttentionValue& DEFAULT_AV() {
-        static AttentionValue* instance = 
-            new AttentionValue(DEFAULTATOMSTI, 
-                               DEFAULTATOMLTI, 
-                               DEFAULTATOMVLTI);
-        return *instance;
+    //! to be used as default attention value
+    static AttentionValuePtr DEFAULT_AV() {
+        static AttentionValuePtr instance = createAV();
+        return instance;
     }
 
 private:
@@ -86,32 +83,33 @@ private:
     lti_t m_LTI;   //!< long-term importance
     vlti_t m_VLTI; //!< represents the number of processes that currently need the
                    //!< atom as nondisposable. So it's only disposable if this is 0
-    static AttentionValue* m_defaultAV; //! default attention value
+    static AttentionValuePtr m_defaultAV; //! default attention value
 
 public:
-    virtual ~AttentionValue() {}
+    ~AttentionValue() {}
     // CLASS CONSTRUCTORS
 
-	/**
+   /**
      * @param STI (int): The STI value to set for the atom
      * @param LTI (int): The LTI value to set for the atom
      * @param VLTI (unsigned short): The VLTI value to set for this atom
      */
     AttentionValue(sti_t STI = DEFAULTATOMSTI,
                    lti_t LTI = DEFAULTATOMLTI,
-                   vlti_t VLTI = DEFAULTATOMVLTI);
+                   vlti_t VLTI = DEFAULTATOMVLTI)
+        : m_STI(STI), m_LTI(LTI), m_VLTI(VLTI) {}
 
     // PUBLIC GET/SET PROPERTIES
 
     //! return STI property value
-    virtual sti_t getSTI() const;
-    virtual float getScaledSTI() const;
+    sti_t getSTI() const { return m_STI; }
+    float getScaledSTI() const { return (((float) m_STI) + 32768) / 65534; }
 
     //! return LTI property value
-    virtual lti_t getLTI() const;
+    lti_t getLTI() const { return m_LTI; }
 
     //! return VLTI property value
-    virtual vlti_t getVLTI() const;
+    vlti_t getVLTI() const { return m_VLTI; }
 
     // PUBLIC METHODS
 
@@ -120,82 +118,41 @@ public:
 
     //! Returns const string "[sti_val, lti_val, vlti_val]"
     // @param none
-    virtual std::string toString() const;
+    std::string toString() const;
 
     //! Returns An AttentionValue* cloned from this AttentionValue
     // @param none
-    virtual AttentionValue* clone() const;
+    AttentionValuePtr clone() const { return createAV(m_STI, m_LTI, m_VLTI); }
+    AttentionValue* rawclone() const { return new AttentionValue(m_STI, m_LTI, m_VLTI); }
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
     // @param none
-    virtual bool operator==(const AttentionValue& av) const;
+    bool operator==(const AttentionValue& av) const {
+        return (m_STI == av.getSTI() && m_LTI == av.getLTI() && m_VLTI == av.getVLTI());
+    }
     inline bool operator!=(const AttentionValue& rhs) const
          { return !(*this == rhs); }
 
-	//! functor for comparing atom's attention value
+    //! functor for comparing atom's attention value
     struct STISort : public AtomComparator  {
         STISort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
 
-	//! functor for comparing atom's attention value
+    //! functor for comparing atom's attention value
     struct LTIAndTVAscendingSort : public AtomComparator  {
         LTIAndTVAscendingSort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
 
-	//! functor for comparing atom's attention value
+    //! functor for comparing atom's attention value
     struct LTIThenTVAscendingSort : public AtomComparator {
         LTIThenTVAscendingSort() {};
-        virtual bool test(AtomPtr h1, AtomPtr h2);
+        virtual bool test(AtomPtr, AtomPtr);
     };
-
-
-    // STATIC METHODS
-
-    //! Returns a shared AttentionValue with default STI, LTI, VLTI values
-    // @param none
-    static const AttentionValue& getDefaultAV();
-
-	//!@{
-    //! factory method
-    static AttentionValue* factory();
-    static AttentionValue* factory(sti_t sti);
-    static AttentionValue* factory(float scaledSti);
-    static AttentionValue* factory(sti_t sti, lti_t lti);
-    static AttentionValue* factory(sti_t sti, lti_t lti, vlti_t vlti);
-    //!@}
 };
 
-//! envelope for an AttentionValue
-class AttentionValueHolder 
-    : public std::enable_shared_from_this<AttentionValueHolder> 
-{
-    friend class AtomSpaceImpl;
-    friend class AttentionBank;
-    friend class ImportanceIndex; // needs access attentionValue to directly change it.
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
-
-protected:
-    AttentionValue attentionValue;
-
-    /** Sets the AttentionValue object */
-    virtual void setAttentionValue(const AttentionValue &a) {
-        attentionValue = a;
-    }
-
-
-public:
-    /** Returns the AttentionValue object */
-    virtual const AttentionValue& getAttentionValue() const {
-        return attentionValue;
-    }
-};
-
-typedef std::shared_ptr<AttentionValueHolder> AttentionValueHolderPtr;
 
 /** @}*/
 } // namespace opencog 

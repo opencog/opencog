@@ -748,8 +748,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
     // differently from invalid elements found in its begining.
 
     while ((set != NULL) &&
-            ((set->getAtom()->getAttentionValue().getSTI() < lowerBound) ||
-             (set->getAtom()->getAttentionValue().getSTI() > upperBound))) {
+            ((set->getAtom()->getAttentionValue()->getSTI() < lowerBound) ||
+             (set->getAtom()->getAttentionValue()->getSTI() > upperBound))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -760,8 +760,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if ((set->next->getAtom()->getAttentionValue().getSTI() < lowerBound) ||
-                (set->next->getAtom()->getAttentionValue().getSTI() > upperBound)) {
+        if ((set->next->getAtom()->getAttentionValue()->getSTI() < lowerBound) ||
+                (set->next->getAtom()->getAttentionValue()->getSTI() > upperBound)) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;

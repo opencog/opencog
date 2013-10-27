@@ -166,10 +166,10 @@ public:
         // Check nodes
         Handle h1 = atomSpace.getHandle(CONCEPT_NODE, NODE1_NAME);
         TS_ASSERT(h1 != Handle::UNDEFINED);
-        const AttentionValue& av1 = atomSpace.getAV(h1);
-        TS_ASSERT(av1.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-        TS_ASSERT(av1.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-        TS_ASSERT(av1.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        AttentionValuePtr av1 = atomSpace.getAV(h1);
+        TS_ASSERT(av1->getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av1->getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av1->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
         TruthValuePtr tv1 = atomSpace.getTV(h1);
         TS_ASSERT(tv1->getType() == tvs[0]->getType());
         TS_ASSERT(tv1->getMean() == tvs[0]->getMean());
@@ -178,10 +178,10 @@ public:
 
         Handle h2 = atomSpace.getHandle(CONCEPT_NODE, NODE2_NAME);
         TS_ASSERT(h2 != Handle::UNDEFINED);
-        const AttentionValue& av2 = atomSpace.getAV(h2);
-        TS_ASSERT(av2.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-        TS_ASSERT(av2.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-        TS_ASSERT(av2.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        AttentionValuePtr av2 = atomSpace.getAV(h2);
+        TS_ASSERT(av2->getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av2->getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av2->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
         TruthValuePtr tv2 = atomSpace.getTV(h2);
         TS_ASSERT(tv2->getType() == tvs[1]->getType());
@@ -191,10 +191,10 @@ public:
 
         Handle h3 = atomSpace.getHandle(CONCEPT_NODE, NODE3_NAME);
         TS_ASSERT(h3 != Handle::UNDEFINED);
-        const AttentionValue& av3 = atomSpace.getAV(h3);
-        TS_ASSERT(av3.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-        TS_ASSERT(av3.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-        TS_ASSERT(av3.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        AttentionValuePtr av3 = atomSpace.getAV(h3);
+        TS_ASSERT(av3->getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av3->getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av3->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
         TruthValuePtr tv3 = atomSpace.getTV(h3);
         TS_ASSERT(tv3->getType() == tvs[2]->getType());
@@ -205,10 +205,10 @@ public:
 
         Handle h4 = atomSpace.getHandle(CONCEPT_NODE, NODE4_NAME);
         TS_ASSERT(h4 != Handle::UNDEFINED);
-        const AttentionValue& av4 = atomSpace.getAV(h4);
-        TS_ASSERT(av4.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-        TS_ASSERT(av4.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-        TS_ASSERT(av4.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        AttentionValuePtr av4 = atomSpace.getAV(h4);
+        TS_ASSERT(av4->getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av4->getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av4->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
         TruthValuePtr tv4 = atomSpace.getTV(h4);
         TS_ASSERT(tv4->getType() == tvs[3]->getType());
@@ -226,10 +226,10 @@ public:
 
         Handle h5 = atomSpace.getHandle(CONCEPT_NODE, NODE5_NAME);
         TS_ASSERT(h5 != Handle::UNDEFINED);
-        const AttentionValue& av5 = atomSpace.getAV(h5);
-        TS_ASSERT(av5.getSTI()  == AttentionValue::DEFAULTATOMSTI);
-        TS_ASSERT(av5.getLTI()  == AttentionValue::DEFAULTATOMLTI);
-        TS_ASSERT(av5.getVLTI() == AttentionValue::DEFAULTATOMVLTI);
+        AttentionValuePtr av5 = atomSpace.getAV(h5);
+        TS_ASSERT(av5->getSTI()  == AttentionValue::DEFAULTATOMSTI);
+        TS_ASSERT(av5->getLTI()  == AttentionValue::DEFAULTATOMLTI);
+        TS_ASSERT(av5->getVLTI() == AttentionValue::DEFAULTATOMVLTI);
 
         TruthValuePtr tv5 = atomSpace.getTV(h5);
         TS_ASSERT(tv5->getType() == tvs[4]->getType());

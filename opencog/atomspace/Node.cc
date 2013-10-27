@@ -71,8 +71,8 @@ std::string Node::toString(std::string indent) const
     snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d) %s)\n",
              classserver().getTypeName(type).c_str(),
              tmpname.c_str(),
-             (int)getAttentionValue().getSTI(),
-             (int)getAttentionValue().getLTI(),
+             (int)getAttentionValue()->getSTI(),
+             (int)getAttentionValue()->getLTI(),
              getTruthValue()->toString().c_str());
     return indent + buf;
 }
