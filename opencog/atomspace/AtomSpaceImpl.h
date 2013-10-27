@@ -1001,11 +1001,6 @@ private:
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
     opencog::recent_val<AttentionValue::sti_t> minSTI;
 
-    /* These indicate the amount importance funds available in the
-     * AtomSpace */
-    long fundsSTI;
-    long fundsLTI;
-
     /**
      * Remove stimulus from atom, only should be used when Atom is deleted.
      */

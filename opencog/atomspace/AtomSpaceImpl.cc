@@ -176,10 +176,6 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
         return result;
     }
 
-    // Remove default STI/LTI from AtomSpace Funds
-    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
-
     // Maybe the backing store knows about this atom.
     if (backing_store) {
         NodePtr n(backing_store->getNode(t, name.c_str()));
@@ -212,10 +208,6 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         _mergeAtomSignal(this,result);
         return result;
     }
-
-    // Remove default STI/LTI from AtomSpace Funds
-    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
     // Maybe the backing store knows about this atom.
     if (backing_store)
