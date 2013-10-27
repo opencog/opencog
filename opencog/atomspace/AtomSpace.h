@@ -1176,11 +1176,6 @@ public:
     static bool isHandleInSeq(Handle h, HandleSeq &seq);
 
 private:
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
     bool handleAddSignal(AtomSpaceImpl *, Handle);
 
 #ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE

@@ -978,39 +978,11 @@ private:
     AtomSignal _mergeAtomSignal;
     AtomPtrSignal _removeAtomSignal;
 
-    /** The AtomSpace currently acts like event loop, but some legacy code (such as
-     * saving/loading) might not like the AtomSpace changing while acting upon
-     * it. Those that absolutely require it can get a lock to halt the event loop.
-     * @warn This should only be used as a last resort, you need to add your
-     * class as a friend class to the AtomSpace, and there is no
-     * guarantee this will be available in the future.
-     */
-    mutable pthread_mutex_t atomSpaceLock;
-
     /**
      * signal connections used to keep track of atom removal in the AtomTable
      */
     boost::signals::connection removedAtomConnection; 
     boost::signals::connection addedAtomConnection; 
-
-    /** Boundary at which an atom is considered within the attentional
-     * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent */
-    AttentionValue::sti_t attentionalFocusBoundary;
-
-    opencog::recent_val<AttentionValue::sti_t> maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> minSTI;
-
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
-    /**
-     * Creates the space map node, if not created yet.
-     * returns the handle of the node.
-     */
-    Handle getSpaceMapNode(void);
 
     /**
      * Handler of the 'atom removed' signal from self

@@ -62,7 +62,6 @@ AtomSpaceImpl::AtomSpaceImpl(void)
     addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
     removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1, _2));
 
-    pthread_mutex_init(&atomSpaceLock, NULL);
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
 }
 
