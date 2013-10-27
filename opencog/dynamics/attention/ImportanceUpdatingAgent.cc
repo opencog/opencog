@@ -159,9 +159,11 @@ void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &a
         //cout << "STI " << (float) a->getSTI(agents[n]);
         //cout << " stim " << agents[n]->getTotalStimulus() << endl;
 
-        STIAtomWageForAgent.push_back((float) a->getAttentionBank().getSTI(AttentionValueHolderPtr(agents[n])) /
+        STIAtomWageForAgent.push_back((float)
+            agents[n]->getAV()->getSTI() /
                                       agents[n]->getTotalStimulus());
-        LTIAtomWageForAgent.push_back((float) a->getAttentionBank().getLTI(AttentionValueHolderPtr(agents[n])) /
+        LTIAtomWageForAgent.push_back((float)
+            agents[n]->getAV()->getLTI() /
                                       agents[n]->getTotalStimulus());
     }
 }
@@ -495,8 +497,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
 void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, AgentPtr agent)
 {
-    AttentionValue::sti_t current, exchangeAmount;
-    current = a->getAttentionBank().getSTI(AttentionValueHolderPtr(agent));
+    AttentionValue::sti_t current = agent->getAV()->getSTI();
 
     /* TODO
      *
@@ -508,39 +509,48 @@ void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, AgentPtr agent)
      *    Currency flows from MindAgents to Units when MindAgents pay Units
      *    rent for the processor time they utilize.
      */
-    exchangeAmount = 0;
+    AttentionValue::sti_t exchangeAmount = 0;
 
     // just top up to a fixed amount for now
     if (current < STIAtomWage * 100)
         exchangeAmount = STIAtomWage * 100 - current;
 
-    a->getAttentionBank().setSTI(AttentionValueHolderPtr(agent), current + exchangeAmount);
+    a->getAttentionBank().updateSTIFunds(exchangeAmount);
+
+    AttentionValuePtr old_av = agent->getAV();
+    AttentionValuePtr new_av = createAV(current + exchangeAmount,
+                                        old_av->getLTI(),
+                                        old_av->getVLTI());
+    agent->setAV(new_av);
 }
 
 void ImportanceUpdatingAgent::updateAgentLTI(AtomSpace* a, AgentPtr agent)
 {
-    AttentionValue::sti_t current, exchangeAmount;
-    current = a->getAttentionBank().getLTI(AttentionValueHolderPtr(agent));
+    AttentionValue::lti_t current = agent->getAV()->getLTI();
 
     // TODO: see above
-    exchangeAmount = 0;
+    AttentionValue::lti_t exchangeAmount = 0;
 
     // just top up to a fixed amount for now
     if (current < LTIAtomWage * 100)
         exchangeAmount = LTIAtomWage * 100 - current;
 
-    a->getAttentionBank().setLTI(AttentionValueHolderPtr(agent), current + exchangeAmount);
+    a->getAttentionBank().updateLTIFunds(exchangeAmount);
+
+    AttentionValuePtr old_av = agent->getAV();
+    AttentionValuePtr new_av = createAV(old_av->getSTI(),
+                                        current + exchangeAmount,
+                                        old_av->getVLTI());
+    agent->setAV(new_av);
 }
 
 void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents, Handle h)
 {
-    AttentionValue::sti_t current, stiRentCharged, exchangeAmount;
-
-    current = a->getSTI(h);
-    stiRentCharged = calculateSTIRent(a, current);
+    AttentionValue::sti_t current = a->getSTI(h);
+    AttentionValue::sti_t stiRentCharged = calculateSTIRent(a, current);
 
     int total_stim = 0;
-    exchangeAmount = -stiRentCharged;
+    AttentionValue::sti_t exchangeAmount = -stiRentCharged;
     for (size_t n = 0; n < agents.size(); n++) {
         if (agents[n]->getTotalStimulus() == 0)
             continue;
@@ -551,7 +561,13 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) STIAtomWage;
         exchangeAmount += (AttentionValue::sti_t) wage * s;
 
-        a->getAttentionBank().setSTI(AttentionValueHolderPtr(agents[n]), a->getAttentionBank().getSTI(AttentionValueHolderPtr(agents[n])) - exchangeAmount);
+        a->getAttentionBank().updateSTIFunds(-exchangeAmount);
+
+        AttentionValuePtr old_av = agents[n]->getAV();
+        AttentionValuePtr new_av = createAV(current - exchangeAmount,
+                                            old_av->getLTI(),
+                                            old_av->getVLTI());
+        agents[n]->setAV(new_av);
     }
     a->setSTI(h, current + exchangeAmount);
 
@@ -605,10 +621,8 @@ AttentionValue::sti_t ImportanceUpdatingAgent::calculateSTIRent(AtomSpace* a, At
 void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents, Handle h)
 {
     /* collect LTI */
-    AttentionValue::lti_t current, exchangeAmount;
-
-    current = a->getLTI(h);
-    exchangeAmount = -LTIAtomRent;
+    AttentionValue::lti_t current = a->getLTI(h);
+    AttentionValue::lti_t exchangeAmount = -LTIAtomRent;
     for (size_t n = 0; n < agents.size(); n++) {
         if (agents[n]->getTotalStimulus() == 0)
             continue;
@@ -618,7 +632,13 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) LTIAtomWage;
         exchangeAmount += (AttentionValue::lti_t) (wage * s);
 
-        a->getAttentionBank().setLTI(AttentionValueHolderPtr(agents[n]), a->getAttentionBank().getLTI(AttentionValueHolderPtr(agents[n])) - exchangeAmount);
+        a->getAttentionBank().updateLTIFunds(-exchangeAmount);
+
+        AttentionValuePtr old_av = agents[n]->getAV();
+        AttentionValuePtr new_av = createAV(old_av->getSTI(),
+                                            current - exchangeAmount,
+                                            old_av->getVLTI());
+        agents[n]->setAV(new_av);
     }
     a->setLTI(h, current + exchangeAmount);
 

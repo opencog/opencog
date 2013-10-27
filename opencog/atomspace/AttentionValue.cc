@@ -81,6 +81,11 @@ AttentionValuePtr AttentionValue::clone() const
     return createAV(m_STI, m_LTI, m_VLTI);
 }
 
+AttentionValue* AttentionValue::rawclone() const
+{
+    return new AttentionValue(m_STI, m_LTI, m_VLTI);
+}
+
 bool AttentionValue::operator==(const AttentionValue& av) const
 {
     return (m_STI == av.getSTI() && m_LTI == av.getLTI() && m_VLTI == av.getVLTI());
@@ -95,43 +100,6 @@ AttentionValuePtr AttentionValue::getDefaultAV()
         m_defaultAV = createAV();
     return m_defaultAV;
 }
-
-AttentionValuePtr AttentionValue::factory()
-{
-    return createAV(DEFAULTATOMSTI, DEFAULTATOMLTI, DEFAULTATOMVLTI);
-}
-
-AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti)
-{
-    return createAV(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
-}
-
-AttentionValuePtr AttentionValue::factory(float scaledSti)
-{
-
-    AttentionValue::sti_t sti;
-
-    if (scaledSti >= 1.0) {
-        sti = 32767;
-    } else if (scaledSti <= 0.0) {
-        sti = -32768;
-    } else {
-        sti = (AttentionValue::sti_t) ((65534 * scaledSti) - 32767);
-    }
-
-    return createAV(sti, DEFAULTATOMLTI, DEFAULTATOMVLTI);
-}
-
-AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti)
-{
-    return createAV(sti, lti, DEFAULTATOMVLTI);
-}
-
-AttentionValuePtr AttentionValue::factory(AttentionValue::sti_t sti, AttentionValue::lti_t lti, AttentionValue::vlti_t vlti)
-{
-    return createAV(sti, lti, vlti);
-}
-
 
 bool AttentionValue::STISort::test(AtomPtr h1, AtomPtr h2)
 {

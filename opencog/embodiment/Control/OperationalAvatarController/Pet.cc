@@ -950,9 +950,8 @@ void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
-        const AttentionValue& attentionValue =
-            atomSpace->getAV(*it);
-        if (attentionValue.getLTI() < AtomSpaceUtil::highLongTermImportance)
+        AttentionValuePtr attentionValue = atomSpace->getAV(*it);
+        if (attentionValue->getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else it++;
     }

@@ -113,6 +113,7 @@ public:
      * Get the LTI funds available in the AtomSpace pool.
      *
      * @return LTI funds available
+
      */
     long getLTIFunds() const;
 

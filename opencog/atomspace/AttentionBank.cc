@@ -81,14 +81,14 @@ long AttentionBank::getLTIFunds() const
 long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
 {
     std::lock_guard<std::mutex> lock(lock_funds);
-    fundsSTI+=diff;
+    fundsSTI += diff;
     return fundsSTI;
 }
 
 long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
 {
     std::lock_guard<std::mutex> lock(lock_funds);
-    fundsLTI+=diff;
+    fundsLTI += diff;
     return fundsLTI;
 }
 

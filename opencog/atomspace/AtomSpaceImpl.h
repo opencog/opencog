@@ -262,7 +262,7 @@ public:
     void setMean(Handle, float mean) throw (InvalidParamException);
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValueHolder. STI above and below threshold
+     * for a given AttentionValue. STI above and below threshold
      * normalised separately and linearly.
      *
      * @param h The attention value holder to get STI for
@@ -275,7 +275,7 @@ public:
     float getNormalisedSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given AttentionValueHolder.
+     * for a given AttentionValue.
      *
      * @param h The attention value holder to get STI for
      * @param average Should the recent average max/min STI be used, or the
@@ -285,13 +285,6 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValuePtr avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValuePtr avh) const;
 
     /** Retrieve the AttentionValue of a given Handle */
     AttentionValuePtr getAV(Handle h) const {

@@ -57,7 +57,7 @@ private:
     AttentionValue::lti_t lti[NUM_AVS];
     AttentionValue::vlti_t vlti[NUM_AVS];
 
-    AttentionValue* avs[NUM_AVS];
+    AttentionValuePtr avs[NUM_AVS];
 
 public:
     AttentionValueUTest() {
@@ -79,26 +79,21 @@ public:
         vlti[2] = DEFAULTATOMVLTI
         vlti[3] = AV3_VLTI;
 
-        AttentionValue *av = AttentionValue::factory();
-        delete av;
+        AttentionValuePtr av = createAV();
     }
 
     void setUp() {
-        avs[0] = AttentionValue::factory();
-        avs[1] = AttentionValue::factory(sti[1]);
-        avs[2] = AttentionValue::factory(sti[2], lti[2]);
-        avs[3] = AttentionValue::factory(sti[3], lti[3], vlti[3]);
+        avs[0] = createAV();
+        avs[1] = createAV(sti[1]);
+        avs[2] = createAV(sti[2], lti[2]);
+        avs[3] = createAV(sti[3], lti[3], vlti[3]);
     }
 
-    void tearDown() {
-        for (int i = 0; i < NUM_AVS; i++) {
-            delete avs[i];
-        }
-    }
+    void tearDown() {}
 
     void testConstructors() {
 
-        AttentionValue *av;
+        AttentionValuePtr av;
 
         for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
@@ -114,7 +109,7 @@ public:
 
     void testGets() {
 
-        AttentionValue *av;
+        AttentionValuePtr av;
 
         for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
@@ -126,7 +121,7 @@ public:
     }
 
     void testclone() {
-        AttentionValue *clonedAV, *av;
+        AttentionValuePtr clonedAV, av;
 
         for (int i = 0; i < NUM_AVS; i++) {
             av = avs[i];
@@ -260,32 +255,32 @@ public:
     }
 
     void testgetDefault() {
-        const AttentionValue& av = AttentionValue::getDefaultAV();
+        AttentionValuePtr av = AttentionValue::getDefaultAV();
 
-        TS_ASSERT(av.getSTI() == sti[0]);
-        TS_ASSERT(av.getLTI() == lti[0]);
-        TS_ASSERT(av.getVLTI() == vlti[0]);
+        TS_ASSERT(av->getSTI() == sti[0]);
+        TS_ASSERT(av->getLTI() == lti[0]);
+        TS_ASSERT(av->getVLTI() == vlti[0]);
     }
 
     void testfactory() {
-        AttentionValue *av;
+        AttentionValuePtr av;
 
-        av = AttentionValue::factory();
+        av = createAV();
         TS_ASSERT(av->getSTI() == sti[0]);
         TS_ASSERT(av->getLTI() == lti[0]);
         TS_ASSERT(av->getVLTI() == vlti[0]);
 
-        av = AttentionValue::factory(sti[1]);
+        av = createAV(sti[1]);
         TS_ASSERT(av->getSTI() == sti[1]);
         TS_ASSERT(av->getLTI() == lti[1]);
         TS_ASSERT(av->getVLTI() == vlti[1]);
 
-        av = AttentionValue::factory(sti[2], lti[2]);
+        av = createAV(sti[2], lti[2]);
         TS_ASSERT(av->getSTI() == sti[2]);
         TS_ASSERT(av->getLTI() == lti[2]);
         TS_ASSERT(av->getVLTI() == vlti[2]);
 
-        av = AttentionValue::factory(sti[3], lti[3], vlti[3]);
+        av = createAV(sti[3], lti[3], vlti[3]);
         TS_ASSERT(av->getSTI() == sti[3]);
         TS_ASSERT(av->getLTI() == lti[3]);
         TS_ASSERT(av->getVLTI() == vlti[3]);

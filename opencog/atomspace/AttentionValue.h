@@ -72,7 +72,7 @@ public:
     static const sti_t MINSTI = SHRT_MIN;
     static const lti_t MINLTI = SHRT_MIN;
 
-	//! to be used as default attention value
+	 //! to be used as default attention value
     static AttentionValuePtr DEFAULT_AV() {
         static AttentionValuePtr instance = 
             std::make_shared<AttentionValue>(DEFAULTATOMSTI, 
@@ -127,6 +127,7 @@ public:
     //! Returns An AttentionValue* cloned from this AttentionValue
     // @param none
     virtual AttentionValuePtr clone() const;
+    virtual AttentionValue* rawclone() const;
 
     //! Compares two AttentionValues and returns true if the
     //! elements are equal false otherwise
@@ -159,46 +160,9 @@ public:
     //! Returns a shared AttentionValue with default STI, LTI, VLTI values
     // @param none
     static AttentionValuePtr getDefaultAV();
-
-	//!@{
-    //! factory method
-    static AttentionValuePtr factory();
-    static AttentionValuePtr factory(sti_t);
-    static AttentionValuePtr factory(float scaledSti);
-    static AttentionValuePtr factory(sti_t, lti_t);
-    static AttentionValuePtr factory(sti_t, lti_t, vlti_t);
-    //!@}
 };
 #define createAV std::make_shared<AttentionValue>
 
-
-//! envelope for an AttentionValue
-class AttentionValueHolder 
-    : public std::enable_shared_from_this<AttentionValueHolder> 
-{
-    friend class AtomSpaceImpl;
-    friend class AttentionBank;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
-
-protected:
-    AttentionValue attentionValue;
-
-    /** Sets the AttentionValue object */
-    virtual void setAttentionValue(const AttentionValue &a) {
-        attentionValue = a;
-    }
-
-
-public:
-    /** Returns the AttentionValue object */
-    virtual const AttentionValue& getAttentionValue() const {
-        return attentionValue;
-    }
-};
-
-typedef std::shared_ptr<AttentionValueHolder> AttentionValueHolderPtr;
 
 /** @}*/
 } // namespace opencog 
