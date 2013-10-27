@@ -172,7 +172,7 @@ to get microseconds:
 (***) See comment below
 
 So...
-The AtomSpceImpl adds an aprox 30 usec overhead to addNode/addLink and
+The AtomSpaceImpl adds an aprox 30 usec overhead to addNode/addLink and
 the client/server interface adds another 2 usecs
 
 Its not clear why AtomSpaceImpl does NOT add an overhead to getType and

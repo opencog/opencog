@@ -80,15 +80,6 @@ public:
     }
 
     /**
-     * Retrieve from the Atom Table the Atom of the Handle.
-    */
-    HandleRequest getHandle(Handle h) {
-        HandleRequest hr(new GetHandleASR(&atomspace,h));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node

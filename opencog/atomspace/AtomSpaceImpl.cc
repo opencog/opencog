@@ -88,7 +88,7 @@ void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 
 void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
 {
-    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), atomAsString(h).c_str());
+    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), h->toShortString().c_str());
     Type type = getType(h);
     if (type == CONTEXT_LINK) {
         // Add corresponding VersionedTV to the contextualized atom
@@ -279,16 +279,6 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
         }
     }
     return base;
-}
-
-std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
-{
-    h = atomTable.getHandle(h);
-    if (h) {
-        if (terse) return h->toShortString();
-        else return h->toString();
-    }
-    return std::string("ERROR: Bad handle");
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,

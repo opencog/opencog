@@ -339,13 +339,6 @@ public:
     }
 
     /**
-     * Retrieve from the Atom Table the actual atom for this handle.
-    */
-    Handle getHandle(Handle h) const {
-        return atomSpaceAsync->getHandle(h)->get_result();
-    }
-
-    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node

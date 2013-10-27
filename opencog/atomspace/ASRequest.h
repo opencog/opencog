@@ -309,16 +309,6 @@ public:
     
 };
 
-class GetHandleASR : public OneParamASR <Handle, Handle> {
-public:
-    GetHandleASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<Handle, Handle>(a,h) {};
-    
-    virtual void do_work() {
-        set_result(atomspace->getHandle(p1));
-    };
-};
-
 class GetIncomingASR : public OneParamASR <HandleSeq, Handle> {
 public:
     GetIncomingASR(AtomSpaceImpl *a, Handle h) :

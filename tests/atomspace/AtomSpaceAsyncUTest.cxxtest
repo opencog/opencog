@@ -72,25 +72,25 @@ public:
 
     void atomAdded1(opencog::AtomSpaceImpl* a, Handle h) {
         TS_ASSERT(a->getSize() == 1);
-        logger().debug("atomAdded1: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
-    void atomAdded2(opencog::AtomSpaceImpl* a,Handle h) {
+    void atomAdded2(opencog::AtomSpaceImpl* a, Handle h) {
         TS_ASSERT(a->getSize() == 1);
-        logger().debug("atomAdded2: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
     }
 
-    void atomMerged1(opencog::AtomSpaceImpl* a,Handle h) {
+    void atomMerged1(opencog::AtomSpaceImpl* a, Handle h) {
         TS_ASSERT(a->getSize() == 1);
-        logger().debug("atomMerged1: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomMerged1: %s", h->toString().c_str());
         __testSignalsCounter += 100;
     }
 
-    void atomMerged2(opencog::AtomSpaceImpl* a,Handle h) {
+    void atomMerged2(opencog::AtomSpaceImpl* a, Handle h) {
         TS_ASSERT(a->getSize() == 1);
-        logger().debug("atomMerged2: %s", a->atomAsString(h,true).c_str());
+        logger().debug("atomMerged2: %s", h->toString().c_str());
         __testSignalsCounter += 1000;
     }
 

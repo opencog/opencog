@@ -180,15 +180,6 @@ public:
     Handle getHandle(Type t, const HandleSeq& outgoing) const
         { return atomTable.getHandle(t, outgoing); }
 
-    /** Get the atom referred to by Handle h represented as a string. */
-    std::string atomAsString(Handle h, bool terse = true) const;
-
-    /** Retrieve the atom pointer of a given Handle */
-    Handle getHandle(Handle h) const
-    {
-        return h;
-    }
-
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const
     {
