@@ -26,15 +26,9 @@
 #define _OPENCOG_ATTENTION_VALUE_H
 
 #include <string>
-
 #include <limits.h>
 
-#include <opencog/atomspace/types.h>
 #include <opencog/atomspace/Handle.h>
-
-#ifdef ZMQ_EXPERIMENT
-   #include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -49,10 +43,6 @@ typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
 
 class AttentionValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
-
 public:
     typedef short sti_t;   //!< short-term importance type
     typedef short lti_t;   //!< long-term importance type

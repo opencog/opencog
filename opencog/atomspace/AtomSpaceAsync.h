@@ -9,7 +9,6 @@
 #include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/ASRequest.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/atomspace/types.h>
 
 class AtomSpaceAsyncUTest;
 

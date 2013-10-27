@@ -23,17 +23,16 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
+#include <stdlib.h>
+
 #include <mutex>
 #include <unordered_map>
 #include <vector>
-
-#include <stdlib.h>
 
 #include <boost/signal.hpp>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/atom_types.h>
-#include <opencog/util/platform.h>
 
 namespace opencog
 {

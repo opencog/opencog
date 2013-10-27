@@ -46,11 +46,9 @@
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/platform.h>
 
 class AtomTableUTest;
 
