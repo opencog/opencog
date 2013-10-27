@@ -365,6 +365,10 @@ protected:
      void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
                                   bool &preconImpossible, bool onlyCheckIfNegativeGoal =false );
 
+     // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
+     // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
+     int checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible);
+
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
      // ground the variables according to its forward state node,
@@ -378,12 +382,12 @@ protected:
      // select the most suitable vaule to ground a numeric variable
      // this function should be called after groundARuleNodeBySelectingNonNumericValues
      // the currentbindings will be added new binding pairs if this function find good values for ungrounded variables
-     bool selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode *ruleNod = 0);
+     bool selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode *ruleNod);
 
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
      // @ values: the candidate values
      // @ varName: the variable name
-     ParamValue selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values);
+     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)

@@ -1431,6 +1431,72 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible)
+{
+    int satisfiedPreconNum = 0;
+
+    // check how many preconditions will be satisfied
+    vector<State*>::iterator itpre;
+    for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
+    {
+        State* ps = *itpre;
+        State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentBindingsFromForwardState);
+        if (! groundPs)
+            continue;
+
+        // first check if this state has beed satisfied by the previous state nodes
+        bool found = false;
+
+        StateNode* satStateNode;
+
+        bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode,ruleNode,true);
+
+        // if it's found in the temporaryStateNodes
+        if (found)
+        {
+            if (satByTemp)
+                ++ satisfiedPreconNum;
+            else
+            {
+                // check if there is any rule related to achieve this unsatisfied precondition
+                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                {
+                    preconImpossible = true;
+                    return -999;
+                }
+            }
+
+            delete groundPs;
+            continue;
+
+        }
+        else
+        {
+            // cannot find this state in the temporaryStateNodes list, need to check it in real time
+            // check real time
+            float satisfiedDegree;
+            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+                 ++ satisfiedPreconNum;
+            else
+            {
+                // check if there is any rule related to achieve this unsatisfied precondition
+                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                {
+                    preconImpossible = true;
+                    return -999;
+                }
+            }
+
+            delete groundPs;
+            continue;
+
+        }
+
+    }
+
+    return satisfiedPreconNum;
+}
+
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
                                         bool &isDiffStateOwnerType, bool &preconImpossible, bool onlyCheckIfNegativeGoal)
 {
@@ -1540,63 +1606,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     }
 
     // check how many preconditions will be satisfied
-    vector<State*>::iterator itpre;
-    for (itpre = tmpRuleNode->originalRule->preconditionList.begin(); itpre != tmpRuleNode->originalRule->preconditionList.end(); ++ itpre)
-    {
-        State* ps = *itpre;
-        State* groundPs = Rule::groundAStateByRuleParamMap(ps, tmpRuleNode->currentBindingsFromForwardState);
-        if (! groundPs)
-            continue;
-
-        // first check if this state has beed satisfied by the previous state nodes
-        bool found = false;
-
-        StateNode* satStateNode;
-
-        bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode,tmpRuleNode,true);
-
-        // if it's found in the temporaryStateNodes
-        if (found)
-        {
-            if (satByTemp)
-                ++ satisfiedPreconNum;
-            else
-            {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
-                {
-                    preconImpossible = true;
-                    return;
-                }
-            }
-
-            delete groundPs;
-            continue;
-
-        }
-        else
-        {
-            // cannot find this state in the temporaryStateNodes list, need to check it in real time
-            // check real time
-            float satisfiedDegree;
-            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
-                 ++ satisfiedPreconNum;
-            else
-            {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
-                {
-                    preconImpossible = true;
-                    return;
-                }
-            }
-
-            delete groundPs;
-            continue;
-
-        }
-
-    }
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
 
     delete tmpRuleNode;
 
@@ -2533,11 +2543,11 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 
     if (rule->CostHeuristics.size() != 0)
     {
-        bestValue = selectBestNumericValueFromCandidates(rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+        bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
     }
-    else if (ruleNode && (ruleNode->costHeuristics.size()!= 0) )
+    else if (ruleNode->costHeuristics.size()!= 0)
     {
-        bestValue = selectBestNumericValueFromCandidates(0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values);
+        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values);
     }
     else
     {
@@ -2545,14 +2555,12 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         bestValue = values.front();
     }
 
-
     if (bestValue == UNDEFINED_VALUE)
     {
         logger().error("OCPlanner::selectValueForGroundingNumericState: failed to find the best value for grounding numeric state!" );
         return false;
     }
 
-    //  ground the rule fully first
     currentbindings.insert(std::pair<string, ParamValue>(beIt->first,bestValue));
     return true;
 
@@ -2560,36 +2568,53 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 }
 
 
-ParamValue OCPlanner::selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values)
+
+ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values)
 {
 
-    // todo: need to check how many preconditions satisfied
+    // check how many preconditions will be satisfied
+    RuleNode* tmpRuleNode = new RuleNode(rule);
+    tmpRuleNode->currentAllBindings = currentbindings;
+
     vector<ParamValue>::iterator vit;
-    float lowestcost = 999999.9;
+    float bestScore = -999999.9;
     ParamValue bestValue = UNDEFINED_VALUE;
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
-        // try to ground the rule fully first
+        tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
 
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
-
         if (cost < -0.00001f)
         {
             logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
             return UNDEFINED_VALUE;
         }
 
-        currentbindings.erase(varName);
+        bool preconImpossible;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
+        float score = satisfiedPreconNum * 10.0f - cost;
+        if (preconImpossible)
+            score -= 99999.9f;
 
-        if (cost < lowestcost)
+        currentbindings.erase(varName);
+        tmpRuleNode->currentAllBindings.erase(varName);
+
+        if (score > bestScore)
         {
-            lowestcost = cost;
+            bestScore = score;
             bestValue = *vit;
         }
     }
 
+    if (bestScore < -999999.89)
+    {
+        logger().error("OCPlanner::selectBestNumericValueFromCandidates failed! Cannot find a best value!" );
+        return UNDEFINED_VALUE;
+    }
+
+    delete tmpRuleNode;
     return bestValue;
 }
 
