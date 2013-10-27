@@ -368,12 +368,16 @@ public:
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
-        return atomSpaceAsync->atomAsString(h,terse)->get_result();
+        if (terse) return h->toShortString();
+        return h->toString();
     }
 
     /** Retrieve the name of a given Handle */
-    std::string getName(Handle h) const {
-        return atomSpaceAsync->getName(h)->get_result();
+    const std::string& getName(Handle h) const {
+        static std::string noname;
+        NodePtr nnn = NodeCast(h);
+        if (nnn) return nnn->getName();
+        return noname;
     }
 
     /** Change the Short-Term Importance of a given Handle */
@@ -398,32 +402,39 @@ public:
     
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return atomSpaceAsync->getSTI(h)->get_result();
+        return h->getAttentionValue()->getSTI();
     }
 
     /** Retrieve the Long-term Importance of a given atom */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return atomSpaceAsync->getLTI(h)->get_result();
+        return h->getAttentionValue()->getLTI();
     }
 
     /** Retrieve the Very-Long-Term Importance of a given atom */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return atomSpaceAsync->getVLTI(h)->get_result();
+        return h->getAttentionValue()->getVLTI();
     }
 
     /** Retrieve the outgoing set of a given link */
-    HandleSeq getOutgoing(Handle h) const {
-        return atomSpaceAsync->getOutgoing(h)->get_result();
+    const HandleSeq& getOutgoing(Handle h) const {
+        static HandleSeq empty;
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getOutgoingSet();
+        return empty;
     }
 
     /** Retrieve a single Handle from the outgoing set of a given link */
-    Handle getOutgoing(Handle h, int idx) const {
-        return atomSpaceAsync->getOutgoing(h,idx)->get_result();
+    Handle getOutgoing(Handle h, Arity idx) const {
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getOutgoingAtom(idx);
+        return Handle::UNDEFINED;
     }
 
     /** Retrieve the arity of a given link */
-    int getArity(Handle h) const {
-        return atomSpaceAsync->getArity(h)->get_result();
+    Arity getArity(Handle h) const {
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getArity();
+        return 0;
     }
 
     /** Return whether s is the source handle in a link l */ 
@@ -432,41 +443,19 @@ public:
     }
 
     /** Retrieve the AttentionValue of a given Handle */
-    AttentionValuePtr getAV(Handle) const;
+    AttentionValuePtr getAV(Handle h) const {
+        return h->getAttentionValue();
+    }
 
     /** Change the AttentionValue of a given Handle */
     void setAV(Handle, AttentionValuePtr);
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle) const;
+    Type getType(Handle h) const {
+        return h->getType();
+    }
 
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    // Experimental code for speeding up TV retrieval...
-    /** Cached get type function */
-    class _getType : public std::unary_function<Handle, Type> {
-        AtomSpace* a;
-        public:
-        _getType(AtomSpace* _a) : a(_a) { };
-        Type operator()(const Handle& h) const {
-            return a->atomSpaceAsync->getType(h)->get_result();
-        }
-    };
-    _getType* __getType;
-    // dummy get type version which is cached using lru_cache
-    lru_cache_threaded<AtomSpace::_getType> *getTypeCached;
-#endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
-
-
-    /* Retrieve the TruthValue summary of a given Handle
-     */
-    //tv_summary_t getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
-
-    /** Retrieve the TruthValue of a given Handle
-     * @note This is an unpleasant hack which is unsafe as it returns a pointer
-     * to the AtomSpace TV which may be lost if the Atom the TV belongs to is
-     * removed. It's much faster than having to copy the value and use smart
-     * pointers though. Garbage collection should solve this.
-     */
+    /** Retrieve the TruthValue of a given Handle */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
@@ -537,8 +526,8 @@ public:
     }
 
     /** Convenience functions... */
-    bool isNode(const Handle& h) const;
-    bool isLink(const Handle& h) const;
+    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
+    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
 
     /**
      * Gets a set of handles that matches with the given arguments.
