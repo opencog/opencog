@@ -34,7 +34,6 @@
 #include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
@@ -473,8 +472,22 @@ public:
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
 
+    /**
+     * Return true if the handle belongs to *this* atomspace; else
+     * return false.  Note that the handle might still be valid in
+     * some other atomsapce. */
     bool isValidHandle(Handle h) const {
-        return (NULL != h);
+        // The h->getHandle() maneuver below is a trick to get at the
+        // UUID of the actual atom, rather than the cached UUID in the
+        // handle. Technically, this is not quite right, since perhaps
+        // handles with valid UUID's but unresolved atom pointers are
+        // "valid".  This call is essentially forcing resolution :-(
+        // We should also be confirming that the UUID is OK, by asking
+        // the TLB about it.  Anyway, this check is not entirely technically
+        // correct ... worse, its a potentially performance-critical check,
+        // as its called fairly often (I think).
+        // return (NULL != h) and TLB::isValidHandle(h->getHandle());
+        return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
     }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1

@@ -149,6 +149,9 @@ void Atom::setAtomTable(AtomTable *tb)
         // remove, as far as the old table is concerned
         AVCHSigl& avch = atomTable->AVChangedSignal();
         avch(getHandle(), _attentionValue, AttentionValue::DEFAULT_AV());
+
+        // UUID's belong to the atom table, not the atom. Reclaim it.
+        _uuid = Handle::UNDEFINED.value();
     }
     atomTable = tb;
     if (NULL != tb) {
