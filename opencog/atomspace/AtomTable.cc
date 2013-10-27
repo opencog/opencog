@@ -664,14 +664,6 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     return result;
 }
 
-bool AtomTable::decayed(Handle h)
-{
-    // XXX This should be an assert ... I think something is seriously
-    // wrong if the handle isn't being found!  XXX FIXME
-    if (NULL == h) return false;
-    return h->getFlag(REMOVED_BY_DECAY);
-}
-
 AtomPtrSet AtomTable::decayShortTermImportance()
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);

@@ -119,9 +119,6 @@ private:
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
 
-
-    static bool decayed(Handle h);
-
     // JUST FOR TESTS:
     bool isCleared() const;
 

@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/Atom.h>
@@ -165,32 +166,23 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 			it != iset.end(); it++)
 		{
 			AtomPtr a(*it);
-
-			// XXX a should never be NULL; however, someone somewhere is
-			// removing atoms from the TLB, although they forgot to remove
-			// them from the atomTable, and so they are still showing up
-			// i the incoming set. XXX TODO uncomment the assert below.
-			// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
-			if (a and isOld(a, minSTI)) {
+			OC_ASSERT(a != NULL, "Corrupt incoming set!");
+			if (isOld(a, minSTI)) {
 				UnorderedHandleSet un = extractOld(atomtable, minSTI, *it, true);
 				result.insert(un.begin(), un.end());
 			}
 		}
 	}
 
-	// Only return if there is at least one incoming atom that is
-	// not marked for removal by decay.
+	// This handle can be extracted only if all links in its incoming
+	// set are also marked for removal by decay.
 	const UnorderedHandleSet& iset = atomtable->getIncomingSet(handle);
 	for (UnorderedHandleSet::const_iterator it = iset.begin();
 			it != iset.end(); it++)
 	{
 		AtomPtr a(*it);
-		// XXX a should never be NULL; however, someone somewhere is
-		// removing atoms from the TLB, although they forgot to remove
-		// them from the atomTable, and so they are still showing up
-		// i the incoming set. XXX TODO uncomment the assert below.
-		// OC_ASSERT(a, "Atom removed from TLB But its still in the atomtable!");
-		if (a and a->getFlag(REMOVED_BY_DECAY) == false) {
+		OC_ASSERT(a != NULL, "Corrupt incoming set!");
+		if (a->getFlag(REMOVED_BY_DECAY) == false) {
 			handle->setFlag(REMOVED_BY_DECAY, false);
 			return result;
 		}
