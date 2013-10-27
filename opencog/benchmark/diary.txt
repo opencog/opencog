@@ -493,3 +493,31 @@ Again: a 1.7x perf improvement when running a concurrent compile on other
 CPU; without that, the python numbers would be in the 3.8-4.3 range.
 
 
+
+27 October 2013
+---------------
+Remeasure after removing a variety of un-needed serialization code.
+Summary: pretty much everything got faster for every layer.
+ -- The AtomSpace API is now 2x to 5x faster than it was in March 2013
+    when this diary was started.
+ -- The AtomTable API is mostly 2x-3x slower than it was in March 2013
+    Essentially all of this slow-down is attributable to the use of
+    std::shared_ptr for memory management.  Perhaps someday, BoehmGC
+    should be explored ... 
+
+                   -A -X         -A -x            -A          -A -g
+   test           AtomTable    AtomSpaceImpl    AtomSpace    Scheme
+   name           K-ops/sec      K-ops/sec      K-ops/sec   K-ops/sec
+   ----           ---------    -------------    ---------   ---------
+  noop             5000         5000            2000          inf
+  addNode           208          147              68.0          8.93
+  addLink            55.2         46.7            37.4          7.52
+  getType          1111          588             588            7.58
+  getTV             769          476             250            6.37
+  setTV             714          435             213            7.63
+  getHandleSet        0.440        0.424           0.265         -
+  getNodeHandles     82.6         84.0            56.8           -
+  getOutgoingSet    666          500             435           11.90
+  getIncomingSet   1111          833             232            5.32
+
+
