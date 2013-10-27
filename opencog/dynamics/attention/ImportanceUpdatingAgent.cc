@@ -515,7 +515,7 @@ void ImportanceUpdatingAgent::updateAgentSTI(AtomSpace* a, AgentPtr agent)
     if (current < STIAtomWage * 100)
         exchangeAmount = STIAtomWage * 100 - current;
 
-    a->getAttentionBank().updateSTIFunds(exchangeAmount);
+    a->getAttentionBank().updateSTIFunds(-exchangeAmount);
 
     AttentionValuePtr old_av = agent->getAV();
     AttentionValuePtr new_av = createAV(current + exchangeAmount,
@@ -535,7 +535,7 @@ void ImportanceUpdatingAgent::updateAgentLTI(AtomSpace* a, AgentPtr agent)
     if (current < LTIAtomWage * 100)
         exchangeAmount = LTIAtomWage * 100 - current;
 
-    a->getAttentionBank().updateLTIFunds(exchangeAmount);
+    a->getAttentionBank().updateLTIFunds(-exchangeAmount);
 
     AttentionValuePtr old_av = agent->getAV();
     AttentionValuePtr new_av = createAV(old_av->getSTI(),
@@ -561,7 +561,7 @@ void ImportanceUpdatingAgent::updateAtomSTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) STIAtomWage;
         exchangeAmount += (AttentionValue::sti_t) wage * s;
 
-        a->getAttentionBank().updateSTIFunds(-exchangeAmount);
+        a->getAttentionBank().updateSTIFunds(exchangeAmount);
 
         AttentionValuePtr old_av = agents[n]->getAV();
         AttentionValuePtr new_av = createAV(current - exchangeAmount,
@@ -632,7 +632,7 @@ void ImportanceUpdatingAgent::updateAtomLTI(AtomSpace* a, const AgentSeq &agents
             wage = (float) LTIAtomWage;
         exchangeAmount += (AttentionValue::lti_t) (wage * s);
 
-        a->getAttentionBank().updateLTIFunds(-exchangeAmount);
+        a->getAttentionBank().updateLTIFunds(exchangeAmount);
 
         AttentionValuePtr old_av = agents[n]->getAV();
         AttentionValuePtr new_av = createAV(old_av->getSTI(),

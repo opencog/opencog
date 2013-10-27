@@ -798,7 +798,16 @@ void HopfieldServer::encodePattern(Pattern pattern, stim_t stimulus)
 //        if (options->keyNodes && hGridKey[i]) continue; // Don't encode onto key nodes
 //        getAtomSpace()->stimulateAtom(hGrid[i], perUnit * pattern[i]);
 //    }
-    getAtomSpace().getAttentionBank().setSTI(imprintAgent, patternStimulus);
+    // getAtomSpace().getAttentionBank().setSTI(imprintAgent, patternStimulus);
+    
+    getAtomSpace().getAttentionBank().updateSTIFunds(-patternStimulus);
+
+    AttentionValuePtr old_av = imprintAgent->getAV();
+    AttentionValuePtr new_av = createAV(patternStimulus,
+                                        old_av->getLTI(),
+                                        old_av->getVLTI());
+    imprintAgent->setAV(new_av);
+
     imprintAgent->setPattern(pattern);
     imprintAgent->run();
 }
