@@ -473,7 +473,9 @@ public:
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
 
-    bool isValidHandle(const Handle& h) const;
+    bool isValidHandle(Handle h) const {
+        return (NULL != h);
+    }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately

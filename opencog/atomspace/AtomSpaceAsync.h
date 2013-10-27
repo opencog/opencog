@@ -223,12 +223,6 @@ public:
         return r;
     }
 
-    BoolRequest isValidHandle(Handle h) {
-        BoolRequest r(new ValidateHandleASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
     /** Retrieve the incoming set of a given atom */
     HandleSeqRequest getIncoming(Handle h) {
         HandleSeqRequest hr(new GetIncomingASR(&atomspace,h));

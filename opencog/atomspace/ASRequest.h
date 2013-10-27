@@ -309,18 +309,6 @@ public:
     
 };
 
-class ValidateHandleASR : public OneParamASR <bool, Handle> {
-public:
-    ValidateHandleASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<bool, Handle>(a,h)
-        {};
-    
-    virtual void do_work() {
-        set_result(atomspace->isValidHandle(p1));
-    };
-    
-};
-
 class GetHandleASR : public OneParamASR <Handle, Handle> {
 public:
     GetHandleASR(AtomSpaceImpl *a, Handle h) :

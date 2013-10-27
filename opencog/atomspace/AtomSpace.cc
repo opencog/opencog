@@ -161,13 +161,8 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tv
             name+=alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
-    } while(isValidHandle(result));//If the name already exists, try again
+    } while (isValidHandle(result));//If the name already exists, try again
     return addNode(t, name, tvn);
-}
-
-bool AtomSpace::isValidHandle(const Handle& h) const
-{
-    return atomSpaceAsync->isValidHandle(h)->get_result();
 }
 
 void AtomSpace::setAV(Handle h, AttentionValuePtr av)
