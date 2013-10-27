@@ -255,7 +255,7 @@ public:
     }
 
     void testgetDefault() {
-        AttentionValuePtr av = AttentionValue::getDefaultAV();
+        AttentionValuePtr av = AttentionValue::DEFAULT_AV();
 
         TS_ASSERT(av->getSTI() == sti[0]);
         TS_ASSERT(av->getLTI() == lti[0]);

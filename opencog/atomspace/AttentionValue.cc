@@ -22,45 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "Atom.h"
 #include "AttentionValue.h"
-
-#include <math.h>
-
-#include <opencog/atomspace/AtomSpace.h>
-#include <opencog/util/platform.h>
 
 using namespace opencog;
 
 const AttentionValue::sti_t AttentionValue::DEFAULTATOMSTI = 0;
 const AttentionValue::lti_t AttentionValue::DEFAULTATOMLTI = 0;
 const AttentionValue::vlti_t AttentionValue::DEFAULTATOMVLTI = 0;
-
-AttentionValue::AttentionValue(sti_t STI, lti_t LTI, vlti_t VLTI)
-{
-    m_STI = STI;
-    m_LTI = LTI;
-    m_VLTI = VLTI;
-}
-
-AttentionValue::sti_t AttentionValue::getSTI() const
-{
-    return m_STI;
-}
-
-float AttentionValue::getScaledSTI() const
-{
-    return (((float) m_STI) + 32768) / 65534;
-}
-
-AttentionValue::lti_t AttentionValue::getLTI() const
-{
-    return m_LTI;
-}
-
-AttentionValue::vlti_t AttentionValue::getVLTI() const
-{
-    return m_VLTI;
-}
 
 void AttentionValue::decaySTI()
 {
@@ -74,31 +43,6 @@ std::string AttentionValue::toString() const
     char buffer[256];
     sprintf(buffer, "[%d, %d, %s]", (int)m_STI, (int)m_LTI, m_VLTI ? "NONDISPOSABLE" : "DISPOSABLE");
     return buffer;
-}
-
-AttentionValuePtr AttentionValue::clone() const
-{
-    return createAV(m_STI, m_LTI, m_VLTI);
-}
-
-AttentionValue* AttentionValue::rawclone() const
-{
-    return new AttentionValue(m_STI, m_LTI, m_VLTI);
-}
-
-bool AttentionValue::operator==(const AttentionValue& av) const
-{
-    return (m_STI == av.getSTI() && m_LTI == av.getLTI() && m_VLTI == av.getVLTI());
-}
-
-
-AttentionValuePtr AttentionValue::m_defaultAV = NULL;
-
-AttentionValuePtr AttentionValue::getDefaultAV()
-{
-    if (!m_defaultAV)
-        m_defaultAV = createAV();
-    return m_defaultAV;
 }
 
 bool AttentionValue::STISort::test(AtomPtr h1, AtomPtr h2)
