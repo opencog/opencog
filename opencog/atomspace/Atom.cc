@@ -58,10 +58,9 @@ Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
     flags = 0;
     atomTable = NULL;
     type = t;
+    _attentionValue = av;
 
     if (not tv->isNullTv()) truthValue = tv;
-
-    setAttentionValue(av);
 
     // XXX FIXME for right now, all atoms will always keep their
     // incoming sets.  In the future, this should only be set by
