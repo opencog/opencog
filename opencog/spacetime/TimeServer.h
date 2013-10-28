@@ -39,7 +39,6 @@ namespace opencog
  *  @{
  */
 
-class AtomSpaceImpl;
 class TimeServerSavable;
 
 /**
@@ -343,8 +342,8 @@ private:
     boost::signals::connection removedAtomConnection;
     boost::signals::connection addedAtomConnection;
 
-    void atomAdded(AtomSpaceImpl*, Handle);
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
+    void atomAdded(Handle);
+    void atomRemoved(AtomPtr);
  
     /**
      * The temporal table used by this TimeServer

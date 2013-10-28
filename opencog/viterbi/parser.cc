@@ -19,6 +19,7 @@
 
 #include <link-grammar/read-dict.h>
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Atom.h>
 
 #if LATER

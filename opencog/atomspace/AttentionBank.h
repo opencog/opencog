@@ -69,11 +69,6 @@ class AttentionBank
 
     mutable std::mutex lock_funds;
 
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
 public:
     /** The table notifies us about AV changes */
     AttentionBank(AtomTable*);

@@ -136,7 +136,7 @@ protected:
     boost::signals::connection conn;
 
     /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
+    void atomRemoved(AtomPtr);
 
 public:
 

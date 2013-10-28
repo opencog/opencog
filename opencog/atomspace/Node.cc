@@ -21,15 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Node.h"
-
 #include <stdio.h>
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
+
+#include "Node.h"
 
 using namespace opencog;
 

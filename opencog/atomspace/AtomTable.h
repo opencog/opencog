@@ -46,11 +46,9 @@
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/platform.h>
 
 class AtomTableUTest;
 
@@ -64,8 +62,8 @@ typedef std::set<AtomPtr> AtomPtrSet;
 
 class SavingLoading;
 
-typedef boost::signal<void (Handle)> AtomSigl;
-typedef boost::signal<void (AtomPtr)> AtomPtrSigl;
+typedef boost::signal<void (Handle)> AtomSignal;
+typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
 typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
 
 /**
@@ -118,11 +116,13 @@ private:
     /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);
 
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomSignal _mergeAtomSignal;
+    AtomPtrSignal _removeAtomSignal;
+
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
-
-
-    static bool decayed(Handle h);
 
     // JUST FOR TESTS:
     bool isCleared() const;
@@ -737,6 +737,12 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
+
+    // XXX FIXME TODO this is fundamentallyy wrong, since 
+    // we cannot lock these up to provide thread safety ...
+    AtomSignal& addAtomSignal() { return _addAtomSignal; }
+    AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
+    AtomSignal& mergeAtomSignal() { return _mergeAtomSignal; }
 
     /** Provide ability for other to find out about AV changes */
     AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }

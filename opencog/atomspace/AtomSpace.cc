@@ -59,86 +59,44 @@ using namespace opencog;
 
 AtomSpace::AtomSpace(void)
 {
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    // Ensure caching is ready before anything else happens
-    setUpCaching();
-#endif
     atomSpaceAsync = new AtomSpaceAsync();
     ownsAtomSpaceAsync = true;
-    c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
+
     c_add = atomSpaceAsync->addAtomSignal(
-            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    // Ensure caching is ready before anything else happens
-    setUpCaching();
-#endif
     this->atomSpaceAsync = other.atomSpaceAsync;
     ownsAtomSpaceAsync = false;
-    c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
+
     c_add = atomSpaceAsync->addAtomSignal(
-            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
-
-
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-void AtomSpace::setUpCaching()
-{
-    // Initialise lru cache for getType
-    __getType = new _getType(this);
-    getTypeCached = new lru_cache_threaded<AtomSpace::_getType>(1000, *__getType);
-
-}
-#endif
 
 AtomSpace::AtomSpace(AtomSpaceAsync& a)
 {
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    setUpCaching();
-#endif
     atomSpaceAsync = &a;
     ownsAtomSpaceAsync = false;
+
+    c_add = atomSpaceAsync->addAtomSignal(
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::~AtomSpace()
 {
-    c_remove.disconnect();
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    delete __getType;
-    delete getTypeCached;
-#endif
+    c_add.disconnect();
     // Will be unnecessary once GC is implemented
     if (ownsAtomSpaceAsync)
         delete atomSpaceAsync;
 }
 
-bool AtomSpace::handleAddSignal(AtomSpaceImpl *as, Handle h)
+bool AtomSpace::handleAddSignal(Handle h)
 {
+    // XXX TODO FIXME  this must be locked to avoid corruption!!!
     addAtomSignalQueue.push_back(h);
     return false;
-}
-
-bool AtomSpace::atomRemoveSignal(AtomSpaceImpl *as, AtomPtr a)
-{
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    getTypeCached->remove(a->getHandle());
-#endif
-    return false;
-}
-
-Type AtomSpace::getType(Handle h) const
-{
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    Type t = (*getTypeCached)(h);
-    return t;
-#else
-    return atomSpaceAsync->getType(h)->get_result();
-#endif
 }
 
 strength_t AtomSpace::getMean(Handle h, VersionHandle vh) const
@@ -152,12 +110,6 @@ confidence_t AtomSpace::getConfidence(Handle h, VersionHandle vh) const
     FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
     return tvr->get_result();
 }
-
-/*tv_summary_t AtomSpace::getTV(Handle h, VersionHandle vh) const
-{
-    TruthValueRequest tvr = atomSpaceAsync->getTV(h, vh);
-    return tvr->get_result();
-}*/
 
 TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
 {
@@ -176,20 +128,6 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
-}
-
-bool AtomSpace::isNode(const Handle& h) const
-{
-    DPRINTF("AtomSpace::isNode Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, NODE);
-}
-
-bool AtomSpace::isLink(const Handle& h) const
-{
-    DPRINTF("AtomSpace::isLink Atom space address: %p\n", this);
-    Type t = getType(h);
-    return classserver().isA(t, LINK);
 }
 
 void AtomSpace::do_merge_tv(Handle h, TruthValuePtr tvn)
@@ -220,18 +158,8 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tv
             name+=alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
-    } while(isValidHandle(result));//If the name already exists, try again
+    } while (isValidHandle(result));//If the name already exists, try again
     return addNode(t, name, tvn);
-}
-
-bool AtomSpace::isValidHandle(const Handle& h) const
-{
-    return atomSpaceAsync->isValidHandle(h)->get_result();
-}
-
-AttentionValuePtr AtomSpace::getAV(Handle h) const
-{
-    return atomSpaceAsync->getAV(h)->get_result();
 }
 
 void AtomSpace::setAV(Handle h, AttentionValuePtr av)
@@ -266,11 +194,6 @@ AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti
 
 void AtomSpace::clear()
 {
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    {
-        getTypeCached->clear();
-    }
-#endif
     atomSpaceAsync->clear()->get_result();
 }
 
@@ -278,18 +201,5 @@ void AtomSpace::print(std::ostream& output,
            Type type, bool subclass) const
 {
     atomSpaceAsync->print(output, type, subclass)->get_result();
-}
-
-
-bool AtomSpace::isHandleInSeq(Handle h, HandleSeq &seq)
-{
-    HandleSeq::const_iterator it;
-    for (it = seq.begin(); it != seq.end(); ++ it)
-    {
-        if ((Handle)(*it) == h)
-            return true;
-    }
-
-    return false;
 }
 
