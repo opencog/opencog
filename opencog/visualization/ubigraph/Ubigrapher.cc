@@ -94,9 +94,9 @@ void Ubigrapher::watchSignals()
     if (isConnected()) {
         if (!listening) {
             c_add = space.atomSpaceAsync->addAtomSignal(
-                    boost::bind(&Ubigrapher::handleAddSignal, this, _1, _2));
+                    boost::bind(&Ubigrapher::handleAddSignal, this, _1));
             c_remove = space.atomSpaceAsync->removeAtomSignal(
-                    boost::bind(&Ubigrapher::atomRemoveSignal, this, _1, _2));
+                    boost::bind(&Ubigrapher::atomRemoveSignal, this, _1));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
         } else {
