@@ -265,6 +265,25 @@ TODO the forward chainer will work fine with this rule, but the backward chainer
             inputs=inputs,
             outputs=outputs)
 
+class IntensionalLinkEvaluationRule(Rule):
+    '''Using (AttractionLink A x) and (AttractionLink B x), evaluate (IntensionalInheritance A B), (IntensionalInheritance B A), and (IntensionalSimilarityLink A B).'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(types.AttractionLink, [A, x]),
+                 chainer.link(types.AttractionLink, [B, x])]
+
+        outputs= [chainer.link(types.IntensionalInheritanceLink, [A, B]),
+                  chainer.link(types.IntensionalInheritanceLink, [B, A]),
+                  chainer.link(types.IntensionalInheritanceSimilarityLink, [A, B])]
+
+        Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
+            inputs=inputs,
+            outputs=outputs)
+
+
 class EvaluationToMemberRule(Rule):
     '''Turns EvaluationLink(PredicateNode P, argument) into 
        MemberLink(argument, ConceptNode "SatisfyingSet(P)".
