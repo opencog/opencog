@@ -45,7 +45,7 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     totalStimulus = 0;
 
     conn = _cogserver.getAtomSpace().atomSpaceAsync->removeAtomSignal(
-            boost::bind(&Agent::atomRemoved, this, _1, _2));
+            boost::bind(&Agent::atomRemoved, this, _1));
 }
 
 Agent::~Agent()
@@ -83,7 +83,7 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
+void Agent::atomRemoved(AtomPtr atom)
 {
     Handle h = atom->getHandle();
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)

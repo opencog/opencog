@@ -28,6 +28,8 @@
 #include <unistd.h>
 #endif
 
+#include <boost/lexical_cast.hpp>
+
 #include <opencog/embodiment/Control/LoggerFactory.h>
 
 #include "Spawner.h"
@@ -35,7 +37,6 @@
 #include "NetworkElementCommon.h"
 
 using std::string;
-using boost::lexical_cast;
 using namespace opencog;
 using namespace messaging;
 
@@ -153,9 +154,9 @@ bool Spawner::processNextMessage(Message *message)
             ownerID + " " + 
             agentType + " " +
             agentTraits + " " + 
-            lexical_cast<string>(oacPort) + " " +
-            lexical_cast<string>(cogServerShellPort) + " " +
-            lexical_cast<string>(zmqPublishPort); 
+            boost::lexical_cast<string>(oacPort) + " " +
+            boost::lexical_cast<string>(cogServerShellPort) + " " +
+            boost::lexical_cast<string>(zmqPublishPort); 
 
         if (config().get_bool("RUN_OAC_DEBUGGER")) {
             string debuggerPath = config().get("OAC_DEBUGGER_PATH");

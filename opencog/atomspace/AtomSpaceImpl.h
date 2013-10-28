@@ -49,9 +49,6 @@ namespace opencog
 
 class AtomSpaceImpl;
 
-typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
-typedef boost::signal<void (AtomSpaceImpl*,AtomPtr)> AtomPtrSignal;
-
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
  * AtomSpace requests that are running within the AtomSpaceAsync event loop.
@@ -160,7 +157,9 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = true);
+    bool removeAtom(Handle h, bool recursive = true) {
+        return 0 < atomTable.extract(h, recursive).size();
+    }
 
     /**
      * Retrieve from the Atom Table the Handle of a given node
@@ -880,7 +879,7 @@ public:
      * Deprecated, importance updating should be done by ImportanceUpdating
      * Agent. Still used by Embodiment.
      */
-    void decayShortTermImportance();
+    void decayShortTermImportance() { atomTable.decayShortTermImportance(); }
 
     size_t Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     size_t Links(VersionHandle = NULL_VERSION_HANDLE) const;
@@ -964,35 +963,23 @@ private:
      */
     BackingStore *backing_store;
 
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomSignal _mergeAtomSignal;
-    AtomPtrSignal _removeAtomSignal;
-
     /**
      * signal connections used to keep track of atom removal in the AtomTable
      */
     boost::signals::connection removedAtomConnection; 
     boost::signals::connection addedAtomConnection; 
 
-    /**
-     * Handler of the 'atom removed' signal from self
-     */
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
+    /** Handler for the 'atom removed' signal */
+    void atomRemoved(AtomPtr);
 
-    /**
-     * Handler of the 'atom added' signal from self
-     */
-    void atomAdded(AtomSpaceImpl*, Handle);
+    /** Handler for the 'atom added' signal */
+    void atomAdded(Handle);
 
 public:
     // pass on the signals from the Atom Table
-    AtomSignal& addAtomSignal()
-        { return _addAtomSignal; }
-    AtomPtrSignal& removeAtomSignal()
-        { return _removeAtomSignal; }
-    AtomSignal& mergeAtomSignal()
-        { return _mergeAtomSignal; }
+    AtomSignal& addAtomSignal() { return atomTable._addAtomSignal; }
+    AtomPtrSignal& removeAtomSignal() { return atomTable._removeAtomSignal; }
+    AtomSignal& mergeAtomSignal() { return atomTable._mergeAtomSignal; }
 
     /**
      * Overrides and declares copy constructor and equals operator as private 

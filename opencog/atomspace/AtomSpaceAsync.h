@@ -604,7 +604,7 @@ public:
         return r;
     }
 
-    // TODO wrap these in a mutex
+    // TODO XXX FIXME wrap these in a mutex
     boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.addAtomSignal().connect(function);
     }

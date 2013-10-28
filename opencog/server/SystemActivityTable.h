@@ -85,7 +85,7 @@ protected:
     boost::signals::connection _conn;
 
     /** called by AtomSpaceImpl via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
+    void atomRemoved(AtomPtr);
 
     /** trim Activity sequence to a maximum size */
     void trimActivitySeq(ActivitySeq&, size_t max);

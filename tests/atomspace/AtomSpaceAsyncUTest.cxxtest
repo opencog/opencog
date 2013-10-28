@@ -70,40 +70,40 @@ public:
         delete rng;
     }
 
-    void atomAdded1(opencog::AtomSpaceImpl* a, Handle h) {
-        TS_ASSERT(a->getSize() == 1);
+    void atomAdded1(Handle h) {
+        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
         logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
-    void atomAdded2(opencog::AtomSpaceImpl* a, Handle h) {
-        TS_ASSERT(a->getSize() == 1);
+    void atomAdded2(Handle h) {
+        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
         logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
     }
 
-    void atomMerged1(opencog::AtomSpaceImpl* a, Handle h) {
-        TS_ASSERT(a->getSize() == 1);
+    void atomMerged1(Handle h) {
+        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
         logger().debug("atomMerged1: %s", h->toString().c_str());
         __testSignalsCounter += 100;
     }
 
-    void atomMerged2(opencog::AtomSpaceImpl* a, Handle h) {
-        TS_ASSERT(a->getSize() == 1);
+    void atomMerged2(Handle h) {
+        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
         logger().debug("atomMerged2: %s", h->toString().c_str());
         __testSignalsCounter += 1000;
     }
 
-    void atomRemoved1(opencog::AtomSpaceImpl* a, AtomPtr atom) {
+    void atomRemoved1(AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
-        TS_ASSERT(a->getSize() == 0);
+        TS_ASSERT(atomSpace->getSize()->get_result() == 0);
         logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
-    void atomRemoved2(opencog::AtomSpaceImpl* a, AtomPtr atom) {
+    void atomRemoved2(AtomPtr atom) {
         // Atom is removed from table, but not from TLB until AFTER callbacks are completed
-        TS_ASSERT(a->getSize() == 0);
+        TS_ASSERT(atomSpace->getSize()->get_result() == 0);
         logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
@@ -111,17 +111,17 @@ public:
     void testSignals() {
         // connect signals
         boost::signals::connection add1 =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1, _2));
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
         boost::signals::connection add2 =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1, _2));
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1));
         boost::signals::connection merge1 =
-            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2));
+            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1));
         boost::signals::connection merge2 =
-            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2));
+            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1));
         boost::signals::connection remove1 =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1, _2));
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1));
         boost::signals::connection remove2 =
-            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1, _2));
+            atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1));
 
         /* add and remove a simple node */
         __testSignalsCounter = 0;

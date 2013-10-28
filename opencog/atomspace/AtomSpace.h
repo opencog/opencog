@@ -38,14 +38,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
 
-// Whether to wrap certain functions in lru_cache_threaded<>
-#define USE_ATOMSPACE_LOCAL_THREAD_CACHE 1
-
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-#include <opencog/util/lru_cache.h>
-#endif
-
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -1165,28 +1157,9 @@ public:
     // of callbacks. It's accessible via the Cython wrapper.
     std::list<Handle> addAtomSignalQueue;
 
-
-    static bool isHandleInSeq(Handle h, HandleSeq &seq);
-
 private:
-    bool handleAddSignal(AtomSpaceImpl *, Handle);
-
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    /** For monitoring removals to the AtomSpace so that cache entries can be
-     * invalidated as necessary
-     */
-    bool atomRemoveSignal(AtomSpaceImpl *, AtomPtr);
-
-    //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
-    bool watchingAtomSpace;
-
     boost::signals::connection c_add; //! Connection to add atom signals
-    boost::signals::connection c_remove; //! Connection to remove atom signals
-
-    void setUpCaching();
-#endif
-
-
+    bool handleAddSignal(Handle);
 };
 
 /** @}*/

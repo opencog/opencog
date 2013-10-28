@@ -61,44 +61,41 @@ AtomSpace::AtomSpace(void)
 {
     atomSpaceAsync = new AtomSpaceAsync();
     ownsAtomSpaceAsync = true;
-    c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
+
     c_add = atomSpaceAsync->addAtomSignal(
-            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
     this->atomSpaceAsync = other.atomSpaceAsync;
     ownsAtomSpaceAsync = false;
-    c_remove = atomSpaceAsync->removeAtomSignal(
-            boost::bind(&AtomSpace::atomRemoveSignal, this, _1, _2));
+
     c_add = atomSpaceAsync->addAtomSignal(
-            boost::bind(&AtomSpace::handleAddSignal, this, _1, _2));
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(AtomSpaceAsync& a)
 {
     atomSpaceAsync = &a;
     ownsAtomSpaceAsync = false;
+
+    c_add = atomSpaceAsync->addAtomSignal(
+        boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::~AtomSpace()
 {
-    c_remove.disconnect();
+    c_add.disconnect();
     // Will be unnecessary once GC is implemented
     if (ownsAtomSpaceAsync)
         delete atomSpaceAsync;
 }
 
-bool AtomSpace::handleAddSignal(AtomSpaceImpl *as, Handle h)
+bool AtomSpace::handleAddSignal(Handle h)
 {
+    // XXX TODO FIXME  this must be locked to avoid corruption!!!
     addAtomSignalQueue.push_back(h);
-    return false;
-}
-
-bool AtomSpace::atomRemoveSignal(AtomSpaceImpl *as, AtomPtr a)
-{
     return false;
 }
 
@@ -204,18 +201,5 @@ void AtomSpace::print(std::ostream& output,
            Type type, bool subclass) const
 {
     atomSpaceAsync->print(output, type, subclass)->get_result();
-}
-
-
-bool AtomSpace::isHandleInSeq(Handle h, HandleSeq &seq)
-{
-    HandleSeq::const_iterator it;
-    for (it = seq.begin(); it != seq.end(); ++ it)
-    {
-        if ((Handle)(*it) == h)
-            return true;
-    }
-
-    return false;
 }
 
