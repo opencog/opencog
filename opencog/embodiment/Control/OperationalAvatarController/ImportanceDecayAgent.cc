@@ -29,19 +29,18 @@ using namespace opencog::oac;
 
 ImportanceDecayAgent::~ImportanceDecayAgent()
 {
+    mergedAtomConnection.disconnect();
 }
 
 ImportanceDecayAgent::ImportanceDecayAgent(CogServer& cs) : Agent(cs)
 {
     lastTickTime = 0;
-    mergedAtomConnection.disconnect();
 }
 
 void ImportanceDecayAgent::connectSignals(AtomSpace& as)
 {
     mergedAtomConnection = as.atomSpaceAsync->mergeAtomSignal(
-            boost::bind(&ImportanceDecayAgent::atomMerged,
-            this, _1, _2));
+            boost::bind(&ImportanceDecayAgent::atomMerged, this, _1));
 }
 
 void ImportanceDecayAgent::run()
@@ -50,13 +49,14 @@ void ImportanceDecayAgent::run()
     dynamic_cast<OAC *>(&_cogserver)->decayShortTermImportance();
 }
 
-void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)
+void ImportanceDecayAgent::atomMerged(Handle h)
 {
     logger().fine("ImportanceDecayAgent::atomMerged(%lu)", h.value());
     // Restore the default STI value if it has decayed
     // TODO: Remove this code when the merge of atoms consider the STI values
     // this way as well.
-    if (as->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
-        as->setSTI(h, AttentionValue::DEFAULTATOMSTI);
+// XXX ?? but DEFAULTATOMSTI is zero, and I don't think sti goes below zoer !!
+    if (_cogserver.getAtomSpace().getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
+        _cogserver.getAtomSpace().setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }
 }

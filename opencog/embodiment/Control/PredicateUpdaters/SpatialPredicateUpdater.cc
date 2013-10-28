@@ -23,18 +23,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdlib>
+#include <iterator>
+#include <map>
+#include <set>
+#include <vector>
+
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include "SpatialPredicateUpdater.h"
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
+#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
 #include <opencog/spacetime/SpaceTime.h>
 #include <opencog/spacetime/SpaceServer.h>
-#include <opencog/embodiment/Control/OperationalAvatarController/EventDetectionAgent.h>
-#include <cstdlib>
-#include <vector>
-#include <iterator>
-#include <map>
-#include <set>
 
 using namespace opencog::oac;
 using namespace opencog;
@@ -610,7 +611,7 @@ bool SpatialPredicateUpdater::SpatialRelationCache::
 getRelation(std::string entityA_id, std::string entityB_id, SPATIAL_RELATION_VECTOR & relation)
 {
     std::string key = entityA_id + entityB_id; 
-    boost::unordered_map <std::string, SPATIAL_RELATION_VECTOR>::iterator
+    std::unordered_map <std::string, SPATIAL_RELATION_VECTOR>::iterator
         iter_relation = this->_entityRelationMap.find(key); 
 
     if ( iter_relation != this->_entityRelationMap.end() ) {

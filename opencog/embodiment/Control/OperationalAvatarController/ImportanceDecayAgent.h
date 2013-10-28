@@ -58,12 +58,12 @@ public:
     virtual void run();
 
     // connects to the signals from AtomSpace it needs to know
-    void connectSignals(AtomSpace& as);
+    void connectSignals(AtomSpace&);
 
     /**
      * Method to receive atom merge signals from AtomSpace
      */
-    void atomMerged(AtomSpaceImpl* as, Handle h);
+    void atomMerged(Handle);
 
 }; // class
 
