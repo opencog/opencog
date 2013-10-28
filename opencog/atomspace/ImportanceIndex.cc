@@ -71,9 +71,10 @@ void ImportanceIndex::removeAtom(AtomPtr atom)
 	remove(bin, atom->getHandle());
 }
 
-UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* atomtable)
+UnorderedHandleSet ImportanceIndex::decayShortTermImportance(AtomTable* atomtable)
 {
 	UnorderedHandleSet oldAtoms;
+	AVCHSigl& avch = atomtable->AVChangedSignal();
 
 	unsigned int bin;
 	if (IMPORTANCE_INDEX_SIZE != (1 << 16) ) {
@@ -85,7 +86,10 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
 			{
 				Handle h(*hit);
 
-				h->getAttentionValue()->decaySTI();
+				AttentionValuePtr av(h->getAttentionValue());
+				av->decaySTI();
+				avch(h, av, av);
+
 				unsigned int newbin = importanceBin(h->getAttentionValue()->getSTI());
 				if (newbin != bin) {
 					insert(newbin, h);
@@ -109,16 +113,23 @@ UnorderedHandleSet ImportanceIndex::decayShortTermImportance(const AtomTable* at
 		for (UnorderedUUIDSet::iterator hit = band.begin(); hit != band.end(); hit++)
 		{
 			Handle h(*hit);
-			h->getAttentionValue()->decaySTI();
+
+			AttentionValuePtr av(h->getAttentionValue());
+			av->decaySTI();
+			avch(h, av, av);
 		}
 		idx[0].insert(idx[1].begin(), idx[1].end());
 		for (bin = 1; bin < IMPORTANCE_INDEX_SIZE-1; bin++)
 		{
 			idx[bin] = idx[bin+1];
 			UnorderedUUIDSet & band = idx[bin];
-			for (UnorderedUUIDSet::iterator hit = band.begin(); hit != band.end(); hit++) {
+			for (UnorderedUUIDSet::iterator hit = band.begin(); hit != band.end(); hit++)
+			{
 				Handle h(*hit);
-				h->getAttentionValue()->decaySTI();
+
+				AttentionValuePtr av(h->getAttentionValue());
+				av->decaySTI();
+				avch(h, av, av);
 			}
 		}
 		idx[bin].clear();
