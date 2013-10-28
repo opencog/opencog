@@ -54,7 +54,7 @@ void ImportanceDecayAgent::atomMerged(const Handle& h,
     // Restore the default STI value if it has decayed
     // TODO: Remove this code when the merge of atoms consider the STI values
     // this way as well.
-    if (new_av->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
+    if (new_av->getSTI() < AttentionValue::DEFAULTATOMSTI) {
         _cogserver.getAtomSpace().setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }
 }
