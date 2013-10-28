@@ -614,6 +614,9 @@ public:
     boost::signals::connection mergeAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.mergeAtomSignal().connect(function);
     }
+    boost::signals::connection AVChangedSignal(const AVCHSigl::slot_type& function) {
+        return atomspace.AVChangedSignal().connect(function);
+    }
 
     //--------------
     inline AttentionBank& getAttentionBank()

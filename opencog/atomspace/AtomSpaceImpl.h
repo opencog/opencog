@@ -980,6 +980,7 @@ public:
     AtomSignal& addAtomSignal() { return atomTable._addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return atomTable._removeAtomSignal; }
     AtomSignal& mergeAtomSignal() { return atomTable._mergeAtomSignal; }
+    AVCHSigl& AVChangedSignal() { return atomTable._AVChangedSignal; }
 
     /**
      * Overrides and declares copy constructor and equals operator as private 
