@@ -32,7 +32,6 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <opencog/atomspace/AtomSpaceAsync.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>

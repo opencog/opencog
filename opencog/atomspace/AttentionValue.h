@@ -75,10 +75,15 @@ private:
                    //!< atom as nondisposable. So it's only disposable if this is 0
     static AttentionValuePtr m_defaultAV; //! default attention value
 
-public:
-    ~AttentionValue() {}
-    // CLASS CONSTRUCTORS
+    //! Decays short term importance
+    //! Private, because changing the AV without emitting a signal
+    //! will confuse everyone, so we sharply limit who is allowed
+    //! to do this.
+    void  decaySTI();
 
+    friend class ImportanceIndex; // The index can change the STI.
+
+public:
    /**
      * @param STI (int): The STI value to set for the atom
      * @param LTI (int): The LTI value to set for the atom
@@ -89,7 +94,7 @@ public:
                    vlti_t VLTI = DEFAULTATOMVLTI)
         : m_STI(STI), m_LTI(LTI), m_VLTI(VLTI) {}
 
-    // PUBLIC GET/SET PROPERTIES
+    ~AttentionValue() {}
 
     //! return STI property value
     sti_t getSTI() const { return m_STI; }
@@ -100,11 +105,6 @@ public:
 
     //! return VLTI property value
     vlti_t getVLTI() const { return m_VLTI; }
-
-    // PUBLIC METHODS
-
-    //! Decays short term importance
-    void  decaySTI();
 
     //! Returns const string "[sti_val, lti_val, vlti_val]"
     // @param none

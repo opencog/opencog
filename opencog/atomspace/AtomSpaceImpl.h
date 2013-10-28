@@ -979,7 +979,8 @@ public:
     // pass on the signals from the Atom Table
     AtomSignal& addAtomSignal() { return atomTable._addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return atomTable._removeAtomSignal; }
-    AtomSignal& mergeAtomSignal() { return atomTable._mergeAtomSignal; }
+    TVCHSigl& TVChangedSignal() { return atomTable._TVChangedSignal; }
+    AVCHSigl& AVChangedSignal() { return atomTable._AVChangedSignal; }
 
     /**
      * Overrides and declares copy constructor and equals operator as private 

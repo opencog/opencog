@@ -611,8 +611,11 @@ public:
     boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function) {
         return atomspace.removeAtomSignal().connect(function);
     }
-    boost::signals::connection mergeAtomSignal(const AtomSignal::slot_type& function) {
-        return atomspace.mergeAtomSignal().connect(function);
+    boost::signals::connection AVChangedSignal(const AVCHSigl::slot_type& function) {
+        return atomspace.AVChangedSignal().connect(function);
+    }
+    boost::signals::connection TVChangedSignal(const TVCHSigl::slot_type& function) {
+        return atomspace.TVChangedSignal().connect(function);
     }
 
     //--------------
