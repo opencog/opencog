@@ -1466,7 +1466,7 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossib
     for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
     {
         State* ps = *itpre;
-        State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentBindingsFromForwardState);
+        State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
         if (! groundPs)
             continue;
 
@@ -1632,6 +1632,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     }
 
     // check how many preconditions will be satisfied
+    tmpRuleNode->updateCurrentAllBindings();
     satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
 
     delete tmpRuleNode;
@@ -2608,24 +2609,28 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
-        tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
+        // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
-
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
         if (cost < -0.00001f)
         {
             logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
             return UNDEFINED_VALUE;
         }
-
-        bool preconImpossible;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
-        float score = satisfiedPreconNum * 10.0f - cost;
-        if (preconImpossible)
-            score -= 99999.9f;
-
         currentbindings.erase(varName);
-        tmpRuleNode->currentAllBindings.erase(varName);
+        float score = 0.0f-cost;
+
+        // check how many preconditions will be satisfied
+        if (! rule->IsRecursiveRule)
+        {
+            bool preconImpossible;
+            tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
+            int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
+            tmpRuleNode->currentAllBindings.erase(varName);
+            score += satisfiedPreconNum * 10.0f;
+            if (preconImpossible)
+                score -= 99999.9f;
+        }
 
         if (score > bestScore)
         {
