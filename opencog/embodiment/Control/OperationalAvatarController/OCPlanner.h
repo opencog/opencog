@@ -172,12 +172,6 @@ public:
 
     string getDepthOfRuleNode();
 
-    bool operator < (const RuleNode& other) const
-    {
-        // so , the deeper rule node will be put front
-        return !( other.getLastForwardStateNode() < getLastForwardStateNode());
-    }
-
     // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
     StateNode* getMostClosedBackwardStateNode() const;
 
@@ -186,6 +180,8 @@ public:
 
     // get the backward StateNode with the deepest depth, which is the most closed forward state node to me
     StateNode* getDeepestBackwardStateNode() const;
+
+//    bool operator < (const RuleNode& other) const;
 
 };
 
@@ -226,17 +222,24 @@ public:
         else if ( (other.depth == "-1") && (depth != "-1"))
             return false;
 
-        int size = (sizeof(depth) < sizeof(other.depth)) ? sizeof(depth) :  sizeof(other.depth);
+        int size;
+        if (depth.size() < other.depth.size())
+            size = depth.size();
+        else
+            size = other.depth.size();
+
         for (int i =0; i < size; i ++)
         {
-            if ( depth[i] < (other.depth)[i] )
+            int myBit = atoi(depth.substr(i,1).c_str());
+            int otherBit = atoi(other.depth.substr(i,1).c_str());
+            if ( myBit < otherBit )
                 return true;
-            else if  ((other.depth)[i] < depth[i] )
+            else if  (otherBit < myBit)
                 return false;
         }
 
         // all the fist size digits are equal
-        if (sizeof(depth) < sizeof(other.depth))
+        if (depth.size() < other.depth.size())
             return true;
         else
             return false;
@@ -329,7 +332,7 @@ protected:
      // to store all the rule node in current plan. it should be clear everytime begin new planning.
      // every new rule node will be insurt into this list, and it will be removed from the set if it's deleted
      // this list will be sorted after a planning finised according to the order of dependency relations
-     list<RuleNode*> allRuleNodeInThisPlan;
+     vector<RuleNode*> allRuleNodeInThisPlan;
 
      vector<SpaceServer::SpaceMap*> imaginarySpaceMaps;
 
@@ -441,6 +444,7 @@ protected:
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
 
      void outputStateInfo(State* s, bool outPutStateValue);
+     void outputRuleNodeStep(RuleNode* ruleNode);
 
 };
 

@@ -69,7 +69,7 @@ StateNode* RuleNode::getLastForwardStateNode() const
     {
         if (lastedStateNode == 0)
             lastedStateNode = (StateNode*)(*it);
-        if ( lastedStateNode < ((StateNode*)(*it)))
+        else if ( (*lastedStateNode) < (*((StateNode*)(*it))))
         {
             lastedStateNode = (StateNode*)(*it);
         }
@@ -91,13 +91,25 @@ StateNode* RuleNode::getDeepestBackwardStateNode() const
     {
         if (lastedStateNode == 0)
             lastedStateNode = (StateNode*)(*it);
-
-        if ( lastedStateNode < ((StateNode*)(*it)))
+        else if ( (*lastedStateNode) < (*((StateNode*)(*it))))
         {
             lastedStateNode = (StateNode*)(*it);
         }
     }
     return lastedStateNode;
+}
+
+bool compareRuleNodeDepth (const RuleNode* one, const RuleNode* other)
+{
+    // so , the deeper rule node will be put front
+    // so , the deeper rule node will be put front
+    // debug:
+    StateNode* m = one->getLastForwardStateNode();
+    StateNode* o = other->getLastForwardStateNode() ;
+    cout << "Debug: compare rule node depth: me = "  << m->depth << " other = " << o->depth << " ; ";
+    bool d = (*o) < (*m) ;
+    cout << "me is put before other :" << d << std::endl;
+    return (d);
 }
 
 void RuleNode::updateCurrentAllBindings()
@@ -121,6 +133,36 @@ bool findInStateNodeList(list<StateNode*> &stateNodeList, StateNode* state)
     return false;
 }
 
+StateNode* RuleNode::getMostClosedBackwardStateNode() const
+{
+    // get the BackwardStateNode with the least depth
+    vector<StateNode*>::const_iterator it = backwardLinks.begin();
+    StateNode* lastedStateNode = 0;
+
+    for (; it != backwardLinks.end(); ++ it)
+    {
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
+        else if ( (*((StateNode*)(*it))) <  (*lastedStateNode))
+        {
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+
+    return lastedStateNode;
+}
+
+//bool RuleNode::operator < (const RuleNode& other) const
+//{
+//    // so , the deeper rule node will be put front
+//    // debug:
+//    StateNode* m = getLastForwardStateNode();
+//    StateNode* o = other.getLastForwardStateNode() ;
+//    cout << "Debug: compare rule node depth: me = "  << m->depth << " other = " << o->depth << std::endl;
+//    bool d = m < o ;
+//    cout << "me is deeper than other :" << d;
+//    return (  other.getLastForwardStateNode() < getLastForwardStateNode() );
+//}
 
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
@@ -130,7 +172,7 @@ void StateNode::calculateNodesDepth()
 
     if (! forwardRuleNode)
     {
-        if ( sizeof(depth) == 1)
+        if ( depth.size() == 1)
         {
             return; // it's the goal state nodes
         }
@@ -194,24 +236,6 @@ void StateNode::calculateNodesDepth()
     }
 
 
-}
-
-StateNode* RuleNode::getMostClosedBackwardStateNode() const
-{
-    // get the BackwardStateNode with the least depth
-    vector<StateNode*>::const_iterator it = backwardLinks.begin();
-    StateNode* lastedStateNode = 0;
-
-    for (; it != backwardLinks.end(); ++ it)
-    {
-        if (lastedStateNode == 0)
-            lastedStateNode = (StateNode*)(*it);
-
-        if ( ((StateNode*)(*it)) <  lastedStateNode)
-        {
-            lastedStateNode = (StateNode*)(*it);
-        }
-    }
 }
 
 SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode)
@@ -299,7 +323,7 @@ bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,St
 
     // most closed state node, describing the same state of the input state
     stateNode = 0;
-    StateNode* mostClosedNode;
+    StateNode* mostClosedNode = 0;
 
     if (forwardRuleNode)
         mostClosedNode = forwardRuleNode->getMostClosedBackwardStateNode();
@@ -310,7 +334,7 @@ bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,St
         // cuz the forward state won't affect the current state
         if (mostClosedNode)
         {
-            if (((StateNode*)(*vit)) < mostClosedNode)
+            if ((*((StateNode*)(*vit))) < (*mostClosedNode))
                 continue;
         }
 
@@ -327,7 +351,7 @@ bool OCPlanner::findStateInTempStates(State& state, RuleNode *forwardRuleNode,St
             {
                 stateNode = (StateNode*)(*vit);
             }
-            else if (((StateNode*)(*vit)) < stateNode) // get the most closed state node backward from the forwardRuleNode
+            else if ((*((StateNode*)(*vit))) < (*stateNode)) // get the most closed state node backward from the forwardRuleNode
             {
                 stateNode = ((StateNode*)(*vit));
             }
@@ -999,7 +1023,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         ruleNode->forwardLinks.push_back(curStateNode);
         curStateNode->backwardRuleNode = ruleNode; // the depth of curStateNode has been calculated when it created as a precondition of its forward rule node
 
-        allRuleNodeInThisPlan.push_front(ruleNode);
+        allRuleNodeInThisPlan.insert(allRuleNodeInThisPlan.begin(),ruleNode);
 
         // When apply a rule, we need to select proper variables to ground it.
 
@@ -1301,14 +1325,16 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
 
     // sort the list of rule node
-    allRuleNodeInThisPlan.sort();
+    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
 
     // and then encapsule the action for each step and send to PAI
-    list<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
+    vector<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
     int stepNum = 1;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
         RuleNode* r = (RuleNode*)(*planRuleNodeIt);
+
+        outputRuleNodeStep(r);
 
         SpaceServer::SpaceMap* backwardStepMap ;
 
@@ -1822,7 +1848,7 @@ void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
 
 void OCPlanner::deleteRuleNodeInAllRuleNodeList(RuleNode *ruleNode)
 {
-    list<RuleNode*>::iterator it;
+    vector<RuleNode*>::iterator it;
     for (it = allRuleNodeInThisPlan.begin(); it != allRuleNodeInThisPlan.end(); ++it)
     {
         if ((*it) == ruleNode)
@@ -2672,6 +2698,32 @@ void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
         cout << " " << STATE_TYPE_NAME[s->stateType] << " " << s->stateVariable->stringRepresentation();
     }
 
+}
+
+void OCPlanner::outputRuleNodeStep(RuleNode* ruleNode)
+{
+    cout << std::endl << "RuleNode:" << ruleNode->originalRule->ruleName << " Action:" << ruleNode->originalRule->action->getName() <<  std::endl;
+    cout << " All forward state nodes:" << std::endl;
+
+    // get the forwardStateNode with the deepest depth
+    vector<StateNode*>::const_iterator it = ruleNode->forwardLinks.begin();
+    StateNode* lastedStateNode = 0;
+
+    for (; it != ruleNode->forwardLinks.end(); ++ it)
+    {
+        cout << std::endl;
+        outputStateInfo(((StateNode*)(*it))->state, true);
+        cout << " Depth = " << ((StateNode*)(*it))->depth;
+        cout << std::endl;
+        if (lastedStateNode == 0)
+            lastedStateNode = (StateNode*)(*it);
+        if ( (*lastedStateNode) < (*((StateNode*)(*it))))
+        {
+            lastedStateNode = (StateNode*)(*it);
+        }
+    }
+
+    cout << " Rule node dept = " << lastedStateNode->depth << std::endl;;
 }
 
 // a bunch of rules for test, load from c++ codes
