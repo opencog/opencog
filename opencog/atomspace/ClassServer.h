@@ -49,6 +49,7 @@ typedef ClassServer* ClassServerFactory(void);
  * The current implementation is hardwired. Future versions may include
  * different structures based on run-time type identification.
  */
+typedef boost::signal<void (Type)> TypeSignal;
 class ClassServer
 {
 private:
@@ -65,7 +66,7 @@ private:
     std::vector< std::vector<bool> > recursiveMap;
     std::unordered_map<std::string, Type> name2CodeMap;
     std::unordered_map<Type, const std::string*> code2NameMap;
-    boost::signal<void (Type)> _addTypeSignal;
+    TypeSignal _addTypeSignal;
 
     void setParentRecursively(Type parent, Type type);
 
@@ -76,11 +77,11 @@ public:
     /** Adds a new atom type with the given name and parent type */
     Type addType(Type parent, const std::string& name);
 
-    /** Gets the boost::signal for connecting to add type signals
+    /** Provides ability to get type-added signals.
      * @warning methods connected to this signal must not call ClassServer::addType or
      * things will deadlock.
      */
-    boost::signal<void (Type)>& addTypeSignal();
+    TypeSignal& addTypeSignal();
 
     /**
      * Stores the children types on the OutputIterator 'result'. Returns the
