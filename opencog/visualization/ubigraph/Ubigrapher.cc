@@ -150,28 +150,27 @@ void Ubigrapher::setStyles()
     
 }
 
-bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
+bool Ubigrapher::handleAddSignal(Handle h)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    AtomPtr a = as->getHandle(h);
     usleep(pushDelay);
-    if (classserver().isA(a->getType(),NODE))
+    if (classserver().isA(h->getType(),NODE))
         return addVertex(h);
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            LinkPtr l(LinkCast(a));
-            if (l && l->getOutgoingSet().size() == 2 &&
-                     as->getIncoming(h).size() == 0)
+            LinkPtr l(LinkCast(h));
+            if (l and l->getOutgoingSet().size() == 2 and
+                     space.getIncoming(h).size() == 0)
                 return addEdges(h);
         }
         return (addVertex(h) || addEdges(h));
     }
 }
 
-bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
+bool Ubigrapher::atomRemoveSignal(AtomPtr a)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
@@ -184,8 +183,8 @@ bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
         if (compact) {
             // don't make nodes for binary links with no incoming
             LinkPtr l(LinkCast(a));
-            if (l && l->getOutgoingSet().size() == 2 &&
-                     as->getIncoming(h).size() == 0)
+            if (l and l->getOutgoingSet().size() == 2 and
+                     space.getIncoming(h).size() == 0)
                 return removeEdges(h);
         }
         return removeVertex(h);
@@ -208,11 +207,10 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
             * multiplier;
     }
     ost << baseline + scaler;
-    AtomPtr a = space.getHandle(h);
-    LinkPtr l(LinkCast(a));
+    LinkPtr l(LinkCast(h));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
+        if (compact and out.size() == 2 and space.getIncoming(h).size() == 0) {
             ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
         } else
             ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
