@@ -71,39 +71,39 @@ public:
     }
 
     void atomAdded1(Handle h) {
-        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
     void atomAdded2(Handle h) {
-        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
     }
 
     void atomMerged1(Handle h) {
-        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomMerged1: %s", h->toString().c_str());
         __testSignalsCounter += 100;
     }
 
     void atomMerged2(Handle h) {
-        TS_ASSERT(atomSpace->getSize()->get_result() == 1);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomMerged2: %s", h->toString().c_str());
         __testSignalsCounter += 1000;
     }
 
     void atomRemoved1(AtomPtr atom) {
-        // Atom is removed from table, but not from TLB until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->getSize()->get_result() == 0);
+        // Atom is not removed from table until AFTER callbacks are completed
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
     void atomRemoved2(AtomPtr atom) {
-        // Atom is removed from table, but not from TLB until AFTER callbacks are completed
-        TS_ASSERT(atomSpace->getSize()->get_result() == 0);
+        // Atom is not removed from table until AFTER callbacks are completed
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
@@ -128,12 +128,17 @@ public:
         logger().debug("before first atom add");
         Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
         TS_ASSERT(__testSignalsCounter == 11);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
+
         logger().debug("before second atom add");
         atomSpace->addNode(NUMBER_NODE, "1")->get_result();
         TS_ASSERT(__testSignalsCounter == 1111);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
+
         logger().debug("before atom remove, table size = %d", atomSpace->getSize()->get_result());
         atomSpace->removeAtom(wnHandle)->get_result();
         TS_ASSERT(__testSignalsCounter == 111111);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 0);
 
         /* add a simple node and let decayShortTermImportance remove it */
         __testSignalsCounter = 0;
@@ -148,6 +153,7 @@ public:
             atomSpace->decayShortTermImportance()->get_result();
         }
         TS_ASSERT(__testSignalsCounter == 110011);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 0);
 
         /* add a node with LTI == 1 so that decayShortTermImportance cannot remove it */
         __testSignalsCounter = 0;
@@ -161,8 +167,10 @@ public:
             atomSpace->decayShortTermImportance();
         }
         TS_ASSERT(__testSignalsCounter == 11);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         atomSpace->removeAtom(wnHandle)->get_result();
         TS_ASSERT(__testSignalsCounter == 110011);
+        TS_ASSERT(atomSpace->atomspace.getSize() == 0);
 
         // test disconnections
         __testSignalsCounter = 0;
