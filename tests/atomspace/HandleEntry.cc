@@ -329,8 +329,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, bool deleted)
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            set->getAtom()->isMarkedForRemoval() != deleted) {
+    while (set != NULL) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -342,14 +341,10 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, bool deleted)
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (set->getAtom()->isMarkedForRemoval() != deleted) {
-            buffer = set->next;
-            set->next = set->next->next;
-            buffer->next = NULL;
-            delete buffer;
-        } else {
-            set = set->next;
-        }
+        buffer = set->next;
+        set->next = set->next->next;
+        buffer->next = NULL;
+        delete buffer;
     }
 
     // head contains the filtered list.

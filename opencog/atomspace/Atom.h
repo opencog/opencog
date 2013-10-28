@@ -39,10 +39,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
-#ifdef ZMQ_EXPERIMENT
-	#include "ProtocolBufferSerializer.h"
-#endif
-
 class AtomUTest;
 
 namespace opencog
@@ -52,7 +48,6 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 
@@ -65,20 +60,14 @@ typedef std::shared_ptr<Link> LinkPtr;
 class Atom
     : public std::enable_shared_from_this<Atom>
 {
-    friend class SavingLoading;   // needs to set flags diectly
-    friend class AtomTable;
-    friend class TLB;
-    friend class Handle;
-    friend class ::AtomUTest;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
+    friend class ::AtomUTest;     // Needs to call setFlag()
+    friend class AtomTable;       // Needs to call MarkedForRemoval()
+    friend class ImportanceIndex; // Needs to call setFlag()
+    friend class Handle;          // Needs to view _uuid
+    friend class SavingLoading;   // Needs to set _uuid
+    friend class TLB;             // Needs to view _uuid
 
 private:
-#ifdef ZMQ_EXPERIMENT
-    Atom() {};
-#endif
-
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
 
@@ -128,6 +117,34 @@ protected:
     void insert_atom(LinkPtr);
     void remove_atom(LinkPtr);
 
+private:
+    /** Returns whether this atom is marked for removal.
+     *
+     * @return Whether this atom is marked for removal.
+     */
+    bool isMarkedForRemoval() const;
+
+    /** Returns an atom flag.
+     * A byte represents all flags. Each bit is one of them.
+     *
+     * @param An int indicating which of the flags will be returned.
+     * @return A boolean indicating if that flag is set or not.
+     */
+    bool getFlag(int) const;
+
+    /** Changes the value of the given flag.
+     *
+     * @param An int indicating which of the flags will be set.
+     * @param A boolean indicating the new value of the flag.
+     */
+    void setFlag(int, bool);
+
+    //! Marks the atom for removal.
+    void markForRemoval();
+
+    //! Unsets removal flag.
+    void unsetRemovalFlag();
+
 public:
 
     virtual ~Atom();
@@ -167,33 +184,6 @@ public:
     void setTruthValue(CompositeTruthValuePtr ctv) {
         setTruthValue(std::static_pointer_cast<TruthValue>(ctv));
     }
-
-    /** Returns whether this atom is marked for removal.
-     *
-     * @return Whether this atom is marked for removal.
-     */
-    bool isMarkedForRemoval() const;
-
-    /** Returns an atom flag.
-     * A byte represents all flags. Each bit is one of them.
-     *
-     * @param An int indicating which of the flags will be returned.
-     * @return A boolean indicating if that flag is set or not.
-     */
-    bool getFlag(int) const;
-
-    /** Changes the value of the given flag.
-     *
-     * @param An int indicating which of the flags will be set.
-     * @param A boolean indicating the new value of the flag.
-     */
-    void setFlag(int, bool);
-
-    //! Marks the atom for removal.
-    void markForRemoval();
-
-    //! Unsets removal flag.
-    void unsetRemovalFlag();
 
     /** Returns a string representation of the node.
      *
