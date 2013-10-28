@@ -160,6 +160,12 @@ def mem2InhFormula(tvs):
 
     return [TruthValue(mem_tv.mean, count)]
 
+def fuzzy_and(mean0, mean1):
+    return min(mean0, mean1)
+
+def fuzzy_or(mean0, mean1):
+    return max(mean0, mean1)
+
 def subsetEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
     mem_a = mem_a_tv.mean > 0.5
@@ -176,6 +182,15 @@ def subsetEvaluationFormula(tvs):
     else:
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
+
+def subsetFuzzyEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+
+    fuzzy_and_ab = fuzzy_and(mem_a_tv.mean, mem_b_tv.mean)
+
+    # P(x in B | x in A) = P(x in A ^ x in B) / P(x in A)
+
+    # ... TODO implement this formula. my head got sore --Jade
 
 def similarityEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
