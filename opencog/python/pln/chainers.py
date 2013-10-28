@@ -221,8 +221,9 @@ class Chainer(AbstractChainer):
             self.learnRuleFrequencies = True
             self.rule_count = defaultdict(constant_factory)
 
-    def forward_step(self):
-        rule = self._select_rule()
+    def forward_step(self, rule=None):
+        if rule is None:
+            rule = self._select_rule()
 
         print rule
         results = self._apply_forward(rule)

@@ -38,10 +38,11 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rule)
 
         # create probabilistic logical links out of MemberLinks
-        self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
-        self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
 
-        self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
         self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))

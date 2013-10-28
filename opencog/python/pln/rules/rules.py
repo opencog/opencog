@@ -245,6 +245,26 @@ class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
             output_type = types.IntensionalSimilarityLink,
             formula= formulas.similarityEvaluationFormula)        
 
+class ExtensionalLinkEvaluationRule(Rule):
+    '''Using (MemberLink x A) and (MemberLink x B), evaluate (Subset A B), (Subset B A), and (SimilarityLink A B). This is more efficient than having to find them separately using the different rules. If you use this Rule, do NOT include the separate rules too! (Or the chainer will use all of them and screw up the TV.
+TODO include AndLink + OrLink too (might as well)
+TODO the forward chainer will work fine with this rule, but the backward chainer won't (because it would require all of the output atoms to already exist at least with 0,0 TV), but it should probably only require one of them.'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(types.MemberLink, [x, A]),
+                 chainer.link(types.MemberLink, [x, B])]
+
+        outputs= [chainer.link(types.SubsetLink, [A, B]),
+                  chainer.link(types.SubsetLink, [B, A]),
+                  chainer.link(types.ExtensionalSimilarityLink, [A, B])]
+
+        Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
+            inputs=inputs,
+            outputs=outputs)
+
 class EvaluationToMemberRule(Rule):
     '''Turns EvaluationLink(PredicateNode P, argument) into 
        MemberLink(argument, ConceptNode "SatisfyingSet(P)".

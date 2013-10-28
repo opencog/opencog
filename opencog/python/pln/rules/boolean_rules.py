@@ -1,19 +1,18 @@
 from opencog.atomspace import types, TruthValue
 
-import pln.formulas as formulas
-import pln.rules.rules as rules
-Rule = rules.Rule
+from pln import formulas
+from pln.rules import rules
 
 import math
 
 # Heuristically create boolean links using the TruthValues of their arguments
 
-class NotCreationRule(Rule):
+class NotCreationRule(rules.Rule):
     '''A => NotLink(A)'''
     def __init__(self, chainer):
         A = chainer.new_variable()
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= formulas.notFormula,
             outputs= [chainer.link(types.NotLink, [A])],
             inputs= [A])
@@ -36,22 +35,22 @@ def create_and_or_rules(chainer, min_n, max_n):
 
     return rules
 
-class AndCreationRule(Rule):
+class AndCreationRule(rules.Rule):
     '''Take a set of N atoms and create AndLink(atoms)'''
     def __init__(self, chainer, N):
         atoms = chainer.make_n_variables(N)
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= formulas.andSymmetricFormula,
             outputs= [chainer.link(types.AndLink, atoms)],
             inputs=  atoms)
 
-class OrCreationRule(Rule):
+class OrCreationRule(rules.Rule):
     '''[A, B...] => Or(A, B...)'''
     def __init__(self, chainer, N):
         atoms = chainer.make_n_variables(N)
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= formulas.orFormula,
             outputs= [chainer.link(types.OrLink, atoms)],
             inputs=  atoms)
@@ -128,11 +127,11 @@ def create_boolean_transformation_rules(chainer):
 
     return rules
 
-class AbstractEliminationRule(Rule):
+class AbstractEliminationRule(rules.Rule):
     def __init__(self, chainer, N, link_type):
         atoms = chainer.make_n_variables(N)
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= None,
             outputs= atoms,
             inputs=  [chainer.link(link_type, atoms)])
@@ -145,7 +144,7 @@ class AndBreakdownRule(AbstractEliminationRule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula=formulas.andBreakdownFormula,
             outputs= [B],
             inputs= [A, chainer.link(types.AndLink, [A, B])])
@@ -156,7 +155,7 @@ class OrBreakdownRule(AbstractEliminationRule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula=formulas.orBreakdownFormula,
             outputs= [B],
             inputs= [A, chainer.link(types.OrLink, [A, B])])
@@ -203,12 +202,12 @@ class OrEliminationRule(AbstractEliminationRule):
 
         return output_tvs
 
-class NotEliminationRule(Rule):
+class NotEliminationRule(rules.Rule):
     '''NotLink(A) => A'''
     def __init__(self, chainer):
         A = chainer.new_variable()
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= formulas.notFormula,
             outputs= [A],
             inputs=  [chainer.link(types.NotLink, [A])])

@@ -194,6 +194,19 @@ def similarityEvaluationFormula(tvs):
         # increment |A or B| without changing |A and B|
         return [TruthValue(0, 1)]
 
+def extensionalEvaluationFormula(tvs):
+    '''Inputs: Membership x A.tv, Membership x B.tv
+Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SimilarityLink A B.tv'''
+    subsetAB = subsetEvaluationFormula(tvs)
+    subsetBA = subsetEvaluationFormula(reversed(tvs))
+
+    similarityAB = similarityEvaluationFormula(tvs)
+
+    # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
+    tvs = subsetAB + subsetBA + similarityAB
+    for tv in tvs: print str(tv)
+    return tvs
+
 def extensionalSimilarityFormula(tvs):
     [and_tv, or_tv] = tvs
 
