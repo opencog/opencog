@@ -82,13 +82,15 @@ public:
         __testSignalsCounter += 10;
     }
 
-    void atomMerged1(Handle h) {
+    void atomMerged1(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomMerged1: %s", h->toString().c_str());
         __testSignalsCounter += 100;
     }
 
-    void atomMerged2(Handle h) {
+    void atomMerged2(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomMerged2: %s", h->toString().c_str());
         __testSignalsCounter += 1000;
@@ -115,9 +117,9 @@ public:
         boost::signals::connection add2 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1));
         boost::signals::connection merge1 =
-            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1));
+            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2, _3));
         boost::signals::connection merge2 =
-            atomSpace->mergeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1));
+            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2, _3));
         boost::signals::connection remove1 =
             atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1));
         boost::signals::connection remove2 =
