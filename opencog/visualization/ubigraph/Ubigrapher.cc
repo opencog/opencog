@@ -447,7 +447,7 @@ bool Ubigrapher::addEdges(Handle h)
                 logger().error("Status was %d", status);
             
             int style = compactLinkStyle;
-            if (classserver().isA(a->getType(), ORDERED_LINK))
+            if (classserver().isA(h->getType(), ORDERED_LINK))
                 style = compactLinkStyleDirected;
             ubigraph_change_edge_style(id, style);
             if (labelsOn) {
