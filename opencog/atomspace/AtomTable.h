@@ -741,8 +741,6 @@ public:
      */
     Handle getRandom(RandGen* rng) const;
 
-    // XXX FIXME TODO this is fundamentallyy wrong, since 
-    // we cannot lock these up to provide thread safety ...
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
 
