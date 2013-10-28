@@ -169,6 +169,9 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
     cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
+    cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
+    cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
+    cout << "AtomPairSignal = " << sizeof(AtomPairSignal) << endl;
     cout << DIVIDER_LINE << endl;
 }
 

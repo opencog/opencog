@@ -60,8 +60,6 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-class SavingLoading;
-
 typedef boost::signal<void (Handle)> AtomSignal;
 typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
 typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
@@ -407,9 +405,15 @@ public:
 
     /**
      * Return the incoming set associated with handle h.
+     * Note that this returns a copy of the incoming set,
+     * thus making it thread-safe against concurrent additions
+     * or deletions by other threads.
      */
-    const UnorderedHandleSet& getIncomingSet(Handle h) const
-        { return incomingIndex.getIncomingSet(h); }
+    UnorderedHandleSet getIncomingSet(Handle h) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        return incomingIndex.getIncomingSet(h);
+    }
 
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result,
@@ -704,7 +708,7 @@ public:
      * associated with handle or if the atom is a link.
      */
     inline NodePtr getNode(Handle h) const {
-        h = getHandle(h);
+        h = getHandle(h); // force resolution of uuid into atom pointer.
         return NodeCast(h);
     }
 
@@ -715,7 +719,7 @@ public:
      * associated with handle or if the atom is a node.
      */
     inline LinkPtr getLink(Handle h) const {
-        h = getHandle(h);
+        h = getHandle(h); // force resolution of uuid into atom pointer.
         return LinkCast(h);
     }
 
@@ -741,8 +745,6 @@ public:
      */
     Handle getRandom(RandGen* rng) const;
 
-    // XXX FIXME TODO this is fundamentallyy wrong, since 
-    // we cannot lock these up to provide thread safety ...
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
 

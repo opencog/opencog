@@ -604,7 +604,7 @@ public:
         return r;
     }
 
-    // TODO XXX FIXME wrap these in a mutex
+    // TODO XXX FIXME convert to boost::signals2 ASAP for thread safety.
     boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function) {
         return atomspace.addAtomSignal().connect(function);
     }

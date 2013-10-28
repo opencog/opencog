@@ -32,16 +32,14 @@
 #include <set>
 #include <string>
 
+#include <boost/signal.hpp>
+
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
-
-#ifdef ZMQ_EXPERIMENT
-	#include "ProtocolBufferSerializer.h"
-#endif
 
 class AtomUTest;
 
@@ -52,9 +50,10 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
+typedef std::set<LinkPtr> IncomingSet;
+typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -65,20 +64,14 @@ typedef std::shared_ptr<Link> LinkPtr;
 class Atom
     : public std::enable_shared_from_this<Atom>
 {
-    friend class SavingLoading;   // needs to set flags diectly
-    friend class AtomTable;
-    friend class TLB;
-    friend class Handle;
-    friend class ::AtomUTest;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
+    friend class ::AtomUTest;     // Needs to call setFlag()
+    friend class AtomTable;       // Needs to call MarkedForRemoval()
+    friend class ImportanceIndex; // Needs to call setFlag()
+    friend class Handle;          // Needs to view _uuid
+    friend class SavingLoading;   // Needs to set _uuid
+    friend class TLB;             // Needs to view _uuid
 
 private:
-#ifdef ZMQ_EXPERIMENT
-    Atom() {};
-#endif
-
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
 
@@ -107,7 +100,7 @@ protected:
     Atom(Type, TruthValuePtr = TruthValue::NULL_TV(),
             AttentionValuePtr = AttentionValue::DEFAULT_AV());
 
-    struct IncomingSet
+    struct InSet
     {
         // Just right now, we will use a single shared mutex for all
         // locking on the incoming set.  If this causes too much
@@ -117,16 +110,47 @@ protected:
         // incoming set is not tracked by garbage collector,
         // to avoid cyclic references.
         // std::set<ptr> uses 48 bytes (per atom).
-        std::set<LinkPtr> _iset;
+        IncomingSet _iset;
+        // Some people want to know if the incoming set has changed...
+        AtomPairSignal _addAtomSignal;
+        AtomPairSignal _removeAtomSignal;
     };
-    typedef std::shared_ptr<IncomingSet> IncomingSetPtr;
-    IncomingSetPtr _incoming_set;
+    typedef std::shared_ptr<InSet> InSetPtr;
+    InSetPtr _incoming_set;
     void keep_incoming_set();
     void drop_incoming_set();
 
     // Insert and remove links from the incoming set.
     void insert_atom(LinkPtr);
     void remove_atom(LinkPtr);
+
+private:
+    /** Returns whether this atom is marked for removal.
+     *
+     * @return Whether this atom is marked for removal.
+     */
+    bool isMarkedForRemoval() const;
+
+    /** Returns an atom flag.
+     * A byte represents all flags. Each bit is one of them.
+     *
+     * @param An int indicating which of the flags will be returned.
+     * @return A boolean indicating if that flag is set or not.
+     */
+    bool getFlag(int) const;
+
+    /** Changes the value of the given flag.
+     *
+     * @param An int indicating which of the flags will be set.
+     * @param A boolean indicating the new value of the flag.
+     */
+    void setFlag(int, bool);
+
+    //! Marks the atom for removal.
+    void markForRemoval();
+
+    //! Unsets removal flag.
+    void unsetRemovalFlag();
 
 public:
 
@@ -168,32 +192,8 @@ public:
         setTruthValue(std::static_pointer_cast<TruthValue>(ctv));
     }
 
-    /** Returns whether this atom is marked for removal.
-     *
-     * @return Whether this atom is marked for removal.
-     */
-    bool isMarkedForRemoval() const;
-
-    /** Returns an atom flag.
-     * A byte represents all flags. Each bit is one of them.
-     *
-     * @param An int indicating which of the flags will be returned.
-     * @return A boolean indicating if that flag is set or not.
-     */
-    bool getFlag(int) const;
-
-    /** Changes the value of the given flag.
-     *
-     * @param An int indicating which of the flags will be set.
-     * @param A boolean indicating the new value of the flag.
-     */
-    void setFlag(int, bool);
-
-    //! Marks the atom for removal.
-    void markForRemoval();
-
-    //! Unsets removal flag.
-    void unsetRemovalFlag();
+    //! Return the incoming set of this atom.
+    IncomingSet getIncomingSet() const;
 
     /** Returns a string representation of the node.
      *
