@@ -418,20 +418,23 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
-void AtomTable::merge(Handle h, TruthValuePtr tvn)
+void AtomTable::merge(const Handle& h, const TruthValuePtr& tvn)
 {
-    if (NULL == h) return; // XXX Should be OC_ASSERT
+    if (NULL == h)
+        throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomTable: Null handle specified during atom merge!");
 
     // Merge the TVs
     if (tvn and not tvn->isNullTv()) {
         TruthValuePtr currentTV = h->getTruthValue();
+        TruthValuePtr mergedTV;
         if (currentTV->isNullTv()) {
-            h->setTruthValue(tvn);
+            mergedTV = tvn;
         } else {
-            TruthValuePtr mergedTV = currentTV->merge(tvn);
-            h->setTruthValue(mergedTV);
+            mergedTV = currentTV->merge(tvn);
         }
-        _mergeAtomSignal(h);
+        h->setTruthValue(mergedTV);
+        _TVChangedSignal(h, currentTV, mergedTV);
     }
 }
 

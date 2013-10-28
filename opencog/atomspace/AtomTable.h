@@ -65,6 +65,7 @@ class SavingLoading;
 typedef boost::signal<void (Handle)> AtomSignal;
 typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
 typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
+typedef boost::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -118,8 +119,10 @@ private:
 
     /** Provided signals */
     AtomSignal _addAtomSignal;
-    AtomSignal _mergeAtomSignal;
     AtomPtrSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
 
     /** Signal emitted when the AV changes. */
     AVCHSigl _AVChangedSignal;
@@ -668,12 +671,12 @@ public:
     }
 
     /**
-     * Merge the existing atom with the given handle with the given truth value.
-     * If the handle is valid, emits atom merged signal.
+     * Merge the truth value with that of an existing atom.
+     * Emits the TV changed signal.
      * @param h     Handle of the Atom to be merged
      * @param tvn   TruthValue to be merged to current atom's truth value.  
      */
-    void merge(Handle, TruthValuePtr);
+    void merge(const Handle&, const TruthValuePtr&);
 
     /**
      * Adds an atom to the table, checking for duplicates and merging
@@ -742,10 +745,12 @@ public:
     // we cannot lock these up to provide thread safety ...
     AtomSignal& addAtomSignal() { return _addAtomSignal; }
     AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
-    AtomSignal& mergeAtomSignal() { return _mergeAtomSignal; }
 
-    /** Provide ability for other to find out about AV changes */
+    /** Provide ability for others to find out about AV changes */
     AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
+
+    /** Provide ability for others to find out about TV changes */
+    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
 };
 
 /** @}*/
