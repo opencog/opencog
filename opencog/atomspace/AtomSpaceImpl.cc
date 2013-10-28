@@ -149,21 +149,15 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 {
-
-// XXX FIXME: this duplicates effort already being done in the atom table.
     DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
-    Handle result = getHandle(t, name);
-    if (atomTable.holds(result)) {
-        atomTable.merge(result, tvn);
-        return result;
-    }
 
     // Maybe the backing store knows about this atom.
+// XXX this is utterly the wrong place to do this ... 
     if (backing_store) {
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
-            result = atomTable.add(n);
+            Handle result = atomTable.add(n);
             atomTable.merge(result,tvn);
             return result;
         }
@@ -179,13 +173,8 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
 {
     DPRINTF("AtomSpaceImpl::addLink AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
-    Handle result = getHandle(t, outgoing);
-    if (atomTable.holds(result)) {
-        // If the node already exists, it must be merged properly
-        atomTable.merge(result, tvn);
-        return result;
-    }
 
+// XXX this is utterly the wrong place to do this ... 
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
@@ -193,7 +182,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         if (l) {
             // register the atom with the atomtable (so it gets placed in
             // indices)
-            result = atomTable.add(l);
+            Handle result = atomTable.add(l);
             atomTable.merge(result,tvn);
             return result;
         }
