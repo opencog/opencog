@@ -2,7 +2,7 @@
                       OpenCog AtomSpace Visualizer
                       ----------------------------
 
-Visualizes the contents of the opecog atomspace.
+Visualizes the contents of the opencog atomspace.
 
 
 How to use this:
@@ -17,3 +17,10 @@ Known Bugs:
 * broken atom_types.script handling. There are at least 5, or more,
   atom_types.sciript files in use; all should be loaded.  Better yet,
   don't use them at all; ask the atomspace about what types it knows.
+* UI fails to appear when using recent versions of the gtk+ library, due
+  to passing 0 for the column width in all of the calls to gtk_grid_attach().
+  Also, all UI elements are manually coded/positioned, making it difficult to
+  maintain/enhance...should probably use Glade or QT designer, or similar
+  GUI development tool.
+* port number of the REST server is hard-coded to 17034. This should
+  be a command-line parm or configurable option.
