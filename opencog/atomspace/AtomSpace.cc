@@ -30,7 +30,6 @@
 #include <time.h>
 #include <cstdlib>
 
-#include <pthread.h>
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>

@@ -30,7 +30,6 @@
 #include <set>
 
 #include <stdlib.h>
-#include <pthread.h>
 #include <boost/bind.hpp>
 
 #include <opencog/atomspace/ClassServer.h>

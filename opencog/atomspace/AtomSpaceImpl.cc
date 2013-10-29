@@ -27,7 +27,6 @@
 #include <fstream>
 #include <list>
 
-#include <pthread.h>
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
