@@ -174,24 +174,6 @@ class FunctionComposite(Function):
     def derivative(self, point):
         return self.functions[self.find_bounds_for(point)].derivative(point)
 
-    def plot(self, x_datetime=False):
-        import matplotlib.pyplot as plt
-        from spatiotemporal.unix_time import UnixTime
-
-        x = []
-        y = []
-        for bounds in sorted(self.functions):
-            (a, b) = bounds
-            if a not in [PLUS_INFINITY, MINUS_INFINITY] and b not in [PLUS_INFINITY, MINUS_INFINITY]:
-                y.append(self.functions[bounds](a))
-                y.append(self.functions[bounds](b))
-                if x_datetime:
-                    a, b = UnixTime(a).to_datetime(), UnixTime(b).to_datetime()
-                x.append(a)
-                x.append(b)
-        plt.plot(x, y)
-        return plt
-
     @property
     def function_undefined(self):
         return self._function_undefined
@@ -204,6 +186,8 @@ class FunctionComposite(Function):
 
 class FunctionPiecewiseLinear(FunctionComposite):
     def __init__(self, input_list, output_list, function_undefined=None):
+        for i in xrange(1, len(input_list)):
+            assert input_list[i - 1] < input_list[i]
         if function_undefined is not None:
             self.function_undefined = function_undefined
         self.input_list = input_list

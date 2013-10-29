@@ -138,6 +138,10 @@ class TemporalEventPiecewiseLinear(TemporalEvent):
         a, b = input_list[0], input_list[-1]
         index_beginning = index_of_first_local_maximum(output_list)
         index_ending = len(output_list) - index_of_first_local_maximum(reversed(output_list)) - 1
+
+        assert output_list[index_beginning] == 1, "value of 'output_list' in event's 'beginning' should be 1"
+        assert output_list[index_ending] == 1, "value of 'output_list' in event's 'ending' should be 1"
+
         beginning = input_list[index_beginning]
         ending = input_list[index_ending]
 
@@ -192,7 +196,16 @@ if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
     event = TemporalInstance(datetime(2010, 1, 1), datetime(2011, 2, 1))
-    event.plot().show()
+    plt = event.plot()
+    plt.show()
 
-    event = TemporalEventPiecewiseLinear([1, 2, 3], [4, 5, 6])
-    event.plot().show()
+    plt.ylim(ymax=1.1)
+
+    event = TemporalEventPiecewiseLinear([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.1, 0.3, 0.7, 1, 1, 0.9, 0.6, 0.1, 0])
+    event.plot()
+    print event.distribution_beginning.integrate(event.a, event.beginning)
+    print event.distribution_beginning.pdf()
+    print event.distribution_beginning.cdf()
+    print event.distribution_beginning.rvs(10)
+    event.distribution_beginning.plot()
+    event.distribution_ending.plot().show()

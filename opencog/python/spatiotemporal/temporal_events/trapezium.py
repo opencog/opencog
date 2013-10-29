@@ -81,16 +81,13 @@ def generate_random_events(size=20):
 if __name__ == '__main__':
     import time
 
-    #events = generate_random_events(1000)
-    events = generate_random_events(1)
+    events = generate_random_events(1000)
+    #events = generate_random_events(1)
 
     start = time.time()
 
     for event in events:
-        a = event.membership_function()
         plt = event.plot()
-        #plt = event.probability_distribution.plot(x_datetime=True)
-        plt = event.instance().plot()
 
     print 'Performance:', time.time() - start, 'seconds'
 
