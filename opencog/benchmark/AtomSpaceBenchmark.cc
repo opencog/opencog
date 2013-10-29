@@ -349,6 +349,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             scm = &SchemeEval::instance(asp);
 #endif
         }
+        numberOfTypes = classserver().getNumberOfClasses();
 
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
         UUID_end = TLB::getMaxUUID();
@@ -372,9 +373,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
 Type AtomSpaceBenchmark::randomType(Type t)
 {
-    int numberOfTypes = classserver().getNumberOfClasses();
     OC_ASSERT(t < numberOfTypes);
-    Type randomType = NOTYPE;
+    Type randomType = ATOM + rng->randint(numberOfTypes-1);
     while (!classserver().isA(randomType, t))
         randomType = ATOM + rng->randint(numberOfTypes-1);
     return randomType;
