@@ -421,8 +421,11 @@ public:
     }
 
     /** Return whether s is the source handle in a link l */ 
-    bool isSource(Handle source, Handle link) const {
-        return atomSpaceAsync->isSource(source, link)->get_result();
+    bool isSource(Handle source, Handle link) const
+    {
+        LinkPtr l(LinkCast(link));
+        if (l) return l->isSource(source);
+        return false;
     }
 
     /** Retrieve the AttentionValue of a given Handle */

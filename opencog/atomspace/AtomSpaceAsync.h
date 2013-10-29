@@ -221,13 +221,6 @@ public:
         return hr;
     }
 
-    /** Return whether "source" is the source handle in link "link" */
-    BoolRequest isSource(Handle source, Handle link) {
-        BoolRequest r(new IsSourceASR(&atomspace,source,link));
-        requestQueue.push(r);
-        return r;
-    }
-
     VoidRequest setAV(Handle h, AttentionValuePtr av) {
         VoidRequest r(new SetAttentionValueASR(&atomspace,h,av));
         requestQueue.push(r);

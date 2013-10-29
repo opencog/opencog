@@ -320,28 +320,6 @@ public:
     
 };
 
-class GetTypeASR : public OneParamASR <Type, Handle> {
-public:
-    GetTypeASR(AtomSpaceImpl *a, Handle h) :
-        OneParamASR<Type,Handle>(a,h) {};
-    
-    virtual void do_work() {
-        set_result(atomspace->getType(p1));
-    };
-    
-};
-
-class IsSourceASR : public TwoParamASR<bool,Handle,Handle> {
-public:
-    IsSourceASR(AtomSpaceImpl *a,Handle h,Handle link) :
-        TwoParamASR<bool,Handle,Handle>(a,h,link) { };
-    
-    virtual void do_work() {
-        set_result(atomspace->isSource(p1,p2));
-    };
-    
-};
-
 class GetTruthValueMeanASR : public GenericASR <float> {
     Handle h;
     VersionHandle vh;
