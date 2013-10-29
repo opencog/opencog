@@ -8,6 +8,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
+// #undef HAVE_CYTHON
+// #undef HAVE_GUILE
 
 using boost::tuple;
 
@@ -77,6 +79,7 @@ class AtomSpaceBenchmark
     std::vector<std::string>  methodNames;
 public:
     int Nreps;
+    int Nloops;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;

@@ -58,6 +58,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     counter = 0;
     showTypeSizes = false;
     Nreps = 100000;
+    Nloops = 1;
     sizeIncrease=0;
     saveToFile=false;
     saveInterval=1;
@@ -635,7 +636,10 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_type(Handle(" << h.value() << "))\n";
+        for (int i=0; i<Nloops; i++) {
+            dss << "aspace.get_type(Handle(" << h.value() << "))\n";
+            h = getRandomHandle();
+        }
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -644,9 +648,12 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
+#if 1 // ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-type (cog-atom " << h.value() << "))\n";
+        for (int i=0; i<Nloops; i++) {
+            ss << "(cog-type (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+        }
         std::string gs = ss.str();
 #else
         std::ostringstream dss;
