@@ -23,8 +23,6 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
-#include <stdlib.h>
-
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -122,12 +120,19 @@ public:
 
     /**
      * Returns whether a given class is assignable from another.
+     * This is the single-most commonly called method in this class.
      *
      * @param super Super class.
      * @param sub Subclass.
      * @return Whether a given class is assignable from another.
      */
-    bool isA(Type sub, Type super);
+    bool isA(Type sub, Type super)
+    {
+        std::lock_guard<std::mutex> l(type_mutex);
+        if ((sub >= nTypes) || (super >= nTypes)) return false;
+        return recursiveMap[super][sub];
+    }
+
     bool isA_non_recursive(Type sub, Type super);
 
     /**
