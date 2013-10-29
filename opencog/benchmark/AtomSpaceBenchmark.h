@@ -8,8 +8,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
-#undef HAVE_CYTHON
-#undef HAVE_GUILE
+// #undef HAVE_CYTHON
+// #undef HAVE_GUILE
 
 using boost::tuple;
 
