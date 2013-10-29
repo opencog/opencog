@@ -74,15 +74,12 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 #endif
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
-
 }
 
-AtomSpaceBenchmark::~AtomSpaceBenchmark() {
-    // We don't delete the AtomSpace as we assume termination of the benchmark
-    // program here and cleanup of large AtomSpaces takes a while.
-
-    // deleting the PyhtonModule currently results in a deadlock in python.
-    // XXX python needs fixing.
+AtomSpaceBenchmark::~AtomSpaceBenchmark()
+{
+    delete prg;
+    delete rng;
 }
 
 // This is wrong, because it failes to also count the amount of RAM
