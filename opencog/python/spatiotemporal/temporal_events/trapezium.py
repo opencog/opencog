@@ -1,5 +1,5 @@
 from scipy.stats import t
-from spatiotemporal.temporal_events.generic import TemporalEventPiecewiseLinear, TemporalEventSimple
+from spatiotemporal.temporal_events.generic import TemporalEventPiecewiseLinear, TemporalInstance
 from spatiotemporal.unix_time import UnixTime, random_time
 
 __author__ = 'keyvan'
@@ -59,31 +59,7 @@ class TemporalEventTrapezium(TemporalEventPiecewiseLinear):
     def instance(self):
         a = self.random_time(self.a, self.beginning)
         b = self.random_time(self.ending, self.b)
-        return TemporalEventSimple(a, b)
-
-    @property
-    def beginning(self):
-        return self[1]
-
-    @beginning.setter
-    def beginning(self, value):
-        assert self.a < value < self.ending, "'beginning' should be within ['a' : 'ending'] interval"
-        self[1] = value
-        self.membership_function.invalidate()
-
-    @property
-    def ending(self):
-        return self[-2]
-
-    @ending.setter
-    def ending(self, value):
-        assert self._beginning < value < self.b, "'ending' should be within ['beginning' : 'b'] interval"
-        self[-2] = value
-        self.membership_function.invalidate()
-
-    def __repr__(self):
-        return 'PiecewiseTemporalEvent(a: {0} , beginning: {1}, ending: {2}, b: {3})'.format(
-            self.a, self.beginning, self.ending, self.b)
+        return TemporalInstance(a, b)
 
 
 def generate_random_events(size=20):
@@ -111,7 +87,9 @@ if __name__ == '__main__':
     start = time.time()
 
     for event in events:
-        event.plot()
+        a = event.membership_function()
+        plt = event.plot()
+        #plt = event.probability_distribution.plot(x_datetime=True)
         plt = event.instance().plot()
 
     print 'Performance:', time.time() - start, 'seconds'

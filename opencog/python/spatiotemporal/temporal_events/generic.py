@@ -1,7 +1,8 @@
 from datetime import datetime
+from scipy.stats.distributions import rv_frozen
 from scipy import integrate
-from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval, TimeIntervalListBased
-from fuzzy.membership_function import MembershipFunctionPiecewiseLinear, invoke_function_on
+from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval
+from fuzzy.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.geometric import index_of_first_local_maximum
 from utility.numeric.globals import EPSILON
@@ -9,21 +10,27 @@ from utility.numeric.globals import EPSILON
 __author__ = 'keyvan'
 
 
-class BaseTemporalEvent(TimeInterval):
-    _precision = None
-    PRECISION_FACTOR = 100
-    def membership_function(self, time=None):
-        if time is None:
-            time = self
+class TemporalEvent(TimeInterval):
+    _distribution_beginning = None
+    _distribution_ending = None
+    _beginning = None
+    _ending = None
+    _membership_function = None
+    input_list = None
 
-        return invoke_function_on(self.membership_function_single_point, time)
+    def __init__(self, a, beginning, ending, b, distribution_beginning, distribution_ending, bins=50):
+        assert beginning < ending
+        TimeInterval.__init__(self, a, b, bins)
+        self._beginning = UnixTime(beginning)
+        self._ending = UnixTime(ending)
+        self.distribution_beginning = distribution_beginning
+        self.distribution_ending = distribution_ending
 
-    def membership_function_single_point(self, time_step):
-        """
-        to override, membership_function calls to it
-        alternatively one can directly override membership_function
-        """
-        return 0
+    @property
+    def membership_function(self):
+        if self._membership_function is None:
+            self._membership_function = MembershipFunction(self)
+        return self._membership_function
 
     def _interval_from_self_if_none(self, a, b, interval):
         if interval is None:
@@ -40,7 +47,17 @@ class BaseTemporalEvent(TimeInterval):
         use either 'a' and 'b' or 'interval'
         """
         interval = self._interval_from_self_if_none(a, b, interval)
-        return integrate.quad(self.membership_function, interval.a, interval.b) / interval.duration
+        area, error = integrate.quad(self.membership_function, interval.a, interval.b)
+        return area / interval.duration
+
+    def to_list(self):
+        if self.input_list is None:
+            self.input_list = [
+                self.a, UnixTime(self.a + EPSILON),
+                self.beginning, self.ending,
+                UnixTime(self.b - EPSILON), self.b
+            ]
+        return self.input_list
 
     def to_dict(self):
         result = {}
@@ -57,96 +74,124 @@ class BaseTemporalEvent(TimeInterval):
         return plt
 
     @property
+    def distribution_beginning(self):
+        return self._distribution_beginning
+
+    @distribution_beginning.setter
+    def distribution_beginning(self, value):
+        assert isinstance(value, rv_frozen)
+        self._distribution_beginning = value
+
+    @property
+    def distribution_ending(self):
+        return self._distribution_ending
+
+    @distribution_ending.setter
+    def distribution_ending(self, value):
+        assert isinstance(value, rv_frozen)
+        self._distribution_ending = value
+
+    @property
     def beginning(self):
-        return self[index_of_first_local_maximum(self.membership_function())]
+        return self._beginning
 
     @property
     def ending(self):
-        return self[index_of_first_local_maximum(reversed(self.membership_function()))]
+        return self._ending
 
     @property
-    def precision(self):
-        if self._precision is None:
-            return self.duration / 100
-        return self._precision
+    def _iter_step_beginning(self):
+        return float(self.beginning - self.a) / self._bins
 
-    @precision.setter
-    def precision(self, value):
-        assert value > 0
-        self._precision = value
+    @property
+    def _iter_step_ending(self):
+        return float(self.b - self.ending) / self._bins
+
+    def __getitem__(self, index):
+        if index >= len(self) or index < 0:
+            raise IndexError
+        if index < self._bins:
+            return self._iter_step_beginning * index
+        if index in [self._bins, self._bins + 1]:
+            return 1
+        return self._iter_step_ending * index
+
+    def __len__(self):
+        return self._bins * 2
+
+    def __iter__(self):
+        return (self[t] for t in xrange(self._bins * 2))
+
+    def __reversed__(self):
+        return (self.membership_function(t) for t in reversed(self.to_list()))
+
+    def __repr__(self):
+        return '{0}(a: {1}, beginning: {2}, ending:{3}, b:{4})'.format(self.__class__.__name__,
+                                                                       self.a, self.beginning, self.ending, self.b)
 
     def __str__(self):
         return repr(self)
 
 
-class TemporalEventPiecewiseLinear(TimeIntervalListBased, BaseTemporalEvent):
-    def __init__(self, input_list, output_list):
-        TimeIntervalListBased.__init__(self, input_list)
+class TemporalEventPiecewiseLinear(TemporalEvent):
+    def __init__(self, input_list, output_list, bins=50):
+        a, b = input_list[0], input_list[-1]
+        index_beginning = index_of_first_local_maximum(output_list)
+        index_ending = len(output_list) - index_of_first_local_maximum(reversed(output_list)) - 1
+        beginning = input_list[index_beginning]
+        ending = input_list[index_ending]
+
+        distribution_beginning = ProbabilityDistributionPiecewiseLinear(
+            input_list[0:index_beginning + 1],
+            output_list[0:index_beginning + 1],
+        )
+        distribution_ending = ProbabilityDistributionPiecewiseLinear(
+            input_list[index_ending:len(input_list)],
+            [1 - output_list[t] for t in xrange(index_ending, len(input_list))],
+        )
+
+        TemporalEvent.__init__(self, a, beginning, ending, b, distribution_beginning, distribution_ending, bins)
+        self.input_list = input_list
         self.output_list = output_list
-        self.membership_function = MembershipFunctionPiecewiseLinear(self, output_list)
-        self.membership_function_single_point = self.membership_function
 
     def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
-        return self.membership_function_single_point.integrate(interval.a, interval.b) / (interval.b - interval.a)
+        return self.membership_function.integrate(interval.a, interval.b) / (interval.b - interval.a)
 
-    def to_list(self):
-        result = []
-        for i, time_step in enumerate(self):
-            if i == len(self) - 1 and self.output_list[len(self) - 1] == 0:
-                result.append(UnixTime(time_step - EPSILON))
-            result.append(time_step)
-            if i == 0 and self.output_list[0] == 0:
-                result.append(UnixTime(time_step + EPSILON))
-        return result
+    def __getitem__(self, index):
+        return self.input_list.__getitem__(index)
 
-    @TimeIntervalListBased.a.setter
-    def a(self, value):
-        TimeIntervalListBased.a.fset(value)
-        self.membership_function.invalidate()
+    def __len__(self):
+        return len(self.input_list)
 
-    @TimeIntervalListBased.b.setter
-    def b(self, value):
-        TimeIntervalListBased.b.fset(value)
-        self.membership_function.invalidate()
+    def __iter__(self):
+        return iter(self.input_list)
+
+    def __reversed__(self):
+        return reversed(self.input_list)
 
     def __repr__(self):
         pairs = ['{0}: {1}'.format(self[i], self.output_list[i]) for i in xrange(len(self))]
         return '{0}({1})'.format(self.__class__.__name__, ', '.join(pairs))
 
-    def __str__(self):
-        return BaseTemporalEvent.__str__(self)
 
-    # Every time that self as list changes, or output_list
-    # changes, membership_function should be invalidated
-    # Here, only the two main methods that change the list content have been overridden
-    # One can add more later if needed...
-    def append(self, x):
-        TimeIntervalListBased.append(self, x)
-        self.membership_function.invalidate()
-
-    def __setitem__(self, index, value):
-        TimeIntervalListBased.__setitem__(self, index, value)
-        self.membership_function.invalidate()
-
-
-class TemporalEventSimple(TemporalEventPiecewiseLinear):
+class TemporalInstance(TimeInterval):
     def __init__(self, a, b):
-        TemporalEventPiecewiseLinear.__init__(self, [a, b], [1, 1])
+        TimeInterval.__init__(self, a, b, 1)
 
+    def plot(self):
+        import matplotlib.pyplot as plt
+        from spatiotemporal.unix_time import UnixTime
 
-class TemporalEventDistributional(BaseTemporalEvent):
-    def __init__(self, a, b, pdf, iter_step=1):
-        assert callable(pdf), "'pdf' should be callable"
-        BaseTemporalEvent.__init__(self, a, b, iter_step=iter_step)
-        self.membership_function = pdf
-        self.membership_function_single_point = pdf
+        x_axis = [UnixTime(time).to_datetime() for time in self]
+        plt.plot(x_axis, [1, 1])
+        return plt
 
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-    event = TemporalEventSimple(datetime(2010, 1, 1), datetime(2011, 2, 1))
+    event = TemporalInstance(datetime(2010, 1, 1), datetime(2011, 2, 1))
     event.plot().show()
 
     event = TemporalEventPiecewiseLinear([1, 2, 3], [4, 5, 6])

@@ -1,5 +1,6 @@
 from math import fabs
 from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
+from scipy.integrate import quad
 
 __author__ = 'keyvan'
 
@@ -31,7 +32,11 @@ class Function(object):
 
     def integrate(self, start, end):
         assert end >= start, "'stop' should be greater than 'end'"
-        return 0
+        area, error = quad(self.__call__, start, end)
+        return area
+
+    def derivative(self, point):
+        return None
 
 
 class _function_undefined(Function):
@@ -54,8 +59,11 @@ class FunctionHorizontalLinear(Function):
         return self.y_intercept
 
     def integrate(self, start, end):
-        Function.integrate(self, start, end)
+        assert end >= start, "'stop' should be greater than 'end'"
         return float(self.y_intercept) * (end - start)
+
+    def derivative(self, point):
+        return 0
 
     @property
     def b(self):
@@ -79,7 +87,7 @@ class FunctionLinear(Function):
         return x, self(x)
 
     def integrate(self, start, end):
-        Function.integrate(self, start, end)
+        assert end >= start, "'stop' should be greater than 'end'"
         if self.a == 0:
             return self.b * (end - start)
 
@@ -99,6 +107,9 @@ class FunctionLinear(Function):
         plus_triangle = (end - x_intercept) * self(end)
         return minus_triangle + plus_triangle
 
+    def derivative(self, point):
+        return self.a
+
     @property
     def x_intercept(self):
         return - float(self.b) / self.a
@@ -109,10 +120,12 @@ class FunctionLinear(Function):
 
 
 class FunctionComposite(Function):
-    function_undefined = FUNCTION_UNDEFINED
+    _function_undefined = FUNCTION_UNDEFINED
 
-    def __init__(self, bounds_function_dictionary):
+    def __init__(self, bounds_function_dictionary, function_undefined=None):
         assert isinstance(bounds_function_dictionary, dict)
+        if function_undefined is not None:
+            self.function_undefined = function_undefined
         for bounds in bounds_function_dictionary:
             assert isinstance(bounds, (tuple, list)) and len(bounds) is 2
             a, b = bounds
@@ -129,7 +142,7 @@ class FunctionComposite(Function):
         return self.function_undefined(x)
 
     def integrate(self, start, end):
-        Function.integrate(self, start, end)
+        assert end >= start, "'stop' should be greater than 'end'"
         result = 0
         for function_bounds in self.functions:
             (a, b) = function_bounds
@@ -152,13 +165,41 @@ class FunctionComposite(Function):
             result += self.functions[function_bounds].integrate(a, b)
         return result
 
-    def plot(self):
-        import matplotlib.pyplot as plt
+    def find_bounds_for(self, point):
+        for bounds in self.functions:
+            (a, b) = bounds
+            if a <= point and b >= point:
+                return bounds
 
-        x = sorted([x for x, y in self.functions if x != PLUS_INFINITY and x != MINUS_INFINITY])
-        y = [self(t) for t in x]
+    def derivative(self, point):
+        return self.functions[self.find_bounds_for(point)].derivative(point)
+
+    def plot(self, x_datetime=False):
+        import matplotlib.pyplot as plt
+        from spatiotemporal.unix_time import UnixTime
+
+        x = []
+        y = []
+        for bounds in sorted(self.functions):
+            (a, b) = bounds
+            if a not in [PLUS_INFINITY, MINUS_INFINITY] and b not in [PLUS_INFINITY, MINUS_INFINITY]:
+                y.append(self.functions[bounds](a))
+                y.append(self.functions[bounds](b))
+                if x_datetime:
+                    a, b = UnixTime(a).to_datetime(), UnixTime(b).to_datetime()
+                x.append(a)
+                x.append(b)
         plt.plot(x, y)
         return plt
+
+    @property
+    def function_undefined(self):
+        return self._function_undefined
+
+    @function_undefined.setter
+    def function_undefined(self, value):
+        assert isinstance(value, Function)
+        self._function_undefined = value
 
 
 class FunctionPiecewiseLinear(FunctionComposite):
@@ -179,6 +220,11 @@ class FunctionPiecewiseLinear(FunctionComposite):
         bounds_function_dictionary[(MINUS_INFINITY, self.input_list[0])] = self.function_undefined
         bounds_function_dictionary[(self.input_list[-1], PLUS_INFINITY)] = self.function_undefined
         FunctionComposite.__init__(self, bounds_function_dictionary)
+
+    def normalised(self):
+        area = self.integrate(MINUS_INFINITY, PLUS_INFINITY)
+        output_list = [v / area for v in self.output_list]
+        return FunctionPiecewiseLinear(self.input_list, output_list, self.function_undefined)
 
     def __getitem__(self, index):
         return self.output_list.__getitem__(index)

@@ -11,7 +11,7 @@ times_overlapped = float(0)
 times_preceded = float(0)
 times_met = float(0)
 size = 100000
-prec = 0.25
+prec = 2
 x = []
 y = []
 
@@ -43,9 +43,6 @@ m = times_met / size
 print 'o:', o
 print 'p:', p
 print 'm:', m
-print (6.5 + 9) / 2
-print 'm+o:', m + o, m / (m + o), o / (m + o)
 
 plt.hist(x, 50, normed=True)
-#plt.hist(y, 50)
 plt.show()

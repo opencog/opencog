@@ -1,4 +1,4 @@
-from spatiotemporal.temporal_events import TemporalEventSimple
+from spatiotemporal.temporal_events import TemporalInstance
 from spatiotemporal.temporal_events.trapezium import generate_random_events
 
 __author__ = 'keyvan'
@@ -7,9 +7,9 @@ __author__ = 'keyvan'
 def assert_is_instance(instance_or_iterable):
     try:
         for instance in instance_or_iterable:
-            assert isinstance(instance, TemporalEventSimple)
+            assert isinstance(instance, TemporalInstance)
     except:
-        assert isinstance(instance_or_iterable, TemporalEventSimple)
+        assert isinstance(instance_or_iterable, TemporalInstance)
 
 
 def is_in_start_interval_of(time_step, instance):

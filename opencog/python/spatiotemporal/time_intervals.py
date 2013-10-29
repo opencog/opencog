@@ -16,16 +16,16 @@ def assert_is_time_interval(interval):
 class TimeInterval(object):
     _a = None
     _b = None
-    _iter_step = 1
+    _iter_step = None
 
-    def __init__(self, a, b, iter_step=1):
+    def __init__(self, a, b, bins=50):
         """
         a and b can be in either datetime or unix time
         """
-        self.a = a
-        self.b = b
-        assert self.a < self.b, "'b' should be greater than 'a'"
-        self.iter_step = iter_step
+        assert a < b, "'b' should be greater than 'a'"
+        self._a = UnixTime(a)
+        self._b = UnixTime(b)
+        self.bins = bins
 
     def random_time(self, start=None, stop=None, probability_distribution=None):
         if start is None:
@@ -46,9 +46,6 @@ class TimeInterval(object):
             result.append(time_step)
         return result
 
-    def union(self, other):
-        pass
-
     @property
     def duration(self):
         return float(self.b - self.a)
@@ -57,36 +54,29 @@ class TimeInterval(object):
     def a(self):
         return self._a
 
-    @a.setter
-    def a(self, value):
-        self._a = UnixTime(value)
-
     @property
     def b(self):
         return self._b
 
-    @b.setter
-    def b(self, value):
-        self._b = UnixTime(value)
-
     @property
-    def iter_step(self):
-        return self._iter_step
+    def bins(self):
+        return self._bins
 
-    @iter_step.setter
-    def iter_step(self, value):
+    @bins.setter
+    def bins(self, value):
         if value != self._iter_step:
-            assert isinstance(value, (int, float, long)), value > 0
-            self._iter_step = value
+            assert isinstance(value, int), value > 0
+            self._bins = value
+            self._iter_step = self.duration / value
 
     def __getitem__(self, index):
-        value = self.a + index * self.iter_step
+        value = self.a + index * self._iter_step
         if value > self.b:
             raise IndexError
         return UnixTime(value)
 
     def __len__(self):
-        return int(self.b - self.a)/int(self.iter_step) + 1
+        return int(self.b - self.a)/int(self._iter_step) + 1
 
     def __iter__(self):
         return (self[t] for t in xrange(len(self)))
@@ -96,10 +86,10 @@ class TimeInterval(object):
 
     def __contains__(self, item):
         """
-        item can either be unix time or any object with 'a' and 'b' unix time attributes (e.g. a Interval)
+        item can either be unix time or any object with 'a' and 'b' unix time attributes (e.g. an Interval)
         """
         if is_unix_time(item):
-            return self.a <= item <= self.b
+            return self.a <= item and self.b >= item
         return self.a <= item.a and self.b <= item.b
 
     def __repr__(self):
@@ -109,52 +99,52 @@ class TimeInterval(object):
         return 'from {0} to {1}'.format(self.a, self.b)
 
 
-class TimeIntervalListBased(list, TimeInterval):
-    def __init__(self, iterable):
-        assert len(iterable) >= 2
-        iterable = sorted(iterable)
-        list_converted_to_unix_time = []
-        first_item = True
-        for current in iterable:
-            current = UnixTime(current)
-            list_converted_to_unix_time.append(current)
-            if first_item:
-                previous = current
-                first_item = False
-                continue
-            assert current > previous
-            previous = current
-        list.__init__(self, list_converted_to_unix_time)
-
-    def to_list(self):
-        return self
-
-    @property
-    def a(self):
-        return self[0]
-
-    @a.setter
-    def a(self, value):
-        assert value > self[1]
-        self[0] = UnixTime(value)
-
-    @property
-    def b(self):
-        return self[-1]
-
-    @b.setter
-    def b(self, value):
-        assert value > self[-2]
-        self[-1] = UnixTime(value)
-
-    def __contains__(self, item):
-        return TimeInterval.__contains__(self, item)
-
-    def __repr__(self):
-        return TimeInterval.__repr__(self)
-
-    def __str__(self):
-        return TimeInterval.__str__(self)
+#class TimeIntervalListBased(list, TimeInterval):
+#    def __init__(self, iterable):
+#        assert len(iterable) >= 2
+#        iterable = sorted(iterable)
+#        list_converted_to_unix_time = []
+#        first_item = True
+#        for current in iterable:
+#            current = UnixTime(current)
+#            list_converted_to_unix_time.append(current)
+#            if first_item:
+#                previous = current
+#                first_item = False
+#                continue
+#            assert current > previous
+#            previous = current
+#        list.__init__(self, list_converted_to_unix_time)
+#
+#    def to_list(self):
+#        return self
+#
+#    @property
+#    def a(self):
+#        return self[0]
+#
+#    @a.setter
+#    def a(self, value):
+#        assert value > self[1]
+#        self[0] = UnixTime(value)
+#
+#    @property
+#    def b(self):
+#        return self[-1]
+#
+#    @b.setter
+#    def b(self, value):
+#        assert value > self[-2]
+#        self[-1] = UnixTime(value)
+#
+#    def __contains__(self, item):
+#        return TimeInterval.__contains__(self, item)
+#
+#    def __repr__(self):
+#        return TimeInterval.__repr__(self)
+#
+#    def __str__(self):
+#        return TimeInterval.__str__(self)
 
 
 if __name__ == '__main__':
@@ -175,5 +165,3 @@ if __name__ == '__main__':
         b.append(a[t])
 
     print 'time:', list_performance, 'for list vs.', time.time() - start, 'direct'
-
-    a = TimeIntervalListBased([1, 2, 3])
