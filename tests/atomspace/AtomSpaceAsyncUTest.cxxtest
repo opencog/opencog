@@ -141,6 +141,7 @@ public:
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
 
+        /* Since we're adding *exactly* the same atom, we should get a merged signal */
         logger().debug("before second atom add");
         atomSpace->addNode(NUMBER_NODE, "1")->get_result();
         TS_ASSERT(__testSignalsCounter == 1111);
