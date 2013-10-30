@@ -53,30 +53,35 @@ private:
     int num_atoms;
 
 public:
-    AtomSpaceAsyncUTest() {
-        n_threads = 10;
-        num_atoms = 100;
+    AtomSpaceAsyncUTest()
+    {
+        n_threads = 20;
+        num_atoms = 800;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
 
-    void setUp() {
+    void setUp()
+    {
         atomSpace = new AtomSpaceAsync();
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
-    void tearDown() {
+    void tearDown()
+    {
         delete atomSpace;
         delete rng;
     }
 
-    void atomAdded1(Handle h) {
+    void atomAdded1(Handle h)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
-    void atomAdded2(Handle h) {
+    void atomAdded2(Handle h)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
@@ -96,21 +101,24 @@ public:
         __testSignalsCounter += 1000;
     }
 
-    void atomRemoved1(AtomPtr atom) {
+    void atomRemoved1(AtomPtr atom)
+    {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
-    void atomRemoved2(AtomPtr atom) {
+    void atomRemoved2(AtomPtr atom)
+    {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
 
-    void testSignals() {
+    void testSignals()
+    {
         // connect signals
         boost::signals::connection add1 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
@@ -196,7 +204,8 @@ public:
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
-    void testRemovalByDecay() {
+    void testRemovalByDecay()
+    {
         AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
 
         /* add a simple tree of links & nodes */
@@ -255,7 +264,8 @@ public:
         CHK(LIST_LINK,        ==);
     }
 
-    Type randomType(Type t) {
+    Type randomType(Type t)
+    {
         int numberOfTypes = classserver().getNumberOfClasses();
         OC_ASSERT(t < numberOfTypes);
         Type randomType = NOTYPE;
@@ -264,14 +274,15 @@ public:
         return randomType;
     }
 
-    void threadedAdd(int N) {
-        int counter=0;
-        double chanceOfNonDefaultNode = 0.0;
-        for (int i =0; i < N; i++) {
+    void threadedAdd(int N)
+    {
+        int counter = 0;
+        double chanceOfNonDefaultNode = 0.3;
+        for (int i = 0; i < N; i++) {
             double p = rng->randdouble();
             Type t = CONCEPT_NODE;
             if (p < chanceOfNonDefaultNode)
-                t=randomType(NODE);
+                t = randomType(NODE);
             std::ostringstream oss;
             oss << "node " << counter;
             counter++;
@@ -279,7 +290,8 @@ public:
         }
     }
 
-    void testThreadedAdd() {
+    void testThreadedAdd()
+    {
         boost::thread_group thread_pool;
         for (int i=0; i < n_threads; i++) {
             boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedAdd, this, _1), num_atoms);
@@ -287,12 +299,13 @@ public:
         }
         thread_pool.join_all();
         int size = atomSpace->getSize()->get_result();
-        //std::cout<<"size:"<<size<<std::endl;
+        // std::cout<<"size:"<<size<<std::endl;
         TS_ASSERT_EQUALS(size, num_atoms);
     }
 
-    void threadedRemove(int start,int interval) {
-        for (int i =start; i < start+interval; i++) {
+    void threadedRemove(int start, int interval)
+    {
+        for (int i = start; i < start+interval; i++) {
             std::ostringstream oss;
             oss << "node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
@@ -305,7 +318,8 @@ public:
         }
     }
 
-    void testThreadedRemove() {
+    void testThreadedRemove()
+    {
         testThreadedAdd();
         int interval = num_atoms/n_threads;
         boost::thread_group thread_pool;
