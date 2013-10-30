@@ -49,17 +49,19 @@
 using namespace opencog;
 
 // Single, global mutex for locking the incoming set.
-std::mutex Atom::InSet::_mtx;
+std::mutex Atom::_mtx;
+// Single, global mutex for locking the attention value.
+std::mutex Atom::_avmtx;
 
 Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 {
     _uuid = Handle::UNDEFINED.value();
-    flags = 0;
-    atomTable = NULL;
-    type = t;
+    _flags = 0;
+    _atomTable = NULL;
+    _type = t;
     _attentionValue = av;
 
-    if (not tv->isNullTv()) truthValue = tv;
+    if (not tv->isNullTv()) _truthValue = tv;
 
     // XXX FIXME for right now, all atoms will always keep their
     // incoming sets.  In the future, this should only be set by
@@ -70,89 +72,97 @@ Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 
 Atom::~Atom()
 {
-    atomTable = NULL;
+    _atomTable = NULL;
     drop_incoming_set();
 }
 
 void Atom::setTruthValue(TruthValuePtr tv)
 {
-    if (not tv->isNullTv()) truthValue = tv;
+    // OK, I think the below is thread-safe, and nees no locking. Why?
+    // isNullTV is atomic, because the call-by-pointer is.
+    // The shared-pointer swap is atomic, I think (not 100% sure)
+    // The check for _atomTable is atomic, and nothing inside that needs
+    // to be serialized. So I think we're good (unless swap isn't atomic).
+    if (tv->isNullTv()) return;
+    _truthValue.swap(tv);  // after swap, tv points at old tv.
+    if (_atomTable != NULL) {
+        TVCHSigl& tvch = _atomTable->TVChangedSignal();
+        tvch(getHandle(), tv, _truthValue);
+    }
 }
 
-void Atom::setAttentionValue(AttentionValuePtr new_av) throw (RuntimeException)
+void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
 {
-    if (new_av == _attentionValue) return;
-    if (*new_av == *_attentionValue) return;
+    if (av == _attentionValue) return;
+    if (*av == *_attentionValue) return;
 
-    int oldBin = -1;
-    if (atomTable != NULL) {
-        // gets current bin
-        oldBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
-    }
+    // I don't think we need to lock here, since I believe that swap
+    // is atomic (right??)
+    _attentionValue.swap(av);
 
-    AttentionValuePtr old_av = _attentionValue;
-    _attentionValue = new_av;
+    if (_atomTable != NULL) {
+        std::lock_guard<std::mutex> lck (_avmtx);
 
-    if (atomTable != NULL) {
-        // gets new bin
+        // gets old and new bins
+        int oldBin = ImportanceIndex::importanceBin(av->getSTI());
         int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
 
         // if the atom importance has changed its bin,
         // updates the importance index
         if (oldBin != newBin) {
-            AtomPtr a(std::static_pointer_cast<Atom>(shared_from_this()));
-            atomTable->updateImportanceIndex(a, oldBin);
+            AtomPtr a(shared_from_this());
+            _atomTable->updateImportanceIndex(a, oldBin);
         }
 
         // Notify any interested parties that the AV changed.
-        AVCHSigl& avch = atomTable->AVChangedSignal();
-        avch(getHandle(), old_av, new_av);
+        AVCHSigl& avch = _atomTable->AVChangedSignal();
+        avch(getHandle(), av, _attentionValue);  // av is old, after swap.
     }
 }
 
 bool Atom::isMarkedForRemoval() const
 {
-    return (flags & MARKED_FOR_REMOVAL) != 0;
+    return (_flags & MARKED_FOR_REMOVAL) != 0;
 }
 
 bool Atom::getFlag(int flag) const
 {
-    return (flags & flag) != 0;
+    return (_flags & flag) != 0;
 }
 
 void Atom::setFlag(int flag, bool value)
 {
     if (value) {
-        flags |= flag;
+        _flags |= flag;
     } else {
-        flags &= ~(flag);
+        _flags &= ~(flag);
     }
 }
 
 void Atom::unsetRemovalFlag(void)
 {
-    flags &= ~MARKED_FOR_REMOVAL;
+    _flags &= ~MARKED_FOR_REMOVAL;
 }
 
 void Atom::markForRemoval(void)
 {
-    flags |= MARKED_FOR_REMOVAL;
+    _flags |= MARKED_FOR_REMOVAL;
 }
 
 void Atom::setAtomTable(AtomTable *tb)
 {
-    if (tb == atomTable) return;
+    if (tb == _atomTable) return;
 
     // Notify any interested parties that the AV changed.
-    if (NULL == tb and NULL != atomTable) {
+    if (NULL == tb and NULL != _atomTable) {
         // remove, as far as the old table is concerned
-        AVCHSigl& avch = atomTable->AVChangedSignal();
+        AVCHSigl& avch = _atomTable->AVChangedSignal();
         avch(getHandle(), _attentionValue, AttentionValue::DEFAULT_AV());
 
         // UUID's belong to the atom table, not the atom. Reclaim it.
         _uuid = Handle::UNDEFINED.value();
     }
-    atomTable = tb;
+    _atomTable = tb;
     if (NULL != tb) {
         // add, as far as the old table is concerned
         AVCHSigl& avch = tb->AVChangedSignal();
@@ -183,7 +193,7 @@ void Atom::keep_incoming_set()
 void Atom::drop_incoming_set()
 {
     if (NULL == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.clear();
     // delete _incoming_set;
     _incoming_set = NULL;
@@ -193,7 +203,7 @@ void Atom::drop_incoming_set()
 void Atom::insert_atom(LinkPtr a)
 {
     if (NULL == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.insert(a);
     _incoming_set->_addAtomSignal(shared_from_this(), a);
 }
@@ -202,7 +212,7 @@ void Atom::insert_atom(LinkPtr a)
 void Atom::remove_atom(LinkPtr a)
 {
     if (NULL == _incoming_set) return;
-    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
     _incoming_set->_iset.erase(a);
 }
@@ -216,6 +226,6 @@ IncomingSet Atom::getIncomingSet() const
     if (NULL == _incoming_set) return empty_set;
 
     // Prevent update of set while a copy is being made.
-    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    std::lock_guard<std::mutex> lck (_mtx);
     return _incoming_set->_iset;
 }

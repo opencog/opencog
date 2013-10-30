@@ -76,17 +76,25 @@ private:
     void setAtomTable(AtomTable *);
 
     //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const { return atomTable; }
+    AtomTable *getAtomTable() const { return _atomTable; }
 
 protected:
     UUID _uuid;
-    AtomTable *atomTable;
+    AtomTable *_atomTable;
 
-    Type type;
-    char flags;
+    Type _type;
+    char _flags;
 
-    TruthValuePtr truthValue;
+    TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
+
+    // Lock needed to serialize AV changes.
+    // Just right now, we will use a single shared mutex for all
+    // locking.  If this causes too much contention, then we can
+    // fall back to a non-global lock, at the cost of 40 additional
+    // bytes per atom.
+    static std::mutex _avmtx;
+    static std::mutex _mtx;
 
     /**
      * Constructor for this class.
@@ -102,11 +110,6 @@ protected:
 
     struct InSet
     {
-        // Just right now, we will use a single shared mutex for all
-        // locking on the incoming set.  If this causes too much
-        // contention, then we can fall back to a non-global lock,
-        // at the cost of 40 additional bytes per atom.
-        static std::mutex _mtx;
         // incoming set is not tracked by garbage collector,
         // to avoid cyclic references.
         // std::set<ptr> uses 48 bytes (per atom).
@@ -160,14 +163,14 @@ public:
      *
      * @return The type of the atom.
      */
-    inline Type getType() const { return type; }
+    inline Type getType() const { return _type; }
 
     /** Returns the handle of the atom.
      *
      * @return The handle of the atom.
      */
     inline Handle getHandle() {
-        return Handle(std::static_pointer_cast<Atom>(shared_from_this()));
+        return Handle(shared_from_this());
     }
 
     /** Returns the AttentionValue object of the atom.
@@ -184,7 +187,7 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue() const { return truthValue; }
+    TruthValuePtr getTruthValue() const { return _truthValue; }
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
