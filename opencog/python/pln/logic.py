@@ -7,7 +7,6 @@ class Logic(object):
        inspired by the AIMA chapter on first-order logic. They all operate directly on Atoms.'''
     def __init__(self, atomspace):
         self._atomspace = atomspace
-        self._new_var_counter = 10**6 # arbitrary
 
     def variables(self, atom):
         '''Find all the variables in an expression (which may be repeated)'''
@@ -23,10 +22,8 @@ class Logic(object):
             return result
 
     def new_variable(self):
-        self._new_var_counter += 1
-        
-        var_name = '$pln_var_'+str(self._new_var_counter)
-        return self._atomspace.add_node(types.VariableNode, var_name)
+        prefix = '$pln_var_'
+        return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
     def find(self, template, atoms, s={}):
         assert(isinstance(atoms, list))
@@ -37,11 +34,11 @@ class Logic(object):
         return self.unify(x, y, s) != None
 
     def standardize_apart(self, atom, dic=None):
-        '''Create a new link where all the variables in the link are replaced with new variables'''
+        '''Create a new link where all the variables in the link are replaced with new variables. dic creates a mapping of old variables to new ones'''
         assert isinstance(atom, Atom)
 
         # every time $v1 appears in the original expression, it must be replaced with the SAME $v1001
-        if dic == None:
+        if dic is None:
             dic = {}
 
         if atom.is_node():
@@ -56,7 +53,9 @@ class Logic(object):
                 return atom
         else: # atom is a link
             outgoing = [self.standardize_apart(a, dic) for a in atom.out]
-            return self.change_outgoing(atom, outgoing)
+
+            sa_link = self.change_outgoing(atom, outgoing)
+            return sa_link
 
     def substitute(self, substitution, atom):
         '''Substitute the substitution s into the expression x.
@@ -171,7 +170,7 @@ class Logic(object):
         return s2
 
     def change_outgoing(self, link, outgoing):
-        '''Returns a new link with the same type as @link but a different outgoing set'''
+        '''Returns a new link with the same type as @link but a different outgoing set. If you pass the same outgoing set, it will return the same Atom!'''
         return self._atomspace.add_link(link.type, outgoing)
 
     def is_variable(self, atom):
