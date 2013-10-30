@@ -22,5 +22,5 @@ Known Bugs:
   Also, all UI elements are manually coded/positioned, making it difficult to
   maintain/enhance...should probably use Glade or QT designer, or similar
   GUI development tool.
-* port number of the REST server is hard-coded to 17034. This should
-  be a command-line parm or configurable option.
+* hard-coded to use the old REST API, which no longer exists...need to change to
+  the new interface (http://wiki.opencog.org/w/Web_interface).
