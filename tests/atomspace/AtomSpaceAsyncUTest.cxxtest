@@ -2,6 +2,7 @@
  * tests/atomspace/AtomSpaceAsyncUTest.cxxtest
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -48,6 +49,8 @@ private:
 
     AtomSpaceAsync *atomSpace;
     int __testSignalsCounter;
+    int __totalAdded;
+    int __totalChanged;
     RandGen *rng;
 
     int n_threads;
@@ -76,6 +79,7 @@ public:
         delete rng;
     }
 
+    // =================================================================
     void atomAdded1(Handle h)
     {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
@@ -208,6 +212,7 @@ public:
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
+    // =================================================================
     void testRemovalByDecay()
     {
         AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
@@ -268,6 +273,7 @@ public:
         CHK(LIST_LINK,        ==);
     }
 
+    // =================================================================
     Type randomType(Type t)
     {
         int numberOfTypes = classserver().getNumberOfClasses();
@@ -329,6 +335,7 @@ public:
         TS_ASSERT_EQUALS(size, num_atoms);
     }
 
+    // =================================================================
     void threadedRemove(int start, int interval)
     {
         for (int i = start; i < start+interval; i++) {
@@ -360,4 +367,34 @@ public:
     }
     
 
+    // =================================================================
+    void countAtomAdded(Handle h)
+    {
+        //logger().debug("atomAdded1: %s", h->toString().c_str());
+        __totalAdded += 1;
+    }
+
+    void countAtomChanged(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
+    {
+        // logger().debug("atomMerged1: %s", h->toString().c_str());
+        __totalChanged +=1;
+    }
+
+    void testThreadedSignals()
+    {
+        // connect signals
+        boost::signals::connection add =
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
+
+        boost::signals::connection chg =
+            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
+
+        /* add and remove a simple node */
+        __totalAdded = 0;
+        __totalChanged = 0;
+
+        testThreadedDuplicateAdd();
+        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
+        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1));
+    }
 };
