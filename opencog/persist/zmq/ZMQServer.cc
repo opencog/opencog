@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//TODO move to persist
-
 #include "ZMQServer.h"
 
 using namespace opencog;
