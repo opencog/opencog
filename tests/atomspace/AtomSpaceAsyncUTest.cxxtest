@@ -276,7 +276,7 @@ public:
         return randomType;
     }
 
-    void threadedAdd(int N)
+    void threadedAdd(int thread_id, int N)
     {
         int counter = 0;
         double chanceOfNonDefaultNode = 0.0;
@@ -286,7 +286,7 @@ public:
             if (p < chanceOfNonDefaultNode)
                 t = randomType(NODE);
             std::ostringstream oss;
-            oss << "node " << counter;
+            oss << "thread " << thread_id << " node " << counter;
             counter++;
             atomSpace->addNode(t,oss.str())->get_result(); 
         }
@@ -297,13 +297,28 @@ public:
         std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
             thread_pool.push_back(
-                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, num_atoms));
+                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
         int size = atomSpace->getSize()->get_result();
-        // std::cout<<"size:"<<size<<std::endl;
+        std::cout << "unique atomspace size:" << size << std::endl;
 
-        // wtf .. we shoulg get num_atoms * n_threads!
+        // we shoulg get num_atoms * n_threads distinct atoms
+        TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+    }
+
+    void testThreadedDuplicateAdd()
+    {
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, -1, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        int size = atomSpace->getSize()->get_result();
+        std::cout << "duplicate atomspace size:" << size << std::endl;
+
+        // We shoulg get only num_atoms, because all threads are creating duplicates.
         TS_ASSERT_EQUALS(size, num_atoms);
     }
 
@@ -311,9 +326,9 @@ public:
     {
         for (int i = start; i < start+interval; i++) {
             std::ostringstream oss;
-            oss << "node " << i;
+            oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
-            HandleSeq hs = atomSpace->getHandlesByName(oss.str(),NODE)->get_result();
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
@@ -324,7 +339,7 @@ public:
 
     void testThreadedRemove()
     {
-        testThreadedAdd();
+        testThreadedDuplicateAdd();
         int interval = num_atoms/n_threads;
         std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
