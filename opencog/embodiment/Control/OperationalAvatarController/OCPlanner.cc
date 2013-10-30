@@ -152,18 +152,6 @@ StateNode* RuleNode::getMostClosedBackwardStateNode() const
     return lastedStateNode;
 }
 
-//bool RuleNode::operator < (const RuleNode& other) const
-//{
-//    // so , the deeper rule node will be put front
-//    // debug:
-//    StateNode* m = getLastForwardStateNode();
-//    StateNode* o = other.getLastForwardStateNode() ;
-//    cout << "Debug: compare rule node depth: me = "  << m->depth << " other = " << o->depth << std::endl;
-//    bool d = m < o ;
-//    cout << "me is deeper than other :" << d;
-//    return (  other.getLastForwardStateNode() < getLastForwardStateNode() );
-//}
-
 // this should be called after its forward node is assigned or changed
 void StateNode::calculateNodesDepth()
 {
@@ -238,19 +226,60 @@ void StateNode::calculateNodesDepth()
 
 }
 
-SpaceServer::SpaceMap* OCPlanner::getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode)
+SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNode)
 {
-    // first , get the BackwardStateNodes
-    if (ruleNode->backwardLinks.size() == 0)
-        return &(spaceServer().getLatestMap());
+    // sort all the rule nodes in current planning network, in the order of from left to right (from starting to goal / from backward to forward)
+    sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
+    RuleNode* clostestRuleNode = 0;
 
-    StateNode* lastedStateNode = ruleNode->getMostClosedBackwardStateNode();
-
-    // get the curMap of the backward rule of this state node
-    if (lastedStateNode->backwardRuleNode != 0)
-        return lastedStateNode->backwardRuleNode->curMap;
+    if (stateNode->backwardRuleNode)
+    {
+         clostestRuleNode = stateNode->backwardRuleNode;
+    }
     else
-        return &(spaceServer().getLatestMap());
+    {
+        // get the most closest rule node to the input stateNode in its backward side,
+        // because only the back ward node will affect the input state node
+
+        vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
+
+        for (; it != allRuleNodeInThisPlan.end(); ++ it)
+        {
+            RuleNode* rnode = (RuleNode*)(*it);
+
+            StateNode* snode = rnode->getLastForwardStateNode();
+
+            if (snode == stateNode)
+                continue;
+
+            if ((*snode) < (*stateNode))
+                break; // the node with a lower depth is more closed to the goal, so it won't affect the input state node
+
+            clostestRuleNode = rnode;
+        }
+    }
+
+    if (clostestRuleNode == 0)
+        return curMap;
+
+    SpaceServer::SpaceMap *iSpaceMap = curMap->clone();
+
+    // execute the all the actions in current planning network to change the imaginary space map in the order in allRuleNodeInThisPlan,
+    // till the clostestRuleNode
+    vector<RuleNode*>::const_iterator it = allRuleNodeInThisPlan.begin();
+
+    for (; it != allRuleNodeInThisPlan.end(); ++ it)
+    {
+        RuleNode* rnode = (RuleNode*)(*it);
+
+        executeActionInImaginarySpaceMap(rnode,iSpaceMap);
+
+        if (rnode == clostestRuleNode)
+            break;
+    }
+
+    return iSpaceMap;
+
 }
 
 // @ bool &found: return if this same state is found in temporaryStateNodes
@@ -584,10 +613,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     curtimeStamp = oac->getPAI().getLatestSimWorldTimestamp();
 
-    // clone a spaceMap for image all the the steps happen in the spaceMap, like building a block in some postion.
-    // Cuz it only happens in imagination, not really happen, we should not really change in the real spaceMap
+    curMap = &(spaceServer().getLatestMap());
 
-    imaginarySpaceMaps.clear();
     startStateNodes.clear();
     allRuleNodeInThisPlan.clear();
     unsatisfiedStateNodes.clear();
@@ -595,7 +622,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     imaginaryHandles.clear(); // TODO: Create imaginary atoms
     satisfiedGoalStateNodes.clear();
     OCPlanner::goalRuleNode.backwardLinks.clear();
-
 
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
@@ -700,10 +726,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         cout<<std::endl;
 
         SpaceServer::SpaceMap* curImaginaryMap;
-        if (curStateNode->backwardRuleNode == 0)
-            curImaginaryMap = &(spaceServer().getLatestMap());
-        else
-            curImaginaryMap = curStateNode->backwardRuleNode->curMap;
+        curImaginaryMap = getClosestBackwardSpaceMap(curStateNode);
 
         // Set this cloned spaceMap for Inquery
         Inquery::setSpaceMap(curImaginaryMap);
@@ -1221,9 +1244,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // out put all the effects debug info:
         cout<<"Debug planning step " << tryStepNum <<": All preconditions for rule :"<< ruleNode->originalRule->ruleName << std::endl;
         int preConNum = 1;
-        itpre = ruleNode->originalRule->preconditionList.end();
-        itpre --;
-        for (; ; -- itpre, ++preConNum)
+        int unsatisfiedPreconNum = 0;
+
+        itpre = ruleNode->originalRule->preconditionList.begin();
+        for (; itpre != ruleNode->originalRule->preconditionList.end();  ++itpre, ++preConNum)
         {
             State* ps = *itpre;
             State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -1292,7 +1316,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             }
 
-            cout<<"Precondition  " << preConNum <<": ";
+            cout<<"Precondition  " << preConNum <<": depth: " << newStateNode->depth << " ";
             outputStateInfo(groundPs, true);
             if(isSat)
             {
@@ -1304,16 +1328,24 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // add it to unsatisfied list
                 unsatisfiedStateNodes.push_back(newStateNode);
                 cout << " is unsatisfied :(" << std::endl;
+                unsatisfiedPreconNum ++;
             }
-
-            if (itpre == ruleNode->originalRule->preconditionList.begin())
-                break;
         }
 
-        // execute the current rule action to change the imaginary SpaceMap if any action that involved changing space map
-        // return the changed map
-        SpaceServer::SpaceMap* newCurMap = executeActionInImaginarySpaceMap(ruleNode,curImaginaryMap);
-        ruleNode->curMap = newCurMap;
+        // there is a tricky logic here: if it's an recursive rule, switch its two precons in the unsatisfiedStateNodes list if it  has two
+        // , so that the precon which is more closer to current state will be put in the end of  the unsatisfiedStateNodes list, so that it will be dealt with next loop
+        // because for a resursiv rule, it's usually more easy to do a forward reasoning than backward
+        if (ruleNode->originalRule->IsRecursiveRule && (unsatisfiedPreconNum == 2) )
+        {
+            StateNode* precon1 = unsatisfiedStateNodes.back();
+            unsatisfiedStateNodes.pop_back();
+            list<StateNode*>::iterator uitpre = unsatisfiedStateNodes.end();
+            uitpre --;
+            unsatisfiedStateNodes.insert(uitpre,precon1);
+        }
+
+        if (curImaginaryMap != curMap)
+            delete curImaginaryMap;
 
     }
 
@@ -1330,21 +1362,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // and then encapsule the action for each step and send to PAI
     vector<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
     int stepNum = 1;
+    SpaceServer::SpaceMap* backwardStepMap = curMap->clone();
+
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
         RuleNode* r = (RuleNode*)(*planRuleNodeIt);
 
         outputRuleNodeStep(r);
 
-        SpaceServer::SpaceMap* backwardStepMap ;
-
-        if (stepNum == 1)
-            backwardStepMap = &(spaceServer().getLatestMap());
-        else
+        if (stepNum != 1)
         {
             lastStepIt = planRuleNodeIt;
             lastStepIt --;
-            backwardStepMap = ((RuleNode*)(*lastStepIt))->curMap;
         }
 
         // generate the action series according to the planning network we have constructed in this planning process
@@ -1434,6 +1463,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             oac->getPAI().addAction(planID, action);
 
         }
+
+        executeActionInImaginarySpaceMap(r,backwardStepMap);
         stepNum ++;
     }
 
@@ -1441,16 +1472,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
-
-    // delete all imaginary space map
-    vector<SpaceServer::SpaceMap*>::iterator iMapIt = imaginarySpaceMaps.begin();
-    for (;iMapIt != imaginarySpaceMaps.end(); ++ iMapIt)
-    {
-        SpaceServer::SpaceMap* iMap = (SpaceServer::SpaceMap*)(*iMapIt);
-
-        if (iMap)
-            delete iMap;
-    }
 
     // todo: remove all the imaginary atoms in imaginaryHandles
 
@@ -1640,31 +1661,27 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 }
 
 // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
-SpaceServer::SpaceMap* OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer::SpaceMap *iSpaceMap)
+void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer::SpaceMap *iSpaceMap)
 {
     static int imaginaryBlockNum = 1;
 
     // currently we just cheat to enable the following actions
     // ToBeImproved: the right way is to add a callback function for each action to auto execute
 
-    SpaceServer::SpaceMap* newClonedMap = iSpaceMap;
-
     switch (ruleNode->originalRule->action->getType().getCode())
     {
         case pai::EAT_CODE:
         {
             // get the handle of the food to eat
-            newClonedMap = iSpaceMap->clone();
             string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
             Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-            newClonedMap->removeNoneBlockEntity(foodH);
+            iSpaceMap->removeNoneBlockEntity(foodH);
             break;
         }
         case pai::MOVE_TO_OBJ_CODE:
         {
             // get the actor entity handle
-            newClonedMap = iSpaceMap->clone();
             string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
             Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
             Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
@@ -1674,14 +1691,13 @@ SpaceServer::SpaceMap* OCPlanner::executeActionInImaginarySpaceMap(RuleNode* rul
             Entity target =  boost::get<Entity>((ruleNode->currentAllBindings)[targetVarName]);
             Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
             // get new location it moves tol
-            spatial::BlockVector targetLocation = newClonedMap->getObjectLocation(targetH);
-            newClonedMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
+            spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
             break;
         }
         case pai::WALK_CODE:
         {
             // get the actor entity handle
-            newClonedMap = iSpaceMap->clone();
             string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
             Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
             Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
@@ -1690,30 +1706,24 @@ SpaceServer::SpaceMap* OCPlanner::executeActionInImaginarySpaceMap(RuleNode* rul
             string newPosVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
             spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
-            newClonedMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
 
             break;
         }
         case pai::BUILD_BLOCK_CODE:
         {
-            newClonedMap = iSpaceMap->clone();
             // get the  location of block
             string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
             spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
             Handle iBlockH = AtomSpaceUtil::addNode(*atomSpace, IMAGINARY_STRUCTURE_NODE,"Imaginary_Block_" + imaginaryBlockNum++);
-            newClonedMap->addSolidUnitBlock(buildPos,iBlockH);
+            iSpaceMap->addSolidUnitBlock(buildPos,iBlockH);
             break;
         }
         default:
             // TODO: TNick: is this the right way of handling other codes?
             break;
     }
-
-    if (newClonedMap != iSpaceMap)
-        imaginarySpaceMaps.push_back(newClonedMap);
-
-    return newClonedMap;
 
 }
 
@@ -2574,7 +2584,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     }
     else if (ruleNode->costHeuristics.size()!= 0)
     {
-        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values);
+        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,false);
     }
     else
     {
@@ -2596,7 +2606,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 
 
 
-ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values)
+ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons)
 {
 
     // check how many preconditions will be satisfied
@@ -2621,7 +2631,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         float score = 0.0f-cost;
 
         // check how many preconditions will be satisfied
-        if (! rule->IsRecursiveRule)
+        if (checkPrecons)
         {
             bool preconImpossible;
             tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
