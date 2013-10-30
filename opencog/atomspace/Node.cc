@@ -34,10 +34,10 @@ using namespace opencog;
 void Node::init( const std::string& cname)
 throw (InvalidParamException, AssertionException)
 {
-    if (not classserver().isA(type, NODE)) {
+    if (not classserver().isA(_type, NODE)) {
         throw InvalidParamException(TRACE_INFO,
         "Node - Invalid node type '%d' %s.", 
-        type, classserver().getTypeName(type).c_str());
+        _type, classserver().getTypeName(_type).c_str());
     }
     name = cname;
 }
@@ -55,7 +55,7 @@ std::string Node::toShortString(std::string indent) const
     if (name == "")
         tmpname = "#" + _uuid;
     snprintf(buf, BUFSZ, "(%s \"%s\")\n",
-             classserver().getTypeName(type).c_str(),
+             classserver().getTypeName(_type).c_str(),
              tmpname.c_str());
     return indent + buf;
 }
@@ -67,7 +67,7 @@ std::string Node::toString(std::string indent) const
     if (name == "")
         tmpname = "#" + _uuid;
     snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d) %s)\n",
-             classserver().getTypeName(type).c_str(),
+             classserver().getTypeName(_type).c_str(),
              tmpname.c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),

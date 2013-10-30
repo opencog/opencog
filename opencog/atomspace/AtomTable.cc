@@ -425,6 +425,10 @@ void AtomTable::merge(const Handle& h, const TruthValuePtr& tvn)
 
     // Merge the TVs
     if (tvn and not tvn->isNullTv()) {
+        // As far as I can tell, there is no need to lock this
+        // section of the code; there are no changes to the table,
+        // and all changes to the TV are essentially atomic, from
+        // what I can tell.
         TruthValuePtr currentTV = h->getTruthValue();
         TruthValuePtr mergedTV;
         if (currentTV->isNullTv()) {
@@ -433,7 +437,6 @@ void AtomTable::merge(const Handle& h, const TruthValuePtr& tvn)
             mergedTV = currentTV->merge(tvn);
         }
         h->setTruthValue(mergedTV);
-        _TVChangedSignal(h, currentTV, mergedTV);
     }
 }
 

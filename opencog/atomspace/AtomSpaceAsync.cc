@@ -18,7 +18,7 @@ AtomSpaceAsync::~AtomSpaceAsync()
 void AtomSpaceAsync::startEventLoop()
 {
     processingRequests = true;
-    m_Thread = boost::thread(&AtomSpaceAsync::eventLoop, this);
+    m_Thread = std::thread(&AtomSpaceAsync::eventLoop, this);
 }
 
 void AtomSpaceAsync::stopEventLoop()

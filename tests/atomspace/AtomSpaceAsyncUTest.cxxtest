@@ -2,6 +2,7 @@
  * tests/atomspace/AtomSpaceAsyncUTest.cxxtest
  *
  * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -23,6 +24,7 @@
  */
 
 #include <algorithm>
+#include <thread>
 
 #include <math.h>
 #include <string.h>
@@ -47,36 +49,46 @@ private:
 
     AtomSpaceAsync *atomSpace;
     int __testSignalsCounter;
+    int __totalAdded;
+    int __totalChanged;
     RandGen *rng;
 
     int n_threads;
     int num_atoms;
 
 public:
-    AtomSpaceAsyncUTest() {
-        n_threads = 10;
-        num_atoms = 100;
+    AtomSpaceAsyncUTest()
+    {
+        // Current atomspace can to 50K or 100K atoms/sec, so the 
+        // below should run for at least 2 to 5 seconds each time.
+        n_threads = 20;
+        num_atoms = 13000;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
 
-    void setUp() {
+    void setUp()
+    {
         atomSpace = new AtomSpaceAsync();
         rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
     }
 
-    void tearDown() {
+    void tearDown()
+    {
         delete atomSpace;
         delete rng;
     }
 
-    void atomAdded1(Handle h) {
+    // =================================================================
+    void atomAdded1(Handle h)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded1: %s", h->toString().c_str());
         __testSignalsCounter += 1;
     }
 
-    void atomAdded2(Handle h) {
+    void atomAdded2(Handle h)
+    {
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomAdded2: %s", h->toString().c_str());
         __testSignalsCounter += 10;
@@ -96,21 +108,24 @@ public:
         __testSignalsCounter += 1000;
     }
 
-    void atomRemoved1(AtomPtr atom) {
+    void atomRemoved1(AtomPtr atom)
+    {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved1: %s", atom->toString().c_str());
         __testSignalsCounter += 10000;
     }
 
-    void atomRemoved2(AtomPtr atom) {
+    void atomRemoved2(AtomPtr atom)
+    {
         // Atom is not removed from table until AFTER callbacks are completed
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
         logger().debug("atomRemoved2: %s", atom->toString().c_str());
         __testSignalsCounter += 100000;
     }
 
-    void testSignals() {
+    void testSignals()
+    {
         // connect signals
         boost::signals::connection add1 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
@@ -132,6 +147,7 @@ public:
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
 
+        /* Since we're adding *exactly* the same atom, we should get a merged signal */
         logger().debug("before second atom add");
         atomSpace->addNode(NUMBER_NODE, "1")->get_result();
         TS_ASSERT(__testSignalsCounter == 1111);
@@ -196,7 +212,10 @@ public:
         TS_ASSERT(__testSignalsCounter == 0);
     }
 
-    void testRemovalByDecay() {
+    // =================================================================
+
+    void testRemovalByDecay()
+    {
         AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
 
         /* add a simple tree of links & nodes */
@@ -255,7 +274,11 @@ public:
         CHK(LIST_LINK,        ==);
     }
 
-    Type randomType(Type t) {
+    // =================================================================
+    // Test multi-threaded addition of nodes to atomspace.
+
+    Type randomType(Type t)
+    {
         int numberOfTypes = classserver().getNumberOfClasses();
         OC_ASSERT(t < numberOfTypes);
         Type randomType = NOTYPE;
@@ -264,39 +287,67 @@ public:
         return randomType;
     }
 
-    void threadedAdd(int N) {
-        int counter=0;
+    void threadedAdd(int thread_id, int N)
+    {
+        int counter = 0;
+        // For the duplicate-atoms test, all the atoms must be exactly alike!
         double chanceOfNonDefaultNode = 0.0;
-        for (int i =0; i < N; i++) {
+        if (0 < thread_id) chanceOfNonDefaultNode = 0.3;
+        for (int i = 0; i < N; i++) {
             double p = rng->randdouble();
             Type t = CONCEPT_NODE;
             if (p < chanceOfNonDefaultNode)
-                t=randomType(NODE);
+                t = randomType(NODE);
+
             std::ostringstream oss;
-            oss << "node " << counter;
+            oss << "thread " << thread_id << " node " << counter;
             counter++;
-            atomSpace->addNode(t,oss.str())->get_result(); 
+
+            TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
+            atomSpace->addNode(t, oss.str(), tv)->get_result(); 
         }
     }
 
-    void testThreadedAdd() {
-        boost::thread_group thread_pool;
+    void testThreadedAdd()
+    {
+        std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
-            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedAdd, this, _1), num_atoms);
-            thread_pool.add_thread(t);
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, i, num_atoms));
         }
-        thread_pool.join_all();
+        for (std::thread& t : thread_pool) t.join();
         int size = atomSpace->getSize()->get_result();
-        //std::cout<<"size:"<<size<<std::endl;
+        std::cout << "unique atomspace size:" << size << std::endl;
+
+        // we should get num_atoms * n_threads distinct atoms
+        TS_ASSERT_EQUALS(size, num_atoms * n_threads);
+    }
+
+    void testThreadedDuplicateAdd()
+    {
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, -1, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        int size = atomSpace->getSize()->get_result();
+        std::cout << "duplicate atomspace size:" << size << std::endl;
+
+        // We should get only num_atoms, because all threads are creating duplicates.
         TS_ASSERT_EQUALS(size, num_atoms);
     }
 
-    void threadedRemove(int start,int interval) {
-        for (int i =start; i < start+interval; i++) {
+    // =================================================================
+    // Test multi-threaded remove of atoms, by name.
+
+    void threadedRemove(int start, int interval)
+    {
+        for (int i = start; i < start+interval; i++) {
             std::ostringstream oss;
-            oss << "node " << i;
+            oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
-            HandleSeq hs = atomSpace->getHandlesByName(oss.str(),NODE)->get_result();
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
@@ -305,19 +356,165 @@ public:
         }
     }
 
-    void testThreadedRemove() {
-        testThreadedAdd();
+    void testThreadedRemove()
+    {
+        testThreadedDuplicateAdd();
         int interval = num_atoms/n_threads;
-        boost::thread_group thread_pool;
+        std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
-            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
-            thread_pool.add_thread(t);
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
         }
-        thread_pool.join_all();
+        for (std::thread& t : thread_pool) t.join();
         int size = atomSpace->getSize()->get_result();
         TS_ASSERT_EQUALS(size, 0);
         size = atomSpace->getSize()->get_result();
     }
     
 
+    // =================================================================
+    // when signals issued in multi-threaded env, make sure all of them arrive.
+
+    void countAtomAdded(Handle h)
+    {
+        //logger().debug("atomAdded1: %s", h->toString().c_str());
+        __totalAdded += 1;
+    }
+
+    void countAtomChanged(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
+    {
+        // logger().debug("atomMerged1: %s", h->toString().c_str());
+        __totalChanged +=1;
+    }
+
+    void testThreadedSignals()
+    {
+        // connect signals
+        boost::signals::connection add =
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
+
+        boost::signals::connection chg =
+            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
+
+        __totalAdded = 0;
+        __totalChanged = 0;
+
+        testThreadedDuplicateAdd();
+        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
+        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1));
+    }
+
+    // =================================================================
+
+    void threadedSetTV(int N)
+    {
+        static int bogus = 0;
+
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread -1 node " << i;
+
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            Handle h = hs[0];
+
+            bogus ++;
+            bogus %= N;
+
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+            atomSpace->setTV(h, tv)->get_result(); 
+        }
+    }
+
+    void testThreadedTV()
+    {
+        // Use the earlier test for atomspace setup.
+        testThreadedSignals();
+
+#if 0
+        // (re-) connect signals (not needed)
+        boost::signals::connection add =
+            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
+
+        boost::signals::connection chg =
+            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
+#endif
+        // reset the counts
+        __totalAdded = 0;
+        __totalChanged = 0;
+
+        // Do nothing but twiddle TV values.
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedSetTV, this, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        int size = atomSpace->getSize()->get_result();
+        std::cout << "TV atomspace size:" << size << std::endl;
+
+        // We should get only num_atoms, because all threads created duplicates.
+        TS_ASSERT_EQUALS(size, num_atoms);
+
+        TS_ASSERT_EQUALS(__totalAdded, 0); // no change from before.
+        TS_ASSERT_EQUALS(__totalChanged, num_atoms * n_threads); // lots!
+    }
+
+    // =================================================================
+
+    void threadedLinkAdd(int thread_id, int N)
+    {
+        static int bogus = 0;
+
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread -1 node " << i;
+
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            Handle ha = hs[0];
+
+            std::ostringstream ossb;
+            ossb << "thread -1 node " << (2*i) % N;
+
+            hs = atomSpace->getHandlesByName(ossb.str(), NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+
+            bogus ++;
+            bogus %= N;
+
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+
+            Type t = LIST_LINK;
+            hs.push_back(ha);
+            atomSpace->addLink(t, hs, tv)->get_result(); 
+        }
+    }
+
+    void testLinkAdd()
+    {
+        // Use the earlier test for atomspace setup.
+        testThreadedSignals();
+
+        // reset the counts
+        __totalAdded = 0;
+        __totalChanged = 0;
+
+        // Add lotsa links
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedLinkAdd, this, i, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        int size = atomSpace->getSize()->get_result();
+        std::cout << "Link atomspace size:" << size << std::endl;
+
+        // We should get only 2*num_atoms, because all threads created duplicates.
+        // num_atoms nodes, and num_atoms links.
+        TS_ASSERT_EQUALS(size, 2*num_atoms);
+
+        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
+        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1)); // lots!
+    }
 };
