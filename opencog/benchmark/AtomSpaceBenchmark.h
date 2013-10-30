@@ -8,6 +8,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
+// #undef HAVE_CYTHON
+// #undef HAVE_GUILE
 
 using boost::tuple;
 
@@ -67,6 +69,7 @@ class AtomSpaceBenchmark
     std::poisson_distribution<unsigned> *prg;
 
     Type randomType(Type t);
+    int numberOfTypes;
 
     clock_t makeRandomNode(const std::string& s);
     clock_t makeRandomLink();
@@ -77,6 +80,7 @@ class AtomSpaceBenchmark
     std::vector<std::string>  methodNames;
 public:
     int Nreps;
+    int Nloops;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;

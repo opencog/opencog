@@ -94,9 +94,9 @@ void Ubigrapher::watchSignals()
     if (isConnected()) {
         if (!listening) {
             c_add = space.atomSpaceAsync->addAtomSignal(
-                    boost::bind(&Ubigrapher::handleAddSignal, this, _1, _2));
+                    boost::bind(&Ubigrapher::handleAddSignal, this, _1));
             c_remove = space.atomSpaceAsync->removeAtomSignal(
-                    boost::bind(&Ubigrapher::atomRemoveSignal, this, _1, _2));
+                    boost::bind(&Ubigrapher::atomRemoveSignal, this, _1));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
         } else {
@@ -150,28 +150,27 @@ void Ubigrapher::setStyles()
     
 }
 
-bool Ubigrapher::handleAddSignal(AtomSpaceImpl* as, Handle h)
+bool Ubigrapher::handleAddSignal(Handle h)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
     if (!isConnected()) return false;
-    AtomPtr a = as->getHandle(h);
     usleep(pushDelay);
-    if (classserver().isA(a->getType(),NODE))
+    if (classserver().isA(h->getType(),NODE))
         return addVertex(h);
     else {
         if (compact) {
             // don't make nodes for binary links with no incoming
-            LinkPtr l(LinkCast(a));
-            if (l && l->getOutgoingSet().size() == 2 &&
-                     as->getIncoming(h).size() == 0)
+            LinkPtr l(LinkCast(h));
+            if (l and l->getOutgoingSet().size() == 2 and
+                     space.getIncoming(h).size() == 0)
                 return addEdges(h);
         }
         return (addVertex(h) || addEdges(h));
     }
 }
 
-bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
+bool Ubigrapher::atomRemoveSignal(AtomPtr a)
 {
     // XXX This is an error waiting to happen. Signals handling adds must be
     // thread safe as they are called from the AtomSpace event loop
@@ -184,8 +183,8 @@ bool Ubigrapher::atomRemoveSignal(AtomSpaceImpl* as, AtomPtr a)
         if (compact) {
             // don't make nodes for binary links with no incoming
             LinkPtr l(LinkCast(a));
-            if (l && l->getOutgoingSet().size() == 2 &&
-                     as->getIncoming(h).size() == 0)
+            if (l and l->getOutgoingSet().size() == 2 and
+                     space.getIncoming(h).size() == 0)
                 return removeEdges(h);
         }
         return removeVertex(h);
@@ -208,11 +207,10 @@ void Ubigrapher::updateSizeOfHandle(Handle h, property_t p, float multiplier, fl
             * multiplier;
     }
     ost << baseline + scaler;
-    AtomPtr a = space.getHandle(h);
-    LinkPtr l(LinkCast(a));
+    LinkPtr l(LinkCast(h));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
-        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
+        if (compact and out.size() == 2 and space.getIncoming(h).size() == 0) {
             ubigraph_set_edge_attribute(h.value(), "width", ost.str().c_str());
         } else
             ubigraph_set_vertex_attribute(h.value(), "size", ost.str().c_str());
@@ -281,8 +279,7 @@ void Ubigrapher::updateColourOfHandle(Handle h, property_t p, unsigned char star
         }
     }
 
-    AtomPtr a = space.getHandle(h);
-    LinkPtr l(LinkCast(a));
+    LinkPtr l(LinkCast(h));
     if (l) {
         const std::vector<Handle> &out = l->getOutgoingSet();
         if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -349,8 +346,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
             if (space.getNormalisedZeroToOneSTI(h,false,true) < limit) okToApply = false;
         }
         if (okToApply) {
-            AtomPtr a = space.getHandle(h);
-            LinkPtr l(LinkCast(a));
+            LinkPtr l(LinkCast(h));
             if (l) {
                 const std::vector<Handle> &out = l->getOutgoingSet();
                 if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
@@ -368,12 +364,10 @@ void Ubigrapher::applyStyleToHandleSeq(HandleSeq hs, int style)
     if (!isConnected()) return;
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
-        AtomPtr a = space.getHandle(h);
-        if (!a) continue;
-        LinkPtr l(LinkCast(a));
+        LinkPtr l(LinkCast(h));
         if (l) {
             const std::vector<Handle> &out = l->getOutgoingSet();
-            if (compact && out.size() == 2 and space.getIncoming(h).size() == 0) {
+            if (compact and out.size() == 2 and space.getIncoming(h).size() == 0) {
                 ubigraph_change_edge_style(h.value(), style);
             } else
                 ubigraph_change_vertex_style(h.value(), style);
@@ -387,10 +381,9 @@ bool Ubigrapher::addVertex(Handle h)
 	// if (classserver().isA(space.getType(h), FW_VARIABLE_NODE)) return false;
 
     if (!isConnected()) return false;
-    AtomPtr a = space.getHandle(h);
-    bool isNode = classserver().isA(a->getType(),NODE);
+    bool isNode = classserver().isA(h->getType(),NODE);
 
-    int id = (int)h.value();
+    int id = (int) h.value();
 
     if (isNode) {
         int status = ubigraph_new_vertex_w_id(id);
@@ -398,8 +391,8 @@ bool Ubigrapher::addVertex(Handle h)
             logger().error("Status was %d", status);
         ubigraph_change_vertex_style(id, nodeStyle);
     } else {
-        LinkPtr l(LinkCast(a));
-        if (l && compact && l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
+        LinkPtr l(LinkCast(h));
+        if (l and compact and l->getOutgoingSet().size() == 2 and space.getIncoming(h).size() == 0)
             return false;
         int status = ubigraph_new_vertex_w_id(id);
         if (status)
@@ -409,7 +402,7 @@ bool Ubigrapher::addVertex(Handle h)
 
     if (labelsOn) {
         std::ostringstream ost;
-        std::string type = classserver().getTypeName(a->getType());
+        std::string type = classserver().getTypeName(h->getType());
         if (compactLabels) {
             ost << initials(type);
         } else {
@@ -417,7 +410,7 @@ bool Ubigrapher::addVertex(Handle h)
         }
         
         if (isNode) {
-            NodePtr n(NodeCast(a));
+            NodePtr n(NodeCast(h));
             ost << " " << n->getName();
         } /*else {
             LinkPtr l(LinkCast(a));
@@ -435,10 +428,9 @@ bool Ubigrapher::addVertex(Handle h)
 bool Ubigrapher::addEdges(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.getHandle(h);
 
     usleep(pushDelay);
-    LinkPtr l(LinkCast(a));
+    LinkPtr l(LinkCast(h));
     if (l)
     {
         const std::vector<Handle> &out = l->getOutgoingSet();
@@ -447,7 +439,7 @@ bool Ubigrapher::addEdges(Handle h)
 //      // it's later necessary to change this edge
 //      int status = ubigraph_new_edge_w_id(id,x,y);
 
-        if (compact && out.size() == 2 and space.getIncoming(h).size() == 0)
+        if (compact and out.size() == 2 and space.getIncoming(h).size() == 0)
         {
             int id = h.value();
             int status = ubigraph_new_edge_w_id(id, out[0].value(),out[1].value());
@@ -455,11 +447,11 @@ bool Ubigrapher::addEdges(Handle h)
                 logger().error("Status was %d", status);
             
             int style = compactLinkStyle;
-            if (classserver().isA(a->getType(), ORDERED_LINK))
+            if (classserver().isA(h->getType(), ORDERED_LINK))
                 style = compactLinkStyleDirected;
             ubigraph_change_edge_style(id, style);
             if (labelsOn) {
-                std::string type = classserver().getTypeName(a->getType());
+                std::string type = classserver().getTypeName(h->getType());
                 std::ostringstream ost;
                 if (compactLabels) {
                     ost << initials(type);
@@ -472,10 +464,10 @@ bool Ubigrapher::addEdges(Handle h)
             return false;
         } else {
             int style = outgoingStyle;
-            if (classserver().isA(a->getType(), ORDERED_LINK))
+            if (classserver().isA(h->getType(), ORDERED_LINK))
                 style = outgoingStyleDirected;
             for (size_t i = 0; i < out.size(); i++) {
-                int id = ubigraph_new_edge(h.value(),out[i].value());
+                int id = ubigraph_new_edge(h.value(), out[i].value());
                 ubigraph_change_edge_style(id, style);
                 //ubigraph_set_edge_attribute(id, "label", toString(i).c_str());
             }
@@ -491,18 +483,17 @@ bool Ubigrapher::addEdges(Handle h)
 bool Ubigrapher::removeVertex(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.getHandle(h);
 
     if (compact)
     {
         // Won't have made a node for a binary link with no incoming
-        LinkPtr l(LinkCast(a));
+        LinkPtr l(LinkCast(h));
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
             return false;
     }
 
-    int id = (int)h.value();
+    int id = (int) h.value();
     int status = ubigraph_remove_vertex(id);
     if (status)
         logger().error("Status was %d", status);
@@ -513,7 +504,6 @@ bool Ubigrapher::removeVertex(Handle h)
 bool Ubigrapher::removeEdges(Handle h)
 {
     if (!isConnected()) return false;
-    AtomPtr a = space.getHandle(h);
 
     // This method is only relevant to binary Links with no incoming.
     // Any other atoms will be represented by vertexes, and the edges
@@ -521,7 +511,7 @@ bool Ubigrapher::removeEdges(Handle h)
     // vertexes are deleted.
     if (compact)
     {
-        LinkPtr l(LinkCast(a));
+        LinkPtr l(LinkCast(h));
         if (l and l->getOutgoingSet().size() == 2 
               and space.getIncoming(h).size() == 0)
         {                     

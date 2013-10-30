@@ -29,19 +29,15 @@ using namespace opencog::oac;
 
 ImportanceDecayAgent::~ImportanceDecayAgent()
 {
+    mergedAtomConnection.disconnect();
 }
 
 ImportanceDecayAgent::ImportanceDecayAgent(CogServer& cs) : Agent(cs)
 {
     lastTickTime = 0;
-    mergedAtomConnection.disconnect();
-}
-
-void ImportanceDecayAgent::connectSignals(AtomSpace& as)
-{
-    mergedAtomConnection = as.atomSpaceAsync->mergeAtomSignal(
-            boost::bind(&ImportanceDecayAgent::atomMerged,
-            this, _1, _2));
+    AtomSpace& as = _cogserver.getAtomSpace();
+    mergedAtomConnection = as.atomSpaceAsync->AVChangedSignal(
+            boost::bind(&ImportanceDecayAgent::atomMerged, this, _1, _2, _3));
 }
 
 void ImportanceDecayAgent::run()
@@ -50,13 +46,15 @@ void ImportanceDecayAgent::run()
     dynamic_cast<OAC *>(&_cogserver)->decayShortTermImportance();
 }
 
-void ImportanceDecayAgent::atomMerged(AtomSpaceImpl* as, Handle h)
+void ImportanceDecayAgent::atomMerged(const Handle& h,
+                                      const AttentionValuePtr& old_av,
+                                      const AttentionValuePtr& new_av)
 {
     logger().fine("ImportanceDecayAgent::atomMerged(%lu)", h.value());
     // Restore the default STI value if it has decayed
     // TODO: Remove this code when the merge of atoms consider the STI values
     // this way as well.
-    if (as->getSTI(h) < AttentionValue::DEFAULTATOMSTI) {
-        as->setSTI(h, AttentionValue::DEFAULTATOMSTI);
+    if (new_av->getSTI() < AttentionValue::DEFAULTATOMSTI) {
+        _cogserver.getAtomSpace().setSTI(h, AttentionValue::DEFAULTATOMSTI);
     }
 }

@@ -21,15 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Node.h"
-
 #include <stdio.h>
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
+
+#include "Node.h"
 
 using namespace opencog;
 
@@ -71,8 +69,8 @@ std::string Node::toString(std::string indent) const
     snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d) %s)\n",
              classserver().getTypeName(type).c_str(),
              tmpname.c_str(),
-             (int)getAttentionValue().getSTI(),
-             (int)getAttentionValue().getLTI(),
+             (int)getAttentionValue()->getSTI(),
+             (int)getAttentionValue()->getLTI(),
              getTruthValue()->toString().c_str());
     return indent + buf;
 }

@@ -30,10 +30,8 @@
 #include <set>
 
 #include <stdlib.h>
-#include <pthread.h>
 #include <boost/bind.hpp>
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
@@ -54,10 +52,10 @@ AtomTable::AtomTable()
 {
     size = 0;
 
-    //connect signals
+    // connect signal to find out about type additions
     addedTypeConnection =
-        classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
-                    this, _1));
+        classserver().addTypeSignal().connect(
+            boost::bind(&AtomTable::typeAdded, this, _1));
 
     Handle::set_resolver(this);
 }
@@ -419,22 +417,24 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
-void AtomTable::merge(Handle h, TruthValuePtr tvn)
+void AtomTable::merge(const Handle& h, const TruthValuePtr& tvn)
 {
-    if (NULL == h) return;
+    if (NULL == h)
+        throw opencog::RuntimeException(TRACE_INFO, 
+            "AtomTable: Null handle specified during atom merge!");
 
     // Merge the TVs
     if (tvn and not tvn->isNullTv()) {
         TruthValuePtr currentTV = h->getTruthValue();
+        TruthValuePtr mergedTV;
         if (currentTV->isNullTv()) {
-            h->setTruthValue(tvn);
+            mergedTV = tvn;
         } else {
-            TruthValuePtr mergedTV = currentTV->merge(tvn);
-            h->setTruthValue(mergedTV);
+            mergedTV = currentTV->merge(tvn);
         }
+        h->setTruthValue(mergedTV);
+        _TVChangedSignal(h, currentTV, mergedTV);
     }
-    // if (logger().isFineEnabled()) 
-    //    logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
 }
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
@@ -533,9 +533,11 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 
     atom->setAtomTable(this);
 
-    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    // Now that we are completely done, emit the added signal.
+    _addAtomSignal(h);
 
-    return atom->getHandle();
+    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    return h;
 }
 
 int AtomTable::getSize() const
@@ -647,7 +649,13 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         return AtomPtrSet();
     }
 
-    // decrements the size of the table
+    // Issue the atom removal signal *BEFORE* the atom is actually
+    // removed.  This is needed so that certain subsystems, e.g. the
+    // Agent system activity table, can correctly manage the atom;
+    // it needs info that gets blanked out during removal.
+    _removeAtomSignal(atom);
+
+    // Decrements the size of the table
     size--;
 
     nodeIndex.removeAtom(atom);
@@ -658,18 +666,10 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
-    atom->atomTable = NULL;
+    atom->setAtomTable(NULL);
 
     result.insert(atom);
     return result;
-}
-
-bool AtomTable::decayed(Handle h)
-{
-    // XXX This should be an assert ... I think something is seriously
-    // wrong if the handle isn't being found!  XXX FIXME
-    if (NULL == h) return false;
-    return h->getFlag(REMOVED_BY_DECAY);
 }
 
 AtomPtrSet AtomTable::decayShortTermImportance()

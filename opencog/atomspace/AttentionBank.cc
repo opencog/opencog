@@ -1,81 +1,69 @@
-#include "AttentionBank.h"
+/*
+ * opencog/atomspace/AttentionBank.cc
+ *
+ * Copyright (C) 2013 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * Written by Joel Pitt
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
 
 #include <opencog/util/Config.h>
+#include "AttentionBank.h"
+#include "AtomTable.h"
 
 using namespace opencog;
 
-AttentionBank::AttentionBank()
+AttentionBank::AttentionBank(AtomTable* atab)
 {
     startingFundsSTI = fundsSTI = config().get_int("STARTING_STI_FUNDS");
     startingFundsLTI = fundsLTI = config().get_int("STARTING_LTI_FUNDS");
     attentionalFocusBoundary = 1;
+
+    AVChangedConnection = 
+        atab->AVChangedSignal().connect(
+            boost::bind(&AttentionBank::AVChanged, this, _1, _2, _3));
 }
 
 AttentionBank::~AttentionBank()
 {
+    AVChangedConnection.disconnect();
     fundsSTI = config().get_int("STARTING_STI_FUNDS");
 }
 
-long AttentionBank::getTotalSTI() const {
+
+void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
+                                        AttentionValuePtr new_av)
+{
+    // Add the old attention values to the AtomSpace funds and
+    // subtract the new attention values from the AtomSpace funds
+    fundsSTI += (old_av->getSTI() - new_av->getSTI());
+    fundsLTI += (old_av->getLTI() - new_av->getLTI());
+}
+
+long AttentionBank::getTotalSTI() const
+{
     return startingFundsSTI - fundsSTI;
 }
 
-long AttentionBank::getTotalLTI() const {
+long AttentionBank::getTotalLTI() const
+{
     return startingFundsLTI - fundsLTI;
-}
-
-void AttentionBank::setAV(AttentionValueHolderPtr avh, const AttentionValue& av)
-{
-    std::lock_guard<std::mutex> lock(lock_funds);
-    const AttentionValue& oldAV = avh->getAttentionValue();
-    // Add the old attention values to the AtomSpace funds and
-    // subtract the new attention values from the AtomSpace funds
-    fundsSTI += (oldAV.getSTI() - av.getSTI());
-    fundsLTI += (oldAV.getLTI() - av.getLTI());
-
-    avh->setAttentionValue(av);
-}
-
-void AttentionBank::setSTI(AttentionValueHolderPtr avh, AttentionValue::sti_t stiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(stiValue, currentAv.getLTI(), currentAv.getVLTI()));
-}
-
-void AttentionBank::setLTI(AttentionValueHolderPtr avh, AttentionValue::lti_t ltiValue)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), ltiValue, currentAv.getVLTI()));
-}
-
-void AttentionBank::incVLTI(AttentionValueHolderPtr avh)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), currentAv.getVLTI()+1));
-}
-
-void AttentionBank::decVLTI(AttentionValueHolderPtr avh)
-{
-    const AttentionValue& currentAv = getAV(avh);
-    AttentionValue::vlti_t vlti = currentAv.getVLTI();
-    //we only want to decrement the vlti if it's not already disposable.
-    if(vlti!=AttentionValue::DISPOSABLE) vlti--;
-    setAV(avh, AttentionValue(currentAv.getSTI(), currentAv.getLTI(), vlti));
-}
-
-AttentionValue::sti_t AttentionBank::getSTI(AttentionValueHolderPtr avh) const
-{
-    return avh->getAttentionValue().getSTI();
-}
-
-AttentionValue::lti_t AttentionBank::getLTI(AttentionValueHolderPtr avh) const
-{
-    return avh->getAttentionValue().getLTI();
-}
-
-AttentionValue::vlti_t AttentionBank::getVLTI(AttentionValueHolderPtr avh) const
-{
-    return avh->getAttentionValue().getVLTI();
 }
 
 long AttentionBank::getSTIFunds() const
@@ -93,14 +81,14 @@ long AttentionBank::getLTIFunds() const
 long AttentionBank::updateSTIFunds(AttentionValue::sti_t diff)
 {
     std::lock_guard<std::mutex> lock(lock_funds);
-    fundsSTI+=diff;
+    fundsSTI += diff;
     return fundsSTI;
 }
 
 long AttentionBank::updateLTIFunds(AttentionValue::lti_t diff)
 {
     std::lock_guard<std::mutex> lock(lock_funds);
-    fundsLTI+=diff;
+    fundsLTI += diff;
     return fundsLTI;
 }
 
@@ -145,9 +133,4 @@ AttentionValue::sti_t AttentionBank::setAttentionalFocusBoundary(AttentionValue:
 {
     attentionalFocusBoundary = boundary;
     return boundary;
-}
-
-const AttentionValue& AttentionBank::getAV(AttentionValueHolderPtr avh) const
-{
-    return avh->getAttentionValue();
 }

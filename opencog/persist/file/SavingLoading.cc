@@ -413,8 +413,6 @@ void SavingLoading::loadLinks(FILE* f, HandMapPtr handles,
         }
         Type t = dumpToCore[oldType];
         LinkPtr link(readLink(f, t, handles));
-        readTrail(f, link->getTrail());
-
         atomTable.add(link);
     }
     CHECK_FREAD;
@@ -431,23 +429,6 @@ void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles)
         CompositeRenumber::updateVersionHandles(ctv, handles);
         atom->setTruthValue(ctv);
     }
-
-    // updates handles for trail
-    if (classserver().isA(atom->getType(), LINK)) {
-        Trail *t = (LinkPtr(LinkCast(atom)))->getTrail();
-        if (t->getSize()) {
-            //logger().fine("SavingLoading::updateHandles: trails");
-            Trail *newTrail = new Trail();
-            for (size_t i = 0; i < t->getSize(); i++) {
-                Handle handle = t->getElement(i);
-                CoreUtils::updateHandle(&handle, handles);
-                newTrail->insert(handle);
-            }
-            (LinkPtr(LinkCast(atom)))->setTrail(newTrail);
-            //newTrail->print();
-        }
-    }
-
 }
 
 void SavingLoading::writeAtom(FILE *f, AtomPtr atom)
@@ -490,9 +471,8 @@ Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
     atom->_uuid = uuid;
 
     // reads AttentionValue
-    AttentionValue *av = readAttentionValue(f);
-    atom->setAttentionValue(*av);
-    delete (av);
+    AttentionValuePtr av = readAttentionValue(f);
+    atom->setAttentionValue(av);
 
     TruthValuePtr tv = readTruthValue(f);
     atom->setTruthValue(tv);
@@ -551,8 +531,6 @@ void SavingLoading::writeLink(FILE *f, LinkPtr link)
 {
     logger().fine("writeLink(): %s", link->toString().c_str());
 
-    //link->getTrail()->print();
-
     writeAtom(f, link);
 
     // the link's arity is written on the file
@@ -565,24 +543,13 @@ void SavingLoading::writeLink(FILE *f, LinkPtr link)
         UUID uuid = link->getOutgoingAtom(i).value();
         fwrite(&uuid, sizeof(UUID), 1, f);
     }
-
-    // the trail
-    Trail *trail = link->getTrail();
-
-    int trailSize = trail->getSize();
-    fwrite(&trailSize, sizeof(int), 1, f);
-    for (int i = 0; i < trailSize; i++) {
-        UUID uuid = trail->getElement(i).value();
-        fwrite(&uuid, sizeof(UUID), 1, f);
-    }
-
 }
 
-void SavingLoading::writeAttentionValue(FILE *f, const AttentionValue& attentionValue)
+void SavingLoading::writeAttentionValue(FILE *f, AttentionValuePtr attentionValue)
 {
-    AttentionValue::sti_t tempSTI = attentionValue.getSTI();
-    AttentionValue::lti_t tempLTI = attentionValue.getLTI();
-    AttentionValue::vlti_t tempVLTI = attentionValue.getVLTI();
+    AttentionValue::sti_t tempSTI = attentionValue->getSTI();
+    AttentionValue::lti_t tempLTI = attentionValue->getLTI();
+    AttentionValue::vlti_t tempVLTI = attentionValue->getVLTI();
 
     fwrite(&tempSTI, sizeof(AttentionValue::sti_t), 1, f);
     fwrite(&tempLTI, sizeof(AttentionValue::lti_t), 1, f);
@@ -601,7 +568,7 @@ void SavingLoading::writeTruthValue(FILE *f, TruthValuePtr tv)
     fwrite(tvStr.c_str(), sizeof(char), length, f);
 }
 
-AttentionValue *SavingLoading::readAttentionValue(FILE *f)
+AttentionValuePtr SavingLoading::readAttentionValue(FILE *f)
 {
     AttentionValue::sti_t tempSTI;
     AttentionValue::lti_t tempLTI;
@@ -613,7 +580,7 @@ AttentionValue *SavingLoading::readAttentionValue(FILE *f)
     FREAD_CK(&tempVLTI, sizeof(AttentionValue::vlti_t), 1, f);
 
     CHECK_FREAD;
-    return(AttentionValue::factory(tempSTI, tempLTI, tempVLTI));
+    return createAV(tempSTI, tempLTI, tempVLTI);
 }
 
 
@@ -665,21 +632,6 @@ LinkPtr SavingLoading::readLink(FILE* f, Type t, HandMapPtr handles)
     link->_uuid = junk->_uuid;
     handles->add(h, link);
     return link;
-}
-
-void SavingLoading::readTrail(FILE* f, Trail* trail)
-{
-    // the trail
-    int trailSize;
-    bool b_read = true;
-    FREAD_CK(&trailSize, sizeof(int), 1, f);
-    for (int i = 0; i < trailSize; i++) {
-        UUID uuid;
-        FREAD_CK(&uuid, sizeof(UUID), 1, f);
-        Handle handle(uuid);
-        trail->insert( handle, false);
-    }
-    CHECK_FREAD;
 }
 
 void SavingLoading::printProgress(const char *s, int n)

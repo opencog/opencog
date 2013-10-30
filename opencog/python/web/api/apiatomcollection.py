@@ -2,11 +2,12 @@ __author__ = 'Cosmo Harrigan'
 
 from flask import abort
 from flask.ext.restful import Resource, reqparse, marshal
-from opencog.atomspace import *
+from opencog.atomspace import Handle
 from mappers import *
 
 
 class AtomCollectionAPI(Resource):
+    # This is because of https://github.com/twilio/flask-restful/issues/134
     @classmethod
     def new(cls, atomspace):
         cls.atomspace = atomspace

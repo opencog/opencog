@@ -1,6 +1,4 @@
-LINK_DIRECTORIES (
-	${PROJECT_BINARY_DIR}/opencog/atomspace
-)
+# Build file for the atomspace benchmark
 
 IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES (

@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//TODO move to persist
-
 #ifndef _OPENCOG_ZMQ_SERVER_H
 #define _OPENCOG_ZMQ_SERVER_H
 

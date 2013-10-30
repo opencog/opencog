@@ -102,11 +102,13 @@ class AtomSpaceImpl;
  * carry out other admin tasks before and after each cycle, without subclasses
  * needing to carry these out themselves unless they had specific reason to.
  */
-class Agent : public AttentionValueHolder
+class Agent
 {
 
 protected:
     CogServer& _cogserver;
+
+    AttentionValuePtr _attentionValue;
 
     /** The agent's frequency. Determines how often the opencog server should
      *  schedule this agent. A value of 1 (the default) means that the agent
@@ -134,7 +136,7 @@ protected:
     boost::signals::connection conn;
 
     /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
+    void atomRemoved(AtomPtr);
 
 public:
 
@@ -219,6 +221,8 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
+    AttentionValuePtr getAV() { return _attentionValue; }
+    void setAV(AttentionValuePtr new_av) { _attentionValue = new_av; }
 }; // class
 
 typedef std::shared_ptr<Agent> AgentPtr;

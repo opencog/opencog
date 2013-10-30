@@ -32,20 +32,10 @@
 #include <boost/scoped_ptr.hpp>
 
 #include <opencog/atomspace/AtomSpaceAsync.h>
-#include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/BackingStore.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/util/exceptions.h>
-
-// Whether to wrap certain functions in lru_cache_threaded<>
-#define USE_ATOMSPACE_LOCAL_THREAD_CACHE 1
-
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-#include <opencog/util/lru_cache.h>
-#endif
-
 
 namespace opencog
 {
@@ -340,13 +330,6 @@ public:
     }
 
     /**
-     * Retrieve from the Atom Table the actual atom for this handle.
-    */
-    Handle getHandle(Handle h) const {
-        return atomSpaceAsync->getHandle(h)->get_result();
-    }
-
-    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
@@ -368,12 +351,16 @@ public:
 
     /** Get the atom referred to by Handle h represented as a string. */
     std::string atomAsString(Handle h, bool terse = true) const {
-        return atomSpaceAsync->atomAsString(h,terse)->get_result();
+        if (terse) return h->toShortString();
+        return h->toString();
     }
 
     /** Retrieve the name of a given Handle */
-    std::string getName(Handle h) const {
-        return atomSpaceAsync->getName(h)->get_result();
+    const std::string& getName(Handle h) const {
+        static std::string noname;
+        NodePtr nnn = NodeCast(h);
+        if (nnn) return nnn->getName();
+        return noname;
     }
 
     /** Change the Short-Term Importance of a given Handle */
@@ -398,76 +385,63 @@ public:
     
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return atomSpaceAsync->getSTI(h)->get_result();
+        return h->getAttentionValue()->getSTI();
     }
 
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
+    /** Retrieve the Long-term Importance of a given atom */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return atomSpaceAsync->getLTI(h)->get_result();
+        return h->getAttentionValue()->getLTI();
     }
 
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
+    /** Retrieve the Very-Long-Term Importance of a given atom */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return atomSpaceAsync->getVLTI(h)->get_result();
+        return h->getAttentionValue()->getVLTI();
     }
 
     /** Retrieve the outgoing set of a given link */
-    HandleSeq getOutgoing(Handle h) const {
-        return atomSpaceAsync->getOutgoing(h)->get_result();
+    const HandleSeq& getOutgoing(Handle h) const {
+        static HandleSeq empty;
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getOutgoingSet();
+        return empty;
     }
 
     /** Retrieve a single Handle from the outgoing set of a given link */
-    Handle getOutgoing(Handle h, int idx) const {
-        return atomSpaceAsync->getOutgoing(h,idx)->get_result();
+    Handle getOutgoing(Handle h, Arity idx) const {
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getOutgoingAtom(idx);
+        return Handle::UNDEFINED;
     }
 
     /** Retrieve the arity of a given link */
-    int getArity(Handle h) const {
-        return atomSpaceAsync->getArity(h)->get_result();
+    Arity getArity(Handle h) const {
+        LinkPtr lll = LinkCast(h);
+        if (lll) return lll->getArity();
+        return 0;
     }
 
     /** Return whether s is the source handle in a link l */ 
-    bool isSource(Handle source, Handle link) const {
-        return atomSpaceAsync->isSource(source, link)->get_result();
+    bool isSource(Handle source, Handle link) const
+    {
+        LinkPtr l(LinkCast(link));
+        if (l) return l->isSource(source);
+        return false;
     }
 
     /** Retrieve the AttentionValue of a given Handle */
-    AttentionValue getAV(Handle h) const;
+    AttentionValuePtr getAV(Handle h) const {
+        return h->getAttentionValue();
+    }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av);
+    void setAV(Handle, AttentionValuePtr);
 
     /** Retrieve the type of a given Handle */
-    Type getType(Handle h) const;
+    Type getType(Handle h) const {
+        return h->getType();
+    }
 
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    // Experimental code for speeding up TV retrieval...
-    /** Cached get type function */
-    class _getType : public std::unary_function<Handle, Type> {
-        AtomSpace* a;
-        public:
-        _getType(AtomSpace* _a) : a(_a) { };
-        Type operator()(const Handle& h) const {
-            return a->atomSpaceAsync->getType(h)->get_result();
-        }
-    };
-    _getType* __getType;
-    // dummy get type version which is cached using lru_cache
-    lru_cache_threaded<AtomSpace::_getType> *getTypeCached;
-#endif // USE_ATOMSPACE_LOCAL_THREAD_CACHE
-
-
-    /* Retrieve the TruthValue summary of a given Handle
-     */
-    //tv_summary_t getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
-
-    /** Retrieve the TruthValue of a given Handle
-     * @note This is an unpleasant hack which is unsafe as it returns a pointer
-     * to the AtomSpace TV which may be lost if the Atom the TV belongs to is
-     * removed. It's much faster than having to copy the value and use smart
-     * pointers though. Garbage collection should solve this.
-     */
+    /** Retrieve the TruthValue of a given Handle */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
 
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
@@ -485,7 +459,23 @@ public:
         atomSpaceAsync->setMean(h, mean)->get_result();
     }
 
-    bool isValidHandle(const Handle& h) const;
+    /**
+     * Return true if the handle belongs to *this* atomspace; else
+     * return false.  Note that the handle might still be valid in
+     * some other atomsapce. */
+    bool isValidHandle(Handle h) const {
+        // The h->getHandle() maneuver below is a trick to get at the
+        // UUID of the actual atom, rather than the cached UUID in the
+        // handle. Technically, this is not quite right, since perhaps
+        // handles with valid UUID's but unresolved atom pointers are
+        // "valid".  This call is essentially forcing resolution :-(
+        // We should also be confirming that the UUID is OK, by asking
+        // the TLB about it.  Anyway, this check is not entirely technically
+        // correct ... worse, its a potentially performance-critical check,
+        // as its called fairly often (I think).
+        // return (NULL != h) and TLB::isValidHandle(h->getHandle());
+        return (NULL != h) and (h->getHandle() != Handle::UNDEFINED);
+    }
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
      * for a given Handle. STI above and below threshold normalised separately
@@ -538,8 +528,8 @@ public:
     }
 
     /** Convenience functions... */
-    bool isNode(const Handle& h) const;
-    bool isLink(const Handle& h) const;
+    bool isNode(Handle h) const { return NodeCast(h) != NULL; }
+    bool isLink(Handle h) const { return LinkCast(h) != NULL; }
 
     /**
      * Gets a set of handles that matches with the given arguments.
@@ -1151,7 +1141,7 @@ public:
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr atom) {
-            return atom->getAttentionValue().getSTI() > threshold;
+            return atom->getAttentionValue()->getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -1160,7 +1150,7 @@ public:
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr atom) {
-            return atom->getAttentionValue().getLTI() > threshold;
+            return atom->getAttentionValue()->getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
@@ -1169,33 +1159,9 @@ public:
     // of callbacks. It's accessible via the Cython wrapper.
     std::list<Handle> addAtomSignalQueue;
 
-
-    static bool isHandleInSeq(Handle h, HandleSeq &seq);
-
 private:
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
-    bool handleAddSignal(AtomSpaceImpl *, Handle);
-
-#ifdef USE_ATOMSPACE_LOCAL_THREAD_CACHE
-    /** For monitoring removals to the AtomSpace so that cache entries can be
-     * invalidated as necessary
-     */
-    bool atomRemoveSignal(AtomSpaceImpl *, AtomPtr);
-
-    //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
-    bool watchingAtomSpace;
-
     boost::signals::connection c_add; //! Connection to add atom signals
-    boost::signals::connection c_remove; //! Connection to remove atom signals
-
-    void setUpCaching();
-#endif
-
-
+    bool handleAddSignal(Handle);
 };
 
 /** @}*/

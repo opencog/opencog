@@ -42,7 +42,6 @@ ADD_LIBRARY (atomspace SHARED
     StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
-    Trail.cc
     TruthValue.cc
     TypeIndex.cc
     VersionHandle.cc
@@ -57,10 +56,6 @@ SET(ATOMSPACE_LINK_LIBS
 	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
-
-IF (HAVE_ZMQ)
-	SET(ATOMSPACE_LINK_LIBS ${ATOMSPACE_LINK_LIBS} zmq)
-ENDIF (HAVE_ZMQ)
 
 TARGET_LINK_LIBRARIES(atomspace
 	${ATOMSPACE_LINK_LIBS}
@@ -117,7 +112,6 @@ INSTALL (FILES
     StringIndex.h
     TargetTypeIndex.h
     TLB.h
-    Trail.h
     TruthValue.h
     TypeIndex.h
     VersionHandle.h

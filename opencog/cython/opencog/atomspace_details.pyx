@@ -277,6 +277,10 @@ cdef class AtomSpace:
             return Atom(key,self)
         raise IndexError("No Atom with handle %s" % str(key))
 
+    def __iter__(self):
+        """ Support iterating across all atoms in the atomspace """
+        return iter(self.get_atoms_by_type(0))
+
     def size(self):
         """ Return the number of atoms in the AtomSpace """
         return self.atomspace.getSize()

@@ -27,7 +27,6 @@
 #include <string>
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Trail.h>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
@@ -58,7 +57,6 @@ class Link : public Atom
 #endif
 
 private:
-    Trail* trail;
 #ifdef ZMQ_EXPERIMENT
     Link() {};
 #endif
@@ -196,20 +194,6 @@ public:
      * @return The number of different target types of an atom.
      */
     int getTargetTypeIndexSize() const;
-
-    /**
-     * Returns the trail of the link.
-     *
-     * @return Trail of the link.
-     */
-    Trail* getTrail();
-
-    /**
-     * Sets a trail for the link.
-     *
-     * @param Trail to be set.
-     */
-    void setTrail(Trail *);
 
     /**
      * Returns a string representation of the link.

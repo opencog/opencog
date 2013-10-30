@@ -137,46 +137,10 @@ Note: Currently, the iterators are not safe against concurrent atom
 insertion or removal.  In particular, they are not thread-safe. 
 This needs to be fixed at some point... XXX TODO.
 
-
-======================================================================
-======================================================================
-======================================================================
-
-                   Garbage Collection Design
-                   -------------------------
-
-Without garbage collection (or smart pointers) it becomes unsafe to use
-bare pointers in a multi-threaded environment.  With garbage collection
-(or smart pointers), and a reasonably good design and coding style, the
-use of bare pointers in a multi-threaded environment becomes safe. In
-what follows, smart poiners will not be considered because they are 
-(1) generally slower (2) use more RAM, (3) are harder to design with,
-as compared to garbage collection.
-
-There is one big stumbling block to garbage collection, and that is 
-the need to maintain the incoming set for atoms, and the need to perform
-a Handle to Atom* lookup.  Both of these introduce circular references,
-and can thus stump the garbage collector.  The fix for this issue is
-two-fold:  (a) The IncomingIndex must still hold Handle, not Atom*
-(b) the TLB must NOT inherit from the garbage collector, and/or must
-disguise pointers, e.g. by using XOR.  Finally, the Atom destructor
-must be responsible for removing atoms from the TLB.  Aside from 
-these issues, it should be completely safe to convert all other uses
-of Handles to Atom* (with certain exceptions, e.g. in object the 
-persistance code, etc.)
-
-The primary motivation for raw pointer access is speed.  See the
-numbers reported in opencog/benchmark/diary.txt -- in many cases,
-raw pointer access is two orders of magnitude faster than using
-the 'safe', Handle-oriented AtomSpace interface.
-
-TODO:
--- conditionally add boehm GC
--- convert outgoing set to hold Atom*
--- Add locks to TypeIndex iterator, etc.
--- add threading to benchmark
--- benchmark scheme API
-
+(The AtomSpace is currently thread-safe, because it serializes all acccess.
+It is also a bottleneck, because it .. serializes all access.  The above
+mentioned concerns only come into play if/when we blow away the serialization
+in the atomspace.)
 
 
 ======================================================================
@@ -404,3 +368,58 @@ FIXED ISSUES:
    indexes.  It should be removed to save space.
 
    Status: removed, March 2013
+
+10) Garbage collection.
+
+   Status:  All atom pointers have been converted to use
+   std::shared_pointer to auto-manage atom deletion. September 2013.
+
+11) Trail class.  Used only by old, broken C++ PLN code. New
+   python PLN will use TrailLink.
+
+   Status: removed, October 2013
+
+======================================================================
+======================================================================
+======================================================================
+
+                   Garbage Collection Design
+                   -------------------------
+Status: Stale. At this time, Handles use std::shared_pointer to deal
+with memory management, and so using GC is no longer urgent.  The
+shared_pointers seem to work OK, for now.  A GC experiment might be
+interesting some day in teh future, when typical userrs stress the
+atomspace much more strongly.
+
+Without garbage collection (or smart pointers) it becomes unsafe to use
+bare pointers in a multi-threaded environment.  With garbage collection
+(or smart pointers), and a reasonably good design and coding style, the
+use of bare pointers in a multi-threaded environment becomes safe. In
+what follows, smart poiners will not be considered because they are 
+(1) generally slower (2) use more RAM, (3) are harder to design with,
+as compared to garbage collection.
+
+There is one big stumbling block to garbage collection, and that is 
+the need to maintain the incoming set for atoms, and the need to perform
+a Handle to Atom* lookup.  Both of these introduce circular references,
+and can thus stump the garbage collector.  The fix for this issue is
+two-fold:  (a) The IncomingIndex must still hold Handle, not Atom*
+(b) the TLB must NOT inherit from the garbage collector, and/or must
+disguise pointers, e.g. by using XOR.  Finally, the Atom destructor
+must be responsible for removing atoms from the TLB.  Aside from 
+these issues, it should be completely safe to convert all other uses
+of Handles to Atom* (with certain exceptions, e.g. in object the 
+persistance code, etc.)
+
+The primary motivation for raw pointer access is speed.  See the
+numbers reported in opencog/benchmark/diary.txt -- in many cases,
+raw pointer access is two orders of magnitude faster than using
+the 'safe', Handle-oriented AtomSpace interface.
+
+TODO:
+-- conditionally add boehm GC
+-- convert outgoing set to hold Atom* (Done, Sept 2013)
+-- Add locks to TypeIndex iterator, etc.
+-- add threading to benchmark
+
+

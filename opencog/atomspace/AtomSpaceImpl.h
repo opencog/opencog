@@ -49,9 +49,6 @@ namespace opencog
 
 class AtomSpaceImpl;
 
-typedef boost::signal<void (AtomSpaceImpl*,Handle)> AtomSignal;
-typedef boost::signal<void (AtomSpaceImpl*,AtomPtr)> AtomPtrSignal;
-
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
  * AtomSpace requests that are running within the AtomSpaceAsync event loop.
@@ -60,18 +57,6 @@ class AtomSpaceImpl
 {
     friend class SavingLoading;
     friend class SaveRequest;
-
-    /**
-     * Used to fetch atoms from disk.
-     */
-    BackingStore *backing_store;
-
-    /** Provided signals */
-    AtomSignal _addAtomSignal;
-    AtomSignal _mergeAtomSignal;
-    AtomPtrSignal _removeAtomSignal;
-
-    AttentionBank bank;
 
 public:
     AtomSpaceImpl(void);
@@ -172,7 +157,9 @@ public:
      * @return True if the Atom for the given Handle was successfully
      *         removed. False, otherwise.
      */
-    bool removeAtom(Handle h, bool recursive = true);
+    bool removeAtom(Handle h, bool recursive = true) {
+        return 0 < atomTable.extract(h, recursive).size();
+    }
 
     /**
      * Retrieve from the Atom Table the Handle of a given node
@@ -191,15 +178,6 @@ public:
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const
         { return atomTable.getHandle(t, outgoing); }
-
-    /** Get the atom referred to by Handle h represented as a string. */
-    std::string atomAsString(Handle h, bool terse = true) const;
-
-    /** Retrieve the atom pointer of a given Handle */
-    Handle getHandle(Handle h) const
-    {
-        return h;
-    }
 
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const
@@ -274,7 +252,7 @@ public:
     void setMean(Handle, float mean) throw (InvalidParamException);
 
     /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValueHolder. STI above and below threshold
+     * for a given AttentionValue. STI above and below threshold
      * normalised separately and linearly.
      *
      * @param h The attention value holder to get STI for
@@ -284,10 +262,10 @@ public:
      * range can be return if average=true
      * @return normalised STI between -1..1
      */
-    float getNormalisedSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
+    float getNormalisedSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given AttentionValueHolder.
+     * for a given AttentionValue.
      *
      * @param h The attention value holder to get STI for
      * @param average Should the recent average max/min STI be used, or the
@@ -296,58 +274,74 @@ public:
      * range can be return if average=true
      * @return normalised STI between 0..1
      */
-    float getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the Long-term Importance of a given AttentionValueHolder */
-    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given
-     * AttentionValueHolder */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
+    float getNormalisedZeroToOneSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
 
     /** Retrieve the AttentionValue of a given Handle */
-    const AttentionValue& getAV(Handle h) const {
-        return bank.getAV(AtomPtr(h));
+    AttentionValuePtr getAV(Handle h) const {
+        return h->getAttentionValue();
     }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, const AttentionValue &av) {
-        bank.setAV(AtomPtr(h), av);
+    void setAV(Handle h, AttentionValuePtr av) {
+        h->setAttentionValue(av);
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        bank.setSTI(AtomPtr(h), stiValue);
+        /* Make a copy */
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        bank.setLTI(AtomPtr(h), ltiValue);
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
     void incVLTI(Handle h) {
-        bank.incVLTI(AtomPtr(h));
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + 1);
+        h->setAttentionValue(new_av);
     }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {
-        bank.decVLTI(AtomPtr(h));
+        AttentionValuePtr old_av = h->getAttentionValue();
+        //we only want to decrement the vlti if it's not already disposable.
+        if (old_av->getVLTI() == AttentionValue::DISPOSABLE) return;
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() - 1);
+        h->setAttentionValue(new_av);
     }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
-        return bank.getSTI(AtomPtr(h));
+        return h->getAttentionValue()->getSTI();
     }
 
     /** Retrieve the Long-term Importance of a given Handle */
     AttentionValue::lti_t getLTI(Handle h) const {
-        return bank.getLTI(AtomPtr(h));
+        return h->getAttentionValue()->getLTI();
     }
 
     /** Retrieve the Very-Long-Term Importance of a given Handle */
     AttentionValue::vlti_t getVLTI(Handle h) const {
-        return bank.getVLTI(AtomPtr(h));
+        return h->getAttentionValue()->getVLTI();
     }
 
     bool isValidHandle(Handle h) const {
@@ -885,7 +879,7 @@ public:
      * Deprecated, importance updating should be done by ImportanceUpdating
      * Agent. Still used by Embodiment.
      */
-    void decayShortTermImportance();
+    void decayShortTermImportance() { atomTable.decayShortTermImportance(); }
 
     size_t Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
     size_t Links(VersionHandle = NULL_VERSION_HANDLE) const;
@@ -945,7 +939,7 @@ public:
         STIAboveThreshold(const AttentionValue::sti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr a) {
-            return a->getAttentionValue().getSTI() > threshold;
+            return a->getAttentionValue()->getSTI() > threshold;
         }
         AttentionValue::sti_t threshold;
     };
@@ -954,7 +948,7 @@ public:
         LTIAboveThreshold(const AttentionValue::lti_t t) : threshold (t) {}
 
         virtual bool test(AtomPtr a) {
-            return a->getAttentionValue().getLTI() > threshold;
+            return a->getAttentionValue()->getLTI() > threshold;
         }
         AttentionValue::lti_t threshold;
     };
@@ -962,15 +956,12 @@ public:
 private:
 
     AtomTable atomTable;
+    AttentionBank bank;
 
-    /** The AtomSpace currently acts like event loop, but some legacy code (such as
-     * saving/loading) might not like the AtomSpace changing while acting upon
-     * it. Those that absolutely require it can get a lock to halt the event loop.
-     * @warn This should only be used as a last resort, you need to add your
-     * class as a friend class to the AtomSpace, and there is no
-     * guarantee this will be available in the future.
+    /**
+     * Used to fetch atoms from disk.
      */
-    mutable pthread_mutex_t atomSpaceLock;
+    BackingStore *backing_store;
 
     /**
      * signal connections used to keep track of atom removal in the AtomTable
@@ -978,48 +969,18 @@ private:
     boost::signals::connection removedAtomConnection; 
     boost::signals::connection addedAtomConnection; 
 
-    /** Boundary at which an atom is considered within the attentional
-     * focus of opencog. Atom's with STI less than this value are
-     * not charged STI rent */
-    AttentionValue::sti_t attentionalFocusBoundary;
+    /** Handler for the 'atom removed' signal */
+    void atomRemoved(AtomPtr);
 
-    opencog::recent_val<AttentionValue::sti_t> maxSTI;
-    opencog::recent_val<AttentionValue::sti_t> minSTI;
-
-    /* These indicate the amount importance funds available in the
-     * AtomSpace */
-    long fundsSTI;
-    long fundsLTI;
-
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
-    /**
-     * Creates the space map node, if not created yet.
-     * returns the handle of the node.
-     */
-    Handle getSpaceMapNode(void);
-
-    /**
-     * Handler of the 'atom removed' signal from self
-     */
-    void atomRemoved(AtomSpaceImpl*, AtomPtr);
-
-    /**
-     * Handler of the 'atom added' signal from self
-     */
-    void atomAdded(AtomSpaceImpl*, Handle);
+    /** Handler for the 'atom added' signal */
+    void atomAdded(Handle);
 
 public:
     // pass on the signals from the Atom Table
-    AtomSignal& addAtomSignal()
-        { return _addAtomSignal; }
-    AtomPtrSignal& removeAtomSignal()
-        { return _removeAtomSignal; }
-    AtomSignal& mergeAtomSignal()
-        { return _mergeAtomSignal; }
+    AtomSignal& addAtomSignal() { return atomTable._addAtomSignal; }
+    AtomPtrSignal& removeAtomSignal() { return atomTable._removeAtomSignal; }
+    TVCHSigl& TVChangedSignal() { return atomTable._TVChangedSignal; }
+    AVCHSigl& AVChangedSignal() { return atomTable._AVChangedSignal; }
 
     /**
      * Overrides and declares copy constructor and equals operator as private 

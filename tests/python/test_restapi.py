@@ -53,9 +53,9 @@ class TestRESTApi():
         assert post_result['type'] == atom['type']
         assert post_result['name'] == atom['name']
         assert post_result['truthvalue']['type'] == truthvalue['type']
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
 
         # Compare to the values created in the AtomSpace
@@ -63,8 +63,8 @@ class TestRESTApi():
         assert Handle(post_result['handle']) == atomspace_result.h
         assert post_result['name'] == atomspace_result.name
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
-        assert TruthValue(float(post_result['truthvalue']['details']['strength']),\
-                          float(post_result['truthvalue']['details']['count']))  == atomspace_result.tv
+        assert TruthValue(float(post_result['truthvalue']['details']['strength']),
+                          float(post_result['truthvalue']['details']['count'])) == atomspace_result.tv
 
         # Get by handle and compare
         handle = post_result['handle']
@@ -87,7 +87,7 @@ class TestRESTApi():
     def test_post_and_get_link(self):
         # Create a test link between swan and animal
         truthvalue = {'type': 'simple', 'details': {'strength': 0.5, 'count': 0.4}}
-        atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue, 'outgoing':\
+        atom = {'type': 'InheritanceLink', 'truthvalue': truthvalue, 'outgoing':
             [self.swan.h.value(), self.animal.h.value()]}
 
         post_response = self.client.post(self.uri + 'atoms', data=json.dumps(atom), headers=self.headers)
@@ -96,9 +96,9 @@ class TestRESTApi():
         # Verify values returned by the POST request
         assert post_result['type'] == atom['type']
         assert post_result['truthvalue']['type'] == truthvalue['type']
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
         assert self.swan.h.value() in post_result['outgoing']
         assert self.animal.h.value() in post_result['outgoing']
@@ -107,8 +107,8 @@ class TestRESTApi():
         atomspace_result = self.atomspace[Handle(post_result['handle'])]
         assert Handle(post_result['handle']) == atomspace_result.h
         assert types.__dict__.get(post_result['type']) == atomspace_result.type
-        assert TruthValue(float(post_result['truthvalue']['details']['strength']),\
-                          float(post_result['truthvalue']['details']['count']))  == atomspace_result.tv
+        assert TruthValue(float(post_result['truthvalue']['details']['strength']),
+                          float(post_result['truthvalue']['details']['count'])) == atomspace_result.tv
 
         # Get by handle and compare
         handle = post_result['handle']
@@ -130,9 +130,9 @@ class TestRESTApi():
 
         # Verify values returned by the PUT request
         assert put_result['handle'] == atom.h.value()
-        assert_almost_equals(\
+        assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(put_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
         assert put_result['attentionvalue']['sti'] == attentionvalue['sti']
         assert put_result['attentionvalue']['lti'] == attentionvalue['lti']
@@ -142,8 +142,8 @@ class TestRESTApi():
         atomspace_result = self.atomspace[Handle(put_result['handle'])]
         assert Handle(put_result['handle']) == atomspace_result.h
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
-        assert TruthValue(float(put_result['truthvalue']['details']['strength']),\
-                          float(put_result['truthvalue']['details']['count']))  == atomspace_result.tv
+        assert TruthValue(float(put_result['truthvalue']['details']['strength']),
+                          float(put_result['truthvalue']['details']['count'])) == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
@@ -162,9 +162,9 @@ class TestRESTApi():
 
         # Verify values returned by the PUT request
         assert put_result['handle'] == atom.h.value()
-        assert_almost_equals(\
+        assert_almost_equals(
             float(put_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(put_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
         assert put_result['attentionvalue']['sti'] == attentionvalue['sti']
         assert put_result['attentionvalue']['lti'] == attentionvalue['lti']
@@ -174,8 +174,8 @@ class TestRESTApi():
         atomspace_result = self.atomspace[Handle(put_result['handle'])]
         assert Handle(put_result['handle']) == atomspace_result.h
         assert types.__dict__.get(put_result['type']) == atomspace_result.type
-        assert TruthValue(float(put_result['truthvalue']['details']['strength']),\
-                          float(put_result['truthvalue']['details']['count']))  == atomspace_result.tv
+        assert TruthValue(float(put_result['truthvalue']['details']['strength']),
+                          float(put_result['truthvalue']['details']['count'])) == atomspace_result.tv
         assert put_result['attentionvalue'] == atomspace_result.av
 
         # Get by handle and compare
@@ -194,14 +194,14 @@ class TestRESTApi():
         post_result = json.loads(post_response.data)['atoms']
 
         # Verify values returned by the POST request
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
         assert post_result['handle'] == existing_atom.h.value()
-        assert TruthValue(float(post_result['truthvalue']['details']['strength']),\
+        assert TruthValue(float(post_result['truthvalue']['details']['strength']),
                           float(post_result['truthvalue']['details']['count'])) == existing_atom.tv
 
     def test_post_revise_existing_link(self):
@@ -217,14 +217,14 @@ class TestRESTApi():
 
         # Verify values returned by the POST request
         assert post_result['outgoing'] == outgoing
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['strength']), truthvalue['details']['strength'], places=5)
-        assert_almost_equals(\
+        assert_almost_equals(
             float(post_result['truthvalue']['details']['count']), truthvalue['details']['count'], places=5)
 
         # Compare to the values updated in the AtomSpace
         assert post_result['handle'] == existing_atom.h.value()
-        assert TruthValue(float(post_result['truthvalue']['details']['strength']),\
+        assert TruthValue(float(post_result['truthvalue']['details']['strength']),
                           float(post_result['truthvalue']['details']['count'])) == existing_atom.tv
 
     @raises(IndexError)

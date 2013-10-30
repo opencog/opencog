@@ -49,21 +49,17 @@
 using namespace opencog;
 
 // Single, global mutex for locking the incoming set.
-std::mutex Atom::IncomingSet::_mtx;
+std::mutex Atom::InSet::_mtx;
 
-
-Atom::Atom(Type t, TruthValuePtr tv, const AttentionValue& av)
+Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 {
     _uuid = Handle::UNDEFINED.value();
     flags = 0;
     atomTable = NULL;
     type = t;
+    _attentionValue = av;
 
     if (not tv->isNullTv()) truthValue = tv;
-    if (atomTable != NULL)
-        setAttentionValue(av);
-    else
-        attentionValue = av;
 
     // XXX FIXME for right now, all atoms will always keep their
     // incoming sets.  In the future, this should only be set by
@@ -83,21 +79,23 @@ void Atom::setTruthValue(TruthValuePtr tv)
     if (not tv->isNullTv()) truthValue = tv;
 }
 
-void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeException)
+void Atom::setAttentionValue(AttentionValuePtr new_av) throw (RuntimeException)
 {
-    if (new_av == attentionValue) return;
+    if (new_av == _attentionValue) return;
+    if (*new_av == *_attentionValue) return;
 
     int oldBin = -1;
     if (atomTable != NULL) {
         // gets current bin
-        oldBin = ImportanceIndex::importanceBin(attentionValue.getSTI());
+        oldBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
     }
 
-    attentionValue = new_av;
+    AttentionValuePtr old_av = _attentionValue;
+    _attentionValue = new_av;
 
     if (atomTable != NULL) {
         // gets new bin
-        int newBin = ImportanceIndex::importanceBin(attentionValue.getSTI());
+        int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
 
         // if the atom importance has changed its bin,
         // updates the importance index
@@ -105,6 +103,10 @@ void Atom::setAttentionValue(const AttentionValue& new_av) throw (RuntimeExcepti
             AtomPtr a(std::static_pointer_cast<Atom>(shared_from_this()));
             atomTable->updateImportanceIndex(a, oldBin);
         }
+
+        // Notify any interested parties that the AV changed.
+        AVCHSigl& avch = atomTable->AVChangedSignal();
+        avch(getHandle(), old_av, new_av);
     }
 }
 
@@ -139,7 +141,23 @@ void Atom::markForRemoval(void)
 
 void Atom::setAtomTable(AtomTable *tb)
 {
+    if (tb == atomTable) return;
+
+    // Notify any interested parties that the AV changed.
+    if (NULL == tb and NULL != atomTable) {
+        // remove, as far as the old table is concerned
+        AVCHSigl& avch = atomTable->AVChangedSignal();
+        avch(getHandle(), _attentionValue, AttentionValue::DEFAULT_AV());
+
+        // UUID's belong to the atom table, not the atom. Reclaim it.
+        _uuid = Handle::UNDEFINED.value();
+    }
     atomTable = tb;
+    if (NULL != tb) {
+        // add, as far as the old table is concerned
+        AVCHSigl& avch = tb->AVChangedSignal();
+        avch(getHandle(), AttentionValue::DEFAULT_AV(), _attentionValue);
+    }
 }
 
 
@@ -156,7 +174,7 @@ void Atom::setAtomTable(AtomTable *tb)
 void Atom::keep_incoming_set()
 {
     if (_incoming_set) return;
-    _incoming_set = std::make_shared<IncomingSet>();
+    _incoming_set = std::make_shared<InSet>();
 }
 
 /// Stop tracking the incoming set for this atom.
@@ -177,6 +195,7 @@ void Atom::insert_atom(LinkPtr a)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
     _incoming_set->_iset.insert(a);
+    _incoming_set->_addAtomSignal(shared_from_this(), a);
 }
 
 /// Remove an atom from the incoming set.
@@ -184,6 +203,19 @@ void Atom::remove_atom(LinkPtr a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    _incoming_set->_removeAtomSignal(shared_from_this(), a);
     _incoming_set->_iset.erase(a);
 }
 
+// We return a copy here, and not a reference, because the 
+// set itself is not thread-safe during reading while 
+// simultaneous insertion/deletion.
+IncomingSet Atom::getIncomingSet() const
+{
+    static IncomingSet empty_set;
+    if (NULL == _incoming_set) return empty_set;
+
+    // Prevent update of set while a copy is being made.
+    std::lock_guard<std::mutex> lck (_incoming_set->_mtx);
+    return _incoming_set->_iset;
+}

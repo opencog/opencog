@@ -30,6 +30,7 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/server/CogServer.h>
 

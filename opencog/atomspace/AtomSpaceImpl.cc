@@ -27,7 +27,6 @@
 #include <fstream>
 #include <list>
 
-#include <pthread.h>
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
@@ -54,14 +53,14 @@ using namespace opencog;
 // ====================================================================
 
 AtomSpaceImpl::AtomSpaceImpl(void)
+    : bank(&atomTable)
 {
     backing_store = NULL;
 
     // connect signals
-    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1, _2));
-    removedAtomConnection = removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1, _2));
+    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1));
+    removedAtomConnection = atomTable.removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1));
 
-    pthread_mutex_init(&atomSpaceLock, NULL);
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
 }
 
@@ -86,9 +85,9 @@ void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 
 // ====================================================================
 
-void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
+void AtomSpaceImpl::atomAdded(Handle h)
 {
-    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), atomAsString(h).c_str());
+    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), h->toShortString().c_str());
     Type type = getType(h);
     if (type == CONTEXT_LINK) {
         // Add corresponding VersionedTV to the contextualized atom
@@ -103,7 +102,7 @@ void AtomSpaceImpl::atomAdded(AtomSpaceImpl *a, Handle h)
     }
 }
 
-void AtomSpaceImpl::atomRemoved(AtomSpaceImpl *a, AtomPtr atom)
+void AtomSpaceImpl::atomRemoved(AtomPtr atom)
 {
     Type type = atom->getType();
     if (type == CONTEXT_LINK) {
@@ -141,64 +140,30 @@ AtomSpaceImpl& AtomSpaceImpl::operator=(const AtomSpaceImpl& other)
 }
 
 AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
+    : bank(&atomTable)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpaceImpl - Cannot copy an object of this class");
-}
-
-bool AtomSpaceImpl::removeAtom(Handle h, bool recursive)
-{
-    AtomPtrSet extractedAtoms = atomTable.extract(h, recursive);
-    if (extractedAtoms.size() == 0) return false;
-
-    AtomPtrSet::const_iterator it;
-    for (it = extractedAtoms.begin(); it != extractedAtoms.end(); it++) {
-        AtomPtr a = *it;
-
-        // Also refund sti/lti to AtomSpace funds pool
-        bank.updateSTIFunds(bank.getSTI(a));
-        bank.updateLTIFunds(bank.getLTI(a));
-
-        // emit remove atom signal
-        _removeAtomSignal(this, a);
-    }
-
-    return true;
 }
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 {
     DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
-    Handle result = getHandle(t, name);
-    if (atomTable.holds(result)) {
-        atomTable.merge(result, tvn);
-        // emit "merge atom" signal
-        _mergeAtomSignal(this,result);
-        return result;
-    }
-
-    // Remove default STI/LTI from AtomSpace Funds
-    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
 
     // Maybe the backing store knows about this atom.
+// XXX this is utterly the wrong place to do this ... 
     if (backing_store) {
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
-            result = atomTable.add(n);
+            Handle result = atomTable.add(n);
             atomTable.merge(result,tvn);
-            // emit "merge atom" signal
-            _mergeAtomSignal(this,result);
             return result;
         }
     }
 
     NodePtr n(createNode(t, name, tvn));
     Handle newNodeHandle = atomTable.add(n);
-    // emit add atom signal
-    _addAtomSignal(this, newNodeHandle);
-
     return newNodeHandle;
 }
 
@@ -207,18 +172,8 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
 {
     DPRINTF("AtomSpaceImpl::addLink AtomTable address: %p\n", &atomTable);
     DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
-    Handle result = getHandle(t, outgoing);
-    if (atomTable.holds(result)) {
-        // If the node already exists, it must be merged properly
-        atomTable.merge(result, tvn);
-        _mergeAtomSignal(this,result);
-        return result;
-    }
 
-    // Remove default STI/LTI from AtomSpace Funds
-    fundsSTI -= AttentionValue::DEFAULTATOMSTI;
-    fundsLTI -= AttentionValue::DEFAULTATOMLTI;
-
+// XXX this is utterly the wrong place to do this ... 
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
@@ -226,17 +181,13 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         if (l) {
             // register the atom with the atomtable (so it gets placed in
             // indices)
-            result = atomTable.add(l);
+            Handle result = atomTable.add(l);
             atomTable.merge(result,tvn);
-            // Send a merge signal
-            _mergeAtomSignal(this,result);
             return result;
         }
     }
 
     Handle newLinkHandle = atomTable.add(createLink(t, outgoing, tvn));
-    // emit add atom signal
-    _addAtomSignal(this, newLinkHandle);
     return newLinkHandle;
 }
 
@@ -290,16 +241,6 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
         }
     }
     return base;
-}
-
-std::string AtomSpaceImpl::atomAsString(Handle h, bool terse) const
-{
-    h = atomTable.getHandle(h);
-    if (h) {
-        if (terse) return h->toShortString();
-        else return h->toString();
-    }
-    return std::string("ERROR: Bad handle");
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
@@ -435,12 +376,12 @@ void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
     setTV(h, newTv);
 }
 
-float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedSTI(AttentionValuePtr av, bool average, bool clip) const
 {
     // get normalizer (maxSTI - attention boundary)
     int normaliser;
     float val;
-    AttentionValue::sti_t s = bank.getSTI(avh);
+    AttentionValue::sti_t s = av->getSTI();
     if (s > bank.getAttentionalFocusBoundary()) {
         normaliser = (int) bank.getMaxSTI(average) - bank.getAttentionalFocusBoundary();
         if (normaliser == 0) {
@@ -461,11 +402,11 @@ float AtomSpaceImpl::getNormalisedSTI(AttentionValueHolderPtr avh, bool average,
     }
 }
 
-float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValueHolderPtr avh, bool average, bool clip) const
+float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
 {
     int normaliser;
     float val;
-    AttentionValue::sti_t s = bank.getSTI(avh);
+    AttentionValue::sti_t s = av->getSTI();
     normaliser = bank.getMaxSTI(average) - bank.getMinSTI(average);
     if (normaliser == 0) {
         return 0.0f;
@@ -488,18 +429,6 @@ size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
     HandleSeq hs;
     atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
     return hs.size();
-}
-
-void AtomSpaceImpl::decayShortTermImportance()
-{
-    DPRINTF("AtomSpaceImpl::decayShortTermImportance Atom space address: %p\n", this);
-    AtomPtrSet oldAtoms = atomTable.decayShortTermImportance();
-
-    // Send signals  -- emit remove atom signal
-    AtomPtrSet::const_iterator it;
-    AtomPtrSet::const_iterator end = oldAtoms.end();
-    for (it = oldAtoms.begin(); it != end; it++)
-        _removeAtomSignal(this, (*it));
 }
 
 

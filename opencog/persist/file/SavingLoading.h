@@ -168,7 +168,7 @@ private:
      * @param AttentionValue to be written.
      * @return Number of bytes written to file.
      */
-    void writeAttentionValue(FILE*, const AttentionValue&);
+    void writeAttentionValue(FILE*, AttentionValuePtr);
 
 
     /**
@@ -198,7 +198,6 @@ private:
      * @param Table to be filled with mappings from old to new handles.
      */
     LinkPtr readLink(FILE*, Type, HandMapPtr);
-    void readTrail(FILE*, Trail*);
 
     /**
      * This method reads all TruthValue members from a given file.
@@ -214,7 +213,7 @@ private:
      * @param File from where the AttentionValue will be read.
      * @return The newly AttentionValue read from the file.
      */
-    AttentionValue* readAttentionValue(FILE* f);
+    AttentionValuePtr readAttentionValue(FILE* f);
 
 
     /**

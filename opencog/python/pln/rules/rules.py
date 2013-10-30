@@ -55,7 +55,9 @@ class Rule(object):
             new_template = chainer.standardize_apart(template, dic)
             new_outputs.append(new_template)
 
-        return (new_inputs, new_outputs)
+        created_vars = dic.values()
+
+        return (new_inputs, new_outputs, created_vars)
 
 # Inheritance Rules
 

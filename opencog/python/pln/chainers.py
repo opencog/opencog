@@ -231,7 +231,7 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
-        (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         specific_inputs = []
         empty_substitution = {}
         subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
@@ -240,6 +240,12 @@ class Chainer(AbstractChainer):
         # set the outputs after you've found all the inputs
         # mustn't use '=' because it will discard the original reference and thus have no effect
         specific_outputs = self.substitute_list(subst, generic_outputs)
+
+        # delete the query atoms after you've finished using them.
+        # recursive means it will delete the new variable nodes and the links
+        # containing them (but not the existing nodes and links)
+        for var in created_vars:
+            self.atomspace.remove(var, recursive=True)
 
         # handle rules that create their output in a custom way, not just using templates
         if hasattr(rule, 'custom_compute'):
@@ -303,7 +309,7 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
-        (generic_inputs, generic_outputs) = rule.standardize_apart_input_output(self)
+        (generic_inputs, generic_outputs, created_atoms) = rule.standardize_apart_input_output(self)
         specific_outputs = []
         empty_substitution = {}
         subst = self._choose_outputs(specific_outputs, generic_outputs, empty_substitution)

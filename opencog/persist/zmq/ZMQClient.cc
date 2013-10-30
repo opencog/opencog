@@ -22,8 +22,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-//TODO move to persist
-
 #include "ZMQClient.h"
 #include <zmq.hpp>
 #include <opencog/atomspace/ZMQMessages.pb.h>

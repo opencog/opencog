@@ -58,6 +58,7 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     counter = 0;
     showTypeSizes = false;
     Nreps = 100000;
+    Nloops = 1;
     sizeIncrease=0;
     saveToFile=false;
     saveInterval=1;
@@ -74,15 +75,12 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
 #endif
 
     rng = new opencog::MT19937RandGen((unsigned long) time(NULL));
-
 }
 
-AtomSpaceBenchmark::~AtomSpaceBenchmark() {
-    // We don't delete the AtomSpace as we assume termination of the benchmark
-    // program here and cleanup of large AtomSpaces takes a while.
-
-    // deleting the PyhtonModule currently results in a deadlock in python.
-    // XXX python needs fixing.
+AtomSpaceBenchmark::~AtomSpaceBenchmark()
+{
+    delete prg;
+    delete rng;
 }
 
 // This is wrong, because it failes to also count the amount of RAM
@@ -169,6 +167,9 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
     cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
+    cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
+    cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
+    cout << "AtomPairSignal = " << sizeof(AtomPairSignal) << endl;
     cout << DIVIDER_LINE << endl;
 }
 
@@ -348,6 +349,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
             scm = &SchemeEval::instance(asp);
 #endif
         }
+        numberOfTypes = classserver().getNumberOfClasses();
 
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
         UUID_end = TLB::getMaxUUID();
@@ -371,9 +373,8 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 
 Type AtomSpaceBenchmark::randomType(Type t)
 {
-    int numberOfTypes = classserver().getNumberOfClasses();
     OC_ASSERT(t < numberOfTypes);
-    Type randomType = NOTYPE;
+    Type randomType = ATOM + rng->randint(numberOfTypes-1);
     while (!classserver().isA(randomType, t))
         randomType = ATOM + rng->randint(numberOfTypes-1);
     return randomType;
@@ -635,7 +636,10 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #if HAVE_CYTHON
     case BENCH_PYTHON: {
         std::ostringstream dss;
-        dss << "aspace.get_type(Handle(" << h.value() << "))\n";
+        for (int i=0; i<Nloops; i++) {
+            dss << "aspace.get_type(Handle(" << h.value() << "))\n";
+            h = getRandomHandle();
+        }
         std::string ps = dss.str();
         clock_t t_begin = clock();
         pyev->eval(ps);
@@ -644,9 +648,12 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if ALL_AT_ONCE
+#if 1 // ALL_AT_ONCE
         std::ostringstream ss;
-        ss << "(cog-type (cog-atom " << h.value() << "))\n";
+        for (int i=0; i<Nloops; i++) {
+            ss << "(cog-type (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+        }
         std::string gs = ss.str();
 #else
         std::ostringstream dss;
