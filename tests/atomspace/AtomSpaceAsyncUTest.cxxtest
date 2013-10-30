@@ -460,4 +460,61 @@ public:
         TS_ASSERT_EQUALS(__totalChanged, num_atoms * n_threads); // lots!
     }
 
+    // =================================================================
+
+    void threadedLinkAdd(int thread_id, int N)
+    {
+        static int bogus = 0;
+
+        for (int i = 0; i < N; i++) {
+            std::ostringstream oss;
+            oss << "thread -1 node " << i;
+
+            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+            Handle ha = hs[0];
+
+            std::ostringstream ossb;
+            ossb << "thread -1 node " << (2*i) % N;
+
+            hs = atomSpace->getHandlesByName(ossb.str(), NODE)->get_result();
+            TS_ASSERT_EQUALS(hs.size(), 1); 
+
+            bogus ++;
+            bogus %= N;
+
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
+
+            Type t = LIST_LINK;
+            hs.push_back(ha);
+            atomSpace->addLink(t, hs, tv)->get_result(); 
+        }
+    }
+
+    void testLinkAdd()
+    {
+        // Use the earlier test for atomspace setup.
+        testThreadedSignals();
+
+        // reset the counts
+        __totalAdded = 0;
+        __totalChanged = 0;
+
+        // Add lotsa links
+        std::vector<std::thread> thread_pool;
+        for (int i=0; i < n_threads; i++) {
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedLinkAdd, this, i, num_atoms));
+        }
+        for (std::thread& t : thread_pool) t.join();
+        int size = atomSpace->getSize()->get_result();
+        std::cout << "Link atomspace size:" << size << std::endl;
+
+        // We should get only 2*num_atoms, because all threads created duplicates.
+        // num_atoms nodes, and num_atoms links.
+        TS_ASSERT_EQUALS(size, 2*num_atoms);
+
+        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
+        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1)); // lots!
+    }
 };
