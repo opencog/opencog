@@ -56,8 +56,10 @@ private:
 public:
     AtomSpaceAsyncUTest()
     {
+        // Current atomspace can to 50K or 100K atoms/sec, so the 
+        // below should run for at least 2 to 5 seconds each time.
         n_threads = 20;
-        num_atoms = 800;
+        num_atoms = 18000;
         logger().setLevel(Logger::INFO);
         logger().setPrintToStdoutFlag(true);
     }
@@ -279,16 +281,21 @@ public:
     void threadedAdd(int thread_id, int N)
     {
         int counter = 0;
+        // For the duplicate-atoms test, all the atoms must be exactly alike!
         double chanceOfNonDefaultNode = 0.0;
+        if (0 < thread_id) chanceOfNonDefaultNode = 0.3;
         for (int i = 0; i < N; i++) {
             double p = rng->randdouble();
             Type t = CONCEPT_NODE;
             if (p < chanceOfNonDefaultNode)
                 t = randomType(NODE);
+
             std::ostringstream oss;
             oss << "thread " << thread_id << " node " << counter;
             counter++;
-            atomSpace->addNode(t,oss.str())->get_result(); 
+
+            TruthValuePtr tv(SimpleTruthValue::createTV((double) i / (double) N, N));
+            atomSpace->addNode(t, oss.str(), tv)->get_result(); 
         }
     }
 
