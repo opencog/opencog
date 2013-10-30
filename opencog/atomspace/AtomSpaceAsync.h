@@ -2,7 +2,7 @@
 #define _OPENCOG_ATOMSPACE_ASYNC_H
 
 #include <iostream>
-#include <boost/thread.hpp>
+#include <thread>
 
 #include <opencog/util/concurrent_queue.h>
 
@@ -30,7 +30,7 @@ class AtomSpaceAsync {
     friend class PersistModule;
 
     bool processingRequests;
-    boost::thread m_Thread;
+    std::thread m_Thread;
 
     int counter;
 

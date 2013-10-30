@@ -29,8 +29,6 @@
 #include <set>
 #include <vector>
 
-#include <boost/scoped_ptr.hpp>
-
 #include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>

@@ -23,6 +23,7 @@
  */
 
 #include <algorithm>
+#include <thread>
 
 #include <math.h>
 #include <string.h>
@@ -277,7 +278,7 @@ public:
     void threadedAdd(int N)
     {
         int counter = 0;
-        double chanceOfNonDefaultNode = 0.3;
+        double chanceOfNonDefaultNode = 0.0;
         for (int i = 0; i < N; i++) {
             double p = rng->randdouble();
             Type t = CONCEPT_NODE;
@@ -292,14 +293,16 @@ public:
 
     void testThreadedAdd()
     {
-        boost::thread_group thread_pool;
+        std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
-            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedAdd, this, _1), num_atoms);
-            thread_pool.add_thread(t);
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, num_atoms));
         }
-        thread_pool.join_all();
+        for (std::thread& t : thread_pool) t.join();
         int size = atomSpace->getSize()->get_result();
         // std::cout<<"size:"<<size<<std::endl;
+
+        // wtf .. we shoulg get num_atoms * n_threads!
         TS_ASSERT_EQUALS(size, num_atoms);
     }
 
@@ -322,12 +325,12 @@ public:
     {
         testThreadedAdd();
         int interval = num_atoms/n_threads;
-        boost::thread_group thread_pool;
+        std::vector<std::thread> thread_pool;
         for (int i=0; i < n_threads; i++) {
-            boost::thread *t = new boost::thread(boost::bind(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
-            thread_pool.add_thread(t);
+            thread_pool.push_back(
+                std::thread(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
         }
-        thread_pool.join_all();
+        for (std::thread& t : thread_pool) t.join();
         int size = atomSpace->getSize()->get_result();
         TS_ASSERT_EQUALS(size, 0);
         size = atomSpace->getSize()->get_result();
