@@ -44,7 +44,7 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
             (a, b) = bounds
             if a in [MINUS_INFINITY, PLUS_INFINITY] and b in [MINUS_INFINITY, PLUS_INFINITY]:
                 continue
-            share += self.pdf.dictionary_bounds_function[bounds].integrate(a, b)
+            share += self.pdf.dictionary_bounds_function[bounds].integral(a, b)
             self.roulette_wheel.append((a, b, share))
 
     def interval(self, alpha):

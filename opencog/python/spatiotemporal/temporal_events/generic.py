@@ -158,38 +158,26 @@ class TemporalInstance(TimeInterval):
 
 
 if __name__ == '__main__':
+    from utility.geometric import integral
+    from scipy.stats import norm
     import matplotlib.pyplot as plt
 
     #event = TemporalInstance(datetime(2010, 1, 1), datetime(2011, 2, 1))
     #plt = event.plot()
     #plt.show()
 
+    events = [
+        TemporalEvent(norm(loc=10, scale=2), norm(loc=30, scale=2), 100),
+        TemporalEvent(norm(loc=5, scale=2), norm(loc=15, scale=4), 100),
 
-    #event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0})
-    #event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
-    #y = event.membership_function.range
-    #a = event.membership_function(5.5)
-    #event.plot()
-    #plt.ylim(ymax=1.1)
-    #print event.distribution_beginning.pdf.integrate(event.a, event.beginning)
-    #print event.distribution_beginning.pdf()
-    #print event.distribution_beginning.cdf()
-    #print event.distribution_beginning.rvs(10)
-    #event.distribution_beginning.plot()
-    #event.distribution_ending.plot().show()
 
-    from scipy.stats import norm
+        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+    ]
 
-    dist_1 = norm(loc=10, scale=2)
-    dist_2 = norm(loc=30, scale=2)
-    event = TemporalEvent(dist_1, dist_2, 100)
-    plt = event.plot()
-    plt.ylim(ymax=1.05)
-    plt.show()
-
-    dist_1 = norm(loc=5, scale=2)
-    dist_2 = norm(loc=15, scale=4)
-    event = TemporalEvent(dist_1, dist_2, 100)
-    plt = event.plot()
-    plt.ylim(ymax=1.05)
-    plt.show()
+    for event in events:
+        plt = event.plot()
+        print integral(event.distribution_beginning.pdf, event.a, event.beginning)
+        print event.distribution_beginning.rvs(10)
+        plt.ylim(ymax=1.1)
+        plt.show()

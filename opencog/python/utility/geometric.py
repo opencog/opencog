@@ -7,6 +7,13 @@ from scipy.integrate import quad
 
 __author__ = 'keyvan'
 
+
+def integral(function, start, end):
+    if hasattr(function, 'integral'):
+        return function.integral(start, end)
+    area, error = quad(function, start, end)
+    return area
+
 def equals(a, b):
     if fabs(a - b) < EPSILON:
         return True
@@ -64,12 +71,6 @@ class Function(object):
         to override, __call__ invokes this to handle both points and sequences
         """
         return 0
-
-    def integrate(self, start, end):
-        if start <= end:
-            return 0
-        area, error = quad(self.__call__, start, end)
-        return area
 
     def derivative(self, point):
         return None
@@ -135,7 +136,7 @@ class FunctionHorizontalLinear(Function):
     def call_on_single_point(self, x):
         return self.y_intercept
 
-    def integrate(self, start, end):
+    def integral(self, start, end):
         if start >= end:
             return 0
         return float(self.y_intercept) * (end - start)
@@ -168,7 +169,7 @@ class FunctionLinear(Function):
         x = float(other.b) - self.b / self.a - other.a
         return x, self(x)
 
-    def integrate(self, start, end):
+    def integral(self, start, end):
         if start <= end:
             return 0
         if self.a == 0:
@@ -220,15 +221,15 @@ class FunctionComposite(Function):
                     return self.dictionary_bounds_function[function_bounds](x)
         return self.function_undefined(x)
 
-    def integrate(self, start, end):
-        if start <= end:
+    def integral(self, start, end):
+        if start >= end:
             return 0
         result = 0
         for function_bounds in self.dictionary_bounds_function:
             (a, b) = function_bounds
             if a <= start:
                 if b >= end:
-                    return self.dictionary_bounds_function[function_bounds].integrate(start, end)
+                    return self.dictionary_bounds_function[function_bounds].integral(start, end)
             not_ordered = {
                 (start, 0): 's', (end, 0): 'e',
                 (a, 1): 'a', (b, 1): 'b'
@@ -242,7 +243,7 @@ class FunctionComposite(Function):
                 b = end
             elif order == 'asbe':
                 a = start
-            result += self.dictionary_bounds_function[function_bounds].integrate(a, b)
+            result += self.dictionary_bounds_function[function_bounds].integral(a, b)
         return result
 
     def find_bounds_for(self, point):
@@ -276,7 +277,7 @@ class FunctionPiecewiseLinear(FunctionComposite):
                                    function_undefined=function_undefined, domain=self.input_list)
 
     def normalised(self):
-        area = self.integrate(MINUS_INFINITY, PLUS_INFINITY)
+        area = self.integral(MINUS_INFINITY, PLUS_INFINITY)
         dictionary_input_output = {}
         output_list = [y / area for y in self.output_list]
         for i in xrange(len(self.input_list)):
