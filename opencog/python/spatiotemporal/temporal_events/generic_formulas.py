@@ -45,14 +45,21 @@ def function_convolution_generic(pdf_1, bounds_1, pdf_2, bounds_2, bins=50):
     return convolution_function.normalised()
 
 if __name__ == '__main__':
-    from scipy.stats import norm, uniform
+    from scipy.stats import norm, uniform, mode
     from spatiotemporal.time_intervals import TimeInterval
-    from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY
+    from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
+    from numpy import isinf
 
     dist_1 = norm(loc=5.5, scale=4.5)
     dist_2 = norm(loc=9, scale=2)
     #dist_1 = uniform(loc=1, scale=9)
     #dist_2 = uniform(loc=7, scale=4)
+
+    a, b = dist_1.interval(1)
+    print mode(dist_1)
+    print type(a)
+    print a, b
+    print isinf(a), isinf(b)
 
     bounds_1 = 1, 10
     bounds_2 = 7, 11

@@ -1,13 +1,17 @@
 from datetime import datetime
+from numpy import isinf
 from scipy.stats.distributions import rv_frozen
 from scipy import integrate
 from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval
-from fuzzy.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
+from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
+from utility.generic import convert_dict_to_sorted_lists
 from utility.geometric import index_of_first_local_maximum
 from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
+
+DISTRIBUTION_INTEGRAL_LIMIT = 1 - EPSILON
 
 
 class TemporalEvent(TimeInterval):
@@ -15,22 +19,30 @@ class TemporalEvent(TimeInterval):
     _distribution_ending = None
     _beginning = None
     _ending = None
-    _membership_function = None
-    input_list = None
+    _dict = None
 
-    def __init__(self, a, beginning, ending, b, distribution_beginning, distribution_ending, bins=50):
-        assert beginning < ending
+    def __init__(self, distribution_beginning, distribution_ending,
+                 bins=50, distribution_integral_limit=DISTRIBUTION_INTEGRAL_LIMIT):
+        if not isinstance(distribution_beginning, rv_frozen):
+            raise TypeError("'distribution_beginning' should be a scipy frozen distribution")
+        if not isinstance(distribution_ending, rv_frozen):
+            raise TypeError("'distribution_ending' should be a scipy frozen distribution")
+        if not 0 < distribution_integral_limit <= 1:
+            raise TypeError("'distribution_integral_limit' should be in (0, 1]")
+        self._distribution_beginning = distribution_beginning
+        self._distribution_ending = distribution_ending
+
+        a, beginning = distribution_beginning.interval(1)
+        if isinf(a) or isinf(beginning):
+            a, beginning = distribution_beginning.interval(distribution_integral_limit)
+        ending, b = distribution_ending.interval(1)
+        if isinf(ending) or isinf(b):
+            ending, b = distribution_ending.interval(distribution_integral_limit)
+
         TimeInterval.__init__(self, a, b, bins)
         self._beginning = UnixTime(beginning)
         self._ending = UnixTime(ending)
-        self.distribution_beginning = distribution_beginning
-        self.distribution_ending = distribution_ending
-
-    @property
-    def membership_function(self):
-        if self._membership_function is None:
-            self._membership_function = MembershipFunction(self)
-        return self._membership_function
+        self.membership_function = MembershipFunction(self)
 
     def _interval_from_self_if_none(self, a, b, interval):
         if interval is None:
@@ -50,46 +62,26 @@ class TemporalEvent(TimeInterval):
         area, error = integrate.quad(self.membership_function, interval.a, interval.b)
         return area / interval.duration
 
-    def to_list(self):
-        if self.input_list is None:
-            self.input_list = [
-                self.a, UnixTime(self.a + EPSILON),
-                self.beginning, self.ending,
-                UnixTime(self.b - EPSILON), self.b
-            ]
-        return self.input_list
-
     def to_dict(self):
-        result = {}
-        for time_step in self.to_list():
-            result[time_step] = self.membership_function(time_step)
-        return result
+        if self._dict is None:
+            self._dict = {}
+            for time_step in self.to_list():
+                self._dict[time_step] = self.membership_function(time_step)
+        return self._dict
 
     def plot(self):
         import matplotlib.pyplot as plt
-        from spatiotemporal.unix_time import UnixTime
-
-        x_axis = [UnixTime(time).to_datetime() for time in self]
-        plt.plot(x_axis, self.membership_function)
+        y = self.membership_function()
+        plt.plot(self.to_datetime_list(), y)
         return plt
 
     @property
     def distribution_beginning(self):
         return self._distribution_beginning
 
-    @distribution_beginning.setter
-    def distribution_beginning(self, value):
-        assert isinstance(value, rv_frozen)
-        self._distribution_beginning = value
-
     @property
     def distribution_ending(self):
         return self._distribution_ending
-
-    @distribution_ending.setter
-    def distribution_ending(self, value):
-        assert isinstance(value, rv_frozen)
-        self._distribution_ending = value
 
     @property
     def beginning(self):
@@ -98,32 +90,6 @@ class TemporalEvent(TimeInterval):
     @property
     def ending(self):
         return self._ending
-
-    @property
-    def _iter_step_beginning(self):
-        return float(self.beginning - self.a) / self._bins
-
-    @property
-    def _iter_step_ending(self):
-        return float(self.b - self.ending) / self._bins
-
-    def __getitem__(self, index):
-        if index >= len(self) or index < 0:
-            raise IndexError
-        if index < self._bins:
-            return self._iter_step_beginning * index
-        if index in [self._bins, self._bins + 1]:
-            return 1
-        return self._iter_step_ending * index
-
-    def __len__(self):
-        return self._bins * 2
-
-    def __iter__(self):
-        return (self[t] for t in xrange(self._bins * 2))
-
-    def __reversed__(self):
-        return (self.membership_function(t) for t in reversed(self.to_list()))
 
     def __repr__(self):
         return '{0}(a: {1}, beginning: {2}, ending:{3}, b:{4})'.format(self.__class__.__name__,
@@ -134,29 +100,20 @@ class TemporalEvent(TimeInterval):
 
 
 class TemporalEventPiecewiseLinear(TemporalEvent):
-    def __init__(self, input_list, output_list, bins=50):
-        a, b = input_list[0], input_list[-1]
-        index_beginning = index_of_first_local_maximum(output_list)
-        index_ending = len(output_list) - index_of_first_local_maximum(reversed(output_list)) - 1
+    def __init__(self, dictionary_beginning, dictionary_ending, bins=50):
+        input_list_beginning, output_list_beginning = convert_dict_to_sorted_lists(dictionary_beginning)
+        ending_x = sorted(dictionary_ending)
+        ending_y = [dictionary_ending[i] for i in ending_x]
+        dictionary_ending = {}
+        for i, time_step in enumerate(ending_x):
+            dictionary_ending[time_step] = ending_y[len(ending_x) - i - 1]
+        input_list_ending, output_list_ending = convert_dict_to_sorted_lists(dictionary_ending)
 
-        assert output_list[index_beginning] == 1, "value of 'output_list' in event's 'beginning' should be 1"
-        assert output_list[index_ending] == 1, "value of 'output_list' in event's 'ending' should be 1"
+        distribution_beginning = ProbabilityDistributionPiecewiseLinear(dictionary_beginning)
+        distribution_ending = ProbabilityDistributionPiecewiseLinear(dictionary_ending)
 
-        beginning = input_list[index_beginning]
-        ending = input_list[index_ending]
-
-        distribution_beginning = ProbabilityDistributionPiecewiseLinear(
-            input_list[0:index_beginning + 1],
-            output_list[0:index_beginning + 1],
-        )
-        distribution_ending = ProbabilityDistributionPiecewiseLinear(
-            input_list[index_ending:len(input_list)],
-            [1 - output_list[t] for t in xrange(index_ending, len(input_list))],
-        )
-
-        TemporalEvent.__init__(self, a, beginning, ending, b, distribution_beginning, distribution_ending, bins)
-        self.input_list = input_list
-        self.output_list = output_list
+        TemporalEvent.__init__(self, distribution_beginning, distribution_ending, bins=bins)
+        self.input_list = sorted(set(input_list_beginning + input_list_ending))
 
     def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
@@ -175,7 +132,7 @@ class TemporalEventPiecewiseLinear(TemporalEvent):
         return reversed(self.input_list)
 
     def __repr__(self):
-        pairs = ['{0}: {1}'.format(self[i], self.output_list[i]) for i in xrange(len(self))]
+        pairs = ['{0}: {1}'.format(self[i], self.membership_function[i]) for i in xrange(len(self))]
         return '{0}({1})'.format(self.__class__.__name__, ', '.join(pairs))
 
 
@@ -195,15 +152,17 @@ class TemporalInstance(TimeInterval):
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
 
-    event = TemporalInstance(datetime(2010, 1, 1), datetime(2011, 2, 1))
-    plt = event.plot()
-    plt.show()
+    #event = TemporalInstance(datetime(2010, 1, 1), datetime(2011, 2, 1))
+    #plt = event.plot()
+    #plt.show()
 
-    plt.ylim(ymax=1.1)
 
-    event = TemporalEventPiecewiseLinear([1, 2, 3, 4, 5, 6, 7, 8, 9, 10], [0, 0.1, 0.3, 0.7, 1, 1, 0.9, 0.6, 0.1, 0])
+    event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+    y = event.membership_function.range
+    a = event.membership_function(5.5)
     event.plot()
-    print event.distribution_beginning.integrate(event.a, event.beginning)
+    plt.ylim(ymax=1.1)
+    print event.distribution_beginning.pdf.integrate(event.a, event.beginning)
     print event.distribution_beginning.pdf()
     print event.distribution_beginning.cdf()
     print event.distribution_beginning.rvs(10)

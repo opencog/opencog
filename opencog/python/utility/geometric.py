@@ -1,14 +1,34 @@
 from math import fabs
+from datetime import datetime
+from spatiotemporal.unix_time import UnixTime
+from utility.generic import convert_dict_to_sorted_lists
 from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
 from scipy.integrate import quad
 
 __author__ = 'keyvan'
 
-
 def equals(a, b):
     if fabs(a - b) < EPSILON:
         return True
     return False
+
+
+def invoke_method_on(method, sequence_or_point):
+    if method is None:
+        return None
+    if not callable(method):
+        raise TypeError("'method' is not callable")
+    result = []
+    try:
+        for point in sequence_or_point:
+            if type(point) is datetime:
+                point = UnixTime(point)
+            result.append(method(point))
+    except TypeError:
+        if type(sequence_or_point) is datetime:
+            sequence_or_point = UnixTime(sequence_or_point)
+        return method(sequence_or_point)
+    return result
 
 
 def index_of_first_local_maximum(sequence):
@@ -27,27 +47,84 @@ def index_of_first_local_maximum(sequence):
 
 
 class Function(object):
-    def __call__(self, x):
+    _domain = None
+    _range = None
+    _function_undefined = None
+
+    def __init__(self, function_undefined=None, domain=None):
+        if function_undefined is not None:
+            self.function_undefined = function_undefined
+        if domain is not None:
+            if not hasattr(domain, '__iter__') or not hasattr(domain, '__getitem__'):
+                    raise TypeError("'domain' should be iterable and support indexing")
+            self._domain = domain
+
+    def call_on_single_point(self, x):
+        """
+        to override, __call__ invokes this to handle both points and sequences
+        """
         return 0
 
     def integrate(self, start, end):
-        assert end >= start, "'stop' should be greater than 'end'"
+        if start <= end:
+            return 0
         area, error = quad(self.__call__, start, end)
         return area
 
     def derivative(self, point):
         return None
 
+    def _check_domain_for(self, feature_name):
+        if self.domain is None:
+            raise TypeError("'{0}' object does not support {1}, 'domain' should be specified".format(
+                self.__class__.__name__, feature_name))
 
-class _function_undefined(Function):
-    def __call__(self, x):
-        return None
+    def plot(self):
+        self._check_domain_for('plotting')
+        import matplotlib.pyplot as plt
+        plt.plot(self.domain, self.range)
+        return plt
 
-    def integrate(self, start, end):
-        return None
+    @property
+    def function_undefined(self):
+        return self._function_undefined
 
+    @function_undefined.setter
+    def function_undefined(self, value):
+        if value is not None and not isinstance(value, Function):
+            raise TypeError("'function_undefined' should be of type 'Function'")
+        self._function_undefined = value
 
-FUNCTION_UNDEFINED = _function_undefined()
+    @property
+    def domain(self):
+        return self._domain
+
+    @property
+    def range(self):
+        return self()
+
+    def __call__(self, x=None):
+        if x is None:
+            self._check_domain_for("call with 'None'")
+            x = self.domain
+
+        return invoke_method_on(self.call_on_single_point, x)
+
+    def __getitem__(self, index):
+        self._check_domain_for('indexing')
+        return self.range[index]
+
+    def __len__(self):
+        self._check_domain_for('len()')
+        return len(self.range)
+
+    def __iter__(self):
+        self._check_domain_for('iter()')
+        return iter(self.range)
+
+    def __reversed__(self):
+        self._check_domain_for('reversed()')
+        return reversed(self.range)
 
 
 class FunctionHorizontalLinear(Function):
@@ -55,11 +132,12 @@ class FunctionHorizontalLinear(Function):
         self.y_intercept = y_intercept
         self.a = 0
 
-    def __call__(self, x):
+    def call_on_single_point(self, x):
         return self.y_intercept
 
     def integrate(self, start, end):
-        assert end >= start, "'stop' should be greater than 'end'"
+        if start >= end:
+            return 0
         return float(self.y_intercept) * (end - start)
 
     def derivative(self, point):
@@ -68,6 +146,10 @@ class FunctionHorizontalLinear(Function):
     @property
     def b(self):
         return self.y_intercept
+
+
+FUNCTION_ZERO = FunctionHorizontalLinear(0)
+FUNCTION_ONE = FunctionHorizontalLinear(1)
 
 
 class FunctionLinear(Function):
@@ -79,7 +161,7 @@ class FunctionLinear(Function):
         self.a = a
         self.b = b
 
-    def __call__(self, x):
+    def call_on_single_point(self, x):
         return float(self.a * x + self.b)
 
     def intersect(self, other):
@@ -87,7 +169,8 @@ class FunctionLinear(Function):
         return x, self(x)
 
     def integrate(self, start, end):
-        assert end >= start, "'stop' should be greater than 'end'"
+        if start <= end:
+            return 0
         if self.a == 0:
             return self.b * (end - start)
 
@@ -120,35 +203,32 @@ class FunctionLinear(Function):
 
 
 class FunctionComposite(Function):
-    _function_undefined = FUNCTION_UNDEFINED
+    def __init__(self, dictionary_bounds_function, function_undefined=None, domain=None):
+        Function.__init__(self, function_undefined=function_undefined, domain=domain)
+        if not isinstance(dictionary_bounds_function, dict):
+            raise TypeError("'dictionary_bounds_function' should be a dictionary with (lower_bound, higher_bound) "
+                            "tuple keys and values of type 'Function'")
+        self._dictionary_bounds_function = dictionary_bounds_function
 
-    def __init__(self, bounds_function_dictionary, function_undefined=None):
-        assert isinstance(bounds_function_dictionary, dict)
-        if function_undefined is not None:
-            self.function_undefined = function_undefined
-        for bounds in bounds_function_dictionary:
-            assert isinstance(bounds, (tuple, list)) and len(bounds) is 2
-            a, b = bounds
-            assert isinstance(a, (float, int, long)) and isinstance(b, (float, int, long))
-            assert isinstance(bounds_function_dictionary[bounds], Function)
-        self.functions = bounds_function_dictionary
-
-    def __call__(self, x):
-        for function_bounds in self.functions:
+    def call_on_single_point(self, x):
+        for function_bounds in self.dictionary_bounds_function:
             (a, b) = function_bounds
             if a <= x:
                 if b >= x:
-                    return self.functions[function_bounds](x)
+                    if self.dictionary_bounds_function[function_bounds] is None:
+                        return None
+                    return self.dictionary_bounds_function[function_bounds](x)
         return self.function_undefined(x)
 
     def integrate(self, start, end):
-        assert end >= start, "'stop' should be greater than 'end'"
+        if start <= end:
+            return 0
         result = 0
-        for function_bounds in self.functions:
+        for function_bounds in self.dictionary_bounds_function:
             (a, b) = function_bounds
             if a <= start:
                 if b >= end:
-                    return self.functions[function_bounds].integrate(start, end)
+                    return self.dictionary_bounds_function[function_bounds].integrate(start, end)
             not_ordered = {
                 (start, 0): 's', (end, 0): 'e',
                 (a, 1): 'a', (b, 1): 'b'
@@ -162,62 +242,46 @@ class FunctionComposite(Function):
                 b = end
             elif order == 'asbe':
                 a = start
-            result += self.functions[function_bounds].integrate(a, b)
+            result += self.dictionary_bounds_function[function_bounds].integrate(a, b)
         return result
 
     def find_bounds_for(self, point):
-        for bounds in self.functions:
+        for bounds in self.dictionary_bounds_function:
             (a, b) = bounds
             if a <= point and b >= point:
                 return bounds
 
     def derivative(self, point):
-        return self.functions[self.find_bounds_for(point)].derivative(point)
+        return self.dictionary_bounds_function[self.find_bounds_for(point)].derivative(point)
 
     @property
-    def function_undefined(self):
-        return self._function_undefined
-
-    @function_undefined.setter
-    def function_undefined(self, value):
-        assert isinstance(value, Function)
-        self._function_undefined = value
+    def dictionary_bounds_function(self):
+        return self._dictionary_bounds_function
 
 
 class FunctionPiecewiseLinear(FunctionComposite):
-    def __init__(self, input_list, output_list, function_undefined=None):
-        for i in xrange(1, len(input_list)):
-            assert input_list[i - 1] < input_list[i]
-        if function_undefined is not None:
-            self.function_undefined = function_undefined
-        self.input_list = input_list
-        self.output_list = output_list
-        self.invalidate()
+    def __init__(self, dictionary_input_output, function_undefined=None):
+        self.input_list, self.output_list = convert_dict_to_sorted_lists(dictionary_input_output)
 
-    def invalidate(self):
-        assert len(self.input_list) == len(self.output_list) >= 2
-        bounds_function_dictionary = {}
+        dictionary_bounds_function = {}
         for i in xrange(1, len(self.input_list)):
             x_0, x_1 = self.input_list[i - 1], self.input_list[i]
             y_0, y_1 = self.output_list[i - 1], self.output_list[i]
-            bounds_function_dictionary[(x_0, x_1)] = FunctionLinear(x_0=x_0, x_1=x_1, y_0=y_0, y_1=y_1)
-        bounds_function_dictionary[(MINUS_INFINITY, self.input_list[0])] = self.function_undefined
-        bounds_function_dictionary[(self.input_list[-1], PLUS_INFINITY)] = self.function_undefined
-        FunctionComposite.__init__(self, bounds_function_dictionary)
+            dictionary_bounds_function[(x_0, x_1)] = FunctionLinear(x_0=x_0, x_1=x_1, y_0=y_0, y_1=y_1)
+        if MINUS_INFINITY not in self.input_list:
+            dictionary_bounds_function[(MINUS_INFINITY, self.input_list[0])] = function_undefined
+        if PLUS_INFINITY not in self.input_list:
+            dictionary_bounds_function[(self.input_list[-1], PLUS_INFINITY)] = function_undefined
+        FunctionComposite.__init__(self, dictionary_bounds_function,
+                                   function_undefined=function_undefined, domain=self.input_list)
 
     def normalised(self):
         area = self.integrate(MINUS_INFINITY, PLUS_INFINITY)
-        output_list = [v / area for v in self.output_list]
-        return FunctionPiecewiseLinear(self.input_list, output_list, self.function_undefined)
-
-    def __getitem__(self, index):
-        return self.output_list.__getitem__(index)
-
-    def __len__(self):
-        return len(self.output_list)
-
-    def __iter__(self):
-        return iter(self.output_list)
+        dictionary_input_output = {}
+        output_list = [y / area for y in self.output_list]
+        for i in xrange(len(self.input_list)):
+            dictionary_input_output[self.input_list[i]] = output_list[i]
+        return FunctionPiecewiseLinear(dictionary_input_output, function_undefined=self.function_undefined)
 
 if __name__ == '__main__':
     #from spatiotemporal.temporal_events import TemporalEventTrapezium
