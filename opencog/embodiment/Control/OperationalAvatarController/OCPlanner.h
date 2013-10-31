@@ -439,7 +439,7 @@ protected:
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
 
      void outputStateInfo(State* s, bool outPutStateValue);
-     void outputRuleNodeStep(RuleNode* ruleNode);
+     void outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes = true);
 
 };
 
