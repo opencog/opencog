@@ -2,11 +2,11 @@ from math import fabs
 from random import random
 from scipy.stats.distributions import rv_frozen
 from spatiotemporal.time_intervals import TimeInterval
-from spatiotemporal.unix_time import random_time
+from spatiotemporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.geometric import Function, FunctionPiecewiseLinear,\
     FunctionHorizontalLinear, FunctionComposite, invoke_method_on, FUNCTION_ZERO, FUNCTION_ONE
-from utility.numeric.globals import PLUS_INFINITY, MINUS_INFINITY
+from utility.numeric.globals import PLUS_INFINITY, MINUS_INFINITY, EPSILON
 
 __author__ = 'keyvan'
 
@@ -16,8 +16,6 @@ class MembershipFunction(Function):
         Function.__init__(self, function_undefined=FUNCTION_ZERO, domain=temporal_event)
 
     def call_on_single_point(self, time_step):
-        a = self.domain.distribution_beginning.cdf(time_step)
-        a = self.domain.distribution_ending.cdf(time_step)
         return self.domain.distribution_beginning.cdf(time_step) - self.domain.distribution_ending.cdf(time_step)
 
 
@@ -76,7 +74,13 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
 
     def plot(self):
         import matplotlib.pyplot as plt
-        plt.plot(self.to_datetime_list(), self.pdf)
+        x_axis, y_axis = [], []
+        for time_step in self:
+            x_axis.append(UnixTime(time_step - EPSILON).to_datetime())
+            x_axis.append(UnixTime(time_step + EPSILON).to_datetime())
+            y_axis.append(self.pdf(time_step - EPSILON))
+            y_axis.append(self.pdf(time_step + EPSILON))
+        plt.plot(x_axis, y_axis)
         return plt
 
     def __getitem__(self, index):
