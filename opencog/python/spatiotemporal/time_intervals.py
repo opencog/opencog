@@ -73,16 +73,16 @@ class TimeInterval(object):
         if value != self._iter_step:
             assert isinstance(value, int), value > 0
             self._bins = value
-            self._iter_step = self.duration / value
+            self._iter_step = (self.duration + 1) / value
 
     def __getitem__(self, index):
-        value = self.a + index * self._iter_step
-        if value > self.b:
+        if index >= len(self):
             raise IndexError
+        value = self.a + index * self._iter_step
         return UnixTime(value)
 
     def __len__(self):
-        return int(self.b - self.a)/int(self._iter_step) + 1
+        return self.bins
 
     def __iter__(self):
         return (self[t] for t in xrange(len(self)))

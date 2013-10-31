@@ -71,8 +71,16 @@ class TemporalEvent(TimeInterval):
 
     def plot(self):
         import matplotlib.pyplot as plt
-        y = self.membership_function()
-        plt.plot(self.to_datetime_list(), y)
+        x = self.to_datetime_list()
+        plt.plot(x, self.membership_function())
+        if hasattr(self.distribution_beginning, 'plot'):
+            self.distribution_beginning.plot()
+        else:
+            plt.plot(x, self.distribution_beginning.pdf(self))
+        if hasattr(self.distribution_ending, 'plot'):
+            self.distribution_ending.plot()
+        else:
+            plt.plot(x, self.distribution_ending.pdf(self))
         return plt
 
     @property
@@ -157,14 +165,31 @@ if __name__ == '__main__':
     #plt.show()
 
 
-    event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0})
-    y = event.membership_function.range
-    a = event.membership_function(5.5)
-    event.plot()
-    plt.ylim(ymax=1.1)
-    print event.distribution_beginning.pdf.integrate(event.a, event.beginning)
-    print event.distribution_beginning.pdf()
-    print event.distribution_beginning.cdf()
-    print event.distribution_beginning.rvs(10)
-    event.distribution_beginning.plot()
-    event.distribution_ending.plot().show()
+    #event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+    #event = TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+    #y = event.membership_function.range
+    #a = event.membership_function(5.5)
+    #event.plot()
+    #plt.ylim(ymax=1.1)
+    #print event.distribution_beginning.pdf.integrate(event.a, event.beginning)
+    #print event.distribution_beginning.pdf()
+    #print event.distribution_beginning.cdf()
+    #print event.distribution_beginning.rvs(10)
+    #event.distribution_beginning.plot()
+    #event.distribution_ending.plot().show()
+
+    from scipy.stats import norm
+
+    dist_1 = norm(loc=10, scale=2)
+    dist_2 = norm(loc=30, scale=2)
+    event = TemporalEvent(dist_1, dist_2, 100)
+    plt = event.plot()
+    plt.ylim(ymax=1.05)
+    plt.show()
+
+    dist_1 = norm(loc=5, scale=2)
+    dist_2 = norm(loc=15, scale=4)
+    event = TemporalEvent(dist_1, dist_2, 100)
+    plt = event.plot()
+    plt.ylim(ymax=1.05)
+    plt.show()
