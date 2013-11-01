@@ -1,4 +1,5 @@
-from spatiotemporal.temporal_events import TemporalEventSimple
+from spatiotemporal.temporal_events import TemporalInstance
+from spatiotemporal.temporal_events.trapezium import generate_random_events
 
 __author__ = 'keyvan'
 
@@ -6,9 +7,9 @@ __author__ = 'keyvan'
 def assert_is_instance(instance_or_iterable):
     try:
         for instance in instance_or_iterable:
-            assert isinstance(instance, TemporalEventSimple)
+            assert isinstance(instance, TemporalInstance)
     except:
-        assert isinstance(instance_or_iterable, TemporalEventSimple)
+        assert isinstance(instance_or_iterable, TemporalInstance)
 
 
 def is_in_start_interval_of(time_step, instance):
@@ -91,3 +92,60 @@ def meets(instance_1, instance_2):
 
 def met_by(instance_1, instance_2):
     return meets(instance_2, instance_1)
+
+
+INSTANCE_FORMULAS = {
+    'p': precedes,
+    'm': meets,
+    'o': overlaps,
+    'F': finished_by,
+    'D': contains,
+    's': starts,
+    'e': equals,
+    'S': started_by,
+    'd': during,
+    'f': finishes,
+    'O': overlapped_by,
+    'M': met_by,
+    'P': preceded_by
+}
+
+
+if __name__ == '__main__':
+    size = 10
+    events = generate_random_events(2)
+    instances = [[], []]
+
+    for i, event in enumerate(events):
+        plt = event.plot()
+        for j in xrange(size):
+            instances[i].append(event.instance())
+
+    degrees = {}
+    for predicate in INSTANCE_FORMULAS:
+        degrees[predicate] = float(0)
+
+    plt.ylim(ymax=1.1)
+    instances[0][0].plot()
+    instances[1][0].plot()
+
+    for instance_1, instance_2 in ((i, j) for i in instances[0] for j in instances[1]):
+        #plt.ylim(ymax=1.1)
+        #instance_1.plot()
+        #instance_2.plot()
+        #plt.show()
+        fds = 2 + 3
+        for predicate in INSTANCE_FORMULAS:
+            if INSTANCE_FORMULAS[predicate](instance_1, instance_2) is True:
+                degrees[predicate] += 1
+        #plt.clf()
+        #events[0].plot()
+        #events[1].plot()
+
+    
+    for predicate in degrees:
+        degrees[predicate] /= size ** 2
+
+    print degrees
+
+    plt.show()
