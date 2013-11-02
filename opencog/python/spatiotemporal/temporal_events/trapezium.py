@@ -84,13 +84,14 @@ if __name__ == '__main__':
     #plt.ylim(ymin=0, ymax=1.1)
     #plt.show()
 
-    events = generate_random_events(5)
+    events = generate_random_events(1)
     #events = generate_random_events(500)
 
     start = time.time()
 
     for event in events:
         plt = event.plot()
+        plt = event.instance().plot()
 
     print 'Performance:', time.time() - start, 'seconds'
 

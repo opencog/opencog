@@ -160,8 +160,7 @@ class TemporalInstance(TimeInterval):
         import matplotlib.pyplot as plt
         from spatiotemporal.unix_time import UnixTime
 
-        x_axis = [UnixTime(time).to_datetime() for time in self]
-        plt.plot(x_axis, [1, 1])
+        plt.plot([UnixTime(self.a).to_datetime(), UnixTime(self.b).to_datetime()], [1, 1])
         return plt
 
 
