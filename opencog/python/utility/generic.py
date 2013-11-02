@@ -16,8 +16,5 @@ def subsets_of_len_two(seq):
 
 
 def convert_dict_to_sorted_lists(dictionary):
-    key_list, value_list = [], []
-    for x in sorted(dictionary):
-        key_list.append(x)
-        value_list.append(dictionary[x])
-    return key_list, value_list
+    keys = sorted(dictionary)
+    return keys, [dictionary[key] for key in keys]

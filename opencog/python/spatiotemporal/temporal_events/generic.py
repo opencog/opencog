@@ -6,7 +6,7 @@ from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import index_of_first_local_maximum
+from utility.geometric import index_of_first_local_maximum, FunctionPiecewiseLinear, FUNCTION_ZERO
 from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
@@ -110,34 +110,42 @@ class TemporalEvent(TimeInterval):
 class TemporalEventPiecewiseLinear(TemporalEvent):
     def __init__(self, dictionary_beginning, dictionary_ending, bins=50):
         input_list_beginning, output_list_beginning = convert_dict_to_sorted_lists(dictionary_beginning)
-        ending_x = sorted(dictionary_ending)
-        ending_y = [dictionary_ending[i] for i in ending_x]
+        for i in xrange(1, len(input_list_beginning)):
+            if not dictionary_beginning[input_list_beginning[i]] > dictionary_beginning[input_list_beginning[i - 1]]:
+                raise TypeError("values of 'dictionary_beginning' should be increasing in time")
+
+        input_list_ending, output_list_ending = convert_dict_to_sorted_lists(dictionary_ending)
+        for i in xrange(1, len(input_list_ending)):
+            if not dictionary_ending[input_list_ending[i]] < dictionary_ending[input_list_ending[i - 1]]:
+                raise TypeError("values of 'dictionary_ending' should be decreasing in time")
         dictionary_ending = {}
-        for i, time_step in enumerate(ending_x):
-            dictionary_ending[time_step] = ending_y[len(ending_x) - i - 1]
+        for i, time_step in enumerate(input_list_ending):
+            dictionary_ending[time_step] = output_list_ending[len(input_list_ending) - i - 1]
         input_list_ending, output_list_ending = convert_dict_to_sorted_lists(dictionary_ending)
 
         distribution_beginning = ProbabilityDistributionPiecewiseLinear(dictionary_beginning)
         distribution_ending = ProbabilityDistributionPiecewiseLinear(dictionary_ending)
 
         TemporalEvent.__init__(self, distribution_beginning, distribution_ending, bins=bins)
-        self.input_list = sorted(set(input_list_beginning + input_list_ending))
+        self._list = sorted(set(input_list_beginning + input_list_ending))
+        self.membership_function = FunctionPiecewiseLinear(self.to_dict(), FUNCTION_ZERO)
+
 
     def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)
         return self.membership_function.integrate(interval.a, interval.b) / (interval.b - interval.a)
 
     def __getitem__(self, index):
-        return self.input_list.__getitem__(index)
+        return self._list.__getitem__(index)
 
     def __len__(self):
-        return len(self.input_list)
+        return len(self._list)
 
     def __iter__(self):
-        return iter(self.input_list)
+        return iter(self._list)
 
     def __reversed__(self):
-        return reversed(self.input_list)
+        return reversed(self._list)
 
     def __repr__(self):
         pairs = ['{0}: {1}'.format(self[i], self.membership_function[i]) for i in xrange(len(self))]
@@ -169,7 +177,6 @@ if __name__ == '__main__':
     events = [
         TemporalEvent(norm(loc=10, scale=2), norm(loc=30, scale=2), 100),
         TemporalEvent(norm(loc=5, scale=2), norm(loc=15, scale=4), 100),
-
 
         TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
         TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
