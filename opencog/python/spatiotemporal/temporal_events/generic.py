@@ -2,7 +2,7 @@ from datetime import datetime
 from numpy import isinf
 from scipy.stats.distributions import rv_frozen
 from scipy import integrate
-from spatiotemporal.time_intervals import assert_is_time_interval, TimeInterval
+from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
@@ -44,23 +44,24 @@ class TemporalEvent(TimeInterval):
         self._ending = UnixTime(ending)
         self.membership_function = MembershipFunction(self)
 
-    def _interval_from_self_if_none(self, a, b, interval):
+    def degree(self, time_step=None, a=None, b=None, interval=None):
+        """
+        usage: provide 'time_step' or 'a' and 'b' or 'interval'
+        """
+        if time_step is not None:
+            return self.membership_function(time_step)
+
         if interval is None:
             if (a, b) == (None, None):
                 interval = self
             else:
                 interval = TimeInterval(a, b)
         else:
-            assert_is_time_interval(interval)
-        return interval
+            check_is_time_interval(interval)
+        return integral(self.membership_function, interval.a, interval.b)
 
-    def degree_in_interval(self, a=None, b=None, interval=None):
-        """
-        use either 'a' and 'b' or 'interval'
-        """
-        interval = self._interval_from_self_if_none(a, b, interval)
-        area, error = integrate.quad(self.membership_function, interval.a, interval.b)
-        return area / interval.duration
+    def instance(self):
+        return TemporalInstance(self.distribution_beginning.rvs(), self.distribution_ending.rvs())
 
     def to_dict(self):
         if self._dict is None:
@@ -129,7 +130,6 @@ class TemporalEventPiecewiseLinear(TemporalEvent):
         TemporalEvent.__init__(self, distribution_beginning, distribution_ending, bins=bins)
         self._list = sorted(set(input_list_beginning + input_list_ending))
         self.membership_function = FunctionPiecewiseLinear(self.to_dict(), FUNCTION_ZERO)
-
 
     def degree_in_interval(self, a=None, b=None, interval=None):
         interval = self._interval_from_self_if_none(a, b, interval)

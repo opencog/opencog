@@ -8,9 +8,10 @@ def is_time_interval(item):
         item, 'b') and is_unix_time(item.a) and is_unix_time(item.b) and item.a < item.b
 
 
-def assert_is_time_interval(interval):
-    assert is_time_interval(interval), "passed 'interval' should have 'a' and 'b' attributes, " \
-                                       "both of which should be in unix time, and 'b' has to be greater than 'a'"
+def check_is_time_interval(interval):
+    if not is_time_interval(interval):
+        raise TypeError("passed 'interval' should have 'a' and 'b' attributes, "
+                        "both of which should be in unix time, and 'b' has to be greater than 'a'")
 
 
 class TimeInterval(object):
@@ -107,7 +108,7 @@ class TimeInterval(object):
 
 if __name__ == '__main__':
     import time
-    a = TimeInterval(1, 100000)
+    a = TimeInterval(1, 100000, 1000000)
     b = []
 
     start = time.time()

@@ -50,7 +50,7 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
     def interval(self, alpha):
         if alpha == 1:
             return self.a, self.b
-        raise NotImplementedError
+        raise NotImplementedError("'interval' is not implemented for 'alpha' other than 1")
 
     def rvs(self, size=None):
         if size is None:

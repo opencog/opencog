@@ -14,6 +14,7 @@ def integral(function, start, end):
     area, error = quad(function, start, end)
     return area
 
+
 def equals(a, b):
     if fabs(a - b) < EPSILON:
         return True
@@ -285,18 +286,18 @@ class FunctionPiecewiseLinear(FunctionComposite):
         return FunctionPiecewiseLinear(dictionary_input_output, function_undefined=self.function_undefined)
 
 if __name__ == '__main__':
-    #from spatiotemporal.temporal_events import TemporalEventTrapezium
-    #e = TemporalEventTrapezium(1, 10, 3, 8)
-    #print e
-    #mf = e.membership_function()
-    #print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
-    #print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
-    #print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
-    #print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
-    #print 'degree in [1 : 10]:', e.degree_in_interval()
-    #print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
+    from spatiotemporal.temporal_events import TemporalEventTrapezium
+    e = TemporalEventTrapezium(1, 10, 3, 8)
+    print e
+    mf = e.membership_function()
+    print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
+    print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
+    print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
+    print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
+    print 'degree in [1 : 10]:', e.degree_in_interval()
+    print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
 
-    a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
-    print (a(-0.25) + a(0.25))/4
-    print a(0.25) * 2.75 / 2
+    #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
+    #print (a(-0.25) + a(0.25))/4
+    #print a(0.25) * 2.75 / 2
 
