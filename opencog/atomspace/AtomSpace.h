@@ -372,24 +372,41 @@ public:
     }
 
     /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        atomSpaceAsync->setSTI(h, stiValue)->get_result();
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+        /* Make a copy */
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        atomSpaceAsync->setLTI(h, ltiValue)->get_result();
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
+    }
+
+    /** Change the Very-Long-Term Importance of a given Handle */
+    void chgVLTI(Handle h, int unit) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + unit);
+        h->setAttentionValue(new_av);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
-    void incVLTI(Handle h) {
-        atomSpaceAsync->incVLTI(h)->get_result();
-    }
+    void incVLTI(Handle h) { chgVLTI(h, +1); }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
-    void decVLTI(Handle h) {
-        atomSpaceAsync->decVLTI(h)->get_result();
-    }
+    void decVLTI(Handle h) {chgVLTI(h, -1); }
     
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
@@ -442,8 +459,8 @@ public:
     }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, AttentionValuePtr av) {
-        atomSpaceAsync->setAV(h,av)->get_result();
+    void setAV(Handle h, AttentionValuePtr av) const {
+        h->setAttentionValue(av);
     }
 
     /** Retrieve the type of a given Handle */

@@ -59,6 +59,42 @@ private:
 
     AttentionValuePtr avs[NUM_AVS];
 
+    AttentionValue::vlti_t getVLTI(Handle h) const {
+        return h->getAttentionValue()->getVLTI();
+    }
+
+    void chgVLTI(Handle h, int unit) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + unit);
+        h->setAttentionValue(new_av);
+    }
+
+    void incVLTI(Handle h) { chgVLTI(h, +1); }
+    void decVLTI(Handle h) { chgVLTI(h, -1); }
+
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+        /* Make a copy */
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
+    }
+
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
+    }
+
+
 public:
     AttentionValueUTest() {
         //logger().setLevel(Logger::DEBUG);
@@ -149,21 +185,21 @@ public:
         AtomSpaceImpl* atomSpace = new AtomSpaceImpl();
         vector<Handle> atoms = createSimpleGraph(atomSpace, "vlti");
         
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
-        atomSpace->incVLTI(atoms[0]);//VLTI=1
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
-        atomSpace->incVLTI(atoms[0]);//VLTI=2
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
-        atomSpace->decVLTI(atoms[0]);//VLTI=1
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
-        atomSpace->incVLTI(atoms[0]);//VLTI=2
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
-        atomSpace->decVLTI(atoms[0]);//VLTI=1
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
-        atomSpace->decVLTI(atoms[0]);//VLTI=0
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
-        atomSpace->decVLTI(atoms[0]);//VLTI=0
-        TS_ASSERT(atomSpace->getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        incVLTI(atoms[0]);//VLTI=2
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=1
+        TS_ASSERT(getVLTI(atoms[0])!=AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
     }
 
     void testComparisons() {
@@ -231,20 +267,20 @@ public:
         TruthValuePtr tv4 = SimpleTruthValue::createTV(0.5f, 0.05f);
         buf[baseNameLength] = '1';
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
-        atomSpace->setSTI(h1, 0);
-        atomSpace->setLTI(h1, 300);
+        setSTI(h1, 0);
+        setLTI(h1, 300);
         buf[baseNameLength] = '2';
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
-        atomSpace->setSTI(h2, 500);
-        atomSpace->setLTI(h2, 7000);
+        setSTI(h2, 500);
+        setLTI(h2, 7000);
         buf[baseNameLength] = '3';
         Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
-        atomSpace->setSTI(h3, 500);
-        atomSpace->setLTI(h3, 7000);
+        setSTI(h3, 500);
+        setLTI(h3, 7000);
         buf[baseNameLength] = '4';
         Handle h4 = atomSpace->addNode(CONCEPT_NODE, buf, tv4);
-        atomSpace->setSTI(h4, 500);
-        atomSpace->setLTI(h4, 20000);
+        setSTI(h4, 500);
+        setLTI(h4, 20000);
 
         testAtoms.push_back(h1);
         testAtoms.push_back(h2);

@@ -64,6 +64,28 @@ void HandleEntry2HandleSeq(HandleEntry& src, HandleSeq& dest)
     dest = src.toHandleVector();
 }
 
+void setSTI(Handle h, AttentionValue::sti_t stiValue)
+{
+    /* Make a copy */
+    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        stiValue,
+        old_av->getLTI(),
+        old_av->getVLTI());
+    h->setAttentionValue(new_av);
+}
+
+
+void setLTI(Handle h, AttentionValue::lti_t ltiValue)
+{
+    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        ltiValue,
+        old_av->getVLTI());
+    h->setAttentionValue(new_av);
+}
+
 HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
 {
     char buf[256];
@@ -79,16 +101,16 @@ HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
     TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
-    atomSpace->setSTI(h1, AV1_STI);
-    atomSpace->setLTI(h1, AV1_LTI);
+    setSTI(h1, AV1_STI);
+    setLTI(h1, AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
-    atomSpace->setSTI(h2, AV2_STI);
-    atomSpace->setLTI(h2, AV2_LTI);
+    setSTI(h2, AV2_STI);
+    setLTI(h2, AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
-    atomSpace->setSTI(h3, AV3_STI);
-    atomSpace->setLTI(h3, AV3_LTI);
+    setSTI(h3, AV3_STI);
+    setLTI(h3, AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
@@ -866,7 +888,7 @@ public:
         bool clip = false, average = false;
         TS_ASSERT_EQUALS(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
         average = true;
-        atomSpace->setSTI(h,10);
+        setSTI(h,10);
         atomSpace->getAttentionBank().updateMaxSTI(10);
         TS_ASSERT(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
         clip = true;

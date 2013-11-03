@@ -298,18 +298,6 @@ public:
 
 };
 
-class SetAttentionValueASR : public TwoParamASR <bool, Handle, AttentionValuePtr> {
-public:
-    SetAttentionValueASR(AtomSpaceImpl *a, Handle h, AttentionValuePtr av) :
-        TwoParamASR<bool, Handle, AttentionValuePtr>(a,h,av) {};
-    
-    virtual void do_work() {
-        atomspace->setAV(p1,p2);
-        set_result(true);
-    };
-    
-};
-
 class GetNormalisedAttentionValueSTIASR : public GenericASR<float> {
     Handle h;
     bool average, clip, positive;
@@ -325,56 +313,6 @@ public:
             set_result(atomspace->getNormalisedSTI(h->getAttentionValue(), average, clip));
     };
 };
-
-class SetAttentionValueSTIASR : public TwoParamASR <bool, Handle, AttentionValue::sti_t> {
-public:
-    SetAttentionValueSTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::sti_t sti) :
-        TwoParamASR<bool, Handle, AttentionValue::sti_t>(a,h,sti) {};
-    
-    virtual void do_work() {
-        atomspace->setSTI(p1,p2);
-        set_result(true);
-    };
-    
-};
-
-
-class SetAttentionValueLTIASR : public TwoParamASR <bool, Handle, AttentionValue::lti_t> {
-public:
-    SetAttentionValueLTIASR(AtomSpaceImpl *a, Handle h, AttentionValue::lti_t lti) :
-        TwoParamASR<bool,Handle,AttentionValue::lti_t>(a,h,lti) {};
-    
-    virtual void do_work() {
-        atomspace->setLTI(p1,p2);
-        set_result(true);
-    };
-    
-};
-
-class IncAttentionValueVLTIASR : public OneParamASR <bool, Handle> {
-public:
-    IncAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h) :
-    OneParamASR<bool,Handle>(a,h) {}
-    
-    virtual void do_work() {
-        atomspace->incVLTI(p1);
-        set_result(true);
-    }
-    
-};
-
-class DecAttentionValueVLTIASR : public OneParamASR <bool, Handle> {
-public:
-    DecAttentionValueVLTIASR(AtomSpaceImpl *a, Handle h) :
-    OneParamASR<bool,Handle>(a,h) {}
-    
-    virtual void do_work() {
-        atomspace->decVLTI(p1);
-        set_result(true);
-    }
-    
-};
-
 
 // -----------------
 // Search requests

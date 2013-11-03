@@ -137,12 +137,6 @@ public:
         return hr;
     }
 
-    VoidRequest setAV(Handle h, AttentionValuePtr av) {
-        VoidRequest r(new SetAttentionValueASR(&atomspace,h,av));
-        requestQueue.push(r);
-        return r;
-    }
-
     /** Retrieve the complete TruthValue of a given Handle */
     TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
         TruthValueCompleteRequest r(new GetCompleteTruthValueASR(&atomspace,h,vh));
@@ -178,13 +172,6 @@ public:
         return r;
     }
 
-    /** Change the Short-Term Importance of an Atom */
-    VoidRequest setSTI(Handle h, AttentionValue::sti_t sti) {
-        VoidRequest r(new SetAttentionValueSTIASR(&atomspace,h,sti));
-        requestQueue.push(r);
-        return r;
-    }
-
     /** Retrieve the normalised Short-Term Importance for a given Handle.
      * Unless positive parameter is true, STI above and below the attentional
      * focus threshold is normalised separately and linearly.
@@ -201,27 +188,6 @@ public:
     FloatRequest getNormalisedSTI(Handle h, bool average=true, bool clip=false, bool positive=false) {
         FloatRequest r(new GetNormalisedAttentionValueSTIASR(
                     &atomspace,h,average,clip,positive));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Change the Long-Term Importance of an Atom */
-    VoidRequest setLTI(Handle h, AttentionValue::lti_t lti) {
-        VoidRequest r(new SetAttentionValueLTIASR(&atomspace,h,lti));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Increase the Very Long-Term Importance of an Atom by 1*/
-    VoidRequest incVLTI(Handle h) {
-        VoidRequest r(new IncAttentionValueVLTIASR(&atomspace,h));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Decrease the Very Long-Term Importance of an Atom by 1*/
-    VoidRequest decVLTI(Handle h) {
-        VoidRequest r(new DecAttentionValueVLTIASR(&atomspace,h));
         requestQueue.push(r);
         return r;
     }
