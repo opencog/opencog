@@ -19,29 +19,34 @@ class AtomSpaceTest(TestCase):
         a2 = self.space.add_node(types.Node,"test")
         self.assertEquals(a1,a2)
 
-        # fails when adding with a link type
-        a1 = self.space.add_node(types.Link,"test")
-        self.assertEquals(a1,None)
+        # Should fail when intentionally adding bad type
+        # self.assertRaises(RuntimeError, self.space.add_node(types.Link, "test"))
+        caught = False
+        try:
+           self.space.add_node(types.Link, "test")
+        except RuntimeError:
+           caught = True
+        self.assertEquals(caught, True)
 
         # test adding with a truthvalue
-        a3 = self.space.add_node(types.Node,"test_w_tv",TruthValue(0.5,100))
-        self.assertEquals(self.space.size(),2)
+        a3 = self.space.add_node(types.Node, "test_w_tv", TruthValue(0.5,100))
+        self.assertEquals(self.space.size(), 2)
 
         # test adding with prefixed node
-        a1 = self.space.add_node(types.Node,"test",prefixed=True)
-        a2 = self.space.add_node(types.Node,"test",prefixed=True)
+        a1 = self.space.add_node(types.Node, "test", prefixed=True)
+        a2 = self.space.add_node(types.Node, "test", prefixed=True)
         self.assertNotEqual(a1,a2)
-        self.assertEquals(self.space.size(),4)
+        self.assertEquals(self.space.size(), 4)
 
-        a3 = self.space.add_node(types.Node,"test",TruthValue(0.5,100),prefixed=True)
+        a3 = self.space.add_node(types.Node, "test", TruthValue(0.5,100), prefixed=True)
         self.assertNotEqual(a1,a3)
-        self.assertEquals(self.space.size(),5)
+        self.assertEquals(self.space.size(), 5)
 
         # tests with bad parameters
         # test with not a proper truthvalue
-        self.assertRaises(TypeError,self.space.add_node,types.Node,"test",0,True)
+        self.assertRaises(TypeError, self.space.add_node, types.Node, "test", 0, True)
         # test with bad type
-        self.assertRaises(TypeError,self.space.add_node,"ConceptNode","test",TruthValue(0.5,100))
+        self.assertRaises(TypeError, self.space.add_node, "ConceptNode", "test", TruthValue(0.5,100))
 
     def test_add_link(self):
         n1 = self.space.add_node(types.Node, "test1")
@@ -60,8 +65,12 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(l4 is not None)
 
         # Should fail when adding an intentionally bad type
-        l1 = self.space.add_link(types.Node, [n1,n3])
-        self.assertEquals(l1, None)
+        caught = False
+        try:
+           l1 = self.space.add_link(types.Node, [n1,n3])
+        except RuntimeError:
+           caught = True
+        self.assertEquals(caught, True)
 
     def test_is_valid(self):
         h1 = self.space.add_node(types.Node,"test1")
@@ -72,7 +81,7 @@ class AtomSpaceTest(TestCase):
         # check with bad UUID
         self.assertFalse(self.space.is_valid(2919))
         # check with bad type
-        self.assertRaises(TypeError,self.space.is_valid,"test")
+        self.assertRaises(TypeError, self.space.is_valid, "test")
 
     def test_truth_value(self):
         # check attributes come back as assigned
@@ -204,8 +213,8 @@ class AtomSpaceTest(TestCase):
     def test_container_methods(self):
         self.assertEquals(len(self.space),0) 
         h = Handle(100)
-        self.assertRaises(KeyError,self.space.__getitem__,"blah")
-        self.assertRaises(IndexError,self.space.__getitem__,h)
+        self.assertRaises(KeyError, self.space.__getitem__, "blah")
+        self.assertRaises(IndexError, self.space.__getitem__, h)
         a1 = self.space.add_node(types.Node,"test1")
         a2 = self.space.add_node(types.ConceptNode,"test2")
         a3 = self.space.add_node(types.PredicateNode,"test3")
@@ -260,7 +269,7 @@ class AtomTest(TestCase):
         self.assertEqual(l.out, [a1,a2])
 
         # ensure out is considered immutable
-        self.assertRaises(AttributeError, setattr, l,"out",[a1])
+        self.assertRaises(AttributeError, setattr, l, "out", [a1])
 
     def test_arity(self):
         a1 = self.space.add_node(types.Node,"test2")
