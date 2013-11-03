@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_ZMQ_CLIENT_H
 #define _OPENCOG_ZMQ_CLIENT_H
 
-#include "Atom.h"
-#include "Handle.h"
+#include "opencog/atomspace/Atom.h"
+#include "opencog/atomspace/Handle.h"
 #include "types.h"
 #include <zmq.hpp>
 #include <opencog/atomspace/ZMQMessages.pb.h>
