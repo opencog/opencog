@@ -294,7 +294,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByName(OutputIterator result,
                  Type type,
                  const std::string& name,
                  bool subclass = true) const
@@ -304,7 +304,7 @@ public:
 
     /** Same as above, but includes check for VH */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByNameVH(OutputIterator result,
                  const std::string& name,
                  Type type,
                  bool subclass,
@@ -336,16 +336,16 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByType(OutputIterator result,
                  Type type,
                  bool subclass = false) const 
     {
         return atomTable.getHandlesByType(result, type, subclass);
     }
 
-    /* Same as above */
+    /* Same as above, but slower due to VH. */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTypeVH(OutputIterator result,
                  Type type,
                  bool subclass,
                  VersionHandle vh) const
@@ -382,7 +382,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTargetTypeVH(OutputIterator result,
                  Type type,
                  Type targetType,
                  bool subclass,
@@ -417,7 +417,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByTypeVH(OutputIterator result,
                  Handle handle,
                  Type type,
                  bool subclass,
@@ -502,7 +502,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByName(OutputIterator result,
                  const std::string& targetName,
                  Type targetType,
                  Type type,
@@ -513,7 +513,7 @@ public:
     }
 
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByNameVH(OutputIterator result,
                  const std::string& targetName,
                  Type targetType,
                  Type type,
@@ -684,7 +684,7 @@ public:
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
-        getHandleSet(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
         sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(&atomTable, compare));
 
         // copy the vector and return the iterator.
@@ -728,7 +728,7 @@ public:
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandleSet(back_inserter(handle_set), atype, subclass);
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i;

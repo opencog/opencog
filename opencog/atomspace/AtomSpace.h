@@ -520,8 +520,9 @@ public:
      * @param subClasses Follow subtypes of linkType too.
      */
     HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-            Type linkType=LINK, bool subClasses=true) const {
-        return atomSpaceAsync->getNeighbors(h,fanin,fanout,linkType,subClasses)->get_result();
+            Type linkType=LINK, bool subClasses=true) const
+    {
+        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
     }
 
     /** Retrieve the incoming set of a given atom */
@@ -560,10 +561,9 @@ public:
                  Type type,
                  const std::string& name,
                  bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
-                std::string(name), type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -592,10 +592,9 @@ public:
                  const char* name,
                  Type type,
                  bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
-                name, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -621,9 +620,9 @@ public:
     getHandleSet(OutputIterator result,
                  Type type,
                  bool subclass = false,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByType(type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByTypeVH(result, type, subclass, vh);
     }
 
     /**
@@ -656,10 +655,10 @@ public:
                  bool subclass,
                  bool targetSubclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTarget(type, targetType,
-                subclass, targetSubclass, vh, targetVh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByTargetTypeVH(result,
+               type, targetType, subclass, targetSubclass, vh, targetVh);
     }
 
     /**
@@ -690,10 +689,9 @@ public:
                  Handle handle,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetHandle(handle,
-                type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
     }
 
     /**
@@ -778,10 +776,10 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetName(
-               targetName, targetType, type, subclass, vh, targetVh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getIncomingSetByNameVH(result,
+               targetName, targetType, type, subclass, vh, targetVh);
     }
 
     /**
@@ -972,7 +970,8 @@ public:
                  Type type,
                  bool subclass,
                  Compare compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
         HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
                 type, subclass, compare, vh)->get_result();
         return std::copy(result_set.begin(), result_set.end(), result);

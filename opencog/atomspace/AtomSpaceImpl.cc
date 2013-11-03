@@ -380,28 +380,30 @@ void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
 
-    getHandleSet(back_inserter(allAtoms), ATOM, true);
+    getHandlesByType(back_inserter(allAtoms), ATOM, true);
 
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
-    DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
+    DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
     Logger::Level save = logger().getLevel();
     logger().setLevel(Logger::DEBUG);
 
+    // XXX FIXME TODO This is a stunningly inefficient way to clear the
+    // atomspace! This will take minutes on any decent-sized atomspace!
     size_t j = 0;
     std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
         bool result = removeAtom(*i, true);
         if (result) {
             DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
-                j,i->value(),Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+                j, i->value(), Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
             j++;
         }
     }
 
     allAtoms.clear();
-    getHandleSet(back_inserter(allAtoms), ATOM, true);
+    getHandlesByType(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);

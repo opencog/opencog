@@ -357,7 +357,8 @@ public:
             std::ostringstream oss;
             oss << "thread -1 node " << i;
             //std::cout << "removing " << oss.str() << std::endl;
-            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            HandleSeq hs;
+            atomSpace->getImplconst().getHandlesByName(back_inserter(hs), NODE, oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1); 
             if (hs.size() != 0) {
                 //std::cout << " handle " << hs[0] << std::endl;
@@ -424,7 +425,8 @@ public:
             std::ostringstream oss;
             oss << "thread -1 node " << i;
 
-            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            HandleSeq hs;
+            atomSpace->getImplconst().getHandlesByName(back_inserter(hs), NODE, oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1); 
             Handle h = hs[0];
 
@@ -480,15 +482,17 @@ public:
             std::ostringstream oss;
             oss << "thread -1 node " << i;
 
-            HandleSeq hs = atomSpace->getHandlesByName(oss.str(), NODE)->get_result();
+            HandleSeq hs;
+            atomSpace->getImplconst().getHandlesByName(back_inserter(hs), NODE, oss.str());
             TS_ASSERT_EQUALS(hs.size(), 1); 
             Handle ha = hs[0];
 
             std::ostringstream ossb;
             ossb << "thread -1 node " << (2*i) % N;
 
-            hs = atomSpace->getHandlesByName(ossb.str(), NODE)->get_result();
-            TS_ASSERT_EQUALS(hs.size(), 1); 
+            HandleSeq hsb;
+            atomSpace->getImplconst().getHandlesByName(back_inserter(hsb), NODE, ossb.str());
+            TS_ASSERT_EQUALS(hsb.size(), 1); 
 
             bogus ++;
             bogus %= N;

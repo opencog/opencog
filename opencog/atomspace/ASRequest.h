@@ -110,7 +110,7 @@ public:
     virtual void do_work() {
         HandleSeq _result;
         HandleSeq hs;
-        atomspace->getHandleSet(back_inserter(hs), t, subclass, vh);
+        atomspace->getHandlesByTypeVH(back_inserter(hs), t, subclass, vh);
         foreach (Handle h, hs) {
             if ((*p)(h) && atomspace->containsVersionedTV(h, vh))
                 _result.push_back(h);
@@ -118,28 +118,6 @@ public:
         set_result(_result);
     }
     
-};
-
-class GetNeighborsASR : public GenericASR<HandleSeq> {
-    Handle h;
-    Type linkType;
-    bool subclasses;
-    bool fanin;
-    bool fanout;
-
-public:
-    GetNeighborsASR(AtomSpaceImpl* a,
-            const Handle& _h, bool _fanin, bool _fanout,
-            Type _linkType, bool _subclasses) :
-        GenericASR<HandleSeq>(a), h(_h), linkType(_linkType),
-        subclasses(_subclasses), fanin(_fanin), fanout(_fanout)
-            { }
-
-    ~GetNeighborsASR() { }
-
-    virtual void do_work() {
-        set_result(atomspace->getNeighbors(h,fanin,fanout,linkType,subclasses));
-    }
 };
 
 class GetHandlesByOutgoingSetASR : public GenericASR<HandleSeq> {
@@ -186,98 +164,7 @@ public:
     }
 };
 
-class GetHandlesByNameASR: public GenericASR<HandleSeq> {
-    std::string name;
-    Type type;
-    bool subclass;
-    VersionHandle vh;
 
-public:
-    GetHandlesByNameASR(AtomSpaceImpl* a,
-            const std::string& _name, Type _type, bool _subclass,
-             VersionHandle _vh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
-        name = _name;
-        type = _type;
-        subclass = _subclass;
-        vh = _vh;
-    }
-
-    virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result), name, type, subclass, vh);
-    }
-};
-
-class GetHandlesByTypeASR: public GenericASR<HandleSeq> {
-    Type type;
-    bool subclass;
-    VersionHandle vh;
-
-public:
-    GetHandlesByTypeASR(AtomSpaceImpl* a,
-            Type _type, bool _subclass,
-            VersionHandle _vh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
-        type = _type;
-        subclass = _subclass;
-        vh = _vh;
-    }
-
-    virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),type,subclass,vh);
-    }
-};
-
-class GetHandlesByTargetASR: public GenericASR<HandleSeq> {
-    Type type, targetType;
-    bool subclass, targetSubclass;
-    VersionHandle vh, targetVh;
-
-public:
-    GetHandlesByTargetASR(AtomSpaceImpl* a,
-            Type _type, Type _targetType,
-            bool _subclass, bool _targetSubclass,
-            VersionHandle _vh = NULL_VERSION_HANDLE,
-            VersionHandle _targetVh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
-        type = _type;
-        subclass = _subclass;
-        vh = _vh;
-        targetType = _targetType;
-        targetSubclass = _targetSubclass;
-        targetVh = _targetVh;
-    }
-
-    virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),type,targetType,
-                subclass,targetSubclass,vh,targetVh);
-    }
-};
-
-class GetHandlesByTargetHandleASR: public GenericASR<HandleSeq> {
-    Handle h;
-    Type type;
-    bool subclass;
-    VersionHandle vh;
-
-public:
-    GetHandlesByTargetHandleASR(AtomSpaceImpl* a,
-            Handle _h,
-            Type _type,
-            bool _subclass,
-            VersionHandle _vh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
-        h = _h;
-        type = _type;
-        subclass = _subclass;
-        vh = _vh;
-    }
-
-    virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),h,type,
-                subclass,vh);
-    }
-};
 
 class GetHandlesByTargetTypesASR: public GenericASR<HandleSeq> {
     Type* types;
@@ -378,37 +265,6 @@ public:
     }
 };
 
-class GetHandlesByTargetNameASR: public GenericASR<HandleSeq> {
-    std::string targetName;
-    Type targetType;
-    Type type;
-    bool subclass;
-    VersionHandle vh;
-    VersionHandle targetVh;
-
-public:
-    GetHandlesByTargetNameASR(AtomSpaceImpl* a,
-            const char* _targetName,
-            Type _targetType,
-            Type _type,
-            bool _subclass,
-            VersionHandle _vh = NULL_VERSION_HANDLE,
-            VersionHandle _targetVh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
-        targetName = _targetName;
-        targetType = _targetType;
-        type = _type;
-        subclass = _subclass;
-        vh = _vh;
-        targetVh = _targetVh;
-    }
-
-    virtual void do_work() {
-        atomspace->getHandleSet(back_inserter(result),targetName.c_str(),
-                targetType,type,subclass,vh,targetVh);
-    }
-};
-
 class GetSortedHandleSetASR: public GenericASR<HandleSeq> {
     Type type;
     bool subclass;
@@ -433,7 +289,6 @@ public:
 };
 
 // Requests are based on their parent class that defines the return type
-typedef std::shared_ptr< GenericASR<Handle> > HandleRequest;
 typedef std::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
 
 /** @}*/
