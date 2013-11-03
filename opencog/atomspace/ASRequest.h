@@ -172,93 +172,6 @@ public:
     
 };
 
-class GetTruthValueMeanASR : public GenericASR <float> {
-    Handle h;
-    VersionHandle vh;
-public:
-    GetTruthValueMeanASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<float> (a)  {
-        h=_h; vh=_vh;
-    };
-    
-    virtual void do_work() {
-        TruthValuePtr tv = atomspace->getTV(h,vh);
-        set_result(tv->getMean());
-    };
-    
-};
-
-class GetTruthValueConfidenceASR : public GenericASR <float> {
-    Handle h;
-    VersionHandle vh;
-public:
-    GetTruthValueConfidenceASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<float> (a)  {
-        h=_h; vh=_vh;
-    };
-    
-    virtual void do_work() {
-        TruthValuePtr tv = atomspace->getTV(h,vh);
-        set_result(tv->getConfidence());
-    };
-    
-};
-
-class GetCompleteTruthValueASR : public GenericASR <TruthValuePtr> {
-    Handle h;
-    VersionHandle vh;
-public:
-    GetCompleteTruthValueASR (AtomSpaceImpl *a, Handle _h, VersionHandle& _vh) :
-        GenericASR<TruthValuePtr> (a)  {
-        h=_h; vh=_vh;
-        result = NULL;
-    };
-    ~GetCompleteTruthValueASR() {
-    }
-    
-    virtual void do_work() {
-        set_result(atomspace->getTV(h,vh));
-    };
-    
-};
-
-class SetTruthValueASR : public GenericASR <bool> {
-    Handle h;
-    TruthValuePtr tv;
-    VersionHandle vh;
-public:
-    SetTruthValueASR(AtomSpaceImpl *a, Handle _h, TruthValuePtr _tv, const VersionHandle& _vh) :
-            GenericASR<bool>(a) {
-        tv = NULL;
-        h = _h;
-        tv = _tv;
-        vh = _vh;
-    }
-    ~SetTruthValueASR() {
-    }
-    
-    virtual void do_work() {
-        atomspace->setTV(h, tv, vh);
-        set_result(true);
-    };
-    
-};
-
-class SetTruthValueMeanASR : public TwoParamASR <bool,Handle,float> {
-    Handle h;
-public:
-    SetTruthValueMeanASR(AtomSpaceImpl *a, Handle _h, float mean) :
-            TwoParamASR<bool,Handle,float>(a,_h,mean) {
-    }
-    
-    virtual void do_work() {
-        atomspace->setMean(p1,p2);
-        set_result(true);
-    };
-    
-};
-
-
 // -----------------
 // Search requests
 
@@ -599,21 +512,7 @@ public:
 
 // Requests are based on their parent class that defines the return type
 typedef std::shared_ptr< GenericASR<Handle> > HandleRequest;
-typedef std::shared_ptr< GenericASR<AtomPtr > > AtomRequest;
-typedef std::shared_ptr< GenericASR<AttentionValuePtr> > AttentionValueRequest;
-typedef std::shared_ptr< GenericASR<AttentionValue::sti_t> > STIRequest;
-typedef std::shared_ptr< GenericASR<AttentionValue::lti_t> > LTIRequest;
-typedef std::shared_ptr< GenericASR<AttentionValue::vlti_t> > VLTIRequest;
-typedef std::shared_ptr< GenericASR<TruthValuePtr> > TruthValueCompleteRequest;
 typedef std::shared_ptr< GenericASR<HandleSeq> > HandleSeqRequest;
-typedef std::shared_ptr< GenericASR<Type> > TypeRequest;
-typedef std::shared_ptr< GenericASR<int> > IntRequest;
-typedef std::shared_ptr< GenericASR<float> > FloatRequest;
-typedef std::shared_ptr< GenericASR<bool> > BoolRequest;
-typedef std::shared_ptr< GenericASR<size_t> > HashRequest;
-typedef std::shared_ptr< GenericASR<std::string> > StringRequest;
-// Can't actually init template with void, so use bool as stand-in.
-typedef std::shared_ptr< GenericASR<bool> > VoidRequest;
 
 /** @}*/
 /** @}*/

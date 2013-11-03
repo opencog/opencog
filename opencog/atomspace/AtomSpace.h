@@ -471,25 +471,20 @@ public:
     /** Retrieve the TruthValue of a given Handle */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
     {
-        TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
-        TruthValuePtr x(tvr->get_result());
-        tvr->result = NULL; // cheat to avoid copying TruthValue once again
-        return x;
+        return getImplconst().getTV(h, vh);
     }
 
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        FloatRequest tvr = atomSpaceAsync->getMean(h, vh);
-        return tvr->get_result();
+        return getTV(h, vh)->getMean();
     }
 
     confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
-        return tvr->get_result();
+        return getTV(h, vh)->getConfidence();
     }
 
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        atomSpaceAsync->setTV(h, tv, vh)->get_result();
+        getImpl().setTV(h, tv, vh);
     }
 
     /** Change the primary TV's mean of a given Handle
@@ -498,7 +493,7 @@ public:
      * enforce the use of setTV.
      */
     void setMean(Handle h, float mean) {
-        atomSpaceAsync->setMean(h, mean)->get_result();
+        getImpl().setMean(h, mean);
     }
 
     /**

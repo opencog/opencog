@@ -111,41 +111,6 @@ public:
         return hr;
     }
 
-    /** Retrieve the complete TruthValue of a given Handle */
-    TruthValueCompleteRequest getTVComplete(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
-        TruthValueCompleteRequest r(new GetCompleteTruthValueASR(&atomspace,h,vh));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Retrieve the complete TruthValue of a given Handle */
-    FloatRequest getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
-        FloatRequest r(new GetTruthValueMeanASR(&atomspace,h,vh));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Retrieve the complete TruthValue of a given Handle */
-    FloatRequest getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) {
-        FloatRequest r(new GetTruthValueConfidenceASR(&atomspace,h,vh));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Change the TruthValue summary of a given Handle */
-    VoidRequest setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        VoidRequest r(new SetTruthValueASR(&atomspace,h,tv,vh));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Change the primary TV's mean of a given Handle */
-    VoidRequest setMean(Handle h, float mean) {
-        VoidRequest r(new SetTruthValueMeanASR(&atomspace,h,mean));
-        requestQueue.push(r);
-        return r;
-    }
-
     //--------------
     // These functions are query methods - they currently return HandleSeqs,
     // but in future the Request objects returned from these functions will be more
