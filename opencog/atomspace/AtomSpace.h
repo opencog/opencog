@@ -105,41 +105,6 @@ public:
     AtomSpace(const AtomSpace&);
     ~AtomSpace();
 
-    /**
-     * Recursively store the atom to the backing store.
-     * I.e. if the atom is a link, then store all of the atoms
-     * in its outgoing set as well, recursively.
-     * @deprecated Use AtomSpaceAsync::storeAtom in new code.
-     */
-    inline void storeAtom(Handle h) {
-        atomSpaceAsync->storeAtom(h)->get_result();
-    }
-
-    /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
-     * @deprecated Use AtomSpaceAsync::fetchAtom in new code.
-     */
-    inline Handle fetchAtom(Handle h) {
-        return atomSpaceAsync->fetchAtom(h)->get_result();
-    }
-
-    /**
-     * Use the backing store to load the entire incoming set of the atom.
-     * If the flag is true, then the load is done recursively. 
-     * This method queries the backing store to obtain all atoms that 
-     * contain this one in their outgoing sets. All of these atoms are
-     * then loaded into this AtomSpace's AtomTable.
-     * @deprecated Use AtomSpaceAsync::fetchIncomingSet in new code.
-     */
-    inline Handle fetchIncomingSet(Handle h, bool recursive) {
-        return atomSpaceAsync->fetchIncomingSet(h,recursive)->get_result();
-    };
-
     inline AttentionBank& getAttentionBank()
     { return atomSpaceAsync->getAttentionBank(); }
 
@@ -561,7 +526,7 @@ public:
 
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle h) {
-        return atomSpaceAsync->getIncoming(h)->get_result();
+        return getImpl().getIncoming(h);
     }
 
     /** Convenience functions... */

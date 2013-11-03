@@ -63,55 +63,6 @@ public:
     inline void unregisterBackingStore(BackingStore *bs) { atomspace.unregisterBackingStore(bs); }
 
     //--------------
-    // These functions are the core API for manipulating the AtomSpace
-    // hypergraph.
-
-    /**
-     * Recursively store the atom to the backing store.
-     * I.e. if the atom is a link, then store all of the atoms
-     * in its outgoing set as well, recursively.
-     */
-    HandleRequest storeAtom(Handle h) {
-        HandleRequest hr(new StoreAtomASR(&atomspace,h));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
-     */
-    HandleRequest fetchAtom(Handle h) {
-        HandleRequest hr(new FetchAtomASR(&atomspace,h));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /**
-     * Use the backing store to load the entire incoming set of the atom.
-     * If the flag is true, then the load is done recursively. 
-     * This method queries the backing store to obtain all atoms that 
-     * contain this one in their outgoing sets. All of these atoms are
-     * then loaded into this atomtable/atomspace.
-     */
-    HandleRequest fetchIncomingSet(Handle h, bool recursive) {
-        HandleRequest hr(new FetchIncomingSetASR(&atomspace,h,recursive));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /** Retrieve the incoming set of a given atom */
-    HandleSeqRequest getIncoming(Handle h) {
-        HandleSeqRequest hr(new GetIncomingASR(&atomspace,h));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    //--------------
     // These functions are query methods - they currently return HandleSeqs,
     // but in future the Request objects returned from these functions will be more
     // functional and allow/limit users to retrieving N results, resubmit
