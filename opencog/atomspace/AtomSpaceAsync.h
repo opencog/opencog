@@ -154,26 +154,6 @@ public:
         return r;
     }
 
-    /**
-     * Removes an atom from the atomspace
-     *
-     * When the atom is removed from the atomspace, all memory associated
-     * with it is also deleted; in particular, the atom is removed from
-     * the TLB as well, so that future TLB lookups will be invalid. 
-     *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; if set, the links in the
-     *        incoming set of the atom to be removed will also be
-     *        removed.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
-     */
-    BoolRequest removeAtom(Handle h, bool recursive = false) {
-        BoolRequest r(new RemoveAtomASR(&atomspace,h,recursive));
-        requestQueue.push(r);
-        return r;
-    }
-
     /** Retrieve the incoming set of a given atom */
     HandleSeqRequest getIncoming(Handle h) {
         HandleSeqRequest hr(new GetIncomingASR(&atomspace,h));

@@ -226,16 +226,6 @@ public:
     
 };
 
-class RemoveAtomASR : public TwoParamASR<bool,Handle,bool> {
-public:
-    RemoveAtomASR(AtomSpaceImpl *a,Handle h,bool recursive) :
-        TwoParamASR<bool,Handle,bool>(a,h,recursive) { };
-    
-    virtual void do_work() {
-        set_result(atomspace->removeAtom(p1,p2));
-    };
-    
-};
 
 class GetIncomingASR : public OneParamASR <HandleSeq, Handle> {
 public:

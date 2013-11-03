@@ -334,7 +334,7 @@ public:
      *         removed. False, otherwise.
      */
     bool removeAtom(Handle h, bool recursive = true) {
-        return atomSpaceAsync->removeAtom(h,recursive)->get_result();
+        return getImpl().removeAtom(h,recursive);
     }
 
     /**
