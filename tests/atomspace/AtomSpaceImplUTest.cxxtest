@@ -283,8 +283,8 @@ public:
         }
         //logger().debug("Primary and versioned TVS checked\n");
 
-        TS_ASSERT(atomSpace->Nodes() == (NUM_NODES + NUM_VH_NODES));
-        TS_ASSERT(atomSpace->Links() == 8);
+        TS_ASSERT(atomSpace->getNodeCount() == (NUM_NODES + NUM_VH_NODES));
+        TS_ASSERT(atomSpace->getLinkCount() == 8);
 
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {

@@ -1096,10 +1096,10 @@ public:
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
     size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return atomSpaceAsync->nodeCount(vh)->get_result(); }
+        return atomSpaceAsync->atomspace.getNodeCount(vh); }
 
     size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return atomSpaceAsync->linkCount(vh)->get_result(); }
+        return atomSpaceAsync->atomspace.getLinkCount(vh); }
 
     //! Clear the atomspace, remove all atoms
     void clear() { atomSpaceAsync->clear()->get_result(); }

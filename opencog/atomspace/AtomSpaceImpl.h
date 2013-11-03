@@ -849,8 +849,18 @@ public:
      */
     void decayShortTermImportance() { atomTable.decayShortTermImportance(); }
 
-    size_t Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
-    size_t Links(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t getNodeCount(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+        return hs.size();
+    }
+    size_t getLinkCount(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+        return hs.size();
+    }
 
     bool containsVersionedTV(Handle h, VersionHandle vh) const
         { return atomTable.containsVersionedTV(h, vh); }

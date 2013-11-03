@@ -141,24 +141,6 @@ public:
     }
 
     /**
-     * Get the number of Nodes in the AtomSpace
-     */
-    IntRequest nodeCount(const VersionHandle& vh) {
-        IntRequest ir(new NodeCountASR(&atomspace,vh));
-        requestQueue.push(ir);
-        return ir;
-    }
-
-    /**
-     * Get the number of Nodes in the AtomSpace
-     */
-    IntRequest linkCount(const VersionHandle& vh) {
-        IntRequest ir(new LinkCountASR(&atomspace,vh));
-        requestQueue.push(ir);
-        return ir;
-    }
-
-    /**
      * Print out the AtomSpace to the referenced stream.
      * @param output  the output stream where the atoms will be printed.
      * @param type  the type of atoms that should be printed.

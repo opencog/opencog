@@ -419,32 +419,6 @@ float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool averag
     }
 }
 
-size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::Nodes Atom space address: %p\n", this);
-
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    // It would be cheaper if instead we just used foreachHandleByTypeVH
-    // and just had a function that simply counts!!
-    HandleSeq hs;
-    atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
-    return hs.size();
-}
-
-
-size_t AtomSpaceImpl::Links(VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
-
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    // It would be cheaper if instead we just used foreachHandleByTypeVH
-    // and just had a function that simply counts!!
-    HandleSeq hs;
-    atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
-    return hs.size();
-}
-
-
 void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;

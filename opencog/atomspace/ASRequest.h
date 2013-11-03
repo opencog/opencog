@@ -238,28 +238,6 @@ public:
     
 };
 
-class NodeCountASR : public OneParamASR<int,VersionHandle> {
-public:
-    NodeCountASR(AtomSpaceImpl *a,const VersionHandle &vh) :
-        OneParamASR<int,VersionHandle>(a, vh) {};
-    
-    virtual void do_work() {
-        set_result(atomspace->Nodes(p1));
-    };
-    
-};
-
-class LinkCountASR : public OneParamASR<int,VersionHandle> {
-public:
-    LinkCountASR(AtomSpaceImpl *a,const VersionHandle &vh) :
-        OneParamASR<int,VersionHandle>(a,vh) {};
-    
-    virtual void do_work() {
-        set_result(atomspace->Links(p1));
-    };
-    
-};
-
 class ClearASR : public GenericASR<bool> {
 public:
     ClearASR(AtomSpaceImpl *a) : GenericASR<bool>(a) {};
