@@ -44,24 +44,24 @@ class AtomSpaceTest(TestCase):
         self.assertRaises(TypeError,self.space.add_node,"ConceptNode","test",TruthValue(0.5,100))
 
     def test_add_link(self):
-        n1 = self.space.add_node(types.Node,"test1")
-        n2 = self.space.add_node(types.Node,"test2")
-        l1 = self.space.add_link(types.Link,[n1,n2])
+        n1 = self.space.add_node(types.Node, "test1")
+        n2 = self.space.add_node(types.Node, "test2")
+        l1 = self.space.add_link(types.Link, [n1,n2])
         self.assertTrue(l1 is not None)
-        l2 = self.space.add_link(types.Link,[n1,n2])
+        l2 = self.space.add_link(types.Link, [n1,n2])
         self.assertTrue(l2 is not None)
         self.assertTrue(l2 == l1)
 
-        n3 = self.space.add_node(types.Node,"test3")
-        l3 = self.space.add_link(types.Link,[n1,n3],TruthValue(0.5,100))
+        n3 = self.space.add_node(types.Node, "test3")
+        l3 = self.space.add_link(types.Link, [n1,n3], TruthValue(0.5,100))
         self.assertTrue(l3 is not None)
-        # test with a handle instead of atom
-        l4 = self.space.add_link(types.Link,[n2.h,n3],TruthValue(0.5,100))
+        # Test with a handle instead of atom
+        l4 = self.space.add_link(types.Link, [n2.h, n3], TruthValue(0.5,100))
         self.assertTrue(l4 is not None)
 
-        # fails when adding with a node type
-        l1 = self.space.add_link(1,[n1,n3])
-        self.assertEquals(l1,None)
+        # Should fail when adding an intentionally bad type
+        l1 = self.space.add_link(types.Node, [n1,n3])
+        self.assertEquals(l1, None)
 
     def test_is_valid(self):
         h1 = self.space.add_node(types.Node,"test1")
