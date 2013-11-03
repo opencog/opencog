@@ -120,44 +120,6 @@ public:
     }
 };
 
-template<typename T, typename A, typename B, typename C>
-class ThreeParamASR: public GenericASR<T> {
-protected:
-    A p1;
-    B p2;
-    C p3;
-public:
-    ThreeParamASR(AtomSpaceImpl *a, const A& param1, const B& param2, const C& param3) : GenericASR<T>(a) {
-        p1 = param1;
-        p2 = param2;
-        p3 = param3;
-    }
-};
-
-
-class GetNodeHandleASR : public TwoParamASR <Handle, Type, std::string> {
-public:
-    GetNodeHandleASR(AtomSpaceImpl *a, Type type, const std::string& name) :
-        TwoParamASR<Handle, Type, std::string>(a, type, name)
-        {};
-    
-    virtual void do_work() {
-        set_result(atomspace->getHandle(p1, p2));
-    };
-    
-};
-
-class GetLinkHandleASR : public TwoParamASR <Handle,Type,HandleSeq> {
-public:
-    GetLinkHandleASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing) :
-        TwoParamASR<Handle,Type,HandleSeq>(a,type,outgoing)
-        {};
-    
-    virtual void do_work() {
-        set_result(atomspace->getHandle(p1, p2));
-    };
-    
-};
 
 // store and fetching atoms is low level stuff that should be handled by the
 // AtomSpace internally

@@ -334,7 +334,7 @@ public:
      *         removed. False, otherwise.
      */
     bool removeAtom(Handle h, bool recursive = true) {
-        return getImpl().removeAtom(h,recursive);
+        return getImpl().removeAtom(h, recursive);
     }
 
     /**
@@ -344,7 +344,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return atomSpaceAsync->getHandle(t,str)->get_result();
+        return getImplconst().getHandle(t, str);
     }
 
     /**
@@ -354,7 +354,7 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return atomSpaceAsync->getHandle(t,outgoing)->get_result();
+        return getImplconst().getHandle(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */

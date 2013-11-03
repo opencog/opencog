@@ -26,7 +26,7 @@ void producer(int thread_i) {
     for (int i = 0; i< N/n_threads; i++ ) {
         Type t = randomType(NODE);
         as->getImpl().addNode(t,"test");
-        HandleRequest hr2(as->getHandle(t,"test"));
+        as->getImpl().getHandle(t,"test");
     }
     cout << "Done sending requests from thread " << thread_i << "." << endl;
 }
@@ -67,12 +67,10 @@ int main(int argc, char** argv) {
         thread_pool.add_thread(t);
     }
     
-    std::vector<HandleRequest> hrs;
     for (int i = 0; i< N/n_threads; i++ ) {
         Type t = randomType(NODE);
         a.getImpl().addNode(t,"test");
-        HandleRequest hr2(a.getHandle(t,"test"));
-        // hrs.push_back(hr);
+        a.getImpl().getHandle(t,"test");
     }
     cout << "Done sending requests from main thread" << endl;
     /*for (int i = 0; i< N/n_threads; i++ ) {

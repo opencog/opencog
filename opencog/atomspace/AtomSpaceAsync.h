@@ -67,30 +67,6 @@ public:
     // hypergraph.
 
     /**
-     * Retrieve from the Atom Table the Handle of a given node
-     *
-     * @param t     Type of the node
-     * @param str   Name of the node
-    */
-    HandleRequest getHandle(Type t, const std::string& str) {
-        HandleRequest hr(new GetNodeHandleASR(&atomspace,t,str));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /**
-     * Retrieve from the Atom Table the Handle of a given link
-     * @param t        Type of the node
-     * @param outgoing a reference to a HandleSeq containing
-     *        the outgoing set of the link.
-    */
-    HandleRequest getHandle(Type t, const HandleSeq& outgoing) {
-        HandleRequest hr(new GetLinkHandleASR(&atomspace,t,outgoing));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
