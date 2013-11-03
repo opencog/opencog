@@ -174,6 +174,31 @@ public:
 
     /** Change the Very-Long-Term Importance of an attention value holder */
     //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
+
+    /** Retrieve the doubly normalised Short-Term Importance between -1..1
+     * for a given AttentionValue. STI above and below threshold
+     * normalised separately and linearly.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between -1..1
+     */
+    float getNormalisedSTI(AttentionValuePtr, bool average, bool clip) const;
+
+    /** Retrieve the linearly normalised Short-Term Importance between 0..1
+     * for a given AttentionValue.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to 0..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between 0..1
+     */
+    float getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
 };
 
 /** @}*/

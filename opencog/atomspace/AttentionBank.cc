@@ -134,3 +134,47 @@ AttentionValue::sti_t AttentionBank::setAttentionalFocusBoundary(AttentionValue:
     attentionalFocusBoundary = boundary;
     return boundary;
 }
+
+float AttentionBank::getNormalisedSTI(AttentionValuePtr av, bool average, bool clip) const
+{
+    // get normalizer (maxSTI - attention boundary)
+    int normaliser;
+    float val;
+    AttentionValue::sti_t s = av->getSTI();
+    if (s > getAttentionalFocusBoundary()) {
+        normaliser = (int) getMaxSTI(average) - getAttentionalFocusBoundary();
+        if (normaliser == 0) {
+            return 0.0f;
+        }
+        val = (s - getAttentionalFocusBoundary()) / (float) normaliser;
+    } else {
+        normaliser = -((int) getMinSTI(average) + getAttentionalFocusBoundary());
+        if (normaliser == 0) {
+            return 0.0f;
+        }
+        val = (s + getAttentionalFocusBoundary()) / (float) normaliser;
+    }
+    if (clip) {
+        return std::max(-1.0f, std::min(val,1.0f));
+    } else {
+        return val;
+    }
+}
+
+float AttentionBank::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
+{
+    int normaliser;
+    float val;
+    AttentionValue::sti_t s = av->getSTI();
+    normaliser = getMaxSTI(average) - getMinSTI(average);
+    if (normaliser == 0) {
+        return 0.0f;
+    }
+    val = (s - getMinSTI(average)) / (float) normaliser;
+    if (clip) {
+        return std::max(0.0f, std::min(val,1.0f));
+    } else {
+        return val;
+    }
+}
+

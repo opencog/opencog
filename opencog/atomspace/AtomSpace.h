@@ -531,7 +531,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return getImplconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -545,7 +545,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getImplconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
