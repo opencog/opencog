@@ -772,7 +772,7 @@ public:
 
         HandleSeq highSTI;
         AtomSpaceImpl::STIAboveThreshold stiAbove(1000);
-        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &stiAbove);
+        atomSpace->atomTable.getHandlesByTypePredVH(back_inserter(highSTI), NODE, true, &stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(stiAbove (highSTI[i]) );
         }
@@ -783,7 +783,7 @@ public:
         
         HandleSeq highLTI;
         AtomSpaceImpl::LTIAboveThreshold ltiAbove(800);
-        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &ltiAbove);
+        atomSpace->atomTable.getHandlesByTypePredVH(back_inserter(highLTI), NODE, true, &ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(ltiAbove (highLTI[i]) );
         }

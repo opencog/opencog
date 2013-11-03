@@ -41,13 +41,13 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
 
+class AtomSpaceImplUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-class AtomSpaceImpl;
 
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
@@ -57,6 +57,7 @@ class AtomSpaceImpl
 {
     friend class SavingLoading;
     friend class SaveRequest;
+    friend class ::AtomSpaceImplUTest;
 
 public:
     AtomSpaceImpl(void);
