@@ -143,13 +143,13 @@ public:
         /* add and remove a simple node */
         __testSignalsCounter = 0;
         logger().debug("before first atom add");
-        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        Handle wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
 
         /* Since we're adding *exactly* the same atom, we should get a merged signal */
         logger().debug("before second atom add");
-        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 1111);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
 
@@ -160,7 +160,7 @@ public:
 
         /* add a simple node and let decayShortTermImportance remove it */
         __testSignalsCounter = 0;
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 11);
         AttentionValuePtr av = wnHandle->getAttentionValue();
         AttentionValuePtr newAV = createAV(config().get_int("MIN_STI") + 10, av->getLTI(), av->getVLTI());
@@ -175,7 +175,7 @@ public:
 
         /* add a node with LTI == 1 so that decayShortTermImportance cannot remove it */
         __testSignalsCounter = 0;
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 11);
         AttentionValuePtr av2 = wnHandle->getAttentionValue();
         newAV = createAV(config().get_int("MIN_STI") + 10, 1, av2->getVLTI());
@@ -195,8 +195,8 @@ public:
         add1.disconnect();
         merge1.disconnect();
         remove1.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
-        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
+        atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 1010);
         atomSpace->removeAtom(wnHandle)->get_result();
         TS_ASSERT(__testSignalsCounter == 101010);
@@ -205,8 +205,8 @@ public:
         add2.disconnect();
         merge2.disconnect();
         remove2.disconnect();
-        wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
-        atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
+        atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 0);
         atomSpace->removeAtom(wnHandle)->get_result();
         TS_ASSERT(__testSignalsCounter == 0);
@@ -219,19 +219,19 @@ public:
         AttentionValue::sti_t min_sti = opencog::config().get_int("MIN_STI");
 
         /* add a simple tree of links & nodes */
-        Handle wnHandle = atomSpace->addNode(NUMBER_NODE, "1")->get_result();
+        Handle wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         atomSpace->setSTI(wnHandle,(AttentionValue::sti_t) (min_sti + 7));
 
-        Handle snHandle = atomSpace->addNode(CONCEPT_NODE, "28675194")->get_result();
+        Handle snHandle = atomSpace->getImpl().addNode(CONCEPT_NODE, "28675194");
         atomSpace->setSTI(snHandle,(AttentionValue::sti_t) (min_sti + 5));
 
         std::vector<Handle> os;
         os.push_back(wnHandle);
         os.push_back(snHandle);
-        Handle ilHandle = atomSpace->addLink(INHERITANCE_LINK,os)->get_result();
+        Handle ilHandle = atomSpace->getImpl().addLink(INHERITANCE_LINK,os);
         atomSpace->setSTI(ilHandle,(AttentionValue::sti_t) (min_sti + 6));
 
-        Handle llHandle = atomSpace->addLink(LIST_LINK,os)->get_result();
+        Handle llHandle = atomSpace->getImpl().addLink(LIST_LINK,os);
         atomSpace->setSTI(llHandle,(AttentionValue::sti_t) (min_sti + 5));
 
 #define CHK(TYPE, OP) { \
@@ -304,7 +304,7 @@ public:
             counter++;
 
             TruthValuePtr tv(SimpleTruthValue::createTV(((double) i) / ((double) N), i));
-            atomSpace->addNode(t, oss.str(), tv)->get_result(); 
+            atomSpace->getImpl().addNode(t, oss.str(), tv); 
         }
     }
 
@@ -487,7 +487,7 @@ public:
 
             Type t = LIST_LINK;
             hs.push_back(ha);
-            atomSpace->addLink(t, hs, tv)->get_result(); 
+            atomSpace->getImpl().addLink(t, hs, tv); 
         }
     }
 

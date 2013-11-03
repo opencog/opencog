@@ -64,6 +64,7 @@ public:
     ~AtomSpaceImpl();
 
     AttentionBank& getAttentionBank() {return bank; }
+    const AttentionBank& getAttentionBankconst() const {return bank; }
 
     /**
      * Register a provider of backing storage.

@@ -25,7 +25,7 @@ Type randomType(Type t)
 void producer(int thread_i) {
     for (int i = 0; i< N/n_threads; i++ ) {
         Type t = randomType(NODE);
-        HandleRequest hr(as->addNode(t,"test"));
+        as->getImpl().addNode(t,"test");
         HandleRequest hr2(as->getHandle(t,"test"));
     }
     cout << "Done sending requests from thread " << thread_i << "." << endl;
@@ -70,9 +70,9 @@ int main(int argc, char** argv) {
     std::vector<HandleRequest> hrs;
     for (int i = 0; i< N/n_threads; i++ ) {
         Type t = randomType(NODE);
-        HandleRequest hr(a.addNode(t,"test"));
+        a.getImpl().addNode(t,"test");
         HandleRequest hr2(a.getHandle(t,"test"));
-        hrs.push_back(hr);
+        // hrs.push_back(hr);
     }
     cout << "Done sending requests from main thread" << endl;
     /*for (int i = 0; i< N/n_threads; i++ ) {

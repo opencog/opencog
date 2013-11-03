@@ -143,6 +143,12 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomSpaceAsync->getAttentionBank(); }
 
+    inline const AttentionBank& getAttentionBankconst() const
+    { return atomSpaceAsync->getAttentionBankconst(); }
+
+    inline AtomSpaceImpl& getImpl()
+    { return atomSpaceAsync->getImpl(); }
+
     inline const AtomSpaceImpl& getImplconst() const
     { return atomSpaceAsync->getImplconst(); }
 
@@ -173,7 +179,7 @@ public:
      */
     inline Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
-        return atomSpaceAsync->addNode(t, name, tvn)->get_result();
+        return getImpl().addNode(t, name, tvn);
     }
 
     /**
@@ -198,7 +204,7 @@ public:
     inline Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     { 
-        return atomSpaceAsync->addLink(t,outgoing,tvn)->get_result();
+        return getImpl().addLink(t,outgoing,tvn);
     }
 
     inline Handle addLink(Type t, Handle h,
@@ -1047,8 +1053,8 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() {
-        return getAttentionBank().getAttentionalFocusBoundary();
+    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+        return getAttentionBankconst().getAttentionalFocusBoundary();
     }
 
     /** Change the attentional focus boundary.
@@ -1067,8 +1073,8 @@ public:
      * maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
      */
-    AttentionValue::sti_t getMaxSTI(bool average=true)
-    { return getAttentionBank().getMaxSTI(average); } 
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    { return getAttentionBankconst().getMaxSTI(average); } 
 
     /** Get the minimum STI observed in the AtomSpace.
      *
@@ -1076,8 +1082,8 @@ public:
      * minimum STI, otherwise return the actual maximum.
      * @return Minimum STI
      */
-    AttentionValue::sti_t getMinSTI(bool average=true)
-    { return getAttentionBank().getMinSTI(average); } 
+    AttentionValue::sti_t getMinSTI(bool average=true) const
+    { return getAttentionBankconst().getMinSTI(average); } 
 
     /** Update the minimum STI observed in the AtomSpace.
      * Min/max are not updated on setSTI because average is calculate by lobe

@@ -134,46 +134,6 @@ public:
     }
 };
 
-class AddNodeASR : public ThreeParamASR <Handle, Type, std::string, TruthValuePtr> {
-public:
-    AddNodeASR(AtomSpaceImpl *a, Type type, const std::string& name, TruthValuePtr tv) :
-        ThreeParamASR<Handle, Type, std::string, TruthValuePtr>(a,type,name,tv)
-        { return; };
-    ~AddNodeASR() {
-    }
-    
-    virtual void do_work() {
-        Handle r;
-        try {
-            r = atomspace->addNode(p1, p2, p3);
-            set_result(r);
-        } catch (InvalidParamException &e) {
-            logger().error(e.what());
-            set_result(r);
-        }
-    };
-    
-};
-
-class AddLinkASR : public ThreeParamASR <Handle,Type, HandleSeq, TruthValuePtr> {
-public:
-    AddLinkASR(AtomSpaceImpl *a, Type type, const HandleSeq& outgoing, TruthValuePtr tv) :
-        ThreeParamASR<Handle, Type, HandleSeq, TruthValuePtr>(a, type, outgoing, tv)
-        {};
-    ~AddLinkASR() {
-    }
-    
-    virtual void do_work() {
-        Handle r;
-        try {
-            r = atomspace->addLink(p1, p2, p3);
-        } catch (InvalidParamException &e) {
-            logger().error(e.what());
-        }
-        set_result(r);
-    };
-    
-};
 
 class GetNodeHandleASR : public TwoParamASR <Handle, Type, std::string> {
 public:

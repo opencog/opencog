@@ -66,20 +66,6 @@ public:
     // These functions are the core API for manipulating the AtomSpace
     // hypergraph.
 
-    HandleRequest addNode(Type t, const std::string& str = "",
-            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
-        HandleRequest hr(new AddNodeASR(&atomspace,t,str,tv));
-        requestQueue.push(hr);
-        return hr;
-    }
-
-    HandleRequest addLink(Type t, const HandleSeq& outgoing,
-            TruthValuePtr tv = TruthValue::DEFAULT_TV() ) {
-        HandleRequest hr(new AddLinkASR(&atomspace,t,outgoing,tv));
-        requestQueue.push(hr);
-        return hr;
-    }
-
     /**
      * Retrieve from the Atom Table the Handle of a given node
      *
@@ -588,6 +574,9 @@ public:
     //--------------
     inline AttentionBank& getAttentionBank()
     { return atomspace.getAttentionBank(); }
+
+    inline const AttentionBank& getAttentionBankconst() const
+    { return atomspace.getAttentionBankconst(); }
 
     const AtomTable& getAtomTable() { return atomspace.getAtomTable(); };
 };
