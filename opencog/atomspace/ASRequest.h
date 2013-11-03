@@ -160,34 +160,6 @@ public:
     
 };
 
-class ClearASR : public GenericASR<bool> {
-public:
-    ClearASR(AtomSpaceImpl *a) : GenericASR<bool>(a) {};
-    
-    virtual void do_work() {
-        atomspace->clear();
-        set_result(true);
-    };
-    
-};
-
-class PrintASR : public TwoParamASR<bool,Type,bool> {
-    std::ostream* _output;
-public:
-    PrintASR(AtomSpaceImpl *a,std::ostream& o,Type t,bool subclass) :
-        TwoParamASR<bool,Type,bool>(a,t,subclass) 
-    {
-        _output=&o;
-    };
-    
-    virtual void do_work() {
-        std::ostream& output(*_output);
-        atomspace->print(output,p1,p2);
-        set_result(true);
-    };
-    
-};
-
 
 class GetIncomingASR : public OneParamASR <HandleSeq, Handle> {
 public:
@@ -286,33 +258,6 @@ public:
     
 };
 
-class DecaySTIASR : public GenericASR<bool> {
-public:
-    DecaySTIASR(AtomSpaceImpl *a) :
-        GenericASR<bool>(a) { };
-    
-    virtual void do_work() {
-        atomspace->decayShortTermImportance();
-        set_result(true);
-    };
-
-};
-
-class GetNormalisedAttentionValueSTIASR : public GenericASR<float> {
-    Handle h;
-    bool average, clip, positive;
-public:
-    GetNormalisedAttentionValueSTIASR(AtomSpaceImpl *a, Handle _h, bool _average=true,
-            bool _clip=false, bool _positive=false) :
-        GenericASR<float>(a), h(_h), average(_average), clip(_clip), positive(_positive) {};
-    
-    virtual void do_work() {
-        if (positive)
-            set_result(atomspace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip));
-        else
-            set_result(atomspace->getNormalisedSTI(h->getAttentionValue(), average, clip));
-    };
-};
 
 // -----------------
 // Search requests

@@ -104,32 +104,6 @@ public:
         return hr;
     }
 
-    /**
-     * Print out the AtomSpace to the referenced stream.
-     * @param output  the output stream where the atoms will be printed.
-     * @param type  the type of atoms that should be printed.
-     * @param subclass  if true, matches all atoms whose type is
-     *              subclass of the given type. If false, matches
-     *              only atoms of the exact type.
-     * @warning STL streams are not thread safe but things usually work
-     * passably, stream output can just get messed up.
-     * @todo We should really use an alternative streaming object that is
-     * thread safe.
-     */
-    VoidRequest print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) {
-        VoidRequest pr(new PrintASR(&atomspace,output,type,subclass));
-        requestQueue.push(pr);
-        return pr;
-    }
-
-    //! Clear the atomspace, remove all atoms
-    VoidRequest clear() {
-        VoidRequest r(new ClearASR(&atomspace));
-        requestQueue.push(r);
-        return r;
-    }
-
     /** Retrieve the incoming set of a given atom */
     HandleSeqRequest getIncoming(Handle h) {
         HandleSeqRequest hr(new GetIncomingASR(&atomspace,h));
@@ -168,26 +142,6 @@ public:
     /** Change the primary TV's mean of a given Handle */
     VoidRequest setMean(Handle h, float mean) {
         VoidRequest r(new SetTruthValueMeanASR(&atomspace,h,mean));
-        requestQueue.push(r);
-        return r;
-    }
-
-    /** Retrieve the normalised Short-Term Importance for a given Handle.
-     * Unless positive parameter is true, STI above and below the attentional
-     * focus threshold is normalised separately and linearly.
-     *
-     * @param h The atom handle to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1, or 0..1 with
-     * positive==true? Outside these ranges can be returned if average=true
-     * @param positive Linearly normalise the STI from 0..1 instead of from
-     * -1..1.
-     * @return normalised STI
-     */
-    FloatRequest getNormalisedSTI(Handle h, bool average=true, bool clip=false, bool positive=false) {
-        FloatRequest r(new GetNormalisedAttentionValueSTIASR(
-                    &atomspace,h,average,clip,positive));
         requestQueue.push(r);
         return r;
     }
@@ -466,17 +420,6 @@ public:
         HandleSeqRequest hr(new FilterASR(&atomspace, p,t,subclass,vh));
         requestQueue.push(hr);
         return hr;
-    }
-
-    /**
-     * Decays STI of all atoms (one cycle of importance decay).
-     * @deprecated importance updating should be done by ImportanceUpdating
-     * Agent, but currently still used by Embodiment code.
-     */
-    VoidRequest decayShortTermImportance() {
-        VoidRequest r(new DecaySTIASR(&atomspace));
-        requestQueue.push(r);
-        return r;
     }
 
     // TODO XXX FIXME convert to boost::signals2 ASAP for thread safety.

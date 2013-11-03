@@ -178,7 +178,7 @@ public:
 
         for (unsigned int i = 0; i <= 10; ++i) {
             logger().debug(wnHandle->getAttentionValue()->toString());
-            atomSpace->decayShortTermImportance()->get_result();
+            atomSpace->getImpl().decayShortTermImportance();
         }
         TS_ASSERT(__testSignalsCounter == 110011);
         TS_ASSERT(atomSpace->atomspace.getSize() == 0);
@@ -192,7 +192,7 @@ public:
         wnHandle->setAttentionValue(newAV);
         for (unsigned int i = 0; i <= 10; ++i) {
             logger().debug(wnHandle->getAttentionValue()->toString());
-            atomSpace->decayShortTermImportance();
+            atomSpace->getImpl().decayShortTermImportance();
         }
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
@@ -252,7 +252,7 @@ public:
         // decay sti up to the threshold where the least important atoms
         // should be about to be removed
         for (int i = 0; i < 5; i++)
-            atomSpace->decayShortTermImportance()->get_result();
+            atomSpace->getImpl().decayShortTermImportance();
         // and test the existance of each atom
         const AtomTable& atomTable = atomSpace->atomspace.getAtomTable();
         CHK(NUMBER_NODE,      !=);
@@ -262,7 +262,7 @@ public:
 
         // run another decaying cycle; the list link node should have been
         // removed
-        atomSpace->decayShortTermImportance()->get_result();
+        atomSpace->getImpl().decayShortTermImportance();
         CHK(NUMBER_NODE,      !=);
         CHK(CONCEPT_NODE,     !=);
         CHK(INHERITANCE_LINK, !=);
@@ -270,14 +270,14 @@ public:
 
         // an another one; the inheritance link and the sense node should have
         // been removed
-        atomSpace->decayShortTermImportance()->get_result();
+        atomSpace->getImpl().decayShortTermImportance();
         CHK(NUMBER_NODE,      !=);
         CHK(CONCEPT_NODE,     ==);
         CHK(INHERITANCE_LINK, ==);
         CHK(LIST_LINK,        ==);
 
         // and another, final one; by now all nodes should have been removed
-        atomSpace->decayShortTermImportance()->get_result();
+        atomSpace->getImpl().decayShortTermImportance();
         CHK(NUMBER_NODE,      ==);
         CHK(CONCEPT_NODE,     ==);
         CHK(INHERITANCE_LINK, ==);

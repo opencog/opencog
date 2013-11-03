@@ -167,7 +167,7 @@ public:
      */
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const {
-        atomSpaceAsync->print(output, type, subclass)->get_result();
+        getImplconst().print(output, type, subclass);
     }
 
     /** Add a new node to the Atom Table,
@@ -531,7 +531,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync->getNormalisedSTI(h, average, clip, false)->get_result();
+        return getImplconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -545,7 +545,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync->getNormalisedSTI(h, average, clip, true)->get_result();
+        return getImplconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
@@ -1062,7 +1062,7 @@ public:
      * embodiment.
      */
     void decayShortTermImportance() {
-        atomSpaceAsync->decayShortTermImportance()->get_result(); }
+        getImpl().decayShortTermImportance(); }
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
@@ -1128,7 +1128,7 @@ public:
         return getImplconst().getLinkCount(vh); }
 
     //! Clear the atomspace, remove all atoms
-    void clear() { atomSpaceAsync->clear()->get_result(); }
+    void clear() { getImpl().clear(); }
 
 // ---- filter templates
 
