@@ -42,8 +42,10 @@ class AtomSpaceAsync
 
     void eventLoop();
 
-public: 
     AtomSpaceImpl atomspace;
+public: 
+    AtomSpaceImpl& getImpl() { return atomspace; }
+    const AtomSpaceImpl& getImplconst() const { return atomspace; }
 
     AtomSpaceAsync();
     ~AtomSpaceAsync();

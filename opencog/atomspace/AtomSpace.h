@@ -143,10 +143,13 @@ public:
     inline AttentionBank& getAttentionBank()
     { return atomSpaceAsync->getAttentionBank(); }
 
+    inline const AtomSpaceImpl& getImplconst() const
+    { return atomSpaceAsync->getImplconst(); }
+
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return atomSpaceAsync->atomspace.getSize(); }
+    inline int getSize() const { return getImplconst().getSize(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -1044,8 +1047,8 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const {
-        return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
+    AttentionValue::sti_t getAttentionalFocusBoundary() {
+        return getAttentionBank().getAttentionalFocusBoundary();
     }
 
     /** Change the attentional focus boundary.
@@ -1056,7 +1059,7 @@ public:
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
         AttentionValue::sti_t s) {
-        return atomSpaceAsync->atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
+        return getAttentionBank().setAttentionalFocusBoundary(s);
     }
 
     /** Get the maximum STI observed in the AtomSpace.
@@ -1096,10 +1099,10 @@ public:
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
     size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return atomSpaceAsync->atomspace.getNodeCount(vh); }
+        return getImplconst().getNodeCount(vh); }
 
     size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return atomSpaceAsync->atomspace.getLinkCount(vh); }
+        return getImplconst().getLinkCount(vh); }
 
     //! Clear the atomspace, remove all atoms
     void clear() { atomSpaceAsync->clear()->get_result(); }
