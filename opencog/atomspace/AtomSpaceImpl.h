@@ -738,41 +738,8 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
-        STIAboveThreshold s = STIAboveThreshold(bank.getAttentionalFocusBoundary());
-        return getHandleSetFiltered(result, type, subclass, &s, vh);
-
-    }
-
-    /**
-     * Gets a set of handles that matches with the given type
-     * (subclasses optionally) and a given criterion.
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param compare A criterion for including atoms. It must be something that returns a bool when called.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note  The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.  Example
-     *        of call to this method, which would return all entries in
-     *        AtomSpace beyond 500 LTI:
-     * @code
-     *        std::list<Handle> ret;
-     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSetFiltered(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 AtomPredicate* pred,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        return atomTable.getHandlesByTypePredVH(result, type, subclass, pred, vh);
+        STIAboveThreshold s(bank.getAttentionalFocusBoundary());
+        return atomTable.getHandlesByTypePredVH(result, type, subclass, &s, vh);
     }
 
     /**
