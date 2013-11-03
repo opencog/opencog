@@ -34,8 +34,6 @@ class AtomSpaceAsync
 
     int counter;
 
-    AtomSpaceImpl atomspace;
-
     void startEventLoop();
     void stopEventLoop();
 
@@ -45,6 +43,7 @@ class AtomSpaceAsync
     void eventLoop();
 
 public: 
+    AtomSpaceImpl atomspace;
 
     AtomSpaceAsync();
     ~AtomSpaceAsync();
@@ -139,15 +138,6 @@ public:
         HandleRequest hr(new FetchIncomingSetASR(&atomspace,h,recursive));
         requestQueue.push(hr);
         return hr;
-    }
-
-    /**
-     * Get the size of the AtomSpace
-     */
-    IntRequest getSize() {
-        IntRequest ir(new GetSizeASR(&atomspace));
-        requestQueue.push(ir);
-        return ir;
     }
 
     /**

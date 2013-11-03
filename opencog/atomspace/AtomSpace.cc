@@ -98,31 +98,6 @@ bool AtomSpace::handleAddSignal(Handle h)
     return false;
 }
 
-strength_t AtomSpace::getMean(Handle h, VersionHandle vh) const
-{
-    FloatRequest tvr = atomSpaceAsync->getMean(h, vh);
-    return tvr->get_result();
-}
-
-confidence_t AtomSpace::getConfidence(Handle h, VersionHandle vh) const
-{
-    FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
-    return tvr->get_result();
-}
-
-TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
-{
-    TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
-    TruthValuePtr x(tvr->get_result());
-    tvr->result = NULL; // cheat to avoid copying TruthValue once again
-    return x;
-}
-
-void AtomSpace::setTV(Handle h, TruthValuePtr tv, VersionHandle vh)
-{
-    atomSpaceAsync->setTV(h, tv, vh)->get_result();
-}
-
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO,
@@ -135,59 +110,19 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tv
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
-    srand(time(0));
+    static unsigned long int cnt = 0;
+    srand(++cnt);
     static const int len = 16;
     string name;
     Handle result;
     //Keep trying new random suffixes until you generate a new name
     do {
-        name=prefix;
+        name = prefix;
         for (int i = 0; i < len; ++i) {
-            name+=alphanum[rand() % (sizeof(alphanum) - 1)];
+            name += alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
-    } while (isValidHandle(result));//If the name already exists, try again
+    } while (isValidHandle(result)); // If the name already exists, try again
     return addNode(t, name, tvn);
-}
-
-void AtomSpace::setAV(Handle h, AttentionValuePtr av)
-{
-    atomSpaceAsync->setAV(h,av)->get_result();
-}
-
-int AtomSpace::Nodes(VersionHandle vh) const
-{
-    return atomSpaceAsync->nodeCount(vh)->get_result();
-}
-
-AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
-{
-    return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
-}
-
-int AtomSpace::Links(VersionHandle vh) const
-{
-    return atomSpaceAsync->linkCount(vh)->get_result();
-}
-
-void AtomSpace::decayShortTermImportance()
-{
-    atomSpaceAsync->decayShortTermImportance()->get_result();
-}
-
-AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)
-{
-    return atomSpaceAsync->atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
-}
-
-void AtomSpace::clear()
-{
-    atomSpaceAsync->clear()->get_result();
-}
-
-void AtomSpace::print(std::ostream& output,
-           Type type, bool subclass) const
-{
-    atomSpaceAsync->print(output, type, subclass)->get_result();
 }
 

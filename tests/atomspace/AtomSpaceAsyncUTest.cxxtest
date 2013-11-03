@@ -153,7 +153,7 @@ public:
         TS_ASSERT(__testSignalsCounter == 1111);
         TS_ASSERT(atomSpace->atomspace.getSize() == 1);
 
-        logger().debug("before atom remove, table size = %d", atomSpace->getSize()->get_result());
+        logger().debug("before atom remove, table size = %u", atomSpace->atomspace.getSize());
         atomSpace->removeAtom(wnHandle)->get_result();
         TS_ASSERT(__testSignalsCounter == 111111);
         TS_ASSERT(atomSpace->atomspace.getSize() == 0);
@@ -316,7 +316,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        int size = atomSpace->getSize()->get_result();
+        size_t size = atomSpace->atomspace.getSize();
         std::cout << "unique atomspace size:" << size << std::endl;
 
         // we should get num_atoms * n_threads distinct atoms
@@ -331,7 +331,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedAdd, this, -1, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        int size = atomSpace->getSize()->get_result();
+        size_t size = atomSpace->atomspace.getSize();
         std::cout << "duplicate atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads are creating duplicates.
@@ -366,9 +366,9 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedRemove, this, i*interval, interval));
         }
         for (std::thread& t : thread_pool) t.join();
-        int size = atomSpace->getSize()->get_result();
+        size_t size = atomSpace->atomspace.getSize();
         TS_ASSERT_EQUALS(size, 0);
-        size = atomSpace->getSize()->get_result();
+        size = atomSpace->atomspace.getSize();
     }
     
 
@@ -450,7 +450,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedSetTV, this, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        int size = atomSpace->getSize()->get_result();
+        size_t size = atomSpace->atomspace.getSize();
         std::cout << "TV atomspace size:" << size << std::endl;
 
         // We should get only num_atoms, because all threads created duplicates.
@@ -507,7 +507,7 @@ public:
                 std::thread(&AtomSpaceAsyncUTest::threadedLinkAdd, this, i, num_atoms));
         }
         for (std::thread& t : thread_pool) t.join();
-        int size = atomSpace->getSize()->get_result();
+        size_t size = atomSpace->atomspace.getSize();
         std::cout << "Link atomspace size:" << size << std::endl;
 
         // We should get only 2*num_atoms, because all threads created duplicates.

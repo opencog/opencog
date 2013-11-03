@@ -146,7 +146,7 @@ public:
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return atomSpaceAsync->getSize()->get_result(); }
+    inline int getSize() const { return atomSpaceAsync->atomspace.getSize(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -157,7 +157,9 @@ public:
      *              only atoms of the exact type.
      */
     void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const;
+               Type type = ATOM, bool subclass = true) const {
+        atomSpaceAsync->print(output, type, subclass)->get_result();
+    }
 
     /** Add a new node to the Atom Table,
      * if the atom already exists then the old and the new truth value is merged
@@ -431,7 +433,9 @@ public:
     }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle, AttentionValuePtr);
+    void setAV(Handle h, AttentionValuePtr av) {
+        atomSpaceAsync->setAV(h,av)->get_result();
+    }
 
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const {
@@ -439,13 +443,28 @@ public:
     }
 
     /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
+    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
+    {
+        TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
+        TruthValuePtr x(tvr->get_result());
+        tvr->result = NULL; // cheat to avoid copying TruthValue once again
+        return x;
+    }
 
-    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
-    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
+    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+        FloatRequest tvr = atomSpaceAsync->getMean(h, vh);
+        return tvr->get_result();
+    }
+
+    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+        FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
+        return tvr->get_result();
+    }
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle, TruthValuePtr, VersionHandle vh = NULL_VERSION_HANDLE);
+    void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
+        atomSpaceAsync->setTV(h, tv, vh)->get_result();
+    }
 
     /** Change the primary TV's mean of a given Handle
      * @note By Joel: this makes no sense to me, how can you generally set a mean
@@ -1016,7 +1035,8 @@ public:
      * @deprecated ECAN should be used, but this method is still used by
      * embodiment.
      */
-    void decayShortTermImportance();
+    void decayShortTermImportance() {
+        atomSpaceAsync->decayShortTermImportance()->get_result(); }
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
@@ -1024,7 +1044,9 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const;
+    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+        return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
+    }
 
     /** Change the attentional focus boundary.
      * Some situations may benefit from less focussed searches.
@@ -1033,7 +1055,9 @@ public:
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s);
+        AttentionValue::sti_t s) {
+        return atomSpaceAsync->atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
+    }
 
     /** Get the maximum STI observed in the AtomSpace.
      * @param average If true, return an exponentially decaying average of
@@ -1071,11 +1095,14 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
-    int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
-    int Links(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return atomSpaceAsync->nodeCount(vh)->get_result(); }
+
+    size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return atomSpaceAsync->linkCount(vh)->get_result(); }
 
     //! Clear the atomspace, remove all atoms
-    void clear();
+    void clear() { atomSpaceAsync->clear()->get_result(); }
 
 // ---- filter templates
 

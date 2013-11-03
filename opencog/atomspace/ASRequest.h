@@ -238,16 +238,6 @@ public:
     
 };
 
-class GetSizeASR : public GenericASR<int> {
-public:
-    GetSizeASR(AtomSpaceImpl *a) : GenericASR<int>(a) {};
-    
-    virtual void do_work() {
-        set_result(atomspace->getSize());
-    };
-    
-};
-
 class NodeCountASR : public OneParamASR<int,VersionHandle> {
 public:
     NodeCountASR(AtomSpaceImpl *a,const VersionHandle &vh) :
