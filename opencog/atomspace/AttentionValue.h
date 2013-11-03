@@ -46,7 +46,7 @@ class AttentionValue
 public:
     typedef short sti_t;   //!< short-term importance type
     typedef short lti_t;   //!< long-term importance type
-    typedef unsigned short vlti_t; //!< very long-term importance type
+    typedef short vlti_t;  //!< very long-term importance type
 
     static const int DISPOSABLE = 0; //!< Status flag for vlti
 
@@ -92,7 +92,7 @@ public:
     AttentionValue(sti_t STI = DEFAULTATOMSTI,
                    lti_t LTI = DEFAULTATOMLTI,
                    vlti_t VLTI = DEFAULTATOMVLTI)
-        : m_STI(STI), m_LTI(LTI), m_VLTI(VLTI) {}
+        : m_STI(STI), m_LTI(LTI), m_VLTI(VLTI<0 ? 0 : VLTI) {}
 
     ~AttentionValue() {}
 

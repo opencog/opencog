@@ -200,6 +200,8 @@ public:
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
         decVLTI(atoms[0]);//VLTI=0
         TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
+        decVLTI(atoms[0]);//VLTI=0
+        TS_ASSERT(getVLTI(atoms[0])==AttentionValue::DISPOSABLE);
     }
 
     void testComparisons() {
