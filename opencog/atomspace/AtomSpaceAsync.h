@@ -20,8 +20,8 @@ namespace opencog {
 class AtomSpace;
 class SavingLoading;
 
-class AtomSpaceAsync {
-
+class AtomSpaceAsync
+{
     friend class ::AtomTableUTest;
     friend class ::AtomSpaceAsyncUTest;
     friend class AtomSpaceBenchmark;

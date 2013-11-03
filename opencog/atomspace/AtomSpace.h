@@ -85,7 +85,6 @@ class AtomSpace
      */
     AtomSpace& operator=(const AtomSpace&);
 public:
-    void do_merge_tv(Handle, TruthValuePtr);
 
     /** 
      * The AtomSpace class is essentially just be a wrapper of the asynchronous
@@ -904,7 +903,6 @@ public:
     {
         STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
         return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
-
     }
 
     /**

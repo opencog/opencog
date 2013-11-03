@@ -129,17 +129,6 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
             "AtomSpace - Cannot copy an object of this class");
 }
 
-void AtomSpace::do_merge_tv(Handle h, TruthValuePtr tvn)
-{
-    TruthValuePtr currentTV(getTV(h));
-    if (currentTV->isNullTv()) {
-        setTV(h, tvn);
-    } else {
-        TruthValuePtr mergedTV(currentTV->merge(tvn));
-        setTV(h, mergedTV);
-    }
-}
-
 Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tvn)
 {
     static const char alphanum[] =
