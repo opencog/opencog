@@ -284,8 +284,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     }
     Handle rh = getRandomHandle();
     // This spurious line is to ensure the AtomSpaceAsyc queue is empty
-    if (not testKind == BENCH_TABLE)
-        asp->atomSpaceAsync->getTVComplete(rh)->get_result();
+    // if (not testKind == BENCH_TABLE)
+    //    asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
@@ -862,7 +862,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     }
     case BENCH_IMPL: {
         t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results2), NODE, oss.str(), true);
+        asp->atomSpaceAsync->atomspace.getHandlesByName(back_inserter(results2), NODE, oss.str(), true);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -905,7 +905,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     case BENCH_IMPL: {
         HandleSeq results;
         clock_t t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandleSet(back_inserter(results), t, true);
+        asp->atomSpaceAsync->atomspace.getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
