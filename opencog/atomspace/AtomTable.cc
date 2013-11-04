@@ -543,9 +543,21 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     return h;
 }
 
-int AtomTable::getSize() const
+size_t AtomTable::getSize() const
 {
     return size;
+}
+
+size_t AtomTable::getNumNodes() const
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    return nodeIndex.size();
+}
+
+size_t AtomTable::getNumLinks() const
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    return linkIndex.size();
 }
 
 void AtomTable::log(Logger& logger, Type type, bool subclass) const

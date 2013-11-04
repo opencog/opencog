@@ -1712,9 +1712,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
     // TODO: try to optimize this method. It is using getHandleSet twice for
     // isHolding (below and through getLatestHoldingObjectHandle)
     std::vector<Handle> handles;
-    atomSpace.getHandleSet( back_inserter(handles),
-                            OBJECT_NODE,
-                            objectId, true );
+    atomSpace.getHandlesByName( back_inserter(handles), objectId, OBJECT_NODE, true );
 
     if (handles.size() != 1) {
         logger().debug("AtomSpaceUtil - No agent is holding object[%s]",
@@ -2963,16 +2961,13 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
         return atomSpace.getHandle(CONCEPT_NODE, objectId);
     } else { //Now let's deal with the default case
         HandleSeq tmp;
-        atomSpace.getHandleSet(std::back_inserter(tmp),
-                               ACCESSORY_NODE, objectId);
+        atomSpace.getHandlesByName(std::back_inserter(tmp), objectId, ACCESSORY_NODE);
         if (tmp.empty()) { //it is not an accessory, let's try a structure
-            atomSpace.getHandleSet(std::back_inserter(tmp),
-                                   STRUCTURE_NODE, objectId);
+            atomSpace.getHandlesByName(std::back_inserter(tmp), objectId, STRUCTURE_NODE);
         }
 
         if (tmp.empty()) { //it is not an structure, let's try a ordinary object
-            atomSpace.getHandleSet(std::back_inserter(tmp),
-                                   OBJECT_NODE, objectId);
+            atomSpace.getHandlesByName(std::back_inserter(tmp), objectId, OBJECT_NODE);
         }
 
         //assume that structure and accessories have distinct id

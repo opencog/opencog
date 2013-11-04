@@ -100,6 +100,8 @@ public:
      * Return the number of atoms contained in the space.
      */
     inline int getSize() const { return getAtomTable().getSize(); }
+    inline int getNumNodes() const { return getAtomTable().getNumNodes(); }
+    inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -532,9 +534,19 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 Type type,
+    getHandlesByName(OutputIterator result,
                  const std::string& name,
+                 Type type = ATOM,
+                 bool subclass = true) const
+    {
+        return getAtomTable().getHandlesByName(result, name, type, subclass);
+    }
+
+    /** Same as above, but a little slower because it does a VH check. */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByNameVH(OutputIterator result,
+                 const std::string& name,
+                 Type type = ATOM,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
@@ -592,7 +604,17 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByType(OutputIterator result,
+                 Type type,
+                 bool subclass = false) const
+    {
+        return getAtomTable().getHandlesByType(result, type, subclass);
+    }
+
+    /** Same as above, but slightly less efficient, since it requires
+     * a VH check. */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTypeVH(OutputIterator result,
                  Type type,
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
@@ -927,15 +949,12 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
 
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        // XXX Should use copy_if just like the others
-        return std::copy(fs.begin(), fs.end(), result);
+        return std::copy_if(hs.begin(), hs.end(), result,
+            [&](Handle h)->bool {
+                return (*compare)(h) and
+                    getAtomTable().containsVersionedTV(h, vh); } );
     }
 
     /**
@@ -972,7 +991,7 @@ public:
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
         std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
         return std::copy(hs.begin(), hs.end(), result);
     }
@@ -992,7 +1011,7 @@ public:
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandleSet(back_inserter(handle_set), atype, subclass);
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i;
@@ -1080,52 +1099,24 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
-    size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        // XXX FIXME TODO: the following is horridly inefficient,
-        HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
-        return hs.size();
-    }
-
-    size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        // XXX FIXME TODO: the following is horridly inefficient,
-        HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
-        return hs.size();
-    }
-
     //! Clear the atomspace, remove all atoms
     void clear() { getImpl().clear(); }
 
 // ---- filter templates
 
+    // @deprecated do not use in new code!
     HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
         HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
-
-        // XXX Should use copy_if just like the others
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        return fs;
+        getHandleSetFiltered(back_inserter(hs), ATOM, true, compare, vh);
+        return hs;
     }
 
+    // @deprecated do not use in new code!
     template<typename OutputIterator>
     OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
-        HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
-
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        // XXX Should use copy_if just like the others
-        return std::copy(fs.begin(), fs.end(), result);
+        return getHandleSetFiltered(result, ATOM, true, compare, vh);
     }
 
     /**
@@ -1136,29 +1127,23 @@ public:
      * @param end iterator for the sequence
      * @param struct or function embodying the criterion
      * @return The handles in the sequence that match the criterion.
+     * @deprecated do not use in new code!
      */
     template<typename InputIterator>
     HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const
     {
         HandleSeq result;
-        for (; begin != end; begin++) {
-            //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
-            if ((*compare)(*begin)) {
-                //std::cout << "passed! " <<  std::endl;
-                result.push_back(*begin);
-            }
-        }
+        std::copy_if(begin, end, back_inserter(result),
+            [&](Handle h)->bool { return (*compare)(h); } ); 
         return result;
     }
 
     // XXX FIXME TODO -- don't use this, use std::copy_if
     template<typename InputIterator, typename OutputIterator>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator result, AtomPredicate* compare) const
     {
-        for (; begin != end; begin++)
-            if (compare(*begin))
-                * it++ = *begin;
-        return it;
+        return std::copy_if(begin, end, result,
+            [&](Handle h)->bool { return (*compare)(h); } ); 
     }
 
 // ---- custom filter templates

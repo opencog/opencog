@@ -132,10 +132,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         # ==== query methods ====
         # get by type
-        output_iterator getHandleSet(output_iterator,Type t,bint subclass)
+        output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
         # get by name
-        output_iterator getHandleSet(output_iterator,Type t,string& name)
-        output_iterator getHandleSet(output_iterator,Type t,string& name,bint subclass)
+        output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
         # get by target types
         output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
         # get by target handle

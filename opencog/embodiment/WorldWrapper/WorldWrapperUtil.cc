@@ -113,7 +113,7 @@ Handle WorldWrapperUtil::toHandle(const AtomSpace& as,
     if (h == Handle::UNDEFINED) {
         //Nil: I add this case because apparently some object have type NODE
         HandleSeq tmp;
-        as.getHandleSet(std::back_inserter(tmp), OBJECT_NODE, id);
+        as.getHandlesByName(std::back_inserter(tmp), id, OBJECT_NODE);
         //unique id assumption
         OC_ASSERT(tmp.size() <= 1);
         return tmp.empty() ? Handle::UNDEFINED : tmp.front();
@@ -205,7 +205,7 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
     //otherwise search for a predicate node
     /*
     HandleSeq tmp;
-    as.getHandleSet(std::back_inserter(tmp), PREDICATE_NODE, obj);
+    as.getHandleByName(std::back_inserter(tmp), obj, PREDICATE_NODE);
 
 //    if(tmp.size()==0) //do a dump before failing
 //      as.print();

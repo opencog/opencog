@@ -134,9 +134,9 @@ Logger* ImportanceUpdatingAgent::getLogger()
 void ImportanceUpdatingAgent::getHandlesToUpdate(AtomSpace *a, HandleSeq &hs)
 {
     if (updateLinks)
-        a->getHandleSet(back_inserter(hs),ATOM,true);
+        a->getHandlesByType(back_inserter(hs), ATOM, true);
     else
-        a->getHandleSet(back_inserter(hs),NODE,true);
+        a->getHandlesByType(back_inserter(hs), NODE, true);
 }
 
 void ImportanceUpdatingAgent::calculateAtomWages(AtomSpace *a, const AgentSeq &agents)
@@ -447,7 +447,9 @@ void ImportanceUpdatingAgent::updateSTIRent(AtomSpace* a, bool gradual)
 void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
 {
     AttentionValue::lti_t oldLTIAtomRent;
-    float focusSize = a->Nodes();
+
+    float focusSize = a->getNumNodes();
+
     // LTIAtomRent must be adapted based on total AtomSpace size, or else balance btw
     // lobe LTI wealth and node/link LTI wealth will not be maintained
 
@@ -459,7 +461,7 @@ void ImportanceUpdatingAgent::updateLTIRent(AtomSpace* a)
                     * (float) totalStimulusSinceReset.recent \
                     / (float) focusSize);
     } else {
-        focusSize += a->Links();
+        focusSize += a->getNumLinks();
         if (focusSize > 0)
             LTIAtomRent = (AttentionValue::sti_t)ceil((float) LTIAtomWage \
                     * (float) totalStimulusSinceReset.recent \
@@ -479,7 +481,7 @@ void ImportanceUpdatingAgent::updateAttentionalFocusSizes(AtomSpace* a)
 
     AttentionValue::sti_t threshold = a->getAttentionalFocusBoundary() + amnesty;
     AtomSpace::STIAboveThreshold stiAbove(threshold);
-    a->getHandleSetFiltered(back_inserter(inFocus),ATOM,true,&stiAbove);
+    a->getHandleSetFiltered(back_inserter(inFocus), ATOM, true, &stiAbove);
 
     attentionalFocusSize.update(inFocus.size());
 

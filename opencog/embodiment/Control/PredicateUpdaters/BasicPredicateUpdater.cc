@@ -71,7 +71,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
 Handle BasicPredicateUpdater::getHandle(std::string objName)
 {
     HandleSeq objHandle;
-    atomSpace.getHandleSet(back_inserter(objHandle), OBJECT_NODE, objName, true);
+    atomSpace.getHandlesByName(back_inserter(objHandle), objName, OBJECT_NODE, true);
 
     // found no handle - ERROR
     if (objHandle.size() < 1) {

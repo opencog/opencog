@@ -168,7 +168,9 @@ public:
     /**
      * Return the number of atoms contained in a table.
      */
-    int getSize() const;
+    size_t getSize() const;
+    size_t getNumNodes() const;
+    size_t getNumLinks() const;
 
     /**
      * Adds a new predicate index to this atom table given the Handle of
@@ -570,6 +572,7 @@ public:
         return std::copy(hs.begin(), hs.end(), result);
     }
 
+    /** Same as above, but a little slower, because it does a VH check. */
     template <typename OutputIterator> OutputIterator
     getHandlesByNameVH(OutputIterator result,
                        const std::string& name,
