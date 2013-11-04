@@ -227,7 +227,6 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
     cout << "Benchmarking ";
     switch (testKind) {
         case BENCH_AS:  cout << "AtomSpace's "; break;
-        case BENCH_IMPL:  cout << "AtomSpaceImpl's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
         case BENCH_SCM:  cout << "Scheme's "; break;
@@ -409,11 +408,6 @@ clock_t AtomSpaceBenchmark::makeRandomNode(const std::string& csi)
     }
 
     switch (testKind) {
-    case BENCH_IMPL: {
-        clock_t t_begin = clock();
-        asp->atomSpaceAsync->atomspace.addNode(t, scp); 
-        return clock() - t_begin;
-    }
     case BENCH_TABLE: {
         clock_t t_begin = clock();
         atab->add(createNode(t, scp));
@@ -526,11 +520,6 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
         return clock() - t_begin;
     }
 #endif /* HAVE_GUILE */
-    case BENCH_IMPL: {
-        clock_t tAddLinkStart = clock();
-        asp->atomSpaceAsync->atomspace.addLink(t, outgoing);
-        return clock() - tAddLinkStart;
-    }
     case BENCH_TABLE: {
         clock_t tAddLinkStart = clock();
         atab->add(createLink(t, outgoing));
@@ -674,12 +663,6 @@ timepair_t AtomSpaceBenchmark::bm_getType()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getType(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
     case BENCH_AS: {
         t_begin = clock();
         asp->getType(h); 
@@ -727,12 +710,6 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     case BENCH_TABLE: {
         t_begin = clock();
         h->getTruthValue();
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        h->getTV();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -809,13 +786,6 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
-        h->setTV(stv);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
     case BENCH_AS: {
         t_begin = clock();
         TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
@@ -860,12 +830,6 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandlesByName(back_inserter(results2), NODE, oss.str(), true);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
     case BENCH_AS: {
         t_begin = clock();
         asp->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
@@ -899,13 +863,6 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
         clock_t t_begin = clock();
         HandleSeq results;
         atab->getHandlesByType(back_inserter(results), t, true);
-        clock_t time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_IMPL: {
-        HandleSeq results;
-        clock_t t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -961,12 +918,6 @@ timepair_t AtomSpaceBenchmark::bm_getOutgoingSet()
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getOutgoing(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
     case BENCH_AS: {
         t_begin = clock();
         asp->getOutgoing(h);
@@ -1014,12 +965,6 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
     case BENCH_TABLE: {
         t_begin = clock();
         atab->getIncomingSet(h);
-        time_taken = clock() - t_begin;
-        return timepair_t(time_taken,0);
-    }
-    case BENCH_IMPL: {
-        t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getIncoming(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
