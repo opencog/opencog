@@ -27,7 +27,6 @@
 
 #include <algorithm>
 #include <list>
-#include <set>
 #include <vector>
 
 #include <boost/signal.hpp>
@@ -119,7 +118,8 @@ public:
      *              only atoms of the exact type.
      */
     void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const;
+               Type type = ATOM, bool subclass = true) const
+    { atomTable.print(output, type, subclass); }
 
     //helpers for GDB debugging, because trying to get std::cout is annoying
     void printGDB() const;
@@ -241,17 +241,6 @@ public:
 
     bool isLink(Handle h) const
         { return classserver().isA(getType(h), LINK); }
-
-    /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle, VersionHandle = NULL_VERSION_HANDLE) const;
-
-    /** Change the TruthValue of a given Handle
-     * @return whether TV was successfully set
-     */
-    bool setTV(Handle, TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
-
-    /** Change the primary TV's mean of a given Handle */
-    void setMean(Handle, float mean) throw (InvalidParamException);
 
     bool isValidHandle(Handle h) const {
         return atomTable.holds(h);

@@ -438,7 +438,7 @@ public:
             bogus %= N;
 
             TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
-            atomSpace->getImpl().setTV(h, tv); 
+            h->setTV(tv); 
         }
     }
 

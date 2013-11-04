@@ -152,12 +152,12 @@ Handle addRealAtom(AtomSpaceImpl& as, AtomPtr atom,
             return as.addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
-    TruthValuePtr currentTV = as.getTV(result);
+    TruthValuePtr currentTV = result->getTV();
     if (currentTV->isNullTv()) {
-        as.setTV(result, newTV);
+        result->setTV(newTV);
     } else {
         TruthValuePtr mergedTV = currentTV->merge(newTV);
-        as.setTV(result, mergedTV);
+        result->setTV(mergedTV);
     }
     return result;
 }
@@ -243,11 +243,11 @@ public:
             int vhIdx = i % NUM_VHS;
             if (vhIdx) {
                 VersionHandle vh = VHs[vhIdx];
-                atomSpace->setTV(h[i], TruthValue::DEFAULT_TV(), vh);
+                h[i]->setTV(TruthValue::DEFAULT_TV(), vh);
                 if (i < NUM_FORCEUSER_LINKS)
-                    atomSpace->setTV(FU[i], TruthValue::DEFAULT_TV(), vh);
+                    FU[i]->setTV(TruthValue::DEFAULT_TV(), vh);
                 if (i < NUM_HUMAN_LINKS)
-                    atomSpace->setTV(H[i], TruthValue::DEFAULT_TV(), vh);
+                    H[i]->setTV(TruthValue::DEFAULT_TV(), vh);
             }
         }
         //logger().debug("Versioned TVS added\n");
@@ -255,29 +255,30 @@ public:
         // Check primary and versioned TVS
         for (int i = 0; i < NUM_NODES; i++) {
             int vhIdx = i % NUM_VHS;
-            TruthValuePtr tv = atomSpace->getTV(h[i]);
-            logger().debug("tv initialized to TV object with pointer %p => &(atomSpace->getTV(h[i])) = %p\n",  tv.get(), atomSpace->getTV(h[i]).get());
+            TruthValuePtr tv = h[i]->getTV();
+            logger().debug("tv initialized to TV object with pointer %p => &(getTV(h[i])) = %p\n",
+tv.get(), h[i]->getTV().get());
             TS_ASSERT(not tv->isNullTv());
-            logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
+            logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), h[i]->getTV()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
-                TruthValuePtr tv = atomSpace->getTV(FU[i]);
+                TruthValuePtr tv = FU[i]->getTV();
                 //logger().debug("AFTER ASSIGN THE reference tv to another TV: &tv = %p, &(atomSpace->getTV(h[i]) = %p &(atomSpace->getTV(FU[i])) = %p\n", tv.get(), atomSpace->getTV(h[i].get()), atomSpace->getTV(FU[i]).get());
                 TS_ASSERT(not tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
-                logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
+                // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
+                // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
                 TS_ASSERT(fabs(tv->getMean() - ForceUser[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("FU: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
-                TruthValuePtr tv = atomSpace->getTV(H[i]);
+                TruthValuePtr tv = H[i]->getTV();
                 TS_ASSERT(not tv->isNullTv());
-                logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
-                logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
-                logger().debug("H: tv mean = %f,atomSpace->getTV(H[i]) = %f\n", tv->getMean(), atomSpace->getTV(H[i])->getMean());
+                // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
+                // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
+                // logger().debug("H: tv mean = %f,atomSpace->getTV(H[i]) = %f\n", tv->getMean(), atomSpace->getTV(H[i])->getMean());
                 TS_ASSERT(fabs(tv->getMean() - Human[i]) < FLOAT_ACCEPTABLE_ERROR);
                 logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
@@ -285,18 +286,18 @@ public:
             if (vhIdx) {
                 TruthValuePtr expectedTv = TruthValue::DEFAULT_TV();
                 VersionHandle vh = VHs[vhIdx];
-                TruthValuePtr tv = atomSpace->getTV(h[i], vh);
+                TruthValuePtr tv = h[i]->getTV(vh);
                 TS_ASSERT(not tv->isNullTv());
                 TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
                 if (i < NUM_FORCEUSER_LINKS) {
-                    TruthValuePtr tv = atomSpace->getTV(FU[i], vh);
+                    TruthValuePtr tv = FU[i]->getTV(vh);
                     TS_ASSERT(not tv->isNullTv());
                     TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
                 }
                 if (i < NUM_HUMAN_LINKS) {
-                    TruthValuePtr tv = atomSpace->getTV(H[i], vh);
+                    TruthValuePtr tv = H[i]->getTV(vh);
                     TS_ASSERT(not tv->isNullTv());
                     TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
                     TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
@@ -856,16 +857,16 @@ public:
         // Ensure that context link removal removes the TV from the associated
         // CompositeTV
         Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
-        atomSpace->setTV(h,SimpleTruthValue::createTV(0.5,0.5));
+        h->setTV(SimpleTruthValue::createTV(0.5,0.5));
         Handle ch = atomSpace->addNode(CONCEPT_NODE,"context");
         HandleSeq oset;
         oset.push_back(ch);
         oset.push_back(h);
         Handle contextLink = atomSpace->addLink(CONTEXT_LINK,oset,SimpleTruthValue::createTV(0.8,0.1));
         VersionHandle vh(CONTEXTUAL, ch); 
-        TS_ASSERT_DELTA(atomSpace->getTV(h,vh)->getMean(),0.8,0.001);
+        TS_ASSERT_DELTA(h->getTV(vh)->getMean(), 0.8, 0.001);
         atomSpace->removeAtom(contextLink);
-        TS_ASSERT(atomSpace->getTV(h,vh) == TruthValue::NULL_TV());
+        TS_ASSERT(h->getTV(vh) == TruthValue::NULL_TV());
 
     }
 
@@ -874,13 +875,13 @@ public:
         Handle ch = atomSpace->addNode(CONCEPT_NODE,"context");
         VersionHandle vh1 = VHs[1];
         VersionHandle vh(CONTEXTUAL, ch); 
-        atomSpace->setTV(h, TruthValue::DEFAULT_TV(), vh);
+        h->setTV(TruthValue::DEFAULT_TV(), vh);
         CompositeTruthValuePtr ctv = CompositeTVCast(CompositeTruthValue::createTV(TruthValue::DEFAULT_TV(), vh));
         ctv->setVersionedTV(SimpleTruthValue::createTV(0.5,0.5),vh1);
-        atomSpace->setTV(h, ctv);
+        h->setTV(ctv);
         ctv->setVersionedTV(SimpleTruthValue::createTV(0.6,0.5),vh1);
-        atomSpace->setTV(h, ctv);
-        TS_ASSERT(*atomSpace->getTV(h, vh1) == SimpleTruthValue(0.6,0.5));
+        h->setTV(ctv);
+        TS_ASSERT(*h->getTV(vh1) == SimpleTruthValue(0.6,0.5));
     }
 
     void testGetNormalisedSTI() {

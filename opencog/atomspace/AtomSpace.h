@@ -436,7 +436,7 @@ public:
     /** Retrieve the TruthValue of a given Handle */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
     {
-        return getImplconst().getTV(h, vh);
+        return h->getTV(vh);
     }
 
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
@@ -449,7 +449,7 @@ public:
 
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        getImpl().setTV(h, tv, vh);
+        h->setTV(tv, vh);
     }
 
     /** Change the primary TV's mean of a given Handle
@@ -457,9 +457,7 @@ public:
      * across all TV types. I think a better solution would be to remove this
      * enforce the use of setTV.
      */
-    void setMean(Handle h, float mean) {
-        getImpl().setMean(h, mean);
-    }
+    void setMean(Handle h, float mean) { h->setMean(mean); }
 
     /**
      * Return true if the handle belongs to *this* atomspace; else
