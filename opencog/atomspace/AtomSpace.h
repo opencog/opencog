@@ -730,17 +730,18 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByOutgoing(OutputIterator result,
                  const HandleSeq& handles,
                  Type* types,
                  bool* subclasses,
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByOutgoingSet(
-                handles,types,subclasses,arity,type,subclass,vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByOutgoing(handles,
+                types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -825,11 +826,11 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetNames(
-                names, types, subclasses, arity, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByNames(names,
+            types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -871,11 +872,11 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetTypes(
-                types, subclasses, arity, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByTypes(types,
+            subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -909,6 +910,18 @@ public:
         return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
     }
 
+    // Wrapper for comparing atoms from a HandleSeq
+    template <typename Compare>
+    struct compareAtom
+    {
+        Compare* c;
+        compareAtom(Compare* _c) : c(_c) {}
+
+        bool operator()(Handle h1, Handle h2) {
+            return (*c)(h1, h2);
+        }
+    };
+
     /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally) and a given criterion.
@@ -937,9 +950,18 @@ public:
                  Type type,
                  bool subclass,
                  AtomPredicate* compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq hs = atomSpaceAsync->filter(compare, type, subclass, vh)->get_result();
-        return std::copy(hs.begin(), hs.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        // XXX Should use copy_if just like the others
+        return std::copy(fs.begin(), fs.end(), result);
     }
 
     /**
@@ -973,9 +995,12 @@ public:
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
-                type, subclass, compare, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+        // get the handle set as a vector and sort it.
+        std::vector<Handle> hs;
+
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
 
@@ -1100,20 +1125,38 @@ public:
 
 // ---- filter templates
 
-    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        return atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
+    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+
+        // XXX Should use copy_if just like the others
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        return fs;
     }
 
     template<typename OutputIterator>
-    OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result = atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
-        foreach(Handle h, result) 
-            * it++ = h;
-        return it;
+    OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        // XXX Should use copy_if just like the others
+        return std::copy(fs.begin(), fs.end(), result);
     }
 
     /**
      * Filter handles from a sequence according to the given criterion.
+     * XXX Do Not use this in new code FIXME TODO -- use std::copy_if() instead
      *
      * @param begin iterator for the sequence
      * @param end iterator for the sequence
@@ -1121,7 +1164,8 @@ public:
      * @return The handles in the sequence that match the criterion.
      */
     template<typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
+    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const
+    {
         HandleSeq result;
         for (; begin != end; begin++) {
             //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
@@ -1133,8 +1177,10 @@ public:
         return result;
     }
 
+    // XXX FIXME TODO -- don't use this, use std::copy_if
     template<typename InputIterator, typename OutputIterator>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const {
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const
+    {
         for (; begin != end; begin++)
             if (compare(*begin))
                 * it++ = *begin;

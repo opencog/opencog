@@ -14,7 +14,6 @@ ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
     AtomSpace.cc
-    AtomSpaceAsync.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc
@@ -72,7 +71,6 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-    ASRequest.h
     Atom.h
     AtomIndex.h
     AtomSpaceDefinitions.h

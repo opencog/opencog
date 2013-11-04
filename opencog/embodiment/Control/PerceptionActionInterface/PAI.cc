@@ -3721,7 +3721,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
             HandleSeq outgoing;
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
-            atomSpace.getHandleSet(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
+            atomSpace.getHandlesByOutgoing(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
             foreach(Handle evalLink, sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);
                 if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {

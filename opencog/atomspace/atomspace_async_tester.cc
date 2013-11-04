@@ -1,4 +1,3 @@
-#include "ASRequest.h"
 #include "AtomSpaceAsync.h"
 #include "ClassServer.h"
 #include <opencog/util/mt19937ar.h>
@@ -7,6 +6,7 @@
 #include <ctime>
 
 using namespace opencog;
+using namespace std;
 
 int n_threads = 5;
 int N = 1000000;
