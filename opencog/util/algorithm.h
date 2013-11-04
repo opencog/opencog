@@ -2,6 +2,7 @@
 #define _OPENCOG_ALGORITHM_H
 
 #include <algorithm>
+#include <set>
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
 
