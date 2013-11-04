@@ -40,6 +40,14 @@ void LinkIndex::resize()
 	idx.resize(classserver().getNumberOfClasses());
 }
 
+size_t LinkIndex::size() const
+{
+	size_t cnt = 0;
+	size_t vsz = idx.size();
+	for (size_t i=0; i<vsz; i++) cnt += idx[i].size();
+	return cnt;
+}
+
 void LinkIndex::insertAtom(AtomPtr a)
 {
 	Type t = a->getType();
@@ -64,7 +72,7 @@ void LinkIndex::removeAtom(AtomPtr a)
 
 Handle LinkIndex::getHandle(Type t, const HandleSeq &seq) const
 {
-	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+	if (t >= idx.size()) throw RuntimeException(TRACE_INFO,
             "Index out of bounds for atom type (t = %lu)", t);
 	const HandleSeqIndex &hsi = idx[t];
 	return hsi.get(seq);
@@ -89,7 +97,7 @@ UnorderedHandleSet LinkIndex::getHandleSet(Type type, const HandleSeq& seq, bool
 			// The 'AssignableFrom' direction is unit-tested in AtomSpaceUTest.cxxtest
 			if (classserver().isA(s, type))
 			{
-				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
                         "Index out of bounds for atom type (s = %lu)", s);
 				const HandleSeqIndex &hsi = idx[s];
 				Handle h = hsi.get(seq);

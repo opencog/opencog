@@ -100,6 +100,8 @@ public:
      * Return the number of atoms contained in the space.
      */
     inline int getSize() const { return getAtomTable().getSize(); }
+    inline int getNumNodes() const { return getAtomTable().getNumNodes(); }
+    inline int getNumLinks() const { return getAtomTable().getNumLinks(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -592,7 +594,17 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByType(OutputIterator result,
+                 Type type,
+                 bool subclass = false) const
+    {
+        return getAtomTable().getHandlesByType(result, type, subclass);
+    }
+
+    /** Same as above, but slightly less efficient, since it requires
+     * a VH check. */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTypeVH(OutputIterator result,
                  Type type,
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
@@ -927,7 +939,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
 
         HandleSeq fs;
         foreach (Handle h, hs) {
@@ -972,7 +984,7 @@ public:
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
         std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
         return std::copy(hs.begin(), hs.end(), result);
     }
@@ -992,7 +1004,7 @@ public:
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandleSet(back_inserter(handle_set), atype, subclass);
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i;
@@ -1080,20 +1092,6 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
-    size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        // XXX FIXME TODO: the following is horridly inefficient,
-        HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
-        return hs.size();
-    }
-
-    size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        // XXX FIXME TODO: the following is horridly inefficient,
-        HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
-        return hs.size();
-    }
-
     //! Clear the atomspace, remove all atoms
     void clear() { getImpl().clear(); }
 
@@ -1102,7 +1100,7 @@ public:
     HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
         HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+        getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
 
         // XXX Should use copy_if just like the others
         HandleSeq fs;
@@ -1117,7 +1115,7 @@ public:
     OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
         HandleSeq hs;
-        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+        getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
 
         HandleSeq fs;
         foreach (Handle h, hs) {

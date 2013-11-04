@@ -352,7 +352,7 @@ cdef class AtomSpace:
     def get_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype
-        self.atomspace.getHandleSet(back_inserter(o_vect),t,subt)
+        self.atomspace.getHandlesByType(back_inserter(o_vect),t,subt)
         return convert_handle_seq_to_python_list(o_vect,self)
 
     def get_atoms_by_name(self, Type t, name, subtype = True):

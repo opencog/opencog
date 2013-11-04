@@ -946,7 +946,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 */
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
-    atomSpace->getHandleSet(back_inserter(highLTIObjects), OBJECT_NODE, true);
+    atomSpace->getHandlesByType(back_inserter(highLTIObjects), OBJECT_NODE, true);
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {

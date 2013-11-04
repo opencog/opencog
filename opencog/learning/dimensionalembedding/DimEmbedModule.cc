@@ -193,7 +193,7 @@ void DimEmbedModule::addPivot(Handle h, Type linkType, bool fanin)
     bool symmetric = classserver().isA(linkType,UNORDERED_LINK);
     if (!fanin) as->incVLTI(h);//We don't want pivot atoms to be forgotten...
     HandleSeq nodes;
-    as->getHandleSet(std::back_inserter(nodes), NODE, true);
+    as->getHandlesByType(std::back_inserter(nodes), NODE, true);
 
     std::map<Handle,double> distMap;
 
@@ -329,7 +329,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
     dimensionMap[linkType]=numDimensions;
     //const HandleSeq& pivots = getPivots(linkType);
     HandleSeq nodes;//candidates for new pivots
-    as->getHandleSet(std::back_inserter(nodes), NODE, true);
+    as->getHandlesByType(std::back_inserter(nodes), NODE, true);
     if (nodes.empty()) return;
     if (nodes.size() < (size_t) numDimensions) numDimensions = nodes.size();
 
@@ -342,7 +342,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
         if (!symmetric && !fanin && (nodes.empty() || i==numDimensions-1)) {
             fanin=true;
             nodes.clear();
-            as->getHandleSet(std::back_inserter(nodes), NODE, true);
+            as->getHandlesByType(std::back_inserter(nodes), NODE, true);
             i=-1;
         }
 

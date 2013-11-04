@@ -168,7 +168,9 @@ public:
     /**
      * Return the number of atoms contained in a table.
      */
-    int getSize() const;
+    size_t getSize() const;
+    size_t getNumNodes() const;
+    size_t getNumLinks() const;
 
     /**
      * Adds a new predicate index to this atom table given the Handle of
