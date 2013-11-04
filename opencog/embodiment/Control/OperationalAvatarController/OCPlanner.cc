@@ -811,7 +811,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     if (isNegativeGoal || preconImpossible || isDiffStateOwnerType)
                         continue;
 
-                    curRuleScore -= negativeNum;
+                    curRuleScore -= negativeNum*1.2;
                     curRuleScore += satisfiedPreconNum;
 
                     while(true)
@@ -3227,7 +3227,7 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryBestAccessiblePosition;
     bs.goalState = existPathState6;
     pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_2), bs));
 

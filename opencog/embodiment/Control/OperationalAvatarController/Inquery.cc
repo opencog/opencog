@@ -45,6 +45,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <random>
+#include <algorithm>
 
 #include "Inquery.h"
 #include "OCPlanner.h"
@@ -457,8 +459,8 @@ ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
     }
 
     vector<spatial::BlockVector> path;
-    spatial::BlockVector nearestPos;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+    spatial::BlockVector nearestPos, bestPos;
+    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos, bestPos))
         return "true";
     else
         return "false";
@@ -489,13 +491,51 @@ vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamV
         pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
     }
 
-    spatial::BlockVector nearestPos;
+    spatial::BlockVector nearestPos, bestPos;
     vector<spatial::BlockVector> path;
-    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,true);
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,bestPos,true, false);
 
     if (nearestPos != pos1)
     {
         values.push_back(Vector(nearestPos.x,nearestPos.y,nearestPos.z));
+
+    }
+
+    return values;
+}
+
+vector<ParamValue> Inquery::inqueryBestAccessiblePosition(const vector<ParamValue>& stateOwnerList)
+{
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
+    spatial::BlockVector pos1,pos2;
+    vector<ParamValue> values;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+    if (entity1)
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    else
+    {
+        Vector* v1 = boost::get<Vector>(&var1);
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+    }
+
+    Entity* entity2 = boost::get<Entity>(&var2);
+    if (entity2)
+        pos2 = spaceMap->getObjectLocation(entity2->id);
+    else
+    {
+        Vector* v2 = boost::get<Vector>(&var2);
+        pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
+    }
+
+    spatial::BlockVector nearestPos, bestPos;
+    vector<spatial::BlockVector> path;
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,bestPos,false, true);
+
+    if (bestPos != pos1)
+    {
+        values.push_back(Vector(bestPos.x,bestPos.y,bestPos.z));
 
     }
 
@@ -550,6 +590,9 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
 
                 values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
             }
+
+    // random sort
+    std::random_shuffle(values.begin(),values.end());
 
     return values;
 }
