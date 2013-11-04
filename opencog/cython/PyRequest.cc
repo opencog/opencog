@@ -43,7 +43,7 @@ PyRequest::~PyRequest()
 
 bool PyRequest::execute()
 {
-    string result = run_request(_pyrequest, _parameters, &_cogserver.getAtomSpace());
+    std::string result = run_request(_pyrequest, _parameters, &_cogserver.getAtomSpace());
     // errors only with result is not empty... && duplicate errors are not reported.
     if (result.size() > 0 && result != _last_result) {
         // Any string returned is a traceback
