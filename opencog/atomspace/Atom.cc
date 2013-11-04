@@ -95,6 +95,20 @@ void Atom::setTruthValue(TruthValuePtr tv)
 
 void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
 {
+    // XXX lock here.  I don't get it, but running AtomSpaceAsyncUTest
+    // over and over in a loop eventually leads to a crash, deep inside
+    // of the smat pointer deref: _truthValue->getType() below.
+    // specifically: opencog::Atom::setTV <+528>: callq  *0x30(%rax)
+    // and rax contains a garbage value --  a string "node 1" from the
+    // unit test.  Looks to me like a bug in the shared_ptr code.
+    // Until gcc/boost fixes this ... I guess we have to lock, for now.
+    // I'm assuming this is a gcc bug, I just don't see any bug in the
+    // code here; it should all be thread-safe and atomic. November 2013
+    // This is with gcc version (Ubuntu/Linaro 4.6.4-1ubuntu1~12.04) 4.6.4
+    // With this lock, no crash after 15 minutes of testing.
+    // Anyway, the point is that this lock is wasteful, and should be 
+    // un-needed.
+    std::lock_guard<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
     {
         CompositeTruthValuePtr ctv = (_truthValue->getType() == COMPOSITE_TRUTH_VALUE) ?
@@ -102,7 +116,8 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
                             CompositeTruthValue::createCTV(_truthValue, NULL_VERSION_HANDLE);
         ctv->setVersionedTV(new_tv, vh);
         new_tv = std::static_pointer_cast<TruthValue>(ctv);
-    } else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE and
+    }
+    else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE and
                  new_tv->getType() != COMPOSITE_TRUTH_VALUE)
     {
         CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(_truthValue));
