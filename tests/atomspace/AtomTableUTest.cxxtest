@@ -80,7 +80,7 @@ public:
     void setUp()
     {
         atomSpace = new AtomSpace();
-        table = (AtomTable*) & (atomSpace->atomSpaceAsync->getAtomTable());
+        table = (AtomTable*) & (atomSpace->getAtomTable());
 
         /* load scm files with all necessary nodes and links  */
         load_scm_file(*atomSpace, PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");

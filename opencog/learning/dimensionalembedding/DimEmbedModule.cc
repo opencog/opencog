@@ -49,9 +49,9 @@ DimEmbedModule::DimEmbedModule(CogServer& cs) : Module(cs)
 {
     logger().info("[DimEmbedModule] constructor");
     this->as = &_cogserver.getAtomSpace();
-    addedAtomConnection = as->atomSpaceAsync->
+    addedAtomConnection = as->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
-    removedAtomConnection = as->atomSpaceAsync->
+    removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
 }
 
@@ -66,9 +66,9 @@ void DimEmbedModule::init()
 {
     logger().info("[DimEmbedModule] init");
     this->as = &_cogserver.getAtomSpace();
-    addedAtomConnection = as->atomSpaceAsync->
+    addedAtomConnection = as->
         addAtomSignal(boost::bind(&DimEmbedModule::handleAddSignal, this, _1));
-    removedAtomConnection = as->atomSpaceAsync->
+    removedAtomConnection = as->
         removeAtomSignal(boost::bind(&DimEmbedModule::atomRemoveSignal, this, _1));
 #ifdef HAVE_GUILE
     //Functions available to scheme shell

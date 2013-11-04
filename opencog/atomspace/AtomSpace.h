@@ -29,7 +29,7 @@
 #include <set>
 #include <vector>
 
-#include <opencog/atomspace/AtomSpaceAsync.h>
+#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -43,32 +43,14 @@ namespace opencog
 /**
  * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
  * provide standard functions that return results immediately.
- * The AtomSpace is a wrapper around opencog::AtomSpaceAsync which submits
- * requests to a queue.
- * These requests (defined in ASRequest.h) access the core
- * opencog::AtomSpaceImpl class. For an asynchronous interface that allows
- * AtomSpace requests to be fired and forgot (mostly useful for setting TVs,
- * queuing handleset queries or creating Atoms), see AtomSpaceAsync.
- *
- * The default constructor will create a new AtomSpaceAsync. To connect to
- * an existing AtomSpaceAsync and send requests to it, pass a reference.
  *
  * @code
- *  // Create an atomspace with it's own internal AtomSpace event-loop.
+ *  // Create an atomspace
  *  AtomSpace atomspace;
- *
- *  // create AtomSpaceAsync and start event loop
- *  AtomSpaceAsync& atomSpaceAsync;
- *  // wrap it in this legacy AtomSpace API
- *  AtomSpace atomspace2(atomSpaceAsync);
- *
- *  // Share the event-loop of atomspace
- *  AtomSpace atomspace3(*atomspace.atomSpaceAsync);
  * @endcode
  *
- * If one were to add atoms to via atomspace3 or atomspace, they would both be
- * in the same "AtomSpace". Adding atoms via atomSpaceAsync or atomspace2 would
- * place atoms in another "AtomSpace" separate from atomspace and atomspace3.
+ * If one were to add atoms to via AtomTable or AtomSpace, they would both be
+ * in the same "AtomSpace".
  */
 class AtomSpace
 {
@@ -76,49 +58,43 @@ class AtomSpace
     friend class ::AtomTableUTest;
     friend class SaveRequest;
 
-    //! Indicates whether the AtomSpace should delete AtomSpaceAsync on destruction
-    bool ownsAtomSpaceAsync;
-
     /**
-     * Overrides and declares equals operator as private 
+     * Overrides and declares equals operator as private
      * for avoiding large object copying by mistake.
      */
     AtomSpace& operator=(const AtomSpace&);
-public:
 
-    /** 
-     * The AtomSpace class is essentially just be a wrapper of the asynchronous
-     * AtomSpaceAsync which returns ASRequest "futures" as well as allowing
-     * thread-local caching of some requests. Functions in this
-     * class will block until notified that they've been fulfilled by the
-     * AtomSpaceAsync event loop.
+    /**
+     * The AtomSpace class is essentially just be a wrapper of the AtomTable
      */
-    mutable AtomSpaceAsync* atomSpaceAsync;
+    mutable AtomSpaceImpl* _atomSpaceImpl;
+    bool _ownsAtomSpaceImpl;
 
+public:
     AtomSpace(void);
     /**
      * Create an atomspace that will send requests to an existing AtomSpace
      * event-loop.
      */
-    AtomSpace(AtomSpaceAsync& a);
+    AtomSpace(AtomSpaceImpl* a);
 
     AtomSpace(const AtomSpace&);
     ~AtomSpace();
 
     inline AttentionBank& getAttentionBank()
-    { return atomSpaceAsync->getAttentionBank(); }
+    { return _atomSpaceImpl->bank; }
 
     inline const AttentionBank& getAttentionBankconst() const
-    { return atomSpaceAsync->getAttentionBankconst(); }
+    { return _atomSpaceImpl->bank; }
 
     inline AtomSpaceImpl& getImpl()
-    { return atomSpaceAsync->getImpl(); }
+    { return *_atomSpaceImpl; }
 
     inline const AtomSpaceImpl& getImplconst() const
-    { return atomSpaceAsync->getImplconst(); }
+    { return *_atomSpaceImpl; }
 
     inline const AtomTable& getAtomTable() const
-    { return getImplconst().getAtomTable(); }
+    { return getImplconst().atomTable; }
 
     /**
      * Return the number of atoms contained in the space.
@@ -142,8 +118,7 @@ public:
      * if the atom already exists then the old and the new truth value is merged
      * \param t     Type of the node
      * \param name  Name of the node
-     * \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h) 
-     * @deprecated New code should directly use the AtomSpaceAsync::addNode method.
+     * \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h)
      */
     inline Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
@@ -167,11 +142,10 @@ public:
      *                  the outgoing set of the link
      * @param tvn       Optional TruthValue of the node. If not
      *                  provided, uses the DEFAULT_TV (see TruthValue.h)
-     * @deprecated New code should directly use the AtomSpaceAsync::addLink method.
      */
     inline Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV())
-    { 
+    {
         return getImpl().addLink(t,outgoing,tvn);
     }
 
@@ -375,7 +349,7 @@ public:
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
     void decVLTI(Handle h) {chgVLTI(h, -1); }
-    
+
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
         return h->getAttentionValue()->getSTI();
@@ -413,7 +387,7 @@ public:
         return 0;
     }
 
-    /** Return whether s is the source handle in a link l */ 
+    /** Return whether s is the source handle in a link l */
     bool isSource(Handle source, Handle link) const
     {
         LinkPtr l(LinkCast(link));
@@ -437,7 +411,7 @@ public:
     }
 
     /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
+    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         return h->getTV(vh);
     }
@@ -1047,7 +1021,7 @@ public:
      * embodiment.
      */
     void decayShortTermImportance() {
-        getImpl().decayShortTermImportance(); }
+        getImpl().atomTable.decayShortTermImportance(); }
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
@@ -1076,7 +1050,7 @@ public:
      * @return Maximum STI
      */
     AttentionValue::sti_t getMaxSTI(bool average=true) const
-    { return getAttentionBankconst().getMaxSTI(average); } 
+    { return getAttentionBankconst().getMaxSTI(average); }
 
     /** Get the minimum STI observed in the AtomSpace.
      *
@@ -1085,7 +1059,7 @@ public:
      * @return Minimum STI
      */
     AttentionValue::sti_t getMinSTI(bool average=true) const
-    { return getAttentionBankconst().getMinSTI(average); } 
+    { return getAttentionBankconst().getMinSTI(average); }
 
     /** Update the minimum STI observed in the AtomSpace.
      * Min/max are not updated on setSTI because average is calculate by lobe
@@ -1217,6 +1191,24 @@ public:
         }
         AttentionValue::lti_t threshold;
     };
+
+    // TODO XXX FIXME convert to boost::signals2 ASAP for thread safety.
+    boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function)
+    {
+        return getImpl().atomTable.addAtomSignal().connect(function);
+    }
+    boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
+    {
+        return getImpl().atomTable.removeAtomSignal().connect(function);
+    }
+    boost::signals::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    {
+        return getImpl().atomTable.AVChangedSignal().connect(function);
+    }
+    boost::signals::connection TVChangedSignal(const TVCHSigl::slot_type& function)
+    {
+        return getImpl().atomTable.TVChangedSignal().connect(function);
+    }
 
     // Provide access to the atom-added signal in Python, but using a queue instead
     // of callbacks. It's accessible via the Cython wrapper.

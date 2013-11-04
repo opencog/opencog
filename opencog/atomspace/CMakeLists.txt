@@ -75,7 +75,6 @@ INSTALL (FILES
     AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
-    AtomSpaceAsync.h
     AtomSpaceImpl.h
     AtomTable.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
@@ -117,11 +116,3 @@ INSTALL (FILES
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
 
-ADD_EXECUTABLE (atomspace_async
-    atomspace_async_tester
-)
-
-TARGET_LINK_LIBRARIES (atomspace_async
-	atomspace
-	cogutil
-)

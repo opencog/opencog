@@ -56,7 +56,7 @@ AtomSpaceImpl::AtomSpaceImpl(void)
     backing_store = NULL;
 
     // connect signals
-    addedAtomConnection = addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1));
+    addedAtomConnection = atomTable.addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1));
     removedAtomConnection = atomTable.removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1));
 
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
@@ -290,7 +290,7 @@ void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
 
-    getAtomTable().getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true);
 
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
@@ -313,11 +313,9 @@ void AtomSpaceImpl::clear()
     }
 
     allAtoms.clear();
-    getAtomTable().getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);
 }
 
-void AtomSpaceImpl::printGDB() const { getAtomTable().print(); }
-void AtomSpaceImpl::printTypeGDB(Type t) const { getAtomTable().print(std::cout,t,true); }

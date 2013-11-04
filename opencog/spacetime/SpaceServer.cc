@@ -64,8 +64,8 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
     curMap = NULL;
 
     // connect signals
-    removedAtomConnection = _atomspace.atomSpaceAsync->addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
-    addedAtomConnection = _atomspace.atomSpaceAsync->removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1));
+    removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
+    addedAtomConnection = _atomspace.removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1));
 }
 
 SpaceServer::~SpaceServer()

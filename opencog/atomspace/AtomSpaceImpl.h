@@ -50,10 +50,11 @@ namespace opencog
 
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
- * AtomSpace requests that are running within the AtomSpaceAsync event loop.
+ * the AtomSpace
  */
 class AtomSpaceImpl
 {
+    friend class AtomSpace;
     friend class SavingLoading;
     friend class SaveRequest;
     friend class ::AtomSpaceImplUTest;
@@ -61,9 +62,6 @@ class AtomSpaceImpl
 public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
-
-    AttentionBank& getAttentionBank() {return bank; }
-    const AttentionBank& getAttentionBankconst() const {return bank; }
 
     /**
      * Register a provider of backing storage.
@@ -98,15 +96,6 @@ public:
      * then loaded into this atomtable/atomspace.
      */
     Handle fetchIncomingSet(Handle, bool);
-
-    /**
-     * @return a const reference to the AtomTable
-     */
-    const AtomTable& getAtomTable() const { return atomTable; }
-
-    //helpers for GDB debugging, because trying to get std::cout is annoying
-    void printGDB() const;
-    void printTypeGDB(Type t) const;
 
     /** Add a new node to the Atom Table,
      * if the atom already exists then the old and the new truth value is merged
@@ -163,35 +152,13 @@ public:
     HandleSeq getNeighbors(Handle h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
 
-
-    template <typename Compare>
-    struct filterAtom{
-        Compare *c;
-        const AtomTable* table;
-        filterAtom(const AtomTable* _table, Compare *_c) : c(_c), table(_table) {}
-
-        bool operator()(const Handle& h1) {
-            return (*c)(h1);
-        }
-    };
-
-    /* ----------------------------------------------------------- */
-
-    /**
-     * Decays STI of all atoms (one cycle of importance decay).
-     * Deprecated, importance updating should be done by ImportanceUpdating
-     * Agent. Still used by Embodiment.
-     */
-    void decayShortTermImportance() { atomTable.decayShortTermImportance(); }
-
     //! Clear the atomspace, remove all atoms
     void clear();
-
-private:
 
     AtomTable atomTable;
     AttentionBank bank;
 
+private:
     /**
      * Used to fetch atoms from disk.
      */
@@ -210,12 +177,6 @@ private:
     void atomAdded(Handle);
 
 public:
-    // pass on the signals from the Atom Table
-    AtomSignal& addAtomSignal() { return atomTable._addAtomSignal; }
-    AtomPtrSignal& removeAtomSignal() { return atomTable._removeAtomSignal; }
-    TVCHSigl& TVChangedSignal() { return atomTable._TVChangedSignal; }
-    AVCHSigl& AVChangedSignal() { return atomTable._AVChangedSignal; }
-
     /**
      * Overrides and declares copy constructor and equals operator as private 
      * for avoiding large object copying by mistake.

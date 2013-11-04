@@ -82,8 +82,7 @@ void SavingLoading::save(const char *fileName,
 
     // TODO: bad bad - saving and loading should be integrated as a request or
     // use the AtomSpace API.
-    AtomTable& atomTable = const_cast<AtomTable&> (
-            atomSpace.atomSpaceAsync->getAtomTable() );
+    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -292,7 +291,7 @@ void SavingLoading::load(const char *fileName,
     processed = 0;
     total = atomCount;
 
-    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.atomSpaceAsync->getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.getAtomTable());
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);
