@@ -29,21 +29,24 @@
 using namespace opencog;
 using namespace opencog::spatial;
 
-bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path, BlockVector& nearestPos, bool getNearestPos)
+bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
+                                     BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos)
 {
     BlockVector end = target;
     map<BlockVector,double> costMap;
     map<BlockVector,double>::const_iterator itercost;
     int searchTimes = 0;
     float nearestDis = begin - target;
+    float bestHeuristic = nearestDis * 1.41421356f;
     nearestPos = begin;
+    bestPos = begin;
     bool nostandable = false;
 
     // check if the begin and target pos standable first
     if ((! mapManager->checkStandable(begin)) || (! mapManager->checkStandable(target)))
     {
         nostandable = true;
-        if (! getNearestPos)
+        if ((! getNearestPos) && (! getBestPos))
         return false;
     }
 
@@ -124,7 +127,7 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
                         }
 
                         // calculate the cost of this pos
-                        curCost = calculateCostByDistance(begin, end, curPos,nearestDis,nearestPos);
+                        curCost = calculateCostByDistance(begin, end, curPos,nearestDis,nearestPos,bestHeuristic,bestPos);
 
                         pathfindingSteps++;
                         costMap.insert(pair<BlockVector, int>(curPos,curCost));
@@ -196,18 +199,25 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
 }
 
 
-double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,float& nearestDis,BlockVector& nearestPos)
+double Pathfinder3D::calculateCostByDistance(const BlockVector& begin, const BlockVector& target,  const BlockVector& pos,
+                                             float& nearestDis,BlockVector& nearestPos, float& bestHeuristic, BlockVector& bestPos)
 {
-    // return (target - pos) * 2.0 + (begin - pos);
     float dis = target - pos;
     if (dis < nearestDis)
     {
         nearestDis = dis;
         nearestPos = pos;
     }
+
+    float heuristic = dis*1.41421356f + (begin - pos);
+    if (heuristic < bestHeuristic )
+    {
+        bestHeuristic = heuristic;
+        bestPos = pos;
+    }
+
     return dis;
 }
-
 
 
 // before call this funciton, please make sure the pos want to access is standable first
