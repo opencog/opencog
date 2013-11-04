@@ -24,6 +24,7 @@
  */
 
 #include <algorithm>
+#include <atomic>
 #include <thread>
 
 #include <math.h>
@@ -48,15 +49,18 @@ class AtomSpaceAsyncUTest :  public CxxTest::TestSuite
 private:
 
     AtomSpaceAsync *atomSpace;
-    int __testSignalsCounter;
-    int __totalAdded;
-    int __totalChanged;
+
+    // Counters must be atomic; we are incrementing them inside threads
+    std::atomic_size_t __testSignalsCounter;
+    std::atomic_size_t __totalAdded;
+    std::atomic_size_t __totalChanged;
     RandGen *rng;
 
     int n_threads;
     int num_atoms;
 
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) const
+    {
         /* Make a copy */
         AttentionValuePtr old_av = h->getAttentionValue();
         AttentionValuePtr new_av = createAV(
@@ -411,8 +415,8 @@ public:
         __totalChanged = 0;
 
         testThreadedDuplicateAdd();
-        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
-        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1));
+        TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1));
     }
 
     // =================================================================
@@ -460,8 +464,8 @@ public:
         // We should get only num_atoms, because all threads created duplicates.
         TS_ASSERT_EQUALS(size, num_atoms);
 
-        TS_ASSERT_EQUALS(__totalAdded, 0); // no change from before.
-        TS_ASSERT_EQUALS(__totalChanged, num_atoms * n_threads); // lots!
+        TS_ASSERT_EQUALS((int) __totalAdded, 0); // no change from before.
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * n_threads); // lots!
     }
 
     void testThreadedTVagain()
@@ -535,7 +539,7 @@ public:
         // num_atoms nodes, and num_atoms links.
         TS_ASSERT_EQUALS(size, 2*num_atoms);
 
-        TS_ASSERT_EQUALS(__totalAdded, num_atoms);
-        TS_ASSERT_EQUALS(__totalChanged, num_atoms * (n_threads-1)); // lots!
+        TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1)); // lots!
     }
 };
