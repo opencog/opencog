@@ -443,14 +443,6 @@ public:
         // Use the earlier test for atomspace setup.
         testThreadedSignals();
 
-#if 0
-        // (re-) connect signals (not needed)
-        boost::signals::connection add =
-            atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
-
-        boost::signals::connection chg =
-            atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
-#endif
         // reset the counts
         __totalAdded = 0;
         __totalChanged = 0;
@@ -470,6 +462,21 @@ public:
 
         TS_ASSERT_EQUALS(__totalAdded, 0); // no change from before.
         TS_ASSERT_EQUALS(__totalChanged, num_atoms * n_threads); // lots!
+    }
+
+    void testThreadedTVagain()
+    {
+        int n_threads_save = n_threads;
+        int num_atoms_save = num_atoms;
+        n_threads = 4;
+        num_atoms = 4000;
+        for (int i=0; i<20; i++) {
+            testThreadedTV();
+            tearDown();
+            setUp();
+        }
+        n_threads = n_threads_save;
+        num_atoms = num_atoms_save;
     }
 
     // =================================================================
