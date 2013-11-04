@@ -46,7 +46,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAxXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -65,9 +65,6 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
              benchmarker.setMethod("getHandleSet");
-             break;
-           case 'x':
-             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
