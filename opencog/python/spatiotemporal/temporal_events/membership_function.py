@@ -5,8 +5,9 @@ from spatiotemporal.time_intervals import TimeInterval
 from spatiotemporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.geometric import Function, FunctionPiecewiseLinear,\
-    FunctionHorizontalLinear, FunctionComposite, invoke_method_on, FUNCTION_ZERO, FUNCTION_ONE
-from utility.numeric.globals import PLUS_INFINITY, MINUS_INFINITY, EPSILON
+    FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE
+from numpy import PINF as POSITIVE_INFINITY, NINF as NEGATIVE_INFINITY
+from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
 
@@ -24,12 +25,12 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
         self.input_list, cdf_output_list = convert_dict_to_sorted_lists(dictionary_input_output)
         TimeInterval.__init__(self, self.input_list[0], self.input_list[-1])
         self.cdf = FunctionPiecewiseLinear(dictionary_input_output, function_undefined=FUNCTION_ZERO)
-        self.cdf.dictionary_bounds_function[(self.b, PLUS_INFINITY)] = FUNCTION_ONE
+        self.cdf.dictionary_bounds_function[(self.b, POSITIVE_INFINITY)] = FUNCTION_ONE
         pdf_output_list = []
         dictionary_bounds_function = {}
         for bounds in sorted(self.cdf.dictionary_bounds_function):
             a, b = bounds
-            if a in [MINUS_INFINITY, PLUS_INFINITY] or b in [MINUS_INFINITY, PLUS_INFINITY]:
+            if a in [NEGATIVE_INFINITY, POSITIVE_INFINITY] or b in [NEGATIVE_INFINITY, POSITIVE_INFINITY]:
                 continue
             pdf_y_intercept = fabs(self.cdf.derivative((a + b) / 2.0))
             pdf_output_list.append(pdf_y_intercept)
@@ -42,7 +43,7 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
         share = 0
         for bounds in self.pdf.dictionary_bounds_function:
             (a, b) = bounds
-            if a in [MINUS_INFINITY, PLUS_INFINITY] and b in [MINUS_INFINITY, PLUS_INFINITY]:
+            if a in [NEGATIVE_INFINITY, POSITIVE_INFINITY] and b in [NEGATIVE_INFINITY, POSITIVE_INFINITY]:
                 continue
             share += self.pdf.dictionary_bounds_function[bounds].integral(a, b)
             self.roulette_wheel.append((a, b, share))

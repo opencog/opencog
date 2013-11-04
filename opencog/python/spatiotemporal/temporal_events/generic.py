@@ -2,6 +2,7 @@ from datetime import datetime
 from numpy import isinf
 from scipy.stats.distributions import rv_frozen
 from scipy import integrate
+from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
@@ -32,12 +33,10 @@ class TemporalEvent(TimeInterval):
         self._distribution_beginning = distribution_beginning
         self._distribution_ending = distribution_ending
 
-        a, beginning = distribution_beginning.interval(1)
-        if isinf(a) or isinf(beginning):
-            a, beginning = distribution_beginning.interval(distribution_integral_limit)
-        ending, b = distribution_ending.interval(1)
-        if isinf(ending) or isinf(b):
-            ending, b = distribution_ending.interval(distribution_integral_limit)
+        a, beginning = calculate_bounds_of_probability_distribution(distribution_beginning,
+                                                                    distribution_integral_limit)
+        ending, b = calculate_bounds_of_probability_distribution(distribution_ending,
+                                                                 distribution_integral_limit)
 
         TimeInterval.__init__(self, a, b, bins)
         self._beginning = UnixTime(beginning)
