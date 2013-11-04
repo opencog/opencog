@@ -732,7 +732,7 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     }
     case BENCH_IMPL: {
         t_begin = clock();
-        asp->atomSpaceAsync->atomspace.getTV(h);
+        h->getTV();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }
@@ -812,7 +812,7 @@ timepair_t AtomSpaceBenchmark::bm_setTruthValue()
     case BENCH_IMPL: {
         t_begin = clock();
         TruthValuePtr stv(SimpleTruthValue::createTV(strength, conf));
-        asp->atomSpaceAsync->atomspace.setTV(h, stv);
+        h->setTV(stv);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }

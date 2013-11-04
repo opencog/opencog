@@ -117,10 +117,13 @@ public:
     inline const AtomSpaceImpl& getImplconst() const
     { return atomSpaceAsync->getImplconst(); }
 
+    inline const AtomTable& getAtomTable() const
+    { return getImplconst().getAtomTable(); }
+
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return getImplconst().getSize(); }
+    inline int getSize() const { return getAtomTable().getSize(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -132,7 +135,7 @@ public:
      */
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const {
-        getImplconst().print(output, type, subclass);
+        getAtomTable().print(output, type, subclass);
     }
 
     /** Add a new node to the Atom Table,
@@ -309,7 +312,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return getImplconst().getHandle(t, str);
+        return getAtomTable().getHandle(t, str);
     }
 
     /**
@@ -319,7 +322,7 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getImplconst().getHandle(t, outgoing);
+        return getAtomTable().getHandle(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
@@ -436,7 +439,7 @@ public:
     /** Retrieve the TruthValue of a given Handle */
     TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
     {
-        return getImplconst().getTV(h, vh);
+        return h->getTV(vh);
     }
 
     strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
@@ -449,7 +452,7 @@ public:
 
     /** Change the TruthValue of a given Handle */
     void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        getImpl().setTV(h, tv, vh);
+        h->setTV(tv, vh);
     }
 
     /** Change the primary TV's mean of a given Handle
@@ -457,9 +460,7 @@ public:
      * across all TV types. I think a better solution would be to remove this
      * enforce the use of setTV.
      */
-    void setMean(Handle h, float mean) {
-        getImpl().setMean(h, mean);
-    }
+    void setMean(Handle h, float mean) { h->setMean(mean); }
 
     /**
      * Return true if the handle belongs to *this* atomspace; else
@@ -563,7 +564,7 @@ public:
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
+        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -594,7 +595,7 @@ public:
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
+        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -622,7 +623,7 @@ public:
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByTypeVH(result, type, subclass, vh);
+        return getAtomTable().getHandlesByTypeVH(result, type, subclass, vh);
     }
 
     /**
@@ -657,7 +658,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByTargetTypeVH(result,
+        return getAtomTable().getHandlesByTargetTypeVH(result,
                type, targetType, subclass, targetSubclass, vh, targetVh);
     }
 
@@ -691,7 +692,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
+        return getAtomTable().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
     }
 
     /**
@@ -729,17 +730,18 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByOutgoing(OutputIterator result,
                  const HandleSeq& handles,
                  Type* types,
                  bool* subclasses,
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByOutgoingSet(
-                handles,types,subclasses,arity,type,subclass,vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByOutgoing(handles,
+                types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -778,7 +780,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getIncomingSetByNameVH(result,
+        return getAtomTable().getIncomingSetByNameVH(result,
                targetName, targetType, type, subclass, vh, targetVh);
     }
 
@@ -824,11 +826,11 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetNames(
-                names, types, subclasses, arity, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByNames(names,
+            types, subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -870,11 +872,11 @@ public:
                  Arity arity,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetTypes(
-                types, subclasses, arity, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByTypes(types,
+            subclasses, arity, type, subclass, vh);
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -908,6 +910,18 @@ public:
         return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
     }
 
+    // Wrapper for comparing atoms from a HandleSeq
+    template <typename Compare>
+    struct compareAtom
+    {
+        Compare* c;
+        compareAtom(Compare* _c) : c(_c) {}
+
+        bool operator()(Handle h1, Handle h2) {
+            return (*c)(h1, h2);
+        }
+    };
+
     /**
      * Gets a set of handles that matches with the given type
      * (subclasses optionally) and a given criterion.
@@ -936,9 +950,18 @@ public:
                  Type type,
                  bool subclass,
                  AtomPredicate* compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq hs = atomSpaceAsync->filter(compare, type, subclass, vh)->get_result();
-        return std::copy(hs.begin(), hs.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        // XXX Should use copy_if just like the others
+        return std::copy(fs.begin(), fs.end(), result);
     }
 
     /**
@@ -972,9 +995,12 @@ public:
                  Compare compare,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
-                type, subclass, compare, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+        // get the handle set as a vector and sort it.
+        std::vector<Handle> hs;
+
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
 
@@ -1081,30 +1107,56 @@ public:
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
     size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getImplconst().getNodeCount(vh); }
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+        return hs.size();
+    }
 
     size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getImplconst().getLinkCount(vh); }
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+        return hs.size();
+    }
 
     //! Clear the atomspace, remove all atoms
     void clear() { getImpl().clear(); }
 
 // ---- filter templates
 
-    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        return atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
+    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+
+        // XXX Should use copy_if just like the others
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        return fs;
     }
 
     template<typename OutputIterator>
-    OutputIterator filter(OutputIterator it, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE) {
-        HandleSeq result = atomSpaceAsync->filter(compare,ATOM,true,vh)->get_result();
-        foreach(Handle h, result) 
-            * it++ = h;
-        return it;
+    OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    {
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
+
+        HandleSeq fs;
+        foreach (Handle h, hs) {
+            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
+                fs.push_back(h);
+        }
+        // XXX Should use copy_if just like the others
+        return std::copy(fs.begin(), fs.end(), result);
     }
 
     /**
      * Filter handles from a sequence according to the given criterion.
+     * XXX Do Not use this in new code FIXME TODO -- use std::copy_if() instead
      *
      * @param begin iterator for the sequence
      * @param end iterator for the sequence
@@ -1112,7 +1164,8 @@ public:
      * @return The handles in the sequence that match the criterion.
      */
     template<typename InputIterator>
-    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const {
+    HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const
+    {
         HandleSeq result;
         for (; begin != end; begin++) {
             //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
@@ -1124,8 +1177,10 @@ public:
         return result;
     }
 
+    // XXX FIXME TODO -- don't use this, use std::copy_if
     template<typename InputIterator, typename OutputIterator>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const {
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const
+    {
         for (; begin != end; begin++)
             if (compare(*begin))
                 * it++ = *begin;

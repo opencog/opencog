@@ -40,6 +40,8 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -89,6 +91,72 @@ void Atom::setTruthValue(TruthValuePtr tv)
         TVCHSigl& tvch = _atomTable->TVChangedSignal();
         tvch(getHandle(), tv, _truthValue);
     }
+}
+
+void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
+{
+    if (!isNullVersionHandle(vh))
+    {
+        CompositeTruthValuePtr ctv = (_truthValue->getType() == COMPOSITE_TRUTH_VALUE) ?
+                            CompositeTruthValue::createCTV(_truthValue) :
+                            CompositeTruthValue::createCTV(_truthValue, NULL_VERSION_HANDLE);
+        ctv->setVersionedTV(new_tv, vh);
+        new_tv = std::static_pointer_cast<TruthValue>(ctv);
+    } else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE and
+                 new_tv->getType() != COMPOSITE_TRUTH_VALUE)
+    {
+        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(_truthValue));
+        ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
+        new_tv = std::static_pointer_cast<TruthValue>(ctv);
+    }
+    setTruthValue(new_tv); // always call setTruthValue to update indices
+}
+
+TruthValuePtr Atom::getTV(VersionHandle vh) const
+{
+    if (isNullVersionHandle(vh)) {
+        return _truthValue;
+    }
+    else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE)
+    {
+        return std::dynamic_pointer_cast<CompositeTruthValue>(_truthValue)->getVersionedTV(vh);
+    }
+    return TruthValue::NULL_TV();
+}
+
+
+void Atom::setMean(float mean) throw (InvalidParamException)
+{
+    TruthValuePtr newTv = _truthValue;
+    if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
+        // Since CompositeTV has no setMean() method, we must handle it differently
+        CompositeTruthValuePtr ctv = std::static_pointer_cast<CompositeTruthValue>(newTv);
+
+        TruthValuePtr primaryTv = ctv->getPrimaryTV();
+        if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
+            primaryTv = SimpleTruthValue::createTV(mean, primaryTv->getCount());
+        } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
+            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(primaryTv);
+            itv->setMean(mean);
+            primaryTv = itv;
+        } else {
+            throw InvalidParamException(TRACE_INFO,
+               "Atom::setMean(): Got a primaryTV with an invalid or unknown type");
+        }
+        ctv->setVersionedTV(primaryTv, NULL_VERSION_HANDLE);
+    } else {
+        if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
+            newTv = SimpleTruthValue::createTV(mean, newTv->getCount());
+        } else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
+            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(newTv);
+            itv->setMean(mean);
+            newTv = itv;
+        } else {
+            throw InvalidParamException(TRACE_INFO,
+               "Atom::setMean(): - Got a TV with an invalid or unknown type");
+        }
+    }
+    setTV(newTv);
 }
 
 void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)

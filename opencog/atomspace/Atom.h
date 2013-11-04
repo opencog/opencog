@@ -191,9 +191,13 @@ public:
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
-    void setTruthValue(CompositeTruthValuePtr ctv) {
-        setTruthValue(std::static_pointer_cast<TruthValue>(ctv));
-    }
+
+    //! The get,setTV methods deal with versioning. Yuck.
+    void setTV(TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
+    TruthValuePtr getTV(VersionHandle = NULL_VERSION_HANDLE) const;
+
+    /** Change the primary TV's mean */
+    void setMean(float) throw (InvalidParamException);
 
     //! Return the incoming set of this atom.
     IncomingSet getIncomingSet() const;

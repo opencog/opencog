@@ -23,16 +23,12 @@
 #ifndef _OPENCOG_NUMERIC_H
 #define _OPENCOG_NUMERIC_H
 
-#include <math.h>
-#include <stdint.h>
+#include <algorithm> // for std::max
 #include <cmath>
-#include <ctime>
-#include <cstdlib>
 #include <climits>
-#include <map>
+#include <cstdlib>
 #include <limits>
 #include <numeric>
-#include <set>
 #include <vector>
 
 #include <boost/range/numeric.hpp>
@@ -312,6 +308,10 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 template<typename Float>
 Float bound(Float x, Float l, Float u)
 {
+// undef min and max, because some of the C header files define
+// these as ordinary macros, which is NOT what we want.
+#undef max
+#undef min
     return std::max(l, std::min(u, x));
 }
     

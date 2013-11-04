@@ -21,21 +21,22 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
-#include "DimEmbedModule.h"
 #include <algorithm>
-#include <opencog/util/Logger.h>
-#include <numeric>
 #include <cmath>
-#include <opencog/guile/SchemePrimitive.h>
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/util/exceptions.h>
 #include <limits>
+#include <numeric>
 #include <string>
+#include <utility>
+
+#include <opencog/atomspace/ClassServer.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/guile/SchemePrimitive.h>
+#include <opencog/util/exceptions.h>
+#include <opencog/util/Logger.h>
 extern "C" {
 #include <opencog/util/cluster.h>
 }
-#include <opencog/atomspace/SimpleTruthValue.h>
+#include "DimEmbedModule.h"
 
 using namespace opencog;
 
@@ -352,7 +353,7 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
     //two elements will have distance greater than numDimensions.
     if (symmetric) {
         CoverTree<CoverTreePoint>& cTree =
-            embedTreeMap.insert(make_pair(linkType,CoverTree<CoverTreePoint>(numDimensions+.1))).first->second;
+            embedTreeMap.insert(std::make_pair(linkType,CoverTree<CoverTreePoint>(numDimensions+.1))).first->second;
         AtomEmbedding& aE = atomMaps[linkType];
         AtomEmbedding::const_iterator it = aE.begin();
         for (;it!=aE.end();++it) {
@@ -360,8 +361,8 @@ void DimEmbedModule::embedAtomSpace(Type linkType,
         }
     } else {
         std::pair<CoverTree<CoverTreePoint>, CoverTree<CoverTreePoint> >& cTrees
-            = asymEmbedTreeMap.insert(make_pair(linkType,
-                                            make_pair(CoverTree<CoverTreePoint>(numDimensions+.1), CoverTree<CoverTreePoint>(numDimensions+.1)))).first->second;
+            = asymEmbedTreeMap.insert(std::make_pair(linkType,
+                                            std::make_pair(CoverTree<CoverTreePoint>(numDimensions+.1), CoverTree<CoverTreePoint>(numDimensions+.1)))).first->second;
         std::pair<AtomEmbedding, AtomEmbedding>& aE = asymAtomMaps[linkType];
         const AtomEmbedding& aE1 = aE.first;
         AtomEmbedding::const_iterator it = aE1.begin();
@@ -792,11 +793,11 @@ void DimEmbedModule::addKMeansClusters(Type l, int maxClusters,
     const AtomEmbedding& aE = atomMaps[l];
     if (kPasses==-1) kPasses = (std::log(aE.size())/std::log(2))-1;
 
-    typedef std::pair<double,std::pair<HandleSeq,vector<double> > > cPair;
-    typedef std::multimap<double,std::pair<HandleSeq,vector<double> > >
+    typedef std::pair<double,std::pair<HandleSeq,std::vector<double> > > cPair;
+    typedef std::multimap<double,std::pair<HandleSeq,std::vector<double> > >
         pQueue_t;
     pQueue_t clusters;
-    //make a Priority Queue of (HandleSeq,vector<double>) pairs, where
+    //make a Priority Queue of (HandleSeq,std::vector<double>) pairs, where
     //we can easily extract those with the lowest value to discard if we
     //exceed maxClusters.
     int k = aE.size()/2;

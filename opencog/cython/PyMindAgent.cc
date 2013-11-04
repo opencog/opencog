@@ -58,7 +58,7 @@ PyMindAgent::~PyMindAgent()
 
 void PyMindAgent::run()
 {
-    string result = run_agent(pyagent, &_cogserver.getAtomSpace());
+    std::string result = run_agent(pyagent, &_cogserver.getAtomSpace());
     // errors only with result is not empty... && duplicate errors are not reported.
     if (result.size() > 0 && result != last_result) {
         // Any string returned is a traceback

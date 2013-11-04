@@ -25,9 +25,10 @@
 #ifndef _OPENCOG_DIM_EMBED_MODULE_H
 #define _OPENCOG_DIM_EMBED_MODULE_H
 
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>

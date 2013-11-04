@@ -569,7 +569,7 @@ throw(opencog::NotFoundException)
     seq.push_back(listLinkHandle);
 
     HandleSeq evalLinkHandleset;
-    atomSpace.getHandleSet(back_inserter(evalLinkHandleset),
+    atomSpace.getHandlesByOutgoing(back_inserter(evalLinkHandleset),
                            seq, NULL, NULL, 2, EVALUATION_LINK, false);
 
 
@@ -1976,7 +1976,7 @@ std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace,
         objectName[1] = object;
         Type types[] = { WORD_NODE, atomSpace.getType( object ) };
         HandleSeq wrLinks;
-        atomSpace.getHandleSet( back_inserter(wrLinks), objectName,
+        atomSpace.getHandlesByOutgoing( back_inserter(wrLinks), objectName,
                                 &types[0], NULL, 2, WR_LINK, false );
         if ( wrLinks.size( ) > 0 ) {
             name = atomSpace.getName( atomSpace.getOutgoing( wrLinks[0], 0 ) );
@@ -1997,7 +1997,7 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
         outgoing.push_back(objNameHandle);
         outgoing.push_back(Handle::UNDEFINED);
         HandleSeq wrLinks;
-        atomSpace.getHandleSet(back_inserter(wrLinks), outgoing,
+        atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
                                NULL, NULL, 2, WR_LINK, false);
         if (!wrLinks.empty()) {
             objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
@@ -2022,7 +2022,7 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
             outgoing.push_back(objNameHandle);
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
-            atomSpace.getHandleSet(back_inserter(wrLinks), outgoing,
+            atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
                                    NULL, NULL, 2, WR_LINK, false);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
@@ -2049,7 +2049,7 @@ std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
             outgoing.push_back(objNameHandle);
             outgoing.push_back(Handle::UNDEFINED);
             HandleSeq wrLinks;
-            atomSpace.getHandleSet(back_inserter(wrLinks), outgoing,
+            atomSpace.getHandlesByOutgoing(back_inserter(wrLinks), outgoing,
                                    NULL, NULL, 2, WR_LINK, false);
             if (!wrLinks.empty()) {
                 objIdHandle = atomSpace.getOutgoing(wrLinks[0], 1);
@@ -3439,7 +3439,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
 
     Type inheritanceLinkTypes[] = { PREDICATE_NODE, DEFINED_FRAME_NODE };
     HandleSeq inheritanceLinks;
-    atomSpace.getHandleSet( back_inserter( inheritanceLinks ),
+    atomSpace.getHandlesByOutgoing( back_inserter( inheritanceLinks ),
                             inheritanceLink,
                             &inheritanceLinkTypes[0], NULL, 2, INHERITANCE_LINK, false );        
 
@@ -3500,7 +3500,7 @@ std::map<std::string, Handle> AtomSpaceUtil::getFrameElementInstanceNameValues( 
         elementValue.push_back( Handle::UNDEFINED );
         
         HandleSeq evaluationLinks;
-        atomSpace.getHandleSet( back_inserter( evaluationLinks ),
+        atomSpace.getHandlesByOutgoing( back_inserter( evaluationLinks ),
                                 elementValue, NULL, NULL, 2, EVALUATION_LINK, false );
 
         // store (frame element name, frame element instance value) pair
@@ -3543,7 +3543,7 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
     evalLink.push_back( aElementValue );
     HandleSeq evalLinks;
     Type evalLinkTypes[] = {PREDICATE_NODE, atomSpace.getType( aElementValue ) };
-    atomSpace.getHandleSet( back_inserter( evalLinks ),
+    atomSpace.getHandlesByOutgoing( back_inserter( evalLinks ),
                             evalLink,
                             &evalLinkTypes[0], NULL, 2, EVALUATION_LINK, false );
 
@@ -3569,7 +3569,7 @@ HandleSeq AtomSpaceUtil::retrieveFrameInstancesUsingAnElementValue( AtomSpace& a
                 
                 HandleSeq frameElementLinks;
                 Type frameElementLinkTypes[] = { PREDICATE_NODE, PREDICATE_NODE };
-                atomSpace.getHandleSet( back_inserter( frameElementLinks ),
+                atomSpace.getHandlesByOutgoing( back_inserter( frameElementLinks ),
                                         frameElementLink,
                                         &frameElementLinkTypes[0], NULL, 2,
                                         FRAME_ELEMENT_LINK, false );

@@ -199,8 +199,9 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
         atTimeLinkOutgoing[1] = h;
-        HandleSeq atTimeLinks = atomspace->atomSpaceAsync->getHandlesByOutgoingSet(atTimeLinkOutgoing,
-                NULL, NULL, 2, AT_TIME_LINK, false)->get_result();
+        HandleSeq atTimeLinks;
+        atomspace->getHandlesByOutgoing(back_inserter(atTimeLinks), atTimeLinkOutgoing,
+                NULL, NULL, 2, AT_TIME_LINK, false);
         if (!atTimeLinks.empty()) {
             result = atTimeLinks[0];
             if (atTimeLinks.size() > 1) {

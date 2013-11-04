@@ -84,7 +84,7 @@ float HopfieldServer::totalEnergy()
             outgoing.push_back(hGrid[j]);
             
             HandleSeq ret;
-            a.getHandleSet(back_inserter(ret), outgoing, NULL,
+            a.getHandlesByOutgoing(back_inserter(ret), outgoing, NULL,
                            NULL, 2, HEBBIAN_LINK, true);
             // If no links then skip
             if (ret.size() == 0) { continue; }
@@ -434,7 +434,7 @@ void HopfieldServer::addRandomLinks()
 
         outgoing.push_back(hGrid[source]);
         outgoing.push_back(hGrid[target]);
-        atomSpace.getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         // try links going the other way (because some Hebbian links are
         // ordered)
         if (selected.size() == 0) {
@@ -442,7 +442,7 @@ void HopfieldServer::addRandomLinks()
             outgoing.push_back(hGrid[target]);
             outgoing.push_back(hGrid[source]);
             // try links going the other way (because some Hebbian links are
-            atomSpace.getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+            atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         }
         if (selected.size() > 0) {
             //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, atomSpace.atomAsString(he->handle).c_str());
