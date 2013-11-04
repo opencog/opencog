@@ -36,7 +36,7 @@ ImportanceDecayAgent::ImportanceDecayAgent(CogServer& cs) : Agent(cs)
 {
     lastTickTime = 0;
     AtomSpace& as = _cogserver.getAtomSpace();
-    mergedAtomConnection = as.atomSpaceAsync->AVChangedSignal(
+    mergedAtomConnection = as.AVChangedSignal(
             boost::bind(&ImportanceDecayAgent::atomMerged, this, _1, _2, _3));
 }
 

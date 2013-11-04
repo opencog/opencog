@@ -139,7 +139,7 @@ cdef class AtomSpace:
     #cdef cTimeServer *timeserver
     #cdef bint owns_atomspace
 
-    # TODO how do we do a copy constructor that shares the AtomSpaceAsync?
+    # TODO how do we do a copy constructor that shares the AtomSpaceImpl?
     def __cinit__(self):
         self.owns_atomspace = False
 
@@ -349,8 +349,6 @@ cdef class AtomSpace:
         return self.atomspace.atomAsString(deref(h.h),terse).c_str()
 
     # query methods
-    # @todo it would be better if we got AtomSpaceAsync request objects directly
-    # to avoid excessive copying
     def get_atoms_by_type(self, Type t, subtype = True):
         cdef vector[cHandle] o_vect
         cdef bint subt = subtype

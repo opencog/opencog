@@ -23,34 +23,14 @@
 
 #include "AtomSpace.h"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <list>
-#include <time.h>
-#include <cstdlib>
-
 #include <stdlib.h>
+#include <string>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/oc_assert.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
 
-using std::string;
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::min;
-using std::max;
 using namespace opencog;
 
 // ====================================================================
@@ -58,28 +38,28 @@ using namespace opencog;
 
 AtomSpace::AtomSpace(void)
 {
-    atomSpaceAsync = new AtomSpaceAsync();
-    ownsAtomSpaceAsync = true;
+    _atomSpaceImpl = new AtomSpaceImpl();
+    _ownsAtomSpaceImpl = true;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
-    this->atomSpaceAsync = other.atomSpaceAsync;
-    ownsAtomSpaceAsync = false;
+    _atomSpaceImpl = other._atomSpaceImpl;
+    _ownsAtomSpaceImpl = false;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
-AtomSpace::AtomSpace(AtomSpaceAsync& a)
+AtomSpace::AtomSpace(AtomSpaceImpl* a)
 {
-    atomSpaceAsync = &a;
-    ownsAtomSpaceAsync = false;
+    _atomSpaceImpl = a;
+    _ownsAtomSpaceImpl = false;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
@@ -87,8 +67,8 @@ AtomSpace::~AtomSpace()
 {
     c_add.disconnect();
     // Will be unnecessary once GC is implemented
-    if (ownsAtomSpaceAsync)
-        delete atomSpaceAsync;
+    if (_ownsAtomSpaceImpl)
+        delete _atomSpaceImpl;
 }
 
 bool AtomSpace::handleAddSignal(Handle h)
@@ -104,7 +84,7 @@ AtomSpace& AtomSpace::operator=(const AtomSpace& other)
             "AtomSpace - Cannot copy an object of this class");
 }
 
-Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tvn)
+Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix, TruthValuePtr tvn)
 {
     static const char alphanum[] =
         "0123456789"
@@ -113,7 +93,7 @@ Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tv
     static unsigned long int cnt = 0;
     srand(++cnt);
     static const int len = 16;
-    string name;
+    std::string name;
     Handle result;
     //Keep trying new random suffixes until you generate a new name
     do {

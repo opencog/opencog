@@ -91,17 +91,10 @@ cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
 
 
 # AtomSpace
-# The best way would be to access the Async methods directly, but the request
-# objects would take a while to wrap from cython
-#cdef extern from "opencog/atomspace/AtomSpaceAsync.h" namespace "opencog":
-#    cdef cppclass cAtomSpaceAsync "opencog::AtomSpaceAsync":
-#        vector[cHandle] getHandlesByType(Type t, bint subclass, VersionHandle)
 
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
-
-        #cAtomSpaceAsync atomSpaceAsync
 
         cHandle addNode(Type t, string s) except +
         cHandle addNode(Type t, string s, tv_ptr tvn) except +

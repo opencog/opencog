@@ -282,9 +282,6 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         if (i % diff == 0) cerr << "." << flush;
     }
     Handle rh = getRandomHandle();
-    // This spurious line is to ensure the AtomSpaceAsyc queue is empty
-    // if (not testKind == BENCH_TABLE)
-    //    asp->atomSpaceAsync->getTVComplete(rh)->get_result();
     gettimeofday(&tim, NULL);
     double t2=tim.tv_sec+(tim.tv_usec/1000000.0);
     printf("\n%.6lf seconds elapsed (%.2f per second)\n", t2-t1, 1.0f/((t2-t1)/Nreps));
@@ -343,7 +340,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #else
             asp = new AtomSpace();
 #endif
-            Handle::set_resolver(&asp->atomSpaceAsync->getAtomTable());
+            Handle::set_resolver(&asp->getAtomTable());
 #if HAVE_GUILE
             scm = &SchemeEval::instance(asp);
 #endif
@@ -715,9 +712,6 @@ timepair_t AtomSpaceBenchmark::bm_getTruthValue()
     }
     case BENCH_AS: {
         t_begin = clock();
-        // uncomment this line to test submitting async requests
-        //asp->atomSpaceAsync->getTVComplete(h); 
-        // then comment the one below
         asp->getTV(h);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
