@@ -826,7 +826,7 @@ timepair_t AtomSpaceBenchmark::bm_getNodeHandles()
     }
     case BENCH_AS: {
         t_begin = clock();
-        asp->getHandleSet(back_inserter(results),NODE,oss.str().c_str(),true);
+        asp->getHandlesByName(back_inserter(results), oss.str(), NODE, true);
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
@@ -863,7 +863,7 @@ timepair_t AtomSpaceBenchmark::bm_getHandleSet()
     case BENCH_AS: {
         HandleSeq results;
         clock_t t_begin = clock();
-        asp->getHandleSet(back_inserter(results), t, true);
+        asp->getHandlesByType(back_inserter(results), t, true);
         clock_t time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }}
