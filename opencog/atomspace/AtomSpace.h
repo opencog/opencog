@@ -534,9 +534,19 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
-                 Type type,
+    getHandlesByName(OutputIterator result,
                  const std::string& name,
+                 Type type = ATOM,
+                 bool subclass = true) const
+    {
+        return getAtomTable().getHandlesByName(result, name, type, subclass);
+    }
+
+    /** Same as above, but a little slower because it does a VH check. */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByNameVH(OutputIterator result,
+                 const std::string& name,
+                 Type type = ATOM,
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {

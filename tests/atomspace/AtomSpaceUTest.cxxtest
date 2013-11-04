@@ -343,7 +343,7 @@ public:
             VersionHandle vh = VHs[vhIdx];
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
-                atomSpace->getHandleSet(back_inserter(nodes), NODE, nodeNames[i], true, vh);
+                atomSpace->getHandlesByNameVH(back_inserter(nodes), nodeNames[i], NODE, true, vh);
                 bool mustMatch = (vhIdx == 0 || (i % 4 == vhIdx));
                 TS_ASSERT_EQUALS(nodes.size(), (mustMatch ? 1 : 0));
                 for (int j = 0; j < NUM_NODES; j++) {
@@ -359,30 +359,30 @@ public:
 
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
-            atomSpace->getHandleSet(back_inserter(links), LINK, "", true, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(links), "", LINK, true, vh);
             logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
             TS_ASSERT(links.size() == (vhIdx == 0 ? 8 : 2));
             links.clear();
-            atomSpace->getHandleSet(back_inserter(links), LINK, "", false, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(links), "", LINK, false, vh);
             //logger().debug("2) links.size() = %d\n", links.size());
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
-            atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, "", true, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(allInhLinks), "", INHERITANCE_LINK, true, vh);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
-            atomSpace->getHandleSet(back_inserter(justInhLinks), INHERITANCE_LINK, "", false, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(justInhLinks), "", INHERITANCE_LINK, false, vh);
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == (vhIdx == 0 ? 4 : 1));
             HandleSeq partOfLinks;
-            atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, "", true, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true, vh);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
             partOfLinks.clear();
-            atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, "", false, vh);
+            atomSpace->getHandlesByNameVH(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false, vh);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
         }
@@ -514,7 +514,7 @@ public:
 
         // test fetching all unnamed nodes
         HandleSeq allUnnamed;
-        atomSpace->getHandleSet(back_inserter(allUnnamed), NODE, "", true);
+        atomSpace->getHandlesByName(back_inserter(allUnnamed), "", NODE, true);
         printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
         TS_ASSERT(allUnnamed.size() == 2);
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());

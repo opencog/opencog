@@ -95,10 +95,10 @@ bool ListRequest::execute()
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
-        as.getHandleSet
-            (std::back_inserter(_handles), type, name.c_str(), subtypes);
+        as.getHandlesByName
+            (std::back_inserter(_handles), name.c_str(), type, subtypes);
     } else if (name != "") {     // filter by name
-        as.getHandleSet(std::back_inserter(_handles), ATOM, name.c_str(), true);
+        as.getHandlesByName(std::back_inserter(_handles), name.c_str(), ATOM, true);
     } else if (type != NOTYPE) { // filter by type
         as.getHandlesByType(std::back_inserter(_handles), type, subtypes);
     } else {

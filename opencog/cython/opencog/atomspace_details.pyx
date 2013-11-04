@@ -361,7 +361,7 @@ cdef class AtomSpace:
         py_byte_string = name.encode('UTF-8')
         cdef string *cname = new string(py_byte_string)
         cdef bint subt = subtype
-        self.atomspace.getHandleSet(back_inserter(o_vect),t,deref(cname),subt)
+        self.atomspace.getHandlesByName(back_inserter(o_vect), deref(cname), t, subt)
         del cname
         return convert_handle_seq_to_python_list(o_vect,self)
 

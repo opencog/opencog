@@ -572,6 +572,7 @@ public:
         return std::copy(hs.begin(), hs.end(), result);
     }
 
+    /** Same as above, but a little slower, because it does a VH check. */
     template <typename OutputIterator> OutputIterator
     getHandlesByNameVH(OutputIterator result,
                        const std::string& name,
