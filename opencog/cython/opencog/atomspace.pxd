@@ -103,14 +103,14 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         #cAtomSpaceAsync atomSpaceAsync
 
-        cHandle addNode(Type t, string s)
-        cHandle addNode(Type t, string s, tv_ptr tvn)
+        cHandle addNode(Type t, string s) except +
+        cHandle addNode(Type t, string s, tv_ptr tvn) except +
 
-        cHandle addPrefixedNode(Type t, string s)
-        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn)
+        cHandle addPrefixedNode(Type t, string s) except +
+        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn) except +
 
-        cHandle addLink(Type t, vector[cHandle])
-        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn)
+        cHandle addLink(Type t, vector[cHandle]) except +
+        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +
 
         cHandle getHandle(Type t, string s)
         cHandle getHandle(Type t, vector[cHandle])

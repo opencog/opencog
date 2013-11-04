@@ -64,6 +64,28 @@ void HandleEntry2HandleSeq(HandleEntry& src, HandleSeq& dest)
     dest = src.toHandleVector();
 }
 
+void setSTI(Handle h, AttentionValue::sti_t stiValue)
+{
+    /* Make a copy */
+    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        stiValue,
+        old_av->getLTI(),
+        old_av->getVLTI());
+    h->setAttentionValue(new_av);
+}
+
+
+void setLTI(Handle h, AttentionValue::lti_t ltiValue)
+{
+    AttentionValuePtr old_av = h->getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        ltiValue,
+        old_av->getVLTI());
+    h->setAttentionValue(new_av);
+}
+
 HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
 {
     char buf[256];
@@ -79,16 +101,16 @@ HandleSeq createSimpleGraph(AtomSpaceImpl* atomSpace, const char* baseName)
     TruthValuePtr tv3 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
-    atomSpace->setSTI(h1, AV1_STI);
-    atomSpace->setLTI(h1, AV1_LTI);
+    setSTI(h1, AV1_STI);
+    setLTI(h1, AV1_LTI);
     buf[baseNameLength] = '2';
     Handle h2 = atomSpace->addNode(CONCEPT_NODE, buf, tv2);
-    atomSpace->setSTI(h2, AV2_STI);
-    atomSpace->setLTI(h2, AV2_LTI);
+    setSTI(h2, AV2_STI);
+    setLTI(h2, AV2_LTI);
     buf[baseNameLength] = '3';
     Handle h3 = atomSpace->addNode(CONCEPT_NODE, buf, tv3);
-    atomSpace->setSTI(h3, AV3_STI);
-    atomSpace->setLTI(h3, AV3_LTI);
+    setSTI(h3, AV3_STI);
+    setLTI(h3, AV3_LTI);
 
     HandleSeq outgoing1;
     outgoing1.push_back(h2);
@@ -283,8 +305,8 @@ public:
         }
         //logger().debug("Primary and versioned TVS checked\n");
 
-        TS_ASSERT(atomSpace->Nodes() == (NUM_NODES + NUM_VH_NODES));
-        TS_ASSERT(atomSpace->Links() == 8);
+        TS_ASSERT(atomSpace->getNodeCount() == (NUM_NODES + NUM_VH_NODES));
+        TS_ASSERT(atomSpace->getLinkCount() == 8);
 
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
@@ -293,10 +315,10 @@ public:
             HandleSeq high_mean = atomSpace->filter(&m, VHs[vhIdx]);
 
             HandleSeq nodes;
-            atomSpace->getHandleSet(back_inserter(nodes), NODE, true, VHs[vhIdx]);
+            atomSpace->getHandlesByTypeVH(back_inserter(nodes), NODE, true, VHs[vhIdx]);
 
             HandleSeq links;
-            atomSpace->getHandleSet(back_inserter(links), LINK, true, VHs[vhIdx]);
+            atomSpace->getHandlesByTypeVH(back_inserter(links), LINK, true, VHs[vhIdx]);
 
             HandleSeq all;
             everything e;
@@ -370,7 +392,7 @@ public:
             VersionHandle vh = VHs[vhIdx];
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
-                atomSpace->getHandleSet(back_inserter(nodes), nodeNames[i], NODE, true, vh);
+                atomSpace->getHandlesByNameVH(back_inserter(nodes), nodeNames[i], NODE, true, vh);
                 bool mustMatch = (vhIdx == 0 || (i % 4 == vhIdx));
                 TS_ASSERT_EQUALS(nodes.size(), (mustMatch ? 1 : 0));
                 for (int j = 0; j < NUM_NODES; j++) {
@@ -386,30 +408,30 @@ public:
 
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
-            atomSpace->getHandleSet(back_inserter(links), LINK, true, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(links), LINK, true, vh);
             logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
             TS_ASSERT(links.size() == (vhIdx == 0 ? 8 : 2));
             links.clear();
-            atomSpace->getHandleSet(back_inserter(links), LINK, false, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(links), LINK, false, vh);
             //logger().debug("2) links.size() = %d\n", links.size());
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
-            atomSpace->getHandleSet(back_inserter(allInhLinks), INHERITANCE_LINK, true, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(allInhLinks), INHERITANCE_LINK, true, vh);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
-            atomSpace->getHandleSet(back_inserter(justInhLinks), INHERITANCE_LINK, false, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(justInhLinks), INHERITANCE_LINK, false, vh);
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == (vhIdx == 0 ? 4 : 1));
             HandleSeq partOfLinks;
-            atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, true, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, true, vh);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
             partOfLinks.clear();
-            atomSpace->getHandleSet(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, false, vh);
+            atomSpace->getHandlesByTypeVH(back_inserter(partOfLinks), SCHEMA_EXECUTION_LINK, false, vh);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
         }
@@ -476,13 +498,13 @@ public:
                               );
 
         HandleSeq links;
-        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
-        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 2);
         delete tr;
@@ -573,7 +595,7 @@ public:
 
         // test fetching all unnamed nodes
         HandleSeq allUnnamed;
-        atomSpace->getHandleSet(back_inserter(allUnnamed), NODE, "", true);
+        atomSpace->getHandlesByName(back_inserter(allUnnamed), NODE, "", true);
         printf("\nallUnnamed.size() == %zu\n", allUnnamed.size());
         TS_ASSERT(allUnnamed.size() == 2);
         TS_ASSERT(find(allUnnamed.begin(), allUnnamed.end(), h5) != allUnnamed.end());
@@ -772,7 +794,7 @@ public:
 
         HandleSeq highSTI;
         AtomSpaceImpl::STIAboveThreshold stiAbove(1000);
-        atomSpace->getHandleSetFiltered(back_inserter(highSTI), NODE, true, &stiAbove);
+        atomSpace->atomTable.getHandlesByTypePredVH(back_inserter(highSTI), NODE, true, &stiAbove);
         for (unsigned int i = 0; i < highSTI.size(); i++) {
             TS_ASSERT(stiAbove (highSTI[i]) );
         }
@@ -783,7 +805,7 @@ public:
         
         HandleSeq highLTI;
         AtomSpaceImpl::LTIAboveThreshold ltiAbove(800);
-        atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &ltiAbove);
+        atomSpace->atomTable.getHandlesByTypePredVH(back_inserter(highLTI), NODE, true, &ltiAbove);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
             TS_ASSERT(ltiAbove (highLTI[i]) );
         }
@@ -864,13 +886,13 @@ public:
     void testGetNormalisedSTI() {
         Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
         bool clip = false, average = false;
-        TS_ASSERT_EQUALS(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
+        TS_ASSERT_EQUALS(atomSpace->getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 0.0f);
         average = true;
-        atomSpace->setSTI(h,10);
+        setSTI(h,10);
         atomSpace->getAttentionBank().updateMaxSTI(10);
-        TS_ASSERT(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
+        TS_ASSERT(atomSpace->getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip) > 1.0f);
         clip = true;
-        TS_ASSERT_DELTA(atomSpace->getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
+        TS_ASSERT_DELTA(atomSpace->getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip), 1.0f, 0.001f);
     }
 
 };

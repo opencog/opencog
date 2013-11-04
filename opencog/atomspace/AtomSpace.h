@@ -85,7 +85,6 @@ class AtomSpace
      */
     AtomSpace& operator=(const AtomSpace&);
 public:
-    void do_merge_tv(Handle, TruthValuePtr);
 
     /** 
      * The AtomSpace class is essentially just be a wrapper of the asynchronous
@@ -106,48 +105,22 @@ public:
     AtomSpace(const AtomSpace&);
     ~AtomSpace();
 
-    /**
-     * Recursively store the atom to the backing store.
-     * I.e. if the atom is a link, then store all of the atoms
-     * in its outgoing set as well, recursively.
-     * @deprecated Use AtomSpaceAsync::storeAtom in new code.
-     */
-    inline void storeAtom(Handle h) {
-        atomSpaceAsync->storeAtom(h)->get_result();
-    }
-
-    /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
-     * @deprecated Use AtomSpaceAsync::fetchAtom in new code.
-     */
-    inline Handle fetchAtom(Handle h) {
-        return atomSpaceAsync->fetchAtom(h)->get_result();
-    }
-
-    /**
-     * Use the backing store to load the entire incoming set of the atom.
-     * If the flag is true, then the load is done recursively. 
-     * This method queries the backing store to obtain all atoms that 
-     * contain this one in their outgoing sets. All of these atoms are
-     * then loaded into this AtomSpace's AtomTable.
-     * @deprecated Use AtomSpaceAsync::fetchIncomingSet in new code.
-     */
-    inline Handle fetchIncomingSet(Handle h, bool recursive) {
-        return atomSpaceAsync->fetchIncomingSet(h,recursive)->get_result();
-    };
-
     inline AttentionBank& getAttentionBank()
     { return atomSpaceAsync->getAttentionBank(); }
+
+    inline const AttentionBank& getAttentionBankconst() const
+    { return atomSpaceAsync->getAttentionBankconst(); }
+
+    inline AtomSpaceImpl& getImpl()
+    { return atomSpaceAsync->getImpl(); }
+
+    inline const AtomSpaceImpl& getImplconst() const
+    { return atomSpaceAsync->getImplconst(); }
 
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return atomSpaceAsync->getSize()->get_result(); }
+    inline int getSize() const { return getImplconst().getSize(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -158,7 +131,9 @@ public:
      *              only atoms of the exact type.
      */
     void print(std::ostream& output = std::cout,
-               Type type = ATOM, bool subclass = true) const;
+               Type type = ATOM, bool subclass = true) const {
+        getImplconst().print(output, type, subclass);
+    }
 
     /** Add a new node to the Atom Table,
      * if the atom already exists then the old and the new truth value is merged
@@ -169,7 +144,7 @@ public:
      */
     inline Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
-        return atomSpaceAsync->addNode(t, name, tvn)->get_result();
+        return getImpl().addNode(t, name, tvn);
     }
 
     /**
@@ -194,7 +169,7 @@ public:
     inline Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     { 
-        return atomSpaceAsync->addLink(t,outgoing,tvn)->get_result();
+        return getImpl().addLink(t,outgoing,tvn);
     }
 
     inline Handle addLink(Type t, Handle h,
@@ -324,7 +299,7 @@ public:
      *         removed. False, otherwise.
      */
     bool removeAtom(Handle h, bool recursive = true) {
-        return atomSpaceAsync->removeAtom(h,recursive)->get_result();
+        return getImpl().removeAtom(h, recursive);
     }
 
     /**
@@ -334,7 +309,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return atomSpaceAsync->getHandle(t,str)->get_result();
+        return getImplconst().getHandle(t, str);
     }
 
     /**
@@ -344,7 +319,7 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return atomSpaceAsync->getHandle(t,outgoing)->get_result();
+        return getImplconst().getHandle(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
@@ -362,24 +337,41 @@ public:
     }
 
     /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        atomSpaceAsync->setSTI(h, stiValue)->get_result();
+    void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
+        /* Make a copy */
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
     }
 
     /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        atomSpaceAsync->setLTI(h, ltiValue)->get_result();
+    void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        h->setAttentionValue(new_av);
+    }
+
+    /** Change the Very-Long-Term Importance of a given Handle */
+    void chgVLTI(Handle h, int unit) const {
+        AttentionValuePtr old_av = h->getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            old_av->getLTI(),
+            old_av->getVLTI() + unit);
+        h->setAttentionValue(new_av);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
-    void incVLTI(Handle h) {
-        atomSpaceAsync->incVLTI(h)->get_result();
-    }
+    void incVLTI(Handle h) { chgVLTI(h, +1); }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
-    void decVLTI(Handle h) {
-        atomSpaceAsync->decVLTI(h)->get_result();
-    }
+    void decVLTI(Handle h) {chgVLTI(h, -1); }
     
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
@@ -432,7 +424,9 @@ public:
     }
 
     /** Change the AttentionValue of a given Handle */
-    void setAV(Handle, AttentionValuePtr);
+    void setAV(Handle h, AttentionValuePtr av) const {
+        h->setAttentionValue(av);
+    }
 
     /** Retrieve the type of a given Handle */
     Type getType(Handle h) const {
@@ -440,13 +434,23 @@ public:
     }
 
     /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;
+    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const 
+    {
+        return getImplconst().getTV(h, vh);
+    }
 
-    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
-    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const;  
+    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return getTV(h, vh)->getMean();
+    }
+
+    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return getTV(h, vh)->getConfidence();
+    }
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle, TruthValuePtr, VersionHandle vh = NULL_VERSION_HANDLE);
+    void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
+        getImpl().setTV(h, tv, vh);
+    }
 
     /** Change the primary TV's mean of a given Handle
      * @note By Joel: this makes no sense to me, how can you generally set a mean
@@ -454,7 +458,7 @@ public:
      * enforce the use of setTV.
      */
     void setMean(Handle h, float mean) {
-        atomSpaceAsync->setMean(h, mean)->get_result();
+        getImpl().setMean(h, mean);
     }
 
     /**
@@ -487,7 +491,7 @@ public:
      * @return normalised STI between -1..1
      */
     float getNormalisedSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync->getNormalisedSTI(h, average, clip, false)->get_result();
+        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /** Retrieve the linearly normalised Short-Term Importance between 0..1
@@ -501,7 +505,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return atomSpaceAsync->getNormalisedSTI(h, average, clip, true)->get_result();
+        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
@@ -516,13 +520,14 @@ public:
      * @param subClasses Follow subtypes of linkType too.
      */
     HandleSeq getNeighbors(const Handle& h, bool fanin, bool fanout,
-            Type linkType=LINK, bool subClasses=true) const {
-        return atomSpaceAsync->getNeighbors(h,fanin,fanout,linkType,subClasses)->get_result();
+            Type linkType=LINK, bool subClasses=true) const
+    {
+        return getImplconst().getNeighbors(h, fanin, fanout, linkType, subClasses);
     }
 
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle h) {
-        return atomSpaceAsync->getIncoming(h)->get_result();
+        return getImpl().getIncoming(h);
     }
 
     /** Convenience functions... */
@@ -556,10 +561,9 @@ public:
                  Type type,
                  const std::string& name,
                  bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
-                std::string(name), type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -588,10 +592,9 @@ public:
                  const char* name,
                  Type type,
                  bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByName(
-                name, type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -617,9 +620,9 @@ public:
     getHandleSet(OutputIterator result,
                  Type type,
                  bool subclass = false,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByType(type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByTypeVH(result, type, subclass, vh);
     }
 
     /**
@@ -652,10 +655,10 @@ public:
                  bool subclass,
                  bool targetSubclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTarget(type, targetType,
-                subclass, targetSubclass, vh, targetVh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getHandlesByTargetTypeVH(result,
+               type, targetType, subclass, targetSubclass, vh, targetVh);
     }
 
     /**
@@ -686,10 +689,9 @@ public:
                  Handle handle,
                  Type type,
                  bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetHandle(handle,
-                type, subclass, vh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
     }
 
     /**
@@ -774,10 +776,10 @@ public:
                  Type type,
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const {
-        HandleSeq result_set = atomSpaceAsync->getHandlesByTargetName(
-               targetName, targetType, type, subclass, vh, targetVh)->get_result();
-        return std::copy(result_set.begin(), result_set.end(), result);
+                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+    {
+        return getImplconst().getIncomingSetByNameVH(result,
+               targetName, targetType, type, subclass, vh, targetVh);
     }
 
     /**
@@ -904,7 +906,6 @@ public:
     {
         STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
         return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
-
     }
 
     /**
@@ -969,7 +970,8 @@ public:
                  Type type,
                  bool subclass,
                  Compare compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const {
+                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    {
         HandleSeq result_set = atomSpaceAsync->getSortedHandleSet(
                 type, subclass, compare, vh)->get_result();
         return std::copy(result_set.begin(), result_set.end(), result);
@@ -1018,7 +1020,8 @@ public:
      * @deprecated ECAN should be used, but this method is still used by
      * embodiment.
      */
-    void decayShortTermImportance();
+    void decayShortTermImportance() {
+        getImpl().decayShortTermImportance(); }
 
     /** Get attentional focus boundary
      * Generally atoms below this threshold shouldn't be accessed unless search
@@ -1026,7 +1029,9 @@ public:
      *
      * @return Short Term Importance threshold value
      */
-    AttentionValue::sti_t getAttentionalFocusBoundary() const;
+    AttentionValue::sti_t getAttentionalFocusBoundary() const {
+        return getAttentionBankconst().getAttentionalFocusBoundary();
+    }
 
     /** Change the attentional focus boundary.
      * Some situations may benefit from less focussed searches.
@@ -1035,15 +1040,17 @@ public:
      * @return Short Term Importance threshold value
      */
     AttentionValue::sti_t setAttentionalFocusBoundary(
-        AttentionValue::sti_t s);
+        AttentionValue::sti_t s) {
+        return getAttentionBank().setAttentionalFocusBoundary(s);
+    }
 
     /** Get the maximum STI observed in the AtomSpace.
      * @param average If true, return an exponentially decaying average of
      * maximum STI, otherwise return the actual maximum.
      * @return Maximum STI
      */
-    AttentionValue::sti_t getMaxSTI(bool average=true)
-    { return getAttentionBank().getMaxSTI(average); } 
+    AttentionValue::sti_t getMaxSTI(bool average=true) const
+    { return getAttentionBankconst().getMaxSTI(average); } 
 
     /** Get the minimum STI observed in the AtomSpace.
      *
@@ -1051,8 +1058,8 @@ public:
      * minimum STI, otherwise return the actual maximum.
      * @return Minimum STI
      */
-    AttentionValue::sti_t getMinSTI(bool average=true)
-    { return getAttentionBank().getMinSTI(average); } 
+    AttentionValue::sti_t getMinSTI(bool average=true) const
+    { return getAttentionBankconst().getMinSTI(average); } 
 
     /** Update the minimum STI observed in the AtomSpace.
      * Min/max are not updated on setSTI because average is calculate by lobe
@@ -1073,11 +1080,14 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
-    int Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
-    int Links(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return getImplconst().getNodeCount(vh); }
+
+    size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        return getImplconst().getLinkCount(vh); }
 
     //! Clear the atomspace, remove all atoms
-    void clear();
+    void clear() { getImpl().clear(); }
 
 // ---- filter templates
 

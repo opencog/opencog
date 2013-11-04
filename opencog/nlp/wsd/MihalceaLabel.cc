@@ -152,7 +152,7 @@ bool MihalceaLabel::have_sense(Handle h)
 
 bool MihalceaLabel::pull_pos(Handle sense_h)
 {
-	atom_space->fetchIncomingSet(sense_h, false);
+	atom_space->getImpl().fetchIncomingSet(sense_h, false);
 	return false;
 }
 
@@ -175,7 +175,7 @@ void MihalceaLabel::fetch_senses(Handle lemma_h)
    if (rc) return;
 
 	// If we are here, we need to pull senses from the database.
-	atom_space->fetchIncomingSet(lemma_h, false);
+	atom_space->getImpl().fetchIncomingSet(lemma_h, false);
 
 	// Also pull the POS tags.
 	foreach_binary_link(lemma_h, WORD_SENSE_LINK, &MihalceaLabel::pull_pos, this);

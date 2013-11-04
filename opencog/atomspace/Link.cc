@@ -48,7 +48,7 @@ void Link::init(const std::vector<Handle>& outgoingVector)
 {
     if (not classserver().isA(_type, LINK)) {
         throw InvalidParamException(TRACE_INFO,
-            "Link - Invalid node type '%d' %s.",
+            "Link ctor: Atom type is not a Link: '%d' %s.",
             _type, classserver().getTypeName(_type).c_str());
     }
 

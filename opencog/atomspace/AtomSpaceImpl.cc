@@ -376,101 +376,34 @@ void AtomSpaceImpl::setMean(Handle h, float mean) throw (InvalidParamException)
     setTV(h, newTv);
 }
 
-float AtomSpaceImpl::getNormalisedSTI(AttentionValuePtr av, bool average, bool clip) const
-{
-    // get normalizer (maxSTI - attention boundary)
-    int normaliser;
-    float val;
-    AttentionValue::sti_t s = av->getSTI();
-    if (s > bank.getAttentionalFocusBoundary()) {
-        normaliser = (int) bank.getMaxSTI(average) - bank.getAttentionalFocusBoundary();
-        if (normaliser == 0) {
-            return 0.0f;
-        }
-        val = (s - bank.getAttentionalFocusBoundary()) / (float) normaliser;
-    } else {
-        normaliser = -((int) bank.getMinSTI(average) + bank.getAttentionalFocusBoundary());
-        if (normaliser == 0) {
-            return 0.0f;
-        }
-        val = (s + bank.getAttentionalFocusBoundary()) / (float) normaliser;
-    }
-    if (clip) {
-        return max(-1.0f,min(val,1.0f));
-    } else {
-        return val;
-    }
-}
-
-float AtomSpaceImpl::getNormalisedZeroToOneSTI(AttentionValuePtr av, bool average, bool clip) const
-{
-    int normaliser;
-    float val;
-    AttentionValue::sti_t s = av->getSTI();
-    normaliser = bank.getMaxSTI(average) - bank.getMinSTI(average);
-    if (normaliser == 0) {
-        return 0.0f;
-    }
-    val = (s - bank.getMinSTI(average)) / (float) normaliser;
-    if (clip) {
-        return max(0.0f,min(val,1.0f));
-    } else {
-        return val;
-    }
-}
-
-size_t AtomSpaceImpl::Nodes(VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::Nodes Atom space address: %p\n", this);
-
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    // It would be cheaper if instead we just used foreachHandleByTypeVH
-    // and just had a function that simply counts!!
-    HandleSeq hs;
-    atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
-    return hs.size();
-}
-
-
-size_t AtomSpaceImpl::Links(VersionHandle vh) const
-{
-    DPRINTF("AtomSpaceImpl::Links Atom space address: %p\n", this);
-
-    // The following implementation is still expensive, but already deals with VersionHandles:
-    // It would be cheaper if instead we just used foreachHandleByTypeVH
-    // and just had a function that simply counts!!
-    HandleSeq hs;
-    atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
-    return hs.size();
-}
-
-
 void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
 
-    getHandleSet(back_inserter(allAtoms), ATOM, true);
+    getHandlesByType(back_inserter(allAtoms), ATOM, true);
 
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
-    DPRINTF("atoms in allAtoms: %lu\n",allAtoms.size());
+    DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
     Logger::Level save = logger().getLevel();
     logger().setLevel(Logger::DEBUG);
 
+    // XXX FIXME TODO This is a stunningly inefficient way to clear the
+    // atomspace! This will take minutes on any decent-sized atomspace!
     size_t j = 0;
     std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
         bool result = removeAtom(*i, true);
         if (result) {
             DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
-                j,i->value(),Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
+                j, i->value(), Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
             j++;
         }
     }
 
     allAtoms.clear();
-    getHandleSet(back_inserter(allAtoms), ATOM, true);
+    getHandlesByType(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);

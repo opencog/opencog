@@ -41,13 +41,13 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/recent_val.h>
 
+class AtomSpaceImplUTest;
+
 namespace opencog
 {
 /** \addtogroup grp_atomspace
  *  @{
  */
-
-class AtomSpaceImpl;
 
 /** 
  * \warning The AtomSpaceImpl class contains methods that are only to be called by
@@ -57,12 +57,14 @@ class AtomSpaceImpl
 {
     friend class SavingLoading;
     friend class SaveRequest;
+    friend class ::AtomSpaceImplUTest;
 
 public:
     AtomSpaceImpl(void);
     ~AtomSpaceImpl();
 
     AttentionBank& getAttentionBank() {return bank; }
+    const AttentionBank& getAttentionBankconst() const {return bank; }
 
     /**
      * Register a provider of backing storage.
@@ -251,99 +253,6 @@ public:
     /** Change the primary TV's mean of a given Handle */
     void setMean(Handle, float mean) throw (InvalidParamException);
 
-    /** Retrieve the doubly normalised Short-Term Importance between -1..1
-     * for a given AttentionValue. STI above and below threshold
-     * normalised separately and linearly.
-     *
-     * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to -1..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between -1..1
-     */
-    float getNormalisedSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the linearly normalised Short-Term Importance between 0..1
-     * for a given AttentionValue.
-     *
-     * @param h The attention value holder to get STI for
-     * @param average Should the recent average max/min STI be used, or the
-     * exact min/max?
-     * @param clip Should the returned value be clipped to 0..1? Outside this
-     * range can be return if average=true
-     * @return normalised STI between 0..1
-     */
-    float getNormalisedZeroToOneSTI(AttentionValuePtr avh, bool average=true, bool clip=false) const;
-
-    /** Retrieve the AttentionValue of a given Handle */
-    AttentionValuePtr getAV(Handle h) const {
-        return h->getAttentionValue();
-    }
-
-    /** Change the AttentionValue of a given Handle */
-    void setAV(Handle h, AttentionValuePtr av) {
-        h->setAttentionValue(av);
-    }
-
-    /** Change the Short-Term Importance of a given Handle */
-    void setSTI(Handle h, AttentionValue::sti_t stiValue) {
-        /* Make a copy */
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            stiValue,
-            old_av->getLTI(),
-            old_av->getVLTI());
-        h->setAttentionValue(new_av);
-    }
-
-    /** Change the Long-term Importance of a given Handle */
-    void setLTI(Handle h, AttentionValue::lti_t ltiValue) {
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            ltiValue,
-            old_av->getVLTI());
-        h->setAttentionValue(new_av);
-    }
-
-    /** Increase the Very-Long-Term Importance of a given Handle by 1 */
-    void incVLTI(Handle h) {
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            old_av->getLTI(),
-            old_av->getVLTI() + 1);
-        h->setAttentionValue(new_av);
-    }
-
-    /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
-    void decVLTI(Handle h) {
-        AttentionValuePtr old_av = h->getAttentionValue();
-        //we only want to decrement the vlti if it's not already disposable.
-        if (old_av->getVLTI() == AttentionValue::DISPOSABLE) return;
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            old_av->getLTI(),
-            old_av->getVLTI() - 1);
-        h->setAttentionValue(new_av);
-    }
-
-    /** Retrieve the Short-Term Importance of a given Handle */
-    AttentionValue::sti_t getSTI(Handle h) const {
-        return h->getAttentionValue()->getSTI();
-    }
-
-    /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(Handle h) const {
-        return h->getAttentionValue()->getLTI();
-    }
-
-    /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(Handle h) const {
-        return h->getAttentionValue()->getVLTI();
-    }
-
     bool isValidHandle(Handle h) const {
         return atomTable.holds(h);
     }
@@ -385,7 +294,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByName(OutputIterator result,
                  Type type,
                  const std::string& name,
                  bool subclass = true) const
@@ -395,7 +304,7 @@ public:
 
     /** Same as above, but includes check for VH */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByNameVH(OutputIterator result,
                  const std::string& name,
                  Type type,
                  bool subclass,
@@ -427,16 +336,16 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByType(OutputIterator result,
                  Type type,
                  bool subclass = false) const 
     {
         return atomTable.getHandlesByType(result, type, subclass);
     }
 
-    /* Same as above */
+    /* Same as above, but slower due to VH. */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTypeVH(OutputIterator result,
                  Type type,
                  bool subclass,
                  VersionHandle vh) const
@@ -473,7 +382,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getHandlesByTargetTypeVH(OutputIterator result,
                  Type type,
                  Type targetType,
                  bool subclass,
@@ -508,7 +417,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByTypeVH(OutputIterator result,
                  Handle handle,
                  Type type,
                  bool subclass,
@@ -593,7 +502,7 @@ public:
      * @endcode
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByName(OutputIterator result,
                  const std::string& targetName,
                  Type targetType,
                  Type type,
@@ -604,7 +513,7 @@ public:
     }
 
     template <typename OutputIterator> OutputIterator
-    getHandleSet(OutputIterator result,
+    getIncomingSetByNameVH(OutputIterator result,
                  const std::string& targetName,
                  Type targetType,
                  Type type,
@@ -738,41 +647,8 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         //return getHandleSet(result, type, subclass, InAttentionalFocus(), vh);
-        STIAboveThreshold s = STIAboveThreshold(bank.getAttentionalFocusBoundary());
-        return getHandleSetFiltered(result, type, subclass, &s, vh);
-
-    }
-
-    /**
-     * Gets a set of handles that matches with the given type
-     * (subclasses optionally) and a given criterion.
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param compare A criterion for including atoms. It must be something that returns a bool when called.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note  The matched entries are appended to a container whose
-     *        OutputIterator is passed as the first argument.  Example
-     *        of call to this method, which would return all entries in
-     *        AtomSpace beyond 500 LTI:
-     * @code
-     *        std::list<Handle> ret;
-     *        atomSpaceImpl.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSetFiltered(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 AtomPredicate* pred,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        return atomTable.getHandlesByTypePredVH(result, type, subclass, pred, vh);
+        STIAboveThreshold s(bank.getAttentionalFocusBoundary());
+        return atomTable.getHandlesByTypePredVH(result, type, subclass, &s, vh);
     }
 
     /**
@@ -808,7 +684,7 @@ public:
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
-        getHandleSet(back_inserter(hs), type, subclass, vh);
+        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
         sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(&atomTable, compare));
 
         // copy the vector and return the iterator.
@@ -852,7 +728,7 @@ public:
         std::list<Handle> handle_set;
         // The intended signatue is
         // getHandleSet(OutputIterator result, Type type, bool subclass)
-        getHandleSet(back_inserter(handle_set), atype, subclass);
+        getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
         std::list<Handle>::iterator i;
@@ -881,8 +757,18 @@ public:
      */
     void decayShortTermImportance() { atomTable.decayShortTermImportance(); }
 
-    size_t Nodes(VersionHandle = NULL_VERSION_HANDLE) const;
-    size_t Links(VersionHandle = NULL_VERSION_HANDLE) const;
+    size_t getNodeCount(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        atomTable.getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+        return hs.size();
+    }
+    size_t getLinkCount(VersionHandle vh = NULL_VERSION_HANDLE) const {
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        atomTable.getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+        return hs.size();
+    }
 
     bool containsVersionedTV(Handle h, VersionHandle vh) const
         { return atomTable.containsVersionedTV(h, vh); }

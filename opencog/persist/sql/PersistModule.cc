@@ -191,7 +191,7 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 Handle PersistModule::fetch_atom(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
-	h = as->fetchAtom(h);
+	h = as->getImpl().fetchAtom(h);
 	return h;
 }
 
@@ -199,7 +199,7 @@ Handle PersistModule::fetch_incoming_set(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
 	// The "true" flag here means "fetch recursive".
-	h = as->fetchIncomingSet(h, true);
+	h = as->getImpl().fetchIncomingSet(h, true);
 	return h;
 }
 
@@ -209,7 +209,7 @@ Handle PersistModule::fetch_incoming_set(Handle h)
 Handle PersistModule::store_atom(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
-	as->storeAtom(h);
+	as->getImpl().storeAtom(h);
 	return h;
 }
 
