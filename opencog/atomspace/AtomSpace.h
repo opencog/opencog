@@ -117,10 +117,13 @@ public:
     inline const AtomSpaceImpl& getImplconst() const
     { return atomSpaceAsync->getImplconst(); }
 
+    inline const AtomTable& getAtomTable() const
+    { return getImplconst().getAtomTable(); }
+
     /**
      * Return the number of atoms contained in the space.
      */
-    inline int getSize() const { return getImplconst().getSize(); }
+    inline int getSize() const { return getAtomTable().getSize(); }
 
     /**
      * Prints atoms of this AtomSpace to the given output stream.
@@ -132,7 +135,7 @@ public:
      */
     void print(std::ostream& output = std::cout,
                Type type = ATOM, bool subclass = true) const {
-        getImplconst().print(output, type, subclass);
+        getAtomTable().print(output, type, subclass);
     }
 
     /** Add a new node to the Atom Table,
@@ -309,7 +312,7 @@ public:
      * @param str   Name of the node
     */
     Handle getHandle(Type t, const std::string& str) const {
-        return getImplconst().getHandle(t, str);
+        return getAtomTable().getHandle(t, str);
     }
 
     /**
@@ -319,7 +322,7 @@ public:
      *        the outgoing set of the link.
     */
     Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getImplconst().getHandle(t, outgoing);
+        return getAtomTable().getHandle(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
@@ -561,7 +564,7 @@ public:
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
+        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -592,7 +595,7 @@ public:
                  bool subclass = true,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByNameVH(result, name, type, subclass, vh);
+        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
     }
 
     /**
@@ -620,7 +623,7 @@ public:
                  bool subclass = false,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByTypeVH(result, type, subclass, vh);
+        return getAtomTable().getHandlesByTypeVH(result, type, subclass, vh);
     }
 
     /**
@@ -655,7 +658,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getHandlesByTargetTypeVH(result,
+        return getAtomTable().getHandlesByTargetTypeVH(result,
                type, targetType, subclass, targetSubclass, vh, targetVh);
     }
 
@@ -689,7 +692,7 @@ public:
                  bool subclass,
                  VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
+        return getAtomTable().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
     }
 
     /**
@@ -776,7 +779,7 @@ public:
                  VersionHandle vh = NULL_VERSION_HANDLE,
                  VersionHandle targetVh = NULL_VERSION_HANDLE) const
     {
-        return getImplconst().getIncomingSetByNameVH(result,
+        return getAtomTable().getIncomingSetByNameVH(result,
                targetName, targetType, type, subclass, vh, targetVh);
     }
 
@@ -1079,10 +1082,18 @@ public:
     void updateMaxSTI(AttentionValue::sti_t m) { getAttentionBank().updateMaxSTI(m); }
 
     size_t Nodes(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getImplconst().getNodeCount(vh); }
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), NODE, true, vh);
+        return hs.size();
+    }
 
     size_t Links(VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getImplconst().getLinkCount(vh); }
+        // XXX FIXME TODO: the following is horridly inefficient,
+        HandleSeq hs;
+        getAtomTable().getHandlesByTypeVH(back_inserter(hs), LINK, true, vh);
+        return hs.size();
+    }
 
     //! Clear the atomspace, remove all atoms
     void clear() { getImpl().clear(); }

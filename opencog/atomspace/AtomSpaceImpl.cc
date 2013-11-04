@@ -85,43 +85,44 @@ void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 
 void AtomSpaceImpl::atomAdded(Handle h)
 {
-    DPRINTF("AtomSpaceImpl::atomAdded(%lu): %s\n", h.value(), h->toShortString().c_str());
-    Type type = getType(h);
-    if (type == CONTEXT_LINK) {
-        // Add corresponding VersionedTV to the contextualized atom
-        // Note that when a VersionedTV is added to a
-        // CompositeTruthValue it will not automatically add a
-        // corresponding ContextLink
-        if (getArity(h) == 2) {
-            Handle cx = getOutgoing(h, 0); // context
-            Handle ca = getOutgoing(h, 1); // contextualized atom
-            ca->setTV(h->getTV(), VersionHandle(CONTEXTUAL, cx));
-        } else logger().warn("AtomSpaceImpl::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", getArity(h));
-    }
+    if (h->getType() != CONTEXT_LINK) return;
+
+    LinkPtr lll(LinkCast(h));
+    // Add corresponding VersionedTV to the contextualized atom
+    // Note that when a VersionedTV is added to a
+    // CompositeTruthValue it will not automatically add a
+    // corresponding ContextLink
+    if (lll->getArity() == 2) {
+        Handle cx = lll->getOutgoingAtom(0); // context
+        Handle ca = lll->getOutgoingAtom(1); // contextualized atom
+        ca->setTV(lll->getTV(), VersionHandle(CONTEXTUAL, cx));
+    } else
+        throw RuntimeException(TRACE_INFO,
+            "AtomSpaceImpl::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", 
+        lll->getArity());
 }
 
 void AtomSpaceImpl::atomRemoved(AtomPtr atom)
 {
-    Type type = atom->getType();
-    if (type == CONTEXT_LINK) {
-        // Remove corresponding VersionedTV to the contextualized atom
-        // Note that when a VersionedTV is removed from a
-        // CompositeTruthValue it will not automatically remove the
-        // corresponding ContextLink
-        LinkPtr lll(LinkCast(atom));
-        OC_ASSERT(lll->getArity() == 2,
-            "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n",
-            lll->getArity());
-        Handle cx = lll->getOutgoingAtom(0); // context
-        Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-        TruthValuePtr tv = ca->getTV();
-        CompositeTruthValuePtr new_ctv(CompositeTruthValue::createCTV(tv));
-        new_ctv->removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
-        // @todo: one may want improve that code by converting back
-        // the CompositeTV into a simple or indefinite TV when it has
-        // no more VersionedTV
-        ca->setTV(new_ctv);
-    }
+    if (atom->getType() != CONTEXT_LINK) return;
+
+    // Remove corresponding VersionedTV to the contextualized atom
+    // Note that when a VersionedTV is removed from a
+    // CompositeTruthValue it will not automatically remove the
+    // corresponding ContextLink
+    LinkPtr lll(LinkCast(atom));
+    OC_ASSERT(lll->getArity() == 2,
+        "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n",
+        lll->getArity());
+    Handle cx = lll->getOutgoingAtom(0); // context
+    Handle ca = lll->getOutgoingAtom(1); // contextualized atom
+    TruthValuePtr tv = ca->getTV();
+    CompositeTruthValuePtr new_ctv(CompositeTruthValue::createCTV(tv));
+    new_ctv->removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
+    // @todo: one may want improve that code by converting back
+    // the CompositeTV into a simple or indefinite TV when it has
+    // no more VersionedTV
+    ca->setTV(new_ctv);
 }
 
 // ====================================================================
@@ -289,7 +290,7 @@ void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;
 
-    getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    getAtomTable().getHandlesByType(back_inserter(allAtoms), ATOM, true);
 
     DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
             Links(NULL_VERSION_HANDLE));
@@ -312,11 +313,11 @@ void AtomSpaceImpl::clear()
     }
 
     allAtoms.clear();
-    getHandlesByType(back_inserter(allAtoms), ATOM, true);
+    getAtomTable().getHandlesByType(back_inserter(allAtoms), ATOM, true);
     assert(allAtoms.size() == 0);
 
     logger().setLevel(save);
 }
 
-void AtomSpaceImpl::printGDB() const { print(); }
-void AtomSpaceImpl::printTypeGDB(Type t) const { print(std::cout,t,true); }
+void AtomSpaceImpl::printGDB() const { getAtomTable().print(); }
+void AtomSpaceImpl::printTypeGDB(Type t) const { getAtomTable().print(std::cout,t,true); }

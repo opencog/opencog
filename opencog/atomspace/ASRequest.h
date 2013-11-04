@@ -97,7 +97,8 @@ public:
 // -----------------
 // Search requests
 
-class FilterASR : public GenericASR<HandleSeq> {
+class FilterASR : public GenericASR<HandleSeq>
+{
     AtomPredicate* p;
     Type t;
     bool subclass;
@@ -110,17 +111,17 @@ public:
     virtual void do_work() {
         HandleSeq _result;
         HandleSeq hs;
-        atomspace->getHandlesByTypeVH(back_inserter(hs), t, subclass, vh);
+        atomspace->getAtomTable().getHandlesByTypeVH(back_inserter(hs), t, subclass, vh);
         foreach (Handle h, hs) {
             if ((*p)(h) && atomspace->containsVersionedTV(h, vh))
                 _result.push_back(h);
         }
         set_result(_result);
     }
-    
 };
 
-class GetHandlesByOutgoingSetASR : public GenericASR<HandleSeq> {
+class GetHandlesByOutgoingSetASR : public GenericASR<HandleSeq>
+{
     HandleSeq handles;
     Type* types;
     bool* subclasses;
@@ -134,7 +135,8 @@ public:
             const HandleSeq& _handles, Type* _types, bool* _subclasses,
              Arity _arity, Type _type, bool _subclass,
              VersionHandle _vh = NULL_VERSION_HANDLE) :
-            GenericASR<HandleSeq>(a) {
+            GenericASR<HandleSeq>(a)
+    {
         types = NULL; subclasses = NULL;
         handles = _handles;
         // This is nasty - having to malloc...
@@ -153,7 +155,8 @@ public:
         subclass = _subclass;
         vh = _vh;
     }
-    ~GetHandlesByOutgoingSetASR() {
+    ~GetHandlesByOutgoingSetASR()
+    {
         if (types) delete types;
         if (subclasses) delete subclasses;
     }
