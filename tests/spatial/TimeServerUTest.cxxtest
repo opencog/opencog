@@ -1671,7 +1671,7 @@ public:
         TS_ASSERT((NULL == timeNode));
         // Check if the AtTimeLink was removed from AtomTable
         HandleSeq atTimeLinks;
-        atomSpace.getHandleSet(back_inserter(atTimeLinks), AT_TIME_LINK, false);
+        atomSpace.getHandlesByType(back_inserter(atTimeLinks), AT_TIME_LINK, false);
         TS_ASSERT(atTimeLinks.empty());
         // Check if the pair(node1, T) was removed from TimeServer
         res.clear();

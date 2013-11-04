@@ -124,7 +124,7 @@ public:
 
     void setUp() {
 // Number of nodes added for setting version handles
-#define NUM_VH_NODES 3 
+#define NUM_VH_NODES 3
         atomSpace = new AtomSpace();
         VHs[0] = NULL_VERSION_HANDLE;
         VHs[1] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL1"));
@@ -250,8 +250,8 @@ public:
         }
         //logger().debug("Primary and versioned TVS checked\n");
 
-        TS_ASSERT(atomSpace->Nodes() == (NUM_NODES + NUM_VH_NODES));
-        TS_ASSERT(atomSpace->Links() == 8);
+        TS_ASSERT(atomSpace->getNumNodes() == (NUM_NODES + NUM_VH_NODES));
+        TS_ASSERT(atomSpace->getNumLinks() == 8);
 
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
@@ -266,15 +266,15 @@ public:
             //}
 
             HandleSeq nodes;
-            atomSpace->getHandleSet(back_inserter(nodes), NODE, true, VHs[vhIdx]);
+            atomSpace->getHandlesByTypeVH(back_inserter(nodes), NODE, true, VHs[vhIdx]);
 
             HandleSeq links;
-            atomSpace->getHandleSet(back_inserter(links), LINK, true, VHs[vhIdx]);
+            atomSpace->getHandlesByTypeVH(back_inserter(links), LINK, true, VHs[vhIdx]);
 
             HandleSeq all;
             everything e;
             atomSpace->filter(back_inserter(all), &e, VHs[vhIdx]);
-            
+
             HandleSeq AF_nodes = atomSpace->filter_InAttentionalFocus(nodes.begin(), nodes.end());
             HandleSeq AF_links = atomSpace->filter_InAttentionalFocus(links.begin(), links.end());
 
@@ -417,13 +417,13 @@ public:
                               );
 
         HandleSeq links;
-        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 0);
         Handle evalLink = addAtom(*atomSpace, *tr, TruthValue::DEFAULT_TV());
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         links.clear();
-        atomSpace->getHandleSet(back_inserter(links), LINK, true);
+        atomSpace->getHandlesByType(back_inserter(links), LINK, true);
         logger().debug("links.size() = %d\n", (int) links.size());
         TS_ASSERT(links.size() == 2);
         delete tr;
@@ -490,9 +490,9 @@ public:
         // test adding a node with no truth value
         Handle h4 = atomSpace->addNode(CONCEPT_NODE, "wood");
         TS_ASSERT(h4 != Handle::UNDEFINED);
-    
+
 #if 0
-// Currently disabled. 
+// Currently disabled.
 //
 // Here's the core idea: there is this "philosophy" that is attempting
 // to support anonymous nodes (i.e. nodes with no name) and the idea that
@@ -595,11 +595,12 @@ public:
      *         AttentionValue::STISort stiSort;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, stiSort);
      */
-    void testgetSortedHandleSet() {
+    void testgetSortedHandleSet()
+    {
         HandleSeq atoms;
         logger().debug("BEGIN TEST: getSortedHandleSet");
         atoms = createSimpleGraph(atomSpace, "stim_sortedHandleSet\0");
-        
+
         logger().debug("STISort");
 
         AttentionValue::STISort sSort;
@@ -613,7 +614,7 @@ public:
         }
 
         logger().debug("LTIAndTVAscendingSort");
-        
+
         AttentionValue::LTIAndTVAscendingSort latvSort;
         HandleSeq latvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(latvAtoms), ATOM, true, &latvSort);
@@ -623,9 +624,9 @@ public:
                 TS_ASSERT(latvSort(latvAtoms[i + 1], latvAtoms[i]) == false);
             }
         }
-        
+
         logger().debug("LTIThenTVAscendingSort");
-        
+
         AttentionValue::LTIThenTVAscendingSort lttvSort;
         HandleSeq lttvAtoms;
         atomSpace->getSortedHandleSet(back_inserter(lttvAtoms), ATOM, true, &lttvSort);
@@ -659,12 +660,13 @@ public:
      *         std::list<Handle> ret;
      *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true, LTIAboveThreshold(500));
      */
-    void testgetHandleSetFiltered() {
+    void testgetHandleSetFiltered()
+    {
         HandleSeq atoms;
         logger().debug("BEGIN TEST: getHandleSetFiltered");
-        
+
         atoms = createSimpleGraph(atomSpace, "hs_filt\0");
-        
+
         logger().debug("STIAboveThreshold");
 
         HandleSeq highSTI;
@@ -677,7 +679,7 @@ public:
         TS_ASSERT(highSTI[0] == atoms[0]);
 
         logger().debug("LTIAboveThreshold");
-        
+
         HandleSeq highLTI;
         AtomSpace::LTIAboveThreshold lti_above(800);
         atomSpace->getHandleSetFiltered(back_inserter(highLTI), NODE, true, &lti_above);
@@ -702,15 +704,15 @@ public:
     void testfilter() {
         HandleSeq atoms;
         logger().debug("BEGIN TEST: filter");
-        
+
         //atomSpace->getAtomTable().log(logger(), NODE, true);
         //atomSpace->getAtomTable().log(logger(), LINK, true);
-        
+
         atoms = createSimpleGraph(atomSpace, "filt\0");
 
         //atomSpace->getAtomTable().log(logger(), NODE, true);
         //atomSpace->getAtomTable().log(logger(), LINK, true);
-        
+
         logger().debug("STIAboveThreshold");
 
         AtomSpace::STIAboveThreshold sti_above(1000);
@@ -722,9 +724,9 @@ public:
         }
         TS_ASSERT(highSTI.size() == 1U);
         TS_ASSERT(highSTI[0] == atoms[0]);
-                
+
         logger().debug("LTIAboveThreshold");
-        
+
         AtomSpace::LTIAboveThreshold lti_above(800);
         HandleSeq highLTI = atomSpace->filter(atoms.begin(), atoms.end(), &lti_above);
         for (unsigned int i = 0; i < highLTI.size(); i++) {
@@ -748,13 +750,14 @@ public:
         TS_ASSERT_EQUALS(h1, h2);
     }
 
-    void testGetHandleSetByName() {
+    void testGetHandleSetByName()
+    {
         Handle h1 = atomSpace->addNode(PREDICATE_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
         Handle h2 = atomSpace->addNode(CONCEPT_NODE, "dog1", SimpleTruthValue::createTV(0.001f, 0.00001f));
         Handle h3 = atomSpace->addNode(NODE, "dog1", SimpleTruthValue::createTV(0.5f, 0.99f));
 
         HandleSeq namedAtoms;
-        atomSpace->getHandleSet(back_inserter(namedAtoms), NODE, true);
+        atomSpace->getHandlesByType(back_inserter(namedAtoms), NODE, true);
         TS_ASSERT_EQUALS(namedAtoms.size(), 3 + NUM_VH_NODES);
     }
 };

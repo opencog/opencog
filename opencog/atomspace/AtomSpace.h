@@ -941,13 +941,10 @@ public:
         HandleSeq hs;
         getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
 
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        // XXX Should use copy_if just like the others
-        return std::copy(fs.begin(), fs.end(), result);
+        return std::copy_if(hs.begin(), hs.end(), result,
+            [&](Handle h)->bool {
+                return (*compare)(h) and
+                    getAtomTable().containsVersionedTV(h, vh); } );
     }
 
     /**
@@ -1097,33 +1094,19 @@ public:
 
 // ---- filter templates
 
+    // @deprecated do not use in new code!
     HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
         HandleSeq hs;
-        getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
-
-        // XXX Should use copy_if just like the others
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        return fs;
+        getHandleSetFiltered(back_inserter(hs), ATOM, true, compare, vh);
+        return hs;
     }
 
+    // @deprecated do not use in new code!
     template<typename OutputIterator>
     OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
     {
-        HandleSeq hs;
-        getHandlesByTypeVH(back_inserter(hs), ATOM, true, vh);
-
-        HandleSeq fs;
-        foreach (Handle h, hs) {
-            if ((*compare)(h) && getAtomTable().containsVersionedTV(h, vh))
-                fs.push_back(h);
-        }
-        // XXX Should use copy_if just like the others
-        return std::copy(fs.begin(), fs.end(), result);
+        return getHandleSetFiltered(result, ATOM, true, compare, vh);
     }
 
     /**
@@ -1134,29 +1117,23 @@ public:
      * @param end iterator for the sequence
      * @param struct or function embodying the criterion
      * @return The handles in the sequence that match the criterion.
+     * @deprecated do not use in new code!
      */
     template<typename InputIterator>
     HandleSeq filter(InputIterator begin, InputIterator end, AtomPredicate* compare) const
     {
         HandleSeq result;
-        for (; begin != end; begin++) {
-            //std::cout << "evaluating atom " << atomAsString(*begin) << std::endl;
-            if ((*compare)(*begin)) {
-                //std::cout << "passed! " <<  std::endl;
-                result.push_back(*begin);
-            }
-        }
+        std::copy_if(begin, end, back_inserter(result),
+            [&](Handle h)->bool { return (*compare)(h); } ); 
         return result;
     }
 
     // XXX FIXME TODO -- don't use this, use std::copy_if
     template<typename InputIterator, typename OutputIterator>
-    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator it, AtomPredicate* compare) const
+    OutputIterator filter(InputIterator begin, InputIterator end, OutputIterator result, AtomPredicate* compare) const
     {
-        for (; begin != end; begin++)
-            if (compare(*begin))
-                * it++ = *begin;
-        return it;
+        return std::copy_if(begin, end, result,
+            [&](Handle h)->bool { return (*compare)(h); } ); 
     }
 
 // ---- custom filter templates
