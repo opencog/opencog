@@ -168,33 +168,6 @@ public:
     }
 
     /**
-     * Builds the target type index structure according to the types of
-     * elements in the outgoing set of the given atom.
-     *
-     * @param size gets the size of the returned array.
-     * @return A pointer to target types array built.
-     */
-    Type* buildTargetIndexTypes(int *size);
-
-    /**
-     * Returns the position of a certain type on the reduced array of
-     * target types of an atom.
-     *
-     * @param The type which will be searched in the reduced target types
-     * index array.
-     * @return The position of the given type in the reduced array of
-     * target types.
-     */
-    int locateTargetIndexTypes(Type) const;
-
-    /**
-     * Returns the number of different target types of an atom.
-     *
-     * @return The number of different target types of an atom.
-     */
-    int getTargetTypeIndexSize() const;
-
-    /**
      * Returns a string representation of the link.
      *
      * @return A string representation of the link.
