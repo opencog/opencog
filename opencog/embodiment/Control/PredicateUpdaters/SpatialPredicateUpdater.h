@@ -26,12 +26,15 @@
 #ifndef SPATIALPREDICATEUPDATER_H_
 #define SPATIALPREDICATEUPDATER_H_
 
-#include "BasicPredicateUpdater.h"
+#include <unordered_map>
+#include <vector>
+
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/spatial/3DSpaceMap/Octree3DMapManager.h>
 #include <opencog/spacetime/SpaceServer.h>
-#include <opencog/embodiment/Control/EmbodimentConfig.h>
-#include <vector>
+
+#include "BasicPredicateUpdater.h"
 
 namespace opencog { namespace oac {
 
@@ -104,7 +107,7 @@ private:
         private: 
 
             // key: entityA_id + entityB_id, value: vector of relations
-            boost::unordered_map <std::string, SPATIAL_RELATION_VECTOR> _entityRelationMap;
+            std::unordered_map <std::string, SPATIAL_RELATION_VECTOR> _entityRelationMap;
 
     }; // class SpatialRelationCache
 

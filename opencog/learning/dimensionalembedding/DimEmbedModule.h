@@ -25,9 +25,10 @@
 #ifndef _OPENCOG_DIM_EMBED_MODULE_H
 #define _OPENCOG_DIM_EMBED_MODULE_H
 
-#include <vector>
 #include <map>
 #include <string>
+#include <vector>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
@@ -107,8 +108,7 @@ namespace opencog
          * @return The embedding vector (a vector of doubles between 0 and 1)
          */
         std::vector<double> addNode(Handle h,
-                                    Type linkType,
-                                    AtomSpaceImpl* a);
+                                    Type linkType);
 
         /**
          * Removes the node from the AtomEmbedding and Cover Tree for linkType.
@@ -132,17 +132,17 @@ namespace opencog
          * @param h Handle of new link
          * @param linkType Type of link (which embedding to alter)
          */
-        void addLink(Handle h, Type linkType, AtomSpaceImpl* a);
+        void addLink(Handle h, Type linkType);
         /**
          * For adding symmetric links after the atomspace has been embedded. See
          * addLink.
          */
-        void symAddLink(Handle h, Type linkType, AtomSpaceImpl* a);
+        void symAddLink(Handle h, Type linkType);
         /**
          * For adding asymmetric links after the atomspace has been embedded.
          * See addLink.
          */
-        void asymAddLink(Handle h, Type linkType, AtomSpaceImpl* a);
+        void asymAddLink(Handle h, Type linkType);
     public:
         const char* id();
 
@@ -309,14 +309,14 @@ namespace opencog
          * still need to be periodically reembedded). Should be registered
          * with the atomspace via addAtomSignal
          */
-        void handleAddSignal(AtomSpaceImpl* a, Handle h);
+        void handleAddSignal(Handle h);
 
         /**
          * Removes the node from embedding & cover tree. Does not alter
          * the embedding vector of any nodes. Does nothing if removed
          * atom is a link.
          */
-        void atomRemoveSignal(AtomSpaceImpl* a, AtomPtr h);
+        void atomRemoveSignal(AtomPtr h);
     }; // class
 } //namespace
 

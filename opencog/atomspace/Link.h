@@ -27,7 +27,6 @@
 #include <string>
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/Trail.h>
 #ifdef ZMQ_EXPERIMENT
 #include "ProtocolBufferSerializer.h"
 #endif
@@ -53,15 +52,8 @@ typedef unsigned short Arity;
 class Link : public Atom
 {
     friend class AtomTable;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
 
 private:
-    Trail* trail;
-#ifdef ZMQ_EXPERIMENT
-    Link() {};
-#endif
     void init(const HandleSeq&) throw (InvalidParamException);
 
 protected:
@@ -81,15 +73,17 @@ public:
      *        stored in this Link.
      */
     Link(Type t, const HandleSeq& oset,
-         TruthValuePtr tv = TruthValue::NULL_TV())
-        : Atom(t, tv)
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+        : Atom(t, tv, av)
     {
         init(oset);
     }
 
     Link(Type t, Handle& h,
-         TruthValuePtr tv = TruthValue::NULL_TV())
-        : Atom(t, tv)
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+        : Atom(t, tv, av)
     {
         HandleSeq oset;
         oset.push_back(h);
@@ -97,8 +91,9 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb,
-         TruthValuePtr tv = TruthValue::NULL_TV())
-        : Atom(t, tv)
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+        : Atom(t, tv, av)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -107,8 +102,9 @@ public:
     }
 
     Link(Type t, Handle& ha, Handle &hb, Handle &hc,
-         TruthValuePtr tv = TruthValue::NULL_TV())
-        : Atom(t, tv)
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+        : Atom(t, tv, av)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -117,8 +113,9 @@ public:
         init(oset);
     }
     Link(Type t, Handle& ha, Handle &hb, Handle &hc, Handle &hd,
-         TruthValuePtr tv = TruthValue::NULL_TV())
-        : Atom(t, tv)
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
+        : Atom(t, tv, av)
     {
         HandleSeq oset;
         oset.push_back(ha);
@@ -171,47 +168,6 @@ public:
     }
 
     /**
-     * Builds the target type index structure according to the types of
-     * elements in the outgoing set of the given atom.
-     *
-     * @param size gets the size of the returned array.
-     * @return A pointer to target types array built.
-     */
-    Type* buildTargetIndexTypes(int *size);
-
-    /**
-     * Returns the position of a certain type on the reduced array of
-     * target types of an atom.
-     *
-     * @param The type which will be searched in the reduced target types
-     * index array.
-     * @return The position of the given type in the reduced array of
-     * target types.
-     */
-    int locateTargetIndexTypes(Type) const;
-
-    /**
-     * Returns the number of different target types of an atom.
-     *
-     * @return The number of different target types of an atom.
-     */
-    int getTargetTypeIndexSize() const;
-
-    /**
-     * Returns the trail of the link.
-     *
-     * @return Trail of the link.
-     */
-    Trail* getTrail();
-
-    /**
-     * Sets a trail for the link.
-     *
-     * @param Trail to be set.
-     */
-    void setTrail(Trail *);
-
-    /**
      * Returns a string representation of the link.
      *
      * @return A string representation of the link.
@@ -244,7 +200,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a source.
      */
-    bool isSource(int) throw (IndexErrorException, InvalidParamException);
+    bool isSource(size_t) throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given handle is a target of this link.
@@ -262,7 +218,7 @@ public:
      * @return Whether the element in a given position in the
      *         outgoing set of this link is a target.
      */
-    bool isTarget(int) throw (IndexErrorException, InvalidParamException);
+    bool isTarget(size_t) throw (IndexErrorException, InvalidParamException);
 
     /**
      * Returns whether a given atom is equal to the current link.

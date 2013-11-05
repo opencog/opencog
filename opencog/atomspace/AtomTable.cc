@@ -30,10 +30,8 @@
 #include <set>
 
 #include <stdlib.h>
-#include <pthread.h>
 #include <boost/bind.hpp>
 
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Intersect.h>
 #include <opencog/atomspace/Link.h>
@@ -54,10 +52,10 @@ AtomTable::AtomTable()
 {
     size = 0;
 
-    //connect signals
+    // connect signal to find out about type additions
     addedTypeConnection =
-        classserver().addTypeSignal().connect(boost::bind(&AtomTable::typeAdded,
-                    this, _1));
+        classserver().addTypeSignal().connect(
+            boost::bind(&AtomTable::typeAdded, this, _1));
 
     Handle::set_resolver(this);
 }
@@ -103,13 +101,13 @@ bool AtomTable::isCleared(void) const
 
 AtomTable& AtomTable::operator=(const AtomTable& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomTable - Cannot copy an object of this class");
 }
 
-AtomTable::AtomTable(const AtomTable& other) 
+AtomTable::AtomTable(const AtomTable& other)
 {
-    throw opencog::RuntimeException(TRACE_INFO, 
+    throw opencog::RuntimeException(TRACE_INFO,
             "AtomTable - Cannot copy an object of this class");
 }
 
@@ -147,7 +145,7 @@ Handle AtomTable::getHandle(LinkPtr l) const
 Handle AtomTable::getHandle(AtomPtr a) const
 {
     NodePtr nnn(NodeCast(a));
-    if (nnn) 
+    if (nnn)
          return getHandle(nnn);
     else {
         LinkPtr lll(LinkCast(a));
@@ -187,7 +185,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                                      VersionHandle vh) const
 {
     // Check if it is the special case of looking for an specific atom
-    if (classserver().isA(type, LINK) && 
+    if (classserver().isA(type, LINK) and
         (arity == 0 || !handles.empty()))
     {
         DPRINTF("special case arity=%d\n", arity);
@@ -214,9 +212,9 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
         getHandlesByType(inserter(uhs), type, subclass);
 
         UnorderedHandleSet result;
-        std::copy_if(uhs.begin(), uhs.end(), inserter(result), 
+        std::copy_if(uhs.begin(), uhs.end(), inserter(result),
             // result = HandleEntry::filterSet(result, arity);
-            [&](Handle h)->bool { 
+            [&](Handle h)->bool {
                 LinkPtr l(LinkCast(h));
                 // If a Node, then accept it.
                 if (NULL == l) return containsVersionedTV(h, vh);
@@ -314,11 +312,11 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     return set;
 }
 
-UnorderedHandleSet AtomTable::getHandlesByNames(const char** names, 
-                                     Type* types, 
-                                     bool* subclasses, 
-                                     Arity arity, 
-                                     Type type, 
+UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
+                                     Type* types,
+                                     bool* subclasses,
+                                     Arity arity,
+                                     Type type,
                                      bool subclass,
                                      VersionHandle vh)
     const throw (RuntimeException)
@@ -340,14 +338,14 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     // returned in the array types.
                     std::vector<Type> subTypes;
 
-                    classserver().getChildrenRecursive(types[i], 
+                    classserver().getChildrenRecursive(types[i],
                                            std::back_inserter(subTypes));
 
                     // For all subclasses found, a set is concatenated
                     // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
                         UnorderedHandleSet subSet;
-                        getIncomingSetByName(inserter(subSet), names[i], 
+                        getIncomingSetByName(inserter(subSet), names[i],
                                           subTypes[j], type, subclass);
                         sets[i].insert(subSet.begin(), subSet.end());
                     }
@@ -369,7 +367,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                 sets[i] = filt;
 
             } else {
-                throw RuntimeException(TRACE_INFO, 
+                throw RuntimeException(TRACE_INFO,
                     "Cannot make this search using only target name!\n");
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
@@ -419,24 +417,6 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
     return intersection(sets);
 }
 
-void AtomTable::merge(Handle h, TruthValuePtr tvn)
-{
-    if (NULL == h) return;
-
-    // Merge the TVs
-    if (tvn and not tvn->isNullTv()) {
-        TruthValuePtr currentTV = h->getTruthValue();
-        if (currentTV->isNullTv()) {
-            h->setTruthValue(tvn);
-        } else {
-            TruthValuePtr mergedTV = currentTV->merge(tvn);
-            h->setTruthValue(mergedTV);
-        }
-    }
-    // if (logger().isFineEnabled()) 
-    //    logger().fine("Atom merged: %d => %s", h.value(), h->toString().c_str());
-}
-
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
     if (atom->getAtomTable() != NULL) {
@@ -463,8 +443,8 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     Handle hexist = getHandle(atom);
     if (hexist) {
         DPRINTF("Merging existing Atom with the Atom being added ...\n");
-        merge(hexist, atom->getTruthValue());
-        // XXX TODO -- should merege attention value too, right ???
+        hexist->merge(atom->getTruthValue());
+        // XXX TODO -- should merge attention value too, right ???
         return hexist;
     }
 
@@ -533,19 +513,33 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 
     atom->setAtomTable(this);
 
-    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    // Now that we are completely done, emit the added signal.
+    _addAtomSignal(h);
 
-    return atom->getHandle();
+    DPRINTF("Atom added: %ld => %s\n", atom->_uuid, atom->toString().c_str());
+    return h;
 }
 
-int AtomTable::getSize() const
+size_t AtomTable::getSize() const
 {
     return size;
 }
 
+size_t AtomTable::getNumNodes() const
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    return nodeIndex.size();
+}
+
+size_t AtomTable::getNumLinks() const
+{
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    return linkIndex.size();
+}
+
 void AtomTable::log(Logger& logger, Type type, bool subclass) const
 {
-    foreachHandleByType( 
+    foreachHandleByType(
         [&](Handle h)->void {
             logger.debug("%d: %s", h.value(), h->toString().c_str());
         },
@@ -554,7 +548,7 @@ void AtomTable::log(Logger& logger, Type type, bool subclass) const
 
 void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
-    foreachHandleByType( 
+    foreachHandleByType(
         [&](Handle h)->void {
             output << h << ": " << h->toString() << std::endl;
         },
@@ -567,7 +561,11 @@ Handle AtomTable::getRandom(RandGen *rng) const
 
     Handle randy = Handle::UNDEFINED;
 
-    foreachHandleByType( 
+    // XXX TODO it would be considerably mor efficient to go into the
+    // the type index, and decrement x by the size of the index for
+    // each type.  This would speed up the algo by about 100 (by about
+    // the number of types that are in use...).
+    foreachHandleByType(
         [&](Handle h)->void {
             if (0 == x) randy = h;
             x--;
@@ -596,7 +594,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     if (recursive) {
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
-        // is removed.  
+        // is removed.
         UnorderedHandleSet is = getIncomingSet(handle);
 
         UnorderedHandleSet::const_iterator is_it;
@@ -627,7 +625,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         // throw RuntimeException(TRACE_INFO,
         //   "Cannot extract an atom with a non-trivial incoming set!");
 
-        // XXX well, I guess we could/should check to see if any atoms 
+        // XXX well, I guess we could/should check to see if any atoms
         // in the incoming set belong to this atomspace. Because if
         // none of them do, then it would be ok to extract...
         Logger::Level save = logger().getBackTraceLevel();
@@ -647,7 +645,13 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         return AtomPtrSet();
     }
 
-    // decrements the size of the table
+    // Issue the atom removal signal *BEFORE* the atom is actually
+    // removed.  This is needed so that certain subsystems, e.g. the
+    // Agent system activity table, can correctly manage the atom;
+    // it needs info that gets blanked out during removal.
+    _removeAtomSignal(atom);
+
+    // Decrements the size of the table
     size--;
 
     nodeIndex.removeAtom(atom);
@@ -658,18 +662,10 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
-    atom->atomTable = NULL;
+    atom->setAtomTable(NULL);
 
     result.insert(atom);
     return result;
-}
-
-bool AtomTable::decayed(Handle h)
-{
-    // XXX This should be an assert ... I think something is seriously
-    // wrong if the handle isn't being found!  XXX FIXME
-    if (NULL == h) return false;
-    return h->getFlag(REMOVED_BY_DECAY);
 }
 
 AtomPtrSet AtomTable::decayShortTermImportance()
@@ -687,6 +683,7 @@ AtomPtrSet AtomTable::decayShortTermImportance()
     return aps;
 }
 
+// This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);

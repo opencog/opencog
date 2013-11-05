@@ -30,6 +30,7 @@
 #include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/oc_assert.h>
 
 #include <opencog/server/CogServer.h>
 
@@ -198,8 +199,8 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         }
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (atomspace and singletonInstance->_atomspace->atomSpaceAsync !=
-             atomspace->atomSpaceAsync)
+    else if (atomspace and &singletonInstance->_atomspace->getImpl() !=
+             &atomspace->getImpl())
     {
         // Someone is trying to initialize the Python
         // interpreter
@@ -207,7 +208,7 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         // design
         // there is no easy way to support this...
         throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                               " python interpreter with different AtomSpaceAsync ptr!");
+                               " python interpreter with different AtomSpaceImpl ptr!");
     }
     return *singletonInstance;
 }

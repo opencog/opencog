@@ -39,10 +39,10 @@ void TulipWriter::writeNodes()
     AtomSpace& a = BaseServer::getAtomSpace();
 
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     // write nodes for links too (to represent hypergraph in Tulip)
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(linkHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output Node numbers/ids
     myfile << "(nodes ";
@@ -70,9 +70,9 @@ void TulipWriter::writeCluster(Handle setLink)
     AtomSpace& a = BaseServer::getAtomSpace();
 
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(linkHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output setLink as a cluster
     std::set<Handle> inSet;
@@ -118,9 +118,9 @@ void TulipWriter::writeEdges()
     AtomSpace& a = BaseServer::getAtomSpace();
 
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(linkHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output Edge numbers/ids, source, and target
     foreach (Handle l, linkHandles) {
@@ -139,9 +139,9 @@ void TulipWriter::writeNodeNames()
 
     // Including type of link nodes
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(linkHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(linkHandles), (Type) LINK, true );
 
     // Output node names
     myfile << "(property  0 string \"viewLabel\" " << endl;
@@ -173,7 +173,7 @@ void TulipWriter::writeTruthValue()
     AtomSpace& a = BaseServer::getAtomSpace();
 
     HandleSeq handles;
-    a.getHandleSet(back_inserter(handles), (Type) ATOM, true );
+    a.getHandlesByType(back_inserter(handles), (Type) ATOM, true );
 
     // Output strength component of truth value
     myfile << "(property  0 double \"strength\"" << endl;
@@ -184,9 +184,9 @@ void TulipWriter::writeTruthValue()
     myfile << ")" << endl;
 
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) LINK, true );
 
     // Output distance metric as 1/strength 
     myfile << "(property  0 double \"distance\"" << endl;
@@ -215,9 +215,9 @@ void TulipWriter::writeShapes()
     AtomSpace& a = BaseServer::getAtomSpace();
 
     HandleSeq nodeHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) NODE, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) NODE, true );
     HandleSeq linkHandles;
-    a.getHandleSet(back_inserter(nodeHandles), (Type) LINK, true );
+    a.getHandlesByType(back_inserter(nodeHandles), (Type) LINK, true );
 
     // Output strength component of truth value
     myfile << "(property  0 int \"viewShape\"" << endl;

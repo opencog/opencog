@@ -46,11 +46,9 @@
 #include <opencog/atomspace/PredicateIndex.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/RandGen.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/platform.h>
 
 class AtomTableUTest;
 
@@ -62,7 +60,10 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-class SavingLoading;
+typedef boost::signal<void (Handle)> AtomSignal;
+typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
+typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
+typedef boost::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -106,23 +107,29 @@ private:
 	//!@}
 	
     /**
-     * signal connection used to keep track of atom type addition in the
-     * ClassServer 
+     * signal connection used to find out about atom type additions in the
+     * ClassServer
      */
-    boost::signals::connection addedTypeConnection; 
+    boost::signals::connection addedTypeConnection;
 
-    /**
-     * Handler of the 'type added' signal from ClassServer
-     */
+    /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);
 
-    static bool decayed(Handle h);
+    /** Provided signals */
+    AtomSignal _addAtomSignal;
+    AtomPtrSignal _removeAtomSignal;
+
+    /** Signal emitted when the TV changes. */
+    TVCHSigl _TVChangedSignal;
+
+    /** Signal emitted when the AV changes. */
+    AVCHSigl _AVChangedSignal;
 
     // JUST FOR TESTS:
     bool isCleared() const;
 
     /**
-     * Overrides and declares copy constructor and equals operator as private 
+     * Overrides and declares copy constructor and equals operator as private
      * for avoiding large object copying by mistake.
      */
     AtomTable& operator=(const AtomTable&);
@@ -161,7 +168,9 @@ public:
     /**
      * Return the number of atoms contained in a table.
      */
-    int getSize() const;
+    size_t getSize() const;
+    size_t getNumNodes() const;
+    size_t getNumLinks() const;
 
     /**
      * Adds a new predicate index to this atom table given the Handle of
@@ -313,7 +322,7 @@ public:
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
-             [&](Handle h)->void { 
+             [&](Handle h)->void {
                   if (not isDefined(h)) return;
                   (func)(h);
              });
@@ -328,7 +337,7 @@ public:
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         std::for_each(typeIndex.begin(type, subclass),
                       typeIndex.end(),
-             [&](Handle h)->void { 
+             [&](Handle h)->void {
                   if (not isDefined(h)) return;
                   if (not containsVersionedTV(h, vh)) return;
                   (func)(h);
@@ -349,7 +358,7 @@ public:
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
-             [&](Handle h)->bool { 
+             [&](Handle h)->bool {
                   return isDefined(h)
                       and (*pred)(h)
                       and containsVersionedTV(h, vh);
@@ -398,20 +407,36 @@ public:
 
     /**
      * Return the incoming set associated with handle h.
+     * Note that this returns a copy of the incoming set,
+     * thus making it thread-safe against concurrent additions
+     * or deletions by other threads.
      */
-    const UnorderedHandleSet& getIncomingSet(Handle h) const
-        { return incomingIndex.getIncomingSet(h); }
+    UnorderedHandleSet getIncomingSet(Handle h) const
+    {
+#define LOCO 1
+#if LOCO
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        return incomingIndex.getIncomingSet(h);
+#else
+        UnorderedHandleSet uhs;
+        h->getIncomingSet(inserter(uhs));
+        return uhs;
+#endif
+    }
 
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result,
                    Handle h) const
     {
+#if LOCO
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy(incomingIndex.begin(h),
                          incomingIndex.end(),
                          result);
+#else
+        return h->getIncomingSet(result);
+#endif
     }
-
 
     /**
      * Returns the set of atoms with a given target handle in their
@@ -431,11 +456,17 @@ public:
                          Type type,
                          bool subclass = false) const
     {
+#if LOCO
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
                             result,
-             [&](Handle h)->bool{
+#else
+        // XXX TODO it would be more efficient to move this to Atom.h
+        UnorderedHandleSet uhs(getIncomingSet(h));
+        return std::copy_if(uhs.begin(), uhs.end(), result,
+#endif
+             [&](Handle h)->bool {
                      return isDefined(h)
                         and isType(h, type, subclass); });
     }
@@ -447,10 +478,16 @@ public:
                            bool subclass,
                            VersionHandle vh) const
     {
+#if LOCO
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
                             result,
+#else
+        // XXX TODO it would be more efficient to move this to Atom.h
+        UnorderedHandleSet uhs(getIncomingSet(h));
+        return std::copy_if(uhs.begin(), uhs.end(), result,
+#endif
              [&](Handle h)->bool{
                    return isDefined(h)
                       and isType(h, type, subclass)
@@ -557,6 +594,7 @@ public:
         return std::copy(hs.begin(), hs.end(), result);
     }
 
+    /** Same as above, but a little slower, because it does a VH check. */
     template <typename OutputIterator> OutputIterator
     getHandlesByNameVH(OutputIterator result,
                        const std::string& name,
@@ -662,18 +700,10 @@ public:
     }
 
     /**
-     * Merge the existing atom with the given handle with the given truth value.
-     * If the handle is valid, emits atom merged signal.
-     * @param h     Handle of the Atom to be merged
-     * @param tvn   TruthValue to be merged to current atom's truth value.  
-     */
-    void merge(Handle, TruthValuePtr);
-
-    /**
      * Adds an atom to the table, checking for duplicates and merging
      * when necessary. When an atom is added, the atom table takes over
      * the memory management for that atom. In other words, no other
-     * code should ever attempt to delete the pointer that is passed 
+     * code should ever attempt to delete the pointer that is passed
      * into this method.
      *
      * @param The new atom to be added.
@@ -685,7 +715,7 @@ public:
      * Return true if the atom table holds this handle, else return false.
      */
     bool holds(Handle h) const {
-        return (NULL != h) and h->getAtomTable() == this; 
+        return (NULL != h) and h->getAtomTable() == this;
     }
 
     /** Get Node object already in the AtomTable.
@@ -695,7 +725,7 @@ public:
      * associated with handle or if the atom is a link.
      */
     inline NodePtr getNode(Handle h) const {
-        h = getHandle(h);
+        h = getHandle(h); // force resolution of uuid into atom pointer.
         return NodeCast(h);
     }
 
@@ -706,13 +736,13 @@ public:
      * associated with handle or if the atom is a node.
      */
     inline LinkPtr getLink(Handle h) const {
-        h = getHandle(h);
+        h = getHandle(h); // force resolution of uuid into atom pointer.
         return LinkCast(h);
     }
 
     /**
      * Extracts atoms from the table. Table will not contain the
-     * extracted atoms anymore. 
+     * extracted atoms anymore.
      *
      * Note that if the recursive flag is set to false, and the atom
      * appears in the incoming set of some other atom, then extraction
@@ -731,6 +761,15 @@ public:
      * Return a random atom in the AtomTable.
      */
     Handle getRandom(RandGen* rng) const;
+
+    AtomSignal& addAtomSignal() { return _addAtomSignal; }
+    AtomPtrSignal& removeAtomSignal() { return _removeAtomSignal; }
+
+    /** Provide ability for others to find out about AV changes */
+    AVCHSigl& AVChangedSignal() { return _AVChangedSignal; }
+
+    /** Provide ability for others to find out about TV changes */
+    TVCHSigl& TVChangedSignal() { return _TVChangedSignal; }
 };
 
 /** @}*/

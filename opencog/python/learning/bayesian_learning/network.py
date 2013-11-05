@@ -1,6 +1,8 @@
-from utility.generic import subsets_of_len_two, subsets_of
+from learning.bayesian_learning.util import subsets_of
+from utility.generic import subsets_of_len_two
 
 __author__ = 'keyvan'
+
 
 class Link(list):
 

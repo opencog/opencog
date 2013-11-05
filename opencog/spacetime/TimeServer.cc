@@ -23,7 +23,7 @@
  */
 
 #include <opencog/util/Logger.h>
-#include <opencog/atomspace/AtomSpaceImpl.h>
+#include <opencog/util/oc_assert.h>
 #include <opencog/spacetime/atom_types.h>
 #include "TimeServer.h"
 
@@ -49,8 +49,8 @@ TimeServer::TimeServer(AtomSpace& a, SpaceServer *_ss)
     spaceServer->setTimeServer(this);
 
     // Connect signals
-    addedAtomConnection = a.atomSpaceAsync->addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1, _2));
-    removedAtomConnection = a.atomSpaceAsync->removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1, _2));
+    addedAtomConnection = a.addAtomSignal(boost::bind(&TimeServer::atomAdded, this, _1));
+    removedAtomConnection = a.removeAtomSignal(boost::bind(&TimeServer::atomRemoved, this, _1));
 }
 
 TimeServer::~TimeServer()
@@ -199,8 +199,9 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
         HandleSeq atTimeLinkOutgoing(2);
         atTimeLinkOutgoing[0] = timeNode;
         atTimeLinkOutgoing[1] = h;
-        HandleSeq atTimeLinks = atomspace->atomSpaceAsync->getHandlesByOutgoingSet(atTimeLinkOutgoing,
-                NULL, NULL, 2, AT_TIME_LINK, false)->get_result();
+        HandleSeq atTimeLinks;
+        atomspace->getHandlesByOutgoing(back_inserter(atTimeLinks), atTimeLinkOutgoing,
+                NULL, NULL, 2, AT_TIME_LINK, false);
         if (!atTimeLinks.empty()) {
             result = atTimeLinks[0];
             if (atTimeLinks.size() > 1) {
@@ -213,27 +214,29 @@ Handle TimeServer::getAtTimeLink(const HandleTemporalPair& htp) const
     return result;
 }
 
-void TimeServer::atomAdded(AtomSpaceImpl* a, Handle h)
+void TimeServer::atomAdded(Handle h)
 {
-    Type type = a->getType(h);
+    Type type = h->getType();
     if (type == AT_TIME_LINK) {
         // Add corresponding TimeServer entry
-        if (a->getArity(h) == 2) {
-            Handle timeNode = a->getOutgoing(h, 0);
-            if (a->getType(timeNode) == TIME_NODE) {
-                const string& timeNodeName = a->getName(timeNode);
+        LinkPtr lll = LinkCast(h);
+        if (lll->getArity() == 2) {
+            Handle timeNode = lll->getOutgoingAtom(0);
+            if (timeNode->getType() == TIME_NODE) {
+                NodePtr nnn = NodeCast(timeNode);
+                const string& timeNodeName = nnn->getName();
                 Temporal t = Temporal::getFromTimeNodeName(timeNodeName.c_str());
-                Handle timed_h = a->getOutgoing(h, 1);
+                Handle timed_h = lll->getOutgoingAtom(1);
                 add(timed_h, t);
             } else logger().warn("TimeServer::atomAdded: Invalid atom type "
                     "at the first element in an AtTimeLink's outgoing: "
-                    "%s\n", classserver().getTypeName(a->getType(timeNode)).c_str());
+                    "%s\n", classserver().getTypeName(timeNode->getType()).c_str());
         } else logger().warn("TimeServer::atomAdded: Invalid arity for an "
-                "AtTimeLink: %d (expected: 2)\n", a->getArity(h));
+                "AtTimeLink: %d (expected: 2)\n", lll->getArity());
     }
 }
 
-void TimeServer::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
+void TimeServer::atomRemoved(AtomPtr atom)
 {
     Type type = atom->getType();
     if (type != AT_TIME_LINK) return;

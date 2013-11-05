@@ -27,6 +27,8 @@
 
 #include <mutex>
 
+#include <boost/signal.hpp>
+
 #include <opencog/util/recent_val.h>
 #include <opencog/atomspace/AttentionValue.h>
 
@@ -36,9 +38,14 @@ namespace opencog
  *  @{
  */
 
+class AtomTable;
+
 class AttentionBank
 {
-    AtomSpaceImpl *atomspace;
+    /** The connection by which we are notified of AV changes */
+    boost::signals::connection AVChangedConnection;
+    void AVChanged(Handle, AttentionValuePtr, AttentionValuePtr);
+
     /**
      * Boundary at which an atom is considered within the attentional
      * focus of opencog. Atom's with STI less than this value are
@@ -62,13 +69,9 @@ class AttentionBank
 
     mutable std::mutex lock_funds;
 
-    /**
-     * Remove stimulus from atom, only should be used when Atom is deleted.
-     */
-    void removeStimulus(Handle h);
-
 public:
-    AttentionBank();
+    /** The table notifies us about AV changes */
+    AttentionBank(AtomTable*);
     ~AttentionBank();
 
     /**
@@ -105,6 +108,7 @@ public:
      * Get the LTI funds available in the AtomSpace pool.
      *
      * @return LTI funds available
+
      */
     long getLTIFunds() const;
 
@@ -168,36 +172,33 @@ public:
      */
     void updateMaxSTI(AttentionValue::sti_t m);
 
-    /** Retrieve the AttentionValue of an attention value holder */
-    const AttentionValue& getAV(AttentionValueHolderPtr avh) const;
-
-    /** Change the AttentionValue of an attention value holder */
-    void setAV(AttentionValueHolderPtr avh, const AttentionValue &av);
-
-    /** Change the Short-Term Importance of an attention value holder */
-    void setSTI(AttentionValueHolderPtr avh, AttentionValue::sti_t);
-
-    /** Change the Long-term Importance of an attention value holder */
-    void setLTI(AttentionValueHolderPtr avh, AttentionValue::lti_t);
-
     /** Change the Very-Long-Term Importance of an attention value holder */
     //void setVLTI(AttentionValueHolderPtr avh, AttentionValue::vlti_t);
 
-    /** Incr the Very-Long-Term Importance of an attention value holder by 1*/
-    void incVLTI(AttentionValueHolderPtr avh);
+    /** Retrieve the doubly normalised Short-Term Importance between -1..1
+     * for a given AttentionValue. STI above and below threshold
+     * normalised separately and linearly.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to -1..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between -1..1
+     */
+    float getNormalisedSTI(AttentionValuePtr, bool average, bool clip) const;
 
-    /** Decr the Very-Long-Term Importance of an attention value holder by 1*/
-    void decVLTI(AttentionValueHolderPtr avh);
-
-    /** Retrieve the Short-Term Importance of an attention value holder */
-    AttentionValue::sti_t getSTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Long-term Importance of a given Handle */
-    AttentionValue::lti_t getLTI(AttentionValueHolderPtr avh) const;
-
-    /** Retrieve the Very-Long-Term Importance of a given Handle */
-    AttentionValue::vlti_t getVLTI(AttentionValueHolderPtr avh) const;
-
+    /** Retrieve the linearly normalised Short-Term Importance between 0..1
+     * for a given AttentionValue.
+     *
+     * @param h The attention value holder to get STI for
+     * @param average Should the recent average max/min STI be used, or the
+     * exact min/max?
+     * @param clip Should the returned value be clipped to 0..1? Outside this
+     * range can be return if average=true
+     * @return normalised STI between 0..1
+     */
+    float getNormalisedZeroToOneSTI(AttentionValuePtr, bool average, bool clip) const;
 };
 
 /** @}*/

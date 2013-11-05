@@ -49,8 +49,8 @@ void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
     _cogServer = cogServer;
-    _conn = cogServer->getAtomSpace().atomSpaceAsync->removeAtomSignal(
-            boost::bind(&SystemActivityTable::atomRemoved, this, _1, _2));
+    _conn = cogServer->getAtomSpace().removeAtomSignal(
+            boost::bind(&SystemActivityTable::atomRemoved, this, _1));
 }
 
 void SystemActivityTable::setMaxAgentActivityTableSeqSize(size_t n)
@@ -73,7 +73,7 @@ void SystemActivityTable::trimActivitySeq(ActivitySeq &seq, size_t max)
     seq.resize(max);
 }
 
-void SystemActivityTable::atomRemoved(AtomSpaceImpl *as, AtomPtr atom)
+void SystemActivityTable::atomRemoved(AtomPtr atom)
 {
     Handle h = atom->getHandle();
     for (AgentActivityTable::iterator it  = _agentActivityTable.begin();

@@ -1,6 +1,4 @@
-LINK_DIRECTORIES (
-	${PROJECT_BINARY_DIR}/opencog/atomspace
-)
+# Build file for the atomspace benchmark
 
 IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES (
@@ -14,7 +12,7 @@ ADD_EXECUTABLE (atomspace_bm
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES (atomspace_bm smob)
+	TARGET_LINK_LIBRARIES (atomspace_bm smob server)
 ENDIF(HAVE_GUILE)
 
 IF (HAVE_CYTHON)

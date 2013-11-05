@@ -14,7 +14,7 @@ class HelperTest(TestCase):
         pass
 
     def test_find_agents(self):
-        x=find_subclasses(test_agent,opencog.cogserver.MindAgent)
-        self.assertEqual(len(x),1)
+        x = find_subclasses(test_agent, opencog.cogserver.MindAgent)
+        self.assertEqual(len(x), 1)
         self.assertEqual(x[0][0], 'TestAgent')
 

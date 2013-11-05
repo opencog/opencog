@@ -30,7 +30,6 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
@@ -65,8 +64,8 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
     curMap = NULL;
 
     // connect signals
-    removedAtomConnection = _atomspace.atomSpaceAsync->addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1, _2));
-    addedAtomConnection = _atomspace.atomSpaceAsync->removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1, _2));
+    removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
+    addedAtomConnection = _atomspace.removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1));
 }
 
 SpaceServer::~SpaceServer()
@@ -83,11 +82,11 @@ void SpaceServer::setTimeServer(TimeServer* ts)
     timeser = ts;
 }
 
-void SpaceServer::atomAdded(AtomSpaceImpl* a, Handle h)
+void SpaceServer::atomAdded(Handle h)
 {
 }
 
-void SpaceServer::atomRemoved(AtomSpaceImpl* a, AtomPtr atom)
+void SpaceServer::atomRemoved(AtomPtr atom)
 {
     Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
@@ -703,7 +702,12 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles)
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
         atomspace->setSTI(entity->mEntityNode, 10000);
 
-        if (! AtomSpace::isHandleInSeq(entity->mEntityNode, toUpdateHandles))
+        bool addit = true;
+        HandleSeq::const_iterator it;
+        for (it = toUpdateHandles.begin(); it != toUpdateHandles.end(); ++ it) {
+            if ((Handle)(*it) == entity->mEntityNode) { addit = false; break; }
+        }
+        if (addit)
             toUpdateHandles.push_back(entity->mEntityNode);
     }
 

@@ -158,7 +158,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
 	}
 	case COMPOSITE_TRUTH_VALUE:
 		// @todo
-	default: 
+	default:
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);
 	}
@@ -284,7 +284,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
@@ -354,7 +354,7 @@ void BasicSCMUTest::test_part_of_speech_link(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	check_link("PartOfSpeechLink", PART_OF_SPEECH_LINK, 
+	check_link("PartOfSpeechLink", PART_OF_SPEECH_LINK,
 	           "WordInstanceNode", "DefinedLinguisticConceptNode",
 	           "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096", "adj",
 	            1.0, 1.0);
@@ -425,7 +425,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
@@ -493,7 +493,7 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a frame link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 
 	HandleSeq::const_iterator i;

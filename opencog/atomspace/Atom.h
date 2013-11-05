@@ -32,16 +32,14 @@
 #include <set>
 #include <string>
 
+#include <boost/signal.hpp>
+
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
-
-#ifdef ZMQ_EXPERIMENT
-	#include "ProtocolBufferSerializer.h"
-#endif
 
 class AtomUTest;
 
@@ -52,9 +50,12 @@ namespace opencog
  *  @{
  */
 
-class AtomTable;
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
+typedef std::set<LinkPtr> IncomingSet;
+typedef std::weak_ptr<Link> WinkPtr;
+typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
+typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -62,36 +63,40 @@ typedef std::shared_ptr<Link> LinkPtr;
  * links are specialization of atoms, that is, they inherit all
  * properties from atoms.
  */
-class Atom : public AttentionValueHolder
+class Atom
+    : public std::enable_shared_from_this<Atom>
 {
-    friend class SavingLoading;   // needs to set flags diectly
-    friend class AtomTable;
-    friend class TLB;
-    friend class Handle;
-    friend class ::AtomUTest;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
+    friend class ::AtomUTest;     // Needs to call setFlag()
+    friend class AtomTable;       // Needs to call MarkedForRemoval()
+    friend class ImportanceIndex; // Needs to call setFlag()
+    friend class Handle;          // Needs to view _uuid
+    friend class SavingLoading;   // Needs to set _uuid
+    friend class TLB;             // Needs to view _uuid
+    friend class Link;            // Needs to change incoming set
 
 private:
-#ifdef ZMQ_EXPERIMENT
-    Atom() {};
-#endif
-
     //! Sets the AtomTable in which this Atom is inserted.
     void setAtomTable(AtomTable *);
 
     //! Returns the AtomTable in which this Atom is inserted.
-    AtomTable *getAtomTable() const { return atomTable; }
+    AtomTable *getAtomTable() const { return _atomTable; }
 
 protected:
     UUID _uuid;
-    AtomTable *atomTable;
+    AtomTable *_atomTable;
 
-    Type type;
-    char flags;
+    Type _type;
+    char _flags;
 
-    TruthValuePtr truthValue;
+    TruthValuePtr _truthValue;
+    AttentionValuePtr _attentionValue;
+
+    // Lock needed to serialize changes.
+    // This costs 40 bytes per atom.
+    // Tried using a single, global lock, but there seemed to be too
+    // much contention for it, so using a lock-per-atom, even though
+    // this makes it kind-of fat.
+    std::mutex _mtx;
 
     /**
      * Constructor for this class.
@@ -103,22 +108,25 @@ protected:
      *        in setTruthValue.
      */
     Atom(Type, TruthValuePtr = TruthValue::NULL_TV(),
-            const AttentionValue& = AttentionValue::DEFAULT_AV());
+            AttentionValuePtr = AttentionValue::DEFAULT_AV());
 
-    struct IncomingSet
+    struct InSet
     {
-        // Just right now, we will use a single shared mutex for all
-        // locking on the incoming set.  If this causes too much
-        // contention, then we can fall back to a non-global lock,
-        // at the cost of 40 additional bytes per atom.
-        static std::mutex _mtx;
         // incoming set is not tracked by garbage collector,
         // to avoid cyclic references.
         // std::set<ptr> uses 48 bytes (per atom).
-        std::set<LinkPtr> _iset;
+        WincomingSet _iset;
+#ifdef INCOMING_SET_SIGNALS
+        // Some people want to know if the incoming set has changed...
+        // However, these make the atom quite fat, so this is disabled
+        // just right now. If users really start clamoring, then we can
+        // turn this on.
+        AtomPairSignal _addAtomSignal;
+        AtomPairSignal _removeAtomSignal;
+#endif /* INCOMING_SET_SIGNALS */
     };
-    typedef std::shared_ptr<IncomingSet> IncomingSetPtr;
-    IncomingSetPtr _incoming_set;
+    typedef std::shared_ptr<InSet> InSetPtr;
+    InSetPtr _incoming_set;
     void keep_incoming_set();
     void drop_incoming_set();
 
@@ -126,46 +134,7 @@ protected:
     void insert_atom(LinkPtr);
     void remove_atom(LinkPtr);
 
-public:
-
-    virtual ~Atom();
-
-    /** Returns the type of the atom.
-     *
-     * @return The type of the atom.
-     */
-    inline Type getType() const { return type; }
-
-    /** Returns the handle of the atom.
-     *
-     * @return The handle of the atom.
-     */
-    inline Handle getHandle() {
-        return Handle(std::static_pointer_cast<Atom>(shared_from_this()));
-    }
-
-    /** Returns the AttentionValue object of the atom.
-     *
-     * @return The const reference to the AttentionValue object
-     * of the atom.
-     */
-    const AttentionValue& getAttentionValue() const { return attentionValue; }
-
-    //! Sets the AttentionValue object of the atom.
-    void setAttentionValue(const AttentionValue&) throw (RuntimeException);
-
-    /** Returns the TruthValue object of the atom.
-     *
-     * @return The const referent to the TruthValue object of the atom.
-     */
-    TruthValuePtr getTruthValue() const { return truthValue; }
-
-    //! Sets the TruthValue object of the atom.
-    void setTruthValue(TruthValuePtr);
-    void setTruthValue(CompositeTruthValuePtr ctv) {
-        setTruthValue(std::static_pointer_cast<TruthValue>(ctv));
-    }
-
+private:
     /** Returns whether this atom is marked for removal.
      *
      * @return Whether this atom is marked for removal.
@@ -192,6 +161,73 @@ public:
 
     //! Unsets removal flag.
     void unsetRemovalFlag();
+
+public:
+
+    virtual ~Atom();
+
+    /** Returns the type of the atom.
+     *
+     * @return The type of the atom.
+     */
+    inline Type getType() const { return _type; }
+
+    /** Returns the handle of the atom.
+     *
+     * @return The handle of the atom.
+     */
+    inline Handle getHandle() {
+        return Handle(shared_from_this());
+    }
+
+    /** Returns the AttentionValue object of the atom.
+     *
+     * @return The const reference to the AttentionValue object
+     * of the atom.
+     */
+    AttentionValuePtr getAttentionValue() const { return _attentionValue; }
+
+    //! Sets the AttentionValue object of the atom.
+    void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+
+    /** Returns the TruthValue object of the atom.
+     *
+     * @return The const referent to the TruthValue object of the atom.
+     */
+    TruthValuePtr getTruthValue() const { return _truthValue; }
+
+    //! Sets the TruthValue object of the atom.
+    void setTruthValue(TruthValuePtr);
+
+    //! The get,setTV methods deal with versioning. Yuck.
+    void setTV(TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
+    TruthValuePtr getTV(VersionHandle = NULL_VERSION_HANDLE) const;
+
+    /** Change the primary TV's mean */
+    void setMean(float) throw (InvalidParamException);
+
+    /** merge truth value into this */
+    void merge(TruthValuePtr);
+
+    //! Return the incoming set of this atom.
+    IncomingSet getIncomingSet();
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSet(OutputIterator result)
+    {
+        if (NULL == _incoming_set) return result;
+        std::lock_guard<std::mutex> lck(_mtx);
+        // Sigh. I need to compose copy_if with transform. I could
+        // do this wih boost range adaptors, but I don't feel like it.
+        auto end = _incoming_set->_iset.end();
+        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        {
+            Handle h(w->lock());
+            if (h) { *result = h; result ++; }
+        }
+        return result;
+    }
+
 
     /** Returns a string representation of the node.
      *

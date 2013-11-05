@@ -69,7 +69,7 @@ public:
      */
     Node(Type t, const std::string& s,
          TruthValuePtr tv = TruthValue::NULL_TV(),
-         const AttentionValue& av = AttentionValue::DEFAULT_AV())
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t,tv,av) {
         init(s);
     }

@@ -25,7 +25,6 @@
 #include "PersistModule.h"
 #include "AtomStorage.h"
 
-#include <opencog/atomspace/AtomSpaceAsync.h>
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
@@ -125,7 +124,7 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-close: database not open";
 
-	_cogserver.getAtomSpace().atomSpaceAsync->unregisterBackingStore(backing);
+	_cogserver.getAtomSpace().getImpl().unregisterBackingStore(backing);
 
 	backing->set_store(NULL);
 	delete store;
@@ -141,7 +140,7 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-load: database not open";
 
-	store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().atomSpaceAsync->getAtomTable()));
+	store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
 	return "database load started";
 }
@@ -170,7 +169,7 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	// reserve() is critical here, to reserve UUID range.
 	store->reserve();
 	backing->set_store(store);
-	_cogserver.getAtomSpace().atomSpaceAsync->registerBackingStore(backing);
+	_cogserver.getAtomSpace().getImpl().registerBackingStore(backing);
 
 	return "database opened";
 }
@@ -183,7 +182,7 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-store: database not open";
 
-	store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().atomSpaceAsync->getAtomTable()));
+	store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
 	return "database store started";
 }
@@ -191,7 +190,7 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 Handle PersistModule::fetch_atom(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
-	h = as->fetchAtom(h);
+	h = as->getImpl().fetchAtom(h);
 	return h;
 }
 
@@ -199,7 +198,7 @@ Handle PersistModule::fetch_incoming_set(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
 	// The "true" flag here means "fetch recursive".
-	h = as->fetchIncomingSet(h, true);
+	h = as->getImpl().fetchIncomingSet(h, true);
 	return h;
 }
 
@@ -209,7 +208,7 @@ Handle PersistModule::fetch_incoming_set(Handle h)
 Handle PersistModule::store_atom(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
-	as->storeAtom(h);
+	as->getImpl().storeAtom(h);
 	return h;
 }
 

@@ -1,15 +1,8 @@
 from opencog.atomspace import AtomSpace, types, Atom, Handle, TruthValue, types as t
 import opencog.cogserver
-from tree import *
-import adaptors
-from util import *
-from itertools import *
-from collections import namedtuple
-import sys
-import time
 import random
-from time      import sleep
-from threading import Thread
+from time import sleep
+
 
 def monitor_changes(atomspace):    
     tv_delta = 0.1 

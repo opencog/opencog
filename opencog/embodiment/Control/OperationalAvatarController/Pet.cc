@@ -228,8 +228,8 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 
     if (this->exemplarAvatarId != "") {
         std::vector<Handle> exemplarAvatarSet;
-        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), OBJECT_NODE,
-                this->exemplarAvatarId, true);
+        atomSpace->getHandlesByName(back_inserter(exemplarAvatarSet),
+                this->exemplarAvatarId, OBJECT_NODE, true);
 
         if (exemplarAvatarSet.size() != 1) {
             throw RuntimeException(TRACE_INFO,
@@ -930,8 +930,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     // get the handle for each entity
     foreach(string entity, entitiesInVicinity) {
         HandleSeq objHandle;
-        atomSpace->getHandleSet(back_inserter(objHandle), OBJECT_NODE, entity,
-                true);
+        atomSpace->getHandlesByName(back_inserter(objHandle), entity, OBJECT_NODE, true);
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
@@ -946,13 +945,12 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 */
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
-    atomSpace->getHandleSet(back_inserter(highLTIObjects), OBJECT_NODE, true);
+    atomSpace->getHandlesByType(back_inserter(highLTIObjects), OBJECT_NODE, true);
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
-        const AttentionValue& attentionValue =
-            atomSpace->getAV(*it);
-        if (attentionValue.getLTI() < AtomSpaceUtil::highLongTermImportance)
+        AttentionValuePtr attentionValue = atomSpace->getAV(*it);
+        if (attentionValue->getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else it++;
     }
@@ -991,7 +989,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         patternToSearchLearningSession.push_back(conceptNode);
         // get the handles of all trick
         HandleSeq learningSessionHandles;
-        atomSpace->getHandleSet(back_inserter(learningSessionHandles),
+        atomSpace->getHandlesByOutgoing(back_inserter(learningSessionHandles),
                 patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK,
                 true);
         foreach(Handle learningSessionHandle, learningSessionHandles) {

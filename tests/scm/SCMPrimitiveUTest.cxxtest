@@ -135,7 +135,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
 
 	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
-	TSM_ASSERT ("handle isn't a link ", !as->isNode(yyy));
+	TSM_ASSERT ("handle isn't a link ", as->isLink(yyy));
 
 	const std::vector<Handle>& oset = as->getOutgoing(yyy);
 

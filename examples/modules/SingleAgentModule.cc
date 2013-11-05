@@ -63,8 +63,9 @@ SingleAgentModule::~SingleAgentModule()
 
 void SingleAgentModule::stopAgent()
 {
-    AgentPtr age = std::dynamic_pointer_cast<Agent>(shared_from_this());
-    Module::_cogserver.stopAgent(age);
+    Module::_cogserver.stopAgent(a);
+    Module::_cogserver.stopAgent(b);
+    Module::_cogserver.stopAgent(c);
 }
 
 void SingleAgentModule::run()
@@ -78,12 +79,12 @@ void SingleAgentModule::init()
 
     // Use static global vars -- the egent is destroyed when these go 
     // out of scope (during the C++ finalizer).
-    static SingleAgentModulePtr a = Module::_cogserver.createAgent<SingleAgentModule>(true);
+    a = Module::_cogserver.createAgent<SingleAgentModule>(true);
     a->name = "SingleAgentModule1";
 
-    static SingleAgentModulePtr b = Module::_cogserver.createAgent<SingleAgentModule>(true);
+    b = Module::_cogserver.createAgent<SingleAgentModule>(true);
     b->name = "SingleAgentModule2";
 
-    static SingleAgentModulePtr c = Module::_cogserver.createAgent<SingleAgentModule>(true);
+    c = Module::_cogserver.createAgent<SingleAgentModule>(true);
     c->name = "SingleAgentModule3";
 }

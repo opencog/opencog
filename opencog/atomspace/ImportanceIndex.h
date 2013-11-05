@@ -58,7 +58,7 @@ public:
      */
     void updateImportance(AtomPtr, int);
 
-    UnorderedHandleSet decayShortTermImportance(const AtomTable*);
+    UnorderedHandleSet decayShortTermImportance(AtomTable*);
     UnorderedHandleSet getHandleSet(const AtomTable*,
                               AttentionValue::sti_t,
                               AttentionValue::sti_t) const;

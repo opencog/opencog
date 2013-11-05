@@ -83,7 +83,14 @@ static inline Handle addAtomIter(AtomSpace& as, tree<Vertex>& a, tree<Vertex>::i
 
     if (head_handle_ptr != NULL) {
         OC_ASSERT(as.isValidHandle(*head_handle_ptr), "head_handle_ptr is not valid");
-        as.do_merge_tv(*head_handle_ptr, tvn);
+        TruthValuePtr currentTV(as.getTV(*head_handle_ptr));
+        if (currentTV->isNullTv()) {
+            as.setTV(*head_handle_ptr, tvn);
+        } else {
+            TruthValuePtr mergedTV(currentTV->merge(tvn));
+            as.setTV(*head_handle_ptr, mergedTV);
+        }
+
         return *head_handle_ptr;
     }
 

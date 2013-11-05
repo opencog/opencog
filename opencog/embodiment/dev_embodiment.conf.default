@@ -86,10 +86,10 @@ MAX_OAC_PORT                    = 16340
 #OPENCOG_LOG_LEVEL               = DEBUG
 
 LS_LOG_LEVEL                    = ERROR
-OAC_LOG_LEVEL  	                = DEBUG
-ROUTER_LOG_LEVEL                = ERROR
-SPAWNER_LOG_LEVEL               = ERROR
-PROXY_LOG_LEVEL                 = ERROR
+OAC_LOG_LEVEL  	                = ERROR
+ROUTER_LOG_LEVEL                = DEBUG
+SPAWNER_LOG_LEVEL               = DEBUG
+PROXY_LOG_LEVEL                 = DEBUG
 OPENCOG_LOG_LEVEL               = ERROR
 
 # Back trace log level. 
@@ -163,7 +163,7 @@ PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 OCPLANNING_AGENT_ENABLED = false
 OCPLANNING_AGENT_CYCLE_PERIOD =    1
 
-MONITOR_CHANGES_ENABLED = true
+MONITOR_CHANGES_ENABLED = false
 MONITOR_CHANGES_CYCLE_PERIOD = 5
 
 STIMULUS_UPDATER_ENABLED =             true
@@ -450,6 +450,12 @@ SCM_PRELOAD           = scm/core_types.scm,
                         modulator_updaters.scm,
                         stimulus_updaters.scm
 
+# Use a comma separated list for multiple dirs
+PYTHON_EXTENSION_DIRS  = ../../../opencog/python/web/api
+
+# Run these python modules on start up
+PYTHON_PRELOAD = pyshell, restapi
+
 # PLN settings (needed by OpenPsi among other components)
 PLN_RECORD_TRAILS        = true
 PLN_LOG_LEVEL            = 0
@@ -478,11 +484,6 @@ NLGEN_SERVER_HOST     = localhost
 VISUAL_DEBUGGER_ACTIVE = false 
 VISUAL_DEBUGGER_HOST   = localhost
 VISUAL_DEBUGGER_PORT   = 6000
-
-# Database setup params
-STORAGE                = opencog_nlp
-STORAGE_USERNAME       = opencog
-STORAGE_PASSWD         = asdf
 
 # Dialog controllers
 #DIALOG_CONTROLLERS	= MegaHal, AliceBot, Ramona
