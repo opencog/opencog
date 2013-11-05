@@ -561,6 +561,10 @@ Handle AtomTable::getRandom(RandGen *rng) const
 
     Handle randy = Handle::UNDEFINED;
 
+    // XXX TODO it would be considerably mor efficient to go into the
+    // the type index, and decrement x by the size of the index for
+    // each type.  This would speed up the algo by about 100 (by about
+    // the number of types that are in use...).
     foreachHandleByType(
         [&](Handle h)->void {
             if (0 == x) randy = h;
@@ -679,6 +683,7 @@ AtomPtrSet AtomTable::decayShortTermImportance()
     return aps;
 }
 
+// This is the resize callback, when a new type is dynamically added.
 void AtomTable::typeAdded(Type t)
 {
     std::lock_guard<std::recursive_mutex> lck(_mtx);
