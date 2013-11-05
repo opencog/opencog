@@ -246,7 +246,6 @@ class Chainer(AbstractChainer):
         def constant_factory():
             return initial_frequency
         if learnRuleFrequencies:
-            self.learnRuleFrequencies = True
             self.rule_count = defaultdict(constant_factory)
 
     def forward_step(self, rule=None):
