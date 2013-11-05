@@ -477,14 +477,18 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     continue;
                 }
                 throw RuntimeException(TRACE_INFO,
-                    "AtomTable - Atom in outogin set must have been "
+                    "AtomTable - Atom in outgoing set must have been "
                     "previously inserted into the atom table!");
             }
+
             if (Handle::UNDEFINED == h) {
                 throw RuntimeException(TRACE_INFO,
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
             }
+#if not TABLE_INCOMING_INDEX
+            h->insert_atom(lll);
+#endif
         }
     }
 
@@ -506,7 +510,11 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
+#if TABLE_INCOMING_INDEX
     incomingIndex.insertAtom(atom);
+#else
+    atom->keep_incoming_set();
+#endif
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
@@ -613,8 +621,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         }
     }
 
-    const UnorderedHandleSet& is = getIncomingSet(handle);
-    if (0 < is.size())
+    if (0 < handle->getIncomingSetSize())
     {
         // It is very tempting to just throw, here, but apparently,
         // someone somewhere thinks that it is more appropriate to
@@ -633,6 +640,8 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
         logger().warn("AtomTable.extract(): "
            "attempting to extract atom with non-empty incoming set: %s\n",
            atom->toShortString().c_str());
+
+        UnorderedHandleSet is = getIncomingSet(handle);
         UnorderedHandleSet::const_iterator it;
         for (it = is.begin(); it != is.end(); it++)
         {
@@ -657,7 +666,16 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
+#if TABLE_INCOMING_INDEX
     incomingIndex.removeAtom(atom);
+#else
+    LinkPtr lll(LinkCast(atom));
+    if (lll) {
+        foreach(AtomPtr a, lll->_outgoing) {
+            a->remove_atom(lll);
+        }
+    }
+#endif
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);

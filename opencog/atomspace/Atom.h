@@ -72,7 +72,6 @@ class Atom
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
-    friend class Link;            // Needs to change incoming set
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
@@ -208,6 +207,9 @@ public:
 
     /** merge truth value into this */
     void merge(TruthValuePtr);
+
+    //! Get the size of the incoming set.
+    size_t getIncomingSetSize();
 
     //! Return the incoming set of this atom.
     IncomingSet getIncomingSet();

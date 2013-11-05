@@ -27,7 +27,6 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
-#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Link.h"
@@ -59,30 +58,11 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     if (classserver().isA(_type, UNORDERED_LINK)) {
         std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
     }
-
-#ifdef LATER
-    // Insert this link into incoming set of each atom.
-// XXX ARGH ... cannot do this here; because cannot use shared_from_this()
-// inside a constructor; will have to do this later.
-    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
-    foreach(AtomPtr a, _outgoing) {
-        a->insert_atom(self);
-    }
-#endif
 }
 
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
-
-#ifdef LATER
-    // Remove this link from incoming set of each atom.
-// XXX stupid plick, can't shared_from_this here, either
-    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
-    foreach(AtomPtr a, _outgoing) {
-        a->remove_atom(self);
-    }
-#endif
 }
 
 std::string Link::toShortString(std::string indent) const

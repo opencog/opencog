@@ -100,7 +100,9 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
+#if TABLE_INCOMING_INDEX
     IncomingIndex incomingIndex;
+#endif
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -413,8 +415,7 @@ public:
      */
     UnorderedHandleSet getIncomingSet(Handle h) const
     {
-#define LOCO 1
-#if LOCO
+#if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return incomingIndex.getIncomingSet(h);
 #else
@@ -428,7 +429,7 @@ public:
     getIncomingSet(OutputIterator result,
                    Handle h) const
     {
-#if LOCO
+#if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy(incomingIndex.begin(h),
                          incomingIndex.end(),
@@ -456,7 +457,7 @@ public:
                          Type type,
                          bool subclass = false) const
     {
-#if LOCO
+#if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
@@ -478,7 +479,7 @@ public:
                            bool subclass,
                            VersionHandle vh) const
     {
-#if LOCO
+#if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(incomingIndex.begin(h),
                             incomingIndex.end(),
