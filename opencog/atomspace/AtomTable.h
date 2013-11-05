@@ -673,14 +673,6 @@ public:
     }
 
     /**
-     * Merge the truth value with that of an existing atom.
-     * Emits the TV changed signal.
-     * @param h     Handle of the Atom to be merged
-     * @param tvn   TruthValue to be merged to current atom's truth value.  
-     */
-    void merge(const Handle&, const TruthValuePtr&);
-
-    /**
      * Adds an atom to the table, checking for duplicates and merging
      * when necessary. When an atom is added, the atom table takes over
      * the memory management for that atom. In other words, no other

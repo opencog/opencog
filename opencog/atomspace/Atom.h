@@ -206,6 +206,9 @@ public:
     /** Change the primary TV's mean */
     void setMean(float) throw (InvalidParamException);
 
+    /** merge truth value into this */
+    void merge(TruthValuePtr);
+
     //! Return the incoming set of this atom.
     IncomingSet getIncomingSet();
 

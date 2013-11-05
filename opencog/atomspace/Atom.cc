@@ -75,6 +75,10 @@ Atom::~Atom()
     drop_incoming_set();
 }
 
+// ==============================================================
+// Whole lotta truthiness going on here.  Does it really need to be
+// this complicated!?
+
 void Atom::setTruthValue(TruthValuePtr tv)
 {
     // OK, I think the below is thread-safe, and nees no locking. Why?
@@ -171,6 +175,25 @@ void Atom::setMean(float mean) throw (InvalidParamException)
     setTV(newTv);
 }
 
+void Atom::merge(TruthValuePtr tvn)
+{
+    if (NULL == tvn or tvn->isNullTv()) return;
+
+    // As far as I can tell, there is no need to lock this
+    // section of the code; all changes to the TV are essentially
+    // atomic, from what I can tell (right?)
+    TruthValuePtr currentTV = getTruthValue();
+    TruthValuePtr mergedTV;
+    if (currentTV->isNullTv()) {
+        mergedTV = tvn;
+    } else {
+        mergedTV = currentTV->merge(tvn);
+    }
+    setTruthValue(mergedTV);
+}
+
+// ==============================================================
+
 void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
 {
     if (av == _attentionValue) return;
@@ -200,6 +223,8 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     }
 }
 
+// ==============================================================
+// Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
     return (_flags & MARKED_FOR_REMOVAL) != 0;
@@ -229,6 +254,8 @@ void Atom::markForRemoval(void)
     _flags |= MARKED_FOR_REMOVAL;
 }
 
+// ==============================================================
+
 void Atom::setAtomTable(AtomTable *tb)
 {
     if (tb == _atomTable) return;
@@ -250,6 +277,8 @@ void Atom::setAtomTable(AtomTable *tb)
     }
 }
 
+// ==============================================================
+// Incoming set stuff
 
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
