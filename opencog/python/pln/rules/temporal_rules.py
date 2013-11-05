@@ -7,9 +7,9 @@ from opencog.atomspace import get_type_name
 
 import math
 
-from pln.rules.rules import Rule, ModusPonensRule
+from pln.rules import rules
 
-class TemporalRule(Rule):
+class TemporalRule(rules.Rule):
     '''Base class for temporal Rules. They evaluate a time relation such as BeforeLink, based on some AtTimeLinks.'''
     # TODO it can't use the formulas directly. They require some preprocessing to create a temporal-distribution-dictionary out of some AtTimeLinks. And how to find all of the AtTimeLinks for an Atom?
     # Easy way: the inputs here will eventually find every element of A and B, so just recalculate every time.
@@ -28,12 +28,16 @@ class TemporalRule(Rule):
         self.name = get_type_name(link_type) + 'EvaluationRule'
 
     def temporal_compute(self, input_tuples):
-        links_a, links_b = unzip(input_tuples)
+        links_a = []
+        links_b = []
+        for (link_a, link_b) in input_tuples:
+            links_a.append(link_a)
+            links_b.append(link_b)
 
         dist1 = self.make_distribution(links_a)
         dist2 = self.make_distribution(links_b)
 
-        strength = formula(dist1, dist2)
+        strength = self.formula(dist1, dist2)
         
         # I'm not sure what to choose for this
         count = len(input_tuples)
@@ -51,7 +55,7 @@ class TemporalRule(Rule):
         return dist
 
 
-class TemporalTransitivityRule(Rule):
+class TemporalTransitivityRule(rules.Rule):
     # Hackily infer transitive temporal relationships using the deduction formula
     # This Rule is important but the TV formula is wrong
     def __init__(self, chainer, link_type, formula= formulas.deductionSimpleFormula):
@@ -69,7 +73,7 @@ class TemporalTransitivityRule(Rule):
 
 # there should also be temporal modus ponens too (to predict that something will happen)
 
-class PredictiveAttractionRule(Rule):
+class PredictiveAttractionRule(rules.Rule):
     def __init__(self, chainer):
         A = chainer.new_variable()
         B = chainer.new_variable()

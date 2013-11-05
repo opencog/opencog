@@ -25,6 +25,9 @@ class Logic(object):
         prefix = '$pln_var_'
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
+    def make_n_variables(self, N):
+        return [self.new_variable() for i in xrange(0, N)]
+
     def find(self, template, atoms, s={}):
         assert(isinstance(atoms, list))
 
