@@ -37,7 +37,6 @@
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ImportanceIndex.h>
-#include <opencog/atomspace/IncomingIndex.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/LinkIndex.h>
 #include <opencog/atomspace/Node.h>
@@ -100,7 +99,7 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
-    IncomingIndex incomingIndex;
+    // IncomingIndex incomingIndex;  // now stored with the atom.
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -413,18 +412,16 @@ public:
      */
     UnorderedHandleSet getIncomingSet(Handle h) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return incomingIndex.getIncomingSet(h);
+        UnorderedHandleSet uhs;
+        h->getIncomingSet(inserter(uhs));
+        return uhs;
     }
 
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result,
                    Handle h) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy(incomingIndex.begin(h),
-                         incomingIndex.end(),
-                         result);
+        return h->getIncomingSet(result);
     }
 
 
@@ -446,10 +443,9 @@ public:
                          Type type,
                          bool subclass = false) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
+        // XXX TODO it would be more efficient to move this to Atom.h
+        UnorderedHandleSet uhs(getIncomingSet(h));
+        return std::copy_if(uhs.begin(), uhs.end(), result,
              [&](Handle h)->bool{
                      return isDefined(h)
                         and isType(h, type, subclass); });
@@ -462,10 +458,9 @@ public:
                            bool subclass,
                            VersionHandle vh) const
     {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
+        // XXX TODO it would be more efficient to move this to Atom.h
+        UnorderedHandleSet uhs(getIncomingSet(h));
+        return std::copy_if(uhs.begin(), uhs.end(), result,
              [&](Handle h)->bool{
                    return isDefined(h)
                       and isType(h, type, subclass)

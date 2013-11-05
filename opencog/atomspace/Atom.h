@@ -209,6 +209,23 @@ public:
     //! Return the incoming set of this atom.
     IncomingSet getIncomingSet();
 
+    template <typename OutputIterator> OutputIterator
+    getIncomingSet(OutputIterator result)
+    {
+        if (NULL == _incoming_set) return result;
+        std::lock_guard<std::mutex> lck(_mtx);
+        // Sigh. I need to compose copy_if with transform. I could
+        // do this wih boost range adaptors, but I don't feel like it.
+        auto end = _incoming_set->_iset.end();
+        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        {
+            Handle h(w->lock());
+            if (h) { *result = h; result ++; }
+        }
+        return result;
+    }
+
+
     /** Returns a string representation of the node.
      *
      * @return A string representation of the node.

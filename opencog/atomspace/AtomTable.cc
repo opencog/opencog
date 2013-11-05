@@ -529,7 +529,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
-    incomingIndex.insertAtom(atom);
+    // incomingIndex.insertAtom(atom);
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
@@ -676,7 +676,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
-    incomingIndex.removeAtom(atom);
+    // incomingIndex.removeAtom(atom);
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
