@@ -196,6 +196,7 @@ class Chainer(AbstractChainer):
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
 
@@ -218,7 +219,6 @@ class Chainer(AbstractChainer):
         def constant_factory():
             return initial_frequency
         if learnRuleFrequencies:
-            self.learnRuleFrequencies = True
             self.rule_count = defaultdict(constant_factory)
 
     def forward_step(self, rule=None):
