@@ -71,6 +71,8 @@ class ForwardInferenceAgent(MindAgent):
 
         if self.chainer is None:
             self.create_chainer(atomspace)
+            # For simplicity, do nothing the first time. Silly APIs mean you have to call run to set the atomspace
+            return
 
         result = self.chainer.forward_step()
         if result:

@@ -571,3 +571,13 @@ class Chainer(AbstractChainer):
 
         raise ValueError("lookup_rule: rule doesn't exist "+rule_name)
 
+    def test_rules(self, sample_count=20):
+        for rule in self.rules:
+            # Do a series of samples; different atoms with the same rules.
+            import random; random.seed(0)
+
+            print 'Testing',rule
+
+            for i in xrange(0, sample_count):
+                self.forward_step(rule=rule)   
+

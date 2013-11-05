@@ -260,6 +260,9 @@ def revisionFormula(tvs):
 def andBreakdownFormula(tvs):
     [A, AND_AB] = tvs
 
+    if A.mean == 0:
+        return [TruthValue(0, 0)]
+
     sB = AND_AB.mean / A.mean
     nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
 
