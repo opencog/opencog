@@ -7,9 +7,18 @@ from opencog.atomspace import get_type_name
 
 import math
 
-from pln.rules.rules import Rule, ModusPonensRule
+from pln.rules import rules
 
-class TemporalRule(Rule):
+'''
+go_shopping_1 contains get_cool_stuff_1
+go_shopping_2 contains get_cool_stuff_2
+
+go_shopping contains get_cool_stuff
+
+how to do that kind of reasoning?
+'''
+
+class TemporalRule(rules.Rule):
     '''Base class for temporal Rules. They evaluate a time relation such as BeforeLink, based on some AtTimeLinks.'''
     # TODO it can't use the formulas directly. They require some preprocessing to create a temporal-distribution-dictionary out of some AtTimeLinks. And how to find all of the AtTimeLinks for an Atom?
     # Easy way: the inputs here will eventually find every element of A and B, so just recalculate every time.
@@ -28,12 +37,16 @@ class TemporalRule(Rule):
         self.name = get_type_name(link_type) + 'EvaluationRule'
 
     def temporal_compute(self, input_tuples):
-        links_a, links_b = unzip(input_tuples)
+        links_a = []
+        links_b = []
+        for (link_a, link_b) in input_tuples:
+            links_a.append(link_a)
+            links_b.append(link_b)
 
-        dist1 = self.make_distribution(links_a)
-        dist2 = self.make_distribution(links_b)
+        dist1 = make_distribution(links_a)
+        dist2 = make_distribution(links_b)
 
-        strength = formula(dist1, dist2)
+        strength = self.formula(dist1, dist2)
         
         # I'm not sure what to choose for this
         count = len(input_tuples)
@@ -41,17 +54,19 @@ class TemporalRule(Rule):
         
         return [(target,tv)]
 
-    def make_distribution(self, time_links):
-        dist = {}
-        for link in time_links:
-            time = int(link.out[0].name)
-            fuzzy_tv = link.tv.mean
-            dist[time] = fuzzy_tv
-        
-        return dist
+def make_distribution(time_links):
+    dist = {}
+    for link in time_links:
+        time = get_integer(link.out[0])
+        fuzzy_tv = link.tv.mean
+        dist[time] = fuzzy_tv
+    
+    return dist
 
+def get_integer(time_node):
+    return int(time_node.name)    
 
-class TemporalTransitivityRule(Rule):
+class TemporalTransitivityRule(rules.Rule):
     # Hackily infer transitive temporal relationships using the deduction formula
     # This Rule is important but the TV formula is wrong
     def __init__(self, chainer, link_type, formula= formulas.deductionSimpleFormula):
@@ -69,7 +84,7 @@ class TemporalTransitivityRule(Rule):
 
 # there should also be temporal modus ponens too (to predict that something will happen)
 
-class PredictiveAttractionRule(Rule):
+class PredictiveAttractionRule(rules.Rule):
     def __init__(self, chainer):
         A = chainer.new_variable()
         B = chainer.new_variable()

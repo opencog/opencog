@@ -88,7 +88,7 @@ public:
     bool buildTestData;
 
 
-    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE,
+    enum BenchType { BENCH_AS = 1, BENCH_TABLE,
 #ifdef HAVE_GUILE
         BENCH_SCM,
 #endif 
@@ -108,6 +108,7 @@ public:
 
     bool showTypeSizes;
     void printTypeSizes();
+    size_t estimateOfAtomSize(Handle h);
 
     AtomSpaceBenchmark();
     ~AtomSpaceBenchmark();
@@ -124,6 +125,7 @@ public:
     timepair_t bm_noop();
     timepair_t bm_addNode();
     timepair_t bm_addLink();
+    timepair_t bm_rmAtom();
 
     timepair_t bm_getType();
     timepair_t bm_getNodeHandles();
@@ -131,25 +133,14 @@ public:
     timepair_t bm_getOutgoingSet();
     timepair_t bm_getIncomingSet();
 
-    void bm_getHandleNode() {};
-    void bm_getHandleLink() {};
-    void bm_getName() {};
-
     // Get and set TV and AV
     float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
     timepair_t bm_getTruthValue();
+    timepair_t bm_setTruthValue();
 
 #ifdef ZMQ_EXPERIMENT
     timepair_t bm_getTruthValueZmq();
 #endif
-    timepair_t bm_setTruthValue();
-    void bm_getAttentionValue() {};
-    void bm_setAttentionValue() {};
-
-    void bm_erase() {};
-
-    size_t estimateOfAtomSize(Handle h);
-
 };
 
 } // namespace opencog

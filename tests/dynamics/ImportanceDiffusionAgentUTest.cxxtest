@@ -75,7 +75,7 @@ void removeAll(AtomSpace* atomSpace)
     std::vector<Handle>::iterator i;
     std::back_insert_iterator< std::vector<Handle> > outputI(allAtoms);
 
-    server().getAtomSpace().getHandleSet(outputI, ATOM, true);
+    server().getAtomSpace().getHandlesByType(outputI, ATOM, true);
 
     for (i = allAtoms.begin(); i != allAtoms.end(); i++) {
         server().getAtomSpace().removeAtom(*i);

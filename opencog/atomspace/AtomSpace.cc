@@ -23,34 +23,14 @@
 
 #include "AtomSpace.h"
 
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <list>
-#include <time.h>
-#include <cstdlib>
-
 #include <stdlib.h>
+#include <string>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/Link.h>
-#include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/oc_assert.h>
 
 //#define DPRINTF printf
 #define DPRINTF(...)
 
-using std::string;
-using std::cerr;
-using std::cout;
-using std::endl;
-using std::min;
-using std::max;
 using namespace opencog;
 
 // ====================================================================
@@ -58,28 +38,28 @@ using namespace opencog;
 
 AtomSpace::AtomSpace(void)
 {
-    atomSpaceAsync = new AtomSpaceAsync();
-    ownsAtomSpaceAsync = true;
+    _atomSpaceImpl = new AtomSpaceImpl();
+    _ownsAtomSpaceImpl = true;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
 AtomSpace::AtomSpace(const AtomSpace& other)
 {
-    this->atomSpaceAsync = other.atomSpaceAsync;
-    ownsAtomSpaceAsync = false;
+    _atomSpaceImpl = other._atomSpaceImpl;
+    _ownsAtomSpaceImpl = false;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
-AtomSpace::AtomSpace(AtomSpaceAsync& a)
+AtomSpace::AtomSpace(AtomSpaceImpl* a)
 {
-    atomSpaceAsync = &a;
-    ownsAtomSpaceAsync = false;
+    _atomSpaceImpl = a;
+    _ownsAtomSpaceImpl = false;
 
-    c_add = atomSpaceAsync->addAtomSignal(
+    c_add = addAtomSignal(
         boost::bind(&AtomSpace::handleAddSignal, this, _1));
 }
 
@@ -87,8 +67,8 @@ AtomSpace::~AtomSpace()
 {
     c_add.disconnect();
     // Will be unnecessary once GC is implemented
-    if (ownsAtomSpaceAsync)
-        delete atomSpaceAsync;
+    if (_ownsAtomSpaceImpl)
+        delete _atomSpaceImpl;
 }
 
 bool AtomSpace::handleAddSignal(Handle h)
@@ -98,107 +78,31 @@ bool AtomSpace::handleAddSignal(Handle h)
     return false;
 }
 
-strength_t AtomSpace::getMean(Handle h, VersionHandle vh) const
-{
-    FloatRequest tvr = atomSpaceAsync->getMean(h, vh);
-    return tvr->get_result();
-}
-
-confidence_t AtomSpace::getConfidence(Handle h, VersionHandle vh) const
-{
-    FloatRequest tvr = atomSpaceAsync->getConfidence(h, vh);
-    return tvr->get_result();
-}
-
-TruthValuePtr AtomSpace::getTV(Handle h, VersionHandle vh) const
-{
-    TruthValueCompleteRequest tvr = atomSpaceAsync->getTVComplete(h, vh);
-    TruthValuePtr x(tvr->get_result());
-    tvr->result = NULL; // cheat to avoid copying TruthValue once again
-    return x;
-}
-
-void AtomSpace::setTV(Handle h, TruthValuePtr tv, VersionHandle vh)
-{
-    atomSpaceAsync->setTV(h, tv, vh)->get_result();
-}
-
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)
 {
     throw opencog::RuntimeException(TRACE_INFO,
             "AtomSpace - Cannot copy an object of this class");
 }
 
-void AtomSpace::do_merge_tv(Handle h, TruthValuePtr tvn)
-{
-    TruthValuePtr currentTV(getTV(h));
-    if (currentTV->isNullTv()) {
-        setTV(h, tvn);
-    } else {
-        TruthValuePtr mergedTV(currentTV->merge(tvn));
-        setTV(h, mergedTV);
-    }
-}
-
-Handle AtomSpace::addPrefixedNode(Type t, const string& prefix, TruthValuePtr tvn)
+Handle AtomSpace::addPrefixedNode(Type t, const std::string& prefix, TruthValuePtr tvn)
 {
     static const char alphanum[] =
         "0123456789"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         "abcdefghijklmnopqrstuvwxyz";
-    srand(time(0));
+    static unsigned long int cnt = 0;
+    srand(++cnt);
     static const int len = 16;
-    string name;
+    std::string name;
     Handle result;
     //Keep trying new random suffixes until you generate a new name
     do {
-        name=prefix;
+        name = prefix;
         for (int i = 0; i < len; ++i) {
-            name+=alphanum[rand() % (sizeof(alphanum) - 1)];
+            name += alphanum[rand() % (sizeof(alphanum) - 1)];
         }
         result = getHandle(t, name);
-    } while (isValidHandle(result));//If the name already exists, try again
+    } while (isValidHandle(result)); // If the name already exists, try again
     return addNode(t, name, tvn);
-}
-
-void AtomSpace::setAV(Handle h, AttentionValuePtr av)
-{
-    atomSpaceAsync->setAV(h,av)->get_result();
-}
-
-int AtomSpace::Nodes(VersionHandle vh) const
-{
-    return atomSpaceAsync->nodeCount(vh)->get_result();
-}
-
-AttentionValue::sti_t AtomSpace::getAttentionalFocusBoundary() const
-{
-    return atomSpaceAsync->atomspace.getAttentionBank().getAttentionalFocusBoundary();
-}
-
-int AtomSpace::Links(VersionHandle vh) const
-{
-    return atomSpaceAsync->linkCount(vh)->get_result();
-}
-
-void AtomSpace::decayShortTermImportance()
-{
-    atomSpaceAsync->decayShortTermImportance()->get_result();
-}
-
-AttentionValue::sti_t AtomSpace::setAttentionalFocusBoundary(AttentionValue::sti_t s)
-{
-    return atomSpaceAsync->atomspace.getAttentionBank().setAttentionalFocusBoundary(s);
-}
-
-void AtomSpace::clear()
-{
-    atomSpaceAsync->clear()->get_result();
-}
-
-void AtomSpace::print(std::ostream& output,
-           Type type, bool subclass) const
-{
-    atomSpaceAsync->print(output, type, subclass)->get_result();
 }
 

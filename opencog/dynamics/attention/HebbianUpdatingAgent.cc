@@ -85,7 +85,7 @@ void HebbianUpdatingAgent::hebbianUpdatingUpdate()
                    "(convert links = %d)", convertLinks);
 
     // get links again to include the new ones
-    a->getHandleSet(link_output, HEBBIAN_LINK, true);
+    a->getHandlesByType(link_output, HEBBIAN_LINK, true);
 
     for (current_l = links.begin(); current_l != links.end(); ++current_l) {
         // for each hebbian link, find targets, work out conjunction and convert

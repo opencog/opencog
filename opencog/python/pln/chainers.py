@@ -19,6 +19,33 @@ def get_attentional_focus(atomspace, attentional_focus_boundary=0):
             attentional_focus.append(node)
     return attentional_focus
 
+'''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
+
+The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
+
+I really think we should make a reasonably fast algorithm, and then add rules one at a time, adding useful heuristics simultaneously (so that PLN will actually be useful rather than just get in the AI's way). It looks to me like this set of heuristics would be enough to make PLN not spiral crazily out of control.
+
+* choose atoms with probability proportional to their STI
+* higher confidence atoms are usually better
+* higher strength atoms are often better (but obviously for finding Not(A) you don't want A to be strong)
+
+It's possible to do a lot of learning online, and it's both efficient and a nice control strategy. The system should give high STI to things that happened recently or are near the agent
+
+Cognitive synergy:
+* After you have clustering and fishgram working, you can do reasoning on the results of those processes 
+* Dimensional embedding tells you which similarity links (or inheritance links) are likely to be good (see the opencog book)
+* PLN planning: you could have various special heuristics for hierarchical planning
+* Use MOSES
+
+You can (and should) also think carefully about how to represent data so that more useful inferences are shorter. This will generally help a LOT!!!!!!!!!!
+
+Special cases for different kinds of rules:
+* For deduction, it would be really useful to explicitly notice a hierarchy of more abstract/specific concepts (as described in the RealWorldReasoning book).
+And any time you find Inheritance A B, also calculate the intensional and extensional parts separately
+* For space/time reasoning, you should prefer things that are close in space/time (and in fact, for reasoning about objects generally. You can find nearby things using the space/time servers
+* You can probably get past toddler-level AI without having to use predicate logic much. And it may be easier to convert 2+ place predicates into 1-place predicates (see EvaluationToMemberRule)
+'''
+
 class AbstractChainer(Logic):
     '''Has important utility methods for chainers.'''
     def __init__(self, atomspace):
@@ -44,7 +71,6 @@ class AbstractChainer(Logic):
         attentional_focus = get_attentional_focus(self._atomspace)
 
         atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
-
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
             if template.type == types.VariableNode:
@@ -52,6 +78,10 @@ class AbstractChainer(Logic):
             else:
                 root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
+
+            if len(all_atoms) == 0:
+                return None
+
             atom = self._select_from(template, s, all_atoms, allow_zero_tv, useAF=False)
 
         return atom
@@ -75,17 +105,27 @@ class AbstractChainer(Logic):
             return self._selectOne(atoms)
         else:
             # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
-            return random.choice(atoms)
+            # after modifying the score function,, it does
+            return self._selectOne(atoms)
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
-            return atom.av['sti']
+            sti = atom.av['sti']
+            if sti < 1:
+                return 1
+            else:
+                return sti
 
         def mixed_score(atom):
-            return int(sti_score(atom)*atom.tv.mean*atom.tv.confidence)
+            s = int(100*sti_score(atom) + 100*atom.tv.mean + 100*atom.tv.confidence)
+            if s < 1:
+                return 1
+            else:
+                return s
 
-        score = sti_score
+        #score = sti_score
+        score = mixed_score
 
         assert type(atoms[0]) == Atom
 
@@ -95,6 +135,7 @@ class AbstractChainer(Logic):
         for atom in atoms:
             current += score(atom)
             if current >= pick:
+                print 'choosing atom based on score',score(atom), atom
                 return atom
 
         assert False
@@ -119,9 +160,13 @@ class AbstractChainer(Logic):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
-        if atom.type in [types.InheritanceLink, types.SubsetLink]:
-            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
-            not_self_link    = atom.out[0] != atom.out[1]
+#        if atom.type in [types.InheritanceLink, types.SubsetLink, types.SimilarityLink]:
+#            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
+#            not_self_link    = atom.out[0] != atom.out[1]
+#            return not_self_link
+        if atom.arity == 2:
+            # heuristically assume that all selflinks are invalid!
+            not_self_link = atom.out[0] != atom.out[1]
             return not_self_link
         else:
             return True
@@ -178,6 +223,7 @@ class Chainer(AbstractChainer):
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
 
@@ -189,7 +235,7 @@ class Chainer(AbstractChainer):
         #self.produced_from = defaultdict(set)
         self.history_index = InferenceHistoryIndex()
 
-        self.history_atomspace = AtomSpace()
+        #self.history_atomspace = AtomSpace()
         # TODO actually load and save these. When loading it, rebuild the indexes above.
 
         # Record how often each Rule is used. To bias the Rule frequencies.
@@ -200,20 +246,23 @@ class Chainer(AbstractChainer):
         def constant_factory():
             return initial_frequency
         if learnRuleFrequencies:
-            self.learnRuleFrequencies = True
             self.rule_count = defaultdict(constant_factory)
 
-    def forward_step(self):
-        rule = self._select_rule()
+    def forward_step(self, rule=None):
+        if rule is None:
+            rule = self._select_rule()
 
+        print rule
         results = self._apply_forward(rule)
 
         return results
 
-    def backward_step(self):
-        rule = self._select_rule()
+    def backward_step(self, rule=None, target_atoms=None):
+        if rule is None:
+            rule = self._select_rule()
 
-        results = self._apply_backward(rule)
+        print rule
+        results = self._apply_backward(rule, target_outputs=target_atoms)
 
         return results
 
@@ -253,7 +302,9 @@ class Chainer(AbstractChainer):
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
         elif hasattr(rule, 'temporal_compute'):
             # All inputs ever, and then use the special temporal computation instead of revision.
-            all_input_tuples = self.history.lookup_all_applications(rule, specific_outputs)
+            past_input_tuples = self.history_index.lookup_all_applications(rule, specific_outputs)
+            all_input_tuples = [specific_inputs]+past_input_tuples
+
             (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
         else:
@@ -297,30 +348,51 @@ class Chainer(AbstractChainer):
 
     ### backward chaining implementation
 
-    def _apply_backward(self, rule):
-        # randomly choose suitable atoms for this rule's inputs
-            # choose a random atom matching the first input to the rule
-            # choose a random atom matching the second input to the rule, compatible with the first input
-            # etc
-            # it can fail if there are no compatible atoms
-        # if all inputs are found, then
-            # apply the rule and create the output
-            # give it an appropriate TV (using the formula and possibly revision)
-            # give it an STI boost
-            # record this inference in the InferenceHistoryRepository
+    def delete_queries(self, created_vars, subst):
+        # Delete any variables that have been bound to something (they're no longer required).
+        # Variables that haven't been bound become backward chaining queries
+        for var in created_vars:
+            if subst is None or (var in subst and subst[var] != var):
+                print 'removing', var
+                self.atomspace.remove(var, recursive=True)
 
-        (generic_inputs, generic_outputs, created_atoms) = rule.standardize_apart_input_output(self)
+    def _apply_backward(self, rule, target_outputs=None):
+        # target outputs is the exact series of outputs to produce. If you don't specify, it will choose outputs for you
+
+        # choose outputs if needed, and then choose some inputs to apply this rule with.
+
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         specific_outputs = []
-        empty_substitution = {}
-        subst = self._choose_outputs(specific_outputs, generic_outputs, empty_substitution)
+        subst = {}
+
+        print (generic_inputs, generic_outputs, created_vars)
+
+        if target_outputs is None:
+            subst = self._choose_outputs(specific_outputs, generic_outputs, subst)
+        else:
+            specific_outputs = target_outputs
+            for (template, atom) in zip(generic_outputs, target_outputs):
+                subst = self.unify(template, atom, subst)
+
+        print specific_outputs
 
         if not subst:
+            self.delete_queries(created_vars, subst)
             return None
 
         specific_inputs = []
         subst = self._choose_inputs(specific_inputs, generic_outputs, subst, allow_zero_tv = True)
+        found = len(subst) > 0
+
+        print specific_inputs
+
+        self.delete_queries(created_vars, subst)
+        if not found:
+            return None
 
         print rule, map(str,specific_outputs), map(str,specific_inputs)
+
+        # Delete any variables
 
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
@@ -342,7 +414,6 @@ class Chainer(AbstractChainer):
             return (specific_outputs, specific_inputs)
 
     def _choose_outputs(self, return_outputs, output_templates, subst_so_far):
-        return_inputs = [x for x in output_templates]
 
         for i in xrange(0, len(output_templates)):
             template = output_templates[i]
@@ -358,7 +429,7 @@ class Chainer(AbstractChainer):
             if subst_so_far == None:
                 import pdb; pdb.set_trace()
 
-            return_outputs[i] = atom
+            return_outputs.append(atom)
 
         return subst_so_far
 
@@ -384,6 +455,8 @@ class Chainer(AbstractChainer):
 
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
+
+        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
 
     def _give_stimulus(self, atom):
         # Arbitrary
@@ -456,7 +529,8 @@ class Chainer(AbstractChainer):
         if not new:
             return False
         else:
-            self._add_to_inference_repository(rule, outputs, inputs)
+            #self._add_to_inference_repository(rule, outputs, inputs)
+            return True
 
     def _add_to_inference_repository(self, rule, outputs, inputs):
         TA = self.history_atomspace
@@ -495,4 +569,14 @@ class Chainer(AbstractChainer):
                 return rule
 
         raise ValueError("lookup_rule: rule doesn't exist "+rule_name)
+
+    def test_rules(self, sample_count=20):
+        for rule in self.rules:
+            # Do a series of samples; different atoms with the same rules.
+            import random; random.seed(0)
+
+            print 'Testing',rule
+
+            for i in xrange(0, sample_count):
+                self.forward_step(rule=rule)   
 

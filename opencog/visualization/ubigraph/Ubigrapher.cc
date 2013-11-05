@@ -93,9 +93,9 @@ void Ubigrapher::watchSignals()
 {
     if (isConnected()) {
         if (!listening) {
-            c_add = space.atomSpaceAsync->addAtomSignal(
+            c_add = space.addAtomSignal(
                     boost::bind(&Ubigrapher::handleAddSignal, this, _1));
-            c_remove = space.atomSpaceAsync->removeAtomSignal(
+            c_remove = space.removeAtomSignal(
                     boost::bind(&Ubigrapher::atomRemoveSignal, this, _1));
             assert(c_add.connected() && c_remove.connected());
             listening = true;
@@ -227,7 +227,7 @@ void Ubigrapher::updateSizeOfType(Type t, property_t p, float multiplier, float 
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space.getHandleSet(out_hi, t, true);
+    space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         updateSizeOfHandle(h, p, multiplier, baseline);
@@ -307,7 +307,7 @@ void Ubigrapher::updateColourOfType(Type t, property_t p, unsigned char startRGB
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     
     // Get all atoms (and subtypes) of type t
-    space.getHandleSet(out_hi, t, true);
+    space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         updateColourOfHandle(h, p, startRGB, endRGB, hard);
@@ -321,7 +321,7 @@ void Ubigrapher::applyStyleToType(Type t, int style)
     HandleSeq hs;
     std::back_insert_iterator< HandleSeq > out_hi(hs);
     // Get all atoms (and subtypes) of type t
-    space.getHandleSet(out_hi, t, true);
+    space.getHandlesByType(out_hi, t, true);
     applyStyleToHandleSeq(hs, style);
 }
 
@@ -332,7 +332,7 @@ void Ubigrapher::applyStyleToTypeGreaterThan(Type t, int style, property_t p, fl
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    space.getHandleSet(out_hi, t, true);
+    space.getHandlesByType(out_hi, t, true);
     // For each, get prop, scale... and 
     foreach (Handle h, hs) {
         bool okToApply = true;

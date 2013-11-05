@@ -66,7 +66,7 @@ void EntityExperienceAgent::run()
         HandleSeq links, link(2);
         link[0] = Handle::UNDEFINED;
         link[1] = Handle::UNDEFINED;
-        atomSpace.getHandleSet( std::back_inserter(links), link, &type[0],
+        atomSpace.getHandlesByOutgoing( std::back_inserter(links), link, &type[0],
                                  &subclasses[0], 2, REFERENCE_LINK, false );
         unsigned int i;
         for( i = 0; i < links.size( ); ++i ) {
@@ -85,13 +85,13 @@ void EntityExperienceAgent::run()
         {
             Type type[] = { SEME_NODE, CONCEPT_NODE };
             HandleSeq link = { semeNodes[i], Handle::UNDEFINED };
-            atomSpace.getHandleSet( std::back_inserter( typeLinks ), link, 
+            atomSpace.getHandlesByOutgoing( std::back_inserter( typeLinks ), link, 
                                      &type[0], NULL, 2, INHERITANCE_LINK, false );
         }
         {
             Type type[] = { CONCEPT_NODE, SEME_NODE };
             HandleSeq link = { Handle::UNDEFINED, semeNodes[i] };
-            atomSpace.getHandleSet( std::back_inserter( classLinks ), link, 
+            atomSpace.getHandlesByOutgoing( std::back_inserter( classLinks ), link, 
                                      &type[0], NULL, 2, REFERENCE_LINK, false );
         }
         

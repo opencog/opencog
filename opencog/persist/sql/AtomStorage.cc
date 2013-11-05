@@ -30,6 +30,7 @@
 #ifdef HAVE_SQL_STORAGE
 
 #include <stdlib.h>
+#include <memory>
 
 #include "AtomStorage.h"
 #include "odbcxx.h"
@@ -741,7 +742,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			break;
 		case INDEFINITE_TRUTH_VALUE:
 		{
-			IndefiniteTruthValuePtr itv = static_pointer_cast<IndefiniteTruthValue>(tv);
+			IndefiniteTruthValuePtr itv = std::static_pointer_cast<IndefiniteTruthValue>(tv);
 			STMTF("stv_mean", itv->getL());
 			STMTF("stv_count", itv->getU());
 			STMTF("stv_confidence", itv->getConfidenceLevel());

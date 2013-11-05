@@ -66,7 +66,7 @@ void ImportanceSpreadingAgent::spreadImportance()
     std::vector<Handle>::iterator hi;
     std::back_insert_iterator< std::vector<Handle> > out_hi(atoms);
 
-    a->getHandleSet(out_hi, NODE, true);
+    a->getHandlesByType(out_hi, NODE, true);
     logger().fine("---------- Spreading importance for atoms with threshold above %d", spreadThreshold);
 
     hi = atoms.begin();

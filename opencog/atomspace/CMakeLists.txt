@@ -14,7 +14,6 @@ ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
     AtomSpace.cc
-    AtomSpaceAsync.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc
@@ -72,12 +71,10 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-    ASRequest.h
     Atom.h
     AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
-    AtomSpaceAsync.h
     AtomSpaceImpl.h
     AtomTable.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
@@ -119,11 +116,3 @@ INSTALL (FILES
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
 
-ADD_EXECUTABLE (atomspace_async
-    atomspace_async_tester
-)
-
-TARGET_LINK_LIBRARIES (atomspace_async
-	atomspace
-	cogutil
-)

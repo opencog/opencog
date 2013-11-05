@@ -476,7 +476,7 @@ bool CogServer::loadModule(const std::string& filename)
 // TODO FIXME I guess this needs to be different for windows.
 #define PATH_SEP '/'
     // The module file identifier does NOT include the file path!
-    string fi = filename;
+    std::string fi = filename;
     size_t path_sep = fi.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         fi.erase(0, path_sep+1);
@@ -583,7 +583,7 @@ std::string CogServer::listModules()
         ModuleData moduleData = startIterator->second;
 
         // Only list the names, not the filenames.
-        if (module_id.find(".so", 0) != string::npos)
+        if (module_id.find(".so", 0) != std::string::npos)
         {
             // Add the module_id to our stream
             oss
@@ -605,7 +605,7 @@ std::string CogServer::listModules()
 bool CogServer::unloadModule(const std::string& moduleId)
 {
     // The module file identifier does NOT include the file path!
-    string f = moduleId;
+    std::string f = moduleId;
     size_t path_sep = f.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         f.erase(0, path_sep+1);
@@ -648,7 +648,7 @@ bool CogServer::unloadModule(const std::string& moduleId)
 CogServer::ModuleData CogServer::getModuleData(const std::string& moduleId)
 {
     // The module file identifier does NOT include the file path!
-    string f = moduleId;
+    std::string f = moduleId;
     size_t path_sep = f.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         f.erase(0, path_sep+1);

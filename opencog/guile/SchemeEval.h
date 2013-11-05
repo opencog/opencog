@@ -115,13 +115,13 @@ class SchemeEval
 				singletonInstance = new SchemeEval(atomspace);
 			}
 			else if (atomspace && 
-				singletonInstance->atomspace->atomSpaceAsync != atomspace->atomSpaceAsync)
+				&singletonInstance->atomspace->getImpl() != &atomspace->getImpl())
 			{
 				 // Someone is trying to initialise the Scheme interpretator
 				 // on a different AtomSpace. because of the singleton design
 				 // there is no easy way to support this...
 				 throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
-									 " scm interpretor with different AtomSpaceAsync ptr!"));
+									 " scm interpretor with different AtomSpaceImpl ptr!"));
 			}
 			return *singletonInstance;
 		}

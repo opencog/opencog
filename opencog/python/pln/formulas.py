@@ -34,6 +34,15 @@ def deductionSimpleFormula(tvs):
     
     return [TruthValue(sAC, nAC)]
 
+# better deduction formula based on concept geometry
+def deductionGeometryFormula(tvs):
+    [AB, BC] = tvs
+
+    sAC = AB.mean*BC.mean / min(AB.mean+BC.mean, 1)
+    nAC = AB.count+BC.count
+
+    return [TruthValue(sAC, nAC)]
+
 def inversionFormula(tvs):
     [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
     
@@ -42,20 +51,20 @@ def inversionFormula(tvs):
     
     return [TruthValue(sBA, nBA)]
 
-def crispModusPonensFormula(tvs, U):
+def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     true = 0.5
-    if all(x > true for x in [sAB, nAB, sA, nA]):
-        return (1, confidence_to_count(0.99))
+    if all(x >= true for x in [sAB, nAB, sA, nA]):
+        return [TruthValue(1, confidence_to_count(0.99))]
     else:
         return [TruthValue(0, 0)]
 
 def modusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
-    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
-        return crispModusPonensFormula(tvs)
+#    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
+#        return crispModusPonensFormula(tvs)
 
     # P(B|not A) -- how should we find this?
     #BNA = TruthValue(0.5, 0.01)
@@ -151,10 +160,16 @@ def mem2InhFormula(tvs):
 
     return [TruthValue(mem_tv.mean, count)]
 
+def fuzzy_and(mean0, mean1):
+    return min(mean0, mean1)
+
+def fuzzy_or(mean0, mean1):
+    return max(mean0, mean1)
+
 def subsetEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
-    mem_a = mem_a_tv.mean > 0.5
-    mem_b = mem_b_tv.mean > 0.5
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
 
     # P(x in B | x in A)
 
@@ -168,10 +183,19 @@ def subsetEvaluationFormula(tvs):
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
 
+def subsetFuzzyEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+
+    fuzzy_and_ab = fuzzy_and(mem_a_tv.mean, mem_b_tv.mean)
+
+    # P(x in B | x in A) = P(x in A ^ x in B) / P(x in A)
+
+    # ... TODO implement this formula. my head got sore --Jade
+
 def similarityEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
-    mem_a = mem_a_tv.mean > 0.5
-    mem_b = mem_b_tv.mean > 0.5
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
 
     # tv = |A and B| / |A or B|
 
@@ -184,6 +208,19 @@ def similarityEvaluationFormula(tvs):
     else:
         # increment |A or B| without changing |A and B|
         return [TruthValue(0, 1)]
+
+def extensionalEvaluationFormula(tvs):
+    '''Inputs: Membership x A.tv, Membership x B.tv
+Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SimilarityLink A B.tv'''
+    subsetAB = subsetEvaluationFormula(tvs)
+    subsetBA = subsetEvaluationFormula(reversed(tvs))
+
+    similarityAB = similarityEvaluationFormula(tvs)
+
+    # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
+    tvs = subsetAB + subsetBA + similarityAB
+    for tv in tvs: print str(tv)
+    return tvs
 
 def extensionalSimilarityFormula(tvs):
     [and_tv, or_tv] = tvs
@@ -214,26 +251,31 @@ def revisionFormula(tvs):
     # revise two truth values
 
     n = x.count+y.count
-    ## it should be a confidence-weighted average
-    #weight_1 = x.count*1.0/n
-    #weight_2 = y.count*1.0/n
+    weight_1 = x.count*1.0/n
+    weight_2 = y.count*1.0/n
     # TODO maybe check for overlap
-#    s = (weight_1*x.mean+y.mean)/2.0
-    s = (x.mean+y.mean)/2.0
+    s = (weight_1*x.mean + weight_2*y.mean)
     return TruthValue(s, n)
+
+def andBreakdownFormula(tvs):
+    [A, AND_AB] = tvs
+
+    if A.mean == 0:
+        return [TruthValue(0, 0)]
+
+    sB = AND_AB.mean / A.mean
+    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+
+    return [TruthValue(sB, nB)]
+
+def orBreakdownFormula(tvs):
+    [A, OR_AB] = tvs
+
+    sB = OR_AB.mean / (1-A.mean)
+    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+
+    return [TruthValue(sB, nB)]
 
 def low(n):
     return max(n, 0.00001)
-
-# temporal formulas
-def beforeFormula(dist1, dist2):
-    times_event1 = [int(t) for t in dist1.keys()]
-    times_event2 = [int(t) for t in dist2.keys()]
-    
-    if all(t_event1 < t_event2 for t_event1 in times_event1 for t_event2 in times_event2):
-        strength = 1
-    else:
-        strength = 0
-    
-    return strength
 
