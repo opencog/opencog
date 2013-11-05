@@ -61,12 +61,6 @@ Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
     _attentionValue = av;
 
     if (not tv->isNullTv()) _truthValue = tv;
-
-    // XXX FIXME for right now, all atoms will always keep their
-    // incoming sets.  In the future, this should only be set by
-    // the user, or by the atomtable, when an atom is added to
-    // the atomtable.
-    keep_incoming_set();
 }
 
 Atom::~Atom()
@@ -328,6 +322,13 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
 #endif /* INCOMING_SET_SIGNALS */
     _incoming_set->_iset.erase(a);
+}
+
+size_t Atom::getIncomingSetSize()
+{
+    if (NULL == _incoming_set) return 0;
+    std::lock_guard<std::mutex> lck (_mtx);
+    return _incoming_set->_iset.size();
 }
 
 // We return a copy here, and not a reference, because the set itself

@@ -65,6 +65,7 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
              benchmarker.setMethod("getHandleSet");
+             benchmarker.setMethod("removeAtom");
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;

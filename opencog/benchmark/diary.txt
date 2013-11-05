@@ -521,3 +521,43 @@ Summary: pretty much everything got faster for every layer.
   getIncomingSet   1111          833             232            5.32
 
 
+5 November 2013
+---------------
+Remeasure after ripping out the AtomSpaceAsync wrapper.  Basically, expect
+the atomspace and atomtable performance to be nearly identical (there are
+still some differences and minor additinal layers, but they're mosty the
+same).  There is no AtomSpaceImpl any more, so not measured.
+
+Summary:
+ -- AtomTable is not as good as the April 1 results; which are 2x to 2.5x 
+    faster than below.  The primary reason for this is the use of
+    std::shared_ptr for all pointers.  Clearly, moving to garbage collection
+    seems to be the right thing to do, long-run.
+
+ -- AtomSpace is 6x to 15x faster. This is due to the removal of the
+    excessive data copying of AtomSpaceAsync, as well as less locking
+    for most operations.
+
+ -- We are not measuring threaded performance here, but that should also
+    much much better, maybe in the 20x-50x range, since the AtomSpaceAsync
+    had a single lock and thus huge lock contention.  Now, most lock 
+    contention is gone, except for atomtable operations (all getHandleSet
+    calls require index lookups and so will contend).
+ 
+                   -A -X         -A          -A -g
+   test           AtomTable    AtomSpace    Scheme
+   name           K-ops/sec    K-ops/sec   K-ops/sec
+   ----           ---------    ---------   ---------
+  noop             5000        5000          
+  addNode           196         185         
+  addLink            87          78.1       
+  getType          1000         769        
+  getTV             769         833       
+  setTV             555         455      
+  getHandleSet        0.471       0.426        
+  getNodeHandles     95.2        87.0
+  getOutgoingSet    769         588          
+  getIncomingSet    526         555         
+  removeAtom        161         156
+
+
