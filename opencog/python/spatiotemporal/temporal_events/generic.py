@@ -40,7 +40,9 @@ class TemporalEvent(list, TimeInterval):
         self.membership_function = MembershipFunction(self)
         bins_beginning = bins / 2
         bins_ending = bins - bins_beginning
-        list.__init__(self, TimeInterval(a, beginning, bins_beginning) + TimeInterval(ending, b, bins_ending))
+        self.interval_beginning = TimeInterval(a, beginning, bins_beginning)
+        self.interval_ending = TimeInterval(ending, b, bins_ending)
+        list.__init__(self, self.interval_beginning + self.interval_ending)
         TimeInterval.__init__(self, a, b, bins)
 
     def degree(self, time_step=None, a=None, b=None, interval=None):
@@ -71,16 +73,17 @@ class TemporalEvent(list, TimeInterval):
 
     def plot(self):
         import matplotlib.pyplot as plt
-        x = self.to_datetime_list()
-        plt.plot(x, self.membership_function())
+        plt.plot(self.to_datetime_list(), self.membership_function())
         if hasattr(self.distribution_beginning, 'plot'):
             self.distribution_beginning.plot()
         else:
-            plt.plot(x, self.distribution_beginning.pdf(self))
+            plt.plot(self.interval_beginning.to_datetime_list(),
+                     self.distribution_beginning.pdf(self.interval_beginning))
         if hasattr(self.distribution_ending, 'plot'):
             self.distribution_ending.plot()
         else:
-            plt.plot(x, self.distribution_ending.pdf(self))
+            plt.plot(self.interval_ending.to_datetime_list(),
+                     self.distribution_ending.pdf(self.interval_ending))
         return plt
 
     @property
@@ -125,10 +128,6 @@ class TemporalEventPiecewiseLinear(TemporalEvent):
         TemporalEvent.__init__(self, distribution_beginning, distribution_ending, bins=bins)
         self._list = sorted(set(input_list_beginning + input_list_ending))
         self.membership_function = FunctionPiecewiseLinear(self.to_dict(), FUNCTION_ZERO)
-
-    def degree_in_interval(self, a=None, b=None, interval=None):
-        interval = self._interval_from_self_if_none(a, b, interval)
-        return self.membership_function.integrate(interval.a, interval.b) / (interval.b - interval.a)
 
     def __getitem__(self, index):
         return self._list.__getitem__(index)

@@ -19,11 +19,10 @@ class TimeInterval(object):
     _datetime = None
     _iter_step = None
 
-    def __init__(self, a, b, bins=50):
+    def __init__(self, a=None, b=None, bins=50):
         """
         a and b can be in either datetime or unix time
         """
-        assert a < b, "'b' should be greater than 'a'"
         self._a = UnixTime(a)
         self._b = UnixTime(b)
         self.bins = bins
@@ -74,21 +73,17 @@ class TimeInterval(object):
         if value != self._iter_step:
             assert isinstance(value, int), value > 0
             self._bins = value
-            self._iter_step = (self.duration + 1) / value
+            if value == 1:
+                self._iter_step = self.duration
+            else:
+                self._iter_step = self.duration / (value - 1)
 
     def __add__(self, other):
         if not isinstance(other, TimeInterval):
             raise TypeError("unsupported operand type(s) for +: '{0}' and '{1}'".format(
                 self.__class__.__name__, other.__class__.__name__
             ))
-        _list = sorted(self.to_list() + other.to_list())
-        result = TimeInterval(_list[0], _list[-1], self.bins + other.bins)
-        result._list = _list
-        result.__getitem__ = _list.__getitem__
-        result.__len__ = _list.__len__
-        result.__iter__ = _list.__iter__
-        result.__reversed__ = _list.__reversed__
-        return result
+        return sorted(self.to_list() + other.to_list())
 
     def __getitem__(self, index):
         if index >= len(self):

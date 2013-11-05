@@ -1,8 +1,10 @@
 from math import fabs
-from numpy import linspace, convolve
-from spatiotemporal.temporal_events import TemporalEvent
+from numpy import convolve
+from scipy.stats.distributions import uniform_gen
+from spatiotemporal.temporal_events.trapezium_formulas import function_convolution_uniform
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
+from spatiotemporal.time_intervals import TimeInterval
 from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear
 
 __author__ = 'keyvan'
@@ -12,12 +14,15 @@ def function_convolution_generic(dist_1, dist_2, bins=50):
     a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
     a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
 
+    if (type(dist_1.dist), type(dist_2.dist)) is (uniform_gen, uniform_gen):
+        return function_convolution_uniform((a1, b1), (a2, b2))
+
     convolution_bounds_a, convolution_bounds_b = min(a1, a2), max(b1, b2)
 
     delta = fabs(convolution_bounds_a - convolution_bounds_b) / bins
-    range = linspace(convolution_bounds_a, convolution_bounds_b, bins)
-    x = [dist_1.pdf(t) for t in range]
-    y = [dist_2.pdf(t) for t in reversed(range)]
+    convolution_interval = TimeInterval(convolution_bounds_a, convolution_bounds_b, bins)
+    x = [dist_1.pdf(t) for t in convolution_interval]
+    y = [dist_2.pdf(t) for t in reversed(convolution_interval)]
 
     c = convolve(x, y)
     dictionary_convolution = {}
@@ -103,6 +108,10 @@ def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
         convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
         convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
 
+        'S':
+        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+
         'd':
         convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
         convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
@@ -132,23 +141,15 @@ def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
     return result
 
 
-def empirical_convolve(event_1, event_2, prec=0.25, size=50000):
+def test(event_1, event_2, prec=0.25, size=10000):
     import matplotlib.pyplot as plt
 
     times_overlapped = float(0)
     times_preceded = float(0)
     times_met = float(0)
-    size = 50000
     x = []
 
-
     for i in xrange(size):
-        rv1 = beginning_a.rvs()
-        if rv1 <= 0:
-            rv1 = 0.01
-        rv2 = ending_a.rvs()
-        if rv2 >= 12:
-            rv2 = 11.99
         instance_1 = event_1.instance()
         instance_2 = event_2.instance()
         d = instance_1.b - instance_2.a
@@ -164,33 +165,74 @@ def empirical_convolve(event_1, event_2, prec=0.25, size=50000):
     o = times_overlapped / size
     p = times_preceded / size
     m = times_met / size
-    print 'before:', p
-    print 'same:', m
     print 'after:', o
+    print 'same:', m
+    print 'before:', p
 
-    #plt.ylim(ymax=0.15)
     plt.hist(x, 50, normed=True)
 
 
 if __name__ == '__main__':
     from scipy.stats import norm, uniform, expon
+    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
     from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
+    import matplotlib.pyplot as plt
 
-    #beginning_a, ending_a = expon(loc=1, scale=4.5), norm(loc=30, scale=2)
-    #beginning_b, ending_b = expon(loc=25, scale=4.5), norm(loc=60, scale=2)
+    prec = 0.25
 
-    #beginning_a, ending_a = uniform(loc=1, scale=4), uniform(loc=6, scale=4)
-    #beginning_b, ending_b = uniform(loc=0, scale=11), uniform(loc=13, scale=4)
+    for event_1, event_2 in [
+        #(
+        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+        #),
 
-    beginning_a, ending_a = uniform(loc=4, scale=1), uniform(loc=10, scale=2)
-    beginning_b, ending_b = uniform(loc=2, scale=4), uniform(loc=7, scale=7)
+        (
+            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
+        ),
 
-    event_1 = TemporalEvent(beginning_a, ending_a)
-    event_2 = TemporalEvent(beginning_b, ending_b)
+        (
+            TemporalEvent(uniform(loc=4, scale=1), uniform(loc=10, scale=2)),
+            TemporalEvent(uniform(loc=2, scale=4), uniform(loc=7, scale=7))
+        ),
 
-    relations = temporal_relations_between(event_1, event_2, 0.25)
-    for predicate in relations:
-        print predicate, ':', relations[predicate]
+        (
+            TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+            TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+        ),
 
-    event_1.plot()
-    event_2.plot().show()
+        (
+            TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+            TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+        )
+    ]:
+        #plt = event_1.distribution_ending.plot()
+        #plt.ylim(ymin=-0, ymax=0.6)
+        #plt.show()
+        #break
+
+        relations = temporal_relations_between(event_1, event_2, prec)
+        for predicate in 'PMOfdSesDFomp':
+            if predicate == 'o':
+                print '-------------------------'
+            print predicate, ':', relations[predicate]
+            if predicate == 'p':
+                print '-------------------------'
+
+        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
+        plt = event_2.plot()
+        plt.figure()
+        fn = function_convolution_generic(event_1.distribution_ending, event_2.distribution_beginning)
+        before = NEGATIVE_INFINITY, -prec
+        same = -prec, prec
+        after = prec, POSITIVE_INFINITY
+        fn.integral(*before),
+        fn.integral(*same),
+        fn.integral(*after)
+        fn.plot()
+        test(event_1, event_2, prec)
+
+        #print event_1.distribution_ending.mean(), event_2.distribution_beginning.mean()
+
+        plt.show()

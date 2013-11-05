@@ -5,7 +5,7 @@ from spatiotemporal.time_intervals import TimeInterval
 from spatiotemporal.unix_time import random_time, UnixTime
 from utility.generic import convert_dict_to_sorted_lists
 from utility.geometric import Function, FunctionPiecewiseLinear,\
-    FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE
+    FunctionHorizontalLinear, FunctionComposite, FUNCTION_ZERO, FUNCTION_ONE, FunctionLinear
 from numpy import PINF as POSITIVE_INFINITY, NINF as NEGATIVE_INFINITY
 from utility.numeric.globals import EPSILON
 
@@ -21,6 +21,10 @@ class MembershipFunction(Function):
 
 
 class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
+    dist = 'ProbabilityDistributionPiecewiseLinear'
+    _mean = None
+    asd = None
+
     def __init__(self, dictionary_input_output):
         cdf_input_list, cdf_output_list = convert_dict_to_sorted_lists(dictionary_input_output)
         list.__init__(self, cdf_input_list)
@@ -36,25 +40,40 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             pdf_y_intercept = fabs(self.cdf.derivative((a + b) / 2.0))
             pdf_output_list.append(pdf_y_intercept)
             dictionary_bounds_function[bounds] = FunctionHorizontalLinear(pdf_y_intercept)
+            #dictionary_bounds_function[bounds] = FunctionLinear(
+            #    x_0=a, y_0=pdf_y_intercept - pdf_y_intercept / 2.0,
+            #    x_1=b, y_1=pdf_y_intercept + pdf_y_intercept / 2.0)
 
         self.pdf = FunctionComposite(dictionary_bounds_function,
                                      function_undefined=FUNCTION_ZERO, domain=self)
 
         self.roulette_wheel = []
-        mean_lower_bound = 0
-        mean_set = False
+        #center_of_mass_lower_bound = 0
+        #center_of_mass_set = False
+        maximum = 0
+        #self._mean = 0
         for bounds in sorted(self.pdf.dictionary_bounds_function):
             (a, b) = bounds
             if a in [NEGATIVE_INFINITY, POSITIVE_INFINITY] and b in [NEGATIVE_INFINITY, POSITIVE_INFINITY]:
                 continue
             share = self.cdf(b)
-            if not mean_set and share > 0.5:
-                self._mean = UnixTime(self._calculate_mean(mean_lower_bound, b))
-                mean_set = True
-            mean_lower_bound = b
             self.roulette_wheel.append((a, b, share))
 
-    def _calculate_mean(self, lower_bound, upper_bound):
+            #if not center_of_mass_set and share > 0.5:
+            #    self._center_of_mass = UnixTime(self._calculate_center_of_mass(center_of_mass_lower_bound, b))
+            #    center_of_mass_set = True
+            #center_of_mass_lower_bound = b
+
+            #self._mean += self.pdf.integral(a, b) * self.pdf((b - a) / 2.0 + a)
+
+            middle = (b - a) / 2.0 + a
+            middle_value = self.pdf(middle)
+            if middle_value > maximum:
+                self._mean = middle
+                maximum = middle_value
+        pass
+
+    def _calculate_center_of_mass(self, lower_bound, upper_bound):
         while True:
             distance = fabs(upper_bound - lower_bound)
             target = lower_bound - distance / 2
@@ -69,6 +88,7 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
                 upper_bound = target
 
     def mean(self):
+        #return self._center_of_mass
         return self._mean
 
     def interval(self, alpha):
@@ -106,6 +126,9 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             y_axis.append(self.pdf(time_step + EPSILON))
         plt.plot(x_axis, y_axis)
         return plt
+
+    def __hash__(self):
+        return object.__hash__(self)
 
     def __repr__(self):
         return TimeInterval.__repr__(self)
