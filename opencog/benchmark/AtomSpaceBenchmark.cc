@@ -215,6 +215,9 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName)
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getOutgoingSet);
     } else if (_methodName == "getIncomingSet") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getIncomingSet);
+    } else {
+        std::cerr << "Error: specified a bad test name: " << _methodName << std::endl;
+        exit(1);
     }
     methodNames.push_back( _methodName);
 }
@@ -352,7 +355,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         if (buildTestData) buildAtomSpace(atomCount, percentLinks, false);
         UUID_end = TLB::getMaxUUID();
 
-        doBenchmark(methodNames[i],methodsToTest[i]);
+        doBenchmark(methodNames[i], methodsToTest[i]);
 
         if (testKind == BENCH_TABLE)
             delete atab;
