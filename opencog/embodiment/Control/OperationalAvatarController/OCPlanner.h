@@ -310,6 +310,8 @@ protected:
 
      SpaceServer::SpaceMap* curMap;
 
+     SpaceServer::SpaceMap* curImaginaryMap;
+
      // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
      HandleSeq imaginaryHandles;
 
@@ -368,6 +370,16 @@ protected:
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      int checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible);
+
+     // return how many states in the temporaryStateNodes this rule will dissatisfy
+     // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
+     // @ negativeGoal:return if the effect is opposite to the goal(fowardState)
+     int checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bool &isDiffStateOwnerType, bool &negativeGoal, bool checkSpaceMapAffect = false);
+
+     // return how many states in the temporaryStateNodes this rule will dissatisfied by the effect of this action when it's executed in the space map
+     int checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState);
+
+     bool isActionChangeSPaceMap(PetAction* action);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 

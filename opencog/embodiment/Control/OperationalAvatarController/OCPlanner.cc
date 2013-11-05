@@ -99,6 +99,17 @@ StateNode* RuleNode::getDeepestBackwardStateNode() const
     return lastedStateNode;
 }
 
+bool OCPlanner::isActionChangeSPaceMap(PetAction* action)
+{
+    ActionTypeCode type = action->getType().getCode();
+
+    if ( (type== pai::EAT_CODE) || (type == pai::MOVE_TO_OBJ_CODE)
+         || (type == pai::WALK_CODE) || (type== pai::BUILD_BLOCK_CODE) )
+        return true;
+    else
+        return false;
+}
+
 bool compareRuleNodeDepth (const RuleNode* one, const RuleNode* other)
 {
     // so , the deeper rule node will be put front
@@ -220,8 +231,6 @@ void StateNode::calculateNodesDepth()
         }
 
     }
-
-
 }
 
 SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNode)
@@ -728,7 +737,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         outputStateInfo(curStateNode->state,true);
         cout<<std::endl;
 
-        SpaceServer::SpaceMap* curImaginaryMap;
         curImaginaryMap = getClosestBackwardSpaceMap(curStateNode);
 
         // Set this cloned spaceMap for Inquery
@@ -843,7 +851,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 curStateNode->candidateRules.pop_front();
 
             }
-
 
         }
         else //  we have  tried to achieve this state node before,which suggests we have found all the candidate rules
@@ -1177,14 +1184,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 // only check the state nodes without backward rule node,
                 // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
-                if (((StateNode*)(*sait))->backwardRuleNode == 0)
+                if (((StateNode*)(*sait))->backwardRuleNode != 0)
                 {
                      ++ sait;
                     continue;
                 }
 
-                // the state nodes whose backward rule node has a lower depth than this effect state node, will not be affected by this effect
-                if ((*(StateNode*)(*sait)) < (*newStateNode))
+                // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+                // so this state node will not be affected by this effect.
+                if ( (*newStateNode) < (*(StateNode*)(*sait)))
                 {
                      ++ sait;
                     continue;
@@ -1576,6 +1584,144 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossib
     return satisfiedPreconNum;
 }
 
+int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState)
+{
+    if (! isActionChangeSPaceMap(ruleNode->originalRule->action))
+        return 0;
+
+    int negativeNum = 0;
+    SpaceServer::SpaceMap*  clonedCurImaginaryMap = curImaginaryMap->clone();
+    executeActionInImaginarySpaceMap(ruleNode,clonedCurImaginaryMap);
+    Inquery::setSpaceMap(clonedCurImaginaryMap);
+
+    list<StateNode*>::iterator sait;
+
+    for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
+    {
+        StateNode* tempStateNode = (StateNode*)(*sait);
+
+        // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+        if (tempStateNode->forwardRuleNode == 0)
+           continue;
+
+        // only check the state nodes without backward rule node,
+        // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+        if (tempStateNode->backwardRuleNode != 0)
+            continue;
+
+        // only check the state nodes need real time inquery in the space map
+        if (! tempStateNode->state->need_inquery)
+            continue;
+
+        // only check the StateNode which is more backward than the input fowardState
+        // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+        // so this state node will not be affected by this effect.
+        if ((*fowardState) < (*tempStateNode))
+            continue;
+
+        float sd;
+
+        // check if this state has been negative
+        if (! checkIsGoalAchievedInRealTime(tempStateNode->state, sd))
+            negativeNum ++;
+
+    }
+
+    // set back the space map for inquery
+    Inquery::setSpaceMap(curImaginaryMap);
+    delete clonedCurImaginaryMap;
+
+
+}
+
+int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bool &isDiffStateOwnerType, bool &negativeGoal)
+{
+    int negateveStateNum = 0;
+    negativeGoal = false;
+    isDiffStateOwnerType = false;
+
+    // check all the effects:
+    vector<EffectPair>::iterator effectItor;
+
+    for (effectItor = rule->effectList.begin(); effectItor != rule->effectList.end(); ++ effectItor)
+    {
+        Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
+
+        State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings, false,false);
+
+        if (! effState)
+            continue;
+
+        if (! Effect::executeEffectOp(effState,e,ruleNode->currentAllBindings))
+        {
+            delete effState;
+            continue;
+        }
+
+        if (effState->isSameState(*(fowardState->state)))
+        {
+            if (e->ifCheckStateOwnerType )
+            {
+                if (! e->state->isStateOwnerTypeTheSameWithMe( *(fowardState->state)) )
+                {
+                    isDiffStateOwnerType = true;
+                    return 1000;
+                }
+            }
+
+            float satDegree;
+            if (! effState->isSatisfied(*(fowardState->state),satDegree))
+            {
+                negativeGoal = true;
+                delete effState;
+                return 1000;
+            }
+        }
+
+        list<StateNode*>::iterator sait;
+
+        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
+        {
+            StateNode* tempStateNode = (StateNode*)(*sait);
+            // skip the current state node
+            if (fowardState == tempStateNode)
+                continue;
+
+            // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+            if (tempStateNode->forwardRuleNode == 0)
+               continue;
+
+            // only check the state nodes without backward rule node,
+            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+            if (tempStateNode->backwardRuleNode != 0)
+                continue;
+
+            // only check the StateNode which is more backward than the input fowardState
+            // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+            // so this state node will not be affected by this effect.
+            if ((*fowardState) < (*tempStateNode))
+                continue;
+
+            if (effState->isSameState( *(tempStateNode)->state ))
+            {
+                // check if this effect unsatisfy this state
+                float satDegree;
+                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
+                {
+                    negateveStateNum ++;
+                }
+                else
+                    continue;
+            }
+
+        }
+
+        delete effState;
+    }
+
+
+}
+
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
                                         bool &isDiffStateOwnerType, bool &preconImpossible, bool onlyCheckIfNegativeGoal)
 {
@@ -1597,6 +1743,8 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
         }
     }
 
+    tmpRuleNode->updateCurrentAllBindings();
+
     negateveStateNum = 0;
     satisfiedPreconNum = 0;
     negativeGoal = false;
@@ -1604,79 +1752,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     preconImpossible = false;
 
     // check all the effects:
-    vector<EffectPair>::iterator effectItor;
-
-    for (effectItor = rule->effectList.begin(); effectItor != rule->effectList.end(); ++ effectItor)
-    {
-        Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
-
-        State* effState =  Rule::groundAStateByRuleParamMap(e->state, tmpRuleNode->currentBindingsFromForwardState, false,false);
-
-        if (! effState)
-            continue;
-
-        if (! Effect::executeEffectOp(effState,e,tmpRuleNode->currentBindingsFromForwardState))
-        {
-            delete effState;
-            continue;
-        }
-
-        if (effState->isSameState(*(fowardState->state)))
-        {
-            if (e->ifCheckStateOwnerType )
-            {
-                if (! e->state->isStateOwnerTypeTheSameWithMe( *(fowardState->state)) )
-                {
-                    isDiffStateOwnerType = true;
-                    return;
-                }
-            }
-
-            float satDegree;
-            if (! effState->isSatisfied(*(fowardState->state),satDegree))
-            {
-                negativeGoal = true;
-                delete effState;
-                return;
-            }
-        }
-
-        list<StateNode*>::iterator sait;
-
-        for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
-        {
-            // skip the current state node
-            if (fowardState == (StateNode*)(*sait))
-                continue;
-
-            // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
-            if ((StateNode*)(*sait)->forwardRuleNode == 0)
-               continue;
- /*
-            // only check the state nodes without backward rule node,
-            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
-            if (((StateNode*)(*sait))->backwardRuleNode == 0)
-            {
-                continue;
-            }
-*/
-            if (effState->isSameState( *((StateNode*)(*sait))->state ))
-            {
-                // check if this effect unsatisfy this state
-                float satDegree;
-                StateNode* satStateNode = (StateNode*)(*sait);
-                if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
-                {
-                    negateveStateNum ++;
-                }
-                else
-                    continue;
-            }
-
-        }
-
-        delete effState;
-    }
+    negateveStateNum = checkEffectFitness(tmpRuleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     if (onlyCheckIfNegativeGoal)
     {
@@ -1685,7 +1761,6 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     }
 
     // check how many preconditions will be satisfied
-    tmpRuleNode->updateCurrentAllBindings();
     satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
 
     delete tmpRuleNode;
@@ -2641,7 +2716,6 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 
 ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons)
 {
-
     // check how many preconditions will be satisfied
     RuleNode* tmpRuleNode = new RuleNode(rule);
     tmpRuleNode->currentAllBindings = currentbindings;
