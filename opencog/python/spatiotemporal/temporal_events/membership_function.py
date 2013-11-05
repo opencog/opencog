@@ -40,13 +40,34 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
                                      function_undefined=FUNCTION_ZERO, domain=self.input_list)
 
         self.roulette_wheel = []
-        share = 0
-        for bounds in self.pdf.dictionary_bounds_function:
+        mean_lower_bound = 0
+        mean_set = False
+        for bounds in sorted(self.pdf.dictionary_bounds_function):
             (a, b) = bounds
             if a in [NEGATIVE_INFINITY, POSITIVE_INFINITY] and b in [NEGATIVE_INFINITY, POSITIVE_INFINITY]:
                 continue
-            share += self.pdf.dictionary_bounds_function[bounds].integral(a, b)
+            share = self.cdf(b)
+            if not mean_set and share > 0.5:
+                self._mean = self._calculate_mean(mean_lower_bound, b)
+                mean_set = True
+            mean_lower_bound = b
             self.roulette_wheel.append((a, b, share))
+
+    def _calculate_mean(self, mean_lower_bound, mean_upper_bound):
+        while True:
+            target = mean_upper_bound - fabs(mean_upper_bound - mean_lower_bound) / 2
+            if fabs(mean_upper_bound - mean_lower_bound) < EPSILON:
+                return UnixTime(mean_lower_bound)
+            distance = self.cdf(target) - 0.5
+            if fabs(distance) < EPSILON:
+                return UnixTime(target)
+            if distance > 0:
+                mean_upper_bound = target
+            else:
+                mean_lower_bound = target
+
+    def mean(self):
+        return self._mean
 
     def interval(self, alpha):
         if alpha == 1:

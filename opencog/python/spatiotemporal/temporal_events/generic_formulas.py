@@ -1,5 +1,5 @@
 from math import fabs
-from numpy import linspace, convolve, array
+from numpy import linspace, convolve
 from spatiotemporal.temporal_events import TemporalEvent
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
@@ -124,7 +124,9 @@ def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
         convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
     }
 
+    # Adjusting the integral error
     summed_up = sum(result.values())
+    print summed_up
     for predicate in result:
         result[predicate] /= summed_up
     return result
@@ -189,7 +191,6 @@ if __name__ == '__main__':
     relations = temporal_relations_between(event_1, event_2, 0.25)
     for predicate in relations:
         print predicate, ':', relations[predicate]
-    print sum(relations.values())
 
     event_1.plot()
     event_2.plot().show()
