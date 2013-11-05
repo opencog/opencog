@@ -1,8 +1,9 @@
 from datetime import datetime
+from math import fabs
 from numpy import isinf
 from scipy.stats.distributions import rv_frozen
 from scipy import integrate
-from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
+from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution, DISTRIBUTION_INTEGRAL_LIMIT
 from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
@@ -12,10 +13,8 @@ from utility.numeric.globals import EPSILON
 
 __author__ = 'keyvan'
 
-DISTRIBUTION_INTEGRAL_LIMIT = 1 - EPSILON
 
-
-class TemporalEvent(TimeInterval):
+class TemporalEvent(list, TimeInterval):
     _distribution_beginning = None
     _distribution_ending = None
     _beginning = None
@@ -29,19 +28,20 @@ class TemporalEvent(TimeInterval):
         if not isinstance(distribution_ending, rv_frozen):
             raise TypeError("'distribution_ending' should be a scipy frozen distribution")
         if not 0 < distribution_integral_limit <= 1:
-            raise TypeError("'distribution_integral_limit' should be in (0, 1]")
+            raise TypeError("'distribution_integral_limit' should be within (0, 1]")
         self._distribution_beginning = distribution_beginning
         self._distribution_ending = distribution_ending
 
-        a, beginning = calculate_bounds_of_probability_distribution(distribution_beginning,
-                                                                    distribution_integral_limit)
-        ending, b = calculate_bounds_of_probability_distribution(distribution_ending,
-                                                                 distribution_integral_limit)
+        a, beginning = calculate_bounds_of_probability_distribution(distribution_beginning, distribution_integral_limit)
+        ending, b = calculate_bounds_of_probability_distribution(distribution_ending, distribution_integral_limit)
 
-        TimeInterval.__init__(self, a, b, bins)
         self._beginning = UnixTime(beginning)
         self._ending = UnixTime(ending)
         self.membership_function = MembershipFunction(self)
+        bins_beginning = bins / 2
+        bins_ending = bins - bins_beginning
+        list.__init__(self, TimeInterval(a, beginning, bins_beginning) + TimeInterval(ending, b, bins_ending))
+        TimeInterval.__init__(self, a, b, bins)
 
     def degree(self, time_step=None, a=None, b=None, interval=None):
         """
@@ -98,10 +98,6 @@ class TemporalEvent(TimeInterval):
     @property
     def ending(self):
         return self._ending
-
-    def __repr__(self):
-        return '{0}(a: {1}, beginning: {2}, ending:{3}, b:{4})'.format(self.__class__.__name__,
-                                                                       self.a, self.beginning, self.ending, self.b)
 
     def __str__(self):
         return repr(self)

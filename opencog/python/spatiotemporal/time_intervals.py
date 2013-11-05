@@ -76,11 +76,25 @@ class TimeInterval(object):
             self._bins = value
             self._iter_step = (self.duration + 1) / value
 
+    def __add__(self, other):
+        if not isinstance(other, TimeInterval):
+            raise TypeError("unsupported operand type(s) for +: '{0}' and '{1}'".format(
+                self.__class__.__name__, other.__class__.__name__
+            ))
+        _list = sorted(self.to_list() + other.to_list())
+        result = TimeInterval(_list[0], _list[-1], self.bins + other.bins)
+        result._list = _list
+        result.__getitem__ = _list.__getitem__
+        result.__len__ = _list.__len__
+        result.__iter__ = _list.__iter__
+        result.__reversed__ = _list.__reversed__
+        return result
+
     def __getitem__(self, index):
         if index >= len(self):
             raise IndexError
-        value = self.a + index * self._iter_step
-        return UnixTime(value)
+        item = self.a + index * self._iter_step
+        return UnixTime(item)
 
     def __len__(self):
         return self.bins

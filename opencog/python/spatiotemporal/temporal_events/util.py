@@ -1,3 +1,4 @@
+from math import fabs
 from numpy import isinf
 from utility.numeric.globals import EPSILON
 

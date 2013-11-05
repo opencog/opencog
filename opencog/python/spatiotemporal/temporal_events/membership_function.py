@@ -20,10 +20,11 @@ class MembershipFunction(Function):
         return self.domain.distribution_beginning.cdf(time_step) - self.domain.distribution_ending.cdf(time_step)
 
 
-class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
+class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
     def __init__(self, dictionary_input_output):
-        self.input_list, cdf_output_list = convert_dict_to_sorted_lists(dictionary_input_output)
-        TimeInterval.__init__(self, self.input_list[0], self.input_list[-1])
+        cdf_input_list, cdf_output_list = convert_dict_to_sorted_lists(dictionary_input_output)
+        list.__init__(self, cdf_input_list)
+        TimeInterval.__init__(self, self[0], self[-1], 2)
         self.cdf = FunctionPiecewiseLinear(dictionary_input_output, function_undefined=FUNCTION_ZERO)
         self.cdf.dictionary_bounds_function[(self.b, POSITIVE_INFINITY)] = FUNCTION_ONE
         pdf_output_list = []
@@ -37,7 +38,7 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
             dictionary_bounds_function[bounds] = FunctionHorizontalLinear(pdf_y_intercept)
 
         self.pdf = FunctionComposite(dictionary_bounds_function,
-                                     function_undefined=FUNCTION_ZERO, domain=self.input_list)
+                                     function_undefined=FUNCTION_ZERO, domain=self)
 
         self.roulette_wheel = []
         mean_lower_bound = 0
@@ -48,23 +49,24 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
                 continue
             share = self.cdf(b)
             if not mean_set and share > 0.5:
-                self._mean = self._calculate_mean(mean_lower_bound, b)
+                self._mean = UnixTime(self._calculate_mean(mean_lower_bound, b))
                 mean_set = True
             mean_lower_bound = b
             self.roulette_wheel.append((a, b, share))
 
-    def _calculate_mean(self, mean_lower_bound, mean_upper_bound):
+    def _calculate_mean(self, lower_bound, upper_bound):
         while True:
-            target = mean_upper_bound - fabs(mean_upper_bound - mean_lower_bound) / 2
-            if fabs(mean_upper_bound - mean_lower_bound) < EPSILON:
-                return UnixTime(mean_lower_bound)
-            distance = self.cdf(target) - 0.5
-            if fabs(distance) < EPSILON:
-                return UnixTime(target)
-            if distance > 0:
-                mean_upper_bound = target
+            distance = fabs(upper_bound - lower_bound)
+            target = lower_bound - distance / 2
+            if distance < EPSILON:
+                return lower_bound
+            difference = self.cdf(target) - 0.5
+            if fabs(difference) < EPSILON:
+                return target
+            if difference > 0:
+                lower_bound = target
             else:
-                mean_lower_bound = target
+                upper_bound = target
 
     def mean(self):
         return self._mean
@@ -105,17 +107,8 @@ class ProbabilityDistributionPiecewiseLinear(TimeInterval, rv_frozen):
         plt.plot(x_axis, y_axis)
         return plt
 
-    def __getitem__(self, index):
-        return self.input_list.__getitem__(index)
-
-    def __len__(self):
-        return len(self.input_list)
-
-    def __iter__(self):
-        return iter(self.input_list)
-
-    def __reversed__(self):
-        return reversed(self.input_list)
+    def __repr__(self):
+        return TimeInterval.__repr__(self)
 
     def __str__(self):
         return repr(self)
