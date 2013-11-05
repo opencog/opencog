@@ -312,6 +312,8 @@ protected:
 
      SpaceServer::SpaceMap* curImaginaryMap;
 
+     StateNode* curStateNode; // the current selected subgoal node
+
      // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
      HandleSeq imaginaryHandles;
 
@@ -374,7 +376,7 @@ protected:
      // return how many states in the temporaryStateNodes this rule will dissatisfy
      // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
      // @ negativeGoal:return if the effect is opposite to the goal(fowardState)
-     int checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bool &isDiffStateOwnerType, bool &negativeGoal, bool checkSpaceMapAffect = false);
+     int checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bool &isDiffStateOwnerType, bool &negativeGoal);
 
      // return how many states in the temporaryStateNodes this rule will dissatisfied by the effect of this action when it's executed in the space map
      int checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState);
@@ -425,7 +427,7 @@ protected:
      //   if it's 0, it means it has no backward links yet, so only check in startStateNodes.
      //   if it's not 0, check state nodes in temporaryStateNodes with a depth  first , if cannot find in temporaryStateNodes, check in startStateNodes.
      bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,
-                                                 RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curStateNode = 0);
+                                                 RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curSNode = 0);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
      void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);

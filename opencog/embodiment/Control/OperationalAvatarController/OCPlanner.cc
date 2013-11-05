@@ -293,12 +293,12 @@ SpaceServer::SpaceMap* OCPlanner::getClosestBackwardSpaceMap(StateNode* stateNod
 // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
 // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
 bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,RuleNode *forwardRuleNode,
-                                                       bool ifCheckSameRuleNode, StateNode* curStateNode)
+                                                       bool ifCheckSameRuleNode, StateNode* curSNode)
 {
-    //   if curStateNode is 0, it means it has no backward links yet, so only check in startStateNodes.
-    //   if curStateNode is not 0, check temporaryStateNodes first , if cannot find in temporaryStateNodes, check in startStateNodes.
+    //   if curSNode is 0, it means it has no backward links yet, so only check in startStateNodes.
+    //   if curSNode is not 0, check temporaryStateNodes first , if cannot find in temporaryStateNodes, check in startStateNodes.
     satstateNode = 0;
-    if ( (curStateNode != 0) && (curStateNode->backwardRuleNode != 0))
+    if ( (curSNode != 0) && (curSNode->backwardRuleNode != 0))
     {
         // find this state in temporaryStateNodes
         if (findStateInTempStates(goalState,forwardRuleNode,satstateNode,ifCheckSameRuleNode))
@@ -634,6 +634,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     imaginaryHandles.clear(); // TODO: Create imaginary atoms
     satisfiedGoalStateNodes.clear();
     OCPlanner::goalRuleNode.backwardLinks.clear();
+    curStateNode = 0;
 
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
@@ -730,7 +731,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // unsatisfiedStateNodes.sort();
 
         // the state node with deeper depth will be solved first
-        StateNode* curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
+        curStateNode = (StateNode*)(unsatisfiedStateNodes.back());
 
         // out put selected subgoal debug info:
         cout<< std::endl << "Debug planning step " << tryStepNum <<": Selected subgoal :";
@@ -1617,12 +1618,17 @@ int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardSt
         // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
         // so this state node will not be affected by this effect.
         if ((*fowardState) < (*tempStateNode))
-            continue;
+        {
+            // need to check if it's the same level with fowardState,
+            if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+                continue;
+        }
+
 
         float sd;
 
         // check if this state has been negative
-        if (! checkIsGoalAchievedInRealTime(tempStateNode->state, sd))
+        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd))
             negativeNum ++;
 
     }
@@ -1643,7 +1649,7 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
     // check all the effects:
     vector<EffectPair>::iterator effectItor;
 
-    for (effectItor = rule->effectList.begin(); effectItor != rule->effectList.end(); ++ effectItor)
+    for (effectItor = ruleNode->originalRule->effectList.begin(); effectItor != ruleNode->originalRule->effectList.end(); ++ effectItor)
     {
         Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
@@ -1700,7 +1706,12 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
             // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
             // so this state node will not be affected by this effect.
             if ((*fowardState) < (*tempStateNode))
-                continue;
+            {
+                // need to check if it's the same level with fowardState,
+                if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+                    continue;
+            }
+
 
             if (effState->isSameState( *(tempStateNode)->state ))
             {
@@ -1718,6 +1729,8 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 
         delete effState;
     }
+
+    return negateveStateNum;
 
 
 }
@@ -1917,14 +1930,14 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     vector<StateNode*>::iterator forwardStateIt;
     for (forwardStateIt = ruleNode->forwardLinks.begin(); forwardStateIt != ruleNode->forwardLinks.end(); ++ forwardStateIt)
     {
-        StateNode* curStateNode = (StateNode*)(*forwardStateIt);
-        if (curStateNode == forwardStateNode)
+        StateNode* curSNode = (StateNode*)(*forwardStateIt);
+        if (curSNode == forwardStateNode)
             continue;
 
-        deleteStateNodeInTemporaryList(curStateNode);
+        deleteStateNodeInTemporaryList(curSNode);
 
-        if (curStateNode->forwardRuleNode != 0)
-            unsatisfiedStateNodes.push_back(curStateNode);
+        if (curSNode->forwardRuleNode != 0)
+            unsatisfiedStateNodes.push_back(curSNode);
     }
 
     if (forwardStateNode && deleteThisforwardStateNode)
@@ -1935,14 +1948,14 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     vector<StateNode*>::iterator backwardStateIt;
     for (backwardStateIt = ruleNode->backwardLinks.begin(); backwardStateIt != ruleNode->backwardLinks.end(); ++ backwardStateIt)
     {
-        StateNode* curStateNode = (StateNode*)(*backwardStateIt);
+        StateNode* curSNode = (StateNode*)(*backwardStateIt);
 
-        deleteStateNodeInTemporaryList(curStateNode);
+        deleteStateNodeInTemporaryList(curSNode);
 
-         if (curStateNode->backwardRuleNode != 0)
-             deleteRuleNodeRecursively(curStateNode->backwardRuleNode, curStateNode);
+         if (curSNode->backwardRuleNode != 0)
+             deleteRuleNodeRecursively(curSNode->backwardRuleNode, curSNode);
          else
-             delete curStateNode;
+             delete curSNode;
 
     }
 
@@ -2686,18 +2699,23 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     //  select the best one in this vector<ParamValue> that get the highest score according to the heuristics cost calculations
     ParamValue bestValue;
 
-    if (rule->CostHeuristics.size() != 0)
-    {
-        bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
-    }
-    else if (ruleNode->costHeuristics.size()!= 0)
-    {
-        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,false);
-    }
+    if (values.size() == 1)
+        bestValue = values.front();
     else
     {
-        cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
-        bestValue = values.front();
+        if (rule->CostHeuristics.size() != 0)
+        {
+            bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+        }
+        else if (ruleNode->costHeuristics.size()!= 0)
+        {
+            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,false);
+        }
+        else
+        {
+            cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
+            bestValue = values.front();
+        }
     }
 
     if (bestValue == UNDEFINED_VALUE)
@@ -2713,7 +2731,6 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 }
 
 
-
 ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons)
 {
     // check how many preconditions will be satisfied
@@ -2721,7 +2738,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
     tmpRuleNode->currentAllBindings = currentbindings;
 
     vector<ParamValue>::iterator vit;
-    float bestScore = -999999.9;
+    float bestScore = -9999999.9;
     ParamValue bestValue = UNDEFINED_VALUE;
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
@@ -2734,20 +2751,34 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
             logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
             return UNDEFINED_VALUE;
         }
-        currentbindings.erase(varName);
+
         float score = 0.0f-cost;
+        currentbindings.erase(varName);
+
+        // check effect
+        bool isDiffStateOwnerType,  negativeGoal;
+        tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
+
+        int negativeNum = checkEffectFitness(tmpRuleNode, curStateNode, isDiffStateOwnerType,  negativeGoal);
+        if (isActionChangeSPaceMap(rule->action))
+        {
+            negativeNum += checkSpaceMapEffectFitness(tmpRuleNode, curStateNode);
+        }
+
+        score -= (negativeNum * 12.0f);
 
         // check how many preconditions will be satisfied
         if (checkPrecons)
         {
             bool preconImpossible;
-            tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
             int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
-            tmpRuleNode->currentAllBindings.erase(varName);
+
             score += satisfiedPreconNum * 10.0f;
             if (preconImpossible)
                 score -= 99999.9f;
         }
+
+        tmpRuleNode->currentAllBindings.erase(varName);
 
         if (score > bestScore)
         {
@@ -2756,7 +2787,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         }
     }
 
-    if (bestScore < -999999.89)
+    if (bestScore < -9999999.89)
     {
         logger().error("OCPlanner::selectBestNumericValueFromCandidates failed! Cannot find a best value!" );
         return UNDEFINED_VALUE;
@@ -3301,7 +3332,7 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryBestAccessiblePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
     bs.goalState = existPathState6;
     pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_2), bs));
 
