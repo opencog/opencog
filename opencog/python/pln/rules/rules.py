@@ -277,7 +277,7 @@ class IntensionalLinkEvaluationRule(Rule):
 
         outputs= [chainer.link(types.IntensionalInheritanceLink, [A, B]),
                   chainer.link(types.IntensionalInheritanceLink, [B, A]),
-                  chainer.link(types.IntensionalInheritanceSimilarityLink, [A, B])]
+                  chainer.link(types.IntensionalSimilarityLink, [A, B])]
 
         Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
             inputs=inputs,

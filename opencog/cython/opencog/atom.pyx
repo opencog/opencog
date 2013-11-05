@@ -87,7 +87,6 @@ cdef class Atom(object):
         return self.atomspace.get_atom_string(self.handle,terse=True)
 
     def __repr__(self):
-        # str is supposed to be easy to read, and repr is supposed to represent the data exactly
         return self.long_string()
 
     def __richcmp__(a1_, a2_, int op):

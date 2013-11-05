@@ -55,7 +55,7 @@ def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     true = 0.5
-    if all(x > true for x in [sAB, nAB, sA, nA]):
+    if all(x >= true for x in [sAB, nAB, sA, nA]):
         return [TruthValue(1, confidence_to_count(0.99))]
     else:
         return [TruthValue(0, 0)]
@@ -63,8 +63,8 @@ def crispModusPonensFormula(tvs):
 def modusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
-    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
-        return crispModusPonensFormula(tvs)
+#    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
+#        return crispModusPonensFormula(tvs)
 
     # P(B|not A) -- how should we find this?
     #BNA = TruthValue(0.5, 0.01)
@@ -168,8 +168,8 @@ def fuzzy_or(mean0, mean1):
 
 def subsetEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
-    mem_a = mem_a_tv.mean > 0.5
-    mem_b = mem_b_tv.mean > 0.5
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
 
     # P(x in B | x in A)
 
@@ -194,8 +194,8 @@ def subsetFuzzyEvaluationFormula(tvs):
 
 def similarityEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
-    mem_a = mem_a_tv.mean > 0.5
-    mem_b = mem_b_tv.mean > 0.5
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
 
     # tv = |A and B| / |A or B|
 
@@ -260,6 +260,9 @@ def revisionFormula(tvs):
 def andBreakdownFormula(tvs):
     [A, AND_AB] = tvs
 
+    if A.mean == 0:
+        return [TruthValue(0, 0)]
+
     sB = AND_AB.mean / A.mean
     nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
 
@@ -275,5 +278,4 @@ def orBreakdownFormula(tvs):
 
 def low(n):
     return max(n, 0.00001)
-
 

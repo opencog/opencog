@@ -9,6 +9,15 @@ import math
 
 from pln.rules import rules
 
+'''
+go_shopping_1 contains get_cool_stuff_1
+go_shopping_2 contains get_cool_stuff_2
+
+go_shopping contains get_cool_stuff
+
+how to do that kind of reasoning?
+'''
+
 class TemporalRule(rules.Rule):
     '''Base class for temporal Rules. They evaluate a time relation such as BeforeLink, based on some AtTimeLinks.'''
     # TODO it can't use the formulas directly. They require some preprocessing to create a temporal-distribution-dictionary out of some AtTimeLinks. And how to find all of the AtTimeLinks for an Atom?
@@ -34,8 +43,8 @@ class TemporalRule(rules.Rule):
             links_a.append(link_a)
             links_b.append(link_b)
 
-        dist1 = self.make_distribution(links_a)
-        dist2 = self.make_distribution(links_b)
+        dist1 = make_distribution(links_a)
+        dist2 = make_distribution(links_b)
 
         strength = self.formula(dist1, dist2)
         
@@ -45,15 +54,17 @@ class TemporalRule(rules.Rule):
         
         return [(target,tv)]
 
-    def make_distribution(self, time_links):
-        dist = {}
-        for link in time_links:
-            time = int(link.out[0].name)
-            fuzzy_tv = link.tv.mean
-            dist[time] = fuzzy_tv
-        
-        return dist
+def make_distribution(time_links):
+    dist = {}
+    for link in time_links:
+        time = get_integer(link.out[0])
+        fuzzy_tv = link.tv.mean
+        dist[time] = fuzzy_tv
+    
+    return dist
 
+def get_integer(time_node):
+    return int(time_node.name)    
 
 class TemporalTransitivityRule(rules.Rule):
     # Hackily infer transitive temporal relationships using the deduction formula

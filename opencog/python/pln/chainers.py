@@ -19,6 +19,33 @@ def get_attentional_focus(atomspace, attentional_focus_boundary=0):
             attentional_focus.append(node)
     return attentional_focus
 
+'''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
+
+The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
+
+I really think we should make a reasonably fast algorithm, and then add rules one at a time, adding useful heuristics simultaneously (so that PLN will actually be useful rather than just get in the AI's way). It looks to me like this set of heuristics would be enough to make PLN not spiral crazily out of control.
+
+* choose atoms with probability proportional to their STI
+* higher confidence atoms are usually better
+* higher strength atoms are often better (but obviously for finding Not(A) you don't want A to be strong)
+
+It's possible to do a lot of learning online, and it's both efficient and a nice control strategy. The system should give high STI to things that happened recently or are near the agent
+
+Cognitive synergy:
+* After you have clustering and fishgram working, you can do reasoning on the results of those processes 
+* Dimensional embedding tells you which similarity links (or inheritance links) are likely to be good (see the opencog book)
+* PLN planning: you could have various special heuristics for hierarchical planning
+* Use MOSES
+
+You can (and should) also think carefully about how to represent data so that more useful inferences are shorter. This will generally help a LOT!!!!!!!!!!
+
+Special cases for different kinds of rules:
+* For deduction, it would be really useful to explicitly notice a hierarchy of more abstract/specific concepts (as described in the RealWorldReasoning book).
+And any time you find Inheritance A B, also calculate the intensional and extensional parts separately
+* For space/time reasoning, you should prefer things that are close in space/time (and in fact, for reasoning about objects generally. You can find nearby things using the space/time servers
+* You can probably get past toddler-level AI without having to use predicate logic much. And it may be easier to convert 2+ place predicates into 1-place predicates (see EvaluationToMemberRule)
+'''
+
 class AbstractChainer(Logic):
     '''Has important utility methods for chainers.'''
     def __init__(self, atomspace):
@@ -196,6 +223,7 @@ class Chainer(AbstractChainer):
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
 
@@ -429,6 +457,8 @@ class Chainer(AbstractChainer):
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
 
+        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
+
     def _give_stimulus(self, atom):
         # Arbitrary
         STIMULUS_PER_ATOM = 10
@@ -540,4 +570,14 @@ class Chainer(AbstractChainer):
                 return rule
 
         raise ValueError("lookup_rule: rule doesn't exist "+rule_name)
+
+    def test_rules(self, sample_count=20):
+        for rule in self.rules:
+            # Do a series of samples; different atoms with the same rules.
+            import random; random.seed(0)
+
+            print 'Testing',rule
+
+            for i in xrange(0, sample_count):
+                self.forward_step(rule=rule)   
 
