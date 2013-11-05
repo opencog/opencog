@@ -50,10 +50,7 @@
 
 using namespace opencog;
 
-// Single, global mutex for locking the incoming set.
-std::mutex Atom::_mtx;
-// Single, global mutex for locking the attention value.
-std::mutex Atom::_avmtx;
+#define _avmtx _mtx
 
 Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 {
@@ -105,9 +102,9 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
     // I'm assuming this is a gcc bug, I just don't see any bug in the
     // code here; it should all be thread-safe and atomic. November 2013
     // This is with gcc version (Ubuntu/Linaro 4.6.4-1ubuntu1~12.04) 4.6.4
-    // With this lock, no crash after 15 minutes of testing.
+    // With this lock, no crash after 150 minutes of testing.
     // Anyway, the point is that this lock is wasteful, and should be 
-    // un-needed.
+    // un-needed. 
     std::lock_guard<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
     {
@@ -303,7 +300,7 @@ void Atom::remove_atom(LinkPtr a)
 // We return a copy here, and not a reference, because the 
 // set itself is not thread-safe during reading while 
 // simultaneous insertion/deletion.
-IncomingSet Atom::getIncomingSet() const
+IncomingSet Atom::getIncomingSet()
 {
     static IncomingSet empty_set;
     if (NULL == _incoming_set) return empty_set;

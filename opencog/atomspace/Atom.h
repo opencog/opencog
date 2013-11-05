@@ -88,13 +88,12 @@ protected:
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
 
-    // Lock needed to serialize AV changes.
-    // Just right now, we will use a single shared mutex for all
-    // locking.  If this causes too much contention, then we can
-    // fall back to a non-global lock, at the cost of 40 additional
-    // bytes per atom.
-    static std::mutex _avmtx;
-    static std::mutex _mtx;
+    // Lock needed to serialize changes.
+    // This costs 40 bytes per atom.
+    // Tried using a single, global lock, but there seemed to be too
+    // much contention for it, so using a lock-per-atom, even though
+    // this makes it kind-of fat.
+    std::mutex _mtx;
 
     /**
      * Constructor for this class.
@@ -200,7 +199,7 @@ public:
     void setMean(float) throw (InvalidParamException);
 
     //! Return the incoming set of this atom.
-    IncomingSet getIncomingSet() const;
+    IncomingSet getIncomingSet();
 
     /** Returns a string representation of the node.
      *
