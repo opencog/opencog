@@ -60,22 +60,29 @@ void Link::init(const std::vector<Handle>& outgoingVector)
         std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
     }
 
+#ifdef LATER
     // Insert this link into incoming set of each atom.
-    LinkPtr self(LinkCast(shared_from_this()));
+// XXX ARGH ... cannot do this here; because cannot use shared_from_this()
+// inside a constructor; will have to do this later.
+    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
     foreach(AtomPtr a, _outgoing) {
         a->insert_atom(self);
     }
+#endif
 }
 
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
 
+#ifdef LATER
     // Remove this link from incoming set of each atom.
-    LinkPtr self(LinkCast(shared_from_this()));
+// XXX stupid plick, can't shared_from_this here, either
+    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
     foreach(AtomPtr a, _outgoing) {
         a->remove_atom(self);
     }
+#endif
 }
 
 std::string Link::toShortString(std::string indent) const

@@ -204,17 +204,20 @@ public:
         delete atomSpace;
     }
 
-    struct mean : public AtomPredicate {
+    struct mean : public AtomPredicate
+    {
         virtual bool test(AtomPtr h) {
             return h->getTruthValue()->getMean() > 0.8;
         }
     };
 
-    struct everything : public AtomPredicate {
+    struct everything : public AtomPredicate
+    {
         virtual bool test(AtomPtr h) { return true; }
     };
 
-    void testMiscellaneous() {
+    void testMiscellaneous()
+    {
         logger().debug("\ntestMiscelaneous()\n");
 
         const char* nodeNames[NUM_NODES] = {
@@ -229,7 +232,7 @@ public:
         for (int i = 0; i < NUM_NODES; i++) {
             h[i] = atomSpace->addNode (CONCEPT_NODE, nodeNames[i], SimpleTruthValue::createTV(0.001f, SimpleTruthValue::confidenceToCount(0.99f)));
         }
-        //logger().debug("Nodes created\n");
+        logger().debug("Nodes created\n");
 
         float ForceUser[NUM_FORCEUSER_LINKS] = {0.99f, 0.99f, 0.0f, 0.5f};
         Handle FU[NUM_FORCEUSER_LINKS];
@@ -239,7 +242,7 @@ public:
             temp[1] = h[4];
             FU[i] = atomSpace->addLink(SCHEMA_EXECUTION_LINK, temp, SimpleTruthValue::createTV(ForceUser[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
-        //logger().debug("ForceUser links created\n");
+        logger().debug("ForceUser links created\n");
 
         float Human[4] = {0.99f, 0.99f, 0.5f, 0.0f};
         HandleSeq out[4];
@@ -249,7 +252,7 @@ public:
             out[i].push_back(h[5]);
             H[i] = atomSpace->addLink(INHERITANCE_LINK, out[i], SimpleTruthValue::createTV(Human[i], SimpleTruthValue::confidenceToCount(0.99f)));
         }
-        //logger().debug("Human links created\n");
+        logger().debug("Human links created\n");
 
         // Add versioned TVS
         for (int i = 0; i < NUM_NODES; i++) {
@@ -263,7 +266,7 @@ public:
                     H[i]->setTV(TruthValue::DEFAULT_TV(), vh);
             }
         }
-        //logger().debug("Versioned TVS added\n");
+        logger().debug("Versioned TVS added\n");
 
         // Check primary and versioned TVS
         for (int i = 0; i < NUM_NODES; i++) {
@@ -317,7 +320,7 @@ tv.get(), h[i]->getTV().get());
                 }
             }
         }
-        //logger().debug("Primary and versioned TVS checked\n");
+        logger().debug("Primary and versioned TVS checked\n");
 
         HandleSeq hsn;
         atomSpace->atomTable.getHandlesByType(back_inserter(hsn), NODE, true);
@@ -456,7 +459,6 @@ tv.get(), h[i]->getTV().get());
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
         }
-
     }
 
     static inline Handle addAtomIter(AtomSpaceImpl& as, tree<Vertex>& a, tree<Vertex>::iterator it, TruthValuePtr tvn)
