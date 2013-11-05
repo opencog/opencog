@@ -8,9 +8,10 @@ def is_time_interval(item):
         item, 'b') and is_unix_time(item.a) and is_unix_time(item.b) and item.a < item.b
 
 
-def assert_is_time_interval(interval):
-    assert is_time_interval(interval), "passed 'interval' should have 'a' and 'b' attributes, " \
-                                       "both of which should be in unix time, and 'b' has to be greater than 'a'"
+def check_is_time_interval(interval):
+    if not is_time_interval(interval):
+        raise TypeError("passed 'interval' should have 'a' and 'b' attributes, "
+                        "both of which should be in unix time, and 'b' has to be greater than 'a'")
 
 
 class TimeInterval(object):
@@ -18,11 +19,10 @@ class TimeInterval(object):
     _datetime = None
     _iter_step = None
 
-    def __init__(self, a, b, bins=50):
+    def __init__(self, a=None, b=None, bins=50):
         """
         a and b can be in either datetime or unix time
         """
-        assert a < b, "'b' should be greater than 'a'"
         self._a = UnixTime(a)
         self._b = UnixTime(b)
         self.bins = bins
@@ -73,13 +73,23 @@ class TimeInterval(object):
         if value != self._iter_step:
             assert isinstance(value, int), value > 0
             self._bins = value
-            self._iter_step = (self.duration + 1) / value
+            if value == 1:
+                self._iter_step = self.duration
+            else:
+                self._iter_step = self.duration / (value - 1)
+
+    def __add__(self, other):
+        if not isinstance(other, TimeInterval):
+            raise TypeError("unsupported operand type(s) for +: '{0}' and '{1}'".format(
+                self.__class__.__name__, other.__class__.__name__
+            ))
+        return sorted(self.to_list() + other.to_list())
 
     def __getitem__(self, index):
         if index >= len(self):
             raise IndexError
-        value = self.a + index * self._iter_step
-        return UnixTime(value)
+        item = self.a + index * self._iter_step
+        return UnixTime(item)
 
     def __len__(self):
         return self.bins
@@ -107,7 +117,7 @@ class TimeInterval(object):
 
 if __name__ == '__main__':
     import time
-    a = TimeInterval(1, 100000)
+    a = TimeInterval(1, 100000, 1000000)
     b = []
 
     start = time.time()

@@ -1,8 +1,9 @@
-from math import fabs
+from math import fabs, isnan
 from datetime import datetime
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
+from utility.numeric.globals import SMALLEST_FLOAT as EPSILON
+from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.integrate import quad
 
 __author__ = 'keyvan'
@@ -13,6 +14,7 @@ def integral(function, start, end):
         return function.integral(start, end)
     area, error = quad(function, start, end)
     return area
+
 
 def equals(a, b):
     if fabs(a - b) < EPSILON:
@@ -139,6 +141,8 @@ class FunctionHorizontalLinear(Function):
     def integral(self, start, end):
         if start >= end:
             return 0
+        if equals(self.y_intercept, 0):
+            return 0
         return float(self.y_intercept) * (end - start)
 
     def derivative(self, point):
@@ -159,6 +163,8 @@ class FunctionLinear(Function):
         if (a, b) == (None, None):
             a = (float(y_1) - y_0) / (x_1 - x_0)
             b = y_0 - a * x_0
+            if isnan(a) or isnan(b):
+                pass
         self.a = a
         self.b = b
 
@@ -170,22 +176,15 @@ class FunctionLinear(Function):
         return x, self(x)
 
     def integral(self, start, end):
-        if start <= end:
+        if start >= end:
             return 0
         if self.a == 0:
             return self.b * (end - start)
 
         x_intercept = self.x_intercept
 
-        if start > x_intercept or equals(start, x_intercept):
-            area_of_triangle = (end - start) * (self(end) - self(start)) / 2
-            area_of_rectangle = (end - start) * self(start)
-            return area_of_triangle + area_of_rectangle
-
-        if end < x_intercept or equals(end, x_intercept):
-            area_of_triangle = (end - start) * (self(start) - self(end)) / 2
-            area_of_rectangle = (end - start) * self(end)
-            return area_of_triangle + area_of_rectangle
+        if start > x_intercept or end < x_intercept:
+            return (self(start) + self(end)) * (end - start) / 2.0
 
         minus_triangle = (x_intercept - start) * self(start)
         plus_triangle = (end - x_intercept) * self(end)
@@ -269,15 +268,17 @@ class FunctionPiecewiseLinear(FunctionComposite):
             x_0, x_1 = self.input_list[i - 1], self.input_list[i]
             y_0, y_1 = self.output_list[i - 1], self.output_list[i]
             dictionary_bounds_function[(x_0, x_1)] = FunctionLinear(x_0=x_0, x_1=x_1, y_0=y_0, y_1=y_1)
-        if MINUS_INFINITY not in self.input_list:
-            dictionary_bounds_function[(MINUS_INFINITY, self.input_list[0])] = function_undefined
-        if PLUS_INFINITY not in self.input_list:
-            dictionary_bounds_function[(self.input_list[-1], PLUS_INFINITY)] = function_undefined
+        if NEGATIVE_INFINITY not in self.input_list:
+            dictionary_bounds_function[(NEGATIVE_INFINITY, self.input_list[0])] = function_undefined
+        if POSITIVE_INFINITY not in self.input_list:
+            dictionary_bounds_function[(self.input_list[-1], POSITIVE_INFINITY)] = function_undefined
         FunctionComposite.__init__(self, dictionary_bounds_function,
                                    function_undefined=function_undefined, domain=self.input_list)
 
     def normalised(self):
-        area = self.integral(MINUS_INFINITY, PLUS_INFINITY)
+        area = self.integral(NEGATIVE_INFINITY, POSITIVE_INFINITY)
+        if equals(area, 0):
+            pass
         dictionary_input_output = {}
         output_list = [y / area for y in self.output_list]
         for i in xrange(len(self.input_list)):
@@ -285,18 +286,18 @@ class FunctionPiecewiseLinear(FunctionComposite):
         return FunctionPiecewiseLinear(dictionary_input_output, function_undefined=self.function_undefined)
 
 if __name__ == '__main__':
-    #from spatiotemporal.temporal_events import TemporalEventTrapezium
-    #e = TemporalEventTrapezium(1, 10, 3, 8)
-    #print e
-    #mf = e.membership_function()
-    #print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
-    #print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
-    #print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
-    #print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
-    #print 'degree in [1 : 10]:', e.degree_in_interval()
-    #print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
+    from spatiotemporal.temporal_events import TemporalEventTrapezium
+    e = TemporalEventTrapezium(1, 10, 3, 8)
+    print e
+    mf = e.membership_function()
+    print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
+    print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
+    print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
+    print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
+    print 'degree in [1 : 10]:', e.degree_in_interval()
+    print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
 
-    a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
-    print (a(-0.25) + a(0.25))/4
-    print a(0.25) * 2.75 / 2
+    #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
+    #print (a(-0.25) + a(0.25))/4
+    #print a(0.25) * 2.75 / 2
 

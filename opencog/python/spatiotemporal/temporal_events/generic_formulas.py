@@ -1,89 +1,157 @@
 from math import fabs
-from numpy import linspace, convolve
+from numpy import convolve
+from scipy.stats.distributions import uniform_gen
+from spatiotemporal.temporal_events.trapezium_formulas import function_convolution_uniform
+from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
+from spatiotemporal.temporal_interval_handling import calculateCenterMass
+from spatiotemporal.time_intervals import TimeInterval
 from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear
 
 __author__ = 'keyvan'
 
-def function_convolution_generic(pdf_1, bounds_1, pdf_2, bounds_2, bins=50):
-    a1, b1 = bounds_1
-    a2, b2 = bounds_2
-    length_1 = fabs(a1 - b1)
-    length_2 = fabs(a2 - b2)
+
+def function_convolution_generic(dist_1, dist_2, bins=50):
+    a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
+    a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
+
+    if (type(dist_1.dist), type(dist_2.dist)) is (uniform_gen, uniform_gen):
+        return function_convolution_uniform((a1, b1), (a2, b2))
 
     convolution_bounds_a, convolution_bounds_b = min(a1, a2), max(b1, b2)
 
     delta = fabs(convolution_bounds_a - convolution_bounds_b) / bins
-    range = linspace(convolution_bounds_a, convolution_bounds_b, bins)
-    x = [pdf_1(t) for t in range]
-    y = [pdf_2(t) for t in range]
+    convolution_interval = TimeInterval(convolution_bounds_a, convolution_bounds_b, bins)
+    x = [dist_1.pdf(t) for t in convolution_interval]
+    y = [dist_2.pdf(t) for t in reversed(convolution_interval)]
 
     c = convolve(x, y)
-    #c = c[::-1]
+    dictionary_convolution = {}
+    for t in xrange(len(c)):
+        dictionary_convolution[delta * t] = c[t]
+    bias = calculateCenterMass(dictionary_convolution)[0] + dist_2.mean() - dist_1.mean()
+    dictionary_convolution_biased = {}
+    for t in dictionary_convolution:
+        dictionary_convolution_biased[t - bias] = dictionary_convolution[t]
 
-    index_a, index_b = 0, 0
-    for i in xrange(len(c) - 1):
-        if not c[i] > 0:
-            index_a += 1
-        else:
-            break
-    for i in xrange(len(c) - 1, -1, -1):
-        if not c[i] > 0:
-            index_b += 1
-        else:
-            break
-    index_a -= 1
-    index_b = len(c) - index_b
-
-    transform_a = (float(b1 - a2) - (a1 - b2)) / (index_b - index_a)
-    transform_b = float(a1 - b2) - index_a * transform_a
-
-    transform_function = lambda x: transform_a * x + transform_b
-    transform_function_inverse = lambda y: int((y - transform_b) / transform_a)
-
-    convolution_function = FunctionPiecewiseLinear([transform_function(t) for t in xrange(len(c))],
-                                                   c, FunctionHorizontalLinear(0))
+    convolution_function = FunctionPiecewiseLinear(dictionary_convolution_biased, FunctionHorizontalLinear(0))
     return convolution_function.normalised()
 
-if __name__ == '__main__':
-    from scipy.stats import norm, uniform, mode
-    from spatiotemporal.time_intervals import TimeInterval
-    from utility.numeric.globals import MINUS_INFINITY, PLUS_INFINITY, EPSILON
-    from numpy import isinf
 
-    dist_1 = norm(loc=5.5, scale=4.5)
-    dist_2 = norm(loc=9, scale=2)
-    #dist_1 = uniform(loc=1, scale=9)
-    #dist_2 = uniform(loc=7, scale=4)
+def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
+    beginning_a_beginning_b = temporal_event_1.distribution_beginning, temporal_event_2.distribution_ending
+    beginning_a_ending_b = temporal_event_1.distribution_beginning, temporal_event_2.distribution_ending
+    ending_a_beginning_b = temporal_event_1.distribution_ending, temporal_event_2.distribution_beginning
+    ending_a_ending_b = temporal_event_1.distribution_ending, temporal_event_2.distribution_ending
 
-    a, b = dist_1.interval(1)
-    print mode(dist_1)
-    print type(a)
-    print a, b
-    print isinf(a), isinf(b)
+    function_beginning_a_beginning_b = function_convolution_generic(*beginning_a_beginning_b)
+    function_beginning_a_ending_b = function_convolution_generic(*beginning_a_ending_b)
+    function_ending_a_beginning_b = function_convolution_generic(*ending_a_beginning_b)
+    function_ending_a_ending_b = function_convolution_generic(*ending_a_ending_b)
 
-    bounds_1 = 1, 10
-    bounds_2 = 7, 11
+    before = NEGATIVE_INFINITY, -prec
+    same = -prec, prec
+    after = prec, POSITIVE_INFINITY
 
-    fn = function_convolution_generic(dist_1.pdf, bounds_1, dist_2.pdf, bounds_2)
-    print fn.integrate(-15, 4)
-    #plt = fn.plot().show()
+    convolutions = {
+        beginning_a_beginning_b: (
+            function_beginning_a_beginning_b.integral(*before),
+            function_beginning_a_beginning_b.integral(*same),
+            function_beginning_a_beginning_b.integral(*after)
+        ),
+        beginning_a_ending_b: (
+            function_beginning_a_ending_b.integral(*before),
+            function_beginning_a_ending_b.integral(*same),
+            function_beginning_a_ending_b.integral(*after)
+        ),
+        ending_a_beginning_b: (
+            function_ending_a_beginning_b.integral(*before),
+            function_ending_a_beginning_b.integral(*same),
+            function_ending_a_beginning_b.integral(*after)
+        ),
+        ending_a_ending_b: (
+            function_ending_a_ending_b.integral(*before),
+            function_ending_a_ending_b.integral(*same),
+            function_ending_a_ending_b.integral(*after)
+        ),
+    }
+
+    before = 0
+    same = 1
+    after = 2
+
+    result = {
+        'p':
+        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][before] * convolutions[ending_a_ending_b][before],
+
+        'm':
+        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][same] * convolutions[ending_a_ending_b][before],
+
+        'o':
+        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
+
+        'F':
+        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
+
+        'D':
+        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+
+        's':
+        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
+
+        'e':
+        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
+
+        'S':
+        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+
+        'd':
+        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
+
+        'f':
+        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
+
+        'O':
+        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+
+        'M':
+        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][same] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+
+        'P':
+        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][after] *
+        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
+    }
+
+    # Adjusting the integral error
+    summed_up = sum(result.values())
+    print summed_up
+    for predicate in result:
+        result[predicate] /= summed_up
+    return result
+
+
+def test(event_1, event_2, prec=0.25, size=10000):
+    import matplotlib.pyplot as plt
 
     times_overlapped = float(0)
     times_preceded = float(0)
     times_met = float(0)
-    size = 100000
-    prec = 0.25
     x = []
 
     for i in xrange(size):
-        rv1 = dist_1.rvs()
-        if rv1 <= 0:
-            rv1 = 0.01
-        rv2 = dist_2.rvs()
-        if rv2 >= 12:
-            rv2 = 11.99
-        instance_1 = TimeInterval(0, rv1)
-        instance_2 = TimeInterval(rv2, 12)
+        instance_1 = event_1.instance()
+        instance_2 = event_2.instance()
         d = instance_1.b - instance_2.a
 
         if fabs(d) <= prec:
@@ -97,19 +165,74 @@ if __name__ == '__main__':
     o = times_overlapped / size
     p = times_preceded / size
     m = times_met / size
-    print 'o:', o
-    print 'p:', p
-    print 'm:', m
+    print 'after:', o
+    print 'same:', m
+    print 'before:', p
 
-    print 'precede:', fn.integrate(MINUS_INFINITY, -prec)
-    print 'meet:', fn.integrate(-prec, prec)
-    print 'overlap:', fn.integrate(prec, PLUS_INFINITY)
-
-    plt = fn.plot()
-    plt.ylim(ymax=0.5)
     plt.hist(x, 50, normed=True)
-    x1 = linspace(*bounds_1)
-    x2 = linspace(*bounds_2)
-    plt.plot(x1, dist_1.pdf(x1))
-    plt.plot(x2, dist_2.pdf(x2))
-    plt.show()
+
+
+if __name__ == '__main__':
+    from scipy.stats import norm, uniform, expon
+    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
+    from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
+    import matplotlib.pyplot as plt
+
+    prec = 0.25
+
+    for event_1, event_2 in [
+        #(
+        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+        #),
+
+        (
+            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
+        ),
+
+        (
+            TemporalEvent(uniform(loc=4, scale=1), uniform(loc=10, scale=2)),
+            TemporalEvent(uniform(loc=2, scale=4), uniform(loc=7, scale=7))
+        ),
+
+        (
+            TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+            TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+        ),
+
+        (
+            TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+            TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+        )
+    ]:
+        #plt = event_1.distribution_ending.plot()
+        #plt.ylim(ymin=-0, ymax=0.6)
+        #plt.show()
+        #break
+
+        relations = temporal_relations_between(event_1, event_2, prec)
+        for predicate in 'PMOfdSesDFomp':
+            if predicate == 'o':
+                print '-------------------------'
+            print predicate, ':', relations[predicate]
+            if predicate == 'p':
+                print '-------------------------'
+
+        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
+        plt = event_2.plot()
+        plt.figure()
+        fn = function_convolution_generic(event_1.distribution_ending, event_2.distribution_beginning)
+        before = NEGATIVE_INFINITY, -prec
+        same = -prec, prec
+        after = prec, POSITIVE_INFINITY
+        fn.integral(*before),
+        fn.integral(*same),
+        fn.integral(*after)
+        fn.plot()
+        test(event_1, event_2, prec)
+
+        #print event_1.distribution_ending.mean(), event_2.distribution_beginning.mean()
+
+        plt.show()
