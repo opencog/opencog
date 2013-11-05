@@ -132,11 +132,11 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
+bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
-    if ((i > getArity()) || (i < 0)) {
-        throw IndexErrorException(TRACE_INFO, "Link::isSource(int) invalid index argument");
+    if (i > getArity()) {
+        throw IndexErrorException(TRACE_INFO, "Link::isSource(size_t) invalid index argument");
     }
 
     // on ordered links, only the first position in the outgoing set is a source
@@ -144,7 +144,7 @@ bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
     if (classserver().isA(_type, ORDERED_LINK)) {
         return i == 0;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // on unordered links, the only thing that matter is if the int passed
+        // on unordered links, the only thing that matters is if the int passed
         // is valid (if it is within 0..arity).
         return true;
     } else {
@@ -180,10 +180,10 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     return false;
 }
 
-bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
+bool Link::isTarget(size_t i) throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
-    if ((i > getArity()) || (i < 0)) {
+    if (i > getArity()) {
         throw IndexErrorException(TRACE_INFO, "Link::istarget(int) invalid index argument");
     }
 

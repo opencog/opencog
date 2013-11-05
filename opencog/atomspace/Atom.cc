@@ -103,8 +103,8 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
     // code here; it should all be thread-safe and atomic. November 2013
     // This is with gcc version (Ubuntu/Linaro 4.6.4-1ubuntu1~12.04) 4.6.4
     // With this lock, no crash after 150 minutes of testing.
-    // Anyway, the point is that this lock is wasteful, and should be 
-    // un-needed. 
+    // Anyway, the point is that this lock is wasteful, and should be
+    // un-needed.
     std::lock_guard<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
     {
@@ -297,8 +297,8 @@ void Atom::remove_atom(LinkPtr a)
     _incoming_set->_iset.erase(a);
 }
 
-// We return a copy here, and not a reference, because the 
-// set itself is not thread-safe during reading while 
+// We return a copy here, and not a reference, because the
+// set itself is not thread-safe during reading while
 // simultaneous insertion/deletion.
 IncomingSet Atom::getIncomingSet()
 {
