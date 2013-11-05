@@ -285,7 +285,9 @@ void Atom::insert_atom(LinkPtr a)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.insert(a);
+#ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
+#endif /* INCOMING_SET_SIGNALS */
 }
 
 /// Remove an atom from the incoming set.
@@ -293,13 +295,16 @@ void Atom::remove_atom(LinkPtr a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+#ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
+#endif /* INCOMING_SET_SIGNALS */
     _incoming_set->_iset.erase(a);
 }
 
-// We return a copy here, and not a reference, because the
-// set itself is not thread-safe during reading while
-// simultaneous insertion/deletion.
+// We return a copy here, and not a reference, because the set itself
+// is not thread-safe during reading while simultaneous insertion and
+// deletion.  Besides, the incoming set is weak; we have to make it
+// strong in order to hand it out.
 IncomingSet Atom::getIncomingSet()
 {
     static IncomingSet empty_set;
@@ -307,5 +312,11 @@ IncomingSet Atom::getIncomingSet()
 
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
-    return _incoming_set->_iset;
+    IncomingSet iset;
+    foreach(WinkPtr w, _incoming_set->_iset)
+    {
+        LinkPtr l(w.lock());
+        if (l) iset.insert(l);
+    }
+    return iset;
 }

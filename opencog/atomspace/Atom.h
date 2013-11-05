@@ -53,6 +53,8 @@ namespace opencog
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::set<LinkPtr> IncomingSet;
+typedef std::weak_ptr<Link> WinkPtr;
+typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 /**
@@ -70,6 +72,7 @@ class Atom
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
+    friend class Link;            // Needs to change incoming set
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
@@ -112,10 +115,15 @@ protected:
         // incoming set is not tracked by garbage collector,
         // to avoid cyclic references.
         // std::set<ptr> uses 48 bytes (per atom).
-        IncomingSet _iset;
+        WincomingSet _iset;
+#ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
+        // However, these make the atom quite fat, so this is disabled
+        // just right now. If users really start clamoring, then we can
+        // turn this on.
         AtomPairSignal _addAtomSignal;
         AtomPairSignal _removeAtomSignal;
+#endif /* INCOMING_SET_SIGNALS */
     };
     typedef std::shared_ptr<InSet> InSetPtr;
     InSetPtr _incoming_set;

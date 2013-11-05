@@ -27,6 +27,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Link.h"
@@ -53,16 +54,28 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     }
 
     _outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the elements in the outgoing
-    // list.
+    // if the link is unordered, it will be normalized by sorting the
+    // elements in the outgoing list.
     if (classserver().isA(_type, UNORDERED_LINK)) {
         std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
+    }
+
+    // Insert this link into incoming set of each atom.
+    LinkPtr self(LinkCast(shared_from_this()));
+    foreach(AtomPtr a, _outgoing) {
+        a->insert_atom(self);
     }
 }
 
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
+
+    // Remove this link from incoming set of each atom.
+    LinkPtr self(LinkCast(shared_from_this()));
+    foreach(AtomPtr a, _outgoing) {
+        a->remove_atom(self);
+    }
 }
 
 std::string Link::toShortString(std::string indent) const
