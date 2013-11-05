@@ -195,6 +195,8 @@ void AtomSpaceBenchmark::setMethod(std::string _methodName)
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addNode);
     } else if (_methodName == "addLink") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_addLink);
+    } else if (_methodName == "removeAtom") {
+        methodsToTest.push_back( &AtomSpaceBenchmark::bm_rmAtom);
     } else if (_methodName == "getType") {
         methodsToTest.push_back( &AtomSpaceBenchmark::bm_getType);
     } else if (_methodName == "getTV") {
@@ -600,6 +602,75 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 {
     //cout << "Benchmarking AtomSpace::addLink" << endl;
     return timepair_t(makeRandomLink(),0);
+}
+
+timepair_t AtomSpaceBenchmark::bm_rmAtom()
+{
+    Handle h = getRandomHandle();
+    while (0 < h->getIncomingSetSize()) {
+        h = getRandomHandle();
+    }
+    clock_t t_begin;
+    clock_t time_taken;
+    switch (testKind) {
+#if HAVE_CYTHON
+    case BENCH_PYTHON: {
+        std::ostringstream dss;
+        for (int i=0; i<Nloops; i++) {
+            dss << "aspace.remove(Handle(" << h.value() << "))\n";
+            h = getRandomHandle();
+            // XXX FIXME --- this may have trouble finding anything if
+            // Nloops is bigger than the number of links in the atomspace !
+            while (0 < h->getIncomingSetSize()) {
+                h = getRandomHandle();
+            }
+        }
+        std::string ps = dss.str();
+        clock_t t_begin = clock();
+        pyev->eval(ps);
+        return clock() - t_begin;
+    }
+#endif /* HAVE_CYTHON */
+#if HAVE_GUILE
+    case BENCH_SCM: {
+#if 1 // ALL_AT_ONCE
+        std::ostringstream ss;
+        for (int i=0; i<Nloops; i++) {
+            ss << "(cog-delete-recursive (cog-atom " << h.value() << "))\n";
+            h = getRandomHandle();
+            // XXX FIXME --- this may have trouble finding anything if
+            // Nloops is bigger than the number of links in the atomspace !
+            while (0 < h->getIncomingSetSize()) {
+                h = getRandomHandle();
+            }
+        }
+        std::string gs = ss.str();
+#else
+        std::ostringstream dss;
+        dss << "(define (getty) (cog-type (cog-atom " << h.value() << ")))\n";
+        scm->eval(dss.str());
+        std::string gs = "(getty)";
+#endif
+
+        clock_t t_begin = clock();
+        scm->eval(gs);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+#endif /* HAVE_GUILE */
+    case BENCH_TABLE: {
+        t_begin = clock();
+        atab->extract(h);
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }
+    case BENCH_AS: {
+        t_begin = clock();
+        asp->removeAtom(h); 
+        time_taken = clock() - t_begin;
+        return timepair_t(time_taken,0);
+    }}
+    return timepair_t(0,0);
 }
 
 Handle AtomSpaceBenchmark::getRandomHandle()

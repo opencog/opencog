@@ -64,6 +64,7 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
+             benchmarker.setMethod("rmAtom");
              benchmarker.setMethod("getHandleSet");
              break;
            case 'X':
