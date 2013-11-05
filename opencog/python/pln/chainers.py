@@ -223,6 +223,7 @@ class Chainer(AbstractChainer):
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
 
@@ -455,6 +456,8 @@ class Chainer(AbstractChainer):
 
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
+
+        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
 
     def _give_stimulus(self, atom):
         # Arbitrary

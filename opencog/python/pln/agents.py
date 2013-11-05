@@ -9,7 +9,7 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self, learnRuleFrequencies=True)
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 
         # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
 #        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
@@ -41,7 +41,7 @@ class ForwardInferenceAgent(MindAgent):
 
         # These two "macro rules" make the individual rules redundant
         self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
-        self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalLinkEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
