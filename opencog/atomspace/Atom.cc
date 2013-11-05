@@ -50,10 +50,7 @@
 
 using namespace opencog;
 
-// Single, global mutex for locking the incoming set.
-std::mutex Atom::_mtx;
-// Single, global mutex for locking the attention value.
-std::mutex Atom::_avmtx;
+#define _avmtx _mtx
 
 Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
 {
@@ -77,6 +74,10 @@ Atom::~Atom()
     _atomTable = NULL;
     drop_incoming_set();
 }
+
+// ==============================================================
+// Whole lotta truthiness going on here.  Does it really need to be
+// this complicated!?
 
 void Atom::setTruthValue(TruthValuePtr tv)
 {
@@ -105,8 +106,8 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
     // I'm assuming this is a gcc bug, I just don't see any bug in the
     // code here; it should all be thread-safe and atomic. November 2013
     // This is with gcc version (Ubuntu/Linaro 4.6.4-1ubuntu1~12.04) 4.6.4
-    // With this lock, no crash after 15 minutes of testing.
-    // Anyway, the point is that this lock is wasteful, and should be 
+    // With this lock, no crash after 150 minutes of testing.
+    // Anyway, the point is that this lock is wasteful, and should be
     // un-needed.
     std::lock_guard<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
@@ -174,6 +175,25 @@ void Atom::setMean(float mean) throw (InvalidParamException)
     setTV(newTv);
 }
 
+void Atom::merge(TruthValuePtr tvn)
+{
+    if (NULL == tvn or tvn->isNullTv()) return;
+
+    // As far as I can tell, there is no need to lock this
+    // section of the code; all changes to the TV are essentially
+    // atomic, from what I can tell (right?)
+    TruthValuePtr currentTV = getTruthValue();
+    TruthValuePtr mergedTV;
+    if (currentTV->isNullTv()) {
+        mergedTV = tvn;
+    } else {
+        mergedTV = currentTV->merge(tvn);
+    }
+    setTruthValue(mergedTV);
+}
+
+// ==============================================================
+
 void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
 {
     if (av == _attentionValue) return;
@@ -203,6 +223,8 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     }
 }
 
+// ==============================================================
+// Flag stuff
 bool Atom::isMarkedForRemoval() const
 {
     return (_flags & MARKED_FOR_REMOVAL) != 0;
@@ -232,6 +254,8 @@ void Atom::markForRemoval(void)
     _flags |= MARKED_FOR_REMOVAL;
 }
 
+// ==============================================================
+
 void Atom::setAtomTable(AtomTable *tb)
 {
     if (tb == _atomTable) return;
@@ -253,6 +277,8 @@ void Atom::setAtomTable(AtomTable *tb)
     }
 }
 
+// ==============================================================
+// Incoming set stuff
 
 /// Start tracking the incoming set for this atom.
 /// An atom can't know what it's incoming set is, until this method
@@ -288,7 +314,9 @@ void Atom::insert_atom(LinkPtr a)
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
     _incoming_set->_iset.insert(a);
+#ifdef INCOMING_SET_SIGNALS
     _incoming_set->_addAtomSignal(shared_from_this(), a);
+#endif /* INCOMING_SET_SIGNALS */
 }
 
 /// Remove an atom from the incoming set.
@@ -296,19 +324,28 @@ void Atom::remove_atom(LinkPtr a)
 {
     if (NULL == _incoming_set) return;
     std::lock_guard<std::mutex> lck (_mtx);
+#ifdef INCOMING_SET_SIGNALS
     _incoming_set->_removeAtomSignal(shared_from_this(), a);
+#endif /* INCOMING_SET_SIGNALS */
     _incoming_set->_iset.erase(a);
 }
 
-// We return a copy here, and not a reference, because the 
-// set itself is not thread-safe during reading while 
-// simultaneous insertion/deletion.
-IncomingSet Atom::getIncomingSet() const
+// We return a copy here, and not a reference, because the set itself
+// is not thread-safe during reading while simultaneous insertion and
+// deletion.  Besides, the incoming set is weak; we have to make it
+// strong in order to hand it out.
+IncomingSet Atom::getIncomingSet()
 {
     static IncomingSet empty_set;
     if (NULL == _incoming_set) return empty_set;
 
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
-    return _incoming_set->_iset;
+    IncomingSet iset;
+    foreach(WinkPtr w, _incoming_set->_iset)
+    {
+        LinkPtr l(w.lock());
+        if (l) iset.insert(l);
+    }
+    return iset;
 }

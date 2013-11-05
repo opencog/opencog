@@ -151,7 +151,7 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
             Handle result = atomTable.add(n);
-            atomTable.merge(result,tvn);
+            result->merge(tvn);
             return result;
         }
     }
@@ -176,7 +176,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
             // register the atom with the atomtable (so it gets placed in
             // indices)
             Handle result = atomTable.add(l);
-            atomTable.merge(result,tvn);
+            result->merge(tvn);
             return result;
         }
     }

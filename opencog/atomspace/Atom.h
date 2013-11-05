@@ -53,6 +53,8 @@ namespace opencog
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
 typedef std::set<LinkPtr> IncomingSet;
+typedef std::weak_ptr<Link> WinkPtr;
+typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 /**
@@ -70,6 +72,7 @@ class Atom
     friend class Handle;          // Needs to view _uuid
     friend class SavingLoading;   // Needs to set _uuid
     friend class TLB;             // Needs to view _uuid
+    friend class Link;            // Needs to change incoming set
 
 private:
     //! Sets the AtomTable in which this Atom is inserted.
@@ -88,13 +91,12 @@ protected:
     TruthValuePtr _truthValue;
     AttentionValuePtr _attentionValue;
 
-    // Lock needed to serialize AV changes.
-    // Just right now, we will use a single shared mutex for all
-    // locking.  If this causes too much contention, then we can
-    // fall back to a non-global lock, at the cost of 40 additional
-    // bytes per atom.
-    static std::mutex _avmtx;
-    static std::mutex _mtx;
+    // Lock needed to serialize changes.
+    // This costs 40 bytes per atom.
+    // Tried using a single, global lock, but there seemed to be too
+    // much contention for it, so using a lock-per-atom, even though
+    // this makes it kind-of fat.
+    std::mutex _mtx;
 
     /**
      * Constructor for this class.
@@ -113,10 +115,15 @@ protected:
         // incoming set is not tracked by garbage collector,
         // to avoid cyclic references.
         // std::set<ptr> uses 48 bytes (per atom).
-        IncomingSet _iset;
+        WincomingSet _iset;
+#ifdef INCOMING_SET_SIGNALS
         // Some people want to know if the incoming set has changed...
+        // However, these make the atom quite fat, so this is disabled
+        // just right now. If users really start clamoring, then we can
+        // turn this on.
         AtomPairSignal _addAtomSignal;
         AtomPairSignal _removeAtomSignal;
+#endif /* INCOMING_SET_SIGNALS */
     };
     typedef std::shared_ptr<InSet> InSetPtr;
     InSetPtr _incoming_set;
@@ -199,8 +206,28 @@ public:
     /** Change the primary TV's mean */
     void setMean(float) throw (InvalidParamException);
 
+    /** merge truth value into this */
+    void merge(TruthValuePtr);
+
     //! Return the incoming set of this atom.
-    IncomingSet getIncomingSet() const;
+    IncomingSet getIncomingSet();
+
+    template <typename OutputIterator> OutputIterator
+    getIncomingSet(OutputIterator result)
+    {
+        if (NULL == _incoming_set) return result;
+        std::lock_guard<std::mutex> lck(_mtx);
+        // Sigh. I need to compose copy_if with transform. I could
+        // do this wih boost range adaptors, but I don't feel like it.
+        auto end = _incoming_set->_iset.end();
+        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        {
+            Handle h(w->lock());
+            if (h) { *result = h; result ++; }
+        }
+        return result;
+    }
+
 
     /** Returns a string representation of the node.
      *

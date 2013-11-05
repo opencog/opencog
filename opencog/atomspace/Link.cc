@@ -27,6 +27,7 @@
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
 
 #include "Link.h"
@@ -53,16 +54,35 @@ void Link::init(const std::vector<Handle>& outgoingVector)
     }
 
     _outgoing = outgoingVector;
-    // if the link is unordered, it will be normalized by sorting the elements in the outgoing
-    // list.
+    // if the link is unordered, it will be normalized by sorting the
+    // elements in the outgoing list.
     if (classserver().isA(_type, UNORDERED_LINK)) {
         std::sort(_outgoing.begin(), _outgoing.end(), HandleComparison());
     }
+
+#ifdef LATER
+    // Insert this link into incoming set of each atom.
+// XXX ARGH ... cannot do this here; because cannot use shared_from_this()
+// inside a constructor; will have to do this later.
+    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
+    foreach(AtomPtr a, _outgoing) {
+        a->insert_atom(self);
+    }
+#endif
 }
 
 Link::~Link()
 {
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
+
+#ifdef LATER
+    // Remove this link from incoming set of each atom.
+// XXX stupid plick, can't shared_from_this here, either
+    LinkPtr self(std::dynamic_pointer_cast<Link>(shared_from_this()));
+    foreach(AtomPtr a, _outgoing) {
+        a->remove_atom(self);
+    }
+#endif
 }
 
 std::string Link::toShortString(std::string indent) const
@@ -132,11 +152,11 @@ bool Link::isSource(Handle handle) const throw (InvalidParamException)
     return false;
 }
 
-bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
+bool Link::isSource(size_t i) throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
-    if ((i > getArity()) || (i < 0)) {
-        throw IndexErrorException(TRACE_INFO, "Link::isSource(int) invalid index argument");
+    if (i > getArity()) {
+        throw IndexErrorException(TRACE_INFO, "Link::isSource(size_t) invalid index argument");
     }
 
     // on ordered links, only the first position in the outgoing set is a source
@@ -144,7 +164,7 @@ bool Link::isSource(int i) throw (IndexErrorException, InvalidParamException)
     if (classserver().isA(_type, ORDERED_LINK)) {
         return i == 0;
     } else if (classserver().isA(_type, UNORDERED_LINK)) {
-        // on unordered links, the only thing that matter is if the int passed
+        // on unordered links, the only thing that matters is if the int passed
         // is valid (if it is within 0..arity).
         return true;
     } else {
@@ -180,10 +200,10 @@ bool Link::isTarget(Handle handle) throw (InvalidParamException)
     return false;
 }
 
-bool Link::isTarget(int i) throw (IndexErrorException, InvalidParamException)
+bool Link::isTarget(size_t i) throw (IndexErrorException, InvalidParamException)
 {
     // tests if the int given is valid.
-    if ((i > getArity()) || (i < 0)) {
+    if (i > getArity()) {
         throw IndexErrorException(TRACE_INFO, "Link::istarget(int) invalid index argument");
     }
 
