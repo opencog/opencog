@@ -463,6 +463,9 @@ clock_t AtomSpaceBenchmark::makeRandomLink()
     size_t arity = (*prg)(randgen);
     if (arity == 0) { ++arity; };
 
+    // AtomSpace will throw if the context link has bad arity
+    if (CONTEXT_LINK == t) arity = 2;
+
     HandleSeq outgoing;
     for (size_t j=0; j < arity; j++) {
         outgoing.push_back(getRandomHandle());
