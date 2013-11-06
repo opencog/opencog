@@ -168,6 +168,10 @@ class AbstractChainer(Logic):
             # heuristically assume that all selflinks are invalid!
             not_self_link = atom.out[0] != atom.out[1]
             return not_self_link
+        elif atom.type in [types.AndLink, types.OrLink, types.NotLink]:
+            # see if it has semantically sensible arguments (e.g you don't want MemberLinks inside AndLinks)
+            suitable = all(arg.is_a(types.Node) or arg.is_a(types.EvaluationLink) for arg in atom.out)
+            return suitable
         else:
             return True
 
@@ -298,7 +302,7 @@ class Chainer(AbstractChainer):
 
         # handle rules that create their output in a custom way, not just using templates
         if hasattr(rule, 'custom_compute'):
-            (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
+            (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs, specific_outputs)
             if len(specific_outputs) == 0:
                 return None
             if not self._validate(rule, specific_inputs, specific_outputs):
@@ -579,11 +583,14 @@ class Chainer(AbstractChainer):
 
     def test_rules(self, sample_count=20):
         for rule in self.rules:
-            # Do a series of samples; different atoms with the same rules.
-            import random; random.seed(0)
+            self.test_rule(rule, sample_count)
 
-            print 'Testing',rule
+    def test_rule(self, rule, sample_count):
+        # Do a series of samples; different atoms with the same rules.
+        import random; random.seed(0)
 
-            for i in xrange(0, sample_count):
-                self.forward_step(rule=rule)   
+        print 'Testing',rule
+
+        for i in xrange(0, sample_count):
+            self.forward_step(rule=rule)   
 
