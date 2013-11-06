@@ -7,16 +7,6 @@ import math
 
 # Heuristically create boolean links using the TruthValues of their arguments
 
-class NotCreationRule(rules.Rule):
-    '''A => NotLink(A)'''
-    def __init__(self, chainer):
-        A = chainer.new_variable()
-
-        rules.Rule.__init__(self,
-            formula= formulas.notFormula,
-            outputs= [chainer.link(types.NotLink, [A])],
-            inputs= [A])
-
 # TODO These should take account of dependencies in some cases
 
 def create_and_or_rules(chainer, min_n, max_n):
@@ -35,20 +25,40 @@ def create_and_or_rules(chainer, min_n, max_n):
 
     return rules
 
-class AndCreationRule(rules.Rule):
+class BooleanLinkCreationRule(rules.Rule):
+    def custom_compute(self, inputs, outputs):
+        # the output may have a hierarchy of links, but we should flatten it (this means PLN can incrementally create bigger boolean links)
+        output_tvs = self.calculate(inputs)
+        actual_output = simplify_boolean(self._chainer, outputs[0])
+
+        return ([actual_output], output_tvs)
+
+class NotCreationRule(BooleanLinkCreationRule):
+    '''A => NotLink(A)'''
+    def __init__(self, chainer):
+        A = chainer.new_variable()
+
+        rules.Rule.__init__(self,
+            formula= formulas.notFormula,
+            outputs= [chainer.link(types.NotLink, [A])],
+            inputs= [A])
+
+class AndCreationRule(BooleanLinkCreationRule):
     '''Take a set of N atoms and create AndLink(atoms)'''
     def __init__(self, chainer, N):
         atoms = chainer.make_n_variables(N)
+        self._chainer = chainer
 
         rules.Rule.__init__(self,
             formula= formulas.andSymmetricFormula,
             outputs= [chainer.link(types.AndLink, atoms)],
             inputs=  atoms)
 
-class OrCreationRule(rules.Rule):
+class OrCreationRule(BooleanLinkCreationRule):
     '''[A, B...] => Or(A, B...)'''
     def __init__(self, chainer, N):
         atoms = chainer.make_n_variables(N)
+        self._chainer = chainer
 
         rules.Rule.__init__(self,
             formula= formulas.orFormula,
@@ -63,6 +73,7 @@ def simplify_boolean(chainer, link):
         if arg.type == types.NotLink:
             deeply_nested_arg = arg.out[0]
             return chainer.link(types.NotLink, [deeply_nested_arg])
+        return link
 
     # And(A And(B, C) D) => And(A, B, C, D)
     elif link.type == types.AndLink:
@@ -74,6 +85,7 @@ def simplify_boolean(chainer, link):
             # OrLink or ConceptNode
             else:
                 new_out.append(atom)
+        return chainer.link(types.AndLink, new_out)
 
     # likewise for OrLink
     elif link.type == types.OrLink:
@@ -85,6 +97,7 @@ def simplify_boolean(chainer, link):
             # AndLink or ConceptNode
             else:
                 new_out.append(atom)
+        return chainer.link(types.AndLink, new_out)
 
     else:
         return link
