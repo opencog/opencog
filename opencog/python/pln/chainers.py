@@ -299,6 +299,10 @@ class Chainer(AbstractChainer):
         # handle rules that create their output in a custom way, not just using templates
         if hasattr(rule, 'custom_compute'):
             (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs)
+            if len(specific_outputs) == 0:
+                return None
+            if not self._validate(rule, specific_inputs, specific_outputs):
+                return None
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
         elif hasattr(rule, 'temporal_compute'):
             # All inputs ever, and then use the special temporal computation instead of revision.
@@ -306,10 +310,13 @@ class Chainer(AbstractChainer):
             all_input_tuples = [specific_inputs]+past_input_tuples
 
             (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
+            if not self._validate(rule, specific_inputs, specific_outputs):
+                return None
             return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
         else:
+            if len(specific_outputs) == 0:
+                return None
             if not self._validate(rule, specific_inputs, specific_outputs):
-                self.log_failed_inference('bogus truth value or 0 count')
                 return None
             output_tvs = rule.calculate(specific_inputs)
             if output_tvs is None:
