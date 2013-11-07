@@ -97,7 +97,7 @@ def simplify_boolean(chainer, link):
             # AndLink or ConceptNode
             else:
                 new_out.append(atom)
-        return chainer.link(types.AndLink, new_out)
+        return chainer.link(types.OrLink, new_out)
 
     else:
         return link
