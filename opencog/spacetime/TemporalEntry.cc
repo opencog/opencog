@@ -157,7 +157,7 @@ int TemporalEntry::compare(const Temporal* t1, const Temporal* t2)
 TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t)
 {
     TemporalEntry* buffer;
-    // The search for invalid elements need to be done in two steps because
+    // The search for invalid elements needs to be done in two steps because
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
     DPRINTF("TemporalEntry::remove(set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
@@ -169,11 +169,11 @@ TemporalEntry* TemporalEntry::remove(TemporalEntry* set, Temporal* t)
         buffer->next = NULL;
         delete buffer;
     }
-    DPRINTF("after first loop: (set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
+    DPRINTF("remove; after first loop: (set=%s, t=%s)\n", set->toString().c_str(), t->toString().c_str());
     if (set == NULL) return NULL;
     TemporalEntry* head = set;
     while (set->next != NULL) {
-        DPRINTF("set->next->time = %s, t = %s, equals = %d\n", set->next->time->toString().c_str(), t->toString().c_str(), set->next->time == t);
+        DPRINTF("remove: set->next->time = %s, t = %s, equals = %d\n", set->next->time->toString().c_str(), t->toString().c_str(), set->next->time == t);
         if (*(set->next->time) == *t) {
             buffer = set->next;
             set->next = set->next->next;

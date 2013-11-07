@@ -57,9 +57,9 @@
 using namespace opencog;
 
 namespace opencog {
-struct equal_to_id : public std::binary_function<const Agent*, const std::string&, bool>
+struct equal_to_id : public std::binary_function<AgentPtr, const std::string&, bool>
 {
-    bool operator()(const Agent* a, const std::string& cid) const {
+    bool operator()(AgentPtr a, const std::string& cid) const {
         return (a->classinfo().id != cid);
     }
 };
@@ -107,14 +107,14 @@ CogServer::~CogServer()
 
 CogServer::CogServer() : cycleCount(1)
 {
-    delete atomSpace;  // global static, declared in BaseServer.
+    if (atomSpace) delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
 
     pthread_mutex_init(&messageQueueLock, NULL);
     pthread_mutex_init(&processRequestsLock, NULL);
     pthread_mutex_init(&agentsLock, NULL);
-    
+
     agentsRunning = true;
 }
 
@@ -126,7 +126,7 @@ NetworkServer& CogServer::networkServer()
 void CogServer::enableNetworkServer()
 {
     // WARN: By using boost::asio, at least one listener must be added to
-    // the NetworkServer before starting its thread. Other Listeners may 
+    // the NetworkServer before starting its thread. Other Listeners may
     // be added later, though.
     _networkServer.addListener<ConsoleSocket>(config().get_int("SERVER_PORT"));
     _networkServer.start();
@@ -181,7 +181,7 @@ void CogServer::serverLoop()
     }
 }
 
-void CogServer::runLoopStep(void) 
+void CogServer::runLoopStep(void)
 {
     struct timeval timer_start, timer_end;
     time_t elapsed_time;
@@ -195,7 +195,7 @@ void CogServer::runLoopStep(void)
 
     if (getRequestQueueSize() != 0) {
         processRequests();
-        gettimeofday(&timer_end, NULL); 
+        gettimeofday(&timer_end, NULL);
         requests_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
@@ -204,14 +204,14 @@ void CogServer::runLoopStep(void)
                    requests_time/1000000.0
                   );
     } else {
-        gettimeofday(&timer_end, NULL); 
+        gettimeofday(&timer_end, NULL);
     }
 
     // Run custom loop
     timer_start = timer_end;
     bool runCycle = customLoopRun();
 
-    gettimeofday(&timer_end, NULL); 
+    gettimeofday(&timer_end, NULL);
     elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                    (timer_end.tv_usec - timer_start.tv_usec);
 
@@ -230,7 +230,7 @@ void CogServer::runLoopStep(void)
         cycleCount++;
         if (cycleCount < 0) cycleCount = 0;
 
-        gettimeofday(&timer_end, NULL); 
+        gettimeofday(&timer_end, NULL);
         elapsed_time = ((timer_end.tv_sec - timer_start.tv_sec) * 1000000) +
                        (timer_end.tv_usec - timer_start.tv_usec);
         logger().fine("[CogServer::runLoopStep cycle = %d] Time to process MindAgents: %f",
@@ -244,7 +244,7 @@ void CogServer::runLoopStep(void)
 
 }
 
-bool CogServer::customLoopRun(void) 
+bool CogServer::customLoopRun(void)
 {
     return true;
 }
@@ -260,14 +260,14 @@ void CogServer::processRequests(void)
     pthread_mutex_unlock(&processRequestsLock);
 }
 
-void CogServer::runAgent(Agent *agent)
+void CogServer::runAgent(AgentPtr agent)
 {
     struct timeval timer_start, timer_end;
     struct timeval elapsed_time;
     size_t mem_start, mem_end;
     size_t atoms_start, atoms_end;
     size_t mem_used, atoms_used;
-    time_t time_used; 
+    time_t time_used;
 
     gettimeofday(&timer_start, NULL);
     mem_start = getMemUsage();
@@ -282,12 +282,12 @@ void CogServer::runAgent(Agent *agent)
     gettimeofday(&timer_end, NULL);
     mem_end = getMemUsage();
     atoms_end = atomSpace->getSize();
-    
-    time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
-                (timer_start.tv_sec*1000000  + timer_start.tv_usec); 
 
-    elapsed_time.tv_sec = time_used/1000000; 
-    elapsed_time.tv_usec = time_used - elapsed_time.tv_sec*1000000; 
+    time_used =  timer_end.tv_sec*1000000 + timer_end.tv_usec -
+                (timer_start.tv_sec*1000000  + timer_start.tv_usec);
+
+    elapsed_time.tv_sec = time_used/1000000;
+    elapsed_time.tv_usec = time_used - elapsed_time.tv_sec*1000000;
 
     if (mem_start > mem_end)
         mem_used = 0;
@@ -302,16 +302,16 @@ void CogServer::runAgent(Agent *agent)
                    agent->classinfo().id.c_str(), 1.0*time_used/1000000, mem_used, atoms_used, this->cycleCount
                   );
 
-    _systemActivityTable.logActivity(agent, elapsed_time, mem_used, 
+    _systemActivityTable.logActivity(agent, elapsed_time, mem_used,
                                             atoms_used);
 }
 
 void CogServer::processAgents(void)
 {
     pthread_mutex_lock(&agentsLock);
-    std::vector<Agent*>::const_iterator it;
+    AgentSeq::const_iterator it;
     for (it = agents.begin(); it != agents.end(); ++it) {
-        Agent* agent = *it;
+        AgentPtr agent = *it;
         if ((cycleCount % agent->frequency()) == 0)
             runAgent(agent);
     }
@@ -335,35 +335,34 @@ std::list<const char*> CogServer::agentIds() const
     return Registry<Agent>::all();
 }
 
-Agent* CogServer::createAgent(const std::string& id, const bool start)
+AgentPtr CogServer::createAgent(const std::string& id, const bool start)
 {
-    Agent* a = Registry<Agent>::create(*this, id);
+    AgentPtr a(Registry<Agent>::create(*this, id));
     if (a && start) startAgent(a);
-    return a; 
+    return a;
 }
 
-void CogServer::startAgent(Agent* agent)
+void CogServer::startAgent(AgentPtr agent)
 {
     pthread_mutex_lock(&agentsLock);
     agents.push_back(agent);
     pthread_mutex_unlock(&agentsLock);
 }
 
-void CogServer::stopAgent(Agent* agent)
+void CogServer::stopAgent(AgentPtr agent)
 {
     pthread_mutex_lock(&agentsLock);
-    AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent); 
+    AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent);
     if (ai != agents.end())
         agents.erase(ai);
     pthread_mutex_unlock(&agentsLock);
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
-void CogServer::destroyAgent(Agent *agent)
+void CogServer::destroyAgent(AgentPtr agent)
 {
     stopAgent(agent);
     logger().debug("[CogServer] deleting agent \"%s\"", agent->to_string().c_str());
-    delete agent;
 }
 
 void CogServer::destroyAllAgents(const std::string& id)
@@ -374,12 +373,12 @@ void CogServer::destroyAllAgents(const std::string& id)
     // "joined"
     pthread_mutex_lock(&agentsLock);
     // place agents with classinfo().id == id at the end of the container
-    std::vector<Agent*>::iterator last = 
+    AgentSeq::iterator last =
         std::partition(agents.begin(), agents.end(),
                        boost::bind(equal_to_id(), _1, id));
 
     // save the agents that should be deleted on a temporary container
-    std::vector<Agent*> to_delete(last, agents.end());
+    AgentSeq to_delete(last, agents.end());
 
     // remove those agents from the main container
     agents.erase(last, agents.end());
@@ -391,7 +390,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // delete the selected agents; NOTE: we must ensure that this is executed
     // after the 'agents.erase' call above, because the agent's destructor might
     // include a recursive call to destroyAllAgents
-    std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
+    // std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
     pthread_mutex_unlock(&agentsLock);
 }
 
@@ -477,7 +476,7 @@ bool CogServer::loadModule(const std::string& filename)
 // TODO FIXME I guess this needs to be different for windows.
 #define PATH_SEP '/'
     // The module file identifier does NOT include the file path!
-    string fi = filename;
+    std::string fi = filename;
     size_t path_sep = fi.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         fi.erase(0, path_sep+1);
@@ -563,7 +562,7 @@ bool CogServer::loadModule(const std::string& filename)
 
     // after registration, call the module's init() method
     module->init();
- 
+
     return true;
 }
 
@@ -584,7 +583,7 @@ std::string CogServer::listModules()
         ModuleData moduleData = startIterator->second;
 
         // Only list the names, not the filenames.
-        if (module_id.find(".so", 0) != string::npos)
+        if (module_id.find(".so", 0) != std::string::npos)
         {
             // Add the module_id to our stream
             oss
@@ -606,7 +605,7 @@ std::string CogServer::listModules()
 bool CogServer::unloadModule(const std::string& moduleId)
 {
     // The module file identifier does NOT include the file path!
-    string f = moduleId;
+    std::string f = moduleId;
     size_t path_sep = f.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         f.erase(0, path_sep+1);
@@ -649,7 +648,7 @@ bool CogServer::unloadModule(const std::string& moduleId)
 CogServer::ModuleData CogServer::getModuleData(const std::string& moduleId)
 {
     // The module file identifier does NOT include the file path!
-    string f = moduleId;
+    std::string f = moduleId;
     size_t path_sep = f.rfind(PATH_SEP);
     if (path_sep != std::string::npos)
         f.erase(0, path_sep+1);
@@ -668,7 +667,7 @@ Module* CogServer::getModule(const std::string& moduleId)
     return getModuleData(moduleId).module;
 }
 
-void CogServer::loadModules(const char* module_paths[]) 
+void CogServer::loadModules(const char* module_paths[])
 {
     // Load modules specified in the config file
     std::vector<std::string> modules;
@@ -697,7 +696,7 @@ void CogServer::loadModules(const char* module_paths[])
     }
 }
 
-void CogServer::loadSCMModules(const char* config_paths[]) 
+void CogServer::loadSCMModules(const char* config_paths[])
 {
     // Load scheme modules specified in the config file
     std::vector<std::string> scm_modules;
@@ -721,7 +720,7 @@ void CogServer::loadSCMModules(const char* config_paths[])
         } // if
         if (rc)
         {
-           logger().warn("Failed to load %s: %d %s", 
+           logger().warn("Failed to load %s: %d %s",
                  mod, rc, strerror(rc));
         }
         else
@@ -761,9 +760,9 @@ void CogServer::openDatabase(void)
         return;
     }
     PersistModule *pm = static_cast<PersistModule *>(mod);
-    const std::string &resp = pm->do_open(NULL, args);  
+    const std::string &resp = pm->do_open(NULL, args);
 
-    logger().info("Preload >>%s: %s as user %s\n", 
+    logger().info("Preload >>%s: %s as user %s\n",
         resp.c_str(), dbname.c_str(), username.c_str());
 
 #else /* HAVE_SQL_STORAGE */

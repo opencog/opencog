@@ -304,9 +304,9 @@ ReferenceRuleProvider::ReferenceRuleProvider(void)
     AtomSpaceWrapper* asw = ASW();
     AtomSpace* atomspace = asw->getAtomSpace();
     
-    c_add = atomspace->atomSpaceAsync->addAtomSignal(
+    c_add = atomspace->addAtomSignal(
             boost::bind(&ReferenceRuleProvider::handleAddSignal, this, _1, _2));
-    c_remove = atomspace->atomSpaceAsync->removeAtomSignal(
+    c_remove = atomspace->removeAtomSignal(
             boost::bind(&ReferenceRuleProvider::handleRemoveSignal, this, _1, _2));
     assert(c_add.connected() && c_remove.connected());
 

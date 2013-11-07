@@ -1,7 +1,7 @@
 # MOSES' version, must be updated manually
 SET (MOSES_VERSION_MAJOR 3)
 SET (MOSES_VERSION_MINOR 6)
-SET (MOSES_VERSION_PATCH 8)
+SET (MOSES_VERSION_PATCH 9)
 
 ADD_DEFINITIONS(-DMOSES_VERSION_MAJOR="${MOSES_VERSION_MAJOR}")
 ADD_DEFINITIONS(-DMOSES_VERSION_MINOR="${MOSES_VERSION_MINOR}")
@@ -43,7 +43,11 @@ ADD_LIBRARY (moses SHARED STATIC
 	moses/types
 	moses/using
 
-	scoring/scoring
+	scoring/scoring_base
+	scoring/discriminating_bscore    
+	scoring/precision_bscore    
+    scoring/instance_scorer
+    scoring/bscores
 
 	metapopulation/metapopulation
 	metapopulation/metapop_params

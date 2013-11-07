@@ -23,13 +23,15 @@
 #ifndef _COVER_TREE_H
 #define _COVER_TREE_H
 
-#include <vector>
+#include <float.h>
+
 #include <algorithm>
+#include <cmath>
+#include <iostream>
 #include <map>
 #include <set>
-#include <cmath>
-#include <float.h>
-#include <iostream>
+#include <utility>
+#include <vector>
 
 /** \addtogroup grp_cogutil
  *  @{
@@ -261,8 +263,8 @@ CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k) const
     //minNodes stores the k nearest known points to p.
     std::set<distNodePair> minNodes;
 
-    minNodes.insert(make_pair(maxDist,_root));
-    std::vector<distNodePair> Qj(1,make_pair(maxDist,_root));
+    minNodes.insert(std::make_pair(maxDist,_root));
+    std::vector<distNodePair> Qj(1,std::make_pair(maxDist,_root));
     for(int level = _maxLevel; level>=_minLevel;level--) {
         typename std::vector<distNodePair>::const_iterator it;
         int size = Qj.size();
@@ -273,13 +275,13 @@ CoverTree<Point>::kNearestNodes(const Point& p, const unsigned int& k) const
             for(it2=children.begin(); it2!=children.end(); ++it2) {
                 double d = p.distance((*it2)->getPoint());
                 if(d < maxDist || minNodes.size() < k) {
-                    minNodes.insert(make_pair(d,*it2));
+                    minNodes.insert(std::make_pair(d,*it2));
                     //--minNodes.end() gives us an iterator to the greatest
                     //element of minNodes.
                     if(minNodes.size() > k) minNodes.erase(--minNodes.end());
                     maxDist = (--minNodes.end())->first;
                 }
-                Qj.push_back(make_pair(d,*it2));
+                Qj.push_back(std::make_pair(d,*it2));
             }
         }
         double sep = maxDist + pow(base, level);
@@ -320,7 +322,7 @@ bool CoverTree<Point>::insert_rec(const Point& p,
             double d = p.distance((*it2)->getPoint());
             if(d<minDist) minDist = d;
             if(d<=sep) {
-                Qj.push_back(make_pair(d,*it2));
+                Qj.push_back(std::make_pair(d,*it2));
             }
         }
     }
@@ -380,7 +382,7 @@ void CoverTree<Point>::remove_rec(const Point& p,
                 if(dist == 0.0) parent = it->second;
             }
             if(dist <= sep) {
-                Qj.push_back(make_pair(dist,*it2));
+                Qj.push_back(std::make_pair(dist,*it2));
             }
         }
     }
@@ -435,7 +437,7 @@ void CoverTree<Point>::remove_rec(const Point& p,
                 }
                 minDQ=DBL_MAX;
                 if(br) break;
-                Q.push_back(make_pair((*it)->distance(p),*it));
+                Q.push_back(std::make_pair((*it)->distance(p),*it));
                 i++;
                 sep = pow(base,i);
             }
@@ -466,7 +468,7 @@ CoverTree<Point>::distance(const Point& p,
             minNode = *it;
         }
     }
-    return make_pair(minDist,minNode);  
+    return std::make_pair(minDist,minNode);  
 }
 
 template<class Point>
@@ -487,7 +489,7 @@ void CoverTree<Point>::insert(const Point& newPoint)
         //distance 0 to newPoint in the cover tree (the previous lines check it)
         insert_rec(newPoint,
                    std::vector<distNodePair>
-                   (1,make_pair(_root->distance(newPoint),_root)),
+                   (1,std::make_pair(_root->distance(newPoint),_root)),
                    _maxLevel);
     }
 }
@@ -521,9 +523,9 @@ void CoverTree<Point>::remove(const Point& p)
         }
     }
     std::map<int, std::vector<distNodePair> > coverSets;
-    coverSets[_maxLevel].push_back(make_pair(_root->distance(p),_root));
+    coverSets[_maxLevel].push_back(std::make_pair(_root->distance(p),_root));
     if(removingRoot)
-        coverSets[_maxLevel].push_back(make_pair(newRoot->distance(p),newRoot));
+        coverSets[_maxLevel].push_back(std::make_pair(newRoot->distance(p),newRoot));
     bool multi = false;
     remove_rec(p,coverSets,_maxLevel,multi);
     if(removingRoot) {

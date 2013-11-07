@@ -25,6 +25,7 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/util/platform.h>
 #include <opencog/util/exceptions.h>
 
@@ -100,9 +101,9 @@ public:
 
         Atom* atom = new ConcreteAtom(ORDERED_LINK, outgoing);
         atom->markForRemoval();
-        TS_ASSERT_EQUALS(atom->flags & MARKED_FOR_REMOVAL, MARKED_FOR_REMOVAL);
+        TS_ASSERT_EQUALS(atom->_flags & MARKED_FOR_REMOVAL, MARKED_FOR_REMOVAL);
         atom->unsetRemovalFlag();
-        TS_ASSERT((atom->flags & MARKED_FOR_REMOVAL) != MARKED_FOR_REMOVAL);
+        TS_ASSERT((atom->_flags & MARKED_FOR_REMOVAL) != MARKED_FOR_REMOVAL);
         delete atom;
     }
 

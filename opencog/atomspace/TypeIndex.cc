@@ -36,16 +36,16 @@ void TypeIndex::resize(void)
 	FixedIntegerIndex::resize(num_types + 1);
 }
 
-void TypeIndex::insertAtom(const Atom* a)
+void TypeIndex::insertAtom(AtomPtr a)
 {
 	Type t = a->getType();
-	insert(t,a->getHandle());
+	insert(t, a->getHandle());
 }
 
-void TypeIndex::removeAtom(const Atom* a)
+void TypeIndex::removeAtom(AtomPtr a)
 {
 	Type t = a->getType();
-	remove(t,a->getHandle());
+	remove(t, a->getHandle());
 }
 
 // ================================================================
@@ -103,7 +103,7 @@ TypeIndex::iterator& TypeIndex::iterator::operator=(iterator v)
 Handle TypeIndex::iterator::operator*(void)
 {
 	if (s == send) return Handle::UNDEFINED;
-	return *se;
+	return Handle(*se);
 }
 
 bool TypeIndex::iterator::operator==(iterator v)

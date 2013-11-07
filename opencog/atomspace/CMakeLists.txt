@@ -14,7 +14,6 @@ ADD_LIBRARY (atomspace SHARED
     atom_types.h
     Atom.cc
     AtomSpace.cc
-    AtomSpaceAsync.cc
     AtomSpaceImpl.cc
     AtomSpaceInit.cc
     AtomTable.cc
@@ -42,7 +41,6 @@ ADD_LIBRARY (atomspace SHARED
     StringIndex.cc
     TargetTypeIndex.cc
     TLB.cc
-    Trail.cc
     TruthValue.cc
     TypeIndex.cc
     VersionHandle.cc
@@ -57,10 +55,6 @@ SET(ATOMSPACE_LINK_LIBS
 	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
-
-IF (HAVE_ZMQ)
-	SET(ATOMSPACE_LINK_LIBS ${ATOMSPACE_LINK_LIBS} zmq)
-ENDIF (HAVE_ZMQ)
 
 TARGET_LINK_LIBRARIES(atomspace
 	${ATOMSPACE_LINK_LIBS}
@@ -77,12 +71,10 @@ ELSE (CYGWIN)
 ENDIF (CYGWIN)
 
 INSTALL (FILES
-    ASRequest.h
     Atom.h
     AtomIndex.h
     AtomSpaceDefinitions.h
     AtomSpace.h
-    AtomSpaceAsync.h
     AtomSpaceImpl.h
     AtomTable.h
     ${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
@@ -117,7 +109,6 @@ INSTALL (FILES
     StringIndex.h
     TargetTypeIndex.h
     TLB.h
-    Trail.h
     TruthValue.h
     TypeIndex.h
     VersionHandle.h
@@ -125,11 +116,3 @@ INSTALL (FILES
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )
 
-ADD_EXECUTABLE (atomspace_async
-    atomspace_async_tester
-)
-
-TARGET_LINK_LIBRARIES (atomspace_async
-	atomspace
-	cogutil
-)

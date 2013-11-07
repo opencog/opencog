@@ -83,11 +83,10 @@ class MyExampleClass
 		// with a ListLink.
 		Handle my_func(Handle h)
 		{
-			Handle hlist = Handle::UNDEFINED;
 			TSM_ASSERT("Failed to get a valid handle", as->isValidHandle(h))
 
 			logger().debug("Info: my_func instance %d received the node: %s\n", id, as->getName(h).c_str());
-			hlist = as->addLink(LIST_LINK, h);
+			Handle hlist = as->addLink(LIST_LINK, h);
 			return hlist;
 		}
 
@@ -136,7 +135,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	TSM_ASSERT ("undefined list handle ", as->isValidHandle(yyy));
 
 	TSM_ASSERT ("Null handle for link ", as->isValidHandle(yyy));
-	TSM_ASSERT ("handle isn't a link ", !as->isNode(yyy));
+	TSM_ASSERT ("handle isn't a link ", as->isLink(yyy));
 
 	const std::vector<Handle>& oset = as->getOutgoing(yyy);
 

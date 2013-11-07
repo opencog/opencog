@@ -109,6 +109,8 @@ public:
 
 }; // class
 
+typedef std::shared_ptr<ForgettingAgent> ForgettingAgentPtr;
+
 /**
  * Comparison operator for using qsort on a list of Handles.
  * Returns them with ascending LTI and if equal in LTI,
@@ -124,8 +126,8 @@ struct ForgettingLTIThenTVAscendingSort {
         AttentionValue::lti_t lti1, lti2;
         float tv1, tv2;
 
-        lti1 = a->getAV(h1).getLTI();
-        lti2 = a->getAV(h2).getLTI();
+        lti1 = a->getAV(h1)->getLTI();
+        lti2 = a->getAV(h2)->getLTI();
 
         tv1 = fabs(a->getMean(h1));
         tv2 = fabs(a->getMean(h2));

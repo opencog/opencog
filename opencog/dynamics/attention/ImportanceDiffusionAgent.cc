@@ -114,6 +114,8 @@ void ImportanceDiffusionAgent::run()
     spreadImportance();
 }
 
+#define toFloat getMean
+
 int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffusionAtomsMap,
         std::vector<Handle> links)
 {
@@ -128,8 +130,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
         std::vector<Handle> targets;
         std::vector<Handle>::iterator targetItr;
         Handle linkHandle = *hi;
-        float val;
-        val = a->getTV(*hi)->toFloat();
+        float val = a->getTV(linkHandle)->toFloat();
         if (val == 0.0f) {
             continue;
         }
@@ -211,9 +212,8 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
         int sourceIndex;
         int targetIndex;
         Type type;
-        float val;
 
-        val = a->getTV(*hi)->toFloat();
+        float val = a->getTV(*hi)->toFloat();
         if (val == 0.0f) continue;
         //val *= diffuseTemperature;
         type = a->getType(*hi); 
@@ -344,9 +344,9 @@ void ImportanceDiffusionAgent::spreadImportance()
 
     // Get all HebbianLinks
     if (allLinksSpread) {
-      a->getHandleSet(out_hi, LINK, true);
+      a->getHandlesByType(out_hi, LINK, true);
     } else {
-      a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+      a->getHandlesByType(out_hi, HEBBIAN_LINK, true);
     }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);

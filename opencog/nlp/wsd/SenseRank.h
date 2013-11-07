@@ -10,7 +10,7 @@
 #ifndef _OPENCOG_SENSE_RANK_H
 #define _OPENCOG_SENSE_RANK_H
 
-#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/Handle.h>
 
 #include <deque>
 
@@ -44,14 +44,12 @@ class SenseRank
 		double converge;
 		double convergence_damper;
 		double convergence_limit;
-        AtomSpace *as;
 
-        void log_bad_sense(Handle, const std::string&, bool);
+		void log_bad_sense(Handle, const std::string&, bool);
 
 	public:
 		SenseRank();
 		~SenseRank();
-        void set_atom_space(AtomSpace *_as) {as = _as;}
 		void init_parse(Handle);
 		void rank_parse(Handle);
 		void rank_sentence(Handle);

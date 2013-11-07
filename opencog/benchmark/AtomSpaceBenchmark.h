@@ -8,7 +8,8 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/guile/SchemeEval.h>
+// #undef HAVE_CYTHON
+// #undef HAVE_GUILE
 
 using boost::tuple;
 
@@ -16,6 +17,11 @@ namespace opencog
 {
 
 typedef boost::tuple<clock_t,clock_t> timepair_t;
+
+class CogServer;
+class PythonModule;
+class PythonEval;
+class SchemeEval;
 
 class AtomSpaceBenchmark
 {
@@ -49,8 +55,12 @@ class AtomSpaceBenchmark
     AtomSpace* asp;
     AtomTable* atab;
 #if HAVE_GUILE
-    //AtomSpaceImpl asBackend;
     SchemeEval* scm;
+#endif
+#if HAVE_CYTHON
+    CogServer* cogs;
+    PythonModule* pymo;
+    PythonEval* pyev;
 #endif
 
     MT19937RandGen* rng;
@@ -59,6 +69,7 @@ class AtomSpaceBenchmark
     std::poisson_distribution<unsigned> *prg;
 
     Type randomType(Type t);
+    int numberOfTypes;
 
     clock_t makeRandomNode(const std::string& s);
     clock_t makeRandomLink();
@@ -69,6 +80,7 @@ class AtomSpaceBenchmark
     std::vector<std::string>  methodNames;
 public:
     int Nreps;
+    int Nloops;
     int sizeIncrease;
     bool saveToFile;
     int saveInterval;
@@ -76,14 +88,18 @@ public:
     bool buildTestData;
 
 
-    enum BenchType { BENCH_AS = 1, BENCH_IMPL, BENCH_TABLE,
+    enum BenchType { BENCH_AS = 1, BENCH_TABLE,
 #ifdef HAVE_GUILE
-        BENCH_SCM
+        BENCH_SCM,
+#endif 
+#ifdef HAVE_CYTHON
+        BENCH_PYTHON,
 #endif 
     };
     BenchType testKind;
 
     UUID UUID_begin;
+    UUID UUID_end;
     typedef timepair_t (AtomSpaceBenchmark::*BMFn)();
     std::vector< BMFn > methodsToTest;
 
@@ -92,6 +108,7 @@ public:
 
     bool showTypeSizes;
     void printTypeSizes();
+    size_t estimateOfAtomSize(Handle h);
 
     AtomSpaceBenchmark();
     ~AtomSpaceBenchmark();
@@ -108,6 +125,7 @@ public:
     timepair_t bm_noop();
     timepair_t bm_addNode();
     timepair_t bm_addLink();
+    timepair_t bm_rmAtom();
 
     timepair_t bm_getType();
     timepair_t bm_getNodeHandles();
@@ -115,25 +133,14 @@ public:
     timepair_t bm_getOutgoingSet();
     timepair_t bm_getIncomingSet();
 
-    void bm_getHandleNode() {};
-    void bm_getHandleLink() {};
-    void bm_getName() {};
-
     // Get and set TV and AV
     float chanceUseDefaultTV; // if set, this will use default TV for new atoms and bm_setTruthValue
     timepair_t bm_getTruthValue();
+    timepair_t bm_setTruthValue();
 
 #ifdef ZMQ_EXPERIMENT
     timepair_t bm_getTruthValueZmq();
 #endif
-    timepair_t bm_setTruthValue();
-    void bm_getAttentionValue() {};
-    void bm_setAttentionValue() {};
-
-    void bm_erase() {};
-
-    size_t estimateOfAtomSize(Handle h);
-
 };
 
 } // namespace opencog

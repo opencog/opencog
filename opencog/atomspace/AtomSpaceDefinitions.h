@@ -33,20 +33,13 @@
 
 //!@{
 //! Atom flag
-#define WRITE_MUTEX             1  //BIT0
+// #define WRITE_MUTEX             1  //BIT0
 #define MARKED_FOR_REMOVAL      2  //BIT1
-//#define MULTIPLE_TRUTH_VALUES 4  //BIT2
-#define FIRED_ACTIVATION        8  //BIT3
-#define HYPOTETHICAL_FLAG       16 //BIT4
+// #define MULTIPLE_TRUTH_VALUES   4  //BIT2
+// #define FIRED_ACTIVATION        8  //BIT3
+// #define HYPOTETHICAL_FLAG       16 //BIT4
 #define REMOVED_BY_DECAY        32 //BIT5
 //!@}
-
-//! 4092 importance bins means each bin has STI range of 32
-#define IMPORTANCE_INDEX_SIZE   (1 << 11)
-
-//! This can be made orders of magnitude larger, if desired,
-//! with relatively little cost.
-#define MAX_PREDICATE_INDICES   32
 
 /** @}*/
 #endif // _OPENCOG_ATOMSPACE_DEFINITIONS_H_

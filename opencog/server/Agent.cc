@@ -31,6 +31,8 @@ using namespace opencog;
 
 Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f)
 {
+    _attentionValue = AttentionValue::DEFAULT_AV();
+
     // an empty set of parameters and defaults (so that various
     // methods will still work even if none are set in this or a derived
     // class)
@@ -42,22 +44,23 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = _cogserver.getAtomSpace().atomSpaceAsync->removeAtomSignal(
-            boost::bind(&Agent::atomRemoved, this, _1, _2));
+    conn = _cogserver.getAtomSpace().removeAtomSignal(
+            boost::bind(&Agent::atomRemoved, this, _1));
 }
 
 Agent::~Agent()
 {
     // give back funds
-    _cogserver.getAtomSpace().getAttentionBank().setSTI(this, 0);
-    _cogserver.getAtomSpace().getAttentionBank().setLTI(this, 0);
+    _cogserver.getAtomSpace().getAttentionBank().updateSTIFunds(_attentionValue->getSTI());
+    _cogserver.getAtomSpace().getAttentionBank().updateLTIFunds(_attentionValue->getLTI());
 
     resetUtilizedHandleSets();
-    delete stimulatedAtoms;
     conn.disconnect();
+    delete stimulatedAtoms;
 }
 
-void Agent::setParameters(const std::string* params) {
+void Agent::setParameters(const std::string* params)
+{
     PARAMETERS = params;
 
     for (unsigned int i = 0; params[i] != ""; i += 2) {
@@ -80,8 +83,9 @@ std::string Agent::to_string() const
     return oss.str();
 }
 
-void Agent::atomRemoved(AtomSpaceImpl* a, Handle h)
+void Agent::atomRemoved(AtomPtr atom)
 {
+    Handle h = atom->getHandle();
     for (size_t i = 0; i < _utilizedHandleSets.size(); i++)
         _utilizedHandleSets[i].erase(h);
     removeAtomStimulus(h);

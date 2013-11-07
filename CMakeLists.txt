@@ -328,13 +328,12 @@ ENDIF(PYTHONLIBS_FOUND)
 # Python bindings using Cython
 # Cython is used to generate bindings
 FIND_PROGRAM(CYTHON_EXECUTABLE cython)
-FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
 IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
    # find python destination dir for python bindings
    ADD_DEFINITIONS(-DHAVE_CYTHON)
    SET(HAVE_CYTHON 1)
    EXECUTE_PROCESS(
-	   COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *; print get_python_lib()"
+       COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
 		OUTPUT_VARIABLE PYTHON_DEST
    )
 
@@ -350,6 +349,12 @@ ELSE (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 		MESSAGE(STATUS "Cython executable not found.")
 	ENDIF(NOT CYTHON_EXECUTABLE)
 ENDIF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+
+# Nosetests will find and automatically run python tests.
+FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
+IF (NOSETESTS_EXECUTABLE)
+   SET(HAVE_NOSETESTS 1)
+ENDIF (NOSETESTS_EXECUTABLE)
 
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)
@@ -465,7 +470,8 @@ ENDIF(Boost_FOUND)
 IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
-    SET(HAVE_PLN 1)
+    # PLN won't compile with gcc-4.7
+    # SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
@@ -480,10 +486,6 @@ ENDIF(EXPAT_FOUND AND HAVE_ATOMSPACE)
 IF(HAVE_ATOMSPACE)
 	SET(HAVE_SERVER 1)
 ENDIF(HAVE_ATOMSPACE)
-
-IF(HAVE_SERVER) # because web depends on server
-	SET(HAVE_WEB 1)
-ENDIF(HAVE_SERVER)
 
 IF(HAVE_ATOMSPACE AND ODBC_FOUND) # SQL persistance
 	SET(HAVE_PERSIST 1)
@@ -552,8 +554,8 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib/opencog")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-ADD_SUBDIRECTORY(opencog)
 ADD_SUBDIRECTORY(lib)
+ADD_SUBDIRECTORY(opencog)
 
 ADD_CUSTOM_TARGET(tests)
 ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
@@ -587,9 +589,16 @@ ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
+
 IF (NOT WIN32)
 	ADD_CUSTOM_TARGET (examples
-		COMMAND ${CMAKE_BUILD_TOOL}
+		# using CMAKE_BUILD_TOOL results in teh cryptic error message
+		# warning: jobserver unavailable: using -j1.  Add `+' to parent make rule.
+		# This is because make doesn't know how to pass jobserver args to
+		# the submake.  So, instead, just use $(MAKE) (with round parens)
+		# -- that will do the right thing.
+		# COMMAND ${CMAKE_BUILD_TOOL} 
+		COMMAND $(MAKE) 
 		WORKING_DIRECTORY examples
 		COMMENT "Building examples"
 	)
@@ -683,23 +692,24 @@ ADD_SUBDIRECTORY(doc EXCLUDE_FROM_ALL)
 SUMMARY_ADD("AtomSpace" "A weighted and typed hypergraph database" HAVE_ATOMSPACE)
 SUMMARY_ADD("Attention" "Agents for attention allocation dynamics" HAVE_ATTENTION)
 SUMMARY_ADD("ComboReduct" "Library for reduction of combo program trees" HAVE_COMBOREDUCT)
-SUMMARY_ADD("CythonBinding" "Cython (python) bindings" HAVE_CYTHON)
+SUMMARY_ADD("Cython bindings" "Cython (python) bindings" HAVE_CYTHON)
 SUMMARY_ADD("Dim. Embedding" "Compute dimensional embedding of the AtomSpace" HAVE_DIMEMBED)
 SUMMARY_ADD("Doxygen" "Code documentation" DOXYGEN_FOUND)
 SUMMARY_ADD("Embodiment" "Architecture for embodiment" HAVE_EMBODIMENT)
-SUMMARY_ADD("FeatureSelection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
+SUMMARY_ADD("Feature selection" "MOSES based feature selection tool" HAVE_FEATURE_SELECTION)
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
 SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
-SUMMARY_ADD("SchemeBinding" "Scheme bindings and shell" HAVE_GUILE)
+SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
+SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("SQL Persist" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
+SUMMARY_ADD("SQL persistance" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("WebInterface" "Web server and REST API" HAVE_WEB)
+SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports" HAVE_ZMQ)
 SUMMARY_SHOW()
 
 

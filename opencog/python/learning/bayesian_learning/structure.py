@@ -1,9 +1,9 @@
 from learning.bayesian_learning.network import *
 from random import randrange, random as rand
+from learning.bayesian_learning.util import dim
 from sample_data.uci_adult_dataset.main import uci_adult
 from utility.evolutionary import *
 from utility.numeric.information_theory import mutual_information
-from utility.generic import dim
 from math import log, factorial
 
 __author__ = 'keyvan'

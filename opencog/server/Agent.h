@@ -26,6 +26,7 @@
 #define _OPENCOG_AGENT_H
 
 #include <string>
+#include <unordered_map>
 
 #include <opencog/server/Factory.h>
 #include <opencog/atomspace/AtomSpace.h>
@@ -37,7 +38,8 @@ namespace opencog
  *  @{
  */
 
-typedef boost::unordered_map<Handle, stim_t> AtomStimHashMap;
+typedef short stim_t;
+typedef std::unordered_map<Handle, stim_t, handle_hash> AtomStimHashMap;
 
 class CogServer;
 class AtomSpaceImpl;
@@ -100,11 +102,13 @@ class AtomSpaceImpl;
  * carry out other admin tasks before and after each cycle, without subclasses
  * needing to carry these out themselves unless they had specific reason to.
  */
-class Agent : public AttentionValueHolder
+class Agent
 {
 
 protected:
     CogServer& _cogserver;
+
+    AttentionValuePtr _attentionValue;
 
     /** The agent's frequency. Determines how often the opencog server should
      *  schedule this agent. A value of 1 (the default) means that the agent
@@ -132,7 +136,7 @@ protected:
     boost::signals::connection conn;
 
     /** called by AtomTable via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl* a, Handle h);
+    void atomRemoved(AtomPtr);
 
 public:
 
@@ -217,10 +221,11 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
-
-
-
+    AttentionValuePtr getAV() { return _attentionValue; }
+    void setAV(AttentionValuePtr new_av) { _attentionValue = new_av; }
 }; // class
+
+typedef std::shared_ptr<Agent> AgentPtr;
 
 /** @}*/
 }  // namespace

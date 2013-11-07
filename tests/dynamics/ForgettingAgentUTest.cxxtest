@@ -41,7 +41,7 @@ vector<Handle> createNodes(AtomSpace* atomSpace, std::string baseName, int numbe
 
     for (int i = 0; i < number; i++) {
         std::ostringstream buf;
-        SimpleTruthValue tv1(0.5f, 0.99f);
+        TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
         buf << baseName << i;
         Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf.str().c_str(), tv1);
         //printf("add atom %d: %s\n", i, buf.str().c_str());
@@ -60,7 +60,7 @@ vector<Handle> createSimpleGraph(AtomSpace* atomSpace, const char* baseName)
     baseNameLength = strlen(baseName);
     strcpy(buf,baseName);
 
-    SimpleTruthValue tv1(0.5f, 0.99f);
+    TruthValuePtr tv1 = SimpleTruthValue::createTV(0.5f, 0.99f);
     buf[baseNameLength] = '1';
     Handle h1 = atomSpace->addNode(CONCEPT_NODE, buf, tv1);
     buf[baseNameLength] = '2';
@@ -92,7 +92,7 @@ private:
 
     Factory<ForgettingAgent, Agent> factory;
     CogServer& cogserver;
-    ForgettingAgent* agent;
+    ForgettingAgentPtr agent;
 
 public:
 
@@ -101,7 +101,7 @@ public:
 
     ForgettingAgentUTest() : cogserver(static_cast<CogServer&>(server(CogServer::createInstance))) {
         cogserver.registerAgent(ForgettingAgent::info().id, &factory);
-        agent = static_cast<ForgettingAgent*>(cogserver.createAgent(ForgettingAgent::info().id, true));
+        agent = cogserver.createAgent<ForgettingAgent>(true);
         logger().setLevel(Logger::FINE);
         logger().setPrintToStdoutFlag(true);
     }
@@ -130,16 +130,16 @@ public:
 
         // Case: 100 atoms, 10% loss, all same LTI
         // Result: 10 random atom lost
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 
         // --
-        count = cogserver.getAtomSpace().Nodes();
+        count = cogserver.getAtomSpace().getNumNodes();
         agent->forgetPercentage = 0.0f;
         cogserver.runLoopStep();
 
         // Case: 90 atoms, 0% loss, all same LTI
         // Result: 0 random atom lost
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 
         // --
         agent->forgetPercentage = 1.0f;
@@ -148,7 +148,7 @@ public:
 
         // Case: 90 atoms, 100% loss, all same LTI
         // Result: all atoms lost
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 
         // Test to make sure atoms are removed in the right order:
         count = 10;
@@ -160,12 +160,12 @@ public:
         agent->forgetPercentage = 0.20;
         cogserver.runLoopStep();
         // First two handles should now be invalid...
-#ifdef USE_TLB_MAP 
+#ifdef USE_TLB_MAP
         TS_ASSERT(!cogserver.getAtomSpace().isValidHandle(atoms[0]));
         TS_ASSERT(!cogserver.getAtomSpace().isValidHandle(atoms[1]));
 #else
         HandleSeq result;
-        cogserver.getAtomSpace().getHandleSet(back_inserter(result),ATOM,true);
+        cogserver.getAtomSpace().getHandlesByType(back_inserter(result),ATOM,true);
         for (unsigned int i = 0; i < result.size(); i++) {
             TS_ASSERT(result[i] != atoms[0]);
             TS_ASSERT(result[i] != atoms[1]);
@@ -192,7 +192,7 @@ public:
         // Case: 100 atoms, none below threshold
         // Result: Nothing lost
         cogserver.runLoopStep();
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 
         // Case: 100 atoms, 10 below threshold (ranging from threshold to
         // threshold - 10 LTI)
@@ -204,14 +204,14 @@ public:
         count = 90;
 
         cogserver.runLoopStep();
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 10; i++) {
             TS_ASSERT(!cogserver.getAtomSpace().isValidHandle(atoms[i]));
         }
 #else
         HandleSeq result;
-        cogserver.getAtomSpace().getHandleSet(back_inserter(result),ATOM,true);
+        cogserver.getAtomSpace().getHandlesByType(back_inserter(result),ATOM,true);
         for (unsigned int i = 0; i < result.size(); i++) {
             for (int j = 0; j < 10; j++) {
                 TS_ASSERT(result[i] != atoms[j]);
@@ -245,14 +245,14 @@ public:
         }
         count = 95;
         cogserver.runLoopStep();
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
 #ifdef USE_TLB_MAP
         for (int i = 0; i < 5; i++) {
             TS_ASSERT(!cogserver.getAtomSpace().isValidHandle(atoms[i]));
         }
 #else
         HandleSeq result;
-        cogserver.getAtomSpace().getHandleSet(back_inserter(result),ATOM,true);
+        cogserver.getAtomSpace().getHandlesByType(back_inserter(result),ATOM,true);
         for (unsigned int i = 0; i < result.size(); i++) {
             for (int j = 0; j < 5; j++) {
                 TS_ASSERT(result[i] != atoms[j]);
@@ -268,7 +268,7 @@ public:
         }
         count = 86;
         cogserver.runLoopStep();
-        TS_ASSERT_EQUALS(cogserver.getAtomSpace().Nodes(), count);
+        TS_ASSERT_EQUALS(cogserver.getAtomSpace().getNumNodes(), count);
         numRemoved = 0;
 #ifdef USE_TLB_MAP
         for (int i = 5; i < 20; i++) {
@@ -278,7 +278,7 @@ public:
         }
 #else
         result.clear();
-        cogserver.getAtomSpace().getHandleSet(back_inserter(result),ATOM,true);
+        cogserver.getAtomSpace().getHandlesByType(back_inserter(result),ATOM,true);
         for (int j = 5; j < 20; j++) {
             bool removed = true;
             for (unsigned int i = 0; i < result.size(); i++) {

@@ -145,7 +145,7 @@ void Pet::initTraitsAndFeelings()
     }
 
     // feelings
-    SimpleTruthValue tv(0.5f, 0.0f);
+    TruthValuePtr tv = SimpleTruthValue::createTV(0.5f, 0.0f);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("fear"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
@@ -159,7 +159,7 @@ void Pet::initTraitsAndFeelings()
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("gratitude"), tv, petHandle), 1);
 
-    tv.setMean(0.51f);
+    tv = SimpleTruthValue::createTV(0.51f, 0.0f);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
                 std::string("happiness"), tv, petHandle), 1);
     atomSpace->setLTI(AtomSpaceUtil::setPredicateValue(*atomSpace,
@@ -228,8 +228,8 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
 
     if (this->exemplarAvatarId != "") {
         std::vector<Handle> exemplarAvatarSet;
-        atomSpace->getHandleSet(back_inserter(exemplarAvatarSet), OBJECT_NODE,
-                this->exemplarAvatarId, true);
+        atomSpace->getHandlesByName(back_inserter(exemplarAvatarSet),
+                this->exemplarAvatarId, OBJECT_NODE, true);
 
         if (exemplarAvatarSet.size() != 1) {
             throw RuntimeException(TRACE_INFO,
@@ -238,9 +238,9 @@ void Pet::adjustIsExemplarAvatarPredicate(bool active) throw (RuntimeException)
                     exemplarAvatarSet.size(), this->exemplarAvatarId.c_str());
         }
 
-        SimpleTruthValue tv(0.0, 1.0);
+        TruthValuePtr tv = SimpleTruthValue::createTV(0.0, 1.0);
         if (active) {
-            tv.setMean(1.0);
+            tv = SimpleTruthValue::createTV(1.0, 1.0);
         }
 
         Handle atTimeLink = AtomSpaceUtil::addPropertyPredicate(*atomSpace,
@@ -930,8 +930,7 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
     // get the handle for each entity
     foreach(string entity, entitiesInVicinity) {
         HandleSeq objHandle;
-        atomSpace->getHandleSet(back_inserter(objHandle), OBJECT_NODE, entity,
-                true);
+        atomSpace->getHandlesByName(back_inserter(objHandle), entity, OBJECT_NODE, true);
         if (objHandle.size() == 1) {
             petVicinity.push_back(*objHandle.begin());
         } else {
@@ -946,13 +945,12 @@ bool Pet::getVicinityAtTime(unsigned long timestamp, HandleSeq& petVicinity)
 */
 void Pet::getHighLTIObjects(HandleSeq& highLTIObjects)
 {
-    atomSpace->getHandleSet(back_inserter(highLTIObjects), OBJECT_NODE, true);
+    atomSpace->getHandlesByType(back_inserter(highLTIObjects), OBJECT_NODE, true);
 
     HandleSeq::iterator it = highLTIObjects.begin();
     while (it != highLTIObjects.end()) {
-        const AttentionValue& attentionValue =
-            atomSpace->getAV(*it);
-        if (attentionValue.getLTI() < AtomSpaceUtil::highLongTermImportance)
+        AttentionValuePtr attentionValue = atomSpace->getAV(*it);
+        if (attentionValue->getLTI() < AtomSpaceUtil::highLongTermImportance)
             it = highLTIObjects.erase(it);
         else it++;
     }
@@ -991,7 +989,7 @@ void Pet::getAllActionsDoneInATrickAtTime(const Temporal& time, HandleSeq& actio
         patternToSearchLearningSession.push_back(conceptNode);
         // get the handles of all trick
         HandleSeq learningSessionHandles;
-        atomSpace->getHandleSet(back_inserter(learningSessionHandles),
+        atomSpace->getHandlesByOutgoing(back_inserter(learningSessionHandles),
                 patternToSearchLearningSession, NULL, NULL, 2, INHERITANCE_LINK,
                 true);
         foreach(Handle learningSessionHandle, learningSessionHandles) {

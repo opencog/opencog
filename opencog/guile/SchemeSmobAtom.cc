@@ -82,7 +82,7 @@ SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
 	TruthValuePtr tv = atomspace->getTV(h);
-	TruthValue *stv = tv->clone();
+	TruthValue *stv = tv->rawclone();
 	return take_tv(stv);
 }
 
@@ -91,15 +91,15 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	atomspace->setTV(h, *tv);
+	atomspace->setTV(h, tv->clone());
 	return satom;
 }
 
 SCM SchemeSmob::ss_av (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-av");
-	const AttentionValue &av = atomspace->getAV(h);
-	AttentionValue *sav = av.clone();
+	AttentionValuePtr av = atomspace->getAV(h);
+	AttentionValue *sav = av->rawclone();
 	return take_av(sav);
 }
 
@@ -108,7 +108,7 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 	Handle h = verify_handle(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
 
-	atomspace->setAV(h, *av);
+	atomspace->setAV(h, av->clone());
 	return satom;
 }
 
@@ -184,7 +184,7 @@ SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;
-	atomspace->getHandleSet(back_inserter(handle_set), t, false);
+	atomspace->getHandlesByType(back_inserter(handle_set), t, false);
 
 	// Loop over all handles in the handle set.
 	// Call proc on each handle, in turn.

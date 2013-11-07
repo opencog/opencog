@@ -42,6 +42,13 @@ private:
      */
     boost::signals::connection mergedAtomConnection;
 
+    /**
+     * Method to receive atom merge signals from AtomSpace
+     */
+    void atomMerged(const Handle&, 
+                    const AttentionValuePtr& old_av,
+                    const AttentionValuePtr& new_av);
+
 public:
 
     ImportanceDecayAgent(CogServer&);
@@ -56,16 +63,9 @@ public:
     }
 
     virtual void run();
-
-    // connects to the signals from AtomSpace it needs to know
-    void connectSignals(AtomSpace& as);
-
-    /**
-     * Method to receive atom merge signals from AtomSpace
-     */
-    void atomMerged(AtomSpaceImpl* as, Handle h);
-
 }; // class
+
+typedef std::shared_ptr<ImportanceDecayAgent> ImportanceDecayAgentPtr;
 
 } } // namespace opencog::oac
 

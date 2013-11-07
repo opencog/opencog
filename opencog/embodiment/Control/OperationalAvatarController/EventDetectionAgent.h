@@ -37,7 +37,6 @@
 #include <opencog/learning/statistics/DataProvider.h>
 #include <boost/graph/adjacency_list.hpp>
 
-using namespace std;
 using namespace opencog::statistics;
 
 namespace opencog { namespace oac {
@@ -176,8 +175,9 @@ private:
     unsigned long cycleCount;  // Indicate how many times this mind
                                // agent has been executed
 
-
 };
+
+typedef std::shared_ptr<EventDetectionAgent> EventDetectionAgentPtr;
 
 }}
 

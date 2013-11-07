@@ -10,16 +10,25 @@ as well as to be saved and restored from disk, file, database, network.
 
 Systems include:
 
-file       -- file-based storage
-hypertable -- experimental HyperTable support.
+file       -- file-based storage.  Works, but deprecated.
+
+hypertable -- experimental HyperTable support. Unmaintained.
+              (Won't compile at this time.)
+
 memcache   -- experimental/broken, uses memcached for persistence.
+              (Won't compile at this time.)
+
 sql        -- works well for most uses -- with caveats
-xml        -- XML-based file storage
+
+xml        -- Obsolete XML-based file storage; will be removed soon.
+
+zmq        -- ZeroMQ-based atomspace serialization and deserialization.
+              Unmaintained.  (Won't compile at this time.)
 
 
 The hypertable, memcache and sql systems all support networked,
-peer-to-peer communications between cogservers.  (Although both 
-hypertable and sql are currently buggy).
+peer-to-peer communications between cogservers.  (In principle ...
+currently, needs test cases, and general work to enable/support).
 
 Note that additional i/o methods can be found in the "visualization"
 directory, which e.g. dump the entire atomspace into various graphics

@@ -6,8 +6,8 @@
 #include "AtomSpaceBenchmark.h"
 
 
-int main(int argc, char** argv) {
-
+int main(int argc, char** argv)
+{
     const char* benchmark_desc = "Benchmark tool OpenCog AtomSpace\n"
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
@@ -15,17 +15,20 @@ int main(int argc, char** argv) {
      "-x        \tTest the AtomSpaceImpl instead of the public AtomSpace API\n"
      "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
      "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
+     "-c        \tTest the Python API instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to call the method in the measurement loop\n" 
      "          \t(default: 100000)\n"
+     "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
+     "          \t(default: 1)\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "          \t(default: 0)\n"
      "-- Build test data --\n"
      "-p <float> \tSet the connection probability or coordination number\n"
      "         \t(default: 0.2)\n"
      "         \t(-p impact behaviour of -S too)\n"
-     "-s <int> \tSet how many atoms are created (default: 65536)\n"
+     "-s <int> \tSet how many atoms are created (default: 256K)\n"
      "-d <float> \tChance of using default truth value (default: 0.8)\n"
      "-- Saving data --\n"
      "-k       \tCalculate stats (warning, this will affect rss memory reporting)\n"
@@ -43,7 +46,7 @@ int main(int argc, char** argv) {
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAxXgm:ln:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -58,13 +61,11 @@ int main(int argc, char** argv) {
              benchmarker.setMethod("getTV");
 //             benchmarker.setMethod("getTVZmq");
              benchmarker.setMethod("setTV");
-             benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
-             break;
-           case 'x':
-             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;
+             benchmarker.setMethod("getHandleSet");
+             benchmarker.setMethod("removeAtom");
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
@@ -74,6 +75,14 @@ int main(int argc, char** argv) {
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM;
 #else
              cerr << "Fatal Error: Benchmark not compiled with scheme support!" << endl;
+             exit(1);
+#endif
+             break;
+           case 'c':
+#ifdef HAVE_CYTHON
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_PYTHON;
+#else
+             cerr << "Fatal Error: Benchmark not compiled with cython support!" << endl;
              exit(1);
 #endif
              break;
@@ -87,6 +96,9 @@ int main(int argc, char** argv) {
              break;
            case 'n':
              benchmarker.Nreps = atoi(optarg);
+             break;
+           case 'r':
+             benchmarker.Nloops = atoi(optarg);
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
@@ -119,5 +131,5 @@ int main(int argc, char** argv) {
     }
 
     benchmarker.startBenchmark();
-
+    return 0;
 }

@@ -24,7 +24,7 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/spacetime/TimeServer.h>
 
-#include <opencog/web/json_spirit/json_spirit.h>
+#include <lib/json_spirit/json_spirit.h>
 
 #include "OAC.h"
 #include "PsiModulatorUpdaterAgent.h"
@@ -76,7 +76,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
     // Update LatestLink containig latest modulator level
     std::string predicateName = this->modulatorName + "Modulator"; 
     Handle modulatorPredicateNode = atomSpace.addNode(PREDICATE_NODE, predicateName.c_str()); 
-    SimpleTruthValue stv = SimpleTruthValue(this->currentModulatorValue, 1); 
+    TruthValuePtr stv = SimpleTruthValue::createTV(this->currentModulatorValue, 1); 
 
     std::vector <Handle> outgoings;
     Handle listLink = atomSpace.addLink(LIST_LINK, outgoings); 

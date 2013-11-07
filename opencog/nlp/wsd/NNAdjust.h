@@ -13,7 +13,6 @@
 #include <string>
 
 #include <opencog/atomspace/Atom.h>
-#include <opencog/atomspace/AtomSpace.h>
 
 namespace opencog {
 
@@ -31,12 +30,10 @@ class NNAdjust
 		bool sense_of_first_inst(Handle, Handle);
 		bool sense_of_second_inst(Handle, Handle);
 		bool sense_pair(Handle);
-        AtomSpace *as;
 
 	public:
 		NNAdjust(void);
 		~NNAdjust();
-        void set_atom_space(AtomSpace* _as) { as = _as; };
 		void adjust_sentence(Handle);
 		void adjust_parse(Handle);
 };

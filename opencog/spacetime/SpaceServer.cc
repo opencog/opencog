@@ -30,7 +30,6 @@
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/AtomSpace.h>
-#include <opencog/atomspace/AtomSpaceImpl.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 
 #include <opencog/spatial/3DSpaceMap/Block3D.h>
@@ -65,8 +64,8 @@ SpaceServer::SpaceServer(AtomSpace &_atomspace) :
     curMap = NULL;
 
     // connect signals
-    removedAtomConnection = _atomspace.atomSpaceAsync->addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1, _2));
-    addedAtomConnection = _atomspace.atomSpaceAsync->removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1, _2));
+    removedAtomConnection = _atomspace.addAtomSignal(boost::bind(&SpaceServer::atomAdded, this, _1));
+    addedAtomConnection = _atomspace.removeAtomSignal(boost::bind(&SpaceServer::atomRemoved, this, _1));
 }
 
 SpaceServer::~SpaceServer()
@@ -83,15 +82,15 @@ void SpaceServer::setTimeServer(TimeServer* ts)
     timeser = ts;
 }
 
-void SpaceServer::atomAdded(AtomSpaceImpl* a, Handle h)
+void SpaceServer::atomAdded(Handle h)
 {
 }
 
-void SpaceServer::atomRemoved(AtomSpaceImpl* a, Handle h)
+void SpaceServer::atomRemoved(AtomPtr atom)
 {
-    Type type = a->getType(h);
+    Type type = atom->getType();
     if (classserver().isA(type, OBJECT_NODE)) {
-        removeSpaceInfo(h);
+        removeSpaceInfo(atom->getHandle());
     }
 }
 
@@ -703,7 +702,12 @@ void SpaceServer::addBlockEntityNodes(HandleSeq &toUpdateHandles)
         entity->mEntityNode = atomspace->addNode(BLOCK_ENTITY_NODE, opencog::toString(entity->getEntityID()));
         atomspace->setSTI(entity->mEntityNode, 10000);
 
-        if (! AtomSpace::isHandleInSeq(entity->mEntityNode, toUpdateHandles))
+        bool addit = true;
+        HandleSeq::const_iterator it;
+        for (it = toUpdateHandles.begin(); it != toUpdateHandles.end(); ++ it) {
+            if ((Handle)(*it) == entity->mEntityNode) { addit = false; break; }
+        }
+        if (addit)
             toUpdateHandles.push_back(entity->mEntityNode);
     }
 
@@ -735,7 +739,7 @@ void SpaceServer::addBlocksLisitPredicateToEntity(opencog::spatial::BlockEntity*
         HandleSeq unitBlockNodes = curMap->getAllUnitBlockHandlesOfABlock(*b);
         foreach(Handle blockNode, unitBlockNodes)
         {
-            SimpleTruthValue tv(1.0, 1.0);
+            TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
             Handle evalLink =  addPropertyPredicate("part-of", blockNode, _entity->mEntityNode, tv);
             timeser->addTimeInfo(evalLink,timeStamp);
         }
@@ -782,7 +786,7 @@ void SpaceServer::updateBlockEntityProperties(opencog::spatial::BlockEntity* _en
 
     // add the primary properties
 
-    SimpleTruthValue tv(1.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     Handle evalLink;
     Handle numberNode;
@@ -829,7 +833,7 @@ Handle SpaceServer::addPropertyPredicate(
         std::string predicateName,
         Handle a,
         Handle b,
-        const TruthValue &tv)
+        TruthValuePtr tv)
 {
     Handle ph = atomspace->addNode(PREDICATE_NODE, predicateName);
 

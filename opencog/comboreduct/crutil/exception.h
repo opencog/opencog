@@ -46,13 +46,23 @@ public:
 };
 
 /// Overflow/ divide-by-zero exception during evaluation.
-// XXX should change this to "OverflowException"
+class OverflowException : public ComboReductException
+{
+    vertex _vertex;
+public:
+    OverflowException();
+    OverflowException(vertex);
+
+    vertex get_vertex() const;
+};
+
+/// Other, non-overflow evaluation exception.
 class EvalException : public ComboReductException
 {
     vertex _vertex;
 public:
     EvalException();
-    EvalException(vertex v = vertex());
+    EvalException(vertex, std::string m = "");
 
     vertex get_vertex() const;
 };

@@ -100,6 +100,8 @@ public:
 
 };
 
+typedef std::shared_ptr<EntityExperienceAgent> EntityExperienceAgentPtr;
+
 } } // namespace opencog::oac
 
 #endif //  ENTITYEXPERIENCEAGENT_H

@@ -37,7 +37,7 @@
 using namespace opencog;
 
 // If you change this, make sure to update atomspace_details.pyx!
-#define KKK 800.0
+#define KKK 800.0f
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
 {
@@ -56,21 +56,6 @@ SimpleTruthValue::SimpleTruthValue(SimpleTruthValue const& source)
     count = source.count;
 }
 
-void SimpleTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-void SimpleTruthValue::setCount(count_t c)
-{
-    count = c;
-}
-
-void SimpleTruthValue::setConfidence(confidence_t c)
-{
-    count = confidenceToCount(c);
-}
-
 strength_t SimpleTruthValue::getMean() const
 {
     return mean;
@@ -86,52 +71,13 @@ confidence_t SimpleTruthValue::getConfidence() const
     return countToConfidence(count);
 }
 
-float SimpleTruthValue::toFloat() const
-{
-    return static_cast<float>(getMean());
-}
-
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
-    // TODO: confidence is not needed for Saving&Loading.
-    // (Only count is saved). So, for saving memory space
-    // in dump files, it should be removed. However, toString
-    // is being used for debug purposes, so both need to be shown...
-    sprintf(buf, "[%f,%f=%f]",
+    sprintf(buf, "(stv %f %f)",
             static_cast<float>(getMean()),
-            static_cast<float>(getCount()),
             static_cast<float>(getConfidence()));
     return buf;
-}
-
-SimpleTruthValue* SimpleTruthValue::clone() const
-{
-    return new SimpleTruthValue(*this);
-}
-
-SimpleTruthValue& SimpleTruthValue::operator=(const TruthValue & rhs)
-    throw (RuntimeException)
-{
-    const SimpleTruthValue* tv = dynamic_cast<const SimpleTruthValue*>(&rhs);
-    if (tv) {
-        if (tv != this) { // check if this is the same object first.
-            mean = tv->mean;
-            count = tv->count;
-        }
-    } else {
-#ifndef WIN32
-        // The following line was causing a compilation error on MSVC...
-        throw RuntimeException(TRACE_INFO,
-              "Cannot assign a TV of type '%s' to one of type '%s'\n",
-              typeid(rhs).name(), typeid(*this).name());
-#else
-        throw RuntimeException(TRACE_INFO,
-              "SimpleTruthValue - Invalid assignment of a SimpleTV object.");
-#endif
-
-    }
-    return *this;
 }
 
 bool SimpleTruthValue::operator==(const TruthValue& rhs) const
@@ -148,28 +94,26 @@ TruthValueType SimpleTruthValue::getType() const
     return SIMPLE_TRUTH_VALUE;
 }
 
-float SimpleTruthValue::confidenceToCount(confidence_t c)
+count_t SimpleTruthValue::confidenceToCount(confidence_t cf)
 {
-    c = std::min(c, 0.9999999f);
-    return static_cast<count_t>(KKK * c / (1.0 - c));
+    // There are not quite 16 digits in double precision
+    // not quite 7 in single-precision float
+    cf = std::min(cf, 0.9999998f);
+    return static_cast<count_t>(KKK * cf / (1.0f - cf));
 }
 
-float SimpleTruthValue::countToConfidence(count_t c)
+confidence_t SimpleTruthValue::countToConfidence(count_t cn)
 {
-    return static_cast<confidence_t>(c / (c + KKK));
+    return static_cast<confidence_t>(cn / (cn + KKK));
 }
 
-SimpleTruthValue* SimpleTruthValue::fromString(const char* tvStr)
+TruthValuePtr SimpleTruthValue::fromString(const char* tvStr)
 {
-    float mean, count, conf;
-    // TODO: confidence is not needed for Saving&Loading.
-    // (Only count is saved). So, for saving memory space
-    // in dump files, it should be removed. However, toString
-    // is being used for debug purposes, so both need to be shown...
-    sscanf(tvStr, "[%f,%f=%f]", &mean, &count, &conf);
-    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, count = %f, conf = %f\n", tvStr, mean, count, conf);
-    return new SimpleTruthValue(static_cast<strength_t>(mean),
-                                static_cast<count_t>(count));
+    float mean, conf;
+    sscanf(tvStr, "(stv %f %f)", &mean, &conf);
+    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, conf = %f\n", tvStr, mean, conf);
+    return std::make_shared<SimpleTruthValue>(static_cast<strength_t>(mean),
+                                static_cast<count_t>(confidenceToCount(conf)));
 }
 
 

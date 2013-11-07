@@ -23,6 +23,7 @@
  */
 
 #include <memory>
+#include <opencog/util/oc_assert.h>
 #include "BaseServer.h"
 
 using namespace opencog;

@@ -31,7 +31,6 @@
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/TLB.h>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
@@ -159,7 +158,7 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
 	}
 	case COMPOSITE_TRUTH_VALUE:
 		// @todo
-	default: 
+	default:
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);
 	}
@@ -194,17 +193,16 @@ void BasicSCMUTest::check_node(const char * tipo, const char * nodename, float t
 
 	Type t = classserver().getType(tipo);
 	Handle h = as->getHandle(t, nodename);
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h));
+	TSM_ASSERT("Failed to find handle", h != NULL);
 
-	Atom *a = TLB::getAtom(h);
-	Node *n = static_cast<Node *>(a);
+	NodePtr n = NodeCast(h);
 	TSM_ASSERT("Failed to find node", n != NULL);
 
 	if (n)
 	{
-		const TruthValue &tv = n->getTruthValue();
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = n->getTruthValue();
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m-truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c-conf), 1.0e-6);
@@ -250,7 +248,7 @@ void BasicSCMUTest::test_single_atom(void)
 
 	Type t = classserver().getType("Node");
 	Handle h = as->getHandle(t, "My First Node");
-	TSM_ASSERT("Failed to find handle for first atom", TLB::isValidHandle(h));
+	TSM_ASSERT("Failed to find handle for first atom", h != NULL);
 
 	// Load the utility definitions
 	int rc = load_scm_file(*as,PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
@@ -286,7 +284,7 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
@@ -301,18 +299,16 @@ void BasicSCMUTest::check_link(const char * tipo, Type type,
 
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->getHandle(t1, value1);
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
+	TSM_ASSERT("Failed to find handle", h1 != NULL);
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	NodePtr n1 = NodeCast(h1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->getHandle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
+	TSM_ASSERT("Failed to find handle", h2 != NULL);
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	NodePtr n2 = NodeCast(h2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 }
 
@@ -358,7 +354,7 @@ void BasicSCMUTest::test_part_of_speech_link(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	check_link("PartOfSpeechLink", PART_OF_SPEECH_LINK, 
+	check_link("PartOfSpeechLink", PART_OF_SPEECH_LINK,
 	           "WordInstanceNode", "DefinedLinguisticConceptNode",
 	           "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096", "adj",
 	            1.0, 1.0);
@@ -429,7 +425,7 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create parse link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 	HandleSeq::const_iterator i;
 	for (i = links.begin(); i != links.end(); ++i)
@@ -444,27 +440,25 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->getHandle(t1, value1);
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
+	TSM_ASSERT("Failed to find handle", h1 != NULL);
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	NodePtr n1 = NodeCast(h1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	if (n1)
 	{
-		const TruthValue &tv = n1->getTruthValue();
-		float m = tv.getMean();
-		float c = tv.getConfidence();
+		TruthValuePtr tv = n1->getTruthValue();
+		float m = tv->getMean();
+		float c = tv->getConfidence();
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
 		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
 	}
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->getHandle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
+	TSM_ASSERT("Failed to find handle", h2 != NULL);
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	NodePtr n2 = NodeCast(h2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 }
 
@@ -499,7 +493,7 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 	TSM_ASSERT("Failed to create a frame link", !eval_err);
 
 	HandleSeq links;
-	as->getHandleSet(back_inserter(links), type, true);
+	as->getHandlesByType(back_inserter(links), type, true);
 	//printf("Number of links found: %d\n",links.size());
 
 	HandleSeq::const_iterator i;
@@ -515,18 +509,16 @@ void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
 
 	Type t1 = classserver().getType(nodename1);
 	Handle h1 = as->getHandle(t1, value1);
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h1));
+	TSM_ASSERT("Failed to find handle", h1 != NULL);
 
-	Atom *a1 = TLB::getAtom(h1);
-	Node *n1 = static_cast<Node *>(a1);
+	NodePtr n1 = NodeCast(h1);
 	TSM_ASSERT("Failed to find node", n1 != NULL);
 
 	Type t2 = classserver().getType(nodename2);
 	Handle h2 = as->getHandle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", TLB::isValidHandle(h2));
+	TSM_ASSERT("Failed to find handle", h2 != NULL);
 
-	Atom *a2 = TLB::getAtom(h2);
-	Node *n2 = static_cast<Node *>(a2);
+	NodePtr n2 = NodeCast(h2);
 	TSM_ASSERT("Failed to find node", n2 != NULL);
 
 }

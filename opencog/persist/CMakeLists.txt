@@ -8,7 +8,8 @@ IF (ODBC_FOUND)
 	ADD_SUBDIRECTORY (sql)
 ENDIF (ODBC_FOUND)
 
-IF (HAVE_EXPAT)
-	ADD_SUBDIRECTORY (xml)
-ENDIF (HAVE_EXPAT)
+# I give up. This doesn't work, and I can't debug it.
+# IF (HAVE_EXPAT)
+# 	ADD_SUBDIRECTORY (xml)
+# ENDIF (HAVE_EXPAT)
 

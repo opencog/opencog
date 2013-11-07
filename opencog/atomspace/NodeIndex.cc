@@ -36,14 +36,22 @@ void NodeIndex::resize()
 	this->idx.resize(classserver().getNumberOfClasses());
 }
 
-void NodeIndex::insertAtom(Atom *a)
+size_t NodeIndex::size() const
+{
+	size_t cnt = 0;
+	size_t vsz = idx.size();
+	for (size_t i=0; i<vsz; i++) cnt += idx[i].size();
+	return cnt;
+}
+
+void NodeIndex::insertAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	NameIndex &ni = idx[t];
 	ni.insertAtom(a);
 }
 
-void NodeIndex::removeAtom(Atom *a)
+void NodeIndex::removeAtom(AtomPtr a)
 {
 	Type t = a->getType();
 	NameIndex &ni = idx[t];
@@ -52,7 +60,7 @@ void NodeIndex::removeAtom(Atom *a)
 
 Handle NodeIndex::getHandle(Type t, const char *name) const
 {
-	if (t >= idx.size()) throw RuntimeException(TRACE_INFO, 
+	if (t >= idx.size()) throw RuntimeException(TRACE_INFO,
 		   "Index out of bounds for atom type (t = %lu)", t);
 	const NameIndex &ni = idx[t];
 	return ni.get(name);
@@ -77,7 +85,7 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
 			// The 'AssignableFrom' direction is unit-tested in
 			// AtomSpaceUTest.cxxtest
 			if (classserver().isA(s, type)) {
-				if (s >= idx.size()) throw RuntimeException(TRACE_INFO, 
+				if (s >= idx.size()) throw RuntimeException(TRACE_INFO,
 						  "Index out of bounds for atom type (s = %lu)", s);
 				const NameIndex &ni = idx[s];
 				Handle h = ni.get(name);
@@ -86,7 +94,7 @@ UnorderedHandleSet NodeIndex::getHandleSet(Type type, const char *name,
 			}
 		}
 	} else {
-		Handle h = getHandle(type, name); 
+		Handle h = getHandle(type, name);
 		if (Handle::UNDEFINED != h) hs.insert(h);
 	}
 

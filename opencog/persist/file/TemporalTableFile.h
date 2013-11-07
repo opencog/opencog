@@ -46,14 +46,15 @@ public:
      * This method saves this table in the file specified.
      * @param the file pointer where the TemporalTable must be saved.
      */
-    void save(FILE *, TemporalTable *);
+    void save(FILE*, TemporalTable*);
 
     /**
      * This method loads a TemporalTable stored in the file specified.
      * @param the file pointer where the TemporalTable is stored.
      * @param a map of old Handles (stored in the file) to new Handles (in the current memory).
      */
-    void load(FILE *, TemporalTable *, HandleMap<Atom *> *);
+    typedef std::shared_ptr<HandleMap<AtomPtr>> HandMapPtr;
+    void load(FILE*, TemporalTable*, HandMapPtr);
 
 };
 

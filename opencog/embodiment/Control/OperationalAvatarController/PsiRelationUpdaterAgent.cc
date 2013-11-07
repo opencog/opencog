@@ -231,9 +231,9 @@ Handle PsiRelationUpdaterAgent::getEntityHandle(const AtomSpace & atomSpace, con
     // TODO: What is responsible for creating these handles to entities?
     std::vector<Handle> entityHandleSet;
 
-    atomSpace.getHandleSet( back_inserter(entityHandleSet),
-                            OBJECT_NODE,
+    atomSpace.getHandlesByName( back_inserter(entityHandleSet),
                             entityName,
+                            OBJECT_NODE,
                             true   // Use 'true' here, because OBJECT_NODE is the base class for all the entities
                           );
 
@@ -398,7 +398,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
         // Update the truth value
         if ( novelty.isNovel(this->noveltyThreshold) ) {
 
-            SimpleTruthValue stvTrue(1, 1);
+            TruthValuePtr stvTrue = SimpleTruthValue::createTV(1, 1);
             atomSpace.setTV(hRelationEvaluationLink, stvTrue); 
 
             bHasNovelty = true; 
@@ -411,7 +411,7 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
                           );
        
         } else {
-            SimpleTruthValue stvFalse(0, 0);
+            TruthValuePtr stvFalse = SimpleTruthValue::createTV(0, 0);
             atomSpace.setTV(hRelationEvaluationLink, stvFalse); 
             
             logger().debug("PsiRelationUpdaterAgent::%s pet is not longer 'curious_about' entity '%s' (novelty level = %f) [ cycle = %d ]", 
@@ -428,9 +428,9 @@ void PsiRelationUpdaterAgent::updateEntityNovelty(opencog::CogServer * server)
     // TODO: 'has_novelty' predicate is probably obsolete
     
     if (bHasNovelty) 
-        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue(1.0f, 0.0f), petHandle);
+        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(1.0f, 0.0f), petHandle);
     else
-        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue(0.0f, 0.0f), petHandle);
+        AtomSpaceUtil::setPredicateValue(atomSpace, "has_novelty", SimpleTruthValue::createTV(0.0f, 0.0f), petHandle);
 }
 
 void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace, 
@@ -509,7 +509,7 @@ void PsiRelationUpdaterAgent::updateEntityRelation(AtomSpace & atomSpace,
                 // TODO: Actually, this not so correct, the truth value should not be a constant (1, 1)
                 //       We should give the pet the ability to distinguish the intensity of relation,
                 //       such as friend, good friend and best friend
-                SimpleTruthValue stvTrue(1, 1);
+                TruthValuePtr stvTrue = SimpleTruthValue::createTV(1, 1);
                 atomSpace.setTV(hRelationEvaluationLink, stvTrue); 
                 
                 logger().debug("PsiRelationUpdaterAgent::%s Updated the trutu value of '%s' [ cycle = %d ]", 

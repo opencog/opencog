@@ -47,26 +47,9 @@ public:
     void tearDown() {
     }
 
-    void testPrint() {
-        std::streambuf* cout_sbuf = std::cout.rdbuf(); // save original sbuf
-        std::ofstream   fout("TLB_cout.txt");
-        std::cout.rdbuf(fout.rdbuf()); // redirect 'cout' to a 'fout'
-        TLB::print();
-        std::cout.rdbuf(cout_sbuf); // restore the original stream buffer
-        remove("TLB_cout.txt");
-    }
-
     void testAdd() {
-        Node* n = new Node(CONCEPT_NODE, "test");
+        NodePtr n(createNode(CONCEPT_NODE, "test"));
         TLB::addAtom(n);
         TS_ASSERT_THROWS(TLB::addAtom(n),InvalidParamException);
     }
-
-    void testRemove() {
-        Node* n = new Node(CONCEPT_NODE, "test");
-        Handle h = TLB::addAtom(n);
-        TS_ASSERT_EQUALS(TLB::removeAtom(h),n);
-        TS_ASSERT(TLB::removeAtom(h) == NULL);
-    }
-
 };

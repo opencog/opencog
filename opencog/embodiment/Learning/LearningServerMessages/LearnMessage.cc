@@ -28,7 +28,7 @@
 #include <opencog/util/StringTokenizer.h>
 
 // Arghhh! the NMXML stuff is obsolete, please do not use in new code!
-#include <opencog/persist/xml/NMXmlExporter.h>
+// #include <opencog/persist/xml/NMXmlExporter.h>
 
 #include <opencog/spacetime/SpaceServer.h>
 #include <opencog/spacetime/SpaceTime.h>
@@ -86,7 +86,7 @@ throw (opencog::InvalidParamException, std::bad_exception):
 {
 
 
-    NMXmlExporter exporter(&atomSpace);
+    // NMXmlExporter exporter(&atomSpace);
 
     schema.assign(schm);
     ownerId.assign(owId);
@@ -154,8 +154,8 @@ throw (opencog::InvalidParamException, std::bad_exception):
 
     // why are we assigning the entire atomspace?
     HandleSeq hs;
-    atomSpace.getHandleSet(back_inserter(hs),ATOM, true);
-    behaviorDescriptions.assign(exporter.toXML(hs));
+    atomSpace.getHandlesByType(back_inserter(hs), ATOM, true);
+    // behaviorDescriptions.assign(exporter.toXML(hs));
     logger().debug("LearnMessage - finished creating message (behavior descriptors just added.");
 }
 
@@ -279,7 +279,7 @@ bool LearnMessage::populateAtomSpace(AtomSpace &atomSpace)
     std::vector<XMLBufferReader *> reader(1, new StringXMLBufferReader(behaviorDescriptions.c_str()));
     try {
         //NMXmlParser::loadXML(reader, atomSpace, true, true);
-        NMXmlParser::loadXML(reader, &atomSpace, false, false);
+        //NMXmlParser::loadXML(reader, &atomSpace, false, false);
 
         // load SpaceMap into AtomSpace
         foreach(std::string s, spaceMaps) {

@@ -66,6 +66,9 @@ public:
     void run();
 
 }; // class
+
+typedef std::shared_ptr<GoldStdReaderAgent> GoldStdReaderAgentPtr;
+
 }  // namespace
 
 #endif

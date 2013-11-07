@@ -1515,7 +1515,7 @@ void PAI::processAgentActionWithParameters(Handle& agentNode, const string& inte
         OC_ASSERT(changedStateName != "");
         OC_ASSERT(newStateValNode != Handle::UNDEFINED,
                 "PAI:processAgentActionWithParameters: Got an invalid new state value handle when process a state change action. \n");
-        SimpleTruthValue tv(1.0, 1.0);
+        TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
         Handle newStateEvalLink = AtomSpaceUtil::addPropertyPredicate(atomSpace, changedStateName, targetNode, newStateValNode,tv,Temporal(tsValue));
 
@@ -2470,7 +2470,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "material",
-                                                  SimpleTruthValue( 1.0, 1.0 ), objectNode, materialConceptNode );
+                                                  SimpleTruthValue::createTV( 1.0, 1.0 ), objectNode, materialConceptNode );
             }
 
              //texture property
@@ -2487,7 +2487,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
                 }
 
                 AtomSpaceUtil::setPredicateValue( atomSpace, "texture",
-                                                  SimpleTruthValue( 1.0f, 1.0f ), objectNode, textureConceptNode );
+                                                  SimpleTruthValue::createTV( 1.0f, 1.0f ), objectNode, textureConceptNode );
             }
             
             //color properties
@@ -2528,7 +2528,7 @@ void PAI::processMapInfo(DOMElement * element, HandleSeq &toUpdateHandles)
             Handle agent = AtomSpaceUtil::getAgentHandle( atomSpace, avatarInterface.getPetId( ) );
             if ( agent != objectNode ) { // an agent cannot see himself
                 AtomSpaceUtil::setPredicateValue( atomSpace, "inside_pet_fov",
-                                                  SimpleTruthValue( (isObjectInsidePetFov ? 1.0f : 0.0f), 1.0f ), agent, objectNode );
+                                                  SimpleTruthValue::createTV( (isObjectInsidePetFov ? 1.0f : 0.0f), 1.0f ), agent, objectNode );
             } // if
 
             addPropertyPredicate(std::string("is_moving"), objectNode, moving);
@@ -2798,8 +2798,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     evalLinkOutgoing.push_back(predicateListLink);
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
-    SimpleTruthValue tv(1,1e35);
-    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp,tv);
+    Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp, TruthValue::TRUE_TV());
     AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
@@ -2953,11 +2952,11 @@ Rotation PAI::addRotationPredicate(Handle objectNode, unsigned long timestamp,
 void PAI::addPropertyPredicate(std::string predicateName, Handle objectNode, bool propertyValue, bool permanent)
 {
 
-    SimpleTruthValue tv(0.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(0.0, 1.0));
 
     // if predicate is true set its TV to 1.0, otherwise leave it 0.0
     if (propertyValue) {
-        tv.setMean(1.0);
+        tv = SimpleTruthValue::createTV(1.0, 1.0);
     }
 
     logger().fine("PAI - Adding predName: %s, value: %d, obj: %s",
@@ -2989,7 +2988,7 @@ void PAI::addInheritanceLink(std::string conceptNodeName, Handle subNodeHandle, 
         seq.push_back(conceptNodeHandle);
 
         Handle link = AtomSpaceUtil::addLink(atomSpace, INHERITANCE_LINK, seq, true);
-        atomSpace.setTV(link, SimpleTruthValue(1.0, 1.0));
+        atomSpace.setTV(link, SimpleTruthValue::createTV(1.0, 1.0));
     }
 }
 
@@ -3159,16 +3158,16 @@ void PAI::addSemanticStructure(Handle objectNode,
     typeName[0] = std::toupper(typeName[0]);
 
     // Add semantic structure into atomspace, used for language comprehension.
-    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId , SimpleTruthValue(1, 1));
+    Handle objSemeNode = atomSpace.addNode(SEME_NODE, entityId , SimpleTruthValue::createTV(1, 1));
     Handle objWordNode = atomSpace.addNode(WORD_NODE, entityClass);
-    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass, SimpleTruthValue(1, 1));
+    Handle objClassNode = atomSpace.addNode(CONCEPT_NODE, entityClass, SimpleTruthValue::createTV(1, 1));
         
     // Create the inheritance link
-    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName, SimpleTruthValue(1, 1));
+    Handle objectType = atomSpace.addNode(CONCEPT_NODE, typeName, SimpleTruthValue::createTV(1, 1));
     HandleSeq inheritance(2);
     inheritance[0] = objSemeNode;
     inheritance[1] = objectType;
-    Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, SimpleTruthValue(1, 1));
+    Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, SimpleTruthValue::createTV(1, 1));
     atomSpace.setLTI(link, 1);
 
     HandleSeq classReference(2);
@@ -3197,7 +3196,7 @@ void PAI::addSemanticStructure(Handle objectNode,
         inheritance[1] = objectType;
 
         Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
-                SimpleTruthValue(1, 1));
+                SimpleTruthValue::createTV(1, 1));
         atomSpace.setLTI(link, 1);
     }
 
@@ -3208,7 +3207,7 @@ void PAI::addSemanticStructure(Handle objectNode,
         inheritance[1] = objClassNode;
 
         Handle link = atomSpace.addLink(INHERITANCE_LINK, inheritance, 
-                SimpleTruthValue(1, 1));
+                SimpleTruthValue::createTV(1, 1));
         atomSpace.setLTI(link, 1);
     }
     
@@ -3263,7 +3262,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp);
 
     // count=1, i.e. one observation of this biological urge
-    atomSpace.setTV(atTimeLink,SimpleTruthValue((strength_t)level, 1));
+    atomSpace.setTV(atTimeLink,SimpleTruthValue::createTV((strength_t)level, 1));
     atomSpace.setSTI(atTimeLink, sti); 
 
     AtomSpaceUtil::updateLatestPhysiologicalFeeling(atomSpace, atTimeLink, feelingNode);
@@ -3292,7 +3291,7 @@ Handle PAI::addPhysiologicalFeeling(const string petID,
                                                      "#Biological_urge", 
                                                      frameInstanceName,
                                                      elements, 
-                                                     SimpleTruthValue( (level < 0.5) ? 0.0 : level, 1.0 )
+                                                     SimpleTruthValue::createTV( (level < 0.5) ? 0.0 : level, 1.0 )
                                                     );
     } else {
         Handle predicateNode = atomSpace.getHandle(PREDICATE_NODE, frameInstanceName);
@@ -3317,7 +3316,7 @@ Handle PAI::addOwnershipRelation(const Handle owner, const Handle owned, bool is
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing, isPetObject);
 
     // set predicate evaluation true
-    atomSpace.setTV(evalLink, SimpleTruthValue(1.0f, 0.0f));
+    atomSpace.setTV(evalLink, SimpleTruthValue::createTV(1.0f, 0.0f));
 
     // No time info for now - UNCOMMENT if ownership needs time info
     //atomSpace.addTimeInfo( evalLink, timestamp);
@@ -3722,7 +3721,7 @@ bool PAI::addSpacePredicates( Handle objectNode, const MapInfo& mapinfo, bool is
             HandleSeq outgoing;
             outgoing.push_back(predNode);
             outgoing.push_back(Handle::UNDEFINED);
-            atomSpace.getHandleSet(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
+            atomSpace.getHandlesByOutgoing(back_inserter(sizeEvalLinks), outgoing, NULL, NULL, 2, EVALUATION_LINK, false);
             foreach(Handle evalLink, sizeEvalLinks) {
                 Handle listLink = atomSpace.getOutgoing(evalLink, 1);
                 if (atomSpace.getType(listLink) == LIST_LINK && atomSpace.getArity(listLink) == 4) {
@@ -3838,7 +3837,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     Handle agentNode = AtomSpaceUtil::getAgentHandle(atomSpace, avatarInterface.getPetId());
     if (agentNode != objectNode) { // an agent cannot see itself
         AtomSpaceUtil::setPredicateValue(atomSpace, "inside_pet_fov",
-                                        SimpleTruthValue((isVisible ? 1.0f : 0.0f), 1.0f), 
+                                        SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f), 
                                         agentNode, objectNode);
     } // if
 
@@ -3858,7 +3857,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "material",
-                                          SimpleTruthValue(1.0, 1.0), objectNode, materialConceptNode);
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, materialConceptNode);
     } // if
 
     // Add color property predicate
@@ -3877,7 +3876,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "color_name",
-                                          SimpleTruthValue(1.0, 1.0), objectNode, colorNameConceptNode);
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, colorNameConceptNode);
     } // if
 
     // Add texture property predicate
@@ -3894,7 +3893,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
         atomSpace.setLTI(referenceLink, 1);
 
         AtomSpaceUtil::setPredicateValue(atomSpace, "texture",
-                                          SimpleTruthValue(1.0f, 1.0f), objectNode, textureConceptNode);
+                                          SimpleTruthValue::createTV(1.0f, 1.0f), objectNode, textureConceptNode);
     } // if
 
     /* TODO
@@ -4143,7 +4142,7 @@ void PAI::processExistingStateInfo(DOMElement* element)
         return;
     }
 
-    SimpleTruthValue tv(1.0, 1.0);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
 
     string stateNameStr(stateName);
     AtomSpaceUtil::addPropertyPredicate(atomSpace, stateNameStr, objectHandle, valueHandle,tv,Temporal(tsValue));

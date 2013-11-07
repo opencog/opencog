@@ -47,10 +47,11 @@ class NodeIndex
 	public:
 		NodeIndex();
 
-		void insertAtom(Atom* a);
-		void removeAtom(Atom* a);
+		void insertAtom(AtomPtr a);
+		void removeAtom(AtomPtr a);
 		void remove(bool (*)(Handle));
 		void resize();
+		size_t size() const;
 
 		Handle getHandle(Type type, const char *) const;
 		UnorderedHandleSet getHandleSet(Type type, const char *, bool subclass) const;

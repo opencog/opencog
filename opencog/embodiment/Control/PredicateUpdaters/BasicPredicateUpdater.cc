@@ -60,7 +60,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
     seq.push_back(listLinkHandle);
 
     std::vector<Handle> allHandles;
-    atomSpace.getHandleSet(back_inserter(allHandles), seq, NULL, NULL, 2, EVALUATION_LINK, false);
+    atomSpace.getHandlesByOutgoing(back_inserter(allHandles), seq, NULL, NULL, 2, EVALUATION_LINK, false);
 
     if (allHandles.size() != 1) {
         return Handle::UNDEFINED;
@@ -71,7 +71,7 @@ Handle BasicPredicateUpdater::getPredHandle(Handle object, std::string predicate
 Handle BasicPredicateUpdater::getHandle(std::string objName)
 {
     HandleSeq objHandle;
-    atomSpace.getHandleSet(back_inserter(objHandle), OBJECT_NODE, objName, true);
+    atomSpace.getHandlesByName(back_inserter(objHandle), objName, OBJECT_NODE, true);
 
     // found no handle - ERROR
     if (objHandle.size() < 1) {

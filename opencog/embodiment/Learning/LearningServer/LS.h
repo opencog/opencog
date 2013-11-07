@@ -106,7 +106,7 @@ private:
     int candidateSchemaCnt;
 
     //imitation learning task (can plug hillclimbing or MOSES)
-    ImitationLearningAgent* ILAgent;
+    ImitationLearningAgentPtr ILAgent;
 
     Factory<ImitationLearningAgent, Agent> factory;
 

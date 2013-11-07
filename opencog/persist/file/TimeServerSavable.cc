@@ -45,7 +45,7 @@ const char* TimeServerSavable::getId() const
     return id;
 }
 
-void TimeServerSavable::saveRepository(FILE *fp) const
+void TimeServerSavable::saveRepository(FILE* fp) const
 {
     logger().debug("Saving %s (%ld)\n", getId(), ftell(fp));
     // Saves TemporalTable
@@ -53,7 +53,7 @@ void TimeServerSavable::saveRepository(FILE *fp) const
     ttf.save(fp, timeserver->table);
 }
 
-void TimeServerSavable::loadRepository(FILE *fp, HandleMap<Atom *> *conv)
+void TimeServerSavable::loadRepository(FILE* fp, HandMapPtr conv)
 {
     logger().debug("Loading %s (%ld)\n", getId(), ftell(fp));
     // Loads the TemporalTable

@@ -449,7 +449,7 @@ void PatternUTest::test_implication(void)
 	// Be sure to explicitly check that we got hitem_2 as the result
 
 	std::vector<Handle> ret;
-	as->getHandleSet(back_inserter(ret), PARSE_LINK);
+	as->getHandlesByType(back_inserter(ret), PARSE_LINK);
 
 	TSM_ASSERT_EQUALS("incorrect implication", ret.size(), 1);
 	if (0 < ret.size())

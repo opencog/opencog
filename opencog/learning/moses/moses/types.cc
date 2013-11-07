@@ -99,13 +99,26 @@ bool composite_score::operator<(const composite_score &r) const
                 or (lef == rig and complexity > r.complexity);
 }
 
+// Check for equality, to within floating-point error.
 bool composite_score::operator==(const composite_score &r) const
 {
-    return score == r.get_score()
-        && complexity == r.get_complexity()
-        && complexity_penalty == r.get_complexity_penalty()
-        && diversity_penalty == r.get_diversity_penalty()
-        && penalized_score == r.get_penalized_score();
+    // score_t and complexity_t are both defacto floats.
+    // equality holds if they are equal within about 7 decimal places.
+    // Note: this check is used in iostream_bscored_combo_treeUTest
+    // and a simple equality test will fail on some cpu/os combos.
+    #define FLOAT_EPS 1.0e-7
+    #define CHK_EQ(NAME)  \
+        ((NAME == r.get_##NAME()) || /* Try this cheap test first */ \
+         (fabs(NAME) > 0.0f) ?  \
+            (fabs(r.get_##NAME() / NAME - 1.0f) < FLOAT_EPS) : \
+            (fabs(NAME - r.get_##NAME()) < FLOAT_EPS))
+    return
+        CHK_EQ(score)
+        && CHK_EQ(complexity)
+        && CHK_EQ(complexity_penalty)
+        && CHK_EQ(diversity_penalty)
+        && CHK_EQ(penalized_score)
+        ;
 }
 
 ///////////////////////////
@@ -144,7 +157,7 @@ demeID_t get_demeID(const pbscored_combo_tree& pbst)
 {
     return pbst.second.second;
 }
-        
+
 score_t get_penalized_score(const composite_score& sc)
 {
    return sc.get_penalized_score();

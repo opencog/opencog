@@ -233,7 +233,7 @@ bool message_str_to_vertex(const std::string& str, vertex& v)
 //
 bool enum_str_to_vertex(const std::string& str, vertex& v)
 {
-    // It starts with message:
+    // It starts with "enum:"
     if (str.find(enum_t::prefix())) 
         return false;
 

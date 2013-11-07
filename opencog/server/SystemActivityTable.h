@@ -49,11 +49,11 @@ class AtomSpaceImpl;
 class Activity
 {
 public:
-    Activity(long cycleCount, struct timeval &elapsedTime, size_t memUsed, 
+    Activity(long cycleCount, struct timeval &elapsedTime, size_t memUsed,
                               size_t atomsUsed,
                               const std::vector<UnorderedHandleSet>& utilized) :
-            cycleCount(cycleCount), 
-            elapsedTime(elapsedTime), 
+            cycleCount(cycleCount),
+            elapsedTime(elapsedTime),
             memUsed(memUsed),
             atomsUsed(atomsUsed) {
         for (size_t n = 0; n < utilized.size(); n++)
@@ -66,7 +66,7 @@ public:
     std::vector<UnorderedHandleSet> utilizedHandleSets;
 };
 typedef std::vector<Activity*> ActivitySeq;
-typedef std::map<Agent*, ActivitySeq> AgentActivityTable;
+typedef std::map<AgentPtr, ActivitySeq> AgentActivityTable;
 
 class CogServer;
 
@@ -81,14 +81,14 @@ class SystemActivityTable
 protected:
     AgentActivityTable _agentActivityTable;
     size_t _maxAgentActivityTableSeqSize;
-    CogServer *cogServer;
-    boost::signals::connection conn;
+    CogServer* _cogServer;
+    boost::signals::connection _conn;
 
     /** called by AtomSpaceImpl via a boost:signal when an atom is removed. */
-    void atomRemoved(AtomSpaceImpl* as, Handle h);
+    void atomRemoved(AtomPtr);
 
     /** trim Activity sequence to a maximum size */
-    void trimActivitySeq(ActivitySeq &seq, size_t max);
+    void trimActivitySeq(ActivitySeq&, size_t max);
 
 public:
 
@@ -99,32 +99,31 @@ public:
     virtual ~SystemActivityTable();
 
     /** initialize the SystemActivityTable */
-    virtual void init(CogServer *cogServer);
+    virtual void init(CogServer*);
 
-    /** Returns a reference to the agent activity table 
+    /** Returns a reference to the agent activity table
      *  Activities will be listed with the most recent first. */
     AgentActivityTable& agentActivityTable() {
         return _agentActivityTable;
     }
 
     /** Get the maximum size of a sequence in the AgentActivityTable */
-    size_t maxAgentActivityTableSeqSize() const { 
-        return _maxAgentActivityTableSeqSize; 
+    size_t maxAgentActivityTableSeqSize() const {
+        return _maxAgentActivityTableSeqSize;
     }
 
     /** Set the maximum size of a sequence in the AgentActivityTable */
-    void setMaxAgentActivityTableSeqSize(size_t n);
+    void setMaxAgentActivityTableSeqSize(size_t);
 
     /** Logs activity of an Agent.
      *
      *  This will call agent->getUtilizedHandleSets() to get a list of handle
      *  sets utilized in the activity that has just been completed.
      */
-    void logActivity(Agent *agent, struct timeval &elapsedTime, size_t memUsed, 
-                                   size_t atomsUsed);
+    void logActivity(AgentPtr, struct timeval&, size_t memUsed, size_t atomsUsed);
 
     /** Clear activity of a specified Agent. */
-    void clearActivity(Agent *agent); 
+    void clearActivity(AgentPtr);
 
     /** Clear all activity */
     void clearActivity();

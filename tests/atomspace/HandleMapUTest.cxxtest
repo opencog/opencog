@@ -40,12 +40,12 @@ private:
     Handle handles[N_HANDLES];
     char *content[N_HANDLES];
 
-    HandleMap<char *> *handleMap;
+    HandleMap<char*>::MapPtr handleMap;
 public:
     HandleMapUTest() {
         for (int i = 0; i < N_HANDLES; i++) {
-	    ostringstream oss;
-	    oss << i;
+            ostringstream oss;
+            oss << "hello " << i;
             handles[i] = as.addNode(CONCEPT_NODE, oss.str());
             content[i] = new char[1];
         }
@@ -53,17 +53,16 @@ public:
 
 
     void setUp() {
-        handleMap = new HandleMap<char *>();
+        handleMap = std::make_shared<HandleMap<char*>>();
     }
 
     void tearDown() {
-        delete(handleMap);
     }
 
     void testAdd() {
         for (int i = 0; i < N_HANDLES; i++) {
-            TS_ASSERT(!handleMap->contains(handles[i]));
-            TS_ASSERT_THROWS(handleMap->get(handles[i]),AssertionException&);
+            TS_ASSERT(not handleMap->contains(handles[i]));
+            TS_ASSERT_THROWS(handleMap->get(handles[i]), AssertionException&);
         }
         for (int i = 0; i < N_HANDLES; i++) {
             handleMap->add(handles[i], content[i]);
@@ -92,7 +91,7 @@ public:
         for (int i = 0; i < N_HANDLES; i++) {
             handleMap->add(handles[i], content[i]);
         }
-        HandleMapIterator<char *> *it = handleMap->keys();
+        HandleMapIterator<char*>* it = handleMap->keys();
         for (int i = 0; i < N_HANDLES; i++) {
             TS_ASSERT(it->hasNext());
             Handle h = it->next();

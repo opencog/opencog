@@ -26,11 +26,18 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <algorithm>
+
+#include <opencog/util/functional.h>
+#include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/PredicateIndex.h>
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
-#include <opencog/atomspace/TLB.h>
 
 using namespace opencog;
+
+//! This can be made orders of magnitude larger, if desired,
+//! with relatively little cost.
+#define MAX_PREDICATE_INDICES   32
+
 
 PredicateIndex::PredicateIndex(void)
 {
@@ -40,7 +47,7 @@ PredicateIndex::PredicateIndex(void)
 	numberOfPredicateIndices = 0;
 }
 
-void PredicateIndex::insertAtom(const Atom* atom)
+void PredicateIndex::insertAtom(AtomPtr atom)
 {
 	// Checks Atom against predicate indices and insert it if needed
 	// That is, the atom is inserted only if the predicate says "yes"
@@ -54,17 +61,17 @@ void PredicateIndex::insertAtom(const Atom* atom)
 	}
 }
 
-void PredicateIndex::removeAtom(const Atom* atom)
+void PredicateIndex::removeAtom(AtomPtr atom)
 {
 	Handle h = atom->getHandle();
 	// Erase the handle from each set ... there is a set per index.
-	std::vector<UnorderedHandleSet>::iterator s;
+	std::vector<UnorderedUUIDSet>::iterator s;
 	for (s = idx.begin(); s != idx.end(); ++s) {
-		s->erase(h);
+		s->erase(h.value());
 	}
 }
 
-const UnorderedHandleSet& PredicateIndex::getHandleSet(int index) const
+const UnorderedUUIDSet& PredicateIndex::getHandleSet(int index) const
 {
 	return idx.at(index);
 }
@@ -138,16 +145,20 @@ PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) cons
  * @param VersionHandle for filtering the resulting atoms by
  *       context. NULL_VERSION_HANDLE indicates no filtering
  **/
-const UnorderedHandleSet& PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
+UnorderedHandleSet PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
 {
 	static UnorderedHandleSet emptySet;
-	if (!TLB::isValidHandle(gpnHandle)) return emptySet;
+	if (Handle::UNDEFINED == gpnHandle) return emptySet;
 
 	std::map<Handle, int>::const_iterator it;
 	it = predicateHandles2Indices.find(gpnHandle);
 	if (it == predicateHandles2Indices.end()) return emptySet;
 
-	return getHandleSet(it->second);
+	UnorderedUUIDSet set = getHandleSet(it->second);
+   UnorderedHandleSet ret;
+	std::transform(set.begin(), set.end(), inserter(ret),
+		[](UUID uuid)->Handle { return Handle(uuid); });
+	return ret;
 }
 
 // ================================================================

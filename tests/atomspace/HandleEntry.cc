@@ -31,7 +31,6 @@
 #include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
-#include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
 
 //#define DPRINTF printf
@@ -68,9 +67,9 @@ HandleEntry::~HandleEntry()
     }
 }
 
-Atom* HandleEntry::getAtom()
+AtomPtr HandleEntry::getAtom()
 {
-    return TLB::getAtom(handle);
+    return handle;
 }
 
 HandleEntry* HandleEntry::clone()
@@ -330,8 +329,7 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, bool deleted)
     // invalid elements found in the middle of the list need to be treated
     // differently from invalid elements found in its begining.
 
-    while ((set != NULL) &&
-            set->getAtom()->isMarkedForRemoval() != deleted) {
+    while (set != NULL) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -343,14 +341,10 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, bool deleted)
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if (set->getAtom()->isMarkedForRemoval() != deleted) {
-            buffer = set->next;
-            set->next = set->next->next;
-            buffer->next = NULL;
-            delete buffer;
-        } else {
-            set = set->next;
-        }
+        buffer = set->next;
+        set->next = set->next->next;
+        buffer->next = NULL;
+        delete buffer;
     }
 
     // head contains the filtered list.
@@ -364,8 +358,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->getAtom();
+        LinkPtr link = LinkCast(atom);
         int lar = 0;
         if (link) lar = link->getArity(); 
         if (lar == arity) break;
@@ -380,8 +374,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Arity arity)
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->next->getAtom();
+        LinkPtr link = LinkCast(atom);
         int lar = 0;
         if (link) lar = link->getArity(); 
         if (lar != arity) {
@@ -413,9 +407,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
     while (set != NULL &&
            ((!noName && classserver().isLink(set->getAtom()->getType())) ||
             (noName && classserver().isNode(set->getAtom()->getType()) &&
-              ((Node*) set->getAtom())->getName() != "") ||
+              (NodeCast(set->getAtom()))->getName() != "") ||
             (!noName && 
-              strcmp(((Node*) set->getAtom())->getName().c_str(), name)))) {
+              strcmp((NodeCast(set->getAtom()))->getName().c_str(), name)))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -426,12 +420,12 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name)
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *itAtom = set->next->getAtom();
+        AtomPtr itAtom = set->next->getAtom();
         if ((!noName && classserver().isLink(itAtom->getType())) ||
             (noName && classserver().isNode(itAtom->getType()) &&
-              ((Node*) itAtom)->getName() != "") ||
+              (NodeCast(itAtom))->getName() != "") ||
             (!noName && 
-              strcmp(((Node*) itAtom)->getName().c_str(), name))) {
+              strcmp((NodeCast(itAtom))->getName().c_str(), name))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -512,8 +506,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity posit
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->getAtom();
+        LinkPtr link = LinkCast(atom);
         if (link && 
             ((link->getArity() != arity) ||
              (position >= arity) ||
@@ -530,8 +524,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Handle handle, Arity posit
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->next->getAtom();
+        LinkPtr link = LinkCast(atom);
         if (link && ((link->getArity() != arity) ||
                 (position >= arity) ||
                 (link->getOutgoingSet()[position] != handle))) {
@@ -559,8 +553,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->getAtom();
+        LinkPtr link = LinkCast(atom);
         if (link->getArity() != arity) {
             buffer = set;
             set = set->next;
@@ -591,8 +585,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->next->getAtom();
+        LinkPtr link = LinkCast(atom);
         if (link->getArity() != arity) {
             buffer = set->next;
             set->next = set->next->next;
@@ -636,8 +630,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->getAtom();
+        LinkPtr link = LinkCast(atom);
  
         if ((link->getArity() != arity) ||
              (target = link->getOutgoingAtom(position)->getType(),
@@ -656,8 +650,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type type, bool subclass, 
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
+        AtomPtr atom = set->next->getAtom();
+        LinkPtr link = LinkCast(atom);
         if (((link->getArity() != arity) ||
                 (target = link->getOutgoingAtom(position)->getType(),
                  ((!subclass && (type != target)) ||
@@ -691,17 +685,17 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
     // differently from invalid elements found in its begining.
 
     while (set != NULL) {
-        Atom *atom = set->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
-        Atom *itAtom = NULL;
+        AtomPtr atom = set->getAtom();
+        LinkPtr link = LinkCast(atom);
+        AtomPtr itAtom = NULL;
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
              (!noName && classserver().isLink(itAtom->getType())) ||
              (noName && classserver().isNode(itAtom->getType()) &&
-               ((Node*) itAtom)->getName() != "") ||
+               (NodeCast(itAtom))->getName() != "") ||
              (!noName &&
-               strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
+               strcmp(name, (NodeCast(itAtom))->getName().c_str()))) {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -715,17 +709,17 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* name, Arity po
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        Atom *atom = set->next->getAtom();
-        Link *link = dynamic_cast<Link *>(atom);
-        Atom *itAtom = NULL;
+        AtomPtr atom = set->next->getAtom();
+        LinkPtr link = LinkCast(atom);
+        AtomPtr itAtom = NULL;
         if (link->getArity() == arity)
             itAtom = link->getOutgoingAtom(position);
         if (itAtom == NULL ||
              (!noName && classserver().isLink(itAtom->getType())) ||
              (noName && classserver().isNode(itAtom->getType()) &&
-               ((Node*) itAtom)->getName() != "") ||
+               (NodeCast(itAtom))->getName() != "") ||
              (!noName &&
-               strcmp(name, ((Node*) itAtom)->getName().c_str()))) {
+               strcmp(name, (NodeCast(itAtom))->getName().c_str()))) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -749,8 +743,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
     // differently from invalid elements found in its begining.
 
     while ((set != NULL) &&
-            ((set->getAtom()->getAttentionValue().getSTI() < lowerBound) ||
-             (set->getAtom()->getAttentionValue().getSTI() > upperBound))) {
+            ((set->getAtom()->getAttentionValue()->getSTI() < lowerBound) ||
+             (set->getAtom()->getAttentionValue()->getSTI() > upperBound))) {
         buffer = set;
         set = set->next;
         buffer->next = NULL;
@@ -761,8 +755,8 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
 
     HandleEntry* head = set;
     while (set->next != NULL) {
-        if ((set->next->getAtom()->getAttentionValue().getSTI() < lowerBound) ||
-                (set->next->getAtom()->getAttentionValue().getSTI() > upperBound)) {
+        if ((set->next->getAtom()->getAttentionValue()->getSTI() < lowerBound) ||
+                (set->next->getAtom()->getAttentionValue()->getSTI() > upperBound)) {
             buffer = set->next;
             set->next = set->next->next;
             buffer->next = NULL;
@@ -790,9 +784,10 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
         // differently from invalid elements found in its begining.
 
         while ( (set != NULL) &&
-                (set->getAtom()->getTruthValue().getType() != COMPOSITE_TRUTH_VALUE ||
-                 ((const CompositeTruthValue&) set->getAtom()->getTruthValue()).getVersionedTV(vh).isNullTv())
-              ) {
+                (set->getAtom()->getTruthValue()->getType() != COMPOSITE_TRUTH_VALUE ||
+                 (CompositeTVCast(set->getAtom()->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+              )
+        {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
@@ -803,8 +798,9 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 
         head = set;
         while (set->next != NULL) {
-            if (set->next->getAtom()->getTruthValue().getType() != COMPOSITE_TRUTH_VALUE ||
-                    ((const CompositeTruthValue&) set->next->getAtom()->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (set->next->getAtom()->getTruthValue()->getType() != COMPOSITE_TRUTH_VALUE ||
+                    (CompositeTVCast(set->next->getAtom()->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 buffer = set->next;
                 set->next = set->next->next;
                 buffer->next = NULL;
@@ -820,18 +816,20 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, VersionHandle vh)
 }
 #endif
 
-bool HandleEntry::matchesFilterCriteria(Atom* atom, Type targetType, bool targetSubclasses, VersionHandle vh)
+bool HandleEntry::matchesFilterCriteria(AtomPtr atom, Type targetType,
+                                        bool targetSubclasses, VersionHandle vh)
 {
     bool result = false;
-    Link *link = dynamic_cast<Link *>(atom);
-    int larry = 0;
+    LinkPtr link = LinkCast(atom);
+    size_t larry = 0;
     if (link) {
         larry = link->getArity();
-        for (int i = 0; i < larry && !result; i++) {
-            const Atom* target = link->getOutgoingAtom(i);
+        for (size_t i = 0; i < larry && !result; i++) {
+            AtomPtr target(link->getOutgoingAtom(i));
             DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
-                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (target->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE and
+                not (CompositeTVCast(target->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 if (targetSubclasses) {
                     result = classserver().isA(target->getType(), targetType);
                 } else {
@@ -887,25 +885,26 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, Type targetType, bool targ
     return head;
 }
 
-bool HandleEntry::matchesFilterCriteria(Atom* atom, const char* targetName, Type targetType, VersionHandle vh)
+bool HandleEntry::matchesFilterCriteria(AtomPtr atom, const char* targetName, Type targetType, VersionHandle vh)
 {
     bool result = false;
-    Link *link = dynamic_cast<Link *>(atom);
-    int larry = 0;
+    LinkPtr link(LinkCast(atom));
+    size_t larry = 0;
     if (link) {
         larry = link->getArity();
-        for (int i = 0; i < larry && !result; i++) {
-            const Atom* target = link->getOutgoingAtom(i);
+        for (size_t i = 0; i < larry && !result; i++) {
+            AtomPtr target(link->getOutgoingAtom(i));
             DPRINTF("Checking atom with TYPE = %s, TV = %s\n", classserver().getTypeName(target->getType()), target->getTruthValue().toString().c_str());
             if (classserver().isA(target->getType(), NODE)) {
-                DPRINTF("Node name = %s\n", ((Node*) target)->getName().c_str());
+                DPRINTF("Node name = %s\n", (NodeCast(target))->getName().c_str());
             }
 
-            if (target->getTruthValue().getType() == COMPOSITE_TRUTH_VALUE &&
-                    !((const CompositeTruthValue&) target->getTruthValue()).getVersionedTV(vh).isNullTv()) {
+            if (target->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE and
+                 not (CompositeTVCast(target->getTruthValue())->getVersionedTV(vh)->isNullTv()))
+            {
                 if (targetType == target->getType()) {
-                    const char* nodeName = ((Node*) target)->getName().c_str();
-                    result = !strcmp(targetName, nodeName);
+                    const char* nodeName = (NodeCast(target))->getName().c_str();
+                    result = not strcmp(targetName, nodeName);
                 }
             }
         }
@@ -922,27 +921,37 @@ bool HandleEntry::matchesFilterCriteria(Atom* atom, const char* targetName, Type
 
 HandleEntry* HandleEntry::filterSet(HandleEntry* set, const char* targetName, Type targetType, VersionHandle vh)
 {
-
     HandleEntry* head = set;
-    if (!isNullVersionHandle(vh)) {
+    if (not isNullVersionHandle(vh)) {
         HandleEntry* buffer;
 
         // The search for invalid elements need to be done in two steps because
         // invalid elements found in the middle of the list need to be treated
         // differently from invalid elements found in its begining.
 
-        while ( (set != NULL) && !matchesFilterCriteria(set->getAtom(), targetName, targetType, vh)) {
+        AtomPtr atom;
+        bool match = false;
+        if (set != NULL) {
+            atom = set->getAtom();
+            match = matchesFilterCriteria(atom, targetName, targetType, vh);
+        }
+        while ((set != NULL) and not match)
+        {
             buffer = set;
             set = set->next;
             buffer->next = NULL;
             delete buffer;
+            if (set != NULL) {
+                atom = set->getAtom();
+                match = matchesFilterCriteria(atom, targetName, targetType, vh);
+            }
         }
 
         if (set == NULL) return NULL;
 
         head = set;
         while (set->next != NULL) {
-            if (!matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
+            if (not matchesFilterCriteria(set->next->getAtom(), targetName, targetType, vh)) {
                 buffer = set->next;
                 set->next = set->next->next;
                 buffer->next = NULL;
@@ -962,12 +971,12 @@ std::string HandleEntry::toString(void)
     std::string answer;
 
     for (HandleEntry* current = this; current != NULL; current = current->next) {
-        Atom* atom = TLB::getAtom(current->handle);
+        AtomPtr atom(current->handle);
         if (atom != NULL) {
             if (classserver().isA(atom->getType(), NODE)) {
-                answer += ((Node*) atom)->getName();
+                answer += (NodeCast(atom))->getName();
             } else if (classserver().isA(atom->getType(), LINK)) {
-                answer += ((Link*) atom)->toShortString();
+                answer += (LinkCast(atom))->toShortString();
             }
             //char buf[1024];
             //sprintf(buf,"[table=%d]", atom->getAtomTable());

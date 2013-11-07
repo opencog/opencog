@@ -50,25 +50,25 @@ class BackingStore
 		 * Return a pointer to a link of the indicated type and outset,
 		 * if it exists; else return NULL.
 		 */
-		virtual Link * getLink(Type, const std::vector<Handle>&) const = 0;
+		virtual LinkPtr getLink(Type, const HandleSeq&) const = 0;
 
 		/** 
 		 * Return a pointer to a node of the indicated type and name,
 		 * if it exists; else return NULL.
 		 */
-		virtual Node * getNode(Type, const char *) const = 0;
+		virtual NodePtr getNode(Type, const char *) const = 0;
 
 		/** 
 		 * Return a pointer to an Atom associated with the given
 		 * handle, if it exists; else return NULL.
 		 */
-		virtual Atom * getAtom(Handle) const = 0;
+		virtual AtomPtr getAtom(Handle) const = 0;
 
 		/**
 		 * Return a vector containing the handles of the entire incoming
 		 * set of the indicated handle. 
 		 */
-		virtual std::vector<Handle> getIncomingSet(Handle) const = 0;
+		virtual HandleSeq getIncomingSet(Handle) const = 0;
 
 		/**
 		 * Recursively store the atom and anything in it's outgoing set.

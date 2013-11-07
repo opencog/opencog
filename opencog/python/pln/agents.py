@@ -1,80 +1,161 @@
-__author__ = 'ramin'
-
 from opencog.cogserver import MindAgent
-from opencog.atomspace import types, AtomSpace
-from utility.generic import DEFAULT_TRUTH_VALUE as def_tv
-from logic import ForwardChainer
-import random
-import rules
-import uuid
+from opencog.atomspace import types
 
+from pln.chainers import Chainer, get_attentional_focus
+from pln.rules import rules, temporal_rules, boolean_rules
 
-class SimpleForwardInferenceAgent(MindAgent):
-    def run(self, atomspace=None):
-        node = self.fetch(atomspace)
-        if node is None:
-            return None
-        fc = ForwardChainer(atomspace)
-        fc.add_rule(rules.DeductionRule(atomspace))
-        atoms = fc.run(node)
-        print 'fia:', atoms
-        return atoms
-
-    def fetch(self, atomspace=None):
-        links = list(atomspace.get_atoms_by_type(types.InheritanceLink))
-        link = self._selectOne(links, atomspace)
-        if link is None:
-            return None
-        return link.out[0]
-
-    def _selectOne(self, links, atomspace):
-        max = sum([atomspace.get_av(link.h)['sti'] for link in links])
-        pick = random.uniform(0, max)
-        current = 0
-        for link in links:
-            current += atomspace.get_av(link.h)['sti']
-            if current >= pick:
-                return link
-
-
-class AtomspacePopulatorAgent(MindAgent):
+class ForwardInferenceAgent(MindAgent):
     def __init__(self):
-        self.counter = 0
+        self.chainer = None
+
+    def create_chainer(self, atomspace):
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+
+        # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
+#        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+#            types.EquivalenceLink]
+#        conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.ImplicationLink]
+
+        # always use the mixed inheritance types, because human inference is normally a mix of intensional and extensional
+        conditional_probability_types = [types.InheritanceLink, types.ImplicationLink]
+        similarity_types = [types.SimilarityLink, types.EquivalenceLink]
+
+        for link_type in conditional_probability_types:
+            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
+
+        # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
+        for link_type in similarity_types:
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+
+        # These two Rules create mixed links out of intensional and extensional links
+        self.chainer.add_rule(rules.InheritanceRule(self.chainer))
+        self.chainer.add_rule(rules.SimilarityRule(self.chainer))
+
+        # boolean links
+        for rule in boolean_rules.create_and_or_rules(self.chainer, 1, 2):
+            self.chainer.add_rule(rule)
+
+        # create probabilistic logical links out of MemberLinks
+
+        # These two "macro rules" make the individual rules redundant
+        self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalLinkEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
+        #self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
+
+        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
+        for rule in rules.create_general_evaluation_to_member_rules(self.chainer):
+            self.chainer.add_rule(rule)
+
+        # It's important to have both of these
+        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
+#        self.chainer.add_rule(rules.InheritanceToMemberRule(self.chainer))
+
+        # AttractionLink could be useful for causality
+        self.chainer.add_rule(rules.AttractionRule(self.chainer))
+
+#        for rule in temporal_rules.create_temporal_rules(self.chainer):
+#            self.chainer.add_rule(rule)
 
     def run(self, atomspace):
-        if self.counter < 101:
-            self.counter += 1
+        # incredibly exciting futuristic display!
+        #import os
+        #os.system('cls' if os.name=='nt' else 'clear')
+
+        def show_atoms(atoms):
+            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
+
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+            # For simplicity, do nothing the first time. Silly APIs mean you have to call run to set the atomspace
+            return
+
+        result = self.chainer.forward_step()
+        if result:
+            (rule, inputs, outputs) = result
+
+            print '==== Inference ===='
+            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
+
+            #print
+            #print '==== Attentional Focus ===='
+            #for atom in get_attentional_focus(atomspace)[0:30]:
+            #    print str(atom), atom.av
+
+            #print '==== Result ===='
+            #print output
+            #print '==== Trail ===='
+            #print_atoms( self.chainer.trails[output] )
         else:
-            return None
-        pick = random.random()
-        if pick > 0.65:
-            atom = self._add_atom(atomspace)
-            if atom is not None:
-                atomspace.set_av(atom.h, random.uniform(0, 1), random.uniform(0, 1))
-            print 'apa:', atom
-            return atom
+            print 'Invalid inference attempted'
 
-    def _add_atom(self, atomspace):
-        pick = random.random()
-        if pick > 0.5:
-            return self._add_node(atomspace)
-        else:
-            return self._add_link(atomspace)
+        try:
+            pass
+        except AssertionError:
+            import sys,traceback
+            _,_,tb = sys.exc_info()
+            traceback.print_tb(tb) # Fixed format
 
-    def _add_node(self, atomspace):
-        name = str(uuid.uuid1())
-        return atomspace.add_node(types.ConceptNode, name, def_tv)
+            tbInfo = traceback.extract_tb(tb)
+            filename,line,func,text = tbInfo[-1]
+            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
+            exit(1)
+        except Exception, e:
+            print e
+            print e.args
+            e.print_traceback()
 
-    def _add_link(self, atomspace):
-        nodes = atomspace.get_atoms_by_type(types.ConceptNode)
-        if len(nodes) < 2:
-            return None
+            import sys,traceback
+            _,_,tb = sys.exc_info()
+            traceback.print_tb(tb) # Fixed format
 
-        first_rand = random.randrange(0, len(nodes))
-        second_rand = random.randrange(0, len(nodes))
+            tbInfo = traceback.extract_tb(tb)
+            filename,line,func,text = tbInfo[-1]
+            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
+            exit(1)
 
-        while first_rand == second_rand:
-            second_rand = random.randrange(0, len(nodes))
-        first_node = nodes[first_rand]
-        second_node = nodes[second_rand]
-        return atomspace.add_link(types.InheritanceLink, [first_node, second_node], def_tv)
+    def monte_carlo_one_atom(self, atom, sample_count=100):
+        old_tv = atom.tv
+        print old_tv
+        for i in xrange(0, sample_count):
+            self.chainer.backward_step(target_atoms=[atom])
+        print 'tv before sampling', old_tv
+        print 'tv after sampling', atom.tv
+
+def print_atoms(atoms):
+    for atom in atoms:
+        print atom
+
+def show_atoms(atoms):
+    return ' '.join(str(atom)+str(atom.av) for atom in atoms)
+
+class BackwardInferenceAgent(ForwardInferenceAgent):
+    def run(self, atomspace):
+        # incredibly exciting futuristic display!
+        #import os
+        #os.system('cls' if os.name=='nt' else 'clear')
+
+        def show_atoms(atoms):
+            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
+
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+
+        result = self.chainer.backward_step()
+        if result:
+            (rule, inputs, outputs) = result
+
+            print '==== Inference ===='
+            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
+
+
+'''
+# test it with forgetting, updating and diffusion
+scm-eval (load-scm-from-file "../wordpairs.scm")
+loadpy pln
+agents-start pln.ForwardInferenceAgent opencog::ForgettingAgent opencog::ImportanceUpdatingAgent opencog::ImportanceDiffusionAgent
+'''

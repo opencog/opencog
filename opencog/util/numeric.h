@@ -23,19 +23,14 @@
 #ifndef _OPENCOG_NUMERIC_H
 #define _OPENCOG_NUMERIC_H
 
-#include <math.h>
-#include <stdint.h>
+#include <algorithm> // for std::max
 #include <cmath>
-#include <ctime>
-#include <vector>
-#include <cstdlib>
 #include <climits>
+#include <cstdlib>
 #include <limits>
 #include <numeric>
-#include <set>
-#include <map>
+#include <vector>
 
-#include <boost/math/special_functions.hpp>
 #include <boost/range/numeric.hpp>
 
 #include "exceptions.h"
@@ -62,16 +57,17 @@ namespace opencog
 {
 
 using std::numeric_limits;
-using boost::math::isnan;
-using boost::math::isfinite;
-using boost::math::isinf;
+using std::isnan;
+using std::isfinite;
+using std::isinf;
+
+using std::iota;
 
 #ifndef WIN32
 // This needs to be changed for non-gcc. Note however that so far it
 // has been useless as most of the time you just need pow2 or sq
 // defined below in that header
 using __gnu_cxx::power;
-using __gnu_cxx::iota;
 #endif
 
 const double EPSILON = 1e-6; // default error when comparing 2 floats
@@ -312,6 +308,10 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 template<typename Float>
 Float bound(Float x, Float l, Float u)
 {
+// undef min and max, because some of the C header files define
+// these as ordinary macros, which is NOT what we want.
+#undef max
+#undef min
     return std::max(l, std::min(u, x));
 }
     

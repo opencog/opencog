@@ -186,8 +186,7 @@ void MockOpcHCTest::init(const std::string & myId,
     first_try = true;
 
     registerAgent(HCTestAgent::info().id, &HCTestAgentFactory);
-    _HCTa  = static_cast<HCTestAgent*>(
-                 createAgent(HCTestAgent::info().id, false));
+    _HCTa  = createAgent<HCTestAgent>();
     _HCTa->init(TRICK_NAME, TRICK_ARGS,
                 OWNER_NAME, OWNER_NAME,
                 atomSpace, lsMessageSender,

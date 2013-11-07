@@ -41,7 +41,7 @@ class HandleToTemporalEntryMap
 
 private:
 
-    HandleMap<TemporalEntry *> *internalMap;
+    HandleMap<TemporalEntry*>::MapPtr internalMap;
 
 public:
 

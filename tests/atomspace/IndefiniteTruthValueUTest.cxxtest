@@ -47,6 +47,7 @@ using namespace std;
 #define TV3_U 1.0f
 #define ERROR_THRESHOLD 0.01f
 
+// floats only have about 7.5 digits of precision
 #define FLOAT_ACCEPTABLE_ERROR 0.000001f
 
 #define DIFF_ACCEPTABLE_ERROR 0.01f
@@ -235,55 +236,6 @@ public:
         }
     }
 
-    void testAssignmentOperator() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            IndefiniteTruthValue tv;
-            tv = (const IndefiniteTruthValue&) * (tvs[i]);
-            //tv = *(tvs[i]);
-            TS_ASSERT(fabs(tv.getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(tv.getL(), tv.getU(), default_k, tv.getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
-            TS_ASSERT(tv.isSymmetric());
-            TS_ASSERT(fabs(tv.getMean() - means[i]) <= ERROR_THRESHOLD);
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(tv.getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(tv.getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-        }
-        for (int i = 0; i < NUM_TVS; i++) {
-            IndefiniteTruthValue tv;
-            tv = (const TruthValue&) * (tvs[i]);
-            TS_ASSERT(fabs(tv.getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv.getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(tv.getL(), tv.getU(), default_k, tv.getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(tv.getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
-            TS_ASSERT(tv.isSymmetric());
-            TS_ASSERT(fabs(tv.getMean() - means[i]) <= ERROR_THRESHOLD);
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(tv.getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(tv.getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-        }
-        const TruthValue& simpleTv = SimpleTruthValue(0, 0);
-        const TruthValue& compositeTv = CompositeTruthValue(TruthValue::NULL_TV(), NULL_VERSION_HANDLE);
-        IndefiniteTruthValue tv;
-        TS_ASSERT_THROWS(tv = TruthValue::NULL_TV(), RuntimeException&);
-        TS_ASSERT_THROWS(tv = simpleTv, RuntimeException&);
-        TS_ASSERT_THROWS(tv = compositeTv, RuntimeException&);
-    }
-
-
-    void testToFloat() {
-        for (int i = 0; i < NUM_TVS; i++) {
-            TS_ASSERT(fabs(tvs[i]->toFloat()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
 #define SAVING_AND_LOADING_TV_FLOAT_PRECISION 0.001
     void testToAndFromString() {
         char tvStr[1024];
@@ -295,11 +247,11 @@ public:
             }
             std::string tvToStringValue = tvs[i]->toString();
             sprintf(tvStr, "%s %s\n", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            TruthValue* tv = TruthValue::factory(tvStr);
+            TruthValuePtr tv = TruthValue::factory(tvStr);
             TS_ASSERT(tv != NULL);
             TS_ASSERT(tv->getType() == tvs[i]->getType());
-            delete tv;
-            IndefiniteTruthValue* itv = IndefiniteTruthValue::fromString(tvToStringValue.c_str());
+            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::fromString(tvToStringValue.c_str());
+
             TS_ASSERT(fabs(itv->getL() - ls[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
             TS_ASSERT(fabs(itv->getU() - us[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
             TS_ASSERT(fabs(itv->getConfidenceLevel() - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
@@ -352,7 +304,15 @@ public:
                 TS_ASSERT(isApproxEq(tv->getMean(), (l+us[i])/2, ERROR_THRESHOLD));
                 float expectedCount = count(l, us[i]);
                 float expectedConfidence = confidence(l, us[i]);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
+
+                // Some of the expectedCount are small (e.g. 0.222...)
+                // and some are large (e.g. 19999998) so take care with diff.
+                // ... and sometimes expected count is zero ... 
+                if (1.0 < expectedCount) {
+                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                } else {
+                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                }
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
@@ -369,7 +329,14 @@ public:
                 TS_ASSERT(isApproxEq(tv->getMean(), (ls[i]+u)/2, ERROR_THRESHOLD));
                 float expectedCount = count(ls[i], u);
                 float expectedConfidence = confidence(ls[i], u);
-                TS_ASSERT(fabs(tv->getCount() - expectedCount) <= ERROR_THRESHOLD);
+
+                // Some of the expectedCount are small (e.g. 0.222...)
+                // and some are large (e.g. 19999998) so take care with diff.
+                if (1.0 < expectedCount) {
+                    TS_ASSERT(fabs(tv->getCount() / expectedCount - 1.0f) <= FLOAT_ACCEPTABLE_ERROR);
+                } else {
+                    TS_ASSERT(fabs(tv->getCount() - expectedCount) <= FLOAT_ACCEPTABLE_ERROR);
+                }
                 TS_ASSERT(fabs(tv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
             }
         }
@@ -454,7 +421,8 @@ public:
 
     void testClone() {
         for (int i = 0; i < NUM_TVS; i++) {
-            IndefiniteTruthValue* clonedTv = tvs[i]->clone();
+            TruthValuePtr clon = tvs[i]->clone();
+            IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
             TS_ASSERT(fabs(clonedTv->getL()  - ls[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getU()  - us[i]) <= FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(clonedTv->getConfidenceLevel()  - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) <= FLOAT_ACCEPTABLE_ERROR);
@@ -468,7 +436,6 @@ public:
             float expectedConfidence = confidence(ls[i], us[i]);
             TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
             TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-            delete clonedTv;
         }
         // Changes all attributes and check if clone still works fine.
         tvs[0]->setL(ls[1]);
@@ -477,7 +444,8 @@ public:
         tvs[0]->setDiff(0.1f);
         //tvs[0]->setSymmetric(false); Cannot call this yet because it thows an exception (asymmetric indefinite tv is not implemented)
         tvs[0]->setMean(means[1]);
-        IndefiniteTruthValue* clonedTv = tvs[0]->clone();
+        TruthValuePtr clon = tvs[0]->clone();
+        IndefiniteTruthValuePtr clonedTv = IndefiniteTVCast(clon);
         TS_ASSERT(fabs(clonedTv->getL()  - ls[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(clonedTv->getU()  - us[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(clonedTv->getConfidenceLevel() - (IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL + 0.1f)) <= ERROR_THRESHOLD);
@@ -489,7 +457,6 @@ public:
         float expectedConfidence = confidence(ls[1], us[1]);
         TS_ASSERT(fabs(clonedTv->getCount() - expectedCount) <= ERROR_THRESHOLD);
         TS_ASSERT(fabs(clonedTv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-        delete clonedTv;
     }
 
     void testSetAndGetFirstOrderDistribution() {

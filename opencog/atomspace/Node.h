@@ -43,7 +43,6 @@ namespace opencog
  */
 class Node : public Atom
 {
-    friend class AtomSpaceImpl;  // needs acces to clone()
 #ifdef ZMQ_EXPERIMENT
     friend class ProtocolBufferSerializer;
 #endif
@@ -58,8 +57,6 @@ private:
 #endif
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
-    /** @todo cloning atoms is a fundamental violation oft he architecture. */
-    virtual Atom* clone() const;
 public:
 
     /**
@@ -71,22 +68,17 @@ public:
      * @param Node truthvalue A reference to a TruthValue object.
      */
     Node(Type t, const std::string& s,
-         const TruthValue& tv = TruthValue::NULL_TV(),
-         const AttentionValue& av = AttentionValue::DEFAULT_AV())
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV())
         : Atom(t,tv,av) {
         init(s);
     }
 
     /** Copy constructor, does not copy atom table membership! */
-    Node(const Node &n) 
-        : Atom(n.getType(),n.getTruthValue(),n.getAttentionValue()) {
+    Node(const Node &n)
+        : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue()) {
         init(n.name);
     }
-
-    /**
-     * Destructor for this class.
-     */
-    virtual ~Node();
 
     /**
      * Gets the name of the node.
@@ -96,22 +88,12 @@ public:
     const std::string& getName() const;
 
     /**
-     * @param name A reference to a std::string with the name
-     *             of the node.  Use empty string for unamed node.
-     * @exception RuntimeException is thrown if this method is
-     *             called for an Node already inserted into
-     *             AtomSpace. Otherwise, internal index structures
-     *              would become inconsistent.
-     */
-    void  setName(const std::string& name) throw (RuntimeException);
-
-    /**
      * Returns a string representation of the node.
      *
      * @return A string representation of the node.
      */
-    std::string toString() const;
-    std::string toShortString() const;
+    std::string toString(std::string indent = "") const;
+    std::string toShortString(std::string indent = "") const;
 
     /**
      * Returns whether a given atom is equal to the current node.
@@ -127,6 +109,14 @@ public:
      */
     virtual bool operator!=(const Atom&) const;
 };
+
+typedef std::shared_ptr<Node> NodePtr;
+static inline NodePtr NodeCast(const Handle& h)
+    { AtomPtr a(h); return std::dynamic_pointer_cast<Node>(a); }
+static inline NodePtr NodeCast(AtomPtr a) { return std::dynamic_pointer_cast<Node>(a); }
+
+// XXX temporary hack ...
+#define createNode std::make_shared<Node>
 
 /** @}*/
 } // namespace opencog
