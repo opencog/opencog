@@ -50,13 +50,15 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
         self.roulette_wheel = []
         #center_of_mass_lower_bound = 0
         #center_of_mass_set = False
-        maximum = 0
-        #self._mean = 0
+
+        self._mean = 0
         for bounds in sorted(self.pdf.dictionary_bounds_function):
             (a, b) = bounds
             if a in [NEGATIVE_INFINITY, POSITIVE_INFINITY] and b in [NEGATIVE_INFINITY, POSITIVE_INFINITY]:
                 continue
-            share = self.cdf(b)
+            cdf = self.cdf.dictionary_bounds_function[bounds]
+            pdf = self.pdf.dictionary_bounds_function[bounds]
+            share = cdf(b)
             self.roulette_wheel.append((a, b, share))
 
             #if not center_of_mass_set and share > 0.5:
@@ -64,31 +66,23 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             #    center_of_mass_set = True
             #center_of_mass_lower_bound = b
 
-            #self._mean += self.pdf.integral(a, b) * self.pdf((b - a) / 2.0 + a)
+            self._mean += (a + b) / 2.0 * pdf(a) * (b - a)
 
-            middle = (b - a) / 2.0 + a
-            middle_value = self.pdf(middle)
-            if middle_value > maximum:
-                self._mean = middle
-                maximum = middle_value
-        pass
-
-    def _calculate_center_of_mass(self, lower_bound, upper_bound):
-        while True:
-            distance = fabs(upper_bound - lower_bound)
-            target = lower_bound - distance / 2
-            if distance < EPSILON:
-                return lower_bound
-            difference = self.cdf(target) - 0.5
-            if fabs(difference) < EPSILON:
-                return target
-            if difference > 0:
-                lower_bound = target
-            else:
-                upper_bound = target
+    #def _calculate_center_of_mass(self, lower_bound, upper_bound):
+    #    while True:
+    #        distance = fabs(upper_bound - lower_bound)
+    #        target = lower_bound - distance / 2
+    #        if distance < EPSILON:
+    #            return lower_bound
+    #        difference = self.cdf(target) - 0.5
+    #        if fabs(difference) < EPSILON:
+    #            return target
+    #        if difference > 0:
+    #            lower_bound = target
+    #        else:
+    #            upper_bound = target
 
     def mean(self):
-        #return self._center_of_mass
         return self._mean
 
     def interval(self, alpha):
