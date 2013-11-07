@@ -65,9 +65,20 @@ public:
 
     bool operator==(const Vector& other) const
     {
-        if ((x - other.x < MIN_DOUBLE) &&
-            (y - other.y < MIN_DOUBLE) &&
-            (z - other.z < MIN_DOUBLE) )
+        double d_x = x - other.x;
+        double d_y = y - other.y;
+        double d_z = z - other.z;
+
+        if (d_x < 0)
+            d_x = -d_x;
+        if (d_y < 0)
+            d_y = -d_y;
+        if (d_z < 0)
+            d_z = -d_z;
+
+        if ((d_x < MIN_DOUBLE) &&
+            (d_y < MIN_DOUBLE) &&
+            (d_z < MIN_DOUBLE) )
             return true;
         else
             return false;

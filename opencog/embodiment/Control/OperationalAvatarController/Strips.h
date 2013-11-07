@@ -300,6 +300,8 @@ namespace opencog { namespace oac {
     // but the right way, we should define 26 rules to tell the planner what is "Adjacent location"
     struct BestNumericVariableInqueryStruct
     {
+        // in fact, we just use the stateownerlist of this state, this state only need to provide the right state owners to the InqueryVariableFun
+        // the state name and state variable doesn't really matter
         State* goalState;
         InqueryVariableFun bestNumericVariableInqueryFun;
     };
@@ -365,6 +367,8 @@ namespace opencog { namespace oac {
         //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
         bool IsRecursiveRule;
 
+        string ruleName; // this is just for debug use , it can be empty
+
         // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
         // which is the most closed to the a grounded numeric goal
         map<string,BestNumericVariableInqueryStruct> bestNumericVariableinqueryStateFuns;
@@ -379,11 +383,11 @@ namespace opencog { namespace oac {
         // constructors
         Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
             action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
 
         Rule(PetAction* _action, ParamValue _actor, float _basic_cost):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(){}
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
 
         float getBasicCost();
 
@@ -412,8 +416,9 @@ namespace opencog { namespace oac {
         // in some planning step, need to ground some state to calculate the cost or others
         // return a new state which is the grounded version of s, by a parameter value map
         // if the "groundings" cannot ground all the variables in this state, return 0
+        // fullGound is to ground all the ownerlist fully, cannot leave any state ower ungrounded. Defaultly true
        static State* groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groundings,bool toGroundStateValue = true,
-                                                bool ifRealTimeQueryStateValue = true, ParamValue knownStateVal = UNDEFINED_VALUE);
+                                                bool ifRealTimeQueryStateValue = true, ParamValue knownStateVal = UNDEFINED_VALUE, bool fullGroundStateOwners = true);
 
         bool static isRuleUnGrounded( Rule* rule);
 

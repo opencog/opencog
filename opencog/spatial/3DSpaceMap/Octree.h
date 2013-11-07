@@ -171,7 +171,7 @@ namespace opencog
             // the Octree3DMapManager
             Octree3DMapManager* mOctree3DMapManager;
 
-            Octree* clone(Octree3DMapManager* newOctree3DMapManager);
+            Octree* clone(Octree3DMapManager* newOctree3DMapManager, Octree* parentTree = 0);
 
         protected:
 
@@ -198,9 +198,9 @@ namespace opencog
             int mIndex_x, mIndex_y, mIndex_z;
 
             // this constructor is only used in clone this instance
-            Octree(Octree3DMapManager* _octree3DMapManager,Octree * _parent, int _size, int _OctreeDepth, AxisAlignedBox& _boundingBox,
+            Octree(Octree3DMapManager* _octree3DMapManager, Octree* _mParent, int _size, int _OctreeDepth, AxisAlignedBox& _boundingBox,
                            BlockVector& _nearLeftBottomPoint,BlockVector& _centre, int index_x, int index_y, int index_z ):
-                mOctree3DMapManager(_octree3DMapManager),mParent(_parent),mSize(_size),mOctreeDepth(_OctreeDepth),mBoundingBox(_boundingBox),
+                mOctree3DMapManager(_octree3DMapManager),mParent(_mParent), mSize(_size),mOctreeDepth(_OctreeDepth),mBoundingBox(_boundingBox),
                 mNearLeftBottomPoint(_nearLeftBottomPoint),mCentre(_centre),mIndex_x(index_x), mIndex_y(index_y), mIndex_z(index_z){}
 
         };
