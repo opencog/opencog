@@ -45,6 +45,8 @@
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAI.h>
+#include <random>
+#include <algorithm>
 
 #include "Inquery.h"
 #include "OCPlanner.h"
@@ -320,8 +322,10 @@ ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
     ParamValue var2 = stateOwnerList.back();
 
     Entity* entity1 = boost::get<Entity>(&var1);
+    Vector* vector1 = boost::get<Vector>(&var1);
     Entity* entity2 = boost::get<Entity>(&var2);
     Vector* vector2 = boost::get<Vector>(&var2);
+
     if (entity1 && entity2)
     {
         d = spaceMap->distanceBetween(entity1->id, entity2->id);
@@ -329,6 +333,19 @@ ParamValue Inquery::inqueryDistance(const vector<ParamValue>& stateOwnerList)
     else if (entity1 && vector2)
     {
         d = spaceMap->distanceBetween(entity1->id, SpaceServer::SpaceMapPoint(vector2->x,vector2->y,vector2->z));
+    }
+    else if (entity2 && vector1)
+    {
+        d = spaceMap->distanceBetween(entity2->id, SpaceServer::SpaceMapPoint(vector1->x,vector1->y,vector1->z));
+    }
+    else if (vector2 && vector1)
+    {
+        d = spaceMap->distanceBetween(SpaceServer::SpaceMapPoint(vector1->x,vector1->y,vector1->z), SpaceServer::SpaceMapPoint(vector2->x,vector2->y,vector2->z));
+    }
+    else
+    {
+        std::cout<<"Debug error: inqueryDistance : cannot find:" << std::endl
+                << ActionParameter::ParamValueToString(var1) << " and " << ActionParameter::ParamValueToString(var2) <<std::endl;
     }
 
     return (opencog::toString(d));
@@ -385,10 +402,20 @@ ParamValue Inquery::inqueryIsStandable(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var = stateOwnerList.back();
     Vector* pos = boost::get<Vector>(&var);
+    bool standable;
     if (! pos)
-        return "false";
+    {
+        Entity* entity = boost::get<Entity>(&var);
+        if (! entity)
+            return "false";
 
-    if (spaceMap->checkStandable((int)pos->x,(int)pos->y,(int)pos->z))
+        standable = spaceMap->checkStandable(spaceMap->getObjectLocation(entity->id));
+    }
+    else
+        standable = spaceMap->checkStandable((int)pos->x,(int)pos->y,(int)pos->z);
+
+
+    if (standable)
         return "true";
     else
         return "false";
@@ -418,6 +445,11 @@ ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
         pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
     }
 
+    if ( (!spaceMap->checkStandable(pos1)) || (!spaceMap->checkStandable(pos2)) )
+    {
+        return "false";
+    }
+
     if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
     {
         if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
@@ -427,8 +459,8 @@ ParamValue Inquery::inqueryExistPath(const vector<ParamValue>& stateOwnerList)
     }
 
     vector<spatial::BlockVector> path;
-    spatial::BlockVector nearestPos;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+    spatial::BlockVector nearestPos, bestPos;
+    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos, bestPos))
         return "true";
     else
         return "false";
@@ -459,9 +491,9 @@ vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamV
         pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
     }
 
-    spatial::BlockVector nearestPos;
+    spatial::BlockVector nearestPos, bestPos;
     vector<spatial::BlockVector> path;
-    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos);
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,bestPos,true, false);
 
     if (nearestPos != pos1)
     {
@@ -472,11 +504,11 @@ vector<ParamValue> Inquery::inqueryNearestAccessiblePosition(const vector<ParamV
     return values;
 }
 
-vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList)
+vector<ParamValue> Inquery::inqueryBestAccessiblePosition(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();
-
-    spatial::BlockVector pos1;
+    ParamValue var2 = stateOwnerList.back();
+    spatial::BlockVector pos1,pos2;
     vector<ParamValue> values;
 
     Entity* entity1 = boost::get<Entity>(&var1);
@@ -488,10 +520,69 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
         pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
     }
 
+    Entity* entity2 = boost::get<Entity>(&var2);
+    if (entity2)
+        pos2 = spaceMap->getObjectLocation(entity2->id);
+    else
+    {
+        Vector* v2 = boost::get<Vector>(&var2);
+        pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
+    }
+
+    spatial::BlockVector nearestPos, bestPos;
+    vector<spatial::BlockVector> path;
+    spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos,bestPos,false, true);
+
+    if (bestPos != pos1)
+    {
+        values.push_back(Vector(bestPos.x,bestPos.y,bestPos.z));
+
+    }
+
+    return values;
+}
+
+vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList)
+{
+    vector<ParamValue> values;
+    ParamValue var1 = stateOwnerList.front();
+
+    if (Rule::isParamValueUnGrounded(var1)  )
+    {
+        if (stateOwnerList.size() == 1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+
+        var1 = stateOwnerList[1];
+        if (Rule::isParamValueUnGrounded(var1))
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+    }
+
+    spatial::BlockVector pos1;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+    if (entity1)
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    else
+    {
+        Vector* v1 = boost::get<Vector>(&var1);
+        if (! v1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got wrong type of variable!"<<std::endl;
+            return values; // return empty value list
+        }
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+    }
+
     // return 24 adjacent neighbour locations (26 neighbours except the pos above and below)
     int x,y,z;
     for (x = -1; x <= 1; x ++)
-        for (y = -1; x <= 1; x ++)
+        for (y = -1; y <= 1; y ++)
             for (z = -1; z <= 1; z ++)
             {
                 if ( (x == 0) && (y == 0))
@@ -500,9 +591,12 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
                 values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
             }
 
+    // random sort
+    std::random_shuffle(values.begin(),values.end());
+
     return values;
 }
-
+/*
 vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();
@@ -527,32 +621,50 @@ vector<ParamValue> Inquery::inqueryStandableNearbyAccessablePosition(const vecto
             for (z = -1; z <= 1; z ++)
             {
                 if ( (x == 0) && (y == 0))
-                {
                     continue;
 
-                    SpaceServer::SpaceMapPoint curPos(pos2.x + x,pos2.y + y,pos2.z + z);
+                SpaceServer::SpaceMapPoint curPos(pos2.x + x,pos2.y + y,pos2.z + z);
 
-                    // check if it's standable
-                    if (! spaceMap->checkStandable(curPos))
-                        continue;
-                    // check if there is a path from the avatar to this position
-                    if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
-                    {
-                        if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
-                        {
-                            values.push_back(Vector(curPos.x,curPos.y,curPos.z));
-                        }
-
-                        continue;
-                    }
-
-                    vector<spatial::BlockVector> path;
-                    spatial::BlockVector nearestPos;
-                    if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+                // check if there is a path from the avatar to this position
+                if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
+                {
+                    if (spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap, pos1, pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z))
+                        values.insert(values.begin(),Vector(curPos.x,curPos.y,curPos.z));
+                    else
                         values.push_back(Vector(curPos.x,curPos.y,curPos.z));
 
+                    continue;
                 }
+
+                vector<spatial::BlockVector> path;
+                spatial::BlockVector nearestPos;
+                if (spatial::Pathfinder3D::AStar3DPathFinder(spaceMap, pos1, pos2, path, nearestPos))
+                    values.push_back(Vector(curPos.x,curPos.y,curPos.z));
+
+
             }
+
+    return values;
+}
+*/
+
+vector<ParamValue> Inquery::inqueryUnderPosition(const vector<ParamValue>& stateOwnerList)
+{
+    vector<ParamValue> values;
+
+    ParamValue var = stateOwnerList.front();
+    Vector* v = boost::get<Vector>(&var);
+    if (! v)
+    {
+        Entity* entity = boost::get<Entity>(&var);
+        if (! entity)
+            return values;
+
+        spatial::BlockVector pos = spaceMap->getObjectLocation(entity->id);
+        values.push_back(Vector(pos.x, pos.y, pos.z - 1));
+    }
+    else
+        values.push_back(Vector(v->x, v->y, v->z - 1));
 
     return values;
 }
@@ -561,14 +673,34 @@ ParamValue Inquery::inqueryIsAdjacent(const vector<ParamValue>& stateOwnerList)
 {
     ParamValue var1 = stateOwnerList.front();
     ParamValue var2 = stateOwnerList.back();
+    Entity* entity1;
+    Entity* entity2;
+    SpaceServer::SpaceMapPoint pos1,pos2;
+
     Vector* v1 = boost::get<Vector>(&var1);
+    if (! v1)
+    {
+        entity1 = boost::get<Entity>(&var1);
+        if (! entity1)
+            return "false";
+
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    }
+    else
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+
     Vector* v2 = boost::get<Vector>(&var2);
+    if (! v2)
+    {
+        entity2 = boost::get<Entity>(&var2);
+        if (! entity2)
+            return "false";
 
-    if ((!v1)||(!v2))
-        return "false";
+        pos2 = spaceMap->getObjectLocation(entity2->id);
+    }
+    else
+        pos2 = SpaceServer::SpaceMapPoint(v2->x,v2->y,v2->z);
 
-    SpaceServer::SpaceMapPoint pos1(v1->x,v1->y,v1->z);
-    SpaceServer::SpaceMapPoint pos2(v2->x,v2->y,v2->z);
 
     if (SpaceServer::SpaceMap::isTwoPositionsAdjacent(pos1, pos2))
         return "true";
@@ -686,23 +818,105 @@ ParamValue Inquery::inqueryIsInFrontOf(const vector<ParamValue>& stateOwnerList)
 
 set<spatial::SPATIAL_RELATION> Inquery::getSpatialRelations(const vector<ParamValue>& stateOwnerList)
 {
-//    set<spatial::SPATIAL_RELATION> empty;
-    Entity entity1 = boost::get<Entity>( stateOwnerList.front());
-    Entity entity2 = boost::get<Entity>( stateOwnerList[1]);
-    Entity entity3 = boost::get<Entity>( stateOwnerList[2]);
-/*
-    if ((entity1 == 0)||(entity2 == 0))
+    set<spatial::SPATIAL_RELATION> empty;
+    if (stateOwnerList.size() < 2)
+    {
+        cout<< "Debug:Error:Inquery::getSpatialRelations! Required at least 2 input parameters!" << std::endl;
         return empty;
-*/
+    }
 
-    string entity3ID = "";
-    if (stateOwnerList.size() == 3)
-     {
-         Entity entity3 = boost::get<Entity>( stateOwnerList.back());
-         entity3ID = entity3.id;
-     }
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList[1];
 
-    return  spaceMap->computeSpatialRelations(entity1.id, entity2.id, entity3.id);
+    Entity* entity1 = boost::get<Entity>( &var1);
+    Entity* entity2 = boost::get<Entity>( &var2);
+
+    spatial::AxisAlignedBox box1, box2, box3;
+
+    if (entity1 != 0)
+    {
+        const spatial::Entity3D* e1 = spaceMap->getEntity(entity1->id);
+        if (e1 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity1->id << std::endl;
+            return empty;
+        }
+        else
+            box1 = e1->getBoundingBox();
+    }
+    else
+    {
+        Vector* v1 = boost::get<Vector>( &var1);
+        if (v1 == 0)
+            cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+        else
+        {
+            spatial::BlockVector vec(v1->x,v1->y,v1->z);
+            box1 = spatial::AxisAlignedBox(vec);
+        }
+    }
+
+    if (entity2 != 0)
+    {
+        const spatial::Entity3D* e2 = spaceMap->getEntity(entity2->id);
+        if (e2 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity2->id << std::endl;
+            return empty;
+        }
+        else
+            box2 = e2->getBoundingBox();
+    }
+    else
+    {
+        Vector* v2 = boost::get<Vector>( &var2);
+        if (v2 == 0)
+        {
+            cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+            return empty;
+        }
+        else
+        {
+            spatial::BlockVector vec(v2->x,v2->y,v2->z);
+            box2 = spatial::AxisAlignedBox(vec);
+        }
+    }
+
+    if (stateOwnerList.size() > 2)
+    {
+        ParamValue var3 = stateOwnerList[2];
+        Entity* entity3 = boost::get<Entity>( &var3);
+
+        if (entity3 != 0)
+        {
+            const spatial::Entity3D* e3 = spaceMap->getEntity(entity3->id);
+            if (e3 == 0)
+            {
+                cout<< "Debug:Error:Inquery::getSpatialRelations! Cannot find this Entity:" << entity3->id << std::endl;
+                return empty;
+            }
+            else
+                box3 = e3->getBoundingBox();
+        }
+        else
+        {
+            Vector* v3 = boost::get<Vector>( &var3);
+            if (v3 == 0)
+            {
+                cout<< "Debug:Error:Inquery::getSpatialRelations: Wrong input paramenter!" << std::endl;
+                return empty;
+            }
+            else
+            {
+                spatial::BlockVector vec(v3->x,v3->y,v3->z);
+                box3 = spatial::AxisAlignedBox(vec);
+            }
+        }
+    }
+    else
+        box3 = spatial::AxisAlignedBox::ZERO;
+
+    return  spaceMap->computeSpatialRelations(box1,box2,box3);
 }
 
 // find atoms by given condition, by patern mactcher.

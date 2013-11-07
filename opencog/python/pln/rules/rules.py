@@ -320,6 +320,8 @@ def create_general_evaluation_to_member_rules(chainer):
     for argument_count in xrange(2, 3): # Bizarbitrary constant!
         for index in xrange(0, argument_count):
             rules.append(GeneralEvaluationToMemberRule(chainer, index, argument_count))
+            rules.append(GeneralAtTimeEvaluationToMemberRule(chainer, index, argument_count))
+
     return rules
 
 class GeneralEvaluationToMemberRule(Rule):
@@ -347,13 +349,54 @@ sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
         [predicate, list_link] = eval_link.out
 
         args = list_link.out
-        parameter_names = ['%s:%s' % (arg.name, arg.type) for arg in args]
+        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
         parameter_names[self.index] = '_'
         parameter_names = ' '.join(parameter_names)
         concept_name = 'SatisfyingSet(%s %s)' % (predicate.name, parameter_names)
 
         set_node = self.chainer.node(types.ConceptNode, concept_name)
 
+        arg = args[self.index]
+        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+        tv = eval_link.tv
+
+        return ([member_link], [tv])
+
+class GeneralAtTimeEvaluationToMemberRule(Rule):
+    '''EvaluationLinks in AtTimeLinks are good for temporal rules, but don't let PLN use the normal logical rules. If you have (AtTime some_time (Evaluation near jade jades_stuff then jades_stuff is a member of the set "objects that are near jade at some time".
+$x where (AtTimeLink ? EvaluationLink near jade $x)
+''' 
+    def __init__(self, chainer, index, arg_count):
+        self.index = index
+        self.chainer = chainer
+
+        time = chainer.new_variable()
+        pred = chainer.new_variable()
+        all_args = chainer.make_n_variables(arg_count)
+        list_link = chainer.link(types.ListLink, all_args)
+        eval_link = chainer.link(types.EvaluationLink, [pred, list_link])
+        at_time = chainer.link(types.AtTimeLink, [time, eval_link])
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula= None,
+                      inputs=  [at_time],
+                      outputs= [])
+
+    def custom_compute(self, inputs):
+        [at_time] = inputs
+        [time, eval_link] = at_time.out
+        [predicate, list_link] = eval_link.out
+
+        args = list_link.out
+        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
+        parameter_names[self.index] = '_'
+        parameter_names = ' '.join(parameter_names)
+        concept_name = 'SatisfyingSet(sometimes %s %s)' % (predicate.name, parameter_names)
+
+        set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        arg = args[self.index]
         member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
 

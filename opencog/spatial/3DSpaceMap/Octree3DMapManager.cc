@@ -745,7 +745,7 @@ bool Octree3DMapManager::isTwoPositionsAdjacent(const BlockVector &pos1, const B
     return false;
 }
 
-bool Octree3DMapManager::checkStandable(BlockVector& pos) const
+bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 {
 
     Block3D* block;
@@ -753,8 +753,8 @@ bool Octree3DMapManager::checkStandable(BlockVector& pos) const
         return false;
 
     // check if there is any non-block obstacle in this pos
-    if (mPosToNoneBlockEntityMap.count(pos) != 0 )
-    return false;
+    /*if (mPosToNoneBlockEntityMap.count(pos) != 0 )
+    return false;*/
 
     if (mRootOctree->checkIsSolid(pos,block))
         return false;
@@ -1087,49 +1087,59 @@ bool Octree3DMapManager::getUnitBlockHandlesOfABlock(const BlockVector& _nearLef
     return true;
 }
 
-
 // todo: to be completed
+std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const AxisAlignedBox& boundingboxA,
+                                                                        const AxisAlignedBox& boundingboxB,
+                                                                        const AxisAlignedBox& boundingboxC,
+                                                                        const Entity3D* observer ) const
+{
+    std::set<SPATIAL_RELATION> spatialRelations;
+
+    if (boundingboxC != AxisAlignedBox::ZERO)
+    {
+        // todo: compute if A is between B and C
+
+        return spatialRelations;
+    }
+
+    if (observer == 0 )
+        observer = selfAgentEntity;
+
+    if (boundingboxA.isFaceTouching(boundingboxB))
+    {
+        spatialRelations.insert(TOUCHING);
+    }
+
+    if (boundingboxA.nearLeftBottomConer.z >= boundingboxB.nearLeftBottomConer.z + boundingboxB.size_z)
+       spatialRelations.insert(ABOVE);
+
+    if (boundingboxB.nearLeftBottomConer.z >= boundingboxA.nearLeftBottomConer.z + boundingboxA.size_z)
+       spatialRelations.insert(BELOW);
+
+
+    // if A is near/far to B
+    double dis = boundingboxB.getCenterPoint() - boundingboxA.getCenterPoint();
+    double AR = boundingboxA.getRadius();
+    double BR = boundingboxB.getRadius();
+    double nearDis = (AR + BR)*2.0;
+    if (dis <= nearDis )
+       spatialRelations.insert(NEAR);
+    else if (dis > nearDis*10.0 )
+       spatialRelations.insert(FAR_);
+
+    return spatialRelations;
+}
+
+
  std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations( const Entity3D* entityA,
                                                                            const Entity3D* entityB,
                                                                            const Entity3D* entityC,
                                                                            const Entity3D* observer ) const
  {
-     std::set<SPATIAL_RELATION> spatialRelations;
-
-     if (entityC != 0)
-     {
-         // todo: compute if A is between B and C
-
-         return spatialRelations;
-     }
-
-     if (observer == 0 )
-         observer = selfAgentEntity;
-
-     if (entityA->getBoundingBox().isFaceTouching(entityB->getBoundingBox()))
-     {
-         spatialRelations.insert(TOUCHING);
-     }
-
-     if (entityA->getBoundingBox().nearLeftBottomConer.z >= entityB->getBoundingBox().nearLeftBottomConer.z + entityB->getBoundingBox().size_z)
-        spatialRelations.insert(ABOVE);
-
-     if (entityB->getBoundingBox().nearLeftBottomConer.z >= entityA->getBoundingBox().nearLeftBottomConer.z + entityA->getBoundingBox().size_z)
-        spatialRelations.insert(BELOW);
-
-
-     // if A is near/far to B
-     double dis = entityB->getCenterPosition() - entityA->getCenterPosition();
-     double AR = entityA->getRadius();
-     double BR = entityB->getRadius();
-     double nearDis = (AR + BR)*2.0;
-     if (dis <= nearDis )
-        spatialRelations.insert(NEAR);
-     else if (dis > nearDis*10.0 )
-        spatialRelations.insert(FAR_);
-
-
-     return spatialRelations;
+     if (entityC)
+        return computeSpatialRelations(entityA->getBoundingBox(),entityB->getBoundingBox(),entityC->getBoundingBox(),observer);
+     else
+        return computeSpatialRelations(entityA->getBoundingBox(),entityB->getBoundingBox(),AxisAlignedBox::ZERO,observer);
  }
 
  std::set<SPATIAL_RELATION> Octree3DMapManager::computeSpatialRelations(

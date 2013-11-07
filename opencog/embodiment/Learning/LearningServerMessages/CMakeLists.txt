@@ -18,7 +18,3 @@ TARGET_LINK_LIBRARIES (LearningServerMessages
 	comboreduct
 )
 
-# IF (HAVE_EXPAT)
-# 	TARGET_LINK_LIBRARIES(LearningServerMessages xml)
-# ENDIF (HAVE_EXPAT)
-

@@ -756,9 +756,9 @@ vector<BlockVector> Octree::getAllNeighbourSolidBlockVectors(BlockVector& curPos
         return vectorList;
 }
 
-Octree* Octree::clone(Octree3DMapManager* newOctree3DMapManager)
+Octree* Octree::clone(Octree3DMapManager* newOctree3DMapManager, Octree *parentTree)
 {
-    Octree* cloneOctree = new Octree(newOctree3DMapManager,mParent,mSize,mOctreeDepth,mBoundingBox,mNearLeftBottomPoint,mCentre,mIndex_x,mIndex_y,mIndex_z);
+    Octree* cloneOctree = new Octree(newOctree3DMapManager,parentTree,mSize,mOctreeDepth,mBoundingBox,mNearLeftBottomPoint,mCentre,mIndex_x,mIndex_y,mIndex_z);
 
     for (int x = 0; x < 2; x ++)
         for (int y = 0; y < 2; y ++)
@@ -768,7 +768,7 @@ Octree* Octree::clone(Octree3DMapManager* newOctree3DMapManager)
                 if (mChildren[x][y][z] == 0)
                     cloneOctree->mChildren[x][y][z] = 0;
                 else
-                    cloneOctree->mChildren[x][y][z] = (mChildren[x][y][z])->clone(newOctree3DMapManager);
+                    cloneOctree->mChildren[x][y][z] = (mChildren[x][y][z])->clone(newOctree3DMapManager,cloneOctree);
 
                 // clone the blocks inside me
                 if (mAllMyBlocks[x][y][z] == 0)
