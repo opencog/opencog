@@ -3,6 +3,7 @@ __author__ = 'jade'
 from pln.rules.rules import Rule
 from pln.logic import Logic
 from pln.formulas import revisionFormula
+from pln.rules import rules
 
 from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 
@@ -171,10 +172,15 @@ class AbstractChainer(Logic):
             # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
             both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
             return not self_link and not both_variables
-        elif atom.type in [types.AndLink, types.OrLink, types.NotLink]:
+        elif atom.type in rules.BOOLEAN_LINKS:
             # see if it has semantically sensible arguments (e.g you don't want MemberLinks inside AndLinks)
-            suitable = all(arg.is_a(types.Node) or arg.is_a(types.EvaluationLink) for arg in atom.out)
+            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.EvaluationLink) for arg in atom.out)
             return suitable
+        elif atom.type in rules.FIRST_ORDER_LINKS:
+            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.ObjectNode) or arg.type in rules.BOOLEAN_LINKS)
+            return suitable
+        elif atom.type in rules.HIGHER_ORDER_LINKS:
+            suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
         else:
             return True
 

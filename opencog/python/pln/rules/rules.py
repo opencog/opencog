@@ -7,6 +7,10 @@ import math
 '''Some Rules evaluate various kinds of logical links based explicitly on set membership. A set = a ConceptNode.
 Other Rules calculate them heuristically, based on set probabilities and logical links.'''
 
+BOOLEAN_LINKS = [types.AndLink, types.OrLink, types.NotLink]
+FIRST_ORDER_LINKS = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+HIGHER_ORDER_LINKS = [types.ImplicationLink, types.EquivalenceLink]
+
 class Rule(object):
 
     def __init__ (self, outputs, inputs, formula):
