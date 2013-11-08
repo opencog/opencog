@@ -367,8 +367,6 @@ namespace opencog { namespace oac {
         //  e.g. if can move from A to B & can move from B to C, then can move from A to C , is a recursive rule
         bool IsRecursiveRule;
 
-        string ruleName; // this is just for debug use , it can be empty
-
         // pre-defined or learnt fuction to inquery the best numeric value to ground this rule to achieve a numeric states,
         // which is the most closed to the a grounded numeric goal
         map<string,BestNumericVariableInqueryStruct> bestNumericVariableinqueryStateFuns;
@@ -379,6 +377,8 @@ namespace opencog { namespace oac {
         // such like: OCPlanner::vector_var[3].stringRepresentation(), see ActionParameter::stringRepresentation()
         // In vector<ParamValue*>, the ParamValue* is the address of one parameter,help easily to find all using places of this parameter in this rule
         map<string , vector<paramIndex> > paraIndexMap;
+
+        string ruleName; // this is just for debug use , it can be empty
 
         // constructors
         Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):

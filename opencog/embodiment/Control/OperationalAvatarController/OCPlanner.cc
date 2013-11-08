@@ -1637,6 +1637,7 @@ int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardSt
     Inquery::setSpaceMap(curImaginaryMap);
     delete clonedCurImaginaryMap;
 
+    return negativeNum;
 
 }
 
