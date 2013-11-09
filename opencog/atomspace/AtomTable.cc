@@ -436,7 +436,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     // Lock before checking to see if this kind of atom can already
     // be found in the atomspace.  We need to lock here, to avoid two
     // different threads from trying to add exactly the same atom.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // Is the equivalent of this atom already in the table?
     // If so, then we merge the truth values.
@@ -519,7 +519,16 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
 
+    // XXX Setting the atom table causes AVchagned signals to be sent.
+    // Ideally we should unlock, send the AVCH signal, lock, set the table,
+    // unlock and send the other AVCH signal.  But right now, I'm too lazy
+    // to fix this.  I'm figuring no one will notice.
     atom->setAtomTable(this);
+
+    // We can now unlock, since we are done. In particular, the signals
+    // need to run unlocked, since they may result in more atom table
+    // additions.
+    lck.unlock();
 
     // Now that we are completely done, emit the added signal.
     _addAtomSignal(h);
