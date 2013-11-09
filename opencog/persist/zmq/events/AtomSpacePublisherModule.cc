@@ -30,6 +30,7 @@
 #include <opencog/util/platform.h>
 #include <iostream>
 #include <opencog/util/Config.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -37,6 +38,7 @@ using boost::property_tree::ptree;
 using boost::property_tree::read_json;
 using boost::property_tree::write_json;
 
+// @todo: Remove zhelpers.hpp
 #include "zhelpers.hpp"
 
 using namespace std;
@@ -48,14 +50,10 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
 {
     logger().info("[AtomSpacePublisherModule] constructor");
     this->as = &cs.getAtomSpace();
-    addAtomConnection = as->atomSpaceAsync->
-        addAtomSignal(boost::bind(&AtomSpacePublisherModule::handleAddSignal, this, _1));
-    removeAtomConnection = as->atomSpaceAsync->
-        removeAtomSignal(boost::bind(&AtomSpacePublisherModule::atomRemoveSignal, this, _1));
-    TVChangedConnection = as->atomSpaceAsync->
-        TVChangedSignal(boost::bind(&AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
-    AVChangedConnection = as->atomSpaceAsync->
-        AVChangedSignal(boost::bind(&AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
+    addAtomConnection = as->addAtomSignal(boost::bind(&AtomSpacePublisherModule::handleAddSignal, this, _1));
+    removeAtomConnection = as->removeAtomSignal(boost::bind(&AtomSpacePublisherModule::atomRemoveSignal, this, _1));
+    TVChangedConnection = as->TVChangedSignal(boost::bind(&AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
+    AVChangedConnection = as->AVChangedSignal(boost::bind(&AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
 }
 
 void AtomSpacePublisherModule::init(void)
@@ -99,6 +97,7 @@ void AtomSpacePublisherModule::handleAddSignal(Handle h)
     std::string payload = atomToJSON(h);
     s_sendmore (*publisher, "add");
     s_send (*publisher, payload);
+    cout << payload;
 }
 
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
@@ -141,38 +140,117 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string vltiString = std::to_string(av->getVLTI());
 
     // TruthValue
-    std::string tvString = "";
-    // @TODO:
+    // @TODO: refer to this previous code:
     // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL123
-    // TruthValuePtr tvp = as->getTV(h);
-    //    output << "\"truthvalue\":" << tvToJSON(tvp);// << std::endl;
-    //    output << "}";
-    // tvToJSON
+
+    // @todo: move this into tvToJSON and fix pointer error encountered before
+    TruthValuePtr tvp = as->getTV(h);
+    //tvString = tvToJSON(tvp);
+    std::string tvString = "";
+
+    ptree ptTV;
+    switch (tvp->getType())
+    {
+        case SIMPLE_TRUTH_VALUE:
+            ptTV.put("type", "simple");
+            ptTV.put("details.strength", tvp->getMean());
+            ptTV.put("details.count", tvp->getCount());
+            ptTV.put("details.confidence", tvp->getConfidence());
+
+            break;
+
+        case COUNT_TRUTH_VALUE:
+            ptTV.put("type", "count");
+            ptTV.put("details.strength", tvp->getMean());
+            ptTV.put("details.count", tvp->getCount());
+            ptTV.put("details.confidence", tvp->getConfidence());
+            break;
+
+        case INDEFINITE_TRUTH_VALUE:
+            IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
+            ptTV.put("type", "indefinite");
+            ptTV.put("details.strength", itv->getMean());
+            ptTV.put("details.L", itv->getL());
+            ptTV.put("details.U", itv->getU());
+            ptTV.put("details.confidence", itv->getConfidenceLevel());
+            ptTV.put("details.diff", itv->getDiff());
+            ptTV.put("details.symmetric", itv->isSymmetric());
+            break;
+
+// @todo: Resolve 'jump to case label' error
+/*
+        case COMPOSITE_TRUTH_VALUE:
+            CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
+            ptTV.put("type", "composite");
+            // @todo: Move tvToJSON and call it on tvp->getPrimaryTV()
+            ptTV.put("details.primary", "");
+
+            // @todo: Move tvToJSON and call it here
+
+            //foreach(VersionHandle vh, ctv->vh_range()) {
+            //    ptTV.put("tv.details." + VersionHandle::indicatorToStr(vh.indicator), vh.substantive);
+            //    tvToJSON(ctv->getVersionedTV(vh));
+            }
+            break;
+*/
+    }
+
+    std::ostringstream bufTV;
+    write_json (bufTV, ptTV, false);
+    tvString = bufTV.str();
+
     // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL130
 
     // Incoming
-    std::string incomingString = "";
+    //std::string incomingString = "";
     // @TODO:
     // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL113
     //HandleSeq incoming = as->getIncoming(h);
     //copy(incoming.begin(), incoming.end(), ostream_iterator<Handle>(cout, " "));
     // From previous REST API:
-    /*
+
+
     HandleSeq incoming = as->getIncoming(h);
-    cout << "\"incoming\":[";
+    ptree ptIncoming;
+    cout << "\n\"incoming\":["; // @todo remove
     for (uint i = 0; i < incoming.size(); i++) {
-        if (i != 0) cout << ",";
-        cout << incoming[i].value();
+        if (i != 0) cout << ",";     // @todo remove
+        cout << incoming[i].value(); // @todo remove
+
+        // @todo check how to insert these values
+        // std::to_string(incoming[i].value())
     }
-    cout << "],"; // << std::endl;
-    */
+    // @todo remove
+    cout << "],\n"; // << std::endl;
+
 
     // Outgoing
-    std::string outgoingString = "";
+    //std::string outgoingString = "";
     // @TODO:
     // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL103
 
-    // Use Boost property maps for JSON serialization
+    // @todo why does this throw? the exception occurs at: line 443 of AtomTable.cc "Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)"
+    // And intermittently, it shows this error message:
+    // terminate called after throwing an instance of 'concurrent_queue<std::shared_ptr<opencog::ASRequest> >::Canceled'
+    // what():  std::exception
+
+    /*
+    HandleSeq outgoing = as->getOutgoing(h);
+    ptree ptOutgoing;
+
+    cout << "\n\"outgoing\":["; // @todo remove
+    for (uint i = 0; i < outgoing.size(); i++) {
+        if (i != 0) cout << ",";     // @todo remove
+        cout << outgoing[i].value(); // @todo remove
+
+        // @todo check how to insert these values
+        // std::to_string(outgoing[i].value())
+    }
+    // @todo remove
+    cout << "],\n"; // << std::endl;
+    */
+
+    // Use Boost property trees for JSON serialization
     ptree pt;
     pt.put("handle", handleString);
     pt.put("type", typeNameString);
@@ -181,13 +259,20 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     pt.put("av.lti", ltiString);
     pt.put("av.vlti", vltiString);
     pt.put("tv", tvString);
-    pt.put("incoming", incomingString);
-    pt.put("outgoing", outgoingString);
+    //pt.put_child("outgoing", ptOutgoing);//incomingString);
+    pt.put_child("incoming", ptIncoming);//outgoingString);
 
     std::ostringstream buf;
     write_json (buf, pt, false);
     std::string json = buf.str();
 
+    cout << json;
+
     return json;
 }
+/*
+std::string tvToJSON(TruthValuePtr tvp)
+{
+    // @todo
+}*/
 
