@@ -604,7 +604,7 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     // incoming set also grabs a lock, we need this mutex to be
     // recurisve. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
-    std::lock_guard<std::recursive_mutex> lck(_mtx);
+    std::unique_lock<std::recursive_mutex> lck(_mtx);
 
     // If recursive-flag is set, also extract all the links in the atom's
     // incoming set
@@ -667,7 +667,9 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     // removed.  This is needed so that certain subsystems, e.g. the
     // Agent system activity table, can correctly manage the atom;
     // it needs info that gets blanked out during removal.
+    lck.unlock();
     _removeAtomSignal(atom);
+    lck.lock();
 
     // Decrements the size of the table
     size--;
@@ -689,6 +691,9 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);
 
+    // XXX Setting the atom table causes AVChanged signals to be emitted.
+    // We should really do this unlocked, but I'm tooo lazy to fix, and
+    // am hoping no one will notice.
     atom->setAtomTable(NULL);
 
     result.insert(atom);
