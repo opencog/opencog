@@ -52,17 +52,21 @@ AtomTable::AtomTable()
 {
     size = 0;
 
-    // connect signal to find out about type additions
+    // Set resolver before doing anything else, such as getting
+    // the atom-added signals.  Just in case some other thread
+    // is busy adding types while we are being created.
+    Handle::set_resolver(this);
+
+    // Connect signal to find out about type additions
     addedTypeConnection =
         classserver().addTypeSignal().connect(
             boost::bind(&AtomTable::typeAdded, this, _1));
-
-    Handle::set_resolver(this);
 }
 
 AtomTable::~AtomTable()
 {
-    //disconnect signals
+    // Disconnect signals. Only then clear the resolver.
+    std::lock_guard<std::recursive_mutex> lck(_mtx);
     addedTypeConnection.disconnect();
     Handle::clear_resolver(this);
 
