@@ -309,32 +309,7 @@ class Chainer(AbstractChainer):
         for var in created_vars:
             self.atomspace.remove(var, recursive=True)
 
-        # handle rules that create their output in a custom way, not just using templates
-        if hasattr(rule, 'custom_compute'):
-            (specific_outputs, output_tvs) = rule.custom_compute(specific_inputs, specific_outputs)
-            if len(specific_outputs) == 0:
-                return None
-            if not self._validate(rule, specific_inputs, specific_outputs):
-                return None
-            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
-        elif hasattr(rule, 'temporal_compute'):
-            # All inputs ever, and then use the special temporal computation instead of revision.
-            past_input_tuples = self.history_index.lookup_all_applications(rule, specific_outputs)
-            all_input_tuples = [specific_inputs]+past_input_tuples
-
-            (specific_outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
-            if not self._validate(rule, specific_inputs, specific_outputs):
-                return None
-            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=False)
-        else:
-            if len(specific_outputs) == 0:
-                return None
-            if not self._validate(rule, specific_inputs, specific_outputs):
-                return None
-            output_tvs = rule.calculate(specific_inputs)
-            if output_tvs is None:
-                return None
-            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs, revise=True)
+        return self.apply_rule(rule, specific_inputs, specific_outputs)
 
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
@@ -434,21 +409,11 @@ class Chainer(AbstractChainer):
         if not found:
             return None
 
-        print rule, map(str,final_outputs), map(str,specific_inputs)
-
-        # Delete any variables
-
         # If it doesn't find suitable inputs, then it can still stimulate the atoms, but not assign a TruthValue
         # Stimulating the inputs makes it more likely to find them in future.
 
-        # some of the validations might not make sense for backward chaining
-        if not self._validate(rule, specific_inputs, final_outputs):
-            return None
-
         if self._all_nonzero_tvs(specific_inputs):
-            output_tvs = rule.calculate(specific_inputs)
-
-            return self._apply_rule(rule, specific_inputs, final_outputs, output_tvs)
+            return self.apply_rule(rule, specific_inputs, final_outputs)
         else:
             if self._stimulateAtoms:
 #                for atom in specific_outputs:
@@ -479,7 +444,33 @@ class Chainer(AbstractChainer):
 
     ### stuff used by both forward and backward chaining
 
+    def apply_rule(self, rule, inputs, outputs):
+        '''Called by both the backward and forward chainers. inputs and outputs are found generically for every rule, but some rules have special case code and will create their own outputs.'''
+        if hasattr(rule, 'custom_compute'):
+            (outputs, output_tvs) = rule.custom_compute(inputs, outputs)
+            if len(outputs) == 0:
+                return None
+            return self._apply_rule(rule, inputs, outputs, output_tvs, revise=True)
+        elif hasattr(rule, 'temporal_compute'):
+            # Lookup all inputs ever found by the chainer, and then use the special temporal computation instead of revision.
+            past_input_tuples = self.history_index.lookup_all_applications(rule, outputs)
+            all_input_tuples = [inputs]+past_input_tuples
+
+            (outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
+            return self._apply_rule(rule, inputs, outputs, output_tvs, revise=False)
+        else:
+            if len(outputs) == 0:
+                return None
+            output_tvs = rule.calculate(inputs)
+            if output_tvs is None:
+                return None
+            return self._apply_rule(rule, inputs, outputs, output_tvs, revise=True)
+
     def _apply_rule(self, rule, inputs, outputs, output_tvs, revise=True):
+        '''Helper for apply_rule'''
+        if not self._validate(rule, inputs, outputs):
+            return None
+
         if revise:
             assert isinstance(output_tvs, list)
 
@@ -510,6 +501,8 @@ class Chainer(AbstractChainer):
     ### automatically reject some inferences based on various problems
 
     def _validate(self, rule, inputs, outputs):
+        # some of the validations might not make sense for backward chaining
+
         print rule, map(str,inputs), map(str,outputs)
         # Sanity checks
         if not self.valid_structure(outputs[0]):
@@ -622,8 +615,8 @@ class Chainer(AbstractChainer):
         # Do a series of samples; different atoms with the same rules.
         import random; random.seed(0)
 
-        print 'Testing',rule
+        print 'Testing',rule,'in forward chainer'
 
         for i in xrange(0, sample_count):
-            self.forward_step(rule=rule)   
+            self.forward_step(rule=rule)
 
