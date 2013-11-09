@@ -620,3 +620,8 @@ class Chainer(AbstractChainer):
         for i in xrange(0, sample_count):
             self.forward_step(rule=rule)
 
+        print 'Testing',rule,'in backward chainer'
+
+        for i in xrange(0, sample_count):
+            self.backward_step(rule=rule)
+
