@@ -33,10 +33,13 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-    
+        self.name+= ' (' +self._get_type_names(inputs)+ ' -> '
+        self.name+= self._get_type_names(outputs)+')'
+
         print self.name
-        for atom in self._inputs + self._outputs:
-            assert atom.type != 65535 # missing type bug (cython issue?)
+
+    def _get_type_names(self, templates):
+        return ' '.join(template.type_name for template in templates)
 
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
