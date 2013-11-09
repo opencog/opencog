@@ -200,7 +200,7 @@ namespace opencog
             BlockVector getNearFreePointAtDistance( const BlockVector& position, int distance, const BlockVector& startDirection, bool toBeStandOn = true ) const;
 
             // check whether people can stand on this position or not, which means first there is not any obstacle or block here and there is a block under it.
-            bool checkStandable(BlockVector& pos) const;
+            bool checkStandable(const BlockVector &pos) const;
             bool checkStandable(int x, int y, int z) const;
 
             bool containsObject(const Handle objectNode) const;
@@ -284,6 +284,11 @@ namespace opencog
                                                                    string entityCName = "",
                                                                    string observerName = ""
                                                                    ) const;
+
+            std::set<SPATIAL_RELATION> computeSpatialRelations( const AxisAlignedBox& boundingboxA,
+                                                                const AxisAlignedBox& boundingboxB,
+                                                                const AxisAlignedBox& boundingboxC = AxisAlignedBox::ZERO,
+                                                                const Entity3D* observer = 0 ) const;
 
             /**
              * Return a string description of the relation

@@ -551,17 +551,13 @@ throw(opencog::NotFoundException)
     Handle predicateHandle = atomSpace.getHandle(PREDICATE_NODE,
                              predicateName);
     if (predicateHandle == Handle::UNDEFINED) {
-        throw opencog::NotFoundException( TRACE_INFO,
-                  (std::string("AtomSpaceUtil - Predicate not found: ")
-                   + predicateName ).c_str( ) );
+        return Handle::UNDEFINED;
     }
 
     // testing if there is a list link already
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
     if (listLinkHandle == Handle::UNDEFINED) {
-        throw opencog::NotFoundException( TRACE_INFO,
-                ( "AtomSpaceUtil - List link not found. "
-                  "predicateName[" + predicateName + "]").c_str( ) );
+        return Handle::UNDEFINED;
     }
 
     HandleSeq seq;

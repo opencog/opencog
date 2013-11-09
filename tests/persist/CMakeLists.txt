@@ -6,7 +6,7 @@ IF (ODBC_FOUND)
 ENDIF (ODBC_FOUND)
 
 # I can't get this stuff to work, and its obsolete anyway
-# IF (HAVE_EXPAT)
+# IF (HAVE_XML)
 #    ADD_SUBDIRECTORY (xml)
-# ENDIF (HAVE_EXPAT)
+# ENDIF (HAVE_XML)
 

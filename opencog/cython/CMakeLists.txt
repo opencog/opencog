@@ -14,74 +14,84 @@ INCLUDE_DIRECTORIES(
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
-# How to Cython the .pyx file
-add_custom_command(OUTPUT opencog/pymoses.cpp
-	COMMAND
-	${CYTHON_EXECUTABLE} -o opencog/pymoses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/pymoses.pyx"
-	DEPENDS "opencog/pymoses.pyx" "opencog/pymoses.pxd")
+IF (HAVE_ATOMSPACE)
+	# How to Cython the .pyx file
+	add_custom_command(OUTPUT opencog/atomspace.cpp
+		COMMAND
+		${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
+		DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace.pxd"  "opencog/atomspace_details.pyx" opencog_atom_types)
+ENDIF (HAVE_ATOMSPACE)
 
-add_custom_command(OUTPUT opencog/atomspace.cpp
-	COMMAND
-	${CYTHON_EXECUTABLE} -o opencog/atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/atomspace.pyx"
-	DEPENDS "opencog/atom.pyx" "opencog/classserver.pyx" "opencog/atomspace.pyx" "opencog/atomspace.pxd"  "opencog/atomspace_details.pyx" opencog_atom_types)
+IF (HAVE_SERVER)
+	add_custom_command(OUTPUT opencog/cogserver.cpp
+		COMMAND
+		${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
+		DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd" opencog_atom_types)
 
-add_custom_command(OUTPUT opencog/cogserver.cpp
-	COMMAND
-	${CYTHON_EXECUTABLE} -o opencog/cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/cogserver.pyx"
-	DEPENDS "opencog/cogserver.pyx" "opencog/request.pyx" "opencog/agent.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd" opencog_atom_types)
+	add_custom_command(OUTPUT opencog/util.cpp
+		COMMAND
+		${CYTHON_EXECUTABLE} -o opencog/util.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/util.pyx"
+		DEPENDS "opencog/util.pyx" "opencog/atomspace.pxd" opencog_atom_types)
 
-add_custom_command(OUTPUT opencog/util.cpp
-	COMMAND
-	${CYTHON_EXECUTABLE} -o opencog/util.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/util.pyx"
-	DEPENDS "opencog/util.pyx" "opencog/atomspace.pxd" opencog_atom_types)
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp"
+		"opencog/util.cpp")
 
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "opencog/cogserver.cpp" "opencog/atomspace.cpp"
-	"opencog/util.cpp")
+	add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
+		COMMAND
+		${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
+		DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
 
-add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
-	COMMAND
-	${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
-	DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
+	add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
+		COMMAND
+		${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
+		DEPENDS "opencog/atomspace.pxd" opencog_atom_types)
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
+ENDIF(HAVE_SERVER)
 
-add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
-	COMMAND
-	${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
-	DEPENDS "opencog/atomspace.pxd" opencog_atom_types)
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
+IF (HAVE_ATOMSPACE AND HAVE_GUILE)
+	add_custom_command(OUTPUT scheme_wrapper.cpp
+		COMMAND
+		${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
+		DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
+ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
-add_custom_command(OUTPUT scheme_wrapper.cpp
-	COMMAND
-	${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
-	DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
-list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
-# opencog.pymoses Python bindings
-ADD_LIBRARY(moses_cython SHARED
-	opencog/pymoses.cpp
-)
+IF (HAVE_MOSES)
+	add_custom_command(OUTPUT opencog/pymoses.cpp
+		COMMAND
+		${CYTHON_EXECUTABLE} -o opencog/pymoses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/opencog/pymoses.pyx"
+		DEPENDS "opencog/pymoses.pyx" "opencog/pymoses.pxd")
 
-TARGET_LINK_LIBRARIES(moses_cython
-	moses_exec
-	moses
-	cogutil
-	comboreduct
-	feature_selection
-	${Boost_PROGRAM_OPTIONS_LIBRARY}
-	${Boost_THREAD_LIBRARY}
-)
-
-IF (HAVE_MPI)
-	TARGET_LINK_LIBRARIES (moses_cython
-		# These two work for both MPICH2 and OpenMPI, for me.
-		${MPI_LIBRARY}
-		${MPI_EXTRA_LIBRARY}
+	# opencog.pymoses Python bindings
+	ADD_LIBRARY(moses_cython SHARED
+		opencog/pymoses.cpp
 	)
-ENDIF (HAVE_MPI)
 
-SET_TARGET_PROPERTIES(moses_cython PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME opencog/pymoses)
+	TARGET_LINK_LIBRARIES(moses_cython
+		moses_exec
+		moses
+		cogutil
+		comboreduct
+		feature_selection
+		${Boost_PROGRAM_OPTIONS_LIBRARY}
+		${Boost_THREAD_LIBRARY}
+	)
+
+	IF (HAVE_MPI)
+		TARGET_LINK_LIBRARIES (moses_cython
+			# These two work for both MPICH2 and OpenMPI, for me.
+			${MPI_LIBRARY}
+			${MPI_EXTRA_LIBRARY}
+		)
+	ENDIF (HAVE_MPI)
+
+	SET_TARGET_PROPERTIES(moses_cython PROPERTIES
+		PREFIX ""
+		OUTPUT_NAME opencog/pymoses)
+
+ENDIF (HAVE_MOSES)
 
 # opencog.atomspace Python bindings
 ADD_LIBRARY(atomspace_cython SHARED

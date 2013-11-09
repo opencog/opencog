@@ -141,7 +141,7 @@ def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
     return result
 
 
-def test(event_1, event_2, prec=0.25, size=10000):
+def test(event_1, event_2, prec=0.25, size=100000):
     import matplotlib.pyplot as plt
 
     times_overlapped = float(0)
@@ -181,11 +181,15 @@ if __name__ == '__main__':
     prec = 0.25
 
     for event_1, event_2 in [
-        #(
-        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
-        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
-        #),
+        (
+            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+            TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
+        ),
+
+        (
+            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=6, scale=4)),
+            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=13, scale=4))
+        ),
 
         (
             TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
@@ -205,7 +209,13 @@ if __name__ == '__main__':
         (
             TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
             TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
-        )
+        ),
+
+        (
+            TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+            TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+                                         {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+        ),
     ]:
         #plt = event_1.distribution_ending.plot()
         #plt.ylim(ymin=-0, ymax=0.6)
@@ -232,7 +242,4 @@ if __name__ == '__main__':
         fn.integral(*after)
         fn.plot()
         test(event_1, event_2, prec)
-
-        #print event_1.distribution_ending.mean(), event_2.distribution_beginning.mean()
-
         plt.show()
