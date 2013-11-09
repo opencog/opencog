@@ -29,6 +29,10 @@ class BooleanLinkCreationRule(rules.Rule):
     def custom_compute(self, inputs, outputs):
         # the output may have a hierarchy of links, but we should flatten it (this means PLN can incrementally create bigger boolean links)
         output_tvs = self.calculate(inputs)
+        if output_tvs is None:
+            # Formula created invalid TV
+            return ([], [])
+
         actual_output = simplify_boolean(self._chainer, outputs[0])
 
         return ([actual_output], output_tvs)
@@ -37,6 +41,7 @@ class NotCreationRule(BooleanLinkCreationRule):
     '''A => NotLink(A)'''
     def __init__(self, chainer):
         A = chainer.new_variable()
+        self._chainer = chainer
 
         rules.Rule.__init__(self,
             formula= formulas.notFormula,
