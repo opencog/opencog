@@ -3,6 +3,7 @@ __author__ = 'jade'
 from pln.rules.rules import Rule
 from pln.logic import Logic
 from pln.formulas import revisionFormula
+from pln.rules import rules
 
 from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 
@@ -117,6 +118,7 @@ class AbstractChainer(Logic):
             else:
                 return sti
 
+        # never used mixed_score to choose backward chaining targets (it requires an atom to already have better than 0,0 TV)
         def mixed_score(atom):
             s = int(100*sti_score(atom) + 100*atom.tv.mean + 100*atom.tv.confidence)
             if s < 1:
@@ -124,8 +126,8 @@ class AbstractChainer(Logic):
             else:
                 return s
 
-        #score = sti_score
-        score = mixed_score
+        score = sti_score
+        #score = mixed_score
 
         assert type(atoms[0]) == Atom
 
@@ -166,12 +168,19 @@ class AbstractChainer(Logic):
 #            return not_self_link
         if atom.arity == 2:
             # heuristically assume that all selflinks are invalid!
-            not_self_link = atom.out[0] != atom.out[1]
-            return not_self_link
-        elif atom.type in [types.AndLink, types.OrLink, types.NotLink]:
+            self_link = atom.out[0] == atom.out[1]
+            # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
+            both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
+            return not self_link and not both_variables
+        elif atom.type in rules.BOOLEAN_LINKS:
             # see if it has semantically sensible arguments (e.g you don't want MemberLinks inside AndLinks)
-            suitable = all(arg.is_a(types.Node) or arg.is_a(types.EvaluationLink) for arg in atom.out)
+            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.EvaluationLink) for arg in atom.out)
             return suitable
+        elif atom.type in rules.FIRST_ORDER_LINKS:
+            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.ObjectNode) or arg.type in rules.BOOLEAN_LINKS)
+            return suitable
+        elif atom.type in rules.HIGHER_ORDER_LINKS:
+            suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
         else:
             return True
 
@@ -372,36 +381,60 @@ class Chainer(AbstractChainer):
 
         # choose outputs if needed, and then choose some inputs to apply this rule with.
 
-        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
-        specific_outputs = []
-        subst = {}
+        '''
+        GENERALLY-ish
+        get a target to constrain the inputs
+        get the inputs
+        refill the target, based on extra constraints in the input
 
-        print (generic_inputs, generic_outputs, created_vars)
+        EXAMPLE
+        Inh cat breathe
+        DeductionRule finds these target inputs
+        Inh cat ?
+        Inh ? breathe
+
+        suppose we can prove Inh cat animal, Inh animal breathe
+
+        Inh cat ?
+        invert animal->cat
+
+        Inh cat ?
+        InversionRule
+        Inh ? cat
+        match to Inh animal cat
+        rewrite target Inh cat animal
+
+        '''
+
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
+        subst = {}
+        print (generic_inputs, generic_outputs)
 
         if target_outputs is None:
-            subst = self._choose_outputs(specific_outputs, generic_outputs, subst)
+            # This variable isn't really used; now we just use the substitution instead
+            initial_outputs = []
+            subst = self._choose_outputs(initial_outputs, generic_outputs, subst)
         else:
-            specific_outputs = target_outputs
             for (template, atom) in zip(generic_outputs, target_outputs):
                 subst = self.unify(template, atom, subst)
-
-        print specific_outputs
 
         if not subst:
             self.delete_queries(created_vars, subst)
             return None
 
         specific_inputs = []
-        subst = self._choose_inputs(specific_inputs, generic_outputs, subst, allow_zero_tv = True)
+        subst = self._choose_inputs(specific_inputs, generic_inputs, subst, allow_zero_tv = True)
         found = len(subst) > 0
 
         print specific_inputs
+
+        final_outputs = self.substitute_list(subst, generic_outputs)
 
         self.delete_queries(created_vars, subst)
         if not found:
             return None
 
-        print rule, map(str,specific_outputs), map(str,specific_inputs)
+        print rule, map(str,final_outputs), map(str,specific_inputs)
 
         # Delete any variables
 
@@ -409,20 +442,20 @@ class Chainer(AbstractChainer):
         # Stimulating the inputs makes it more likely to find them in future.
 
         # some of the validations might not make sense for backward chaining
-        if not self._validate(rule, specific_inputs, specific_outputs):
+        if not self._validate(rule, specific_inputs, final_outputs):
             return None
 
         if self._all_nonzero_tvs(specific_inputs):
             output_tvs = rule.calculate(specific_inputs)
 
-            return self._apply_rule(rule, specific_inputs, specific_outputs, output_tvs)
+            return self._apply_rule(rule, specific_inputs, final_outputs, output_tvs)
         else:
             if self._stimulateAtoms:
 #                for atom in specific_outputs:
 #                    self._give_stimulus(atom)
                 for atom in specific_inputs:
                     self._give_stimulus(atom)
-            return (specific_outputs, specific_inputs)
+            return (rule, specific_inputs, final_outputs)
 
     def _choose_outputs(self, return_outputs, output_templates, subst_so_far):
 
