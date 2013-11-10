@@ -1,20 +1,223 @@
-from math import fabs
+from math import fabs, acos
 from numpy import convolve
+from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.stats.distributions import uniform_gen
 from spatiotemporal.temporal_events.trapezium_formulas import function_convolution_uniform
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
-from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear
+from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral
 
 __author__ = 'keyvan'
+
+# Benvolution ------------------------------------------
+
+
+def fn_before_point(dist, time_step):
+    a, b = calculate_bounds_of_probability_distribution(dist)
+    p = dist.pdf(a)
+    if time_step < a:
+        return 1
+    if a <= time_step <= b:
+        value = p * (b - time_step) - p * (time_step - a)
+        if value < 0:
+            return 0
+        return value
+    return 0
+    #return integral(dist.pdf, time_step, b) - integral(dist.pdf, a, time_step)
+
+
+def fn_before(dist_1, dist_2):
+    return fn_after(dist_2, dist_1)
+
+
+def fn_after(dist_1, dist_2):
+    a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
+    a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
+    return integral(lambda z: dist_2.pdf(z) * fn_before_point(dist_1, z), min(a1, a2), max(b1, b2))
+    #return fn_before(dist_2, dist_1)
+
+
+def fn_same(dist_1, dist_2):
+    return 1 - fabs(fn_after(dist_1, dist_2) - fn_before(dist_1, dist_2))
+
+
+def ben(temporal_event_1, temporal_event_2):
+    beginning_a = temporal_event_1.distribution_beginning
+    ending_a = temporal_event_1.distribution_ending
+    beginning_b = temporal_event_2.distribution_beginning
+    ending_b = temporal_event_2.distribution_ending
+
+    beginning_a_beginning_b = 'beg_a_beg_b'
+    beginning_a_ending_b = 'beg_a_end_b'
+    ending_a_beginning_b = 'end_a_beg_b'
+    ending_a_ending_b = 'end_a_end_b'
+
+    asd = fn_before(beginning_a, ending_b)
+
+    benvolutions = {
+        beginning_a_beginning_b: (
+            fn_before(beginning_a, beginning_b),
+            fn_same(beginning_a, beginning_b),
+            fn_after(beginning_a, beginning_b)
+        ),
+        beginning_a_ending_b: (
+            fn_before(beginning_a, ending_b),
+            fn_same(beginning_a, ending_b),
+            fn_after(beginning_a, ending_b)
+        ),
+        ending_a_beginning_b: (
+            fn_before(ending_a, beginning_b),
+            fn_same(ending_a, beginning_b),
+            fn_after(ending_a, beginning_b)
+        ),
+        ending_a_ending_b: (
+            fn_before(ending_a, ending_b),
+            fn_same(ending_a, ending_b),
+            fn_after(ending_a, ending_b)
+        ),
+    }
+
+    before = 0
+    same = 1
+    after = 2
+
+    return {
+        'p':
+            benvolutions[beginning_a_beginning_b][before] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][before] * benvolutions[ending_a_ending_b][before],
+
+        'm':
+            benvolutions[beginning_a_beginning_b][before] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][same] * benvolutions[ending_a_ending_b][before],
+
+        'o':
+            benvolutions[beginning_a_beginning_b][before] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][before],
+
+        'F':
+            benvolutions[beginning_a_beginning_b][before] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][same],
+
+        'D':
+            benvolutions[beginning_a_beginning_b][before] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][after],
+
+        's':
+            benvolutions[beginning_a_beginning_b][same] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][before],
+
+        'e':
+            benvolutions[beginning_a_beginning_b][same] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][same],
+
+        'S':
+            benvolutions[beginning_a_beginning_b][same] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][after],
+
+        'd':
+            benvolutions[beginning_a_beginning_b][after] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][before],
+
+        'f':
+            benvolutions[beginning_a_beginning_b][after] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][same],
+
+        'O':
+            benvolutions[beginning_a_beginning_b][after] * benvolutions[beginning_a_ending_b][before] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][after],
+
+        'M':
+            benvolutions[beginning_a_beginning_b][after] * benvolutions[beginning_a_ending_b][same] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][after],
+
+        'P':
+            benvolutions[beginning_a_beginning_b][after] * benvolutions[beginning_a_ending_b][after] *
+            benvolutions[ending_a_beginning_b][after] * benvolutions[ending_a_ending_b][after],
+    }
+
+# --------------------------------------------------------
+
+
+class BaseTemporalFormula(object):
+    before = None
+    same = None
+    after = None
+
+
+class FormulaCreator(object):
+    def __init__(self, temporal_formula):
+        if not isinstance(temporal_formula, BaseTemporalFormula):
+            raise TypeError("'temporal_formula' should be an instance of BaseTemporalFormula")
+
+        self.before = temporal_formula.before
+        self.same = temporal_formula.same
+        self.after = temporal_formula.after
+
+    def temporal_relations_between(self, temporal_event_1, temporal_event_2):
+        beginning_a, ending_a = temporal_event_1.distribution_beginning, temporal_event_1.distribution_ending
+        beginning_b, ending_b = temporal_event_2.distribution_beginning, temporal_event_2.distribution_ending
+
+        return {
+            'p':
+                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.before(ending_a, beginning_b) * self.before(ending_a, ending_b),
+
+            'm':
+                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.same(ending_a, beginning_b) * self.before(ending_a, ending_b),
+
+            'o':
+                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+
+            'F':
+                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+
+            'D':
+                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+            's':
+                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+
+            'e':
+                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+
+            'S':
+                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+            'd':
+                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+
+            'f':
+                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+
+            'O':
+                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+            'M':
+                self.after(beginning_a, beginning_b) * self.same(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+            'P':
+                self.after(beginning_a, beginning_b) * self.after(beginning_a, ending_b) *
+                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        }
 
 
 def function_convolution_generic(dist_1, dist_2, bins=50):
     a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
     a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
 
-    if (type(dist_1.dist), type(dist_2.dist)) is (uniform_gen, uniform_gen):
+    if (type(dist_1.dist), type(dist_2.dist)) == (uniform_gen, uniform_gen):
         return function_convolution_uniform((a1, b1), (a2, b2))
 
     convolution_bounds_a, convolution_bounds_b = min(a1, a2), max(b1, b2)
@@ -37,111 +240,37 @@ def function_convolution_generic(dist_1, dist_2, bins=50):
     return convolution_function.normalised()
 
 
-def temporal_relations_between(temporal_event_1, temporal_event_2, prec):
-    beginning_a_beginning_b = temporal_event_1.distribution_beginning, temporal_event_2.distribution_ending
-    beginning_a_ending_b = temporal_event_1.distribution_beginning, temporal_event_2.distribution_ending
-    ending_a_beginning_b = temporal_event_1.distribution_ending, temporal_event_2.distribution_beginning
-    ending_a_ending_b = temporal_event_1.distribution_ending, temporal_event_2.distribution_ending
+class TemporalFormulaConvolution(BaseTemporalFormula):
+    def __init__(self):
+        self.convolutions = {}
+        self.integrals = {}
 
-    function_beginning_a_beginning_b = function_convolution_generic(*beginning_a_beginning_b)
-    function_beginning_a_ending_b = function_convolution_generic(*beginning_a_ending_b)
-    function_ending_a_beginning_b = function_convolution_generic(*ending_a_beginning_b)
-    function_ending_a_ending_b = function_convolution_generic(*ending_a_ending_b)
+    def before(self, dist_1, dist_2):
+        if (dist_1, dist_2) in self.integrals:
+            return self.integrals[(dist_1, dist_2)]
 
-    before = NEGATIVE_INFINITY, -prec
-    same = -prec, prec
-    after = prec, POSITIVE_INFINITY
+        if (dist_1, dist_2) in self.convolutions:
+            convolution = self.convolutions[(dist_1, dist_2)]
+        else:
+            convolution = function_convolution_generic(dist_1, dist_2)
+            self.convolutions[(dist_1, dist_2)] = convolution
 
-    convolutions = {
-        beginning_a_beginning_b: (
-            function_beginning_a_beginning_b.integral(*before),
-            function_beginning_a_beginning_b.integral(*same),
-            function_beginning_a_beginning_b.integral(*after)
-        ),
-        beginning_a_ending_b: (
-            function_beginning_a_ending_b.integral(*before),
-            function_beginning_a_ending_b.integral(*same),
-            function_beginning_a_ending_b.integral(*after)
-        ),
-        ending_a_beginning_b: (
-            function_ending_a_beginning_b.integral(*before),
-            function_ending_a_beginning_b.integral(*same),
-            function_ending_a_beginning_b.integral(*after)
-        ),
-        ending_a_ending_b: (
-            function_ending_a_ending_b.integral(*before),
-            function_ending_a_ending_b.integral(*same),
-            function_ending_a_ending_b.integral(*after)
-        ),
-    }
+        result = integral(convolution, NEGATIVE_INFINITY, 0)
+        self.integrals[(dist_1, dist_2)] = result
 
-    before = 0
-    same = 1
-    after = 2
+        return result
 
-    result = {
-        'p':
-        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][before] * convolutions[ending_a_ending_b][before],
+    def after(self, dist_1, dist_2):
+        return self.before(dist_2, dist_1)
 
-        'm':
-        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][same] * convolutions[ending_a_ending_b][before],
-
-        'o':
-        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
-
-        'F':
-        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
-
-        'D':
-        convolutions[beginning_a_beginning_b][before] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
-
-        's':
-        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
-
-        'e':
-        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
-
-        'S':
-        convolutions[beginning_a_beginning_b][same] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
-
-        'd':
-        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][before],
-
-        'f':
-        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][same],
-
-        'O':
-        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][before] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
-
-        'M':
-        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][same] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
-
-        'P':
-        convolutions[beginning_a_beginning_b][after] * convolutions[beginning_a_ending_b][after] *
-        convolutions[ending_a_beginning_b][after] * convolutions[ending_a_ending_b][after],
-    }
-
-    # Adjusting the integral error
-    summed_up = sum(result.values())
-    print summed_up
-    for predicate in result:
-        result[predicate] /= summed_up
-    return result
+    def same(self, dist_1, dist_2):
+        result = 1 - fabs(self.after(dist_1, dist_2) - self.before(dist_1, dist_2))
+        if result < 0:
+            return 0
+        return result
 
 
-def test(event_1, event_2, prec=0.25, size=100000):
+def test(event_1, event_2, prec=0.25, size=10000):
     import matplotlib.pyplot as plt
 
     times_overlapped = float(0)
@@ -152,7 +281,7 @@ def test(event_1, event_2, prec=0.25, size=100000):
     for i in xrange(size):
         instance_1 = event_1.instance()
         instance_2 = event_2.instance()
-        d = instance_1.b - instance_2.a
+        d = instance_1.a - instance_2.a
 
         if fabs(d) <= prec:
             times_met += 1
@@ -175,12 +304,14 @@ def test(event_1, event_2, prec=0.25, size=100000):
 if __name__ == '__main__':
     from scipy.stats import norm, uniform, expon
     from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
-    from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
     import matplotlib.pyplot as plt
 
-    prec = 0.25
-
     for event_1, event_2 in [
+        (
+            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
+            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
+        ),
+
         (
             TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
             TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
@@ -197,8 +328,8 @@ if __name__ == '__main__':
         ),
 
         (
-            TemporalEvent(uniform(loc=4, scale=1), uniform(loc=10, scale=2)),
-            TemporalEvent(uniform(loc=2, scale=4), uniform(loc=7, scale=7))
+            TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
+            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
         ),
 
         (
@@ -217,29 +348,22 @@ if __name__ == '__main__':
                                          {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
         ),
     ]:
-        #plt = event_1.distribution_ending.plot()
-        #plt.ylim(ymin=-0, ymax=0.6)
-        #plt.show()
-        #break
+        tfc = TemporalFormulaConvolution()
+        fc = FormulaCreator(tfc)
 
-        relations = temporal_relations_between(event_1, event_2, prec)
-        for predicate in 'PMOfdSesDFomp':
-            if predicate == 'o':
-                print '-------------------------'
-            print predicate, ':', relations[predicate]
-            if predicate == 'p':
-                print '-------------------------'
+        temporal_relations = fc.temporal_relations_between(event_1, event_2)
+
+        print '----------------------'
+        print sum(temporal_relations.values())
+        for p in 'pmoFDseSdfOMP':
+            print p, temporal_relations[p]
+
+        same = tfc.same(event_1.distribution_beginning, event_2.distribution_beginning)
+        print same == 0.0
+        print 0 * tfc.before(
+            event_1.distribution_beginning, event_2.distribution_ending) * tfc.after(
+            event_1.distribution_ending, event_2.distribution_beginning) * tfc.before(
+            event_1.distribution_ending, event_2.distribution_ending)
 
         event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-        plt = event_2.plot()
-        plt.figure()
-        fn = function_convolution_generic(event_1.distribution_ending, event_2.distribution_beginning)
-        before = NEGATIVE_INFINITY, -prec
-        same = -prec, prec
-        after = prec, POSITIVE_INFINITY
-        fn.integral(*before),
-        fn.integral(*same),
-        fn.integral(*after)
-        fn.plot()
-        test(event_1, event_2, prec)
-        plt.show()
+        event_2.plot().show()
