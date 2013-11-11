@@ -3165,7 +3165,7 @@ void OCPlanner::loadTestRulesFromCodes()
     walkclosedRule->addCostHeuristic(CostHeuristic(closedState8, 0.01f));
 
     BestNumericVariableInqueryStruct bs2;
-    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentAccessPosition;
     bs2.goalState = adjacentState0;
     walkclosedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(nearby_pos), bs2));
 
@@ -3290,7 +3290,7 @@ void OCPlanner::loadTestRulesFromCodes()
     accessAdjacentRule->addEffect(EffectPair(0.7f,becomeExistPathEffect));
 
     BestNumericVariableInqueryStruct bs0;
-    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentAccessPosition;
     bs0.goalState = existPathState3;
     accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_to), bs0));
 
@@ -3333,7 +3333,7 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryBestAccessiblePosition;
     bs.goalState = existPathState6;
     pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_2), bs));
 
