@@ -7,6 +7,10 @@ import math
 '''Some Rules evaluate various kinds of logical links based explicitly on set membership. A set = a ConceptNode.
 Other Rules calculate them heuristically, based on set probabilities and logical links.'''
 
+BOOLEAN_LINKS = [types.AndLink, types.OrLink, types.NotLink]
+FIRST_ORDER_LINKS = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+HIGHER_ORDER_LINKS = [types.ImplicationLink, types.EquivalenceLink]
+
 class Rule(object):
 
     def __init__ (self, outputs, inputs, formula):
@@ -29,10 +33,13 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-    
+        self.name+= ' (' +self._get_type_names(inputs)+ ' -> '
+        self.name+= self._get_type_names(outputs)+')'
+
         print self.name
-        for atom in self._inputs + self._outputs:
-            assert atom.type != 65535 # missing type bug (cython issue?)
+
+    def _get_type_names(self, templates):
+        return ' '.join(template.type_name for template in templates)
 
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
@@ -299,7 +306,7 @@ class EvaluationToMemberRule(Rule):
                       inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
 
@@ -344,7 +351,7 @@ sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
                       inputs=  [chainer.link(types.EvaluationLink, [pred, list_link])],
                       outputs= [])
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, list_link] = eval_link.out
 
@@ -383,7 +390,7 @@ $x where (AtTimeLink ? EvaluationLink near jade $x)
                       inputs=  [at_time],
                       outputs= [])
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [at_time] = inputs
         [time, eval_link] = at_time.out
         [predicate, list_link] = eval_link.out
@@ -422,7 +429,7 @@ class MemberToInheritanceRule(LinkToLinkRule):
             formula= None)
         self.chainer=chainer
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [mem_link] = inputs
         [object, superset] = mem_link.out
 
