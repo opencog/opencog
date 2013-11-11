@@ -97,7 +97,6 @@ void AtomSpacePublisherModule::handleAddSignal(Handle h)
     std::string payload = atomToJSON(h);
     s_sendmore (*publisher, "add");
     s_send (*publisher, payload);
-    cout << payload;
 }
 
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
@@ -140,14 +139,7 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string vltiString = std::to_string(av->getVLTI());
 
     // TruthValue
-    // @TODO: refer to this previous code:
-    // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL123
-
-    // @todo: move this into tvToJSON and fix pointer error encountered before
     TruthValuePtr tvp = as->getTV(h);
-    //tvString = tvToJSON(tvp);
-    std::string tvString = "";
-
     ptree ptTV;
     switch (tvp->getType())
     {
@@ -177,16 +169,13 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
             ptTV.put("details.symmetric", itv->isSymmetric());
             break;
 
-// @todo: Resolve 'jump to case label' error
+// To do: CompositeTruthValue
 /*
         case COMPOSITE_TRUTH_VALUE:
             CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
             ptTV.put("type", "composite");
             // @todo: Move tvToJSON and call it on tvp->getPrimaryTV()
             ptTV.put("details.primary", "");
-
-            // @todo: Move tvToJSON and call it here
-
             //foreach(VersionHandle vh, ctv->vh_range()) {
             //    ptTV.put("tv.details." + VersionHandle::indicatorToStr(vh.indicator), vh.substantive);
             //    tvToJSON(ctv->getVersionedTV(vh));
@@ -195,11 +184,7 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
 */
     }
 
-    std::ostringstream bufTV;
-    write_json (bufTV, ptTV, false);
-    tvString = bufTV.str();
-
-    // Incoming
+    // Incoming set
     HandleSeq incoming = as->getIncoming(h);
     ptree ptIncoming;
     for (uint i = 0; i < incoming.size(); i++) {
@@ -208,10 +193,9 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
         ptIncoming.push_back(std::make_pair("", ptElement));
     }
 
-    // Outgoing
+    // Outgoing set
     HandleSeq outgoing = as->getOutgoing(h);
     ptree ptOutgoing;
-
     for (uint i = 0; i < outgoing.size(); i++) {
         ptree ptElement;
         ptElement.put("", std::to_string(outgoing[i].value()));
@@ -236,10 +220,3 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
 
     return json;
 }
-
-/*
-std::string tvToJSON(TruthValuePtr tvp)
-{
-    // @todo
-}*/
-

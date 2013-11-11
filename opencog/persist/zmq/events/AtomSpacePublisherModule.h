@@ -76,7 +76,6 @@ class AtomSpacePublisherModule : public Module
         void InitZeroMQ();
 
         std::string atomToJSON(Handle h);
-        std::string tvToJSON(TruthValuePtr& tvp);
 
     public:
         AtomSpacePublisherModule(CogServer&);
