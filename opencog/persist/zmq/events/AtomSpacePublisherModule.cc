@@ -199,56 +199,24 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     write_json (bufTV, ptTV, false);
     tvString = bufTV.str();
 
-    // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL130
-
     // Incoming
-    //std::string incomingString = "";
-    // @TODO:
-    // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL113
-    //HandleSeq incoming = as->getIncoming(h);
-    //copy(incoming.begin(), incoming.end(), ostream_iterator<Handle>(cout, " "));
-    // From previous REST API:
-
-
     HandleSeq incoming = as->getIncoming(h);
     ptree ptIncoming;
-    cout << "\n\"incoming\":["; // @todo remove
     for (uint i = 0; i < incoming.size(); i++) {
-        if (i != 0) cout << ",";     // @todo remove
-        cout << incoming[i].value(); // @todo remove
-
-        // @todo check how to insert these values
-        // std::to_string(incoming[i].value())
+        ptree ptElement;
+        ptElement.put("", std::to_string(incoming[i].value()));
+        ptIncoming.push_back(std::make_pair("", ptElement));
     }
-    // @todo remove
-    cout << "],\n"; // << std::endl;
-
 
     // Outgoing
-    //std::string outgoingString = "";
-    // @TODO:
-    // https://github.com/opencog/opencog/pull/346/files#diff-01b35cec300185bd9a43ee545e50566bL103
-
-    // @todo why does this throw? the exception occurs at: line 443 of AtomTable.cc "Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)"
-    // And intermittently, it shows this error message:
-    // terminate called after throwing an instance of 'concurrent_queue<std::shared_ptr<opencog::ASRequest> >::Canceled'
-    // what():  std::exception
-
-    /*
     HandleSeq outgoing = as->getOutgoing(h);
     ptree ptOutgoing;
 
-    cout << "\n\"outgoing\":["; // @todo remove
     for (uint i = 0; i < outgoing.size(); i++) {
-        if (i != 0) cout << ",";     // @todo remove
-        cout << outgoing[i].value(); // @todo remove
-
-        // @todo check how to insert these values
-        // std::to_string(outgoing[i].value())
+        ptree ptElement;
+        ptElement.put("", std::to_string(outgoing[i].value()));
+        ptOutgoing.push_back(std::make_pair("", ptElement));
     }
-    // @todo remove
-    cout << "],\n"; // << std::endl;
-    */
 
     // Use Boost property trees for JSON serialization
     ptree pt;
@@ -258,18 +226,17 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     pt.put("av.sti", stiString);
     pt.put("av.lti", ltiString);
     pt.put("av.vlti", vltiString);
-    pt.put("tv", tvString);
-    //pt.put_child("outgoing", ptOutgoing);//incomingString);
-    pt.put_child("incoming", ptIncoming);//outgoingString);
+    pt.add_child("tv", ptTV);
+    pt.add_child("outgoing", ptOutgoing);
+    pt.add_child("incoming", ptIncoming);
 
     std::ostringstream buf;
-    write_json (buf, pt, false);
+    write_json (buf, pt, true);
     std::string json = buf.str();
-
-    cout << json;
 
     return json;
 }
+
 /*
 std::string tvToJSON(TruthValuePtr tvp)
 {
