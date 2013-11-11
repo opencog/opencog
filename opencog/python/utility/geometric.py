@@ -300,4 +300,3 @@ if __name__ == '__main__':
     #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
     #print (a(-0.25) + a(0.25))/4
     #print a(0.25) * 2.75 / 2
-
