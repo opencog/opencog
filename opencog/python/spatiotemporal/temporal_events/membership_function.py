@@ -44,8 +44,8 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             #    x_0=a, y_0=pdf_y_intercept - pdf_y_intercept / 2.0,
             #    x_1=b, y_1=pdf_y_intercept + pdf_y_intercept / 2.0)
 
-        self.pdf = FunctionComposite(dictionary_bounds_function,
-                                     function_undefined=FUNCTION_ZERO, domain=self)
+        self.pdf = FunctionComposite(dictionary_bounds_function, function_undefined=FUNCTION_ZERO, domain=self,
+                                     is_normalised=True)
 
         self.roulette_wheel = []
         #center_of_mass_lower_bound = 0

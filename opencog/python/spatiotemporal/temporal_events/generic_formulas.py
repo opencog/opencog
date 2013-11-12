@@ -140,9 +140,17 @@ def ben(temporal_event_1, temporal_event_2):
 
 
 class BaseTemporalFormula(object):
-    before = None
-    same = None
-    after = None
+    def before(self, dist_1, dist_2):
+        return 0.0
+
+    def after(self, dist_1, dist_2):
+        return 1.0 - self.before(dist_1, dist_2)
+
+    def same(self, dist_1, dist_2):
+        result = 1.0 - fabs(self.after(dist_1, dist_2) - self.before(dist_1, dist_2))
+        if result < 0:
+            return 0
+        return result
 
 
 class FormulaCreator(object):
@@ -260,15 +268,6 @@ class TemporalFormulaConvolution(BaseTemporalFormula):
 
         return result
 
-    def after(self, dist_1, dist_2):
-        return self.before(dist_2, dist_1)
-
-    def same(self, dist_1, dist_2):
-        result = 1 - fabs(self.after(dist_1, dist_2) - self.before(dist_1, dist_2))
-        if result < 0:
-            return 0
-        return result
-
 
 def test(event_1, event_2, prec=0.25, size=10000):
     import matplotlib.pyplot as plt
@@ -306,7 +305,30 @@ if __name__ == '__main__':
     from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
     import matplotlib.pyplot as plt
 
+    figure_number = 1
     for event_1, event_2 in [
+        #(
+        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
+        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
+        #),
+        #
+        #(
+        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
+        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
+        #),
+        #
+        #(
+        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
+        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
+        #),
+        #
+        #(
+        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
+        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
+        #),
+
+
+
         (
             TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
             TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
@@ -353,17 +375,25 @@ if __name__ == '__main__':
 
         temporal_relations = fc.temporal_relations_between(event_1, event_2)
 
+        print '\nFigure' + str(figure_number)
         print '----------------------'
-        print sum(temporal_relations.values())
+        #print sum(temporal_relations.values())
         for p in 'pmoFDseSdfOMP':
             print p, temporal_relations[p]
 
-        same = tfc.same(event_1.distribution_beginning, event_2.distribution_beginning)
-        print same == 0.0
-        print 0 * tfc.before(
-            event_1.distribution_beginning, event_2.distribution_ending) * tfc.after(
-            event_1.distribution_ending, event_2.distribution_beginning) * tfc.before(
-            event_1.distribution_ending, event_2.distribution_ending)
+        figure_number += 1
+
+        #self = fc
+        #beginning_a = event_1.distribution_beginning
+        #ending_a = event_1.distribution_ending
+        #beginning_b = event_2.distribution_beginning
+        #ending_b = event_2.distribution_ending
+        #
+        #print self.after(beginning_a, beginning_b)
+        #print self.before(beginning_a, ending_b)
+        #print self.after(ending_a, beginning_b)
+        #print self.after(ending_a, ending_b)
 
         event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-        event_2.plot().show()
+        event_2.plot().figure()
+    plt.show()
