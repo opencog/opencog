@@ -602,7 +602,7 @@ class Chainer(AbstractChainer):
 
     def lookup_rule(self, rule_name):
         for rule in self.rules:
-            if rule.name == rule_name:
+            if rule.name == rule_name or rule.full_name == rule_name:
                 return rule
 
         raise ValueError("lookup_rule: rule doesn't exist "+rule_name)

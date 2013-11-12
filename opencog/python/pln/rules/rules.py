@@ -33,10 +33,10 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-        self.name+= ' (' +self._get_type_names(inputs)+ ' -> '
-        self.name+= self._get_type_names(outputs)+')'
+        self.full_name=self.name+ ' (' +self._get_type_names(inputs)+ ' -> '
+        self.full_name+= self._get_type_names(outputs)+')'
 
-        print self.name
+        print self.full_name
 
     def _get_type_names(self, templates):
         return ' '.join(template.type_name for template in templates)

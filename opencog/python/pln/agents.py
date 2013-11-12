@@ -49,8 +49,9 @@ class ForwardInferenceAgent(MindAgent):
         #self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
-        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
-        for rule in rules.create_general_evaluation_to_member_rules(self.chainer):
+        self.member_rules = [rules.EvaluationToMemberRule(self.chainer)]
+        self.member_rules += rules.create_general_evaluation_to_member_rules(self.chainer)
+        for rule in self.member_rules:
             self.chainer.add_rule(rule)
 
         # It's important to have both of these
@@ -127,6 +128,25 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.backward_step(target_atoms=[atom])
         print 'tv before sampling', old_tv
         print 'tv after sampling', atom.tv
+
+    def embodied_inference(self, sample_count=1000):
+        '''Do the series of inferences that is typically useful for embodied inference.
+           Create a variety of MemberLinks from EvaluationLinks, and then use those to derive
+           SubsetLinks, and use those to derive IntensionalInheritanceLinks, and use those to derive
+           (Mixed)InheritanceLinks, then use those InheritanceLinks to find lots of InheritanceLinks.
+           The reason to do it in this order is that doing the later stages first, you would find few results'''
+        # Store those rules, in that order
+        rules=[]
+        rules+= self.member_rules
+        rules.append(self.chainer.lookup_rule("ExtensionalLinkEvaluationRule"))
+        rules.append(self.chainer.lookup_rule("AttractionRule"))
+        rules.append(self.chainer.lookup_rule("IntensionalLinkEvaluationRule"))
+        rules.append(self.chainer.lookup_rule("InheritanceRule"))
+
+        for rule in rules:
+            for i in xrange(0, sample_count):
+                self.chainer.forward_step(rule=rule)
+            
 
 def print_atoms(atoms):
     for atom in atoms:
