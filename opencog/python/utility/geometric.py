@@ -2,7 +2,7 @@ from math import fabs, isnan
 from datetime import datetime
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.numeric.globals import SMALLEST_FLOAT as EPSILON
+from utility.numeric.globals import EPSILON
 from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.integrate import quad
 
@@ -183,7 +183,7 @@ class FunctionLinear(Function):
 
         x_intercept = self.x_intercept
 
-        if start > x_intercept or end < x_intercept:
+        if start > x_intercept or end < x_intercept or equals(end, x_intercept) or equals(start, x_intercept):
             return (self(start) + self(end)) * (end - start) / 2.0
 
         minus_triangle = (x_intercept - start) * self(start)
@@ -300,4 +300,3 @@ if __name__ == '__main__':
     #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
     #print (a(-0.25) + a(0.25))/4
     #print a(0.25) * 2.75 / 2
-

@@ -103,7 +103,7 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
     // With this lock, no crash after 150 minutes of testing.
     // Anyway, the point is that this lock is wasteful, and should be
     // un-needed.
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
     {
         CompositeTruthValuePtr ctv = (_truthValue->getType() == COMPOSITE_TRUTH_VALUE) ?
@@ -119,6 +119,9 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
         ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
         new_tv = std::static_pointer_cast<TruthValue>(ctv);
     }
+    // Release the lock before sending out signals, as otherwise
+    // deadlocks can happen in user code invoked by the signal handler.
+    lck.unlock();
     setTruthValue(new_tv); // always call setTruthValue to update indices
 }
 
