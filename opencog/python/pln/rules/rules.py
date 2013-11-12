@@ -109,22 +109,42 @@ class DeductionRule(Rule):
                       chainer.link(link_type, [B, C])])
 
 # TODO add macro-rules for Abduction and Induction based on Deduction and Inversion
-# abandoned
+'''deduction
+S is M, M is L, then S is L
+
+induction
+M is S, M is L, then S is L
+invert  same    same
+
+abduction
+S is M, L is M, then S is L
+        invert
+'''
 class InductionRule(Rule):
-    '''A->B, A->C entails B->C'''
+    '''M->S, M->L, S->L'''
     def __init__(self, chainer, link_type):
-        A = chainer.new_variable()
-        B = chainer.new_variable()
-        C = chainer.new_variable()
+        S = chainer.new_variable()
+        M = chainer.new_variable()
+        L = chainer.new_variable()
 
         Rule.__init__(self,
-            outputs= [chainer.link(link_type, [B, C])],
-            inputs=  [chainer.link(link_type, [A, B]),
-                      chainer.link(link_type, [A, C])],
-            formula= None)
-            
-    def compute(inputs):
-        pass
+            outputs= [chainer.link(link_type, [S, L])],
+            inputs=  [chainer.link(link_type, [M, S]),
+                      chainer.link(link_type, [M, L])],
+            formula= formulas.inductionFormula)
+
+class AbductionRule(Rule):
+    '''S is M, L is M, S->L'''
+    def __init__(self, chainer, link_type):
+        S = chainer.new_variable()
+        M = chainer.new_variable()
+        L = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [chainer.link(link_type, [S, L])],
+            inputs=  [chainer.link(link_type, [S, M]),
+                      chainer.link(link_type, [L, M])],
+            formula= formulas.inductionFormula)
 
 # TODO implement transitiveSimilarityFormula
 class TransitiveSimilarityRule(Rule):

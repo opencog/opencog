@@ -51,6 +51,22 @@ def inversionFormula(tvs):
     
     return [TruthValue(sBA, nBA)]
 
+def inductionFormula(tvs):
+    # InversionRule on the initial argument and then Deduction
+    MS, ML = tvs
+
+    SM = inversionFormula(MS)
+    SL = deductionGeometryFormula(SM, ML)
+    return SL
+
+def abductionFormula(tvs):
+    # InversionRUle on the final argument and then Deduction
+    SM, LM = tvs
+
+    ML = inversionFormula(LM)
+    SL = deductionGeometryFormula(SM, ML)
+    return SL
+
 def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 

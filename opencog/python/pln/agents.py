@@ -23,6 +23,8 @@ class ForwardInferenceAgent(MindAgent):
         for link_type in conditional_probability_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
         # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
