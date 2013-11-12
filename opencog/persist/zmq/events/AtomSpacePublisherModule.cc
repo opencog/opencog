@@ -136,7 +136,7 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     AttentionValuePtr av = as->getAV(h);
     std::string stiString = std::to_string(av->getSTI());
     std::string ltiString = std::to_string(av->getLTI());
-    std::string vltiString = std::to_string(av->getVLTI());
+    std::string vltiString = av->getVLTI() != 0 ? "true" : "false";
 
     // TruthValue
     TruthValuePtr tvp = as->getTV(h);
@@ -169,7 +169,7 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
             ptTV.put("details.symmetric", itv->isSymmetric());
             break;
 
-// To do: CompositeTruthValue
+// Todo: CompositeTruthValue
 /*
         case COMPOSITE_TRUTH_VALUE:
             CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
@@ -203,19 +203,23 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     }
 
     // Use Boost property trees for JSON serialization
+    ptree ptAtoms;
     ptree pt;
+
     pt.put("handle", handleString);
     pt.put("type", typeNameString);
     pt.put("name", nameString);
-    pt.put("av.sti", stiString);
-    pt.put("av.lti", ltiString);
-    pt.put("av.vlti", vltiString);
-    pt.add_child("tv", ptTV);
+    pt.put("attentionvalue.sti", stiString);
+    pt.put("attentionvalue.lti", ltiString);
+    pt.put("attentionvalue.vlti", vltiString);
+    pt.add_child("truthvalue", ptTV);
     pt.add_child("outgoing", ptOutgoing);
     pt.add_child("incoming", ptIncoming);
 
+    ptAtoms.add_child("atoms", pt);
+
     std::ostringstream buf;
-    write_json (buf, pt, true);
+    write_json (buf, ptAtoms, true);
     std::string json = buf.str();
 
     return json;
