@@ -21,6 +21,25 @@ class Logic(object):
                 result += self.variables(o)
             return result
 
+    def get_first_node(self, atom):
+        '''Using a depth first search on the link, return the first Node found. If atom is a Node just return that.'''
+        if atom.is_node() and not self.is_variable(atom):
+            return atom
+        else:
+            for o in atom.out:
+                ret = self.get_first_node(o)
+                if not ret is None:
+                    return ret
+            return None
+
+    def get_incoming_recursive(self, atom):
+        inc = atom.incoming
+        ret=[]
+        ret+= inc
+        for link in inc:
+            ret+= self.get_incoming_recursive(link)
+        return ret
+
     def new_variable(self):
         prefix = '$pln_var_'
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
@@ -40,10 +59,19 @@ class Logic(object):
     def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
         if template.type == types.VariableNode:
             root_type = types.Atom
+            atoms = self.atomspace.get_atoms_by_type(root_type)
         else:
-            root_type = template.type
+            # If the atom is a link with all variables below it, then lookup all links of that type
+            # If it has any nodes (which aren't VariableNodes!), then lookup the incoming set for that node
+            first_node = self.get_first_node(template)
+            if first_node is None:
+                root_type = template.type
+                atoms = self.atomspace.get_atoms_by_type(root_type)
+            else:
+                print first_node
+                atoms = self.get_incoming_recursive(first_node)
+                print atoms
 
-        atoms = self.atomspace.get_atoms_by_type(root_type)
         if useAF:
             atoms = self.filter_attentional_focus(atoms)
 
