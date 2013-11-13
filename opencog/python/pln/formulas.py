@@ -77,20 +77,21 @@ def crispModusPonensFormula(tvs):
         return [TruthValue(0, 0)]
 
 def modusPonensFormula(tvs):
-    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+    (sAB, nAB), (sNotAB, nNotAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
 #    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
 #        return crispModusPonensFormula(tvs)
 
-    # P(B|not A) -- how should we find this?
-    #BNA = TruthValue(0.5, 0.01)
-    sBNA, nBNA = (0.5, 0.01)
+    # guess P(B|not A)
+    #    sNotAB, nNotAB = (0.5, 0.01)
     
+    
+
     n2 = min(nAB, nA)
-    if n2 + nBNA > 0:
-        s2 = ((sAB * sA * n2 + nBNA +
-                 sBNA * (1 - sA) * nBNA) /
-                 low(n2 + nBNA))
+    if n2 + nNotAB > 0:
+        s2 = ((sAB * sA * n2 + nNotAB +
+                 sNotAB * (1 - sA) * nNotAB) /
+                 low(n2 + nNotAB))
     else:
         raise NotImplementedError
         s2 = BNA.confidence

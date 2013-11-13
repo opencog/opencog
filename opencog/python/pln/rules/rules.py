@@ -169,9 +169,12 @@ class ModusPonensRule(Rule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
+        notA = chainer.link(types.NotLink, [A])
+
         Rule.__init__(self,
             outputs= [B],
             inputs=  [chainer.link(link_type, [A, B]),
+                      chainer.link(link_type, [notA, B]),
                       A],
             formula= formulas.modusPonensFormula)
 
