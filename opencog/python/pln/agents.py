@@ -148,9 +148,11 @@ class ForwardInferenceAgent(MindAgent):
 
         for rule in rules:
             self.chainer.update_all_node_probabilities()
-            for i in xrange(0, sample_count):
-                self.chainer.forward_step(rule=rule)
-            
+            if len(rule._inputs) == 1:
+                self.chainer.apply_bulk(rule=rule)
+            else:
+                for i in xrange(0, sample_count):
+                    self.chainer.forward_step(rule=rule)            
 
 def print_atoms(atoms):
     for atom in atoms:

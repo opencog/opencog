@@ -272,6 +272,8 @@ class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
             output_type = types.IntensionalSimilarityLink,
             formula= formulas.similarityEvaluationFormula)        
 
+# TODO maybe make the closed world assumption? you need plenty of 0 MemberLinks to make these calculations work right
+
 class ExtensionalLinkEvaluationRule(Rule):
     '''Using (MemberLink x A) and (MemberLink x B), evaluate (Subset A B), (Subset B A), and (SimilarityLink A B). This is more efficient than having to find them separately using the different rules. If you use this Rule, do NOT include the separate rules too! (Or the chainer will use all of them and screw up the TV.
 TODO include AndLink + OrLink too (might as well)

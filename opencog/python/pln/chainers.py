@@ -301,6 +301,24 @@ class Chainer(AbstractChainer):
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
+    def apply_bulk(self, rule):
+        '''Apply a rule to every possible input. It's much more efficient (for that case) than calling apply_forward(rule) repeatedly. So I don't have to include backtracking, it only works for rules with one input template.'''
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
+        output_atoms = []
+
+        assert len(generic_inputs) == 1
+        template = generic_inputs[0]
+        input_atoms = self.find(template, ground=True)
+
+        for input in input_atoms:
+            subst = self.unify(template, input, {})
+            outputs = self.substitute_list(subst, generic_outputs)
+            self.apply_rule(rule, [input], outputs)
+            output_atoms+=generic_outputs
+
+        for var in created_vars:
+            self.atomspace.remove(var, recursive=True)
+
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
         return_inputs += [x for x in input_templates]
