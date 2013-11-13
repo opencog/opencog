@@ -25,7 +25,7 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
-            self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
+            #self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
         # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
         for link_type in similarity_types:
@@ -76,6 +76,9 @@ class ForwardInferenceAgent(MindAgent):
             self.create_chainer(atomspace)
             # For simplicity, do nothing the first time. Silly APIs mean you have to call run to set the atomspace
             return
+
+        # Update all of the node probabilities at each step
+        self.chainer.update_all_node_probabilities()
 
         result = self.chainer.forward_step()
         if result:
@@ -144,6 +147,7 @@ class ForwardInferenceAgent(MindAgent):
         rules.append(self.chainer.lookup_rule("InheritanceRule"))
 
         for rule in rules:
+            self.chainer.update_all_node_probabilities()
             for i in xrange(0, sample_count):
                 self.chainer.forward_step(rule=rule)
             

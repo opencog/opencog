@@ -28,10 +28,15 @@ class Logic(object):
     def make_n_variables(self, N):
         return [self.new_variable() for i in xrange(0, N)]
 
-    def find(self, template, atoms, s={}):
+    def find(self, template, atoms, s={}, ground=False):
         assert(isinstance(atoms, list))
 
-        return [atom for atom in atoms if self.unify_together(atom, template, s)]
+        results = [atom for atom in atoms if self.unify_together(atom, template, s)]
+        
+        if ground:
+            results = [atom for atom in results if len(self.variables(atom)) == 0]
+
+        return results
 
     def unify_together(self, x, y, s):
         return self.unify(x, y, s) != None

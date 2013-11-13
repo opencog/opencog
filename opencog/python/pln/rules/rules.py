@@ -332,7 +332,10 @@ class EvaluationToMemberRule(Rule):
 
         # Only support the case with 1 argument
         if arg.type == types.ListLink:
-            return ([], [])
+            if len(arg.out) == 1:
+                arg = arg.out[0]
+            else:
+                return ([], [])
 
         concept_name = 'SatisfyingSet(%s)' % (predicate.name,)
         set_node = self.chainer.node(types.ConceptNode, concept_name)
