@@ -12,8 +12,8 @@ from collections import defaultdict
 
 # @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
 # every Atom's STI (in the whole AtomSpace)
-def get_attentional_focus(atomspace, attentional_focus_boundary=0):
-    nodes = atomspace.get_atoms_by_type(types.Atom)
+def get_attentional_focus(atomspace, attentional_focus_boundary=0, type=types.Atom):
+    nodes = atomspace.get_atoms_by_type(type)
     attentional_focus = []
     for node in nodes:
         if node.av['sti'] > attentional_focus_boundary:
@@ -59,6 +59,9 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
+    def log_failed_inference(self,message):
+        print 'Attempted invalid inference:',message
+
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
     def _select_one_matching(self, template, s = {}, allow_zero_tv = False):
@@ -66,18 +69,19 @@ class AbstractChainer(Logic):
         if len(self.variables(template)) == 0:
             return template
 
+        if template.type == types.VariableNode:
+            root_type = types.Atom
+        else:
+            root_type = template.type
+
         # TODO backward chaining doesn't work, because this method will pick up Atoms
         # that have variables in them (including the queries left over from other inferences)!!!
 
-        attentional_focus = get_attentional_focus(self._atomspace)
+        attentional_focus = get_attentional_focus(self._atomspace, root_type)
 
         atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
-            if template.type == types.VariableNode:
-                root_type = types.Atom
-            else:
-                root_type = template.type
             all_atoms = self._atomspace.get_atoms_by_type(root_type)
 
             if len(all_atoms) == 0:
@@ -91,13 +95,10 @@ class AbstractChainer(Logic):
         # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
-        atoms = self.find(template, atoms, substitution)
+        atoms = self.find(template, atoms, substitution, ground=ground_results)
 
         if not allow_zero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]
-
-        if ground_results:
-            atoms = [atom for atom in atoms if len(self.variables(atom)) == 0]
 
         if len(atoms) == 0:
             return None
@@ -181,11 +182,35 @@ class AbstractChainer(Logic):
             return suitable
         elif atom.type in rules.HIGHER_ORDER_LINKS:
             suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
+        elif atom.is_a(types.MemberLink):
+            # Assume the domain of all predicates is objects
+            element = atom.out[0]
+            return element.is_a(types.ObjectNode)
         else:
             return True
 
-    def log_failed_inference(self,message):
-        print 'Attempted invalid inference:',message
+    def count_objects(self):
+        all_object_nodes = self.atomspace.get_atoms_by_type(types.ObjectNode)
+        return len(all_object_nodes)
+
+    def count_members(self, conceptnode):
+        var = self.new_variable()
+        template = self.link(types.MemberLink, [var, conceptnode])
+        all_member_links = self.atomspace.get_atoms_by_type(types.MemberLink)
+        members = self.find(template, all_member_links, {}, ground=True)
+        self.atomspace.remove(var)
+        return len(members)
+
+    def node_tv(self, conceptnode):
+        '''Calculate the probability of any object being a member of this conceptnode.
+        Only works for predicates whose domain is ObjectNodes. It will often change as new information is received'''
+        N = self.count_objects()
+        p = self.count_members(conceptnode)*1.0/N
+        return TruthValue(p, N)
+
+    def update_all_node_probabilities(self):
+        for node in self.atomspace.get_atoms_by_type(types.ConceptNode):
+            node.tv = self.node_tv(node)
 
 class InferenceHistoryIndex(object):
     def __init__(self):
