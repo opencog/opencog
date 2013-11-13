@@ -1,7 +1,7 @@
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
-from pln.chainers import Chainer, get_attentional_focus
+from pln.chainers import Chainer
 from pln.rules import rules, temporal_rules, boolean_rules
 
 class ForwardInferenceAgent(MindAgent):

@@ -28,8 +28,29 @@ class Logic(object):
     def make_n_variables(self, N):
         return [self.new_variable() for i in xrange(0, N)]
 
-    def find(self, template, atoms, s={}, ground=False):
-        assert(isinstance(atoms, list))
+    # @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
+    # every Atom's STI (in the whole AtomSpace)
+    def get_attentional_focus(self, attentional_focus_boundary=0, type=types.Atom):
+        nodes = self.atomspace.get_atoms_by_type(type)
+        attentional_focus = []
+        for node in nodes:
+            if node.av['sti'] > attentional_focus_boundary:
+                attentional_focus.append(node)
+        return attentional_focus
+
+    def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
+        if template.type == types.VariableNode:
+            root_type = types.Atom
+        else:
+            root_type = template.type
+
+        if useAF:
+            atoms = self.get_attentional_focus(root_type)
+        else:
+            atoms = self.atomspace.get_atoms_by_type(root_type)
+
+        if not allow_zero_tv:
+            atoms = [atom for atom in atoms if atom.tv.count > 0]
 
         results = [atom for atom in atoms if self.unify_together(atom, template, s)]
         

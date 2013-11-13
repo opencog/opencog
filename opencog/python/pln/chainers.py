@@ -10,16 +10,6 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-# @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
-# every Atom's STI (in the whole AtomSpace)
-def get_attentional_focus(atomspace, attentional_focus_boundary=0, type=types.Atom):
-    nodes = atomspace.get_atoms_by_type(type)
-    attentional_focus = []
-    for node in nodes:
-        if node.av['sti'] > attentional_focus_boundary:
-            attentional_focus.append(node)
-    return attentional_focus
-
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
 The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
@@ -69,63 +59,39 @@ class AbstractChainer(Logic):
         if len(self.variables(template)) == 0:
             return template
 
-        if template.type == types.VariableNode:
-            root_type = types.Atom
-        else:
-            root_type = template.type
-
         # TODO backward chaining doesn't work, because this method will pick up Atoms
         # that have variables in them (including the queries left over from other inferences)!!!
 
-        attentional_focus = get_attentional_focus(self._atomspace, root_type)
-
-        atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
+        atom = self._select_from(template, s, allow_zero_tv, useAF=True)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
-            all_atoms = self._atomspace.get_atoms_by_type(root_type)
-
-            if len(all_atoms) == 0:
-                return None
-
-            atom = self._select_from(template, s, all_atoms, allow_zero_tv, useAF=False)
+            atom = self._select_from(template, s, allow_zero_tv, useAF=False)
 
         return atom
 
-    def _select_from(self, template, substitution, atoms, allow_zero_tv, useAF):
+    def _select_from(self, template, substitution, allow_zero_tv, useAF):
         # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
-        atoms = self.find(template, atoms, substitution, ground=ground_results)
-
-        if not allow_zero_tv:
-            atoms = [atom for atom in atoms if atom.tv.count > 0]
+        atoms = self.find(template, substitution, useAF=useAF, allow_zero_tv=allow_zero_tv, ground=ground_results)
 
         if len(atoms) == 0:
             return None
 
-        if useAF:
-            return self._selectOne(atoms)
-        else:
-            # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
-            # after modifying the score function,, it does
-            return self._selectOne(atoms)
+        return self._selectOne(atoms)
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
             sti = atom.av['sti']
-            if sti < 1:
-                return 1
-            else:
+            if sti > 1:
                 return sti
-
-        # never used mixed_score to choose backward chaining targets (it requires an atom to already have better than 0,0 TV)
-        def mixed_score(atom):
-            s = int(100*sti_score(atom) + 100*atom.tv.mean + 100*atom.tv.confidence)
-            if s < 1:
-                return 1
             else:
-                return s
+                return 1
+
+        def mixed_score(atom):
+            s = int(10*sti_score(atom) + 100*(atom.tv.mean+0.01) + 100*(atom.tv.confidence+0.01))
+            return s
 
         score = sti_score
         #score = mixed_score
@@ -196,8 +162,7 @@ class AbstractChainer(Logic):
     def count_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        all_member_links = self.atomspace.get_atoms_by_type(types.MemberLink)
-        members = self.find(template, all_member_links, {}, ground=True)
+        members = self.find(template, {}, ground=True)
         self.atomspace.remove(var)
         return len(members)
 
