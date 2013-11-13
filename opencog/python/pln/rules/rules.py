@@ -225,6 +225,26 @@ class SubsetEvaluationRule(MembershipBasedEvaluationRule):
             output_type=types.SubsetLink,
             formula=formulas.subsetEvaluationFormula)
 
+class NegatedSubsetEvaluationRule(MembershipBasedEvaluationRule):
+    '''Computes P(B|NOT(A) === (Subset NOT(A) B).
+       (MemberLink x NOT(B)).tv.mean = 1-(MemberLink x B).tv.mean'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        member_type = types.MemberLink
+        output_type = types.SubsetLink
+        inputs= [chainer.link(member_type, [x, A]),
+                 chainer.link(member_type, [x, B])]
+
+        notA = chainer.link(types.NotLink, [A])
+
+        Rule.__init__(self,
+            formula= formulas.negatedSubsetEvaluationFormula,
+            outputs= [chainer.link(output_type, [notA, B])],
+            inputs=  inputs)
+
 class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates IntensionalInheritance(A B) from the definition.
        (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
@@ -275,7 +295,7 @@ class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
 # TODO maybe make the closed world assumption? you need plenty of 0 MemberLinks to make these calculations work right
 
 class ExtensionalLinkEvaluationRule(Rule):
-    '''Using (MemberLink x A) and (MemberLink x B), evaluate (Subset A B), (Subset B A), and (SimilarityLink A B). This is more efficient than having to find them separately using the different rules. If you use this Rule, do NOT include the separate rules too! (Or the chainer will use all of them and screw up the TV.
+    '''Using (MemberLink x A) and (MemberLink x B), evaluate (Subset A B), (Subset B A), (Subset NOT(A) B), (Subset NOT(B) A), and (SimilarityLink A B). This is more efficient than having to find them separately using the different rules. If you use this Rule, do NOT include the separate rules too! (Or the chainer will use all of them and screw up the TV.
 TODO include AndLink + OrLink too (might as well)
 TODO the forward chainer will work fine with this rule, but the backward chainer won't (because it would require all of the output atoms to already exist at least with 0,0 TV), but it should probably only require one of them.'''
     def __init__(self, chainer):
@@ -288,6 +308,8 @@ TODO the forward chainer will work fine with this rule, but the backward chainer
 
         outputs= [chainer.link(types.SubsetLink, [A, B]),
                   chainer.link(types.SubsetLink, [B, A]),
+                  chainer.link(types.SubsetLink, [chainer.link(types.NotLink,[A]), B]),
+                  chainer.link(types.SubsetLink, [chainer.link(types.NotLink,[B]), A]),
                   chainer.link(types.ExtensionalSimilarityLink, [A, B])]
 
         Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
@@ -485,9 +507,11 @@ class AttractionRule(Rule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
+        subset1 = chainer.link(types.SubsetLink, [A, B])
+        subset2 = chainer.link(types.SubsetLink, [chainer.link(types.NotLink, [A]), B])
+
         Rule.__init__(self,
             formula= formulas.attractionFormula,
             outputs= [chainer.link(types.AttractionLink, [A, B])],
-            inputs=  [chainer.link(types.SubsetLink, [A, B]),
-                      B])
+            inputs=  [subset1, subset2])
 

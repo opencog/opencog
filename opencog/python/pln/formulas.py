@@ -199,6 +199,13 @@ def subsetEvaluationFormula(tvs):
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
 
+def negatedSubsetEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_not_a_mean = 1 - mem_a_tv.mean
+    mem_not_a_tv = TruthValue(mem_not_a_mean, mem_a_tv.count)
+
+    return subsetEvaluationFormula([mem_not_a_tv, mem_b_tv])
+
 def subsetFuzzyEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
 
@@ -227,14 +234,16 @@ def similarityEvaluationFormula(tvs):
 
 def extensionalEvaluationFormula(tvs):
     '''Inputs: Membership x A.tv, Membership x B.tv
-Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SimilarityLink A B.tv'''
+Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SubsetLink NOT(A) B.tv, SubsetLink NOT(B) A.tv SimilarityLink A B.tv'''
     subsetAB = subsetEvaluationFormula(tvs)
     subsetBA = subsetEvaluationFormula(reversed(tvs))
+    subsetNotAB = negatedSubsetEvaluationFormula(tvs)
+    subsetNotBA = negatedSubsetEvaluationFormula(reversed(tvs))
 
     similarityAB = similarityEvaluationFormula(tvs)
 
     # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
-    tvs = subsetAB + subsetBA + similarityAB
+    tvs = subsetAB + subsetBA + subsetNotAB + subsetNotBA + similarityAB
     for tv in tvs: print str(tv)
     return tvs
 
