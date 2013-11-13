@@ -30,12 +30,11 @@ class Logic(object):
 
     # @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
     # every Atom's STI (in the whole AtomSpace)
-    def get_attentional_focus(self, attentional_focus_boundary=0, type=types.Atom):
-        nodes = self.atomspace.get_atoms_by_type(type)
+    def filter_attentional_focus(self, atoms, attentional_focus_boundary=0):
         attentional_focus = []
-        for node in nodes:
-            if node.av['sti'] > attentional_focus_boundary:
-                attentional_focus.append(node)
+        for atom in atoms:
+            if atom.av['sti'] > attentional_focus_boundary:
+                attentional_focus.append(atom)
         return attentional_focus
 
     def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
@@ -44,10 +43,9 @@ class Logic(object):
         else:
             root_type = template.type
 
+        atoms = self.atomspace.get_atoms_by_type(root_type)
         if useAF:
-            atoms = self.get_attentional_focus(root_type)
-        else:
-            atoms = self.atomspace.get_atoms_by_type(root_type)
+            atoms = self.filter_attentional_focus(atoms)
 
         if not allow_zero_tv:
             atoms = [atom for atom in atoms if atom.tv.count > 0]
