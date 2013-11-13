@@ -1,6 +1,5 @@
 from math import fabs
-from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear, FUNCTION_ZERO
-from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
+from utility.geometric import FunctionPiecewiseLinear, FUNCTION_ZERO
 
 __author__ = 'keyvan'
 
@@ -19,6 +18,6 @@ def function_convolution_uniform(bounds_1, bounds_2):
 
     p = min(1 / length_1, 1 / length_2)
 
-    convolution_function = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0},
-                                                   FUNCTION_ZERO)
-    return convolution_function
+    result = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0}, FUNCTION_ZERO)
+    result.is_normalised = True
+    return result
