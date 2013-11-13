@@ -68,9 +68,7 @@ class Logic(object):
                 root_type = template.type
                 atoms = self.atomspace.get_atoms_by_type(root_type)
             else:
-                print first_node
                 atoms = self.get_incoming_recursive(first_node)
-                print atoms
 
         if useAF:
             atoms = self.filter_attentional_focus(atoms)
