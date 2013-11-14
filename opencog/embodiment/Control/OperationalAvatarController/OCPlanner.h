@@ -244,6 +244,22 @@ public:
 
     }
 
+    bool isTheSameDepthLevelWithMe(const StateNode& other) const
+    {
+        if (depth.size() == other.depth.size())
+        {
+            if (depth.size() == 1)
+                return true;
+            else
+            {
+                if (other.depth.substr(0,depth.size() - 1) == depth.substr(0,depth.size() - 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
     // the root state node (goals) depth is 0~z, the sub state nodes of node 1 will be 10~1z, the sub state nodes of node 12 will be 120~12z...etc
     // it its forward rule node has multiple forward state node, using the deepest one
@@ -338,6 +354,8 @@ protected:
      // this list will be sorted after a planning finised according to the order of dependency relations
      vector<RuleNode*> allRuleNodeInThisPlan;
 
+     int tryStepNum;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -366,12 +384,14 @@ protected:
      // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // onlyCheckIfNegativeGoal is not to check preconditions
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
      void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
-                                  bool &preconImpossible, bool onlyCheckIfNegativeGoal =false );
+                                  bool &preconImpossible, bool &willAddCirle , bool onlyCheckIfNegativeGoal = false);
 
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
-     int checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible);
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork);
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy
      // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
