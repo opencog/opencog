@@ -221,50 +221,89 @@ class FormulaCreator(object):
         }
 
 
-def function_convolution_generic(dist_1, dist_2, bins=50):
-    a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
-    a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
-
-    if (type(dist_1.dist), type(dist_2.dist)) == (uniform_gen, uniform_gen):
-        return function_convolution_uniform((a1, b1), (a2, b2))
-
-    convolution_bounds_a, convolution_bounds_b = min(a1, a2), max(b1, b2)
-
-    delta = fabs(convolution_bounds_a - convolution_bounds_b) / bins
-    convolution_interval = TimeInterval(convolution_bounds_a, convolution_bounds_b, bins)
-    x = [dist_1.pdf(t) for t in convolution_interval]
-    y = [dist_2.pdf(t) for t in reversed(convolution_interval)]
-
-    c = convolve(x, y)
-    dictionary_convolution = {}
-    for t in xrange(len(c)):
-        dictionary_convolution[delta * t] = c[t]
-    bias = calculateCenterMass(dictionary_convolution)[0] + dist_2.mean() - dist_1.mean()
-    dictionary_convolution_biased = {}
-    for t in dictionary_convolution:
-        dictionary_convolution_biased[t - bias] = dictionary_convolution[t]
-
-    convolution_function = FunctionPiecewiseLinear(dictionary_convolution_biased, FunctionHorizontalLinear(0))
-    return convolution_function.normalised()
-
-
 class TemporalFormulaConvolution(BaseTemporalFormula):
     def __init__(self):
         self.convolutions = {}
-        self.integrals = {}
+        self.before_integrals = {}
+        self.same_integrals = {}
+        self.bounds = {}
+
+    def function_convolution_generic(self, dist_1, dist_2, bins=50):
+        a1, b1, a2, b2 = 0, 0, 0, 0
+        if dist_1 in self.bounds:
+            a1, b1 = self.bounds[dist_1]
+        else:
+            a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
+            self.bounds[dist_1] = a1, b1
+        if dist_2 in self.bounds:
+            a2, b2 = self.bounds[dist_2]
+        else:
+            a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
+            self.bounds[dist_2] = a2, b2
+
+        if (type(dist_1.dist), type(dist_2.dist)) == (uniform_gen, uniform_gen):
+            return function_convolution_uniform((a1, b1), (a2, b2))
+
+        convolution_bounds_a, convolution_bounds_b = min(a1, a2), max(b1, b2)
+
+        delta = fabs(convolution_bounds_a - convolution_bounds_b) / bins
+        convolution_interval = TimeInterval(convolution_bounds_a, convolution_bounds_b, bins)
+        x = [dist_1.pdf(t) for t in convolution_interval]
+        y = [dist_2.pdf(t) for t in reversed(convolution_interval)]
+
+        c = convolve(x, y)
+        dictionary_convolution = {}
+        for t in xrange(len(c)):
+            dictionary_convolution[delta * t] = c[t]
+        bias = calculateCenterMass(dictionary_convolution)[0] + dist_2.mean() - dist_1.mean()
+        dictionary_convolution_biased = {}
+        for t in dictionary_convolution:
+            dictionary_convolution_biased[t - bias] = dictionary_convolution[t]
+
+        convolution_function = FunctionPiecewiseLinear(dictionary_convolution_biased, FunctionHorizontalLinear(0))
+        return convolution_function.normalised()
+
+    def duration(self, dist):
+        a, b = 0, 0
+        if dist in self.bounds:
+            a, b = self.bounds[dist]
+        else:
+            a, b = calculate_bounds_of_probability_distribution(dist)
+            self.bounds[dist] = a, b
+        return b - a
 
     def before(self, dist_1, dist_2):
-        if (dist_1, dist_2) in self.integrals:
-            return self.integrals[(dist_1, dist_2)]
+        if (dist_1, dist_2) in self.before_integrals:
+            return self.before_integrals[(dist_1, dist_2)]
 
         if (dist_1, dist_2) in self.convolutions:
             convolution = self.convolutions[(dist_1, dist_2)]
         else:
-            convolution = function_convolution_generic(dist_1, dist_2)
+            convolution = self.function_convolution_generic(dist_1, dist_2)
             self.convolutions[(dist_1, dist_2)] = convolution
 
         result = integral(convolution, NEGATIVE_INFINITY, 0)
-        self.integrals[(dist_1, dist_2)] = result
+        self.before_integrals[(dist_1, dist_2)] = result
+
+        return result
+
+    def same(self, dist_1, dist_2):
+        if (dist_1, dist_2) in self.same_integrals:
+            return self.same_integrals[(dist_1, dist_2)]
+
+        if (dist_1, dist_2) in self.convolutions:
+            convolution = self.convolutions[(dist_1, dist_2)]
+        else:
+            convolution = self.function_convolution_generic(dist_1, dist_2)
+            self.convolutions[(dist_1, dist_2)] = convolution
+
+        a1, b1 = self.bounds[dist_1]
+        a2, b2 = self.bounds[dist_2]
+
+        integral_length = fabs(max(a1, a2) - min(b1, b2))
+
+        result = integral(convolution, -integral_length, integral_length)
+        self.same_integrals[(dist_1, dist_2)] = result
 
         return result
 
@@ -299,101 +338,127 @@ def test(event_1, event_2, prec=0.25, size=10000):
 
     plt.hist(x, 50, normed=True)
 
-
 if __name__ == '__main__':
     from scipy.stats import norm, uniform, expon
-    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
-    import matplotlib.pyplot as plt
+    tfc = TemporalFormulaConvolution()
+    fc = FormulaCreator(tfc)
+    for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
+        print name, '-----------------------'
+        for i in xrange(40):
+            F_a = i * 0.2
+            G_a = 10 - i * 0.2
+            if i == 100:
+                pass
+            F = uniform(loc=F_a, scale=2)
+            G = uniform(loc=G_a, scale=2)
+            print func(F, G)
 
-    figure_number = 1
-    for event_1, event_2 in [
-        #(
-        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
-        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
-        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
-        #),
-
-
-
-        (
-            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
-            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=13, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
-        ),
-
-        (
-            TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
-            TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
-        ),
-
-        (
-            TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
-            TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
-        ),
-
-        (
-            TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-            TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
-                                         {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
-        ),
-    ]:
-        tfc = TemporalFormulaConvolution()
-        fc = FormulaCreator(tfc)
-
-        temporal_relations = fc.temporal_relations_between(event_1, event_2)
-
-        print '\nFigure' + str(figure_number)
-        print '----------------------'
-        #print sum(temporal_relations.values())
-        for p in 'pmoFDseSdfOMP':
-            print p, temporal_relations[p]
-
-        figure_number += 1
-
-        #self = fc
-        #beginning_a = event_1.distribution_beginning
-        #ending_a = event_1.distribution_ending
-        #beginning_b = event_2.distribution_beginning
-        #ending_b = event_2.distribution_ending
-        #
-        #print self.after(beginning_a, beginning_b)
-        #print self.before(beginning_a, ending_b)
-        #print self.after(ending_a, beginning_b)
-        #print self.after(ending_a, ending_b)
-
-        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-        event_2.plot().figure()
-    plt.show()
+#
+#
+#if __name__ == '__main__':
+#    from scipy.stats import norm, uniform, expon
+#    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
+#    import matplotlib.pyplot as plt
+#
+#    figure_number = 1
+#    for event_1, event_2 in [
+#        (
+#            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
+#            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=13, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
+#        ),
+#
+#        #(
+#        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=4, scale=2)),
+#        #    TemporalEvent(uniform(loc=6, scale=2), uniform(loc=9, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
+#        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
+#        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
+#        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
+#        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
+#        #),
+#
+#        #(
+#        #    TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+#        #    TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+#        #    TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+#        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+#        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+#        #),
+#    ]:
+#        tfc = TemporalFormulaConvolution()
+#        fc = FormulaCreator(tfc)
+#
+#        temporal_relations = fc.temporal_relations_between(event_1, event_2)
+#
+#        print '\nFigure' + str(figure_number)
+#        print '----------------------'
+#        #print sum(temporal_relations.values())
+#        for p in 'pmoFDseSdfOMP':
+#            print p, temporal_relations[p]
+#
+#        figure_number += 1
+#
+#        #print ben(event_1, event_2)
+#
+#        #self = fc
+#        #beginning_a = event_1.distribution_beginning
+#        #ending_a = event_1.distribution_ending
+#        #beginning_b = event_2.distribution_beginning
+#        #ending_b = event_2.distribution_ending
+#        #
+#        #print self.same(beginning_a, beginning_b)
+#        #print self.same(beginning_a, ending_b)
+#        #print self.same(ending_a, beginning_b)
+#        #print self.same(ending_a, ending_b)
+#        #print self.after(beginning_a, beginning_b)
+#        #print self.before(beginning_a, ending_b)
+#        #print self.after(ending_a, beginning_b)
+#        #print self.after(ending_a, ending_b)
+#
+#        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
+#        event_2.plot().figure()
+#
+#    plt.show()
