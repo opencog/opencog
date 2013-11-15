@@ -1,0 +1,146 @@
+/*
+ * tests/persist/zmq/events/AtomSpacePublisherModuleUTest.cxxtest
+ *
+ * Copyright (C) 2013 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Cosmo Harrigan
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/Module.h>
+#include <opencog/util/Logger.h>
+#include <iostream>
+#include <opencog/util/Config.h>
+#include <opencog/util/zhelpers.hpp>
+
+#include <sstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+using boost::property_tree::ptree;
+using boost::property_tree::read_json;
+using boost::property_tree::write_json;
+
+using namespace opencog;
+using namespace std;
+
+class AtomSpacePublisherModuleUTest : public CxxTest::TestSuite
+{
+private:
+    CogServer* cogserver;
+    AtomSpace* as;
+    zmq::context_t * context;
+    zmq::socket_t * subscriberAdd;
+    zmq::socket_t * subscriberRemove;
+    zmq::socket_t * subscriberTVChanged;
+    zmq::socket_t * subscriberAVChanged;
+
+public:
+    void setUp () {
+    }
+
+    void tearDown () {
+    }
+
+    void InitZeroMQ () {
+        //  Prepare the context and subscribers
+        context = new zmq::context_t(1);
+        subscriberAdd = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberRemove = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberTVChanged = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberAVChanged = new zmq::socket_t(*context, ZMQ_SUB);
+
+        subscriberAdd->connect("tcp://localhost:5563");
+        subscriberRemove->connect("tcp://localhost:5563");
+        subscriberTVChanged->connect("tcp://localhost:5563");
+        subscriberAVChanged->connect("tcp://localhost:5563");
+
+        subscriberAdd->setsockopt(ZMQ_SUBSCRIBE, "add", 3);
+        subscriberRemove->setsockopt(ZMQ_SUBSCRIBE, "remove", 6);
+        subscriberTVChanged->setsockopt(ZMQ_SUBSCRIBE, "tvchanged", 9);
+        subscriberAVChanged->setsockopt(ZMQ_SUBSCRIBE, "avchanged", 9);
+    }
+
+    void testAtomSpaceEvents(void)
+    {
+        InitZeroMQ();
+
+        config().set("LOG_DIR", ".");
+        config().set("ZMQ_EVENT_PORT", "5563");
+        config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
+
+        cogserver = &static_cast<CogServer&>(server(CogServer::createInstance));
+
+        // TODO: We should properly utilize CONFDIR and put opencog.conf there instead of specifying this crazy relative path
+        cogserver->loadModule("../../../../opencog/persist/zmq/events/libatomspacepublishermodule.so");
+
+        logger().setLevel(Logger::DEBUG);
+        logger().setPrintToStdoutFlag(true);
+
+        this->as = &cogserver->getAtomSpace();
+
+        // Wait for the subscriber to initialize to avoid the 'slow joiner' syndrome
+        sleep(5);
+
+        // Add an atom
+        TruthValuePtr tv = SimpleTruthValue::createTV(2, 3);
+        as->addNode(CONCEPT_NODE, "ExampleNode", tv);
+
+        // Receive the event
+        // Read envelope with address
+        std::string address = s_recv (*subscriberAdd);
+
+        // Read message contents
+        std::string contents = s_recv (*subscriberAdd);
+
+        // Assert that the subscriber socket received that atomspace 'add' event
+        // and that the contents of the message is as expected
+        // TODO: Verify actual JSON contents
+        // (Debug Boost property tree JSON deserialization issue)
+
+        // Modify the atom's TruthValue      
+        // Assert that the subscriber socket received that atomspace 'tvchanged' event
+        // Assert that the contents of the message is as expected
+
+        // Modify the atom's AttentionValue
+        // Assert that the subscriber socket received that atomspace 'avchanged' event
+        // Assert that the contents of the message is as expected
+
+        // Remove the atom
+        // Assert that the subscriber socket received that atomspace 'remove' event
+        // Assert that the contents of the message is as expected
+
+        // Cleanup
+        cogserver->stop();
+        subscriberAdd->close();
+        subscriberRemove->close();
+        subscriberTVChanged->close();
+        subscriberAVChanged->close();
+        delete subscriberAdd;
+        delete subscriberRemove;
+        delete subscriberTVChanged;
+        delete subscriberAVChanged;
+        delete context;
+    }
+};

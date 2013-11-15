@@ -28,13 +28,13 @@
 #include <string>
 
 #include <opencog/server/Agent.h>
-#include <opencog/server/Factory.h>
 #include <opencog/server/Module.h>
-
-#include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
 
-#include "zhelpers.hpp"
+//#include <boost/property_tree/ptree.hpp>
+//using boost::property_tree::ptree;
+
+#include "opencog/util/zhelpers.hpp"
 
 namespace opencog
 {
@@ -75,8 +75,6 @@ class AtomSpacePublisherModule : public Module
 
         void InitZeroMQ();
 
-        std::string atomToJSON(Handle h);
-
     public:
         AtomSpacePublisherModule(CogServer&);
         virtual ~AtomSpacePublisherModule();
@@ -89,10 +87,11 @@ class AtomSpacePublisherModule : public Module
         void atomRemoveSignal(AtomPtr atom);
         void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
         void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
-}; // class
 
-} // namespace opencog
+        std::string atomToJSON(Handle h);
+//        ptree tvToPtree(TruthValuePtr tv);
+};
 
-#endif // _OPENCOG_ATOMSPACE_PUBLISHER_MODULE_H
+}
 
-
+#endif

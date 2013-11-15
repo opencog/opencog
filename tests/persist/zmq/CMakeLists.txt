@@ -1,0 +1,3 @@
+IF (HAVE_ZMQ)
+    ADD_SUBDIRECTORY (events)
+ENDIF (HAVE_ZMQ)

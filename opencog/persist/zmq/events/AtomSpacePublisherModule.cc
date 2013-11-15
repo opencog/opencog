@@ -24,22 +24,18 @@
 
 #include "AtomSpacePublisherModule.h"
 
-#include <opencog/server/Factory.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
-#include <iostream>
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
+#include "opencog/util/zhelpers.hpp"
+#include <iostream>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 using boost::property_tree::ptree;
 using boost::property_tree::read_json;
 using boost::property_tree::write_json;
-
-// @todo: Remove zhelpers.hpp
-#include "zhelpers.hpp"
 
 using namespace std;
 using namespace opencog;
@@ -69,8 +65,9 @@ void AtomSpacePublisherModule::run()
 AtomSpacePublisherModule::~AtomSpacePublisherModule()
 {
     logger().info("Terminating AtomSpacePublisherModule.");
-    delete context;
+    publisher->close();
     delete publisher;
+    delete context;
 }
 
 void AtomSpacePublisherModule::InitZeroMQ()
@@ -140,25 +137,33 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // TruthValue
     TruthValuePtr tvp = as->getTV(h);
+
     ptree ptTV;
+
+    //ptTV = tvToPtree(tvp);
+
     switch (tvp->getType())
     {
         case SIMPLE_TRUTH_VALUE:
+        {
             ptTV.put("type", "simple");
             ptTV.put("details.strength", tvp->getMean());
             ptTV.put("details.count", tvp->getCount());
             ptTV.put("details.confidence", tvp->getConfidence());
-
             break;
+        }
 
         case COUNT_TRUTH_VALUE:
+        {
             ptTV.put("type", "count");
             ptTV.put("details.strength", tvp->getMean());
             ptTV.put("details.count", tvp->getCount());
             ptTV.put("details.confidence", tvp->getConfidence());
             break;
+        }
 
         case INDEFINITE_TRUTH_VALUE:
+        {
             IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
             ptTV.put("type", "indefinite");
             ptTV.put("details.strength", itv->getMean());
@@ -168,20 +173,23 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
             ptTV.put("details.diff", itv->getDiff());
             ptTV.put("details.symmetric", itv->isSymmetric());
             break;
+        }
 
-// Todo: CompositeTruthValue
-/*
         case COMPOSITE_TRUTH_VALUE:
+        {
+/*
+            // TODO: CompositeTruthValue
             CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
             ptTV.put("type", "composite");
-            // @todo: Move tvToJSON and call it on tvp->getPrimaryTV()
+            // TODO: call tvToPtree on tvp->getPrimaryTV()
             ptTV.put("details.primary", "");
-            //foreach(VersionHandle vh, ctv->vh_range()) {
-            //    ptTV.put("tv.details." + VersionHandle::indicatorToStr(vh.indicator), vh.substantive);
-            //    tvToJSON(ctv->getVersionedTV(vh));
+            foreach(VersionHandle vh, ctv->vh_range()) {
+                ptTV.put("tv.details." + VersionHandle::indicatorToStr(vh.indicator), vh.substantive);
+                tvToJSON(ctv->getVersionedTV(vh));
             }
-            break;
 */
+            break;
+        }
     }
 
     // Incoming set
@@ -219,8 +227,19 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     ptAtoms.add_child("atoms", pt);
 
     std::ostringstream buf;
-    write_json (buf, ptAtoms, true);
+    write_json (buf, ptAtoms, false); // false = don't use pretty print
     std::string json = buf.str();
 
     return json;
 }
+
+// TODO: Create tvToPtree method to convert a TruthValuePointer to a Boost Property Tree
+// (Debug 'undefined symbol' issue with TruthValuePtr)
+/*
+ptree tvToPtree(TruthValuePtr tv)
+{
+    ptree pt;
+
+    return pt;
+}
+*/
