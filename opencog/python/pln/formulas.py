@@ -53,17 +53,17 @@ def inversionFormula(tvs):
 
 def inductionFormula(tvs):
     # InversionRule on the initial argument and then Deduction
-    MS, ML = tvs
+    MS, ML, S, M, L = tvs
 
-    SM = inversionFormula(MS)
+    SM = inversionFormula(MS, M, S)
     SL = deductionGeometryFormula(SM, ML)
     return SL
 
 def abductionFormula(tvs):
     # InversionRUle on the final argument and then Deduction
-    SM, LM = tvs
+    SM, LM, S, M, L = tvs
 
-    ML = inversionFormula(LM)
+    ML = inversionFormula(LM, L, M)
     SL = deductionGeometryFormula(SM, ML)
     return SL
 
@@ -198,6 +198,35 @@ def subsetEvaluationFormula(tvs):
         return [TruthValue(1, 1)]
     else:
         # A and NOTB => 1 observation of NOTB|A
+        return [TruthValue(0, 1)]
+
+def andEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
+
+    # P(x in B AND x in A)
+    and_ab = mem_a and mem_b
+
+    if and_ab:
+        # This object is in A and B
+        return [TruthValue(1, 1)]
+    else:
+        # This object is not in A AND B
+        # So raise the count by one, lowering the probability slightly
+        return [TruthValue(0, 1)]
+
+def orEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
+
+    # P(x in B OR x in A)
+    or_ab = mem_a or mem_b
+
+    if or_ab:
+        return [TruthValue(1, 1)]
+    else:
         return [TruthValue(0, 1)]
 
 def negatedSubsetEvaluationFormula(tvs):

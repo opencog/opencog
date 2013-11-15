@@ -41,6 +41,9 @@ class ForwardInferenceAgent(MindAgent):
 
         # create probabilistic logical links out of MemberLinks
 
+        self.chainer.add_rule(rules.AndEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.OrEvaluationRule(self.chainer))
+
         # These two "macro rules" make the individual rules redundant
         self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.IntensionalLinkEvaluationRule(self.chainer))

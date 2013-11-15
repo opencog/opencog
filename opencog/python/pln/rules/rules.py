@@ -130,7 +130,7 @@ class InductionRule(Rule):
         Rule.__init__(self,
             outputs= [chainer.link(link_type, [S, L])],
             inputs=  [chainer.link(link_type, [M, S]),
-                      chainer.link(link_type, [M, L])],
+                      chainer.link(link_type, [M, L]), S, M, L],
             formula= formulas.inductionFormula)
 
 class AbductionRule(Rule):
@@ -143,7 +143,7 @@ class AbductionRule(Rule):
         Rule.__init__(self,
             outputs= [chainer.link(link_type, [S, L])],
             inputs=  [chainer.link(link_type, [S, M]),
-                      chainer.link(link_type, [L, M])],
+                      chainer.link(link_type, [L, M]), S, M, L],
             formula= formulas.inductionFormula)
 
 # TODO implement transitiveSimilarityFormula
@@ -254,19 +254,37 @@ class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
        ASSOC(A) is the set of x where AttractionLink(x, A)'''
     # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
     # Reuses the subset formula. because intensional inheritance = subset based on intension rather than extension
+    # heyyyy - wouldn't the AttractionLinks be the wrong way around here!
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer, 
             member_type = types.AttractionLink,
             output_type = types.IntensionalInheritanceLink,
             formula= formulas.subsetEvaluationFormula)
 
-# abandoned for now because you have to estimate the number of objects (maybe an arbitrary setting?)
+# TODO only for AND of two concepts.
+# TODO the TV depends on the number of objects that do NOT satisfy AND(A B).
+# This is VERY annoying
 class AndEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluate And(A B) from the definition.
        |A and B| = |x in A and x in B|
-       P(A and B) = |A and B| / universe (gulp)'''
+       P(A and B) = |A and B| / N'''
     # count(a^b)
-    pass
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer, 
+            member_type = types.MemberLink,
+            output_type = types.AndLink,
+            formula= formulas.andEvaluationFormula)
+
+class OrEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluate Or(A B) from the definition.
+       |A or B| = |x in A or x in B|
+       P(A or B) = |A or B| / universe'''
+    # count(a|b)
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer, 
+            member_type = types.MemberLink,
+            output_type = types.OrLink,
+            formula= formulas.orEvaluationFormula)
 
 # It's more useful to calculate Subset(context, AndLink(A B))
 # You could have a special subset evaluator that uses separate rules for and/or
