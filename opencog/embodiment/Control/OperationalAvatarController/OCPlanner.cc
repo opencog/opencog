@@ -1519,13 +1519,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork)
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
-    for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
+    vector<State*>& precondList = ruleNode->originalRule->preconditionList;
+
+    if (orginalRule)
+        precondList = orginalRule->preconditionList;
+
+    for (itpre = precondList.begin(); itpre != precondList.end(); ++ itpre)
     {
         State* ps = *itpre;
         State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -1583,7 +1588,7 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
 
         }
 
-        if ( ! satisfied)
+        if (! satisfied)
         {
             // check if this precond will add a cirle to the planning network
             // if this precond is unsatified and exactly the same with one of its previous / forward state node,
@@ -1641,6 +1646,7 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
 
         delete groundPs;
     }
+
 
     return satisfiedPreconNum;
 }
@@ -2771,7 +2777,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         }
         else if (ruleNode->costHeuristics.size()!= 0)
         {
-            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,false);
+            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
         }
         else
         {
@@ -2793,7 +2799,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 }
 
 
-ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons)
+ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
+                                                           string varName, vector<ParamValue>& values, Rule *orginalRule, bool checkPrecons)
 {
     // check how many preconditions will be satisfied
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -2840,7 +2847,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         // check how many preconditions will be satisfied
 
         bool preconImpossible;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle);
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,orginalRule);
 
         if (preconImpossible)
             score -= 99999.9f;

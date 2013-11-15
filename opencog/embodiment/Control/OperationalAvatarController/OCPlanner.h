@@ -391,7 +391,7 @@ protected:
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
-     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork);
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule *orginalRule = 0);
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy
      // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
@@ -421,7 +421,8 @@ protected:
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
      // @ values: the candidate values
      // @ varName: the variable name
-     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons = true);
+     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
+                                                     string varName, vector<ParamValue>& values, Rule* orginalRule = 0, bool checkPrecons = true);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
