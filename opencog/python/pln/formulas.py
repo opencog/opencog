@@ -51,6 +51,22 @@ def inversionFormula(tvs):
     
     return [TruthValue(sBA, nBA)]
 
+def inductionFormula(tvs):
+    # InversionRule on the initial argument and then Deduction
+    MS, ML, S, M, L = tvs
+
+    SM = inversionFormula(MS, M, S)
+    SL = deductionGeometryFormula(SM, ML)
+    return SL
+
+def abductionFormula(tvs):
+    # InversionRUle on the final argument and then Deduction
+    SM, LM, S, M, L = tvs
+
+    ML = inversionFormula(LM, L, M)
+    SL = deductionGeometryFormula(SM, ML)
+    return SL
+
 def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
@@ -61,20 +77,21 @@ def crispModusPonensFormula(tvs):
         return [TruthValue(0, 0)]
 
 def modusPonensFormula(tvs):
-    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+    (sAB, nAB), (sNotAB, nNotAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
 #    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
 #        return crispModusPonensFormula(tvs)
 
-    # P(B|not A) -- how should we find this?
-    #BNA = TruthValue(0.5, 0.01)
-    sBNA, nBNA = (0.5, 0.01)
+    # guess P(B|not A)
+    #    sNotAB, nNotAB = (0.5, 0.01)
     
+    
+
     n2 = min(nAB, nA)
-    if n2 + nBNA > 0:
-        s2 = ((sAB * sA * n2 + nBNA +
-                 sBNA * (1 - sA) * nBNA) /
-                 low(n2 + nBNA))
+    if n2 + nNotAB > 0:
+        s2 = ((sAB * sA * n2 + nNotAB +
+                 sNotAB * (1 - sA) * nNotAB) /
+                 low(n2 + nNotAB))
     else:
         raise NotImplementedError
         s2 = BNA.confidence
@@ -183,6 +200,42 @@ def subsetEvaluationFormula(tvs):
         # A and NOTB => 1 observation of NOTB|A
         return [TruthValue(0, 1)]
 
+def andEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
+
+    # P(x in B AND x in A)
+    and_ab = mem_a and mem_b
+
+    if and_ab:
+        # This object is in A and B
+        return [TruthValue(1, 1)]
+    else:
+        # This object is not in A AND B
+        # So raise the count by one, lowering the probability slightly
+        return [TruthValue(0, 1)]
+
+def orEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_a = mem_a_tv.mean >= 0.5
+    mem_b = mem_b_tv.mean >= 0.5
+
+    # P(x in B OR x in A)
+    or_ab = mem_a or mem_b
+
+    if or_ab:
+        return [TruthValue(1, 1)]
+    else:
+        return [TruthValue(0, 1)]
+
+def negatedSubsetEvaluationFormula(tvs):
+    [mem_a_tv, mem_b_tv] = tvs
+    mem_not_a_mean = 1 - mem_a_tv.mean
+    mem_not_a_tv = TruthValue(mem_not_a_mean, mem_a_tv.count)
+
+    return subsetEvaluationFormula([mem_not_a_tv, mem_b_tv])
+
 def subsetFuzzyEvaluationFormula(tvs):
     [mem_a_tv, mem_b_tv] = tvs
 
@@ -211,14 +264,16 @@ def similarityEvaluationFormula(tvs):
 
 def extensionalEvaluationFormula(tvs):
     '''Inputs: Membership x A.tv, Membership x B.tv
-Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SimilarityLink A B.tv'''
+Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SubsetLink NOT(A) B.tv, SubsetLink NOT(B) A.tv SimilarityLink A B.tv'''
     subsetAB = subsetEvaluationFormula(tvs)
     subsetBA = subsetEvaluationFormula(reversed(tvs))
+    subsetNotAB = negatedSubsetEvaluationFormula(tvs)
+    subsetNotBA = negatedSubsetEvaluationFormula(reversed(tvs))
 
     similarityAB = similarityEvaluationFormula(tvs)
 
     # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
-    tvs = subsetAB + subsetBA + similarityAB
+    tvs = subsetAB + subsetBA + subsetNotAB + subsetNotBA + similarityAB
     for tv in tvs: print str(tv)
     return tvs
 

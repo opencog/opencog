@@ -10,16 +10,6 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-# @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
-# every Atom's STI (in the whole AtomSpace)
-def get_attentional_focus(atomspace, attentional_focus_boundary=0):
-    nodes = atomspace.get_atoms_by_type(types.Atom)
-    attentional_focus = []
-    for node in nodes:
-        if node.av['sti'] > attentional_focus_boundary:
-            attentional_focus.append(node)
-    return attentional_focus
-
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
 The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
@@ -59,6 +49,9 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
+    def log_failed_inference(self,message):
+        print 'Attempted invalid inference:',message
+
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
     def _select_one_matching(self, template, s = {}, allow_zero_tv = False):
@@ -69,62 +62,36 @@ class AbstractChainer(Logic):
         # TODO backward chaining doesn't work, because this method will pick up Atoms
         # that have variables in them (including the queries left over from other inferences)!!!
 
-        attentional_focus = get_attentional_focus(self._atomspace)
-
-        atom = self._select_from(template, s, attentional_focus, allow_zero_tv, useAF=True)
+        atom = self._select_from(template, s, allow_zero_tv, useAF=True)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
-            if template.type == types.VariableNode:
-                root_type = types.Atom
-            else:
-                root_type = template.type
-            all_atoms = self._atomspace.get_atoms_by_type(root_type)
-
-            if len(all_atoms) == 0:
-                return None
-
-            atom = self._select_from(template, s, all_atoms, allow_zero_tv, useAF=False)
+            atom = self._select_from(template, s, allow_zero_tv, useAF=False)
 
         return atom
 
-    def _select_from(self, template, substitution, atoms, allow_zero_tv, useAF):
+    def _select_from(self, template, substitution, allow_zero_tv, useAF):
         # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
-        atoms = self.find(template, atoms, substitution)
-
-        if not allow_zero_tv:
-            atoms = [atom for atom in atoms if atom.tv.count > 0]
-
-        if ground_results:
-            atoms = [atom for atom in atoms if len(self.variables(atom)) == 0]
+        atoms = self.find(template, substitution, useAF=useAF, allow_zero_tv=allow_zero_tv, ground=ground_results)
 
         if len(atoms) == 0:
             return None
 
-        if useAF:
-            return self._selectOne(atoms)
-        else:
-            # selectOne doesn't work if the STI is below 0 i.e. outside of the attentional focus.
-            # after modifying the score function,, it does
-            return self._selectOne(atoms)
+        return self._selectOne(atoms)
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
             sti = atom.av['sti']
-            if sti < 1:
-                return 1
-            else:
+            if sti > 1:
                 return sti
-
-        # never used mixed_score to choose backward chaining targets (it requires an atom to already have better than 0,0 TV)
-        def mixed_score(atom):
-            s = int(100*sti_score(atom) + 100*atom.tv.mean + 100*atom.tv.confidence)
-            if s < 1:
-                return 1
             else:
-                return s
+                return 1
+
+        def mixed_score(atom):
+            s = int(10*sti_score(atom) + 100*(atom.tv.mean+0.01) + 100*(atom.tv.confidence+0.01))
+            return s
 
         score = sti_score
         #score = mixed_score
@@ -181,11 +148,34 @@ class AbstractChainer(Logic):
             return suitable
         elif atom.type in rules.HIGHER_ORDER_LINKS:
             suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
+        elif atom.is_a(types.MemberLink):
+            # Assume the domain of all predicates is objects
+            element = atom.out[0]
+            return element.is_a(types.ObjectNode)
         else:
             return True
 
-    def log_failed_inference(self,message):
-        print 'Attempted invalid inference:',message
+    def count_objects(self):
+        all_object_nodes = self.atomspace.get_atoms_by_type(types.ObjectNode)
+        return len(all_object_nodes)
+
+    def count_members(self, conceptnode):
+        var = self.new_variable()
+        template = self.link(types.MemberLink, [var, conceptnode])
+        members = self.find(template, {}, ground=True)
+        self.atomspace.remove(var)
+        return len(members)
+
+    def node_tv(self, conceptnode):
+        '''Calculate the probability of any object being a member of this conceptnode.
+        Only works for predicates whose domain is ObjectNodes. It will often change as new information is received'''
+        N = self.count_objects()
+        p = self.count_members(conceptnode)*1.0/N
+        return TruthValue(p, N)
+
+    def update_all_node_probabilities(self):
+        for node in self.atomspace.get_atoms_by_type(types.ConceptNode):
+            node.tv = self.node_tv(node)
 
 class InferenceHistoryIndex(object):
     def __init__(self):
@@ -293,23 +283,42 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
-        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
-        specific_inputs = []
-        empty_substitution = {}
-        subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
-        if subst is None:
-            return None
-        # set the outputs after you've found all the inputs
-        # mustn't use '=' because it will discard the original reference and thus have no effect
-        specific_outputs = self.substitute_list(subst, generic_outputs)
-
-        # delete the query atoms after you've finished using them.
-        # recursive means it will delete the new variable nodes and the links
-        # containing them (but not the existing nodes and links)
-        for var in created_vars:
-            self.atomspace.remove(var, recursive=True)
+        try:
+            (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
+            specific_inputs = []
+            empty_substitution = {}
+            subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
+            if subst is None:
+                return None
+            # set the outputs after you've found all the inputs
+            # mustn't use '=' because it will discard the original reference and thus have no effect
+            specific_outputs = self.substitute_list(subst, generic_outputs)
+        finally:
+            # delete the query atoms after you've finished using them.
+            # recursive means it will delete the new variable nodes and the links
+            # containing them (but not the existing nodes and links)
+            for var in created_vars:
+                self.atomspace.remove(var, recursive=True)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
+
+    def apply_bulk(self, rule):
+        '''Apply a rule to every possible input. It's much more efficient (for that case) than calling apply_forward(rule) repeatedly. So I don't have to include backtracking, it only works for rules with one input template.'''
+        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
+        output_atoms = []
+
+        assert len(generic_inputs) == 1
+        template = generic_inputs[0]
+        input_atoms = self.find(template, ground=True)
+
+        for input in input_atoms:
+            subst = self.unify(template, input, {})
+            outputs = self.substitute_list(subst, generic_outputs)
+            self.apply_rule(rule, [input], outputs)
+            output_atoms+=generic_outputs
+
+        for var in created_vars:
+            self.atomspace.remove(var, recursive=True)
 
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
@@ -602,7 +611,7 @@ class Chainer(AbstractChainer):
 
     def lookup_rule(self, rule_name):
         for rule in self.rules:
-            if rule.name == rule_name:
+            if rule.name == rule_name or rule.full_name == rule_name:
                 return rule
 
         raise ValueError("lookup_rule: rule doesn't exist "+rule_name)

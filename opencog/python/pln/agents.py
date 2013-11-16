@@ -1,7 +1,7 @@
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
-from pln.chainers import Chainer, get_attentional_focus
+from pln.chainers import Chainer
 from pln.rules import rules, temporal_rules, boolean_rules
 
 class ForwardInferenceAgent(MindAgent):
@@ -23,7 +23,9 @@ class ForwardInferenceAgent(MindAgent):
         for link_type in conditional_probability_types:
             self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
-            self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
+            #self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
         # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
         for link_type in similarity_types:
@@ -39,16 +41,21 @@ class ForwardInferenceAgent(MindAgent):
 
         # create probabilistic logical links out of MemberLinks
 
+        self.chainer.add_rule(rules.AndEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.OrEvaluationRule(self.chainer))
+
         # These two "macro rules" make the individual rules redundant
         self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.IntensionalLinkEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.NegatedSubsetEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
         #self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
-        self.chainer.add_rule(rules.EvaluationToMemberRule(self.chainer))
-        for rule in rules.create_general_evaluation_to_member_rules(self.chainer):
+        self.member_rules = [rules.EvaluationToMemberRule(self.chainer)]
+        self.member_rules += rules.create_general_evaluation_to_member_rules(self.chainer)
+        for rule in self.member_rules:
             self.chainer.add_rule(rule)
 
         # It's important to have both of these
@@ -73,6 +80,9 @@ class ForwardInferenceAgent(MindAgent):
             self.create_chainer(atomspace)
             # For simplicity, do nothing the first time. Silly APIs mean you have to call run to set the atomspace
             return
+
+        # Update all of the node probabilities at each step
+        self.chainer.update_all_node_probabilities()
 
         result = self.chainer.forward_step()
         if result:
@@ -125,6 +135,28 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.backward_step(target_atoms=[atom])
         print 'tv before sampling', old_tv
         print 'tv after sampling', atom.tv
+
+    def embodied_inference(self, sample_count=1000):
+        '''Do the series of inferences that is typically useful for embodied inference.
+           Create a variety of MemberLinks from EvaluationLinks, and then use those to derive
+           SubsetLinks, and use those to derive IntensionalInheritanceLinks, and use those to derive
+           (Mixed)InheritanceLinks, then use those InheritanceLinks to find lots of InheritanceLinks.
+           The reason to do it in this order is that doing the later stages first, you would find few results'''
+        # Store those rules, in that order
+        rules=[]
+        rules+= self.member_rules
+        rules.append(self.chainer.lookup_rule("ExtensionalLinkEvaluationRule"))
+        rules.append(self.chainer.lookup_rule("AttractionRule"))
+        rules.append(self.chainer.lookup_rule("IntensionalLinkEvaluationRule"))
+        rules.append(self.chainer.lookup_rule("InheritanceRule"))
+
+        for rule in rules:
+            self.chainer.update_all_node_probabilities()
+            if len(rule._inputs) == 1:
+                self.chainer.apply_bulk(rule=rule)
+            else:
+                for i in xrange(0, sample_count):
+                    self.chainer.forward_step(rule=rule)            
 
 def print_atoms(atoms):
     for atom in atoms:
