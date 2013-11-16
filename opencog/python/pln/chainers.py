@@ -283,21 +283,22 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
-        (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
-        specific_inputs = []
-        empty_substitution = {}
-        subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
-        if subst is None:
-            return None
-        # set the outputs after you've found all the inputs
-        # mustn't use '=' because it will discard the original reference and thus have no effect
-        specific_outputs = self.substitute_list(subst, generic_outputs)
-
-        # delete the query atoms after you've finished using them.
-        # recursive means it will delete the new variable nodes and the links
-        # containing them (but not the existing nodes and links)
-        for var in created_vars:
-            self.atomspace.remove(var, recursive=True)
+        try:
+            (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
+            specific_inputs = []
+            empty_substitution = {}
+            subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
+            if subst is None:
+                return None
+            # set the outputs after you've found all the inputs
+            # mustn't use '=' because it will discard the original reference and thus have no effect
+            specific_outputs = self.substitute_list(subst, generic_outputs)
+        finally:
+            # delete the query atoms after you've finished using them.
+            # recursive means it will delete the new variable nodes and the links
+            # containing them (but not the existing nodes and links)
+            for var in created_vars:
+                self.atomspace.remove(var, recursive=True)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
