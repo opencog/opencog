@@ -10,6 +10,23 @@ from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear,
 
 __author__ = 'keyvan'
 
+
+TEMPORAL_RELATIONS = {
+    'p': 'precedes',
+    'm': 'meets',
+    'o': 'overlaps',
+    'F': 'finished by',
+    'D': 'contains',
+    's': 'starts',
+    'e': 'equals',
+    'S': 'started by',
+    'd': 'during',
+    'f': 'finishes',
+    'O': 'overlapped by',
+    'M': 'met by',
+    'P': 'preceded by'
+}
+
 # Benvolution ------------------------------------------
 
 
@@ -340,18 +357,36 @@ def test(event_1, event_2, prec=0.25, size=10000):
 
 if __name__ == '__main__':
     from scipy.stats import norm, uniform, expon
+    from numpy import linspace
+    import matplotlib.pyplot as plt
     tfc = TemporalFormulaConvolution()
     fc = FormulaCreator(tfc)
-    for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
-        print name, '-----------------------'
-        for i in xrange(40):
-            F_a = i * 0.2
-            G_a = 10 - i * 0.2
-            if i == 100:
-                pass
-            F = uniform(loc=F_a, scale=2)
-            G = uniform(loc=G_a, scale=2)
-            print func(F, G)
+
+    F = uniform(loc=20, scale=2)
+    G = norm(loc=21, scale=0.5)
+
+    plt.plot([20, 22], [0.5, 0.5])
+    x = linspace(0, 43, 2000)
+    plt.plot(x, G.pdf(x))
+
+    print fc.same(F, G)
+
+    plt.figure()
+    print calculate_bounds_of_probability_distribution(G)
+
+    tfc.convolutions[(F, G)].plot()
+    plt.show()
+
+    #for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
+    #    print name, '-----------------------'
+    #    for i in xrange(40):
+    #        F_a = i * 0.2
+    #        G_a = 10 - i * 0.2
+    #        if i == 100:
+    #            pass
+    #        F = uniform(loc=F_a, scale=2)
+    #        G = uniform(loc=G_a, scale=2)
+    #        print func(F, G)
 
 #
 #
