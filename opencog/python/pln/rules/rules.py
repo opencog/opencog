@@ -536,3 +536,19 @@ class AttractionRule(Rule):
             outputs= [chainer.link(types.AttractionLink, [A, B])],
             inputs=  [subset1, subset2])
 
+class OntologicalInheritanceRule(Rule):
+    '''Create an isa ontology.'''
+    def __init__(self, chainer):
+        self._chainer = chainer
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inhAB = chainer.link(types.InheritanceLink, [A, B])
+        inhBA = chainer.link(types.InheritanceLink, [B, A])
+        ontoinhAB = chainer.link(types.OntologicalInheritanceLink, [A, B])
+
+        Rule.__init__(self,
+            formula= formulas.ontoInhFormula,
+            inputs=  [inhAB, inhBA],
+            outputs= [ontoinhAB])
+

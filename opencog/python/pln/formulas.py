@@ -295,7 +295,16 @@ def extensionalSimilarityFormula(tvs):
 def attractionFormula(tvs):
     [ab, b] = tvs
 
-    mean = min(0, ab.mean - b.mean)
+    mean = low(ab.mean - b.mean)
+
+    count = ab.count
+
+    return [TruthValue(mean, count)]
+
+def ontoInhFormula(tvs):
+    [ab, ba] = tvs
+
+    mean = low(ab - ba)
 
     count = ab.count
 
@@ -332,5 +341,5 @@ def orBreakdownFormula(tvs):
     return [TruthValue(sB, nB)]
 
 def low(n):
-    return max(n, 0.00001)
+    return max(n, 0)
 

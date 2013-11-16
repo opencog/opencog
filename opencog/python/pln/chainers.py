@@ -84,10 +84,7 @@ class AbstractChainer(Logic):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
             sti = atom.av['sti']
-            if sti > 1:
-                return sti
-            else:
-                return 1
+            return max(sti, 1)
 
         def mixed_score(atom):
             s = int(10*sti_score(atom) + 100*(atom.tv.mean+0.01) + 100*(atom.tv.confidence+0.01))
@@ -98,8 +95,8 @@ class AbstractChainer(Logic):
 
         assert type(atoms[0]) == Atom
 
-        max = sum([score(atom) for atom in atoms])
-        pick = random.randrange(0, max)
+        total = sum([score(atom) for atom in atoms])
+        pick = random.randrange(0, total)
         current = 0
         for atom in atoms:
             current += score(atom)

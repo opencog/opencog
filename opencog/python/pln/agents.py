@@ -65,6 +65,8 @@ class ForwardInferenceAgent(MindAgent):
         # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
 
+        self.chainer.add_rule(rules.OntologicalInheritanceRule(self.chainer))
+
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
 
