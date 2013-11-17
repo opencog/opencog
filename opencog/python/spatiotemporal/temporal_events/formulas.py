@@ -27,6 +27,23 @@ TEMPORAL_RELATIONS = {
     'P': 'preceded by'
 }
 
+
+class TemporalRelation(dict):
+    all_relations = 'pmoFDseSdfOMP'
+
+    def to_list(self):
+        result = []
+        for name in self.all_relations:
+            result.append(self[name])
+        return result
+
+    def __repr__(self):
+        return 'TemporalRelation({0})'.format(''.join([name for name in self.all_relations if self[name] > 0]))
+
+    def __str__(self):
+        return repr(self)
+
+
 # Benvolution ------------------------------------------
 
 
@@ -183,59 +200,48 @@ class FormulaCreator(object):
         beginning_a, ending_a = temporal_event_1.distribution_beginning, temporal_event_1.distribution_ending
         beginning_b, ending_b = temporal_event_2.distribution_beginning, temporal_event_2.distribution_ending
 
-        return {
-            'p':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.before(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result = TemporalRelation()
 
-            'm':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.same(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['p'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.before(ending_a, beginning_b) * self.before(ending_a, ending_b),
 
-            'o':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['m'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.same(ending_a, beginning_b) * self.before(ending_a, ending_b),
 
-            'F':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['o'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
 
-            'D':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['F'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
 
-            's':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['D'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
 
-            'e':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['s'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
 
-            'S':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['e'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
 
-            'd':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['S'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
 
-            'f':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['d'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
 
-            'O':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['f'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
 
-            'M':
-                self.after(beginning_a, beginning_b) * self.same(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['O'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
 
-            'P':
-                self.after(beginning_a, beginning_b) * self.after(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
-        }
+        result['M'] = self.after(beginning_a, beginning_b) * self.same(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+        result['P'] = self.after(beginning_a, beginning_b) * self.after(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+
+        return result
 
 
 class TemporalFormulaConvolution(BaseTemporalFormula):
