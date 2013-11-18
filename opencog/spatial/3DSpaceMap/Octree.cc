@@ -595,7 +595,7 @@ vector<BlockEntity*> Octree::getNeighbourEntities(BlockVector& _pos)
                     if (block == beginBlock)
                         continue; // we don't contain the begin block in our return list
 
-                    for (it = entities.begin(); it != entities.end(); ++ i )
+                    for (it = entities.begin(); it != entities.end(); ++ it )
                     {
                         if (block->mBlockEntity == (BlockEntity*)(*it))
                             break;
