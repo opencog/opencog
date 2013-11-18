@@ -1522,6 +1522,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
+    willCauseCirleNetWork = false;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
@@ -1608,31 +1609,31 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
                     continue;
 
-                if ((tempStateNode->state->stateName == "existPath")&&(groundPs->stateName == "existPath"))
-                {
+//                if ((tempStateNode->state->stateName == "existPath")&&(groundPs->stateName == "existPath"))
+//                {
 
-                        ParamValue p1 = tempStateNode->state->stateOwnerList[0];
-                        ParamValue p2 = tempStateNode->state->stateOwnerList[1];
+//                        ParamValue p1 = tempStateNode->state->stateOwnerList[0];
+//                        ParamValue p2 = tempStateNode->state->stateOwnerList[1];
 
-                        Vector* v1 = boost::get<Vector>(&p1);
-                        Vector* v2 = boost::get<Vector>(&p2);
+//                        Vector* v1 = boost::get<Vector>(&p1);
+//                        Vector* v2 = boost::get<Vector>(&p2);
 
-                        ParamValue p3 = groundPs->stateOwnerList[0];
-                        ParamValue p4 = groundPs->stateOwnerList[1];
+//                        ParamValue p3 = groundPs->stateOwnerList[0];
+//                        ParamValue p4 = groundPs->stateOwnerList[1];
 
-                        Vector* v3 = boost::get<Vector>(&p3);
-                        Vector* v4 = boost::get<Vector>(&p4);
+//                        Vector* v3 = boost::get<Vector>(&p3);
+//                        Vector* v4 = boost::get<Vector>(&p4);
 
-                        if (v1 == v3)
-                        {
-                            if (v2 == v4)
-                            {
-                                int i =0;
-                                i++;
-                            }
-                        }
+//                        if (v1 == v3)
+//                        {
+//                            if (v2 == v4)
+//                            {
+//                                int i =0;
+//                                i++;
+//                            }
+//                        }
 
-                }
+//                }
 
                 if (groundPs->isSameState( *(tempStateNode)->state ))
                 {
@@ -2815,11 +2816,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         // debug
         ParamValue var = (ParamValue)(*vit);
         Vector* v1 = boost::get<Vector>(&var);
-        if ( (tryStepNum == 17) && (*v1) == Vector(60,69,102) )
-        {
-            int i = 0;
-            i ++;
-        }
+
         // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
@@ -2829,7 +2826,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
             return UNDEFINED_VALUE;
         }
 
-        float score = 0.0f-cost;
+        float score = 0.0f-cost*100;
         currentbindings.erase(varName);
 
         // check effect
