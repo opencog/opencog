@@ -101,7 +101,6 @@ class AbstractChainer(Logic):
         for atom in atoms:
             current += score(atom)
             if current >= pick:
-                print 'choosing atom based on score',score(atom), atom
                 return atom
 
         assert False
@@ -252,7 +251,6 @@ class Chainer(AbstractChainer):
         if rule is None:
             rule = self._select_rule()
 
-        print rule
         results = self._apply_forward(rule)
 
         return results
@@ -261,7 +259,6 @@ class Chainer(AbstractChainer):
         if rule is None:
             rule = self._select_rule()
 
-        print rule
         results = self._apply_backward(rule, target_outputs=target_atoms)
 
         return results
@@ -389,7 +386,6 @@ class Chainer(AbstractChainer):
 
         (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         subst = {}
-        print (generic_inputs, generic_outputs)
 
         if target_outputs is None:
             # This variable isn't really used; now we just use the substitution instead
@@ -406,8 +402,6 @@ class Chainer(AbstractChainer):
         specific_inputs = []
         subst = self._choose_inputs(specific_inputs, generic_inputs, subst, allow_zero_tv = True)
         found = len(subst) > 0
-
-        print specific_inputs
 
         final_outputs = self.substitute_list(subst, generic_outputs)
 
@@ -497,8 +491,6 @@ class Chainer(AbstractChainer):
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
 
-        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
-
     def _give_stimulus(self, atom):
         # Arbitrary
         STIMULUS_PER_ATOM = 10
@@ -509,7 +501,6 @@ class Chainer(AbstractChainer):
     def _validate(self, rule, inputs, outputs):
         # some of the validations might not make sense for backward chaining
 
-        print rule, map(str,inputs), map(str,outputs)
         # Sanity checks
         if not self.valid_structure(outputs[0]):
             self.log_failed_inference('invalid structure')

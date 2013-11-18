@@ -44,10 +44,12 @@ def deductionGeometryFormula(tvs):
     return [TruthValue(sAC, nAC)]
 
 def inversionFormula(tvs):
-    [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+    # To make this formula work properly, we need to have no hacks.
+
+    [AB, A, B] = tvs
     
-    sBA = sAB * sA / low(sB)
-    nBA = nAB * nB / low(nA)
+    sBA = AB.mean * A.mean / low(B.mean)
+    nBA = AB.count * B.mean / low(A.mean)
     
     return [TruthValue(sBA, nBA)]
 
