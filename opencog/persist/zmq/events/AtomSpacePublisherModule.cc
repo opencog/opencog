@@ -247,4 +247,3 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
 
     return ptTV;
 }
-
