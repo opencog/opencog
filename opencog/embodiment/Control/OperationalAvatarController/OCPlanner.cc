@@ -2486,6 +2486,44 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
+float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowardState, ParamGroundedMapInARule& oneGroupOfbindings,bool &impossible)
+{
+
+    float fitnessScore = 0;
+
+   ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
+
+   ruleNode->currentAllBindings.insert(oneGroupOfbindings.begin(),oneGroupOfbindings.end());
+
+    int negateveStateNum = 0;
+    int satisfiedPreconNum = 0;
+    bool negativeGoal = false;
+    bool isDiffStateOwnerType = false;
+    bool preconImpossible = false;
+    bool willAddCirle = false;
+
+    impossible = false;
+
+    // check all the effects:
+    negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
+
+    // check how many preconditions will be satisfied
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle);
+
+    // ruleNode resetbinding
+    ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
+
+    fitnessScore = fitnessScore - negateveStateNum*100.0f + satisfiedPreconNum*100.0f;
+
+    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle)
+    {
+        impossible = true;
+        fitnessScore -= 999999;
+    }
+
+    return fitnessScore;
+
+}
 
 // this function should be called after groundARuleNodeFromItsForwardState.
 // this function only ground non-numeric states
@@ -2562,6 +2600,12 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
             int candidateGroupNum = 1;
 
+            if (ruleNode->originalRule->ruleName == "eatFoodtoAchieveEnergyDemand")
+            {
+                int oo = 0;
+                oo ++;
+            }
+
             if (candidateListHandles.size() != 0)
             {
 
@@ -2577,52 +2621,21 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
-
                         cout<<varNames[index]<< "= " << ActionParameter::ParamValueToString(v) << std::endl;
-
-                        // Check if this group of candidates is able to ground some other need_real_time_inquery states
-                        // and how many of these need_real_time_inquery state can be satisifed by this group of candidates
-                        int numOfSat = 0;
-                        list<UngroundedVariablesInAState>::iterator nrtiIt= uvIt;
-                        for (; nrtiIt != ruleNode->curUngroundedVariables.end(); ++ nrtiIt)
-                        {
-                            if (((UngroundedVariablesInAState&)(*nrtiIt)).contain_numeric_var)
-                                break;
-
-                            if (! ((UngroundedVariablesInAState&)(*nrtiIt)).state->need_inquery)
-                                break;
-
-                            ParamGroundedMapInARule tryBindings = ruleNode->currentBindingsFromForwardState;
-                            tryBindings.insert(oneGroupCandidate.begin(),oneGroupCandidate.end());
-                            State* groundedState = Rule::groundAStateByRuleParamMap(((UngroundedVariablesInAState&)(*nrtiIt)).state, tryBindings);
-                            if (groundedState != 0)
-                            {
-                                bool found;
-                                StateNode* satStateNode;
-                                if (checkIfThisGoalIsSatisfiedByTempStates(*groundedState,found,satStateNode,0, false))
-                                    numOfSat ++;
-                                else if (found)
-                                    continue; // found in temp state list, but is not satisfied
-                                else
-                                {
-                                    // cannot find it in temp state list, check it in real time
-                                    float satDegree;
-                                    if (checkIsGoalAchievedInRealTime(*groundedState,satDegree ))
-                                        numOfSat ++;
-                                    else
-                                        continue;
-                                }
-
-                            }
-
-                            delete groundedState;
-
-                        }
-
-                        tmpcandidates.push_back(TmpParamCandidate(numOfSat, oneGroupCandidate));
-
                         index ++;
                     }
+
+                    bool impossile;
+                    float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
+
+                    cout << "Fitness score = " << fitnessScore ;
+                    if (impossile)
+                        cout << " , impossible bindings, would not be put into candidate list. " ;
+
+                    cout << std::endl;
+
+                    if (! impossile)
+                        tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
 
                 }
 
@@ -2813,10 +2826,6 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
-        // debug
-        ParamValue var = (ParamValue)(*vit);
-        Vector* v1 = boost::get<Vector>(&var);
-
         // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
