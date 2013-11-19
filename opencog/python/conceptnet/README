@@ -4,6 +4,7 @@ Procedure to create a scheme data file from conceptnet csv files
 3. run to_scm.py from the terminal
 
 Notes:
-1. Corpus = The word frequency csv file used to claculate the term probabilities. (60000_Word_Freqs.csv)
-2. The scheme file is outputed in the same folder 
+1. The test files used can be found at https://github.com/opencog/test-datasets/tree/master/conceptnet 
+2. Corpus = The word frequency csv file used to claculate the term probabilities. (60000_Word_Freqs.csv)
+3. The scheme file is outputed in the same folder 
 
