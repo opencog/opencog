@@ -1,0 +1,9 @@
+Procedure to create a scheme data file from conceptnet csv files
+1. Download the current csv tar ball from http://conceptnet5.media.mit.edu/downloads/current/
+2. Extract the tarball contents into this folder 
+3. run to_scm.py from the terminal
+
+Notes:
+1. Corpus = The word frequency csv file used to claculate the term probabilities. (60000_Word_Freqs.csv)
+2. The scheme file is outputed in the same folder 
+
