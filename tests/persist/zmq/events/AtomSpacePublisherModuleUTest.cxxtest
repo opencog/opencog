@@ -92,7 +92,7 @@ public:
 
         cogserver = &static_cast<CogServer&>(server(CogServer::createInstance));
 
-        // TODO: We should properly utilize CONFDIR and put opencog.conf there instead of specifying this crazy relative path
+        // TODO: We should fix Config.cc instead of specifying this crazy relative path
         cogserver->loadModule("../../../../opencog/persist/zmq/events/libatomspacepublishermodule.so");
 
         logger().setLevel(Logger::DEBUG);
@@ -100,36 +100,102 @@ public:
 
         this->as = &cogserver->getAtomSpace();
 
-        // Wait for the subscriber to initialize to avoid the 'slow joiner' syndrome
+        // Wait for the subscribers to initialize to avoid the 'slow joiner' syndrome
         sleep(5);
 
+        std::stringstream ss;
+        ptree pt;
+        ptree ptAtom;
+
         // Add an atom
-        TruthValuePtr tv = SimpleTruthValue::createTV(2, 3);
-        as->addNode(CONCEPT_NODE, "ExampleNode", tv);
+        TruthValuePtr tv = SimpleTruthValue::createTV(2.1, 3.1);
+        Handle h = as->addNode(CONCEPT_NODE, "ExampleNode", tv);
 
         // Receive the event
-        // Read envelope with address
-        std::string address = s_recv (*subscriberAdd);
+        std::string address = s_recv (*subscriberAdd); // Message envelope with address
+        std::string contents = s_recv (*subscriberAdd); // Message contents
 
-        // Read message contents
-        std::string contents = s_recv (*subscriberAdd);
+        // The atomspace fires a dummy 'avchanged' signal when you add a node, which needs to be flushed here
+        // so that it will not be in the queue during later tests
+        // https://github.com/opencog/opencog/issues/394
+        s_recv (*subscriberAVChanged);
+        s_recv (*subscriberAVChanged);
 
-        // Assert that the subscriber socket received that atomspace 'add' event
-        // and that the contents of the message is as expected
-        // TODO: Verify actual JSON contents
-        // (Debug Boost property tree JSON deserialization issue)
+        // Assert that the subscriber socket received the properly formatted atomspace 'add' event
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
 
-        // Modify the atom's TruthValue      
-        // Assert that the subscriber socket received that atomspace 'tvchanged' event
-        // Assert that the contents of the message is as expected
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "2.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "3.1");
 
-        // Modify the atom's AttentionValue
-        // Assert that the subscriber socket received that atomspace 'avchanged' event
-        // Assert that the contents of the message is as expected
+        // Modify the atom's TruthValue
+        TruthValuePtr newTV = SimpleTruthValue::createTV(5.1, 7.1);
+        as->setTV(h, newTV);
+
+        // Receive the event
+        address = s_recv (*subscriberTVChanged);
+        contents = s_recv (*subscriberTVChanged);
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+
+        // The following AttentionValue test is pending resolution of this issue:
+        // https://github.com/opencog/opencog/issues/405
+
+//        // Modify the atom's AttentionValue
+//        as->setSTI(h, 30);
+//        as->setLTI(h, 50);
+
+//        // Receive the event
+//        address = s_recv (*subscriberAVChanged);
+//        contents = s_recv (*subscriberAVChanged);
+
+//        // Assert that the subscriber socket received the properly formatted atomspace 'avchanged' event
+//        ss << contents;
+//        read_json(ss, pt);
+//        ptAtom = pt.get_child("atoms");
+
+//        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+//        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+//        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+//        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+//        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+//        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
+//        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
 
         // Remove the atom
-        // Assert that the subscriber socket received that atomspace 'remove' event
-        // Assert that the contents of the message is as expected
+        as->removeAtom(h);
+
+        // Receive the event
+        address = s_recv (*subscriberRemove);
+        contents = s_recv (*subscriberRemove);
+
+        // The atomspace fires a dummy 'avchanged' signal when you remove a node, which needs to be flushed here
+        // so that it will not be in the queue during later tests
+        // https://github.com/opencog/opencog/issues/394
+        s_recv (*subscriberAVChanged);
+        s_recv (*subscriberAVChanged);
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'remove' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+//        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
+//        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
 
         // Cleanup
         cogserver->stop();
