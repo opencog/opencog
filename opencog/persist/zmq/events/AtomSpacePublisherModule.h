@@ -31,8 +31,8 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 
-//#include <boost/property_tree/ptree.hpp>
-//using boost::property_tree::ptree;
+#include <boost/property_tree/ptree.hpp>
+using boost::property_tree::ptree;
 
 #include "opencog/util/zhelpers.hpp"
 
@@ -89,7 +89,7 @@ class AtomSpacePublisherModule : public Module
         void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
 
         std::string atomToJSON(Handle h);
-//        ptree tvToPtree(TruthValuePtr tv);
+        ptree tvToPtree(TruthValuePtr tv);
 };
 
 }

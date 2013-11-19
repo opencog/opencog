@@ -137,60 +137,8 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // TruthValue
     TruthValuePtr tvp = as->getTV(h);
-
     ptree ptTV;
-
-    //ptTV = tvToPtree(tvp);
-
-    switch (tvp->getType())
-    {
-        case SIMPLE_TRUTH_VALUE:
-        {
-            ptTV.put("type", "simple");
-            ptTV.put("details.strength", tvp->getMean());
-            ptTV.put("details.count", tvp->getCount());
-            ptTV.put("details.confidence", tvp->getConfidence());
-            break;
-        }
-
-        case COUNT_TRUTH_VALUE:
-        {
-            ptTV.put("type", "count");
-            ptTV.put("details.strength", tvp->getMean());
-            ptTV.put("details.count", tvp->getCount());
-            ptTV.put("details.confidence", tvp->getConfidence());
-            break;
-        }
-
-        case INDEFINITE_TRUTH_VALUE:
-        {
-            IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
-            ptTV.put("type", "indefinite");
-            ptTV.put("details.strength", itv->getMean());
-            ptTV.put("details.L", itv->getL());
-            ptTV.put("details.U", itv->getU());
-            ptTV.put("details.confidence", itv->getConfidenceLevel());
-            ptTV.put("details.diff", itv->getDiff());
-            ptTV.put("details.symmetric", itv->isSymmetric());
-            break;
-        }
-
-        case COMPOSITE_TRUTH_VALUE:
-        {
-/*
-            // TODO: CompositeTruthValue
-            CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
-            ptTV.put("type", "composite");
-            // TODO: call tvToPtree on tvp->getPrimaryTV()
-            ptTV.put("details.primary", "");
-            foreach(VersionHandle vh, ctv->vh_range()) {
-                ptTV.put("tv.details." + VersionHandle::indicatorToStr(vh.indicator), vh.substantive);
-                tvToJSON(ctv->getVersionedTV(vh));
-            }
-*/
-            break;
-        }
-    }
+    ptTV = tvToPtree(tvp);
 
     // Incoming set
     HandleSeq incoming = as->getIncoming(h);
@@ -233,13 +181,70 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     return json;
 }
 
-// TODO: Create tvToPtree method to convert a TruthValuePointer to a Boost Property Tree
-// (Debug 'undefined symbol' issue with TruthValuePtr)
-/*
-ptree tvToPtree(TruthValuePtr tv)
+ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
 {
-    ptree pt;
+    ptree ptTV;
 
-    return pt;
+    switch (tvp->getType())
+    {
+        case SIMPLE_TRUTH_VALUE:
+        {
+            ptTV.put("type", "simple");
+            ptTV.put("details.strength", tvp->getMean());
+            ptTV.put("details.count", tvp->getCount());
+            ptTV.put("details.confidence", tvp->getConfidence());
+            break;
+        }
+
+        case COUNT_TRUTH_VALUE:
+        {
+            ptTV.put("type", "count");
+            ptTV.put("details.strength", tvp->getMean());
+            ptTV.put("details.count", tvp->getCount());
+            ptTV.put("details.confidence", tvp->getConfidence());
+            break;
+        }
+
+        case INDEFINITE_TRUTH_VALUE:
+        {
+            IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
+            ptTV.put("type", "indefinite");
+            ptTV.put("details.strength", itv->getMean());
+            ptTV.put("details.L", itv->getL());
+            ptTV.put("details.U", itv->getU());
+            ptTV.put("details.confidence", itv->getConfidenceLevel());
+            ptTV.put("details.diff", itv->getDiff());
+            ptTV.put("details.symmetric", itv->isSymmetric());
+            break;
+        }
+
+        case COMPOSITE_TRUTH_VALUE:
+        {
+            CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
+            ptTV.put("type", "composite");
+
+            TruthValuePtr primaryTvp = ctv->getPrimaryTV();
+            ptree ptPrimaryTv = tvToPtree(primaryTvp);
+            ptTV.add_child("details.primary", ptPrimaryTv);
+
+            ptree ptVersionedTruthValueMap;
+            foreach(VersionHandle vh, ctv->vh_range()) {
+                ptree ptVersionedTV;
+
+                ptVersionedTV.put("handle", std::to_string(vh.substantive.value()));
+                ptVersionedTV.put("indicator", VersionHandle::indicatorToStr(vh.indicator));
+                ptree ptVersionedTVInstance = tvToPtree(ctv->getVersionedTV(vh));
+                ptVersionedTV.add_child("truthvalue", ptVersionedTVInstance);
+
+                ptVersionedTruthValueMap.push_back(std::make_pair("", ptVersionedTV));
+            }
+
+            ptTV.add_child("details.versionedtruthvaluemap", ptVersionedTruthValueMap);
+
+            break;
+        }
+    }
+
+    return ptTV;
 }
-*/
+

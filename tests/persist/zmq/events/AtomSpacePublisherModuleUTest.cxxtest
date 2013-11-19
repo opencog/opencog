@@ -197,6 +197,64 @@ public:
 //        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
 //        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
 
+
+        // Add an atom with a CompositeTruthValue and test that the associated
+        // JSON object from the event is properly formatted
+        Handle contextExampleNode1 = as->addNode(CONCEPT_NODE, "ContextExampleNode1");
+        Handle contextExampleNode2 = as->addNode(CONCEPT_NODE, "ContextExampleNode2");
+        Handle exampleNode = as->addNode(CONCEPT_NODE, "ExampleNodeWithContextualTV");
+
+        TruthValuePtr simpleTV1 = SimpleTruthValue::createTV(4.1, 6.1);
+        VersionHandle vh1 = VersionHandle(CONTEXTUAL, contextExampleNode1);
+
+        TruthValuePtr simpleTV2 = SimpleTruthValue::createTV(5.1, 8.1);
+        VersionHandle vh2 = VersionHandle(CONTEXTUAL, contextExampleNode2);
+
+        as->setTV(exampleNode, simpleTV1, vh1);
+        as->setTV(exampleNode, simpleTV2, vh2);
+
+        // Receive the event corresponding to the first of the two TruthValue changes, and disregard it
+        s_recv (*subscriberTVChanged);
+        s_recv (*subscriberTVChanged);
+
+        // Receive the event corresponding to the second of the two TruthValue changes
+        address = s_recv (*subscriberTVChanged);
+        contents = s_recv (*subscriberTVChanged);
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNodeWithContextualTV");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "composite");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.strength", "") == "0");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.count", "") == "0");
+
+        ptree ptVersionedTruthValueMap = ptAtom.get_child("truthvalue.details.versionedtruthvaluemap");
+        TS_ASSERT(ptVersionedTruthValueMap.size() == 2);
+
+        BOOST_FOREACH(boost::property_tree::ptree::value_type &v, ptVersionedTruthValueMap)
+        {
+            assert(v.first.empty()); // array elements have no names
+
+            if (v.second.get<std::string>("handle", "") == std::to_string(vh1.substantive.value()))
+            {
+                TS_ASSERT(v.second.get<std::string>("indicator", "") == "CONTEXTUAL");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.type", "") == "simple");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.strength", "") == "4.1");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.count", "") == "6.1");
+            }
+            else if (v.second.get<std::string>("handle", "") == std::to_string(vh2.substantive.value()))
+            {
+                TS_ASSERT(v.second.get<std::string>("indicator", "") == "CONTEXTUAL");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.type", "") == "simple");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.strength", "") == "5.1");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.count", "") == "8.1");
+            }
+        }
+
         // Cleanup
         cogserver->stop();
         subscriberAdd->close();
