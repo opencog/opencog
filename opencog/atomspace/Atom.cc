@@ -200,24 +200,27 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     // is atomic (right??)
     _attentionValue.swap(av);
 
-    if (_atomTable != NULL) {
-        std::lock_guard<std::mutex> lck (_avmtx);
+    // If the atom free-floating, we are done.
+    if (NULL == _atomTable) return;
 
-        // gets old and new bins
-        int oldBin = ImportanceIndex::importanceBin(av->getSTI());
-        int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
+    std::unique_lock<std::mutex> lck (_avmtx);
 
-        // if the atom importance has changed its bin,
-        // updates the importance index
-        if (oldBin != newBin) {
-            AtomPtr a(shared_from_this());
-            _atomTable->updateImportanceIndex(a, oldBin);
-        }
+    // gets old and new bins
+    int oldBin = ImportanceIndex::importanceBin(av->getSTI());
+    int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
 
-        // Notify any interested parties that the AV changed.
-        AVCHSigl& avch = _atomTable->AVChangedSignal();
-        avch(getHandle(), av, _attentionValue);  // av is old, after swap.
+    // if the atom importance has changed its bin,
+    // updates the importance index
+    if (oldBin != newBin) {
+        AtomPtr a(shared_from_this());
+        _atomTable->updateImportanceIndex(a, oldBin);
     }
+    // Must unlock before sending signals, to avoid future deadlocks.
+    lck.unlock();
+
+    // Notify any interested parties that the AV changed.
+    AVCHSigl& avch = _atomTable->AVChangedSignal();
+    avch(getHandle(), av, _attentionValue);  // av is old, after swap.
 }
 
 // ==============================================================
