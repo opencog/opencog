@@ -276,13 +276,13 @@ public:
 
 struct TmpParamCandidate
 {
-   int satNum;
+   float fitnessScore;
    ParamGroundedMapInARule aGroupOfParmCandidate;
-   TmpParamCandidate(int _satNum, ParamGroundedMapInARule _aGroupOfParmCandidate):satNum(_satNum),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
+   TmpParamCandidate(float _fitnessScore, ParamGroundedMapInARule _aGroupOfParmCandidate):fitnessScore(_fitnessScore),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
 
    bool operator < (const TmpParamCandidate& other) const
    {
-       if (satNum < other.satNum)
+       if (fitnessScore > other.fitnessScore)
            return true;
        else
            return false;
@@ -409,6 +409,10 @@ protected:
      // by finding the variables in this rule and its forward state node with the same semantic meaning,
      // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
+
+     // return fitness score for one group of binding
+     // bool &impossible return if this group of bindings is impossible to move one planning, so if it's true, should not consider this group as a candidate
+     float checkNonNumericValueFitness(RuleNode *ruleNode, StateNode *fowardState, ParamGroundedMapInARule &oneGroupOfbindings, bool &impossible);
 
      // To ground the non Numeric variables in this rule,  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingNonNumericValues(RuleNode* ruleNode);
