@@ -1,4 +1,4 @@
-Procedure to create a scheme data file from conceptnet csv files
+Procedure to create a scheme data file from conceptnet csv files:
 1. Download the current csv tar ball from http://conceptnet5.media.mit.edu/downloads/current/
 2. Extract the tarball contents into this folder 
 3. run to_scm.py from the terminal
@@ -7,4 +7,184 @@ Notes:
 1. The test files used can be found at https://github.com/opencog/test-datasets/tree/master/conceptnet 
 2. Corpus = The word frequency csv file used to claculate the term probabilities. (60000_Word_Freqs.csv)
 3. The scheme file is outputed in the same folder 
+
+Example Inputs(conceptnet URI) and corresponding outputs:
+1.
+/a/[/r/IsA/,/c/en/america_beautiful/,/c/en/national_anthem/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(InheritanceLink (stv 1.0 0.5)
+		(ConceptNode  "america_beautiful" (stv 2.52457494464e-09 0.95))
+		(ConceptNode  "national_anthem" (stv 2.52457494464e-09 0.95))
+	)
+)
+
+2.
+/a/[/r/PartOf/,/c/en/ankara/,/c/en/central_anatolia_region/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "PartOf"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "ankara" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "central_anatolia_region" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+3.
+/a/[/r/AtLocation/,/c/en/apple_inc/,/c/en/apple_campus/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "AtLocation"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "apple_inc" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "apple_campus" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+4.
+/a/[/r/HasSubevent/,/c/en/type/,/c/en/think/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "HasSubevent"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "type" (stv 8.42703118648e-06 0.95))
+			(ConceptNode  "think" (stv 7.33136565774e-06 0.95))
+		)
+	)
+)
+
+5.
+/a/[/r/DefinedAs/,/c/en/wool/,/c/en/hair_of_sheep/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "DefinedAs"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "wool" (stv 1.15625532756e-05 0.95))
+			(ConceptNode  "hair_of_sheep" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+6.
+/a/[/r/UsedFor/,/c/en/library/,/c/en/lend_book/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "UsedFor"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "library" (stv 6.12613357612e-05 0.95))
+			(ConceptNode  "lend_book" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+7.
+/a/[/r/Desires/,/c/en/person/,/c/en/intellectual_stimulation/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "Desires"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "person" (stv 0.000312100578319 0.95))
+			(ConceptNode  "intellectual_stimulation" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+8.
+/a/[/r/DefinedAs/,/c/en/philosophy/,/c/en/old_form_of_systematic_scholarly_inquiry/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "DefinedAs"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "philosophy" (stv 4.20568941089e-05 0.95))
+			(ConceptNode  "old_form_of_systematic_scholarly_inquiry" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+9.
+/a/[/r/HasProperty/,/c/en/and_chew_tobacco/,/c/en/disgust/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "HasProperty"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "and_chew_tobacco" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "disgust" (stv 1.01487913031e-06 0.95))
+		)
+	)
+)
+
+10.
+/a/[/r/HasPrerequisite/,/c/en/read_book/,/c/en/get_one/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "HasPrerequisite"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "read_book" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "get_one" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+11.
+/a/[/r/CapableOf/,/c/en/couple/,/c/en/see_counselor/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "CapableOf"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "couple" (stv 1.19614361179e-05 0.95))
+			(ConceptNode  "see_counselor" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
+
+12.
+/a/[/r/Causes/,/c/en/pass_class/,/c/en/joy/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "Causes"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "pass_class" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "joy" (stv 3.87219305986e-05 0.95))
+		)
+	)
+)
+
+13.
+/a/[/r/HasPrerequisite/,/c/en/leave_line/,/c/en/ask_someone_to_hold_your_place/]
+	-->
+(ContextLink (stv 1.0 0.5) 
+	(ConceptNode  "Universe" (stv 4.51368755491e-05 0.95))
+	(EvaluationLink  (stv 1.0 0.5)
+		(PredicateNode  "HasPrerequisite"  (stv 2.52457494464e-09 0.95))
+		(ListLink  
+			(ConceptNode  "leave_line" (stv 2.52457494464e-09 0.95))
+			(ConceptNode  "ask_someone_to_hold_your_place" (stv 2.52457494464e-09 0.95))
+		)
+	)
+)
 
