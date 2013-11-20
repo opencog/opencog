@@ -314,6 +314,8 @@ class Chainer(AbstractChainer):
         for var in created_vars:
             self.atomspace.remove(var, recursive=True)
 
+        return output_atoms
+
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
         return_inputs += [x for x in input_templates]
@@ -351,7 +353,6 @@ class Chainer(AbstractChainer):
         # Variables that haven't been bound become backward chaining queries
         for var in created_vars:
             if subst is None or (var in subst and subst[var] != var):
-                print 'removing', var
                 self.atomspace.remove(var, recursive=True)
 
     def _apply_backward(self, rule, target_outputs=None):

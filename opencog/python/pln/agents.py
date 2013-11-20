@@ -27,9 +27,12 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
             #self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
 
+        self.chainer.add_rule(rules.TermProbabilityRule(self.chainer))
+
         # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
         for link_type in similarity_types:
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+        # It should have ModusPonens too. It doesn't need inversion though obviously
 
         # These two Rules create mixed links out of intensional and extensional links
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))

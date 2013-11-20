@@ -57,16 +57,16 @@ def inductionFormula(tvs):
     # InversionRule on the initial argument and then Deduction
     MS, ML, S, M, L = tvs
 
-    SM = inversionFormula(MS, M, S)
-    SL = deductionGeometryFormula(SM, ML)
+    [SM] = inversionFormula([MS, M, S])
+    SL = deductionGeometryFormula([SM, ML])
     return SL
 
 def abductionFormula(tvs):
     # InversionRUle on the final argument and then Deduction
     SM, LM, S, M, L = tvs
 
-    ML = inversionFormula(LM, L, M)
-    SL = deductionGeometryFormula(SM, ML)
+    [ML] = inversionFormula([LM, L, M])
+    SL = deductionGeometryFormula([SM, ML])
     return SL
 
 def crispModusPonensFormula(tvs):
@@ -99,6 +99,17 @@ def modusPonensFormula(tvs):
         s2 = BNA.confidence
     
     return [TruthValue(s2, n2)]
+
+def termProbabilityFormula(tvs):
+    # sB = sA*sAB/sBA
+    # A, Inheritance A B, => B
+
+    [A, AB, BA] = tvs
+    
+    sB = A.mean*AB.mean/BA.mean
+    nB = A.count
+
+    return [TruthValue(sB, nB)]
 
 def inheritanceFormula(tvs):
     tv_subset, tv_inh = tvs
@@ -276,7 +287,6 @@ Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SubsetLink NOT(A) B.tv, SubsetLin
 
     # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
     tvs = subsetAB + subsetBA + subsetNotAB + subsetNotBA + similarityAB
-    for tv in tvs: print str(tv)
     return tvs
 
 def extensionalSimilarityFormula(tvs):

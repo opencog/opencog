@@ -178,6 +178,12 @@ class ModusPonensRule(Rule):
                       A],
             formula= formulas.modusPonensFormula)
 
+class TermProbabilityRule(Rule):
+    def __init__(self, chainer):
+        ModusPonensRule.__init__(self, chainer, types.InheritanceLink)
+
+        self.formula=formulas.termProbabilityFormula
+
 class InheritanceRule(Rule):
     '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''
     def __init__(self, chainer):
