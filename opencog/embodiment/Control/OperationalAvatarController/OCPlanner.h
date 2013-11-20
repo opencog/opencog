@@ -244,6 +244,22 @@ public:
 
     }
 
+    bool isTheSameDepthLevelWithMe(const StateNode& other) const
+    {
+        if (depth.size() == other.depth.size())
+        {
+            if (depth.size() == 1)
+                return true;
+            else
+            {
+                if (other.depth.substr(0,depth.size() - 1) == depth.substr(0,depth.size() - 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
     // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
     // the root state node (goals) depth is 0~z, the sub state nodes of node 1 will be 10~1z, the sub state nodes of node 12 will be 120~12z...etc
     // it its forward rule node has multiple forward state node, using the deepest one
@@ -260,13 +276,13 @@ public:
 
 struct TmpParamCandidate
 {
-   int satNum;
+   float fitnessScore;
    ParamGroundedMapInARule aGroupOfParmCandidate;
-   TmpParamCandidate(int _satNum, ParamGroundedMapInARule _aGroupOfParmCandidate):satNum(_satNum),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
+   TmpParamCandidate(float _fitnessScore, ParamGroundedMapInARule _aGroupOfParmCandidate):fitnessScore(_fitnessScore),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
 
    bool operator < (const TmpParamCandidate& other) const
    {
-       if (satNum < other.satNum)
+       if (fitnessScore > other.fitnessScore)
            return true;
        else
            return false;
@@ -338,6 +354,8 @@ protected:
      // this list will be sorted after a planning finised according to the order of dependency relations
      vector<RuleNode*> allRuleNodeInThisPlan;
 
+     int tryStepNum;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -366,12 +384,14 @@ protected:
      // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // onlyCheckIfNegativeGoal is not to check preconditions
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
      void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
-                                  bool &preconImpossible, bool onlyCheckIfNegativeGoal =false );
+                                  bool &preconImpossible, bool &willAddCirle , bool onlyCheckIfNegativeGoal = false);
 
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
-     int checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible);
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule *orginalRule = 0);
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy
      // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
@@ -390,6 +410,10 @@ protected:
      // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
+     // return fitness score for one group of binding
+     // bool &impossible return if this group of bindings is impossible to move one planning, so if it's true, should not consider this group as a candidate
+     float checkNonNumericValueFitness(RuleNode *ruleNode, StateNode *fowardState, ParamGroundedMapInARule &oneGroupOfbindings, bool &impossible);
+
      // To ground the non Numeric variables in this rule,  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingNonNumericValues(RuleNode* ruleNode);
 
@@ -401,7 +425,8 @@ protected:
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
      // @ values: the candidate values
      // @ varName: the variable name
-     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons = true);
+     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
+                                                     string varName, vector<ParamValue>& values, Rule* orginalRule = 0, bool checkPrecons = true);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)

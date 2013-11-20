@@ -542,6 +542,65 @@ vector<ParamValue> Inquery::inqueryBestAccessiblePosition(const vector<ParamValu
     return values;
 }
 
+vector<ParamValue> Inquery::inqueryAdjacentAccessPosition(const vector<ParamValue>& stateOwnerList)
+{
+    vector<ParamValue> values;
+    ParamValue var1 = stateOwnerList.front();
+
+    if (Rule::isParamValueUnGrounded(var1)  )
+    {
+        if (stateOwnerList.size() == 1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+
+        var1 = stateOwnerList[1];
+        if (Rule::isParamValueUnGrounded(var1))
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got all ungrounded input variables!"<<std::endl;
+            return values; // return empty value list
+        }
+    }
+
+    spatial::BlockVector pos1;
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+    if (entity1)
+        pos1 = spaceMap->getObjectLocation(entity1->id);
+    else
+    {
+        Vector* v1 = boost::get<Vector>(&var1);
+        if (! v1)
+        {
+            cout<<"Debug error: Inquery::inqueryAdjacentPosition: got wrong type of variable!"<<std::endl;
+            return values; // return empty value list
+        }
+        pos1 = SpaceServer::SpaceMapPoint(v1->x,v1->y,v1->z);
+    }
+
+    // return 24 adjacent neighbour locations (26 neighbours except the pos above and below)
+    int x,y,z;
+    for (x = -1; x <= 1; x ++)
+        for (y = -1; y <= 1; y ++)
+            for (z = -1; z <= 1; z ++)
+            {
+                if ( (x == 0) && (y == 0))
+                    continue;
+
+                if (spaceMap->checkIsSolid(pos1.x + x,pos1.y + y,pos1.z + z))
+                    continue;
+
+                if ( spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap,pos1,x, y, z))
+                    values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
+            }
+
+    // random sort
+//    std::random_shuffle(values.begin(),values.end());
+
+    return values;
+}
+
 vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& stateOwnerList)
 {
     vector<ParamValue> values;
@@ -592,7 +651,7 @@ vector<ParamValue> Inquery::inqueryAdjacentPosition(const vector<ParamValue>& st
             }
 
     // random sort
-    std::random_shuffle(values.begin(),values.end());
+//    std::random_shuffle(values.begin(),values.end());
 
     return values;
 }
