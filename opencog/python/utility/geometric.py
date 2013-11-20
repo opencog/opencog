@@ -2,7 +2,7 @@ from math import fabs, isnan
 from datetime import datetime
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.numeric.globals import SMALLEST_FLOAT as EPSILON
+from utility.numeric.globals import EPSILON
 from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.integrate import quad
 
@@ -183,7 +183,7 @@ class FunctionLinear(Function):
 
         x_intercept = self.x_intercept
 
-        if start > x_intercept or end < x_intercept:
+        if start > x_intercept or end < x_intercept or equals(end, x_intercept) or equals(start, x_intercept):
             return (self(start) + self(end)) * (end - start) / 2.0
 
         minus_triangle = (x_intercept - start) * self(start)
@@ -203,7 +203,12 @@ class FunctionLinear(Function):
 
 
 class FunctionComposite(Function):
-    def __init__(self, dictionary_bounds_function, function_undefined=None, domain=None):
+    is_normalised = False
+
+    def __init__(self, dictionary_bounds_function, function_undefined=None, domain=None, is_normalised=False):
+        if is_normalised is not False:
+            self.is_normalised = True
+
         Function.__init__(self, function_undefined=function_undefined, domain=domain)
         if not isinstance(dictionary_bounds_function, dict):
             raise TypeError("'dictionary_bounds_function' should be a dictionary with (lower_bound, higher_bound) "
@@ -221,6 +226,11 @@ class FunctionComposite(Function):
         return self.function_undefined(x)
 
     def integral(self, start, end):
+        if self.is_normalised and self.domain is not None:
+            if (start < self.domain[0] or equals(start, self.domain[0])) and (
+                    end > self.domain[-1] or equals(end, self.domain[-1])):
+                return 1.0
+
         if start >= end:
             return 0
         result = 0
@@ -260,7 +270,7 @@ class FunctionComposite(Function):
 
 
 class FunctionPiecewiseLinear(FunctionComposite):
-    def __init__(self, dictionary_input_output, function_undefined=None):
+    def __init__(self, dictionary_input_output, function_undefined=None, is_normalised=False):
         self.input_list, self.output_list = convert_dict_to_sorted_lists(dictionary_input_output)
 
         dictionary_bounds_function = {}
@@ -273,17 +283,21 @@ class FunctionPiecewiseLinear(FunctionComposite):
         if POSITIVE_INFINITY not in self.input_list:
             dictionary_bounds_function[(self.input_list[-1], POSITIVE_INFINITY)] = function_undefined
         FunctionComposite.__init__(self, dictionary_bounds_function,
-                                   function_undefined=function_undefined, domain=self.input_list)
+                                   function_undefined=function_undefined,
+                                   domain=self.input_list,
+                                   is_normalised=is_normalised)
 
     def normalised(self):
         area = self.integral(NEGATIVE_INFINITY, POSITIVE_INFINITY)
         if equals(area, 0):
-            pass
+            area = self.integral(NEGATIVE_INFINITY, POSITIVE_INFINITY)
         dictionary_input_output = {}
         output_list = [y / area for y in self.output_list]
         for i in xrange(len(self.input_list)):
             dictionary_input_output[self.input_list[i]] = output_list[i]
-        return FunctionPiecewiseLinear(dictionary_input_output, function_undefined=self.function_undefined)
+        result = FunctionPiecewiseLinear(dictionary_input_output, function_undefined=self.function_undefined)
+        result.is_normalised = True
+        return result
 
 if __name__ == '__main__':
     from spatiotemporal.temporal_events import TemporalEventTrapezium
@@ -300,4 +314,3 @@ if __name__ == '__main__':
     #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
     #print (a(-0.25) + a(0.25))/4
     #print a(0.25) * 2.75 / 2
-

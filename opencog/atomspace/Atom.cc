@@ -103,7 +103,7 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
     // With this lock, no crash after 150 minutes of testing.
     // Anyway, the point is that this lock is wasteful, and should be
     // un-needed.
-    std::lock_guard<std::mutex> lck (_mtx);
+    std::unique_lock<std::mutex> lck (_mtx);
     if (!isNullVersionHandle(vh))
     {
         CompositeTruthValuePtr ctv = (_truthValue->getType() == COMPOSITE_TRUTH_VALUE) ?
@@ -119,6 +119,9 @@ void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
         ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
         new_tv = std::static_pointer_cast<TruthValue>(ctv);
     }
+    // Release the lock before sending out signals, as otherwise
+    // deadlocks can happen in user code invoked by the signal handler.
+    lck.unlock();
     setTruthValue(new_tv); // always call setTruthValue to update indices
 }
 
@@ -197,24 +200,27 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     // is atomic (right??)
     _attentionValue.swap(av);
 
-    if (_atomTable != NULL) {
-        std::lock_guard<std::mutex> lck (_avmtx);
+    // If the atom free-floating, we are done.
+    if (NULL == _atomTable) return;
 
-        // gets old and new bins
-        int oldBin = ImportanceIndex::importanceBin(av->getSTI());
-        int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
+    std::unique_lock<std::mutex> lck (_avmtx);
 
-        // if the atom importance has changed its bin,
-        // updates the importance index
-        if (oldBin != newBin) {
-            AtomPtr a(shared_from_this());
-            _atomTable->updateImportanceIndex(a, oldBin);
-        }
+    // gets old and new bins
+    int oldBin = ImportanceIndex::importanceBin(av->getSTI());
+    int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
 
-        // Notify any interested parties that the AV changed.
-        AVCHSigl& avch = _atomTable->AVChangedSignal();
-        avch(getHandle(), av, _attentionValue);  // av is old, after swap.
+    // if the atom importance has changed its bin,
+    // updates the importance index
+    if (oldBin != newBin) {
+        AtomPtr a(shared_from_this());
+        _atomTable->updateImportanceIndex(a, oldBin);
     }
+    // Must unlock before sending signals, to avoid future deadlocks.
+    lck.unlock();
+
+    // Notify any interested parties that the AV changed.
+    AVCHSigl& avch = _atomTable->AVChangedSignal();
+    avch(getHandle(), av, _attentionValue);  // av is old, after swap.
 }
 
 // ==============================================================

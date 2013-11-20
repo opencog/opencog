@@ -21,6 +21,25 @@ class Logic(object):
                 result += self.variables(o)
             return result
 
+    def get_first_node(self, atom):
+        '''Using a depth first search on the link, return the first Node found. If atom is a Node just return that.'''
+        if atom.is_node() and not self.is_variable(atom):
+            return atom
+        else:
+            for o in atom.out:
+                ret = self.get_first_node(o)
+                if not ret is None:
+                    return ret
+            return None
+
+    def get_incoming_recursive(self, atom):
+        inc = atom.incoming
+        ret=[]
+        ret+= inc
+        for link in inc:
+            ret+= self.get_incoming_recursive(link)
+        return ret
+
     def new_variable(self):
         prefix = '$pln_var_'
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
@@ -28,10 +47,41 @@ class Logic(object):
     def make_n_variables(self, N):
         return [self.new_variable() for i in xrange(0, N)]
 
-    def find(self, template, atoms, s={}):
-        assert(isinstance(atoms, list))
+    # @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
+    # every Atom's STI (in the whole AtomSpace)
+    def filter_attentional_focus(self, atoms, attentional_focus_boundary=0):
+        attentional_focus = []
+        for atom in atoms:
+            if atom.av['sti'] > attentional_focus_boundary:
+                attentional_focus.append(atom)
+        return attentional_focus
 
-        return [atom for atom in atoms if self.unify_together(atom, template, s)]
+    def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
+        if template.type == types.VariableNode:
+            root_type = types.Atom
+            atoms = self.atomspace.get_atoms_by_type(root_type)
+        else:
+            # If the atom is a link with all variables below it, then lookup all links of that type
+            # If it has any nodes (which aren't VariableNodes!), then lookup the incoming set for that node
+            first_node = self.get_first_node(template)
+            if first_node is None:
+                root_type = template.type
+                atoms = self.atomspace.get_atoms_by_type(root_type)
+            else:
+                atoms = self.get_incoming_recursive(first_node)
+
+        if useAF:
+            atoms = self.filter_attentional_focus(atoms)
+
+        if not allow_zero_tv:
+            atoms = [atom for atom in atoms if atom.tv.count > 0]
+
+        results = [atom for atom in atoms if self.unify_together(atom, template, s)]
+        
+        if ground:
+            results = [atom for atom in results if len(self.variables(atom)) == 0]
+
+        return results
 
     def unify_together(self, x, y, s):
         return self.unify(x, y, s) != None
