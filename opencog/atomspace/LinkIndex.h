@@ -50,6 +50,7 @@ class LinkIndex
         void removeAtom(AtomPtr a);
         void remove(bool (*)(Handle));
         void resize();
+        size_t size() const;
 
         Handle getHandle(Type type, const HandleSeq&) const;
         UnorderedHandleSet getHandleSet(Type type, const HandleSeq &, bool subclass) const;

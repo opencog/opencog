@@ -82,8 +82,7 @@ void SavingLoading::save(const char *fileName,
 
     // TODO: bad bad - saving and loading should be integrated as a request or
     // use the AtomSpace API.
-    AtomTable& atomTable = const_cast<AtomTable&> (
-            atomSpace.atomSpaceAsync->getAtomTable() );
+    AtomTable& atomTable = const_cast<AtomTable&> (atomSpace.getAtomTable());
 
     // stores the total number of atoms in the system
     int atomCount = atomTable.getSize();
@@ -292,7 +291,7 @@ void SavingLoading::load(const char *fileName,
     processed = 0;
     total = atomCount;
 
-    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.atomSpaceAsync->getAtomTable());
+    AtomTable& atomTable = const_cast<AtomTable&>(atomSpace.getAtomTable());
 
     std::vector<Type> dumpToCore;
     loadClassServerInfo(f, dumpToCore);
@@ -439,7 +438,7 @@ void SavingLoading::writeAtom(FILE *f, AtomPtr atom)
     Type type = atom->getType();
     fwrite(&type, sizeof(Type), 1, f);
     // writes the atom flags
-    char flags = atom->flags;
+    char flags = atom->_flags;
     fwrite(&flags, sizeof(char), 1, f);
 
     // writes the atom handle
@@ -463,7 +462,7 @@ Handle SavingLoading::readAtom(FILE *f, AtomPtr atom)
     char flags;
     bool b_read = true;
     FREAD_CK(&flags, sizeof(char), 1, f);
-    atom->flags = flags;
+    atom->_flags = flags;
 
     // reads the atom handle
     UUID uuid;

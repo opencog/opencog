@@ -25,8 +25,8 @@
 #ifndef _OPENCOG_COVER_TREE_POINT_H
 #define _OPENCOG_COVER_TREE_POINT_H
 
-#include <vector>
 #include <string>
+#include <vector>
 #include <opencog/util/numeric.h>
 
 #include <opencog/atomspace/AtomSpace.h>

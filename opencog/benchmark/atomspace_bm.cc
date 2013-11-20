@@ -20,13 +20,15 @@ int main(int argc, char** argv)
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to call the method in the measurement loop\n" 
      "          \t(default: 100000)\n"
+     "-r <int>  \tLooping count; how many times a python/scheme operation is looped\n"
+     "          \t(default: 1)\n"
      "-S <int>  \tHow many random atoms to add after each measurement\n"
      "          \t(default: 0)\n"
      "-- Build test data --\n"
      "-p <float> \tSet the connection probability or coordination number\n"
      "         \t(default: 0.2)\n"
      "         \t(-p impact behaviour of -S too)\n"
-     "-s <int> \tSet how many atoms are created (default: 65536)\n"
+     "-s <int> \tSet how many atoms are created (default: 256K)\n"
      "-d <float> \tChance of using default truth value (default: 0.8)\n"
      "-- Saving data --\n"
      "-k       \tCalculate stats (warning, this will affect rss memory reporting)\n"
@@ -44,7 +46,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAxXgcm:ln:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -63,9 +65,7 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
              benchmarker.setMethod("getHandleSet");
-             break;
-           case 'x':
-             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_IMPL;
+             benchmarker.setMethod("removeAtom");
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;
@@ -96,6 +96,9 @@ int main(int argc, char** argv)
              break;
            case 'n':
              benchmarker.Nreps = atoi(optarg);
+             break;
+           case 'r':
+             benchmarker.Nloops = atoi(optarg);
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);

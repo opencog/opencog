@@ -107,14 +107,12 @@ public:
     ParamGroundedMapInARule currentAllBindings; // currentBindingsFromForwardState + currentBindingsViaSelecting
 
     // all state nodes connected to this nodes that have been satisfied by this rulenode according to the currently applying rule: the effect state nodes of this rule
-    set<StateNode*> forwardLinks;
+    vector<StateNode*> forwardLinks;
 
     // all state nodes connected to this nodes that are negatived by this rule node according to the currently applying rule: the effect state nodes of this rule
     set<StateNode*> negativeForwardLinks;
 
-    set<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule
-
-    SpaceServer::SpaceMap* curMap; // to store an imaginary cloned 3D space map after execute the effects of this rule node
+    vector<StateNode*> backwardLinks; // all the links connect to the state nodes in last layer: the precondition state nodes of this rule    
 
     // cost as soft heuristics inherited from its
     // these carry the heuristics information for the backward steps to select variable values
@@ -149,6 +147,14 @@ public:
         appliedTimes = 0;
     }
 
+    RuleNode()
+    {
+        originalRule = 0;
+        costHeuristics.clear();
+        still_useful = true;
+        appliedTimes = 0;
+    }
+
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
     {
         costHeuristics.push_back( CostHeuristic(cost_cal_state,cost_coefficient));
@@ -162,13 +168,18 @@ public:
     // after rebinding , add currentBindingsFromForwardState and currentBindingsViaSelecting together to CurrentAllBindings
     void updateCurrentAllBindings();
 
-    static int getDepthOfRuleNode(const RuleNode* r);
+    string getDepthOfRuleNode();
 
-    bool operator < (const RuleNode& other) const
-    {
-        // so , the deeper rule node will be put front
-        return ( RuleNode::getDepthOfRuleNode(this) > RuleNode::getDepthOfRuleNode(&other));
-    }
+    // get the BackwardStateNode with the least depth, which is the most closed backward state node to me
+    StateNode* getMostClosedBackwardStateNode() const;
+
+    // get the Forward StateNode with the deepest depth, which is the most closed forward state node to me
+    StateNode* getLastForwardStateNode() const;
+
+    // get the backward StateNode with the deepest depth, which is the most closed forward state node to me
+    StateNode* getDeepestBackwardStateNode() const;
+
+//    bool operator < (const RuleNode& other) const;
 
 };
 
@@ -180,9 +191,9 @@ public:
     RuleNode* forwardRuleNode; // the forward rule node connect to this node in next rule layer
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
-    int depth; // depth = -1 means no rule node need this state node as a precondition
+    string depth; // depth = -1 means no rule node need this state node as a precondition, depth string composed of 0~9, A~Z, a~z, see calculateNodeDepth()
 
-    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = -1;}
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1";}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
@@ -192,19 +203,69 @@ public:
     // the rules have been tried on this state node
     list< Rule*> ruleHistory;
 
-    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
-    // the root state node depth is 0, every state node's depth is its forward rule node's forward state node' depth +1
-    // it its forward rule node has multiple forward state node, using the deepest one
-    // return depth
-    int calculateNodeDepth();
-
     // have tried to find candidateRules
     bool hasFoundCandidateRules;
 
+    // if this node < the other node, it means this node is more closed to the goal than the other node, the other node is deeper than this node
     bool operator < (const StateNode& other) const
     {
-        return ( depth < other.depth);
+        // A node that is Deepest is the orginal starting state, it's the deepest in our backward planning network, the most far away from the goal state
+        if ( (depth == "Deepest") && (other.depth != "Deepest"))
+            return false;
+        else if ( (other.depth == "Deepest") && (depth != "Deepest"))
+            return true;
+
+        if ( (depth == "-1") && (other.depth != "-1"))
+            return true;
+        else if ( (other.depth == "-1") && (depth != "-1"))
+            return false;
+
+        int size;
+        if (depth.size() < other.depth.size())
+            size = depth.size();
+        else
+            size = other.depth.size();
+
+        for (int i =0; i < size; i ++)
+        {
+            int myBit = atoi(depth.substr(i,1).c_str());
+            int otherBit = atoi(other.depth.substr(i,1).c_str());
+            if ( myBit < otherBit )
+                return true;
+            else if  (otherBit < myBit)
+                return false;
+        }
+
+        // all the fist size digits are equal
+        if (depth.size() < other.depth.size())
+            return true;
+        else
+            return false;
+
     }
+
+    bool isTheSameDepthLevelWithMe(const StateNode& other) const
+    {
+        if (depth.size() == other.depth.size())
+        {
+            if (depth.size() == 1)
+                return true;
+            else
+            {
+                if (other.depth.substr(0,depth.size() - 1) == depth.substr(0,depth.size() - 1))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // the root state node (goals) depth is 0~z, the sub state nodes of node 1 will be 10~1z, the sub state nodes of node 12 will be 120~12z...etc
+    // it its forward rule node has multiple forward state node, using the deepest one
+    // this function need to be call after its forward rule node assigned, to calculate the depth of this state node
+    // it its forward rule node has multiple forward state nodes, using the deepest one
+    void calculateNodesDepth();
 
     ~StateNode()
     {
@@ -215,28 +276,27 @@ public:
 
 struct TmpParamCandidate
 {
-   int satNum;
+   float fitnessScore;
    ParamGroundedMapInARule aGroupOfParmCandidate;
-   TmpParamCandidate(int _satNum, ParamGroundedMapInARule _aGroupOfParmCandidate):satNum(_satNum),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
+   TmpParamCandidate(float _fitnessScore, ParamGroundedMapInARule _aGroupOfParmCandidate):fitnessScore(_fitnessScore),aGroupOfParmCandidate(_aGroupOfParmCandidate){}
 
    bool operator < (const TmpParamCandidate& other) const
    {
-       if (satNum < other.satNum)
+       if (fitnessScore > other.fitnessScore)
            return true;
        else
            return false;
    }
 };
 
-// about node depth: both state nodes and rule nodes have depth, is to describe the relative position of these nodes;
-//                   the goal state node's depth is 0, the starting nodes (most backward nodes, original state nodes) is 999;
-//                   The max step number we do for a planning problem is 999 steps. If try 999 steps, still cannot find a solution, return planning fail.
 class OCPlanner
 {
 public:
      OCPlanner(AtomSpace* _atomspace,string _selfID, string _selfType);
 
      ~OCPlanner();
+
+     static RuleNode goalRuleNode;
 
      // TODO:
      // add a new rule from a implicationLink in the Atomspace
@@ -264,6 +324,12 @@ protected:
 
      unsigned long curtimeStamp;
 
+     SpaceServer::SpaceMap* curMap;
+
+     SpaceServer::SpaceMap* curImaginaryMap;
+
+     StateNode* curStateNode; // the current selected subgoal node
+
      // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
      HandleSeq imaginaryHandles;
 
@@ -271,6 +337,8 @@ protected:
      // so that we can quickly find what rules have effect on a specific state during planning
      // map<float,Rule*> is map<probability, rule>
      map<string,multimap<float,Rule*> > ruleEffectIndexes;
+
+     vector<StateNode*> satisfiedGoalStateNodes;
 
      list<StateNode*> unsatisfiedStateNodes; // all the state nodes that have not been satisfied till current planning step
 
@@ -284,9 +352,9 @@ protected:
      // to store all the rule node in current plan. it should be clear everytime begin new planning.
      // every new rule node will be insurt into this list, and it will be removed from the set if it's deleted
      // this list will be sorted after a planning finised according to the order of dependency relations
-     list<RuleNode*> allRuleNodeInThisPlan;
+     vector<RuleNode*> allRuleNodeInThisPlan;
 
-     vector<SpaceServer::SpaceMap*> imaginarySpaceMaps;
+     int tryStepNum;
 
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
@@ -296,7 +364,6 @@ protected:
 
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
-
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
@@ -311,10 +378,30 @@ protected:
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
 
-     // return how many states in the temporaryStateNodes will be Negatived by this rule
-     // bool &negativeGoal return if this rule after grounded will negative this forward goal state
-     // bool &isDiffStateOwnerType return if the effect state owner types are differnt from its fowardState
-     int checkNegativeStateNumBythisRule(Rule* rule, StateNode* fowardState, bool &negativeGoal, bool &isDiffStateOwnerType);
+     // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
+     // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
+     // @ negativeGoal: return if this rule after grounded will negative this forward goal state
+     // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
+     // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
+     // onlyCheckIfNegativeGoal is not to check preconditions
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
+     void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
+                                  bool &preconImpossible, bool &willAddCirle , bool onlyCheckIfNegativeGoal = false);
+
+     // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
+     // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
+     // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule *orginalRule = 0);
+
+     // return how many states in the temporaryStateNodes this rule will dissatisfy
+     // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
+     // @ negativeGoal:return if the effect is opposite to the goal(fowardState)
+     int checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bool &isDiffStateOwnerType, bool &negativeGoal);
+
+     // return how many states in the temporaryStateNodes this rule will dissatisfied by the effect of this action when it's executed in the space map
+     int checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState);
+
+     bool isActionChangeSPaceMap(PetAction* action);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
@@ -323,18 +410,23 @@ protected:
      // and put the value of the variables of the froward state to the rule variables.
      bool groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 
+     // return fitness score for one group of binding
+     // bool &impossible return if this group of bindings is impossible to move one planning, so if it's true, should not consider this group as a candidate
+     float checkNonNumericValueFitness(RuleNode *ruleNode, StateNode *fowardState, ParamGroundedMapInARule &oneGroupOfbindings, bool &impossible);
+
      // To ground the non Numeric variables in this rule,  which has not been grounded by "groundARuleNodeFromItsForwardState"
      bool groundARuleNodeBySelectingNonNumericValues(RuleNode* ruleNode);
 
      // select the most suitable vaule to ground a numeric variable
      // this function should be called after groundARuleNodeBySelectingNonNumericValues
      // the currentbindings will be added new binding pairs if this function find good values for ungrounded variables
-     bool selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode *ruleNod = 0);
+     bool selectValueForGroundingNumericState(Rule* rule, ParamGroundedMapInARule& currentbindings, RuleNode *ruleNod);
 
      // select Best Numeric Value From Candidates by calculating the cost via the cost heuristics of this rule node
      // @ values: the candidate values
      // @ varName: the variable name
-     ParamValue selectBestNumericValueFromCandidates(float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values);
+     ParamValue selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
+                                                     string varName, vector<ParamValue>& values, Rule* orginalRule = 0, bool checkPrecons = true);
 
      // to create the curUngroundedVariables list in a rule node
      // and the list is in the order of grounding priority (which variables should be gounded first, and for each variable which states should be satisfied first)
@@ -348,7 +440,7 @@ protected:
      // @ StateNode& *stateNode: the stateNode in temporaryStateNodes which satisfied or dissatisfied this goal
      // @ RuleNode* forwardRuleNode : the state's forward rule node
      // @ ifCheckSameRuleNode: if avoid finding the state node generate by same rule node
-     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode, int depth);
+     bool findStateInTempStates(State& state, RuleNode *forwardRuleNode, StateNode *&stateNode, bool ifCheckSameRuleNode);
 
      bool findStateInStartStateNodes(State& state, StateNode* &stateNode);
 
@@ -360,7 +452,7 @@ protected:
      //   if it's 0, it means it has no backward links yet, so only check in startStateNodes.
      //   if it's not 0, check state nodes in temporaryStateNodes with a depth  first , if cannot find in temporaryStateNodes, check in startStateNodes.
      bool checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &found, StateNode *&satstateNode,
-                                                 RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curStateNode = 0);
+                                                 RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curSNode = 0);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
      void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);
@@ -368,12 +460,10 @@ protected:
      // rebind a state node, replace the old state in this node with the new state generated by new bindings
      void reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings);
 
-     SpaceServer::SpaceMap* getLatestSpaceMapFromBackwardStateNodes(RuleNode* ruleNode);
+     SpaceServer::SpaceMap* getClosestBackwardSpaceMap(StateNode* stateNode);
 
-     // execute the current rule action if any action that involved changing space map
-     // return the input iSpaceMap if there is no change to space map, return a new cloned imaginary space map if the space map changed by the action.
-     // iSpaceMap will remain unchanged.
-     SpaceServer::SpaceMap *executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap *iSpaceMap);
+     // execute the current rule action if any action that involved changing space map in the input iSpaceMap
+     void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap *iSpaceMap);
 
      void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
@@ -388,6 +478,7 @@ protected:
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
 
      void outputStateInfo(State* s, bool outPutStateValue);
+     void outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes = true);
 
 };
 

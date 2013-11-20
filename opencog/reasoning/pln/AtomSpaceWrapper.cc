@@ -115,9 +115,9 @@ void AtomSpaceWrapper::setWatchingAtomSpace(bool watch)
     DPRINTF("ASW[%p]::setwatching atomspace %p\n", this,(void*) atomspace);
     if (watch) {
         if (!watchingAtomSpace) {
-            c_add = atomspace->atomSpaceAsync->addAtomSignal(
+            c_add = atomspace->addAtomSignal(
                     boost::bind(&AtomSpaceWrapper::handleAddSignal, this, _1, _2));
-            c_remove = atomspace->atomSpaceAsync->removeAtomSignal(
+            c_remove = atomspace->removeAtomSignal(
                     boost::bind(&AtomSpaceWrapper::handleRemoveSignal, this, _1, _2));
             assert(c_add.connected() && c_remove.connected());
             watchingAtomSpace = true;

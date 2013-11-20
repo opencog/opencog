@@ -676,8 +676,8 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
 {
     std::vector<SpaceServer::SpaceMapPoint> actions;
 
-    SpaceServer::SpaceMapPoint nearestPos;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos))
+    SpaceServer::SpaceMapPoint nearestPos,bestPos;
+    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos,bestPos))
     {
         printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);

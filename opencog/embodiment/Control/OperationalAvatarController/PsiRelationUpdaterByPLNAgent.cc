@@ -275,9 +275,9 @@ Handle PsiRelationUpdaterAgent::getEntityHandle(opencog::CogServer * server, con
 
     std::vector<Handle> entityHandleSet;
 
-    atomSpace.getHandleSet( back_inserter(entityHandleSet),
-                            OBJECT_NODE,
+    atomSpace.getHandlesByName( back_inserter(entityHandleSet),
                             entityName,
+                            OBJECT_NODE,
                             true   // Use 'true' here, because OBJECT_NODE is the base class for all the entities
                           );
 

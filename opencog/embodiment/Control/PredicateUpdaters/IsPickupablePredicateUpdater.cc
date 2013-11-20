@@ -103,7 +103,7 @@ void IsPickupablePredicateUpdater::update(Handle object, Handle pet, unsigned lo
             HandleSeq parentHandles;
             Type types[] = { SEME_NODE, CONCEPT_NODE };
             
-            atomSpace.getHandleSet( back_inserter(parentHandles),
+            atomSpace.getHandlesByOutgoing( back_inserter(parentHandles),
                                     isMovableFrame, &types[0], NULL, 2, INHERITANCE_LINK, false );
 
             OC_ASSERT(parentHandles.size( ) == 1, 

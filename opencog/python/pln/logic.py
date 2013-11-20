@@ -7,7 +7,6 @@ class Logic(object):
        inspired by the AIMA chapter on first-order logic. They all operate directly on Atoms.'''
     def __init__(self, atomspace):
         self._atomspace = atomspace
-        self._new_var_counter = 10**6 # arbitrary
 
     def variables(self, atom):
         '''Find all the variables in an expression (which may be repeated)'''
@@ -22,26 +21,77 @@ class Logic(object):
                 result += self.variables(o)
             return result
 
+    def get_first_node(self, atom):
+        '''Using a depth first search on the link, return the first Node found. If atom is a Node just return that.'''
+        if atom.is_node() and not self.is_variable(atom):
+            return atom
+        else:
+            for o in atom.out:
+                ret = self.get_first_node(o)
+                if not ret is None:
+                    return ret
+            return None
+
+    def get_incoming_recursive(self, atom):
+        inc = atom.incoming
+        ret=[]
+        ret+= inc
+        for link in inc:
+            ret+= self.get_incoming_recursive(link)
+        return ret
+
     def new_variable(self):
-        self._new_var_counter += 1
+        prefix = '$pln_var_'
+        return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
+
+    def make_n_variables(self, N):
+        return [self.new_variable() for i in xrange(0, N)]
+
+    # @todo The AtomSpace has an ImportanceIndex which is much more efficient. This algorithm checks
+    # every Atom's STI (in the whole AtomSpace)
+    def filter_attentional_focus(self, atoms, attentional_focus_boundary=0):
+        attentional_focus = []
+        for atom in atoms:
+            if atom.av['sti'] > attentional_focus_boundary:
+                attentional_focus.append(atom)
+        return attentional_focus
+
+    def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
+        if template.type == types.VariableNode:
+            root_type = types.Atom
+            atoms = self.atomspace.get_atoms_by_type(root_type)
+        else:
+            # If the atom is a link with all variables below it, then lookup all links of that type
+            # If it has any nodes (which aren't VariableNodes!), then lookup the incoming set for that node
+            first_node = self.get_first_node(template)
+            if first_node is None:
+                root_type = template.type
+                atoms = self.atomspace.get_atoms_by_type(root_type)
+            else:
+                atoms = self.get_incoming_recursive(first_node)
+
+        if useAF:
+            atoms = self.filter_attentional_focus(atoms)
+
+        if not allow_zero_tv:
+            atoms = [atom for atom in atoms if atom.tv.count > 0]
+
+        results = [atom for atom in atoms if self.unify_together(atom, template, s)]
         
-        var_name = '$pln_var_'+str(self._new_var_counter)
-        return self._atomspace.add_node(types.VariableNode, var_name)
+        if ground:
+            results = [atom for atom in results if len(self.variables(atom)) == 0]
 
-    def find(self, template, atoms, s={}):
-        assert(isinstance(atoms, list))
-
-        return [atom for atom in atoms if self.unify_together(atom, template, s)]
+        return results
 
     def unify_together(self, x, y, s):
         return self.unify(x, y, s) != None
 
     def standardize_apart(self, atom, dic=None):
-        '''Create a new link where all the variables in the link are replaced with new variables'''
+        '''Create a new link where all the variables in the link are replaced with new variables. dic creates a mapping of old variables to new ones'''
         assert isinstance(atom, Atom)
 
         # every time $v1 appears in the original expression, it must be replaced with the SAME $v1001
-        if dic == None:
+        if dic is None:
             dic = {}
 
         if atom.is_node():
@@ -56,7 +106,9 @@ class Logic(object):
                 return atom
         else: # atom is a link
             outgoing = [self.standardize_apart(a, dic) for a in atom.out]
-            return self.change_outgoing(atom, outgoing)
+
+            sa_link = self.change_outgoing(atom, outgoing)
+            return sa_link
 
     def substitute(self, substitution, atom):
         '''Substitute the substitution s into the expression x.
@@ -171,7 +223,7 @@ class Logic(object):
         return s2
 
     def change_outgoing(self, link, outgoing):
-        '''Returns a new link with the same type as @link but a different outgoing set'''
+        '''Returns a new link with the same type as @link but a different outgoing set. If you pass the same outgoing set, it will return the same Atom!'''
         return self._atomspace.add_link(link.type, outgoing)
 
     def is_variable(self, atom):

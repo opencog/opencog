@@ -131,13 +131,6 @@ bool ClassServer::isA_non_recursive(Type type, Type parent)
     return inheritanceMap[parent][type];
 }
 
-bool ClassServer::isA(Type type, Type parent)
-{
-    std::lock_guard<std::mutex> l(type_mutex);
-    if ((type >= nTypes) || (parent >= nTypes)) return false;
-    return recursiveMap[parent][type];
-}
-
 bool ClassServer::isDefined(const std::string& typeName)
 {
     std::lock_guard<std::mutex> l(type_mutex);

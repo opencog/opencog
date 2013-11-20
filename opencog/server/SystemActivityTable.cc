@@ -49,7 +49,7 @@ void SystemActivityTable::init(CogServer *cogServer)
 {
     logger().debug("[SystemActivityTable] init");
     _cogServer = cogServer;
-    _conn = cogServer->getAtomSpace().atomSpaceAsync->removeAtomSignal(
+    _conn = cogServer->getAtomSpace().removeAtomSignal(
             boost::bind(&SystemActivityTable::atomRemoved, this, _1));
 }
 

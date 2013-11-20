@@ -91,26 +91,19 @@ cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
 
 
 # AtomSpace
-# The best way would be to access the Async methods directly, but the request
-# objects would take a while to wrap from cython
-#cdef extern from "opencog/atomspace/AtomSpaceAsync.h" namespace "opencog":
-#    cdef cppclass cAtomSpaceAsync "opencog::AtomSpaceAsync":
-#        vector[cHandle] getHandlesByType(Type t, bint subclass, VersionHandle)
 
 cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
     cdef cppclass cAtomSpace "opencog::AtomSpace":
         AtomSpace()
 
-        #cAtomSpaceAsync atomSpaceAsync
+        cHandle addNode(Type t, string s) except +
+        cHandle addNode(Type t, string s, tv_ptr tvn) except +
 
-        cHandle addNode(Type t, string s)
-        cHandle addNode(Type t, string s, tv_ptr tvn)
+        cHandle addPrefixedNode(Type t, string s) except +
+        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn) except +
 
-        cHandle addPrefixedNode(Type t, string s)
-        cHandle addPrefixedNode(Type t, string s, tv_ptr tvn)
-
-        cHandle addLink(Type t, vector[cHandle])
-        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn)
+        cHandle addLink(Type t, vector[cHandle]) except +
+        cHandle addLink(Type t, vector[cHandle], tv_ptr tvn) except +
 
         cHandle getHandle(Type t, string s)
         cHandle getHandle(Type t, vector[cHandle])
@@ -139,10 +132,9 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         # ==== query methods ====
         # get by type
-        output_iterator getHandleSet(output_iterator,Type t,bint subclass)
+        output_iterator getHandlesByType(output_iterator, Type t, bint subclass)
         # get by name
-        output_iterator getHandleSet(output_iterator,Type t,string& name)
-        output_iterator getHandleSet(output_iterator,Type t,string& name,bint subclass)
+        output_iterator getHandlesByName(output_iterator, string& name, Type t, bint subclass)
         # get by target types
         output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
         # get by target handle

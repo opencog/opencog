@@ -44,7 +44,7 @@ Agent::Agent(CogServer& cs, const unsigned int f) : _cogserver(cs), _frequency(f
     stimulatedAtoms = new AtomStimHashMap();
     totalStimulus = 0;
 
-    conn = _cogserver.getAtomSpace().atomSpaceAsync->removeAtomSignal(
+    conn = _cogserver.getAtomSpace().removeAtomSignal(
             boost::bind(&Agent::atomRemoved, this, _1));
 }
 

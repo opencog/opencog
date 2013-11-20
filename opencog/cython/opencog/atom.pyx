@@ -87,7 +87,7 @@ cdef class Atom(object):
         return self.atomspace.get_atom_string(self.handle,terse=True)
 
     def __repr__(self):
-        return "Atom(%s,%s)" % (repr(self.handle),repr(self.atomspace))
+        return self.long_string()
 
     def __richcmp__(a1_, a2_, int op):
         if not isinstance(a1_, Atom) or not isinstance(a2_, Atom):

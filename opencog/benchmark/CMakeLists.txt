@@ -12,7 +12,7 @@ ADD_EXECUTABLE (atomspace_bm
 )
 
 IF (HAVE_GUILE)
-	TARGET_LINK_LIBRARIES (atomspace_bm smob)
+	TARGET_LINK_LIBRARIES (atomspace_bm smob server)
 ENDIF(HAVE_GUILE)
 
 IF (HAVE_CYTHON)

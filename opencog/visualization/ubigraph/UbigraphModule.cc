@@ -124,7 +124,7 @@ std::string UbigraphModule::do_ubigraphRandomSTI(Request *dummy, std::list<std::
     int nNodes = 2;
 
     if (!args.empty()) nNodes = atoi(args.front().c_str());
-    _cogserver.getAtomSpace().getHandleSet(out_hi, NODE, true);
+    _cogserver.getAtomSpace().getHandlesByType(out_hi, NODE, true);
     if (hs.size() == 0) return "";
     while (nNodes > 0) {
         _cogserver.getAtomSpace().setSTI(hs[rng.randint(hs.size())], 1000);

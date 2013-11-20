@@ -7,6 +7,10 @@ import math
 '''Some Rules evaluate various kinds of logical links based explicitly on set membership. A set = a ConceptNode.
 Other Rules calculate them heuristically, based on set probabilities and logical links.'''
 
+BOOLEAN_LINKS = [types.AndLink, types.OrLink, types.NotLink]
+FIRST_ORDER_LINKS = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
+HIGHER_ORDER_LINKS = [types.ImplicationLink, types.EquivalenceLink]
+
 class Rule(object):
 
     def __init__ (self, outputs, inputs, formula):
@@ -29,9 +33,13 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-    
-        for atom in self._inputs + self._outputs:
-            assert atom.type != 65535 # missing type bug (cython issue?)
+        self.full_name=self.name+ ' (' +self._get_type_names(inputs)+ ' -> '
+        self.full_name+= self._get_type_names(outputs)+')'
+
+        print self.full_name
+
+    def _get_type_names(self, templates):
+        return ' '.join(template.type_name for template in templates)
 
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
@@ -55,7 +63,9 @@ class Rule(object):
             new_template = chainer.standardize_apart(template, dic)
             new_outputs.append(new_template)
 
-        return (new_inputs, new_outputs)
+        created_vars = dic.values()
+
+        return (new_inputs, new_outputs, created_vars)
 
 # Inheritance Rules
 
@@ -71,7 +81,7 @@ class InversionRule(Rule):
                       A, B],
             formula= formulas.inversionFormula)
 
-class DeductionRule(Rule):
+class IndependenceBasedDeductionRule(Rule):
     '''A->B, B->C entails A->C'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
@@ -85,23 +95,56 @@ class DeductionRule(Rule):
                       chainer.link(link_type, [B, C]),
                       A, B, C])
 
-# TODO add macro-rules for Abduction and Induction based on Deduction and Inversion
-# abandoned
-class InductionRule(Rule):
-    '''A->B, A->C entails B->C'''
+class DeductionRule(Rule):
+    '''A->B, B->C entails A->C. Uses concept geometry.'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()
 
         Rule.__init__(self,
-            outputs= [chainer.link(link_type, [B, C])],
+            formula= formulas.deductionGeometryFormula,
+            outputs= [chainer.link(link_type, [A, C])],
             inputs=  [chainer.link(link_type, [A, B]),
-                      chainer.link(link_type, [A, C])],
-            formula= None)
-            
-    def compute(inputs):
-        pass
+                      chainer.link(link_type, [B, C])])
+
+# TODO add macro-rules for Abduction and Induction based on Deduction and Inversion
+'''deduction
+S is M, M is L, then S is L
+
+induction
+M is S, M is L, then S is L
+invert  same    same
+
+abduction
+S is M, L is M, then S is L
+        invert
+'''
+class InductionRule(Rule):
+    '''M->S, M->L, S->L'''
+    def __init__(self, chainer, link_type):
+        S = chainer.new_variable()
+        M = chainer.new_variable()
+        L = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [chainer.link(link_type, [S, L])],
+            inputs=  [chainer.link(link_type, [M, S]),
+                      chainer.link(link_type, [M, L]), S, M, L],
+            formula= formulas.inductionFormula)
+
+class AbductionRule(Rule):
+    '''S is M, L is M, S->L'''
+    def __init__(self, chainer, link_type):
+        S = chainer.new_variable()
+        M = chainer.new_variable()
+        L = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [chainer.link(link_type, [S, L])],
+            inputs=  [chainer.link(link_type, [S, M]),
+                      chainer.link(link_type, [L, M]), S, M, L],
+            formula= formulas.inductionFormula)
 
 # TODO implement transitiveSimilarityFormula
 class TransitiveSimilarityRule(Rule):
@@ -126,9 +169,12 @@ class ModusPonensRule(Rule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
+        notA = chainer.link(types.NotLink, [A])
+
         Rule.__init__(self,
             outputs= [B],
             inputs=  [chainer.link(link_type, [A, B]),
+                      chainer.link(link_type, [notA, B]),
                       A],
             formula= formulas.modusPonensFormula)
 
@@ -157,115 +203,6 @@ class SimilarityRule(Rule):
                       chainer.link(types.OrLink, [A, B])],
             formula= formulas.extensionalSimilarityFormula)
 
-# Boolean link creation Rules
-# An EliminationRule uses a logical link to produce its arguments
-
-class NotCreationRule(Rule):
-    '''A => NotLink(A)'''
-    def __init__(self, chainer):
-        A = chainer.new_variable()
-
-        Rule.__init__(self,
-            formula= formulas.notFormula,
-            outputs= [chainer.link(types.NotLink, [A])],
-            inputs= [A])
-
-class NotEliminationRule(Rule):
-    '''NotLink(A) => A'''
-    def __init__(self, chainer):
-        A = chainer.new_variable()
-
-        Rule.__init__(self,
-            formula= formulas.notFormula,
-            outputs= [A],
-            inputs=  [chainer.link(types.NotLink, [A])])
-
-def make_n_variables(chainer, N):
-    return [chainer.new_variable() for i in xrange(0, N)]
-
-# TODO These should take account of dependencies in some cases
-
-def create_and_or_rules(chainer, min_n, max_n):
-    rules = []
-    for n in min_n, max_n:
-        rules.append(AndCreationRule(chainer, n))
-        rules.append(OrCreationRule(chainer, n))
-        rules.append(AndEliminationRule(chainer, n))
-        rules.append(OrEliminationRule(chainer, n))
-
-    return rules
-
-class AndCreationRule(Rule):
-    '''Take a set of N atoms and create AndLink(atoms)'''
-    def __init__(self, chainer, N):
-        atoms = make_n_variables(chainer, N)
-
-        Rule.__init__(self,
-            formula= formulas.andSymmetricFormula,
-            outputs= [chainer.link(types.AndLink, atoms)],
-            inputs=  atoms)
-
-class OrCreationRule(Rule):
-    '''[A, B...] => Or(A, B...)'''
-    def __init__(self, chainer, N):
-        atoms = make_n_variables(chainer, N)
-
-        Rule.__init__(self,
-            formula= formulas.orFormula,
-            outputs= [chainer.link(types.OrLink, atoms)],
-            inputs=  atoms)
-
-# Elimination Rules
-
-class AbstractEliminationRule(Rule):
-    def __init__(self, chainer, N, link_type):
-        atoms = make_n_variables(chainer, N)
-
-        Rule.__init__(self,
-            formula= None,
-            outputs= atoms,
-            inputs=  [chainer.link(link_type, atoms)])
-
-class AndEliminationRule(AbstractEliminationRule):
-    '''AndLink(atoms) => atoms'''
-    def __init__(self, chainer, N):
-        AbstractEliminationRule.__init__(self, chainer, N, link_type= types.AndLink)
-
-    def calculate(self, atoms):
-        [and_atom] = atoms
-        outputs = and_atom.out
-        N = len(outputs)
-
-        # assume independence, i.e. P(A^B^C...) = P(A)P(B)P(C)...
-        # therefore P(A) = Nth root of P(AndLink)
-        # same for P(B) etc
-        individual_frequency = math.pow(and_atom.tv.mean, 1.0/N)
-        individual_count = and_atom.tv.count/1.42
-
-        output_tvs = [TruthValue(individual_frequency, individual_count) for out in outputs]
-
-        return output_tvs
-
-class OrEliminationRule(AbstractEliminationRule):
-    '''Take OrLink(atoms) and produce all of the atoms separately'''
-    def __init__(self, chainer, N):
-        AbstractEliminationRule.__init__(self, chainer, N, link_type= types.OrLink)
-
-    def calculate(self, atoms):
-        [or_atom] = atoms
-        outputs = or_atom.out
-        N = len(outputs)
-
-        # TODO this formula is wrong: it assumes P(A or B or C...) = P(A)+P(B)+P(C)...
-        # therefore P(A) = P(OrLink)/N
-        # same for P(B) etc
-        individual_mean = or_atom.tv.mean/N
-        count = 1 # hack
-
-        output_tvs = [TruthValue(individual_mean, count) for out in outputs]
-
-        return output_tvs
-
 # Direct evaluation Rules
 
 class MembershipBasedEvaluationRule(Rule):
@@ -291,24 +228,74 @@ class SubsetEvaluationRule(MembershipBasedEvaluationRule):
             output_type=types.SubsetLink,
             formula=formulas.subsetEvaluationFormula)
 
+class NegatedSubsetEvaluationRule(MembershipBasedEvaluationRule):
+    '''Computes P(B|NOT(A) === (Subset NOT(A) B).
+       (MemberLink x NOT(B)).tv.mean = 1-(MemberLink x B).tv.mean'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        member_type = types.MemberLink
+        output_type = types.SubsetLink
+        inputs= [chainer.link(member_type, [x, A]),
+                 chainer.link(member_type, [x, B])]
+
+        notA = chainer.link(types.NotLink, [A])
+
+        Rule.__init__(self,
+            formula= formulas.negatedSubsetEvaluationFormula,
+            outputs= [chainer.link(output_type, [notA, B])],
+            inputs=  inputs)
+
 class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates IntensionalInheritance(A B) from the definition.
        (Inheritance A B).tv.mean = Subset(ASSOC(A) ASSOC(B))
        ASSOC(A) is the set of x where AttractionLink(x, A)'''
     # So it's like SubsetEvaluation but using AttractionLinks instead of MemberLinks!
     # Reuses the subset formula. because intensional inheritance = subset based on intension rather than extension
+    # heyyyy - wouldn't the AttractionLinks be the wrong way around here!
     def __init__(self, chainer):
         MembershipBasedEvaluationRule.__init__(self, chainer, 
             member_type = types.AttractionLink,
             output_type = types.IntensionalInheritanceLink,
             formula= formulas.subsetEvaluationFormula)
 
-# abandoned for now because you have to estimate the number of objects (maybe an arbitrary setting?)
+# TODO only for AND of two concepts.
+# TODO the TV depends on the number of objects that do NOT satisfy AND(A B).
+# This is VERY annoying
 class AndEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluate And(A B) from the definition.
        |A and B| = |x in A and x in B|
-       P(A and B) = |A and B| / universe (gulp)'''
-    pass
+       P(A and B) = |A and B| / N'''
+    # count(a^b)
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer, 
+            member_type = types.MemberLink,
+            output_type = types.AndLink,
+            formula= formulas.andEvaluationFormula)
+
+class OrEvaluationRule(MembershipBasedEvaluationRule):
+    '''Evaluate Or(A B) from the definition.
+       |A or B| = |x in A or x in B|
+       P(A or B) = |A or B| / universe'''
+    # count(a|b)
+    def __init__(self, chainer):
+        MembershipBasedEvaluationRule.__init__(self, chainer, 
+            member_type = types.MemberLink,
+            output_type = types.OrLink,
+            formula= formulas.orEvaluationFormula)
+
+# It's more useful to calculate Subset(context, AndLink(A B))
+# You could have a special subset evaluator that uses separate rules for and/or
+
+#        inputs= [chainer.link(member_type, [x, A]),
+#                 chainer.link(member_type, [x, B])]
+#
+# or generally, evaluate ANYTHING in subset (because you can just require that all of the premise nodes are Anded with context
+
+# or really, try to do contextual reasoning. maybe do it for small relationships first?
+# the above subset evaluation rule will 
 
 class ExtensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates ExtensionalSimilarity from the definition.'''
@@ -326,10 +313,54 @@ class IntensionalSimilarityEvaluationRule(MembershipBasedEvaluationRule):
             output_type = types.IntensionalSimilarityLink,
             formula= formulas.similarityEvaluationFormula)        
 
+# TODO maybe make the closed world assumption? you need plenty of 0 MemberLinks to make these calculations work right
+
+class ExtensionalLinkEvaluationRule(Rule):
+    '''Using (MemberLink x A) and (MemberLink x B), evaluate (Subset A B), (Subset B A), (Subset NOT(A) B), (Subset NOT(B) A), and (SimilarityLink A B). This is more efficient than having to find them separately using the different rules. If you use this Rule, do NOT include the separate rules too! (Or the chainer will use all of them and screw up the TV.
+TODO include AndLink + OrLink too (might as well)
+TODO the forward chainer will work fine with this rule, but the backward chainer won't (because it would require all of the output atoms to already exist at least with 0,0 TV), but it should probably only require one of them.'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(types.MemberLink, [x, A]),
+                 chainer.link(types.MemberLink, [x, B])]
+
+        outputs= [chainer.link(types.SubsetLink, [A, B]),
+                  chainer.link(types.SubsetLink, [B, A]),
+                  chainer.link(types.SubsetLink, [chainer.link(types.NotLink,[A]), B]),
+                  chainer.link(types.SubsetLink, [chainer.link(types.NotLink,[B]), A]),
+                  chainer.link(types.ExtensionalSimilarityLink, [A, B])]
+
+        Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
+            inputs=inputs,
+            outputs=outputs)
+
+class IntensionalLinkEvaluationRule(Rule):
+    '''Using (AttractionLink A x) and (AttractionLink B x), evaluate (IntensionalInheritance A B), (IntensionalInheritance B A), and (IntensionalSimilarityLink A B).'''
+    def __init__(self, chainer):
+        x = chainer.new_variable()
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inputs= [chainer.link(types.AttractionLink, [A, x]),
+                 chainer.link(types.AttractionLink, [B, x])]
+
+        outputs= [chainer.link(types.IntensionalInheritanceLink, [A, B]),
+                  chainer.link(types.IntensionalInheritanceLink, [B, A]),
+                  chainer.link(types.IntensionalSimilarityLink, [A, B])]
+
+        Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
+            inputs=inputs,
+            outputs=outputs)
+
+
 class EvaluationToMemberRule(Rule):
     '''Turns EvaluationLink(PredicateNode P, argument) into 
        MemberLink(argument, ConceptNode "SatisfyingSet(P)".
-       The argument can either be a single Node/Link or a ListLink or arguments.'''
+       The argument must be a single Node.
+       #The argument can either be a single Node/Link or a ListLink or arguments.'''
     def __init__(self, chainer):
         P = chainer.new_variable()
         ARG = chainer.new_variable()
@@ -340,13 +371,107 @@ class EvaluationToMemberRule(Rule):
                       inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
+
+        # Only support the case with 1 argument
+        if arg.type == types.ListLink:
+            if len(arg.out) == 1:
+                arg = arg.out[0]
+            else:
+                return ([], [])
 
         concept_name = 'SatisfyingSet(%s)' % (predicate.name,)
         set_node = self.chainer.node(types.ConceptNode, concept_name)
 
+        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+        tv = eval_link.tv
+
+        return ([member_link], [tv])
+
+def create_general_evaluation_to_member_rules(chainer):
+    rules = []
+    for argument_count in xrange(2, 3): # Bizarbitrary constant!
+        for index in xrange(0, argument_count):
+            rules.append(GeneralEvaluationToMemberRule(chainer, index, argument_count))
+            rules.append(GeneralAtTimeEvaluationToMemberRule(chainer, index, argument_count))
+
+    return rules
+
+class GeneralEvaluationToMemberRule(Rule):
+    '''An EvaluationLink with 2+ arguments has a satisfying set where every member is a ListLink. But there's another option which may be more useful. If you specify all but one of the arguments, you get a new predicate with only one variable left. And its satisfying set would just be normal objects.
+Given (EvaluationLink pred (ListLink $thing ...)), create
+sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
+(MemberLink $thing sat_set)''' 
+    def __init__(self, chainer, index, arg_count):
+        self.index = index
+        #self.arg_count= arg_count
+        self.chainer = chainer
+
+        pred = chainer.new_variable()
+        all_args = chainer.make_n_variables(arg_count)
+        list_link = chainer.link(types.ListLink, all_args)
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula= None,
+                      inputs=  [chainer.link(types.EvaluationLink, [pred, list_link])],
+                      outputs= [])
+
+    def custom_compute(self, inputs, outputs):
+        [eval_link] = inputs
+        [predicate, list_link] = eval_link.out
+
+        args = list_link.out
+        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
+        parameter_names[self.index] = '_'
+        parameter_names = ' '.join(parameter_names)
+        concept_name = 'SatisfyingSet(%s %s)' % (predicate.name, parameter_names)
+
+        set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        arg = args[self.index]
+        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+        tv = eval_link.tv
+
+        return ([member_link], [tv])
+
+class GeneralAtTimeEvaluationToMemberRule(Rule):
+    '''EvaluationLinks in AtTimeLinks are good for temporal rules, but don't let PLN use the normal logical rules. If you have (AtTime some_time (Evaluation near jade jades_stuff then jades_stuff is a member of the set "objects that are near jade at some time".
+$x where (AtTimeLink ? EvaluationLink near jade $x)
+''' 
+    def __init__(self, chainer, index, arg_count):
+        self.index = index
+        self.chainer = chainer
+
+        time = chainer.new_variable()
+        pred = chainer.new_variable()
+        all_args = chainer.make_n_variables(arg_count)
+        list_link = chainer.link(types.ListLink, all_args)
+        eval_link = chainer.link(types.EvaluationLink, [pred, list_link])
+        at_time = chainer.link(types.AtTimeLink, [time, eval_link])
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula= None,
+                      inputs=  [at_time],
+                      outputs= [])
+
+    def custom_compute(self, inputs, outputs):
+        [at_time] = inputs
+        [time, eval_link] = at_time.out
+        [predicate, list_link] = eval_link.out
+
+        args = list_link.out
+        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
+        parameter_names[self.index] = '_'
+        parameter_names = ' '.join(parameter_names)
+        concept_name = 'SatisfyingSet(sometimes %s %s)' % (predicate.name, parameter_names)
+
+        set_node = self.chainer.node(types.ConceptNode, concept_name)
+
+        arg = args[self.index]
         member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
 
@@ -364,27 +489,28 @@ class LinkToLinkRule(Rule):
             inputs=  [chainer.link(from_type, [A, B])])
 
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(Ben American) => MemberLink Ben {Ben}, InheritanceLink({Ben} American).
-       {Ben} is the set containing only Ben.'''
+    '''MemberLink(Jade robot) => MemberLink Jade {Jade}, InheritanceLink({Jade} robot).
+       {Jade} is the set containing only Jade.'''
     def __init__(self, chainer):
         # use link2link rule so that backward chaining will know approximately the right target.
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
             formula= None)
+        self.chainer=chainer
 
-    def custom_compute(self, inputs):
+    def custom_compute(self, inputs, outputs):
         [mem_link] = inputs
         [object, superset] = mem_link.out
 
         singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
-        singleton_set_node = self.chainer.node(types.ConceptNode, concept_name)
+        singleton_set_node = self.chainer.node(types.ConceptNode, singleton_concept_name)
 
         member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
-        tvs = [TruthValue(1, formulas.confidence_to_count(1))]
+        tvs = [TruthValue(1, formulas.confidence_to_count(0.99))]
 
-        self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
-        tvs += formulas.mem2InhFormula([mem_link]) # use mem2inh formula
+        inh_link = self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
+        tvs += formulas.mem2InhFormula([mem_link.tv]) # use mem2inh formula
 
-        return ([member_link], tvs)
+        return ([member_link, inh_link], tvs)
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
 #class MemberToSubsetRule(LinkToLinkRule):
@@ -402,18 +528,11 @@ class AttractionRule(Rule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
+        subset1 = chainer.link(types.SubsetLink, [A, B])
+        subset2 = chainer.link(types.SubsetLink, [chainer.link(types.NotLink, [A]), B])
+
         Rule.__init__(self,
             formula= formulas.attractionFormula,
             outputs= [chainer.link(types.AttractionLink, [A, B])],
-            inputs=  [chainer.link(types.SubsetLink, [A, B]),
-                      B])
-
-# redundant now
-class ASSOCEvaluationRule(Rule):
-    '''Creates the extensional association set of ConceptNode C (called ASSOC_ext(C).
-    MemberLink(e, ASSOC_ext(C)).tv = Func(Subset(e, C), Subset(Not(e), C)).
-
-    Or now that we have AttractionLink
-    MemberLink(e, ASSOC(C)).tv = AttractionLink e C'''
-    pass
+            inputs=  [subset1, subset2])
 

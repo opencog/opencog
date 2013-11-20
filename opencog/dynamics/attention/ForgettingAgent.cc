@@ -92,7 +92,7 @@ void ForgettingAgent::forget(float proportion = 0.10f)
     int count = 0;
     int removalAmount;
 
-    a->getHandleSet(output2, ATOM, true);
+    a->getHandlesByType(output2, ATOM, true);
     // Sort atoms by lti, remove the lowest unless vlti is NONDISPOSABLE
     std::sort(atomsVector.begin(), atomsVector.end(), ForgettingLTIThenTVAscendingSort(a));
 

@@ -344,9 +344,9 @@ void ImportanceDiffusionAgent::spreadImportance()
 
     // Get all HebbianLinks
     if (allLinksSpread) {
-      a->getHandleSet(out_hi, LINK, true);
+      a->getHandlesByType(out_hi, LINK, true);
     } else {
-      a->getHandleSet(out_hi, HEBBIAN_LINK, true);
+      a->getHandlesByType(out_hi, HEBBIAN_LINK, true);
     }
 
     totalDiffusionAtoms = makeDiffusionAtomsMap(diffusionAtomsMap, links);

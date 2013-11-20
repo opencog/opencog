@@ -84,7 +84,7 @@ float HopfieldServer::totalEnergy()
             outgoing.push_back(hGrid[j]);
             
             HandleSeq ret;
-            a.getHandleSet(back_inserter(ret), outgoing, NULL,
+            a.getHandlesByOutgoing(back_inserter(ret), outgoing, NULL,
                            NULL, 2, HEBBIAN_LINK, true);
             // If no links then skip
             if (ret.size() == 0) { continue; }
@@ -401,7 +401,7 @@ void HopfieldServer::reset()
     HandleSeq toRemove;
 
     // Remove all links and replace
-    atomSpace.getHandleSet(back_inserter(toRemove), HEBBIAN_LINK, true);
+    atomSpace.getHandlesByType(back_inserter(toRemove), HEBBIAN_LINK, true);
     foreach (Handle handle, toRemove) {
         atomSpace.removeAtom(handle);
     }
@@ -418,7 +418,7 @@ void HopfieldServer::addRandomLinks()
     int maxAttempts = 10000;
 
     // Add links if less than desired number and to replace forgotten links
-    atomSpace.getHandleSet(back_inserter(countLinks), HEBBIAN_LINK, true);
+    atomSpace.getHandlesByType(back_inserter(countLinks), HEBBIAN_LINK, true);
     amount = this->links - countLinks.size();
 
     logger().fine("Adding %d random Hebbian Links.", amount);
@@ -434,7 +434,7 @@ void HopfieldServer::addRandomLinks()
 
         outgoing.push_back(hGrid[source]);
         outgoing.push_back(hGrid[target]);
-        atomSpace.getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+        atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         // try links going the other way (because some Hebbian links are
         // ordered)
         if (selected.size() == 0) {
@@ -442,7 +442,7 @@ void HopfieldServer::addRandomLinks()
             outgoing.push_back(hGrid[target]);
             outgoing.push_back(hGrid[source]);
             // try links going the other way (because some Hebbian links are
-            atomSpace.getHandleSet(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
+            atomSpace.getHandlesByOutgoing(back_inserter(selected), outgoing, (Type*) NULL, (bool*) NULL, outgoing.size(), HEBBIAN_LINK, true);
         }
         if (selected.size() > 0) {
             //logger().fine("Trying to add %d -> %d, but already exists %s", source, target, atomSpace.atomAsString(he->handle).c_str());
@@ -468,7 +468,7 @@ void HopfieldServer::resetNodes(bool toDefault)
     AtomSpace& a = getAtomSpace();
     HandleSeq nodes;
 
-    a.getHandleSet(back_inserter(nodes), NODE, true);
+    a.getHandlesByType(back_inserter(nodes), NODE, true);
 
 	if (toDefault) {
         foreach (Handle handle, nodes) {
@@ -523,7 +523,7 @@ void HopfieldServer::updateKeyNodeLinks(Handle keyHandle, float density)
     // randomly remove other links from other key nodes if # links > max
     HandleSeq links;
     std::back_insert_iterator< HandleSeq > lo(links);
-    atomSpace->getHandleSet(lo, HEBBIAN_LINK, true);
+    atomSpace->getHandlesByType(lo, HEBBIAN_LINK, true);
     int amountToRemove = links.size() - this->links;
     if (amountToRemove > 0 && keyNodes.size() == 1) {
         logger().info("Only one keyNode, so unable to remove any links to "
@@ -1044,7 +1044,7 @@ void HopfieldServer::printLinks()
     std::back_insert_iterator< HandleSeq > out_hi(hs);
 
     // Get all atoms (and subtypes) of type t
-    getAtomSpace().getHandleSet(out_hi, LINK, true);
+    getAtomSpace().getHandlesByType(out_hi, LINK, true);
     // For each, get prop, scale... and 
 //    foreach (Handle h, hs) {
 //        cout << getAtomSpace->atomAsString(h) << endl;
