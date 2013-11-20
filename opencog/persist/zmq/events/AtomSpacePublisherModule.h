@@ -42,8 +42,11 @@ namespace opencog
 class CogServer;
 
 /**
- * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using
- * ZeroMQ to allow for external clients to interface with the AtomSpace via a publish/subscribe pattern.
+ * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using ZeroMQ
+ * to allow for external clients to receive updates from the AtomSpace via a publish/subscribe pattern.
+ *
+ * Full documentation is available here:
+ *   http://wiki.opencog.org/w/AtomSpace_Event_Publisher
  *
  * Clients can subscribe to the events by subscribing to the ZeroMQ socket defined in the
  * ZMQ_EVENT_PORT parameter set in the OpenCog configuration file.
@@ -56,7 +59,8 @@ class CogServer;
  *   avchanged
  *
  * The message is a JSON-formatted string with the following structure:
- *   http://wiki.opencog.org/w/REST_API#Format_of_Atom_object
+ *   http://wiki.opencog.org/w/AtomSpace_Event_Publisher#Message_format
+ *
  **/
 class AtomSpacePublisherModule;
 typedef std::shared_ptr<AtomSpacePublisherModule> AtomSpacePublisherModulePtr;
