@@ -5,10 +5,10 @@ import operator, functools, itertools
 from utility.util import concat_lists
 
 DEDUCTION_TERM_WEIGHT = 1.0
-INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
-EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
-INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
-MembershipToExtensionalInheritanceCountDiscountFactor = 1.0
+INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
+EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
+INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 0.9
+MembershipToExtensionalInheritanceCountDiscountFactor = 0.9
 CRISP_COUNT_THRESHOLD = 0.97
 
 def identityFormula(tvs):
@@ -17,7 +17,7 @@ def identityFormula(tvs):
 def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
 
-def deductionSimpleFormula(tvs):
+def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
 
     # Temporary filtering fix to make sure that nAB >= nA
@@ -111,6 +111,29 @@ def termProbabilityFormula(tvs):
 
     return [TruthValue(sB, nB)]
 
+def transitiveSimilarityFormula(tvs):
+    # Note, this formula doesn't care about count
+
+    [AB, BC, A, B, C] = tvs
+    simAB = AB.mean
+    simBC = BC.mean
+    sA = A.mean
+    sB = B.mean
+    sC = C.mean
+
+    def deduction(freqAB, freqBC):
+        sAC = freqAB*freqBC + negate(freqAB)*(sC-sB*freqBC)/negate(sB)
+        return sAC
+
+    T1 = (1+sB/sA)*simAB / (1+simAB)
+    T2 = (1+sC/sB)*simBC / (1+simBC)
+    T3 = (1+sB/sC)*simBC / (1+simBC)
+    T4 = (1+sA/sB)*simAB / (1+simAB)
+
+    ded12 = deduction(T1, T2)
+    ded34 = deduction(T3, T4)
+    simAC = invert(invert(ded12)+invert(ded34)-1)
+
 def inheritanceFormula(tvs):
     tv_subset, tv_inh = tvs
 
@@ -176,13 +199,27 @@ def inheritanceFormula(tvs, U):
 
     return [TruthValue(s, n)]
 
-def inheritance2SimilarityFormula(tvs, U):
-    [(sAB, nAB), (sBA, nBA)] = tvs
+def twoInheritanceToSimilarityFormula(tvs):
+    [(sAB, nAB), (sBA, nBA)] = tv_seq_to_tv_tuple_seq(tvs)
 
-    s = 1.0/ ( 1.0/sAB + 1.0/sBA -1)
+    s = invert( invert(sAB) + invert(sBA) -1)
     n = (nAB + nBA) / (1 + s)
 
     return [TruthValue(s, n)]
+
+def oneInheritanceToSimilarityFormula(tvs):
+    [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    meat = (sA/sC+1)/sAC - 1
+
+    simAC = invert(meat)
+
+def similarityToInheritanceFormula(tvs):
+    '''Given simAB, sA and sB, estimate sAB. Could easily be turned around to
+       estimate sBA'''
+    [(simAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    sAB = (1+sB/sA)*simAB / (1 + simAB)
 
 def mem2InhFormula(tvs):
     [mem_tv] = tvs
@@ -354,4 +391,10 @@ def orBreakdownFormula(tvs):
 
 def low(n):
     return max(n, 0)
+
+def invert(n):
+    return 1.0/n
+
+def negate(n):
+    return 1.0-n
 

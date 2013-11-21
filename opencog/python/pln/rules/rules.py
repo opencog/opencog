@@ -178,7 +178,7 @@ class ModusPonensRule(Rule):
                       A],
             formula= formulas.modusPonensFormula)
 
-class TermProbabilityRule(Rule):
+class TermProbabilityRule(ModusPonensRule):
     def __init__(self, chainer):
         ModusPonensRule.__init__(self, chainer, types.InheritanceLink)
 

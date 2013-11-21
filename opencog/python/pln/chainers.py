@@ -145,9 +145,9 @@ class AbstractChainer(Logic):
         elif atom.type in rules.HIGHER_ORDER_LINKS:
             suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
         elif atom.is_a(types.MemberLink):
-            # Assume the domain of all predicates is objects
+            # Assume the domain of all predicates is objects or concepts or variables
             element = atom.out[0]
-            return element.is_a(types.ObjectNode)
+            return element.is_a(types.ObjectNode) or element.is_a(types.ConceptNode) or element.is_a(types.VariableNode)
         else:
             return True
 
