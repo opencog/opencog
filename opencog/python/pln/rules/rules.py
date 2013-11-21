@@ -146,7 +146,6 @@ class AbductionRule(Rule):
                       chainer.link(link_type, [L, M]), S, M, L],
             formula= formulas.inductionFormula)
 
-# TODO implement transitiveSimilarityFormula
 class TransitiveSimilarityRule(Rule):
     '''Similarity A B, Similarity B C => Similarity A C'''
     def __init__(self, chainer):
