@@ -93,6 +93,8 @@ namespace opencog
 
             static const int AccessDistance = 2;
 
+            bool enable_BlockEntity_Segmentation;
+
             /**
              * @ min_x and min_y is the start position of this octree space
              * @_floorHeight: the height of the floor, the z value of  start position
@@ -361,7 +363,7 @@ namespace opencog
             Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
                                int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                               Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations);
+                               Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations, bool _enable_BlockEntity_Segmentation);
 
 
 /*
