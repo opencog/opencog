@@ -60,9 +60,6 @@ class AtomSpaceNamespace(BaseNamespace, BroadcastMixin):
         print 'ZeroMQ listener initialized'
         while True:
             [address, contents] = subscriber.recv_multipart()
-            print("[%s] %s" % (address, contents))
-            print '\a'
-
             self.emit(address, contents)
 
 
