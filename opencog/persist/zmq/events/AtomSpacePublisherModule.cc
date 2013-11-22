@@ -46,7 +46,7 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
 {
     logger().info("[AtomSpacePublisherModule] constructor");
     this->as = &cs.getAtomSpace();
-    addAtomConnection = as->addAtomSignal(boost::bind(&AtomSpacePublisherModule::handleAddSignal, this, _1));
+    addAtomConnection = as->addAtomSignal(boost::bind(&AtomSpacePublisherModule::atomAddSignal, this, _1));
     removeAtomConnection = as->removeAtomSignal(boost::bind(&AtomSpacePublisherModule::atomRemoveSignal, this, _1));
     TVChangedConnection = as->TVChangedSignal(boost::bind(&AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
     AVChangedConnection = as->AVChangedSignal(boost::bind(&AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
@@ -89,7 +89,7 @@ void AtomSpacePublisherModule::InitZeroMQ()
     publisher->bind(zmq_address);
 }
 
-void AtomSpacePublisherModule::handleAddSignal(Handle h)
+void AtomSpacePublisherModule::atomAddSignal(Handle h)
 {
     std::string payload = atomToJSON(h);
     s_sendmore (*publisher, "add");
@@ -241,6 +241,11 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
 
             ptTV.add_child("details.versionedtruthvaluemap", ptVersionedTruthValueMap);
 
+            break;
+        }
+
+        case NUMBER_OF_TRUTH_VALUE_TYPES:
+        {
             break;
         }
     }

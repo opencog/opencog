@@ -87,7 +87,7 @@ class AtomSpacePublisherModule : public Module
         static const char *id(void);
         virtual void init(void);
 
-        void handleAddSignal(Handle h);
+        void atomAddSignal(Handle h);
         void atomRemoveSignal(AtomPtr atom);
         void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
         void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
