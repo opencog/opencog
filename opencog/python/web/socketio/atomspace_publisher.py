@@ -1,5 +1,6 @@
 """
 AtomSpace Publisher Extension for socket.io
+Extends: http://wiki.opencog.org/wikihome/index.php?title=AtomSpace_Event_Publisher
 
 Forwards ZeroMQ messages from the AtomSpace Publisher module
 to a socket.io socket accessible from web applications using
@@ -22,7 +23,7 @@ Instructions:
 
 3) Ensure that libatomspacepublishermodule.so is loaded
 
-4) Browse to: http://localhost:8080/ to load an example client
+4) Browse to: http://localhost:8080/ to load an example client, defined in 'index.html'
 
 5) Perform atomspace operations, and you should see updates in the browser
 
