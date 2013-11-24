@@ -93,7 +93,7 @@ class IndependenceBasedDeductionRule(Rule):
             outputs= [chainer.link(link_type, [A, C])],
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [B, C]),
-                      A, B, C])
+                      B, C])
 
 class DeductionRule(Rule):
     '''A->B, B->C entails A->C. Uses concept geometry.'''

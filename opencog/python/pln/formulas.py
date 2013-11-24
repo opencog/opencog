@@ -16,39 +16,33 @@ def identityFormula(tvs):
 def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
 
-def deductionIndependenceBasedFormula(tvs):
-    [(sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
+# I didn't incorporate count into the formulas, it just makes things tacky.
+def makeUpCount(tvs):
+    return min(tv.mean for tv in tvs)
 
-    # Temporary filtering fix to make sure that nAB >= nA
-    nA = min(nA, nAB)
-    sDenominator = low(1 - sB)
-    nDenominator = low(nB)
-    
-    w1 = DEDUCTION_TERM_WEIGHT # strength
-    w2 = 2 - w1 # strength
-    sAC = (w1 * sAB * sBC
-               + w2 * (1 - sAB) * (sC - sB * sBC) / sDenominator)
-    
-    nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT * nA * nBC / nDenominator
-    
-    return [TruthValue(sAC, nAC)]
+def deductionIndependenceBasedFormula(tvs):
+    [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/(1-sB)
+
+    n = makeUpCount(tvs)*INDEPENDENCE_ASSUMPTION_DISCOUNT
+
+    return [TruthValue(sAC, n)]
 
 # better deduction formula based on concept geometry
 def deductionGeometryFormula(tvs):
     [AB, BC] = tvs
 
     sAC = AB.mean*BC.mean / min(AB.mean+BC.mean, 1)
-    nAC = AB.count+BC.count
+    nAC = makeUpCount(tvs)
 
     return [TruthValue(sAC, nAC)]
 
 def inversionFormula(tvs):
-    # To make this formula work properly, we need to have no hacks.
-
     [AB, A, B] = tvs
     
-    sBA = AB.mean * A.mean / low(B.mean)
-    nBA = AB.count * B.mean / low(A.mean)
+    sBA = AB.mean * B.mean / low(A.mean)
+    nBA = makeUpCount(tvs)
     
     return [TruthValue(sBA, nBA)]
 
@@ -68,46 +62,19 @@ def abductionFormula(tvs):
     SL = deductionGeometryFormula([SM, ML])
     return SL
 
-# Just a hack in Ari's implementation so he could do planning and everything else using ModusPonens!
-def crispModusPonensFormula(tvs):
-    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+def modusPonensFormula(tvs):
+    [AB, A] = tvs
 
-    true = 0.5
-    if all(x >= true for x in [sAB, nAB, sA, nA]):
-        return [TruthValue(1, confidence_to_count(0.99))]
-    else:
-        return [TruthValue(0, 0)]
+    sNotAB=0.2
+
+    return preciseModusPonensFormula([AB, NotAB, A])
 
 def preciseModusPonensFormula(tvs):
-    (sAB, nAB), (sNotAB, nNotAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
-
-#    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
-#        return crispModusPonensFormula(tvs)
-
-    # guess P(B|not A)
-    #    sNotAB, nNotAB = (0.5, 0.01)
-
-    n2 = min(nAB, nA)
-    if n2 + nNotAB > 0:
-        s2 = ((sAB * sA * n2 + nNotAB +
-                 sNotAB * (1 - sA) * nNotAB) /
-                 low(n2 + nNotAB))
-    else:
-        raise NotImplementedError
-        s2 = BNA.confidence
-    
-    return [TruthValue(s2, n2)]
-
-def modusPonensFormula(tvs):
-    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
-    # All of the formulas become messier if you have to use counts.
-    # Indefinite probabilities are way better
-
-    sNotAB = 0.2
+    (sAB, nAB), (sNotAB, _) (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     sB = sAB*sA + sNotAB*negate(sA)
     
-    n = min(nAB, nA)
+    n = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
@@ -118,7 +85,7 @@ def symmetricModusPonensFormula(tvs):
 
     sB = sA*simAB + sNotAB*negate(sA)*(1+simAB)
 
-    n = min(nAB, nA)
+    n = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
@@ -129,13 +96,11 @@ def termProbabilityFormula(tvs):
     [AB, BA, A] = tvs
     
     sB = A.mean*AB.mean/BA.mean
-    nB = A.count
+    nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
 def transitiveSimilarityFormula(tvs):
-    # Note, this formula doesn't care about count
-
     [AB, BC, A, B, C] = tvs
     simAB = AB.mean
     simBC = BC.mean
@@ -158,36 +123,37 @@ def transitiveSimilarityFormula(tvs):
     # Given inhAC and inhCA you can estimate simAC
     simAC = invert(invert(inhAC)+invert(inhCA)-1)
 
+    count = makeUpCount(tvs)
+
+    return [TruthValue(simAC, count)]
+
 def inheritanceFormula(tvs):
     tv_subset, tv_inh = tvs
 
     # simple average of subset and inheritance
     mean = (tv_subset.mean + tv_inh.mean) /2.0
-    count = (tv_subset.count + tv_inh.count) / 2.0
+    count = makeUpCount(tvs)
 
     return [TruthValue(mean, count)]
 
 def notFormula(tvs):
-    tv = tvs[0]
-    return [TruthValue(1.0 - tv.mean, tv.count)]
+    [notA] = tvs
+    return [TruthValue(negate(notA.mean), makeUpCount(tvs))]
 
-def andSymmetricFormula(tvs):
+def andFormula(tvs):
     total_strength = 1.0
-    total_confidence = 1.0
     
     for tv in tvs:
         total_strength *= tv.mean
-        total_confidence *= count_to_confidence(tv.count)
     
-    return [TruthValue(total_strength, confidence_to_count(total_confidence))]
-
-def andSimpleFormula(tvs):
-    [A, B] = tvs
-    sAndAB = A.mean*B.mean
+    return [TruthValue(total_strength, makeUpCount(tvs))]
 
 def andExclusionFormula(tvs):
+    [orAB, A, B] = tvs
     # Use inclusion-exclusion.
-    s = A.mean+B.mean - OrAB.mean
+    s = A.mean+B.mean - orAB.mean
+
+    return [TruthValue(s, makeUpCount(tvs))]
 
 def orFormula(tvs):
     (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
@@ -195,7 +161,7 @@ def orFormula(tvs):
     # Uses the inclusion-exclusion formula.
     andAB=sA*sB
     s = sA + sB - andAB
-#    n_tot = nA + nB - (A + B) / 2
+    n_tot = nA + nB - (A + B) / 2
     
     return [TruthValue(s_tot, n_tot)]
 
@@ -236,12 +202,16 @@ def oneInheritanceToSimilarityFormula(tvs):
 
     simAC = invert(meat)
 
+    return [TruthValue(simAC, makeUpCount(tvs))]  
+
 def similarityToInheritanceFormula(tvs):
     '''Given simAB, sA and sB, estimate sAB. Could easily be turned around to
        estimate sBA'''
     [(simAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
 
     sAB = (1+sB/sA)*simAB / (1 + simAB)
+
+    return [TruthValue(sAB, makeUpCount(tvs))]
 
 def mem2InhFormula(tvs):
     [mem_tv] = tvs
@@ -359,25 +329,25 @@ def extensionalSimilarityFormula(tvs):
         return [TruthValue(0, 0)]
 
     P = and_size / or_size
-    N = and_tv.count + or_tv.count
+    N = makeUpCount(tvs)
 
     return [TruthValue(P, N)]
 
 def attractionFormula(tvs):
     [ab, b] = tvs
 
-    mean = low(ab.mean - b.mean)
+    s = low(ab.mean - b.mean)
 
-    count = ab.count
+    count = makeUpCount(tvs)
 
-    return [TruthValue(mean, count)]
+    return [TruthValue(s, count)]
 
 def ontoInhFormula(tvs):
     [ab, ba] = tvs
 
     mean = low(ab - ba)
 
-    count = ab.count
+    count = makeUpCount(tvs)
 
     return [TruthValue(mean, count)]
 
@@ -399,7 +369,7 @@ def andBreakdownFormula(tvs):
         return [TruthValue(0, 0)]
 
     sB = AND_AB.mean / A.mean
-    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+    nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
@@ -407,7 +377,7 @@ def orBreakdownFormula(tvs):
     [A, OR_AB] = tvs
 
     sB = OR_AB.mean / (1-A.mean)
-    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+    nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
