@@ -17,6 +17,8 @@ def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
 
 # I didn't incorporate count into the formulas, it just makes things tacky.
+# There are also some divide-by-zero errors where a TV is 0 (or 1, because NOT(A) is used in some formulas). If the formulas are designed well enough, that can still be compatible with indefinite TVs.
+
 def makeUpCount(tvs):
     return min(tv.mean for tv in tvs)
 
@@ -29,7 +31,8 @@ def deductionIndependenceBasedFormula(tvs):
 
     return [TruthValue(sAC, n)]
 
-# better deduction formula based on concept geometry
+# better deduction formula based on concept geometry.
+# I swear that's not the formula in the book though
 def deductionGeometryFormula(tvs):
     [AB, BC] = tvs
 
@@ -51,7 +54,7 @@ def inductionFormula(tvs):
     MS, ML, S, M, L = tvs
 
     [SM] = inversionFormula([MS, M, S])
-    SL = deductionGeometryFormula([SM, ML])
+    SL = deductionIndependenceBasedFormula([SM, ML, M, L])
     return SL
 
 def abductionFormula(tvs):
@@ -59,7 +62,7 @@ def abductionFormula(tvs):
     SM, LM, S, M, L = tvs
 
     [ML] = inversionFormula([LM, L, M])
-    SL = deductionGeometryFormula([SM, ML])
+    SL = deductionIndependenceBasedFormula([SM, ML, M, L])
     return SL
 
 def modusPonensFormula(tvs):

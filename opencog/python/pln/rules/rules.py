@@ -81,7 +81,7 @@ class InversionRule(Rule):
                       A, B],
             formula= formulas.inversionFormula)
 
-class IndependenceBasedDeductionRule(Rule):
+class DeductionRule(Rule):
     '''A->B, B->C entails A->C'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
@@ -95,7 +95,8 @@ class IndependenceBasedDeductionRule(Rule):
                       chainer.link(link_type, [B, C]),
                       B, C])
 
-class DeductionRule(Rule):
+# It doesn't have the right formula
+class DeductionGeometryRule(Rule):
     '''A->B, B->C entails A->C. Uses concept geometry.'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
