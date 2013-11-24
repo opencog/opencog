@@ -162,8 +162,8 @@ class TransitiveSimilarityRule(Rule):
                       chainer.link(link_type, [B, C]),
                       A, B, C])
 
-class ModusPonensRule(Rule):
-    '''A->B, A entails B'''
+class PreciseModusPonensRule(Rule):
+    '''Given P(A->B) and P(NOT(A)->B) and sA, estimate sB'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
@@ -175,8 +175,33 @@ class ModusPonensRule(Rule):
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [notA, B]),
                       A],
+            formula= formulas.preciseModusPonensFormula)
+
+class ModusPonensRule(Rule):
+    '''Given P(A->B) and sA, estimate sB'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [B],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      A],
             formula= formulas.modusPonensFormula)
 
+class SymmetricModusPonensRule(Rule):
+    '''Given (Similarity A B) and sA, estimate sB'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [B],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      A],
+            formula= formulas.symmetricModusPonensFormula)
+
+# when to use this?
 class TermProbabilityRule(ModusPonensRule):
     def __init__(self, chainer):
         ModusPonensRule.__init__(self, chainer, types.InheritanceLink)

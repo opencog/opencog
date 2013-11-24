@@ -32,7 +32,7 @@ class ForwardInferenceAgent(MindAgent):
 
         for link_type in similarity_types:
             self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer, link_type))
-        # It should have ModusPonens too. It doesn't need inversion though obviously
+        # We also want symmetric Modus Ponens. It doesn't need inversion though obviously
 
         # These two Rules create mixed links out of intensional and extensional links
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))

@@ -9,7 +9,6 @@ INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 0.9
 MembershipToExtensionalInheritanceCountDiscountFactor = 0.9
-CRISP_COUNT_THRESHOLD = 0.97
 
 def identityFormula(tvs):
     return tvs
@@ -69,6 +68,7 @@ def abductionFormula(tvs):
     SL = deductionGeometryFormula([SM, ML])
     return SL
 
+# Just a hack in Ari's implementation so he could do planning and everything else using ModusPonens!
 def crispModusPonensFormula(tvs):
     (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
@@ -78,7 +78,7 @@ def crispModusPonensFormula(tvs):
     else:
         return [TruthValue(0, 0)]
 
-def modusPonensFormula(tvs):
+def preciseModusPonensFormula(tvs):
     (sAB, nAB), (sNotAB, nNotAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
 #    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
@@ -86,8 +86,6 @@ def modusPonensFormula(tvs):
 
     # guess P(B|not A)
     #    sNotAB, nNotAB = (0.5, 0.01)
-    
-    
 
     n2 = min(nAB, nA)
     if n2 + nNotAB > 0:
@@ -99,6 +97,30 @@ def modusPonensFormula(tvs):
         s2 = BNA.confidence
     
     return [TruthValue(s2, n2)]
+
+def modusPonensFormula(tvs):
+    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+    # All of the formulas become messier if you have to use counts.
+    # Indefinite probabilities are way better
+
+    sNotAB = 0.2
+
+    sB = sAB*sA + sNotAB*negate(sA)
+    
+    n = min(nAB, nA)
+
+    return [TruthValue(sB, nB)]
+
+def symmetricModusPonensFormula(tvs):
+    (simAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+
+    sNotAB = 0.2
+
+    sB = sA*simAB + sNotAB*negate(sA)*(1+simAB)
+
+    n = min(nAB, nA)
+
+    return [TruthValue(sB, nB)]
 
 def termProbabilityFormula(tvs):
     # sB = sA*sAB/sBA
@@ -129,10 +151,12 @@ def transitiveSimilarityFormula(tvs):
     T2 = (1+sC/sB)*simBC / (1+simBC)
     T3 = (1+sB/sC)*simBC / (1+simBC)
     T4 = (1+sA/sB)*simAB / (1+simAB)
+    
+    inhAC = deduction(T1, T2)
+    inhCA = deduction(T3, T4)
 
-    ded12 = deduction(T1, T2)
-    ded34 = deduction(T3, T4)
-    simAC = invert(invert(ded12)+invert(ded34)-1)
+    # Given inhAC and inhCA you can estimate simAC
+    simAC = invert(invert(inhAC)+invert(inhCA)-1)
 
 def inheritanceFormula(tvs):
     tv_subset, tv_inh = tvs
@@ -157,23 +181,21 @@ def andSymmetricFormula(tvs):
     
     return [TruthValue(total_strength, confidence_to_count(total_confidence))]
 
-def orFormula(tvs):
-    N = len(tvs)
-    
-    if N == 1:
-        return [tvs[0]]
-    
-    if N > 2:
-        # TODO handle via divide-and-conquer or something
-        raise NotImplementedError("OR calculation not supported for arity > 2")
+def andSimpleFormula(tvs):
+    [A, B] = tvs
+    sAndAB = A.mean*B.mean
 
+def andExclusionFormula(tvs):
+    # Use inclusion-exclusion.
+    s = A.mean+B.mean - OrAB.mean
+
+def orFormula(tvs):
     (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
-    
-    A = sA * nB
-    B = sB * nA
-    
-    s_tot = sA + sB
-    n_tot = nA + nB - (A + B) / 2
+
+    # Uses the inclusion-exclusion formula.
+    andAB=sA*sB
+    s = sA + sB - andAB
+#    n_tot = nA + nB - (A + B) / 2
     
     return [TruthValue(s_tot, n_tot)]
 
