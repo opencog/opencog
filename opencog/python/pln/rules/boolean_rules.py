@@ -55,7 +55,7 @@ class AndCreationRule(BooleanLinkCreationRule):
         self._chainer = chainer
 
         rules.Rule.__init__(self,
-            formula= formulas.andSymmetricFormula,
+            formula= formulas.andFormula,
             outputs= [chainer.link(types.AndLink, atoms)],
             inputs=  atoms)
 

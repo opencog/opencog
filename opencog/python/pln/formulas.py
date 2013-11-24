@@ -73,7 +73,7 @@ def modusPonensFormula(tvs):
     return preciseModusPonensFormula([AB, NotAB, A])
 
 def preciseModusPonensFormula(tvs):
-    (sAB, nAB), (sNotAB, _) (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+    (sAB, nAB), (sNotAB, _), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
 
     sB = sAB*sA + sNotAB*negate(sA)
     

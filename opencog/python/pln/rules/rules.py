@@ -89,7 +89,7 @@ class DeductionRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
-            formula= formulas.deductionSimpleFormula,
+            formula= formulas.deductionIndependenceBasedFormula,
             outputs= [chainer.link(link_type, [A, C])],
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [B, C]),

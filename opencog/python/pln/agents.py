@@ -28,8 +28,7 @@ class ForwardInferenceAgent(MindAgent):
             # Seems better than Modus Ponens - it doesn't make anything up
             self.chainer.add_rule(rules.TermProbabilityRule(self.chainer, link_type))
 
-        for link_type in similarity_types:
-            self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer, link_type))
+        self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer))
         # We also want symmetric Modus Ponens. It doesn't need inversion though obviously
 
         # These two Rules create mixed links out of intensional and extensional links
