@@ -25,10 +25,8 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
-            #self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
-
-        # I'm still not 100% clear the difference between this and modus ponens?
-        self.chainer.add_rule(rules.TermProbabilityRule(self.chainer))
+            # Seems better than Modus Ponens - it doesn't make anything up
+            self.chainer.add_rule(rules.TermProbabilityRule(self.chainer, link_type))
 
         for link_type in similarity_types:
             self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer, link_type))

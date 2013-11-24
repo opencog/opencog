@@ -201,12 +201,19 @@ class SymmetricModusPonensRule(Rule):
                       A],
             formula= formulas.symmetricModusPonensFormula)
 
-# when to use this?
-class TermProbabilityRule(ModusPonensRule):
-    def __init__(self, chainer):
-        ModusPonensRule.__init__(self, chainer, types.InheritanceLink)
+class TermProbabilityRule(Rule):
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
 
-        self.formula=formulas.termProbabilityFormula
+        AB= chainer.link(link_type, [A, B])
+        BA= chainer.link(link_type, [B, A])
+
+        Rule.__init__(self,
+            outputs=[B],
+            inputs= [AB, BA, A],
+            formula= formulas.termProbabilityFormula
+            )
 
 class InheritanceRule(Rule):
     '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''

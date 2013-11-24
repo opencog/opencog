@@ -124,9 +124,9 @@ def symmetricModusPonensFormula(tvs):
 
 def termProbabilityFormula(tvs):
     # sB = sA*sAB/sBA
-    # A, Inheritance A B, => B
+    # A, Inheritance A B, Inheritance B A => B
 
-    [A, AB, BA] = tvs
+    [AB, BA, A] = tvs
     
     sB = A.mean*AB.mean/BA.mean
     nB = A.count
