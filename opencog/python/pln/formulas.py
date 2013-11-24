@@ -8,7 +8,7 @@ DEDUCTION_TERM_WEIGHT = 1.0
 INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 0.9
-MembershipToExtensionalInheritanceCountDiscountFactor = 0.9
+MembershipToInheritanceCountDiscountFactor = 0.9
 
 def identityFormula(tvs):
     return tvs
@@ -245,7 +245,7 @@ def similarityToInheritanceFormula(tvs):
 
 def mem2InhFormula(tvs):
     [mem_tv] = tvs
-    count = mem_tv.count * MembershipToExtensionalInheritanceCountDiscountFactor
+    count = mem_tv.count * MembershipToInheritanceCountDiscountFactor
 
     return [TruthValue(mem_tv.mean, count)]
 

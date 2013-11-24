@@ -519,28 +519,18 @@ class LinkToLinkRule(Rule):
             inputs=  [chainer.link(from_type, [A, B])])
 
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(Jade robot) => MemberLink Jade {Jade}, InheritanceLink({Jade} robot).
-       {Jade} is the set containing only Jade.'''
+    '''MemberLink(Jade robot) => InheritanceLink(Jade robot).'''
     def __init__(self, chainer):
-        # use link2link rule so that backward chaining will know approximately the right target.
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
-            formula= None)
+            formula= formulas.mem2InhFormula)
         self.chainer=chainer
 
-    def custom_compute(self, inputs, outputs):
-        [mem_link] = inputs
-        [object, superset] = mem_link.out
-
-        singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
-        singleton_set_node = self.chainer.node(types.ConceptNode, singleton_concept_name)
-
-        member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
-        tvs = [TruthValue(1, formulas.confidence_to_count(0.99))]
-
-        inh_link = self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
-        tvs += formulas.mem2InhFormula([mem_link.tv]) # use mem2inh formula
-
-        return ([member_link, inh_link], tvs)
+class InheritanceToMemberRule(LinkToLinkRule):
+    '''InheritanceLink(Jade robot) => MemberLink(Jade robot).'''
+    def __init__(self, chainer):
+        LinkToLinkRule.__init__(self, chainer, from_type=types.InheritanceLink, to_type=types.MemberLink,
+            formula= formulas.mem2InhFormula)
+        self.chainer=chainer
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
 #class MemberToSubsetRule(LinkToLinkRule):
