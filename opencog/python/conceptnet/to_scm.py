@@ -5,7 +5,6 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-
 from opencog.atomspace import TruthValue
 import reader
 import term
