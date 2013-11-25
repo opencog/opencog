@@ -1,6 +1,6 @@
 __author__ = 'Cosmo Harrigan'
 
-from flask import abort
+from flask import abort, json, current_app
 from flask.ext.restful import Resource, reqparse, marshal
 from opencog.atomspace import Handle
 from mappers import *
@@ -17,16 +17,18 @@ class AtomCollectionAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('type', type=str, location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
+        self.reqparse.add_argument('callback', type=str, location='args')
         super(AtomCollectionAPI, self).__init__()
 
     def get(self):
         """
         Returns a list of atoms matching the specified criteria
-        Uri: atoms?type=[type]&name=[name]
+        Uri: atoms?type=[type]&name=[name]&callback=[callback]
 
         :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
         :param name: (optional, not allowed for Link types) Atom name
         If neither type or name are provided, all atoms will be retrieved
+        :param callback: (optional) JavaScript callback function for JSONP support
 
         :return result: Returns a JSON representation of an atom list.
         Example:
@@ -70,6 +72,8 @@ class AtomCollectionAPI(Resource):
         args = self.reqparse.parse_args()
         type = args.get('type')
         name = args.get('name')
+        callback = args.get('callback')
+                  
         if type is None and name is None:
             atoms = self.atomspace.get_atoms_by_type(types.Atom)
         elif name is None:
@@ -79,8 +83,17 @@ class AtomCollectionAPI(Resource):
                 type = 'Node'
             atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
 
-        response = AtomListResponse(atoms)
-        return {'result': response.format()}
+        atom_list = AtomListResponse(atoms)
+        json_data = {'result': atom_list.format()}
+        
+        # if callback function supplied, pad the JSON data (i.e. JSONP):
+        if callback is not None:
+            response = str(callback) + '(' + json.dumps(json_data) + ');'
+            return current_app.response_class(response, mimetype = 'application/javascript')
+        else:
+            return current_app.response_class(json.dumps(json_data), mimetype = 'application/json')
+        
+    
 
     def post(self):
         """
