@@ -1,0 +1,11 @@
+
+                        HOWTO Run the SQL Tests
+                        -----------------------
+
+The test in this directory is disabled, because it requires some
+manual configuration in order to make it work. Most users don't
+bother with this configuration, so we disable it to avoid grief.
+
+To run this test, perform the following steps:
+
+1) Edit the CMakefile, uncomment the test.
