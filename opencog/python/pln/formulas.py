@@ -164,9 +164,9 @@ def orFormula(tvs):
     # Uses the inclusion-exclusion formula.
     andAB=sA*sB
     s = sA + sB - andAB
-    n_tot = nA + nB - (A + B) / 2
+    n_tot = makeUpCount(tvs)
     
-    return [TruthValue(s_tot, n_tot)]
+    return [TruthValue(s, n_tot)]
 
 def andPartitionFormula(tvs, U):
     [(sAndA, nAndA), (sAndB, nAndB)] = tvs
