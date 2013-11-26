@@ -59,26 +59,38 @@ class AbstractChainer(Logic):
         if len(self.variables(template)) == 0:
             return template
 
-        # TODO backward chaining doesn't work, because this method will pick up Atoms
-        # that have variables in them (including the queries left over from other inferences)!!!
-
-        atom = self._select_from(template, s, allow_zero_tv, useAF=True)
+        atom=None
+        if self._preferAttentionalFocus:
+            atom = self._select_fromAF(template, s)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace.
-            atom = self._select_from(template, s, allow_zero_tv, useAF=False)
+            atom = self._select_from_atomspace(template, s)
 
         return atom
 
-    def _select_from(self, template, substitution, allow_zero_tv, useAF):
+    def _select_fromAF(self, template, substitution):
         # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
-        atoms = self.find(template, substitution, useAF=useAF, allow_zero_tv=allow_zero_tv, ground=ground_results)
+        atoms = self.find(template, substitution)
 
         if len(atoms) == 0:
             return None
 
         return self._selectOne(atoms)
+
+    def _select_from_atomspace(self, template, substitution):
+        # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
+        atoms = self.lookup_atoms(template)
+
+        # The atomspace lookup and the shuffle are both O(N)...
+        random.shuffle(atoms)
+
+        # O(N*the percentage of atoms that are useful)
+        for atom in atoms:
+            if self.wanted_atom(atom, template, substitution, ground=True):
+                return atom
+        return None
 
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
@@ -158,7 +170,7 @@ class AbstractChainer(Logic):
     def count_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        members = self.find(template, {}, ground=True)
+        members = self.find(template)
         self.atomspace.remove(var)
         return len(members)
 
@@ -216,12 +228,13 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self._preferAttentionalFocus = preferAttentionalFocus
         self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
@@ -303,7 +316,7 @@ class Chainer(AbstractChainer):
 
         assert len(generic_inputs) == 1
         template = generic_inputs[0]
-        input_atoms = self.find(template, ground=True)
+        input_atoms = self.find(template)
 
         for input in input_atoms:
             subst = self.unify(template, input, {})
@@ -329,8 +342,8 @@ class Chainer(AbstractChainer):
                 # Find the substitution that would change 'template' to 'atom'
                 # Alternatively this could be returned by _select_one_matching
                 subst_so_far = self.unify(template, atom, subst_so_far)
-                if subst_so_far == None:
-                    import pdb; pdb.set_trace()
+                #if subst_so_far == None:
+                #    import pdb; pdb.set_trace()
 
                 return_inputs[i] = atom
             else:

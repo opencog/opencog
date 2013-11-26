@@ -84,7 +84,7 @@ class ForwardInferenceAgent(MindAgent):
             return
 
         # Update all of the node probabilities at each step
-        self.chainer.update_all_node_probabilities()
+        #self.chainer.update_all_node_probabilities()
 
         result = self.chainer.forward_step()
         if result:
