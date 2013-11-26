@@ -4,7 +4,7 @@ from flask import abort, json, current_app
 from flask.ext.restful import Resource, reqparse, marshal
 from opencog.atomspace import Handle
 from mappers import *
-
+from flask.ext.restful.utils import cors
 
 class AtomCollectionAPI(Resource):
     # This is because of https://github.com/twilio/flask-restful/issues/134
@@ -20,6 +20,8 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument('callback', type=str, location='args')
         super(AtomCollectionAPI, self).__init__()
 
+    # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
+    @cors.crossdomain(origin='*')
     def get(self):
         """
         Returns a list of atoms matching the specified criteria
