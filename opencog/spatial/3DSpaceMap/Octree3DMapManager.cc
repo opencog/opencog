@@ -268,11 +268,13 @@ BlockVector Octree3DMapManager::getLastAppearedLocation(Handle entityHandle)
 }
 
 
-void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp)
+void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp, bool is_standLocation)
 {
     map<Handle, Entity3D*>::iterator it = mAllNoneBlockEntities.find(entityNode);
     multimap<BlockVector, Entity3D*>::iterator biter;
     multimap<BlockVector, Entity3D*>::iterator eiter;
+
+    BlockVector newpos = _newpos;
 
     if (it != mAllNoneBlockEntities.end())
     {
@@ -289,12 +291,17 @@ void Octree3DMapManager::updateNoneBLockEntityLocation(const Handle &entityNode,
             ++ biter;
         }
 
-        ((Entity3D*)(it->second))->updateNonBlockEntityLocation(_newpos);
+        Entity3D* entity = (Entity3D*)(it->second);
 
-        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(_newpos,(Entity3D*)(it->second)));
+        if (is_standLocation && entity->getHeight() > 1) // the feet loction, not the center point
+            newpos.z += (entity->getHeight()) / 2;
+
+        entity->updateNonBlockEntityLocation(newpos);
+
+        mPosToNoneBlockEntityMap.insert(pair<BlockVector, Entity3D*>(newpos,(Entity3D*)(it->second)));
     }
 
-    _addNonBlockEntityHistoryLocation(entityNode,_newpos,timestamp);
+    _addNonBlockEntityHistoryLocation(entityNode,newpos,timestamp);
 }
 
 

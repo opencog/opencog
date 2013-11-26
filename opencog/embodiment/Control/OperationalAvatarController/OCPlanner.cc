@@ -1881,7 +1881,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
             // get new location it moves tol
             spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp,true);
             break;
         }
         case pai::WALK_CODE:
@@ -1895,7 +1895,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             string newPosVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
             spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp,true);
 
             break;
         }
@@ -1945,7 +1945,7 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
             // get old location from the record before execute this effect
             Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
             spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp,true);
 
             break;
         }
@@ -1960,7 +1960,7 @@ void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::Sp
             // get old location from the record before execute this effect
             Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
             spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp,true);
 
             break;
         }

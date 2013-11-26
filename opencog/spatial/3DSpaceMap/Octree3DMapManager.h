@@ -143,7 +143,7 @@ namespace opencog
             void addNoneBlockEntity(const Handle &entityNode, BlockVector _centerPosition,
                                     int _width, int _lenght, int _height, double yaw, std::string _entityName,std::string _entityClass, bool isSelfObject,unsigned long timestamp,bool is_obstacle = false);
 
-            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp);
+            void updateNoneBLockEntityLocation(const Handle &entityNode, BlockVector _newpos, unsigned long timestamp, bool is_standLocation = false);
 
             void removeNoneBlockEntity(const Handle &entityNode);
 
