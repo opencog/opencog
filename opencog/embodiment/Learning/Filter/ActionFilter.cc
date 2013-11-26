@@ -39,7 +39,7 @@ using namespace opencog::pai;
 using namespace opencog::world;
 using namespace PetCombo;
 
-//constructor, desctructor
+//constructor, destructor
 
 ActionFilter::ActionFilter(const std::string& self_id,
                            const std::string& owner_id,

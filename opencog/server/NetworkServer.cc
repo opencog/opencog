@@ -45,7 +45,7 @@ NetworkServer::~NetworkServer()
     logger().debug("[NetworkServer] enter destructor");
     if (_thread != 0)
         pthread_join(_thread, NULL);
-    logger().debug("[NetworkServer] all threads joined, exit desctructor");
+    logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
 extern "C" {
