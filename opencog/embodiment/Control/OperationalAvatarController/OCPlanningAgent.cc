@@ -141,6 +141,9 @@ void OCPlanningAgent::run()
     if (!this->bInitialized)
         this->init();
 
+    if (! oac->getPAI().hasFinishFistTimeWorldPercetption())
+        return;
+
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
 
