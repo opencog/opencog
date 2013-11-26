@@ -1,21 +1,19 @@
 from spatiotemporal.temporal_events.trapezium import generate_random_events
-import ffx
+import os
+import csv
 
 __author__ = 'keyvan'
 
 
 def create_composition_table(temporal_events):
-    table = []
-
+    print os.path.dirname(os.path.abspath(__file__)) + "/data.csv~"
+    csv_writer = csv.writer(open(os.path.dirname(os.path.abspath(__file__)) + '/data.csv~', 'w+'))
     for A in temporal_events:
         for B in temporal_events:
             for C in temporal_events:
-                table.append(((A * B).to_list() + (B * C).to_list(), (A * C).to_list))
-
-    return table
+                csv_writer.writerow((A * B).to_list() + (B * C).to_list() + (A * C).to_list())
 
 
 if __name__ == '__main__':
-    a = create_composition_table(generate_random_events(20))
-    ffx.run()
+    create_composition_table(generate_random_events(2))
     pass
