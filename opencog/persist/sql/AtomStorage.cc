@@ -653,10 +653,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
 	// UUID uuid = atom->_uuid;
-	UUID uuid = atom->getHandle().value();  // XXX cheesy hack, fixme
+	Handle h = atom->getHandle();
+	if (TLB::isInvalidHandle(h))
+		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
+
+	UUID uuid = h.value();  // XXX cheesy hack, fixme
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = atomExists(atom->getHandle());
+	bool update = atomExists(h);
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";

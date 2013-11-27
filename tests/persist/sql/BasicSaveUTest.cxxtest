@@ -32,7 +32,8 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <./opencog/nlp/types/atom_types.h>
+#include <opencog/atomspace/TLB.h>
+#include <opencog/nlp/types/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
 
 #include <opencog/server/CogServer.h>
@@ -205,6 +206,7 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
 	a->setTruthValue(stv);
+	TLB::addAtom(a);
 
 	// Store the atom ... 
 	store->storeAtom(a);
@@ -219,14 +221,15 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	// Create a second atom, connect it to the first
 	// with a link. Save it, fetch it ... are they equal?
 	AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
+	TLB::addAtom(a2);
 	store->storeAtom(a2);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a->getHandle());
 	hvec.push_back(a2->getHandle());
 
-
 	LinkPtr l(createLink(SET_LINK, hvec));
+	TLB::addAtom(l);
 	store->storeAtom(l);
 
 	AtomPtr lb = store->getAtom(l->getHandle());
