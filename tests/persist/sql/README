@@ -9,3 +9,53 @@ bother with this configuration, so we disable it to avoid grief.
 To run this test, perform the following steps:
 
 1) Edit the CMakefile, uncomment the test.
+
+2) Configure an SQL server, as described in opencog/persist/sql/README
+   Abreiviated instructions follow below; else skip to step 3.
+
+2a) Install the postgres server, the postgress client, unixodbc and
+    odbc-postgresql
+
+2b) Edit /etc/odbcinst.ini and copy the example config into there.
+    Use the Unicode drivers, not the ANSI (ASCII) drivers. Opencog
+    uses unicode.
+
+2c) Create a test database. This can be done at the shell prompt: 
+
+    $ createdb test-persist
+
+2d) Create a database user named opencog_tester with password 'cheese'.
+    You can pick a different username and password, but it must be
+    consistent with the ~/.odbc.ini file. Do NOT use your login password!
+    Pick something else! Create the user at the shell prompt:
+
+    $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'"
+
+2e) edit ~/.odbc.ini and add something similar to the following:
+
+    [opencog_test]
+    Description = Unit-Test DB for Opencog unit tests.
+    Driver      = PostgreSQL
+    Trace       = 0
+    TraceFile   =
+    CommLog     = No
+    Database    = persist-test
+    Servername  = localhost
+    Port        = 5432
+    Username    = opencog
+    Password    = cheese
+    ReadOnly    = No
+    RowVersioning     = No
+    ShowSystemTables  = Yes
+    ShowOidColumn     = Yes
+    FakeOidIndex      = Yes
+    ConnSettings      =
+
+
+4) 
+4) edit lib/opencog-test.conf and set the username 
+
+   XXX TODO copy relevant instructions here...
+
+
+3) run the test case: ./tests/scm/BasicSCMUTest

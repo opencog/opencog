@@ -104,7 +104,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
 				"want it or need it, just ignore this test failure.\n"
-				"Otherwise, please be sure to read opencong/persist/README,\n"
+				"Otherwise, please be sure to read opencong/persist/sql/README,\n"
 				"and create/configure the SQL database as described there.\n"
 				"Next, edit lib/opencog-test.conf appropriately, so as\n"
 				"to indicate the location of your database. If this is\n"
@@ -127,8 +127,8 @@ class BasicSaveUTest :  public CxxTest::TestSuite
  */
 void BasicSaveUTest::setUp(void)
 {
-	CogServer& cogserver = static_cast<CogServer&>(server());
-	as = &cogserver.getAtomSpace();
+	CogServer& cogserve = cogserver();
+	as = &cogserve.getAtomSpace();
 
 	astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
@@ -137,6 +137,7 @@ void BasicSaveUTest::setUp(void)
 		freindlyFailMessage();
 		exit(1);
 	}
+	logger().info("Connect to %s as %s pwd %s\n", dbname, username, passwd);
 
 	// Trash the contents of the database.
 	astore->kill_data();
