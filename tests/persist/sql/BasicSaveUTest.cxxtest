@@ -178,13 +178,21 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 
 	TruthValuePtr ta = a->getTruthValue();
 	TruthValuePtr tb = b->getTruthValue();
-	TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
-
-	if (not ((*ta) == (*tb)))
+	if (ta or tb)
 	{
-		fprintf(stderr, "Error, truth value miscompare, "
-		        "ma=%f mb=%f ca=%f cb=%f\n",
-		        ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+		TSM_ASSERT("Missing truth value", ta);
+		TSM_ASSERT("Missing truth value", tb);
+		if (ta and tb)
+		{
+			TSM_ASSERT("Truth value miscompare", (*ta)==(*tb));
+
+			if (not ((*ta) == (*tb)))
+			{
+				fprintf(stderr, "Error, truth value miscompare, "
+					"ma=%f mb=%f ca=%f cb=%f\n",
+					ta->getMean(), tb->getMean(), ta->getCount(), tb->getCount());
+			}
+		}
 	}
 }
 

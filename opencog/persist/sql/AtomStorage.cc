@@ -733,11 +733,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
 	// Store the truth value
 	TruthValuePtr tv = atom->getTruthValue();
-	TruthValueType tvt = tv->getType();
+	TruthValueType tvt = NULL_TRUTH_VALUE;
+	if (tv) tvt = tv->getType();
 	STMTI("tv_type", tvt);
 
 	switch (tvt)
 	{
+		case NULL_TRUTH_VALUE:
+			break;
 		case SIMPLE_TRUTH_VALUE:
 		case COUNT_TRUTH_VALUE:
 			STMTF("stv_mean", tv->getMean());
@@ -756,7 +759,8 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: store_single: Unknown truth value type\n");
+			throw RuntimeException(TRACE_INFO,
+				"Error: store_single: Unknown truth value type\n");
 	}
 
 	std::string qry = cols + vals + coda;
@@ -1143,6 +1147,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	// Now get the truth value
 	switch (rp.tv_type)
 	{
+		case NULL_TRUTH_VALUE:
+			break;
 		case SIMPLE_TRUTH_VALUE:
 		{
 			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
@@ -1165,7 +1171,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: makeAtom: Unknown truth value type\n");
+			throw RuntimeException(TRACE_INFO,
+				"Error: makeAtom: Unknown truth value type\n");
 	}
 
 	load_count ++;
