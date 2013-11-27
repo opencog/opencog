@@ -976,7 +976,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom = makeAtom(rp, rp.handle);
+	AtomPtr atom(makeAtom(rp, rp.handle));
 	rp.rs->release();
 	return atom;
 }
@@ -1126,10 +1126,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			atom = createLink(realtype, outvec);
 		}
 
-		// Make sure that the handle in the TLB is synced with
-		// the handle we use in the database.
-		// TLB::addAtom(atom, h);
-// XXX FIXME borken
+		// Give the atom the correct UUID. The AtomTable will need this.
+		atom->_uuid = h.value();
 	}
 	else
 	{
@@ -1149,6 +1147,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	{
 		case NULL_TRUTH_VALUE:
 			break;
+
 		case SIMPLE_TRUTH_VALUE:
 		{
 			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));

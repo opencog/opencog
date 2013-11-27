@@ -67,6 +67,7 @@ class Atom
     : public std::enable_shared_from_this<Atom>
 {
     friend class ::AtomUTest;     // Needs to call setFlag()
+    friend class AtomStorage;     // Needs to set _uuid
     friend class AtomTable;       // Needs to call MarkedForRemoval()
     friend class ImportanceIndex; // Needs to call setFlag()
     friend class Handle;          // Needs to view _uuid
