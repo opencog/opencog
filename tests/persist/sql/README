@@ -29,9 +29,47 @@ To run this test, perform the following steps:
     consistent with the ~/.odbc.ini file. Do NOT use your login password!
     Pick something else! Create the user at the shell prompt:
 
-    $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'"
+    $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d test-persist
 
-2e) edit ~/.odbc.ini and add something similar to the following:
+2e) Check that the above worked, by manually logging in:
+
+    $  psql test-persist -U opencog_tester -W -h localhost
+
+    If you can't login, something up above failed.
+
+2f) Initialize the test database by creating tables. Do this with:
+
+    $ cat opencog/persist/sql/atom.sql | psql test-persist -U opencog_tester -W -h localhost
+
+2g) Verify that the tables were created. Login as before, then enter \d
+    at the postgres prompt.  You should see this:
+
+    test-persist=> \d
+                  List of relations
+     Schema |   Name    | Type  |     Owner      
+    --------+-----------+-------+----------------
+     public | atoms     | table | opencog_tester
+     public | edges     | table | opencog_tester
+     public | global    | table | opencog_tester
+     public | typecodes | table | opencog_tester
+    (4 rows)
+
+    If the above doesn't work, go back, and try again.
+
+2h) Verify that opencog_tester has write permissions to the tables. Do
+    this by entering the below.
+
+    test-persist=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
+
+    You should see the appropriate respone:
+
+    INSERT 0 1
+
+    If the above doesn't work, go back, and try again.
+
+2i) Edit ~/.odbc.ini and add something similar to the below. Pay special
+    attention to the username, the password, and the name of the database
+    to connect to.
 
     [opencog_test]
     Description = Unit-Test DB for Opencog unit tests.
@@ -39,10 +77,10 @@ To run this test, perform the following steps:
     Trace       = 0
     TraceFile   =
     CommLog     = No
-    Database    = persist-test
+    Database    = test-persist
     Servername  = localhost
     Port        = 5432
-    Username    = opencog
+    Username    = opencog_tester
     Password    = cheese
     ReadOnly    = No
     RowVersioning     = No
@@ -50,7 +88,6 @@ To run this test, perform the following steps:
     ShowOidColumn     = Yes
     FakeOidIndex      = Yes
     ConnSettings      =
-
 
 4) 
 4) edit lib/opencog-test.conf and set the username 

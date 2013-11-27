@@ -137,7 +137,7 @@ void BasicSaveUTest::setUp(void)
 		freindlyFailMessage();
 		exit(1);
 	}
-	logger().info("Connect to %s as %s pwd %s\n", dbname, username, passwd);
+	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
 
 	// Trash the contents of the database.
 	astore->kill_data();
