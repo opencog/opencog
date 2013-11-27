@@ -60,7 +60,7 @@ Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
     _type = t;
     _attentionValue = av;
 
-    if (not tv->isNullTv()) _truthValue = tv;
+    if (tv and not tv->isNullTv()) _truthValue = tv;
 }
 
 Atom::~Atom()

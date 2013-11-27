@@ -244,6 +244,7 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
             break;
         }
 
+        case NULL_TRUTH_VALUE:
         case NUMBER_OF_TRUTH_VALUE_TYPES:
         {
             break;
