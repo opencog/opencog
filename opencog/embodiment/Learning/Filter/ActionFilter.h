@@ -55,7 +55,7 @@ public:
     typedef object_set::iterator object_set_it;
     typedef object_set::const_iterator object_set_const_it;
 
-    //constructor, desctructor
+    //constructor, destructor
     //arity denotes the number of input arguments
     //of the combo program to learn
     ActionFilter(const std::string& pet_id,

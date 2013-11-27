@@ -32,6 +32,7 @@
 #include <opencog/atomspace/Handle.h>
 
 class TLBUTest;
+class BasicSaveUTest;
 
 namespace opencog
 {
@@ -54,6 +55,7 @@ class TLB
     friend class AtomStorage;
     friend class AtomTable;
     friend class ::TLBUTest;
+    friend class ::BasicSaveUTest;
 
 private:
 
@@ -98,7 +100,7 @@ inline bool TLB::isInvalidHandle(const Handle& h)
 
 inline bool TLB::isValidHandle(const Handle& h)
 {
-    return !isInvalidHandle(h);
+    return not isInvalidHandle(h);
 }
 
 inline void TLB::addAtom(AtomPtr atom)

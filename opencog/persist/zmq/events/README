@@ -1,0 +1,22 @@
+The AtomSpacePublisherModule class publishes AtomSpace change events across 
+the network using ZeroMQ sockets to allow for external clients to receive 
+updates from the AtomSpace via a publish/subscribe pattern.
+
+Clients can subscribe to the events by subscribing to a ZeroMQ socket.
+
+Supported events are:
+
+add
+remove
+tvchanged
+avchanged
+
+The default configuration parameters in opencog.conf are:
+
+  ZMQ_EVENT_USE_PUBLIC_IP = TRUE
+  ZMQ_EVENT_PORT = 5563
+
+Detailed documentation, including a description of the JSON message format
+specification and example client code is posted here:
+
+http://wiki.opencog.org/w/AtomSpace_Event_Publisher

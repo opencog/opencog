@@ -1,14 +1,8 @@
 
 IF (HAVE_ZMQ)
 
-ADD_LIBRARY (zmqatoms SHARED
-	ProtocolBufferSerializer
-	ZMQClient
-	ZMQMessages.pb
-	ZMQServer
-)
-
-TARGET_LINK_LIBRARIES(zmqatoms mq)
+ADD_SUBDIRECTORY (atomspace)
+ADD_SUBDIRECTORY (events)
 
 ENDIF (HAVE_ZMQ)
 

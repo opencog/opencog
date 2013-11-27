@@ -582,7 +582,7 @@ vector<BlockEntity*> Octree::getNeighbourEntities(BlockVector& _pos)
         for (int j = -1; j < 2; j ++)
             for (int k = -1; k < 2; k ++)
             {
-                if (i == 0 && j == 0 && k == 0)
+                if ((i == 0) && (j == 0) && (k == 0))
                     continue;
                 BlockVector nextPos(_pos.x + i,_pos.y + j, _pos.z + k);
 
@@ -595,7 +595,7 @@ vector<BlockEntity*> Octree::getNeighbourEntities(BlockVector& _pos)
                     if (block == beginBlock)
                         continue; // we don't contain the begin block in our return list
 
-                    for (it = entities.begin(); it != entities.end(); ++ i )
+                    for (it = entities.begin(); it != entities.end(); ++ it )
                     {
                         if (block->mBlockEntity == (BlockEntity*)(*it))
                             break;

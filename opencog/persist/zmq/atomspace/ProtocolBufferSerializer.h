@@ -27,7 +27,7 @@
 #ifndef _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 #define _OPENCOG_PROTOCOLBUFFER_SERIALIZER_H
 
-#include "types.h"
+#include "opencog/atomspace/types.h"
 #include <string>
 #include "ZMQMessages.pb.h"
 
