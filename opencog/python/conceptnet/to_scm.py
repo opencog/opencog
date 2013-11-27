@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue
+from opencog.atomspace import TruthValue, confidence_to_count
 import reader
 import term
 
@@ -14,12 +14,22 @@ corpus_dict = {}
 conceptnet_dict = {}
 twf = 0
 # ConceptNet relation to Opencog Link mappings
-map_dict = {"/r/IsA": 'InheritanceLink'}
+map_dict = {"/r/ConceptuallyRelatedTo": "IntensionalSimilarityLink",
+            "/r/ThematicKLine": "IntensionalSimilarityLink",
+            "/r/SuperThematicKLine": "IntensionalInheritanceLink",
+            "/r/IsA": "InheritanceLink",
+            "/r/PropertyOf": "InheritanceLink",
+            "/r/DefinedAs": "SimilarityLink",
+            "/r/PrerequisiteEventOf": "RetroactiveImplicationLink",
+            "/r/FirstSubeventOf": "StartsLink",
+            "/r/SubeventOf": "DuringLink",
+            "/r/LastSubeventOf": "EndsLink",
+            "/r/EffectOf": "PredictiveImplicationLink"
+            }
 
 
 def set_TV(word):
     global corpus_dict, conceptnet_dict, twf
-    stv = TruthValue()
     if not(corpus_dict):
         term_lists = term.read_frequencies(corpus_path)
         corpus_dict = dict(term_lists)
@@ -30,34 +40,34 @@ def set_TV(word):
         return stv
     except KeyError:
         if ("  " + word.upper()) in corpus_dict:
-            stv.mean = float(corpus_dict[("  " + word.upper())]) / twf
-            stv.count = .95  # have no reason for this value
-            conceptnet_dict[word] = stv
-            return stv
+            mean = float(corpus_dict[("  " + word.upper())]) / twf
+            count = confidence_to_count(.95) # have no reason for this value
+            conceptnet_dict[word] = TruthValue(mean,count)
+            return conceptnet_dict[word]
         else:
-            stv.mean = 1 / (twf + 1)
-            stv.count = .95  # have no reason for this value
-            conceptnet_dict[word] = stv
-            return stv
+            mean = 1 / (twf + 1)
+            count = confidence_to_count(.95) # have no reason for this value
+            conceptnet_dict[word] = TruthValue(mean,count)
+            return conceptnet_dict[word]
 
 
-def write_file(cn_assertion):
+def write_atoms(cn_assertion):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, 0.5)
     try:
         link_type = map_dict[cn_assertion[0]]
-        return ('(' + str(link_type) + ' (stv ' + str(TV.mean) + ' ' + str(TV.count) + ')\n\t' +
-                '(ConceptNode "' + cn_assertion[1][6:] + '" (stv {cn_argument1.mean} {cn_argument1.count}))\n\t' +
-                '(ConceptNode "' + cn_assertion[2][6:] + '" (stv {cn_assertion2.mean} {cn_assertion2.count}))\n)'
-                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_assertion2=set_TV(cn_assertion[2][6:]))
+        return ('(' + str(link_type) + ' '+str(TV)+ '\n\t' +
+                '(ConceptNode "' + cn_assertion[1][6:] + '" {cn_argument1})\n\t' +
+                '(ConceptNode "' + cn_assertion[2][6:] + '" {cn_argument2})\n)'
+                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_argument2=set_TV(cn_assertion[2][6:]))
     except KeyError:
         return ('(EvaluationLink (stv ' + str(TV.mean) + ' ' + str(TV.count) + ')\n\t' +
                 '(PredicateNode "' + cn_assertion[0][3:] + '" (stv ' + str(set_TV(cn_assertion[0][3:]).mean) + ' ' + str(set_TV(cn_assertion[0][3:]).count) + '))\n\t' +
                 '(ListLink \n\t\t' +
-                '(ConceptNode "' + cn_assertion[1][6:] + '" (stv {cn_argument1.mean} {cn_argument1.count}))\n\t\t' +
-                '(ConceptNode "' + cn_assertion[2][6:] + '" (stv {cn_assertion2.mean} {cn_assertion2.count}))\n\t)\n)'
-                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_assertion2=set_TV(cn_assertion[2][6:]))
+                '(ConceptNode "' + cn_assertion[1][6:] + '" {cn_argument1})\n\t\t' +
+                '(ConceptNode "' + cn_assertion[2][6:] + '" {cn_argument2})\n\t)\n)'
+                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_argument2=set_TV(cn_assertion[2][6:]))
 
 
 def from_file(cn_path, scm_name):
@@ -65,7 +75,7 @@ def from_file(cn_path, scm_name):
     lists_of_assertions = reader.csv(cn_path)
     with open(scm_name, 'w') as scm_file:
         for an_assertion in lists_of_assertions:
-            temp = write_file(an_assertion)
+            temp = write_atoms(an_assertion)
             scm_file.write(temp + '\n' * 2)
 
 if __name__ == '__main__':
