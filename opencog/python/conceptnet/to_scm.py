@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue, confidence_to_count
+from opencog.atomspace import TruthValue
 import reader
 import term
 
@@ -41,33 +41,47 @@ def set_TV(word):
     except KeyError:
         if ("  " + word.upper()) in corpus_dict:
             mean = float(corpus_dict[("  " + word.upper())]) / twf
-            count = confidence_to_count(.95) # have no reason for this value
-            conceptnet_dict[word] = TruthValue(mean,count)
+            count = .95  # have no reason for this value
+            conceptnet_dict[word] = TruthValue(mean, count)
             return conceptnet_dict[word]
         else:
             mean = 1 / (twf + 1)
-            count = confidence_to_count(.95) # have no reason for this value
-            conceptnet_dict[word] = TruthValue(mean,count)
+            count = .95  # have no reason for this value
+            conceptnet_dict[word] = TruthValue(mean, count)
             return conceptnet_dict[word]
+
+
+def print_TV(word, case=1):
+    return('(stv ' + str(word.mean) + ' ' + str(word.count) + ')')
 
 
 def write_atoms(cn_assertion):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
-    TV = TruthValue(1, 0.5)
+    TV = TruthValue(1, .5)
     try:
         link_type = map_dict[cn_assertion[0]]
-        return ('(' + str(link_type) + ' '+str(TV)+ '\n\t' +
-                '(ConceptNode "' + cn_assertion[1][6:] + '" {cn_argument1})\n\t' +
-                '(ConceptNode "' + cn_assertion[2][6:] + '" {cn_argument2})\n)'
-                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_argument2=set_TV(cn_assertion[2][6:]))
+        return ('(' + str(link_type) + ' {link_tv}\n\t' +
+                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t' +
+                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n'
+                ).format(link_tv=print_TV(TV),
+                         cn_argument1=cn_assertion[1][6:],
+                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
+                         cn_argument2=cn_assertion[2][6:],
+                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
     except KeyError:
-        return ('(EvaluationLink (stv ' + str(TV.mean) + ' ' + str(TV.count) + ')\n\t' +
-                '(PredicateNode "' + cn_assertion[0][3:] + '" (stv ' + str(set_TV(cn_assertion[0][3:]).mean) + ' ' + str(set_TV(cn_assertion[0][3:]).count) + '))\n\t' +
-                '(ListLink \n\t\t' +
-                '(ConceptNode "' + cn_assertion[1][6:] + '" {cn_argument1})\n\t\t' +
-                '(ConceptNode "' + cn_assertion[2][6:] + '" {cn_argument2})\n\t)\n)'
-                ).format(cn_argument1=set_TV(cn_assertion[1][6:]), cn_argument2=set_TV(cn_assertion[2][6:]))
+        return ('(EvaluationLink' + ' {link_tv}\n\t' +
+                '(PredicateNode "{cn_relation}" {cn_rel_stv})\n\t' +
+                '(ListLink\n\t\t' +
+                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t\t' +
+                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n\t)\n)'
+                ).format(link_tv=print_TV(TV),
+                         cn_relation=cn_assertion[0][3:],
+                         cn_rel_stv=print_TV(set_TV(cn_assertion[0][3:])),
+                         cn_argument1=cn_assertion[1][6:],
+                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
+                         cn_argument2=cn_assertion[2][6:],
+                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
 
 
 def from_file(cn_path, scm_name):
