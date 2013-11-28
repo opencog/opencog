@@ -36,7 +36,7 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer.add_rule(rules.SimilarityRule(self.chainer))
 
         # boolean links
-        for rule in boolean_rules.create_and_or_rules(self.chainer, 1, 2):
+        for rule in boolean_rules.create_and_or_rules(self.chainer, 2, 3):
             self.chainer.add_rule(rule)
 
         # create probabilistic logical links out of MemberLinks

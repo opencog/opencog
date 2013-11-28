@@ -86,7 +86,12 @@ class AbstractChainer(Logic):
 
         print 'shuffling atoms'
         # The atomspace lookup and the shuffle are both O(N)...
+        # But if you shuffle it you're guaranteed to eventually find a suitable atom if one exists.
+        # The correct option would be to do it inside the atomspace.
+        # Sample without replacement, or shuffle a little bit at a time.
+        # Or even being able to get results N atoms at a time would help a lot!
         random.shuffle(atoms)
+        #atoms = random.sample(atoms, len(atoms))
 
         print 'filtering atoms'
         # O(N*the percentage of atoms that are useful)

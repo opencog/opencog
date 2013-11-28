@@ -348,7 +348,7 @@ def attractionFormula(tvs):
 def ontoInhFormula(tvs):
     [ab, ba] = tvs
 
-    mean = low(ab - ba)
+    mean = low(ab.mean - ba.mean)
 
     count = makeUpCount(tvs)
 
