@@ -2,7 +2,37 @@ This package is useful for mapping ConceptNet assertions into OpenCog atoms. For
 ConceptNet relation 'IsA' ( denoted on the csv file as /r/IsA/) is mapped to 'InheritanceLink',
 because their meanings are the same. Simillarily other relation can be mapped to OpenCog links 
 by adding them to map_dict variable in the to_scm.py module. For ConceptNet relations that 
-don't have an equivalent OpenCog links, a PredicateNode is used.
+don't have an equivalent OpenCog links, an EvaluationLink is used. In some cases a relation maybe mapped to more than one links. 
+
+The follwing is a list of ConceptNet relation to OpenCog link mappings,
+	1. ConceptuallyRelatedTo -> IntensionalSimilarityLink
+	2. ThematicKLine -> IntensionalSimilarityLink
+	3. SuperThematicKLine -> IntensionalInheritanceLink
+        4. IsA -> InheritanceLink
+        5. PropertyOf -> InheritanceLink
+        6. DefinedAs -> SimilarityLink
+        7. PrerequisiteEventOf -> RetroactiveImplicationLink
+        8. FirstSubeventOf -> StartsLink
+        9. SubeventOf -> DuringLink
+        10. LastSubeventOf -> EndsLink
+        11. EffectOf -> PredictiveImplicationLink
+        	     -> EvaluationLink
+        12. PartOf -> EvaluationLink PartOf
+        13. MadeOf -> EvaluationLink MadeOf
+        14. CapableOf -> EvaluationLink CapableOf
+        15. LocationOf -> EvaluationLink LocationOf
+        16. DesirousEffectOF -> EvaluationLink DesirousEffectOF
+        17. UsedFor -> EvaluationLink UsedFor
+        18. CapableOfReceivingAction -> EvaluationLink CapableOfReceivingAction
+        19. MotivationOf -> EvaluationLink MotivationOf
+        20. DesireOf -> EvaluationLink DesireOf
+        21. HasPrerequisite -> RetroactiveImplicationLink
+        22. Causes -> PredictiveImplicationLink
+        23. HasProperty -> IntensionalInheritanceLink
+        24. Desires -> EvaluationLink Desires
+        25. HasSubevent -> DuringLink
+        26. AtLocation -> EvaluationLink AtLocation
+                
 
 Procedure to create a scheme data file from conceptnet csv files:
 1. Download the current csv tar ball from http://conceptnet5.media.mit.edu/downloads/current/
@@ -19,18 +49,18 @@ Example Inputs(conceptnet URI) and corresponding outputs:
 /a/[/r/IsA/,/c/en/america_beautiful/,/c/en/national_anthem/]
 	-->
 (InheritanceLink (stv 1.0 0.5)
-	(ConceptNode "america_beautiful" (stv 2.52457494464e-09 0.95))
-	(ConceptNode "national_anthem" (stv 2.52457494464e-09 0.95))
+	(ConceptNode "america_beautiful" (stv 2.5245749935e-09 0.949999988079))
+	(ConceptNode "national_anthem" (stv 2.5245749935e-09 0.949999988079))
 )
 
 2.
 /a/[/r/PartOf/,/c/en/ankara/,/c/en/central_anatolia_region/]
 	-->
 (EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "PartOf" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "ankara" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "central_anatolia_region" (stv 2.52457494464e-09 0.95))
+	(PredicateNode "PartOf" (stv 2.5245749935e-09 0.949999988079))
+	(ListLink
+		(ConceptNode "ankara" (stv 2.5245749935e-09 0.949999988079))
+		(ConceptNode "central_anatolia_region" (stv 2.5245749935e-09 0.949999988079))
 	)
 )
 
@@ -38,43 +68,37 @@ Example Inputs(conceptnet URI) and corresponding outputs:
 /a/[/r/AtLocation/,/c/en/apple_inc/,/c/en/apple_campus/]
 	-->
 (EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "AtLocation" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "apple_inc" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "apple_campus" (stv 2.52457494464e-09 0.95))
+	(PredicateNode "AtLocation" (stv 2.5245749935e-09 0.949999988079))
+	(ListLink
+		(ConceptNode "apple_inc" (stv 2.5245749935e-09 0.949999988079))
+		(ConceptNode "apple_campus" (stv 2.5245749935e-09 0.949999988079))
 	)
 )
 
 4.
 /a/[/r/HasSubevent/,/c/en/type/,/c/en/think/]
 	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "HasSubevent" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "type" (stv 8.42703118648e-06 0.95))
-		(ConceptNode "think" (stv 7.33136565774e-06 0.95))
-	)
+(DuringLink (stv 1.0 0.5)
+	(ConceptNode "type" (stv 8.42703138915e-06 0.949999988079))
+	(ConceptNode "think" (stv 7.3313658504e-06 0.949999988079))
 )
 
 5.
 /a/[/r/DefinedAs/,/c/en/wool/,/c/en/hair_of_sheep/]
 	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "DefinedAs" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "wool" (stv 1.15625532756e-05 0.95))
-		(ConceptNode "hair_of_sheep" (stv 2.52457494464e-09 0.95))
-	)
+(SimilarityLink (stv 1.0 0.5)
+	(ConceptNode "wool" (stv 1.15625534818e-05 0.949999988079))
+	(ConceptNode "hair_of_sheep" (stv 2.5245749935e-09 0.949999988079))
 )
 
 6.
 /a/[/r/UsedFor/,/c/en/library/,/c/en/lend_book/]
 	-->
 (EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "UsedFor" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "library" (stv 6.12613357612e-05 0.95))
-		(ConceptNode "lend_book" (stv 2.52457494464e-09 0.95))
+	(PredicateNode "UsedFor" (stv 2.5245749935e-09 0.949999988079))
+	(ListLink
+		(ConceptNode "library" (stv 6.12613366684e-05 0.949999988079))
+		(ConceptNode "lend_book" (stv 2.5245749935e-09 0.949999988079))
 	)
 )
 
@@ -82,76 +106,45 @@ Example Inputs(conceptnet URI) and corresponding outputs:
 /a/[/r/Desires/,/c/en/person/,/c/en/intellectual_stimulation/]
 	-->
 (EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "Desires" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "person" (stv 0.000312100578319 0.95))
-		(ConceptNode "intellectual_stimulation" (stv 2.52457494464e-09 0.95))
+	(PredicateNode "Desires" (stv 2.5245749935e-09 0.949999988079))
+	(ListLink
+		(ConceptNode "person" (stv 0.000312100572046 0.949999988079))
+		(ConceptNode "intellectual_stimulation" (stv 2.5245749935e-09 0.949999988079))
 	)
 )
 
 8.
-/a/[/r/DefinedAs/,/c/en/philosophy/,/c/en/old_form_of_systematic_scholarly_inquiry/]
+/a/[/r/HasProperty/,/c/en/and_chew_tobacco/,/c/en/disgust/]
 	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "DefinedAs" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "philosophy" (stv 4.20568941089e-05 0.95))
-		(ConceptNode "old_form_of_systematic_scholarly_inquiry" (stv 2.52457494464e-09 0.95))
-	)
+(IntensionalInheritanceLink (stv 1.0 0.5)
+	(ConceptNode "and_chew_tobacco" (stv 2.5245749935e-09 0.949999988079))
+	(ConceptNode "disgust" (stv 1.01487910342e-06 0.949999988079))
 )
 
 9.
-/a/[/r/HasProperty/,/c/en/and_chew_tobacco/,/c/en/disgust/]
+/a/[/r/HasPrerequisite/,/c/en/read_book/,/c/en/get_one/]
 	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "HasProperty" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "and_chew_tobacco" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "disgust" (stv 1.01487913031e-06 0.95))
-	)
+(RetroactiveImplicationLink (stv 1.0 0.5)
+	(ConceptNode "read_book" (stv 2.5245749935e-09 0.949999988079))
+	(ConceptNode "get_one" (stv 2.5245749935e-09 0.949999988079))
 )
 
 10.
-/a/[/r/HasPrerequisite/,/c/en/read_book/,/c/en/get_one/]
+/a/[/r/CapableOf/,/c/en/couple/,/c/en/see_counselor/]
 	-->
 (EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "HasPrerequisite" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "read_book" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "get_one" (stv 2.52457494464e-09 0.95))
+	(PredicateNode "CapableOf" (stv 2.5245749935e-09 0.949999988079))
+	(ListLink
+		(ConceptNode "couple" (stv 1.19614360301e-05 0.949999988079))
+		(ConceptNode "see_counselor" (stv 2.5245749935e-09 0.949999988079))
 	)
 )
 
 11.
-/a/[/r/CapableOf/,/c/en/couple/,/c/en/see_counselor/]
-	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "CapableOf" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "couple" (stv 1.19614361179e-05 0.95))
-		(ConceptNode "see_counselor" (stv 2.52457494464e-09 0.95))
-	)
-)
-
-12.
 /a/[/r/Causes/,/c/en/pass_class/,/c/en/joy/]
 	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "Causes" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "pass_class" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "joy" (stv 3.87219305986e-05 0.95))
-	)
-)
-
-13.
-/a/[/r/HasPrerequisite/,/c/en/leave_line/,/c/en/ask_someone_to_hold_your_place/]
-	-->
-(EvaluationLink (stv 1.0 0.5)
-	(PredicateNode "HasPrerequisite" (stv 2.52457494464e-09 0.95))
-	(ListLink 
-		(ConceptNode "leave_line" (stv 2.52457494464e-09 0.95))
-		(ConceptNode "ask_someone_to_hold_your_place" (stv 2.52457494464e-09 0.95))
-	)
+(PredictiveImplicationLink (stv 1.0 0.5)
+	(ConceptNode "pass_class" (stv 2.5245749935e-09 0.949999988079))
+	(ConceptNode "joy" (stv 3.87219297409e-05 0.949999988079))
 )
 

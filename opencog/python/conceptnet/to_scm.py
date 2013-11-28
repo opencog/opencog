@@ -14,18 +14,23 @@ corpus_dict = {}
 conceptnet_dict = {}
 twf = 0
 # ConceptNet relation to Opencog Link mappings
-map_dict = {"/r/ConceptuallyRelatedTo": "IntensionalSimilarityLink",
-            "/r/ThematicKLine": "IntensionalSimilarityLink",
-            "/r/SuperThematicKLine": "IntensionalInheritanceLink",
-            "/r/IsA": "InheritanceLink",
-            "/r/PropertyOf": "InheritanceLink",
-            "/r/DefinedAs": "SimilarityLink",
-            "/r/PrerequisiteEventOf": "RetroactiveImplicationLink",
-            "/r/FirstSubeventOf": "StartsLink",
-            "/r/SubeventOf": "DuringLink",
-            "/r/LastSubeventOf": "EndsLink",
-            "/r/EffectOf": "PredictiveImplicationLink"
-            }
+map_dict1 = {"/r/ConceptuallyRelatedTo": "IntensionalSimilarityLink",
+             "/r/ThematicKLine": "IntensionalSimilarityLink",
+             "/r/SuperThematicKLine": "IntensionalInheritanceLink",
+             "/r/IsA": "InheritanceLink",
+             "/r/PropertyOf": "InheritanceLink",
+             "/r/DefinedAs": "SimilarityLink",
+             "/r/PrerequisiteEventOf": "RetroactiveImplicationLink",
+             "/r/FirstSubeventOf": "StartsLink",
+             "/r/SubeventOf": "DuringLink",
+             "/r/LastSubeventOf": "EndsLink",
+             "/r/EffectOf": "PredictiveImplicationLink",
+             "/r/HasPrerequisite": "RetroactiveImplicationLink",
+             "/r/Causes": "PredictiveImplicationLink",
+             "/r/HasProperty": "IntensionalInheritanceLink",
+             "/r/HasSubevent": "DuringLink"
+             }
+map_dict2 = {"/r/EffectOf": "EvaluationLink"}
 
 
 def set_TV(word):
@@ -55,21 +60,20 @@ def print_TV(word, case=1):
     return('(stv ' + str(word.mean) + ' ' + str(word.count) + ')')
 
 
-def write_atoms(cn_assertion):
+def write_atoms(cn_assertion, template_no, link_type=''):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, .5)
-    try:
-        link_type = map_dict[cn_assertion[0]]
+    if template_no == 1:
         return ('(' + str(link_type) + ' {link_tv}\n\t' +
                 '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t' +
-                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n'
+                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n)'
                 ).format(link_tv=print_TV(TV),
                          cn_argument1=cn_assertion[1][6:],
                          cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
                          cn_argument2=cn_assertion[2][6:],
                          cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
-    except KeyError:
+    elif template_no == 2:
         return ('(EvaluationLink' + ' {link_tv}\n\t' +
                 '(PredicateNode "{cn_relation}" {cn_rel_stv})\n\t' +
                 '(ListLink\n\t\t' +
@@ -89,7 +93,14 @@ def from_file(cn_path, scm_name):
     lists_of_assertions = reader.csv(cn_path)
     with open(scm_name, 'w') as scm_file:
         for an_assertion in lists_of_assertions:
-            temp = write_atoms(an_assertion)
+            if an_assertion[0] in map_dict2:
+                temp = write_atoms(an_assertion, 2)
+                scm_file.write(temp + '\n' * 2)
+            try:
+                link_type = map_dict1[an_assertion[0]]
+                temp = write_atoms(an_assertion, 1, link_type)
+            except KeyError:
+                temp = write_atoms(an_assertion, 2,)
             scm_file.write(temp + '\n' * 2)
 
 if __name__ == '__main__':
