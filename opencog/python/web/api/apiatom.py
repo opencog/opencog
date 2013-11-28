@@ -1,10 +1,10 @@
 __author__ = 'Cosmo Harrigan'
 
-from flask import abort
+from flask import abort, json, current_app
 from flask.ext.restful import Resource, reqparse, marshal
 from opencog.atomspace import Handle
 from mappers import *
-
+from flask.ext.restful.utils import cors
 
 class AtomAPI(Resource):
     # This is because of https://github.com/twilio/flask-restful/issues/134
@@ -17,8 +17,11 @@ class AtomAPI(Resource):
         self.reqparse = reqparse.RequestParser()
         self.reqparse.add_argument('type', type=str, choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str)
+        self.reqparse.add_argument('callback', type=str, location='args')
         super(AtomAPI, self).__init__()
 
+    # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
+    @cors.crossdomain(origin='*')
     def get(self, id):
         """
         Returns the atom for the given handle
@@ -63,8 +66,17 @@ class AtomAPI(Resource):
         except IndexError:
             abort(404, 'Handle not found')
 
-        return {'atoms': marshal(atom, atom_fields)}
-
+        json_data = {'atoms': marshal(atom, atom_fields)}
+        
+        # if callback function supplied, pad the JSON data (i.e. JSONP):
+        args = self.reqparse.parse_args()
+        callback = args.get('callback')
+        if callback is not None:
+            response = str(callback) + '(' + json.dumps(json_data) + ');'
+            return current_app.response_class(response, mimetype = 'application/javascript')
+        else:
+            return current_app.response_class(json.dumps(json_data), mimetype = 'application/json')
+        
     def put(self, id):
         """
         Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom

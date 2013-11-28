@@ -8,7 +8,7 @@
 # Required:
 easy_install Flask
 easy_install -U mock
-easy_install flask-restful
+easy_install -U flask-restful
 easy_install six
 
 # Optional:
