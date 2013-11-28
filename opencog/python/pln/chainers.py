@@ -82,7 +82,7 @@ class AbstractChainer(Logic):
     def _select_from_atomspace(self, template, substitution):
         # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
         print 'looking up atoms'
-        atoms = self.lookup_atoms(template)
+        atoms = self.lookup_atoms(template, substitution)
 
         print 'shuffling atoms'
         # The atomspace lookup and the shuffle are both O(N)...
@@ -92,9 +92,9 @@ class AbstractChainer(Logic):
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
             if self.wanted_atom(atom, template, substitution, ground=True):
-                print 'finish'
+                print 'found', template, substitution,'=>',atom
                 return atom
-        print 'finish'
+        print 'not found', template, substitution
         return None
 
     def _selectOne(self, atoms):

@@ -64,7 +64,12 @@ class Logic(object):
 
         return atoms
 
-    def lookup_atoms(self, template):
+    def lookup_atoms(self, template, substitution):
+        template = self.substitute(substitution, template)
+
+        if len(self.variables(template)) == 0:
+            return [template]
+
         if template.type == types.VariableNode:
             root_type = types.Atom
             atoms = self.atomspace.get_atoms_by_type(root_type)
