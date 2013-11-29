@@ -809,7 +809,14 @@ bool Octree3DMapManager::checkStandable(const BlockVector& pos) const
 
     BlockVector under(pos.x,pos.y,pos.z - 1);
     if (mRootOctree->checkIsSolid(under,block))
+    {
+        if (block->getBlockMaterial().materialType == "water")
+            return false;
+
         return true;
+    }
+
+
 
     return false;
 
