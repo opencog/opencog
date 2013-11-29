@@ -332,6 +332,8 @@ void PsiDemandUpdaterAgent::init()
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
+
+    hasPsiDemandUpdaterForTheFirstTime = false;
 }
 
 void PsiDemandUpdaterAgent::run()
@@ -373,6 +375,8 @@ void PsiDemandUpdaterAgent::run()
 
     // Send the truth values of demand goals to the virtual world
     this->sendUpdatedValues();
+
+    hasPsiDemandUpdaterForTheFirstTime = true;
 
 #ifdef HAVE_ZMQ
     // Publish updated Demand values via ZeroMQ

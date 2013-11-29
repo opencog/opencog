@@ -144,6 +144,9 @@ void OCPlanningAgent::run()
     if (! oac->getPAI().hasFinishFistTimeWorldPercetption())
         return;
 
+    if (! oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime())
+        return;
+
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
 
