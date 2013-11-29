@@ -19,7 +19,8 @@ def csv(csv_file_path):
                 break
             else:
                 temp = line.split('\t')
-                container.append(temp[1:6])
+                if temp[1:6] not in container:
+                    container.append(temp[1:6])
     del container[0]
     return container   # container is a list of lists
 
