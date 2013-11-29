@@ -1554,16 +1554,6 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 ++ satisfiedPreconNum;
                 satisfied = true;
             }
-            else
-            {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
-                {
-                    delete groundPs;
-                    preconImpossible = true;
-                    return -999;
-                }
-            }
 
         }
         else
@@ -1576,10 +1566,41 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 ++ satisfiedPreconNum;
                 satisfied = true;
             }
+
+        }
+
+        if (! satisfied)
+        {
+            // check if there is any rule related to achieve this unsatisfied precondition
+            map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(groundPs->name());
+            if ( it == ruleEffectIndexes.end())
+            {
+                delete groundPs;
+                preconImpossible = true;
+                return -999;
+            }
             else
             {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
+                multimap<float,Rule*> ::iterator ruleIt;
+                bool negativeGoal = true;
+
+                // at least one of the related rules should not be negative this subgoal
+                for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
+                {
+                    Rule* r = ruleIt->second;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle;
+                    int negativeNum,satisfiedPreconNum;
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle, true);
+
+                    if ((!isNegativeGoal) && (!isDiffStateOwnerType)) // if this rule will negative this goal, we should not choose to apply it.
+                    {
+                        negativeGoal = false;
+                        break;
+                    }
+                }
+
+                if (negativeGoal)
                 {
                     delete groundPs;
                     preconImpossible = true;
@@ -1587,10 +1608,6 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 }
             }
 
-        }
-
-        if (! satisfied)
-        {
             // check if this precond will add a cirle to the planning network
             // if this precond is unsatified and exactly the same with one of its previous / forward state node,
             // which is expectly to be satisfied partly by this effect directly or undirectly.
@@ -1609,37 +1626,14 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
                     continue;
 
-//                if ((tempStateNode->state->stateName == "existPath")&&(groundPs->stateName == "existPath"))
-//                {
-
-//                        ParamValue p1 = tempStateNode->state->stateOwnerList[0];
-//                        ParamValue p2 = tempStateNode->state->stateOwnerList[1];
-
-//                        Vector* v1 = boost::get<Vector>(&p1);
-//                        Vector* v2 = boost::get<Vector>(&p2);
-
-//                        ParamValue p3 = groundPs->stateOwnerList[0];
-//                        ParamValue p4 = groundPs->stateOwnerList[1];
-
-//                        Vector* v3 = boost::get<Vector>(&p3);
-//                        Vector* v4 = boost::get<Vector>(&p4);
-
-//                        if (v1 == v3)
-//                        {
-//                            if (v2 == v4)
-//                            {
-//                                int i =0;
-//                                i++;
-//                            }
-//                        }
-
-//                }
-
                 if (groundPs->isSameState( *(tempStateNode)->state ))
                 {
+                    delete groundPs;
                     willCauseCirleNetWork = true;
                     return -999;
                 }
+
+                // todo: recursively check if the future backward branch to achieve this subgoal contains any precondition impossibilities
 
             }
 
@@ -1916,70 +1910,70 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 
 }
 
-void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
-{
-    // currently we just cheat to enable the following actions
-    // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
+//void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
+//{
+//    // currently we just cheat to enable the following actions
+//    // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 
-    switch (ruleNode->originalRule->action->getType().getCode())
-    {
-        case pai::EAT_CODE:
-        {
-            // get the handle of the food to eat
-            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
-            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
-            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-            // get the location last time it appeared
-            iSpaceMap->addNoneBlockEntity(foodH,iSpaceMap->getLastAppearedLocation(foodH),1,1,1,0.0,foodEntity.id,foodEntity.type,false,curtimeStamp);
+//    switch (ruleNode->originalRule->action->getType().getCode())
+//    {
+//        case pai::EAT_CODE:
+//        {
+//            // get the handle of the food to eat
+//            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+//            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
+//            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
+//            // get the location last time it appeared
+//            iSpaceMap->addNoneBlockEntity(foodH,iSpaceMap->getLastAppearedLocation(foodH),1,1,1,0.0,foodEntity.id,foodEntity.type,false,curtimeStamp);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::MOVE_TO_OBJ_CODE:
-        {
-            // get the actor entity handle
-            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
-            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
+//        case pai::MOVE_TO_OBJ_CODE:
+//        {
+//            // get the actor entity handle
+//            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+//            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
+//            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
 
-            // get old location from the record before execute this effect
-            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
-            spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp,true);
+//            // get old location from the record before execute this effect
+//            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
+//            spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
+//            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp,true);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::WALK_CODE:
-        {
-            // get the actor entity handle
-            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
-            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
+//        case pai::WALK_CODE:
+//        {
+//            // get the actor entity handle
+//            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+//            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
+//            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
 
-            // get old location from the record before execute this effect
-            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
-            spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp,true);
+//            // get old location from the record before execute this effect
+//            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
+//            spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
+//            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp,true);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::BUILD_BLOCK_CODE:
-        {
-            // get the  location the new block is to be build at
-            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
-            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
-            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
+//        case pai::BUILD_BLOCK_CODE:
+//        {
+//            // get the  location the new block is to be build at
+//            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+//            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
+//            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
 
-            iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
-            break;
-        }
-        default:
-            // TODO: TNick: is this the right way of handling other codes?
-            break;
-    }
-}
+//            iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
+//            break;
+//        }
+//        default:
+//            // TODO: TNick: is this the right way of handling other codes?
+//            break;
+//    }
+//}
 
 void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings)
 {

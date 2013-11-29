@@ -465,7 +465,7 @@ protected:
      // execute the current rule action if any action that involved changing space map in the input iSpaceMap
      void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap *iSpaceMap);
 
-     void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+     // void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
      void deleteStateNodeInTemporaryList(StateNode* stateNode);
 
