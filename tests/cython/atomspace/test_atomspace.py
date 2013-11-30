@@ -146,6 +146,26 @@ class AtomSpaceTest(TestCase):
         result = self.space.get_atoms_by_type(types.AnchorNode, subtype=False)
         self.assertEqual(len(result), 0)
 
+    def test_get_by_av(self):
+        h1 = self.space.add_node(types.ConceptNode, "test1")
+        h2 = self.space.add_node(types.ConceptNode, "test2")
+        h3 = self.space.add_link(types.InheritanceLink, [h1, h2])
+        h4 = self.space.add_node(types.ConceptNode, "test4")
+
+        self.space.set_av(h=h1.h, sti=10)
+        self.space.set_av(h=h2.h, sti=5)
+        self.space.set_av(h=h3.h, sti=4)
+        self.space.set_av(h=h4.h, sti=1)
+
+        result = self.space.get_atoms_by_av(4, 10)
+        assert len(result) == 3
+        assert set(result) == set([h1, h2, h3])
+        assert h4 not in result
+
+        result = self.space.get_atoms_in_attentional_focus()
+        assert len(result) == 4
+        assert set(result) == set([h1, h2, h3, h4])
+
     def test_get_by_target_type(self):
         h1 = self.space.add_node(types.Node, "test1")
         h2 = self.space.add_node(types.ConceptNode, "test2")

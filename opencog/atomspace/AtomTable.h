@@ -672,8 +672,8 @@ public:
      * @param Importance range upper bound (inclusive).
      * @return The set of atoms within the given importance range.
      */
-    UnorderedHandleSet getHandleSet(AttentionValue::sti_t lowerBound,
-                              AttentionValue::sti_t upperBound = 32767) const
+    UnorderedHandleSet getHandlesByAV(AttentionValue::sti_t lowerBound,
+                              AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return importanceIndex.getHandleSet(this, lowerBound, upperBound);
