@@ -365,9 +365,12 @@ cdef class AtomSpace:
         del cname
         return convert_handle_seq_to_python_list(o_vect,self)
 
-    def get_atoms_by_av(self, lower_bound, upper_bound):
+    def get_atoms_by_av(self, lower_bound, upper_bound=None):
         cdef vector[cHandle] o_vect
-        self.atomspace.getHandlesByAV(back_inserter(o_vect), lower_bound, upper_bound)
+        if upper_bound is not None:
+            self.atomspace.getHandlesByAV(back_inserter(o_vect), lower_bound, upper_bound)
+        else:
+            self.atomspace.getHandlesByAV(back_inserter(o_vect), lower_bound)
         return convert_handle_seq_to_python_list(o_vect, self)
 
     def get_atoms_in_attentional_focus(self):

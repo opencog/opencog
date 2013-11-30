@@ -18,6 +18,11 @@ class AtomCollectionAPI(Resource):
         self.reqparse.add_argument('type', type=str, location='args', choices=types.__dict__.keys())
         self.reqparse.add_argument('name', type=str, location='args')
         self.reqparse.add_argument('callback', type=str, location='args')
+        self.reqparse.add_argument('filterby', type=str, location='args',
+                                   choices=['stirange', 'attentionalfocus'])
+        self.reqparse.add_argument('stimin', type=int, location='args')
+        self.reqparse.add_argument('stimax', type=int, location='args')
+
         super(AtomCollectionAPI, self).__init__()
 
     # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
@@ -25,11 +30,15 @@ class AtomCollectionAPI(Resource):
     def get(self):
         """
         Returns a list of atoms matching the specified criteria
-        Uri: atoms?type=[type]&name=[name]&callback=[callback]
+        Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&callback=[callback]
 
         :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
         :param name: (optional, not allowed for Link types) Atom name
         If neither type or name are provided, all atoms will be retrieved
+        :param filterby: (optional, can't be combined with type or name) Allows certain predefined filters
+          - The filter 'stirange' allows the additional parameters 'stimin' (required) and 'stimax' (optional) and
+            returns the atoms in a given STI range
+          - The filter 'attentionalfocus' returns the atoms in the AttentionalFocus
         :param callback: (optional) JavaScript callback function for JSONP support
 
         :return result: Returns a JSON representation of an atom list.
@@ -75,15 +84,34 @@ class AtomCollectionAPI(Resource):
         type = args.get('type')
         name = args.get('name')
         callback = args.get('callback')
-                  
-        if type is None and name is None:
-            atoms = self.atomspace.get_atoms_by_type(types.Atom)
-        elif name is None:
-            atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
-        else:
-            if type is None:
-                type = 'Node'
-            atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
+
+        filter_by = args.get('filterby')
+        sti_min = args.get('stimin')
+        sti_max = args.get('stimax')
+
+        # First, check if there is a valid filter type, and give it precedence if it exists
+        valid_filter = False
+        if filter_by is not None:
+            if filter_by == 'stirange':
+                if sti_min is not None:
+                    valid_filter = True
+                    atoms = self.atomspace.get_atoms_by_av(sti_min, sti_max)
+                else:
+                    abort(400, 'Invalid request: stirange filter requires stimin parameter')
+            elif filter_by == 'attentionalfocus':
+                valid_filter = True
+                atoms = self.atomspace.get_atoms_in_attentional_focus()
+
+        # If there is not a valid filter type, proceed to select by type or name
+        if not valid_filter:
+            if type is None and name is None:
+                atoms = self.atomspace.get_atoms_by_type(types.Atom)
+            elif name is None:
+                atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
+            else:
+                if type is None:
+                    type = 'Node'
+                atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
 
         atom_list = AtomListResponse(atoms)
         json_data = {'result': atom_list.format()}
@@ -91,9 +119,9 @@ class AtomCollectionAPI(Resource):
         # if callback function supplied, pad the JSON data (i.e. JSONP):
         if callback is not None:
             response = str(callback) + '(' + json.dumps(json_data) + ');'
-            return current_app.response_class(response, mimetype = 'application/javascript')
+            return current_app.response_class(response, mimetype='application/javascript')
         else:
-            return current_app.response_class(json.dumps(json_data), mimetype = 'application/json')
+            return current_app.response_class(json.dumps(json_data), mimetype='application/json')
         
     
 

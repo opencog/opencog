@@ -151,6 +151,7 @@ class AtomSpaceTest(TestCase):
         h2 = self.space.add_node(types.ConceptNode, "test2")
         h3 = self.space.add_link(types.InheritanceLink, [h1, h2])
         h4 = self.space.add_node(types.ConceptNode, "test4")
+        h5 = self.space.add_node(types.ConceptNode, "test5")
 
         self.space.set_av(h=h1.h, sti=10)
         self.space.set_av(h=h2.h, sti=5)

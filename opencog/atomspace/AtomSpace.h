@@ -887,7 +887,7 @@ public:
     template <typename OutputIterator> OutputIterator
     getHandlesByAV(OutputIterator result,
                    AttentionValue::sti_t lowerBound,
-                   AttentionValue::sti_t upperBound) const
+                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
         UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
         return std::copy(hs.begin(), hs.end(), result);
