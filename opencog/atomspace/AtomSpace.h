@@ -876,6 +876,36 @@ public:
     }
 
     /**
+     * Returns the set of atoms within the given importance range.
+     *
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
+     *
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByAV(OutputIterator result,
+                   AttentionValue::sti_t lowerBound,
+                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
+    {
+        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    /**
+     * Gets the set of all handles in the Attentional Focus
+     *
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSetInAttentionalFocus(OutputIterator result) const
+    {
+        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
+    }
+
+    /**
      * Gets a set of handles in the Attentional Focus that matches with the given type
      * (subclasses optionally).
      *
@@ -887,6 +917,7 @@ public:
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
+     * @note: This method DOES NOT utilize the ImportanceIndex.
      * @note The matched entries are appended to a container whose
      * OutputIterator is passed as the first argument.  Example of call to this
      * method, which would return all entries in AtomSpace in the

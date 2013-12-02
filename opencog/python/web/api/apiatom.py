@@ -15,8 +15,6 @@ class AtomAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('type', type=str, choices=types.__dict__.keys())
-        self.reqparse.add_argument('name', type=str)
         self.reqparse.add_argument('callback', type=str, location='args')
         super(AtomAPI, self).__init__()
 
@@ -73,9 +71,9 @@ class AtomAPI(Resource):
         callback = args.get('callback')
         if callback is not None:
             response = str(callback) + '(' + json.dumps(json_data) + ');'
-            return current_app.response_class(response, mimetype = 'application/javascript')
+            return current_app.response_class(response, mimetype='application/javascript')
         else:
-            return current_app.response_class(json.dumps(json_data), mimetype = 'application/json')
+            return current_app.response_class(json.dumps(json_data), mimetype='application/json')
         
     def put(self, id):
         """
