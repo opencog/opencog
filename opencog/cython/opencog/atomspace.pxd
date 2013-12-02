@@ -139,6 +139,11 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         output_iterator getHandleSet(output_iterator,Type t,Type target,bint subclass,bint target_subclass)
         # get by target handle
         output_iterator getHandleSet(output_iterator,cHandle& h,Type t,bint subclass)
+        # get by STI range
+        output_iterator getHandlesByAV(output_iterator, short lowerBound, short upperBound)
+        output_iterator getHandlesByAV(output_iterator, short lowerBound)
+        # get from AttentionalFocus
+        output_iterator getHandleSetInAttentionalFocus(output_iterator)
 
         # vector[chandle].iterator getHandleSet(output_iterator,Type t,string name,bint subclass,cVersionHandle vh)
 

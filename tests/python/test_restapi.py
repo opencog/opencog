@@ -259,3 +259,24 @@ class TestRESTApi():
         # Confirm the atom isn't contained in the AtomSpace anymore
         assert_raises(self.atomspace[atom.h], IndexError)
 
+    def test_get_atoms_by_av(self):
+        # Assign some STI values
+        self.atomspace.set_av(h=self.bird.h, sti=9)
+        self.atomspace.set_av(h=self.swan.h, sti=20)
+        self.atomspace.set_av(h=self.bird_animal.h, sti=15)
+        self.atomspace.set_av(h=self.animal.h, sti=0)
+
+        get_response = self.client.get(self.uri + 'atoms?filterby=attentionalfocus')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 3
+        assert set([atom['handle'] for atom in get_result]) == set([self.bird.h.value(), self.swan.h.value(), self.bird_animal.h.value()])
+
+        get_response = self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 2
+        assert set([atom['handle'] for atom in get_result]) == set([self.swan.h.value(), self.bird_animal.h.value()])
+
+        get_response = self.client.get(self.uri + 'atoms?filterby=stirange&stimin=15&stimax=18')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 1
+        assert set([atom['handle'] for atom in get_result]) == set([self.bird_animal.h.value()])
