@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue
+from opencog.atomspace import TruthValue, types
 import reader
 import term
 
@@ -13,24 +13,41 @@ corpus_path = ""
 corpus_dict = {}
 conceptnet_dict = {}
 twf = 0
+
+
 # ConceptNet relation to Opencog Link mappings
-map_dict1 = {"/r/ConceptuallyRelatedTo": "IntensionalSimilarityLink",
-             "/r/ThematicKLine": "IntensionalSimilarityLink",
-             "/r/SuperThematicKLine": "IntensionalInheritanceLink",
-             "/r/IsA": "InheritanceLink",
-             "/r/PropertyOf": "InheritanceLink",
-             "/r/DefinedAs": "SimilarityLink",
-             "/r/PrerequisiteEventOf": "RetroactiveImplicationLink",
-             "/r/FirstSubeventOf": "StartsLink",
-             "/r/SubeventOf": "DuringLink",
-             "/r/LastSubeventOf": "EndsLink",
-             "/r/EffectOf": "PredictiveImplicationLink",
-             "/r/HasPrerequisite": "RetroactiveImplicationLink",
-             "/r/Causes": "PredictiveImplicationLink",
-             "/r/HasProperty": "IntensionalInheritanceLink",
-             "/r/HasSubevent": "DuringLink"
-             }
-map_dict2 = {"/r/EffectOf": "EvaluationLink"}
+def map(relation, dict):
+    if dict == 1:
+        map_dict1 = {
+            "/r/ConceptuallyRelatedTo": "IntensionalSimilarityLink",
+            "/r/ThematicKLine": "IntensionalSimilarityLink",
+            "/r/SuperThematicKLine": "IntensionalInheritanceLink",
+            "/r/IsA": "InheritanceLink",
+            "/r/PropertyOf": "InheritanceLink",
+            "/r/DefinedAs": "SimilarityLink",
+            "/r/PrerequisiteEventOf": "RetroactiveImplicationLink",
+            "/r/FirstSubeventOf": "StartsLink",
+            "/r/SubeventOf": "DuringLink",
+            "/r/LastSubeventOf": "EndsLink",
+            "/r/EffectOf": "PredictiveImplicationLink",
+            "/r/HasPrerequisite": "RetroactiveImplicationLink",
+            "/r/Causes": "PredictiveImplicationLink",
+            "/r/HasProperty": "IntensionalInheritanceLink",
+            "/r/HasSubevent": "DuringLink"
+        }
+        try:
+            if map_dict1[relation] in types.__dict__.keys():
+                return map_dict1[relation]
+            else:
+                return "EvaluationLink"
+        except KeyError:
+            return "EvaluationLink"
+    elif dict == 2:
+        try:
+            map_dict2 = {"/r/EffectOf": "EvaluationLink"}
+            return map_dict2[relation]
+        except KeyError:
+            return False
 
 
 def set_TV(word):
@@ -93,14 +110,16 @@ def from_file(cn_path, scm_name):
     lists_of_assertions = reader.csv(cn_path)
     with open(scm_name, 'w') as scm_file:
         for an_assertion in lists_of_assertions:
-            if an_assertion[0] in map_dict2:
+            if map(an_assertion[0], 2):
                 temp = write_atoms(an_assertion, 2)
                 scm_file.write(temp + '\n' * 2)
-            try:
-                link_type = map_dict1[an_assertion[0]]
-                temp = write_atoms(an_assertion, 1, link_type)
-            except KeyError:
-                temp = write_atoms(an_assertion, 2,)
+
+            if ((map(an_assertion[0], 1) == "EvaluationLink") and
+            (map(an_assertion[0], 2) != "EvaluationLink")):
+                # this condition is to prevent repetition of EvaluationLink
+                temp = write_atoms(an_assertion, 2)
+            elif map(an_assertion[0], 1) != "EvaluationLink":
+                temp = write_atoms(an_assertion, 1, map(an_assertion[0], 1))
             scm_file.write(temp + '\n' * 2)
 
 if __name__ == '__main__':
