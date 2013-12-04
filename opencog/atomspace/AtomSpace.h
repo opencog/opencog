@@ -905,38 +905,6 @@ public:
         return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
     }
 
-    /**
-     * Gets a set of handles in the Attentional Focus that matches with the given type
-     * (subclasses optionally).
-     *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note: This method DOES NOT utilize the ImportanceIndex.
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to this
-     * method, which would return all entries in AtomSpace in the
-     * AttentionalFocus:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
-    template <typename OutputIterator> OutputIterator
-    getHandleSetInAttentionalFocus(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
-        return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
-    }
-
     // Wrapper for comparing atoms from a HandleSeq
     template <typename Compare>
     struct compareAtom
