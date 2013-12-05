@@ -59,12 +59,12 @@ class AbstractChainer(Logic):
         if len(self.variables(template)) == 0:
             return template
 
-        atom=None
-        if self._preferAttentionalFocus:
-            atom = self._select_fromAF(template, s)
+        atoms = self.atomspace.get_atoms_in_attentional_focus()
+        atom = self._select_atom(template, s, atoms)
         if not atom:
-            # if it can't find anything in the attentional focus, try the whole atomspace.
-            atom = self._select_from_atomspace(template, s)
+            # if it can't find anything in the attentional focus, try the whole atomspace. (it actually still uses indexes to find a subset of the links, that is more likely to be useful)
+            atoms = self.lookup_atoms(template, s)
+            atom = self._select_atom(template, s, atoms)
 
         return atom
 
@@ -79,12 +79,9 @@ class AbstractChainer(Logic):
 
         return self._selectOne(atoms)
 
-    def _select_from_atomspace(self, template, substitution):
+    def _select_atom(self, template, substitution, atoms):
         # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
-        print 'looking up atoms'
-        atoms = self.lookup_atoms(template, substitution)
 
-        print 'shuffling atoms'
         # The atomspace lookup and the shuffle are both O(N)...
         # But if you shuffle it you're guaranteed to eventually find a suitable atom if one exists.
         # The correct option would be to do it inside the atomspace.
@@ -93,13 +90,10 @@ class AbstractChainer(Logic):
         random.shuffle(atoms)
         #atoms = random.sample(atoms, len(atoms))
 
-        print 'filtering atoms'
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
             if self.wanted_atom(atom, template, substitution, ground=True):
-                print 'found', template, substitution,'=>',atom
                 return atom
-        print 'not found', template, substitution
         return None
 
     def _selectOne(self, atoms):

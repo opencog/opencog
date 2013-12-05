@@ -40,8 +40,7 @@ class Logic(object):
             ret+= self.get_incoming_recursive(link)
         return ret
 
-    def new_variable(self):
-        prefix = '$pln_var_'
+    def new_variable(self, prefix='$pln_var_'):
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
     def make_n_variables(self, N):
@@ -109,7 +108,7 @@ class Logic(object):
                 if atom in dic:
                     return dic[atom]
                 else:
-                    var = self.new_variable()
+                    var = self.new_variable(prefix='$standardize_apart_')
                     dic[atom] = var
                     return var
             else:

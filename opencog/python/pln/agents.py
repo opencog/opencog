@@ -2,7 +2,7 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
 from pln.chainers import Chainer
-from pln.rules import rules, temporal_rules, boolean_rules
+from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules
 
 class ForwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -69,6 +69,15 @@ class ForwardInferenceAgent(MindAgent):
 
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
+
+        self.chainer.add_rule(quantifier_rules.HigherOrderRule(self.chainer, self.chainer.rules[0]))
+
+        contextual_rules = []
+        for rule in self.rules:
+            contextual_rules.append(context_rules.ContextualRule(self.chainer, rule))
+        for rule in contextual_rules:
+            self.chainer.add_rule(rule)
+        self.chainer.add_rule(context_rules.AndToContextRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!

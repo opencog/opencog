@@ -549,8 +549,8 @@ class InheritanceToMemberRule(LinkToLinkRule):
 
 class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
-       P(Attr A B) = P(B|A) - P(B). (If it's a negative number just say 0)
-       It should be P(B|Not A) rather than P(B) but that would be more expensive/annoying.'''
+       P(Attr A B) = P(B|A) - P(B|Not A). (If it's a negative number just say 0)
+'''
     def __init__(self, chainer):
         self._chainer = chainer
         A = chainer.new_variable()
