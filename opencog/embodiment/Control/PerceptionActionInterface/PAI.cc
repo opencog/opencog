@@ -3812,6 +3812,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
     const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
 
+    // the specific class this entity is, e.g. battery
+    std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
+
+    Handle classHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityClass);
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
+
     // Add the property predicates in atomspace
     addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate 
     addPropertyPredicate(std::string("is_edible"), objectNode, isEdible, true);
