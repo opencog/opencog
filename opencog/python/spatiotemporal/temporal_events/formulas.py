@@ -400,13 +400,13 @@ def test(event_1, event_2, prec=0.25, size=10000):
 
     plt.hist(x, 50, normed=True)
 
-#if __name__ == '__main__':
-#    from scipy.stats import norm, uniform, expon
-#    from numpy import linspace
-#    import matplotlib.pyplot as plt
-#    from numpy import float64
-#    tfc = TemporalFormulaCosineConvolution()
-#    fc = FormulaCreator(tfc)
+if __name__ == '__main__':
+    from scipy.stats import norm, uniform, expon
+    from numpy import linspace
+    import matplotlib.pyplot as plt
+    from numpy import float64
+    tfc = TemporalFormulaConvolution()
+    fc = FormulaCreator(tfc)
 
     #F = uniform(loc=20, scale=2)
     #G = norm(loc=21, scale=0.2)
@@ -423,123 +423,123 @@ def test(event_1, event_2, prec=0.25, size=10000):
     #tfc.convolutions[(F, G)].plot()
     #plt.show()
     #
-    #F = uniform(loc=20, scale=4)
-    #for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
-    #    print name, '-----------------------'
-    #    for i in xrange(40):
-    #        G_a = 30 - float64(i) * 0.4
-    #        if i == 100:
-    #            pass
-    #        G = uniform(loc=G_a, scale=2)
-    #        if i == 22:
-    #            pass
-    #        print func(F, G)
+    F = uniform(loc=20, scale=5)
+    for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
+        print name, '-----------------------'
+        for i in xrange(40):
+            G_a = 30 - float64(i) * 0.4
+            if i == 100:
+                pass
+            G = uniform(loc=G_a, scale=0.5)
+            if i == 22:
+                pass
+            print func(F, G)
 
-
-if __name__ == '__main__':
-    from scipy.stats import norm, uniform, expon
-    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
-    import matplotlib.pyplot as plt
-
-    figure_number = 1
-    for event_1, event_2 in [
-        (
-            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
-            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=13, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
-        ),
-
-        (
-            TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
-        ),
-
-        #(
-        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=4, scale=2)),
-        #    TemporalEvent(uniform(loc=6, scale=2), uniform(loc=9, scale=2))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
-        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
-        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
-        #),
-        #
-        #(
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
-        #),
-
-        #(
-        #    TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
-        #    TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
-        #),
-        #
-        #(
-        #    TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
-        #    TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
-        #),
-        #
-        #(
-        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
-        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
-        #),
-    ]:
-        tfc = TemporalFormulaConvolution()
-        fc = FormulaCreator(tfc)
-
-        temporal_relations = fc.temporal_relations_between(event_1, event_2)
-
-        print '\nFigure' + str(figure_number)
-        print '----------------------'
-        #print sum(temporal_relations.values())
-        for p in 'pmoFDseSdfOMP':
-            print p, temporal_relations[p]
-
-        figure_number += 1
-
-        #print ben(event_1, event_2)
-
-        #self = fc
-        #beginning_a = event_1.distribution_beginning
-        #ending_a = event_1.distribution_ending
-        #beginning_b = event_2.distribution_beginning
-        #ending_b = event_2.distribution_ending
-        #
-        #print self.same(beginning_a, beginning_b)
-        #print self.same(beginning_a, ending_b)
-        #print self.same(ending_a, beginning_b)
-        #print self.same(ending_a, ending_b)
-        #print self.after(beginning_a, beginning_b)
-        #print self.before(beginning_a, ending_b)
-        #print self.after(ending_a, beginning_b)
-        #print self.after(ending_a, ending_b)
-
-        #event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-        #event_2.plot().figure()
-
-    #plt.show()
+#
+#if __name__ == '__main__':
+#    from scipy.stats import norm, uniform, expon
+#    from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
+#    import matplotlib.pyplot as plt
+#
+#    figure_number = 1
+#    for event_1, event_2 in [
+#        (
+#            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
+#            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=8, scale=5), uniform(loc=15, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=0, scale=2), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=13, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+#            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
+#        ),
+#
+#        (
+#            TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
+#            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
+#        ),
+#
+#        #(
+#        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=4, scale=2)),
+#        #    TemporalEvent(uniform(loc=6, scale=2), uniform(loc=9, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
+#        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
+#        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
+#        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
+#        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
+#        #),
+#
+#        #(
+#        #    TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+#        #    TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+#        #    TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+#        #),
+#        #
+#        #(
+#        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+#        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+#        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+#        #),
+#    ]:
+#        tfc = TemporalFormulaConvolution()
+#        fc = FormulaCreator(tfc)
+#
+#        temporal_relations = fc.temporal_relations_between(event_1, event_2)
+#
+#        print '\nFigure' + str(figure_number)
+#        print '----------------------'
+#        #print sum(temporal_relations.values())
+#        for p in 'pmoFDseSdfOMP':
+#            print p, temporal_relations[p]
+#
+#        figure_number += 1
+#
+#        #print ben(event_1, event_2)
+#
+#        #self = fc
+#        #beginning_a = event_1.distribution_beginning
+#        #ending_a = event_1.distribution_ending
+#        #beginning_b = event_2.distribution_beginning
+#        #ending_b = event_2.distribution_ending
+#        #
+#        #print self.same(beginning_a, beginning_b)
+#        #print self.same(beginning_a, ending_b)
+#        #print self.same(ending_a, beginning_b)
+#        #print self.same(ending_a, ending_b)
+#        #print self.after(beginning_a, beginning_b)
+#        #print self.before(beginning_a, ending_b)
+#        #print self.after(ending_a, beginning_b)
+#        #print self.after(ending_a, ending_b)
+#
+#        #event_1.plot().ylim(ymin=-0.1, ymax=1.1)
+#        #event_2.plot().figure()
+#
+#    #plt.show()
