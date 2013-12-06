@@ -895,6 +895,8 @@
 ;    )
 ;)
 ;
+
+
 ;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)
 ;
@@ -910,4 +912,330 @@
 ;        (add_gpn "angerWhenAttackedPrecondition")	      
 ;    )
 ;)
+
+;begin adding facts for Einstein puzzle:
+; Base concepts
+(ConceptNode "house" (stv 0.05 1))
+(ConceptNode "person" (stv 0.05 1))
+(ConceptNode "pet" (stv 0.05 1))
+(ConceptNode "drink" (stv 0.05 1))
+(ConceptNode "cigaretteBrand" (stv 0.05 1))
+(ConceptNode "colour" (stv 0.05 1))
+
+
+; Colours
+(InheritanceLink (stv 1 1)
+   (ConceptNode "red" (stv 0.01 1))
+   (ConceptNode "colour")
+)
+
+(InheritanceLink (stv 1 1)
+   (ConceptNode "green" (stv 0.01 1))
+   (ConceptNode "colour")
+)
+
+(InheritanceLink (stv 1 1)
+   (ConceptNode "white" (stv 0.01 1))
+   (ConceptNode "colour")
+)
+
+(InheritanceLink (stv 1 1)
+   (ConceptNode "yellow" (stv 0.01 1))
+   (ConceptNode "colour")
+)
+
+(InheritanceLink (stv 1 1)
+   (ConceptNode "blue" (stv 0.01 1))
+   (ConceptNode "colour")
+)
+
+; nation
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_nation")
+   (ListLink
+      (ConceptNode "British")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_nation")
+   (ListLink
+      (ConceptNode "Swedish")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_nation")
+   (ListLink
+      (ConceptNode "Danish")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_nation")
+   (ListLink
+      (ConceptNode "Norwegian")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_nation")
+   (ListLink
+      (ConceptNode "German")
+      (ConceptNode "true")
+   )
+)
+
+; people  this will be added from the Game world to the Atomspace
+;(EvaluationLink (stv 1 1)
+;   (PredicateNode "class")
+;   (ListLink
+;      (AvantarNode "man_1")
+;      (ConceptNode "people")
+;   )
+;)
+
+
+
+; Pets
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "dogs")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "birds")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "cats")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "horse")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "fish")
+      (ConceptNode "true")
+   )
+)
+
+
+; Cigarettes
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_cigaretteBrand")
+   (ListLink
+      (ConceptNode "pallMall")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_cigaretteBrand")
+   (ListLink
+      (ConceptNode "dunhill")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_cigaretteBrand")
+   (ListLink
+      (ObjectNode "blend")
+      (ObjectNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_cigaretteBrand")
+   (ListLink
+      (ConceptNode "bluemaster")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_cigaretteBrand")
+   (ListLink
+      (ConceptNode "prince")
+      (ConceptNode "true")
+   )
+)
+
+
+; Drinks
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "tea")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "coffee")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "milk")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "beer")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "water")
+      (ConceptNode "true")
+   )
+)
+
+; House  inheritance definitions
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_house")
+   (ListLink
+      (ObjectNode "firstHouse")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_house")
+   (ListLink
+      (ObjectNode "secondHouse")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_house")
+   (ListLink
+      (ObjectNode "thirdHouse")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_house")
+   (ListLink
+      (ObjectNode "fourthHouse")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_house")
+   (ListLink
+      (ObjectNode "fifthHouse")
+      (ConceptNode "true")
+   )
+)
+
+; House leftOf definitions
+(EvaluationLink (stv 1 1)
+   (PredicateNode "leftOf")
+   (ListLink
+      (ObjectNode "firstHouse")
+      (ObjectNode "secondHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "leftOf")
+   (ListLink
+      (ObjectNode "secondHouse")
+      (ObjectNode "thirdHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "leftOf")
+   (ListLink
+      (ObjectNode "thirdHouse")
+      (ObjectNode "fourthHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "leftOf")
+   (ListLink
+      (ObjectNode "fourthHose")
+      (ObjectNode "fifthHouse")
+   )
+)
+      
+; House rightOf definitions
+(EvaluationLink (stv 1 1)
+   (PredicateNode "rightOf")
+   (ListLink
+      (ObjectNode "secondHouse")
+      (ObjectNode "firstHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "rightOf")
+   (ListLink
+      (ObjectNode "thirdHouse")
+      (ObjectNode "secondHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "rightOf")
+   (ListLink
+      (ObjectNode "fourthHouse")
+      (ObjectNode "thirdHouse")
+   )
+)
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "rightOf")
+   (ListLink
+      (ObjectNode "fifthHouse")
+      (ObjectNode "fourthHouse")
+   )
+)
+      
+
+
+
+
 
