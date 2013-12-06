@@ -1193,13 +1193,16 @@ void Rule::_preProcessRuleParameterIndexes()
                 _addParameterIndex(s,*ownerIt);
         }
 
+        // check the effect value
+        if (isParamValueUnGrounded(e->opParamValue))
+            _addParameterIndex(s,e->opParamValue);
+        else
+            return; // if the opParamValue is grounded , not need to add the old state value in index
+
         // check the state value
         if (isParameterUnGrounded( *(s->stateVariable)))
                 _addParameterIndex(s,s->stateVariable->getValue());
 
-        // check the effect value
-        if (isParamValueUnGrounded(e->opParamValue))
-            _addParameterIndex(s,e->opParamValue);
     }
 
     // Check if all the cost calcuation states parameters grounded
