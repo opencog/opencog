@@ -109,15 +109,15 @@ unsigned hill_climbing::operator()(deme_t& deme,
         ++iteration;
         logger().debug("Iteration: %u", iteration);
 
-        // Estimate the number of neighbours at the distance d.
+        // Estimate the number of neighbors at the distance d.
         // This is faster than actually counting.
-        size_t total_number_of_neighbours =
+        size_t total_number_of_neighbors =
             estimate_neighborhood(distance, fields);
 
         // Number of instances to try, this go-around.
         size_t number_of_new_instances =
             n_new_instances(distance, max_evals, current_number_of_instances,
-                            total_number_of_neighbours);
+                            total_number_of_neighbors);
 
         // The first few times through, (or, if we decided on a full
         // rescan), explore the entire nearest neighborhood.
@@ -139,7 +139,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         // intentionally over-estimates by a factor of two. So the
         // breakeven point would be 2*crossover_pop_size, and we pad this
         // a bit, as small exhaustive searches do beat guessing...
-        size_t xover_min_neighbours = 10*(hc_params.crossover_pop_size/3);
+        size_t xover_min_neighbors = hc_params.crossover_min_neighbors;
         //
         // current_number_of_instances can drop as low as 1 if the
         // population trimmer wiped out everything, which can happen.
@@ -147,7 +147,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
         size_t xover_min_deme = 3;
 
         // whether crossover must be attempted for the current iteration
-        bool large_nbh = total_number_of_neighbours >= xover_min_neighbours,
+        bool large_nbh = total_number_of_neighbors >= xover_min_neighbors,
             xover = hc_params.crossover
             && (iteration > 2)
             && !already_xover
@@ -159,8 +159,8 @@ unsigned hill_climbing::operator()(deme_t& deme,
             stringstream why_xover;
             if (large_nbh)
                 why_xover << "too large neighborhood "
-                          << total_number_of_neighbours << ">="
-                          << xover_min_neighbours;
+                          << total_number_of_neighbors << ">="
+                          << xover_min_neighbors;
             else if (last_chance)
                 why_xover << "last chance";
             else
@@ -194,7 +194,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             // The current_number_of_instances arg is needed only to
             // be able to manage the size of the deme appropriately.
             number_of_new_instances =
-                sample_new_instances(total_number_of_neighbours,
+                sample_new_instances(total_number_of_neighbors,
                                      number_of_new_instances,
                                      current_number_of_instances,
                                      center_inst, deme, distance);
@@ -509,12 +509,12 @@ size_t hill_climbing::estimate_neighborhood(size_t distance,
 
 size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
                                       size_t current_number_of_evals,
-                                      size_t total_number_of_neighbours)
+                                      size_t total_number_of_neighbors)
 {
     if (distance == 0)
         return 1;
     
-    size_t number_of_new_instances = total_number_of_neighbours;
+    size_t number_of_new_instances = total_number_of_neighbors;
     
     // binomial coefficient has a combinatoric explosion to the power
     // distance. So throttle back by fraction raised to power dist.
@@ -576,8 +576,8 @@ size_t hill_climbing::n_new_instances(size_t distance, unsigned max_evals,
         }
     }
 
-    logger().debug("Budget %u samples out of estimated %u neighbours",
-                   number_of_new_instances, total_number_of_neighbours);
+    logger().debug("Budget %u samples out of estimated %u neighbors",
+                   number_of_new_instances, total_number_of_neighbors);
 
     return number_of_new_instances;
 }
