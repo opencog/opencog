@@ -48,7 +48,6 @@ using namespace std;
 class AtomSpacePublisherModuleUTest : public CxxTest::TestSuite
 {
 private:
-    CogServer* cogserver;
     AtomSpace* as;
     zmq::context_t * context;
     zmq::socket_t * subscriberAdd;
@@ -57,8 +56,9 @@ private:
     zmq::socket_t * subscriberAVChanged;
 
 public:
-    void tearDown () {
-        cogserver->stop();
+    void tearDown ()
+    {
+        cogserver().stop();
         subscriberAdd->close();
         subscriberRemove->close();
         subscriberTVChanged->close();
@@ -70,7 +70,8 @@ public:
         delete context;
     }
 
-    void InitZeroMQ () {
+    void InitZeroMQ ()
+    {
         //  Prepare the context and event subscribers
         context = new zmq::context_t(1);
         subscriberAdd = new zmq::socket_t(*context, ZMQ_SUB);
@@ -92,20 +93,46 @@ public:
         sleep(5);
     }
 
-    void InitCogServer () {
-        config().set("LOG_DIR", ".");
+    void InitCogServer ()
+    {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+
+        // Please don't write log files here. They crap up the build directory!
+        // config().set("LOG_DIR", ".");
         config().set("ZMQ_EVENT_PORT", "5563");
         config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
+        config().set("MODULES", "opencog/persist/zmq/events/libatomspacepublishermodule.so");
+        
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        cogserver = &static_cast<CogServer&>(server(CogServer::createInstance));
-
-        // TODO: We should fix the way CogServer.cc searches for modules instead of specifying this crazy relative path
-        cogserver->loadModule("../../../../opencog/persist/zmq/events/libatomspacepublishermodule.so");
+        // Blindly search a bunch of paths hoping to find the files
+        // in one of them ...
+        const char * paths[] =
+        {
+            "./",
+            "../",
+            "../../",
+            "../../../",
+            "../../../../",
+            "../../../../../",
+            "../../../../../../",
+            NULL
+        };
+        cogserver().loadModules(paths);
 
         logger().setLevel(Logger::DEBUG);
         logger().setPrintToStdoutFlag(true);
 
-        this->as = &cogserver->getAtomSpace();
+        this->as = &cogserver().getAtomSpace();
     }
 
     void testAtomSpaceEvents(void)
