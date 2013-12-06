@@ -49,6 +49,7 @@ class AtomSpacePublisherModuleUTest : public CxxTest::TestSuite
 {
 private:
     AtomSpace* as;
+    std::string url;
     zmq::context_t * context;
     zmq::socket_t * subscriberAdd;
     zmq::socket_t * subscriberRemove;
@@ -79,10 +80,10 @@ public:
         subscriberTVChanged = new zmq::socket_t(*context, ZMQ_SUB);
         subscriberAVChanged = new zmq::socket_t(*context, ZMQ_SUB);
 
-        subscriberAdd->connect("tcp://localhost:5563");
-        subscriberRemove->connect("tcp://localhost:5563");
-        subscriberTVChanged->connect("tcp://localhost:5563");
-        subscriberAVChanged->connect("tcp://localhost:5563");
+        subscriberAdd->connect(url.c_str());
+        subscriberRemove->connect(url.c_str());
+        subscriberTVChanged->connect(url.c_str());
+        subscriberAVChanged->connect(url.c_str());
 
         subscriberAdd->setsockopt(ZMQ_SUBSCRIBE, "add", 3);
         subscriberRemove->setsockopt(ZMQ_SUBSCRIBE, "remove", 6);
@@ -106,9 +107,12 @@ public:
 
         // Please don't write log files here. They crap up the build directory!
         // config().set("LOG_DIR", ".");
-        // Please don't over-ride; it crashes if there's a cog-server running.
+        // Must not use standard port; it crashes if there's a cog-server running.
         // config().set("ZMQ_EVENT_PORT", "5563");
         // config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
+
+        url = "tcp://localhost:" + config()["ZMQ_EVENT_PORT"];
+
         config().set("MODULES", "opencog/persist/zmq/events/libatomspacepublishermodule.so");
         
         logger().setFilename(config()["LOG_FILE"]);
