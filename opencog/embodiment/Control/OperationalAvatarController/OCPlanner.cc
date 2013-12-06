@@ -543,7 +543,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
     {
         satisfiedDegree = 1.0f;
-        return 1.0f;
+        return true;
     }
 
 //    // First search this state in the temporaryStateNodes list
@@ -564,9 +564,12 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
         // call its inquery funciton
         InqueryStateFun f = oneGoal.inqueryStateFun;
         ParamValue inqueryValue = f(oneGoal.stateOwnerList);
-        OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
-                  oneGoal.name().c_str());
+        if (inqueryValue == UNDEFINED_VALUE)
+        {
+            // there is not information in Atomspace about this state. We don't know the state, so just return false
+            satisfiedDegree = 0.0f;
+            return false;
+        }
 
         return oneGoal.isSatisfiedMe(inqueryValue,satisfiedDegree,original_state);
 
@@ -575,9 +578,13 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     {
         // TODO
         ParamValue value = Inquery::getParamValueFromAtomspace(oneGoal);
-        OC_ASSERT(!(value == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
-                  oneGoal.name().c_str());
+        if (value == UNDEFINED_VALUE)
+        {
+            // there is not information in Atomspace about this state. We don't know the state, so just return false
+            satisfiedDegree = 0.0f;
+            return false;
+        }
+
 
         // put this state into the cache, so we don't need to search for it next time
         State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
@@ -2594,12 +2601,6 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
             int candidateGroupNum = 1;
 
-            if (ruleNode->originalRule->ruleName == "eatFoodtoAchieveEnergyDemand")
-            {
-                int oo = 0;
-                oo ++;
-            }
-
             if (candidateListHandles.size() != 0)
             {
 
@@ -3996,7 +3997,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // precondition 3: closed to var_fish_keeper
     vector<ParamValue> closedToFishKeeperStateOwnerList;
-    closedToFishKeeperStateOwnerList.push_back(varAvatar);
+    closedToFishKeeperStateOwnerList.push_back(var_avatar);
     closedToFishKeeperStateOwnerList.push_back(var_fish_keeper);
     State* closedToFishKeeperState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedToFishKeeperStateOwnerList, true, &Inquery::inqueryDistance);
 
@@ -4008,7 +4009,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // effect1: Integrity Goal Achieved
     Effect* IntegrityGoalAchievedEffect = new Effect(IntegrityGoalState, OP_ASSIGN, SV_TRUE);
 
-    Rule* IntegrityRule = new Rule(eatAction,boost::get<Entity>(var_avatar),0.2f);
+    Rule* IntegrityRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.2f);
     IntegrityRule->ruleName = "ClosedToFishKeeperIIntegrityRule";
     IntegrityRule->addPrecondition(fishKeeperPeopleState);
     IntegrityRule->addPrecondition(keepFishState);
