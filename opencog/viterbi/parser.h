@@ -15,7 +15,7 @@
 #include <string>
 
 // link-grammar include files, needed for Exp, Dict
-#include <link-grammar/read-dict.h>
+#include <link-grammar/dict-api.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/guile/SchemeEval.h>
 
