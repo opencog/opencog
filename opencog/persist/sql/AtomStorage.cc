@@ -653,10 +653,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
 	// UUID uuid = atom->_uuid;
-	UUID uuid = atom->getHandle().value();  // XXX cheesy hack, fixme
+	Handle h = atom->getHandle();
+	if (TLB::isInvalidHandle(h))
+		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
+
+	UUID uuid = h.value();  // XXX cheesy hack, fixme
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = atomExists(atom->getHandle());
+	bool update = atomExists(h);
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -729,11 +733,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
 	// Store the truth value
 	TruthValuePtr tv = atom->getTruthValue();
-	TruthValueType tvt = tv->getType();
+	TruthValueType tvt = NULL_TRUTH_VALUE;
+	if (tv) tvt = tv->getType();
 	STMTI("tv_type", tvt);
 
 	switch (tvt)
 	{
+		case NULL_TRUTH_VALUE:
+			break;
 		case SIMPLE_TRUTH_VALUE:
 		case COUNT_TRUTH_VALUE:
 			STMTF("stv_mean", tv->getMean());
@@ -752,7 +759,8 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: store_single: Unknown truth value type\n");
+			throw RuntimeException(TRACE_INFO,
+				"Error: store_single: Unknown truth value type\n");
 	}
 
 	std::string qry = cols + vals + coda;
@@ -968,7 +976,7 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	}
 
 	rp.height = height;
-	AtomPtr atom = makeAtom(rp, rp.handle);
+	AtomPtr atom(makeAtom(rp, rp.handle));
 	rp.rs->release();
 	return atom;
 }
@@ -1118,10 +1126,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			atom = createLink(realtype, outvec);
 		}
 
-		// Make sure that the handle in the TLB is synced with
-		// the handle we use in the database.
-		// TLB::addAtom(atom, h);
-// XXX FIXME borken
+		// Give the atom the correct UUID. The AtomTable will need this.
+		atom->_uuid = h.value();
 	}
 	else
 	{
@@ -1139,6 +1145,9 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	// Now get the truth value
 	switch (rp.tv_type)
 	{
+		case NULL_TRUTH_VALUE:
+			break;
+
 		case SIMPLE_TRUTH_VALUE:
 		{
 			TruthValuePtr stv(SimpleTruthValue::createTV(rp.mean, rp.count));
@@ -1161,7 +1170,8 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			fprintf(stderr, "Error: Composite truth values are not handled\n");
 			break;
 		default:
-			fprintf(stderr, "Error: makeAtom: Unknown truth value type\n");
+			throw RuntimeException(TRACE_INFO,
+				"Error: makeAtom: Unknown truth value type\n");
 	}
 
 	load_count ++;

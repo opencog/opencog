@@ -60,15 +60,11 @@ public:
 
     void tearDown() {
 
-        std::cout << "Start tear down\n";
-
         delete mmc;
 
     }
 
     void testCreateQueue() {
-
-
 
         mmc->createQueue(id2);
 
@@ -77,7 +73,6 @@ public:
     }
 
     void testQueueOperations() {
-
 
         mmc->createQueue(id1);
         mmc->createQueue(id2);
@@ -109,20 +104,16 @@ public:
 
         ret_message = mmc->pop(id1);
         TS_ASSERT(ret_message != NULL);
-        std::cout << ret_message->getPlainTextRepresentation() << "\n";
 
         delete ret_message;
 
         ret_message = mmc->pop(id1);
         TS_ASSERT(ret_message != NULL);
-        std::cout << ret_message->getPlainTextRepresentation() << "\n";
 
         delete ret_message;
 
         ret_message = mmc->pop(id1);
         TS_ASSERT(ret_message == NULL);
-
-
     }
 
 
@@ -205,10 +196,6 @@ public:
 
         opencog::MT19937RandGen rng(0);
 
-        pthread_t thread = pthread_self();
-
-        std::cout << "Init " << thread << "\n";
-
         std::string id1("id1");
         std::string id2("id2");
 
@@ -229,14 +216,8 @@ public:
                 StringMessage * str_message = new StringMessage(std::string("from"), std::string("to"), msg);
 
                 if (rng.randbool()) {
-                    std::cout << thread << "--push--1-\t\t";
-                    std::cout << str_message->getPlainTextRepresentation();
-                    std::cout << "\n";
                     mmc->push(id1, str_message);
                 } else {
-                    std::cout << thread << "--push--2-\t\t";
-                    std::cout << str_message->getPlainTextRepresentation();
-                    std::cout << "\n";
                     mmc->push(id2, str_message);
                 }
             }
@@ -248,20 +229,12 @@ public:
                 if (rng.randbool()) {
                     ret_message = mmc->pop(id1);
                     if (ret_message != NULL) {
-                        std::cout << thread << "--pop---1-\t\t\t\t" << ret_message->getPlainTextRepresentation() << " <<<<\n";
-
                         delete ret_message;
-                    } else {
-                        std::cout << thread << "--pop---1-" << i << " is null\n";
                     }
                 } else {
                     ret_message = mmc->pop(id2);
                     if (ret_message != NULL) {
-                        std::cout << thread << "--pop---2-\t\t\t\t" << ret_message->getPlainTextRepresentation() << " <<<<\n";
-
                         delete ret_message;
-                    } else {
-                        std::cout << thread << "--pop---2-" << i << " is null\n";
                     }
                 }
             }
@@ -270,11 +243,6 @@ public:
 
                 if (rng.randbool()) {
                     if (mmc->isQueueEmpty(id1)) {
-                        std::cout << thread << "--ID1---IS EMPTY\n";
-                    }
-                } else {
-                    if (mmc->isQueueEmpty(id2)) {
-                        std::cout << thread << "--ID2---IS EMPTY\n";
                     }
                 }
             }

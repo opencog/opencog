@@ -473,7 +473,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // thread-safe, and there is no particularly elegant
                     // way to lock. So we punt.  This makes sense,
                     // because it is unlikely that one thread is going to
-                    // be winging on the outgoing set, while another
+                    // be wingeing on the outgoing set, while another
                     // thread is performing an atom-table add.  I'm pretty
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.

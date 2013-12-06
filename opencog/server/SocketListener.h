@@ -47,25 +47,30 @@ class SocketListener : public SocketPort
 
 private:
 
-    boost::asio::io_service& io_service;
-    tcp::acceptor acceptor;
+    boost::asio::io_service& _io_service;
+    tcp::acceptor _acceptor;
 
 public:
 
-    SocketListener(boost::asio::io_service& _io_service, int _port) :
-        SocketPort(_port),
-        io_service(_io_service),
-        acceptor(_io_service, tcp::endpoint(tcp::v4(), _port))
+    SocketListener(boost::asio::io_service& io_service, int port) :
+        SocketPort(port),
+        _io_service(io_service),
+        _acceptor(io_service, tcp::endpoint(tcp::v4(), port))
     {
         logger().debug("SocketListener::SocketListener() started");
         logger().debug("Acceptor listening.");
-        _Socket* ss = new _Socket(io_service);
-        acceptor.async_accept(ss->getSocket(),
-                              boost::bind(&SocketListener::handle_accept, this, ss,
-                              boost::asio::placeholders::error));
+
+        // XXX FIXME ... this is leaking memory -- theres no dtor for
+        // this socket !?
+        _Socket* ss = new _Socket(_io_service);
+        _acceptor.async_accept(ss->getSocket(),
+             boost::bind(&SocketListener::handle_accept,
+             this, ss,
+             boost::asio::placeholders::error));
         logger().debug("SocketListener::SocketListener() ended");
     }
 
+    ~SocketListener() {}
 
     void handle_accept(_Socket* ss, const boost::system::error_code& error)
     {
@@ -73,10 +78,12 @@ public:
         if (!error)
         {
             ss->start();
-            ss = new _Socket(io_service);
-            acceptor.async_accept(ss->getSocket(),
-                                  boost::bind(&SocketListener::handle_accept, this, ss,
-                                  boost::asio::placeholders::error));
+            // Again with the leaking memory ... !?!
+            _Socket* nss = new _Socket(_io_service);
+            _acceptor.async_accept(nss->getSocket(),
+                  boost::bind(&SocketListener::handle_accept,
+                  this, nss,
+                  boost::asio::placeholders::error));
         }
         else
         {

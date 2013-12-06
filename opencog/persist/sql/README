@@ -219,7 +219,7 @@ How To Pass the Unit Test
 -------------------------
 The collection of OpenCog unit tests includes one that tests the 
 persistence infrastructure. It is called BasicSaveUTest, and it
-will fail unless a test database is set up.  Toe set this up, 
+will fail unless a test database is set up.  To set this up, 
 you'll need to repeat some of the above instructions:
 
 -- Create a new database: e.g. 

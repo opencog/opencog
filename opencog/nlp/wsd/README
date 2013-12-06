@@ -311,13 +311,13 @@ refer to the same word in the same sentence.
 
    <!-- in parse 2, the word "bark" is associated with bark_144 -->
    ReferenceLink
-      WordNode "bark"
       WordInstanceNode "bark_144"
+      WordNode "bark"
 
    <!-- in parse 3, the word "bark" is associated with bark_169 -->
    ReferenceLink
-      WordNode "bark"
       WordInstanceNode "bark_169"
+      WordNode "bark"
 
 In the above, the associated WordNode is meant to be the non-lemmatized
 form of the word, since, in principle (though extremely rare in

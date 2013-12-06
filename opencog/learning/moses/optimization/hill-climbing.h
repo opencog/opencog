@@ -50,6 +50,7 @@ struct hc_parameters
           single_step(step),
           crossover(cross),
           crossover_pop_size(120),
+          crossover_min_neighbors(400),
           max_nn_evals (max_evals),
           fraction_of_nn(_fraction_of_nn),
           score_range(5.0),
@@ -63,8 +64,14 @@ struct hc_parameters
     bool single_step;
     bool crossover;
 
-    // number of created instances by crossover
+    // Number of created instances by crossover
     unsigned crossover_pop_size;
+
+    // Threshold to control when crossover is gonna be triggered. If
+    // the number of neighbors to explore is above that threshold
+    // (and at least 2 iterations have occured), the crossover kicks
+    // in.
+    unsigned crossover_min_neighbors;
 
     // Evaluate no more than this number of instances per iteration.
     // Problems with 100 or more features easily lead to exemplars with
@@ -192,7 +199,7 @@ protected:
     // Return an estimate of the number of new instances to search
     size_t n_new_instances(size_t distance, unsigned max_evals,
                            size_t current_number_of_evals,
-                           size_t total_number_of_neighbours);
+                           size_t total_number_of_neighbors);
 
     /**
      * Cross the single top-scoring instance against the next-highest scorers.

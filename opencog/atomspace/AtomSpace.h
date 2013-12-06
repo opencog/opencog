@@ -876,34 +876,33 @@ public:
     }
 
     /**
-     * Gets a set of handles in the Attentional Focus that matches with the given type
-     * (subclasses optionally).
+     * Returns the set of atoms within the given importance range.
      *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
      *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to this
-     * method, which would return all entries in AtomSpace in the
-     * AttentionalFocus:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
+     * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSetInAttentionalFocus(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByAV(OutputIterator result,
+                   AttentionValue::sti_t lowerBound,
+                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
-        return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
+        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    /**
+     * Gets the set of all handles in the Attentional Focus
+     *
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSetInAttentionalFocus(OutputIterator result) const
+    {
+        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
     }
 
     // Wrapper for comparing atoms from a HandleSeq
