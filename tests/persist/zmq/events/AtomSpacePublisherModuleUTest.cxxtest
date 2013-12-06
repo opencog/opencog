@@ -106,8 +106,9 @@ public:
 
         // Please don't write log files here. They crap up the build directory!
         // config().set("LOG_DIR", ".");
-        config().set("ZMQ_EVENT_PORT", "5563");
-        config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
+        // Please don't over-ride; it crashes if there's a cog-server running.
+        // config().set("ZMQ_EVENT_PORT", "5563");
+        // config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
         config().set("MODULES", "opencog/persist/zmq/events/libatomspacepublishermodule.so");
         
         logger().setFilename(config()["LOG_FILE"]);
@@ -128,9 +129,6 @@ public:
             NULL
         };
         cogserver().loadModules(paths);
-
-        logger().setLevel(Logger::DEBUG);
-        logger().setPrintToStdoutFlag(true);
 
         this->as = &cogserver().getAtomSpace();
     }
