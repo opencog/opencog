@@ -2975,27 +2975,6 @@ void OCPlanner::loadTestRulesFromCodes()
     // define a special action: do nothing
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
 
-    //----------------------------Begin Rule: if energy value is high enough, the energy goal is achieved-------------------------------------------
-//    ParamValue var_avatar = entity_var[1];
-//    ParamValue var_achieve_energy_goal = bool_var[1];
-
-//    // precondition 1:
-//    vector<ParamValue> energyStateOwnerList0;
-//    energyStateOwnerList0.push_back(var_avatar);
-//    State* energyState0 = new State("Energy",ActionParamType::FLOAT(),STATE_GREATER_THAN ,ParamValue("0.8"), energyStateOwnerList0);
-//    // effect1: energy increases
-//    State* energyGoalState = new State("EnergyGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
-
-//    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
-
-//    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
-//    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
-
-//    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
-
-//    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
-
-    //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
 
     //----------------------------Begin Rule: eat food to achieve energy demanding goal -------------------------------------------
     // define variables:
@@ -3424,6 +3403,863 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(pathTransmitRule);
 
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
+
+
+
+
+    //----------------------------Begin Einstein puzzle rules---------------------------------------------------------------------
+    //----------------------------Begin RUle: if house1 is left to house2,then house1 is next to house2---------------------------
+    // define variables:
+    ParamValue var_house_1 = entity_var[0];
+    ParamValue var_house_2 = entity_var[1];
+    ParamValue var_house_next = entity_var[2];
+    ParamValue var_house_next_2 = entity_var[3];
+
+    // precondition 1: house1 is left to house2
+    vector<ParamValue> leftToStateOwnerList1;
+    leftToStateOwnerList1.push_back(var_house_1);
+    State* leftToState1 = new State("leftOf",ActionParamType::ENTITY(),STATE_EQUAL_TO , var_house_2, leftToStateOwnerList1);
+
+    // effect1: house1 is next to house2
+    vector<ParamValue> nextToStateOwnerList1;
+    nextToStateOwnerList1.push_back(var_house_1);
+    State* nextToState1 = new State("nextTo",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_next, nextToStateOwnerList1);
+    Effect* nextToEffect1 = new Effect(nextToState1, OP_ASSIGN, var_house_2,true);
+
+    // effect2: house2 is next to house1
+    vector<ParamValue> nextToStateOwnerList2;
+    nextToStateOwnerList2.push_back(var_house_2);
+    State* nextToState2 = new State("nextTo",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_next_2, nextToStateOwnerList2);
+    Effect* nextToEffect2 = new Effect(nextToState2, OP_ASSIGN, var_house_1,true);
+
+    // add rule:
+    Rule* leftNextToRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    leftNextToRule->ruleName = "houseLeftTo->NextTo";
+    leftNextToRule->addPrecondition(leftToState1);
+
+    leftNextToRule->addEffect(EffectPair(1.0f,nextToEffect1));
+    leftNextToRule->addEffect(EffectPair(1.0f,nextToEffect2));
+
+    this->AllRules.push_back(leftNextToRule);
+    //----------------------------End RUle: if house1 is left to house2,then house1 is next to house2---------------------------
+
+    //----------------------------Begin RUle: if house1 is right to house2,then house1 is next to house2---------------------------
+    // precondition 1: house1 is left to house2
+    vector<ParamValue> rightToStateOwnerList1;
+    rightToStateOwnerList1.push_back(var_house_1);
+    State* rightToState1 = new State("rightOf",ActionParamType::ENTITY(),STATE_EQUAL_TO , var_house_2, rightToStateOwnerList1);
+
+    // add rule:
+    Rule* rightNextToRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    rightNextToRule->ruleName = "houseRightTo->NextTo";
+    rightNextToRule->addPrecondition(rightToState1);
+
+    rightNextToRule->addEffect(EffectPair(1.0f,nextToEffect1));
+    rightNextToRule->addEffect(EffectPair(1.0f,nextToEffect2));
+
+    this->AllRules.push_back(rightNextToRule);
+    //----------------------------End RUle: if house1 is right to house2,then house1 is next to house2---------------------------
+
+    //----------------------------Begin RUle: if house1 is next to house2,then house2 is next to house1---------------------------
+    // precondition 1: house1 is left to house2
+    vector<ParamValue> nextToStateOwnerList12;
+    nextToStateOwnerList12.push_back(var_house_1);
+    State* nextToState12 = new State("nextTo",ActionParamType::ENTITY(),STATE_EQUAL_TO , var_house_2, nextToStateOwnerList12);
+
+    // add rule:
+    Rule* nextToRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    nextToRule->ruleName = "nextToRule";
+    nextToRule->addPrecondition(nextToState12);
+
+    nextToRule->addEffect(EffectPair(1.0f,nextToEffect2));
+
+    this->AllRules.push_back(nextToRule);
+    //----------------------------End RUle: if house1 is right to house2,then house1 is next to house2---------------------------
+
+    //----------------------------Begin Rule: The Englishman lives in the red house.----------------------------------------------
+    // define variables:
+    ParamValue var_man_x = entity_var[0];
+    ParamValue var_red_house = entity_var[1];
+
+    // precondition 1: var_man_x is people
+    vector<ParamValue> peopleStateOwnerList1;
+    peopleStateOwnerList1.push_back(var_man_x);
+    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1);
+
+    // precondition 2: var_man_x's nation is British
+    vector<ParamValue> nationStateOwnerList1;
+    nationStateOwnerList1.push_back(var_man_x);
+    State* isBritishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO , "British", nationStateOwnerList1);
+
+    // precondition 3: var_red_house's color is red
+    vector<ParamValue> colorStateOwnerList1;
+    colorStateOwnerList1.push_back(var_red_house);
+    State* isRedState1 = new State("color",ActionParamType::STRING(),STATE_EQUAL_TO , "red", colorStateOwnerList1);
+
+    // effect1: var_man_x lives in var_red_house
+    vector<ParamValue> liveInRedStateOwnerList1;
+    liveInRedStateOwnerList1.push_back(var_man_x);
+    State* liveInRedState1 = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_next, liveInRedStateOwnerList1);
+    Effect* liveInRedEffect1 = new Effect(liveInRedState1, OP_ASSIGN, var_red_house,true);
+
+    // add rule:
+    Rule* BritishLiveInRedRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    BritishLiveInRedRule->ruleName = "BritishLiveInRedRule";
+    BritishLiveInRedRule->addPrecondition(peopleState1);
+    BritishLiveInRedRule->addPrecondition(isBritishState1);
+    BritishLiveInRedRule->addPrecondition(isRedState1);
+
+    BritishLiveInRedRule->addEffect(EffectPair(1.0f,liveInRedEffect1));
+
+    this->AllRules.push_back(BritishLiveInRedRule);
+    //----------------------------End Rule: The Englishman lives in the red house.----------------------------------------------
+
+    //----------------------------Begin Rule: The Swedish man keeps dogs as pets..----------------------------------------------
+    // define variables:
+    ParamValue var_dog_pet = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x's nation is Swedish
+    vector<ParamValue> nationStateOwnerList2;
+    nationStateOwnerList2.push_back(var_man_x);
+    State* isSwedishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO , "Swedish", nationStateOwnerList2);
+
+    // effect1: var_man_x keeps dogs
+    vector<ParamValue> keepDogsStateOwnerList1;
+    keepDogsStateOwnerList1.push_back(var_man_x);
+    State* keepDogsState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_dog_pet, keepDogsStateOwnerList1);
+    Effect* keepDogsEffect1 = new Effect(keepDogsState1, OP_ASSIGN, "dogs",true);
+
+    // add rule:
+    Rule* SwedishKeepsDogsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    SwedishKeepsDogsRule->ruleName = "SwedishKeepsDogsRule";
+    SwedishKeepsDogsRule->addPrecondition(peopleState1);
+    SwedishKeepsDogsRule->addPrecondition(isSwedishState1);
+
+    SwedishKeepsDogsRule->addEffect(EffectPair(1.0f,keepDogsEffect1));
+
+    this->AllRules.push_back(SwedishKeepsDogsRule);
+    //----------------------------End Rule: The Swedish man keeps dogs as pets..----------------------------------------------
+
+    //----------------------------Begin Rule: The Danish man drinks tea------------------------------------------------------
+    // define variables:
+    ParamValue var_tea = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x's nation is Danish
+    vector<ParamValue> nationStateOwnerList3;
+    nationStateOwnerList3.push_back(var_man_x);
+    State* isDanishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO , "Swedish", nationStateOwnerList3);
+
+    // effect1: var_man_x drinks tea
+    vector<ParamValue> drinkTeaStateOwnerList1;
+    drinkTeaStateOwnerList1.push_back(var_man_x);
+    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_tea, drinkTeaStateOwnerList1);
+    Effect* drinkTeaEffect1 = new Effect(drinkTeaState1, OP_ASSIGN, "tea",true);
+
+    // add rule:
+    Rule* DanishDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    DanishDrinksTeaRule->ruleName = "DanishDrinksTeaRule";
+    DanishDrinksTeaRule->addPrecondition(peopleState1);
+    DanishDrinksTeaRule->addPrecondition(isDanishState1);
+
+    DanishDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect1));
+
+    this->AllRules.push_back(DanishDrinksTeaRule);
+    //----------------------------End Rule:  The Danish man drinks tea--------------------------------------------------
+
+    //----------------------------Begin Rule: The Green house is next to, and on the left of the White house--------------------------------------------------
+    // define variables:
+    ParamValue var_green_house = entity_var[0];
+    ParamValue var_white_house = entity_var[1];
+
+    // precondition 1: var_green_house's color is green
+    vector<ParamValue> greenStateOwnerList;
+    greenStateOwnerList.push_back(var_green_house);
+    State* isGreenState1 = new State("color",ActionParamType::STRING(),STATE_EQUAL_TO , "green", greenStateOwnerList);
+
+    // precondition 2: var_white_house's color is white
+    vector<ParamValue> whiteStateOwnerList;
+    whiteStateOwnerList.push_back(var_white_house);
+    State* isWhiteState1 = new State("color",ActionParamType::STRING(),STATE_EQUAL_TO , "white", whiteStateOwnerList);
+
+    // effect1: var_green_house is left of  var_white_house
+    vector<ParamValue> leftOfStateOwnerList1;
+    leftOfStateOwnerList1.push_back(var_green_house);
+    State* leftOfState1 = new State("leftOf",ActionParamType::ENTITY(),STATE_EQUAL_TO , var_white_house, leftOfStateOwnerList1);
+    Effect* leftOfEffect1 = new Effect(leftOfState1, OP_ASSIGN, var_white_house,true);
+
+    // add rule:
+    Rule* GreenLeftOfWhiteRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    GreenLeftOfWhiteRule->ruleName = "GreenLeftOfWhiteRule";
+    GreenLeftOfWhiteRule->addPrecondition(isGreenState1);
+    GreenLeftOfWhiteRule->addPrecondition(isWhiteState1);
+
+    GreenLeftOfWhiteRule->addEffect(EffectPair(1.0f,leftOfEffect1));
+
+    this->AllRules.push_back(GreenLeftOfWhiteRule);
+    //----------------------------End Rule: The Green house is next to, and on the left of the White house----------------------------------------------
+
+    //----------------------------Begin Rule: The person lives in the Green house drinks coffee.------------------------------------------------------
+    // define variables:
+    ParamValue var_coffee = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_green_house's color is green
+
+    // precondition 3: var_man_x lives in green house
+    vector<ParamValue> liveInGreenStateOwnerList1;
+    liveInGreenStateOwnerList1.push_back(var_man_x);
+    State* liveInGreenState1 = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_green_house, liveInGreenStateOwnerList1);
+
+    // effect1: var_man_x drinks coffee
+    vector<ParamValue> drinkCoffeeStateOwnerList1;
+    drinkCoffeeStateOwnerList1.push_back(var_man_x);
+    State* drinkCoffeeState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_coffee, drinkCoffeeStateOwnerList1);
+    Effect* drinkCoffeeEffect1 = new Effect(drinkCoffeeState1, OP_ASSIGN, "coffee",true);
+
+    // add rule:
+    Rule* greenHouseManDrinksCoffeeRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    greenHouseManDrinksCoffeeRule->ruleName = "greenHouseManDrinksCoffeeRule";
+    greenHouseManDrinksCoffeeRule->addPrecondition(peopleState1);
+    greenHouseManDrinksCoffeeRule->addPrecondition(isGreenState1);
+    greenHouseManDrinksCoffeeRule->addPrecondition(liveInGreenState1);
+
+    greenHouseManDrinksCoffeeRule->addEffect(EffectPair(1.0f,drinkCoffeeEffect1));
+
+    this->AllRules.push_back(greenHouseManDrinksCoffeeRule);
+    //----------------------------End Rule:  The person lives in the Green house drinks coffee--------------------------------------------------
+
+
+    //----------------------------Begin Rule: The person who smokes Pall Mall rears birds.----------------------------------------------
+    // define variables:
+    ParamValue var_birds_pet = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x smokes pall Mall
+    vector<ParamValue> smokePallMallStateOwnerList2;
+    smokePallMallStateOwnerList2.push_back(var_man_x);
+    State* smokePallMallState1 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO , "pallMall", smokePallMallStateOwnerList2);
+
+    // effect1: var_man_x keeps birds
+    vector<ParamValue> keepBirdsStateOwnerList1;
+    keepBirdsStateOwnerList1.push_back(var_man_x);
+    State* keepBirdsState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_birds_pet, keepBirdsStateOwnerList1);
+    Effect* keepBirdsEffect1 = new Effect(keepBirdsState1, OP_ASSIGN, "birds",true);
+
+    // add rule:
+    Rule* PallMallSmokerKeepsBirdsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    PallMallSmokerKeepsBirdsRule->ruleName = "PallMallSmokerKeepsBirdsRule";
+    PallMallSmokerKeepsBirdsRule->addPrecondition(peopleState1);
+    PallMallSmokerKeepsBirdsRule->addPrecondition(smokePallMallState1);
+
+    PallMallSmokerKeepsBirdsRule->addEffect(EffectPair(1.0f,keepBirdsEffect1));
+
+    this->AllRules.push_back(PallMallSmokerKeepsBirdsRule);
+    //----------------------------End Rule: The person who smokes Pall Mall rears birds..----------------------------------------------
+
+
+    //----------------------------Begin Rule: The person who lives in the Yellow house smokes Dunhill..----------------------------------------------
+    // define variables:
+    ParamValue var_cigarette_brand = str_var[0];
+    ParamValue var_yellow_house = entity_var[1];
+
+    // precondition 1: var_man_x is people
+
+
+    // precondition 2: var_yellow_house's color is yellow
+    vector<ParamValue> yellowStateOwnerList;
+    yellowStateOwnerList.push_back(var_yellow_house);
+    State* isYellowState1 = new State("color",ActionParamType::STRING(),STATE_EQUAL_TO , "yellow", yellowStateOwnerList);
+
+    // precondition 3: var_man_x lives in yellow house
+    vector<ParamValue> liveInYellowStateOwnerList1;
+    liveInYellowStateOwnerList1.push_back(var_man_x);
+    State* liveInYellowState1 = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_yellow_house, liveInYellowStateOwnerList1);
+
+    // effect1: var_man_x smoke Dunhill
+    vector<ParamValue> smokeDunhillStateOwnerList;
+    smokeDunhillStateOwnerList.push_back(var_man_x);
+    State* smokeDunhillState1 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeDunhillStateOwnerList);
+    Effect* smokeDunhillEffect1 = new Effect(smokeDunhillState1, OP_ASSIGN, "dunhill",true);
+
+    // add rule:
+    Rule* yellowHouseManSmokesDunhillRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    yellowHouseManSmokesDunhillRule->ruleName = "yellowHouseManSmokesDunhillRule";
+    yellowHouseManSmokesDunhillRule->addPrecondition(peopleState1);
+    yellowHouseManSmokesDunhillRule->addPrecondition(isYellowState1);
+    yellowHouseManSmokesDunhillRule->addPrecondition(liveInYellowState1);
+
+    yellowHouseManSmokesDunhillRule->addEffect(EffectPair(1.0f,smokeDunhillEffect1));
+
+    this->AllRules.push_back(yellowHouseManSmokesDunhillRule);
+    //----------------------------End Rule: The person who lives in the Yellow house smokes Dunhill.----------------------------------------------
+
+    //----------------------------Begin Rule: The man living in the center house drinks milk.------------------------------------------------------
+    // define variables:
+    ParamValue var_milk = str_var[0];
+
+    ParamValue centerHouse = Entity("thirdHouse","object");
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x lives in center house
+    vector<ParamValue> liveInCenterHouseStateOwnerList;
+    liveInCenterHouseStateOwnerList.push_back(var_man_x);
+    State* liveInCenterHouseState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,centerHouse, liveInCenterHouseStateOwnerList);
+
+    // effect1: var_man_x drinks milk
+    vector<ParamValue> drinkMilkStateOwnerList;
+    drinkMilkStateOwnerList.push_back(var_man_x);
+    State* drinkMilkState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_milk, drinkMilkStateOwnerList);
+    Effect* drinkMilkEffect = new Effect(drinkMilkState, OP_ASSIGN, "milk",true);
+
+    // add rule:
+    Rule* centerHouseManDrinksMilkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    centerHouseManDrinksMilkRule->ruleName = "centerHouseManDrinksMilkRule";
+    centerHouseManDrinksMilkRule->addPrecondition(peopleState1);
+    centerHouseManDrinksMilkRule->addPrecondition(liveInCenterHouseState);
+
+    centerHouseManDrinksMilkRule->addEffect(EffectPair(1.0f,drinkMilkEffect));
+
+    this->AllRules.push_back(centerHouseManDrinksMilkRule);
+    //----------------------------End Rule:  The man living in the center house drinks milk-------------------------------------------------
+
+    //----------------------------Begin Rule: The Norwegian lives in the first house------------------------------------------------------
+    // define variables:
+    ParamValue firstHouse = Entity("firstHouse","object");
+    ParamValue var_house = entity_var[1];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x's nation is Norwegian
+    vector<ParamValue> NorwegianNationStateOwnerList;
+    NorwegianNationStateOwnerList.push_back(var_man_x);
+    State* NorwegianNationState = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO , "Norwegian", NorwegianNationStateOwnerList);
+
+    // effect1: var_man_x  lives in the first house
+    vector<ParamValue> livesInFirstHouseStateOwnerList;
+    livesInFirstHouseStateOwnerList.push_back(var_man_x);
+    State* livesInFirstHouseState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house, livesInFirstHouseStateOwnerList);
+    Effect* livesInFirstHouseEffect = new Effect(livesInFirstHouseState, OP_ASSIGN, firstHouse,true);
+
+    // add rule:
+    Rule* NorwegianLivesInFirstHouseRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    NorwegianLivesInFirstHouseRule->ruleName = "NorwegianLivesInFirstHouseRule";
+    NorwegianLivesInFirstHouseRule->addPrecondition(peopleState1);
+    NorwegianLivesInFirstHouseRule->addPrecondition(NorwegianNationState);
+
+    NorwegianLivesInFirstHouseRule->addEffect(EffectPair(1.0f,livesInFirstHouseEffect));
+
+    this->AllRules.push_back(NorwegianLivesInFirstHouseRule);
+    //----------------------------End Rule:  The Norwegian lives in the first house--------------------------------------------------
+
+    //----------------------------Begin Rule: The man who smokes Blends lives next to the one who keeps cats------------------------------------------------------
+    // define variables:
+    ParamValue var_man_y = entity_var[1];
+    ParamValue var_house_x = entity_var[2];
+    ParamValue var_house_y = entity_var[3];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x  smokes Blends
+    vector<ParamValue> smokeBlendsStateOwnerList;
+    smokeBlendsStateOwnerList.push_back(var_man_x);
+    State* smokeBlendsState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO , "blend", smokeBlendsStateOwnerList);
+
+    // precondition 3: var_man_x lives in var_house_x
+    vector<ParamValue> liveInXHouseStateOwnerList;
+    liveInXHouseStateOwnerList.push_back(var_man_x);
+    State* liveInXHouseState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_x, liveInXHouseStateOwnerList);
+
+    // precondition 4: var_man_y is people
+    vector<ParamValue> peopleStateOwnerList2;
+    peopleStateOwnerList2.push_back(var_man_x);
+    State* peopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList2);
+
+    // precondition 5: var_man_y keeps cats
+    vector<ParamValue> keepCatsStateOwnerList;
+    keepCatsStateOwnerList.push_back(var_man_y);
+    State* keepCatsState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList);
+
+    // precondition 6: var_man_y lives in var_house_y
+    vector<ParamValue> liveInYHouseStateOwnerList;
+    liveInYHouseStateOwnerList.push_back(var_man_y);
+    State* liveInYHouseState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_y, liveInYHouseStateOwnerList);
+
+    // effect1: var_house_x is  next to var_house_y
+    vector<ParamValue> xnextToyStateOwnerList;
+    xnextToyStateOwnerList.push_back(var_house_x);
+    State* xnextToyState = new State("nextTo",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_next, xnextToyStateOwnerList);
+    Effect* xnextToyEffect = new Effect(xnextToyState, OP_ASSIGN, var_house_y,true);
+
+    // add rule:
+    Rule* blendSmokerNextToCatKeeperRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    blendSmokerNextToCatKeeperRule->ruleName = "blendSmokerNextToCatKeeperRule";
+    blendSmokerNextToCatKeeperRule->addPrecondition(peopleState1);
+    blendSmokerNextToCatKeeperRule->addPrecondition(smokeBlendsState);
+    blendSmokerNextToCatKeeperRule->addPrecondition(liveInXHouseState);
+    blendSmokerNextToCatKeeperRule->addPrecondition(peopleState2);
+    blendSmokerNextToCatKeeperRule->addPrecondition(keepCatsState);
+    blendSmokerNextToCatKeeperRule->addPrecondition(liveInYHouseState);
+
+    blendSmokerNextToCatKeeperRule->addEffect(EffectPair(1.0f,xnextToyEffect));
+
+    this->AllRules.push_back(blendSmokerNextToCatKeeperRule);
+    //----------------------------End Rule: The man who smokes Blends lives next to the one who keeps cats--------------------------------------------------
+
+    //----------------------------Begin Rule: The man who keeps horse lives next to the man who smokes Dunhill------------------------------------------------------
+    // define variables:
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x  smokes Dunhill
+
+    // precondition 3: var_man_x lives in var_house_x
+
+    // precondition 4: var_man_y is people
+
+    // precondition 5: var_man_y keeps horse
+    vector<ParamValue> keepHorseStateOwnerList;
+    keepHorseStateOwnerList.push_back(var_man_y);
+    State* keepHorseState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"horse", keepHorseStateOwnerList);
+
+    // precondition 6: var_man_y lives in var_house_y
+
+    // effect1: var_house_x is  next to var_house_y
+
+    // add rule:
+    Rule* DunhillSmokerNextToHorseKeeperRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    DunhillSmokerNextToHorseKeeperRule->ruleName = "DunhillSmokerNextToHorseKeeperRule";
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(peopleState1);
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(smokeDunhillState1);
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(liveInXHouseState);
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(peopleState2);
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(keepHorseState);
+    DunhillSmokerNextToHorseKeeperRule->addPrecondition(liveInYHouseState);
+
+    blendSmokerNextToCatKeeperRule->addEffect(EffectPair(1.0f,xnextToyEffect));
+
+    this->AllRules.push_back(DunhillSmokerNextToHorseKeeperRule);
+    //----------------------------End Rule: The man who keeps horses lives next to the man who smokes Dunhill--------------------------------------------------
+
+
+
+    //----------------------------Begin Rule: The man who smokes Blue Master drinks beer.----------------------------------------------
+    // define variables:
+    ParamValue var_beer = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x smokes Blue Master
+    vector<ParamValue> smokeBluemasterStateOwnerList;
+    smokeBluemasterStateOwnerList.push_back(var_man_x);
+    State* smokeBluemasterState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO , "bluemaster", smokeBluemasterStateOwnerList);
+
+    // effect1: var_man_x drinks beer
+    vector<ParamValue> drinkBeerStateOwnerList;
+    drinkBeerStateOwnerList.push_back(var_man_x);
+    State* drinkBeerState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_beer, drinkBeerStateOwnerList);
+    Effect* drinkBeerEffect = new Effect(drinkBeerState, OP_ASSIGN, "beer",true);
+
+    // add rule:
+    Rule* BluemasterSmokerDrinksBeerRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    BluemasterSmokerDrinksBeerRule->ruleName = "BluemasterSmokerDrinksBeerRule";
+    BluemasterSmokerDrinksBeerRule->addPrecondition(peopleState1);
+    BluemasterSmokerDrinksBeerRule->addPrecondition(smokeBluemasterState);
+
+    BluemasterSmokerDrinksBeerRule->addEffect(EffectPair(1.0f,drinkBeerEffect));
+
+    this->AllRules.push_back(BluemasterSmokerDrinksBeerRule);
+    //----------------------------End Rule: The man who smokes Blue Master drinks beer.----------------------------------------------
+
+    //----------------------------Begin Rule: The German smokes Prince.---------------------------------------------------l---
+    // define variables:
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x's nation is German
+    vector<ParamValue> GermannationStateOwnerList;
+    GermannationStateOwnerList.push_back(var_man_x);
+    State* GermannationState = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO , "German", GermannationStateOwnerList);
+
+    // effect1: var_man_x smokes Prince
+    vector<ParamValue> smokePrinceStateOwnerList;
+    smokePrinceStateOwnerList.push_back(var_man_x);
+    State* smokePrinceState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokePrinceStateOwnerList);
+    Effect* smokePrinceEffect = new Effect(smokePrinceState, OP_ASSIGN, "prince",true);
+
+    // add rule:
+    Rule* GermanSmokesPrincesRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    GermanSmokesPrincesRule->ruleName = "GermanSmokesPrincesRule";
+    GermanSmokesPrincesRule->addPrecondition(peopleState1);
+    GermanSmokesPrincesRule->addPrecondition(GermannationState);
+
+    GermanSmokesPrincesRule->addEffect(EffectPair(1.0f,smokePrinceEffect));
+
+    this->AllRules.push_back(GermanSmokesPrincesRule);
+    //----------------------------End Rule:  The German smokes Prince.--------------------------------------------------
+
+    //----------------------------Begin Rule: The Norwegian lives next to the blue house.-----------------------------------------------------
+    // define variables:
+    ParamValue var_house_Norwegian = entity_var[0];
+    ParamValue var_blue_house = entity_var[1];
+    ParamValue var_color = str_var[0];
+
+
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x's nation is Norwegian
+
+    // precondition 3: var_man_x lives in var_house_Norwegian
+    vector<ParamValue> livesInNorwegianHouseStateOwnerList;
+    livesInNorwegianHouseStateOwnerList.push_back(var_man_x);
+    State* livesInNorwegianHouseState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,var_house_Norwegian, livesInNorwegianHouseStateOwnerList);
+
+    // precondition 4: var_house_Norwegian is next to var_blue_house
+    vector<ParamValue> NorwegianNextToStateOwnerList;
+    NorwegianNextToStateOwnerList.push_back(var_house_Norwegian);
+    State* NorwegianNextToState = new State("nextTo",ActionParamType::ENTITY(),STATE_EQUAL_TO , var_blue_house, NorwegianNextToStateOwnerList);
+
+    // effect1 : var_blue_house's color is blue
+    vector<ParamValue> blueStateOwnerList;
+    blueStateOwnerList.push_back(var_blue_house);
+    State* blueState = new State("color",ActionParamType::STRING(),STATE_EQUAL_TO , var_color, blueStateOwnerList);
+    Effect* blueStateEffect = new Effect(blueState, OP_ASSIGN, "blue",true);
+
+    // add rule:
+    Rule* NorwegianLivesNextToBlueHouseRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    NorwegianLivesNextToBlueHouseRule->ruleName = "NorwegianLivesNextToBlueHouseRule";
+    NorwegianLivesNextToBlueHouseRule->addPrecondition(peopleState1);
+    NorwegianLivesNextToBlueHouseRule->addPrecondition(NorwegianNationState);
+    NorwegianLivesNextToBlueHouseRule->addPrecondition(livesInNorwegianHouseState);
+    NorwegianLivesNextToBlueHouseRule->addPrecondition(NorwegianNextToState);
+
+    NorwegianLivesNextToBlueHouseRule->addEffect(EffectPair(1.0f,blueStateEffect));
+
+    this->AllRules.push_back(NorwegianLivesNextToBlueHouseRule);
+    //----------------------------End Rule:  The Norwegian lives next to the blue house.--------------------------------------------------
+
+    //----------------------------Begin Rule: The Blends smoker lives next to the one who drinks water.------------------------------------------------------
+    // define variables:
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x  smokes Blends
+
+    // precondition 3: var_man_x lives in var_house_x
+
+    // precondition 4: var_man_y is people
+
+    // precondition 5: var_man_y drinks water
+    vector<ParamValue> drinkWaterStateOwnerList;
+    drinkWaterStateOwnerList.push_back(var_man_y);
+    State* drinkWaterState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"water", drinkWaterStateOwnerList);
+
+    // precondition 6: var_man_y lives in var_house_y
+
+    // effect1: var_house_x is  next to var_house_y
+
+    // add rule:
+    Rule* BlendSmokerNextToWaterDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    BlendSmokerNextToWaterDrinkRule->ruleName = "BlendSmokerNextToWaterDrinkRule";
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(peopleState1);
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(smokeBlendsState);
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(liveInXHouseState);
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(peopleState2);
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(drinkWaterState);
+    BlendSmokerNextToWaterDrinkRule->addPrecondition(liveInYHouseState);
+
+    blendSmokerNextToCatKeeperRule->addEffect(EffectPair(1.0f,xnextToyEffect));
+
+    this->AllRules.push_back(BlendSmokerNextToWaterDrinkRule);
+    //----------------------------End Rule: The Blends smoker lives next to the one who drinks water.--------------------------------------------------
+
+
+
+    //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+    // define variables:
+    ParamValue var_fish_keeper = entity_var[0];
+    ParamValue var_achieve_integrity_goal = bool_var[0];
+
+    // precondition 1: var_fish_keeper is people
+    vector<ParamValue> peopleStateOwnerList;
+    peopleStateOwnerList.push_back(var_fish_keeper);
+    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList);
+
+    // precondition 2: var_fish_keeper keeps fish
+    vector<ParamValue> keepFishStateOwnerList;
+    keepFishStateOwnerList.push_back(var_fish_keeper);
+    State* keepFishState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList);
+
+    // precondition 3: closed to var_fish_keeper
+    vector<ParamValue> closedToFishKeeperStateOwnerList;
+    closedToFishKeeperStateOwnerList.push_back(varAvatar);
+    closedToFishKeeperStateOwnerList.push_back(var_fish_keeper);
+    State* closedToFishKeeperState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedToFishKeeperStateOwnerList, true, &Inquery::inqueryDistance);
+
+    // energy state:
+    vector<ParamValue> IntegrityStateOwnerList;
+    IntegrityStateOwnerList.push_back(var_avatar);
+    State* IntegrityGoalState = new State("IntegrityDemandGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_integrity_goal, IntegrityStateOwnerList);
+
+    // effect1: Integrity Goal Achieved
+    Effect* IntegrityGoalAchievedEffect = new Effect(IntegrityGoalState, OP_ASSIGN, SV_TRUE);
+
+    Rule* IntegrityRule = new Rule(eatAction,boost::get<Entity>(var_avatar),0.2f);
+    IntegrityRule->ruleName = "ClosedToFishKeeperIIntegrityRule";
+    IntegrityRule->addPrecondition(fishKeeperPeopleState);
+    IntegrityRule->addPrecondition(keepFishState);
+    IntegrityRule->addPrecondition(closedToFishKeeperState);
+
+    IntegrityRule->addEffect(EffectPair(1.0f,IntegrityGoalAchievedEffect));
+
+    this->AllRules.push_back(IntegrityRule);
+
+    //----------------------------End Rule:closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people do not live in house_n, then man_1 live in house_n--------------------------------------
+    // define variables:
+    ParamValue man_1 = entity_var[0];
+    ParamValue man_2 = entity_var[1];
+    ParamValue man_3 = entity_var[2];
+    ParamValue man_4 = entity_var[3];
+    ParamValue man_5 = entity_var[4];
+    ParamValue house_n = entity_var[5];
+    ParamValue house_man_1 = entity_var[6];
+
+    // precondition 0: house_n is house
+    vector<ParamValue> isHouseStateOwnerList1;
+    isHouseStateOwnerList1.push_back(house_n);
+    State* isHouseState1 = new State("is_house",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isHouseStateOwnerList1);
+
+    // precondition 1 -5 : man_1-5 are people
+    vector<ParamValue> ispeopleStateOwnerList1;
+    ispeopleStateOwnerList1.push_back(man_1);
+    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1);
+
+    vector<ParamValue> ispeopleStateOwnerList2;
+    ispeopleStateOwnerList2.push_back(man_2);
+    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2);
+
+    vector<ParamValue> ispeopleStateOwnerList3;
+    ispeopleStateOwnerList3.push_back(man_3);
+    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3);
+
+    vector<ParamValue> ispeopleStateOwnerList4;
+    ispeopleStateOwnerList4.push_back(man_4);
+    State* ispeopleState4 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList4);
+
+    vector<ParamValue> ispeopleStateOwnerList5;
+    ispeopleStateOwnerList5.push_back(man_5);
+    State* ispeopleState5 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList5);
+
+    // precondition 6-9 : other people do not live in house_1
+    vector<ParamValue> notlivesInStateOwnerList1;
+    notlivesInStateOwnerList1.push_back(man_2);
+    State* notlivesInState1 = new State("liveIn",ActionParamType::ENTITY(),STATE_NOT_EQUAL_TO ,house_n, notlivesInStateOwnerList1);
+
+    vector<ParamValue> notlivesInStateOwnerList2;
+    notlivesInStateOwnerList2.push_back(man_3);
+    State* notlivesInState2 = new State("liveIn",ActionParamType::ENTITY(),STATE_NOT_EQUAL_TO ,house_n, notlivesInStateOwnerList2);
+
+    vector<ParamValue> notlivesInStateOwnerList3;
+    notlivesInStateOwnerList3.push_back(man_4);
+    State* notlivesInState3 = new State("liveIn",ActionParamType::ENTITY(),STATE_NOT_EQUAL_TO ,house_n, notlivesInStateOwnerList3);
+
+    vector<ParamValue> notlivesInStateOwnerList4;
+    notlivesInStateOwnerList4.push_back(man_5);
+    State* notlivesInState4 = new State("liveIn",ActionParamType::ENTITY(),STATE_NOT_EQUAL_TO ,house_n, notlivesInStateOwnerList4);
+
+
+    // effect1: man_1 lives in house_n
+    vector<ParamValue> livesInHouseNStateOwnerList;
+    livesInHouseNStateOwnerList.push_back(man_1);
+    State* livesInHouseNState = new State("liveIn",ActionParamType::ENTITY(),STATE_EQUAL_TO ,house_man_1, livesInHouseNStateOwnerList);
+    Effect* livesInHouseNEffect = new Effect(livesInHouseNState, OP_ASSIGN, house_n,true);
+
+    // add rule:
+    Rule* notLiveInOtherPeoplesHouseRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notLiveInOtherPeoplesHouseRule->ruleName = "notLiveInOtherPeoplesHouseRule";
+    notLiveInOtherPeoplesHouseRule->addPrecondition(isHouseState1);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState1);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState2);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState3);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState4);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState5);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState1);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState2);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState3);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState4);
+
+    notLiveInOtherPeoplesHouseRule->addEffect(EffectPair(1.0f,livesInHouseNEffect));
+
+    this->AllRules.push_back(notLiveInOtherPeoplesHouseRule);
+    //----------------------------End Rule: if other 4 people do not live in house_1, then man_1 live in house_1-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people do not smoke brand_x, then man_1 smokes it--------------------------------------
+    // define variables:
+    ParamValue brand_x = str_var[1];
+
+    // precondition 0: brand_x is cigaretteBrand
+    vector<ParamValue> isBrandStateOwnerList1;
+    isBrandStateOwnerList1.push_back(brand_x);
+    State* isBrandState1 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList1);
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not smoke brand_x
+    vector<ParamValue> notSmokeXStateOwnerList1;
+    notSmokeXStateOwnerList1.push_back(man_2);
+    State* notSmokeXState1 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList1);
+
+    vector<ParamValue> notSmokeXStateOwnerList2;
+    notSmokeXStateOwnerList2.push_back(man_3);
+    State* notSmokeXState2 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList2);
+
+    vector<ParamValue> notSmokeXStateOwnerList3;
+    notSmokeXStateOwnerList3.push_back(man_4);
+    State* notSmokeXState3 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList3);
+
+    vector<ParamValue> notSmokeXStateOwnerList4;
+    notSmokeXStateOwnerList4.push_back(man_5);
+    State* notSmokeXState4 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList4);
+
+    // effect1: man_1 smokes brand_x
+    vector<ParamValue> smokeXStateOwnerList;
+    smokeXStateOwnerList.push_back(man_1);
+    State* smokeXState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeXStateOwnerList);
+    Effect* smokeXEffect = new Effect(smokeXState, OP_ASSIGN, brand_x,true);
+
+    // add rule:
+    Rule* notSmokeOtherPeoplesBrandRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notSmokeOtherPeoplesBrandRule->ruleName = "notSmokeOtherPeoplesBrandRule";
+    notSmokeOtherPeoplesBrandRule->addPrecondition(isBrandState1);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState1);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState2);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState3);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState4);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState5);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState1);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState2);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState3);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState4);
+
+    notSmokeOtherPeoplesBrandRule->addEffect(EffectPair(1.0f,smokeXEffect));
+
+    this->AllRules.push_back(notSmokeOtherPeoplesBrandRule);
+    //----------------------------End Rule:  if other 4 people do not smoke brand_x, then man_1 smokes it-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people do not keep pet_x, then man_1 keeps it--------------------------------------
+    // define variables:
+    ParamValue pet_man_1 = str_var[0];
+    ParamValue pet_x = str_var[1];
+
+    // precondition 0: pet_x is pet
+    vector<ParamValue> isPetStateOwnerList1;
+    isPetStateOwnerList1.push_back(pet_x);
+    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1);
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep pet_x
+    vector<ParamValue> notkeepXStateOwnerList1;
+    notkeepXStateOwnerList1.push_back(man_2);
+    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList1);
+
+    vector<ParamValue> notkeepXStateOwnerList2;
+    notkeepXStateOwnerList2.push_back(man_3);
+    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList2);
+
+    vector<ParamValue> notkeepXStateOwnerList3;
+    notkeepXStateOwnerList3.push_back(man_4);
+    State* notkeepXState3 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList3);
+
+    vector<ParamValue> notkeepXStateOwnerList4;
+    notkeepXStateOwnerList4.push_back(man_5);
+    State* notkeepXState4 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList4);
+
+    // effect1: man_1 keeps pet_x
+    vector<ParamValue> keepXStateOwnerList;
+    keepXStateOwnerList.push_back(man_1);
+    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_man_1, keepXStateOwnerList);
+    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
+
+    // add rule:
+    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState4);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState5);
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState3);
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState4);
+
+    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
+    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------
+    // define variables:
+    ParamValue drink_man_1 = str_var[0];
+    ParamValue drink_x = str_var[1];
+
+    // precondition 0: drink_x is drink
+    vector<ParamValue> isDrinkStateOwnerList1;
+    isDrinkStateOwnerList1.push_back(drink_x);
+    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1);
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not drink drink_x
+    vector<ParamValue> notdrinkXStateOwnerList1;
+    notdrinkXStateOwnerList1.push_back(man_2);
+    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList1);
+
+    vector<ParamValue> notdrinkXStateOwnerList2;
+    notdrinkXStateOwnerList2.push_back(man_3);
+    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList2);
+
+    vector<ParamValue> notdrinkXStateOwnerList3;
+    notdrinkXStateOwnerList3.push_back(man_4);
+    State* notdrinkXState3 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList3);
+
+    vector<ParamValue> notdrinkXStateOwnerList4;
+    notdrinkXStateOwnerList4.push_back(man_5);
+    State* notdrinkXState4 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList4);
+
+    // effect1: man_1 drinks drink_x
+    vector<ParamValue> drinkXStateOwnerList;
+    drinkXStateOwnerList.push_back(man_1);
+    State* drinkXState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_man_1, drinkXStateOwnerList);
+    Effect* drinkXEffect = new Effect(drinkXState, OP_ASSIGN, drink_x,true);
+
+
+    // add rule:
+    Rule* notDrinkOtherPeoplesDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notDrinkOtherPeoplesDrinkRule->ruleName = "notDrinkOtherPeoplesDrinkRule";
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState4);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState5);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState3);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState4);
+
+    notDrinkOtherPeoplesDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
+
+    this->AllRules.push_back(notDrinkOtherPeoplesDrinkRule);
+    //----------------------------End Rule:  if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------------------
 
 }
 
