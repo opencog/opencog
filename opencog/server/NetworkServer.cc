@@ -126,7 +126,8 @@ bool NetworkServer::removeListener(const unsigned short port)
         logger().warn("unable to remove listener from port %d", port);
         return false;
     }
-    delete *l;
+    SocketPort* sp = *l;
     _listeners.erase(l);
+    delete sp;
     return true;
 }
