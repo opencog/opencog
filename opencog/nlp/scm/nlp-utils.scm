@@ -46,14 +46,18 @@
 ; other than #f. This routine returns the last value that stopped the
 ; recusrsion.
 ;
-(define (map-parses proc sent) 
-   (if (not (eq? (cog-type sent) 'SentenceNode))
-      (throw 'wrong-atom-type 'map-parses
-          "Error: expecting SentenceNode" sent)
-   )
-	(cog-map-chase-link-dbg 'ParseLink ParseAnchor
-		" ========= sentence ============ \n" ""
-		proc sent
+(define (map-parses proc sent-or-list)
+	(if (list? sent-or-list)
+		(map (lambda (one-sent) (map-parses proc one-sent)) sent-or-list)
+		; if we are here, its not a list.
+		(if (eq? (cog-type sent-or-list) 'SentenceNode)
+			(cog-map-chase-link 'ParseLink ParseAnchor
+				proc sent-or-list
+			)
+			; If we are here, its not a sentence
+			(throw 'wrong-atom-type 'map-parses
+				"Error: expecting SentenceNode" sent-or-list)
+		)
 	)
 )
 
