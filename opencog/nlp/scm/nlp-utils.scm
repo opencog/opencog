@@ -31,20 +31,20 @@
 ; Every word of a parse is a WordInstance node.
 (define WordAnchor 'WordInstanceNode)
 
-; =============================================================
-; Assorted sentence, parse, word, word-sense wrangling utilities below.
-;
+
+; ---------------------------------------------------------------------
 ; map-parses proc sent
 ; Call proceedure 'proc' on every parse of the sentence 'sent' 
 ; 
-; Expected input is a SentenceNode, which serves as an anchor to all
-; of the parses of a sentence. It is connected via ParseLink's to 
-; each of the individual parses of the sentence. So, look for 
-; ParseAnchor's, which anchor the parses.
+; Expected input is a SentenceNode, or possibly a list of SentenceNodes.
+; Each SentenceNode serves as an anchor to all of the parses of a sentence.
+; It is connected via ParseLink's to each of the individual parses of the
+; sentence. This routine backtracks over the ParseAnchor to find these.
 ;
-; Just as an or-map, the recursion will stop if proc returns something
-; other than #f. This routine returns the last value that stopped the
-; recusrsion.
+; The recursion will stop if proc returns something other than #f. This
+; routine returns the last value that stopped the recursion. (In other
+; words, this is not really a map, but something kind-of weird -- XXX
+; this should probably be fixed -- TODO)
 ;
 (define (map-parses proc sent-or-list)
 	(if (list? sent-or-list)
