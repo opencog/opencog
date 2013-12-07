@@ -1,11 +1,20 @@
 ;
 ; nlp-utils.scm
 ;
-; Assorted NLP utilities.
+; Assorted NLP utilities.  These include:
+; -- looping over all sentences in a document
+; -- looping over all parses of a sentence (map-parses)
+; -- looping over all words in a sentence (map-word-node)
+; -- looping over all RelEx relations
+; -- get word of word instance. (word-inst-get-word)
+; -- get part-of-speech, lemma of word.
+; -- get prepositions
+; -- get word senses
+; -- deleting all atoms pertaining to a sentence
 ;
 ; Important Design Note: A long-term goal of NLP within opencog is to
 ; do processing not in scheme, but in OpenCog itself, using pattern
-; matching. The reason fior this is so that we can apply OpenCog leraning
+; matching. The reason for this is so that we can apply OpenCog learning
 ; algos to learn new ways of processing. Many/most of the utilities below
 ; could be implemented by using pattern maching. Code that depends on these
 ; utilities should be converted to use pattern matching as soon as reasonable.
@@ -456,7 +465,10 @@
 
 ; ---------------------------------------------------------------------
 ; Delete atoms that belong to particular sentence instances; we don't
-; want to log up the server with grunge text.
+; want to clog up the atomspace with old junk we don't want any more.
+; XXX In principle, this could be accomplished by lowering the
+; AttentionValue for teh atoms, and letting the ForgettingAgent do its
+; work. In practice, this is too complicated, for now.
 ;
 (define (delete-sentences)
 	(let ((n 0))
