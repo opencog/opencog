@@ -3,8 +3,8 @@
 ;
 ; Utilities for applying different processing steps to input sentences.
 ; These include getting a list of recently parsed sentences, and a 
-; utility to send raw input text to the RelEx parse server, to get the 
-; text parsed.
+; utility to send raw input text to the RelEx parse server, with the 
+; resulting parse inserted into the cogserver atomspace.
 ; 
 ; Copyright (c) 2009 Linas Vepstas <linasvepstas@gmail.com>
 ;
