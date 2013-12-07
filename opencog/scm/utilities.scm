@@ -1,7 +1,12 @@
 ;
 ; utilities.scm
 ;
-; Miscellaneous handy utilities for working with atoms. These include:
+; Miscellaneous handy utilities for working with atoms.
+; The most useful utilities in here are probably 'cog-chase-link'
+; for finding atoms connected by a given link type, and 'cog-get-pred'
+; which is useful for working with EvaluationLink's.
+;
+; Utilities include:
 ; -- abbreviations for working with truth values (stv, ctv, etc.)
 ; -- simple traversal of outgoing set (gar, gdr, etc.)
 ; -- for-each-except loop.
@@ -19,6 +24,8 @@
 ; -- cog-filter-incoming -- filter atoms of given type from incoming set.
 ; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
+; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
+; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
 ; -- cog-get-link -- Get list of links connecting atom to atom type.
@@ -328,8 +335,19 @@
 ; cog-chase-link link-type endpoint-type anchor
 ;
 ; Starting at the atom 'anchor', chase its incoming links of
-; 'link-type', and return a list of all of the 'node-type' in
-; those links.
+; 'link-type', and return a list of all of the atoms of type 
+; 'node-type' in those links. For example, given:
+;
+;    SomeLink
+;        GivenNode "a"
+;        WantedNode  "p"
+;
+;    SomeLink
+;        GivenNode "a"
+;        WantedNode  "q"
+;
+; then this method will return the two WantedNodes's given the
+; GivenNode, and the link-type 'SomeLink.
 ;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
@@ -350,6 +368,87 @@
 	)
 )
 
+; -----------------------------------------------------------------------
+; cog-map-chase-link -- Invoke proc on atom connected through type.
+;
+; Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
+; Starting at the atom 'anchor', chase its incoming links of
+; 'link-type', and call proceedure 'proc' on all of the atoms of
+; type 'node-type' in those links. For example, given:
+;
+;    SomeLink
+;        GivenNode "a"
+;        WantedNode  "p"
+;
+;    SomeLink
+;        GivenNode "a"
+;        WantedNode  "q"
+;
+; then 'proc' will be called twice, with each of the WantedNodes's
+; as the argument. These wanted nodes were found by following the
+; link type 'SomeLink, starting at GivenNode.
+;
+; It is presumed that 'anchor' points to some atom (typically a node),
+; and that it has many links in its incoming set. So, loop over all of
+; the links of 'link-type' in this set. They presumably link to all 
+; sorts of things. Find all of the things that are of 'endpoint-type'.
+; Return a list of all of these.
+;
+(define (cog-map-chase-link link-type endpoint-type proc anchor)
+	(define (get-endpoint w)
+		; cog-filter-map returns the return value from proc, we pass it on
+		; in turn, so make sure this is last statement
+		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
+	)
+	; cog-filter-map returns the return value from proc, we pass it on
+	; in turn, so make sure this is last statement
+	(if (null? anchor)
+		'()
+		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+	)
+)
+
+; -----------------------------------------------------------------------
+; cog-map-chase-links -- Invoke proc on atom connected through type.
+;
+; Same as cog-chase-link, except that the anchor may be a single atom,
+; or it may be a list.
+(define (cog-map-chase-links link-type endpoint-type proc anchor)
+	(if (list? anchor)
+		(map 
+			(lambda (one-of)
+				(cog-map-chase-links link-type endpoint-type proc one-of)
+			)
+		anchor)
+		(cog-map-chase-link link-type endpoint-type proc anchor)
+	)
+)
+
+; -----------------------------------------------------------------------
+; cog-map-chase-links-chk -- Invoke proc on atom connected through type.
+;
+; Same as cog-chase-links, except that the type of the anchor is
+; checked, and an exception thrown if its the wrong type.
+(define (cog-map-chase-links-chk link-type endpoint-type proc anchor anchor-type)
+	(if (list? anchor)
+		; If we are here, then anchor is a list. Recurse.
+		(map 
+			(lambda (one-of)
+				(cog-map-chase-links link-type endpoint-type proc one-of)
+			)
+		anchor)
+		; If we are here, then its a singleton. Verify type.
+		(if (eq? (cog-type anchor) anchor-type)
+			(cog-map-chase-link link-type endpoint-type proc anchor)
+			(throw 'wrong-atom-type 'cog-map-chase-links
+				"Error: expecting atom:" anchor)
+		)
+	)
+)
+
+; -----------------------------------------------------------------------
+; cog-map-chase-link-dbg -- debugging version of cog-map-chase-link
+;
 ; cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor
 ;
 ; Chase 'link-type' to 'endpoint-type' and apply proc to what is found there.
@@ -384,10 +483,6 @@
 		'()
 		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
 	)
-)
-
-(define (cog-map-chase-link link-type endpoint-type proc anchor)
-	(cog-map-chase-link-dbg link-type endpoint-type '() '() proc anchor)
 )
 
 ; -----------------------------------------------------------------------
