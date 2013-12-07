@@ -1,9 +1,32 @@
 ;
 ; utilities.scm
 ;
-; Miscellaneous handy utilities.
+; Miscellaneous handy utilities for working with atoms. These include:
+; -- abbreviations for working with truth values (stv, ctv, etc.)
+; -- simple traversal of outgoing set (gar, gdr, etc.)
+; -- for-each-except loop.
+; -- cog-atom-incr --  Increment count truth value on "atom" by "cnt".
+; -- delete-hypergraph -- delete a hypergraph and everything "under" it.
+; -- delete-type -- delete all atoms of type 'atom-type'.
+; -- clear -- delete all atoms in the atomspace.
+; -- cog-get-atoms -- Return a list of all atoms of type 'atom-type'
+; -- cog-count-atoms -- Count of the number of atoms of given type.
+; -- cog-report-counts -- Return an association list of counts.
+; -- cog-get-partner -- Return other atom of a link conecting two atoms.
+; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
+; -- cog-filter-map -- call proceedure on list of atoms.
+; -- cog-filter -- return a list of atoms of given type.
+; -- cog-filter-incoming -- filter atoms of given type from incoming set.
+; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
+; -- cog-chase-link -- Return other atom of a link conecting two atoms.
+; -- cog-map-chase-link-dbg -- Debugging version of above.
+; -- cog-map-apply-link -- call proc on link between atom and atom type.
+; -- cog-get-link -- Get list of links connecting atom to atom type.
+; -- cog-get-pred -- Find all EvaluationLinks of given form.
+; -- filter-hypergraph -- recursively traverse outgoing links of graph.
+; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ;
-; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ;
 
@@ -136,6 +159,7 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-get-atoms -- Return a list of all atoms of type 'atom-type'
 ;
 ; cog-get-atoms atom-type
 ; Return a list of all atoms in the atomspace that are of type 'atom-type'
@@ -156,6 +180,7 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-count-atoms -- Count of the number of atoms of given type
 ;
 ; cog-count-atoms atom-type
 ; Return a count of the number of atoms of the given type 'atom-type'
@@ -176,8 +201,8 @@
 )
 
 ; -----------------------------------------------------------------------
-; 
-; cog-report-counts
+; cog-report-counts -- Return an association list of counts
+;
 ; Return an association list holding a report of the number of atoms
 ; of each type currently in the atomspace. Counts are included only
 ; for types with non-zero atom counts.
@@ -197,10 +222,14 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-get-partner -- Return other atom of a link conecting two atoms
 ; cog-get-partner pair atom
 ;
 ; If 'pare' is a link containing two atoms, and 'wrd' is one of the
 ; two atoms, then this returns the other atom in the link.
+;
+; See also cog-chase-link which does not require the link to be
+; explicitly specified; instead, only the pare type is needed.
 ;
 (define (cog-get-partner pare atom)
 	(let ((plist (cog-outgoing-set pare)))
@@ -212,6 +241,7 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-pred-get-partner -- Get the partner in an EvaluationLink
 ; cog-pred-get-partner pred atom
 ;
 ; Get the partner to the atom in the opencog predicate.
@@ -234,6 +264,8 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-filter-map -- call proceedure on list of atoms
+;
 ; cog-filter-map atom-type proc atom-list
 ;
 ; Apply the proceedure 'proc' to every atom of 'atom-list' that is
@@ -246,6 +278,9 @@
 ; (cog-filter-map 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
 ; 
 ; See also: cgw-filter-atom-type, which does the same thing, but for wires.
+;
+; XXX TODO This is not really a map, because of the #f behaviour. This
+; should be fixed someday ...
 ;
 (define (cog-filter-map atom-type proc atom-list) 
 	(define rc #f)
@@ -263,18 +298,24 @@
 	)
 )
 
+; cog-filter -- return a list of atoms of given type.
+;
 ; Given a list of atoms, return a list of atoms that are of 'atom-type'
 (define (cog-filter atom-type atom-list) 
 	(define (is-type? atom) (eq? atom-type (cog-type atom)))
 	(filter is-type? atom-list)
 )
 
+; cog-filter-incoming -- filter atoms of given type from incoming set.
+;
 ; Given an atom, return a list of atoms from its incoming set that 
 ; are of type 'atom-type'
 (define (cog-filter-incoming atom-type atom)
 	(cog-filter atom-type (cog-incoming-set atom))
 )
 
+; cog-filter-outgoing -- filter atoms of given type from outgoing set.
+;
 ; Given an atom, return a list of atoms from its outgoing set that 
 ; are of type 'atom-type'
 (define (cog-filter-outgoing atom-type atom)
@@ -282,6 +323,7 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-chase-link -- Return other atom of a link conecting two atoms.
 ;
 ; cog-chase-link link-type endpoint-type anchor
 ;
@@ -391,6 +433,8 @@
 )
 
 ; ---------------------------------------------------------------------
+; cog-get-pred -- Find all EvaluationLinks of given form.
+;
 ; Return a list of predicates, of the given type, that an instance 
 ; participates in.  That is, given a "predicate" of the form:
 ;
@@ -441,6 +485,8 @@
 )
 
 ; ---------------------------------------------------------------------
+; filter-hypergraph -- recursively traverse outgoing links of graph.
+;
 ; filter-hypergraph pred? atom-list
 ;
 ; Given a list of atoms, and a scheme-predicate pred?, return a
@@ -481,8 +527,8 @@
 )
 
 ; --------------------------------------------------------------------
-; cartesian-prod - distribute the Cartesian product across a tuple of sets
-
+; cartesian-prod -- create Cartesian product from tuple of sets.
+;
 ; This returns the Cartestion product of a tuple of sets by distributing
 ; the product across the set elements. Returned is a list of tuples, where
 ; the elements of the tuple are elements from the corresponding sets.
@@ -512,6 +558,9 @@
 ; ((p a x) (q a x) (p a y) (q a y))
 ; guile> (cartesian-prod (list 'a (list 'p 'q) (list 'x 'y)))
 ; ((a p x) (a q x) (a p y) (a q y))
+;
+; XXX TODO -- this would almost surely be simpler to implement using
+; srfi-1 fold or srfi-1 map, which is really all that it is ... 
 ;
 (define (cartesian-prod tuple-of-lists)
 
