@@ -4,7 +4,8 @@
 
 Assorted generic scripts related to NLP processing. These carry out
 common functions, such as sending off raw text to a parser for parsing,
-or, given a parse, getting all of the words in that parse.
+getting all of the words in that parse, and their parts-of-speech,
+lemma forms, the RelEx relations they participate in, etc.
 
 
 OpenCog scripts

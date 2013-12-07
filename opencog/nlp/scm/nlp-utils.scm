@@ -466,8 +466,9 @@
 ; ---------------------------------------------------------------------
 ; Delete atoms that belong to particular sentence instances; we don't
 ; want to clog up the atomspace with old junk we don't want any more.
-; XXX In principle, this could be accomplished by lowering the
-; AttentionValue for teh atoms, and letting the ForgettingAgent do its
+;
+; XXX TODO: In principle, this could be accomplished by lowering the
+; AttentionValue for the atoms, and letting the ForgettingAgent do its
 ; work. In practice, this is too complicated, for now.
 ;
 (define (delete-sentences)
