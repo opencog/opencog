@@ -21,17 +21,8 @@
 ; Code that cannot be converted will eventually (in the distant future ...) 
 ; become obsolete.
 ; 
-; Copyright (c) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; =============================================================
-
-; Right now, every parse of a sentence is anchored to a ParseNode
-(define ParseAnchor 'ParseNode)
-
-; Every word of a parse is a WordInstance node.
-(define WordAnchor 'WordInstanceNode)
-
-
 ; ---------------------------------------------------------------------
 ; map-parses proc sent
 ; Call proceedure 'proc' on every parse of the sentence 'sent' 
@@ -39,7 +30,7 @@
 ; Expected input is a SentenceNode, or possibly a list of SentenceNodes.
 ; Each SentenceNode serves as an anchor to all of the parses of a sentence.
 ; It is connected via ParseLink's to each of the individual parses of the
-; sentence. This routine backtracks over the ParseAnchor to find these.
+; sentence. This routine backtracks over the ParseNode to find these.
 ;
 ; The recursion will stop if proc returns something other than #f. This
 ; routine returns the last value that stopped the recursion. (In other
@@ -47,48 +38,35 @@
 ; this should probably be fixed -- TODO)
 ;
 (define (map-parses proc sent-or-list)
-	(if (list? sent-or-list)
-		(map (lambda (one-sent) (map-parses proc one-sent)) sent-or-list)
-		; if we are here, its not a list.
-		(if (eq? (cog-type sent-or-list) 'SentenceNode)
-			(cog-map-chase-link 'ParseLink ParseAnchor
-				proc sent-or-list
-			)
-			; If we are here, its not a sentence
-			(throw 'wrong-atom-type 'map-parses
-				"Error: expecting SentenceNode" sent-or-list)
-		)
-	)
+	(cog-map-chase-links-chk 'ParseLink 'ParseNode
+		proc sent-or-list 'SentenceNode)
 )
 
 ; ---------------------------------------------------------------------
 ; map-word-instances proc parse
 ; Call proceedure 'proc' on each word-instance of 'parse'
 ;
-; Expected input is a ParseAnchor, which serves as an anchor
-; to all of the word instances in a parse. The ParseAnchor is
-; connnected via a ParseInstanceLink to the individual words.
+; Expected input is a ParseNode or a list of ParseNodes. These serve
+; as anchors to all of the word instances in a parse. The word instances
+; can be found by back-tracking through the WordInstanceLink to the
+; individual words, which is what this method does.
 ; 
-(define (map-word-instances proc parse) 
-	(cog-map-chase-link-dbg 'ParseInstanceLink WordAnchor
-		" --------- parse ------------ \n" ""
-		proc parse
-	)
+(define (map-word-instances proc parse-or-list) 
+	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
+		proc parse-or-list 'ParseNode)
 )
 
 ; ---------------------------------------------------------------------
 ; map-word-node proc word-inst
 ; Call proceedure 'proc' on the word-node associated to 'word-inst'
 ;
-; Expected input is a WordAnchor, which serves as an anchor
-; to a word instance. The WordAnchor is connnected via a ReferenceLink
+; Expected input is a WordInstanceNode, which serves as an anchor
+; to a word instance. The WordInstanceNode is connnected via a ReferenceLink
 ; to the actual word node.
 ;
 (define (map-word-node proc word-inst) 
-	(cog-map-chase-link-dbg 'ReferenceLink 'WordNode 
-		"" ""  ; " --------- word-found ------------ \n"
-		proc word-inst
-	)
+	(cog-map-chase-links-chk 'ReferenceLink 'WordNode
+		proc word-inst 'WordInstanceNode)
 )
 
 ; ---------------------------------------------------------------------
