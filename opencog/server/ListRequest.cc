@@ -56,15 +56,26 @@ bool ListRequest::execute()
     AtomSpace& as = _cogserver.getAtomSpace();
     std::ostringstream err;
 
+    if (0 == _parameters.size()) {
+        _error << "Error: option required" << std::endl;
+        sendError();
+        return false;
+    }
+
     std::list<std::string>::const_iterator it;
     for (it = _parameters.begin(); it != _parameters.end(); ++it) {
-        if (*it == "-h") { // filter by handle
+        if (*it == "-a") { // list everything
+            type = NOTYPE;
+            handle = Handle::UNDEFINED;
+            subtypes = false;
+            break;
+        } else if (*it == "-h") { // filter by handle
             ++it;
             if (it == _parameters.end()) return syntaxError();
             UUID uuid = strtol((*it).c_str(), NULL, 0);
             handle = Handle(uuid);
             if (!as.isValidHandle(handle)) {
-                _error << "invalid handle" << std::endl;
+                _error << "Error: Invalid handle" << std::endl;
                 sendError();
                 return false;
             }
@@ -78,7 +89,7 @@ bool ListRequest::execute()
             if (it == _parameters.end()) return syntaxError();
             type = classserver().getType((*it).c_str());
             if (type == NOTYPE) {
-                _error << "invalid type" << std::endl;
+                _error << "Error: Invalid type" << std::endl;
                 sendError();
                 return false;
             }
@@ -92,6 +103,10 @@ bool ListRequest::execute()
                 return false;
             }
             subtypes = true;
+        } else {
+            _error << "Error: unknown option \"" << *it <<"\"" << std::endl;
+            sendError();
+            return false;
         }
     }
     if (name != "" && type != NOTYPE) { // filter by name & type
@@ -129,5 +144,12 @@ void ListRequest::sendError()
     if (_mimeType != "text/plain")
         throw RuntimeException(TRACE_INFO, "Unsupported mime-type: %s",
                 _mimeType.c_str());
+    _error << "Supported options:" << std::endl;
+    _error << "-a          List all atoms" << std::endl;
+    _error << "-h handle   List given handle" << std::endl;
+    _error << "-n name     List all atoms with name" << std::endl;
+    _error << "-t type     List all atoms of type" << std::endl;
+    _error << "-T type     List all atoms with type or subtype" << std::endl;
+    _error << "Options may be combined" << std::endl;
     send(_error.str());
 }

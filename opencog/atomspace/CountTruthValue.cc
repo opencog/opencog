@@ -87,7 +87,7 @@ confidence_t CountTruthValue::getConfidence() const
 std::string CountTruthValue::toString() const
 {
     char buf[1024];
-    sprintf(buf, "[%f,%f,%f]",
+    sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(getMean()),
             static_cast<float>(getCount()),
             static_cast<float>(getConfidence()));
