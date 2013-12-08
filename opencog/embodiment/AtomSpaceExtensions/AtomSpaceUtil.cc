@@ -942,7 +942,7 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
-            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+//            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
 
     // Run pattern matcher
@@ -995,7 +995,7 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
 
-            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
+//            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
 
     // Run pattern matcher
