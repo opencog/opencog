@@ -55,10 +55,15 @@
 
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
-(define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
-(define (gdr x) (if (cog-atom? x) (cdr (cog-outgoing-set x)) (cdr x)))
-(define (gadr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cadr x)))
-(define (gaddr x) (if (cog-atom? x) (caddr (cog-outgoing-set x)) (caddr x)))
+; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
+; (define (gdr x) (if (cog-atom? x) (cadr (cog-outgoing-set x)) (cdr x)))
+
+(define (gar x) (car (cog-outgoing-set x)) )
+(define (gdr x) (cadr (cog-outgoing-set x)) )
+(define (gadr x) (gar (gdr x)) ) 
+(define (gddr x) (gdr (gdr x)) )
+(define (gaddr x) (gar (gddr x)) )
+(define (gdddr x) (gdr (gddr x)) )
 
 ; A more agressive way of doing the above:
 ; (define car (let ((oldcar car)) (lambda (x) (if (cog-atom? x) (oldcar (cog-outgoing-set x)) (oldcar x)))))
