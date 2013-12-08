@@ -1,10 +1,11 @@
 This package is useful for mapping ConceptNet assertions into OpenCog atoms. For example, the
 ConceptNet relation 'IsA' ( denoted on the csv file as /r/IsA/) is mapped to 'InheritanceLink',
-because their meanings are the same. Simillarily other relation can be mapped to OpenCog links 
-by adding them to map_dict variable in the to_scm.py module. For ConceptNet relations that 
-don't have an equivalent OpenCog links, an EvaluationLink is used. In some cases a relation maybe mapped to more than one links. 
+because their meanings are the same. Similarly, other relations can be mapped to OpenCog links 
+by adding them to the map_dict variable in the to_scm.py module. For ConceptNet relations that 
+don't have an equivalent OpenCog link, an EvaluationLink is used. In some cases a relation may
+be mapped to more than one link. 
 
-The follwing is a list of ConceptNet relation to OpenCog link mappings,
+The following is a list of ConceptNet relation to OpenCog link mappings:
 	1. ConceptuallyRelatedTo -> IntensionalSimilarityLink
 	2. ThematicKLine -> IntensionalSimilarityLink
 	3. SuperThematicKLine -> IntensionalInheritanceLink
@@ -34,15 +35,18 @@ The follwing is a list of ConceptNet relation to OpenCog link mappings,
         26. AtLocation -> EvaluationLink AtLocation
                 
 
-Procedure to create a scheme data file from conceptnet csv files:
+Procedure to create a scheme data file from the original conceptnet csv files:
 1. Download the current csv tar ball from http://conceptnet5.media.mit.edu/downloads/current/
 2. Extract the tarball contents into this folder 
 3. run to_scm.py from the terminal
 
 Notes:
-1. The test files used can be found at https://github.com/opencog/test-datasets/tree/master/conceptnet 
-2. Corpus = The word frequency csv file used to claculate the term probabilities. (60000_Word_Freqs.csv)
-3. The scheme file is outputed in the same folder 
+1. Instead of downloading and extracting the original files as in the above instructions, you
+can also use the prepared test files, which can be found at:
+https://github.com/opencog/test-datasets/tree/master/conceptnet
+which includes the preprocessed output in conceptnet4.scm
+2. Corpus = The word frequency csv file used to calculate the term probabilities. (60000_Word_Freqs.csv)
+3. The scheme file is output in the same folder 
 
 Example Inputs(conceptnet URI) and corresponding outputs:
 1.

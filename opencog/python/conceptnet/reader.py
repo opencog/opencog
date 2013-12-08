@@ -1,6 +1,6 @@
 __author__ = 'Amen Belayneh'
 
-# This code is used to read the relations from a coceptnet dump, and
+# This code is used to read the relations from a conceptnet dump, and
 # return a container containing a list of lists of the relations
 
 
