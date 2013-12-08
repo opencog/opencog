@@ -249,9 +249,10 @@
 
 ; -----------------------------------------------------------------------
 ; cog-pred-get-partner -- Get the partner in an EvaluationLink
+;
 ; cog-pred-get-partner pred atom
 ;
-; Get the partner to the atom in the opencog predicate.
+; Get the partner to the atom 'atom' in the opencog predicate 'pred'.
 ; An opencog predicate is assumed to be structured as follows:
 ;
 ;    EvaluationLink
@@ -261,8 +262,8 @@
 ;            AnotherAtom  "some other atom"
 ;
 ; Assuming this structure, then, given the top-level link, and one
-; of the two atoms in the ListLink, then return the other atom in the
-; listLink.
+; of the two atoms in the ListLink, this routine returns the other
+; atom in the listLink.
 ;
 (define (cog-pred-get-partner rel atom)
 	; The 'car' appears here because 'cog-filter-outgoing' is returning
@@ -537,11 +538,11 @@
 ;       SomeAtom
 ;       ListLink
 ;           AnotherAtom "abc"
-;           AnotherAtom "def"
+;           GivenAtom "def"
 ;
-; then given the instance (AnotherAtom "def") and pred-type 'SomeAtom
-; then return a list of all of the EvalutaionLink's in which this
-; instance appears.
+; then, given the instance 'inst' (in this example, GivenAtom "def")
+; and predicate type 'pred-type' 'SomeAtom, then this routine returns
+; a list of all of the EvalutaionLink's in which 'inst' appears.
 ;
 (define (cog-get-pred inst pred-type)
 	(concatenate!

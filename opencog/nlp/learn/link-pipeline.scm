@@ -27,7 +27,25 @@
 
 ; (map-parses prt (get-new-parsed-sentences))
 
-(map-parses
-	(lambda (parse) (map-word-instances prt parse))
+; ---------------------------------------------------------------------
+; map-lg-links -- loop over all link-grammar links in sentences.
+;
+; Note -- as currently written, this double-counts.
+(define (map-lg-links proc sent-list)
+	(map-parses
+		(lambda (parse)
+			(map-word-instances
+				(lambda (word-inst)
+					(proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
+				)
+				parse
+			)
+		)
+		sent-list
+	)
+)
+
+; ---------------------------------------------------------------------
+(map-lg-links prt
 	(get-new-parsed-sentences)
 )
