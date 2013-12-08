@@ -8,17 +8,19 @@
 ; Look for new sentences, count the links in them.
 
 
+; Notes:
 ; (get-new-parsed-sentences) returns the sentences
 ; (release-new-parsed-sents) gets rid of the attachment.
 ; delete-hypergraph
 ; cog-atom-incr
 
 ; Plan of attack:
-; get parses, get links between paris of words, increment counts, store.
+; -- get parses, 
+; -- crawl parses to extract lg-links between pairs of words,
+; -- pull matching pairs from sql
+; -- increment counts on pairs
+; -- store back into sql.
 ;
-
-(define (prt x) (begin (display x) #f))
-
 ; ---------------------------------------------------------------------
 ; map-lg-links -- loop over all link-grammar links in sentences.
 ;
@@ -37,7 +39,10 @@
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
-					(proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
+					(begin
+						(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
+						#f
+					)
 				)
 				parse
 			)
@@ -46,6 +51,11 @@
 	)
 )
 
+; Unit test:
+; 
+; (define (prt x) (begin (display x) #f))
+; (map-lg-links prt (get-new-parsed-sentences))
+;
 ; ---------------------------------------------------------------------
 ; make-lg-rel -- create a word-relation from a word-instance relation
 ;
@@ -76,8 +86,14 @@
 	)
 )
 
-(prt (make-lg-rel x))
+; ---------------------------------------------------------------------
 
+(map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
+	(get-new-parsed-sentences)
+)
+(map-lg-links (lambda (x) (prt (make-lg-rel x)))
+	(get-new-parsed-sentences)
+)
 (map-lg-links prt
 	(get-new-parsed-sentences)
 )

@@ -33,8 +33,8 @@
 ; -- filter-hypergraph -- recursively traverse outgoing links of graph.
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ;
-; Copyright (c) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
+; Copyright (c) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
 (use-modules (srfi srfi-1))
