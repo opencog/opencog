@@ -24,24 +24,37 @@ To run this test, perform the following steps:
 
     $ createdb test-persist
 
-2d) Create a database user named opencog_tester with password 'cheese'.
+2d) If you get an error from the above, about missing createdb permissions,
+    Try doing this:
+
+    $ psql -c "ALTER USER <your-unix-username> WITH PASSWORD 'asdf'" -d template1
+
+    Substitute your unix username and some appropriate password; it
+    should NOT be your unix login password.  If this doesn't work, try
+    logging in as postgres, i.e. 
+
+    $ su - postgres; createuser <username> 
+
+    Also, you may need to edit pg_hba.conf. Google for additional help.
+
+2e) Create a database user named opencog_tester with password 'cheese'.
     You can pick a different username and password, but it must be
     consistent with the ~/.odbc.ini file. Do NOT use your login password!
     Pick something else! Create the user at the shell prompt:
 
     $ psql -c "CREATE USER opencog_tester WITH PASSWORD 'cheese'" -d test-persist
 
-2e) Check that the above worked, by manually logging in:
+2f) Check that the above worked, by manually logging in:
 
     $  psql test-persist -U opencog_tester -W -h localhost
 
     If you can't login, something up above failed.
 
-2f) Initialize the test database by creating tables. Do this with:
+2g) Initialize the test database by creating tables. Do this with:
 
     $ cat opencog/persist/sql/atom.sql | psql test-persist -U opencog_tester -W -h localhost
 
-2g) Verify that the tables were created. Login as before, then enter \d
+2h) Verify that the tables were created. Login as before, then enter \d
     at the postgres prompt.  You should see this:
 
     test-persist=> \d
@@ -56,7 +69,7 @@ To run this test, perform the following steps:
 
     If the above doesn't work, go back, and try again.
 
-2h) Verify that opencog_tester has write permissions to the tables. Do
+2i) Verify that opencog_tester has write permissions to the tables. Do
     this by entering the below.
 
     test-persist=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
@@ -67,7 +80,7 @@ To run this test, perform the following steps:
 
     If the above doesn't work, go back, and try again.
 
-2i) Edit ~/.odbc.ini and add something similar to the below. Pay special
+2j) Edit ~/.odbc.ini and add something similar to the below. Pay special
     attention to the username, the password, and the name of the database
     to connect to.
 
@@ -89,7 +102,7 @@ To run this test, perform the following steps:
     FakeOidIndex      = Yes
     ConnSettings      =
 
-2j) Edit lib/opencog-test.conf and verify that the username and password
+2k) Edit lib/opencog-test.conf and verify that the username and password
     are set as above.
 
 3) Run the test case:
