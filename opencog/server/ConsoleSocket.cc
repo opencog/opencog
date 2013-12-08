@@ -114,6 +114,20 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     CogServer& cogserver = static_cast<CogServer&>(server());
     _request = cogserver.createRequest(cmdName);
+
+    // If the command starts with an open-paren, assume its
+    // a scheme command. Pop into the scheme shell, and try again.
+    if (_request == NULL and cmdName[0] == '(') {
+        OnLine("scm");
+
+        // Re-issue the command, but only if we sucessfully got a shell.
+        if (_shell) {
+            OnLine(line);
+            return;
+        }
+    }
+
+    // Command not found.
     if (_request == NULL) {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
