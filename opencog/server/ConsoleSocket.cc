@@ -154,6 +154,10 @@ void ConsoleSocket::OnLine(const std::string& line)
 
         if (_request->isShell()) {
             logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
+
+            // Use a stupid trick to deal with poor architecture.
+#define SECRET_HANDSHAKE ((Request*) 0x1)
+            _request = SECRET_HANDSHAKE;
             // Force a drain of this request, because we *must* enter
             // shell mode before handling any additional input from the
             // socket (since the next input is almost surely intended for
@@ -221,7 +225,7 @@ void ConsoleSocket::OnRequestComplete()
     logger().debug("[ConsoleSocket] OnRequestComplete");
 
     // Shells will send their own prompt
-    if (NULL == _request or not _request->isShell()) {
+    if (_request != SECRET_HANDSHAKE) {
         sendPrompt();
     }
 }

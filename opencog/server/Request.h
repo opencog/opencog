@@ -158,7 +158,7 @@ class CogServer;
                  "opencog::" #mod_type));                             \
                                                                       \
         std::string rs = mod->do_cmd(this, _parameters);              \
-        oss << rs << std::endl;                                       \
+        oss << rs;                                                    \
                                                                       \
         if (_mimeType == "text/plain")                                \
             send(oss.str());                                          \
@@ -271,7 +271,7 @@ public:
     virtual bool execute(void) = 0;
 
     /** Abstract method for telling if the Request if for entering a shell*/
-    virtual bool isShell(void) { return false; }
+    virtual bool isShell(void) = 0;
 
     /** Send the command output back to the client. */
     virtual void send(const std::string& msg) const;
