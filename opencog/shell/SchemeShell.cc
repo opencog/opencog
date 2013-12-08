@@ -22,6 +22,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/guile/SchemeEval.h>
@@ -43,7 +44,13 @@ using namespace opencog;
 SchemeShell::SchemeShell(void)
 {
 	show_output = true;
+
 	normal_prompt = "guile> ";
+	if (config().get_bool("ANSI_ENABLED"))
+		normal_prompt = config()["ANSI_SCM_PROMPT"];
+	else
+		normal_prompt = config()["SCM_PROMPT"];
+
 	pending_prompt = "... ";
 	abort_prompt = "asdf";
 	abort_prompt[0] = IAC;

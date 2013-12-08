@@ -71,8 +71,10 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 
 	if (hush) return "";
 
-	return "Entering scheme shell; use ^D or a single . on a "
-	       "line by itself to exit.";
+	std::string rv =
+		"Entering scheme shell; use ^D or a single . on a "
+		"line by itself to exit.\n" + sh->get_prompt();
+	return rv;
 }
 
 std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args)

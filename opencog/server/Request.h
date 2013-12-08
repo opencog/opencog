@@ -271,7 +271,7 @@ public:
     virtual bool execute(void) = 0;
 
     /** Abstract method for telling if the Request if for entering a shell*/
-    virtual bool isShell(void) = 0;
+    virtual bool isShell(void) { return false; }
 
     /** Send the command output back to the client. */
     virtual void send(const std::string& msg) const;

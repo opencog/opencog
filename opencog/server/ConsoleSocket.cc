@@ -106,6 +106,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
+        _request = NULL;
         OnRequestComplete();
         return;
     }
@@ -217,7 +218,11 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
 void ConsoleSocket::OnRequestComplete()
 {
     logger().debug("[ConsoleSocket] OnRequestComplete");
-    sendPrompt();
+
+    // Shells will send their own prompt
+    if (NULL == _request or not _request->isShell()) {
+        sendPrompt();
+    }
 }
 
 void ConsoleSocket::SetDataRequest()

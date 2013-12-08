@@ -39,7 +39,7 @@ Request::~Request()
     logger().debug("[Request] destructor");
     if (_requestResult) {
         _requestResult->OnRequestComplete();
-        _requestResult->put();  // dec use count we are doe with it.
+        _requestResult->put();  // dec use count we are done with it.
     }
 }
 
