@@ -87,6 +87,17 @@
 )
 
 ; ---------------------------------------------------------------------
+; Process sentences:
+; pick up from anchor, increment, save.
+
+(define (process-sents sents)
+	(begin
+		(map-lg-links
+			(lambda (link) (cog-atom-incr (make-lg-rel link) 1))
+		)
+	)
+)
+	
 
 (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
 	(get-new-parsed-sentences)

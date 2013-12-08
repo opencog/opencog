@@ -325,7 +325,7 @@ The typical nuber of atoms stored will differ from this.
 
 
 How To Pass the Unit Test
--------------------------
+=========================
 There is a unit test for this API.  It is called BasicSaveUTest, and
 is disabled by default, because it requires the above complicated setup.
 Please run this test.  To do this:
@@ -358,6 +358,10 @@ Unit Test Status
 As of 2011-04-29 bzr revision 5314, BasicSaveUTest (still) passes.
 As of 2013-11-26 BasicSaveUTest works and passes, again.
 
+
+Using the System
+================
+Some example walkthroughs of some typical usage scenarios.
 
 Bulk Save and Restore
 ---------------------
@@ -461,6 +465,9 @@ which returns the UUID:
     guile> (cog-handle y)
     2
 
+Using SQL Persistence from Scheme
+---------------------------------
+
 
 Copying Databases
 -----------------
@@ -474,13 +481,14 @@ That's all!
 
 
 Experimental Diary & Results
-----------------------------
+============================
+Diary entries from June 2008
 
 Store performance
 -----------------
 This section reviews the performance for storage of data from opencog
 to the SQL server (and thence to disk).  Performed in 2008, on a typical
-Intel desktop that was new in 2004. Viz a few GhZ, and 4GB RAM/
+Intel desktop that was new in 2004. Viz. under two GhZ, and 4GB RAM.
 
 First run with a large data set (save of 1564K atoms to the database)
 was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
