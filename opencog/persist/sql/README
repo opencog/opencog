@@ -53,18 +53,18 @@ The goal of this implementation is to:
    instance.  This opens the door to distributed OpenCog.
 
 3) Make sure that the opencog core design is amenable to incremental,
-   just-in-time data persistence; that is, the fetching of data 
+   just-in-time data persistence; that is, the fetching of data
    as it is needed, and saving it away when its not needed. This
    requires an infrastructure for attention allocation (atoms
    that don't get attention can be saved away to disk, while those
-   that are needed are fetched on demand.) This will also require 
+   that are needed are fetched on demand.) This will also require
    infrastructure for locks, use counts, etc. that are typical
-   of multi-threaded programming.  This prototype should lay the 
-   foundations for more sophisticated schemes (non-SQL-based) 
+   of multi-threaded programming.  This prototype should lay the
+   foundations for more sophisticated schemes (non-SQL-based)
    to take its place.  This architectural work is inherently difficult,
    and is ongoing.
 
-4) Provide a baseline/reference implementation by which other 
+4) Provide a baseline/reference implementation by which other
    persistence designs can be measured. It is hoped that other systems
    would be at least as fast and as scalable as this one is: this is
    meant to provide a minimal function and performance level. The
@@ -74,28 +74,28 @@ The goal of this implementation is to:
 5) A non-design-goal (at this time) is to build a system that can scale
    to more than 100 cogserver instances.  The current design might be
    able to scale to this many, but almost surely not more.  Scaling
-   larger than this would probably require a fundamental redesign of 
+   larger than this would probably require a fundamental redesign of
    all of opencog, starting with the atomspace.
 
 
 Current Design
 ==============
 The core design defines only a few very simple SQL tables, and some
-simple readers and writers to save and restore atoms from an SQL 
+simple readers and writers to save and restore atoms from an SQL
 database.
 
-Note that the core design does *not* make use of object reflection, 
-nor can it store arbitrary kinds of objects. It is very definitely 
-hard-wired. Yes, this can be considered to be a short-coming. 
-A more general, persistent object framework (for C) can be found 
+Note that the core design does *not* make use of object reflection,
+nor can it store arbitrary kinds of objects. It is very definitely
+hard-wired. Yes, this can be considered to be a short-coming.
+A more general, persistent object framework (for C) can be found
 at http://estron.alioth.debian.org/  However, simplicity, at the
 cost of missing flexibility, seems more important.
 
 The current design can save/restore individual atoms, and it can
 bulk-save/bulk-restore the entire contents of an AtomTable.
-A semi-realized goal of the prototype is to implement incremental save 
+A semi-realized goal of the prototype is to implement incremental save
 and restore -- that is, to fetch atoms in a "just in time" fashion, and
-to save away atoms that are not needed in RAM (e.g. atoms with 
+to save away atoms that are not needed in RAM (e.g. atoms with
 low/non-existent attention values). The AtomSpace BackingStore provides
 the current, minimalistic, low-function API for this.
 
@@ -112,6 +112,14 @@ can lead to inefficiendies. If an atom is going to have a short life, it
 would be pointless to save it to disk. Fetching atoms only when they are
 needed, instead of fetching them earlier, can lead to bottlenecks and
 stalls.  All this remains an open problem.
+
+The current design avoids UUID collisions, and automatically thunks
+UUID's as needed if an accidental collision with the database occurs.
+In order to avoid excess thunking, it is strongly recommended that
+the SQL database should be opened immediately on cogserver start, before
+any atoms are created.  This will automatically reserve the range of
+UUID's that are stored in the DB, and thus avoid collisions as new atoms
+are created.
 
 
 Install, Setup and Usage HOWTO
@@ -147,12 +155,12 @@ Configure the ODBC driver. After install, edit (as root) /etc/odbcinst.ini
 and put the stanza below into it. Notice that it uses the Unicode drivers,
 and NOT the ANSI (ASCII) drivers.  Opencog uses unicode!.
 
-[PostgreSQL]
-Description = PostgreSQL ODBC driver (Unicode version)
-Driver      = psqlodbcw.so
-Setup       = libodbcpsqlS.so
-Debug       = 0
-CommLog     = 0
+    [PostgreSQL]
+    Description = PostgreSQL ODBC driver (Unicode version)
+    Driver      = psqlodbcw.so
+    Setup       = libodbcpsqlS.so
+    Debug       = 0
+    CommLog     = 0
 
 The above stanza associates the name 'PostgreSQL' with a particular
 driver; this name is needed below.  MySQL users need the stanza below;
@@ -161,12 +169,12 @@ a file can safely contain may stanzas defining many different drivers.
 WARNING: MySQL is currently not supported. Anyway, if you wanted to mess
 with it, then add the below:
 
-[MySQL]
-Description = MySQL driver
-Driver      = libmyodbc.so
-Setup       = libodbcmyS.so
-CPTimeout   =
-CPReuse     =
+    [MySQL]
+    Description = MySQL driver
+    Driver      = libmyodbc.so
+    Setup       = libodbcmyS.so
+    CPTimeout   =
+    CPReuse     =
 
 
 Performance tweaks
@@ -175,7 +183,7 @@ The Postgres default configuration needs to be tweaked for performance.
 Failure to do this will result in disastrous load and store times.
 (The notes below date to 2008; perhaps things have changed?)
 
-Edit postgresql.conf (a typical location is 
+Edit postgresql.conf (a typical location is
 /etc/postgresql/8.4/main/postgresql.conf) and make the following changes:
 
    shared_buffers = default was 32MB, change to 25% of install RAM
@@ -192,7 +200,9 @@ usage has been exceeded. This can be fixed by:
 
    vi /etc/sysctl.conf
    kernel.shmmax = 440100100
-(save file contents, then)
+
+save file contents, then:
+
    sysctl -p /etc/sysctl.conf
 
 
@@ -210,24 +220,21 @@ So, at the Unix command line:
 
    $ createdb mycogdata
 
-If you don't have createdb permissions, try doing this:
+If you get an error message "FATAL:  role "<user>" does not exist", then
+try doing this:
 
-   $ psql -c "ALTER USER <your-unix-username> WITH PASSWORD 'asdf'" -d template1
+   $ su - postgres; createuser <your-unix-username>
 
-Substitute your unix username and some appropriate password; it should
-NOT be your unix login password.  If this doesn't work, try logging
-in as postgres, i.e. 
-
-   $ su - postgres; createuser <username>
-
-Also, you may need to edit pg_hba.conf. Google for additional help.
+Answer the question (yes, you want to be superuser) and exit.
+Under rare circumstances, you may need to edit pg_hba.conf. Google for
+additional help.
 
 Next, create a database user named opencog_user with password 'cheese'.
 You can pick a different username and password, but it must be consistent
 with the ~/.odbc.ini file. Do NOT use your login password!  Pick something
 else! Create the user at the shell prompt:
 
-   $ psql -c "CREATE USER opencog_useer WITH PASSWORD 'cheese'" -d mycogdata
+   $ psql -c "CREATE USER opencog_user WITH PASSWORD 'cheese'" -d mycogdata
 
 Check that the above worked, by manually logging in:
 
@@ -244,7 +251,7 @@ at the postgres prompt.  You should see this:
 
     mycogdata=> \d
                   List of relations
-     Schema |   Name    | Type  |     Owner      
+     Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
      public | edges     | table | opencog_user
@@ -254,7 +261,7 @@ at the postgres prompt.  You should see this:
 
 If the above doesn't work, go back, and try again.
 
-Verify that opencog_user has write permissions to the tables. Do this 
+Verify that opencog_user has write permissions to the tables. Do this
 entering the below.
 
     mycogdata=> INSERT INTO TypeCodes (type, typename) VALUES (97, 'SemanticRelationNode');
@@ -291,7 +298,7 @@ name of the database to connect to.
    FakeOidIndex      = Yes
    ConnSettings      =
 
-Be sure to adjust the username and passwd appropriately.  
+Be sure to adjust the username and passwd appropriately.
 
 
 Opencog Setup
@@ -301,6 +308,20 @@ same values as in ~/.odbc.ini.  Better yet, copy lib/opencog.conf to
 your build directory, edit the copy, and start the opencog server as:
 
    $ ./opencog/server/cogserver -c my.conf
+
+Verify that everything works. Start the cogserver, and bulk-save:
+
+   $ telnet localhost 17001
+   opencog> sql-open mycogdata opencog_user cheese
+   Opened "mycogdata" as user "opencog_user"
+
+   opencog> sql-store
+   
+Some output should be printed in the cogserver window: 
+   Max UUID is 278
+   Finished storing 277 atoms total.
+
+The typical nuber of atoms stored will differ from this.
 
 
 How To Pass the Unit Test
@@ -317,11 +338,11 @@ Please run this test.  To do this:
     they call for a test user to be set up. You can do that, or you
     can use yor current DB user.
  -- To compile and run:
-    $ make test 
+    $ make test
 
 So here's a super-short recap:
 
- -- Create a new database: e.g. 
+ -- Create a new database: e.g.
         $ createdb opencog-test
  -- Create the tables:
         $ cat atom.sql | psql opencog-test
@@ -357,27 +378,27 @@ commands:
     opencog> sql-store
     SQL data store thread started
 
-at this point, a progress indicator will be printed by the opencog 
+At this point, a progress indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 
     opencog> sql-close
 
-Next time, you can load the data with:
+At this point, the cogserver can be stopped and restarted.  After a
+restart, load the data with:
 
-    opencog> sql-open nlp linas asdf
+    opencog> sql-open mycogdata opencog_user cheese
     opencog> sql-load
     SQL loader thread started
 
 The completion message will be on the server output, for example:
 
-    Finished loading 973300 atoms in total 
+    Finished loading 973300 atoms in total
 
 
 Individual-atom save and restore
 --------------------------------
-There is a (prototype) interface to save and restore individual atoms. 
-(It is a prototype, since the details are subject to change). It may be
+There is an interface to save and restore individual atoms. It may be
 used as follows:
 
 Start the server:
@@ -386,27 +407,27 @@ Start the server:
 Open a shell:
     $ telnet localhost 17001
     Trying 127.0.0.1...
-    opencog>  sql-open triples linas asdf
-    database opened
+    opencog> sql-open mycogdata opencog_user cheese
+    Database opened
     opencog> scm
     Entering scheme shell; use ^D or a single . on a line by itself to exit.
     guile> (define x (ConceptNode "asdfasdf" (stv 0.123 0.789)))
     guile> (store-atom x)
-    #t
+    (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 
 The above will have caused a single atom to be stored in the database.
 It's presence can be verified by examining the database directly:
 
-    $ psql triples
+    $ psql mycogdata
     Welcome to psql 8.3.6, the PostgreSQL interactive terminal.
-    triples=# select * from atoms;
-     uuid | type | tv_type | stv_mean | stv_confidence | stv_count | height |   name   | outgoing 
+    mycogdata=# select * from atoms;
+     uuid | type | tv_type | stv_mean | stv_confidence | stv_count | height |   name   | outgoing
     ------+------+---------+----------+----------------+-----------+--------+----------+----------
-        2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf | 
+        2 |    3 |       1 |    0.123 |     0.78899997 | 2991.4688 |      0 | asdfasdf |
     (1 row)
 
 The backing-store mechanism can now automatically retrieve this atom at
-a later time.  Thus, for example, shut down the server, restart it, 
+a later time.  Thus, for example, shut down the server, restart it,
 re-open the database, and enter the scheme shell again. Then,
 
     guile> (define y (ConceptNode "asdfasdf"))
@@ -433,7 +454,7 @@ remain in storage, and can be recreated at will:
     guile> y
     (ConceptNode "asdfasdf" (stv 0.123 0.78899997))
 
-The UUID associated with the atom will not change between deletions
+The UUID associated with the atom will NOT change between deletions
 and server restarts. This can be verified with the cog-handle command,
 which returns the UUID:
 
@@ -443,13 +464,14 @@ which returns the UUID:
 
 Copying Databases
 -----------------
-Sooner or later you will want to make a copy of your database, for 
-backup purposes, or sharing. Here's the current 'best practices' for 
+Sooner or later you will want to make a copy of your database, for
+backup purposes, or sharing. Here's the current 'best practices' for
 that:
 
-   $ pg_dump triples
+   $ pg_dump mycogdata
 
 That's all!
+
 
 Experimental Diary & Results
 ----------------------------
@@ -457,7 +479,8 @@ Experimental Diary & Results
 Store performance
 -----------------
 This section reviews the performance for storage of data from opencog
-to the SQL server (and thence to disk).
+to the SQL server (and thence to disk).  Performed in 2008, on a typical
+Intel desktop that was new in 2004. Viz a few GhZ, and 4GB RAM/
 
 First run with a large data set (save of 1564K atoms to the database)
 was a disaster.  Huge CPU usage, with 75% of CPU usage occurring in the
@@ -467,7 +490,7 @@ kernel block i/o layer, and 12% each for the opencog and postgres times:
    1937576 - 1088032 kB = 850MBytes disk use
 
 Experiment: is this due to the bad design for trying to figure whether
-"INSERT" or "UPDATE" should be used? A local client-side cache of the 
+"INSERT" or "UPDATE" should be used? A local client-side cache of the
 keys in the DB seems to change little:
 
    CPU usage for postgres 11:04  and opencog 10:40 and 112:30 for md
@@ -506,7 +529,7 @@ after loading all atoms, rebuild the index. This time, get
    cogserver = 5:49 mins = 0.227 millisecs/atom (4.40K atoms/sec)
    postgres  = 4:50 mins = 0.189 millisecs/atom (5.30K atoms/sec)
 
-Try again, this time with in-line outgoing sets. This improves 
+Try again, this time with in-line outgoing sets. This improves
 performance even further:
 
    cogserver = 2:54 mm:ss = 0.113 millisecs/atom (8.83K atoms/sec)
@@ -517,14 +540,14 @@ no indexes on it (and with in-line outgoing sets):
    cogserver = 2:40 mm:ss
    postgres  = 2:16 mm:ss
 
-Try again, compiled with -O3, storing to empty table, while holding 
+Try again, compiled with -O3, storing to empty table, while holding
 the index on tables (and with in-line outgoing sets).
 
    cogserver = 2:51 mm:ss
    postgres  = 2:06 mm:ss
 
 Apparently, the problem with the indexes has to do with holding them
-for the edge table; when there's no edge table, then there's no index 
+for the edge table; when there's no edge table, then there's no index
 issue!?
 
 Try again, compiled with -O3, saving to (updating) a *full* database.
@@ -539,7 +562,7 @@ index tables (and -O3 and in-lined outgoing):
 
 It appears that UnixODBC is essentially identical to iODBC performance
 
-begin; commit;  
+begin; commit;
 use analyze;
 use prepare;
 
@@ -578,7 +601,7 @@ After a cold start, have
 Appears that there is no performance degradation for cold-starts.
 
 Note also: cogServer CPU usage is *identical* to its CPU usage when
-loading XML! Hurrah! Also, see below: RAM usage is significantly 
+loading XML! Hurrah! Also, see below: RAM usage is significantly
 reduced; apparently, the reading of XML results in very bad memory
 fragmentation.
 
@@ -588,7 +611,7 @@ Implement in-line edges, instead of storing edges in an outboard table.
   postgres  =  7 seconds =  4.56 microsecs/atom (219K atoms/sec)
 
 Turn on -O3 optimization during compile ... all previous figures
-were without *any* optimization. Now get 
+were without *any* optimization. Now get
 
   cogserver = 24 seconds = 15.6 microsecs/atom (64.0K atoms/sec)
   postgres  = 11 seconds
@@ -603,7 +626,7 @@ Evidence of severe memory fragmentation
 ---------------------------------------
 loading 1536K Atoms from XML results in cogserver using 1210 MBytes ram.
 loading 1536K Atoms from SQL results in cogserver using 633 MBytes ram.
-loading 1536K Atoms from SQL (with new record management) results in 
+loading 1536K Atoms from SQL (with new record management) results in
 cogserver using 442 MBytes ram.
 
 Almost one-third the ram !!
@@ -611,67 +634,24 @@ Almost one-third the ram !!
 The fragmentation occurs when the XML is piped to cogserver much faster
 than the cogserver can process it; the fragmentation is between data
 buffered from the sockets, and the cogserver itself.  The fragmentation
-does *not* occur when the data is piped in more slowly,i.e. at the same 
+does *not* occur when the data is piped in more slowly,i.e. at the same
 rate that opencog processes it. Alternately, the problem may be a memory
 leak in CSockets; I think this is the true culprit, but that's not yet
 clear.
 
 
-UUID Collision
---------------
-Suppose a database contains atoms with uuids from 1 to 1000.  Suppose a
-user starts opencog, creates 250 atoms (thus using uuids from 1 to 251),
-and then opens the database.  Unless the atoms that the user created
-are *identical* to those with uuids 1..251 in the DB, then there will
-be a uuid clash with the current design.
-
-There are several possible solutions:
-
-A) Do nothing. (i.e. keep things the way they are today.)
-
-B) Compare range of uuids currently issued in atomspace to the range in
-   the DB. If the ranges overlap, then print error and disallow opening
-   of the DB.  For above scenario, 1..251 overlaps 1..1000 so there's
-   an error and nothing is loaded.
-
-C) Get max uuid used in atomspace, and call this the "uuid thunk".  
-   When loading an atom from the DB, add this thunk to the UUID from
-   the DB, and load the resulting atom into atomspace.  When storing
-   atoms into the DB, subtract this thunk.  For above example, the 
-   thunk is 251 so the DB atoms get mapped to the range 251 to 1251 in
-   atomspace.
-
-I'm about to argue that A is best :-)
-
-But first: Note that, in the above, "DB" can mean "persistant store" 
-(file or sql or other) OR some other remote, running instance of 
-opencog with whom we are sharing atoms.
-
-The problem with both B and C is that they fail if one wants to use two 
-different DB's containing some of the same atoms.  So, for example, if
-one loaded a list of 251 words from a file (the 1..251 range) and then 
-opened a DB having the same 251 words with the same uuids appearing as 
-a subrange of the 1..1000, then both B & C would fail.
-
-The problem with A is that uuid clashes can occur.
-
-My gut instinct is that B & C are too clever for their own pants, and
-will only be regretted later on. By contrast, A is simple and can be
-managed as long as one has some fore-thought and planning.
-
-
 TODO
-----
--- Store more CompositeTruthValues
+====
+-- Fix storage of CompositeTruthValues by storing the equivalent
+   atoms, i.e. creating a ContextLink for each Composite context.
+   This does NOT require modifying the SQL table! Yay!
 
--- Store attention values. (??)
-
--- Run valgrind to track down the CSockets leak problem.
+-- Store attention values. (??) maybe ??
 
 -- Create custom table, tailored for EvaluationLink triples.
-   Since majority of nodes/links in the DB will be in the form of 
+   Since majority of nodes/links in the DB will be in the form of
    EvaluationLink triples, a significant performance gain can be gotten
    by creating a custom table, and shunting queries to that.  This would
-   decrease the SQL table sizes significantly, and decrease server I/O 
+   decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.

@@ -20,22 +20,18 @@ To run this test, perform the following steps:
     Use the Unicode drivers, not the ANSI (ASCII) drivers. Opencog
     uses unicode.
 
-2c) Create a test database. This can be done at the shell prompt: 
+2c) Create a test database. This can be done at the shell prompt:
 
     $ createdb test-persist
 
 2d) If you get an error from the above, about missing createdb permissions,
     Try doing this:
 
-    $ psql -c "ALTER USER <your-unix-username> WITH PASSWORD 'asdf'" -d template1
+    $ su - postgres; createuser <your-unix-username>
 
-    Substitute your unix username and some appropriate password; it
-    should NOT be your unix login password.  If this doesn't work, try
-    logging in as postgres, i.e. 
-
-    $ su - postgres; createuser <username> 
-
-    Also, you may need to edit pg_hba.conf. Google for additional help.
+    Answer the question (yes, you want to be superuser) and exit.
+    Under rare circumstances, you may need to edit pg_hba.conf. Google
+    for additional help.
 
 2e) Create a database user named opencog_tester with password 'cheese'.
     You can pick a different username and password, but it must be
@@ -59,7 +55,7 @@ To run this test, perform the following steps:
 
     test-persist=> \d
                   List of relations
-     Schema |   Name    | Type  |     Owner      
+     Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_tester
      public | edges     | table | opencog_tester

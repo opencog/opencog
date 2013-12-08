@@ -7,6 +7,10 @@ Current project, under construction.
 
 Steps:
 1) Install the 'any' language for link-grammar
-2) Set up and configure postgres
+2) Set up and configure postgres, as described in 
+   opencog/persist/sql/README
+3) createdb learn-pairs
+   Edit ~/.odbc.ini
+
 2) Start the cogserver
 3) Run relex x.sh shell script

@@ -140,9 +140,10 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-load: Error: Database not open";
 
+	// XXX TODO: this should probably be done in a separate thread.
 	store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
-	return "Database load started";
+	return "Database load completed";
 }
 
 
@@ -184,9 +185,10 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	if (store == NULL)
 		return "sql-store: Error: Database not open";
 
+	// XXX TODO This should really be started in a new thread ...
 	store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
-	return "database store started";
+	return "Database store completed";
 }
 
 Handle PersistModule::fetch_atom(Handle h)
