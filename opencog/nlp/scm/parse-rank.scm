@@ -238,7 +238,7 @@ scm
 	)
 
 	; Invoke procedure 'proc' on each link-grammar link.
-	; Expects as input a ParseAnchor (node anchoring a parse)
+	; Expects as input a ParseNode (node anchoring a parse)
 	; Returns whatever proc returns, as an or-map.
 	(define (map-links proc parse-inst)
    	(cog-map-chase-link-dbg 'LinkGrammarLinkageLink 'EvaluationLink

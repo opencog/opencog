@@ -10,7 +10,7 @@
 ; XXX This list is *probably* incomplete, and needs to be reviewed! XXX
 ; In particular, the tense list is incomplete. The par-of-speech list 
 ; might be incomplete.
-; The list of inflections is incomplete.
+; The list of subscripts is very incomplete.
 ; The list of entities (person, locatin, date, money) is incomplete.
 ; The place to check for completeness is on the RelEx wiki page,
 ; documenting these things. See
@@ -64,33 +64,33 @@
 )
 
 ;; -------------------------------------------------------------------
-; inflection-TAG in RelEx
+; subscript-TAG in RelEx
 ;
-; XXX these should probably be replaced by a new InflectionNode,
+; XXX these should probably be replaced by a new SubscriptNode,
 ; as there will likely be a lot of these, too many to list ? XXX
 (InheritanceLink
 	(DefinedLinguisticConceptNode ".a")
-	(ConceptNode "DefinedLinguisticConcept-Inflection")
+	(ConceptNode "DefinedLinguisticConcept-Subscript")
 )
 
 (InheritanceLink
 	(DefinedLinguisticConceptNode ".f")
-	(ConceptNode "DefinedLinguisticConcept-Inflection")
+	(ConceptNode "DefinedLinguisticConcept-Subscript")
 )
 
 (InheritanceLink
 	(DefinedLinguisticConceptNode ".g")
-	(ConceptNode "DefinedLinguisticConcept-Inflection")
+	(ConceptNode "DefinedLinguisticConcept-Subscript")
 )
 
 (InheritanceLink
 	(DefinedLinguisticConceptNode ".n")
-	(ConceptNode "DefinedLinguisticConcept-Inflection")
+	(ConceptNode "DefinedLinguisticConcept-Subscript")
 )
 
 (InheritanceLink
 	(DefinedLinguisticConceptNode ".v")
-	(ConceptNode "DefinedLinguisticConcept-Inflection")
+	(ConceptNode "DefinedLinguisticConcept-Subscript")
 )
 
 ;; -------------------------------------------------------------------

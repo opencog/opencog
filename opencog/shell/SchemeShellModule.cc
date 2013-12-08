@@ -67,6 +67,7 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 		if (arg.compare("quiet") || arg.compare("hush")) hush = true;
 	}
 	sh->hush_prompt(hush);
+	sh->hush_output(hush);
 
 	if (hush) return "";
 

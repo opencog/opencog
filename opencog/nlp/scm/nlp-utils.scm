@@ -1,81 +1,72 @@
 ;
 ; nlp-utils.scm
 ;
-; Assorted NLP utilities.
+; Assorted NLP utilities.  These include:
+; -- looping over all sentences in a document
+; -- looping over all parses of a sentence (map-parses)
+; -- looping over all words in a sentence (map-word-node)
+; -- looping over all RelEx relations
+; -- get word of word instance. (word-inst-get-word)
+; -- get part-of-speech, lemma of word.
+; -- get prepositions
+; -- get word senses
+; -- deleting all atoms pertaining to a sentence
 ;
 ; Important Design Note: A long-term goal of NLP within opencog is to
 ; do processing not in scheme, but in OpenCog itself, using pattern
-; matching. The reason fior this is so that we can apply OpenCog leraning
+; matching. The reason for this is so that we can apply OpenCog learning
 ; algos to learn new ways of processing. Many/most of the utilities below
 ; could be implemented by using pattern maching. Code that depends on these
 ; utilities should be converted to use pattern matching as soon as reasonable.
 ; Code that cannot be converted will eventually (in the distant future ...) 
 ; become obsolete.
 ; 
-; Copyright (c) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; =============================================================
-
-; Right now, every parse of a sentence is anchored to a ParseNode
-(define ParseAnchor 'ParseNode)
-
-; Every word of a parse is a WordInstance node.
-(define WordAnchor 'WordInstanceNode)
-
-; =============================================================
-; Assorted sentence, parse, word, word-sense wrangling utilities below.
-;
+; ---------------------------------------------------------------------
 ; map-parses proc sent
 ; Call proceedure 'proc' on every parse of the sentence 'sent' 
 ; 
-; Expected input is a SentenceNode, which serves as an anchor to all
-; of the parses of a sentence. It is connected via ParseLink's to 
-; each of the individual parses of the sentence. So, look for 
-; ParseAnchor's, which anchor the parses.
+; Expected input is a SentenceNode, or possibly a list of SentenceNodes.
+; Each SentenceNode serves as an anchor to all of the parses of a sentence.
+; It is connected via ParseLink's to each of the individual parses of the
+; sentence. This routine backtracks over the ParseNode to find these.
 ;
-; Just as an or-map, the recursion will stop if proc returns something
-; other than #f. This routine returns the last value that stopped the
-; recusrsion.
+; The recursion will stop if proc returns something other than #f. This
+; routine returns the last value that stopped the recursion. (In other
+; words, this is not really a map, but something kind-of weird -- XXX
+; this should probably be fixed -- TODO)
 ;
-(define (map-parses proc sent) 
-   (if (not (eq? (cog-type sent) 'SentenceNode))
-      (throw 'wrong-atom-type 'map-parses
-          "Error: expecting SentenceNode" sent)
-   )
-	(cog-map-chase-link-dbg 'ParseLink ParseAnchor
-		" ========= sentence ============ \n" ""
-		proc sent
-	)
+(define (map-parses proc sent-or-list)
+	(cog-map-chase-links-chk 'ParseLink 'ParseNode
+		proc sent-or-list 'SentenceNode)
 )
 
 ; ---------------------------------------------------------------------
 ; map-word-instances proc parse
 ; Call proceedure 'proc' on each word-instance of 'parse'
 ;
-; Expected input is a ParseAnchor, which serves as an anchor
-; to all of the word instances in a parse. The ParseAnchor is
-; connnected via a ParseInstanceLink to the individual words.
+; Expected input is a ParseNode or a list of ParseNodes. These serve
+; as anchors to all of the word instances in a parse. The word instances
+; can be found by back-tracking through the WordInstanceLink to the
+; individual words, which is what this method does.
 ; 
-(define (map-word-instances proc parse) 
-	(cog-map-chase-link-dbg 'ParseInstanceLink WordAnchor
-		" --------- parse ------------ \n" ""
-		proc parse
-	)
+(define (map-word-instances proc parse-or-list) 
+	(cog-map-chase-links-chk 'WordInstanceLink 'WordInstanceNode
+		proc parse-or-list 'ParseNode)
 )
 
 ; ---------------------------------------------------------------------
 ; map-word-node proc word-inst
 ; Call proceedure 'proc' on the word-node associated to 'word-inst'
 ;
-; Expected input is a WordAnchor, which serves as an anchor
-; to a word instance. The WordAnchor is connnected via a ReferenceLink
+; Expected input is a WordInstanceNode, which serves as an anchor
+; to a word instance. The WordInstanceNode is connnected via a ReferenceLink
 ; to the actual word node.
 ;
 (define (map-word-node proc word-inst) 
-	(cog-map-chase-link-dbg 'ReferenceLink 'WordNode 
-		"" ""  ; " --------- word-found ------------ \n"
-		proc word-inst
-	)
+	(cog-map-chase-links-chk 'ReferenceLink 'WordNode
+		proc word-inst 'WordInstanceNode)
 )
 
 ; ---------------------------------------------------------------------
@@ -171,20 +162,20 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return the inflection string for it.
-; The "inflection string" is the part that follows the period in
+; Given a word instance, return the subscript string for it.
+; The "subscript string" is the part that follows the period in
 ; the link-grammar dictionary. Thus, for the dictionary entry
-; "red.a" the ".a" is the inflection.  Note that not all link-grammar
-; dictionary entries will have an inflection.
+; "red.a" the ".a" is the subscript.  Note that not all link-grammar
+; dictionary entries will have a subscript.
 ;
-(define (word-inst-get-inflection-str word-inst)
-	; all inflections start with a period as the first character.
-	(define (inflection? tag)
+(define (word-inst-get-subscript-str word-inst)
+	; all subscripts start with a period as the first character.
+	(define (subscript? tag)
 		(if (char=? #\. (string-ref (cog-name tag) 0))
 			#t #f
 		)
 	)
-	(let ((infl (filter! inflection? (word-inst-get-attr word-inst))))
+	(let ((infl (filter! subscript? (word-inst-get-attr word-inst))))
 		(if (null? infl)
 			""
 			(cog-name (car infl))
@@ -193,15 +184,15 @@
 )
 
 ; ---------------------------------------------------------------------
-; Given a word instance, return the inflected word.
-; Here, "inflected words" are link-grammar dictionary entries, for 
+; Given a word instance, return the subscripted word.
+; Here, "subscripted words" are link-grammar dictionary entries, for 
 ; example, "events.n" or "offered.v". Note that not all link-grammar
-; dictionary entries will have an inflection.
+; dictionary entries will have a subscript.
 ;
-(define (word-inst-get-inflected-word-str word-inst)
+(define (word-inst-get-subscripted-word-str word-inst)
 	(string-append
 		(word-inst-get-word-str word-inst)
-		(word-inst-get-inflection-str word-inst)
+		(word-inst-get-subscript-str word-inst)
 	)
 )
 
@@ -456,7 +447,11 @@
 
 ; ---------------------------------------------------------------------
 ; Delete atoms that belong to particular sentence instances; we don't
-; want to log up the server with grunge text.
+; want to clog up the atomspace with old junk we don't want any more.
+;
+; XXX TODO: In principle, this could be accomplished by lowering the
+; AttentionValue for the atoms, and letting the ForgettingAgent do its
+; work. In practice, this is too complicated, for now.
 ;
 (define (delete-sentences)
 	(let ((n 0))
