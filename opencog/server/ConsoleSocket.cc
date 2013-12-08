@@ -154,14 +154,15 @@ void ConsoleSocket::OnLine(const std::string& line)
 
         if (_request->isShell()) {
             logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
-            // Force a drain of this request, because we *must* enter shell mode
-            // before handling any additional input from the socket (since the
-            // next input is almost surely intended for the new shell, not for
-            // the cogserver one).
-            // NOTE: Calling this method for other kinds of requests may cause
-            // cogserver to crash due to concurrency issues, since this runs in
-            // a separate thread (for socket handler) instead of the main thread
-            // (where the server loop runs).
+            // Force a drain of this request, because we *must* enter
+            // shell mode before handling any additional input from the
+            // socket (since the next input is almost surely intended for
+            // the new shell, not for the cogserver one).
+            //
+            // NOTE: Calling this method for non-shell requests may
+            // cause cogserver to crash due to concurrency issues, since
+            // this runs in a separate thread (for socket handler) instead
+            // of the main thread (where the server loop runs).
             cogserver.processRequests();
         }
     } else {
