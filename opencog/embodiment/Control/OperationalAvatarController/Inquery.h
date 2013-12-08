@@ -64,6 +64,8 @@ public:
     // After planning, please reset the spaceMap back to the real one via calling this function
     static void reSetSpaceMap();
 
+    // only apply when getStateOwner is Entity or string
+    static Handle getStateOwnerHandle(ParamValue &stateOwnerParamValue);
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
@@ -84,6 +86,7 @@ public:
     static vector<ParamValue> inqueryAdjacentAccessPosition(const vector<ParamValue>& stateOwnerList);
     /*static vector<ParamValue> inqueryStandableNearbyAccessablePosition(const vector<ParamValue>& stateOwnerList);*/
     static vector<ParamValue> inqueryUnderPosition(const vector<ParamValue>& stateOwnerList);// get the position just under the input pos
+
 
 
     // inquery the spatial relationships

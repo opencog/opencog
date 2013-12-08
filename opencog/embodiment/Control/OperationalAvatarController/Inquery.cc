@@ -74,24 +74,47 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      spaceMap = &(spaceServer().getLatestMap());
  }
 
+ Handle Inquery::getStateOwnerHandle(ParamValue &stateOwnerParamValue)
+ {
+    Entity *entity = boost::get<Entity>(&stateOwnerParamValue);
+    if (entity)
+        return AtomSpaceUtil::getEntityHandle(*atomSpace,entity->id);
+    else
+    {
+        string *concept = boost::get<string>(&stateOwnerParamValue);
+        if (concept)
+            return atomSpace->getHandle(CONCEPT_NODE, *concept);
+    }
+
+    return Handle::UNDEFINED;
+
+ }
+
  ParamValue Inquery::getParamValueFromAtomspace( State& state)
  {
      vector<ParamValue> stateOwnerList = state.stateOwnerList;
-     Entity entity1, entity2, entity3;
+
+     if (stateOwnerList.size() < 1)
+         return UNDEFINED_VALUE;
+
      Handle a, b, c = Handle::UNDEFINED;
 
-     entity1 = boost::get<Entity>(stateOwnerList[0]);
-     a = AtomSpaceUtil::getEntityHandle(*atomSpace,entity1.id);
+     a = getStateOwnerHandle(stateOwnerList[0]);
+
+     if (a == Handle::UNDEFINED)
+         return UNDEFINED_VALUE;
 
      if(stateOwnerList.size() > 1)
      {
-         entity2 = boost::get<Entity>(stateOwnerList[1]);
-         b = AtomSpaceUtil::getEntityHandle(*atomSpace,entity2.id);
+        b = getStateOwnerHandle(stateOwnerList[1]);
+        if (b == Handle::UNDEFINED)
+            return UNDEFINED_VALUE;
      }
      if(stateOwnerList.size() > 2)
-     {
-         entity3 = boost::get<Entity>(stateOwnerList[2]);
-         c = AtomSpaceUtil::getEntityHandle(*atomSpace,entity3.id);
+     {         
+         c = getStateOwnerHandle(stateOwnerList[2]);
+         if (c == Handle::UNDEFINED)
+             return UNDEFINED_VALUE;
      }
 
      Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c);
@@ -1266,6 +1289,24 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
     atomSpace->removeAtom(hResultListLink);
 
-    return resultSet;
+    // loop through all the result groups, remove the groups that bind the same variables to different variables
+    if (allVariables.size() > 1)
+    {
+        HandleSeq nonDuplicatedResultSet;
+        foreach (Handle listH , resultSet)
+        {
+            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+            sort(oneGroup.begin(),oneGroup.end());
+
+            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
+                nonDuplicatedResultSet.push_back(listH);
+
+        }
+        return nonDuplicatedResultSet;
+    }
+    else
+       return resultSet;
+
+
 
 }
