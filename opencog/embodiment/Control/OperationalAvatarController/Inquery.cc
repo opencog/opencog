@@ -290,6 +290,40 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
 }
 
+ParamValue Inquery::inqueryIsSame(const vector<ParamValue>& stateOwnerList)
+{
+    if (stateOwnerList.size() != 2)
+        return opencog::oac::SV_FALSE;;
+
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+
+    Entity* entity2 = boost::get<Entity>(&var2);
+
+    if (entity1 && entity2)
+    {
+        if (entity1->id == entity2->id)
+            return opencog::oac::SV_TRUE;
+        else
+            return opencog::oac::SV_FALSE;
+    }
+
+    string* concept1 = boost::get<string>(&var1);
+    string* concept2 = boost::get<string>(&var2);
+
+    if (concept1 && concept2)
+    {
+        if (concept1 == concept2)
+            return opencog::oac::SV_TRUE;
+        else
+            return opencog::oac::SV_FALSE;
+    }
+
+    return opencog::oac::SV_FALSE;
+}
+
 ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
 {
     switch (opencog::oac::GetVariableType(var))
