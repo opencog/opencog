@@ -55,7 +55,7 @@ namespace opencog
 /**
  * TRIVIAL_MODULE -- Declare a trivial module called MODNAME.
  * This defines the class object, with trivial costructor and 
- * desctructor. The primary users of this are expected to be 
+ * destructor. The primary users of this are expected to be 
  * any .so's that need to define new atom types.  These will
  * be treated as modules, so that the atom types get defined
  * at module load time, rather than later.

@@ -65,7 +65,7 @@ using namespace opencog::world;
 using namespace PetCombo;
 using namespace opencog; /// @todo make it under the namespace opencog
 
-//constructor, desctructor
+//constructor, destructor
 EntropyFilter::EntropyFilter(const std::string& self_id,
                              const std::string& owner_id,
                              AtomSpace& atomSpace,

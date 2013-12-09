@@ -45,7 +45,7 @@ NetworkServer::~NetworkServer()
     logger().debug("[NetworkServer] enter destructor");
     if (_thread != 0)
         pthread_join(_thread, NULL);
-    logger().debug("[NetworkServer] all threads joined, exit desctructor");
+    logger().debug("[NetworkServer] all threads joined, exit destructor");
 }
 
 extern "C" {
@@ -126,7 +126,8 @@ bool NetworkServer::removeListener(const unsigned short port)
         logger().warn("unable to remove listener from port %d", port);
         return false;
     }
-    delete *l;
+    SocketPort* sp = *l;
     _listeners.erase(l);
+    delete sp;
     return true;
 }

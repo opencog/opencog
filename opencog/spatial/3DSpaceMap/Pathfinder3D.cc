@@ -253,7 +253,6 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
         return true;
     }
 
-
     // when the pos has the same z with the the last pos
     // or if want to access the pos 1 unit higher than the last pos
     // check if there are 2 blocks in the 45 degree directions block the way
@@ -261,6 +260,12 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
     //    CBE
     //    BLB
     //    FBG
+    if (k == 1) // if  want to access higer position
+    {
+        if (mapManager->checkIsSolid(lastPos.x,lastPos.y,lastPos.z + 1)) // if the block on top is solid
+            return false;
+    }
+
     if ((i != 0) && (j != 0) ) // k == 0  or k == 1
     {
         // all the blocks in the two neighbour 45 direction inside the agentHeight will block the way
@@ -277,6 +282,7 @@ bool Pathfinder3D::checkNeighbourAccessable(Octree3DMapManager *mapManager, Bloc
 
         return true;
     }
+
 
     return true;
 }

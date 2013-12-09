@@ -706,7 +706,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         return "";
     }
 
-    int tryStepNum = 0;
+    tryStepNum = 0;
 
     while(unsatisfiedStateNodes.size() != 0)
     {
@@ -768,11 +768,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // if there is one rule related to this goal,
                 // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
-                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible;
+                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle;
                 int negativeNum,satisfiedPreconNum;
-                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,true);
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle, true);
 
-                if (isNegativeGoal || isDiffStateOwnerType) // if this rule will negative this goal, we should not choose to apply it.
+                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle) // if this rule will negative this goal, we should not choose to apply it.
                     continue;
 
                 // this rule is positive for this goal, apply it.
@@ -811,9 +811,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
-                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle;
                     int negativeNum,satisfiedPreconNum;
-                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible);
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle);
 
                     //  its effect will negative this current selected goal state, or it has any unsatisfied precondition which is impossible to achieve,
                     //  then it should not add it into candidate rules
@@ -1519,13 +1519,19 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossible)
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
+    willCauseCirleNetWork = false;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
-    for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
+    vector<State*>& precondList = ruleNode->originalRule->preconditionList;
+
+    if (orginalRule)
+        precondList = orginalRule->preconditionList;
+
+    for (itpre = precondList.begin(); itpre != precondList.end(); ++ itpre)
     {
         State* ps = *itpre;
         State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
@@ -1538,24 +1544,26 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossib
         StateNode* satStateNode;
 
         bool satByTemp = checkIfThisGoalIsSatisfiedByTempStates(*groundPs, found, satStateNode,ruleNode,true);
+        bool satisfied = false;
 
         // if it's found in the temporaryStateNodes
         if (found)
         {
             if (satByTemp)
+            {
                 ++ satisfiedPreconNum;
+                satisfied = true;
+            }
             else
             {
                 // check if there is any rule related to achieve this unsatisfied precondition
                 if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
                 {
+                    delete groundPs;
                     preconImpossible = true;
                     return -999;
                 }
             }
-
-            delete groundPs;
-            continue;
 
         }
         else
@@ -1564,23 +1572,82 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, bool &preconImpossib
             // check real time
             float satisfiedDegree;
             if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
-                 ++ satisfiedPreconNum;
+            {
+                ++ satisfiedPreconNum;
+                satisfied = true;
+            }
             else
             {
                 // check if there is any rule related to achieve this unsatisfied precondition
                 if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
                 {
+                    delete groundPs;
                     preconImpossible = true;
                     return -999;
                 }
             }
 
-            delete groundPs;
-            continue;
+        }
+
+        if (! satisfied)
+        {
+            // check if this precond will add a cirle to the planning network
+            // if this precond is unsatified and exactly the same with one of its previous / forward state node,
+            // which is expectly to be satisfied partly by this effect directly or undirectly.
+            list<StateNode*>::iterator sait;
+            for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
+            {
+                StateNode* tempStateNode = (StateNode*)(*sait);
+
+                // only check the StateNode which is more backward than the input fowardState
+                // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+                // so this state node will not be affected by this effect.
+
+                if ((*fowardState) < (*tempStateNode))
+                    continue;
+
+                if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
+                    continue;
+
+//                if ((tempStateNode->state->stateName == "existPath")&&(groundPs->stateName == "existPath"))
+//                {
+
+//                        ParamValue p1 = tempStateNode->state->stateOwnerList[0];
+//                        ParamValue p2 = tempStateNode->state->stateOwnerList[1];
+
+//                        Vector* v1 = boost::get<Vector>(&p1);
+//                        Vector* v2 = boost::get<Vector>(&p2);
+
+//                        ParamValue p3 = groundPs->stateOwnerList[0];
+//                        ParamValue p4 = groundPs->stateOwnerList[1];
+
+//                        Vector* v3 = boost::get<Vector>(&p3);
+//                        Vector* v4 = boost::get<Vector>(&p4);
+
+//                        if (v1 == v3)
+//                        {
+//                            if (v2 == v4)
+//                            {
+//                                int i =0;
+//                                i++;
+//                            }
+//                        }
+
+//                }
+
+                if (groundPs->isSameState( *(tempStateNode)->state ))
+                {
+                    willCauseCirleNetWork = true;
+                    return -999;
+                }
+
+            }
 
         }
 
+        delete groundPs;
     }
+
 
     return satisfiedPreconNum;
 }
@@ -1685,11 +1752,12 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
             }
         }
 
+        // check how many already satisifed state nodes will be negated by this effect
         list<StateNode*>::iterator sait;
-
         for (sait = temporaryStateNodes.begin(); sait != temporaryStateNodes.end(); ++ sait)
         {
             StateNode* tempStateNode = (StateNode*)(*sait);
+
             // skip the current state node
             if (fowardState == tempStateNode)
                 continue;
@@ -1713,8 +1781,7 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
                     continue;
             }
 
-
-            if (effState->isSameState( *(tempStateNode)->state ))
+            if (tempStateNode->state->isSameState(*effState))
             {
                 // check if this effect unsatisfy this state
                 float satDegree;
@@ -1733,11 +1800,10 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 
     return negateveStateNum;
 
-
 }
 
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
-                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool onlyCheckIfNegativeGoal)
+                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool onlyCheckIfNegativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -1764,6 +1830,8 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     negativeGoal = false;
     isDiffStateOwnerType = false;
     preconImpossible = false;
+    willAddCirle = false;
+
 
     // check all the effects:
     negateveStateNum = checkEffectFitness(tmpRuleNode,fowardState,isDiffStateOwnerType,negativeGoal);
@@ -1775,7 +1843,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     }
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle);
 
     delete tmpRuleNode;
 
@@ -2418,6 +2486,44 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
     return true;
 }
 
+float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowardState, ParamGroundedMapInARule& oneGroupOfbindings,bool &impossible)
+{
+
+    float fitnessScore = 0;
+
+   ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
+
+   ruleNode->currentAllBindings.insert(oneGroupOfbindings.begin(),oneGroupOfbindings.end());
+
+    int negateveStateNum = 0;
+    int satisfiedPreconNum = 0;
+    bool negativeGoal = false;
+    bool isDiffStateOwnerType = false;
+    bool preconImpossible = false;
+    bool willAddCirle = false;
+
+    impossible = false;
+
+    // check all the effects:
+    negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
+
+    // check how many preconditions will be satisfied
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle);
+
+    // ruleNode resetbinding
+    ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
+
+    fitnessScore = fitnessScore - negateveStateNum*100.0f + satisfiedPreconNum*100.0f;
+
+    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle)
+    {
+        impossible = true;
+        fitnessScore -= 999999;
+    }
+
+    return fitnessScore;
+
+}
 
 // this function should be called after groundARuleNodeFromItsForwardState.
 // this function only ground non-numeric states
@@ -2494,6 +2600,12 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
             int candidateGroupNum = 1;
 
+            if (ruleNode->originalRule->ruleName == "eatFoodtoAchieveEnergyDemand")
+            {
+                int oo = 0;
+                oo ++;
+            }
+
             if (candidateListHandles.size() != 0)
             {
 
@@ -2509,52 +2621,21 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
-
                         cout<<varNames[index]<< "= " << ActionParameter::ParamValueToString(v) << std::endl;
-
-                        // Check if this group of candidates is able to ground some other need_real_time_inquery states
-                        // and how many of these need_real_time_inquery state can be satisifed by this group of candidates
-                        int numOfSat = 0;
-                        list<UngroundedVariablesInAState>::iterator nrtiIt= uvIt;
-                        for (; nrtiIt != ruleNode->curUngroundedVariables.end(); ++ nrtiIt)
-                        {
-                            if (((UngroundedVariablesInAState&)(*nrtiIt)).contain_numeric_var)
-                                break;
-
-                            if (! ((UngroundedVariablesInAState&)(*nrtiIt)).state->need_inquery)
-                                break;
-
-                            ParamGroundedMapInARule tryBindings = ruleNode->currentBindingsFromForwardState;
-                            tryBindings.insert(oneGroupCandidate.begin(),oneGroupCandidate.end());
-                            State* groundedState = Rule::groundAStateByRuleParamMap(((UngroundedVariablesInAState&)(*nrtiIt)).state, tryBindings);
-                            if (groundedState != 0)
-                            {
-                                bool found;
-                                StateNode* satStateNode;
-                                if (checkIfThisGoalIsSatisfiedByTempStates(*groundedState,found,satStateNode,0, false))
-                                    numOfSat ++;
-                                else if (found)
-                                    continue; // found in temp state list, but is not satisfied
-                                else
-                                {
-                                    // cannot find it in temp state list, check it in real time
-                                    float satDegree;
-                                    if (checkIsGoalAchievedInRealTime(*groundedState,satDegree ))
-                                        numOfSat ++;
-                                    else
-                                        continue;
-                                }
-
-                            }
-
-                            delete groundedState;
-
-                        }
-
-                        tmpcandidates.push_back(TmpParamCandidate(numOfSat, oneGroupCandidate));
-
                         index ++;
                     }
+
+                    bool impossile;
+                    float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
+
+                    cout << "Fitness score = " << fitnessScore ;
+                    if (impossile)
+                        cout << " , impossible bindings, would not be put into candidate list. " ;
+
+                    cout << std::endl;
+
+                    if (! impossile)
+                        tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
 
                 }
 
@@ -2710,7 +2791,7 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
         }
         else if (ruleNode->costHeuristics.size()!= 0)
         {
-            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,false);
+            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
         }
         else
         {
@@ -2732,7 +2813,8 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
 }
 
 
-ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings, string varName, vector<ParamValue>& values, bool checkPrecons)
+ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float basic_cost, vector<CostHeuristic>& costHeuristics, ParamGroundedMapInARule& currentbindings,
+                                                           string varName, vector<ParamValue>& values, Rule *orginalRule, bool checkPrecons)
 {
     // check how many preconditions will be satisfied
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -2753,11 +2835,11 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
             return UNDEFINED_VALUE;
         }
 
-        float score = 0.0f-cost;
+        float score = 0.0f-cost*100;
         currentbindings.erase(varName);
 
         // check effect
-        bool isDiffStateOwnerType,  negativeGoal;
+        bool isDiffStateOwnerType,  negativeGoal, willAddCirle;
         tmpRuleNode->currentAllBindings.insert(std::pair<string, ParamValue>(varName,*vit));
 
         int negativeNum = checkEffectFitness(tmpRuleNode, curStateNode, isDiffStateOwnerType,  negativeGoal);
@@ -2769,15 +2851,21 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         score -= (negativeNum * 12.0f);
 
         // check how many preconditions will be satisfied
+
+        bool preconImpossible;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,orginalRule);
+
+        if (preconImpossible)
+            score -= 99999.9f;
+
+        if (willAddCirle)
+            score -= 99999.9f;
+
         if (checkPrecons)
         {
-            bool preconImpossible;
-            int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,preconImpossible);
-
             score += satisfiedPreconNum * 10.0f;
-            if (preconImpossible)
-                score -= 99999.9f;
         }
+
 
         tmpRuleNode->currentAllBindings.erase(varName);
 
@@ -3165,7 +3253,7 @@ void OCPlanner::loadTestRulesFromCodes()
     walkclosedRule->addCostHeuristic(CostHeuristic(closedState8, 0.01f));
 
     BestNumericVariableInqueryStruct bs2;
-    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs2.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentAccessPosition;
     bs2.goalState = adjacentState0;
     walkclosedRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(nearby_pos), bs2));
 
@@ -3290,7 +3378,7 @@ void OCPlanner::loadTestRulesFromCodes()
     accessAdjacentRule->addEffect(EffectPair(0.7f,becomeExistPathEffect));
 
     BestNumericVariableInqueryStruct bs0;
-    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentPosition;
+    bs0.bestNumericVariableInqueryFun = &Inquery::inqueryAdjacentAccessPosition;
     bs0.goalState = existPathState3;
     accessAdjacentRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_to), bs0));
 
@@ -3333,7 +3421,7 @@ void OCPlanner::loadTestRulesFromCodes()
     pathTransmitRule->addPrecondition(existPathState4);
 
     BestNumericVariableInqueryStruct bs;
-    bs.bestNumericVariableInqueryFun = &Inquery::inqueryNearestAccessiblePosition;
+    bs.bestNumericVariableInqueryFun = &Inquery::inqueryBestAccessiblePosition;
     bs.goalState = existPathState6;
     pathTransmitRule->bestNumericVariableinqueryStateFuns.insert(map<string,BestNumericVariableInqueryStruct>::value_type(ActionParameter::ParamValueToString(var_pos_2), bs));
 
