@@ -13,6 +13,7 @@ ENDIF (APPLE)
 ADD_LIBRARY(cogutil SHARED
 	ansi
 	algorithm
+	backtrace-symbols
 	based_variant
 	cluster
 	comprehension
