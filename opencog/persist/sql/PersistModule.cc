@@ -119,37 +119,39 @@ void PersistModule::init(void)
 std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sql-close: Wrong num args";
+		return "sql-close: Error: Unexpected argument\n";
 
 	if (store == NULL)
-		return "sql-close: database not open";
+		return "sql-close: Error: Database not open\n";
 
 	_cogserver.getAtomSpace().getImpl().unregisterBackingStore(backing);
 
 	backing->set_store(NULL);
 	delete store;
 	store = NULL;
-	return "database closed";
+	return "Database closed\n";
 }
 
 std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sql-load: Wrong num args";
+		return "sql-load: Error: Unexpected argument\n";
 
 	if (store == NULL)
-		return "sql-load: database not open";
+		return "sql-load: Error: Database not open\n";
 
+	// XXX TODO: this should probably be done in a separate thread.
 	store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
-	return "database load started";
+	return "Database load completed\n";
 }
 
 
 std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 {
 	if (args.size() != 3)
-		return "sql-open: Wrong num args";
+		return "sql-open: Error: invalid command syntax\n"
+		       "Usage: sql-open <dbname> <username> <auth>\n";
 
 	std::string dbname   = args.front(); args.pop_front();
 	std::string username = args.front(); args.pop_front();
@@ -157,13 +159,13 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 
 	store = new AtomStorage(dbname, username, auth);
 	if (!store)
-		return "sql-open: Unable to open the database";
+		return "sql-open: Error: Unable to open the database\n";
 
 	if (!store->connected())
 	{
 		delete store;
 		store = NULL;
-		return "sql-open: Unable to connect to the database";
+		return "sql-open: Error: Unable to connect to the database\n";
 	}
 
 	// reserve() is critical here, to reserve UUID range.
@@ -171,20 +173,22 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	backing->set_store(store);
 	_cogserver.getAtomSpace().getImpl().registerBackingStore(backing);
 
-	return "database opened";
+	std::string rc = "Opened \"" + dbname + "\" as user \"" + username + "\"\n"; 
+	return rc;
 }
 
 std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 {
 	if (!args.empty()) 
-		return "sql-store: Wrong num args";
+		return "sql-store: Error: Unexpected argument\n";
 
 	if (store == NULL)
-		return "sql-store: database not open";
+		return "sql-store: Error: Database not open\n";
 
+	// XXX TODO This should really be started in a new thread ...
 	store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
-	return "database store started";
+	return "Database store completed\n";
 }
 
 Handle PersistModule::fetch_atom(Handle h)

@@ -2,10 +2,12 @@
 ; disjunct-list.scm
 ;
 ; Build lists of link-grammar disjuncts (sets of word connectors).
-;
-; This is also a part of a test exploring different coding styles.
-; Similar functionality is (partially) implemented in disjunct.scm,
-; but using a different approach.
+; Given a parsed sentence, the routines here will determine the 
+; disjuncts that were used by link-grammar to perform the parse.
+; The net result is a string containing the disjunct.  The string
+; will be a simple, space-separated list of connectors. A "connector"
+; is a link-grammar link relations, with an appended + or - indicating
+; whether the connection is to the right or left.
 ;
 ; Copyright (c) 2008 Linas Vepstas <linasvepstas@gmail.com>
 ;
@@ -15,7 +17,7 @@
 ; ---------------------------------------------------------------------
 ; Given a list of relations, sort the relations in "sentence order"
 ; (or "parse order"). The "sent-node" argument provides the 
-; sentence by whitch to sort the relations, and the "word" argument
+; sentence by which to sort the relations, and the "word" argument
 ; gives the word relative to which the sort should be done.
 ; So, for example, given 
 ;
@@ -72,7 +74,7 @@
 ;            WordInstanceNode
 ;
 ; this routine will return a string holding the names of the 
-; LinkGrammarRelationshipNode's, appeneded with a + or - to indicate
+; LinkGrammarRelationshipNode's, appended with a + or - to indicate
 ; which direction the relation went in.
 ;
 (define (ldj-make-disjunct-string word sorted-rels)
@@ -84,7 +86,7 @@
 		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
 	)
 
-	; Get the direction of the link -- 
+	; Get the direction of the link ...
 	; It is either to the left(-) or right(+)
 	(define (get-direction rel)
 		(if (equal? word

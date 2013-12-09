@@ -22,6 +22,7 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 #include <opencog/guile/SchemeEval.h>
@@ -43,7 +44,13 @@ using namespace opencog;
 SchemeShell::SchemeShell(void)
 {
 	show_output = true;
+
 	normal_prompt = "guile> ";
+	if (config().get_bool("ANSI_ENABLED"))
+		normal_prompt = config()["ANSI_SCM_PROMPT"];
+	else
+		normal_prompt = config()["SCM_PROMPT"];
+
 	pending_prompt = "... ";
 	abort_prompt = "asdf";
 	abort_prompt[0] = IAC;
@@ -160,8 +167,10 @@ void SchemeShell::eval(const std::string &expr, ConsoleSocket *s)
 
 	// The user is exiting the shell. No one will ever call a method on
 	// this instance ever again. So stop hogging space, and self-destruct.
+	// We have to do this here; there is no other opportunity to call dtor.
 	if (self_destruct)
 	{
+		socket->sendPrompt();
 		delete this;
 	}
 }
