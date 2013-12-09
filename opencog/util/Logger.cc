@@ -91,7 +91,8 @@ static void prt_backtrace(std::ostringstream& oss)
 #ifdef HAVE_BFD
 		// The standard and the heck versions differ slightly in layout.
 		char * begin = strstr(syms[i], "_ZN");
-		if (!begin)
+		char * end = strchr(syms[i], '(');
+		if (!(begin && end) || end <= begin)
 		{
 			// Failed to pull apart the symbol names
 			oss << "\t" << i << ": " << syms[i] << "\n";
@@ -104,6 +105,7 @@ static void prt_backtrace(std::ostringstream& oss)
 			size_t sz = 250;
 			int status;
 			char *fname = (char *) malloc(sz);
+			*end = 0x0;
 			char *rv = abi::__cxa_demangle(begin, fname, &sz, &status);
 			if (rv) fname = rv; // might have re-alloced
 			oss << fname << std::endl;
