@@ -1,4 +1,11 @@
-
+/*
+  A hacky replacement for backtrace_symbols in glibc
+  Notes:
+  Downloaded from:
+  http://cairo.sourcearchive.com/documentation/1.9.4/backtrace-symbols_8c-source.html
+  Compiling requires the 'binutils-dev' package installed, so that bfd.h is
+  available.
+*/
 /*
   A hacky replacement for backtrace_symbols in glibc
 
@@ -34,6 +41,8 @@
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
    Foundation, 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+
+#ifdef HAVE_BFD
 
 #define fatal(a, b) exit(1)
 #define bfd_fatal(a) exit(1)
@@ -310,11 +319,11 @@ static int find_matching_file(struct dl_phdr_info *info,
       for (n = info->dlpi_phnum; --n >= 0; phdr++) {
             if (phdr->p_type == PT_LOAD) {
                   ElfW(Addr) vaddr = phdr->p_vaddr + load_base;
-                  if (match->address >= vaddr && match->address < vaddr +
-phdr->p_memsz) {
+                  ElfW(Addr) match_address = (ElfW(Addr)) match->address;
+                  if (match_address >= vaddr && match_address < vaddr + phdr->p_memsz) {
                         /* we found a match */
                         match->file = info->dlpi_name;
-                        match->base = info->dlpi_addr;
+                        match->base = (void *) info->dlpi_addr;
                   }
             }
       }
@@ -386,3 +395,4 @@ backtrace_symbols_fd(void *const *buffer, int size, int fd)
         free(strings);
 }
 
+#endif HAVE_BFD
