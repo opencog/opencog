@@ -44,6 +44,8 @@
 
 #ifdef HAVE_BFD
 
+#include "backtrace-symbols.h"
+
 #define fatal(a, b) exit(1)
 #define bfd_fatal(a) exit(1)
 #define bfd_nonfatal(a) exit(1)
@@ -330,7 +332,7 @@ static int find_matching_file(struct dl_phdr_info *info,
       return 0;
 }
 
-char **backtrace_symbols(void *const *buffer, int size)
+char **oc_backtrace_symbols(void *const *buffer, int size)
 {
       int stack_depth = size - 1;
       int x,y;
@@ -378,7 +380,7 @@ char **backtrace_symbols(void *const *buffer, int size)
 }
 
 void
-backtrace_symbols_fd(void *const *buffer, int size, int fd)
+oc_backtrace_symbols_fd(void *const *buffer, int size, int fd)
 {
         int j;
         char **strings;
@@ -395,4 +397,4 @@ backtrace_symbols_fd(void *const *buffer, int size, int fd)
         free(strings);
 }
 
-#endif HAVE_BFD
+#endif // HAVE_BFD

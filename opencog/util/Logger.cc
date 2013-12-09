@@ -58,6 +58,7 @@
 #endif
 #include <boost/algorithm/string.hpp>
 
+#include <opencog/util/backtrace-symbols.h>
 #include <opencog/util/platform.h>
 
 using namespace opencog;
@@ -74,7 +75,11 @@ static void prt_backtrace(std::ostringstream& oss)
 	void *bt_buf[BT_BUFSZ];
 
 	int stack_depth = backtrace(bt_buf, BT_BUFSZ);
+#ifdef HAVE_BFD
+	char **syms = oc_backtrace_symbols(bt_buf, stack_depth);
+#else
 	char **syms = backtrace_symbols(bt_buf, stack_depth);
+#endif
 
 	// Start printing at a bit into the stack, so as to avoid recording
 	// the logger functions in the stack trace.
