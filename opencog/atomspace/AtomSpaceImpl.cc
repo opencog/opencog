@@ -206,7 +206,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
            for (size_t i=0; i<arity; i++)
            {
               Handle oh = fetchAtom(ogs[i]);
-              if (oh != ogs[i]) throw new RuntimeException(TRACE_INFO,
+              if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
                     "Unexpected handle mismatch -B!\n");
            }
         }

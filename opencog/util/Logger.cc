@@ -88,6 +88,28 @@ static void prt_backtrace(std::ostringstream& oss)
 	{
 		// Most things we'll print are mangled C++ names,
 		// So demangle them, get them to pretty-print.
+#ifdef HAVE_BFD
+		// The standard and the heck versions differ slightly in layout.
+		char * begin = strstr(syms[i], "_ZN");
+		if (!begin)
+		{
+			// Failed to pull apart the symbol names
+			oss << "\t" << i << ": " << syms[i] << "\n";
+		}
+		else
+		{
+			*begin = 0x0;
+			oss << "\t" << i << ": " << syms[i] << "  ";
+			*begin = '_';
+			size_t sz = 250;
+			int status;
+			char *fname = (char *) malloc(sz);
+			char *rv = abi::__cxa_demangle(begin, fname, &sz, &status);
+			if (rv) fname = rv; // might have re-alloced
+			oss << fname << std::endl;
+			free(fname);
+		}
+#else
 		char * begin = strchr(syms[i], '(');
 		char * end = strchr(syms[i], '+');
 		if (!(begin && end) || end <= begin)
@@ -110,6 +132,7 @@ static void prt_backtrace(std::ostringstream& oss)
 			oss << "(" << fname << " " << end << std::endl;
 			free(fname);
 		}
+#endif
 	}
 	oss << std::endl;
 	free(syms);
