@@ -126,6 +126,16 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
 # ===================================================================
 # Check for existance of various required, optional packages.
 
+# Look for binutils-dev. Needed for pretty stack printing.
+FIND_PACKAGE(BFD)
+IF (BFD_FOUND)
+	MESSAGE(STATUS "Binutils found.")
+	ADD_DEFINITIONS(-DHAVE_BFD)
+	SET(HAVE_BFD 1)
+ELSE (BFD_FOUND)
+	MESSAGE(STATUS "Binutils-dev missing: No pretty stack-trace printing.")
+ENDIF (BFD_FOUND)
+
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
@@ -710,7 +720,8 @@ SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("SQL persistance" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
+SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
+SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)

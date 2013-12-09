@@ -88,16 +88,32 @@
 
 ; ---------------------------------------------------------------------
 ; Process sentences:
-; pick up from anchor, increment, save.
+; pick up from anchor, 
+; fetch words and relations from SQL
+; increment words, incremenet relations
+; save.
 
 (define (process-sents sents)
-	(begin
-		(map-lg-links
-			(lambda (link) (cog-atom-incr (make-lg-rel link) 1))
+	(define (process-one-link link)
+		(let ((rel (make-lg-rel link)))
+			(begin
+				(fetch-atom rel)
+				(cog-atom-incr rel 1) ; inrmenet relation
+				(cog-atom-incr (gar rel) 1)  ; increment link type
+				(cog-atom-incr (gadr rel) 1) ; increment left word
+				(cog-atom-incr (gddr rel) 1) ; increment right work.
+				(store-atom rel)
+				#f ; need to return #f so that map-lg-links doesn't stop.
+			)
 		)
 	)
+	(begin
+		(map-lg-links process-one-link sents)
+      (delete-sentences)
+	)
 )
-	
+
+
 
 (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
 	(get-new-parsed-sentences)
@@ -108,3 +124,5 @@
 (map-lg-links prt
 	(get-new-parsed-sentences)
 )
+
+

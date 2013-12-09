@@ -13,6 +13,7 @@ ENDIF (APPLE)
 ADD_LIBRARY(cogutil SHARED
 	ansi
 	algorithm
+	backtrace-symbols
 	based_variant
 	cluster
 	comprehension
@@ -52,11 +53,13 @@ TARGET_LINK_LIBRARIES(cogutil
 	${Boost_SYSTEM_LIBRARY}
 	${Boost_REGEX_LIBRARY}
 	${Boost_THREAD_LIBRARY}
+	${BFD_LIBRARY}
 )
 
 INSTALL(FILES
 	ansi.h
 	algorithm.h
+	backtrace-symbols.h
 	based_variant.h
 	cluster.h
 	comprehension.h

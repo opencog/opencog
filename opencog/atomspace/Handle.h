@@ -87,6 +87,8 @@ public:
         return *this;
     }
 
+    Handle& operator=(const AtomPtr& a);
+
     inline Atom* operator->() {
         Atom* ptr = _ptr.get();
         if (ptr) return ptr;

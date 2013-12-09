@@ -24,6 +24,7 @@
 ; -- cog-filter-incoming -- filter atoms of given type from incoming set.
 ; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
+; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
 ; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
@@ -375,6 +376,25 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-chase-link-chk -- chase a link with checking
+;
+; cog-chase-link link-type endpoint-type anchor anchor-type
+'
+; Same as above, but throws an error if anchor is not an atom of
+; 'anchor-type'.
+;
+(define (cog-chase-link-chk link-type endpoint-type anchor anchor-type)
+	(let ((lst '()))
+		(define (mklist inst)
+			(set! lst (cons inst lst))
+			#f
+		)
+		(cog-map-chase-links-chk link-type endpoint-type mklist anchor anchor-type)
+		lst
+	)
+)
+
+; -----------------------------------------------------------------------
 ; cog-map-chase-link -- Invoke proc on atom connected through type.
 ;
 ; Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
@@ -440,7 +460,7 @@
 		; If we are here, then anchor is a list. Recurse.
 		(map 
 			(lambda (one-of)
-				(cog-map-chase-links link-type endpoint-type proc one-of)
+				(cog-map-chase-links-chk link-type endpoint-type proc one-of anchor-type)
 			)
 		anchor)
 		; If we are here, then its a singleton. Verify type.
