@@ -16,7 +16,7 @@ class TemporalEvent(list, TimeInterval):
     _beginning = None
     _ending = None
     _dict = None
-    _formula_creator = None
+    _formula_creator = FormulaCreator(TemporalFormulaConvolution())
 
     def __init__(self, distribution_beginning, distribution_ending,
                  bins=50, distribution_integral_limit=DISTRIBUTION_INTEGRAL_LIMIT):
@@ -39,7 +39,6 @@ class TemporalEvent(list, TimeInterval):
         bins_ending = bins - bins_beginning
         self.interval_beginning = TimeInterval(a, beginning, bins_beginning)
         self.interval_ending = TimeInterval(ending, b, bins_ending)
-        self._formula_creator = FormulaCreator(TemporalFormulaConvolution())
         list.__init__(self, self.interval_beginning + self.interval_ending)
         TimeInterval.__init__(self, a, b, bins)
 
