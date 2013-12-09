@@ -4057,6 +4057,27 @@ void OCPlanner::loadTestRulesFromCodes()
     ispeopleStateOwnerList5.push_back(man_5);
     State* ispeopleState5 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList5);
 
+    // additional preconditions: man_2, man_3, man_4, man_5 are not the same to man_1
+    vector<ParamValue> isNotSameOwnerList1;
+    isNotSameOwnerList1.push_back(man_1);
+    isNotSameOwnerList1.push_back(man_2);
+    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+    vector<ParamValue> isNotSameOwnerList2;
+    isNotSameOwnerList2.push_back(man_1);
+    isNotSameOwnerList2.push_back(man_3);
+    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame);
+
+    vector<ParamValue> isNotSameOwnerList3;
+    isNotSameOwnerList3.push_back(man_1);
+    isNotSameOwnerList3.push_back(man_4);
+    State* isNotSameState3 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList3,true, &Inquery::inqueryIsSame);
+
+    vector<ParamValue> isNotSameOwnerList4;
+    isNotSameOwnerList4.push_back(man_1);
+    isNotSameOwnerList4.push_back(man_5);
+    State* isNotSameState4 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList4,true, &Inquery::inqueryIsSame);
+
     // precondition 6-9 : other people do not live in house_1
     vector<ParamValue> notlivesInStateOwnerList1;
     notlivesInStateOwnerList1.push_back(man_2);
@@ -4090,6 +4111,12 @@ void OCPlanner::loadTestRulesFromCodes()
     notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState3);
     notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState4);
     notLiveInOtherPeoplesHouseRule->addPrecondition(ispeopleState5);
+
+    notLiveInOtherPeoplesHouseRule->addPrecondition(isNotSameState1);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(isNotSameState2);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(isNotSameState3);
+    notLiveInOtherPeoplesHouseRule->addPrecondition(isNotSameState4);
+
     notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState1);
     notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState2);
     notLiveInOtherPeoplesHouseRule->addPrecondition(notlivesInState3);
@@ -4143,6 +4170,12 @@ void OCPlanner::loadTestRulesFromCodes()
     notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState3);
     notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState4);
     notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState5);
+
+    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState1);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState2);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState3);
+    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState4);
+
     notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState1);
     notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState2);
     notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState3);
@@ -4197,6 +4230,12 @@ void OCPlanner::loadTestRulesFromCodes()
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState4);
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState5);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState3);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState4);
+
     notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
     notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
     notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState3);
@@ -4252,6 +4291,12 @@ void OCPlanner::loadTestRulesFromCodes()
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState4);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState5);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState3);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState4);
+
     notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState3);
