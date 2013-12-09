@@ -3767,6 +3767,15 @@ void OCPlanner::loadTestRulesFromCodes()
 
     // precondition 1: var_man_x is people
 
+    // precondition : var_house_x and var_house_y are house
+    vector<ParamValue> isVarXHouseStateOwnerList;
+    isVarXHouseStateOwnerList.push_back(var_house_x);
+    State* isVarXHouseState = new State("is_house",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isVarXHouseStateOwnerList);
+
+    vector<ParamValue> isVarYHouseStateOwnerList;
+    isVarYHouseStateOwnerList.push_back(var_house_y);
+    State* isVarYHouseState = new State("is_house",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isVarYHouseStateOwnerList);
+
     // precondition 2: var_man_x  smokes Blends
     vector<ParamValue> smokeBlendsStateOwnerList;
     smokeBlendsStateOwnerList.push_back(var_man_x);
@@ -3802,6 +3811,8 @@ void OCPlanner::loadTestRulesFromCodes()
     Rule* blendSmokerNextToCatKeeperRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
     blendSmokerNextToCatKeeperRule->ruleName = "blendSmokerNextToCatKeeperRule";
     blendSmokerNextToCatKeeperRule->addPrecondition(peopleState1);
+    blendSmokerNextToCatKeeperRule->addPrecondition(isVarXHouseState);
+    blendSmokerNextToCatKeeperRule->addPrecondition(isVarYHouseState);
     blendSmokerNextToCatKeeperRule->addPrecondition(smokeBlendsState);
     blendSmokerNextToCatKeeperRule->addPrecondition(liveInXHouseState);
     blendSmokerNextToCatKeeperRule->addPrecondition(peopleState2);
@@ -4188,7 +4199,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: if other 4 people do not keep pet_x, then man_1 keeps it--------------------------------------
     // define variables:
-    ParamValue pet_man_1 = str_var[0];
+    ParamValue man_1_pet = str_var[0];
     ParamValue pet_x = str_var[1];
 
     // precondition 0: pet_x is pet
@@ -4218,7 +4229,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // effect1: man_1 keeps pet_x
     vector<ParamValue> keepXStateOwnerList;
     keepXStateOwnerList.push_back(man_1);
-    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_man_1, keepXStateOwnerList);
+    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList);
     Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
 
     // add rule:
@@ -4307,6 +4318,146 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(notDrinkOtherPeoplesDrinkRule);
     //----------------------------End Rule:  if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------------------
 
+    //----------------------------Begin Rule: if var_man_x lives in var_house_x, and var_house_x is not the same to var_house_y, then var_man_x doesn't live in var_house_y-------
+    // precondition 0: var_house_x and house_y are pets
+
+    // precondition 1: var_man_x lives in var_house_x
+
+    // precondition 2:  var_house_x is not the same to var_house_y
+    vector<ParamValue> houseXYisNotSameOwnerList1;
+    houseXYisNotSameOwnerList1.push_back(var_house_x);
+    houseXYisNotSameOwnerList1.push_back(var_house_y);
+    State* houseXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", houseXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+    // effect 1: var_man_x doesn't live in var_house_y
+    Effect* notLiveInHouseYStateEffect = new Effect(liveInXHouseState, OP_ASSIGN_NOT_EQUAL_TO, var_house_y,true);
+
+    Rule* ifLivesinHouseXThenNotLivesinYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifLivesinHouseXThenNotLivesinYRule->ruleName = "ifLivesinHouseXThenNotLivesinYRule";
+    ifLivesinHouseXThenNotLivesinYRule->addPrecondition(peopleState1);
+    ifLivesinHouseXThenNotLivesinYRule->addPrecondition(isVarXHouseState);
+    ifLivesinHouseXThenNotLivesinYRule->addPrecondition(isVarYHouseState);
+    ifLivesinHouseXThenNotLivesinYRule->addPrecondition(liveInXHouseState);
+    ifLivesinHouseXThenNotLivesinYRule->addPrecondition(houseXYisNotSameState1);
+
+    ifLivesinHouseXThenNotLivesinYRule->addEffect(EffectPair(1.0f,notLiveInHouseYStateEffect));
+
+    this->AllRules.push_back(ifLivesinHouseXThenNotLivesinYRule);
+
+    //----------------------------End Rule: if man_1 lives in house_x, and house_x is not the same to house_y, then man_1 doesn't live in house_y-------
+
+    //----------------------------Begin Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+    // define variables:
+    ParamValue pet_y = str_var[2];
+
+    // precondition 0: pet_y is pet
+    vector<ParamValue> isPetyStateOwnerList1;
+    isPetyStateOwnerList1.push_back(pet_x);
+    State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1);
+
+    // precondition 1: man_1 keeps pet_x
+    vector<ParamValue> keepXStateOwnerList2;
+    keepXStateOwnerList2.push_back(man_1);
+    State* keepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_x, keepXStateOwnerList2);
+
+    // precondition 2: pet_x is not the same to pet_y
+    vector<ParamValue> petXYisNotSameOwnerList1;
+    petXYisNotSameOwnerList1.push_back(pet_x);
+    petXYisNotSameOwnerList1.push_back(pet_y);
+    State* petXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+    // effect 1: man_1 doesn't keep pet_y
+    Effect* notkeepYStateEffect = new Effect(keepXState2, OP_ASSIGN_NOT_EQUAL_TO, pet_y,true);
+
+    // add rule:
+    Rule* ifKeepsPetXThenNotKeepYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifKeepsPetXThenNotKeepYRule->ruleName = "ifKeepsPetXThenNotKeepYRule";
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(ispeopleState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetyState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(keepXState2);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(petXYisNotSameState1);
+
+    ifKeepsPetXThenNotKeepYRule->addEffect(EffectPair(1.0f,notkeepYStateEffect));
+
+    this->AllRules.push_back(ifKeepsPetXThenNotKeepYRule);
+    //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+
+    //----------------------------Begin Rule:  if man_1 smokes brand_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
+    // define variables:
+    ParamValue brand_y = str_var[2];
+
+    // precondition 0: peopleState1
+    // precondition 1: brand_x and brand_y is cigaretteBrand
+    vector<ParamValue> isBrandStateOwnerList2;
+    isBrandStateOwnerList2.push_back(brand_y);
+    State* isBrandState2 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList2);
+
+    // precondition 2: man_1 smokes brand_x
+    vector<ParamValue> smokeXStateOwnerList2;
+    smokeXStateOwnerList2.push_back(man_1);
+    State* smokeXState2 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,brand_x, smokeXStateOwnerList2);
+
+    // precondition 3:  brand_x is not the same to brand_y
+    vector<ParamValue> brandXYisNotSameOwnerList1;
+    brandXYisNotSameOwnerList1.push_back(brand_x);
+    brandXYisNotSameOwnerList1.push_back(brand_y);
+    State* brandXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", brandXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+    // effect 1: man_1 doesn't smokes brand_y
+    Effect* notSmokeYStateEffect = new Effect(smokeXState2, OP_ASSIGN_NOT_EQUAL_TO, brand_y,true);
+
+    // add rule:
+    Rule* ifSmokesBrandXThenNotSmokesYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifSmokesBrandXThenNotSmokesYRule->ruleName = "ifSmokesBrandXThenNotSmokesYRule";
+    ifSmokesBrandXThenNotSmokesYRule->addPrecondition(ispeopleState1);
+    ifSmokesBrandXThenNotSmokesYRule->addPrecondition(isBrandState1);
+    ifSmokesBrandXThenNotSmokesYRule->addPrecondition(isBrandState2);
+    ifSmokesBrandXThenNotSmokesYRule->addPrecondition(smokeXState2);
+    ifSmokesBrandXThenNotSmokesYRule->addPrecondition(brandXYisNotSameState1);
+
+    ifSmokesBrandXThenNotSmokesYRule->addEffect(EffectPair(1.0f,notSmokeYStateEffect));
+
+    this->AllRules.push_back(ifSmokesBrandXThenNotSmokesYRule);
+    //----------------------------End Rule:  if man_1 smokes brand_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
+
+    //----------------------------Begin Rule:  if man_1 drinks drink_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
+    ParamValue drink_y = str_var[2];
+
+    // precondition 0: peopleState1
+
+    // precondition 1: drink_x drink_y are drink
+    vector<ParamValue> isDrinkStateOwnerList2;
+    isDrinkStateOwnerList2.push_back(drink_y);
+    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2);
+
+    // precondition 2: man_1 drinks drink_x
+    vector<ParamValue> drinkXStateOwnerList1;
+    drinkXStateOwnerList1.push_back(man_1);
+    State* drinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_x, drinkXStateOwnerList1);
+
+    // precondition 3: brand_x is not the same to brand_y
+    vector<ParamValue> drinkXYisNotSameOwnerList1;
+    drinkXYisNotSameOwnerList1.push_back(drink_x);
+    drinkXYisNotSameOwnerList1.push_back(drink_y);
+    State* drinkXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+    // effect1: man_1 drinks drink_x
+    Effect* notdrinkYEffect = new Effect(drinkXState1, OP_ASSIGN_NOT_EQUAL_TO, drink_y,true);
+
+    // add rule:
+    Rule* ifDrinkXThenNotDrinkYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifDrinkXThenNotDrinkYRule->ruleName = "ifDrinkXThenNotDrinkYRule";
+    ifDrinkXThenNotDrinkYRule->addPrecondition(ispeopleState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState2);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXYisNotSameState1);
+
+    ifDrinkXThenNotDrinkYRule->addEffect(EffectPair(1.0f,notdrinkYEffect));
+
+    this->AllRules.push_back(ifSmokesBrandXThenNotSmokesYRule);
+    //----------------------------ENd Rule:  if man_1 drinks drink_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
 }
 
 
