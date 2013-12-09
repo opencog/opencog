@@ -158,7 +158,7 @@ class CogServer;
                  "opencog::" #mod_type));                             \
                                                                       \
         std::string rs = mod->do_cmd(this, _parameters);              \
-        oss << rs << std::endl;                                       \
+        oss << rs;                                                    \
                                                                       \
         if (_mimeType == "text/plain")                                \
             send(oss.str());                                          \

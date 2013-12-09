@@ -171,8 +171,10 @@ void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
 
     // The user is exiting the shell. No one will ever call a method on
     // this instance ever again. So stop hogging space, and self-destruct.
+    // We have to do this here; there is no other opportunity to call dtor.
     if (self_destruct)
     {
+        socket->sendPrompt();
         delete this;
     }
 }
