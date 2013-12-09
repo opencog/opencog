@@ -97,7 +97,9 @@
 		)
 	)
 )
-	
+
+
+delete-sentences
 
 (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
 	(get-new-parsed-sentences)
@@ -108,3 +110,5 @@
 (map-lg-links prt
 	(get-new-parsed-sentences)
 )
+
+

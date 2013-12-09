@@ -467,6 +467,24 @@ which returns the UUID:
 
 Using SQL Persistence from Scheme
 ---------------------------------
+SQL fetch from storage is not fully automatic at this time. This is to
+allay performance concerns: we don't want to be constantly querying the
+database every time some atom is needed. In particular: NOTE THIS IS 
+IMPORTANT: the incoming set of an atom is not automatically fecthed from
+storage.  This must be done manually, using either C++:
+
+   AtomSpace::getImpl()->fetchIncomingSet(h, true);
+
+or the scheme call
+
+  (fetch-incoming-set atom)
+
+If the numeric uuid for an atom is known, but the atom itsself is not,
+then the scheme call
+
+   (fetch-atom handle)
+
+can be used to pull an atom into the AtomSpace from the database server.
 
 
 Copying Databases

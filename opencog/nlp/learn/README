@@ -17,3 +17,14 @@ Steps:
 5) Run the RelEx opencog-server.sh shell script
 
 6)
+
+
+
+Notes:
+------
+
+*new-parsed-sent-anchor*
+(cog-incoming-set *new-parsed-sent-anchor*)
+
+
+(fetch-incoming-set *new-parsed-sent-anchor*)
