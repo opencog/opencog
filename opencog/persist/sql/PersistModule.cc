@@ -191,6 +191,9 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	return "Database store completed\n";
 }
 
+// XXX TODO: the three methods  below really belong in their own
+// module, independent of this SQL module; they would be applicable for
+// any backend, not just the SQL backend.
 Handle PersistModule::fetch_atom(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();

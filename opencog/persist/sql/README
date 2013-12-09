@@ -482,9 +482,16 @@ or the scheme call
 If the numeric uuid for an atom is known, but the atom itsself is not,
 then the scheme call
 
-   (fetch-atom handle)
+   (fetch-atom atom)
 
 can be used to pull an atom into the AtomSpace from the database server.
+
+To force an atom to be saved, call:
+
+   (store-atom atom)
+
+XXX TODO: there is currently no day to delete an atom fromthe database,
+once its in there. This needs fixing ...
 
 
 Copying Databases
