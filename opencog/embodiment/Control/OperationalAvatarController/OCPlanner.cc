@@ -1125,7 +1125,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,true,false,(*oldValItor));
+            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,false,false,(*oldValItor));
             OC_ASSERT( ( effState != 0),
                       "OCPlanner::doPlanning: effect state: %s is not able to be grounded.\n",
                        e->state->name().c_str());

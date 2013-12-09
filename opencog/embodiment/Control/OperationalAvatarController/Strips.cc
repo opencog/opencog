@@ -1017,8 +1017,8 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         }
     }
 
-    // check the state value
-    if (toGroundStateValue && isParameterUnGrounded(*(s->stateVariable)))
+    // try to ground the state value if it is ungrounded
+    if (isParameterUnGrounded(*(s->stateVariable)))
     {
         // if the state value is assigned
         if ( !(knownStateVal == UNDEFINED_VALUE))
@@ -1033,7 +1033,7 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
                 groundedState->stateVariable->assignValue(paramMapIt->second);
             else if (ifRealTimeQueryStateValue)
                 groundedState->stateVariable->assignValue(groundedState->getParamValue());
-            else
+            else if (toGroundStateValue)
             {
                 delete groundedState;
                 return 0;
