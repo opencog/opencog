@@ -315,7 +315,7 @@ ParamValue Inquery::inqueryIsSame(const vector<ParamValue>& stateOwnerList)
 
     if (concept1 && concept2)
     {
-        if (concept1 == concept2)
+        if ((*concept1) == (*concept2))
             return opencog::oac::SV_TRUE;
         else
             return opencog::oac::SV_FALSE;
