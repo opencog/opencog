@@ -2610,27 +2610,33 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     ParamGroundedMapInARule oneGroupCandidate;
                     int index = 0;
 
-                    cout<<"CandidateGroup "<< candidateGroupNum ++ << std::endl;
+                    string outputVarStr;
 
                     foreach (Handle h, candidateHandlesInOneGroup)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
-                        cout<<varNames[index]<< "= " << ActionParameter::ParamValueToString(v) << std::endl;
+                        outputVarStr = varNames[index] + "= " + ActionParameter::ParamValueToString(v) + "\n";
                         index ++;
                     }
 
                     bool impossile;
                     float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
 
-                    cout << "Fitness score = " << fitnessScore ;
-                    if (impossile)
-                        cout << " , impossible bindings, would not be put into candidate list. " ;
+//                    cout << "Fitness score = " << fitnessScore ;
+//                    if (impossile)
+//                        cout << " , impossible bindings, would not be put into candidate list. " ;
 
-                    cout << std::endl;
+
 
                     if (! impossile)
+                    {
+                        cout<< "CandidateGroup "<< candidateGroupNum ++ << std::endl;
+                        cout<< outputVarStr;
+                        cout << "Fitness score = " << fitnessScore << std::endl;
+
                         tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
+                    }
 
                 }
 
@@ -2653,6 +2659,10 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
         list< TmpParamCandidate >::iterator tmpIt;
         for(tmpIt = tmpcandidates.begin(); tmpIt != tmpcandidates.end(); ++ tmpIt)
             ruleNode->ParamCandidates.push_back(((TmpParamCandidate&)(*tmpIt)).aGroupOfParmCandidate);
+
+        // test
+        if (tmpcandidates.size() > 0)
+            break;
 
     }
 
@@ -4350,12 +4360,12 @@ void OCPlanner::loadTestRulesFromCodes()
     // define variables:
     ParamValue pet_y = str_var[2];
 
-    // precondition 0: pet_y is pet
+    // precondition 0: pet_x pet_y is pet
     vector<ParamValue> isPetyStateOwnerList1;
-    isPetyStateOwnerList1.push_back(pet_x);
+    isPetyStateOwnerList1.push_back(pet_y);
     State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1);
 
-    // precondition 1: man_1 keeps pet_x
+    // precondition 1: man_1 keepsl pet_x
     vector<ParamValue> keepXStateOwnerList2;
     keepXStateOwnerList2.push_back(man_1);
     State* keepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_x, keepXStateOwnerList2);
