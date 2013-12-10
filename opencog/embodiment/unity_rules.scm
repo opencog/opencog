@@ -928,6 +928,7 @@
    (PredicateNode "is_color")
    (ListLink
       (ConceptNode "red")
+      (ConceptNode "true")
    )
 )
 
@@ -935,6 +936,7 @@
    (PredicateNode "is_color")
    (ListLink
       (ConceptNode "green")
+      (ConceptNode "true")
    )
 )
 
@@ -942,6 +944,7 @@
    (PredicateNode "is_color")
    (ListLink
       (ConceptNode "white")
+      (ConceptNode "true")
    )
 )
 
@@ -949,6 +952,7 @@
    (PredicateNode "is_color")
    (ListLink
       (ConceptNode "yellow")
+      (ConceptNode "true")
    )
 )
 
@@ -956,6 +960,7 @@
    (PredicateNode "is_color")
    (ListLink
       (ConceptNode "blue")
+      (ConceptNode "true")
    )
 )
 
@@ -965,6 +970,7 @@
    (PredicateNode "is_nation")
    (ListLink
       (ConceptNode "British")
+      (ConceptNode "true")
    )
 )
 
@@ -972,6 +978,7 @@
    (PredicateNode "is_nation")
    (ListLink
       (ConceptNode "Swedish")
+      (ConceptNode "true")
    )
 )
 
@@ -979,6 +986,7 @@
    (PredicateNode "is_nation")
    (ListLink
       (ConceptNode "Danish")
+      (ConceptNode "true")
    )
 )
 
@@ -986,6 +994,7 @@
    (PredicateNode "is_nation")
    (ListLink
       (ConceptNode "Norwegian")
+      (ConceptNode "true")
    )
 )
 
@@ -993,6 +1002,7 @@
    (PredicateNode "is_nation")
    (ListLink
       (ConceptNode "German")
+      (ConceptNode "true")
    )
 )
 
@@ -1012,6 +1022,7 @@
    (PredicateNode "is_pet")
    (ListLink
       (ConceptNode "dogs")
+      (ConceptNode "true")
    )
 )
 
@@ -1019,6 +1030,7 @@
    (PredicateNode "is_pet")
    (ListLink
       (ConceptNode "birds")
+      (ConceptNode "true")
    )
 )
 
@@ -1026,6 +1038,7 @@
    (PredicateNode "is_pet")
    (ListLink
       (ConceptNode "cats")
+      (ConceptNode "true")
    )
 )
 
@@ -1033,6 +1046,7 @@
    (PredicateNode "is_pet")
    (ListLink
       (ConceptNode "horse")
+      (ConceptNode "true")
    )
 )
 
@@ -1040,6 +1054,7 @@
    (PredicateNode "is_pet")
    (ListLink
       (ConceptNode "fish")
+      (ConceptNode "true")
    )
 )
 
@@ -1050,6 +1065,7 @@
    (PredicateNode "is_cigaretteBrand")
    (ListLink
       (ConceptNode "pallMall")
+      (ConceptNode "true")
    )
 )
 
@@ -1057,6 +1073,7 @@
    (PredicateNode "is_cigaretteBrand")
    (ListLink
       (ConceptNode "dunhill")
+      (ConceptNode "true")
    )
 )
 
@@ -1064,6 +1081,7 @@
    (PredicateNode "is_cigaretteBrand")
    (ListLink
       (ObjectNode "blend")
+      (ConceptNode "true")
    )
 )
 
@@ -1071,6 +1089,7 @@
    (PredicateNode "is_cigaretteBrand")
    (ListLink
       (ConceptNode "bluemaster")
+      (ConceptNode "true")
    )
 )
 
@@ -1078,6 +1097,7 @@
    (PredicateNode "is_cigaretteBrand")
    (ListLink
       (ConceptNode "prince")
+      (ConceptNode "true")
    )
 )
 
@@ -1087,6 +1107,7 @@
    (PredicateNode "is_drink")
    (ListLink
       (ConceptNode "tea")
+      (ConceptNode "true")
    )
 )
 
@@ -1094,6 +1115,7 @@
    (PredicateNode "is_drink")
    (ListLink
       (ConceptNode "coffee")
+      (ConceptNode "true")
    )
 )
 
@@ -1101,6 +1123,7 @@
    (PredicateNode "is_drink")
    (ListLink
       (ConceptNode "milk")
+      (ConceptNode "true")
    )
 )
 
@@ -1108,6 +1131,7 @@
    (PredicateNode "is_drink")
    (ListLink
       (ConceptNode "beer")
+      (ConceptNode "true")
    )
 )
 
@@ -1115,6 +1139,7 @@
    (PredicateNode "is_drink")
    (ListLink
       (ConceptNode "water")
+      (ConceptNode "true")
    )
 )
 
@@ -1123,6 +1148,7 @@
    (PredicateNode "is_house")
    (ListLink
       (ObjectNode "firstHouse")
+      (ConceptNode "true")
    )
 )
 
@@ -1130,6 +1156,7 @@
    (PredicateNode "is_house")
    (ListLink
       (ObjectNode "secondHouse")
+      (ConceptNode "true")
    )
 )
 
@@ -1137,6 +1164,7 @@
    (PredicateNode "is_house")
    (ListLink
       (ObjectNode "thirdHouse")
+      (ConceptNode "true")
    )
 )
 
@@ -1144,6 +1172,7 @@
    (PredicateNode "is_house")
    (ListLink
       (ObjectNode "fourthHouse")
+      (ConceptNode "true")
    )
 )
 
@@ -1151,6 +1180,7 @@
    (PredicateNode "is_house")
    (ListLink
       (ObjectNode "fifthHouse")
+      (ConceptNode "true")
    )
 )
 
