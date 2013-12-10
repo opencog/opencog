@@ -88,7 +88,6 @@ class PythonThreadLocker
 class PythonEval : public GenericEval
 {
     private:
-
         void init(void);
         void add_module_directory(const boost::filesystem::path &p);
         void add_module_file(const boost::filesystem::path &p);
@@ -116,7 +115,6 @@ class PythonEval : public GenericEval
         PyObject* sys_path;
 
         std::map <std::string, PyObject*> modules;
-        std::string expr;
 
     public:
         void addModuleFromPath(std::string path);
@@ -149,9 +147,6 @@ class PythonEval : public GenericEval
 
         std::string apply_script(const std::string& script);
         Handle apply(const std::string& func, Handle varargs);
-
-
-
 };
 
 } /* namespace opencog */

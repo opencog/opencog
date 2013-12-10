@@ -39,10 +39,15 @@ namespace opencog {
 class GenericEval
 {
 	protected:
+		std::string _input_line;
 		bool _pending_input;
+		bool _caught_error;
 
 	public:
-		GenericEval(void) : _pending_input(false) {}
+		GenericEval(void) :
+			_input_line(""),
+			_pending_input(false),
+			_caught_error(false) {}
 		virtual ~GenericEval() {}
 
 		/**
@@ -59,7 +64,17 @@ class GenericEval
 		 */
 		virtual void clear_pending()
 		{
+			_input_line = "";
 			_pending_input = false;
+			_caught_error = false;
+		}
+
+		/**
+		 * Return true if an error occured during the evaluation of the expression
+		 */
+		virtual bool eval_error(void)
+		{
+			return _caught_error;
 		}
 
 		virtual std::string eval(const std::string&) = 0;

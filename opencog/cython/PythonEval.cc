@@ -418,22 +418,27 @@ std::string PythonEval::eval(const std::string& partial_expr)
     if (partial_expr == "\n")
     {
         _pending_input = false;
-        result = this->apply_script(this->expr);
-        this->expr = "";
+        result = this->apply_script(_input_line);
+        _input_line = "";
     }
     else
     {
+        // If the line ends with a colon, its not a complete expression,
+        // and we must wait for more input.
+        // XXX FIXME TODO: the same might be true if there was an open
+        // parenthesis, and no close parentheis.  This neds to be
+        // scanned for and fixed.
         size_t size = partial_expr.size();
         size_t colun = partial_expr.find_last_of(':');
         if (size-2 == colun)
             _pending_input = true;
 
-        this->expr += partial_expr;
+        _input_line += partial_expr;
 
         if (not _pending_input)
         {
-            result = this->apply_script(this->expr);
-            this->expr = "";
+            result = this->apply_script(_input_line);
+            _input_line = "";
         }
     }
     return result;

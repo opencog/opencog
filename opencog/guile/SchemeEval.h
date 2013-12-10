@@ -46,9 +46,6 @@ class SchemeEval : public GenericEval
 		const std::string *pexpr;
 		std::string answer;
 		
-		std::string input_line;
-		bool pending_input;
-	
 		// straight-up evaluation
 		static SCM wrap_scm_eval(void *);
 		SCM do_scm_eval(SCM);
@@ -68,7 +65,6 @@ class SchemeEval : public GenericEval
 		static SCM catch_handler_wrapper(void *, SCM, SCM);
 		SCM preunwind_handler(SCM, SCM);
 		SCM catch_handler(SCM, SCM);
-		bool caught_error;
 	
 		// printing of basic types
 		static std::string prt(SCM);
@@ -95,9 +91,6 @@ class SchemeEval : public GenericEval
 
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
-	
-		void clear_pending(void);
-		bool eval_error(void);
 	
 		// Someone thinks that there is some scheme threading bug somewhere,
 		// and the current hack around this is to use a singleton instance.
