@@ -93,51 +93,6 @@ public:
         }
     }
 
-    //static std::string typeToStr(TruthValueType t);
-    void testTypeToStr() {
-        //logger().debug("testTypeToStr()");
-        TS_ASSERT(!strcmp(TruthValue::typeToStr(SIMPLE_TRUTH_VALUE), "SIMPLE_TRUTH_VALUE"));
-        TS_ASSERT(!strcmp(TruthValue::typeToStr(INDEFINITE_TRUTH_VALUE), "INDEFINITE_TRUTH_VALUE"));
-        TS_ASSERT(!strcmp(TruthValue::typeToStr(COMPOSITE_TRUTH_VALUE), "COMPOSITE_TRUTH_VALUE"));
-        TS_ASSERT_THROWS(TruthValue::typeToStr(NUMBER_OF_TRUTH_VALUE_TYPES), InvalidParamException&);
-    }
-
-    //static const TruthValueType strToType(char* s);
-    void testStrToType() {
-        //logger().debug("testStrToType()");
-        TS_ASSERT(TruthValue::strToType("SIMPLE_TRUTH_VALUE") == SIMPLE_TRUTH_VALUE);
-        TS_ASSERT(TruthValue::strToType("INDEFINITE_TRUTH_VALUE") == INDEFINITE_TRUTH_VALUE);
-        TS_ASSERT(TruthValue::strToType("COMPOSITE_TRUTH_VALUE") == COMPOSITE_TRUTH_VALUE);
-        TS_ASSERT_THROWS(TruthValue::strToType("INVALID_TRUTH_VALUE_TYPE"), InvalidParamException&);
-    }
-
-    void testFactoryCharPtr() {
-        //logger().debug("testFactoryCharPtr()");
-        std::string tvStr;
-        for (int i = 0; i < NUM_TVS; i++) {
-            tvStr = TruthValue::typeToStr(tvs[i]->getType());
-            tvStr += " ";
-            tvStr += tvs[i]->toString();
-            TruthValuePtr tv = TruthValue::factory(tvStr.c_str());
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            TS_ASSERT(fabs(tv->getMean()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getCount()  - tvs[i]->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getConfidence() - tvs[i]->getConfidence() ) <= FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
-    //static TruthValue* factory(TruthValueType, char *);
-    void testFactoryTruthValueTypeCharPtr() {
-        //logger().debug("testFactoryTruthValueTypeCharPtr()");
-        for (int i = 0; i < NUM_TVS; i++) {
-            TruthValuePtr tv = TruthValue::factory(tvs[i]->getType(), tvs[i]->toString().c_str());
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            TS_ASSERT(fabs(tv->getMean()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getCount()  - tvs[i]->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(tv->getConfidence() - tvs[i]->getConfidence() ) <= FLOAT_ACCEPTABLE_ERROR);
-        }
-    }
-
     void testMerge() {
         //logger().debug("testMerge()");
         TruthValuePtr mergedTv;

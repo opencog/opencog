@@ -312,19 +312,3 @@ std::string IndefiniteTruthValue::toString() const
             symmetric);
     return buf;
 }
-
-IndefiniteTruthValuePtr IndefiniteTruthValue::fromString(const char* tvStr)
-{
-    float m, l, u, c, d;
-    int s;
-    sscanf(tvStr, "[%f,%f,%f,%f,%f,%d]", &m, &l, &u, &c, &d, &s);
-    DPRINTF("IndefiniteTruthValue::fromString(%s) => mean = %f, L = %f, U = %f, confLevel = %f, diff = %f, symmetric = %d\n", tvStr, m, l, u, c, d, s);
-    IndefiniteTruthValuePtr result(
-        std::make_shared<IndefiniteTruthValue>(static_cast<strength_t>(l),
-                                 static_cast<strength_t>(u),
-                                 static_cast<confidence_t>(c)));
-    result->setDiff(static_cast<strength_t>(d));
-    result->symmetric = s != 0;
-    result->setMean(static_cast<strength_t>(m));
-    return result;
-}

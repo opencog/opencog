@@ -73,11 +73,6 @@ class CompositeTruthValue: public TruthValue
 private:
     TruthValuePtr primaryTV;
     VersionedTruthValueMap versionedTVs;
-    static TruthValuePtr SetDefaultTVIfPertinent(TruthValuePtr);
-
-    //! Special constructor for use by the fromString() method.
-    CompositeTruthValue();
-
 public:
     /**
      * @param The initial primary or versioned TV of this composite TV.
@@ -111,8 +106,6 @@ public:
     TruthValuePtr merge(TruthValuePtr) const;
 
     virtual bool operator==(const TruthValue& rhs) const;
-    static CompositeTruthValuePtr fromString(const char*)
-        throw (InvalidParamException);
     
     /**
      * @return The mean of the primary TruthValue
