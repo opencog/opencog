@@ -74,6 +74,7 @@ class PersistUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
+		void kill_data(void);
 
 		void freindlyFailMessage()
 		{
@@ -92,6 +93,7 @@ class PersistUTest :  public CxxTest::TestSuite
 
 		void add_to_space(int, AtomSpace *, std::string id);
 		void check_space(int, AtomSpace *, std::string id);
+		void check_empty(int, AtomSpace *, std::string id);
 
 		void test_atomspace(void);
 };
@@ -129,6 +131,7 @@ PersistUTest:: PersistUTest(void)
 
 	Module* m = cogserver().getModule("opencog::PersistModule");
 	_pm = dynamic_cast<PersistModule*>(m);
+	_as = &cogserver().getAtomSpace();
 }
 
 /*
@@ -136,9 +139,13 @@ PersistUTest:: PersistUTest(void)
  */
 void PersistUTest::setUp(void)
 {
-	CogServer& cogserve = cogserver();
-	_as = &cogserve.getAtomSpace();
+	kill_data();
+}
 
+// ============================================================
+
+void PersistUTest::kill_data(void)
+{
 	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
 	{
@@ -250,6 +257,26 @@ void PersistUTest::check_space(int idx, AtomSpace *space, std::string id)
 	atomCompare(hl[idx], hlb);
 }
 
+void PersistUTest::check_empty(int idx, AtomSpace *space, std::string id)
+{
+	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
+
+	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb2 == Handle::UNDEFINED);
+
+	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	TSM_ASSERT("Should not find this atom", hb3 == Handle::UNDEFINED);
+
+	std::vector<Handle> hvec;
+	hvec.push_back(h1[idx]);
+	hvec.push_back(h2[idx]);
+	hvec.push_back(h3[idx]);
+
+	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	TSM_ASSERT("Should not find this atom", hlb == Handle::UNDEFINED);
+}
+
 // ============================================================
 
 void PersistUTest::test_atomspace(void)
@@ -285,7 +312,7 @@ void PersistUTest::test_atomspace(void)
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
 
-	/* Verify that the atoms can still be fetched from storage */
+	/* Verify that the atoms can still be fetched from storage. */
 	idx = 0;
 	check_space(idx++, _as, "aaa ");
 	check_space(idx++, _as, "bbb ");
@@ -293,19 +320,31 @@ void PersistUTest::test_atomspace(void)
 	check_space(idx++, _as, "ddd ");
 	check_space(idx++, _as, "eee ");
 
-/*********
-	// Copy atoms; the original atoms will be blown away
-	// when deleted. 
-	int mi = idx;
-	for (idx=0; idx < mi; idx++)
-	{
-		n1[idx] = createNode(*n1[idx]); a1[idx] = n1[idx];
-		n2[idx] = createNode(*n2[idx]); a2[idx] = n2[idx];
-		n3[idx] = createNode(*n3[idx]); a3[idx] = n3[idx];
-		l[idx]  = createLink(*l[idx]);  al[idx] = l[idx];
-	}
+	/* Do it again, for good luck.  */
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
 
-*************/
+	/* Verify that the atoms can still be fetched from storage. */
+	idx = 0;
+	check_space(idx++, _as, "aaa ");
+	check_space(idx++, _as, "bbb ");
+	check_space(idx++, _as, "ccc ");
+	check_space(idx++, _as, "ddd ");
+	check_space(idx++, _as, "eee ");
+
+	/* Kill data for good */
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+	kill_data();
+
+	/* Verify that the atoms no longer being found. */
+	idx = 0;
+	check_empty(idx++, _as, "aaa ");
+	check_empty(idx++, _as, "bbb ");
+	check_empty(idx++, _as, "ccc ");
+	check_empty(idx++, _as, "ddd ");
+	check_empty(idx++, _as, "eee ");
+
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
