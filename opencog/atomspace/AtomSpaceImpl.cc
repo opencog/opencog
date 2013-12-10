@@ -246,6 +246,11 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
     return Handle::UNDEFINED;
 }
 
+void AtomSpaceImpl::storeAtom(Handle h)
+{
+    if (backing_store) backing_store->storeAtom(h);
+}
+
 Handle AtomSpaceImpl::fetchAtom(Handle h)
 {
     // No-op if we've already got this handle.

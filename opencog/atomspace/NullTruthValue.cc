@@ -74,7 +74,7 @@ TruthValuePtr NullTruthValue::merge(TruthValuePtr) throw (RuntimeException)
 
 TruthValuePtr NullTruthValue::clone() const
 {
-    const TruthValuePtr nullo(new NullTruthValue());
+    static TruthValuePtr nullo(new NullTruthValue());
     return nullo;
 }
 

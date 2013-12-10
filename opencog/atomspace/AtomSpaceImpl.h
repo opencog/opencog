@@ -74,9 +74,7 @@ public:
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
      */
-    void storeAtom(Handle h) {
-        if (backing_store) backing_store->storeAtom(h);
-    }
+    void storeAtom(Handle h);
 
     /**
      * Return the atom with the indicated handle. This method will
