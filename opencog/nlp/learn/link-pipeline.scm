@@ -1,18 +1,21 @@
 ;
 ; link-pipeline.scm
 ; 
-; Link-grammar processing pipeline. Currently, counts word pairs.
+; Link-grammar processing pipeline. Currently, just counts word pairs.
 ;
 ; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
-; Look for new sentences, count the links in them.
-
-; Plan of attack:
-; -- get parses, 
-; -- crawl parses to extract lg-links between pairs of words,
-; -- pull matching pairs from sql
-; -- increment counts on pairs
-; -- store back into sql.
+; This code is part of a language-learning effort.  The goal is to
+; observe a lot of text, and then perform clustering to min-max the
+; entropy. Right now, nly the observe part is supported.
+;
+; Main entry point: (observe-text plain-text)
+; Call this entry point with exactly one sentance as plain text.
+; It will be parsed by RelEx, and the resulting link-grammar link
+; usage counts will be updated in the atomspace. The counts are
+; flushed to the SQL database so that they're not forgotten.
+;
+; As of 10 December 2013, this seems to work fine. Deploying ...
 ;
 ; ---------------------------------------------------------------------
 ; map-lg-links -- loop over all link-grammar links in sentences.
@@ -122,23 +125,23 @@
 ;
 ; Some generic hand-testing code for this stuff:
 ;
-(define (prt x) (begin (display x) #f))
-
-(relex-parse "this is")
-(get-new-parsed-sentences)
-
-(map-lg-links prt (get-new-parsed-sentences))
-
-(map-lg-links (lambda (x) (prt (make-lg-rel x)))
-	(get-new-parsed-sentences)
-)
-
-(map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
-	(get-new-parsed-sentences)
-)
-
-(map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
-	(get-new-parsed-sentences)
-)
-
-(observe-text "abcccccccccc  defffffffffffffffff")
+; (define (prt x) (begin (display x) #f))
+; 
+; (relex-parse "this is")
+; (get-new-parsed-sentences)
+; 
+; (map-lg-links prt (get-new-parsed-sentences))
+; 
+; (map-lg-links (lambda (x) (prt (make-lg-rel x)))
+; 	(get-new-parsed-sentences)
+; )
+; 
+; (map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
+; 	(get-new-parsed-sentences)
+; )
+; 
+; (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
+; 	(get-new-parsed-sentences)
+; )
+; 
+; (observe-text "abcccccccccc  defffffffffffffffff")
