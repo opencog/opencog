@@ -759,7 +759,7 @@ void CogServer::openDatabase(void)
         logger().warn("Failed to pre-load database, because persist module not found!\n");
         return;
     }
-    PersistModule *pm = static_cast<PersistModule *>(mod);
+    PersistModule *pm = dynamic_cast<PersistModule *>(mod);
     const std::string &resp = pm->do_open(NULL, args);
 
     logger().info("Preload >>%s: %s as user %s\n",

@@ -48,8 +48,8 @@ using namespace opencog;
 class PersistUTest :  public CxxTest::TestSuite
 {
 	private:
-		AtomSpace *as;
-		PersistModule *pm;
+		AtomSpace *_as;
+		PersistModule *_pm;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
@@ -58,10 +58,10 @@ class PersistUTest :  public CxxTest::TestSuite
 		NodePtr n2[10];
 		NodePtr n3[10];
 		LinkPtr l[10];
-		AtomPtr a1[10];
-		AtomPtr a2[10];
-		AtomPtr a3[10];
-		AtomPtr al[10];
+		Handle h1[10];
+		Handle h2[10];
+		Handle h3[10];
+		Handle hl[10];
 
 	public:
 
@@ -90,8 +90,8 @@ class PersistUTest :  public CxxTest::TestSuite
 			exit(1);
 		}
 
-		void add_to_table(int, AtomTable *, std::string id);
-		void check_table(int, AtomTable *, std::string id);
+		void add_to_space(int, AtomSpace *, std::string id);
+		void check_space(int, AtomSpace *, std::string id);
 
 		void test_atomspace(void);
 };
@@ -128,8 +128,7 @@ PersistUTest:: PersistUTest(void)
 	cogserver().openDatabase();
 
 	Module* m = cogserver().getModule("opencog::PersistModule");
-	pm = dynamic_cast<PersistModule*>(m);
-printf("dyyyyyde its %p\n", pm);
+	_pm = dynamic_cast<PersistModule*>(m);
 }
 
 /*
@@ -138,7 +137,7 @@ printf("dyyyyyde its %p\n", pm);
 void PersistUTest::setUp(void)
 {
 	CogServer& cogserve = cogserver();
-	as = &cogserve.getAtomSpace();
+	_as = &cogserve.getAtomSpace();
 
 	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
@@ -207,56 +206,48 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 
 // ============================================================
 
-void PersistUTest::add_to_table(int idx, AtomTable *table, std::string id)
+void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 {
 	// Create an atom ... 
-	n1[idx] = createNode(WORD_NODE, id + "fromNode");
 	TruthValuePtr stv(SimpleTruthValue::createTV(0.11, 100+idx));
-	n1[idx]->setTruthValue(stv);
-	a1[idx] = n1[idx];
-	table->add(a1[idx]);
+	h1[idx] = as->addNode(WORD_NODE, id + "fromNode", stv);
+	n1[idx] = NodeCast(h1[idx]);
 
-	n2[idx] = createNode(WORD_NODE, id + "toNode");
 	TruthValuePtr stv2(SimpleTruthValue::createTV(0.22, 200+idx));
-	n2[idx]->setTruthValue(stv2);
-	a2[idx] = n2[idx];
-	table->add(a2[idx]);
+	h2[idx] = as->addNode(WORD_NODE, id + "toNode", stv2);
+	n2[idx] = NodeCast(h2[idx]);
 
-	n3[idx] = createNode(WORD_NODE, id + "third wheel");
 	TruthValuePtr stv3(SimpleTruthValue::createTV(0.33, 300+idx));
-	n3[idx]->setTruthValue(stv3);
-	a3[idx] = n3[idx];
-	table->add(a3[idx]);
+	h3[idx] = as->addNode(WORD_NODE, id + "third wheel", stv3);
+	n3[idx] = NodeCast(h3[idx]);
 
 	std::vector<Handle> hvec;
-	hvec.push_back(a1[idx]->getHandle());
-	hvec.push_back(a2[idx]->getHandle());
-	hvec.push_back(a3[idx]->getHandle());
+	hvec.push_back(h1[idx]);
+	hvec.push_back(h2[idx]);
+	hvec.push_back(h3[idx]);
 
-	l[idx] = createLink(PARSE_LINK, hvec);
-	al[idx] = l[idx];
-	table->add(l[idx]);
+	hl[idx] = as->addLink(PARSE_LINK, hvec);
+	l[idx] = LinkCast(hl[idx]);
 }
 
-void PersistUTest::check_table(int idx, AtomTable *table, std::string id)
+void PersistUTest::check_space(int idx, AtomSpace *space, std::string id)
 {
-	Handle hb1 = table->getHandle(n1[idx]);
-	atomCompare(a1[idx], hb1);
+	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
+	atomCompare(h1[idx], hb1);
 
-	Handle hb2 = table->getHandle(n2[idx]);
-	atomCompare(a2[idx], hb2);
+	Handle hb2 = space->getHandle(n2[idx]->getType(), n2[idx]->getName());
+	atomCompare(h2[idx], hb2);
 
-	Handle hb3 = table->getHandle(n3[idx]);
-	atomCompare(a3[idx], hb3);
+	Handle hb3 = space->getHandle(n3[idx]->getType(), n3[idx]->getName());
+	atomCompare(h3[idx], hb3);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(hb1);
 	hvec.push_back(hb2);
 	hvec.push_back(hb3);
 
-	LinkPtr lb(createLink(PARSE_LINK, hvec));
-	Handle hlb = table->getHandle(lb);
-	atomCompare(al[idx], hlb);
+	Handle hlb = space->getHandle(hl[idx]->getType(), hvec);
+	atomCompare(hl[idx], hlb);
 }
 
 // ============================================================
@@ -265,29 +256,25 @@ void PersistUTest::test_atomspace(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	AtomStorage *store = new AtomStorage(dbname, username, passwd);
-	if (!store->connected())
-	{
-		logger().debug("test_atomspace: cannot connect to db");
-		return;
-	}
+	TSM_ASSERT("Persist Module not loaded", _pm);
 
-	AtomTable *table1 = new AtomTable();
 	int idx = 0;
-	add_to_table(idx++, table1, "AA-aa-wow ");
-	add_to_table(idx++, table1, "BB-bb-wow ");
-	add_to_table(idx++, table1, "CC-cc-wow ");
-	add_to_table(idx++, table1, "DD-dd-wow ");
-	add_to_table(idx++, table1, "EE-ee-wow ");
+	add_to_space(idx++, _as, "AA-aa-wow ");
+	add_to_space(idx++, _as, "BB-bb-wow ");
+	add_to_space(idx++, _as, "CC-cc-wow ");
+	add_to_space(idx++, _as, "DD-dd-wow ");
+	add_to_space(idx++, _as, "EE-ee-wow ");
 
-	store->store(*table1);
-	// table1->print();
-	delete store;
+	idx = 0;
+	check_space(idx++, _as, "aaa ");
+	check_space(idx++, _as, "bbb ");
+	check_space(idx++, _as, "ccc ");
+	check_space(idx++, _as, "ddd ");
+	check_space(idx++, _as, "eee ");
 
+/*********
 	// Copy atoms; the original atoms will be blown away
-	// when table1 is deleted. (they're also removed from
-	// the TLB, so this indirectly tests the correctness
-	// of the stored uuid's as well.)
+	// when deleted. 
 	int mi = idx;
 	for (idx=0; idx < mi; idx++)
 	{
@@ -296,27 +283,8 @@ void PersistUTest::test_atomspace(void)
 		n3[idx] = createNode(*n3[idx]); a3[idx] = n3[idx];
 		l[idx]  = createLink(*l[idx]);  al[idx] = l[idx];
 	}
-	delete table1;
 
-	// Reopen connection, and load the atom table.
-	store = new AtomStorage(dbname, username, passwd);
-	TSM_ASSERT("Not connected to database", store->connected());
-
-	AtomTable *table2 = new AtomTable();
-
-	store->load(*table2);
-	// table2->print();
-
-	idx = 0;
-	check_table(idx++, table2, "aaa ");
-	check_table(idx++, table2, "bbb ");
-	check_table(idx++, table2, "ccc ");
-	check_table(idx++, table2, "ddd ");
-	check_table(idx++, table2, "eee ");
-
-	store->kill_data();
-	delete store;
-	delete table2;
+*************/
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
