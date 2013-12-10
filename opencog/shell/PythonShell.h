@@ -53,16 +53,9 @@ class PythonShell: public GenericShell
 private:
     PythonEval *evaluator;
 
-    std::string normal_prompt;
-    std::string pending_prompt;
-    std::string abort_prompt;
     const std::string& get_prompt(void);
-    bool show_output;
-    bool show_prompt;
 
-    ConsoleSocket *socket;
     std::string do_eval(const std::string &);
-    bool self_destruct;
 
 protected:
     void set_socket(ConsoleSocket *);
@@ -70,12 +63,6 @@ protected:
 public:
     PythonShell(void);
     virtual ~PythonShell();
-
-    virtual void eval(const std::string &, ConsoleSocket *);
-    virtual void socketClosed(void);
-
-    void hush_output(bool);
-    void hush_prompt(bool);
 };
 
 /** @}*/

@@ -2,7 +2,7 @@
  * SchemeShell.h
  *
  * Simple scheme shell
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -43,16 +43,9 @@ class SchemeShell : public GenericShell
 	private:
 		SchemeEval *evaluator;
 
-		std::string normal_prompt;
-		std::string pending_prompt;
-		std::string abort_prompt;
 		const std::string& get_prompt(void);
-		bool show_output;
-		bool show_prompt;
 
-		ConsoleSocket *socket;
 		std::string do_eval(const std::string &);
-		bool self_destruct;
 
 	protected:
 		void set_socket(ConsoleSocket *);
@@ -60,12 +53,6 @@ class SchemeShell : public GenericShell
 	public:
 		SchemeShell(void);
 		virtual ~SchemeShell();
-
-		virtual void eval(const std::string &, ConsoleSocket *);
-		virtual void socketClosed(void);
-
-		void hush_output(bool);
-		void hush_prompt(bool);
 };
 
 /** @}*/

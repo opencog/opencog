@@ -1,8 +1,8 @@
 /*
- * GenericShell.c
+ * GenericShell.cc
  *
  * Generic interactive shell
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2103 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -36,8 +37,13 @@ using namespace opencog;
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 
+// Some randome ASCII characters
+#define EOT 0x4   // ctrl-D at keyboard.
+
 GenericShell::GenericShell(void)
 {
+	show_output = true;
+	show_prompt = true;
 	normal_prompt = "> ";
 	pending_prompt = "... ";
 	abort_prompt = "asdf";
@@ -46,6 +52,46 @@ GenericShell::GenericShell(void)
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
 	abort_prompt += normal_prompt;
+
+	socket = NULL;
+}
+
+GenericShell::~GenericShell()
+{
+}
+
+void GenericShell::socketClosed(void)
+{
+	// As of right now, the only thing that calls methods on us is the
+	// console socket. Thus, when the console socket closes, no one
+	// else will ever call a method on this instance ever again. Thus,
+	// we should self-destruct. Three remarks:
+	// 1) This wouldn't be needed if we had garbage collection, and
+	// 2) If this feels hacky to you, well, it is, but I simply do not
+	//    see a solution that is easier/better/simpler within the
+	//    confines of the current module/socket/request design. (I can
+	//    envision all sorts of complicated solutions, but none easy).
+	// 3) This is safe in the current threading design, since the thread
+	//    that is calling eval() is the same thread that is calling this
+	//    method. Thus, no locks. If, instead, it ever happened that the
+	//    eval() method was called from a different thread than the socket
+	//    closed method, then there would be a race leading to a horrible
+	//    crash. The only cure for that would be a redesign of the
+	//    socket/request layers. Again, this would not be needed if we
+	//    had garbage collection. Wah wah wah.
+	delete this;
+}
+
+/* ============================================================== */
+
+void GenericShell::hush_output(bool hush)
+{
+	show_output = !hush;
+}
+
+void GenericShell::hush_prompt(bool hush)
+{
+	show_prompt = !hush;
 }
 
 #ifdef FINISH_IMPLEMENTING_LATER
@@ -63,6 +109,34 @@ const std::string& GenericShell::get_prompt(void)
 	}
 }
 #endif
+
+/* ============================================================== */
+
+void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
+{
+	// XXX A subtle but important point: the way that socket handling
+	// works in OpenCog is that socket-listen/accept happens in one
+	// thread, while socket receive is in another. In particular, the
+	// constructor for this class runs in a *different* thread than
+	// this method does.
+	if (NULL == socket)
+	{
+		socket = s;
+	}
+	const std::string &retstr = do_eval(expr);
+	// logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
+	//
+	socket->Send(retstr);
+
+	// The user is exiting the shell. No one will ever call a method on
+	// this instance ever again. So stop hogging space, and self-destruct.
+	// We have to do this here; there is no other opportunity to call dtor.
+	if (self_destruct)
+	{
+		socket->sendPrompt();
+		delete this;
+	}
+}
 
 /* ============================================================== */
 

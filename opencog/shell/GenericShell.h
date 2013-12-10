@@ -2,7 +2,7 @@
  * GenericShell.h
  *
  * Template for a generic shell
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013 Linas Vepstas <linas@linas.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -24,8 +24,6 @@
 #define _OPENCOG_GENERIC_SHELL_H
 
 #include <string>
-
-#include <opencog/server/Module.h>
 
 /**
  * The GenericShell class implements an "escape" from the default cogserver
@@ -54,13 +52,23 @@ class GenericShell
 		std::string abort_prompt;
 		std::string normal_prompt;
 		std::string pending_prompt;
+		bool show_output;
+		bool show_prompt;
+		bool self_destruct;
+
+		ConsoleSocket *socket;
+
+		virtual std::string do_eval(const std::string &expr) = 0;
 
 	public:
 		GenericShell(void);
-		virtual ~GenericShell() {}
+		virtual ~GenericShell();
 
-		virtual void eval(const std::string &, ConsoleSocket *) = 0;
-		virtual void socketClosed(void) = 0;
+		virtual void eval(const std::string &, ConsoleSocket *);
+		virtual void socketClosed(void);
+
+		virtual void hush_output(bool);
+		virtual void hush_prompt(bool);
 };
 
 /** @}*/

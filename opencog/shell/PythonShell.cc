@@ -99,39 +99,7 @@ void PythonShell::set_socket(ConsoleSocket *s)
     if (!evaluator) evaluator = &PythonEval::instance();
 }
 
-void PythonShell::socketClosed(void)
-{
-    // As of right now, the only thing that calls methods on us is the
-    // console socket. Thus, when the console socket closes, no one
-    // else will ever call a method on this instance ever again. Thus,
-    // we should self-destruct. Three remarks:
-    // 1) This wouldn't be needed if we had garbage collection, and
-    // 2) If this feels hacky to you, well, it is, but I simply do not
-    //    see a solution that is easier/better/simpler within the
-    //    confines of the current module/socket/request design. (I can
-    //    envision all sorts of complicated solutions, but none easy).
-    // 3) This is safe in the current threading design, since the thread
-    //    that is calling eval() is the same thread that is calling this
-    //    method. Thus, no locks. If, instead, it ever happened that the
-    //    eval() method was called from a different thread than the socket
-    //    closed method, then there would be a race leading to a horrible
-    //    crash. The only cure for that would be a redesign of the
-    //    socket/request layers. Again, this would not be needed if we
-    //    had garbage collection. Wah wah wah.
-    delete this;
-}
-
 /* ============================================================== */
-
-void PythonShell::hush_output(bool hush)
-{
-    show_output = !hush;
-}
-
-void PythonShell::hush_prompt(bool hush)
-{
-    show_prompt = !hush;
-}
 
 const std::string& PythonShell::get_prompt(void)
 {
@@ -151,33 +119,6 @@ const std::string& PythonShell::get_prompt(void)
 }
 
 /* ============================================================== */
-
-void PythonShell::eval(const std::string &expr, ConsoleSocket *s)
-{
-    // XXX A subtle but important point: the way that socket handling
-    // works in OpenCog is that socket-listen/accept happens in one
-    // thread, while socket receive is in another. In particular, the
-    // constructor for this class runs in a *different* thread than
-    // this method does.
-    if (NULL == socket)
-    {
-        socket = s;
-    }
-
-    const std::string &retstr = do_eval(expr);
-    // logger().debug("[SchemeShell] response: [%s]", retstr.c_str());
-    //
-    socket->Send(retstr);
-
-    // The user is exiting the shell. No one will ever call a method on
-    // this instance ever again. So stop hogging space, and self-destruct.
-    // We have to do this here; there is no other opportunity to call dtor.
-    if (self_destruct)
-    {
-        socket->sendPrompt();
-        delete this;
-    }
-}
 
 /**
  * Evaluate the expression
