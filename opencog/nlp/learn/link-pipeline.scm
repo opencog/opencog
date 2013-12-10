@@ -87,34 +87,50 @@
 )
 
 ; ---------------------------------------------------------------------
-; Process sentences:
-; pick up from anchor, 
-; fetch words and relations from SQL
-; increment words, incremenet relations
-; save.
+; update-link-counts -- Increment word and link counts
+;
+; This routine updates word counts and link counts in the database.
+; Word and link counts are needed to compute mutial information (mutual
+; entropy), which is required for maximum-entropy-style learning.  The
+; algo implemented here is trite: fetch words and relations from SQL;
+; increment the attached CountTruthValue; save back to SQL.  Note:
+; we are not directly accessing the database; we're just letting the
+; atomspace handle that semi-automatically.
 
-(define (process-sents sents)
-	(define (process-one-link link)
+(define (update-link-counts sents)
+	(define (count-one-link link)
 		(let ((rel (make-lg-rel link)))
 			(begin
-				(fetch-atom rel)
+				(fetch-atom rel) ; get from SQL
 				(cog-atom-incr rel 1) ; inrmenet relation
 				(cog-atom-incr (gar rel) 1)  ; increment link type
 				(cog-atom-incr (gadr rel) 1) ; increment left word
 				(cog-atom-incr (gddr rel) 1) ; increment right work.
-				(store-atom rel)
+				(store-atom rel) ; save to SQL
 				#f ; need to return #f so that map-lg-links doesn't stop.
 			)
 		)
 	)
+	(map-lg-links count-one-link sents)
+)
+
+; ---------------------------------------------------------------------
+; observe-text -- update word and word-pair counts by observing raw text.
+;
+; This is the first part of the learning algo: simply count the words
+; and word-pairs oberved in incoming text. This takes in raw text, gets
+; it parsed, and then updates the counts for the observed words and word
+; pairs.
+(define (observe-text plain-text)
 	(begin
-		(map-lg-links process-one-link sents)
+		(relex-parse plain-text)
+		(update-link-counts (get-new-parsed-sentences))
+		(release-new-parsed-sents)
       (delete-sentences)
 	)
 )
 
-
-
+; ---------------------------------------------------------------------
 (map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
 	(get-new-parsed-sentences)
 )
