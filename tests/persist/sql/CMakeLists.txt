@@ -18,6 +18,11 @@ LINK_LIBRARIES(
 	${Boost_SIGNALS_LIBRARY}
 )
 
-ADD_CXXTEST(BasicSaveUTest)
-ADD_CXXTEST(PersistUTest)
+# These two tests currrently work and pass, as of 10 December 2013
+# They are commented out only because they will fail for anyone who
+# hasn't corrrectly configured their SQL setup.  To run these tests,
+# see the README file, and uncomment the below.
+#
+# ADD_CXXTEST(BasicSaveUTest)
+# ADD_CXXTEST(PersistUTest)
 
