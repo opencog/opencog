@@ -265,6 +265,27 @@ void PersistUTest::test_atomspace(void)
 	add_to_space(idx++, _as, "DD-dd-wow ");
 	add_to_space(idx++, _as, "EE-ee-wow ");
 
+	/* Verify that the atoms were added */
+	idx = 0;
+	check_space(idx++, _as, "aaa ");
+	check_space(idx++, _as, "bbb ");
+	check_space(idx++, _as, "ccc ");
+	check_space(idx++, _as, "ddd ");
+	check_space(idx++, _as, "eee ");
+
+	/* Push all atoms out to the SQL DB */
+	Request* req = cogserver().createRequest("sql-store");
+	cogserver().pushRequest(req);
+	cogserver().processRequests();
+
+	/* Remove atoms from the AtomSpace. This does not delete them from
+	 * the SQL storage, though; to do that, they must be deleted, not
+    * removed.
+	 */
+	_as->clear();
+	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
+
+	/* Verify that the atoms can still be fetched from storage */
 	idx = 0;
 	check_space(idx++, _as, "aaa ");
 	check_space(idx++, _as, "bbb ");

@@ -345,6 +345,15 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     return hs;
 }
 
+bool AtomSpaceImpl::deleteAtom(Handle h, bool recursive)
+{
+    if (backing_store) {
+// Under construction .... 
+        throw RuntimeException(TRACE_INFO, "Not Implemented!!!");
+    }
+    return 0 < atomTable.extract(h, recursive).size();
+}
+
 void AtomSpaceImpl::clear()
 {
     std::vector<Handle> allAtoms;

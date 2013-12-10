@@ -125,22 +125,6 @@ public:
     /** Get a link from the atom taable, if it's in there */
     Handle getLink(Type t, const HandleSeq& outgoing);
 
-    /**
-     * Removes an atom from the atomspace
-     *
-     * @param h The Handle of the atom to be removed.
-     * @param recursive Recursive-removal flag; the removal will
-     *       fail if this flag is not set, and the atom has incoming
-     *       links (that are in the atomspace).  Set to false only if
-     *       you can guarantee that this atom does not appear in the
-     *       outgoing set of any link in the atomspace.
-     * @return True if the Atom for the given Handle was successfully
-     *         removed. False, otherwise.
-     */
-    bool removeAtom(Handle h, bool recursive = true) {
-        return 0 < atomTable.extract(h, recursive).size();
-    }
-
     /** Retrieve the incoming set of a given atom */
     HandleSeq getIncoming(Handle);
 
@@ -157,6 +141,38 @@ public:
      */
     HandleSeq getNeighbors(Handle h, bool fanin=true, bool fanout=true,
             Type linkType=LINK, bool subClasses=true) const;
+
+    /**
+     * Purges an atom from the atomtable. Attached storage is not
+     * affected.
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool removeAtom(Handle h, bool recursive = true) {
+        return 0 < atomTable.extract(h, recursive).size();
+    }
+
+    /**
+     * Delete an atom from the atomtable and from attached storage
+     * This deleting is permanent; a deleted atom cannot be recovered.
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool deleteAtom(Handle h, bool recursive = true);
 
     //! Clear the atomspace, remove all atoms
     void clear();
