@@ -1,15 +1,11 @@
-from datetime import datetime
-from math import fabs
-from numpy import isinf
 from scipy.stats.distributions import rv_frozen
-from scipy import integrate
+from spatiotemporal.temporal_events.formulas import FormulaCreator, TemporalFormulaConvolution
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution, DISTRIBUTION_INTEGRAL_LIMIT
 from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import index_of_first_local_maximum, FunctionPiecewiseLinear, FUNCTION_ZERO
-from utility.numeric.globals import EPSILON
+from utility.geometric import FunctionPiecewiseLinear, FUNCTION_ZERO
 
 __author__ = 'keyvan'
 
@@ -20,6 +16,7 @@ class TemporalEvent(list, TimeInterval):
     _beginning = None
     _ending = None
     _dict = None
+    _formula_creator = FormulaCreator(TemporalFormulaConvolution())
 
     def __init__(self, distribution_beginning, distribution_ending,
                  bins=50, distribution_integral_limit=DISTRIBUTION_INTEGRAL_LIMIT):
@@ -61,6 +58,9 @@ class TemporalEvent(list, TimeInterval):
             check_is_time_interval(interval)
         return integral(self.membership_function, interval.a, interval.b)
 
+    def temporal_relations_with(self, other):
+        return self._formula_creator.temporal_relations_between(self, other)
+
     def instance(self):
         return TemporalInstance(self.distribution_beginning.rvs(), self.distribution_ending.rvs())
 
@@ -71,19 +71,20 @@ class TemporalEvent(list, TimeInterval):
                 self._dict[time_step] = self.membership_function(time_step)
         return self._dict
 
-    def plot(self):
+    def plot(self, show_distributions=False):
         import matplotlib.pyplot as plt
         plt.plot(self.to_datetime_list(), self.membership_function())
-        if hasattr(self.distribution_beginning, 'plot'):
-            self.distribution_beginning.plot()
-        else:
-            plt.plot(self.interval_beginning.to_datetime_list(),
-                     self.distribution_beginning.pdf(self.interval_beginning))
-        if hasattr(self.distribution_ending, 'plot'):
-            self.distribution_ending.plot()
-        else:
-            plt.plot(self.interval_ending.to_datetime_list(),
-                     self.distribution_ending.pdf(self.interval_ending))
+        if show_distributions:
+            if hasattr(self.distribution_beginning, 'plot'):
+                self.distribution_beginning.plot()
+            else:
+                plt.plot(self.interval_beginning.to_datetime_list(),
+                         self.distribution_beginning.pdf(self.interval_beginning))
+            if hasattr(self.distribution_ending, 'plot'):
+                self.distribution_ending.plot()
+            else:
+                plt.plot(self.interval_ending.to_datetime_list(),
+                         self.distribution_ending.pdf(self.interval_ending))
         return plt
 
     @property
@@ -101,6 +102,9 @@ class TemporalEvent(list, TimeInterval):
     @property
     def ending(self):
         return self._ending
+
+    def __mul__(self, other):
+        return self.temporal_relations_with(other)
 
     def __str__(self):
         return repr(self)
@@ -171,13 +175,18 @@ if __name__ == '__main__':
         TemporalEvent(norm(loc=10, scale=2), norm(loc=30, scale=2), 100),
         TemporalEvent(norm(loc=5, scale=2), norm(loc=15, scale=4), 100),
 
-        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+        #TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        #TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
     ]
+
+    print type(events[0])
+
+    print events[0] * events[1]
 
     for event in events:
         plt = event.plot()
         print integral(event.distribution_beginning.pdf, event.a, event.beginning)
         print event.distribution_beginning.rvs(10)
         plt.ylim(ymax=1.1)
-        plt.show()
+        #plt.figure()
+    plt.show()
