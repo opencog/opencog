@@ -166,6 +166,25 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
     return atomTable.add(createNode(t, name, tvn));
 }
 
+Handle AtomSpaceImpl::getNode(Type t, const string& name)
+{
+    // Is this atom already in the atom table? 
+    Handle hexist = atomTable.getHandle(t, name);
+    if (hexist) return hexist;
+
+    // If we are here, the AtomTable does not yet know about this atom.
+    // Maybe the backing store knows about this atom.
+    if (backing_store) {
+        NodePtr n(backing_store->getNode(t, name.c_str()));
+        if (n) {
+            return atomTable.add(n);
+        }
+    }
+
+    // If we are here, nobody knows about this.
+    return Handle::UNDEFINED;
+}
+
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
                               TruthValuePtr tvn)
 {
@@ -194,6 +213,28 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
     // If we are here, neither the AtomTable nor backing store know about
     // this atom. Just add it.
     return atomTable.add(createLink(t, outgoing, tvn));
+}
+
+Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
+{
+    // Is this atom already in the atom table?
+    Handle hexist = atomTable.getHandle(t, outgoing);
+    if (hexist) return hexist;
+
+    // If we are here, the AtomTable does not yet know about this atom.
+    // Maybe the backing store knows about this atom.
+    if (backing_store)
+    {
+        LinkPtr l(backing_store->getLink(t, outgoing));
+        if (l) {
+            // register the atom with the atomtable (so it gets placed in
+            // indices)
+            return atomTable.add(l);
+        }
+    }
+
+    // If we are here, nobody knows about this.
+    return Handle::UNDEFINED;
 }
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)

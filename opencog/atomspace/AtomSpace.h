@@ -287,8 +287,8 @@ public:
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const {
-        return getAtomTable().getHandle(t, str);
+    Handle getHandle(Type t, const std::string& str) {
+        return getImpl().getNode(t, str);
     }
 
     /**
@@ -297,8 +297,8 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getAtomTable().getHandle(t, outgoing);
+    Handle getHandle(Type t, const HandleSeq& outgoing) {
+        return getImpl().getLink(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */

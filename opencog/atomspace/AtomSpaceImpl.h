@@ -106,6 +106,9 @@ public:
      */
     Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
+    /** Get a node from the atom taable, if it's in there */
+    Handle getNode(Type t, const std::string& name = "");
+
     /**
      * Add a new link to the Atom Table
      * If the atom already exists then the old and the new truth value
@@ -118,6 +121,9 @@ public:
      */
     Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+
+    /** Get a link from the atom taable, if it's in there */
+    Handle getLink(Type t, const HandleSeq& outgoing);
 
     /**
      * Removes an atom from the atomspace
