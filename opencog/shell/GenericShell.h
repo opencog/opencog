@@ -61,6 +61,7 @@ class GenericShell
 		GenericEval* evaluator;
 
 		virtual void set_socket(ConsoleSocket *);
+		virtual const std::string& get_prompt(void);
 
 		virtual std::string do_eval(const std::string &expr) = 0;
 

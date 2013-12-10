@@ -95,25 +95,6 @@ void PythonShell::set_socket(ConsoleSocket *s)
 
 /* ============================================================== */
 
-const std::string& PythonShell::get_prompt(void)
-{
-    static const std::string empty_prompt = "";
-    if (!show_prompt) return empty_prompt;
-
-    // Use different prompts, depending on whether there is pending
-    // input or not.
-    if (evaluator->input_pending())
-    {
-        return pending_prompt;
-    }
-    else
-    {
-        return normal_prompt;
-    }
-}
-
-/* ============================================================== */
-
 /**
  * Evaluate the expression
  */

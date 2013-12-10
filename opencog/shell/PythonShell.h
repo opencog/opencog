@@ -48,8 +48,6 @@ class PythonShell: public GenericShell
 {
     friend class PythonShellModule;
 private:
-    const std::string& get_prompt(void);
-
     std::string do_eval(const std::string &);
 
 protected:

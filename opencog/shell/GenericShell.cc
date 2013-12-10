@@ -24,6 +24,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
+#include "GenericEval.h"
 #include "GenericShell.h"
 
 using namespace opencog;
@@ -94,6 +95,24 @@ void GenericShell::hush_prompt(bool hush)
 	show_prompt = !hush;
 }
 
+const std::string& GenericShell::get_prompt(void)
+{
+	static const std::string empty_prompt = "";
+	if (!show_prompt) return empty_prompt;
+
+	// Use different prompts, depending on whether there is pending
+	// input or not.
+	if (evaluator->input_pending())
+	{
+		return pending_prompt;
+	}
+	else
+	{
+		return normal_prompt;
+	}
+}
+
+/* ============================================================== */
 /**
  * Register this shell with the console.
  */

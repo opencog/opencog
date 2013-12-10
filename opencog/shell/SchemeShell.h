@@ -40,8 +40,6 @@ class SchemeShell : public GenericShell
 {
 	friend class SchemeShellModule;
 	private:
-		const std::string& get_prompt(void);
-
 		std::string do_eval(const std::string &);
 
 	protected:
