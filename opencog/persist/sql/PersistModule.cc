@@ -1,10 +1,9 @@
 /*
- * opencog/persist/PersistModule.cc
+ * opencog/persist/sql/PersistModule.cc
  *
- * Copyright (C) 2008 by OpenCog Foundation
+ * Copyright (c) 2008 by OpenCog Foundation
+ * Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
- *
- * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -35,7 +34,7 @@ namespace opencog {
 class SQLBackingStore : public BackingStore
 {
 	private:
-		AtomStorage *store;
+		AtomStorage *_store;
 	public:
 		SQLBackingStore();
 		void set_store(AtomStorage *);
@@ -50,44 +49,44 @@ class SQLBackingStore : public BackingStore
 
 SQLBackingStore::SQLBackingStore()
 {
-	store = NULL;
+	_store = NULL;
 }
 
 void SQLBackingStore::set_store(AtomStorage *as)
 {
-	store = as;
+	_store = as;
 }
 
 NodePtr SQLBackingStore::getNode(Type t, const char *name) const
 {
-	return store->getNode(t, name);
+	return _store->getNode(t, name);
 }
 
 LinkPtr SQLBackingStore::getLink(Type t, const std::vector<Handle>& oset) const
 {
-	return store->getLink(t, oset);
+	return _store->getLink(t, oset);
 }
 
 AtomPtr SQLBackingStore::getAtom(Handle h) const
 {
-	return store->getAtom(h);
+	return _store->getAtom(h);
 }
 
 HandleSeq SQLBackingStore::getIncomingSet(Handle h) const
 {
-	return store->getIncomingSet(h);
+	return _store->getIncomingSet(h);
 }
 
 void SQLBackingStore::storeAtom(Handle h)
 {
-	store->storeAtom(h);
+	_store->storeAtom(h);
 }
 
 DECLARE_MODULE(PersistModule);
 
-PersistModule::PersistModule(CogServer& cs) : Module(cs), store(NULL)
+PersistModule::PersistModule(CogServer& cs) : Module(cs), _store(NULL)
 {
-	backing = new SQLBackingStore();
+	_backing = new SQLBackingStore();
 	do_close_register();
 	do_load_register();
 	do_open_register();
@@ -109,7 +108,7 @@ PersistModule::~PersistModule()
 	do_load_unregister();
 	do_open_unregister();
 	do_store_unregister();
-	delete backing;
+	delete _backing;
 }
 
 void PersistModule::init(void)
@@ -121,14 +120,14 @@ std::string PersistModule::do_close(Request *dummy, std::list<std::string> args)
 	if (!args.empty()) 
 		return "sql-close: Error: Unexpected argument\n";
 
-	if (store == NULL)
+	if (_store == NULL)
 		return "sql-close: Error: Database not open\n";
 
-	_cogserver.getAtomSpace().getImpl().unregisterBackingStore(backing);
+	_cogserver.getAtomSpace().getImpl().unregisterBackingStore(_backing);
 
-	backing->set_store(NULL);
-	delete store;
-	store = NULL;
+	_backing->set_store(NULL);
+	delete _store;
+	_store = NULL;
 	return "Database closed\n";
 }
 
@@ -137,11 +136,11 @@ std::string PersistModule::do_load(Request *dummy, std::list<std::string> args)
 	if (!args.empty()) 
 		return "sql-load: Error: Unexpected argument\n";
 
-	if (store == NULL)
+	if (_store == NULL)
 		return "sql-load: Error: Database not open\n";
 
 	// XXX TODO: this should probably be done in a separate thread.
-	store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
+	_store->load(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
 	return "Database load completed\n";
 }
@@ -157,21 +156,21 @@ std::string PersistModule::do_open(Request *dummy, std::list<std::string> args)
 	std::string username = args.front(); args.pop_front();
 	std::string auth	   = args.front(); args.pop_front();
 
-	store = new AtomStorage(dbname, username, auth);
-	if (!store)
+	_store = new AtomStorage(dbname, username, auth);
+	if (!_store)
 		return "sql-open: Error: Unable to open the database\n";
 
-	if (!store->connected())
+	if (!_store->connected())
 	{
-		delete store;
-		store = NULL;
+		delete _store;
+		_store = NULL;
 		return "sql-open: Error: Unable to connect to the database\n";
 	}
 
 	// reserve() is critical here, to reserve UUID range.
-	store->reserve();
-	backing->set_store(store);
-	_cogserver.getAtomSpace().getImpl().registerBackingStore(backing);
+	_store->reserve();
+	_backing->set_store(_store);
+	_cogserver.getAtomSpace().getImpl().registerBackingStore(_backing);
 
 	std::string rc = "Opened \"" + dbname + "\" as user \"" + username + "\"\n"; 
 	return rc;
@@ -182,11 +181,11 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	if (!args.empty()) 
 		return "sql-store: Error: Unexpected argument\n";
 
-	if (store == NULL)
+	if (_store == NULL)
 		return "sql-store: Error: Database not open\n";
 
 	// XXX TODO This should really be started in a new thread ...
-	store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
+	_store->store(const_cast<AtomTable&>(_cogserver.getAtomSpace().getAtomTable()));
 
 	return "Database store completed\n";
 }

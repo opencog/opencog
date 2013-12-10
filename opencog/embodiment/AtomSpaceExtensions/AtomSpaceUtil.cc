@@ -160,7 +160,7 @@ Handle AtomSpaceUtil::addPunishmentPredicate(AtomSpace& atomSpace,
     return evalLink;
 }
 
-bool AtomSpaceUtil::isActionPredicatePresent(const AtomSpace& atomSpace,
+bool AtomSpaceUtil::isActionPredicatePresent(AtomSpace& atomSpace,
         const char* actionPredicateName,
         Handle actionExecLink,
         unsigned long sinceTimestamp)
@@ -299,7 +299,7 @@ Handle AtomSpaceUtil::getSpaceMapHandleAtTimestamp(const AtomSpace &atomSpace,
     return spaceMapHandle;
 }
 */
-bool AtomSpaceUtil::getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
+bool AtomSpaceUtil::getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
         const std::string predicate,
         const SpaceServer::SpaceMap& sm,
         Handle obj1, Handle obj2)
@@ -372,7 +372,7 @@ bool AtomSpaceUtil::getPredicateValueAtTimestamp(const AtomSpace &atomSpace,
     }
 }
 */
-bool AtomSpaceUtil::getHasSaidValueAtTime(const AtomSpace &atomSpace,
+bool AtomSpaceUtil::getHasSaidValueAtTime(AtomSpace &atomSpace,
         unsigned long timestamp,
         unsigned long delay,
         Handle from_h,
@@ -585,7 +585,7 @@ throw(opencog::NotFoundException)
 }
 
 
-float AtomSpaceUtil::getPredicateValue(const AtomSpace &atomSpace,
+float AtomSpaceUtil::getPredicateValue(AtomSpace &atomSpace,
                                        std::string predicateName,
                                        Handle a,
                                        Handle b)
@@ -631,7 +631,7 @@ throw(opencog::NotFoundException)
 }
 
 
-bool AtomSpaceUtil::isPredicateTrue(const AtomSpace &atomSpace,
+bool AtomSpaceUtil::isPredicateTrue(AtomSpace &atomSpace,
                                     std::string predicateName,
                                     Handle a, Handle b)
 {
@@ -642,7 +642,7 @@ bool AtomSpaceUtil::isPredicateTrue(const AtomSpace &atomSpace,
     }
 }
 
-bool AtomSpaceUtil::isPetOwner( const AtomSpace& atomSpace,
+bool AtomSpaceUtil::isPetOwner( AtomSpace& atomSpace,
                                 Handle avatar, Handle pet )
 {
     HandleSeq seq0;
@@ -1108,7 +1108,7 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
     return atomSpace.getTV(atTime)->getMean();
 }
 
-float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
+float AtomSpaceUtil::getCurrentModulatorLevel(AtomSpace & atomSpace,
                                               const std::string & modulatorName)
 
 {
@@ -1275,7 +1275,7 @@ float AtomSpaceUtil::getCurrentModulatorLevel(const AtomSpace & atomSpace,
     return boost::lexical_cast<float> ( atomSpace.getName(hNumberNode) );
 }
 
-float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
+float AtomSpaceUtil::getCurrentDemandLevel(AtomSpace & atomSpace,
                                            const std::string & demandName)
 {
     float errorValue = randGen().randfloat();   // If error happens, return this value anyway.
@@ -1430,7 +1430,7 @@ float AtomSpaceUtil::getCurrentDemandLevel(const AtomSpace & atomSpace,
     return boost::lexical_cast<float> ( atomSpace.getName(hNumberNode) );
 }
 
-Handle AtomSpaceUtil::getDemandGoalEvaluationLink(const AtomSpace & atomSpace, 
+Handle AtomSpaceUtil::getDemandGoalEvaluationLink(AtomSpace & atomSpace, 
                                                   const std::string & demand 
                                                  )
 {
@@ -1670,7 +1670,7 @@ void AtomSpaceUtil::setupHoldingObject( AtomSpace& atomSpace,
     }
 }
 
-Handle AtomSpaceUtil::getLatestHoldingObjectHandle(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getLatestHoldingObjectHandle(AtomSpace& atomSpace,
         const std::string& holderId )
 {
 
@@ -1696,13 +1696,13 @@ Handle AtomSpaceUtil::getLatestHoldingObjectHandle(const AtomSpace& atomSpace,
     return Handle::UNDEFINED;
 }
 
-bool AtomSpaceUtil::isObjectBeingHolded( const AtomSpace& atomSpace,
+bool AtomSpaceUtil::isObjectBeingHolded( AtomSpace& atomSpace,
         const std::string& objectId )
 {
     return ( getObjectHolderHandle( atomSpace, objectId ) != Handle::UNDEFINED );
 }
 
-Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getObjectHolderHandle( AtomSpace& atomSpace,
         const std::string& objectId )
 {
     // TODO: try to optimize this method. It is using getHandleSet twice for
@@ -1772,7 +1772,7 @@ Handle AtomSpaceUtil::getObjectHolderHandle( const AtomSpace& atomSpace,
     return Handle::UNDEFINED;
 }
 
-std::string AtomSpaceUtil::getObjectHolderId( const AtomSpace& atomSpace,
+std::string AtomSpaceUtil::getObjectHolderId( AtomSpace& atomSpace,
         const std::string& objectId )
 {
     Handle objectHandle = getObjectHolderHandle( atomSpace, objectId );
@@ -1783,7 +1783,7 @@ std::string AtomSpaceUtil::getObjectHolderId( const AtomSpace& atomSpace,
 }
 
 
-Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
         const std::string& holderId )
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
@@ -1827,7 +1827,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpac
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpaceUtil::getMostRecentIsHoldingLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getMostRecentIsHoldingLink(AtomSpace& atomSpace,
         const std::string& holderId )
 {
     Handle h = getMostRecentIsHoldingAtTimeLink(atomSpace, holderId);
@@ -1836,7 +1836,7 @@ Handle AtomSpaceUtil::getMostRecentIsHoldingLink(const AtomSpace& atomSpace,
     else return Handle::UNDEFINED;
 }
 
-std::string AtomSpaceUtil::getHoldingObjectId(const AtomSpace& atomSpace,
+std::string AtomSpaceUtil::getHoldingObjectId(AtomSpace& atomSpace,
         const std::string& holderId )
 {
     Handle holderHandle = getAgentHandle( atomSpace, holderId );
@@ -1854,7 +1854,7 @@ std::string AtomSpaceUtil::getHoldingObjectId(const AtomSpace& atomSpace,
     return atomSpace.getName(objectHandle);
 }
 
-bool AtomSpaceUtil::isHoldingSomething(const AtomSpace& atomSpace,
+bool AtomSpaceUtil::isHoldingSomething(AtomSpace& atomSpace,
                                        const std::string& holderId)
 {
     Handle holderHandle = getAgentHandle(atomSpace, holderId);
@@ -1865,7 +1865,7 @@ bool AtomSpaceUtil::isHoldingSomething(const AtomSpace& atomSpace,
                                           holderHandle);
 }
 
-Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
         const std::string& holderId,
         unsigned long time)
 {
@@ -1889,7 +1889,7 @@ Handle AtomSpaceUtil::getHoldingObjectHandleAtTime(const AtomSpace& atomSpace,
     return Handle::UNDEFINED;
 }
 
-Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getIsHoldingLinkAtTime(AtomSpace& atomSpace,
         const std::string& holderId,
         unsigned long time)
 {
@@ -1946,7 +1946,7 @@ Handle AtomSpaceUtil::getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
     } else return Handle::UNDEFINED;
 }
 
-std::string AtomSpaceUtil::getHoldingObjectIdAtTime(const AtomSpace& as,
+std::string AtomSpaceUtil::getHoldingObjectIdAtTime(AtomSpace& as,
         const std::string& holderId,
         unsigned long time)
 {
@@ -1980,7 +1980,7 @@ std::string AtomSpaceUtil::getObjectName( const AtomSpace& atomSpace,
     return name;
 }
 
-std::string AtomSpaceUtil::getObjIdFromName( const AtomSpace& atomSpace,
+std::string AtomSpaceUtil::getObjIdFromName( AtomSpace& atomSpace,
         const std::string& objName )
 {
     std::string result;
@@ -2450,7 +2450,7 @@ std::string AtomSpaceUtil::convertAgentActionParametersToString( const AtomSpace
     return "";
 }
 
-Handle AtomSpaceUtil::getModulatorSimilarityLink(const AtomSpace & atomSpace,  
+Handle AtomSpaceUtil::getModulatorSimilarityLink(AtomSpace & atomSpace,  
                                   const std::string & modulator, 
                                   const std::string & petId)
 {
@@ -2848,7 +2848,7 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
 */
 }
 
-Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getRuleImplicationLink(AtomSpace& atomSpace,
         const std::string& rule)
 {
 
@@ -2883,7 +2883,7 @@ Handle AtomSpaceUtil::getRuleImplicationLink(const AtomSpace& atomSpace,
     return implicationLink;
 }
 
-float AtomSpaceUtil::getRuleImplicationLinkStrength(const AtomSpace& atomSpace,
+float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
         const std::string& rule,
         const std::string& agentModeName )
 {
@@ -2940,7 +2940,7 @@ spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpa
 }
 
 
-Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getObjectHandle( AtomSpace& atomSpace,
                                        const std::string& objectId )
 {
     // concept node objects
@@ -2973,7 +2973,7 @@ Handle AtomSpaceUtil::getObjectHandle( const AtomSpace& atomSpace,
     }
 }
 
-Handle AtomSpaceUtil::getAgentHandle( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getAgentHandle( AtomSpace& atomSpace,
                                       const std::string& agentId )
 {
     Handle agentHandle = atomSpace.getHandle( PET_NODE, agentId );
@@ -2996,7 +2996,7 @@ Handle AtomSpaceUtil::getAgentHandle( const AtomSpace& atomSpace,
     return agentHandle;
 }
 
-Handle AtomSpaceUtil::getEntityHandle( const AtomSpace& atomSpace,
+Handle AtomSpaceUtil::getEntityHandle( AtomSpace& atomSpace,
                                        const std::string& entityId )
 {
     // try maybe it's an object

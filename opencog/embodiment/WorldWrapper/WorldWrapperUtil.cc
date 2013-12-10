@@ -100,7 +100,7 @@ bool WorldWrapperUtil::definite_object_equal(const definite_object& d1,
     }
 }
 
-Handle WorldWrapperUtil::toHandle(const AtomSpace& as,
+Handle WorldWrapperUtil::toHandle(AtomSpace& as,
                                   definite_object obj,
                                   const string& self_id,
                                   const string& owner_id)
@@ -181,7 +181,7 @@ pre_it WorldWrapperUtil::maketree_vertex(const vertex& v, std::string h)
     return tmp.begin();
 }
 
-Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
+Handle WorldWrapperUtil::rec_lookup(AtomSpace& as, pre_it it,
                                     const string& self_id,
                                     const string& owner_id)
 {
@@ -236,27 +236,27 @@ Handle WorldWrapperUtil::rec_lookup(const AtomSpace& as, pre_it it,
             as.getHandle(EVALUATION_LINK, args) : Handle::UNDEFINED);
 }
 
-Handle WorldWrapperUtil::selfHandle(const AtomSpace& as,
+Handle WorldWrapperUtil::selfHandle(AtomSpace& as,
                                     const string& self_id)
 {
     //check if it's corresponding to a pet
     return AtomSpaceUtil::getAgentHandle( as, self_id );
 }
 
-Handle WorldWrapperUtil::ownerHandle(const AtomSpace& as,
+Handle WorldWrapperUtil::ownerHandle(AtomSpace& as,
                                      const string& owner_id)
 {
     return getAvatarHandle(as, owner_id);
 }
 
-Handle WorldWrapperUtil::getAvatarHandle(const AtomSpace& as,
+Handle WorldWrapperUtil::getAvatarHandle(AtomSpace& as,
         const string& avatar_id)
 {
     return as.getHandle(AVATAR_NODE, avatar_id);
 }
 
 bool WorldWrapperUtil::inSpaceMap(const SpaceServer::SpaceMap& sm,
-                                  const AtomSpace& as,
+                                  AtomSpace& as,
                                   const string& self_id,
                                   const string& owner_id,
                                   vertex v)
@@ -3115,7 +3115,7 @@ float WorldWrapperUtil::getPhysiologicalFeeling(AtomSpace& atomSpace,
     return value;
 }
 
-float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
+float WorldWrapperUtil::getModulator(AtomSpace & atomSpace,
                                      const std::string & modulatorName,
                                      unsigned long time)
 {
@@ -3144,7 +3144,7 @@ float WorldWrapperUtil::getModulator(const AtomSpace & atomSpace,
     return value;
 }
 
-float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
+float WorldWrapperUtil::getDemand(AtomSpace & atomSpace,
                                   const std::string & demandName,
                                   unsigned long time)
 {
@@ -3173,7 +3173,7 @@ float WorldWrapperUtil::getDemand(const AtomSpace & atomSpace,
     return value;
 }
 
-float WorldWrapperUtil::getDemandGoalTruthValue(const AtomSpace & atomSpace,
+float WorldWrapperUtil::getDemandGoalTruthValue(AtomSpace & atomSpace,
                                                 const std::string & demand,
                                                 const std::string & self_id,
                                                 unsigned long time)
