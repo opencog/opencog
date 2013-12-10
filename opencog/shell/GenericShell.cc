@@ -229,7 +229,7 @@ std::string GenericShell::do_eval(const std::string &expr)
 	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
 		self_destruct = true;
-		if (show_prompt) return "Exiting the scheme shell\n";
+		if (show_prompt) return "Exiting the shell\n";
 		return "";
 	}
 
