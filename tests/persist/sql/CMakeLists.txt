@@ -18,5 +18,6 @@ LINK_LIBRARIES(
 	${Boost_SIGNALS_LIBRARY}
 )
 
-#ADD_CXXTEST(BasicSaveUTest)
+ADD_CXXTEST(BasicSaveUTest)
+ADD_CXXTEST(PersistUTest)
 

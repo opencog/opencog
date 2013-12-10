@@ -1,7 +1,7 @@
 /*
- * tests/persist/sql/BasicSaveUTest.cxxtest
+ * tests/persist/sql/PersistUTest.cxxtest
  *
- * Most basic, simplest sniff test, saves and restores a few atoms.
+ * Test AtomSpace persistance.  Assumes BasicSaveUTest is passing.
  *
  * If this test is failing for you, then be sure to read the README in
  * this directory, and also ../../opencong/persist/README, and then
@@ -9,7 +9,7 @@
  * edit ../../lib/test-opencog.conf to add the database credentials
  * (the username and passwd).
  *
- * Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,6 +35,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/persist/sql/AtomStorage.h>
+#include <opencog/persist/sql/PersistModule.h>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
@@ -44,10 +45,11 @@
 
 using namespace opencog;
 
-class BasicSaveUTest :  public CxxTest::TestSuite
+class PersistUTest :  public CxxTest::TestSuite
 {
 	private:
 		AtomSpace *as;
+		PersistModule *pm;
 		const char * dbname;
 		const char * username;
 		const char * passwd;
@@ -63,33 +65,8 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 	public:
 
-		BasicSaveUTest(void)
-		{
-			try
-			{
-				config().load("opencog-test.conf");
-			}
-			catch (RuntimeException &e)
-			{
-				std::cerr << e.getMessage() << std::endl;
-			}
-			logger().setFilename(config()["LOG_FILE"]);
-			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
-			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
-
-			try {
-				// Get the database logins & etc from the config file.
-				dbname = config()["TEST_DB_NAME"].c_str();
-				username = config()["TEST_DB_USERNAME"].c_str();
-				passwd = config()["TEST_DB_PASSWD"].c_str();
-			}
-			catch (InvalidParamException &e)
-			{
-				freindlyFailMessage();
-			}
-		}
-
-		~BasicSaveUTest()
+		PersistUTest(void);
+		~PersistUTest()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -100,7 +77,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		void freindlyFailMessage()
 		{
-			TS_FAIL("The BasicSaveUTest failed.\n"
+			TS_FAIL("The PersistUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
@@ -113,25 +90,57 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			exit(1);
 		}
 
-		AtomStorage *astore;
-		void tearDown(void) { delete astore; }
-		void single_atom_save_restore(std::string id);
 		void add_to_table(int, AtomTable *, std::string id);
 		void check_table(int, AtomTable *, std::string id);
 
-		void test_single_atom(void);
-		void test_table(void);
+		void test_atomspace(void);
 };
+
+PersistUTest:: PersistUTest(void)
+{
+	try
+	{
+		config().load("opencog-test.conf");
+	}
+	catch (RuntimeException &e)
+	{
+		std::cerr << e.getMessage() << std::endl;
+	}
+	logger().setFilename(config()["LOG_FILE"]);
+	logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+	logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+	try {
+		// Get the database logins & etc from the config file.
+		dbname = config()["TEST_DB_NAME"].c_str();
+		username = config()["TEST_DB_USERNAME"].c_str();
+		passwd = config()["TEST_DB_PASSWD"].c_str();
+	}
+	catch (InvalidParamException &e)
+	{
+		freindlyFailMessage();
+	}
+
+	// Copy credential over to where cogserver can find them.
+	config().set("STORAGE", dbname);
+	config().set("STORAGE_USERNAME", username);
+	config().set("STORAGE_PASSWD", passwd);
+	cogserver().openDatabase();
+
+	Module* m = cogserver().getModule("opencog::PersistModule");
+	pm = dynamic_cast<PersistModule*>(m);
+printf("dyyyyyde its %p\n", pm);
+}
 
 /*
  * This is called once before each test, for each test (!!)
  */
-void BasicSaveUTest::setUp(void)
+void PersistUTest::setUp(void)
 {
 	CogServer& cogserve = cogserver();
 	as = &cogserve.getAtomSpace();
 
-	astore = new AtomStorage(dbname, username, passwd);
+	AtomStorage* astore = new AtomStorage(dbname, username, passwd);
 	if (!astore->connected())
 	{
 		logger().info("setUp: cannot connect to database");
@@ -197,59 +206,8 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 }
 
 // ============================================================
-/**
- * A simple test case that tests the save and restore of 
- * a couple of nodes and a link. Does not test atomtable/atomspace at all.
- */
-void BasicSaveUTest::single_atom_save_restore(std::string id)
-{
-	AtomStorage *store = new AtomStorage(dbname, username, passwd);
-	if (!store->connected())
-	{
-		logger().debug("single_atom_save_restore: cannot connect to db");
-		return;
-	}
 
-	// Create an atom ... 
-	AtomPtr a(createNode(SCHEMA_NODE, id + "someNode"));
-	TruthValuePtr stv(SimpleTruthValue::createTV(0.55, 0.6));
-	a->setTruthValue(stv);
-	TLB::addAtom(a);
-
-	// Store the atom ... 
-	store->storeAtom(a);
-
-	// Fetch it back ...
-	Handle h = a->getHandle();
-	AtomPtr b = store->getAtom(h);
-
-	// Are they equal ??
-	atomCompare(a,b);
-
-	// Create a second atom, connect it to the first
-	// with a link. Save it, fetch it ... are they equal?
-	AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
-	TLB::addAtom(a2);
-	store->storeAtom(a2);
-
-	std::vector<Handle> hvec;
-	hvec.push_back(a->getHandle());
-	hvec.push_back(a2->getHandle());
-
-	LinkPtr l(createLink(SET_LINK, hvec));
-	TLB::addAtom(l);
-	store->storeAtom(l);
-
-	AtomPtr lb = store->getAtom(l->getHandle());
-	atomCompare(l, lb);
-
-	store->kill_data();
-	delete store;
-}
-
-// ============================================================
-
-void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
+void PersistUTest::add_to_table(int idx, AtomTable *table, std::string id)
 {
 	// Create an atom ... 
 	n1[idx] = createNode(WORD_NODE, id + "fromNode");
@@ -280,7 +238,7 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 	table->add(l[idx]);
 }
 
-void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
+void PersistUTest::check_table(int idx, AtomTable *table, std::string id)
 {
 	Handle hb1 = table->getHandle(n1[idx]);
 	atomCompare(a1[idx], hb1);
@@ -303,27 +261,14 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 
 // ============================================================
 
-void BasicSaveUTest::test_single_atom(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	single_atom_save_restore("aaa ");
-	single_atom_save_restore("bbb ");
-	single_atom_save_restore("ccc ");
-	single_atom_save_restore("ddd ");
-	single_atom_save_restore("eee ");
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-void BasicSaveUTest::test_table(void)
+void PersistUTest::test_atomspace(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	AtomStorage *store = new AtomStorage(dbname, username, passwd);
 	if (!store->connected())
 	{
-		logger().debug("test_table: cannot connect to db");
+		logger().debug("test_atomspace: cannot connect to db");
 		return;
 	}
 
