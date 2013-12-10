@@ -554,30 +554,41 @@ throw(opencog::NotFoundException)
         return Handle::UNDEFINED;
     }
 
-    // testing if there is a list link already
+    // some EvalLink has just predicate and the first outgoing
+    // e.g.:
+//    (EvaluationLink (stv 1 1)
+//       (PredicateNode "is_food")
+//       (ListLink
+//          (ConceptNode "apple")
+//       )
+//    )
     Handle listLinkHandle = atomSpace.getHandle(LIST_LINK, seq0);
-    if (listLinkHandle == Handle::UNDEFINED) {
-        return Handle::UNDEFINED;
+    HandleSeq evalLinkHandleset;
+    if (listLinkHandle != Handle::UNDEFINED)
+    {
+        HandleSeq seq;
+        seq.push_back(predicateHandle);
+        seq.push_back(listLinkHandle);
+
+        atomSpace.getHandlesByOutgoing(back_inserter(evalLinkHandleset),
+                               seq, NULL, NULL, 2, EVALUATION_LINK, false);
+
     }
 
-    HandleSeq seq;
-    seq.push_back(predicateHandle);
-    seq.push_back(listLinkHandle);
-
-    HandleSeq evalLinkHandleset;
-    atomSpace.getHandlesByOutgoing(back_inserter(evalLinkHandleset),
-                           seq, NULL, NULL, 2, EVALUATION_LINK, false);
-
+    // some EvalLink has its value node blow the first outgoings
+    // in this case, need to call pattern matcher to get the value node given the predicate and first outgoings
+    // e.g.:
+//    (EvaluationLink (stv 1 1)
+//       (PredicateNode "color")
+//       (ListLink
+//          (ConceptNode "sky")
+//          (ConceptNode "blue")
+//       )
+//    )
 
     if (evalLinkHandleset.size() == 0)
     {
-//        cout<< "predicateHandle: \n" << atomSpace.atomAsString(predicateHandle) << std::endl;
-//        cout<< "listLinkHandle: \n" << atomSpace.atomAsString(listLinkHandle) << std::endl;
-//        throw opencog::NotFoundException(TRACE_INFO,
-//               ("AtomSpaceUtil - getLatestEvaluationLink:There is no evaluation link for predicate: "
-//                 + predicateName).c_str() );
         evalLinkHandleset = getEvaluationLinks(atomSpace,predicateName,seq0);
-
     }
 
     return getLatestHandle(atomSpace,evalLinkHandleset);
