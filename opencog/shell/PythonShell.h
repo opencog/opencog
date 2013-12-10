@@ -46,10 +46,7 @@ class PythonShellModule;
 
 class PythonShell: public GenericShell
 {
-    friend class PythonShellModule;
-private:
-    std::string do_eval(const std::string &);
-
+    friend class PythonShellModule; // needs to call set_socket
 protected:
     void set_socket(ConsoleSocket *);
 

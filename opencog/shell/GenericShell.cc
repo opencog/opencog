@@ -38,8 +38,11 @@ using namespace opencog;
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
 
-// Some randome ASCII characters
-#define EOT 0x4   // ctrl-D at keyboard.
+// Some random ASCII control characters (unix semantics)
+#define EOT 0x4   // end    or ^D at keyboard.
+#define SYN 0x16  // quit   or ^C at keyboard.
+#define CAN 0x18  // cancel or ^X at keyboard.
+#define ESC 0x1b  // ecsape or ^[ at keyboard.
 
 GenericShell::GenericShell(void)
 {
@@ -47,18 +50,25 @@ GenericShell::GenericShell(void)
 	show_prompt = true;
 	normal_prompt = "> ";
 	pending_prompt = "... ";
-	abort_prompt = "asdf";
+	abort_prompt = "asdf"; // simply reserve 4 chars
 	abort_prompt[0] = IAC;
 	abort_prompt[1] = WILL;
 	abort_prompt[2] = TIMING_MARK;
 	abort_prompt[3] = '\n';
-	abort_prompt += normal_prompt;
 
+	evaluator = NULL;
 	socket = NULL;
+	self_destruct = false;
 }
 
 GenericShell::~GenericShell()
 {
+	if (socket)
+	{
+		socket->SetShell(NULL);
+		socket->OnRequestComplete();
+		socket = NULL;
+	}
 }
 
 void GenericShell::socketClosed(void)
@@ -128,23 +138,6 @@ void GenericShell::set_socket(ConsoleSocket *s)
 	socket->SetShell(this);
 }
 
-
-#ifdef FINISH_IMPLEMENTING_LATER
-const std::string& GenericShell::get_prompt(void)
-{
-	// Use different prompts, depending on whether there is pending
-	// input or not.
-	if (...)
-	{
-		return pending_prompt;
-	}
-	else
-	{
-		return normal_prompt;
-	}
-}
-#endif
-
 /* ============================================================== */
 
 void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
@@ -175,11 +168,10 @@ void GenericShell::eval(const std::string &expr, ConsoleSocket *s)
 
 /* ============================================================== */
 
-#ifdef FINISH_IMPLEMENTING_LATER
 /**
- * Decode input
+ * Evaluate the expression
  */
-std::string GenericShell::decode_input(const std::string &expr)
+std::string GenericShell::do_eval(const std::string &expr)
 {
 	size_t len = expr.length();
 	if (0 == len)
@@ -206,7 +198,7 @@ std::string GenericShell::decode_input(const std::string &expr)
 			c = expr[i+1];
 			if ((IP == c) || (AO == c))
 			{
-				evaluator.clear_pending();
+				evaluator->clear_pending();
 				return abort_prompt;
 			}
 
@@ -223,42 +215,56 @@ std::string GenericShell::decode_input(const std::string &expr)
 	// escape (^[), cancel (^X) or quit (^C)
 	// These would typically be sent by netcat, and not telnet.
 	unsigned char c = expr[len-1];
-	if ((0x16 == c) || (0x18 == c) || (0x1b == c))
+	if ((SYN == c) || (CAN == c) || (ESC == c))
 	{
-		evaluator.clear_pending();
+		evaluator->clear_pending();
 		return "\n" + normal_prompt;
 	}
 
+	// Look for either an isolated control-D, or a single period on a line
+	// by itself. This means "leave the shell". We leave the shell by
+	// unsetting the shell pointer in the ConsoleSocket.
+	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
+	if ((false == evaluator->input_pending()) &&
+	    ((EOT == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
+	{
+		self_destruct = true;
+		if (show_prompt) return "Exiting the scheme shell\n";
+		return "";
+	}
 
-	/* The #$%^& opecog command shell processor cuts off the
-	 * newline character. Re-insert it; otherwise, comments within
-	 * procedures will have the effect of commenting out the rest
-	 * of the procedure, leading to garbage.
+	/* 
+	 * Sometimes the newline gets cut !?!? This may not be true any
+	 * longer, with the new whiz-bang socket code.
+	 *
+	 * Re-insert it; otherwise, comments within procedures will
+	 * have the effect of commenting out the rest of the procedure,
+	 * leading to garbage.
 	 *
 	 * (This is a pointless string copy, it should be eliminated)
 	 */
 	std::string input = expr + "\n";
 
-	std::string result = evaluator.eval(input.c_str());
+	std::string result = evaluator->eval(input.c_str());
 
-	if (evaluator.input_pending())
+	if (evaluator->input_pending())
 	{
-		if (show_output)
+		if (show_output && show_prompt)
 			return pending_prompt;
 		else
 			return "";
 	}
 
-	if (show_output || evaluator.eval_error())
+	if (show_output || evaluator->eval_error())
 	{
-		result += normal_prompt;
+		if (show_prompt) result += normal_prompt;
 		return result;
 	}
 	else
 	{
 		return "";
 	}
+
 }
-#endif
 
 /* ===================== END OF FILE ============================ */

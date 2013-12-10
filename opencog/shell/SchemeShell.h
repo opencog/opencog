@@ -38,10 +38,7 @@ class SchemeShellModule;
 
 class SchemeShell : public GenericShell
 {
-	friend class SchemeShellModule;
-	private:
-		std::string do_eval(const std::string &);
-
+	friend class SchemeShellModule; // needs to call set_socket()
 	protected:
 		void set_socket(ConsoleSocket *);
 
