@@ -231,6 +231,7 @@ std::string SchemeShell::do_eval(const std::string &expr)
 	// Look for either an isolated control-D, or a single period on a line
 	// by itself. This means "leave the shell". We leave the shell by
 	// unsetting the shell pointer in the ConsoleSocket.
+	// 0x4 is ASCII EOT, which is what ctrl-D at keybd becomes.
 	if ((false == evaluator->input_pending()) &&
 	    ((0x4 == expr[len-1]) || ((1 == len) && ('.' == expr[0]))))
 	{
