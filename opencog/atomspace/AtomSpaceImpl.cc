@@ -146,8 +146,17 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
     Handle hexist = atomTable.getHandle(t, name);
     if (hexist)
     {
+        // XXX FIXME The AtomSpaceAsyncUTest tries to do somethig weird,
+        // that is causing the below to fail. The atomtable add does the
+        // same thing under a lock. I don't understand why it matters.
+        // It would be slight faster to just merge here, but wtf ... 
+        // So anyway, ifdef it out, for now ...
+#ifdef DO_UNLOCKED_UPDATE
         hexist->merge(tvn);  // Update the truth value.
         return hexist;
+#else
+        return atomTable.add(createNode(t, name, tvn));
+#endif
     }
 
     // If we are here, the AtomTable does not yet know about this atom.
