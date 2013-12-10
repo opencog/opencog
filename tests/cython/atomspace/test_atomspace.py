@@ -357,7 +357,7 @@ class AtomTest(TestCase):
         self.assertEqual(a2.long_string(), 
                 "(Node \"test2\" (av 10 1) (stv 0.100000 0.012346))\n")
         self.assertEqual(str(l), 
-                "(Link (stv 0 0)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
+                "(Link (stv 0.000000 0.000000)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
         self.assertEqual(l.long_string(), 
                 "(Link (av 0 0) (stv 0.000000 0.000000)\n" +
                 "  (Node \"test1\" (av 0 0) (stv 0.500000 0.111111))\n" +
