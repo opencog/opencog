@@ -48,13 +48,15 @@
 
 #include "PyIncludeWrapper.h"
 
-#include <opencog/atomspace/Handle.h>
+#include <map>
+#include <string>
+#include <vector>
 
 #include <boost/filesystem/operations.hpp>
 
-#include <string>
-#include <vector>
-#include <map>
+#include <opencog/atomspace/Handle.h>
+#include <opencog/shell/GenericEval.h>
+
 
 namespace opencog {
 
@@ -83,7 +85,7 @@ class PythonThreadLocker
  * It also provides some handy functions, such as getPyAtomspace. These helper
  * functions may need python GIL and you should do this manually.
  */
-class PythonEval
+class PythonEval : public GenericEval
 {
     private:
 
@@ -115,18 +117,12 @@ class PythonEval
 
         std::map <std::string, PyObject*> modules;
         std::string expr;
-        bool pending;
 
     public:
         void addModuleFromPath(std::string path);
         void addSysPath(std::string path);
 
-        std::string eval(std::string);
-        bool input_pending()
-        {
-            return this->pending;
-        }
-        void clear_pending(){this->pending=false;}
+        virtual std::string eval(const std::string&);
 
         PyThreadState * getMainThreadState() {
             return this->mainThreadState;

@@ -13,8 +13,9 @@
 #include <sstream>
 #include <pthread.h>
 #include <libguile.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/atomspace/Handle.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/shell/GenericEval.h>
 #include <opencog/util/exceptions.h>
 
 namespace opencog {
@@ -24,7 +25,7 @@ namespace opencog {
 
 class AtomSpace;
 
-class SchemeEval
+class SchemeEval : public GenericEval
 {
 	private:
 		// Initialization stuff
@@ -95,7 +96,6 @@ class SchemeEval
 		Handle apply(const std::string& func, Handle varargs);
 		std::string apply_generic(const std::string& func, Handle varargs);
 	
-		bool input_pending(void);
 		void clear_pending(void);
 		bool eval_error(void);
 	

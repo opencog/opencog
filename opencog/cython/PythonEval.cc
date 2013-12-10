@@ -65,7 +65,6 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
-    this->pending = false;
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -413,25 +412,25 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
-std::string PythonEval::eval(std::string expr)
+std::string PythonEval::eval(const std::string& partial_expr)
 {
     std::string result = "";
-    if (expr == "\n")
+    if (partial_expr == "\n")
     {
-        this->pending = false;
+        _pending_input = false;
         result = this->apply_script(this->expr);
         this->expr = "";
     }
     else
     {
-        size_t size = expr.size();
-        size_t colun = expr.find_last_of(':');
+        size_t size = partial_expr.size();
+        size_t colun = partial_expr.find_last_of(':');
         if (size-2 == colun)
-            pending = true;
+            _pending_input = true;
 
-        this->expr += expr;
+        this->expr += partial_expr;
 
-        if (not pending)
+        if (not _pending_input)
         {
             result = this->apply_script(this->expr);
             this->expr = "";

@@ -44,7 +44,6 @@ void SchemeEval::init(void)
 	scm_set_current_output_port(outport);
 	in_shell = false;
 
-	pending_input = false;
 	caught_error = false;
 	input_line = "";
 	error_string = SCM_EOL;
@@ -260,11 +259,11 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
 	char * restr = scm_to_locale_string(re);
-	pending_input = false;
+	_pending_input = false;
 
 	if (0 == strcmp(restr, "read-error"))
 	{
-		pending_input = true;
+		_pending_input = true;
 		free(restr);
 		return SCM_EOL;
 	}
@@ -394,7 +393,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 	/* Avoid a string buffer copy if there is no pending input */
 	const char *expr_str;
-	if (pending_input)
+	if (_pending_input)
 	{
 		input_line += expr;
 		expr_str = input_line.c_str();
@@ -406,7 +405,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	}
 
 	caught_error = false;
-	pending_input = false;
+	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
@@ -417,13 +416,13 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
 	 * to true. */
-	if (pending_input)
+	if (_pending_input)
 	{
 		/* Save input for later */
 		if (newin) input_line += expr;
 		return "";
 	}
-	pending_input = false;
+	_pending_input = false;
 	input_line = "";
 
 	if (caught_error)
@@ -461,15 +460,6 @@ std::string SchemeEval::do_eval(const std::string &expr)
 /* ============================================================== */
 
 /**
- * Return true if the expression was incomplete, and more is expected
- * (for example, more closing parens are expected)
- */
-bool SchemeEval::input_pending(void)
-{
-	return pending_input;
-}
-
-/**
  * Return true if an error occured during the evaluation of the expression
  */
 bool SchemeEval::eval_error(void)
@@ -483,7 +473,7 @@ bool SchemeEval::eval_error(void)
 void SchemeEval::clear_pending(void)
 {
 	input_line = "";
-	pending_input = false;
+	_pending_input = false;
 	caught_error = false;
 }
 
