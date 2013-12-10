@@ -27,6 +27,7 @@
 #include <opencog/util/platform.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/ConsoleSocket.h>
 
 #include "SchemeShell.h"
 
@@ -80,14 +81,8 @@ SchemeShell::~SchemeShell()
  */
 void SchemeShell::set_socket(ConsoleSocket *s)
 {
-	if (socket)
-	{
-		socket->SetShell(NULL);
-		socket->OnRequestComplete();
-	}
-
-	socket = s;
-	socket->SetShell(this);
+	// Let the generic shell do the basic work.
+	GenericShell::set_socket(s);
 
 	//	if (!evaluator) evaluator = new SchemeEval();
 	//	Someone did this singleton instance crapola because

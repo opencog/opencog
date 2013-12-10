@@ -31,10 +31,11 @@
  */
 #ifdef HAVE_CYTHON
 
-#include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/server/ConsoleSocket.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/platform.h>
 #include "PythonShell.h"
 
 namespace opencog
@@ -83,16 +84,9 @@ PythonShell::~PythonShell()
  */
 void PythonShell::set_socket(ConsoleSocket *s)
 {
-    if (socket)
-    {
-        socket->SetShell(NULL);
-        socket->OnRequestComplete();
-    }
+    // Let the generic shell do the basic work.
+    GenericShell::set_socket(s);
 
-    socket = s;
-    socket->SetShell(this);
-
-    //	if (!evaluator) evaluator = new SchemeEval();
     //	Someone did this singleton instance crapola because
     //	some scheme threading somehow doesn't work somewhere.
     //	buncha crap. fix this shit.

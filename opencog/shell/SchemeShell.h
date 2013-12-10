@@ -27,8 +27,7 @@
 
 #include <string>
 
-#include <opencog/guile/SchemeEval.h>
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/shell/GenericShell.h>
 
 namespace opencog {
 /** \addtogroup grp_server
@@ -41,8 +40,6 @@ class SchemeShell : public GenericShell
 {
 	friend class SchemeShellModule;
 	private:
-		SchemeEval *evaluator;
-
 		const std::string& get_prompt(void);
 
 		std::string do_eval(const std::string &);

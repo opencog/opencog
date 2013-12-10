@@ -34,10 +34,7 @@
 #ifndef PYTHONSHELL_H
 #define PYTHONSHELL_H
 
-#include <string>
-
-#include <opencog/cython/PythonEval.h>
-#include <opencog/server/ConsoleSocket.h>
+#include <opencog/shell/GenericShell.h>
 
 namespace opencog
 {
@@ -51,8 +48,6 @@ class PythonShell: public GenericShell
 {
     friend class PythonShellModule;
 private:
-    PythonEval *evaluator;
-
     const std::string& get_prompt(void);
 
     std::string do_eval(const std::string &);

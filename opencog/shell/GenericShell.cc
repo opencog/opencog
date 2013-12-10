@@ -94,6 +94,22 @@ void GenericShell::hush_prompt(bool hush)
 	show_prompt = !hush;
 }
 
+/**
+ * Register this shell with the console.
+ */
+void GenericShell::set_socket(ConsoleSocket *s)
+{
+	if (socket)
+	{
+		socket->SetShell(NULL);
+		socket->OnRequestComplete();
+	}
+
+	socket = s;
+	socket->SetShell(this);
+}
+
+
 #ifdef FINISH_IMPLEMENTING_LATER
 const std::string& GenericShell::get_prompt(void)
 {

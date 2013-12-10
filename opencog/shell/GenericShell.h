@@ -45,6 +45,7 @@ namespace opencog {
  */
 
 class ConsoleSocket;
+class GenericEval;
 
 class GenericShell
 {
@@ -56,7 +57,10 @@ class GenericShell
 		bool show_prompt;
 		bool self_destruct;
 
-		ConsoleSocket *socket;
+		ConsoleSocket* socket;
+		GenericEval* evaluator;
+
+		virtual void set_socket(ConsoleSocket *);
 
 		virtual std::string do_eval(const std::string &expr) = 0;
 
