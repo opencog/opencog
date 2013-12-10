@@ -3,16 +3,9 @@
 ; 
 ; Link-grammar processing pipeline. Currently, counts word pairs.
 ;
-; Copyright (c) 2103 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2013 Linas Vepstas <linasvepstas@gmail.com>
 ;
 ; Look for new sentences, count the links in them.
-
-
-; Notes:
-; (get-new-parsed-sentences) returns the sentences
-; (release-new-parsed-sents) gets rid of the attachment.
-; delete-hypergraph
-; cog-atom-incr
 
 ; Plan of attack:
 ; -- get parses, 
@@ -51,11 +44,6 @@
 	)
 )
 
-; Unit test:
-; 
-; (define (prt x) (begin (display x) #f))
-; (map-lg-links prt (get-new-parsed-sentences))
-;
 ; ---------------------------------------------------------------------
 ; make-lg-rel -- create a word-relation from a word-instance relation
 ;
@@ -123,7 +111,7 @@
 ; pairs.
 (define (observe-text plain-text)
 	(begin
-		(relex-parse plain-text)
+		(relex-parse plain-text)  ;; send plain-text to server
 		(update-link-counts (get-new-parsed-sentences))
 		(release-new-parsed-sents)
       (delete-sentences)
@@ -131,14 +119,26 @@
 )
 
 ; ---------------------------------------------------------------------
-(map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
-	(get-new-parsed-sentences)
-)
+;
+; Some generic hand-testing code for this stuff:
+;
+(define (prt x) (begin (display x) #f))
+
+(relex-parse "this is")
+(get-new-parsed-sentences)
+
+(map-lg-links prt (get-new-parsed-sentences))
+
 (map-lg-links (lambda (x) (prt (make-lg-rel x)))
 	(get-new-parsed-sentences)
 )
-(map-lg-links prt
+
+(map-lg-links (lambda (x) (prt (gddr (make-lg-rel x))))
 	(get-new-parsed-sentences)
 )
 
+(map-lg-links (lambda (x) (cog-atom-incr (make-lg-rel x) 1))
+	(get-new-parsed-sentences)
+)
 
+(observe-text "abcccccccccc  defffffffffffffffff")
