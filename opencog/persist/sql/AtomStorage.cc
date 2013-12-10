@@ -149,8 +149,8 @@ class AtomStorage::Response
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
-			store->makeAtom(*this, handle);
-			hvec->push_back(handle);
+			Handle h(store->makeAtom(*this, handle));
+			hvec->push_back(h);
 			return false;
 		}
 
@@ -1092,7 +1092,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 
 	if (NOTYPE == realtype)
 	{
-		fprintf(stderr,
+		throw RuntimeException(TRACE_INFO,
 			"Fatal Error: OpenCog does not have a type called %s\n",
 			db_typename[rp.itype]);
 		return NULL;
@@ -1125,9 +1125,6 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 #endif /* USE_INLINE_EDGES */
 			atom = createLink(realtype, outvec);
 		}
-
-		// Give the atom the correct UUID. The AtomTable will need this.
-		atom->_uuid = h.value();
 	}
 	else
 	{
@@ -1135,12 +1132,23 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		if (realtype != atom->getType())
 		{
 			UUID uuid = h.value();
-			fprintf(stderr,
-				"Error: mismatched atom type for existing atom! "
+			throw RuntimeException(TRACE_INFO,
+				"Fatal Error: mismatched atom type for existing atom! "
 				"uuid=%lu real=%d atom=%d\n",
 				uuid, realtype, atom->getType());
 		}
+		// If we are here, and the atom uuid is set, then it should match.
+		if (Handle::UNDEFINED.value() != atom->_uuid and 
+		    atom->_uuid != h.value())
+		{
+			throw RuntimeException(TRACE_INFO,
+				"Fatal Error: mismatched handle and atom UUID's, atom=%lu handle=%lu",
+				atom->_uuid, h.value());
+		}
 	}
+
+	// Give the atom the correct UUID. The AtomTable will need this.
+	atom->_uuid = h.value();
 
 	// Now get the truth value
 	switch (rp.tv_type)

@@ -142,11 +142,16 @@ AtomSpaceImpl::AtomSpaceImpl(const AtomSpaceImpl& other)
 
 Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 {
-    DPRINTF("AtomSpaceImpl::addNode AtomTable address: %p\n", &atomTable);
-    DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
+    // Is this atom already in the atom table? 
+    Handle hexist = atomTable.getHandle(t, name);
+    if (hexist)
+    {
+        hexist->merge(tvn);  // Update the truth value.
+        return hexist;
+    }
 
+    // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-// XXX this is utterly the wrong place to do this ... 
     if (backing_store) {
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
@@ -156,18 +161,23 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
         }
     }
 
-    NodePtr n(createNode(t, name, tvn));
-    Handle newNodeHandle = atomTable.add(n);
-    return newNodeHandle;
+    // If we are here, neither the AtomTable nor backing store know about
+    // this atom. Just add it.
+    return atomTable.add(createNode(t, name, tvn));
 }
 
 Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
                               TruthValuePtr tvn)
 {
-    DPRINTF("AtomSpaceImpl::addLink AtomTable address: %p\n", &atomTable);
-    DPRINTF("====AtomTable.linkIndex address: %p size: %d\n", &atomTable.linkIndex, atomTable.linkIndex.idx.size());
+    // Is this atom already in the atom table?
+    Handle hexist = atomTable.getHandle(t, outgoing);
+    if (hexist)
+    {
+        hexist->merge(tvn);  // Update the truth value.
+        return hexist;
+    }
 
-// XXX this is utterly the wrong place to do this ... 
+    // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
@@ -181,8 +191,9 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         }
     }
 
-    Handle newLinkHandle = atomTable.add(createLink(t, outgoing, tvn));
-    return newLinkHandle;
+    // If we are here, neither the AtomTable nor backing store know about
+    // this atom. Just add it.
+    return atomTable.add(createLink(t, outgoing, tvn));
 }
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)
@@ -195,11 +206,16 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
-        AtomPtr a(backing_store->getAtom(h));
+        // If the atom correspondig to the UUID isn't available, then
+        // got get it. But in fact, we may already have it, from a
+        // previous recusrive call to getIncomingSet(), so don't waste
+        // any CPU sycles getting it again.
+        if (NULL == h.operator->())
+            h = backing_store->getAtom(h);
 
         // For links, must perform a recursive fetch, as otherwise
         // the atomtable.add below will throw an error.
-        LinkPtr l(LinkCast(a));
+        LinkPtr l(LinkCast(h));
         if (l) {
            const HandleSeq& ogs = l->getOutgoingSet();
            size_t arity = ogs.size();
@@ -207,10 +223,11 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
            {
               Handle oh = fetchAtom(ogs[i]);
               if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
-                    "Unexpected handle mismatch -B!\n");
+                  "Unexpected handle mismatch! Expected %lu got %lu\n",
+                  ogs[i].value(), oh.value());
            }
         }
-        if (a) return atomTable.add(a);
+        if (h) return atomTable.add(h);
     }
 
     return Handle::UNDEFINED;
@@ -218,8 +235,9 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
 
 Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 {
-    Handle base = fetchAtom(h);
-    if (Handle::UNDEFINED == base) return Handle::UNDEFINED;
+    h = fetchAtom(h);
+
+    if (Handle::UNDEFINED == h) return Handle::UNDEFINED;
 
     // Get everything from the backing store.
     if (backing_store) {
@@ -234,7 +252,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
             }
         }
     }
-    return base;
+    return h;
 }
 
 HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
