@@ -106,7 +106,7 @@ Handle AtomSpaceUtil::addLink(AtomSpace& atomSpace,
 {
     Handle result = atomSpace.getHandle(linkType, outgoing);
     if (result == Handle::UNDEFINED) {
-        result = atomSpace.addLink(linkType, outgoing);
+        result = atomSpace.addLink(linkType, outgoing,TruthValue::TRUE_TV());
         if (permanent) {
             atomSpace.setLTI(result, 1);
         }
@@ -115,7 +115,7 @@ Handle AtomSpaceUtil::addLink(AtomSpace& atomSpace,
             atomSpace.setLTI(result, 1);
         }
     } else if (renew_sti) {
-        result = atomSpace.addLink(linkType, outgoing);
+        result = atomSpace.addLink(linkType, outgoing,TruthValue::TRUE_TV());
     }
     return result;
 }
@@ -784,7 +784,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
-        ll = atomSpace.addLink(LIST_LINK, ll_out);
+        ll = atomSpace.addLink(LIST_LINK, ll_out,TruthValue::TRUE_TV());
     }
 
     HandleSeq hs2;
@@ -798,7 +798,7 @@ Handle AtomSpaceUtil::addGenericPropertyPred(AtomSpace& atomSpace,
                      predicateName.c_str());
         return Handle::UNDEFINED;
     } else {
-        el = atomSpace.addLink(EVALUATION_LINK, hs2);
+        el = atomSpace.addLink(EVALUATION_LINK, hs2,TruthValue::TRUE_TV());
         logger().fine("AtomSpaceUtil - %s added with TV %f.",
                      predicateName.c_str(), tv->getMean());
     }
@@ -856,15 +856,15 @@ std::vector<Handle> AtomSpaceUtil::getInheritanceLinks(AtomSpace & atomSpace, Ha
 
     inheritanceLinkOutgoings.push_back(hFirstOutgoing);
     inheritanceLinkOutgoings.push_back(hVariableNode);
-    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings);
+    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings,TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hinheritanceLink);
     implicationLinkOutgoings.push_back(hinheritanceLink);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
 
     // Run pattern matcher
     PatternMatch pm;
@@ -891,15 +891,15 @@ std::vector<Handle> AtomSpaceUtil::getNodesByInheritanceLink(AtomSpace & atomSpa
 
     inheritanceLinkOutgoings.push_back(hVariableNode);
     inheritanceLinkOutgoings.push_back(hSecondOutgoing);
-    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings);
+    Handle hinheritanceLink = atomSpace.addLink(INHERITANCE_LINK, inheritanceLinkOutgoings,TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hinheritanceLink);
     implicationLinkOutgoings.push_back(hVariableNode);
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
 
     // Run pattern matcher
     PatternMatch pm;
@@ -935,23 +935,23 @@ std::vector<Handle> AtomSpaceUtil::getEvaluationLinks(AtomSpace &atomSpace, stri
 
     predicateListLinkOutgoings.push_back(hVariableNode);
 
-    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings);
+    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings,TruthValue::TRUE_TV());
 
     HandleSeq evalLinkOutgoings;
     evalLinkOutgoings.push_back(predicateNode);
     evalLinkOutgoings.push_back(predicateListLink);
-    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings);
+    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings,TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hEvalLink);
 
     // return the EvaluationLinks
     implicationLinkOutgoings.push_back(hEvalLink);
 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
 
 //            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
@@ -989,22 +989,22 @@ std::vector<Handle> AtomSpaceUtil::getNodesByEvaluationLink(AtomSpace &atomSpace
         predicateListLinkOutgoings.push_back(h);
     }
 
-    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings);
+    Handle predicateListLink = atomSpace.addLink(LIST_LINK, predicateListLinkOutgoings,TruthValue::TRUE_TV());
 
     HandleSeq evalLinkOutgoings;
     evalLinkOutgoings.push_back(predicateNode);
     evalLinkOutgoings.push_back(predicateListLink);
-    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings);
+    Handle hEvalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoings,TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hEvalLink);
 
     implicationLinkOutgoings.push_back(hVariableNode);
 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
 
 //            cout<< "hBindLink: \n" << atomSpace.atomAsString(hBindLink) << std::endl;
 
@@ -1034,15 +1034,15 @@ Handle AtomSpaceUtil::getReferenceLink(AtomSpace & atomSpace, Handle hFirstOutgo
 
     referenceLinkOutgoings.push_back(hFirstOutgoing); 
     referenceLinkOutgoings.push_back(hVariableNode); 
-    Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoings);
+    Handle hReferenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoings,TruthValue::TRUE_TV());
 
     implicationLinkOutgoings.push_back(hReferenceLink); 
     implicationLinkOutgoings.push_back(hReferenceLink); 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings); 
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, implicationLinkOutgoings,TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariableNode);  
     bindLinkOutgoings.push_back(hImplicationLink); 
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings);  
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, bindLinkOutgoings,TruthValue::TRUE_TV());
 
     // Run pattern matcher
     PatternMatch pm; 
@@ -1106,8 +1106,8 @@ float AtomSpaceUtil::getCurrentPetFeelingLevel( AtomSpace& atomSpace,
     // Add EvaluationLink
     HandleSeq evalLinkOutgoing;
     evalLinkOutgoing.push_back(feelingNode);
-    evalLinkOutgoing.push_back(atomSpace.addLink(LIST_LINK, agentNode));
-    Handle evalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoing);
+    evalLinkOutgoing.push_back(atomSpace.addLink(LIST_LINK, agentNode,TruthValue::TRUE_TV()));
+    Handle evalLink = atomSpace.addLink(EVALUATION_LINK, evalLinkOutgoing,TruthValue::TRUE_TV());
 
     TimeServer& ts = timeServer();
     unsigned long latest = ts.getLatestTimestamp();
@@ -2621,34 +2621,34 @@ bool AtomSpaceUtil::getDemandEvaluationLinks (AtomSpace & atomSpace,
     Handle hVariableNodeListLink = atomSpace.addNode(VARIABLE_NODE, "$var_list_link");  
     tempOutgoings.push_back(hVariableNodeListLink); 
     tempOutgoings.push_back(hVariableTypeNodeListLink); 
-    variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings) ); 
+    variableListLinkOutgoings.push_back( atomSpace.addLink(TYPED_VARIABLE_LINK, tempOutgoings,TruthValue::TRUE_TV()) );
 
-    Handle hVariableListLink = atomSpace.addLink(LIST_LINK, variableListLinkOutgoings);
+    Handle hVariableListLink = atomSpace.addLink(LIST_LINK, variableListLinkOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear();
     tempOutgoings.push_back( atomSpace.addNode(PREDICATE_NODE, demandName+"DemandGoal") ); 
-    Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK, tempOutgoings);  
+    Handle hEvaluationLinkDemandGoal = atomSpace.addLink(EVALUATION_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear(); 
     tempOutgoings.push_back( atomSpace.addNode(GROUNDED_PREDICATE_NODE, "fuzzy_within") ); 
     tempOutgoings.push_back(hVariableNodeListLink); 
-    Handle hEvaluationLinkFuzzyWithin = atomSpace.addLink(EVALUATION_LINK, tempOutgoings); 
+    Handle hEvaluationLinkFuzzyWithin = atomSpace.addLink(EVALUATION_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear(); 
     tempOutgoings.push_back(hEvaluationLinkDemandGoal); 
     tempOutgoings.push_back(hEvaluationLinkFuzzyWithin); 
-    Handle hSimultaneousEquivalenceLink = atomSpace.addLink(SIMULTANEOUS_EQUIVALENCE_LINK, tempOutgoings); 
-    Handle hReturnListLink = atomSpace.addLink(LIST_LINK, tempOutgoings); 
+    Handle hSimultaneousEquivalenceLink = atomSpace.addLink(SIMULTANEOUS_EQUIVALENCE_LINK, tempOutgoings,TruthValue::TRUE_TV());
+    Handle hReturnListLink = atomSpace.addLink(LIST_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear(); 
     tempOutgoings.push_back(hSimultaneousEquivalenceLink); 
     tempOutgoings.push_back(hReturnListLink); 
-    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, tempOutgoings); 
+    Handle hImplicationLink = atomSpace.addLink(IMPLICATION_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     tempOutgoings.clear(); 
     tempOutgoings.push_back(hVariableListLink); 
     tempOutgoings.push_back(hImplicationLink); 
-    Handle hBindLink = atomSpace.addLink(BIND_LINK, tempOutgoings); 
+    Handle hBindLink = atomSpace.addLink(BIND_LINK, tempOutgoings,TruthValue::TRUE_TV());
 
     // Run pattern matcher
     PatternMatch pm; 
