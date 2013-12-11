@@ -103,7 +103,7 @@ def learn_lasso():
     from sklearn.neighbors import KNeighborsRegressor
     from random import randrange
 
-    clf = KNeighborsRegressor()
+    clf = KNeighborsRegressor(n_neighbors=20)
     clf.fit(train_x, train_y)
 
     for i in [randrange(0, len(train_y) / 2) for x in xrange(20)]:
