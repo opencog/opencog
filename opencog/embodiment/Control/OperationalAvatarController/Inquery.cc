@@ -290,6 +290,11 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
 }
 
+ParamValue Inquery::inqueryUnknowableState(const vector<ParamValue>& stateOwnerList)
+{
+    return UNDEFINED_VALUE;
+}
+
 ParamValue Inquery::inqueryIsSame(const vector<ParamValue>& stateOwnerList)
 {
     if (stateOwnerList.size() != 2)
@@ -1246,7 +1251,18 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     evalLinkOutgoings.push_back(predicateListLink);
     Handle hEvalLink = AtomSpaceUtil::addLink(*atomSpace,EVALUATION_LINK, evalLinkOutgoings);
 
-    return hEvalLink;
+    cout << "generatePMLinkFromAState Truth Value = " << toString(atomSpace->getTV(hEvalLink)->getMean()) << std::endl;;
+
+    // If the state is STATE_NOT_EQUAL_TO, need to use a NotLink wrap the EvaluationLink
+    if (state->stateType == STATE_NOT_EQUAL_TO)
+    {
+        HandleSeq notLinkOutgoings;
+        notLinkOutgoings.push_back(hEvalLink);
+        Handle hNotLink = AtomSpaceUtil::addLink(*atomSpace,NOT_LINK, notLinkOutgoings);
+        return hNotLink;
+    }
+    else
+        return hEvalLink;
 
 }
 
@@ -1281,6 +1297,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
             std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
             andLinkOutgoings.push_back(record.PMLink);
+            cout << "Truth Value = " << toString(atomSpace->getTV(record.PMLink)->getMean()) << std::endl;
         }
 
         // remove the repeated elements
@@ -1309,8 +1326,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;

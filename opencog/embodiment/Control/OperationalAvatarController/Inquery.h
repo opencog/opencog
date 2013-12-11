@@ -71,6 +71,9 @@ public:
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
     static ParamValue getParamValueFromAtomspace(State &state);
 
+    // for that kind of States that do not exist in Atomspace, nor in real time system, just simply return UNDEFINED_VALUE
+    static ParamValue inqueryUnknowableState(const vector<ParamValue>& stateOwnerList);
+
     // check if these two are the same, currently only support entity and string
     static ParamValue inqueryIsSame(const vector<ParamValue>& stateOwnerList);
 
