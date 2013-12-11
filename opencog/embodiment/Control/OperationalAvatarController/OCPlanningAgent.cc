@@ -42,6 +42,8 @@ OCPlanningAgent::OCPlanningAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
+    startPlanning = false;
+
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 }
@@ -130,6 +132,7 @@ bool OCPlanningAgent::isMoveAction(string s)
         return false;
 }
 
+
 void OCPlanningAgent::run()
 {
     this->cycleCount = _cogserver.getCycleCount();
@@ -141,11 +144,17 @@ void OCPlanningAgent::run()
     if (!this->bInitialized)
         this->init();
 
-    if (! oac->getPAI().hasFinishFistTimeWorldPercetption())
-        return;
+    if (! startPlanning)
+    {
+        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption()) &&
+             ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime()))
+        {
+            startPlanning = true;
+            sleep(3); // to wait for the PAI to finish more perception processing
+        }
 
-    if (! oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime())
         return;
+    }
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
