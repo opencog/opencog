@@ -86,7 +86,12 @@ void AtomSpacePublisherModule::InitZeroMQ()
         zmq_ip = "*";
 
     const char * zmq_address = ("tcp://" + zmq_ip + ":" + zmq_event_port).c_str();
-    publisher->bind(zmq_address);
+
+    try {
+        publisher->bind(zmq_address);
+    } catch (zmq::error_t error) {
+        std::cout << "ZeroMQ error: " << error.what() << std::endl;
+    }
 }
 
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
