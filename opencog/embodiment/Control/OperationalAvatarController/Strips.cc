@@ -92,7 +92,12 @@ ParamValue State::getParamValue()
         return this->stateVariable->getValue();
 
     if (need_inquery)
-        return inqueryStateFun(stateOwnerList);
+    {
+        if (inqueryStateFun != 0)
+            return inqueryStateFun(stateOwnerList);
+        else
+            return UNDEFINED_VALUE;
+    }
     else
         return (Inquery::getParamValueFromAtomspace(*this));
 
@@ -1032,7 +1037,16 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             if (paramMapIt != groundings.end())
                 groundedState->stateVariable->assignValue(paramMapIt->second);
             else if (ifRealTimeQueryStateValue)
-                groundedState->stateVariable->assignValue(groundedState->getParamValue());
+            {
+                ParamValue value = groundedState->getParamValue();
+                if ((value == UNDEFINED_VALUE) && toGroundStateValue)
+                {
+                    delete groundedState;
+                    return 0;
+                }
+
+                groundedState->stateVariable->assignValue(value);
+            }
             else if (toGroundStateValue)
             {
                 delete groundedState;
@@ -1193,15 +1207,15 @@ void Rule::_preProcessRuleParameterIndexes()
                 _addParameterIndex(s,*ownerIt);
         }
 
+
         // check the effect value
         if (isParamValueUnGrounded(e->opParamValue))
             _addParameterIndex(s,e->opParamValue);
-        else
-            return; // if the opParamValue is grounded , not need to add the old state value in index
 
-        // check the state value
-        if (isParameterUnGrounded( *(s->stateVariable)))
-                _addParameterIndex(s,s->stateVariable->getValue());
+        //  not need to add the old state value in index
+//        // check the old state value
+//        if (isParameterUnGrounded( *(s->stateVariable)))
+//                _addParameterIndex(s,s->stateVariable->getValue());
 
     }
 
