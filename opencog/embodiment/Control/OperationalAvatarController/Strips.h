@@ -139,6 +139,7 @@ namespace opencog { namespace oac {
 
         //map<string , vector<ParamValue*> > paraIndexMap; // this is only used when this state is inside a rule, the rule class will assign the values to this map
 
+        // for some unknowable states, not existing in Atomspace, nor able to calculate in real time, _need_inquery = true, but _inqueryStateFun = 0
         State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
               vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0);
 
