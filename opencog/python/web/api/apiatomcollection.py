@@ -122,8 +122,6 @@ class AtomCollectionAPI(Resource):
             return current_app.response_class(response, mimetype='application/javascript')
         else:
             return current_app.response_class(json.dumps(json_data), mimetype='application/json')
-        
-    
 
     def post(self):
         """
