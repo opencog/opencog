@@ -35,7 +35,8 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_VITERBI)
-    ADD_SUBDIRECTORY (viterbi)
+	# Disable until new interfaces widely available. -- linas
+	# ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
 
 IF (HAVE_CYTHON)

@@ -44,7 +44,8 @@ IF (CXXTEST_FOUND)
  		ADD_SUBDIRECTORY (spatial)
 
 		IF (HAVE_VITERBI)
-			ADD_SUBDIRECTORY (viterbi)
+			# Disable until new interfaces widely available. -- linas
+			# ADD_SUBDIRECTORY (viterbi)
 		ENDIF (HAVE_VITERBI)
 	ENDIF (HAVE_ATOMSPACE)
 
