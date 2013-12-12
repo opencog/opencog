@@ -13,6 +13,7 @@ ADD_SUBDIRECTORY (learning)
 
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (atomspace)
+    ADD_SUBDIRECTORY (execution)
     ADD_SUBDIRECTORY (benchmark)
     ADD_SUBDIRECTORY (query)
     ADD_SUBDIRECTORY (nlp)

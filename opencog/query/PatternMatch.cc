@@ -20,16 +20,12 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include <opencog/cython/PyIncludeWrapper.h>
-
-#include <opencog/util/Logger.h>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
-
-
+#include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
 #include "DefaultPatternMatchCB.h"
