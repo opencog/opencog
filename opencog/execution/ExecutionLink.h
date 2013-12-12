@@ -49,6 +49,7 @@ public:
     static Handle do_execute(Handle schema, Handle args);
 };
 
+/** @}*/
 }
 
 #endif // _OPENCOG_EXECUTION_LINK_H

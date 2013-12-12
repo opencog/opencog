@@ -48,6 +48,21 @@ ExecutionLink::ExecutionLink(Handle schema, Handle args,
     }
 }
 
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+///
+/// Expects the argument to be an ExecutionLink, which should have the
+/// following structure:
+///
+///     ExecutionLink
+///         GroundedSchemaNode "lang: func_name"
+///         ListLink
+///             SomeAtom
+///             OtherAtom
+///
+/// The "lang:" should be either "scm:" for scheme, or "py:" for python.
+/// This method will then invoke "func_name" on the provided ListLink
+/// of arguments to the function.
+///
 Handle ExecutionLink::do_execute(Handle execlnk)
 {
     if (EXECUTION_LINK != execlnk->getType()) {
@@ -57,6 +72,13 @@ Handle ExecutionLink::do_execute(Handle execlnk)
     return do_execute(l->getOutgoingSet());
 }
 
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+///
+/// Expects the sequence to be exactly two atoms long.
+/// Expects the first handle of the sequence to be a GroundedSchemaNode
+/// Expects the second handle of the sequence to be a ListLink
+/// Executes the GroundedSchemaNode, supplying the second handle as argument
+///
 Handle ExecutionLink::do_execute(const HandleSeq& sna)
 {
     if (2 != sna.size())
@@ -66,6 +88,12 @@ Handle ExecutionLink::do_execute(const HandleSeq& sna)
     return do_execute(sna[0], sna[1]);
 }
 
+/// do_execute -- execute the GroundedSchemaNode of the ExecutionLink
+///
+/// Expects "gsn" to be a GroundedSchemaNode
+/// Expects "args" to be a ListLink
+/// Executes the GroundedSchemaNode, supplying the args as argument
+///
 Handle ExecutionLink::do_execute(Handle gsn, Handle args)
 {
     if (GROUNDED_SCHEMA_NODE != gsn->getType()) {
