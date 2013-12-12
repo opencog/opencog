@@ -21,9 +21,9 @@
  */
 
 #include <opencog/atomspace/atom_types.h>
-#include <opencog/atomspace/ExecutionLink.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
+#include "ExecutionLink.h"
 
 using namespace opencog;
 
