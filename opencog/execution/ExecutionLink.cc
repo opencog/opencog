@@ -1,7 +1,7 @@
 /*
  * opencog/atomspace/ExectuionLink.cc
  *
- * Copyright (C) 2013 Linas Vepstas
+ * Copyright (C) 2009, 2013 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify

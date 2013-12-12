@@ -23,8 +23,7 @@
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
-#include <opencog/cython/PythonEval.h>
-#include <opencog/guile/SchemeEval.h>
+#include <opencog/execution/ExecutionLink.h>
 #include <opencog/util/Logger.h>
 
 #include "PatternMatch.h"
@@ -193,53 +192,13 @@ class Instantiator
 
 Handle Instantiator::execution_link()
 {
-	// The oset contains the grounded schema.
-	if (2 != oset.size()) return Handle::UNDEFINED;
-	Handle gs = oset[0];
-
-	if (!as->isNode(gs)) return Handle::UNDEFINED;
-
-	// Get the schema name.
-	const std::string& schema = as->getName(gs);
-	// printf ("Grounded schema name: %s\n", schema.c_str());
-
-	// At this point, we only run scheme schemas.
-	if (0 == schema.compare(0,4,"scm:", 4))
-	{
-#ifdef HAVE_GUILE
-		// Be freindly, and strip leading white-space, if any.
-		size_t pos = 4;
-		while (' ' == schema[pos]) pos++;
-
-		SchemeEval &applier = SchemeEval::instance();
-		Handle h = applier.apply(schema.substr(pos), oset[1]);
-		return h;
-#else
-		return Handle::UNDEFINED;
-#endif /* HAVE_GUILE */
-	}
-
-    if (0 == schema.compare(0, 3,"py:", 3))
-	{
-#ifdef HAVE_CYTHON
-		// Be freindly, and strip leading white-space, if any.
-		size_t pos = 3;
-        while (' ' == schema[pos]) pos++;
-
-        PythonEval &applier = PythonEval::instance();
-
-        Handle h = applier.apply(schema.substr(pos), oset[1]);
-
-        // Return the handle
-        return h;
-#else
-		return Handle::UNDEFINED;
-#endif /* HAVE_CYTHON */
-	}
+	// This thorws if it can't figure out the schema ...
+	// should we try and catch here ?
+	return ExecutionLink::do_execute(oset);
 
 	// Unkown proceedure type.  Return it, maybe some other
 	// execution-link handler will be able to process it.
-	return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
+	// return as->addLink(EXECUTION_LINK, oset, TruthValue::TRUE_TV());
 }
 
 bool Instantiator::walk_tree(Handle expr)
