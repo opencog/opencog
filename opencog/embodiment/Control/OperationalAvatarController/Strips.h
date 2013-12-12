@@ -381,14 +381,16 @@ namespace opencog { namespace oac {
 
         string ruleName; // this is just for debug use , it can be empty
 
-        // constructors
-        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost):
-            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
+        bool precondOrderDependent; // does the order of preconditions matter?
 
-        Rule(PetAction* _action, ParamValue _actor, float _basic_cost):
+        // constructors
+        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false):
+            action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent){}
+
+        Rule(PetAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""){}
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent){}
 
         float getBasicCost();
 
@@ -430,6 +432,10 @@ namespace opencog { namespace oac {
         bool static isUnGroundedString( string &s);
         bool static isUnGroundedVector(Vector& v);
         bool static isUnGroundedEntity( Entity &e);
+
+        // even when one of if the rule effect describe the same state with the given goal, if is still possible that this rule doesn't help achieving this goal.
+        // e.g. if the goal is to some one keep cats as pet, but the rule effect is some one not to keep something as pet, then this rule won't help to achieve this goal.
+        bool isRulePossibleToHelpToAchieveGoal(State* goal);
 
     protected:
 
