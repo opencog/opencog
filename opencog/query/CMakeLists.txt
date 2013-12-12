@@ -1,7 +1,4 @@
 # Build the query module
-INCLUDE_DIRECTORIES(
-	${PYTHON_INCLUDE_PATH}
-)
 
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
