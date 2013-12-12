@@ -1249,7 +1249,47 @@
       (ObjectNode "fourthHouse")
    )
 )
-      
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "liveIn")
+   (ListLink
+      (AvatarNode "id_man_1")
+      (ObjectNode "firstHouse")
+   )
+)      
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "liveIn")
+   (ListLink
+      (AvatarNode "id_man_2")
+      (ObjectNode "secondHouse")
+   )
+)      
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "liveIn")
+   (ListLink
+      (AvatarNode "id_man_3")
+      (ObjectNode "thirdHouse")
+   )
+)      
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "liveIn")
+   (ListLink
+      (AvatarNode "id_man_4")
+      (ObjectNode "fourthHouse")
+   )
+)      
+
+(EvaluationLink (stv 1 1) 
+   (PredicateNode "liveIn")
+   (ListLink
+      (AvatarNode "id_man_5")
+      (ObjectNode "fifthHouse")
+   )
+)      
+
 
 
 
