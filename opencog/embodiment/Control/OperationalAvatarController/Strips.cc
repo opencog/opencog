@@ -1238,3 +1238,64 @@ void Rule::_preProcessRuleParameterIndexes()
     }
 
 }
+
+// todo: this is not complete. if other users have more requiment, need to implment his own cases.
+bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal)
+{
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = effectList.begin(); effectIt != effectList.end(); ++effectIt)
+    {
+        bool help = false;
+        Effect* e = effectIt->second;
+        State* s = e->state;
+        if (s->name() == goal->name())
+        {
+            help = true;
+            switch (e->effectOp)
+            {
+            case OP_ASSIGN:
+                if (goal->stateType == STATE_NOT_EQUAL_TO)
+                {
+                    help = false;
+
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        help = !(e->opParamValue == goal->getParamValue());
+                    }
+
+                }
+                break;
+
+            case OP_ASSIGN_NOT_EQUAL_TO:
+                if (goal->stateType == STATE_EQUAL_TO)
+                    help = false;
+                break;
+
+            case OP_ASSIGN_GREATER_THAN:
+                if (goal->stateType != STATE_GREATER_THAN)
+                    help = false;
+                break;
+            case OP_ASSIGN_LESS_THAN:
+                if (goal->stateType != STATE_LESS_THAN)
+                    help = false;
+                break;
+            case OP_REVERSE:
+            case OP_ADD:
+            case OP_SUB:
+            case OP_MUL:
+            case OP_DIV:
+            case OP_NUM_OPS:
+            default:
+                help = true;
+                break;
+
+            }
+
+        }
+
+        if (help == true)
+            return true;
+    }
+
+    return false;
+}
