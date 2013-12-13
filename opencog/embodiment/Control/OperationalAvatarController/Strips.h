@@ -435,7 +435,8 @@ namespace opencog { namespace oac {
 
         // even when one of if the rule effect describe the same state with the given goal, if is still possible that this rule doesn't help achieving this goal.
         // e.g. if the goal is to some one keep cats as pet, but the rule effect is some one not to keep something as pet, then this rule won't help to achieve this goal.
-        bool isRulePossibleToHelpToAchieveGoal(State* goal);
+        // output direcHelp means if the effect value is grounded already and the same with the goal value
+        bool isRulePossibleToHelpToAchieveGoal(State* goal, bool &directHelp);
 
     protected:
 

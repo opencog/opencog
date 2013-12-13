@@ -1240,7 +1240,7 @@ void Rule::_preProcessRuleParameterIndexes()
 }
 
 // todo: this is not complete. if other users have more requiment, need to implment his own cases.
-bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal)
+bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal, bool &directHelp)
 {
     vector<EffectPair>::iterator effectIt;
     for(effectIt = effectList.begin(); effectIt != effectList.end(); ++effectIt)
@@ -1251,6 +1251,7 @@ bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal)
         if (s->name() == goal->name())
         {
             help = true;
+            directHelp = false;
             switch (e->effectOp)
             {
             case OP_ASSIGN:
@@ -1263,6 +1264,14 @@ bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal)
                         help = !(e->opParamValue == goal->getParamValue());
                     }
 
+                }
+                else if (goal->stateType == STATE_EQUAL_TO)
+                {
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        directHelp = e->opParamValue == goal->getParamValue();
+                        help = directHelp;
+                    }
                 }
                 break;
 
