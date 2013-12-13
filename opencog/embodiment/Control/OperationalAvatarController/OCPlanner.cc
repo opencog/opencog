@@ -41,6 +41,7 @@
 #include <math.h>
 #include <cstdio>
 #include <sstream>
+#include <boost/bind.hpp>
 #include "OAC.h"
 
 using namespace opencog::oac;
@@ -1280,6 +1281,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         int preConNum = 1;
         int unsatisfiedPreconNum = 0;
 
+        list<StateNode*> unsatisfiedPreconList;
+        unsatisfiedPreconList.clear();
+
         itpre = ruleNode->originalRule->preconditionList.begin();
         for (; itpre != ruleNode->originalRule->preconditionList.end();  ++itpre, ++preConNum)
         {
@@ -1360,13 +1364,23 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             else
             {
                 // add it to unsatisfied list
-                unsatisfiedStateNodes.push_back(newStateNode);
+                getHardnessScoreOfPrecon(newStateNode);
+                unsatisfiedPreconList.push_back(newStateNode);
+
                 cout << " is unsatisfied :(" << std::endl;
                 unsatisfiedPreconNum ++;
             }
         }
 
-        // todo: when the preconditions is not order dependent , need to check the easiness of each unsatisfied preconditions
+        // when the preconditions is not order dependent , need to check the easiness of each unsatisfied preconditions
+        if ( (! ruleNode->originalRule->precondOrderDependent)  && (unsatisfiedPreconNum > 1) )
+        {
+            // if the order of preconds doesn't matter ,we sort the preconds from hard to easy
+            unsatisfiedPreconList.sort(PreconHarder());
+        }
+
+        // add the unsatisfiedPreconList to the end of unsatisfiedStateNodes
+        unsatisfiedStateNodes.insert(unsatisfiedStateNodes.end(), unsatisfiedPreconList.begin(), unsatisfiedPreconList.end());
 
 //        // there is a tricky logic here: if it's an recursive rule, switch its two precons in the unsatisfiedStateNodes list if it  has two
 //        // , so that the precon which is more closer to current state will be put in the end of  the unsatisfiedStateNodes list, so that it will be dealt with next loop
@@ -1533,6 +1547,56 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
+int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
+{
+    map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(stateNode->state->name());
+
+    if ( it == ruleEffectIndexes.end())
+        return 999999;
+
+    multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
+    multimap<float,Rule*> ::iterator ruleIt;
+    bool ruleToHelp = false;
+    bool directHelp = false;
+    int numOfUngroundedVars = 1000; // the more variables this rule has, the more difficult to use it
+
+    // at least one of the related rules should not be negative this subgoal
+    for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
+    {
+        Rule* r = ruleIt->second;
+
+        bool _directHelp;
+        // if this rule will negative this goal, we should not choose to apply it.
+        if (r->isRulePossibleToHelpToAchieveGoal(stateNode->state ,_directHelp))
+        {
+            ruleToHelp = true;
+            if (_directHelp)
+                directHelp =true;
+
+            int varNum = r->paraIndexMap.size();
+            if (varNum < numOfUngroundedVars)
+                numOfUngroundedVars = varNum;
+        }
+
+    }
+
+    if (! ruleToHelp)
+        return 999999;
+
+    int hardnessScore = 1000;
+
+    if (directHelp)
+        hardnessScore = 0;
+
+    hardnessScore += numOfUngroundedVars * 10;
+
+    if (stateNode->state->isNumbericState())
+        hardnessScore += 2000;
+
+    return hardnessScore;
+}
+
+
 int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
@@ -1603,8 +1667,9 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {
                     Rule* r = ruleIt->second;
+                    bool directHelp;
                     // if this rule will negative this goal, we should not choose to apply it.
-                    if (r->isRulePossibleToHelpToAchieveGoal(groundPs))
+                    if (r->isRulePossibleToHelpToAchieveGoal(groundPs,directHelp))
                     {
                         ruleImpossibleToHelp = false;
                         break;
