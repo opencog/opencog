@@ -70,10 +70,11 @@ class ForwardInferenceAgent(MindAgent):
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
 
-        self.chainer.add_rule(quantifier_rules.HigherOrderRule(self.chainer, self.chainer.rules[0]))
+        for rule in self.chainer.rules:
+            self.chainer.add_rule(quantifier_rules.HigherOrderRule(self.chainer, rule))
 
         contextual_rules = []
-        for rule in self.rules:
+        for rule in self.chainer.rules:
             contextual_rules.append(context_rules.ContextualRule(self.chainer, rule))
         for rule in contextual_rules:
             self.chainer.add_rule(rule)

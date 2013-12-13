@@ -73,37 +73,30 @@ def set_TV(word):
             return conceptnet_dict[word]
 
 
-def print_TV(word, case=1):
-    return('(stv ' + str(word.mean) + ' ' + str(word.count) + ')')
-
-
 def write_atoms(cn_assertion, template_no, link_type=''):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, .5)
-    if template_no == 1:
-        return ('(' + str(link_type) + ' {link_tv}\n\t' +
-                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t' +
-                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n)'
-                ).format(link_tv=print_TV(TV),
-                         cn_argument1=cn_assertion[1][6:],
-                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
-                         cn_argument2=cn_assertion[2][6:],
-                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
-    elif template_no == 2:
-        return ('(EvaluationLink' + ' {link_tv}\n\t' +
-                '(PredicateNode "{cn_relation}" {cn_rel_stv})\n\t' +
-                '(ListLink\n\t\t' +
-                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t\t' +
-                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n\t)\n)'
-                ).format(link_tv=print_TV(TV),
-                         cn_relation=cn_assertion[0][3:],
-                         cn_rel_stv=print_TV(set_TV(cn_assertion[0][3:])),
-                         cn_argument1=cn_assertion[1][6:],
-                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
-                         cn_argument2=cn_assertion[2][6:],
-                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
+    cn_argument1=cn_assertion[1][6:]
+    cn_arg1_stv=set_TV(cn_assertion[1][6:])
+    cn_argument2=cn_assertion[2][6:]
+    cn_arg2_stv=set_TV(cn_assertion[2][6:])
 
+    cn1 = atomspace.add_node(types.ConceptNode, cn_argument1, tv=cn_arg1_stv)
+    cn2 = atomspace.add_node(types.ConceptNode, cn_argument2, tv=cn_arg2_stv)
+
+    if template_no == 1:
+        link = atomspace.add_link(get_type(link_type), [cn1, cn2], tv=TV)
+
+        return str(link)
+    elif template_no == 2:
+        cn_relation=cn_assertion[0][3:]
+        cn_rel_stv=set_TV(cn_assertion[0][3:])
+        pn = atomspace.add_node(types.PredicateNode, relation, tv=rel_stv)
+
+        listlink = atomspace.add_link(types.ListLink, [cn1, cn2])
+        evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
+        return str(evallink)
 
 def from_file(cn_path, scm_name):
     # lists_of_assertions is a list of list of assertion
