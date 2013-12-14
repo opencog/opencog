@@ -16,4 +16,20 @@ Steps:
 
 5) Run the RelEx opencog-server.sh shell script
 
-6)
+6) cat ./link-pipeline.scm |netcat localhost 17001
+
+7) telnet localhost 17001
+   opencog> sql-open learn-pairs linas asdf
+   opencog> scm
+   guile> (observe-text "this is a test")
+
+8) psql learn-pairs
+   learn-pairs=# SELECT * from atoms;
+
+9) She works!
+
+That's all for now, folks!
+
+
+Notes:
+------

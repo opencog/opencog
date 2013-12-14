@@ -106,15 +106,3 @@ confidence_t SimpleTruthValue::countToConfidence(count_t cn)
 {
     return static_cast<confidence_t>(cn / (cn + KKK));
 }
-
-TruthValuePtr SimpleTruthValue::fromString(const char* tvStr)
-{
-    float mean, conf;
-    sscanf(tvStr, "(stv %f %f)", &mean, &conf);
-    DPRINTF("SimpleTruthValue::fromString(%s) => mean = %f, conf = %f\n", tvStr, mean, conf);
-    return std::make_shared<SimpleTruthValue>(static_cast<strength_t>(mean),
-                                static_cast<count_t>(confidenceToCount(conf)));
-}
-
-
-

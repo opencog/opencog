@@ -194,7 +194,7 @@ public:
      *         ExecutionOutputLink
      *             GroundSchemaNode: modulatorUpdater
      */ 
-    static float getCurrentModulatorLevel(const AtomSpace & atomSpace, 
+    static float getCurrentModulatorLevel(AtomSpace & atomSpace, 
                                           const std::string & modulatorName);
     /**
      * Returns the current level of the given Demand.
@@ -207,7 +207,7 @@ public:
      *
      * @return float    The current level of a given Demand
      */ 
-    static float getCurrentDemandLevel(const AtomSpace & atomSpace, 
+    static float getCurrentDemandLevel(AtomSpace & atomSpace, 
                                        const std::string & demandName);
 
     /**
@@ -218,7 +218,7 @@ public:
      *
      * @return Handle   The Handle to Demand Goal (EvaluationLink), or Handle::UNDEFINED if fails
      */
-    static Handle getDemandGoalEvaluationLink(const AtomSpace & atomSpace, 
+    static Handle getDemandGoalEvaluationLink(AtomSpace & atomSpace, 
                                               const std::string & demand 
                                              );
 
@@ -368,7 +368,7 @@ public:
      * @note You can use PAI::getCurrentTimestamp() just before calling addAction() to get
      * the timestamp argument for this method.
      */
-    static bool isActionPredicatePresent(const AtomSpace& atomSpace,
+    static bool isActionPredicatePresent(AtomSpace& atomSpace,
                                          const char* actionPredicateName,
                                          Handle actionExecLink,
                                          unsigned long sinceTimestamp);
@@ -418,7 +418,7 @@ public:
      * @param objectB   The handle of the second object to be used in the
      *                  predicate.
      */
-    static bool getPredicateValueAtSpaceMap(const AtomSpace& atomSpace,
+    static bool getPredicateValueAtSpaceMap(AtomSpace& atomSpace,
                                             const std::string predicate,
                                             const SpaceServer::SpaceMap& sm,
                                             Handle obj1, Handle obj2);
@@ -454,7 +454,7 @@ public:
      *                     reconstituted according to the following format
      *                     "to:destinationID: message"
      */
-    static bool getHasSaidValueAtTime(const AtomSpace &atomSpace,
+    static bool getHasSaidValueAtTime(AtomSpace &atomSpace,
                                       unsigned long timestamp,
                                       unsigned long delay,
                                       Handle from_h,
@@ -506,7 +506,7 @@ public:
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
      */
-    static float getPredicateValue(const AtomSpace& atomSpace,
+    static float getPredicateValue(AtomSpace& atomSpace,
                                    std::string predicateName,
                                    Handle a,
                                    Handle b = Handle::UNDEFINED)
@@ -522,7 +522,7 @@ public:
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
      */
-    static bool isPredicateTrue(const AtomSpace& atomSpace,
+    static bool isPredicateTrue(AtomSpace& atomSpace,
                                 std::string predicateName,
                                 Handle a,
                                 Handle b = Handle::UNDEFINED);
@@ -532,7 +532,7 @@ public:
      * @param avatar The handle of the avatar
      * @param avatar The handle of the pet
      */
-    static bool isPetOwner( const AtomSpace& atomSpace,
+    static bool isPetOwner( AtomSpace& atomSpace,
                             Handle avatar, Handle pet );
 
 
@@ -698,14 +698,14 @@ public:
      * @return The Handle of the latest grabbed object. It can be Handle::UNDEFINED
      *         if there is no grabbed object
      */
-    static Handle getLatestHoldingObjectHandle(const AtomSpace& atomSpace,
+    static Handle getLatestHoldingObjectHandle(AtomSpace& atomSpace,
             const std::string& holderId );
 
-    static bool isObjectBeingHolded( const AtomSpace& atomSpace,
+    static bool isObjectBeingHolded( AtomSpace& atomSpace,
                                      const std::string& objectId );
-    static Handle getObjectHolderHandle( const AtomSpace& atomSpace,
+    static Handle getObjectHolderHandle( AtomSpace& atomSpace,
                                          const std::string& objectId );
-    static std::string getObjectHolderId( const AtomSpace& atomSpace,
+    static std::string getObjectHolderId( AtomSpace& atomSpace,
                                           const std::string& objectId );
 
     /**
@@ -717,7 +717,7 @@ public:
      * @return The Handle of the latest atTimeLink that points to isHolding
      * Link. It can be Handle::UNDEFINED if there is no isHolding EvaluationLink
      */
-    static Handle getMostRecentIsHoldingAtTimeLink(const AtomSpace& atomSpace,
+    static Handle getMostRecentIsHoldingAtTimeLink(AtomSpace& atomSpace,
             const std::string& holderId);
 
     /**
@@ -728,7 +728,7 @@ public:
      * @return The Handle of the latest isHolding Link. It can be Handle::UNDEFINED
      *         if there is no isHolding eval link
      */
-    static Handle getMostRecentIsHoldingLink(const AtomSpace& atomSpace,
+    static Handle getMostRecentIsHoldingLink(AtomSpace& atomSpace,
             const std::string& holderId );
 
 
@@ -742,7 +742,7 @@ public:
      * @return The Handle of the latest grabbed object. It can be Handle::UNDEFINED
      *         if there is no grabbed object
      */
-    static Handle getHoldingObjectHandleAtTime(const AtomSpace& atomSpace,
+    static Handle getHoldingObjectHandleAtTime(AtomSpace& atomSpace,
             const std::string& holderId,
             unsigned long time);
 
@@ -757,7 +757,7 @@ public:
      * @return The Handle of the latest isHolding Link. It can be Handle::UNDEFINED
      *         if there is no isHolding eval link
      */
-    static Handle getIsHoldingLinkAtTime(const AtomSpace& atomSpace,
+    static Handle getIsHoldingLinkAtTime(AtomSpace& atomSpace,
                                          const std::string& holderId,
                                          unsigned long time);
 
@@ -772,7 +772,7 @@ public:
      *
      * @return The id of the held object. It can be empty "" if there is no held object
      */
-    static std::string getHoldingObjectIdAtTime(const AtomSpace& atomSpace,
+    static std::string getHoldingObjectIdAtTime(AtomSpace& atomSpace,
             const std::string& holderId,
             unsigned long time);
 
@@ -783,7 +783,7 @@ public:
      * @param holderId Id of an avatar or a pet that is holding or dropping something
      * @return The id of the held object. It can be empty "" if there is no held object
      */
-    static std::string getHoldingObjectId(const AtomSpace& atomSpace,
+    static std::string getHoldingObjectId(AtomSpace& atomSpace,
                                           const std::string& holderId );
 
 
@@ -794,7 +794,7 @@ public:
      * @param holderId Id of an avatar or a pet that is holding something
      * @return true if and only if holderId is holding something
      */
-    static bool isHoldingSomething(const AtomSpace& atomSpace,
+    static bool isHoldingSomething(AtomSpace& atomSpace,
                                    const std::string& holderId );
 
 
@@ -816,7 +816,7 @@ public:
      * Given the name of an object, whose letters  may be all in upercase, gets its id.
      * @return the id of the object, if it exists, or an empty string, otherwise.
      */
-    static std::string getObjIdFromName( const AtomSpace& atomSpace,
+    static std::string getObjIdFromName( AtomSpace& atomSpace,
                                          const std::string& objectName );
 
     /**
@@ -904,7 +904,7 @@ public:
      * @param rule The rule name
      * @return The ImplicationLink handle or Handle::UNDEFINED if an error occur.
      */
-    static Handle getRuleImplicationLink(const AtomSpace& atomSpace,
+    static Handle getRuleImplicationLink(AtomSpace& atomSpace,
                                          const std::string& rule);
     
     /**
@@ -919,7 +919,7 @@ public:
      *         ListLink 
      *             PET_HANDLE
      */
-    static Handle getModulatorSimilarityLink(const AtomSpace & atomSpace,
+    static Handle getModulatorSimilarityLink(AtomSpace & atomSpace,
                                              const std::string & modulator, 
                                              const std::string & petId);
 
@@ -985,7 +985,7 @@ public:
      * @param agentModeName The name of the current agent operation mode
      * @return The ImplicationLink strength or -1 if an error occurs.
      */
-    static float getRuleImplicationLinkStrength(const AtomSpace& atomSpace,
+    static float getRuleImplicationLinkStrength(AtomSpace& atomSpace,
             const std::string& rule,
             const std::string& agentModeName );
 
@@ -1035,7 +1035,7 @@ public:
      * @param objectID The object's ID
      * @return The object's handle. UNDEFINE_HANDLE if the agent's doesn't exists
      */
-    static Handle getObjectHandle ( const AtomSpace& atomSpace, const std::string& objectID );
+    static Handle getObjectHandle ( AtomSpace& atomSpace, const std::string& objectID );
 
 
     /**
@@ -1045,7 +1045,7 @@ public:
      * @param agentID The agent's ID
      * @return The agent's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
-    static Handle getAgentHandle( const AtomSpace& atomSpace, const std::string& agentID );
+    static Handle getAgentHandle( AtomSpace& atomSpace, const std::string& agentID );
 
     /**
      * Return the entity handle using its agentID, it can be an object or an avatar
@@ -1054,8 +1054,8 @@ public:
      * @param entityId The entity's ID
      * @return The object's handle. Handle::UNDEFINED if the agent doesn't exist.
      */
-    static Handle getEntityHandle( const AtomSpace& atomSpace,
-                                           const std::string& entityId );
+    static Handle getEntityHandle( AtomSpace& atomSpace,
+                                   const std::string& entityId );
 
     /**
      * Return the Temporal pointed by a given AtTimeLink

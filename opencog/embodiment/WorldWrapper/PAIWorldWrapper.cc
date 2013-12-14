@@ -107,7 +107,7 @@ throw (ComboException, AssertionException, std::bad_exception)
     _hasPlanFailed = false;
     planID = pai.createActionPlan();
 
-    const AtomSpace& as = pai.getAtomSpace();
+    AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
     // treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
@@ -747,7 +747,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
 bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                                       Handle goBehind, float walkSpeed )
 {
-    const AtomSpace& atomSpace = pai.getAtomSpace();
+    AtomSpace& atomSpace = pai.getAtomSpace();
     const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
     std::string goalName = atomSpace.getName(goalHandle);
 

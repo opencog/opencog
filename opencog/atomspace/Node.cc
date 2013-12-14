@@ -55,8 +55,8 @@ std::string Node::toShortString(std::string indent) const
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) + 
-        " " + tmpname + " " +
-        getTruthValue()->toString() + ")\n";
+        " \"" + tmpname + "\")\n";
+        // + getTruthValue()->toString() + ")\n";
     return nam;
 }
 

@@ -3,11 +3,11 @@
  *
  * Most basic, simplest sniff test, saves and restores a few atoms.
  *
- * If this test is failing for you, then be sure to read
- * ../../opencong/persist/README, and create/configure the SQL database
- * as described there. Next, edit ../../lib/test-opencog.conf 
- * appropriately, so as to indicate the location of your database.
- * This test will then pass.
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
  *
  * Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -198,8 +198,8 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 
 // ============================================================
 /**
- * A simple test cases that tests the save and restore of 
- * a couple of nodes and a link. Does not test atomspaces at all.
+ * A simple test case that tests the save and restore of 
+ * a couple of nodes and a link. Does not test atomtable/atomspace at all.
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {

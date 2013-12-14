@@ -266,7 +266,10 @@ public:
     }
 
     /**
-     * Removes an atom from the atomspace
+     * Remove an atom from the atomspace.  Note that this only purges
+     * the atom from the AtomSpace; it may still remain in persistent
+     * storage.  To also delete from persistant storage, use the
+     * deleteAtom() method. 
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -282,13 +285,31 @@ public:
     }
 
     /**
+     * Deletes an atom from the atomspace, and any attached storage.
+     * The permanently deletes the atom; to merely purge it from the
+     * atomspace, without altering storage, use removeAtom().
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool deleteAtom(Handle h, bool recursive = true) {
+        return getImpl().deleteAtom(h, recursive);
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const {
-        return getAtomTable().getHandle(t, str);
+    Handle getHandle(Type t, const std::string& str) {
+        return getImpl().getNode(t, str);
     }
 
     /**
@@ -297,8 +318,8 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getAtomTable().getHandle(t, outgoing);
+    Handle getHandle(Type t, const HandleSeq& outgoing) {
+        return getImpl().getLink(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */

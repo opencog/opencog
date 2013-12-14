@@ -33,11 +33,6 @@
 
 using namespace opencog;
 
-CompositeTruthValue::CompositeTruthValue()
-{
-    primaryTV = NULL;
-}
-
 CompositeTruthValue::CompositeTruthValue(TruthValuePtr tv, VersionHandle vh)
 {
     primaryTV = TruthValue::DEFAULT_TV();
@@ -87,6 +82,23 @@ confidence_t CompositeTruthValue::getConfidence() const
     return primaryTV->getConfidence();
 }
 
+static const char* typeToStr(TruthValueType t) throw (InvalidParamException)
+{
+    switch (t) {
+    case SIMPLE_TRUTH_VALUE:
+        return "SIMPLE_TRUTH_VALUE";
+    case COUNT_TRUTH_VALUE:
+        return "COUNT_TRUTH_VALUE";
+    case INDEFINITE_TRUTH_VALUE:
+        return "INDEFINITE_TRUTH_VALUE";
+    case COMPOSITE_TRUTH_VALUE:
+        return "COMPOSITE_TRUTH_VALUE";
+    default:
+        throw InvalidParamException(TRACE_INFO,
+             "Invalid Truth Value type: '%d'.", t);
+    }
+}
+
 /*
  * The format of string representation of a Composite TV is as follows:
  * (primaryTv first, followed by the versionedTvs):
@@ -102,10 +114,10 @@ std::string CompositeTruthValue::toString() const
     char buffer[1<<16];
     DPRINTF("primaryTV = %p\n", primaryTV);
     DPRINTF("type = %d\n", primaryTV->getType());
-    DPRINTF("typeStr = %s\n", TruthValue::typeToStr(primaryTV->getType()));
-    DPRINTF("{%s;%s}", TruthValue::typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
+    DPRINTF("typeStr = %s\n", typeToStr(primaryTV->getType()));
+    DPRINTF("{%s;%s}", typeToStr(primaryTV->getType()), primaryTV->toString().c_str());
     sprintf(buffer, "{%s;%s}",
-            TruthValue::typeToStr(primaryTV->getType()),
+            typeToStr(primaryTV->getType()),
             primaryTV->toString().c_str());
     result += buffer;
     for (VersionedTruthValueMap::const_iterator itr = versionedTVs.begin();
@@ -113,87 +125,17 @@ std::string CompositeTruthValue::toString() const
     {
         VersionHandle key = itr->first;
         TruthValuePtr tv = itr->second;
-        DPRINTF("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
+        DPRINTF("{%p;%s;%s;%s}", key.substantive, VersionHandle::indicatorToStr(key.indicator), typeToStr(tv->getType()), tv->toString().c_str());
         sprintf(buffer, "{%lu;%s;%s;%s}",
                 key.substantive.value(),
                 VersionHandle::indicatorToStr(key.indicator),
-                TruthValue::typeToStr(tv->getType()), tv->toString().c_str());
+                typeToStr(tv->getType()), tv->toString().c_str());
         result += buffer;
     }
 
     DPRINTF("\n%s\n", result.c_str());
     return result;
 }
-
-TruthValuePtr CompositeTruthValue::SetDefaultTVIfPertinent(TruthValuePtr tv)
-{
-    if (tv->isDefaultTV())
-        return DEFAULT_TV();
-    return tv;
-}
-
-/**
- * The format of string representation of a Composite TV is as follows
- * (primaryTv first, followed by the versionedTvs):
- * {FIRST_PLN_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
- * {0x2;CONTEXTUAL;FIRST_PLN_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
- * NOTE: string representation of tv types, VersionHandles and tv 
- * attributes cannot have '{', '}' or ';', which are separators
- *
- * XXX This function should be moved to its own file-persistance 
- * directory. It really does not belong here, and things like the
- * UUID wackinesss is just potential for bugs.  In general, all of 
- * the file-persistence code should be removed from this directory.
- */
-CompositeTruthValuePtr CompositeTruthValue::fromString(const char* tvStr)
-    throw (InvalidParamException)
-{
-    char* buff;
-    char* s = strdup(tvStr);
-    // First each token is a tv representation
-    char* tvToken = __strtok_r(s, "{}", &buff);
-    if (tvToken == NULL) {
-        throw InvalidParamException(TRACE_INFO,
-            "Invalid string representation of a CompositeTruthValue object: "
-            "missing primary TV!");
-    }
-    // Creates the new instance.
-    CompositeTruthValuePtr result(new CompositeTruthValue());
-    // Now, separate internal tokens
-    char* internalBuff;
-    char* primaryTvTypeStr = __strtok_r(tvToken, ";", &internalBuff);
-    TruthValueType primaryTvType = TruthValue::strToType(primaryTvTypeStr);
-    char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
-    DPRINTF("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
-    result->primaryTV = TruthValue::factory(primaryTvType, primaryTvStr);
-    result->primaryTV = SetDefaultTVIfPertinent(result->primaryTV);
-
-    // Get the versioned tvs
-    while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
-        char* substantiveStr = __strtok_r(tvToken, ";", &internalBuff);
-
-        UUID uuid;
-        sscanf(substantiveStr, "%lu", (UUID *) &uuid);
-        Handle substantive(uuid);
-
-        // TODO: IF THIS IS USED BY SAVING & LOADING, THIS HANDLE
-        // MUST BE CONVERTED TO A NEW/COMMON HANDLE FORMAT.
-        char* indicatorStr = __strtok_r(NULL, ";", &internalBuff);
-        IndicatorType indicator = VersionHandle::strToIndicator(indicatorStr);
-        DPRINTF("substantive = %p, indicator = %d\n", substantive.value(), indicator);
-        char* versionedTvTypeStr = __strtok_r(NULL, ";", &internalBuff);
-        TruthValueType versionedTvType = TruthValue::strToType(versionedTvTypeStr);
-        char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
-        DPRINTF("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
-        VersionHandle vh(indicator, substantive);
-        TruthValuePtr tv = TruthValue::factory(versionedTvType, versionedTvStr);
-        tv = SetDefaultTVIfPertinent(tv);
-        result->versionedTVs[vh] = tv;
-    }
-    free(s);
-    return result;
-}
-
 
 bool CompositeTruthValue::operator==(const TruthValue& rhs) const
 {

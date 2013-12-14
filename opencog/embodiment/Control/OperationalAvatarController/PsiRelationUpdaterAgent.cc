@@ -62,7 +62,7 @@ void PsiRelationUpdaterAgent::init()
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Get AtomSpace
-    const AtomSpace& atomSpace = oac->getAtomSpace();
+    AtomSpace& atomSpace = oac->getAtomSpace();
 
     // Get relation names from the configuration file
     std::string relationNames = config()["PSI_RELATIONS"];

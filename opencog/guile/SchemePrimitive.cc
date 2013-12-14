@@ -119,7 +119,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 	{
 		rc = fe->invoke(arglist);
 	}
-	catch (std::exception &ex)
+	catch (const std::exception& ex)
 	{
 		const char *msg = ex.what();
 		// scm_misc_error(fe->get_name(), msg, SCM_EOL);
@@ -129,6 +129,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 			scm_from_locale_string(msg),
 			SCM_EOL,
 			SCM_EOL);
+		logger().error("Guile caught C++ exception: %s", msg);
 	}
 	catch (...)
 	{
@@ -139,6 +140,7 @@ SCM PrimitiveEnviron::do_call(SCM sfe, SCM arglist)
 			scm_from_locale_string("unknown C++ exception"),
 			SCM_EOL,
 			SCM_EOL);
+		logger().error("Guile caught unknown C++ exception");
 	}
 	return rc;
 }

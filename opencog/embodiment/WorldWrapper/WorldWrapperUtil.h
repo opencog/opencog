@@ -124,7 +124,7 @@ private:
      *                      in AtomSpace folder.
      * @param time      The current timestamp, which is used for cache searching. 
      */
-    static float getModulator(const AtomSpace & atomSpace,
+    static float getModulator(AtomSpace & atomSpace,
                               const std::string & modulatorName,
                               unsigned long time);
 
@@ -137,7 +137,7 @@ private:
      *                   in AtomSpace folder.
      * @param time       The current timestamp, which is used for cache searching. 
      */
-    static float getDemand(const AtomSpace & atomSpace,
+    static float getDemand(AtomSpace & atomSpace,
                            const std::string & demandName,
                            unsigned long time);
 
@@ -151,7 +151,7 @@ private:
      * @param self_id   ID of the Pet itself.
      * @param time      The current timestamp, which is used for cache searching. 
      */
-    static float getDemandGoalTruthValue(const AtomSpace & atomSpace,
+    static float getDemandGoalTruthValue(AtomSpace & atomSpace,
                                          const std::string & demand,
                                          const std::string & self_id,
                                          unsigned long time
@@ -220,7 +220,7 @@ public:
      * retrieve the Handle in the AtomSpace of a corresponding definite object
      * food_bowl, water_bowl and pet_home, self and owner are comprehended
      */
-    static Handle toHandle(const AtomSpace& as, combo::definite_object obj,
+    static Handle toHandle(AtomSpace& as, combo::definite_object obj,
                            const std::string& self_id, const std::string& owner_id);
 
     /**
@@ -258,7 +258,7 @@ public:
      * AtomSpace lookup of a nested link-and-node struct represented
      * as a subtree
      */
-    static Handle rec_lookup(const AtomSpace& as, combo::combo_tree::iterator it,
+    static Handle rec_lookup(AtomSpace& as, combo::combo_tree::iterator it,
                              const std::string& self_id, const std::string& owner_id);
 
     /**
@@ -266,23 +266,23 @@ public:
      * @warning if there exists a pet and an avatar with the same id
      * then the handle of the pet is returned
      */
-    static Handle selfHandle(const AtomSpace& as, const std::string& self_id);
+    static Handle selfHandle(AtomSpace& as, const std::string& self_id);
 
     /**
      * returns the handle representing owner of owner_id
      */
-    static Handle ownerHandle(const AtomSpace& as, const std::string& owner_id);
+    static Handle ownerHandle(AtomSpace& as, const std::string& owner_id);
 
     /**
      * returns the handle representing the avatar with of avatar_id
      */
-    static Handle getAvatarHandle(const AtomSpace& as, const std::string& avatar_id);
+    static Handle getAvatarHandle(AtomSpace& as, const std::string& avatar_id);
 
     /**
      * check localspacemap for a Handle
      */
     static bool inSpaceMap(const SpaceServer::SpaceMap& sm,
-                           const AtomSpace& as,
+                           AtomSpace& as,
                            const std::string& self_id,
                            const std::string& owner_id,
                            combo::vertex v);

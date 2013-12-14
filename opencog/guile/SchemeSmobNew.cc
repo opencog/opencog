@@ -22,9 +22,9 @@ using namespace opencog;
 /**
  * Return a string holding the scheme representation of an atom/truthvalue.
  *
- * The input is assumed to be pointing at a Handle, a TruthValue, 
+ * The input is assumed to be pointing at a Handle, a TruthValue,
  * an AttentionValue, or a VersionHandle. Returned is a valid scheme
- * expression that represents that Handle, etc. 
+ * expression that represents that Handle, etc.
  */
 std::string SchemeSmob::to_string(SCM node)
 {
@@ -40,7 +40,7 @@ std::string SchemeSmob::to_string(SCM node)
 /**
  * Return a string holding the scheme representation of an atom.
  *
- * The input handle is represented in terms of a valid scheme 
+ * The input handle is represented in terms of a valid scheme
  * expression. Evaluating this expression should result in exactly
  * the same atom being created.
  */
@@ -72,7 +72,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += " \"";
         ret += atomspace->getName(h);
         ret += "\"";
-        
+
         // Print the truth value only after the node name
         TruthValuePtr tv(atomspace->getTV(h));
         if (!tv->isDefaultTV()) {
@@ -305,10 +305,14 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 
     Handle h;
     // Now, create the actual node... in the actual atom space.
+    // tv->clone is called here, because, for the atomspace, we want
+    // to use a use-counted std:shared_ptr, whereas in guile, we are
+    // using a garbage-collected raw pointer.  So clone makes up the
+    // difference.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
     if (tv)
         h = atomspace->addNode(t, name, tv->clone());
-    else   
+    else
         h = atomspace->addNode(t, name);
 
     // Was an attention value explicitly specified?
@@ -400,7 +404,7 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
             outgoing_set.push_back(h);
         }
         else if (scm_is_pair(satom) && !scm_is_null(satom_list)) {
-            // Allow lists to be specified: e.g. 
+            // Allow lists to be specified: e.g.
             // (cog-new-link 'ListLink (list x y z))
             // Do this via a recursive call, flattening nested lists
             // as we go along.
@@ -500,7 +504,7 @@ SCM SchemeSmob::ss_delete (SCM satom)
     // The remove will fail/log warning if the incoming set isn't null.
     if (atomspace->getIncoming(h).size() > 0) return SCM_BOOL_F;
 
-    // AtomSpace::removeAtom() returns true if atom was deleted, 
+    // AtomSpace::removeAtom() returns true if atom was deleted,
     // else returns false
     bool rc = atomspace->removeAtom(h, false);
 
