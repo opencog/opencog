@@ -806,6 +806,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
                 // will also check the fitness of this rule , see checkRuleFitnessRoughly
 
+
                 multimap<float,Rule*> ::iterator ruleIt;
 
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
@@ -833,7 +834,18 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                     if (isNegativeGoal || preconImpossible || isDiffStateOwnerType)
                         continue;
 
-                    curRuleScore -= negativeNum*1.2;
+                    // todo: check rule direct help this goal or not
+                    bool directHelp;
+
+                    // if this rule will negative this goal, we should not choose to apply it.
+                    r->isRulePossibleToHelpToAchieveGoal(curStateNode->state,directHelp);
+
+                    if (directHelp)
+                        curRuleScore += 2.0f;
+
+                    curRuleScore -= (r->paraIndexMap.size()) * 0.3f;
+
+                    curRuleScore -= negativeNum*1.2f;
                     curRuleScore += satisfiedPreconNum;
 
                     while(true)
@@ -1597,10 +1609,11 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
 }
 
 
-int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork,  bool &hasDirectHelpRule, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
     willCauseCirleNetWork = false;
+    hasDirectHelpRule = false;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
@@ -1672,7 +1685,10 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                     if (r->isRulePossibleToHelpToAchieveGoal(groundPs,directHelp))
                     {
                         ruleImpossibleToHelp = false;
-                        break;
+
+                        if (directHelp)
+                            hasDirectHelpRule = true;
+
                     }
                 }
 
@@ -1915,8 +1931,10 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
         return;
     }
 
+    bool hasDirectHelpRule;
+
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle);
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule);
 
     delete tmpRuleNode;
 
@@ -2574,6 +2592,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     bool isDiffStateOwnerType = false;
     bool preconImpossible = false;
     bool willAddCirle = false;
+    bool hasDirectHelpRule = false;
 
     impossible = false;
 
@@ -2581,7 +2600,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle);
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule);
 
     // ruleNode resetbinding
     ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
@@ -2593,6 +2612,9 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
         impossible = true;
         fitnessScore -= 999999;
     }
+
+    if (hasDirectHelpRule)
+        fitnessScore += 500.0f;
 
     return fitnessScore;
 
@@ -2930,7 +2952,8 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         // check how many preconditions will be satisfied
 
         bool preconImpossible;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,orginalRule);
+        bool hasDirectHelpRule;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule, orginalRule);
 
         if (preconImpossible)
             score -= 99999.9f;
@@ -2941,6 +2964,9 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         if (checkPrecons)
         {
             score += satisfiedPreconNum * 10.0f;
+
+            if(hasDirectHelpRule)
+                score += 50.0f;
         }
 
 
@@ -4338,6 +4364,8 @@ void OCPlanner::loadTestRulesFromCodes()
 
     this->AllRules.push_back(notKeepOtherPeoplesPetRule);
     //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
+
+
 
     //----------------------------Begin Rule: if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------
     // define variables:

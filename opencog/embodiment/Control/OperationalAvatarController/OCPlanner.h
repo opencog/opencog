@@ -401,7 +401,8 @@ protected:
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
-     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule *orginalRule = 0);
+     // @ hasDirectHelpRule: return if there is any rule that dirctly help to achieve this goal
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, bool &hasDirectHelpRule, Rule *orginalRule = 0);
 
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy
