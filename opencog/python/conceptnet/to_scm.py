@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue, types
+from opencog.atomspace import TruthValue, types, AtomSpace
 import reader
 import term
 
@@ -73,7 +73,7 @@ def set_TV(word):
             return conceptnet_dict[word]
 
 
-def write_atoms(cn_assertion, template_no, link_type=''):
+def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, .5)
@@ -98,19 +98,19 @@ def write_atoms(cn_assertion, template_no, link_type=''):
         evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
         return str(evallink)
 
-def from_file(cn_path, scm_name):
+def from_file(atomspace, cn_path, scm_name):
     # lists_of_assertions is a list of list of assertion
     lists_of_assertions = reader.csv(cn_path)
     with open(scm_name, 'w') as scm_file:
         for an_assertion in lists_of_assertions:
             if map(an_assertion[0], 2):
-                temp = write_atoms(an_assertion, 2)
+                temp = write_atoms(atomspace, an_assertion, 2)
                 scm_file.write(temp + '\n' * 2)
 
             if ((map(an_assertion[0], 1) == "EvaluationLink") and
             (map(an_assertion[0], 2) != "EvaluationLink")):
                 # this condition is to prevent repetition of EvaluationLink
-                temp = write_atoms(an_assertion, 2)
+                temp = write_atoms(atomspace, an_assertion, 2)
             elif map(an_assertion[0], 1) != "EvaluationLink":
                 temp = write_atoms(an_assertion, 1, map(an_assertion[0], 1))
             scm_file.write(temp + '\n' * 2)
@@ -119,5 +119,6 @@ if __name__ == '__main__':
     cn_url = raw_input("Enter ConceptNet csv file address: ")
     corpus_path = raw_input("Enter corpus address: ")
     name_of_scm_file = raw_input("Enter name for the Scheme Output file: ")
-    from_file(cn_url, name_of_scm_file)
+    atomspace = AtomSpace()
+    from_file(atomspace, cn_url, name_of_scm_file)
     print ("Scheme file is created successfully")

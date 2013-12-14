@@ -580,3 +580,35 @@ class OntologicalInheritanceRule(Rule):
             inputs=  [inhAB, inhBA],
             outputs= [ontoinhAB])
 
+class ProcedureEvaluationRule(Rule):
+    '''Evaluate EvaluationLinks.
+       EvaluationLink (PredicateNode F) (ListLink arguments).'''
+    def __init__(self, chainer):
+        self._chainer = chainer
+        F = chainer.new_variable()
+        ARGS = chainer.new_variable()
+
+        evallink = chainer.link(types.EvaluationLink, [F, args])
+
+        Rule.__init__(self,
+            formula= None,
+            inputs=[],
+            outputs=[evallink])
+
+    def custom_compute(self, inputs, outputs=None):
+        [eval_link] = inputs
+        [function, list_link] = eval_link.out
+
+        function.name
+        args = list_link.out
+
+        # assume it's a python function
+        def is_jade(arguments):
+            node = arguments[0]
+            if node.is_a(types.ConceptNode) and node.name == 'jade':
+                return 1.0
+
+        fuzzy_tv = is_jade(args)
+
+        return [TruthValue(fuzzy_tv, 1.0)]
+
