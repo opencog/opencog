@@ -4305,67 +4305,126 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(notSmokeOtherPeoplesBrandRule);
     //----------------------------End Rule:  if other 4 people do not smoke brand_x, then man_1 smokes it-------------------------------------------------
 
-    //----------------------------Begin Rule: if other 4 people do not keep pet_x, then man_1 keeps it--------------------------------------
-    // define variables:
-    ParamValue man_1_pet = str_var[0];
-    ParamValue pet_x = str_var[1];
+//    //----------------------------Begin Rule: if other 4 people do not keep pet_x, then man_1 keeps it--------------------------------------
+//    // define variables:
+//    ParamValue man_1_pet = str_var[0];
+//    ParamValue pet_x = str_var[1];
 
-    // precondition 0: pet_x is pet
-    vector<ParamValue> isPetStateOwnerList1;
-    isPetStateOwnerList1.push_back(pet_x);
-    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1);
+//    // precondition 0: pet_x is pet
+//    vector<ParamValue> isPetStateOwnerList1;
+//    isPetStateOwnerList1.push_back(pet_x);
+//    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1);
+
+//    // precondition 1 -5 : man_1-5 are people
+
+//    // precondition 6-9 : other people do not keep pet_x
+//    vector<ParamValue> notkeepXStateOwnerList1;
+//    notkeepXStateOwnerList1.push_back(man_2);
+//    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList1, true,0);
+
+//    vector<ParamValue> notkeepXStateOwnerList2;
+//    notkeepXStateOwnerList2.push_back(man_3);
+//    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList2, true,0);
+
+//    vector<ParamValue> notkeepXStateOwnerList3;
+//    notkeepXStateOwnerList3.push_back(man_4);
+//    State* notkeepXState3 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList3, true,0);
+
+//    vector<ParamValue> notkeepXStateOwnerList4;
+//    notkeepXStateOwnerList4.push_back(man_5);
+//    State* notkeepXState4 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList4, true,0);
+
+//    // effect1: man_1 keeps pet_x
+//    vector<ParamValue> keepXStateOwnerList;
+//    keepXStateOwnerList.push_back(man_1);
+//    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList, true,0);
+//    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
+
+//    // add rule:
+//    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
+//    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState4);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState5);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState3);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState4);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState3);
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState4);
+
+//    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+//    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
+//    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people's nation is not nation_x, then man_1's nation is nation_x--------------------------------------
+    // define variables:
+    ParamValue nation_man_1 = str_var[0];
+    ParamValue nation_x = str_var[1];
+
+    // precondition 0: nation_x is nation
+    vector<ParamValue> isNationStateOwnerList1;
+    isNationStateOwnerList1.push_back(nation_x);
+    State* isNationState1 = new State("is_nation",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNationStateOwnerList1);
 
     // precondition 1 -5 : man_1-5 are people
 
-    // precondition 6-9 : other people do not keep pet_x
-    vector<ParamValue> notkeepXStateOwnerList1;
-    notkeepXStateOwnerList1.push_back(man_2);
-    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList1, true,0);
+    // precondition 6-9 : other people do not drink drink_x
+    vector<ParamValue> notNaxtionXStateOwnerList1;
+    notNaxtionXStateOwnerList1.push_back(man_2);
+    State* notNaxtionXState1 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList1, true, 0);
 
-    vector<ParamValue> notkeepXStateOwnerList2;
-    notkeepXStateOwnerList2.push_back(man_3);
-    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList2, true,0);
+    vector<ParamValue> notNaxtionXStateOwnerList2;
+    notNaxtionXStateOwnerList2.push_back(man_3);
+    State* notNaxtionXState2 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList2, true, 0);
 
-    vector<ParamValue> notkeepXStateOwnerList3;
-    notkeepXStateOwnerList3.push_back(man_4);
-    State* notkeepXState3 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList3, true,0);
+    vector<ParamValue> notNaxtionXStateOwnerList3;
+    notNaxtionXStateOwnerList3.push_back(man_4);
+    State* notNaxtionXState3 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList3, true, 0);
 
-    vector<ParamValue> notkeepXStateOwnerList4;
-    notkeepXStateOwnerList4.push_back(man_5);
-    State* notkeepXState4 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList4, true,0);
+    vector<ParamValue> notNaxtionXStateOwnerList4;
+    notNaxtionXStateOwnerList4.push_back(man_5);
+    State* notNaxtionXState4 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList4, true, 0);
 
-    // effect1: man_1 keeps pet_x
-    vector<ParamValue> keepXStateOwnerList;
-    keepXStateOwnerList.push_back(man_1);
-    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList, true,0);
-    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
+    // effect1: man_1's nation is nation_x
+    vector<ParamValue> isNationXStateOwnerList;
+    isNationXStateOwnerList.push_back(man_1);
+    State* isNationXState = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, isNationXStateOwnerList, true, 0);
+    Effect* isNationXEffect = new Effect(isNationXState, OP_ASSIGN, nation_x,true);
+
 
     // add rule:
-    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
-    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState4);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState5);
+    Rule* notTakeOtherPeoplesNationRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notTakeOtherPeoplesNationRule->ruleName = "notTakeOtherPeoplesNationRule";
+    notTakeOtherPeoplesNationRule->addPrecondition(isNationState1);
+    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState1);
+    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState2);
+    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState3);
+    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState4);
+    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState5);
 
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState3);
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState4);
+    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState1);
+    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState2);
+    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState3);
+    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState4);
 
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState3);
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState4);
+    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState1);
+    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState2);
+    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState3);
+    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState4);
 
-    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
+    notTakeOtherPeoplesNationRule->addEffect(EffectPair(1.0f,isNationXEffect));
 
-    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
-    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
-
-
+    this->AllRules.push_back(notTakeOtherPeoplesNationRule);
+    //----------------------------End Rule: if other 4 people's nation is not nation_x, then man_1's nation is nation_x--------------------------------------------------
 
     //----------------------------Begin Rule: if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------
     // define variables:
@@ -4458,9 +4517,15 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
     // define variables:
+    ParamValue man_1_pet = str_var[0];
+    ParamValue pet_x = str_var[1];
     ParamValue pet_y = str_var[2];
 
     // precondition 0: pet_x pet_y is pet
+    vector<ParamValue> isPetStateOwnerList1;
+    isPetStateOwnerList1.push_back(pet_x);
+    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1);
+
     vector<ParamValue> isPetyStateOwnerList1;
     isPetyStateOwnerList1.push_back(pet_y);
     State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1);
@@ -4600,6 +4665,219 @@ void OCPlanner::loadTestRulesFromCodes()
 
     this->AllRules.push_back(ifMan1KeepsPetXThenMan2NotKeepXRule);
     //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+
+    //----------------------------Begin Rule: if other 4 people keep dogs,horse,fish,birds, then man_1 keeps cats--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep pet_x
+    vector<ParamValue> keepDogsStateOwnerList2;
+    keepDogsStateOwnerList2.push_back(man_2);
+    State* keepDogsState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"dogs", keepDogsStateOwnerList2, true,0);
+
+    vector<ParamValue> keepHorseStateOwnerList2;
+    keepHorseStateOwnerList2.push_back(man_3);
+    State* keepHorseState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"horse", keepHorseStateOwnerList2, true,0);
+
+    vector<ParamValue> keepFishStateOwnerList2;
+    keepFishStateOwnerList2.push_back(man_4);
+    State* keepFishState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList2, true,0);
+
+    vector<ParamValue> keepBirdsStateOwnerList2;
+    keepBirdsStateOwnerList2.push_back(man_5);
+    State* keepBirdsState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"birds", keepBirdsStateOwnerList2, true,0);
+
+    // effect1: man_1 keeps cats
+    vector<ParamValue> keepCatsStateOwnerList2;
+    keepCatsStateOwnerList2.push_back(man_1);
+    State* keepCatsState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepCatsStateOwnerList2, true,0);
+    Effect* keepCatsEffect2 = new Effect(keepCatsState2, OP_ASSIGN, "cats",true);
+
+    // add rule:
+    Rule* ifOthersKeepOtherPetsThenMan1KeepCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->ruleName = "ifOthersKeepOtherPetsThenMan1KeepCatsRule";
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(ispeopleState1);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(ispeopleState2);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(ispeopleState3);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(ispeopleState4);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(ispeopleState5);
+
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(isNotSameState1);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(isNotSameState2);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(isNotSameState3);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(isNotSameState4);
+
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(keepDogsState2);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(keepHorseState2);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(keepFishState2);
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addPrecondition(keepBirdsState2);
+
+    ifOthersKeepOtherPetsThenMan1KeepCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect2));
+
+    this->AllRules.push_back(ifOthersKeepOtherPetsThenMan1KeepCatsRule);
+    //----------------------------End Rule: if other 4 people keep dogs,horse,fish,birds, then man_1 keeps cats--------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people keep cats,horse,fish,birds, then man_1 keeps dogs--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep pet_x
+    vector<ParamValue> keepCatsStateOwnerList3;
+    keepCatsStateOwnerList3.push_back(man_2);
+    State* keepCatsState3 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList3, true,0);
+
+    // effect1: man_1 keeps dogs
+    vector<ParamValue> keepDogsStateOwnerList3;
+    keepDogsStateOwnerList3.push_back(man_1);
+    State* keepDogsState3 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepDogsStateOwnerList3, true,0);
+    Effect* keepDogsEffect3 = new Effect(keepDogsState3, OP_ASSIGN, "cats",true);
+
+    // add rule:
+    Rule* ifOthersKeepOtherPetsThenMan1KeepDogsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->ruleName = "ifOthersKeepOtherPetsThenMan1KeepDogsRule";
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(ispeopleState1);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(ispeopleState2);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(ispeopleState3);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(ispeopleState4);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(ispeopleState5);
+
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(isNotSameState1);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(isNotSameState2);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(isNotSameState3);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(isNotSameState4);
+
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(keepCatsState3);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(keepHorseState2);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(keepFishState2);
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addPrecondition(keepBirdsState2);
+
+    ifOthersKeepOtherPetsThenMan1KeepDogsRule->addEffect(EffectPair(1.0f,keepDogsEffect3));
+
+    this->AllRules.push_back(ifOthersKeepOtherPetsThenMan1KeepDogsRule);
+    //----------------------------End Rule: if other 4 people keep dogs,horse,fish,birds, then man_1 keeps cats--------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people keep cats,horse,dogs,birds, then man_1 keeps fish--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep fish
+    vector<ParamValue> keepCatsStateOwnerList4;
+    keepCatsStateOwnerList4.push_back(man_4);
+    State* keepCatsState4 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList4, true,0);
+
+    // effect1: man_1 keeps fish
+    vector<ParamValue> keepFishStateOwnerList3;
+    keepFishStateOwnerList3.push_back(man_1);
+    State* keepFishState3 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepFishStateOwnerList3, true,0);
+    Effect* keepFishEffect3 = new Effect(keepFishState3, OP_ASSIGN, "fish",true);
+
+    // add rule:
+    Rule* ifOthersKeepOtherPetsThenMan1KeepFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->ruleName = "ifOthersKeepOtherPetsThenMan1KeepFishRule";
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(ispeopleState1);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(ispeopleState2);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(ispeopleState3);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(ispeopleState4);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(ispeopleState5);
+
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(isNotSameState1);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(isNotSameState2);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(isNotSameState3);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(isNotSameState4);
+
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(keepDogsState2);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(keepHorseState2);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(keepCatsState4);
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addPrecondition(keepBirdsState2);
+
+    ifOthersKeepOtherPetsThenMan1KeepFishRule->addEffect(EffectPair(1.0f,keepFishEffect3));
+
+    this->AllRules.push_back(ifOthersKeepOtherPetsThenMan1KeepFishRule);
+    //----------------------------End Rule: if other 4 people keep cats,horse,dogs,birds, then man_1 keeps fish--------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people keep dogs,cats,fish,birds, then man_1 keeps horse--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep horse
+    vector<ParamValue> keepCatsStateOwnerList5;
+    keepCatsStateOwnerList5.push_back(man_3);
+    State* keepCatsState5 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList5, true,0);
+
+
+    // effect1: man_1 keeps horse
+    vector<ParamValue> keepHorseStateOwnerList3;
+    keepHorseStateOwnerList3.push_back(man_1);
+    State* keepHorseState3 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepHorseStateOwnerList3, true,0);
+    Effect* keepHorseEffect3 = new Effect(keepHorseState3, OP_ASSIGN, "horse",true);
+
+    // add rule:
+    Rule* ifOthersKeepOtherPetsThenMan1KeepHorseRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->ruleName = "ifOthersKeepOtherPetsThenMan1KeepHorseRule";
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(ispeopleState1);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(ispeopleState2);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(ispeopleState3);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(ispeopleState4);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(ispeopleState5);
+
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(isNotSameState1);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(isNotSameState2);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(isNotSameState3);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(isNotSameState4);
+
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(keepDogsState2);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(keepCatsState5);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(keepFishState2);
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addPrecondition(keepBirdsState2);
+
+    ifOthersKeepOtherPetsThenMan1KeepHorseRule->addEffect(EffectPair(1.0f,keepHorseEffect3));
+
+    this->AllRules.push_back(ifOthersKeepOtherPetsThenMan1KeepHorseRule);
+    //----------------------------End Rule: if other 4 people keep dogs,cats,fish,birds, then man_1 keeps horse--------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people keep dogs,horse,fish,cats, then man_1 keeps birds--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people do not keep birds
+    vector<ParamValue> keepCatsStateOwnerList6;
+    keepCatsStateOwnerList6.push_back(man_5);
+    State* keepCatsState6 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList6, true,0);
+
+    // effect1: man_1 keeps birds
+    vector<ParamValue> keepBirdsStateOwnerList4;
+    keepBirdsStateOwnerList4.push_back(man_1);
+    State* keepBirdsState4 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepBirdsStateOwnerList4, true,0);
+    Effect* keepBirdsEffect4 = new Effect(keepBirdsState4, OP_ASSIGN, "birds",true);
+
+    // add rule:
+    Rule* ifOthersKeepOtherPetsThenMan1KeepBirdsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->ruleName = "ifOthersKeepOtherPetsThenMan1KeepBirdsRule";
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(ispeopleState1);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(ispeopleState2);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(ispeopleState3);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(ispeopleState4);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(ispeopleState5);
+
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(isNotSameState1);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(isNotSameState2);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(isNotSameState3);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(isNotSameState4);
+
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(keepDogsState2);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(keepHorseState2);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(keepFishState2);
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addPrecondition(keepCatsState6);
+
+    ifOthersKeepOtherPetsThenMan1KeepBirdsRule->addEffect(EffectPair(1.0f,keepBirdsEffect4));
+
+    this->AllRules.push_back(ifOthersKeepOtherPetsThenMan1KeepBirdsRule);
+    //----------------------------End Rule: if other 4 people keep dogs,horse,fish,cats, then man_1 keeps birds--------------------------------------
 }
 
 
