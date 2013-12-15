@@ -4247,62 +4247,62 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: if other 4 people do not live in house_1, then man_1 live in house_1-------------------------------------------------
 
     //----------------------------Begin Rule: if other 4 people do not smoke brand_x, then man_1 smokes it--------------------------------------
-    // define variables:
-    ParamValue brand_x = str_var[1];
+//    // define variables:
+//    ParamValue brand_x = str_var[1];
 
-    // precondition 0: brand_x is cigaretteBrand
-    vector<ParamValue> isBrandStateOwnerList1;
-    isBrandStateOwnerList1.push_back(brand_x);
-    State* isBrandState1 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList1);
+//    // precondition 0: brand_x is cigaretteBrand
+//    vector<ParamValue> isBrandStateOwnerList1;
+//    isBrandStateOwnerList1.push_back(brand_x);
+//    State* isBrandState1 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList1);
 
-    // precondition 1 -5 : man_1-5 are people
+//    // precondition 1 -5 : man_1-5 are people
 
-    // precondition 6-9 : other people do not smoke brand_x
-    vector<ParamValue> notSmokeXStateOwnerList1;
-    notSmokeXStateOwnerList1.push_back(man_2);
-    State* notSmokeXState1 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList1, true,0);
+//    // precondition 6-9 : other people do not smoke brand_x
+//    vector<ParamValue> notSmokeXStateOwnerList1;
+//    notSmokeXStateOwnerList1.push_back(man_2);
+//    State* notSmokeXState1 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList1, true,0);
 
-    vector<ParamValue> notSmokeXStateOwnerList2;
-    notSmokeXStateOwnerList2.push_back(man_3);
-    State* notSmokeXState2 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList2, true,0);
+//    vector<ParamValue> notSmokeXStateOwnerList2;
+//    notSmokeXStateOwnerList2.push_back(man_3);
+//    State* notSmokeXState2 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList2, true,0);
 
-    vector<ParamValue> notSmokeXStateOwnerList3;
-    notSmokeXStateOwnerList3.push_back(man_4);
-    State* notSmokeXState3 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList3, true,0);
+//    vector<ParamValue> notSmokeXStateOwnerList3;
+//    notSmokeXStateOwnerList3.push_back(man_4);
+//    State* notSmokeXState3 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList3, true,0);
 
-    vector<ParamValue> notSmokeXStateOwnerList4;
-    notSmokeXStateOwnerList4.push_back(man_5);
-    State* notSmokeXState4 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList4, true,0);
+//    vector<ParamValue> notSmokeXStateOwnerList4;
+//    notSmokeXStateOwnerList4.push_back(man_5);
+//    State* notSmokeXState4 = new State("smoke",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,brand_x, notSmokeXStateOwnerList4, true,0);
 
-    // effect1: man_1 smokes brand_x
-    vector<ParamValue> smokeXStateOwnerList;
-    smokeXStateOwnerList.push_back(man_1);
-    State* smokeXState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeXStateOwnerList, true,0);
-    Effect* smokeXEffect = new Effect(smokeXState, OP_ASSIGN, brand_x,true);
+//    // effect1: man_1 smokes brand_x
+//    vector<ParamValue> smokeXStateOwnerList;
+//    smokeXStateOwnerList.push_back(man_1);
+//    State* smokeXState = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeXStateOwnerList, true,0);
+//    Effect* smokeXEffect = new Effect(smokeXState, OP_ASSIGN, brand_x,true);
 
-    // add rule:
-    Rule* notSmokeOtherPeoplesBrandRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    notSmokeOtherPeoplesBrandRule->ruleName = "notSmokeOtherPeoplesBrandRule";
-    notSmokeOtherPeoplesBrandRule->addPrecondition(isBrandState1);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState1);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState2);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState3);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState4);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState5);
+//    // add rule:
+//    Rule* notSmokeOtherPeoplesBrandRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    notSmokeOtherPeoplesBrandRule->ruleName = "notSmokeOtherPeoplesBrandRule";
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(isBrandState1);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState1);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState2);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState3);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState4);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(ispeopleState5);
 
-    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState1);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState2);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState3);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState4);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState1);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState2);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState3);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(isNotSameState4);
 
-    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState1);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState2);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState3);
-    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState4);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState1);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState2);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState3);
+//    notSmokeOtherPeoplesBrandRule->addPrecondition(notSmokeXState4);
 
-    notSmokeOtherPeoplesBrandRule->addEffect(EffectPair(1.0f,smokeXEffect));
+//    notSmokeOtherPeoplesBrandRule->addEffect(EffectPair(1.0f,smokeXEffect));
 
-    this->AllRules.push_back(notSmokeOtherPeoplesBrandRule);
+//    this->AllRules.push_back(notSmokeOtherPeoplesBrandRule);
     //----------------------------End Rule:  if other 4 people do not smoke brand_x, then man_1 smokes it-------------------------------------------------
 
 //    //----------------------------Begin Rule: if other 4 people do not keep pet_x, then man_1 keeps it--------------------------------------
@@ -4560,10 +4560,16 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule:  if man_1 smokes brand_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
     // define variables:
+    ParamValue brand_x = str_var[1];
     ParamValue brand_y = str_var[2];
 
-    // precondition 0: peopleState1
+    // precondition 0: are people
+
     // precondition 1: brand_x and brand_y is cigaretteBrand
+    vector<ParamValue> isBrandStateOwnerList1;
+    isBrandStateOwnerList1.push_back(brand_x);
+    State* isBrandState1 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList1);
+
     vector<ParamValue> isBrandStateOwnerList2;
     isBrandStateOwnerList2.push_back(brand_y);
     State* isBrandState2 = new State("is_cigaretteBrand",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isBrandStateOwnerList2);
@@ -5100,7 +5106,220 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(ifOthersDrinkOtherDrinksThenMan1DrinkWaterRule);
     //----------------------------End Rule:  if other 4 people drink other drinks, then man_1 drinks water--------------------------------------------------
 
+    //----------------------------Begin Rule: if other 4 people smoke other brands, then man_1 smokes pallMall--------------------------------------
+    // define variables:
 
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people smoke other brands
+    vector<ParamValue> smokeDunhillStateOwnerList2;
+    smokeDunhillStateOwnerList2.push_back(man_2);
+    State* smokeDunhillState2 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"dunhill", smokeDunhillStateOwnerList2, true,0);
+
+    vector<ParamValue> smokeBlendStateOwnerList2;
+    smokeBlendStateOwnerList2.push_back(man_3);
+    State* smokeBlendState2 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"blend", smokeBlendStateOwnerList2, true,0);
+
+    vector<ParamValue> smokeBluemasterStateOwnerList2;
+    smokeBluemasterStateOwnerList2.push_back(man_4);
+    State* smokeBluemasterState2 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"bluemaster", smokeBluemasterStateOwnerList2, true,0);
+
+    vector<ParamValue> smokePrinceStateOwnerList2;
+    smokePrinceStateOwnerList2.push_back(man_5);
+    State* smokePrinceState2 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"prince", smokePrinceStateOwnerList2, true,0);
+
+    // effect1: man_1 smokes pallMall
+    vector<ParamValue> smokePallMallStateOwnerList3;
+    smokePallMallStateOwnerList3.push_back(man_1);
+    State* smokePallMallState3 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokePallMallStateOwnerList3, true,0);
+    Effect* smokePallMallStateEffect3 = new Effect(smokePallMallState3, OP_ASSIGN, "pallMall",true);
+
+    // add rule:
+    Rule* ifOthersSmokeOtherBrandsThenMan1SmokesPallMall = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->ruleName = "ifOthersSmokeOtherBrandsThenMan1SmokesPallMall";
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(ispeopleState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(ispeopleState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(ispeopleState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(ispeopleState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(ispeopleState5);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(isNotSameState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(isNotSameState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(isNotSameState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(isNotSameState4);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(smokeDunhillState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(smokeBlendState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(smokeBluemasterState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addPrecondition(smokePrinceState2);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPallMall->addEffect(EffectPair(1.0f,smokePallMallStateEffect3));
+
+    this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesPallMall);
+    //----------------------------End Rule:  if other 4 people smoke other brands, then man_1 smokes pallMall-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people smoke other brands, then man_1 smokes dunhill--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people smoke other brands
+    vector<ParamValue> smokePallMallStateOwnerList4;
+    smokePallMallStateOwnerList4.push_back(man_2);
+    State* smokePallMallState4 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"pallMall", smokePallMallStateOwnerList4, true,0);
+
+    // effect1: man_1 smokes dunhill
+    vector<ParamValue> smokeDunhillStateOwnerList3;
+    smokeDunhillStateOwnerList3.push_back(man_1);
+    State* smokeDunhillState3 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeDunhillStateOwnerList3, true,0);
+    Effect* smokeDunhillStateEffect3 = new Effect(smokeDunhillState3, OP_ASSIGN, "dunhill",true);
+
+    // add rule:
+    Rule* ifOthersSmokeOtherBrandsThenMan1SmokesDunhill = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->ruleName = "ifOthersSmokeOtherBrandsThenMan1SmokesDunhill";
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(ispeopleState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(ispeopleState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(ispeopleState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(ispeopleState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(ispeopleState5);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(isNotSameState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(isNotSameState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(isNotSameState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(isNotSameState4);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(smokePallMallState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(smokeBlendState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(smokeBluemasterState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addPrecondition(smokePrinceState2);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesDunhill->addEffect(EffectPair(1.0f,smokeDunhillStateEffect3));
+
+    this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesDunhill);
+    //----------------------------End Rule: if other 4 people smoke other brands, then man_1 smokes dunhill-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people smoke other brands, then man_1 smokes blend--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people smoke other brands
+    vector<ParamValue> smokePallMallStateOwnerList5;
+    smokePallMallStateOwnerList5.push_back(man_3);
+    State* smokePallMallState5 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"pallMall", smokePallMallStateOwnerList5, true,0);
+
+
+    // effect1: man_1 smokes pallMall
+    vector<ParamValue> smokeBlendStateOwnerList3;
+    smokeBlendStateOwnerList3.push_back(man_1);
+    State* smokeBlendState3 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeBlendStateOwnerList3, true,0);
+    Effect* smokeBlendState3StateEffect3 = new Effect(smokeBlendState3, OP_ASSIGN, "blend",true);
+
+    // add rule:
+    Rule* ifOthersSmokeOtherBrandsThenMan1SmokesBlend = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->ruleName = "ifOthersSmokeOtherBrandsThenMan1SmokesBlend";
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(ispeopleState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(ispeopleState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(ispeopleState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(ispeopleState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(ispeopleState5);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(isNotSameState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(isNotSameState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(isNotSameState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(isNotSameState4);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(smokeDunhillState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(smokePallMallState5);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(smokeBluemasterState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addPrecondition(smokePrinceState2);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBlend->addEffect(EffectPair(1.0f,smokeBlendState3StateEffect3));
+
+    this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesBlend);
+    //----------------------------End Rule:  if other 4 people smoke other brands, then man_1 smokes blend-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people smoke other brands, then man_1 smokes bluemaster--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people smoke other brands
+
+    vector<ParamValue> smokePallMallStateOwnerList6;
+    smokePallMallStateOwnerList6.push_back(man_4);
+    State* smokePallMallStateState6 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"pallMall", smokePallMallStateOwnerList6, true,0);
+
+    // effect1: man_1 smokes pallMall
+    vector<ParamValue> smokeBluemasterStateOwnerList3;
+    smokeBluemasterStateOwnerList3.push_back(man_1);
+    State* smokeBluemasterState3 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokeBluemasterStateOwnerList3, true,0);
+    Effect* smokeBluemasterStateEffect3 = new Effect(smokeBluemasterState3, OP_ASSIGN, "bluemaster",true);
+
+    // add rule:
+    Rule* ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->ruleName = "ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster";
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(ispeopleState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(ispeopleState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(ispeopleState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(ispeopleState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(ispeopleState5);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(isNotSameState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(isNotSameState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(isNotSameState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(isNotSameState4);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(smokeDunhillState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(smokeBlendState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(smokePallMallStateState6);
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addPrecondition(smokePrinceState2);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster->addEffect(EffectPair(1.0f,smokeBluemasterStateEffect3));
+
+    this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesBluemaster);
+    //----------------------------End Rule:  if other 4 people smoke other brands, then man_1 smokes bluemaster-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people smoke other brands, then man_1 smokes prince--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people smoke other brands
+
+    vector<ParamValue> smokePallMallStateOwnerList7;
+    smokePallMallStateOwnerList7.push_back(man_5);
+    State* smokePallMallState7 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,"pallMall", smokePallMallStateOwnerList7, true,0);
+
+    // effect1: man_1 smokes pallMall
+    vector<ParamValue> smokePrinceStateOwnerList3;
+    smokePrinceStateOwnerList3.push_back(man_1);
+    State* smokePrinceState3 = new State("smoke",ActionParamType::STRING(),STATE_EQUAL_TO ,var_cigarette_brand, smokePrinceStateOwnerList3, true,0);
+    Effect* smokePrinceStateEffect3 = new Effect(smokePrinceState3, OP_ASSIGN, "prince",true);
+
+    // add rule:
+    Rule* ifOthersSmokeOtherBrandsThenMan1SmokesPrince = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->ruleName = "ifOthersSmokeOtherBrandsThenMan1SmokesPrince";
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(ispeopleState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(ispeopleState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(ispeopleState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(ispeopleState4);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(ispeopleState5);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(isNotSameState1);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(isNotSameState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(isNotSameState3);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(isNotSameState4);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(smokeDunhillState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(smokeBlendState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(smokeBluemasterState2);
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addPrecondition(smokePallMallState7);
+
+    ifOthersSmokeOtherBrandsThenMan1SmokesPrince->addEffect(EffectPair(1.0f,smokePrinceStateEffect3));
+
+    this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesPrince);
+    //----------------------------End Rule:  if other 4 people smoke other brands, then man_1 smokes prince-------------------------------------------------
 
 }
 
