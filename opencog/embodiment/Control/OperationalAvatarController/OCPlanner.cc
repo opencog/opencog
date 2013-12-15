@@ -781,11 +781,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // if there is one rule related to this goal,
                 // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
-                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle;
+                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle, contradictoryOtherGoal;
                 int negativeNum,satisfiedPreconNum;
-                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle, true);
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal, true);
 
-                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle) // if this rule will negative this goal, we should not choose to apply it.
+                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle || contradictoryOtherGoal) // if this rule will negative this goal, we should not choose to apply it.
                     continue;
 
                 // this rule is positive for this goal, apply it.
@@ -825,13 +825,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
-                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle,contradictoryOtherGoal;
                     int negativeNum,satisfiedPreconNum;
-                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle);
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal);
 
                     //  its effect will negative this current selected goal state, or it has any unsatisfied precondition which is impossible to achieve,
                     //  then it should not add it into candidate rules
-                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType)
+                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType || contradictoryOtherGoal)
                         continue;
 
                     // todo: check rule direct help this goal or not
@@ -1609,11 +1609,13 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
 }
 
 
-int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork,  bool &hasDirectHelpRule, Rule* orginalRule)
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork,
+                                        bool &hasDirectHelpRule, bool &contradictoryOtherGoal, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
     willCauseCirleNetWork = false;
     hasDirectHelpRule = false;
+    contradictoryOtherGoal = false;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
@@ -1729,6 +1731,50 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 }
 
                 // todo: recursively check if the future backward branch to achieve this subgoal contains any precondition impossibilities
+
+            }
+
+            // check if unsatisifed subgoals will be contradictory by this effect
+            for (sait = unsatisfiedStateNodes.begin(); sait != unsatisfiedStateNodes.end(); ++ sait)
+            {
+                StateNode* tempStateNode = (StateNode*)(*sait);
+
+                // skip the current state node
+                if (fowardState == tempStateNode)
+                    continue;
+
+                // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+                if (tempStateNode->forwardRuleNode == 0)
+                   continue;
+
+                // only check the state nodes without backward rule node,
+                // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+                if (tempStateNode->backwardRuleNode != 0)
+                    continue;
+
+    //            // only check the StateNode which is more backward than the input fowardState
+    //            // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+    //            // so this state node will not be affected by this effect.
+    //            if ((*fowardState) < (*tempStateNode))
+    //            {
+    //                // need to check if it's the same level with fowardState,
+    //                if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+    //                    continue;
+    //            }
+
+                if (tempStateNode->state->isSameState(*groundPs))
+                {
+                    // check if this effect unsatisfy this state
+                    float satDegree;
+                    if (! groundPs->isSatisfied(*(tempStateNode->state ),satDegree))
+                    {
+                        delete groundPs;
+                        contradictoryOtherGoal = true;
+                        return -999;
+                    }
+                    else
+                        continue;
+                }
 
             }
 
@@ -1884,6 +1930,48 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 
         }
 
+        // check how many unsatisifed subgoals will be negated by this effect
+        for (sait = unsatisfiedStateNodes.begin(); sait != unsatisfiedStateNodes.end(); ++ sait)
+        {
+            StateNode* tempStateNode = (StateNode*)(*sait);
+
+            // skip the current state node
+            if (fowardState == tempStateNode)
+                continue;
+
+            // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+            if (tempStateNode->forwardRuleNode == 0)
+               continue;
+
+            // only check the state nodes without backward rule node,
+            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+            if (tempStateNode->backwardRuleNode != 0)
+                continue;
+
+//            // only check the StateNode which is more backward than the input fowardState
+//            // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+//            // so this state node will not be affected by this effect.
+//            if ((*fowardState) < (*tempStateNode))
+//            {
+//                // need to check if it's the same level with fowardState,
+//                if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+//                    continue;
+//            }
+
+            if (tempStateNode->state->isSameState(*effState))
+            {
+                // check if this effect unsatisfy this state
+                float satDegree;
+                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
+                {
+                    negateveStateNum ++;
+                }
+                else
+                    continue;
+            }
+
+        }
+
         delete effState;
     }
 
@@ -1892,7 +1980,7 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 }
 
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
-                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool onlyCheckIfNegativeGoal)
+                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool &contradictoryOtherGoal, bool onlyCheckIfNegativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -1934,7 +2022,8 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     bool hasDirectHelpRule;
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule);
+
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, contradictoryOtherGoal, hasDirectHelpRule);
 
     delete tmpRuleNode;
 
@@ -2593,6 +2682,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     bool preconImpossible = false;
     bool willAddCirle = false;
     bool hasDirectHelpRule = false;
+    bool contradictoryOtherGoal = false;
 
     impossible = false;
 
@@ -2600,14 +2690,14 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule);
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, contradictoryOtherGoal, hasDirectHelpRule);
 
     // ruleNode resetbinding
     ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
 
     fitnessScore = fitnessScore - negateveStateNum*100.0f + satisfiedPreconNum*100.0f;
 
-    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle)
+    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle || contradictoryOtherGoal)
     {
         impossible = true;
         fitnessScore -= 999999;
@@ -2953,12 +3043,10 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
         bool preconImpossible;
         bool hasDirectHelpRule;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule, orginalRule);
+        bool contradictoryOtherGoal;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule, contradictoryOtherGoal, orginalRule);
 
-        if (preconImpossible)
-            score -= 99999.9f;
-
-        if (willAddCirle)
+        if (preconImpossible || willAddCirle || contradictoryOtherGoal)
             score -= 99999.9f;
 
         if (checkPrecons)
@@ -2968,7 +3056,6 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
             if(hasDirectHelpRule)
                 score += 50.0f;
         }
-
 
         tmpRuleNode->currentAllBindings.erase(varName);
 
