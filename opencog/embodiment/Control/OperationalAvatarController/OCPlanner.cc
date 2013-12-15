@@ -4365,65 +4365,65 @@ void OCPlanner::loadTestRulesFromCodes()
 //    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
 //    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
 
-    //----------------------------Begin Rule: if other 4 people's nation is not nation_x, then man_1's nation is nation_x--------------------------------------
-    // define variables:
-    ParamValue nation_man_1 = str_var[0];
-    ParamValue nation_x = str_var[1];
+//    //----------------------------Begin Rule: if other 4 people's nation is not nation_x, then man_1's nation is nation_x--------------------------------------
+//    // define variables:
+//    ParamValue nation_man_1 = str_var[0];
+//    ParamValue nation_x = str_var[1];
 
-    // precondition 0: nation_x is nation
-    vector<ParamValue> isNationStateOwnerList1;
-    isNationStateOwnerList1.push_back(nation_x);
-    State* isNationState1 = new State("is_nation",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNationStateOwnerList1);
+//    // precondition 0: nation_x is nation
+//    vector<ParamValue> isNationStateOwnerList1;
+//    isNationStateOwnerList1.push_back(nation_x);
+//    State* isNationState1 = new State("is_nation",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNationStateOwnerList1);
 
-    // precondition 1 -5 : man_1-5 are people
+//    // precondition 1 -5 : man_1-5 are people
 
-    // precondition 6-9 : other people do not drink drink_x
-    vector<ParamValue> notNaxtionXStateOwnerList1;
-    notNaxtionXStateOwnerList1.push_back(man_2);
-    State* notNaxtionXState1 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList1, true, 0);
+//    // precondition 6-9 : other people do not drink drink_x
+//    vector<ParamValue> notNaxtionXStateOwnerList1;
+//    notNaxtionXStateOwnerList1.push_back(man_2);
+//    State* notNaxtionXState1 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList1, true, 0);
 
-    vector<ParamValue> notNaxtionXStateOwnerList2;
-    notNaxtionXStateOwnerList2.push_back(man_3);
-    State* notNaxtionXState2 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList2, true, 0);
+//    vector<ParamValue> notNaxtionXStateOwnerList2;
+//    notNaxtionXStateOwnerList2.push_back(man_3);
+//    State* notNaxtionXState2 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList2, true, 0);
 
-    vector<ParamValue> notNaxtionXStateOwnerList3;
-    notNaxtionXStateOwnerList3.push_back(man_4);
-    State* notNaxtionXState3 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList3, true, 0);
+//    vector<ParamValue> notNaxtionXStateOwnerList3;
+//    notNaxtionXStateOwnerList3.push_back(man_4);
+//    State* notNaxtionXState3 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList3, true, 0);
 
-    vector<ParamValue> notNaxtionXStateOwnerList4;
-    notNaxtionXStateOwnerList4.push_back(man_5);
-    State* notNaxtionXState4 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList4, true, 0);
+//    vector<ParamValue> notNaxtionXStateOwnerList4;
+//    notNaxtionXStateOwnerList4.push_back(man_5);
+//    State* notNaxtionXState4 = new State("nation",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,nation_x, notNaxtionXStateOwnerList4, true, 0);
 
-    // effect1: man_1's nation is nation_x
-    vector<ParamValue> isNationXStateOwnerList;
-    isNationXStateOwnerList.push_back(man_1);
-    State* isNationXState = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, isNationXStateOwnerList, true, 0);
-    Effect* isNationXEffect = new Effect(isNationXState, OP_ASSIGN, nation_x,true);
+//    // effect1: man_1's nation is nation_x
+//    vector<ParamValue> isNationXStateOwnerList;
+//    isNationXStateOwnerList.push_back(man_1);
+//    State* isNationXState = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, isNationXStateOwnerList, true, 0);
+//    Effect* isNationXEffect = new Effect(isNationXState, OP_ASSIGN, nation_x,true);
 
 
-    // add rule:
-    Rule* notTakeOtherPeoplesNationRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    notTakeOtherPeoplesNationRule->ruleName = "notTakeOtherPeoplesNationRule";
-    notTakeOtherPeoplesNationRule->addPrecondition(isNationState1);
-    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState1);
-    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState2);
-    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState3);
-    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState4);
-    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState5);
+//    // add rule:
+//    Rule* notTakeOtherPeoplesNationRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    notTakeOtherPeoplesNationRule->ruleName = "notTakeOtherPeoplesNationRule";
+//    notTakeOtherPeoplesNationRule->addPrecondition(isNationState1);
+//    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState1);
+//    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState2);
+//    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState3);
+//    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState4);
+//    notTakeOtherPeoplesNationRule->addPrecondition(ispeopleState5);
 
-    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState1);
-    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState2);
-    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState3);
-    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState4);
+//    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState1);
+//    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState2);
+//    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState3);
+//    notTakeOtherPeoplesNationRule->addPrecondition(isNotSameState4);
 
-    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState1);
-    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState2);
-    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState3);
-    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState4);
+//    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState1);
+//    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState2);
+//    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState3);
+//    notTakeOtherPeoplesNationRule->addPrecondition(notNaxtionXState4);
 
-    notTakeOtherPeoplesNationRule->addEffect(EffectPair(1.0f,isNationXEffect));
+//    notTakeOtherPeoplesNationRule->addEffect(EffectPair(1.0f,isNationXEffect));
 
-    this->AllRules.push_back(notTakeOtherPeoplesNationRule);
+//    this->AllRules.push_back(notTakeOtherPeoplesNationRule);
     //----------------------------End Rule: if other 4 people's nation is not nation_x, then man_1's nation is nation_x--------------------------------------------------
 
 //    //----------------------------Begin Rule: if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------
@@ -5320,6 +5320,225 @@ void OCPlanner::loadTestRulesFromCodes()
 
     this->AllRules.push_back(ifOthersSmokeOtherBrandsThenMan1SmokesPrince);
     //----------------------------End Rule:  if other 4 people smoke other brands, then man_1 smokes prince-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people have other nations, then man_1's nation is British--------------------------------------
+    // define variables:
+    ParamValue nation_man_1 = str_var[0];
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people have other nations
+    vector<ParamValue> nationSwedishStateOwnerList1;
+    nationSwedishStateOwnerList1.push_back(man_2);
+    State* nationSwedishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"Swedish", nationSwedishStateOwnerList1, true, 0);
+
+    vector<ParamValue> nationDanishStateOwnerList1;
+    nationDanishStateOwnerList1.push_back(man_3);
+    State* nationDanishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"Danish", nationDanishStateOwnerList1, true, 0);
+
+    vector<ParamValue> nationNorwegianStateOwnerList1;
+    nationNorwegianStateOwnerList1.push_back(man_4);
+    State* nationNorwegianState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"Norwegian", nationNorwegianStateOwnerList1, true, 0);
+
+    vector<ParamValue> nationGermanStateOwnerList1;
+    nationGermanStateOwnerList1.push_back(man_5);
+    State* nationGermanState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"German", nationGermanStateOwnerList1, true, 0);
+
+    // effect1: man_1's nation is British
+    vector<ParamValue> nationBritishStateOwnerList1;
+    nationBritishStateOwnerList1.push_back(man_1);
+    State* nationBritishState1 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, nationBritishStateOwnerList1, true, 0);
+    Effect* nationBritishStateEffect1 = new Effect(nationBritishState1, OP_ASSIGN, "British",true);
+
+
+    // add rule:
+    Rule* ifOthersHaveOtherNationsThenMan1IsBritish = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersHaveOtherNationsThenMan1IsBritish->ruleName = "ifOthersHaveOtherNationsThenMan1IsBritish";
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(ispeopleState1);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(ispeopleState2);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(ispeopleState3);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(ispeopleState4);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(ispeopleState5);
+
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(isNotSameState1);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(isNotSameState2);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(isNotSameState3);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(isNotSameState4);
+
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(nationSwedishState1);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(nationDanishState1);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(nationNorwegianState1);
+    ifOthersHaveOtherNationsThenMan1IsBritish->addPrecondition(nationGermanState1);
+
+    ifOthersHaveOtherNationsThenMan1IsBritish->addEffect(EffectPair(1.0f,nationBritishStateEffect1));
+
+    this->AllRules.push_back(ifOthersHaveOtherNationsThenMan1IsBritish);
+    //----------------------------End Rule: if other 4 people have other nations, then man_1's nation is British-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people have other nations, then man_1's nation is Swedish--------------------------------------
+    // define variables:
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people have other nations
+    vector<ParamValue> nationBritishStateOwnerList2;
+    nationBritishStateOwnerList2.push_back(man_2);
+    State* nationBritishState2 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"British", nationBritishStateOwnerList2, true, 0);
+
+    // effect1: man_1's nation is Swedish
+    vector<ParamValue> nationSwedishStateOwnerList2;
+    nationSwedishStateOwnerList2.push_back(man_1);
+    State* nationSwedishState2= new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, nationSwedishStateOwnerList2, true, 0);
+    Effect* nationSwedishStateEffect2 = new Effect(nationSwedishState2, OP_ASSIGN, "Swedish",true);
+
+
+    // add rule:
+    Rule* ifOthersHaveOtherNationsThenMan1IsSwedish = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->ruleName = "ifOthersHaveOtherNationsThenMan1IsSwedish";
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(ispeopleState1);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(ispeopleState2);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(ispeopleState3);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(ispeopleState4);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(ispeopleState5);
+
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(isNotSameState1);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(isNotSameState2);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(isNotSameState3);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(isNotSameState4);
+
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(nationBritishState2);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(nationDanishState1);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(nationNorwegianState1);
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addPrecondition(nationGermanState1);
+
+    ifOthersHaveOtherNationsThenMan1IsSwedish->addEffect(EffectPair(1.0f,nationSwedishStateEffect2));
+
+    this->AllRules.push_back(ifOthersHaveOtherNationsThenMan1IsSwedish);
+    //----------------------------End Rule: if other 4 people have other nations, then man_1's nation is Swedish-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people have other nations, then man_1's nation is Danish--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people have other nations
+    vector<ParamValue> nationBritishStateOwnerList3;
+    nationBritishStateOwnerList3.push_back(man_3);
+    State* nationBritishState3 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"British", nationBritishStateOwnerList3, true, 0);
+
+
+    // effect1: man_1's nation is Danish
+    vector<ParamValue> nationDanishStateOwnerList2;
+    nationDanishStateOwnerList2.push_back(man_1);
+    State* nationDanishState2 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, nationDanishStateOwnerList2, true, 0);
+    Effect* nationDanishStateEffect2 = new Effect(nationDanishState2, OP_ASSIGN, "Danish",true);
+
+
+    // add rule:
+    Rule* ifOthersHaveOtherNationsThenMan1IsDanish = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersHaveOtherNationsThenMan1IsDanish->ruleName = "ifOthersHaveOtherNationsThenMan1IsDanish";
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(ispeopleState1);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(ispeopleState2);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(ispeopleState3);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(ispeopleState4);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(ispeopleState5);
+
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(isNotSameState1);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(isNotSameState2);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(isNotSameState3);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(isNotSameState4);
+
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(nationSwedishState1);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(nationBritishState3);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(nationNorwegianState1);
+    ifOthersHaveOtherNationsThenMan1IsDanish->addPrecondition(nationGermanState1);
+
+    ifOthersHaveOtherNationsThenMan1IsDanish->addEffect(EffectPair(1.0f,nationDanishStateEffect2));
+
+    this->AllRules.push_back(ifOthersHaveOtherNationsThenMan1IsDanish);
+    //----------------------------End Rule: if other 4 people have other nations, then man_1's nation is Danish-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people have other nations, then man_1's nation is Norwegian--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people have other nations
+
+    vector<ParamValue> nationBritishStateOwnerList4;
+    nationBritishStateOwnerList4.push_back(man_4);
+    State* nationBritishState4 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"British", nationBritishStateOwnerList4, true, 0);
+
+    // effect1: man_1's nation is Norwegian
+    vector<ParamValue> nationNorwegianStateOwnerList2;
+    nationNorwegianStateOwnerList2.push_back(man_1);
+    State* nationNorwegianState2 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, nationNorwegianStateOwnerList2, true, 0);
+    Effect* nationNorwegianEffect2 = new Effect(nationNorwegianState2, OP_ASSIGN, "Norwegian",true);
+
+
+    // add rule:
+    Rule* ifOthersHaveOtherNationsThenMan1IsNorwegian = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->ruleName = "ifOthersHaveOtherNationsThenMan1IsNorwegian";
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(ispeopleState1);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(ispeopleState2);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(ispeopleState3);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(ispeopleState4);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(ispeopleState5);
+
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(isNotSameState1);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(isNotSameState2);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(isNotSameState3);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(isNotSameState4);
+
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(nationSwedishState1);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(nationDanishState1);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(nationBritishState4);
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addPrecondition(nationGermanState1);
+
+    ifOthersHaveOtherNationsThenMan1IsNorwegian->addEffect(EffectPair(1.0f,nationNorwegianEffect2));
+
+    this->AllRules.push_back(ifOthersHaveOtherNationsThenMan1IsNorwegian);
+    //----------------------------End Rule: if other 4 people have other nations, then man_1's nation is Norwegian-------------------------------------------------
+
+    //----------------------------Begin Rule: if other 4 people have other nations, then man_1's nation is German--------------------------------------
+    // define variables:
+
+    // precondition 1 -5 : man_1-5 are people
+
+    // precondition 6-9 : other people have other nations
+    vector<ParamValue> nationBritishStateOwnerList5;
+    nationBritishStateOwnerList5.push_back(man_5);
+    State* nationBritishState5 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,"British", nationBritishStateOwnerList5, true, 0);
+
+    // effect1: man_1's nation is German
+    vector<ParamValue> nationGermanStateOwnerList2;
+    nationGermanStateOwnerList2.push_back(man_1);
+    State* nationGermanState2 = new State("nation",ActionParamType::STRING(),STATE_EQUAL_TO ,nation_man_1, nationGermanStateOwnerList2, true, 0);
+    Effect* nationGermanStateEffect2 = new Effect(nationGermanState2, OP_ASSIGN, "German",true);
+
+
+    // add rule:
+    Rule* ifOthersHaveOtherNationsThenMan1IsGerman = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifOthersHaveOtherNationsThenMan1IsGerman->ruleName = "ifOthersHaveOtherNationsThenMan1IsGerman";
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(ispeopleState1);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(ispeopleState2);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(ispeopleState3);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(ispeopleState4);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(ispeopleState5);
+
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(isNotSameState1);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(isNotSameState2);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(isNotSameState3);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(isNotSameState4);
+
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(nationSwedishState1);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(nationDanishState1);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(nationNorwegianState1);
+    ifOthersHaveOtherNationsThenMan1IsGerman->addPrecondition(nationBritishState5);
+
+    ifOthersHaveOtherNationsThenMan1IsGerman->addEffect(EffectPair(1.0f,nationGermanStateEffect2));
+
+    this->AllRules.push_back(ifOthersHaveOtherNationsThenMan1IsGerman);
+    //----------------------------End Rule: if other 4 people have other nations, then man_1's nation is German-------------------------------------------------
 
 }
 
