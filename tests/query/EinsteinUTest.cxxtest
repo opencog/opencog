@@ -140,11 +140,14 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
 
-	// Result should be a ListLink w/ six solutions
-	// Why six? Obviously, four: (1,1), (1,2), (2,1), (2,2) but also, the reversed: (1,1) and (2,2)
+	// Result should be a ListLink w/ four solutions
+	// Why four? Obviously, (1,1), (1,2), (2,1), (2,2)
+	// Note that we explicitly filter sameness to avoid double counting, as otherwise,
+	// there would be six solutions. Why six? Obviously, four above, but also, the
+	// reversed gounding matches: (1,1) and (2,2)
 	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(puzzle_solution));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
@@ -211,10 +214,15 @@ void EinsteinPuzzle::test_full(void)
 	// and that person14 == person9 (norweigan)
 	Handle same = pm.crisp_logic_bindlink(same_rule);
 	logger().debug("After first same-rule %s\n", SchemeSmob::to_string(same).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 12, getarity(same));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
-	// Next, deduce that the same properties apply to each
+	// Next, propagate this knowledge transitively
 	pm.crisp_logic_bindlink(trans_rule);
+
+	// Do it again...
+	same = pm.crisp_logic_bindlink(same_rule);
+	logger().debug("After first same-rule %s\n", SchemeSmob::to_string(same).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
 	// Result should be a ListLink w/ two solutions
 	// Why two? Because person 1 and 2 are the same person, so both solutions get listed.

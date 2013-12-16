@@ -47,6 +47,18 @@
 						(VariableNode "$property")
 					)
 				)
+				;; Avoid reporting things we already know.
+				;; Basically, if we already know that person A and B
+				;; are the same person, then lets not deduce it again.
+				(NotLink
+					(EvaluationLink
+						(PredicateNode "IsSamePerson")
+						(ListLink
+							(VariableNode "$person_a")
+							(VariableNode "$person_b")
+						)
+					)
+				)
 			)
 			;; implicand -- then the following is true too
 			(EvaluationLink

@@ -76,3 +76,31 @@
 ;; ()
 
 
+;; A little handly-dandy utility to avoid over-reporting of "obvious"
+;; results. We declare that person1 is the same asm person1, etc.
+;; A kind-of pauli-exclusion-principle at work.
+(define (same person)
+	(EvaluationLink (stv 1 1)
+		(PredicateNode "IsSamePerson")
+		(ListLink
+			(AvatarNode person)
+			(AvatarNode person)
+		)
+	)
+)
+
+(same "person1")
+(same "person2")
+(same "person3")
+(same "person4")
+(same "person5")
+(same "person6")
+(same "person7")
+(same "person8")
+(same "person9")
+(same "person10")
+(same "person11")
+(same "person12")
+(same "person13")
+(same "person14")
+(same "person15")
