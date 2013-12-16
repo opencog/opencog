@@ -1,6 +1,6 @@
-
-
-;begin adding facts for Einstein puzzle:
+:
+; Facts for the Einstein puzzle:
+;
 ; Base concepts
 (ConceptNode "house" (stv 0.05 1))
 (ConceptNode "person" (stv 0.05 1))
@@ -52,9 +52,9 @@
 )
 
 
-; nation
+; nationality
 (EvaluationLink (stv 1 1)
-   (PredicateNode "is_nation")
+   (PredicateNode "is_nationality")
    (ListLink
       (ConceptNode "British")
       (ConceptNode "true")
@@ -62,7 +62,7 @@
 )
 
 (EvaluationLink (stv 1 1)
-   (PredicateNode "is_nation")
+   (PredicateNode "is_nationality")
    (ListLink
       (ConceptNode "Swedish")
       (ConceptNode "true")
@@ -70,7 +70,7 @@
 )
 
 (EvaluationLink (stv 1 1)
-   (PredicateNode "is_nation")
+   (PredicateNode "is_nationality")
    (ListLink
       (ConceptNode "Danish")
       (ConceptNode "true")
@@ -78,7 +78,7 @@
 )
 
 (EvaluationLink (stv 1 1)
-   (PredicateNode "is_nation")
+   (PredicateNode "is_nationality")
    (ListLink
       (ConceptNode "Norwegian")
       (ConceptNode "true")
@@ -86,29 +86,19 @@
 )
 
 (EvaluationLink (stv 1 1)
-   (PredicateNode "is_nation")
+   (PredicateNode "is_nationality")
    (ListLink
       (ConceptNode "German")
       (ConceptNode "true")
    )
 )
 
-; people  this will be added from the Game world to the Atomspace
-;(EvaluationLink (stv 1 1)
-;   (PredicateNode "class")
-;   (ListLink
-;      (AvantarNode "man_1")
-;      (ConceptNode "people")
-;   )
-;)
-
-
 
 ; Pets
 (EvaluationLink (stv 1 1)
    (PredicateNode "is_pet")
    (ListLink
-      (ConceptNode "dogs")
+      (ConceptNode "dog")
       (ConceptNode "true")
    )
 )
@@ -116,7 +106,7 @@
 (EvaluationLink (stv 1 1)
    (PredicateNode "is_pet")
    (ListLink
-      (ConceptNode "birds")
+      (ConceptNode "bird")
       (ConceptNode "true")
    )
 )
@@ -124,7 +114,7 @@
 (EvaluationLink (stv 1 1)
    (PredicateNode "is_pet")
    (ListLink
-      (ConceptNode "cats")
+      (ConceptNode "cat")
       (ConceptNode "true")
    )
 )
@@ -151,7 +141,7 @@
 (EvaluationLink (stv 1 1)
    (PredicateNode "is_cigaretteBrand")
    (ListLink
-      (ConceptNode "pallMall")
+      (ConceptNode "pallmall")
       (ConceptNode "true")
    )
 )
