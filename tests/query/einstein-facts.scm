@@ -1,6 +1,8 @@
-:
-; Facts for the Einstein puzzle:
-;
+;;
+;; einstein-facts.scm
+;;
+;; Basic facts for the Einstein puzzle
+;;
 ; Base concepts
 (ConceptNode "house" (stv 0.05 1))
 (ConceptNode "person" (stv 0.05 1))
@@ -328,7 +330,7 @@
 )
 
 (EvaluationLink (stv 1 1) 
-   (PredicateNode "liveIn")
+   (PredicateNode "livesIn")
    (ListLink
       (AvatarNode "id_man_1")
       (ObjectNode "firstHouse")
@@ -336,7 +338,7 @@
 )      
 
 (EvaluationLink (stv 1 1) 
-   (PredicateNode "liveIn")
+   (PredicateNode "livesIn")
    (ListLink
       (AvatarNode "id_man_2")
       (ObjectNode "secondHouse")
@@ -344,7 +346,7 @@
 )      
 
 (EvaluationLink (stv 1 1) 
-   (PredicateNode "liveIn")
+   (PredicateNode "livesIn")
    (ListLink
       (AvatarNode "id_man_3")
       (ObjectNode "thirdHouse")
@@ -352,7 +354,7 @@
 )      
 
 (EvaluationLink (stv 1 1) 
-   (PredicateNode "liveIn")
+   (PredicateNode "livesIn")
    (ListLink
       (AvatarNode "id_man_4")
       (ObjectNode "fourthHouse")
@@ -360,7 +362,7 @@
 )      
 
 (EvaluationLink (stv 1 1) 
-   (PredicateNode "liveIn")
+   (PredicateNode "livesIn")
    (ListLink
       (AvatarNode "id_man_5")
       (ObjectNode "fifthHouse")

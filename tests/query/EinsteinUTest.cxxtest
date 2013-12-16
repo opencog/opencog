@@ -1,7 +1,7 @@
 /*
- * tests/query/VarTypeNotUTest.cxxtest
+ * tests/query/EinstainUTest.cxxtest
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,16 +30,16 @@
 
 using namespace opencog;
 
-class VarTypeNot :  public CxxTest::TestSuite
+class EinsteinPuzzle :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle vscope_good, vscope_bad;
+		Handle puzzle_rules;
 
 	public:
 
-		VarTypeNot(void)
+		EinsteinPuzzle(void)
 		{
 			try
 			{
@@ -57,7 +57,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~VarTypeNot()
+		~EinsteinPuzzle()
 		{
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -76,7 +76,7 @@ class VarTypeNot :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
-void VarTypeNot::setUp(void)
+void EinsteinPuzzle::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
@@ -95,7 +95,8 @@ void VarTypeNot::setUp(void)
       "opencog/spacetime/spacetime_types.scm, "
       "opencog/dynamics/attention/attention_types.scm, "
       "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
-		"tests/query/var-type-not.scm");
+		"tests/query/einstein-facts.scm, "
+		"tests/query/einstein-rules.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
@@ -111,8 +112,7 @@ void VarTypeNot::setUp(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	vscope_good = SchemeEval::instance().apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = SchemeEval::instance().apply("rule-bad", Handle::UNDEFINED);
+	puzzle_rules = SchemeEval::instance().apply("puzzle-impl", Handle::UNDEFINED);
 }
 
 /*
@@ -121,22 +121,17 @@ void VarTypeNot::setUp(void)
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
 #define getarity(hand) as->getArity(hand)
 
-void VarTypeNot::test_exec(void)
+void EinsteinPuzzle::test_exec(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_good);
-	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != vscope_bad);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
 
-	// Result should be a ListLink w/ zero solutions
-	Handle result_good = pm.crisp_logic_bindlink(vscope_good);
-	logger().debug("result-good is %s\n", SchemeSmob::to_string(result_good).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 0, getarity(result_good));
-
-	Handle result_bad = pm.crisp_logic_bindlink(vscope_bad);
-	logger().debug("result-bad is %s\n", SchemeSmob::to_string(result_bad).c_str());
-	TSM_ASSERT_EQUALS("expecting undefined value", Handle::UNDEFINED, result_bad);
+	// Result should be a ListLink w/ one solution
+	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
+	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
