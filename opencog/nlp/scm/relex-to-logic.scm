@@ -1,9 +1,37 @@
+; random-string, random-atom-name and choose-var-name can be moved to utilities.scm
+(define (random-string str-length) 
+	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+	;(define name-length 5)
+	(define str "")
+	(while (> str-length 0)
+		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
+		(set! str-length (- str-length 1))
+	)
+	str
+)
+
+(define (random-atom-name atom-type name-length)
+	(define atom-name (random-string name-length))
+	(if (equal? atom-type 'VariableNode)
+		(set! atom-name (string-append "$" atom-name))
+	)
+	(while (> (length (filter-map (lambda (a-string) (string=? atom-name a-string)) (map cog-name (cog-get-atoms atom-type)))) 0)
+		(if (equal? atom-type 'VariableNode)
+			(set! atom-name (string-append "$" (random-string name-length)))
+			(set! atom-name (random-string name-length))
+		)
+	)
+	atom-name
+)
+
+(define (choose-var-name) (random-atom-name 'VariableNode 36))
 
 (define (check-lemma word win)
 	(equal? word (cog-name (list-ref (cog-chase-link 'LemmaLink 'WordNode win) 0)))
 )
 
-define (get-instance-name word word-index parse-node)
+; 'win' refers to WordInstanceNode
+(define (get-instance-name word word-index parse-node)
 	(define win-list (cog-get-reference parse-node))
 	(cog-name (list-ref 
 			(append-map (lambda (a-predicate a-win) (if a-predicate (list a-win) '()))
@@ -47,19 +75,15 @@ define (get-instance-name word word-index parse-node)
 	(define new_instance (ConceptNode instance)) 
 	(define var (VariableNode var_name)) 
 	(define new_concept (ConceptNode concept)) 
-	(ImplicationLink 
-		(MemberLink var new_instance) 
-		(InheritanceLink var new_concept) 
-	) 
+	(MemberLink var new_instance) 
+	(InheritanceLink var new_concept) 
 )
 
 (define (negative-rule verb instance) 
 	(define new_predicate (PredicateNode instance)) 
 	(define verb_node (PredicateNode verb)) 
-	(AndLink
-		(InheritanceLink new_predicate verb_node) 
-		(NotLink new_predicate)
-	) 
+	(InheritanceLink new_predicate verb_node) 
+	(NotLink new_predicate)
 )
 
 (define (possessive-rule-1 noun noun_instance word)
@@ -141,7 +165,7 @@ define (get-instance-name word word-index parse-node)
 	(InheritanceLink predicateNode_1_ins predicateNode_1) 
 	(InheritanceLink predicateNode_2_ins predicateNode_2) 
 	(EvaluationLink predicateNode_1_ins subjectNode_1_ins)
-	(EvaluationLink predicateNode_2_ins subjectNode_2_ins objectNode_ins))
+	(EvaluationLink predicateNode_2_ins subjectNode_2_ins objectNode_ins)
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
@@ -155,7 +179,7 @@ define (get-instance-name word word-index parse-node)
 	(InheritanceLink subjNode_ins subjNode)
 	(InheritanceLink adjNode_ins adjNode)
 	(EvaluationLink predicateNode_ins)
-	(InheritanceLink subjNode_ins adjNode_ins))
+	(InheritanceLink subjNode_ins adjNode_ins)
 )
 
 (define (all-rule noun  noun_instance)
@@ -192,8 +216,6 @@ define (get-instance-name word word-index parse-node)
 	(InheritanceLink entity Woman) 
 )
 
-
-
 (define (about-rule verb verb_instance  noun noun_instance) 
 	(define new_predicate (PredicateNode verb_instance)) 
 	(define verb_node (PredicateNode verb)) 
@@ -205,7 +227,6 @@ define (get-instance-name word word-index parse-node)
 	(EvaluationLink About new_predicate new_concept) 
 ) 
 
-
 (define (nn-rule n1 n1_instance n2 n2_instance) 
 	(define n1_concept (ConceptNode n1)) 
 	(define n2_concept (ConceptNode n2)) 
@@ -214,4 +235,4 @@ define (get-instance-name word word-index parse-node)
 	(InheritanceLink  n1_ins_concept n1_concept) 
 	(InheritanceLink  n2_ins_concept n2_concept) 
 	(InheritanceLink  n1_ins_concept, n2_ins_concept) 
-) 
+)
