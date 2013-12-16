@@ -3,6 +3,10 @@
 ;;
 ;; Basic facts for the Einstein puzzle
 ;;
+
+(define (stv mean conf) (cog-new-stv mean conf))
+
+
 ; Base concepts
 (ConceptNode "house" (stv 0.05 1))
 (ConceptNode "person" (stv 0.05 1))

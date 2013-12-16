@@ -36,6 +36,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 		PatternMatch pm;
 		AtomSpace *as;
 		Handle puzzle_rules;
+		static const char* paths[];
 
 	public:
 
@@ -55,6 +56,21 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 			// logger().setLevel(Logger::DEBUG);
 			// logger().setPrintToStdoutFlag(true);
+
+			server(CogServer::createInstance);
+			as = &cogserver().getAtomSpace();
+			pm.set_atomspace(as);
+
+			// Load the required data
+			config().set("MODULES",
+				"opencog/nlp/types/libnlp-types.so, "
+				"opencog/spacetime/libspacetime.so, "
+				"opencog/dynamics/attention/libattention.so, "
+				"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+
+			cogserver().loadModules(paths);
+
+
 		}
 
 		~EinsteinPuzzle()
@@ -68,8 +84,19 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 		void tearDown(void) { }
 
+		void test_trivial_deduct(void);
 		void test_exec(void);
 };
+
+const char* EinsteinPuzzle::paths[] =
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+
 
 /*
  * This function sets up an implication link, and some data.
@@ -78,52 +105,37 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 #define al as->addLink
 void EinsteinPuzzle::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
-	pm.set_atomspace(as);
-
-	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/spacetime/libspacetime.so, "
-		"opencog/dynamics/attention/libattention.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+	as->clear();
 
 	config().set("SCM_PRELOAD",
       "opencog/atomspace/core_types.scm, "
       "opencog/nlp/types/nlp_types.scm, "
       "opencog/spacetime/spacetime_types.scm, "
       "opencog/dynamics/attention/attention_types.scm, "
-      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
-		"tests/query/einstein-facts.scm, "
-		"tests/query/einstein-rules.scm");
+      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	const char * paths[] = 
-	{
-		"./",
-		"../",
-		"../../",
-		"../../../",
-		NULL
-	};
-	cogserver().loadModules(paths);
+	cogserver().loadSCMModules(paths);
+
+}
+
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+/*
+ * Trivial deductive test
+ */
+void EinsteinPuzzle::test_trivial_deduct(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+		"tests/query/deduct-trivial.scm");
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
 	puzzle_rules = SchemeEval::instance().apply("puzzle-impl", Handle::UNDEFINED);
-}
-
-/*
- * Basic implication link test.
- */
-#define getlink(hand,pos) as->getOutgoing(hand,pos)
-#define getarity(hand) as->getArity(hand)
-
-void EinsteinPuzzle::test_exec(void)
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
@@ -132,6 +144,24 @@ void EinsteinPuzzle::test_exec(void)
 	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+void EinsteinPuzzle::test_exec(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+
+//		"tests/query/einstein-facts.scm, "
+//		"tests/query/einstein-rules.scm");
+	// Make sure the scheme file actually loaded!
+//	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
+
+	// Result should be a ListLink w/ one solution
+	// Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
+	// logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+//	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
