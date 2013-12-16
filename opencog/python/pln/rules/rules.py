@@ -81,7 +81,7 @@ class InversionRule(Rule):
                       A, B],
             formula= formulas.inversionFormula)
 
-class IndependenceBasedDeductionRule(Rule):
+class DeductionRule(Rule):
     '''A->B, B->C entails A->C'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
@@ -89,13 +89,14 @@ class IndependenceBasedDeductionRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
-            formula= formulas.deductionSimpleFormula,
+            formula= formulas.deductionIndependenceBasedFormula,
             outputs= [chainer.link(link_type, [A, C])],
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [B, C]),
-                      A, B, C])
+                      B, C])
 
-class DeductionRule(Rule):
+# It doesn't have the right formula
+class DeductionGeometryRule(Rule):
     '''A->B, B->C entails A->C. Uses concept geometry.'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
@@ -146,7 +147,6 @@ class AbductionRule(Rule):
                       chainer.link(link_type, [L, M]), S, M, L],
             formula= formulas.inductionFormula)
 
-# TODO implement transitiveSimilarityFormula
 class TransitiveSimilarityRule(Rule):
     '''Similarity A B, Similarity B C => Similarity A C'''
     def __init__(self, chainer):
@@ -163,8 +163,8 @@ class TransitiveSimilarityRule(Rule):
                       chainer.link(link_type, [B, C]),
                       A, B, C])
 
-class ModusPonensRule(Rule):
-    '''A->B, A entails B'''
+class PreciseModusPonensRule(Rule):
+    '''Given P(A->B) and P(NOT(A)->B) and sA, estimate sB'''
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
@@ -176,7 +176,45 @@ class ModusPonensRule(Rule):
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [notA, B]),
                       A],
+            formula= formulas.preciseModusPonensFormula)
+
+class ModusPonensRule(Rule):
+    '''Given P(A->B) and sA, estimate sB'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [B],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      A],
             formula= formulas.modusPonensFormula)
+
+class SymmetricModusPonensRule(Rule):
+    '''Given (Similarity A B) and sA, estimate sB'''
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+            outputs= [B],
+            inputs=  [chainer.link(link_type, [A, B]),
+                      A],
+            formula= formulas.symmetricModusPonensFormula)
+
+class TermProbabilityRule(Rule):
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        AB= chainer.link(link_type, [A, B])
+        BA= chainer.link(link_type, [B, A])
+
+        Rule.__init__(self,
+            outputs=[B],
+            inputs= [AB, BA, A],
+            formula= formulas.termProbabilityFormula
+            )
 
 class InheritanceRule(Rule):
     '''Create a (mixed) InheritanceLink based on the SubsetLink and IntensionalInheritanceLink (based on the definition of mixed InheritanceLinks)'''
@@ -489,28 +527,18 @@ class LinkToLinkRule(Rule):
             inputs=  [chainer.link(from_type, [A, B])])
 
 class MemberToInheritanceRule(LinkToLinkRule):
-    '''MemberLink(Jade robot) => MemberLink Jade {Jade}, InheritanceLink({Jade} robot).
-       {Jade} is the set containing only Jade.'''
+    '''MemberLink(Jade robot) => InheritanceLink(Jade robot).'''
     def __init__(self, chainer):
-        # use link2link rule so that backward chaining will know approximately the right target.
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
-            formula= None)
+            formula= formulas.mem2InhFormula)
         self.chainer=chainer
 
-    def custom_compute(self, inputs, outputs):
-        [mem_link] = inputs
-        [object, superset] = mem_link.out
-
-        singleton_concept_name = '{%s %s}' % (object.type_name, object.name,)
-        singleton_set_node = self.chainer.node(types.ConceptNode, singleton_concept_name)
-
-        member_link = self.chainer.link(types.MemberLink, [object, singleton_set_node])
-        tvs = [TruthValue(1, formulas.confidence_to_count(0.99))]
-
-        inh_link = self.chainer.link(types.InheritanceLink, [singleton_set_node, superset])
-        tvs += formulas.mem2InhFormula([mem_link.tv]) # use mem2inh formula
-
-        return ([member_link, inh_link], tvs)
+class InheritanceToMemberRule(LinkToLinkRule):
+    '''InheritanceLink(Jade robot) => MemberLink(Jade robot).'''
+    def __init__(self, chainer):
+        LinkToLinkRule.__init__(self, chainer, from_type=types.InheritanceLink, to_type=types.MemberLink,
+            formula= formulas.mem2InhFormula)
+        self.chainer=chainer
 
 # Is it a good idea to have every possible rule? Ben says no, you should bias the cognition by putting in particularly useful/synergistic rules.
 #class MemberToSubsetRule(LinkToLinkRule):
@@ -521,8 +549,8 @@ class MemberToInheritanceRule(LinkToLinkRule):
 
 class AttractionRule(Rule):
     '''Creates ExtensionalAttractionLink(A, B) <s>.
-       P(Attr A B) = P(B|A) - P(B). (If it's a negative number just say 0)
-       It should be P(B|Not A) rather than P(B) but that would be more expensive/annoying.'''
+       P(Attr A B) = P(B|A) - P(B|Not A). (If it's a negative number just say 0)
+'''
     def __init__(self, chainer):
         self._chainer = chainer
         A = chainer.new_variable()
@@ -535,4 +563,52 @@ class AttractionRule(Rule):
             formula= formulas.attractionFormula,
             outputs= [chainer.link(types.AttractionLink, [A, B])],
             inputs=  [subset1, subset2])
+
+class OntologicalInheritanceRule(Rule):
+    '''Create an isa ontology.'''
+    def __init__(self, chainer):
+        self._chainer = chainer
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        inhAB = chainer.link(types.InheritanceLink, [A, B])
+        inhBA = chainer.link(types.InheritanceLink, [B, A])
+        ontoinhAB = chainer.link(types.OntologicalInheritanceLink, [A, B])
+
+        Rule.__init__(self,
+            formula= formulas.ontoInhFormula,
+            inputs=  [inhAB, inhBA],
+            outputs= [ontoinhAB])
+
+class ProcedureEvaluationRule(Rule):
+    '''Evaluate EvaluationLinks.
+       EvaluationLink (PredicateNode F) (ListLink arguments).'''
+    def __init__(self, chainer):
+        self._chainer = chainer
+        F = chainer.new_variable()
+        ARGS = chainer.new_variable()
+
+        evallink = chainer.link(types.EvaluationLink, [F, args])
+
+        Rule.__init__(self,
+            formula= None,
+            inputs=[],
+            outputs=[evallink])
+
+    def custom_compute(self, inputs, outputs=None):
+        [eval_link] = inputs
+        [function, list_link] = eval_link.out
+
+        function.name
+        args = list_link.out
+
+        # assume it's a python function
+        def is_jade(arguments):
+            node = arguments[0]
+            if node.is_a(types.ConceptNode) and node.name == 'jade':
+                return 1.0
+
+        fuzzy_tv = is_jade(args)
+
+        return [TruthValue(fuzzy_tv, 1.0)]
 

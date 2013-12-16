@@ -69,7 +69,7 @@ def get_integer(time_node):
 class TemporalTransitivityRule(rules.Rule):
     # Hackily infer transitive temporal relationships using the deduction formula
     # This Rule is important but the TV formula is wrong
-    def __init__(self, chainer, link_type, formula= formulas.deductionSimpleFormula):
+    def __init__(self, chainer, link_type, formula= formulas.deductionIndependenceBasedFormula):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()

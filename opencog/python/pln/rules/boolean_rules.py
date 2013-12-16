@@ -11,7 +11,7 @@ import math
 
 def create_and_or_rules(chainer, min_n, max_n):
     rules = []
-    for n in min_n, max_n:
+    for n in xrange(min_n, max_n):
         rules.append(AndCreationRule(chainer, n))
         rules.append(OrCreationRule(chainer, n))
         rules.append(AndEliminationRule(chainer, n))
@@ -26,7 +26,7 @@ def create_and_or_rules(chainer, min_n, max_n):
     return rules
 
 class BooleanLinkCreationRule(rules.Rule):
-    def custom_compute(self, inputs, outputs):
+    def disabled_custom_compute(self, inputs, outputs):
         # the output may have a hierarchy of links, but we should flatten it (this means PLN can incrementally create bigger boolean links)
         output_tvs = self.calculate(inputs)
         if output_tvs is None:
@@ -55,7 +55,7 @@ class AndCreationRule(BooleanLinkCreationRule):
         self._chainer = chainer
 
         rules.Rule.__init__(self,
-            formula= formulas.andSymmetricFormula,
+            formula= formulas.andFormula,
             outputs= [chainer.link(types.AndLink, atoms)],
             inputs=  atoms)
 

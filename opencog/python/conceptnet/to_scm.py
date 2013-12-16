@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue, types
+from opencog.atomspace import TruthValue, types, AtomSpace
 import reader
 import term
 
@@ -73,51 +73,44 @@ def set_TV(word):
             return conceptnet_dict[word]
 
 
-def print_TV(word, case=1):
-    return('(stv ' + str(word.mean) + ' ' + str(word.count) + ')')
-
-
-def write_atoms(cn_assertion, template_no, link_type=''):
+def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, .5)
+    cn_argument1=cn_assertion[1][6:]
+    cn_arg1_stv=set_TV(cn_assertion[1][6:])
+    cn_argument2=cn_assertion[2][6:]
+    cn_arg2_stv=set_TV(cn_assertion[2][6:])
+
+    cn1 = atomspace.add_node(types.ConceptNode, cn_argument1, tv=cn_arg1_stv)
+    cn2 = atomspace.add_node(types.ConceptNode, cn_argument2, tv=cn_arg2_stv)
+
     if template_no == 1:
-        return ('(' + str(link_type) + ' {link_tv}\n\t' +
-                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t' +
-                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n)'
-                ).format(link_tv=print_TV(TV),
-                         cn_argument1=cn_assertion[1][6:],
-                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
-                         cn_argument2=cn_assertion[2][6:],
-                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
+        link = atomspace.add_link(get_type(link_type), [cn1, cn2], tv=TV)
+
+        return str(link)
     elif template_no == 2:
-        return ('(EvaluationLink' + ' {link_tv}\n\t' +
-                '(PredicateNode "{cn_relation}" {cn_rel_stv})\n\t' +
-                '(ListLink\n\t\t' +
-                '(ConceptNode "{cn_argument1}" {cn_arg1_stv})\n\t\t' +
-                '(ConceptNode "{cn_argument2}" {cn_arg2_stv})\n\t)\n)'
-                ).format(link_tv=print_TV(TV),
-                         cn_relation=cn_assertion[0][3:],
-                         cn_rel_stv=print_TV(set_TV(cn_assertion[0][3:])),
-                         cn_argument1=cn_assertion[1][6:],
-                         cn_arg1_stv=print_TV(set_TV(cn_assertion[1][6:])),
-                         cn_argument2=cn_assertion[2][6:],
-                         cn_arg2_stv=print_TV(set_TV(cn_assertion[2][6:])))
+        cn_relation=cn_assertion[0][3:]
+        cn_rel_stv=set_TV(cn_assertion[0][3:])
+        pn = atomspace.add_node(types.PredicateNode, relation, tv=rel_stv)
 
+        listlink = atomspace.add_link(types.ListLink, [cn1, cn2])
+        evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
+        return str(evallink)
 
-def from_file(cn_path, scm_name):
+def from_file(atomspace, cn_path, scm_name):
     # lists_of_assertions is a list of list of assertion
     lists_of_assertions = reader.csv(cn_path)
     with open(scm_name, 'w') as scm_file:
         for an_assertion in lists_of_assertions:
             if map(an_assertion[0], 2):
-                temp = write_atoms(an_assertion, 2)
+                temp = write_atoms(atomspace, an_assertion, 2)
                 scm_file.write(temp + '\n' * 2)
 
             if ((map(an_assertion[0], 1) == "EvaluationLink") and
             (map(an_assertion[0], 2) != "EvaluationLink")):
                 # this condition is to prevent repetition of EvaluationLink
-                temp = write_atoms(an_assertion, 2)
+                temp = write_atoms(atomspace, an_assertion, 2)
             elif map(an_assertion[0], 1) != "EvaluationLink":
                 temp = write_atoms(an_assertion, 1, map(an_assertion[0], 1))
             scm_file.write(temp + '\n' * 2)
@@ -126,5 +119,6 @@ if __name__ == '__main__':
     cn_url = raw_input("Enter ConceptNet csv file address: ")
     corpus_path = raw_input("Enter corpus address: ")
     name_of_scm_file = raw_input("Enter name for the Scheme Output file: ")
-    from_file(cn_url, name_of_scm_file)
+    atomspace = AtomSpace()
+    from_file(atomspace, cn_url, name_of_scm_file)
     print ("Scheme file is created successfully")

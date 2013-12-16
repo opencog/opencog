@@ -2,7 +2,7 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
 from pln.chainers import Chainer
-from pln.rules import rules, temporal_rules, boolean_rules
+from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules
 
 class ForwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -25,18 +25,18 @@ class ForwardInferenceAgent(MindAgent):
             self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
             self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
-            #self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
+            # Seems better than Modus Ponens - it doesn't make anything up
+            self.chainer.add_rule(rules.TermProbabilityRule(self.chainer, link_type))
 
-        # As a hack, use the standard DeductionRule for SimilarityLinks. It needs its own formula really.
-        for link_type in similarity_types:
-            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+        self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer))
+        # We also want symmetric Modus Ponens. It doesn't need inversion though obviously
 
         # These two Rules create mixed links out of intensional and extensional links
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))
         self.chainer.add_rule(rules.SimilarityRule(self.chainer))
 
         # boolean links
-        for rule in boolean_rules.create_and_or_rules(self.chainer, 1, 2):
+        for rule in boolean_rules.create_and_or_rules(self.chainer, 2, 3):
             self.chainer.add_rule(rule)
 
         # create probabilistic logical links out of MemberLinks
@@ -65,8 +65,20 @@ class ForwardInferenceAgent(MindAgent):
         # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
 
+        self.chainer.add_rule(rules.OntologicalInheritanceRule(self.chainer))
+
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
+
+        for rule in self.chainer.rules:
+            self.chainer.add_rule(quantifier_rules.HigherOrderRule(self.chainer, rule))
+
+        contextual_rules = []
+        for rule in self.chainer.rules:
+            contextual_rules.append(context_rules.ContextualRule(self.chainer, rule))
+        for rule in contextual_rules:
+            self.chainer.add_rule(rule)
+        self.chainer.add_rule(context_rules.AndToContextRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!
@@ -82,7 +94,7 @@ class ForwardInferenceAgent(MindAgent):
             return
 
         # Update all of the node probabilities at each step
-        self.chainer.update_all_node_probabilities()
+        #self.chainer.update_all_node_probabilities()
 
         result = self.chainer.forward_step()
         if result:
