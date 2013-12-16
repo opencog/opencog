@@ -40,56 +40,5 @@
 	)
 )
 
-(define puzzle-impl
-	(BindLink
-		;; variable declrations
-		(ListLink
-         (TypedVariableLink
-            (VariableNode "$predicate")
-            (VariableTypeNode "PredicateNode")
-         )
-         (TypedVariableLink
-            (VariableNode "$person_a")
-            (VariableTypeNode "AvatarNode")
-         )
-         (TypedVariableLink
-            (VariableNode "$person_b")
-            (VariableTypeNode "AvatarNode")
-         )
-         (TypedVariableLink
-            (VariableNode "$property")
-            (VariableTypeNode "ConceptNode")
-         )
-		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$property")
-					)
-				)
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
-						(VariableNode "$person_b")
-						(VariableNode "$property")
-					)
-				)
-			)
-			;; implicand -- then the following is true too
-			(EvaluationLink (stv 1 0.99)
-				(PredicateNode "IsSamePerson")
-				(ListLink
-					(VariableNode "$person_a")
-					(VariableNode "$person_b")
-				)
-			)
-		)
-	)
-)
-
 
 

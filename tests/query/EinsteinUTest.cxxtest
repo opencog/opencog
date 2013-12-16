@@ -131,19 +131,21 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD",
-		"tests/query/deduct-trivial.scm");
+		"tests/query/deduct-trivial.scm, "
+		"tests/query/deduct-rules.scm");
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	puzzle_rules = SchemeEval::instance().apply("puzzle-impl", Handle::UNDEFINED);
+	puzzle_rules = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
 
-	// Result should be a ListLink w/ one solution
+	// Result should be a ListLink w/ six solutions
+	// Why six? Obviously, four: (1,1), (1,2), (2,1), (2,2) but also, the reversed: (1,1) and (2,2)
 	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(puzzle_solution));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
