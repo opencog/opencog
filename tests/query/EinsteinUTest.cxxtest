@@ -35,7 +35,6 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
-		Handle puzzle_rules;
 		static const char* paths[];
 
 	public:
@@ -85,6 +84,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 		void tearDown(void) { }
 
 		void test_trivial_deduct(void);
+		void test_trivial_keep(void);
 		void test_exec(void);
 };
 
@@ -124,7 +124,7 @@ void EinsteinPuzzle::setUp(void)
 #define getarity(hand) as->getArity(hand)
 
 /*
- * Trivial deductive test
+ * Trivial deductive test -- test the is-same-person rule
  */
 void EinsteinPuzzle::test_trivial_deduct(void)
 {
@@ -136,7 +136,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	puzzle_rules = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
+	Handle puzzle_rules = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
@@ -146,6 +146,43 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	Handle puzzle_solution = pm.crisp_logic_bindlink(puzzle_rules);
 	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(puzzle_solution));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
+/*
+ * Trivial deductive test -- print out who keeps what.
+ */
+void EinsteinPuzzle::test_trivial_keep(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	config().set("SCM_PRELOAD",
+		"tests/query/deduct-trivial.scm, "
+		"tests/query/deduct-rules.scm, "
+		"tests/query/deduct-keep.scm");
+	cogserver().loadSCMModules(paths);
+
+	// Create an implication link that will be tested.
+	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
+	Handle print_rule = SchemeEval::instance().apply("print-ownership", Handle::UNDEFINED);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != trans_rule);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != print_rule);
+
+	// First, deduce if two seemingly different people are the same ...
+	pm.crisp_logic_bindlink(same_rule);
+	// Next, deduce that the same properties apply to each
+	pm.crisp_logic_bindlink(trans_rule);
+
+	// Result should be a ListLink w/ two solutions
+	// Why two? Because person 1 and 2 are the same person, so both solutions get listed.
+	Handle puzzle_solution = pm.crisp_logic_bindlink(print_rule);
+	logger().debug("puzzle solution is %s\n", SchemeSmob::to_string(puzzle_solution).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(puzzle_solution));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
