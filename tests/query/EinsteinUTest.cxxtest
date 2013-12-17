@@ -210,18 +210,20 @@ void EinsteinPuzzle::test_full(void)
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != print_rule);
 
 	// First, deduce if two seemingly different people are the same ...
-	// We should be able to immediately deduce that person10 == person15 (blend)
-	// and that person14 == person9 (norweigan)
+	// We should be able to immediately deduce that:
+	// person10 == person15 (blend)
+	// person14 == person9 (norweigan)
+	// dunhill smoker(rule 12) == person7
 	Handle same = pm.crisp_logic_bindlink(same_rule);
 	logger().debug("After first same-rule %s\n", SchemeSmob::to_string(same).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 6, getarity(same));
 
 	// Next, propagate this knowledge transitively
 	pm.crisp_logic_bindlink(trans_rule);
 
 	// Do it again...
 	same = pm.crisp_logic_bindlink(same_rule);
-	logger().debug("After first same-rule %s\n", SchemeSmob::to_string(same).c_str());
+	logger().debug("After second same-rule %s\n", SchemeSmob::to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
 	// Result should be a ListLink w/ two solutions
