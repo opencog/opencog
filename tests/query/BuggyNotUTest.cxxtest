@@ -143,7 +143,14 @@ void BuggyNot::test_bugnot(void)
 	logger().debug("Same-people list is %s\n", SchemeSmob::to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
 
-	// Next, deduce that the same properties apply to each
+	// Next, deduce that the same properties apply to each person.
+	// The bug that this test used to trip had to do with using the same
+	// "pm" twice, to perform a second round of matching. It failed to
+	// clear all internal state, and in particular, failed to clear the
+	// "NotLink" in the optional match.  As a result, the second implication
+	// failed, because it was still using a left-over portion of the previous
+	// implication link. This was a rather distressing bug ... a very obvious
+	// but poor bug, and hadn't been noticed before. Alas.
 	Handle trans = pm.crisp_logic_bindlink(trans_rule);
 	logger().debug("Transitive list is %s\n", SchemeSmob::to_string(trans).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(trans));
