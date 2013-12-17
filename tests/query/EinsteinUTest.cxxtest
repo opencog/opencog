@@ -223,7 +223,9 @@ void EinsteinPuzzle::test_full(void)
 	// Next, propagate this knowledge transitively
 	Handle trans = pm.crisp_logic_bindlink(trans_rule);
 	logger().debug("After first transitive-rule %s\n", SchemeSmob::to_string(trans).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
+// XXX Not used atm.
 	// Deduce neighbors
 	Handle neigh = pm.crisp_logic_bindlink(neigh_rule);
 	logger().debug("After neighbor-rule %s\n", SchemeSmob::to_string(neigh).c_str());

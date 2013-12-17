@@ -4,12 +4,38 @@
 ;; Deduction rules for Einstein puzzle
 ;;
 
+;; Define simple truth value
 (define (stv mean conf) (cog-new-stv mean conf))
 
+;; Declare a variable var to be of type type
 (define (decl-var type var)
 	(TypedVariableLink
 		(VariableNode var)
 		(VariableTypeNode type)
+	)
+)
+
+;; Shorthand for the node types
+
+;; Clause containing three variables
+(define (clause-vvv v1 v2 v3)
+	(EvaluationLink
+		(VariableNode v1)
+		(ListLink
+			(VariableNode v2)
+			(VariableNode v3)
+		)
+	)
+)
+
+;; Clause containing one predicate and two variables
+(define (clause-pvv p1 v2 v3)
+	(EvaluationLink
+		(PredicateNode p1)
+		(ListLink
+			(VariableNode v2)
+			(VariableNode v3)
+		)
 	)
 )
 
@@ -23,47 +49,23 @@
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "AvatarNode" "$person_a")
 			(decl-var "AvatarNode" "$person_b")
-			(decl-var "ConceptNode" "$property")
+			(decl-var "ConceptNode" "$attribute")
 		)
 		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
+			;; body -- if all parts of AndLink hold true ... 
 			(AndLink
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$property")
-					)
-				)
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
-						(VariableNode "$person_b")
-						(VariableNode "$property")
-					)
-				)
+				(clause-vvv "$predicate" "$person_a" "$attribute")
+				(clause-vvv "$predicate" "$person_b" "$attribute")
 				;; Avoid reporting things we already know.
 				;; Basically, if we already know that person A and B
 				;; are the same person, then lets not deduce it again.
-				;; This is, the not link is identical to the conclusion below
+				;; This not link is identical to the conclusion below
 				(NotLink
-					(EvaluationLink
-						(PredicateNode "IsSamePerson")
-						(ListLink
-							(VariableNode "$person_a")
-							(VariableNode "$person_b")
-						)
-					)
+					(clause-pvv "IsSamePerson" "$person_a" "$person_b")
 				)
 			)
 			;; implicand -- then the following is true too
-			(EvaluationLink
-				(PredicateNode "IsSamePerson")
-				(ListLink
-					(VariableNode "$person_a")
-					(VariableNode "$person_b")
-				)
-			)
+			(clause-pvv "IsSamePerson" "$person_a" "$person_b")
 		)
 	)
 )
@@ -79,43 +81,101 @@
 			(decl-var "PredicateNode" "$predicate")
 			(decl-var "AvatarNode" "$person_a")
 			(decl-var "AvatarNode" "$person_b")
-			(decl-var "ConceptNode" "$property")
+			(decl-var "ConceptNode" "$attribute")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-				(EvaluationLink
-					(VariableNode "$predicate")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$property")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "IsSamePerson")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$person_b")
-					)
-				)
+				(clause-vvv "$predicate" "$person_a" "$attribute")
+				(clause-pvv "IsSamePerson" "$person_a" "$person_b")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
 				(NotLink
+					(clause-vvv "$predicate" "$person_b" "$attribute")
+				)
+			)
+			;; implicand -- then the following is true too
+			(clause-vvv "$predicate" "$person_b" "$attribute")
+		)
+	)
+)
+
+;; Clause containing one predicate, one variable, one constant
+(define (clause-pvc p1 v2 c3)
+	(EvaluationLink
+		(PredicateNode p1)
+		(ListLink
+			(VariableNode v2)
+			(ConceptNode c3)
+		)
+	)
+)
+
+;; Clause containing one predicate, one variable, one constant
+(define (clause-pvc p1 v2 c3)
+	(EvaluationLink
+		(PredicateNode p1)
+		(ListLink
+			(VariableNode v2)
+			(ConceptNode c3)
+		)
+	)
+)
+
+;; Clause containing one predicate, one variable, one constant
+(define (clause-pcv p1 c2 v3)
+	(EvaluationLink
+		(PredicateNode p1)
+		(ListLink
+			(ConceptNode c2)
+			(VariableNode v3)
+		)
+	)
+)
+
+
+;; Houses at the end of the street can only have one neighbor, ever.
+;; This is a rather narrow rule, used in very narrow circumstances.
+(define (first-house-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "AvatarNode" "$person_a")
+			(decl-var "AvatarNode" "$person_b")
+			(decl-var "ConceptNode" "$addr_b")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... 
+			(AndLink
+				;; if adress of personA is 1st house
+				(clause-pvc "Address" "$person_a" "101 Main Street")
+				;; and A is neighbor of B
+				(clause-pvv "Neighbor" "$person_a" "$person_b")
+				;; and the next house is one over
+				(EvaluationLink
+					(PredicateNode "Successor")
+					(ListLink
+						(ConceptNode "101 Main Street")
+						(VariableNode "$addr_b")
+					)
+				)
+				;; and we don't already know the conclusion
+				(NotLink
 					(EvaluationLink
-						(VariableNode "$predicate")
+						(PredicateNode "Address")
 						(ListLink
 							(VariableNode "$person_b")
-							(VariableNode "$property")
+							(VariableNode "$addr_b")
 						)
 					)
 				)
 			)
-			;; implicand -- then the following is true too
+			;; implicand -- then the B lives one house over.
 			(EvaluationLink
-				(VariableNode "$predicate")
+				(PredicateNode "Address")
 				(ListLink
 					(VariableNode "$person_b")
-					(VariableNode "$property")
+					(VariableNode "$addr_b")
 				)
 			)
 		)
