@@ -132,8 +132,7 @@ void BuggyNot::test_bugnot(void)
 
 	// Create an implication link that will be tested.
 	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	// Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("wtf-rule", Handle::UNDEFINED);
+	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
@@ -143,9 +142,6 @@ void BuggyNot::test_bugnot(void)
 	Handle same = pm.crisp_logic_bindlink(same_rule);
 	logger().debug("Same-people list is %s\n", SchemeSmob::to_string(same).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(same));
-
-std::string prt = SchemeEval::instance().eval( "(prt-atomspace)");
-printf("duuude its %s\n", prt.c_str());
 
 	// Next, deduce that the same properties apply to each
 	Handle trans = pm.crisp_logic_bindlink(trans_rule);
