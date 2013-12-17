@@ -222,6 +222,8 @@ def mem2InhFormula(tvs):
 
     return [TruthValue(mem_tv.mean, count)]
 
+inh2MemFormula = mem2InhFormula
+
 def fuzzy_and(mean0, mean1):
     return min(mean0, mean1)
 
@@ -383,6 +385,26 @@ def orBreakdownFormula(tvs):
     nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
+
+'''
+Evaluation is_American Ben <fuzzy tv 1>
+Implication is_American is_idiot <strength tv 2>
+|-
+Evaluation is_idiot Ben <tv3>
+
+Use Mem2InhFormula to get the tv of: Implication is_Ben is_American
+Use DeductionFormula to get the tv of: Implication is_ben is_idiot
+Use I2M to get the tv of: Evaluation is_idiot Ben
+'''
+def evaluationImplicationFormula(tvs):
+    [eval_B_A, impl_B_C, B, C] = tvs
+
+    [impl_A_B] = mem2InhFormula(eval_B_A)
+    [impl_A_C] = deductionIndependenceBasedFormula(
+        [impl_A_B, impl_B_C, B, C])
+    [eval_C_A] = inh2MemFormula(impl_A_C)
+
+    return [eval_C_A]
 
 def low(n):
     return max(n, 0)
