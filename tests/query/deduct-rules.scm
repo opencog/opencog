@@ -1,19 +1,18 @@
 ;;
 ;; deduct-rules.scm
 ;;
-;; Deduction rules for Einstein puzzle
+;; Deduction rules for Einstein puzzle.
 ;;
+;; The rules here are written in a fashion as close as possible to
+;; 'ordinary' common-sense deductive rules.  In particular, they are
+;; not written to predispose the problem into a 5x5 solution grid
+;; (although this is what they eventually must lead to). In other
+;; words, there is no effort made to make this teh most "efficient"
+;; possible set of rules; instead, they're the most "natural" or
+;; "common-sense-like" for this task.
 
 ;; Define simple truth value
 (define (stv mean conf) (cog-new-stv mean conf))
-
-;; Declare a variable var to be of type type
-(define (decl-var type var)
-	(TypedVariableLink
-		(VariableNode var)
-		(VariableTypeNode type)
-	)
-)
 
 ;; Shorthand for the node types
 (define VN VariableNode)
@@ -29,6 +28,14 @@
 			(t2 v2)
 			(t3 v3)
 		)
+	)
+)
+
+;; Declare a variable var to be of type type
+(define (decl-var type var)
+	(TypedVariableLink
+		(VariableNode var)
+		(VariableTypeNode type)
 	)
 )
 

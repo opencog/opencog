@@ -189,6 +189,20 @@ void EinsteinPuzzle::test_trivial_keep(void)
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
 
+/* ========================================================================
+ * Full puzzle test -- Try to solve the entire puzzle.
+ * The algorithm used below is simple forward-chaining. Start by reading
+ * a number of facts about the people, and their various attributes. One
+ * goal is to keep the facts as close as possible to natural-English
+ * language assertions as possile.  Then, to these facts, apply a number
+ * of different deductive rules. These rules try to be "natural" as well,
+ * rather than forcing an "un-natural" 5x5 solution grid onto the problem
+ * (Since we don't a-priori know that its really a 5x5 problem ... yet).
+ *
+ * At this time, there are not enough deductive rules to solve the problem;
+ * we just scratch the surface. But, for a unit test, this is enough, for now.
+ * I'd like to expand this sometime later ...
+ */
 void EinsteinPuzzle::test_full(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);

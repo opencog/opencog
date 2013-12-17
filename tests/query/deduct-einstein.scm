@@ -3,8 +3,12 @@
 ;;
 ;; Full set of Einstein Puzzle facts.
 ;; There are 15 explicitly stated facts, and four additional implicit
-;; facts about ordinal counting (ordering of houses in a row)
+;; facts about ordinal counting (ordering of houses in a row).
 ;;
+;; The facts are stated in a fashion that is as close as possible to
+;; the natural-language source. The point being that we want the
+;; expression of facts to be closely tied to human patterns of speech.
+;; Being "efficient" or "clever" is NOT the point.
 
 (define (stv mean conf) (cog-new-stv mean conf))
 
@@ -59,7 +63,7 @@
 
 
 ;; 1. The Englishman lives in the red house.
-(fact "person1" "Nationality" "British")
+(fact "person1" "Nationality" "Englishman")
 (fact "person1" "LivesIn" "red house")
 
 ;; 2. The Swede keeps dogs.
