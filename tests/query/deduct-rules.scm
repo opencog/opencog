@@ -142,7 +142,7 @@
 					)
 				)
 				(EvaluationLink
-					(PredicateNode "LeftOf")
+					(PredicateNode "Successor")
 					(ListLink
 						(VariableNode "$house_a")
 						(VariableNode "$house_b")

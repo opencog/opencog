@@ -1,7 +1,9 @@
 ;;
 ;; deduct-einstein.scm
 ;;
-;; Full set of Einstein Puzzle facts
+;; Full set of Einstein Puzzle facts.
+;; There are 15 explicitly stated facts, and four additional implicit
+;; facts about ordinal counting (ordering of houses in a row)
 ;;
 
 (define (stv mean conf) (cog-new-stv mean conf))
@@ -31,7 +33,7 @@
 	)
 )
 
-;; A neighbor-predicate
+;; A neighbor-predicate: two people live next to each other.
 (define (neighbor person1 person2)
 	(same person1)
 	(same person2)
@@ -40,6 +42,17 @@
 		(ListLink
 			(AvatarNode person1)
 			(AvatarNode person2)
+		)
+	)
+)
+
+;; A left-of predicate: one house is left of another
+(define (left-of house1 house2)
+	(EvaluationLink (stv 1 1)
+		(PredicateNode "LeftOf")
+		(ListLink
+			(ConceptNode house1)
+			(ConceptNode house2)
 		)
 	)
 )
@@ -58,7 +71,7 @@
 (fact "person3" "Drinks" "tea")
 
 ;; 4. The green house is just to the left of the white one.
-;; ()
+(left-of "green house" "white house")
 
 ;; 5. The owner of the green house drinks coffee.
 (fact "person5" "LivesIn" "green house")
@@ -100,17 +113,19 @@
 
 ;; 14. The Norwegian lives next to the blue house.
 (fact "person14" "Nationality" "Norwegian")
-;; ()
+(neighbor "person14" "blue_person")
+(fact "blue_person" "LivesIn" "blue house")
 
 ;; 15. The Blend smoker has a neighbor who drinks water.
 (fact "person15" "Smokes" "Blend")
 (neighbor "person15" "water_person")
 (fact "water_person" "Drinks" "water")
 
-;; State some facts about neighboring houses
-(define (left-of house1 house2)
+;; State some implicitly assumed facts about neighboring houses
+;; This is the 'successor' function of set-theory/ZF
+(define (successor house1 house2)
 	(EvaluationLink (stv 1 1)
-		(PredicateNode "LeftOf")
+		(PredicateNode "Successor")
 		(ListLink
 			(ConceptNode house1)
 			(ConceptNode house2)
@@ -118,8 +133,8 @@
 	)
 )
 
-(left-of "101 Main Street" "102 Main Street")
-(left-of "102 Main Street" "103 Main Street")
-(left-of "103 Main Street" "104 Main Street")
-(left-of "104 Main Street" "105 Main Street")
+(successor "101 Main Street" "102 Main Street")
+(successor "102 Main Street" "103 Main Street")
+(successor "103 Main Street" "104 Main Street")
+(successor "104 Main Street" "105 Main Street")
 
