@@ -12,6 +12,7 @@ def csv(csv_file_path):
     # the context and weight element are included for future.
 
     # You have to open it in utf8 encoding because the conceptnet CSV file uses utf8.
+    # Note that an English concept name can still contain unicode characters
     container = []
     import codecs
     with codecs.open(csv_file_path, 'r', encoding='utf-8') as stream:
@@ -24,7 +25,8 @@ def csv(csv_file_path):
                 # convert it to ascii (required for atomspace)
                 line = line.encode('ascii','xmlcharrefreplace')
                 temp = line.split('\t')
-                if temp[1:6] not in container:
+                if (temp[2].startswith('/c/en/') and
+                 temp[1:6] not in container):
                     container.append(temp[1:6])
     del container[0]
     return container   # container is a list of lists

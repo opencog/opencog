@@ -5,7 +5,7 @@ __author__ = 'Amen Belayneh'
 # script. Make sure you add '.scm' when inputting the name for the scheme
 # output file. The output file will be in the same folder as the script
 
-from opencog.atomspace import TruthValue, types, AtomSpace
+from opencog.atomspace import TruthValue, types, get_type, AtomSpace
 import reader
 import term
 
@@ -77,10 +77,11 @@ def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
     # Assertion is a list. 0.5 confidence is used(for links)because that is
     # the weight given to most of the assertions on ConceptNet
     TV = TruthValue(1, .5)
+
     cn_argument1=cn_assertion[1][6:]
-    cn_arg1_stv=set_TV(cn_assertion[1][6:])
     cn_argument2=cn_assertion[2][6:]
-    cn_arg2_stv=set_TV(cn_assertion[2][6:])
+    cn_arg1_stv=set_TV(cn_argument1)
+    cn_arg2_stv=set_TV(cn_argument2)
 
     cn1 = atomspace.add_node(types.ConceptNode, cn_argument1, tv=cn_arg1_stv)
     cn2 = atomspace.add_node(types.ConceptNode, cn_argument2, tv=cn_arg2_stv)
@@ -92,7 +93,7 @@ def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
     elif template_no == 2:
         cn_relation=cn_assertion[0][3:]
         cn_rel_stv=set_TV(cn_assertion[0][3:])
-        pn = atomspace.add_node(types.PredicateNode, relation, tv=rel_stv)
+        pn = atomspace.add_node(types.PredicateNode, cn_relation, tv=cn_rel_stv)
 
         listlink = atomspace.add_link(types.ListLink, [cn1, cn2])
         evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
@@ -112,7 +113,7 @@ def from_file(atomspace, cn_path, scm_name):
                 # this condition is to prevent repetition of EvaluationLink
                 temp = write_atoms(atomspace, an_assertion, 2)
             elif map(an_assertion[0], 1) != "EvaluationLink":
-                temp = write_atoms(an_assertion, 1, map(an_assertion[0], 1))
+                temp = write_atoms(atomspace, an_assertion, 1, map(an_assertion[0], 1))
             scm_file.write(temp + '\n' * 2)
 
 if __name__ == '__main__':
