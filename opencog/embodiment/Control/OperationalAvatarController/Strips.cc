@@ -52,16 +52,16 @@ const char* opencog::oac::STATE_TYPE_NAME[5] =
 };
 
 State::State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
-             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateOwnerList(_stateOwnerList),stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateOwnerList(_stateOwnerList),stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun), permanent(_permanent)
 {
     this->stateName = _stateName;
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
 }
 
 State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
-             bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun),permanent(_permanent)
 {
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
     stateOwnerList.clear();
