@@ -16,25 +16,18 @@
 )
 
 ;; Shorthand for the node types
+(define VN VariableNode)
+(define PN PredicateNode)
+(define CN ConceptNode)
+(define AN AvatarNode)
 
-;; Clause containing three variables
-(define (clause-vvv v1 v2 v3)
+;; Clause containing relating three things of three types
+(define (clause t1 v1 t2 v2 t3 v3)
 	(EvaluationLink
-		(VariableNode v1)
+		(t1 v1)
 		(ListLink
-			(VariableNode v2)
-			(VariableNode v3)
-		)
-	)
-)
-
-;; Clause containing one predicate and two variables
-(define (clause-pvv p1 v2 v3)
-	(EvaluationLink
-		(PredicateNode p1)
-		(ListLink
-			(VariableNode v2)
-			(VariableNode v3)
+			(t2 v2)
+			(t3 v3)
 		)
 	)
 )
@@ -54,18 +47,18 @@
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... 
 			(AndLink
-				(clause-vvv "$predicate" "$person_a" "$attribute")
-				(clause-vvv "$predicate" "$person_b" "$attribute")
+				(clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause VN "$predicate" VN "$person_b" VN "$attribute")
 				;; Avoid reporting things we already know.
 				;; Basically, if we already know that person A and B
 				;; are the same person, then lets not deduce it again.
 				;; This not link is identical to the conclusion below
 				(NotLink
-					(clause-pvv "IsSamePerson" "$person_a" "$person_b")
+					(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 				)
 			)
 			;; implicand -- then the following is true too
-			(clause-pvv "IsSamePerson" "$person_a" "$person_b")
+			(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 		)
 	)
 )
@@ -86,57 +79,26 @@
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-				(clause-vvv "$predicate" "$person_a" "$attribute")
-				(clause-pvv "IsSamePerson" "$person_a" "$person_b")
+				(clause VN "$predicate" VN "$person_a" VN "$attribute")
+				(clause PN "IsSamePerson" VN "$person_a" VN "$person_b")
 				;; Don't deduce thigs we already know...
 				;; i.e. this not link is identical to conclusion, below.
 				(NotLink
-					(clause-vvv "$predicate" "$person_b" "$attribute")
+					(clause VN "$predicate" VN "$person_b" VN "$attribute")
 				)
 			)
 			;; implicand -- then the following is true too
-			(clause-vvv "$predicate" "$person_b" "$attribute")
-		)
-	)
-)
-
-;; Clause containing one predicate, one variable, one constant
-(define (clause-pvc p1 v2 c3)
-	(EvaluationLink
-		(PredicateNode p1)
-		(ListLink
-			(VariableNode v2)
-			(ConceptNode c3)
-		)
-	)
-)
-
-;; Clause containing one predicate, one variable, one constant
-(define (clause-pvc p1 v2 c3)
-	(EvaluationLink
-		(PredicateNode p1)
-		(ListLink
-			(VariableNode v2)
-			(ConceptNode c3)
-		)
-	)
-)
-
-;; Clause containing one predicate, one variable, one constant
-(define (clause-pcv p1 c2 v3)
-	(EvaluationLink
-		(PredicateNode p1)
-		(ListLink
-			(ConceptNode c2)
-			(VariableNode v3)
+			(clause VN "$predicate" VN "$person_b" VN "$attribute")
 		)
 	)
 )
 
 
 ;; Houses at the end of the street can only have one neighbor, ever.
-;; This is a rather narrow rule, used in very narrow circumstances.
-(define (first-house-rule)
+;; This is a rather narrow rule, as it can only ever apply to the first
+;; address (first ordinal -- a boundary condition)
+;; There should be a symmetric rule for the last address too ...
+(define (first-addr-rule)
 	(BindLink
 		;; variable declarations
 		(ListLink
@@ -148,36 +110,18 @@
 			;; body -- if all parts of AndLink hold true ... 
 			(AndLink
 				;; if adress of personA is 1st house
-				(clause-pvc "Address" "$person_a" "101 Main Street")
+				(clause PN "Address" VN "$person_a" CN "101 Main Street")
 				;; and A is neighbor of B
-				(clause-pvv "Neighbor" "$person_a" "$person_b")
+				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 				;; and the next house is one over
-				(EvaluationLink
-					(PredicateNode "Successor")
-					(ListLink
-						(ConceptNode "101 Main Street")
-						(VariableNode "$addr_b")
-					)
-				)
+				(clause PN "Successor" CN "101 Main Street" VN "$addr_b")
 				;; and we don't already know the conclusion
 				(NotLink
-					(EvaluationLink
-						(PredicateNode "Address")
-						(ListLink
-							(VariableNode "$person_b")
-							(VariableNode "$addr_b")
-						)
-					)
+					(clause PN "Address" VN "$person_b" VN "$addr_b")
 				)
 			)
 			;; implicand -- then the B lives one house over.
-			(EvaluationLink
-				(PredicateNode "Address")
-				(ListLink
-					(VariableNode "$person_b")
-					(VariableNode "$addr_b")
-				)
-			)
+			(clause PN "Address" VN "$person_b" VN "$addr_b")
 		)
 	)
 )
@@ -199,36 +143,12 @@
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-				(EvaluationLink
-					(PredicateNode "Address")
-					(ListLink
-						(VariableNode "$person_a")
-						(VariableNode "$house_a")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "Address")
-					(ListLink
-						(VariableNode "$person_b")
-						(VariableNode "$house_b")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "Successor")
-					(ListLink
-						(VariableNode "$house_a")
-						(VariableNode "$house_b")
-					)
-				)
+				(clause PN "Address" VN "$person_a" VN "$house_a")
+				(clause PN "Address" VN "$person_b" VN "$house_b")
+				(clause PN "Successor" VN "$house_a" VN "$house_b")
 			)
 			;; implicand -- then the following is true too
-			(EvaluationLink
-				(PredicateNode "Neighbor")
-				(ListLink
-					(VariableNode "$person_a")
-					(VariableNode "$person_b")
-				)
-			)
+			(clause PN "Neighbor" VN "$person_a" VN "$person_b")
 		)
 	)
 )
