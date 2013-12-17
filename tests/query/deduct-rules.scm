@@ -6,6 +6,13 @@
 
 (define (stv mean conf) (cog-new-stv mean conf))
 
+(define (decl-var type var)
+	(TypedVariableLink
+		(VariableNode var)
+		(VariableTypeNode type)
+	)
+)
+
 ;; "Is the same person" deduction rule.
 ;; If person A and person B both share the same predicate and property,
 ;; then they must be the same person.
@@ -13,22 +20,10 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(TypedVariableLink
-				(VariableNode "$predicate")
-				(VariableTypeNode "PredicateNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$person_a")
-				(VariableTypeNode "AvatarNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$person_b")
-				(VariableTypeNode "AvatarNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$property")
-				(VariableTypeNode "ConceptNode")
-			)
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "AvatarNode" "$person_a")
+			(decl-var "AvatarNode" "$person_b")
+			(decl-var "ConceptNode" "$property")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
@@ -80,22 +75,10 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(TypedVariableLink
-				(VariableNode "$predicate")
-				(VariableTypeNode "PredicateNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$person_a")
-				(VariableTypeNode "AvatarNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$person_b")
-				(VariableTypeNode "AvatarNode")
-			)
-			(TypedVariableLink
-				(VariableNode "$property")
-				(VariableTypeNode "ConceptNode")
-			)
+			(decl-var "PredicateNode" "$predicate")
+			(decl-var "AvatarNode" "$person_a")
+			(decl-var "AvatarNode" "$person_b")
+			(decl-var "ConceptNode" "$property")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
