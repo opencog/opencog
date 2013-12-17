@@ -112,3 +112,54 @@
 
 
 
+;; neighbor deduction rule.
+;; If Address X is left of address Y, then person who lives in X is
+;; a neighbor of person who lives in Y
+(define (neighbor-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "AvatarNode" "$person_a")
+			(decl-var "AvatarNode" "$person_b")
+			(decl-var "ConceptNode" "$house_a")
+			(decl-var "ConceptNode" "$house_b")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(EvaluationLink
+					(PredicateNode "Address")
+					(ListLink
+						(VariableNode "$person_a")
+						(VariableNode "$house_a")
+					)
+				)
+				(EvaluationLink
+					(PredicateNode "Address")
+					(ListLink
+						(VariableNode "$person_b")
+						(VariableNode "$house_b")
+					)
+				)
+				(EvaluationLink
+					(PredicateNode "LeftOf")
+					(ListLink
+						(VariableNode "$house_a")
+						(VariableNode "$house_b")
+					)
+				)
+			)
+			;; implicand -- then the following is true too
+			(EvaluationLink
+				(PredicateNode "Neighbor")
+				(ListLink
+					(VariableNode "$person_a")
+					(VariableNode "$person_b")
+				)
+			)
+		)
+	)
+)
+
+
+
