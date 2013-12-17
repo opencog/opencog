@@ -538,7 +538,7 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 
 // basically, we only care about the satisfied degree of the numberic state
-bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree,  State* original_state)
+bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree, bool &isUnknownValue, State* original_state)
 {
     // if this goal doesn't really require an exact value, just return fully achieved
     if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
@@ -573,6 +573,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
         if (inqueryValue == UNDEFINED_VALUE)
         {
             // there is not information in Atomspace about this state. We don't know the state, so just return false
+            isUnknownValue = true;
             satisfiedDegree = 0.0f;
             return false;
         }
@@ -587,6 +588,7 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
         if (value == UNDEFINED_VALUE)
         {
             // there is not information in Atomspace about this state. We don't know the state, so just return false
+            isUnknownValue = true;
             satisfiedDegree = 0.0f;
             return false;
         }
@@ -692,6 +694,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         bool found;
         StateNode* knownStateNode;
+        bool isUnknownValue;
 
         if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode, 0,false))
         {
@@ -703,7 +706,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             unsatisfiedStateNodes.push_back(newStateNode);
         }
-        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
+        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree, isUnknownValue))
         {
             satisfiedGoalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
@@ -1356,9 +1359,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             }
             else
             {
+                bool isUnknownValue;
                 // cannot find this state in the temporaryStateNodes list, need to check it in real time
                 // check real time
-                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
                 {
                     isSat = false;
                 }
@@ -1650,6 +1654,13 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 ++ satisfiedPreconNum;
                 satisfied = true;
             }
+            else if (groundPs->permanent)
+            {
+                // this goal has been found in TempStates but not satisfied, and this goal is permanent (change not be changed), which means this goal will never be satified
+                delete groundPs;
+                preconImpossible = true;
+                return -999;
+            }
 
         }
         else
@@ -1657,7 +1668,8 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
             // cannot find this state in the temporaryStateNodes list, need to check it in real time
             // check real time
             float satisfiedDegree;
-            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+            bool isUnknownValue;
+            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
             {
                 ++ satisfiedPreconNum;
                 satisfied = true;
@@ -1723,7 +1735,8 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
                     continue;
 
-                if (groundPs->isSameState( *(tempStateNode->state) ))
+                // a little hack here, only check willCauseCirleNetWork for the States that is not permanent
+                if ((! groundPs->permanent)  && (groundPs->isSameState( *(tempStateNode->state) )))
                 {
                     if (groundPs->stateVariable->getValue() == tempStateNode->state->stateVariable->getValue())
                     {
@@ -1833,7 +1846,10 @@ int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardSt
         float sd;
 
         // check if this state has been negative
-        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd))
+
+        bool permanent;
+
+        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd, permanent))
             negativeNum ++;
 
     }
@@ -1925,7 +1941,14 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
                 float satDegree;
                 if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
                 {
-                    negateveStateNum ++;
+                    if (effState->permanent)
+                    {
+                        negativeGoal = true;
+                        delete effState;
+                        return 1000;
+                    }
+                    else
+                        negateveStateNum ++;
                 }
                 else
                     continue;
@@ -1967,7 +1990,14 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
                 float satDegree;
                 if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
                 {
-                    negateveStateNum ++;
+                    if (effState->permanent)
+                    {
+                        negativeGoal = true;
+                        delete effState;
+                        return 1000;
+                    }
+                    else
+                        negateveStateNum ++;
                 }
                 else
                     continue;
@@ -2027,7 +2057,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
     // check how many preconditions will be satisfied
 
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, contradictoryOtherGoal, hasDirectHelpRule);
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
 
     delete tmpRuleNode;
 
@@ -2498,7 +2528,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
-                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun);
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun,cost_state->permanent);
                 vector<ParamValue>::iterator ownerIt;
                 for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
                 {
@@ -2694,7 +2724,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, contradictoryOtherGoal, hasDirectHelpRule);
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
 
     // ruleNode resetbinding
     ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
@@ -3614,12 +3644,12 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1: var_man_x is people
     vector<ParamValue> peopleStateOwnerList1;
     peopleStateOwnerList1.push_back(var_man_x);
-    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1, true);
+    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0, true);
 
     // precondition 3: var_man_x keeps fish
     vector<ParamValue> keepFishStateOwnerList1;
     keepFishStateOwnerList1.push_back(var_man_x);
-    State* keepFishState1 = new State("keep",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, true);
+    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
 
     // effect1: var_man_x drinks water
     vector<ParamValue> drinkWaterStateOwnerList1;
@@ -3638,10 +3668,37 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(fishKeeperDrinkWaterRule);
     //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
 
+    //----------------------------Begin Rule: The person who drinks water keeps fish------------------------------------------------------
+    // define variables:
+    ParamValue var_pet = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 3: var_man_x  drinks water
+    vector<ParamValue> drinkWaterStateOwnerList2;
+    drinkWaterStateOwnerList2.push_back(var_man_x);
+    State* drinkWaterState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"water", drinkWaterStateOwnerList2, true, 0, true);
+
+    // effect1: var_man_x keeps fish
+    vector<ParamValue> keepFishStateOwnerList2;
+    keepFishStateOwnerList2.push_back(var_man_x);
+    State* keepFishState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepFishStateOwnerList2, false,0,true);
+    Effect* keepFishStateEffect2 = new Effect(keepFishState2, OP_ASSIGN, "fish",true);
+
+    // add rule:
+    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    waterDrinkerKeepsFishRule->ruleName = "waterDrinkerKeepsFishRule";
+    waterDrinkerKeepsFishRule->addPrecondition(peopleState1);
+    waterDrinkerKeepsFishRule->addPrecondition(drinkWaterState2);
+
+    waterDrinkerKeepsFishRule->addEffect(EffectPair(1.0f,keepFishStateEffect2));
+
+    this->AllRules.push_back(waterDrinkerKeepsFishRule);
+    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+
     //----------------------------Begin Rule: The person who drinks tea doesn't keep dogs------------------------------------------------------
     // define variables:
-    ParamValue var_pet= str_var[0];
-
     // precondition 1: var_man_x is people
 
     // precondition 2: var_man_x drinks tea
@@ -3652,7 +3709,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // effect1: var_man_x drinks water
     vector<ParamValue> notkeepDogsStateOwnerList1;
     notkeepDogsStateOwnerList1.push_back(var_man_x);
-    State* notkeepDogsState1 = new State("keep",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, notkeepDogsStateOwnerList1, true);
+    State* notkeepDogsState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, notkeepDogsStateOwnerList1, true);
     Effect* notkeepDogsStateEffect1 = new Effect(notkeepDogsState1, OP_ASSIGN_NOT_EQUAL_TO, "dogs",true);
 
     // add rule:
@@ -3674,7 +3731,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1: var_fish_keeper is people
     vector<ParamValue> peopleStateOwnerList;
     peopleStateOwnerList.push_back(var_fish_keeper);
-    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList, true);
+    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0, true);
 
     // precondition 2: var_fish_keeper keeps fish
     vector<ParamValue> keepFishStateOwnerList;
@@ -3719,15 +3776,15 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1 -5 : man_1-5 are people
     vector<ParamValue> ispeopleStateOwnerList1;
     ispeopleStateOwnerList1.push_back(man_1);
-    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1, true);
+    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0, true);
 
     vector<ParamValue> ispeopleStateOwnerList2;
     ispeopleStateOwnerList2.push_back(man_2);
-    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, true);
+    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0,true);
 
     vector<ParamValue> ispeopleStateOwnerList3;
     ispeopleStateOwnerList3.push_back(man_3);
-    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3, true);
+    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0, true);
 
 
     // additional preconditions: man_2, man_3, man_4, man_5 are not the same to man_1
@@ -3745,7 +3802,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 0: pet_x is pet
     vector<ParamValue> isPetStateOwnerList1;
     isPetStateOwnerList1.push_back(pet_x);
-    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, true);
+    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0,true);
 
     // precondition 1 -5 : man_1-5 are people
 
@@ -3791,7 +3848,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 0: drink_x is drink
     vector<ParamValue> isDrinkStateOwnerList1;
     isDrinkStateOwnerList1.push_back(drink_x);
-    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1, true);
+    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0, true);
 
     // precondition 1 -5 : man_1-5 are people
 
@@ -3839,7 +3896,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     vector<ParamValue> isPetyStateOwnerList1;
     isPetyStateOwnerList1.push_back(pet_y);
-    State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1, true);
+    State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1, false, 0, true);
 
     // precondition 1: man_1 keepsl pet_x
     vector<ParamValue> keepXStateOwnerList2;
@@ -3878,7 +3935,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     vector<ParamValue> isDrinkStateOwnerList2;
     isDrinkStateOwnerList2.push_back(drink_y);
-    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2, true);
+    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0, true);
 
     // precondition 2: man_1 drinks drink_x
     vector<ParamValue> drinkXStateOwnerList1;
@@ -3991,7 +4048,7 @@ void OCPlanner::loadFacts(vector<State*> &knownStates)
 
     vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
     BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntKeepDogsState = new State("keep",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, true, 0, true);
+    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, true, 0, true);
     knownStates.push_back(BritishDoesntKeepDogsState);
 
 }

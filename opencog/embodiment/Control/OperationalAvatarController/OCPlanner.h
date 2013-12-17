@@ -389,7 +389,7 @@ protected:
      // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
+     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, State *original_state = 0);
 
      // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
