@@ -378,6 +378,8 @@ protected:
      // for test, load facts from c++ codes
      void loadFacts(vector<State*> &knownStates);
 
+     void cleanUpContextBeforeRollBackToPreviousStep();
+
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
 //     vector<State*> globalStatesCache;

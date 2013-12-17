@@ -1098,7 +1098,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
-        groundARuleNodeBySelectingNonNumericValues(ruleNode);
+        if (! groundARuleNodeBySelectingNonNumericValues(ruleNode))
+        {
+            // fail to ground all non numeric variables, roll back to previous step
+            cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
+            cleanUpContextBeforeRollBackToPreviousStep();
+            continue;
+
+        }
 
         if (ruleNode->ParamCandidates.size() > 0)
         {
@@ -1124,8 +1131,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
         if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
         {
-            cout << "SelectValueForGroundingNumericState failded!"<< std::endl;
-            // todo
+            cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
+            cleanUpContextBeforeRollBackToPreviousStep();
+            continue;
         }
 
         // out put all the bindings:
@@ -1564,6 +1572,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // todo: remove all the imaginary atoms in imaginaryHandles
 
     return planID;
+}
+
+void OCPlanner::cleanUpContextBeforeRollBackToPreviousStep()
+{
+    allRuleNodeInThisPlan.erase(allRuleNodeInThisPlan.begin());
+    delete(curStateNode->backwardRuleNode);
+    curStateNode->backwardRuleNode = 0;
 }
 
 int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
@@ -2779,6 +2794,12 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
         }
     }
 
+    if (number_easy_state == 0)
+    {
+        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no non numeric variable in this rule. Doesn't need to be grounded!"<<std::endl;
+        return true;
+    }
+
     // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
 
     // find all the canditates meet as many as possible preconditions, and put all the candidates in ParamCandidates
@@ -2790,9 +2811,18 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     // ToBeImproved: in fact we don't need to generate all the possible groups of candidates at this moment,
     //               we can just allow it generateNextCandidates every time one group failed in a planning step
     // we generate the candidates by trying full combination calculation
+
+    // record the varaible number
+    unsigned int var_total_num;
+    bool firstCombination = true;
+    bool cannotGroundAllVaraibles = false;
+
     for (int n_gram = n_max; n_gram >= 1; -- n_gram)
     {
         // Use the binary method to generate all combinations:
+
+        if (cannotGroundAllVaraibles)
+            break;
 
         // generate the first combination
         for (int i = 0; i < n_gram; ++ i)
@@ -2817,6 +2847,25 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             }
             vector<string> varNames;
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
+
+            if (firstCombination)
+            {
+                var_total_num = varNames.size();
+                firstCombination = false;
+            }
+
+            // means that this group of results can't ground it all the ungrounded variables
+            if ( varNames.size() < var_total_num)
+            {
+                cannotGroundAllVaraibles = true;
+                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+                    break;
+
+                generateNextCombinationGroup(indexes, n_max);
+
+                continue;
+            }
+
             int candidateGroupNum = 1;
 
             if (candidateListHandles.size() != 0)
@@ -2844,8 +2893,6 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 //                    cout << "Fitness score = " << fitnessScore ;
 //                    if (impossile)
 //                        cout << " , impossible bindings, would not be put into candidate list. " ;
-
-
 
                     if (! impossile)
                     {
@@ -2886,14 +2933,20 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
     delete indexes;
 
-    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() found candidate group number totally: "<<ruleNode->ParamCandidates.size()<<std::endl;
+    if (ruleNode->ParamCandidates.size() == 0)
+    {
+        return false;
+    }
+    else
+    {
+        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() found candidate group number totally: "<<ruleNode->ParamCandidates.size()<<std::endl;
 
+        // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
+        // we won't ground the numeric states here, because it's too time-consuming,
+        // we won't give all the possible combinations of numeric values and non-numeric values for candidates
 
-    // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
-    // we won't ground the numeric states here, because it's too time-consuming,
-    // we won't give all the possible combinations of numeric values and non-numeric values for candidates
-
-    return true;
+        return true;
+    }
 }
 
 // this should be called only after the currentAllBindings has been chosen
@@ -3697,7 +3750,7 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
 
 
-    //----------------------------Begin Rule: The person who drinks tea doesn't keep dogs------------------------------------------------------
+    //----------------------------Begin Rule: The person who drinks tea keeps cats------------------------------------------------------
     // define variables:
     // precondition 1: var_man_x is people
 
@@ -3706,22 +3759,48 @@ void OCPlanner::loadTestRulesFromCodes()
     drinkTeaStateOwnerList1.push_back(var_man_x);
     State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, true, 0, true);
 
-    // effect1: var_man_x drinks water
-    vector<ParamValue> notkeepDogsStateOwnerList1;
-    notkeepDogsStateOwnerList1.push_back(var_man_x);
-    State* notkeepDogsState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, notkeepDogsStateOwnerList1, true);
-    Effect* notkeepDogsStateEffect1 = new Effect(notkeepDogsState1, OP_ASSIGN_NOT_EQUAL_TO, "dogs",true);
+    // effect1: var_man_x keeps cats
+    vector<ParamValue> keepCatsStateOwnerList1;
+    keepCatsStateOwnerList1.push_back(var_man_x);
+    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, true);
+    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
 
     // add rule:
-    Rule* teaDrinkerNotKeepDogsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    teaDrinkerNotKeepDogsRule->ruleName = "teaDrinkerNotKeepDogsRule";
-    teaDrinkerNotKeepDogsRule->addPrecondition(peopleState1);
-    teaDrinkerNotKeepDogsRule->addPrecondition(drinkTeaState1);
+    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
+    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
+    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
 
-    teaDrinkerNotKeepDogsRule->addEffect(EffectPair(1.0f,notkeepDogsStateEffect1));
+    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
 
-    this->AllRules.push_back(teaDrinkerNotKeepDogsRule);
+    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
     //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+    //----------------------------Begin Rule: The person who keeps cats drinks tea -----------------------------------------------------
+    // define variables:
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x keeps cats
+    vector<ParamValue> keepCatsStateOwnerList2;
+    keepCatsStateOwnerList2.push_back(var_man_x);
+    State* keepCatsStateState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList2, true);
+
+    // effect1: var_man_x drinks tea
+    vector<ParamValue> drinkTeaStateOwnerList2;
+    drinkTeaStateOwnerList2.push_back(var_man_x);
+    State* drinkTeaState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkTeaStateOwnerList2, true, 0, true);
+    Effect* drinkTeaEffect2 = new Effect(drinkTeaState2, OP_ASSIGN, "tea",true);
+
+    // add rule:
+    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    catsKeeperDrinksTeaRule->ruleName = "catsKeeperDrinksTeaRule";
+    catsKeeperDrinksTeaRule->addPrecondition(peopleState1);
+    catsKeeperDrinksTeaRule->addPrecondition(keepCatsStateState2);
+
+    catsKeeperDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect2));
+
+    this->AllRules.push_back(catsKeeperDrinksTeaRule);
+    //----------------------------End Rule: The person who keeps cats drinks tea-------------------------------------------------
 
     //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
     // define variables:
@@ -3770,8 +3849,10 @@ void OCPlanner::loadTestRulesFromCodes()
     ParamValue man_1 = entity_var[0];
     ParamValue man_2 = entity_var[1];
     ParamValue man_3 = entity_var[2];
-    ParamValue man_1_pet = str_var[0];
-    ParamValue pet_x = str_var[1];
+    ParamValue man_1_pet = str_var[3];
+    ParamValue pet_x = str_var[4];
+    ParamValue pet_y = str_var[5];
+    ParamValue pet_z = str_var[6];
 
     // precondition 1 -5 : man_1-5 are people
     vector<ParamValue> ispeopleStateOwnerList1;
@@ -3787,7 +3868,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0, true);
 
 
-    // additional preconditions: man_2, man_3, man_4, man_5 are not the same to man_1
+    // additional preconditions: man_2, man_3,  are not the same to man_1
     vector<ParamValue> isNotSameOwnerList1;
     isNotSameOwnerList1.push_back(man_1);
     isNotSameOwnerList1.push_back(man_2);
@@ -3799,21 +3880,40 @@ void OCPlanner::loadTestRulesFromCodes()
     State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame, true);
 
 
-    // precondition 0: pet_x is pet
+    // precondition 0: pet_x y z are pets
     vector<ParamValue> isPetStateOwnerList1;
     isPetStateOwnerList1.push_back(pet_x);
     State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0,true);
 
-    // precondition 1 -5 : man_1-5 are people
+    vector<ParamValue> isPetStateOwnerList2;
+    isPetStateOwnerList2.push_back(pet_y);
+    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0,true);
+
+    vector<ParamValue> isPetStateOwnerList3;
+    isPetStateOwnerList3.push_back(pet_z);
+    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0,true);
+
+    // precondition 1 -5 : man_1-3 are people
+
+    // precondition: pet_y z are different from pet_x
+    vector<ParamValue> isNotSamePetOwnerList1;
+    isNotSamePetOwnerList1.push_back(pet_x);
+    isNotSamePetOwnerList1.push_back(pet_y);
+    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    vector<ParamValue> isNotSamePetOwnerList2;
+    isNotSamePetOwnerList2.push_back(pet_x);
+    isNotSamePetOwnerList2.push_back(pet_y);
+    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame, true);
 
     // precondition 6-9 : other people do not keep pet_x
     vector<ParamValue> notkeepXStateOwnerList1;
     notkeepXStateOwnerList1.push_back(man_2);
-    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList1, true,0, true);
+    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, notkeepXStateOwnerList1, true,0, true);
 
     vector<ParamValue> notkeepXStateOwnerList2;
     notkeepXStateOwnerList2.push_back(man_3);
-    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,pet_x, notkeepXStateOwnerList2, true,0, true);
+    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_z, notkeepXStateOwnerList2, true,0, true);
 
     // effect1: man_1 keeps pet_x
     vector<ParamValue> keepXStateOwnerList;
@@ -3825,12 +3925,18 @@ void OCPlanner::loadTestRulesFromCodes()
     Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
     notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
     notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState3);
+
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
     notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
 
     notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
     notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet2);
 
     notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
     notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
@@ -3844,22 +3950,44 @@ void OCPlanner::loadTestRulesFromCodes()
     // define variables:
     ParamValue drink_man_1 = str_var[0];
     ParamValue drink_x = str_var[1];
+    ParamValue drink_y = str_var[2];
+    ParamValue drink_z = str_var[3];
 
-    // precondition 0: drink_x is drink
+    // precondition 0: drink_x y z are drink
     vector<ParamValue> isDrinkStateOwnerList1;
     isDrinkStateOwnerList1.push_back(drink_x);
     State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0, true);
 
-    // precondition 1 -5 : man_1-5 are people
+    vector<ParamValue> isDrinkStateOwnerList2;
+    isDrinkStateOwnerList2.push_back(drink_y);
+    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0, true);
+
+    vector<ParamValue> isDrinkStateOwnerList3;
+    isDrinkStateOwnerList3.push_back(drink_z);
+    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0, true);
+
+    // precondition 1 -5 : man_1-3 are people and different
+
+    //  precondition:  drink_y and  drink_z are different
+    vector<ParamValue> isNotSameDrinkOwnerList1;
+    isNotSameDrinkOwnerList1.push_back(drink_x);
+    isNotSameDrinkOwnerList1.push_back(drink_y);
+    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    //  precondition:  drink_y and  drink_z are different
+    vector<ParamValue> isNotSameDrinkOwnerList2;
+    isNotSameDrinkOwnerList2.push_back(drink_x);
+    isNotSameDrinkOwnerList2.push_back(drink_z);
+    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame, true);
 
     // precondition 6-9 : other people do not drink drink_x
     vector<ParamValue> notdrinkXStateOwnerList1;
     notdrinkXStateOwnerList1.push_back(man_2);
-    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList1, true, 0, true);
+    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_y, notdrinkXStateOwnerList1, true, 0, true);
 
     vector<ParamValue> notdrinkXStateOwnerList2;
     notdrinkXStateOwnerList2.push_back(man_3);
-    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,drink_x, notdrinkXStateOwnerList2, true, 0, true);
+    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_z, notdrinkXStateOwnerList2, true, 0, true);
 
     // effect1: man_1 drinks drink_x
     vector<ParamValue> drinkXStateOwnerList;
@@ -3872,12 +4000,18 @@ void OCPlanner::loadTestRulesFromCodes()
     Rule* notDrinkOtherPeoplesDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
     notDrinkOtherPeoplesDrinkRule->ruleName = "notDrinkOtherPeoplesDrinkRule";
     notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState3);
+
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState1);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState2);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
 
     notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState1);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState2);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState2);
 
     notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
     notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
@@ -3890,13 +4024,8 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------Begin Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
     // define variables:
-    ParamValue pet_y = str_var[2];
 
     // precondition 0: pet_x pet_y is pet
-
-    vector<ParamValue> isPetyStateOwnerList1;
-    isPetyStateOwnerList1.push_back(pet_y);
-    State* isPetyState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetyStateOwnerList1, false, 0, true);
 
     // precondition 1: man_1 keepsl pet_x
     vector<ParamValue> keepXStateOwnerList2;
@@ -3917,7 +4046,7 @@ void OCPlanner::loadTestRulesFromCodes()
     ifKeepsPetXThenNotKeepYRule->ruleName = "ifKeepsPetXThenNotKeepYRule";
     ifKeepsPetXThenNotKeepYRule->addPrecondition(ispeopleState1);
     ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState1);
-    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetyState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState2);
     ifKeepsPetXThenNotKeepYRule->addPrecondition(keepXState2);
     ifKeepsPetXThenNotKeepYRule->addPrecondition(petXYisNotSameState1);
 
@@ -3927,15 +4056,10 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
 
     //----------------------------Begin Rule:  if man_1 drinks drink_x, and drink_x is not the same to drink_y, then man_1 doesn't drink drink_y----
-    ParamValue drink_y = str_var[2];
 
     // precondition 0: peopleState1
 
     // precondition 1: drink_x drink_y are drink
-
-    vector<ParamValue> isDrinkStateOwnerList2;
-    isDrinkStateOwnerList2.push_back(drink_y);
-    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0, true);
 
     // precondition 2: man_1 drinks drink_x
     vector<ParamValue> drinkXStateOwnerList1;
@@ -3988,7 +4112,7 @@ void OCPlanner::loadTestRulesFromCodes()
     ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState1);
     ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState2);
     ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState1);
-    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetyState1);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState2);
     ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(keepXState2);
     ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(man12isNotSameSameState1);
 
@@ -3996,6 +4120,46 @@ void OCPlanner::loadTestRulesFromCodes()
 
     this->AllRules.push_back(ifMan1KeepsPetXThenMan2NotKeepXRule);
     //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+
+//    //----------------------------Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
+//    // define variables:
+//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
+//    // precondition 1: man_1 keepsl pet_x
+
+//    // effect 1: man_1 drinks drink_x
+
+//    // add rule:
+//    Rule* aManKeepSomePetAlsoDrinkSomeDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->ruleName = "aManKeepSomePetAlsoDrinkSomeDrinkRule";
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(ispeopleState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isPetState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isDrinkState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(keepXState2);
+
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
+
+//    this->AllRules.push_back(aManKeepSomePetAlsoDrinkSomeDrinkRule);
+//    //----------------------------End Rule: Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
+
+//    //----------------------------Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
+//    // define variables:
+//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
+//    // precondition 1: man_1 keepsl pet_x
+
+//    // effect 1: man_1 drinks drink_x
+
+//    // add rule:
+//    Rule* aManDrinkSomeDrinkAlsoKeepSomePetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->ruleName = "aManDrinkSomeDrinkAlsoKeepSomePetRule";
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(ispeopleState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isPetState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isDrinkState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(drinkXState1);
+
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+//    this->AllRules.push_back(aManDrinkSomeDrinkAlsoKeepSomePetRule);
+//    //----------------------------End Rule: Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
 
 
 
