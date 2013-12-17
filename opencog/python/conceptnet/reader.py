@@ -18,6 +18,8 @@ def csv(csv_file_path):
             if line == '':
                 break
             else:
+                # The file is in utf8 but you can just delete the special Unicode characters
+                line.decode('ascii', 'ignore')
                 temp = line.split('\t')
                 if temp[1:6] not in container:
                     container.append(temp[1:6])
