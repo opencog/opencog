@@ -40,6 +40,7 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
+	ADD_CXXTEST(EinsteinUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil
