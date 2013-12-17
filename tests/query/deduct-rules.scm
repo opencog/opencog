@@ -157,5 +157,29 @@
 	)
 )
 
+;; neighbor relation is symmetric
+;; If A is a neighbor of B then B is a neighbor of A
+(define (neighbor-symmetry-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "AvatarNode" "$person_a")
+			(decl-var "AvatarNode" "$person_b")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+				; Not interested in what we already know.
+				(NotLink
+					(clause PN "Neighbor" VN "$person_b" VN "$person_a")
+				)
+			)
+			;; implicand -- then the following is true too
+			(clause PN "Neighbor" VN "$person_b" VN "$person_a")
+		)
+	)
+)
+
 
 
