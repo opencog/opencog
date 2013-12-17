@@ -8,14 +8,6 @@
 
 ;; The Englishman lives in the red house.
 (EvaluationLink (stv 1 1)
-	(PredicateNode "Nationality")
-	(ListLink
-		(AvatarNode "person1")
-		(ConceptNode "British")
-	)
-)
-
-(EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
 		(AvatarNode "person1")
@@ -32,23 +24,12 @@
 	)
 )
 
-(EvaluationLink (stv 1 1)
-	(PredicateNode "KeepsPet")
-	(ListLink
-		(AvatarNode "person2")
-		(ConceptNode "fish")
-	)
-)
-
-
 
 ;;
 ;; deduct-rules.scm
 ;;
 ;; Deduction rules for Einstein puzzle
 ;;
-
-(define (stv mean conf) (cog-new-stv mean conf))
 
 ;; "Is the same person" deduction rule.
 ;; If person A and person B both share the same predicate and property,
@@ -171,36 +152,6 @@
 	;)
 ;)
 
- (EvaluationLink (stv 1 0.99999976)
-      (PredicateNode "IsSamePerson") ;; Handle=34
-      (ListLink
-         (AvatarNode "person2") ;; Handle=11
-         (AvatarNode "person2") ;; Handle=11
-      )
-   )
-   (EvaluationLink (stv 1 0.99999976)
-      (PredicateNode "IsSamePerson") ;; Handle=34
-      (ListLink
-         (AvatarNode "person2") ;; Handle=11
-         (AvatarNode "person1") ;; Handle=3
-      )
-   )
-   (EvaluationLink (stv 1 0.99999976)
-      (PredicateNode "IsSamePerson") ;; Handle=34
-      (ListLink
-         (AvatarNode "person1") ;; Handle=3
-         (AvatarNode "person1") ;; Handle=3
-      )
-   )
-   (EvaluationLink (stv 1 0.99999976)
-      (PredicateNode "IsSamePerson") ;; Handle=34
-      (ListLink
-         (AvatarNode "person1") ;; Handle=3
-         (AvatarNode "person2") ;; Handle=11
-      )
-   )
-
-
 
 (define (wtf-rule)
 	(BindLink
@@ -218,21 +169,10 @@
 				(VariableNode "$person_b")
 				(VariableTypeNode "AvatarNode")
 			)
-;			(TypedVariableLink
-;				(VariableNode "$property")
-;				(VariableTypeNode "ConceptNode")
-;			)
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-;				(EvaluationLink
-;					(VariableNode "$predicate")
-;					(ListLink
-;						(VariableNode "$person_a")
-;						(VariableNode "$property")
-;					)
-;				)
 				(EvaluationLink
 					(PredicateNode "IsSamePerson")
 					(ListLink
@@ -266,58 +206,5 @@
    (prt-type 'NotLink)                          
  )
 
-
-
-;;
-;; deduct-keep.scm
-;;
-;; Print out who keeps what
-
-(define (print-ownership)
-	(BindLink
-		;; variable declarations
-		(ListLink
-			(TypedVariableLink
-				(VariableNode "$person")
-				(VariableTypeNode "AvatarNode")
-			)
-			(VariableNode "$nationality")
-			(VariableNode "$house")
-			(VariableNode "$pet")
-		)
-		(ImplicationLink
-			;; body -- if all parts of AndLink hold true ... then
-			(AndLink
-				(EvaluationLink
-					(PredicateNode "Nationality")
-					(ListLink
-						(VariableNode "$person")
-						(VariableNode "$nationality")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "LivesIn")
-					(ListLink
-						(VariableNode "$person")
-						(VariableNode "$house")
-					)
-				)
-				(EvaluationLink
-					(PredicateNode "KeepsPet")
-					(ListLink
-						(VariableNode "$person")
-						(VariableNode "$pet")
-					)
-				)
-			)
-			(OrderedLink
-				(VariableNode "$person")
-				(VariableNode "$nationality")
-				(VariableNode "$house")
-				(VariableNode "$pet")
-			)
-		)
-	)
-)
 
 
