@@ -137,15 +137,19 @@
 		(ListLink
 			(decl-var "AvatarNode" "$person_a")
 			(decl-var "AvatarNode" "$person_b")
-			(decl-var "ConceptNode" "$house_a")
-			(decl-var "ConceptNode" "$house_b")
+			(decl-var "ConceptNode" "$addr_a")
+			(decl-var "ConceptNode" "$addr_b")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
 			(AndLink
-				(clause PN "Address" VN "$person_a" VN "$house_a")
-				(clause PN "Address" VN "$person_b" VN "$house_b")
-				(clause PN "Successor" VN "$house_a" VN "$house_b")
+				(clause PN "Address" VN "$person_a" VN "$addr_a")
+				(clause PN "Address" VN "$person_b" VN "$addr_b")
+				(clause PN "Successor" VN "$addr_a" VN "$addr_b")
+				; Not interested in what we already know.
+				(NotLink
+					(clause PN "Neighbor" VN "$person_a" VN "$person_b")
+				)
 			)
 			;; implicand -- then the following is true too
 			(clause PN "Neighbor" VN "$person_a" VN "$person_b")

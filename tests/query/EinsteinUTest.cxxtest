@@ -225,16 +225,16 @@ void EinsteinPuzzle::test_full(void)
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
 
 	// Next, make a deducation about the house on the end.
-	// This combines facts 9+14: blue house has address 102
+	// This combines facts 9+14: blue house has address 102. This is just a single result.
 	Handle faddr = pm.crisp_logic_bindlink(faddr_rule);
 	logger().debug("After first-address-rule %s\n", SchemeSmob::to_string(faddr).c_str());
 	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(faddr));
 
-// XXX Not used atm.
-	// Deduce neighbors
+	// Deduce other neighbors
+	// The above made a deduction about address 102, and fact 8 has address 103 in it.
 	Handle neigh = pm.crisp_logic_bindlink(neigh_rule);
 	logger().debug("After neighbor-rule %s\n", SchemeSmob::to_string(neigh).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(neigh));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(neigh));
 
 	// Result should be a ListLink w/ two solutions
 	// Why two? Because person 1 and 2 are the same person, so both solutions get listed.
