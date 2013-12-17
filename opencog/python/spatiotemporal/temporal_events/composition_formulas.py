@@ -223,7 +223,7 @@ def learn_lasso():
     ax.set_zlabel('A{p}C')
     # http://matplotlib.org/examples/color/colormaps_reference.html
     # rstride=1, cstride=1,
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.gist_stern_r, linewidth=0, antialiased=True)
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.gist_stern_r, linewidth=0, antialiased=False)
 
     # http://stackoverflow.com/questions/11777381/invert-an-axis-in-a-matplotlib-grafic
     ax = plt.gca()
