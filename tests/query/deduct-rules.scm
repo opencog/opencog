@@ -96,7 +96,8 @@
 
 ;; Houses at the end of the street can only have one neighbor, ever.
 ;; This is a rather narrow rule, as it can only ever apply to the first
-;; address (first ordinal -- a boundary condition)
+;; address (first ordinal -- a boundary condition).
+;; This is used to combine rules 9 and 14.
 ;; There should be a symmetric rule for the last address too ...
 (define (first-addr-rule)
 	(BindLink
@@ -181,5 +182,56 @@
 	)
 )
 
+
+;; Deduce if a solution has been found ... this simply tries to see
+;; if all attributes have been deduced, and if so, just clumps them
+;; together.
+(define (found-solution-rule)
+	(BindLink
+		;; variable declarations
+		(ListLink
+			(decl-var "AvatarNode" "$person")
+			(decl-var "ConceptNode" "$nationality")
+			(decl-var "ConceptNode" "$drink")
+			(decl-var "ConceptNode" "$smoke")
+			(decl-var "ConceptNode" "$pet")
+			(decl-var "ConceptNode" "$house")
+			(decl-var "ConceptNode" "$addr")
+		)
+		(ImplicationLink
+			;; body -- if all parts of AndLink hold true ... then
+			(AndLink
+				(clause PN "Nationality" VN "$person" VN "$nationality")
+				(clause PN "Drinks"      VN "$person" VN "$drink")
+				(clause PN "Smokes"      VN "$person" VN "$smoke")
+				(clause PN "Keeps"       VN "$person" VN "$pet")
+				(clause PN "LivesIn"     VN "$person" VN "$house")
+				(clause PN "Address"     VN "$person" VN "$addr")
+
+				;; Don't report a fact we already know.
+				(NotLink
+         		(OrderedLink
+						(VN "$nationality")
+						(VN "$drink")
+						(VN "$smoke")
+						(VN "$pet")
+						(VN "$house")
+						(VN "$addr")
+					)
+				)
+			)
+			;; implicand -- We're just going to use a plain-old ordered
+			;; link here to report the results. Why not ...
+         (OrderedLink
+				(VN "$nationality")
+				(VN "$drink")
+				(VN "$smoke")
+				(VN "$pet")
+				(VN "$house")
+				(VN "$addr")
+			)
+		)
+	)
+)
 
 
