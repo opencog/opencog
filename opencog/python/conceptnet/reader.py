@@ -10,16 +10,19 @@ def csv(csv_file_path):
     # Each element of the container is of the format
     # [rel,start,end,context,weight],
     # the context and weight element are included for future.
+
+    # You have to open it in utf8 encoding because the conceptnet CSV file uses utf8.
     container = []
-    with open(csv_file_path, 'r') as stream:
+    import codecs
+    with codecs.open(csv_file_path, 'r', encoding='utf-8') as stream:
         line = []
         while line != '':
             line = stream.readline()
             if line == '':
                 break
             else:
-                # The file is in utf8 but you can just delete the special Unicode characters
-                line.decode('ascii', 'ignore')
+                # convert it to ascii (required for atomspace)
+                line = line.encode('ascii','xmlcharrefreplace')
                 temp = line.split('\t')
                 if temp[1:6] not in container:
                     container.append(temp[1:6])
