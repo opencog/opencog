@@ -122,7 +122,7 @@
 (fact "water_person" "Drinks" "water")
 
 ;; State some implicitly assumed facts about neighboring houses
-;; This is the 'successor' function of set-theory/ZF
+;; This is the 'successor' function for ordinal numbers.
 (define (successor house1 house2)
 	(EvaluationLink (stv 1 1)
 		(PredicateNode "Successor")

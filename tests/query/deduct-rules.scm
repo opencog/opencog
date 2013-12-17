@@ -45,6 +45,7 @@
 				;; Avoid reporting things we already know.
 				;; Basically, if we already know that person A and B
 				;; are the same person, then lets not deduce it again.
+				;; This is, the not link is identical to the conclusion below
 				(NotLink
 					(EvaluationLink
 						(PredicateNode "IsSamePerson")
@@ -95,6 +96,17 @@
 					(ListLink
 						(VariableNode "$person_a")
 						(VariableNode "$person_b")
+					)
+				)
+				;; Don't deduce thigs we already know...
+				;; i.e. this not link is identical to conclusion, below.
+				(NotLink
+					(EvaluationLink
+						(VariableNode "$predicate")
+						(ListLink
+							(VariableNode "$person_b")
+							(VariableNode "$property")
+						)
 					)
 				)
 			)
