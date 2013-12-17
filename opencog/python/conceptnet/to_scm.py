@@ -89,7 +89,7 @@ def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
     if template_no == 1:
         link = atomspace.add_link(get_type(link_type), [cn1, cn2], tv=TV)
 
-        return str(link)
+        return repr(link)
     elif template_no == 2:
         cn_relation=cn_assertion[0][3:]
         cn_rel_stv=set_TV(cn_assertion[0][3:])
@@ -97,7 +97,7 @@ def write_atoms(atomspace, cn_assertion, template_no, link_type=''):
 
         listlink = atomspace.add_link(types.ListLink, [cn1, cn2])
         evallink = atomspace.add_link(types.EvaluationLink, [pn, listlink], tv=TV)
-        return str(evallink)
+        return repr(evallink)
 
 def from_file(atomspace, cn_path, scm_name):
     # lists_of_assertions is a list of list of assertion
