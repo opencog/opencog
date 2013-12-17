@@ -146,7 +146,7 @@ void BuggyNot::test_bugnot(void)
 	// Next, deduce that the same properties apply to each
 	Handle trans = pm.crisp_logic_bindlink(trans_rule);
 	logger().debug("Transitive list is %s\n", SchemeSmob::to_string(trans).c_str());
-	TSM_ASSERT_EQUALS("wrong number of solutions found", 2, getarity(trans));
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 4, getarity(trans));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

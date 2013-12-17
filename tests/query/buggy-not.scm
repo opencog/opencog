@@ -6,7 +6,7 @@
 
 (define (stv mean conf) (cog-new-stv mean conf))
 
-;; The Englishman lives in the red house.
+;; Person1 lives in the red house.
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
@@ -15,7 +15,7 @@
 	)
 )
 
-;; The person who lives in the red house keeps fish.
+;; Person2 lives the red house.
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink

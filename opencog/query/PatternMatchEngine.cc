@@ -695,6 +695,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 
 	// Copy the variables from vector to set; this makes it easier to
 	// determine set membership.
+	bound_vars.clear();
 	std::vector<Handle>::const_iterator i;
 	for (i = vars.begin();
 	     i != vars.end(); i++)
@@ -703,10 +704,12 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		bound_vars.insert(h);
 	}
 
+	cnf_clauses.clear();
 	cnf_clauses = clauses;
 
 	// Copy the negates into the clause list
 	// Copy the negates into a set.
+	optionals.clear();
 	for (i = negations.begin();
 	     i != negations.end(); i++)
 	{
