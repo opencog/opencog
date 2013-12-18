@@ -124,7 +124,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Integrity # Energy , Certainty, Competence, Affiliation
+PSI_DEMANDS = Energy # Integrity , Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -161,7 +161,7 @@ PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 
 # if use OCPlanningAgent, please turn off PSI_ACTION_SELECTION agent
 OCPLANNING_AGENT_ENABLED = true
-OCPLANNING_AGENT_CYCLE_PERIOD =    1
+OCPLANNING_AGENT_CYCLE_PERIOD =    2
 
 MONITOR_CHANGES_ENABLED = false
 MONITOR_CHANGES_CYCLE_PERIOD = 5
