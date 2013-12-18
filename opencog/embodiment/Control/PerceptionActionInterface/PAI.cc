@@ -3135,7 +3135,7 @@ bool PAI::addSpacePredicates(Handle objectNode, unsigned long timestamp,
         bool isPickupable = AtomSpaceUtil::isPredicateTrue(atomSpace, "is_pickupable", objectNode);
         isObstacle = !isSelfObject && (isAgent || ((hasPetHeight ? (height > 0.3f * pet_height) : true) && !isPickupable));
 
-        logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_pickupable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
+        logger().debug("PAI - addSpacePredicates - Adding object to spaceServer. name[%s], isAgent[%s], hasPetHeight[%s], isObstacle[%s], height[%f], pet_height[%f], is_upable[%s], isSelfObject[%s]", objectName.c_str( ), (isAgent ? "t" : "f"), (hasPetHeight ? "t" : "f"), (isObstacle ? "t" : "f"), height, pet_height, (isPickupable ? "t" : "f"), (isSelfObject ? "t" : "f") );
     } else {
         isObstacle = true;
         entityClass = "block";
@@ -3797,6 +3797,7 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     bool isFoodbowl = getBooleanProperty(properties, FOOD_BOWL_ATTRIBUTE);
     bool isWaterbowl = getBooleanProperty(properties, WATER_BOWL_ATTRIBUTE);
     bool isPickupable = getBooleanProperty(properties, PICK_UP_ABLE_ATTRIBUTE);
+    const std::string& holder = getStringProperty(properties, HOLDER_ATTRIBUTE);
 
     const std::string& color_name = queryMapInfoProperty(properties, COLOR_NAME_ATTRIBUTE);
 
@@ -3810,6 +3811,13 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
     const std::string& material = getStringProperty(properties, MATERIAL_ATTRIBUTE);
     const std::string& texture = getStringProperty(properties, TEXTURE_ATTRIBUTE);
     const std::string& ownerId = getStringProperty(properties, OWNER_ID_ATTRIBUTE);
+
+    // the specific class this entity is, e.g. battery
+    std::string entityClass = getStringProperty(getPropertyMap(mapinfo), ENTITY_CLASS_ATTRIBUTE);
+    TruthValuePtr tv(SimpleTruthValue::createTV(1.0, 1.0));
+
+    Handle classHandle = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, entityClass);
+    AtomSpaceUtil::addPropertyPredicate(atomSpace, ENTITY_CLASS_ATTRIBUTE, objectNode,classHandle, tv, true);
 
     // Add the property predicates in atomspace
     addPropertyPredicate(std::string("exist"), objectNode, true, false); //! Update existance predicate 
@@ -3840,6 +3848,24 @@ void PAI::addEntityProperties(Handle objectNode, bool isSelfObject, const MapInf
                                         SimpleTruthValue::createTV((isVisible ? 1.0f : 0.0f), 1.0f), 
                                         agentNode, objectNode);
     } // if
+
+    // Add holder property predicate
+    if (holder != NULL_ATTRIBUTE)
+    {
+        Handle holderWordNode = atomSpace.addNode(WORD_NODE, holder);
+        Handle holderConceptNode = atomSpace.addNode(AVATAR_NODE, holder);
+
+        HandleSeq referenceLinkOutgoing;
+        referenceLinkOutgoing.push_back(holderConceptNode);
+        referenceLinkOutgoing.push_back(holderWordNode);
+
+        // Add a reference link
+        Handle referenceLink = atomSpace.addLink(REFERENCE_LINK, referenceLinkOutgoing, TruthValue::TRUE_TV());
+        atomSpace.setLTI(referenceLink, 1);
+
+        AtomSpaceUtil::setPredicateValue(atomSpace, "holder",
+                                          SimpleTruthValue::createTV(1.0, 1.0), objectNode, holderConceptNode);
+    }
 
     // Add material property predicate
     if (material != NULL_ATTRIBUTE){

@@ -185,7 +185,7 @@ void Octree::addSolidBlock(Block3D * _block, bool byKnownIndexes, int _x, int _y
     {
         tree->mAllMyBlocks[x][y][z] = _block;
 
-        // After adding this block, we'll try to merge this tree into a bigger block if it is full.
+        // After adding this block, we'll try to merge this tree into a bigger block if it is full of same type of blocks.
         Block3D* bigBlock = tree->mergeAllMyBlocks();
 
         if (bigBlock != 0)
@@ -633,7 +633,6 @@ vector<Block3D*> Octree::findAllBlocksCombinedWith(BlockVector* _pos, bool useBl
     BlockMaterial curMaterial;
 
     while(searchList.size() != 0)
-
     {
         curPos = searchList.front();
         if (checkIsSolid(curPos, curblock))
