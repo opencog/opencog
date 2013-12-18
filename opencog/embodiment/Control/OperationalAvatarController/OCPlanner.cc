@@ -902,7 +902,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 RuleNode* forwardRuleNode = curStateNode->forwardRuleNode;
 
-                if (forwardRuleNode == 0)
+                if (forwardRuleNode == (&OCPlanner::goalRuleNode))
                 {
                     // oh, this state node is already the goal state node, and it's impossible to achieve, return planning fail
                     return "";
@@ -3104,7 +3104,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
-        Vector* vector1 = boost::get<Vector>(&(*vit));
+//        Vector* vector1 = boost::get<Vector>(&(*vit));
 
         // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));

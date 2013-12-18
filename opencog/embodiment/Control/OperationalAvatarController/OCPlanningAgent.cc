@@ -301,9 +301,11 @@ void OCPlanningAgent::run()
         // if planning failed
         if (currentOCPlanID == "")
         {
+            std::cout<<std::endl;
             std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
                      <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
+            std::cout<<std::endl;
         }
         else
         {
