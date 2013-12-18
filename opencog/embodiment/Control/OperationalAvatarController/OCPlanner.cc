@@ -1635,6 +1635,7 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                                         bool &hasDirectHelpRule, bool &contradictoryOtherGoal, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
+    preconImpossible = false;
     willCauseCirleNetWork = false;
     hasDirectHelpRule = false;
     contradictoryOtherGoal = false;
@@ -2258,7 +2259,8 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     }
 
     deleteRuleNodeInAllRuleNodeList(ruleNode);
-    delete ruleNode;
+    if (ruleNode)
+        delete ruleNode;
 
 }
 
@@ -2753,7 +2755,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     }
 
     if (hasDirectHelpRule)
-        fitnessScore += 500.0f;
+        fitnessScore += 50.0f;
 
     return fitnessScore;
 
@@ -3102,6 +3104,8 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
+        Vector* vector1 = boost::get<Vector>(&(*vit));
+
         // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
@@ -3141,7 +3145,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
             score += satisfiedPreconNum * 10.0f;
 
             if(hasDirectHelpRule)
-                score += 50.0f;
+                score += 5.0f;
         }
 
         tmpRuleNode->currentAllBindings.erase(varName);

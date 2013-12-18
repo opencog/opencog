@@ -1333,6 +1333,9 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
+    std::cout<<"Debug: pattern matching results: " << std::endl
+            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+
     // Get result
     // Note: Don't forget remove the hResultListLink
     HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
