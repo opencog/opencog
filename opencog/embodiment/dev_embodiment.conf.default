@@ -124,7 +124,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Energy #, Integrity , Certainty, Competence, Affiliation
+PSI_DEMANDS = Integrity # Energy , Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
