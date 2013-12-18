@@ -70,6 +70,8 @@ class AverageCreationRule(rules.Rule):
 # I probably need a custom_compute (and maybe more)?
 # Forward chaining may be slightly easier
 
+
+# you need to know the probability for $a. maybe use the default term probability?
 class HigherOrderRule(rules.Rule):
     def __init__(self, chainer, rule):
         self._chainer =  chainer

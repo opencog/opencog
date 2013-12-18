@@ -92,7 +92,7 @@ class AbstractChainer(Logic):
 
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
-            if self.wanted_atom(atom, template, substitution, ground=True):
+            if self.wanted_atom(atom, template, substitution, ground=False):
                 return atom
         return None
 

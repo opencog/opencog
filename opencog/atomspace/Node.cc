@@ -67,11 +67,12 @@ std::string Node::toString(std::string indent) const
     std::string tmpname = name;
     if (name == "")
         tmpname = "#" + _uuid;
-    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d) %s)\n",
+    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s)\n",
              classserver().getTypeName(_type).c_str(),
              tmpname.c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),
+             (int)getAttentionValue()->getVLTI(),
              getTruthValue()->toString().c_str());
     return indent + buf;
 }
