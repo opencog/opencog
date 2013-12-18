@@ -326,16 +326,6 @@ namespace opencog
 
         protected:
 
-            // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
-            map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
-            map<BlockVector,Handle> mAllUnitBlocksToAtomsMap;
-
-            map<int,BlockEntity*> mBlockEntityList;
-            map<int,BlockEntity*> mSuperBlockEntityList;
-            map<Handle, Entity3D*> mAllNoneBlockEntities;
-            map<Handle, Entity3D*> mAllAvatarList;
-            multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
-
             int mTotalDepthOfOctree;
 
             std::string     mMapName;
@@ -355,15 +345,25 @@ namespace opencog
 
             Entity3D* selfAgentEntity;
 
+            // We keep these 2 map for quick search. Memory consuming: 50k blocks take about 10M RAM for one map
+            map<Handle, BlockVector> mAllUnitAtomsToBlocksMap;
+            map<BlockVector,Handle> mAllUnitBlocksToAtomsMap;
+
+            map<int,BlockEntity*> mBlockEntityList;
+            map<int,BlockEntity*> mSuperBlockEntityList;
+            map<Handle, Entity3D*> mAllNoneBlockEntities;
+            map<Handle, Entity3D*> mAllAvatarList;
+            multimap<BlockVector, Entity3D*> mPosToNoneBlockEntityMap;
+
             bool getUnitBlockHandlesOfABlock(const BlockVector& _nearLeftPos, int _blockLevel, HandleSeq &handles);
 
             void _addNonBlockEntityHistoryLocation(Handle entityHandle,BlockVector newLocation, unsigned long timestamp);
 
             // this constructor is only used for clone
-            Octree3DMapManager(int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
+            Octree3DMapManager(bool _enable_BlockEntity_Segmentation, int _TotalDepthOfOctree,std::string  _MapName,Octree* _RootOctree, int _FloorHeight, int _AgentHeight,
                                int _TotalUnitBlockNum,AxisAlignedBox& _MapBoundingBox,Entity3D* _selfAgentEntity,map<Handle, BlockVector>& _AllUnitAtomsToBlocksMap,
                                map<BlockVector,Handle>& _AllUnitBlocksToAtomsMap,map<int,BlockEntity*>& _BlockEntityList,map<Handle,
-                               Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations, bool _enable_BlockEntity_Segmentation);
+                               Entity3D*>& _AllNoneBlockEntities, map<Handle, vector<pair<unsigned long, BlockVector> > > _nonBlockEntitieshistoryLocations);
 
 
 /*
