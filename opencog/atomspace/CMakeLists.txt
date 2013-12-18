@@ -49,15 +49,11 @@ ADD_LIBRARY (atomspace SHARED
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
-SET(ATOMSPACE_LINK_LIBS
+TARGET_LINK_LIBRARIES(atomspace
 	cogutil
 	${GSL_LIBRARIES}
 	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
-)
-
-TARGET_LINK_LIBRARIES(atomspace
-	${ATOMSPACE_LINK_LIBS}
 )
 
 IF (CYGWIN)

@@ -236,44 +236,6 @@ public:
         }
     }
 
-    void testToAndFromString()
-    {
-        logger().debug("testToAndFromString()");
-        char tvStr[4096];
-        for (int i = 0; i < NUM_TVS; i++) {
-            std::string tvToStringValue = tvs[i]->toString();
-            //logger().debug("%s", tvToStringValue.c_str());
-            sprintf(tvStr, "%s %s", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            //logger().debug("%s", tvStr);
-            TruthValuePtr rebuiltTv = TruthValue::factory(tvStr);
-            TS_ASSERT(rebuiltTv != NULL);
-            TS_ASSERT(rebuiltTv->getType() == tvs[i]->getType());
-            TruthValuePtr rebo = CompositeTruthValue::fromString(tvToStringValue.c_str());
-            CompositeTruthValuePtr rebuiltCtv = CompositeTVCast(rebo);
-            TS_ASSERT(rebuiltCtv != NULL);
-            TS_ASSERT(rebuiltCtv->getType() == tvs[i]->getType());
-            TS_ASSERT(fabs(rebuiltCtv->getMean()  - tvs[i]->getMean()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(rebuiltCtv->getCount()  - tvs[i]->getCount()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(fabs(rebuiltCtv->getConfidence() - tvs[i]->getConfidence()) <= FLOAT_ACCEPTABLE_ERROR);
-            TS_ASSERT(rebuiltCtv->getNumberOfVersionedTVs() == tvs[i]->getNumberOfVersionedTVs());
-            for (int j = 0; j < NUM_TVS; j++) {
-                TruthValuePtr versionedTv = rebuiltCtv->getVersionedTV(versionHandles[j]);
-                if (versionedTv) {
-                    //logger().debug("************ found versionedTv for tv[%d] => %s", i, versionedTv->toString().c_str());
-                }
-                if (j != i) {
-                    TS_ASSERT((versionedTv == NULL) or (versionedTv->isNullTv()));
-                } else {
-                    TS_ASSERT(versionedTv != NULL);
-                    TS_ASSERT(not versionedTv->isNullTv());
-                    TS_ASSERT(fabs(versionedTv->getMean()  - means[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(versionedTv->getCount()  - counts[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(versionedTv->getConfidence() - confidences[j]) <= FLOAT_ACCEPTABLE_ERROR);
-                }
-            }
-        }
-    }
-
     void testMerge() {
         logger().debug("testMerge()");
         // test merge between CTVs with distinct versioned Tvs but with same default primaryTVs

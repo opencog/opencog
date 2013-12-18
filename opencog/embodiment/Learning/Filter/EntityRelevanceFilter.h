@@ -153,7 +153,7 @@ public:
     *                       start and stop learning
     * @return A set containing all messages meeting the constraint
     */
-    const opencog::combo::message_set getMessages(const AtomSpace& as,
+    const opencog::combo::message_set getMessages(AtomSpace& as,
                                          Temporal t,
                                          const std::string& toID = std::string(),
                                          bool exclude_prefix = false,
@@ -207,7 +207,7 @@ public:
     *                       here
     * @return a map associating agent id with their actions definite_object
     */
-    const agent_to_actions getAgentActions(const AtomSpace& as,
+    const agent_to_actions getAgentActions(AtomSpace& as,
                                            const Temporal& t,
                                            const std::string& selfID,
                                            const std::string& ownerID,

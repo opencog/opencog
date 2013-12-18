@@ -69,8 +69,6 @@ public:
 
     virtual bool operator==(const TruthValue& rhs) const;
 
-    static TruthValuePtr fromString(const char*);
-
     /// Heuristic to compute the count given the confidence (according
     /// to the PLN book)
     /// count =  confidence * k / (1 - confidence)

@@ -236,46 +236,6 @@ public:
         }
     }
 
-#define SAVING_AND_LOADING_TV_FLOAT_PRECISION 0.001
-    void testToAndFromString() {
-        char tvStr[1024];
-        for (int i = 0; i <= NUM_TVS; i++) {
-            bool testChangedMean = (i == NUM_TVS);
-            if (testChangedMean) {
-                i--;
-                tvs[i]->setMean(means[0]);
-            }
-            std::string tvToStringValue = tvs[i]->toString();
-            sprintf(tvStr, "%s %s\n", TruthValue::typeToStr(tvs[i]->getType()), tvToStringValue.c_str());
-            TruthValuePtr tv = TruthValue::factory(tvStr);
-            TS_ASSERT(tv != NULL);
-            TS_ASSERT(tv->getType() == tvs[i]->getType());
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::fromString(tvToStringValue.c_str());
-
-            TS_ASSERT(fabs(itv->getL() - ls[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(fabs(itv->getU() - us[i]) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-            TS_ASSERT(fabs(itv->getConfidenceLevel() - IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL) < SAVING_AND_LOADING_TV_FLOAT_PRECISION);
-	    //compute diff using a method provided with the UTest
-	    float computedDiff = computeDiff(itv->getL(), itv->getU(),
-					     default_k, itv->getConfidenceLevel());
-	    TS_ASSERT(isApproxEq(itv->getDiff(), computedDiff, DIFF_ACCEPTABLE_ERROR));
-            TS_ASSERT(itv->isSymmetric());
-            if (testChangedMean) {
-                //logger().debug("itv->getMean() = %f, means[0] = %f", itv->getMean(), means[0]);
-                TS_ASSERT(fabs(itv->getMean() - means[0]) <= ERROR_THRESHOLD);
-            } else {
-                TS_ASSERT(fabs(itv->getMean() - means[i]) <= ERROR_THRESHOLD);
-            }
-            float expectedCount = count(ls[i], us[i]);
-            float expectedConfidence = confidence(ls[i], us[i]);
-            TS_ASSERT(fabs(itv->getCount() - expectedCount) <= ERROR_THRESHOLD);
-            TS_ASSERT(fabs(itv->getConfidence() - expectedConfidence) <= ERROR_THRESHOLD);
-            if (testChangedMean) {
-                i++;
-            }
-        }
-    }
-
     void testSetAndGetMean() {
         for (int i = 0; i < NUM_TVS; i++) {
             IndefiniteTruthValue* tv = tvs[i];

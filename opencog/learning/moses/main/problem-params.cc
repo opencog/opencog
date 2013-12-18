@@ -287,9 +287,13 @@ void problem_params::options_init()
         ("hc-crossover-pop-size",
          value<unsigned>(&hc_crossover_pop_size)->default_value(120),
          "Number of new candidates created by crossover during each iteration "
-         "of hillclimbing. It also allows to control when crossover occurs over "
-         "exhaustive search. Specifically if the number of candidate to explore "
-         "by exhaustive search is more than 10/3 * crossover_pop_size, then "
+         "of hillclimbing.\n")
+
+        ("hc-crossover-min-neighbors",
+         value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
+         "It also allows to control when crossover occurs instead of "         
+         " exhaustive search. If the neighborhood to explore has more than "
+         "the given number (and at least 2 iterations has passed) then "
          "crossover kicks in.\n")
 
         ("hc-allow-resize-deme",
@@ -947,8 +951,12 @@ void problem_params::options_init()
          "Hillclimber crossover (see --hc-crossover option)\n")
 
         ("fs-hc-crossover-pop-size",
-         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(false),
+         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(120),
          "Hillclimber crossover pop size (see --hc-crossover option)\n")
+
+        ("fs-hc-crossover-min-neighbors",
+         value<unsigned>(&fs_params.hc_crossover_min_neighbors)->default_value(400),
+         "Hillclimber crossover min neighbors (see --hc-crossover option)\n")
 
         ("fs-hc-widen-search",
          value<bool>(&fs_params.hc_widen_search)->default_value(true),
@@ -1224,6 +1232,7 @@ void problem_params::parse_options(int argc, char* argv[])
     hc_params.single_step = hc_single_step;
     hc_params.crossover = hc_crossover;
     hc_params.crossover_pop_size = hc_crossover_pop_size;
+    hc_params.crossover_min_neighbors = hc_crossover_min_neighbors;
     hc_params.max_nn_evals = hc_max_nn;
     hc_params.fraction_of_nn = hc_frac_of_nn;
     hc_params.allow_resize_deme = hc_allow_resize_deme;

@@ -13,6 +13,7 @@ ADD_SUBDIRECTORY (learning)
 
 IF (HAVE_ATOMSPACE)
     ADD_SUBDIRECTORY (atomspace)
+    ADD_SUBDIRECTORY (execution)
     ADD_SUBDIRECTORY (benchmark)
     ADD_SUBDIRECTORY (query)
     ADD_SUBDIRECTORY (nlp)
@@ -35,7 +36,8 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_VITERBI)
-    ADD_SUBDIRECTORY (viterbi)
+	# Disable until new interfaces widely available. -- linas
+	# ADD_SUBDIRECTORY (viterbi)
 ENDIF (HAVE_VITERBI)
 
 IF (HAVE_CYTHON)

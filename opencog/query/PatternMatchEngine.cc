@@ -658,6 +658,35 @@ bool PatternMatchEngine::note_root(Handle h)
 }
 
 /**
+ * Clear all internal state.
+ * This allows a given instance of this class to be used again.
+ */
+void PatternMatchEngine::clear(void)
+{
+	// Clear all state.
+	bound_vars.clear();
+	cnf_clauses.clear();
+	optionals.clear();
+	var_grounding.clear();
+	clause_grounding.clear();
+	root_map.clear();
+	issued.clear();
+
+	curr_root = Handle::UNDEFINED;
+	curr_soln_handle = Handle::UNDEFINED;
+	curr_pred_handle = Handle::UNDEFINED;
+	depth = 0;
+
+	while (!pred_handle_stack.empty()) pred_handle_stack.pop();
+	while (!soln_handle_stack.empty()) soln_handle_stack.pop();
+	while (!root_handle_stack.empty()) root_handle_stack.pop();
+	while (!pred_solutn_stack.empty()) pred_solutn_stack.pop();
+	while (!var_solutn_stack.empty()) var_solutn_stack.pop();
+	while (!issued_stack.empty()) issued_stack.pop();
+}
+
+
+/**
  * Find a grounding for a sequence of clauses in conjunctive normal form.
  *
  * The list of clauses, and the list of negations, are both OpenCog
@@ -691,6 +720,9 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
                          const std::vector<Handle> &clauses,
                          const std::vector<Handle> &negations)
 {
+	// Clear all state.
+	clear();
+
 	if (!atom_space) return;
 
 	// Copy the variables from vector to set; this makes it easier to
@@ -715,15 +747,11 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 		optionals.insert(h);
 	}
 
-	var_grounding.clear();
-	clause_grounding.clear();
-
 	if (cnf_clauses.size() == 0) return;
 
 	// Preparation prior to search.
 	// Create a table of the nodes that appear in the clauses, and
 	// a list of the clauses that each node participates in.
-	root_map.clear();
 	for (i = cnf_clauses.begin();
 	     i != cnf_clauses.end(); i++)
 	{

@@ -22,6 +22,8 @@
 
 #ifdef HAVE_GUILE
 
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
 
@@ -67,11 +69,14 @@ std::string SchemeShellModule::shellout(Request *req, std::list<std::string> arg
 		if (arg.compare("quiet") || arg.compare("hush")) hush = true;
 	}
 	sh->hush_prompt(hush);
+	sh->hush_output(hush);
 
 	if (hush) return "";
 
-	return "Entering scheme shell; use ^D or a single . on a "
-	       "line by itself to exit.";
+	std::string rv =
+		"Entering scheme shell; use ^D or a single . on a "
+		"line by itself to exit.\n" + sh->get_prompt();
+	return rv;
 }
 
 std::string SchemeShellModule::do_eval(Request *req, std::list<std::string> args)

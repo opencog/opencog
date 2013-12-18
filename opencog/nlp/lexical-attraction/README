@@ -682,7 +682,7 @@ maybe tagged with tense, number, etc.
 
    FeatureLink
       WordNode "refer"
-      DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+      DefinedLinguisticConceptNode ".v"  ; the link-grammar subscript
 
 
 The above should be gathered together into a SetLink, as the relative
@@ -700,7 +700,7 @@ Thus, pairs of words might be gathered together as:
             DefinedLinguisticConceptNode "infinitive"  ; verb tense tag
          FeatureLink
             WordNode "refer"
-            DefinedLinguisticConceptNode ".v"  ; the link-grammar "inflection"
+            DefinedLinguisticConceptNode ".v"  ; the link-grammar subscript
       SetLink
          FeatureLink
             WordNode "to"
@@ -709,7 +709,7 @@ Thus, pairs of words might be gathered together as:
 
 Of some interest is the connection between grammatical usage/construction,
 and word sense.  That is, the occurrence of triples of the form
-(inflected-word, word-sense, disjunct). These are used to narrow down
+(subscripted-word, word-sense, disjunct). These are used to narrow down
 the likelihood of a given word sense, given that it was used with a
 certain disjunct.  That is, we are interested in the conditional
 probability P(sense |word, disjunct)
@@ -717,7 +717,7 @@ probability P(sense |word, disjunct)
 CountLink                                ; kind-of-like an evaluation link
     DisjunctNode "S- O+ "                ; link-grammar disjunct
     ListLink
-       WordNode "blah.n"                 ; inflected word
+       WordNode "blah.n"                 ; subscripted word
        WordSenseNode "blah::1:32:0:0.0"  ; wordnet sense
 
 Also of interest is not only how syntax affixes meaning to a single

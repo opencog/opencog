@@ -147,7 +147,7 @@ const message_set EntityRelevanceFilter::getMessages(const WorldProvider& wp,
                        strict_within);
 }
 
-const message_set EntityRelevanceFilter::getMessages(const AtomSpace& atomSpace,
+const message_set EntityRelevanceFilter::getMessages(AtomSpace& atomSpace,
         Temporal t,
         const std::string& toID,
         bool exclude_prefix,
@@ -270,7 +270,7 @@ const agent_to_actions EntityRelevanceFilter::getAgentActions(const WorldProvide
     return getAgentActions(wp.getAtomSpace(), t, selfID, ownerID, exclude_set);
 }
 
-const agent_to_actions EntityRelevanceFilter::getAgentActions(const AtomSpace& as,
+const agent_to_actions EntityRelevanceFilter::getAgentActions(AtomSpace& as,
         const Temporal& t,
         const std::string& selfID,
         const std::string& ownerID,

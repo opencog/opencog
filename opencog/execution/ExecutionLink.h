@@ -1,10 +1,8 @@
 /*
- * opencog/atomspace/ZMQClient.h
+ * opencog/atomspace/ExectuionLink.h
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
+ * Copyright (C) 2013 Linas Vepstas
  * All Rights Reserved
- *
- * Written by Erwin Joosten
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -22,41 +20,36 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_ZMQ_CLIENT_H
-#define _OPENCOG_ZMQ_CLIENT_H
+#ifndef _OPENCOG_EXECUTION_LINK_H
+#define _OPENCOG_EXECUTION_LINK_H
 
-#include "Atom.h"
-#include "Handle.h"
-#include "types.h"
-#include <zmq.hpp>
-#include <opencog/atomspace/ZMQMessages.pb.h>
-#include <string>
-#include <boost/thread.hpp>
+#include <opencog/atomspace/Link.h>
 
-using namespace std;
-
-namespace opencog {
+namespace opencog
+{
 /** \addtogroup grp_atomspace
  *  @{
  */
 
-class ZMQClient {
-    zmq::socket_t* zmqClientSocket;
-    zmq::context_t* zmqContext;
-
-    void SendMessage(ZMQRequestMessage& requestMessage,
-            ZMQReplyMessage& replyMessage);
-
+class ExecutionLink : public Link
+{
 public:
-    ZMQClient(string networkAddres="tcp://127.0.0.1:5555"); //"ipc:///tmp/AtomSpaceZMQ.ipc"
-    ~ZMQClient();
+    ExecutionLink(const HandleSeq& oset,
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    AtomPtr getAtom(Handle& h);
-    
-    /** @todo add other functions as needed */
+    ExecutionLink(Handle schema, Handle args,
+         TruthValuePtr tv = TruthValue::NULL_TV(),
+         AttentionValuePtr av = AttentionValue::DEFAULT_AV());
+
+    Handle execute() { return do_execute(Handle(shared_from_this())); }
+
+    static Handle do_execute(Handle);
+    static Handle do_execute(const HandleSeq& schema_and_args);
+    static Handle do_execute(Handle schema, Handle args);
 };
 
 /** @}*/
-} // namespace opencog
+}
 
-#endif // _OPENCOG_ZMQ_CLIENT_H
+#endif // _OPENCOG_EXECUTION_LINK_H

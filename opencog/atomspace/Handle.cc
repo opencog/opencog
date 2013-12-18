@@ -35,6 +35,13 @@ const Handle Handle::UNDEFINED(ULONG_MAX);
 
 Handle::Handle(AtomPtr atom) : _uuid(atom->_uuid), _ptr(atom) {}
 
+Handle& Handle::operator=(const AtomPtr& a)
+{
+    this->_uuid = a->_uuid;
+    this->_ptr = a;
+    return *this;
+}
+
 const AtomTable* Handle::_resolver = NULL;
 
 Atom* Handle::resolve()

@@ -141,6 +141,16 @@ MET_BY_LINK <- ORDERED_LINK
 STARTED_BY_LINK <- ORDERED_LINK
 FINISHED_BY_LINK <- ORDERED_LINK
 
+OBJECT_NODE <- NODE
+
+PET_NODE <- OBJECT_NODE
+AVATAR_NODE <- OBJECT_NODE
+ACCESSORY_NODE <- OBJECT_NODE
+HUMANOID_NODE <- OBJECT_NODE
+UNKNOWN_OBJECT_NODE <- OBJECT_NODE
+
+ONTOLOGICAL_INHERITANCE_LINK <- ORDERED_LINK
+
 // ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
@@ -153,4 +163,14 @@ ANCHOR_NODE <- NODE
 // Holder of statistical truth values. 
 // XXX not clear if this is used anywhere ... maybe should remove this.
 COUNT_LINK <- ORDERED_LINK
+
+
+
+
+
+
+
+
+
+
 

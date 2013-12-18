@@ -71,9 +71,7 @@ std::string Link::toShortString(std::string indent) const
     std::string more_indent = indent + "  ";
 
     answer << indent << "(" << classserver().getTypeName(_type);
-    float mean = this->getTruthValue()->getMean();
-    float confidence = this->getTruthValue()->getConfidence();
-    answer << " (stv " << mean << " " << confidence << ")\n";
+    answer << " " << getTruthValue()->toString() << "\n";
 
     // Here the target string is made. If a target is a node, its name is
     // concatenated. If it's a link, all its properties are concatenated.

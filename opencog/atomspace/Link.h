@@ -1,8 +1,8 @@
 /*
  * opencog/atomspace/Link.h
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,9 +27,6 @@
 #include <string>
 
 #include <opencog/atomspace/Atom.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {

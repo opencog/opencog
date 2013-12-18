@@ -423,8 +423,12 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
 
 Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
 {
+    // Sometimes one inserts an atom that was previously deleted.
+    // In this case, the removal flag might still be set. Clear it.
+    atom->unsetRemovalFlag();
+
+    // Is the atom already in the table?
     if (atom->getAtomTable() != NULL) {
-        // Atom is already inserted
         return atom->getHandle();
     }
 
@@ -473,7 +477,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // thread-safe, and there is no particularly elegant
                     // way to lock. So we punt.  This makes sense,
                     // because it is unlikely that one thread is going to
-                    // be winging on the outgoing set, while another
+                    // be wingeing on the outgoing set, while another
                     // thread is performing an atom-table add.  I'm pretty
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
@@ -599,11 +603,16 @@ AtomPtrSet AtomTable::extract(Handle handle, bool recursive)
 {
     AtomPtrSet result;
 
+    // Make sure the atom is fully resolved before we go about
+    // deleting it.
     handle = getHandle(handle);
     AtomPtr atom(handle);
     if (!atom || atom->isMarkedForRemoval()) return result;
-    atom->markForRemoval();
 
+    // Perhaps the atom is not in the table?
+    if (atom->getAtomTable() == NULL) return result;
+
+    atom->markForRemoval();
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
     // recurisve. We need to lock here to avoid confusion if multiple

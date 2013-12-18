@@ -80,7 +80,7 @@ public:
     /** Unregisters the factory identified by 'id' */
     virtual bool unregister(const std::string& id)
     {
-        logger().debug("unregistering %s \"%s\"", 
+        logger().debug("Unregistering %s \"%s\"", 
             demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return factories.erase(id) == 1;
     }
@@ -92,12 +92,12 @@ public:
         if (it == factories.end()) {
             // If it wasn't found, then the user probably made a 
             // simple typo at the command line. 
-            logger().info("unknown %s command: %s", 
+            logger().debug("Unknown %s command: %s", 
                demangle(typeid(_BaseType).name()).c_str(), id.c_str());
             return NULL;
         }
         // invoke the creation function
-        logger().debug("creating %s instance with \"%s\"", 
+        logger().debug("Creating %s instance with \"%s\"", 
              demangle(typeid(_BaseType).name()).c_str(), id.c_str());
         return it->second->create(cs);
     }

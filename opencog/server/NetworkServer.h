@@ -110,7 +110,8 @@ public:
      * successful and 'false' otherwise.
      */
     template<class _Socket>
-    bool addListener(const unsigned int port) {
+    bool addListener(const unsigned int port)
+    {
         logger().debug("adding listener to port %d", port);
         SocketListener<_Socket>* sl = new SocketListener<_Socket>(io_service, port);
         //TODO: Error handling (what if bind does not work?)

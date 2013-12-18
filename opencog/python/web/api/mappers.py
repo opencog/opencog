@@ -85,11 +85,8 @@ class FormatHandleValue(fields.Raw):
 
 
 class FormatHandleList(fields.Raw):
-    def format(self, value):
-        handles = []
-        for elem in value:
-            handles.append(elem.h.value())
-        return handles
+    def format(self, values):
+        return [elem.h.value() for elem in values]
 
 
 class AtomListResponse(object):
@@ -102,7 +99,7 @@ class AtomListResponse(object):
             'complete': True,
             'skipped': 0,
             'total': len(self.atoms),
-            'atoms': map(lambda t: marshal(t, atom_fields), self.atoms)
+            'atoms': marshal(self.atoms, atom_fields)
         }
 
 

@@ -124,6 +124,7 @@ struct problem_params
     bool hc_single_step;
     bool hc_crossover;
     unsigned hc_crossover_pop_size;
+    unsigned hc_crossover_min_neighbors;
     bool hc_allow_resize_deme;
     unsigned hc_max_nn;
     double   hc_frac_of_nn;

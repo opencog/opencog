@@ -45,6 +45,23 @@ ConsoleSocket::~ConsoleSocket()
 {
     logger().debug("[ConsoleSocket] destructor");
 
+    // We need the use-count and the condition variables because
+    // somehow the design of either this subsystem, or boost:asio
+    // is broken. Basically, the boost::asio code calls this destructor
+    // for ConsoleSocket while there are still requests outstanding
+    // in another thread.  We have to stall the destructor until all
+    // the in-flight requests are complete; we use the condition 
+    // variable to do this. But really, something somewhere is broken
+    // or mis-designed. Not sure what/where; this code is too complicated.
+    //
+    // Some details: basically, the remote end of the socket "fires and
+    // forgets" a bunch of commands, and then closes the socket before
+    // these requests have completed.  boost:asio notices that the
+    // remote socket has closed, and so decides its a good day to call
+    // destructors. But of course, its not ...
+    std::unique_lock<std::mutex> lck(_mtx);
+    while (_use_count) _cv.wait(lck);
+
     // If there's a shell, let them know that we are going away.
     // This wouldn't be needed if we had garbage collection.
     if (_shell) _shell->socketClosed();
@@ -89,6 +106,7 @@ void ConsoleSocket::OnLine(const std::string& line)
     logger().debug("params.size(): %d", params.size());
     if (params.empty()) {
         // return on empty/blank line
+        _request = NULL;
         OnRequestComplete();
         return;
     }
@@ -97,6 +115,20 @@ void ConsoleSocket::OnLine(const std::string& line)
 
     CogServer& cogserver = static_cast<CogServer&>(server());
     _request = cogserver.createRequest(cmdName);
+
+    // If the command starts with an open-paren, assume its
+    // a scheme command. Pop into the scheme shell, and try again.
+    if (_request == NULL and cmdName[0] == '(') {
+        OnLine("scm");
+
+        // Re-issue the command, but only if we sucessfully got a shell.
+        if (_shell) {
+            OnLine(line);
+            return;
+        }
+    }
+
+    // Command not found.
     if (_request == NULL) {
         char msg[256];
         snprintf(msg, 256, "command \"%s\" not found\n", cmdName.c_str());
@@ -122,14 +154,19 @@ void ConsoleSocket::OnLine(const std::string& line)
 
         if (_request->isShell()) {
             logger().debug("[ConsoleSocket] OnLine request %s is a shell", line.c_str());
-            // Force a drain of this request, because we *must* enter shell mode
-            // before handling any additional input from the socket (since the
-            // next input is almost surely intended for the new shell, not for
-            // the cogserver one).
-            // NOTE: Calling this method for other kinds of requests may cause
-            // cogserver to crash due to concurrency issues, since this runs in
-            // a separate thread (for socket handler) instead of the main thread
-            // (where the server loop runs).
+
+            // Use a stupid trick to deal with poor architecture.
+#define SECRET_HANDSHAKE ((Request*) 0x1)
+            _request = SECRET_HANDSHAKE;
+            // Force a drain of this request, because we *must* enter
+            // shell mode before handling any additional input from the
+            // socket (since the next input is almost surely intended for
+            // the new shell, not for the cogserver one).
+            //
+            // NOTE: Calling this method for non-shell requests may
+            // cause cogserver to crash due to concurrency issues, since
+            // this runs in a separate thread (for socket handler) instead
+            // of the main thread (where the server loop runs).
             cogserver.processRequests();
         }
     } else {
@@ -186,7 +223,11 @@ void ConsoleSocket::OnRawData(const char *buf, size_t len)
 void ConsoleSocket::OnRequestComplete()
 {
     logger().debug("[ConsoleSocket] OnRequestComplete");
-    sendPrompt();
+
+    // Shells will send their own prompt
+    if (_request != SECRET_HANDSHAKE) {
+        sendPrompt();
+    }
 }
 
 void ConsoleSocket::SetDataRequest()

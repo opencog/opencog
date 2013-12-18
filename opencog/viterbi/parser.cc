@@ -17,7 +17,7 @@
 #include <sstream>
 // #include <vector>
 
-#include <link-grammar/read-dict.h>
+#include <link-grammar/dict-api.h>
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Atom.h>

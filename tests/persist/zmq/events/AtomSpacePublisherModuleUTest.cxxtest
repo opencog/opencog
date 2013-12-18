@@ -1,0 +1,288 @@
+/*
+ * tests/persist/zmq/events/AtomSpacePublisherModuleUTest.cxxtest
+ *
+ * Copyright (C) 2013 OpenCog Foundation
+ * All Rights Reserved
+ *
+ * Written by Cosmo Harrigan
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/server/CogServer.h>
+#include <opencog/atomspace/types.h>
+#include <opencog/atomspace/TruthValue.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/atomspace/AtomSpace.h>
+#include <opencog/server/Module.h>
+#include <opencog/util/Logger.h>
+#include <iostream>
+#include <opencog/util/Config.h>
+#include <opencog/util/zhelpers.hpp>
+
+#include <sstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+using boost::property_tree::ptree;
+using boost::property_tree::read_json;
+using boost::property_tree::write_json;
+
+using namespace opencog;
+using namespace std;
+
+class AtomSpacePublisherModuleUTest : public CxxTest::TestSuite
+{
+private:
+    AtomSpace* as;
+    std::string url;
+    zmq::context_t * context;
+    zmq::socket_t * subscriberAdd;
+    zmq::socket_t * subscriberRemove;
+    zmq::socket_t * subscriberTVChanged;
+    zmq::socket_t * subscriberAVChanged;
+
+public:
+    void tearDown ()
+    {
+        cogserver().stop();
+        subscriberAdd->close();
+        subscriberRemove->close();
+        subscriberTVChanged->close();
+        subscriberAVChanged->close();
+        delete subscriberAdd;
+        delete subscriberRemove;
+        delete subscriberTVChanged;
+        delete subscriberAVChanged;
+        delete context;
+    }
+
+    void InitZeroMQ ()
+    {
+        //  Prepare the context and event subscribers
+        context = new zmq::context_t(1);
+        subscriberAdd = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberRemove = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberTVChanged = new zmq::socket_t(*context, ZMQ_SUB);
+        subscriberAVChanged = new zmq::socket_t(*context, ZMQ_SUB);
+
+        subscriberAdd->connect(url.c_str());
+        subscriberRemove->connect(url.c_str());
+        subscriberTVChanged->connect(url.c_str());
+        subscriberAVChanged->connect(url.c_str());
+
+        subscriberAdd->setsockopt(ZMQ_SUBSCRIBE, "add", 3);
+        subscriberRemove->setsockopt(ZMQ_SUBSCRIBE, "remove", 6);
+        subscriberTVChanged->setsockopt(ZMQ_SUBSCRIBE, "tvchanged", 9);
+        subscriberAVChanged->setsockopt(ZMQ_SUBSCRIBE, "avchanged", 9);
+
+        // Wait for the subscribers to initialize to avoid the 'slow joiner' syndrome
+        sleep(5);
+    }
+
+    void InitCogServer ()
+    {
+        try
+        {
+            config().load("opencog-test.conf");
+        }
+        catch (RuntimeException &e)
+        {
+            std::cerr << e.getMessage() << std::endl;
+        }
+
+        // Please don't write log files here. They crap up the build directory!
+        // config().set("LOG_DIR", ".");
+        // Must not use standard port; it crashes if there's a cog-server running.
+        // config().set("ZMQ_EVENT_PORT", "5563");
+        // config().set("ZMQ_EVENT_USE_PUBLIC_IP", "TRUE");
+
+        url = "tcp://localhost:" + config()["ZMQ_EVENT_PORT"];
+
+        config().set("MODULES", "opencog/persist/zmq/events/libatomspacepublishermodule.so");
+        
+        logger().setFilename(config()["LOG_FILE"]);
+        logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+        logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+        // Blindly search a bunch of paths hoping to find the files
+        // in one of them ...
+        const char * paths[] =
+        {
+            "./",
+            "../",
+            "../../",
+            "../../../",
+            "../../../../",
+            "../../../../../",
+            "../../../../../../",
+            NULL
+        };
+        cogserver().loadModules(paths);
+
+        this->as = &cogserver().getAtomSpace();
+    }
+
+    void testAtomSpaceEvents(void)
+    {
+        InitCogServer();
+        InitZeroMQ();
+
+        std::stringstream ss;
+        ptree pt;
+        ptree ptAtom;
+
+        // Add an atom
+        TruthValuePtr tv = SimpleTruthValue::createTV(2.1, 3.1);
+        Handle h = as->addNode(CONCEPT_NODE, "ExampleNode", tv);
+
+        // Receive the event
+        std::string address = s_recv (*subscriberAdd); // Message envelope with address
+        std::string contents = s_recv (*subscriberAdd); // Message contents
+
+        // The atomspace fires a dummy 'avchanged' signal when you add a node, which needs to be flushed here
+        // so that it will not be in the queue during later tests
+        //   https://github.com/opencog/opencog/issues/394
+        s_recv (*subscriberAVChanged);
+        s_recv (*subscriberAVChanged);
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'add' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "2.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "3.1");
+
+        // Modify the atom's TruthValue
+        TruthValuePtr newTV = SimpleTruthValue::createTV(5.1, 7.1);
+        as->setTV(h, newTV);
+
+        // Receive the event
+        address = s_recv (*subscriberTVChanged);
+        contents = s_recv (*subscriberTVChanged);
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+
+        // Modify the atom's AttentionValue
+        AttentionValuePtr av = createAV(30, 50, 0);
+        as->setAV(h, av);
+
+        address = s_recv (*subscriberAVChanged);
+        contents = s_recv (*subscriberAVChanged);
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'avchanged' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
+
+        // Remove the atom
+        as->removeAtom(h);
+
+        // Receive the event
+        address = s_recv (*subscriberRemove);
+        contents = s_recv (*subscriberRemove);
+
+        // The atomspace fires a dummy 'avchanged' signal when you remove a node, which needs to be flushed here
+        // so that it will not be in the queue during later tests
+        // https://github.com/opencog/opencog/issues/394
+        s_recv (*subscriberAVChanged);
+        s_recv (*subscriberAVChanged);
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'remove' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
+
+        // Add an atom with a CompositeTruthValue and test that the associated
+        // JSON object from the event is properly formatted
+        Handle contextExampleNode1 = as->addNode(CONCEPT_NODE, "ContextExampleNode1");
+        Handle contextExampleNode2 = as->addNode(CONCEPT_NODE, "ContextExampleNode2");
+        Handle exampleNode = as->addNode(CONCEPT_NODE, "ExampleNodeWithContextualTV");
+
+        TruthValuePtr simpleTV1 = SimpleTruthValue::createTV(4.1, 6.1);
+        VersionHandle vh1 = VersionHandle(CONTEXTUAL, contextExampleNode1);
+
+        TruthValuePtr simpleTV2 = SimpleTruthValue::createTV(5.1, 8.1);
+        VersionHandle vh2 = VersionHandle(CONTEXTUAL, contextExampleNode2);
+
+        as->setTV(exampleNode, simpleTV1, vh1);
+        as->setTV(exampleNode, simpleTV2, vh2);
+
+        // Receive the event corresponding to the first of the two TruthValue changes, and disregard it
+        s_recv (*subscriberTVChanged);
+        s_recv (*subscriberTVChanged);
+
+        // Receive the event corresponding to the second of the two TruthValue changes
+        address = s_recv (*subscriberTVChanged);
+        contents = s_recv (*subscriberTVChanged);
+        ss << contents;
+        read_json(ss, pt);
+        ptAtom = pt.get_child("atoms");
+
+        // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
+        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNodeWithContextualTV");
+        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "composite");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.strength", "") == "0");
+        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.count", "") == "0");
+
+        ptree ptVersionedTruthValueMap = ptAtom.get_child("truthvalue.details.versionedtruthvaluemap");
+        TS_ASSERT(ptVersionedTruthValueMap.size() == 2);
+
+        BOOST_FOREACH(boost::property_tree::ptree::value_type &v, ptVersionedTruthValueMap)
+        {
+            assert(v.first.empty()); // array elements have no names
+
+            if (v.second.get<std::string>("handle", "") == std::to_string(vh1.substantive.value()))
+            {
+                TS_ASSERT(v.second.get<std::string>("indicator", "") == "CONTEXTUAL");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.type", "") == "simple");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.strength", "") == "4.1");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.count", "") == "6.1");
+            }
+            else if (v.second.get<std::string>("handle", "") == std::to_string(vh2.substantive.value()))
+            {
+                TS_ASSERT(v.second.get<std::string>("indicator", "") == "CONTEXTUAL");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.type", "") == "simple");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.strength", "") == "5.1");
+                TS_ASSERT(v.second.get<std::string>("truthvalue.details.count", "") == "8.1");
+            }
+        }
+    }
+};

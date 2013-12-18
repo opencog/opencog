@@ -40,8 +40,7 @@ class Logic(object):
             ret+= self.get_incoming_recursive(link)
         return ret
 
-    def new_variable(self):
-        prefix = '$pln_var_'
+    def new_variable(self, prefix='$pln_var_'):
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
     def make_n_variables(self, N):
@@ -56,7 +55,20 @@ class Logic(object):
                 attentional_focus.append(atom)
         return attentional_focus
 
-    def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
+    def find(self, template):
+        atoms = self.lookup_atoms(template)
+
+        atoms = self.filter_attentional_focus(atoms)
+        atoms = [atom for atom in atoms if wanted_atom(atom, template, ground=True)]
+
+        return atoms
+
+    def lookup_atoms(self, template, substitution):
+        template = self.substitute(substitution, template)
+
+        if len(self.variables(template)) == 0:
+            return [template]
+
         if template.type == types.VariableNode:
             root_type = types.Atom
             atoms = self.atomspace.get_atoms_by_type(root_type)
@@ -70,18 +82,15 @@ class Logic(object):
             else:
                 atoms = self.get_incoming_recursive(first_node)
 
-        if useAF:
-            atoms = self.filter_attentional_focus(atoms)
+        return atoms
 
-        if not allow_zero_tv:
-            atoms = [atom for atom in atoms if atom.tv.count > 0]
+    def wanted_atom(self, atom, template, s={}, allow_zero_tv=False, ground=False):
 
-        results = [atom for atom in atoms if self.unify_together(atom, template, s)]
-        
-        if ground:
-            results = [atom for atom in results if len(self.variables(atom)) == 0]
+        tv_ok = (allow_zero_tv or atom.tv.count > 0)
+        unifies_ok = self.unify_together(atom, template, s)
+        grounded_ok = not ground or len(self.variables(atom)) == 0
 
-        return results
+        return tv_ok and unifies_ok and grounded_ok
 
     def unify_together(self, x, y, s):
         return self.unify(x, y, s) != None
@@ -99,7 +108,7 @@ class Logic(object):
                 if atom in dic:
                     return dic[atom]
                 else:
-                    var = self.new_variable()
+                    var = self.new_variable(prefix='$standardize_apart_')
                     dic[atom] = var
                     return var
             else:

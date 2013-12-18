@@ -49,19 +49,20 @@ const std::string& Node::getName() const
 
 std::string Node::toShortString(std::string indent) const
 {
-#define BUFSZ 1024
-    char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")
         tmpname = "#" + _uuid;
-    snprintf(buf, BUFSZ, "(%s \"%s\")\n",
-             classserver().getTypeName(_type).c_str(),
-             tmpname.c_str());
-    return indent + buf;
+
+    std::string nam = indent +
+        "(" + classserver().getTypeName(_type) + 
+        " \"" + tmpname + "\")\n";
+        // + getTruthValue()->toString() + ")\n";
+    return nam;
 }
 
 std::string Node::toString(std::string indent) const
 {
+#define BUFSZ 1024
     char buf[BUFSZ];
     std::string tmpname = name;
     if (name == "")

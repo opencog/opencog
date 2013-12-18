@@ -59,35 +59,48 @@ class AbstractChainer(Logic):
         if len(self.variables(template)) == 0:
             return template
 
-        # TODO backward chaining doesn't work, because this method will pick up Atoms
-        # that have variables in them (including the queries left over from other inferences)!!!
-
-        atom = self._select_from(template, s, allow_zero_tv, useAF=True)
+        atoms = self.atomspace.get_atoms_in_attentional_focus()
+        atom = self._select_atom(template, s, atoms)
         if not atom:
-            # if it can't find anything in the attentional focus, try the whole atomspace.
-            atom = self._select_from(template, s, allow_zero_tv, useAF=False)
+            # if it can't find anything in the attentional focus, try the whole atomspace. (it actually still uses indexes to find a subset of the links, that is more likely to be useful)
+            atoms = self.lookup_atoms(template, s)
+            atom = self._select_atom(template, s, atoms)
 
         return atom
 
-    def _select_from(self, template, substitution, allow_zero_tv, useAF):
+    def _select_fromAF(self, template, substitution):
         # never allow inputs with variables. (not even for backchaining targets)
         ground_results = True
 
-        atoms = self.find(template, substitution, useAF=useAF, allow_zero_tv=allow_zero_tv, ground=ground_results)
+        atoms = self.find(template, substitution)
 
         if len(atoms) == 0:
             return None
 
         return self._selectOne(atoms)
 
+    def _select_atom(self, template, substitution, atoms):
+        # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
+
+        # The atomspace lookup and the shuffle are both O(N)...
+        # But if you shuffle it you're guaranteed to eventually find a suitable atom if one exists.
+        # The correct option would be to do it inside the atomspace.
+        # Sample without replacement, or shuffle a little bit at a time.
+        # Or even being able to get results N atoms at a time would help a lot!
+        random.shuffle(atoms)
+        #atoms = random.sample(atoms, len(atoms))
+
+        # O(N*the percentage of atoms that are useful)
+        for atom in atoms:
+            if self.wanted_atom(atom, template, substitution, ground=True):
+                return atom
+        return None
+
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
             sti = atom.av['sti']
-            if sti > 1:
-                return sti
-            else:
-                return 1
+            return max(sti, 1)
 
         def mixed_score(atom):
             s = int(10*sti_score(atom) + 100*(atom.tv.mean+0.01) + 100*(atom.tv.confidence+0.01))
@@ -98,13 +111,12 @@ class AbstractChainer(Logic):
 
         assert type(atoms[0]) == Atom
 
-        max = sum([score(atom) for atom in atoms])
-        pick = random.randrange(0, max)
+        total = sum([score(atom) for atom in atoms])
+        pick = random.randrange(0, total)
         current = 0
         for atom in atoms:
             current += score(atom)
             if current >= pick:
-                print 'choosing atom based on score',score(atom), atom
                 return atom
 
         assert False
@@ -149,9 +161,9 @@ class AbstractChainer(Logic):
         elif atom.type in rules.HIGHER_ORDER_LINKS:
             suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
         elif atom.is_a(types.MemberLink):
-            # Assume the domain of all predicates is objects
+            # Assume the domain of all predicates is objects or concepts or variables
             element = atom.out[0]
-            return element.is_a(types.ObjectNode)
+            return element.is_a(types.ObjectNode) or element.is_a(types.ConceptNode) or element.is_a(types.VariableNode)
         else:
             return True
 
@@ -162,7 +174,7 @@ class AbstractChainer(Logic):
     def count_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        members = self.find(template, {}, ground=True)
+        members = self.find(template)
         self.atomspace.remove(var)
         return len(members)
 
@@ -220,12 +232,13 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self._preferAttentionalFocus = preferAttentionalFocus
         self.learnRuleFrequencies = learnRuleFrequencies
 
         self.atomspace = atomspace
@@ -254,8 +267,8 @@ class Chainer(AbstractChainer):
     def forward_step(self, rule=None):
         if rule is None:
             rule = self._select_rule()
-
         print rule
+
         results = self._apply_forward(rule)
 
         return results
@@ -264,7 +277,6 @@ class Chainer(AbstractChainer):
         if rule is None:
             rule = self._select_rule()
 
-        print rule
         results = self._apply_backward(rule, target_outputs=target_atoms)
 
         return results
@@ -309,7 +321,7 @@ class Chainer(AbstractChainer):
 
         assert len(generic_inputs) == 1
         template = generic_inputs[0]
-        input_atoms = self.find(template, ground=True)
+        input_atoms = self.find(template)
 
         for input in input_atoms:
             subst = self.unify(template, input, {})
@@ -319,6 +331,8 @@ class Chainer(AbstractChainer):
 
         for var in created_vars:
             self.atomspace.remove(var, recursive=True)
+
+        return output_atoms
 
     def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
@@ -333,8 +347,8 @@ class Chainer(AbstractChainer):
                 # Find the substitution that would change 'template' to 'atom'
                 # Alternatively this could be returned by _select_one_matching
                 subst_so_far = self.unify(template, atom, subst_so_far)
-                if subst_so_far == None:
-                    import pdb; pdb.set_trace()
+                #if subst_so_far == None:
+                #    import pdb; pdb.set_trace()
 
                 return_inputs[i] = atom
             else:
@@ -357,7 +371,6 @@ class Chainer(AbstractChainer):
         # Variables that haven't been bound become backward chaining queries
         for var in created_vars:
             if subst is None or (var in subst and subst[var] != var):
-                print 'removing', var
                 self.atomspace.remove(var, recursive=True)
 
     def _apply_backward(self, rule, target_outputs=None):
@@ -392,7 +405,6 @@ class Chainer(AbstractChainer):
 
         (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         subst = {}
-        print (generic_inputs, generic_outputs)
 
         if target_outputs is None:
             # This variable isn't really used; now we just use the substitution instead
@@ -409,8 +421,6 @@ class Chainer(AbstractChainer):
         specific_inputs = []
         subst = self._choose_inputs(specific_inputs, generic_inputs, subst, allow_zero_tv = True)
         found = len(subst) > 0
-
-        print specific_inputs
 
         final_outputs = self.substitute_list(subst, generic_outputs)
 
@@ -500,8 +510,6 @@ class Chainer(AbstractChainer):
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
 
-        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
-
     def _give_stimulus(self, atom):
         # Arbitrary
         STIMULUS_PER_ATOM = 10
@@ -512,7 +520,6 @@ class Chainer(AbstractChainer):
     def _validate(self, rule, inputs, outputs):
         # some of the validations might not make sense for backward chaining
 
-        print rule, map(str,inputs), map(str,outputs)
         # Sanity checks
         if not self.valid_structure(outputs[0]):
             self.log_failed_inference('invalid structure')

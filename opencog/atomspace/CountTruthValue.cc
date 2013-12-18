@@ -87,7 +87,7 @@ confidence_t CountTruthValue::getConfidence() const
 std::string CountTruthValue::toString() const
 {
     char buf[1024];
-    sprintf(buf, "[%f,%f,%f]",
+    sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(getMean()),
             static_cast<float>(getCount()),
             static_cast<float>(getConfidence()));
@@ -107,17 +107,6 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
 TruthValueType CountTruthValue::getType() const
 {
     return COUNT_TRUTH_VALUE;
-}
-
-TruthValuePtr CountTruthValue::fromString(const char* tvStr)
-{
-    float tmean, tcount, tconf;
-    sscanf(tvStr, "[%f,%f,%f]", &tmean, &tconf, &tcount);
-    CountTruthValuePtr ctv(std::make_shared<CountTruthValue>(
-        static_cast<strength_t>(tmean),
-        static_cast<confidence_t>(tconf),
-        static_cast<count_t>(tcount)));
-    return std::static_pointer_cast<TruthValue>(ctv);
 }
 
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const

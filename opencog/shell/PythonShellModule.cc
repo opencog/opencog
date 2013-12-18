@@ -31,9 +31,11 @@
  */
 #ifdef HAVE_CYTHON
 
-#include "PythonShellModule.h"
+#include <opencog/cython/PythonEval.h>
+#include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/platform.h>
+#include "PythonShellModule.h"
 
 namespace opencog
 {
@@ -76,8 +78,10 @@ std::string PythonShellModule::shellout(Request *req, std::list<std::string> arg
 
     if (hush) return "";
 
-    return "Entering python shell; use ^D or a single . on a "
-           "line by itself to exit.";
+    std::string rv =
+        "Entering python shell; use ^D or a single . on a "
+        "line by itself to exit.\n" + sh->get_prompt();
+    return rv;
 }
 
 std::string PythonShellModule::do_eval(Request *req, std::list<std::string> args)

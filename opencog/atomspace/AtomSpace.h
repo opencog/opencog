@@ -266,7 +266,10 @@ public:
     }
 
     /**
-     * Removes an atom from the atomspace
+     * Remove an atom from the atomspace.  Note that this only purges
+     * the atom from the AtomSpace; it may still remain in persistent
+     * storage.  To also delete from persistant storage, use the
+     * deleteAtom() method. 
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -282,13 +285,31 @@ public:
     }
 
     /**
+     * Deletes an atom from the atomspace, and any attached storage.
+     * The permanently deletes the atom; to merely purge it from the
+     * atomspace, without altering storage, use removeAtom().
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool deleteAtom(Handle h, bool recursive = true) {
+        return getImpl().deleteAtom(h, recursive);
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const {
-        return getAtomTable().getHandle(t, str);
+    Handle getHandle(Type t, const std::string& str) {
+        return getImpl().getNode(t, str);
     }
 
     /**
@@ -297,8 +318,8 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getAtomTable().getHandle(t, outgoing);
+    Handle getHandle(Type t, const HandleSeq& outgoing) {
+        return getImpl().getLink(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
@@ -876,34 +897,33 @@ public:
     }
 
     /**
-     * Gets a set of handles in the Attentional Focus that matches with the given type
-     * (subclasses optionally).
+     * Returns the set of atoms within the given importance range.
      *
-     * @param result An output iterator.
-     * @param type The desired type.
-     * @param subclass Whether type subclasses should be considered.
-     * @param vh returns only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
+     * @param Importance range lower bound (inclusive).
+     * @param Importance range upper bound (inclusive).
+     * @return The set of atoms within the given importance range.
      *
-     * @return The set of atoms of a given type (subclasses optionally).
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to this
-     * method, which would return all entries in AtomSpace in the
-     * AttentionalFocus:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
+     * @note: This method utilizes the ImportanceIndex
      */
     template <typename OutputIterator> OutputIterator
-    getHandleSetInAttentionalFocus(OutputIterator result,
-                 Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByAV(OutputIterator result,
+                   AttentionValue::sti_t lowerBound,
+                   AttentionValue::sti_t upperBound = AttentionValue::MAXSTI) const
     {
-        STIAboveThreshold stiAbove(getAttentionalFocusBoundary());
-        return getHandleSetFiltered(result, type, subclass, &stiAbove, vh);
+        UnorderedHandleSet hs = getAtomTable().getHandlesByAV(lowerBound, upperBound);
+        return std::copy(hs.begin(), hs.end(), result);
+    }
+
+    /**
+     * Gets the set of all handles in the Attentional Focus
+     *
+     * @return The set of all atoms in the Attentional Focus
+     * @note: This method utilizes the ImportanceIndex
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandleSetInAttentionalFocus(OutputIterator result) const
+    {
+        return getHandlesByAV(result, getAttentionalFocusBoundary(), AttentionValue::AttentionValue::MAXSTI);
     }
 
     // Wrapper for comparing atoms from a HandleSeq

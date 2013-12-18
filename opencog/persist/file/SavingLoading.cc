@@ -26,28 +26,29 @@
 /* SavingLoading.cc - Saves/loads the atom network (or a subset of it) to/from
  * disk */
 
-#include "CompositeRenumber.h"
-#include "SavingLoading.h"
-#include "SpaceServerSavable.h"
-#include "TimeServerSavable.h"
-#include "CoreUtils.h"
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-#include <opencog/util/platform.h>
-
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/macros.h>
+#include <opencog/util/platform.h>
+
+#include "CompositeRenumber.h"
+#include "SavingLoading.h"
+#include "SpaceServerSavable.h"
+#include "TimeServerSavable.h"
+#include "CoreUtils.h"
 
 using namespace opencog;
 
@@ -582,6 +583,137 @@ AttentionValuePtr SavingLoading::readAttentionValue(FILE *f)
     return createAV(tempSTI, tempLTI, tempVLTI);
 }
 
+static const char* typeToStr(TruthValueType t) throw (InvalidParamException)
+{
+    switch (t) {
+    case SIMPLE_TRUTH_VALUE:
+        return "SIMPLE_TRUTH_VALUE";
+    case COUNT_TRUTH_VALUE:
+        return "COUNT_TRUTH_VALUE";
+    case INDEFINITE_TRUTH_VALUE:
+        return "INDEFINITE_TRUTH_VALUE";
+    case COMPOSITE_TRUTH_VALUE:
+        return "COMPOSITE_TRUTH_VALUE";
+    default:
+        throw InvalidParamException(TRACE_INFO,
+             "Invalid Truth Value type: '%d'.", t);
+    }
+}
+
+static TruthValueType TVstrToType(const char* str) throw (InvalidParamException)
+{
+    TruthValueType t = SIMPLE_TRUTH_VALUE;
+
+    while (t != NUMBER_OF_TRUTH_VALUE_TYPES) {
+        if (!strcmp(str, typeToStr(t))) {
+            return t;
+        }
+        t = (TruthValueType)((int)t + 1);
+    }
+
+    throw InvalidParamException(TRACE_INFO,
+          "TruthValue - Invalid Truth Value type string: '%s'.", str);
+}
+
+
+static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr);
+
+/**
+ * The format of string representation of a Composite TV is as follows
+ * (primaryTv first, followed by the versionedTvs):
+ * {FIRST_PLN_TRUTH_VALUE;[0.000001,0.500000=0.000625]}
+ * {0x2;CONTEXTUAL;FIRST_PLN_TRUTH_VALUE;[0.500000,1.000000=0.001248]}
+ * NOTE: string representation of tv types, VersionHandles and tv 
+ * attributes cannot have '{', '}' or ';', which are separators
+ */
+static CompositeTruthValuePtr comp_tv_from_string(const char* tvStr)
+    throw (InvalidParamException)
+{
+    char* buff;
+    char* s = strdup(tvStr);
+    // First each token is a tv representation
+    char* tvToken = __strtok_r(s, "{}", &buff);
+    if (tvToken == NULL) {
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid string representation of a CompositeTruthValue object: "
+            "missing primary TV!");
+    }
+    // Now, separate internal tokens
+    char* internalBuff;
+    char* primaryTvTypeStr = __strtok_r(tvToken, ";", &internalBuff);
+    TruthValueType primaryTvType = TVstrToType(primaryTvTypeStr);
+    char* primaryTvStr = __strtok_r(NULL, ";", &internalBuff);
+    // DPRINTF("primary tvTypeStr = %s, tvStr = %s\n", primaryTvTypeStr, primaryTvStr);
+
+    TruthValuePtr ptv = tv_factory(primaryTvType, primaryTvStr);
+    if (ptv->isDefaultTV()) ptv = TruthValue::DEFAULT_TV();
+    CompositeTruthValuePtr result(CompositeTruthValue::createCTV(ptv, NULL_VERSION_HANDLE));
+
+    // Get the versioned tvs
+    while ((tvToken = __strtok_r(NULL, "{}", &buff)) != NULL) {
+        char* substantiveStr = __strtok_r(tvToken, ";", &internalBuff);
+
+        UUID uuid;
+        sscanf(substantiveStr, "%lu", (UUID *) &uuid);
+        Handle substantive(uuid);
+
+        char* indicatorStr = __strtok_r(NULL, ";", &internalBuff);
+        IndicatorType indicator = VersionHandle::strToIndicator(indicatorStr);
+        // DPRINTF("substantive = %p, indicator = %d\n", substantive.value(), indicator);
+        char* versionedTvTypeStr = __strtok_r(NULL, ";", &internalBuff);
+        TruthValueType versionedTvType = TVstrToType(versionedTvTypeStr);
+        char* versionedTvStr = __strtok_r(NULL, ";", &internalBuff);
+        // DPRINTF("tvTypeStr = %s, tvStr = %s\n", versionedTvTypeStr, versionedTvStr);
+        VersionHandle vh(indicator, substantive);
+        TruthValuePtr tv = tv_factory(versionedTvType, versionedTvStr);
+        if (tv->isDefaultTV()) tv = TruthValue::DEFAULT_TV();
+        result->setVersionedTV(tv, vh);
+    }
+    free(s);
+    return result;
+}
+
+static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr)
+{
+    switch (type) {
+    case SIMPLE_TRUTH_VALUE: {
+        float mean, conf;
+        sscanf(tvStr, "(stv %f %f)", &mean, &conf);
+        return SimpleTruthValue::createTV(static_cast<strength_t>(mean),
+            static_cast<count_t>(SimpleTruthValue::confidenceToCount(conf)));
+    }
+    case COUNT_TRUTH_VALUE: {
+        float tmean, tcount, tconf;
+        sscanf(tvStr, "(ctv %f %f %f)", &tmean, &tconf, &tcount);
+        return CountTruthValue::createTV(
+            static_cast<strength_t>(tmean),
+            static_cast<confidence_t>(tconf),
+            static_cast<count_t>(tcount));
+    }
+    case INDEFINITE_TRUTH_VALUE: {
+        float m, l, u, c, d;
+        int s;
+        sscanf(tvStr, "[%f,%f,%f,%f,%f,%d]", &m, &l, &u, &c, &d, &s);
+        IndefiniteTruthValuePtr result(
+            IndefiniteTruthValue::createITV(static_cast<strength_t>(l),
+                      static_cast<strength_t>(u),
+                      static_cast<confidence_t>(c)));
+        result->setDiff(static_cast<strength_t>(d));
+        result->setSymmetric(s != 0);
+        result->setMean(static_cast<strength_t>(m));
+        return result;
+
+    }
+    case COMPOSITE_TRUTH_VALUE:
+        return comp_tv_from_string(tvStr);
+
+    default:
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid Truth Value type in factory(...): '%d'.", type);
+        break;
+    }
+    return NULL;
+}
 
 TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 {
@@ -599,7 +731,7 @@ TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     logger().info("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
-    TruthValuePtr result = TruthValue::factory(type, tvStr);
+    TruthValuePtr result = tv_factory(type, tvStr);
     delete[] tvStr;
     CHECK_FREAD;
     return result;

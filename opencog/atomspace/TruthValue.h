@@ -32,10 +32,6 @@
 
 #include <opencog/util/exceptions.h>
 
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
-
 /** \addtogroup grp_atomspace
  *  @{
  */
@@ -64,15 +60,22 @@ typedef strength_seq::iterator confidence_seq_it;
 typedef strength_seq::const_iterator confidence_seq_const_it;
 
 //! TruthValue types
+//! XXX TODO This should probably be removed.
+//! The truth-value types are currently used in only two places;
+//! The guile interpreter, and the SQL peristance layer.  Both of
+//! these layers should almost surely use their own private system
+//! for serializing/deserializing truth value types, instead of
+//! using this.  This is unstable, and should be removed ...
 // NUMBER_OF_TRUTH_VALUE_TYPES must be the last one in this enum.
-enum TruthValueType {
+enum TruthValueType
+{
+    NULL_TRUTH_VALUE = 0,
     SIMPLE_TRUTH_VALUE = 1,
     COUNT_TRUTH_VALUE,
     INDEFINITE_TRUTH_VALUE,
     COMPOSITE_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
-#define MAX_TRUTH_VALUE_NAME_LEN 120
 
 class TruthValue;
 typedef std::shared_ptr<TruthValue> TruthValuePtr;
@@ -82,9 +85,6 @@ class TruthValue
     friend class CompositeTruthValue;
     friend class SavingLoading;
     friend class Atom;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
 
     // the TruthValueUTest class needs to access private members from the
     // TruthValue class, so we declare it as a friend class.
@@ -182,19 +182,6 @@ public:
      * Check if this TV is equal to the default TV. operator!= only compares pointers
      */
     virtual bool isDefaultTV() const;
-
-// STATIC METHODS:
-
-    static const char* typeToStr(TruthValueType t)
-        throw (InvalidParamException);
-    static TruthValueType strToType(const char* str)
-        throw (InvalidParamException);
-
-    // Factories
-    // former factory used by NMShell mkatom command
-    static TruthValuePtr factory(const char*);
-    static TruthValuePtr factory(TruthValueType, const char*)
-       throw (InvalidParamException);
 };
 
 } // namespace opencog

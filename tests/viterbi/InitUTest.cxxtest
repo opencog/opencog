@@ -20,7 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <link-grammar/read-dict.h>
+#include <link-grammar/dict-api.h>
 
 #include <opencog/viterbi/atom_types.h>
 #include <opencog/viterbi/parser.h>

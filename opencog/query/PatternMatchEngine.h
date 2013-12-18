@@ -106,6 +106,9 @@ class PatternMatchEngine
 		void set_atomspace(AtomSpace *);
 		AtomSpace * get_atomspace(void) { return atom_space; } 
 
+		// Clear all internal state
+		void clear(void);
+
 		// Examine each candidate for a match, in turn.
 		bool do_candidate(Handle, Handle, Handle);
 

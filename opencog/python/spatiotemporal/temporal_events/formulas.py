@@ -1,6 +1,7 @@
-from math import fabs, acos
+from math import fabs
 from numpy import convolve
-from numpy import NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
+from numpy import NINF as NEGATIVE_INFINITY
+from scipy.spatial.distance import cosine
 from scipy.stats.distributions import uniform_gen
 from spatiotemporal.temporal_events.trapezium_formulas import function_convolution_uniform
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
@@ -9,6 +10,40 @@ from spatiotemporal.time_intervals import TimeInterval
 from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral
 
 __author__ = 'keyvan'
+
+
+TEMPORAL_RELATIONS = {
+    'p': 'precedes',
+    'm': 'meets',
+    'o': 'overlaps',
+    'F': 'finished by',
+    'D': 'contains',
+    's': 'starts',
+    'e': 'equals',
+    'S': 'started by',
+    'd': 'during',
+    'f': 'finishes',
+    'O': 'overlapped by',
+    'M': 'met by',
+    'P': 'preceded by'
+}
+
+
+class TemporalRelation(dict):
+    all_relations = 'pmoFDseSdfOMP'
+
+    def to_list(self):
+        result = []
+        for name in self.all_relations:
+            result.append(self[name])
+        return result
+
+    def __repr__(self):
+        return 'TemporalRelation({0})'.format(''.join([name for name in self.all_relations if self[name] > 0]))
+
+    def __str__(self):
+        return repr(self)
+
 
 # Benvolution ------------------------------------------
 
@@ -166,59 +201,48 @@ class FormulaCreator(object):
         beginning_a, ending_a = temporal_event_1.distribution_beginning, temporal_event_1.distribution_ending
         beginning_b, ending_b = temporal_event_2.distribution_beginning, temporal_event_2.distribution_ending
 
-        return {
-            'p':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.before(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result = TemporalRelation()
 
-            'm':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.same(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['p'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.before(ending_a, beginning_b) * self.before(ending_a, ending_b)
 
-            'o':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['m'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.same(ending_a, beginning_b) * self.before(ending_a, ending_b)
 
-            'F':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['o'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b)
 
-            'D':
-                self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['F'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b)
 
-            's':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['D'] = self.before(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b)
 
-            'e':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['s'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b)
 
-            'S':
-                self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['e'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b)
 
-            'd':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.before(ending_a, ending_b),
+        result['S'] = self.same(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b)
 
-            'f':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.same(ending_a, ending_b),
+        result['d'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.before(ending_a, ending_b)
 
-            'O':
-                self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['f'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.same(ending_a, ending_b)
 
-            'M':
-                self.after(beginning_a, beginning_b) * self.same(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
+        result['O'] = self.after(beginning_a, beginning_b) * self.before(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b)
 
-            'P':
-                self.after(beginning_a, beginning_b) * self.after(beginning_a, ending_b) *
-                self.after(ending_a, beginning_b) * self.after(ending_a, ending_b),
-        }
+        result['M'] = self.after(beginning_a, beginning_b) * self.same(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b)
+
+        result['P'] = self.after(beginning_a, beginning_b) * self.after(beginning_a, ending_b) *\
+            self.after(ending_a, beginning_b) * self.after(ending_a, ending_b)
+
+        return result
 
 
 class TemporalFormulaConvolution(BaseTemporalFormula):
@@ -308,6 +332,44 @@ class TemporalFormulaConvolution(BaseTemporalFormula):
         return result
 
 
+class TemporalFormulaCosineConvolution(TemporalFormulaConvolution):
+    def __init__(self):
+        self.cosines = {}
+        TemporalFormulaConvolution.__init__(self)
+
+    def function_cosine(self, dist_1, dist_2, bins=50):
+        a1, b1, a2, b2 = 0, 0, 0, 0
+        if dist_1 in self.bounds:
+            a1, b1 = self.bounds[dist_1]
+        else:
+            a1, b1 = calculate_bounds_of_probability_distribution(dist_1)
+            self.bounds[dist_1] = a1, b1
+        if dist_2 in self.bounds:
+            a2, b2 = self.bounds[dist_2]
+        else:
+            a2, b2 = calculate_bounds_of_probability_distribution(dist_2)
+            self.bounds[dist_2] = a2, b2
+
+        cosine_bounds_a, cosine_bounds_b = min(a1, a2), max(b1, b2)
+
+        delta = fabs(cosine_bounds_a - cosine_bounds_b) / bins
+        convolution_interval = TimeInterval(cosine_bounds_a, cosine_bounds_b, bins)
+        #convolution_interval = linspace(cosine_bounds_a, cosine_bounds_b, bins)
+        x = [dist_1.pdf(t) for t in convolution_interval]
+        y = [dist_2.pdf(t) for t in convolution_interval]
+
+        return cosine(x, y)
+
+    def same(self, dist_1, dist_2):
+        return 1 - self.function_cosine(dist_1, dist_2)
+
+    def before(self, dist_1, dist_2):
+        return TemporalFormulaConvolution.before(self, dist_1, dist_2) # * (1 - self.same(dist_1, dist_2))
+
+    def after(self, dist_1, dist_2):
+        return TemporalFormulaConvolution.after(self, dist_1, dist_2) # * (1 - self.same(dist_1, dist_2))
+
+
 def test(event_1, event_2, prec=0.25, size=10000):
     import matplotlib.pyplot as plt
 
@@ -340,20 +402,39 @@ def test(event_1, event_2, prec=0.25, size=10000):
 
 if __name__ == '__main__':
     from scipy.stats import norm, uniform, expon
+    from numpy import linspace
+    import matplotlib.pyplot as plt
+    from numpy import float64
     tfc = TemporalFormulaConvolution()
     fc = FormulaCreator(tfc)
+
+    #F = uniform(loc=20, scale=2)
+    #G = norm(loc=21, scale=0.2)
+
+    #plt.plot([20, 22], [0.5, 0.5])
+    #x = linspace(0, 43, 200)
+    #plt.plot(x, G.pdf(x))
+    #
+    #print fc.same(F, G)
+    #
+    #plt.figure()
+    #print calculate_bounds_of_probability_distribution(G)
+    #
+    #tfc.convolutions[(F, G)].plot()
+    #plt.show()
+    #
+    F = uniform(loc=20, scale=5)
     for func, name in [(fc.before, 'Before'), (fc.same, 'Same'), (fc.after, 'After')]:
         print name, '-----------------------'
         for i in xrange(40):
-            F_a = i * 0.2
-            G_a = 10 - i * 0.2
+            G_a = 30 - float64(i) * 0.4
             if i == 100:
                 pass
-            F = uniform(loc=F_a, scale=2)
-            G = uniform(loc=G_a, scale=2)
+            G = uniform(loc=G_a, scale=0.5)
+            if i == 22:
+                pass
             print func(F, G)
 
-#
 #
 #if __name__ == '__main__':
 #    from scipy.stats import norm, uniform, expon
@@ -458,7 +539,7 @@ if __name__ == '__main__':
 #        #print self.after(ending_a, beginning_b)
 #        #print self.after(ending_a, ending_b)
 #
-#        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-#        event_2.plot().figure()
+#        #event_1.plot().ylim(ymin=-0.1, ymax=1.1)
+#        #event_2.plot().figure()
 #
-#    plt.show()
+#    #plt.show()
