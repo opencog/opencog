@@ -91,10 +91,11 @@ std::string Link::toString(std::string indent) const
 #define BUFSZ 1024
     static char buf[BUFSZ];
 
-    snprintf(buf, BUFSZ, "(%s (av %d %d) %s\n",
+    snprintf(buf, BUFSZ, "(%s (av %d %d %d) %s\n",
              classserver().getTypeName(_type).c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),
+             (int)getAttentionValue()->getVLTI(),
              getTruthValue()->toString().c_str());
     answer = indent + buf;
     // Here the targets string is made. If a target is a node, its name is
