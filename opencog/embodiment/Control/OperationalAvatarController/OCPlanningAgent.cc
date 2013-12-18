@@ -154,7 +154,7 @@ void OCPlanningAgent::run()
             // to wait for the PAI to finish more perception processing
             waitToStart ++;
 
-            if (waitToStart > 3)
+            if (waitToStart > 10)
                 startPlanning = true;
         }
 
