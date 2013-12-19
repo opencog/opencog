@@ -26,11 +26,11 @@ def convert_multiple_expressions(expressions):
     for expression in expressions:
         convert_expression(expression)
 
-def convert_expression(expression):
+def convert_expression(expression, link_tv=DEFAULT_LINK_TV):
     if isinstance(expression,str):
         return convert_token(expression)
     else:
-        return convert_list(expression)
+        return convert_list(expression, link_tv)
 
 def convert_token(token):
     if token.startswith('?'):
@@ -38,24 +38,24 @@ def convert_token(token):
     else:
         return atomspace.add_node(types.ConceptNode, token, tv=DEFAULT_NODE_TV)
 
-def convert_list(expression):
+def convert_list(expression, link_tv):
     predicate = expression[0]
     arguments = expression[1:]
     
-    arguments_atoms = map(convert_expression, arguments)
+    arguments_atoms = [convert_expression(expr, link_tv=None) for expr in arguments]
 
-    return link(predicate, arguments_atoms)
+    return link(predicate, arguments_atoms, link_tv)
 
-def link(predicate, arguments):
+def link(predicate, arguments, link_tv):
     link_type = special_link_type(predicate)
 
     if link_type:
-        return atomspace.add_link(link_type, arguments)
+        return atomspace.add_link(link_type, arguments, tv=link_tv)
     else:
         predicate_node = atomspace.add_node(types.PredicateNode, predicate, tv=DEFAULT_PREDICATE_TV)
         return atomspace.add_link(types.EvaluationLink, [predicate_node,
             atomspace.add_link(types.ListLink, arguments)],
-            tv=DEFAULT_LINK_TV)
+            tv=link_tv)
 
 def special_link_type(predicate):
     mapping = {
