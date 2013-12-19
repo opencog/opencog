@@ -47,7 +47,8 @@ def convert_list(expression, link_tv):
     return link(predicate, arguments_atoms, link_tv)
 
 def link(predicate, arguments, link_tv):
-    if predicate == 'documentation':
+    # Remove things with "" in them
+    if predicate in ['documentation', 'termFormat','externalImage','abbreviation']:
         return None
 
     link_type = special_link_type(predicate)
