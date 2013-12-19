@@ -2,7 +2,7 @@ from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 
 from pln.chainers import Chainer
-from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules
+from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules, predicate_rules
 
 class ForwardInferenceAgent(MindAgent):
     def __init__(self):
@@ -17,7 +17,7 @@ class ForwardInferenceAgent(MindAgent):
 #        conditional_probability_types = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.ImplicationLink]
 
         # always use the mixed inheritance types, because human inference is normally a mix of intensional and extensional
-        conditional_probability_types = [types.InheritanceLink, types.ImplicationLink]
+        conditional_probability_types = [types.InheritanceLink, types.ImplicationLink, types.PredictiveImplicationLink]
         similarity_types = [types.SimilarityLink, types.EquivalenceLink]
 
         for link_type in conditional_probability_types:
@@ -28,8 +28,12 @@ class ForwardInferenceAgent(MindAgent):
             # Seems better than Modus Ponens - it doesn't make anything up
             self.chainer.add_rule(rules.TermProbabilityRule(self.chainer, link_type))
 
-        self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer))
-        # We also want symmetric Modus Ponens. It doesn't need inversion though obviously
+        for link_type in similarity_types:
+            # SimilarityLinks don't require an InversionRule obviously
+            self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.SymmetricModusPonensRule(self.chainer, link_type))
+
+        self.chainer.add_rule(predicate_rules.EvaluationImplicationRule(self.chainer))
 
         # These two Rules create mixed links out of intensional and extensional links
         self.chainer.add_rule(rules.InheritanceRule(self.chainer))
@@ -70,18 +74,18 @@ class ForwardInferenceAgent(MindAgent):
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
 
-        higher_order_rules = []
-        for rule in self.chainer.rules:
-            higher_order_rules.append(quantifier_rules.HigherOrderRule(self.chainer, rule))
-
-        contextual_rules = []
+#        higher_order_rules = []
+#        for rule in self.chainer.rules:
+#            higher_order_rules.append(quantifier_rules.HigherOrderRule(self.chainer, rule))
+#
+#        contextual_rules = []
 #        for rule in self.chainer.rules:
 #            contextual_rules.append(context_rules.ContextualRule(self.chainer, rule))
-
-        for rule in higher_order_rules + contextual_rules:
-            self.chainer.add_rule(rule)
-
-        self.chainer.add_rule(context_rules.AndToContextRule(self.chainer, types.InheritanceLink))
+#
+#        for rule in higher_order_rules + contextual_rules:
+#            self.chainer.add_rule(rule)
+#
+#        self.chainer.add_rule(context_rules.AndToContextRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
         # incredibly exciting futuristic display!

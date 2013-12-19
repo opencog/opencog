@@ -149,12 +149,10 @@ class AbductionRule(Rule):
 
 class TransitiveSimilarityRule(Rule):
     '''Similarity A B, Similarity B C => Similarity A C'''
-    def __init__(self, chainer):
+    def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()
-
-        link_type = types.SimilarityLink
 
         Rule.__init__(self,
             formula= formulas.transitiveSimilarityFormula,
