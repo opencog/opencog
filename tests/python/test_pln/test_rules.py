@@ -1,3 +1,6 @@
+import unittest
+raise unittest.SkipTest("Unit test temporarily disabled - see: https://github.com/opencog/opencog/issues/442")
+
 from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, types, Atom, TruthValue
