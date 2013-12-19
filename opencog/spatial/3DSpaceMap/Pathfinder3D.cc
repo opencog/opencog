@@ -25,17 +25,18 @@
 #include <set>
 #include <map>
 #include <iterator>
+#include <algorithm>
 
 using namespace opencog;
 using namespace opencog::spatial;
 
 bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const BlockVector& begin, const BlockVector& target, vector<BlockVector>& path,
-                                     BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos)
+                                     BlockVector& nearestPos, BlockVector& bestPos, bool getNearestPos, bool getBestPos, bool tryOptimal)
 {
     BlockVector end = target;
     map<BlockVector,double> costMap;
     map<BlockVector,double>::const_iterator itercost;
-    int searchTimes = 0;
+
     float nearestDis = begin - target;
     float bestHeuristic = nearestDis * 1.41421356f;
     nearestPos = begin;
@@ -47,154 +48,135 @@ bool Pathfinder3D::AStar3DPathFinder(Octree3DMapManager *mapManager,  const Bloc
     {
         nostandable = true;
         if ((! getNearestPos) && (! getBestPos))
-        return false;
+            return false;
     }
 
-    while(true)
+
+    set<BlockVector> searchedList;
+    set<BlockVector>::const_iterator iter;
+    BlockVector curPos;
+
+    path.push_back(begin);
+    searchedList.insert(begin);
+    int pathfindingSteps = 0;
+
+    bool is_found = false;
+
+    while(path.size() != 0)
     {
-        set<BlockVector> searchedList;
-        set<BlockVector>::const_iterator iter;
-        BlockVector curPos;
-
-        vector<BlockVector> currentPath;
-
-        currentPath.push_back(begin);
-        searchedList.insert(begin);
-        int pathfindingSteps = 0;
-
-        bool is_found = false;
-        searchTimes ++;
-        while(currentPath.size() != 0)
+        // successfully achieve the target
+        if (path.back() == end)
         {
-            // successfully achieve the target
-            if (currentPath.back() == end)
-            {
-                is_found = true;
-                break;
-            }
+            is_found = true;
+            break;
+        }
 
-            // Calculate 24 neighbour cost and then pick the lowest one.
-            double lowestCost = 999999.99;
-            BlockVector lowestCostPos;
-            double curCost;
+        // Calculate 24 neighbour cost and then pick the lowest one.
+        double lowestCost = 999999.99;
+        BlockVector lowestCostPos;
+        double curCost;
 
-            for (int i = -1; i < 2; i ++)
+        for (int i = -1; i < 2; i ++)
+        {
+            for (int j = -1; j < 2; j ++)
             {
-                for (int j = -1; j < 2; j ++)
+                for (int k = -1; k < 2; k ++)
                 {
-                    for (int k = -1; k < 2; k ++)
+                    // Will not calculate the pos just above or below  or equal to the begin position.
+                    if ( (i == 0) && (j == 0))
+                        continue;
+
+                    curPos.x = path.back().x + i;
+                    curPos.y = path.back().y + j;
+                    curPos.z = path.back().z + k;
+
+                    iter = searchedList.find(curPos);
+                    if (iter != searchedList.end())
                     {
-                        // Will not calculate the pos just above or below  or equal to the begin position.
-                        if ( (i == 0) && (j == 0))
-                            continue;
+                        // already searched!
+                        continue;
+                    }
 
-                        curPos.x = currentPath.back().x + i;
-                        curPos.y = currentPath.back().y + j;
-                        curPos.z = currentPath.back().z + k;
+                    // check if standable
+                    if (! mapManager->checkStandable(curPos))
+                    {
+                        searchedList.insert(curPos);
+                        continue;
+                    }
 
-                        iter = searchedList.find(curPos);
-                        if (iter != searchedList.end())
+
+                    if ( ! checkNeighbourAccessable(mapManager,path.back() , i, j, k))
+                        continue;
+
+                    double costFromLastStep = 0.0;
+                    if (k == 1) // this pos is higher than last pos, have to cost more to jump up
+                        costFromLastStep = 0.2;
+                    else if (k == -1) // this pos is lower than last pos, have to cost more to jump down
+                        costFromLastStep = 0.1;
+
+                    itercost = costMap.find(curPos);
+                    if (itercost != costMap.end())
+                    {
+                        if ((double)(itercost->second) + costFromLastStep < lowestCost)
                         {
-                            // already searched!
-                            continue;
-                        }
-
-                        // check if standable
-                        if (! mapManager->checkStandable(curPos))
-                        {
-                            searchedList.insert(curPos);
-                            continue;
-                        }
-
-
-                        if ( ! checkNeighbourAccessable(mapManager,currentPath.back() , i, j, k))
-                            continue;
-
-                        double costFromLastStep = 0.0;
-                        if (k == 1) // this pos is higher than last pos, have to cost more to jump up
-                            costFromLastStep = 0.2;
-                        else if (k == -1) // this pos is lower than last pos, have to cost more to jump down
-                            costFromLastStep = 0.1;
-
-                        itercost = costMap.find(curPos);
-                        if (itercost != costMap.end())
-                        {
-                            if ((double)(itercost->second) + costFromLastStep < lowestCost)
-                            {
-                                lowestCost = (double)(itercost->second) + costFromLastStep;
-                                lowestCostPos = curPos;
-                            }
-                        }
-
-                        // calculate the cost of this pos
-                        curCost = calculateCostByDistance(begin, end, curPos,nearestDis,nearestPos,bestHeuristic,bestPos);
-
-                        pathfindingSteps++;
-                        costMap.insert(pair<BlockVector, int>(curPos,curCost));
-                        if (curCost + costFromLastStep < lowestCost)
-                        {
-                            lowestCost = curCost +costFromLastStep;
+                            lowestCost = (double)(itercost->second) + costFromLastStep;
                             lowestCostPos = curPos;
                         }
                     }
+
+                    // calculate the cost of this pos
+                    curCost = calculateCostByDistance(begin, end, curPos,nearestDis,nearestPos,bestHeuristic,bestPos);
+
+                    pathfindingSteps++;
+                    costMap.insert(pair<BlockVector, int>(curPos,curCost));
+                    if (curCost + costFromLastStep < lowestCost)
+                    {
+                        lowestCost = curCost +costFromLastStep;
+                        lowestCostPos = curPos;
+                    }
                 }
             }
-
-            // if the lowestCost still == 99999.99, it shows that all the neighbours have been searched and failed,
-            // so we should return to last step
-            if (lowestCost > 999999.0)
-            {
-                currentPath.pop_back();
-            }
-            else
-            {
-                // add the lowestcost neighbour pos to the currentPath
-                currentPath.push_back(lowestCostPos);
-                searchedList.insert(lowestCostPos);
-
-            }
-
         }
 
-        if (! is_found)
-            return false;
-
-        if ((currentPath.size() < 21) || (searchTimes > 4))
+        // if the lowestCost still == 99999.99, it shows that all the neighbours have been searched and failed,
+        // so we should return to last step
+        if (lowestCost > 999999.0)
         {
-            path.insert(path.begin(), currentPath.begin(), currentPath.end());
-            if (nostandable)
-                return false;
-            else
-                return true;
+            path.pop_back();
         }
-
-        // find the farthest pos in this currrentPath from the end position
-        vector<BlockVector>::iterator disIter, farPosIter;
-        double farthestDis = 0.0;
-        for(disIter = currentPath.begin(); disIter != currentPath.end(); ++ disIter)
+        else
         {
-           double dis = (end - *disIter)  + (begin - *disIter);
-           if ( dis > farthestDis)
-           {
-               farPosIter = disIter;
-               farthestDis = dis;
-           }
+            // add the lowestcost neighbour pos to the path
+            path.push_back(lowestCostPos);
+            searchedList.insert(lowestCostPos);
+
         }
-
-        path.insert(path.begin(), farPosIter, currentPath.end());
-
-        // The shortest way found!
-        if (farPosIter == currentPath.begin())
-        {
-            if (nostandable)
-                return false;
-            else
-                return true;
-        }
-
-        end = *(--farPosIter);
 
     }
+
+    if (! is_found)
+        return false;
+
+    if (nostandable)
+        return false;
+    else if (tryOptimal)
+    {
+        // switch the start and end point
+        vector<BlockVector> inversePath;
+        BlockVector inearestPos,ibestPos;
+        AStar3DPathFinder(mapManager, target, begin, inversePath, inearestPos,ibestPos);
+        if (inversePath.size() < path.size())
+        {
+            path = inversePath;
+            std::reverse(path.begin(), path.end());
+
+        }
+
+    }
+
+    return true;
+
+
 
 }
 
