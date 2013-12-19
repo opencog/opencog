@@ -653,6 +653,11 @@ vector<ParamValue> Inquery::inqueryAdjacentAccessPosition(const vector<ParamValu
                 if (spaceMap->checkIsSolid(pos1.x + x,pos1.y + y,pos1.z + z))
                     continue;
 
+                // cannot stand on water
+                spatial::Block3D* block = spaceMap->getBlockAtLocation(pos1.x + x,pos1.y + y,pos1.z + z -1);
+                if ( (block) && (block->getBlockMaterial().materialType == "water"))
+                     continue;
+
                 if ( spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap,pos1,x, y, z))
                     values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
             }

@@ -307,6 +307,8 @@ namespace opencog
             bool checkIsSolid(BlockVector& pos);
             bool checkIsSolid(int x, int y, int z);
 
+            Block3D* getBlockAtLocation(int x, int y, int z);
+
             // return the handle of the unit block in this position
             Handle getUnitBlockHandleFromPosition(const BlockVector &pos);
 
