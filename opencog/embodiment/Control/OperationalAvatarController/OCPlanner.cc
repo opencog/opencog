@@ -3059,24 +3059,21 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     //  select the best one in this vector<ParamValue> that get the highest score according to the heuristics cost calculations
     ParamValue bestValue;
 
-    if (values.size() == 1)
-        bestValue = values.front();
+
+    if (rule->CostHeuristics.size() != 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+    }
+    else if (ruleNode->costHeuristics.size()!= 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
+    }
     else
     {
-        if (rule->CostHeuristics.size() != 0)
-        {
-            bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
-        }
-        else if (ruleNode->costHeuristics.size()!= 0)
-        {
-            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
-        }
-        else
-        {
-            cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
-            bestValue = values.front();
-        }
+        cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
+        bestValue = values.front();
     }
+
 
     if (bestValue == UNDEFINED_VALUE)
     {
