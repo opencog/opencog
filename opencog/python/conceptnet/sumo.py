@@ -78,6 +78,11 @@ def special_link_type(predicate):
     else:
         return None
 
+def print_links():
+    for atom in atomspace:
+        if atom.is_a(types.Link) and atom.tv.count > 0:
+            print atom
+
 if __name__ == '__main__':
     import sys
     filename = sys.argv[1]
@@ -87,5 +92,6 @@ if __name__ == '__main__':
 
     atomspace = AtomSpace()
     convert_multiple_expressions(expressions)
-    atomspace.print_list()
+
+    print_links()
 
