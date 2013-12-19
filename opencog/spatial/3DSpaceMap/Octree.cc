@@ -315,6 +315,8 @@ bool Octree::checkIsSolid(const BlockVector& _pos, Block3D* & _block3d) const
 {
     Octree* tree = (Octree*)(mOctree3DMapManager->getRootOctree());
 
+    _block3d = 0;
+
     int x,y,z;
     while(true)
     {

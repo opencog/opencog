@@ -834,6 +834,15 @@ bool Octree3DMapManager::checkIsSolid(BlockVector& pos)
     return (mRootOctree->checkIsSolid(pos, block));
 }
 
+Block3D* Octree3DMapManager::getBlockAtLocation(int x, int y, int z)
+{
+    Block3D* block;
+    BlockVector pos(x,y,z);
+    mRootOctree->checkIsSolid(pos, block);
+
+    return block;
+}
+
 bool Octree3DMapManager::checkStandable(int x, int y, int z) const
 {
     BlockVector pos(x,y,z);
