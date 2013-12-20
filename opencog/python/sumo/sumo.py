@@ -56,8 +56,15 @@ def link(predicate, arguments, link_tv):
     if link_type:
         return atomspace.add_link(link_type, arguments, tv=link_tv)
     else:
-        predicate_node = atomspace.add_node(types.PredicateNode, predicate, tv=DEFAULT_PREDICATE_TV)
-        return atomspace.add_link(types.EvaluationLink, [predicate_node,
+        if predicate.endswith('Fn'):
+            link_type = types.ExecutionLink
+            node_type = types.SchemaNode
+        else:
+            link_type = types.EvaluationLink
+            node_type = types.PredicateNode
+
+        node = atomspace.add_node(node_type, predicate, tv=DEFAULT_PREDICATE_TV)
+        return atomspace.add_link(link_type, [node,
             atomspace.add_link(types.ListLink, arguments)],
             tv=link_tv)
 
@@ -75,6 +82,7 @@ def special_link_type(predicate):
         'subclass':types.InheritanceLink,
         'exists':types.ExistsLink,
         'forall':types.ForAllLink,
+        'causes':types.PredictiveImplicationLink
         }
 
     if predicate in mapping:
