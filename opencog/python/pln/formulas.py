@@ -90,7 +90,7 @@ def symmetricModusPonensFormula(tvs):
 
     n = makeUpCount(tvs)
 
-    return [TruthValue(sB, nB)]
+    return [TruthValue(sB, n)]
 
 def termProbabilityFormula(tvs):
     # sB = sA*sAB/sBA
