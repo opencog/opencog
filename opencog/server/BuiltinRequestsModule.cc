@@ -226,15 +226,13 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
 
         agents.push_back(agent_type);
     }
-    // doesn't give an error if there is no instance of that agent type running
 
+    // Doesn't give an error if there is no instance of that agent type
+    // running.  TODO FIXME.  Should check.
     for (std::vector<std::string>::const_iterator it = agents.begin();
-         it != agents.end(); ++it) {
-        // Check if this Agent instance is also a module
-        if (_cogserver.getModule(*it) != NULL) {
-            // delete the Agent instance if it is not
-            _cogserver.destroyAllAgents(*it);
-        }
+         it != agents.end(); ++it)
+    {
+        _cogserver.destroyAllAgents(*it);
     }
 
     return "Successfully stopped agents\n";
