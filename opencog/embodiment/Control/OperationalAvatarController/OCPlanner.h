@@ -60,6 +60,7 @@ struct UngroundedVariablesInAState
     // the evalutionlink for this state for using pattern matching
     // default is undefined. only easy state that needs no real time inquery or contains no numeric variables will be generate such a link handle.
     Handle PMLink;
+
     UngroundedVariablesInAState(State* _state, string firstVar)
     {
         state = _state;
@@ -194,7 +195,11 @@ public:
     string depth; // depth = -1 means no rule node need this state node as a precondition, depth string composed of 0~9, A~Z, a~z, see calculateNodeDepth()
     int hardnessScore; // the hardness to achieve this goal, only for unsatisfied goals
 
-    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1"; hardnessScore = -1;}
+    // add a hypothetical link to the atomspace when a state node is created, only for states that permanent = true
+    // all the hypotheticalLink will be stored in the planner, every time finish planning, will delete all of the hypotheticalLinks from the Atomspace
+    Handle hypotheticalLink;
+
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1"; hardnessScore = -1; hypotheticalLink = 0;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
@@ -364,6 +369,8 @@ protected:
      // this list will be sorted after a planning finised according to the order of dependency relations
      vector<RuleNode*> allRuleNodeInThisPlan;
 
+     HandleSeq hypotheticalLinks;
+
      int tryStepNum;
 
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
@@ -417,6 +424,9 @@ protected:
 
      // return how many states in the temporaryStateNodes this rule will dissatisfied by the effect of this action when it's executed in the space map
      int checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState);
+
+     // add hyptothetical link into the AtomSpace for a new StateNode , only for state that is permanent
+     void addHypotheticalLinkForStateNode(StateNode *stateNode);
 
      bool isActionChangeSPaceMap(PetAction* action);
 
