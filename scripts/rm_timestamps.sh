@@ -4,7 +4,7 @@
 # tools just as diff so they ignore timestamp differences.
 
 set -u
-set -x
+# set -x
 
 if [ $# != 1 ]; then
     echo "Description: remove timestamps from a log file"
