@@ -92,8 +92,8 @@ class PersistUTest :  public CxxTest::TestSuite
 		}
 
 		void add_to_space(int, AtomSpace *, std::string id);
-		void check_space(int, AtomSpace *, std::string id);
-		void check_empty(int, AtomSpace *, std::string id);
+		void check_space(int, AtomSpace *);
+		void check_empty(int, AtomSpace *);
 
 		void test_atomspace(void);
 };
@@ -240,7 +240,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	l[idx] = LinkCast(hl[idx]);
 }
 
-void PersistUTest::check_space(int idx, AtomSpace *space, std::string id)
+void PersistUTest::check_space(int idx, AtomSpace *space)
 {
 	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
 	atomCompare(h1[idx], hb1);
@@ -260,7 +260,7 @@ void PersistUTest::check_space(int idx, AtomSpace *space, std::string id)
 	atomCompare(hl[idx], hlb);
 }
 
-void PersistUTest::check_empty(int idx, AtomSpace *space, std::string id)
+void PersistUTest::check_empty(int idx, AtomSpace *space)
 {
 	Handle hb1 = space->getHandle(n1[idx]->getType(), n1[idx]->getName());
 	TSM_ASSERT("Should not find this atom", hb1 == Handle::UNDEFINED);
@@ -297,11 +297,11 @@ void PersistUTest::test_atomspace(void)
 
 	/* Verify that the atoms were added */
 	idx = 0;
-	check_space(idx++, _as, "aaa ");
-	check_space(idx++, _as, "bbb ");
-	check_space(idx++, _as, "ccc ");
-	check_space(idx++, _as, "ddd ");
-	check_space(idx++, _as, "eee ");
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
 
 	/* Push all atoms out to the SQL DB */
 	Request* req = cogserver().createRequest("sql-store");
@@ -317,11 +317,11 @@ void PersistUTest::test_atomspace(void)
 
 	/* Verify that the atoms can still be fetched from storage. */
 	idx = 0;
-	check_space(idx++, _as, "aaa ");
-	check_space(idx++, _as, "bbb ");
-	check_space(idx++, _as, "ccc ");
-	check_space(idx++, _as, "ddd ");
-	check_space(idx++, _as, "eee ");
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
 
 	/* Do it again, for good luck.  */
 	_as->clear();
@@ -329,11 +329,11 @@ void PersistUTest::test_atomspace(void)
 
 	/* Verify that the atoms can still be fetched from storage. */
 	idx = 0;
-	check_space(idx++, _as, "aaa ");
-	check_space(idx++, _as, "bbb ");
-	check_space(idx++, _as, "ccc ");
-	check_space(idx++, _as, "ddd ");
-	check_space(idx++, _as, "eee ");
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
+	check_space(idx++, _as);
 
 	/* Kill data for good */
 	_as->clear();
@@ -342,11 +342,11 @@ void PersistUTest::test_atomspace(void)
 
 	/* Verify that the atoms no longer being found. */
 	idx = 0;
-	check_empty(idx++, _as, "aaa ");
-	check_empty(idx++, _as, "bbb ");
-	check_empty(idx++, _as, "ccc ");
-	check_empty(idx++, _as, "ddd ");
-	check_empty(idx++, _as, "eee ");
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
+	check_empty(idx++, _as);
 
 	/* Orderly shutdown avoids warning in Potgres log file */
 	req = cogserver().createRequest("sql-close");
