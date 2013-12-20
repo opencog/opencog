@@ -101,8 +101,9 @@ To run this test, perform the following steps:
 2k) Edit lib/opencog-test.conf and verify that the username and password
     are set as above.
 
-3) Run the test case:
+3) Run the two test cases:
 
-   $ ./tests/scm/BasicSCMUTest
+   $ ./tests/persist/sql/BasicSaveUTest
+   $ ./tests/persist/sql/PersistUTest
 
    It should print OK! at the end, if all tests passed.

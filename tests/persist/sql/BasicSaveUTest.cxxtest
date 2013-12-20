@@ -85,7 +85,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			}
 			catch (InvalidParamException &e)
 			{
-				freindlyFailMessage();
+				freindlyFailMessage(false);
 			}
 		}
 
@@ -98,9 +98,9 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		void setUp(void);
 
-		void freindlyFailMessage()
+		void freindlyFailMessage(bool ts)
 		{
-			TS_FAIL("The BasicSaveUTest failed.\n"
+			const char * fail = "The BasicSaveUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
@@ -109,7 +109,12 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 				"and create/configure the SQL database as described there.\n"
 				"Next, edit lib/opencog-test.conf appropriately, so as\n"
 				"to indicate the location of your database. If this is\n"
-				"done correctly, then this test will pass.\n");
+				"done correctly, then this test will pass.\n";
+
+			if (ts)
+				TS_FAIL(fail);
+			else
+				fprintf(stderr, "%s", fail);
 			exit(1);
 		}
 
@@ -135,7 +140,7 @@ void BasicSaveUTest::setUp(void)
 	if (!astore->connected())
 	{
 		logger().info("setUp: cannot connect to database");
-		freindlyFailMessage();
+		freindlyFailMessage(true);
 		exit(1);
 	}
 	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
