@@ -649,7 +649,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     allRuleNodeInThisPlan.clear();
     unsatisfiedStateNodes.clear();
     temporaryStateNodes.clear();
-    imaginaryHandles.clear(); // TODO: Create imaginary atoms
     satisfiedGoalStateNodes.clear();
     OCPlanner::goalRuleNode.backwardLinks.clear();
     curStateNode = 0;
@@ -1575,9 +1574,63 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // Reset the spaceMap for inquery back to the real spaceMap
     Inquery::reSetSpaceMap();
 
-    // todo: remove all the imaginary atoms in imaginaryHandles
+    cleanUpEverythingAfterPlanning();
 
     return planID;
+}
+
+void OCPlanner::cleanUpEverythingAfterPlanning()
+{
+    // remove all the imaginary atoms in hypotheticalLinks
+    foreach (Handle h, hypotheticalLinks)
+    {
+        if (h)
+            atomSpace->removeAtom(h);
+    }
+
+    // delete all rule nodes
+    vector<RuleNode*>::iterator planRuleNodeIt;
+    for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
+    {
+         RuleNode* rn = *planRuleNodeIt;
+         if (rn)
+             delete rn;
+    }
+
+    // delete all the state nodes
+
+    vector<StateNode*>::iterator sit;
+    for (sit = satisfiedGoalStateNodes.begin(); sit != satisfiedGoalStateNodes.end(); ++ sit)
+    {
+        StateNode* sn = *sit;
+        if (sn)
+            delete sn;
+    }
+
+    list<StateNode*>::iterator unsit;
+    for (unsit = unsatisfiedStateNodes.begin(); unsit != unsatisfiedStateNodes.end(); ++ unsit)
+    {
+        StateNode* sn = *unsit;
+        if (sn)
+            delete sn;
+    }
+
+    list<StateNode*>::iterator tsit;
+    for (tsit = temporaryStateNodes.begin(); tsit != temporaryStateNodes.end(); ++ tsit)
+    {
+        StateNode* sn = *tsit;
+        if (sn)
+            delete sn;
+    }
+
+    list<StateNode*>::iterator stsit;
+    for (stsit = startStateNodes.begin(); stsit != startStateNodes.end(); ++ stsit)
+    {
+        StateNode* sn = *stsit;
+        if (sn)
+            delete sn;
+    }
+
 }
 
 void OCPlanner::cleanUpContextBeforeRollBackToPreviousStep()

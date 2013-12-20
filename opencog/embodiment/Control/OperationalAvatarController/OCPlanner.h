@@ -345,9 +345,6 @@ protected:
 
      StateNode* curStateNode; // the current selected subgoal node
 
-     // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
-     HandleSeq imaginaryHandles;
-
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
      // map<float,Rule*> is map<probability, rule>
@@ -386,6 +383,8 @@ protected:
      void loadFacts(vector<State*> &knownStates);
 
      void cleanUpContextBeforeRollBackToPreviousStep();
+
+     void cleanUpEverythingAfterPlanning();
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
