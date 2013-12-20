@@ -157,6 +157,9 @@ void PersistUTest::kill_data(void)
 
 	// Trash the contents of the database.
 	astore->kill_data();
+
+	// Destructor also logs out of database.
+	delete astore;
 }
 
 // ============================================================
