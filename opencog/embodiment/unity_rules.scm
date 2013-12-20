@@ -971,5 +971,31 @@
    )
 )
 
+; The German doesn't drink milk
+(EvaluationLink (stv 0 1)
+  (PredicateNode "drink")
+  (ListLink
+    (AvatarNode "id_German_man")
+    (ConceptNode "milk")
+  )
+)
+
+; The British doesn't drink water
+(EvaluationLink (stv 0 1)
+  (PredicateNode "drink")
+  (ListLink
+    (AvatarNode "id_British_man")
+    (ConceptNode "water")
+  )
+)
+
+; The British doesn't keep dogs
+(EvaluationLink (stv 0 1)
+  (PredicateNode "keep_pet")
+  (ListLink
+    (AvatarNode "id_British_man")
+    (ConceptNode "dogs")
+  )
+)
 
 
