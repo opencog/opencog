@@ -5,11 +5,11 @@
 In OpenCog, an "Agent" is a bit of code that is run repeatedly, on a
 regular schedule.  The CogServer maintains a list of active Agents, and
 calls themm on a periodic basis.  This directory provides an example of
-how an agent can be written in C++.  
+how an agent can be written in C++.
 
 To test this agent, do the following:
 
-*) Start the cogserver: From a shell prompt, issue the command 
+*) Start the cogserver: From a shell prompt, issue the command
    ./opencog/server/cogserver from the build directory
 
 *) Connect to the server: telnet localhost 17001
@@ -35,7 +35,7 @@ To test this agent, do the following:
 
    The agent was automatically started when the module was loaded.
 
-*) Stop the example agent. At the cogserver prompt, issue the command 
+*) Stop the example agent. At the cogserver prompt, issue the command
    'agents-stop opencog::ExampleAgent', and verify thaat the example
    agent stopped (by issuing 'agents-active' again).
 
@@ -44,9 +44,9 @@ To test this agent, do the following:
    Starting the agent will call the constructor again (i.e. create a
    new instance of the agent.)
 
-*) Verify that the agent is running, or stopped, by looking at the 
+*) Verify that the agent is running, or stopped, by looking at the
    cogserver.log file.  The example agent prints to the log file every
    time that it's run method is called.
 
-
+That's all folks!  The rest is up to you!
 

@@ -12,12 +12,12 @@ cut-n-paste of the code here is enough.
 The new atom types are loaded into the cogserver when the example module
 is loaded.  To load this module, and use the atom types, do this:
 
-*) Start the cogserver: From a shell prompt, issue the command 
+*) Start the cogserver: From a shell prompt, issue the command
    ./opencog/server/cogserver from the build directory
 
 *) Connect to the server: telnet localhost 17001
 
-*) At the cogserver prompt, issue the command: 
+*) At the cogserver prompt, issue the command:
    opencog> loadmodule examples/atomtypes/libcustomatomtypes.so
    You should see 'done' printed on a line by itself.
 
@@ -47,7 +47,7 @@ is loaded.  To load this module, and use the atom types, do this:
       (BarNode "haw")
    )
 
-   guile> 
+   guile>
 
 That's all folks .. the rest is up to you.
 
