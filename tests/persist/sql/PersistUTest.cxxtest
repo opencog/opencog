@@ -158,7 +158,7 @@ void PersistUTest::kill_data(void)
 	// Trash the contents of the database.
 	astore->kill_data();
 
-	// Destructor also logs out of database.
+	// Destructor also logs out of database (avoid warning in DB log file)
 	delete astore;
 }
 
@@ -347,6 +347,11 @@ void PersistUTest::test_atomspace(void)
 	check_empty(idx++, _as, "ccc ");
 	check_empty(idx++, _as, "ddd ");
 	check_empty(idx++, _as, "eee ");
+
+	/* Orderly shutdown avoids warning in Potgres log file */
+	req = cogserver().createRequest("sql-close");
+	cogserver().pushRequest(req);
+	cogserver().processRequests();
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
