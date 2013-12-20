@@ -1,5 +1,5 @@
 /*
- * examples/modules/SampleAgent.cc
+ * examples/modules/ExampleAgent.cc
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "SampleAgent.h"
+#include "ExampleAgent.h"
 
 #include <opencog/server/CogServer.h>
 #include <opencog/server/Factory.h>
@@ -31,37 +31,37 @@
 using namespace opencog;
 
 // load/unload functions for the Module interface
-DECLARE_MODULE(SampleModule)
+DECLARE_MODULE(ExampleModule)
 
-SampleModule::SampleModule(CogServer& cs) : Module(cs)
+ExampleModule::ExampleModule(CogServer& cs) : Module(cs)
 {
-    logger().info("[SampleModule] constructor");
+    logger().info("[ExampleModule] constructor");
 }
 
-SampleModule::~SampleModule()
+ExampleModule::~ExampleModule()
 {
-    logger().info("[SampleModule] destructor");
-    _cogserver.destroyAllAgents(SampleAgent::info().id);
+    logger().info("[ExampleModule] destructor");
+    _cogserver.destroyAllAgents(ExampleAgent::info().id);
 }
 
-void SampleModule::init()
+void ExampleModule::init()
 {
-    logger().info("[SampleModule] init");
-    _cogserver.registerAgent(SampleAgent::info().id, &factory);
-    _cogserver.createAgent(SampleAgent::info().id, true);
+    logger().info("[ExampleModule] init");
+    _cogserver.registerAgent(ExampleAgent::info().id, &factory);
+    _cogserver.createAgent(ExampleAgent::info().id, true);
 }
 
-SampleAgent::SampleAgent(CogServer& cs) : Agent(cs, 100)
+ExampleAgent::ExampleAgent(CogServer& cs) : Agent(cs, 100)
 {
-    logger().info("[SampleAgent] constructor");
+    logger().info("[ExampleAgent] constructor");
 }
 
-SampleAgent::~SampleAgent()
+ExampleAgent::~ExampleAgent()
 {
-    logger().info("[SampleAgent] destructor");
+    logger().info("[ExampleAgent] destructor");
 }
 
-void SampleAgent::run()
+void ExampleAgent::run()
 {
-    logger().info("[SampleAgent] run");
+    logger().info("[ExampleAgent] run");
 }

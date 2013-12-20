@@ -1,5 +1,5 @@
 /*
- * examples/modules/SampleAgent.h
+ * examples/modules/ExampleAgent.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,8 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_SAMPLE_AGENT_H
-#define _OPENCOG_SAMPLE_AGENT_H
+#ifndef _OPENCOG_EXAMPLE_AGENT_H
+#define _OPENCOG_EXAMPLE_AGENT_H
 
 #include <string>
 
@@ -36,36 +36,36 @@ namespace opencog
 
 class CogServer;
 
-class SampleAgent : public Agent
+class ExampleAgent : public Agent
 {
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
     static const ClassInfo& info() {
-        static const ClassInfo _ci("opencog::SampleAgent");
+        static const ClassInfo _ci("opencog::ExampleAgent");
         return _ci;
     }
 
-    SampleAgent(CogServer&);
-    virtual ~SampleAgent();
+    ExampleAgent(CogServer&);
+    virtual ~ExampleAgent();
     virtual void run();
 
 }; // class
 
-class SampleModule : public Module
+class ExampleModule : public Module
 {
 private:
 
-    Factory<SampleAgent, Agent> factory;
+    Factory<ExampleAgent, Agent> factory;
 
 public:
 
-    SampleModule(CogServer&);
-    virtual ~SampleModule();
+    ExampleModule(CogServer&);
+    virtual ~ExampleModule();
     virtual void init();
     virtual const char* id();
 };
 
 } // namespace opencog
 
-#endif // _OPENCOG_SAMPLE_AGENT_H
+#endif // _OPENCOG_EXAMPLE_AGENT_H
