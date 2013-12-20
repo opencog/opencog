@@ -144,6 +144,9 @@ public:
     // this function is used by generatePMLinkFromAState()
     static HandleSeq generatePMNodeFromeAParamValue(ParamValue& ParamValue, RuleNode* ruleNode);
 
+    // only for grounded paramvalue
+    static HandleSeq generateNodeForGroundedParamValue(ParamValue* realValue);
+
     // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
     static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
 

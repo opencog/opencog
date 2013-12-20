@@ -1139,38 +1139,9 @@ HandleSeq Inquery::findAllObjectsByGivenCondition(State* state)
     return results;
 }
 
-
-
-HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNode* ruleNode)
+HandleSeq Inquery::generateNodeForGroundedParamValue(ParamValue* realValue)
 {
     HandleSeq results;
-
-    ParamValue* realValue;
-
-    if (! Rule::isParamValueUnGrounded(paramValue))
-    {
-        // this stateOwner is const, just add it
-        realValue = &paramValue;
-    }
-    else
-    {
-        // this stateOwner is a variable
-        // look for the value of this variable in the current grounding parameter map
-
-        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(ActionParameter::ParamValueToString(paramValue));
-        if (paramMapIt != ruleNode->currentBindingsFromForwardState.end())
-        {
-            // found it in the current groundings, so just add it as a const
-            realValue = &(paramMapIt->second);
-        }
-        else
-        {
-            // it has not been grounded, so add it as a variable node
-            results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(paramValue)).c_str()));
-            return results;
-        }
-    }
-
     string* str = boost::get<string>(realValue);
     Entity* entity ;
     Vector* vector;
@@ -1180,7 +1151,6 @@ HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNo
 
     if( str)
     {
-
         if (StringManipulator::isNumber(*str))
         {
             results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, str->c_str()));
@@ -1221,9 +1191,39 @@ HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNo
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_low).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_high).c_str()));
     }
+}
 
-    return results;
+HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNode* ruleNode)
+{
 
+    ParamValue* realValue;
+
+    if (! Rule::isParamValueUnGrounded(paramValue))
+    {
+        // this stateOwner is const, just add it
+        realValue = &paramValue;
+    }
+    else
+    {
+        // this stateOwner is a variable
+        // look for the value of this variable in the current grounding parameter map
+
+        ParamGroundedMapInARule::iterator paramMapIt = ruleNode->currentBindingsFromForwardState.find(ActionParameter::ParamValueToString(paramValue));
+        if (paramMapIt != ruleNode->currentBindingsFromForwardState.end())
+        {
+            // found it in the current groundings, so just add it as a const
+            realValue = &(paramMapIt->second);
+        }
+        else
+        { 
+            // it has not been grounded, so add it as a variable node
+            HandleSeq results;
+            results.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE, (ActionParameter::ParamValueToString(paramValue)).c_str()));
+            return results;
+        }
+    }
+
+    return generateNodeForGroundedParamValue(realValue);
 }
 
 // return an EvaluationLink with variableNodes for using Pattern Matching
