@@ -50,6 +50,9 @@ public:
     virtual ~ExampleAgent();
     virtual void run();
 
+private:
+    int thing_a_ma_bob;
+
 }; // class
 
 class ExampleModule : public Module

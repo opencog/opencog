@@ -54,6 +54,7 @@ void ExampleModule::init()
 ExampleAgent::ExampleAgent(CogServer& cs) : Agent(cs, 100)
 {
     logger().info("[ExampleAgent] constructor");
+    thing_a_ma_bob = 0;
 }
 
 ExampleAgent::~ExampleAgent()
@@ -63,5 +64,6 @@ ExampleAgent::~ExampleAgent()
 
 void ExampleAgent::run()
 {
-    logger().info("[ExampleAgent] run");
+    thing_a_ma_bob++;
+    logger().info("[ExampleAgent] run; thing amabob is now %d", thing_a_ma_bob);
 }
