@@ -38,6 +38,8 @@ class Rule(object):
 
         print self.full_name
 
+        self.probabilistic_inputs = True
+
     def _get_type_names(self, templates):
         return ' '.join(template.type_name for template in templates)
 
@@ -256,6 +258,8 @@ class MembershipBasedEvaluationRule(Rule):
             outputs= [chainer.link(output_type, [A, B])],
             inputs=  inputs)
 
+        self.probabilistic_inputs = False
+
 class SubsetEvaluationRule(MembershipBasedEvaluationRule):
     '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
     def __init__(self, chainer):
@@ -283,6 +287,8 @@ class NegatedSubsetEvaluationRule(MembershipBasedEvaluationRule):
             formula= formulas.negatedSubsetEvaluationFormula,
             outputs= [chainer.link(output_type, [notA, B])],
             inputs=  inputs)
+
+        self.probabilistic_inputs = False
 
 class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates IntensionalInheritance(A B) from the definition.
@@ -373,6 +379,8 @@ TODO the forward chainer will work fine with this rule, but the backward chainer
             inputs=inputs,
             outputs=outputs)
 
+        self.probabilistic_inputs = False
+
 class IntensionalLinkEvaluationRule(Rule):
     '''Using (AttractionLink A x) and (AttractionLink B x), evaluate (IntensionalInheritance A B), (IntensionalInheritance B A), and (IntensionalSimilarityLink A B).'''
     def __init__(self, chainer):
@@ -406,6 +414,8 @@ class EvaluationToMemberRule(Rule):
                       formula= None,
                       inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
+
+        self.probabilistic_inputs = False
 
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
@@ -455,6 +465,8 @@ sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
                       inputs=  [chainer.link(types.EvaluationLink, [pred, list_link])],
                       outputs= [])
 
+        self.probabilistic_inputs = False
+
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, list_link] = eval_link.out
@@ -494,6 +506,8 @@ $x where (AtTimeLink ? EvaluationLink near jade $x)
                       inputs=  [at_time],
                       outputs= [])
 
+        self.probabilistic_inputs = False
+
     def custom_compute(self, inputs, outputs):
         [at_time] = inputs
         [time, eval_link] = at_time.out
@@ -530,6 +544,8 @@ class MemberToInheritanceRule(LinkToLinkRule):
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
             formula= formulas.mem2InhFormula)
         self.chainer=chainer
+
+        self.probabilistic_inputs = False
 
 class InheritanceToMemberRule(LinkToLinkRule):
     '''InheritanceLink(Jade robot) => MemberLink(Jade robot).'''

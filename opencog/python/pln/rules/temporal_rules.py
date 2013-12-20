@@ -36,6 +36,8 @@ class TemporalRule(rules.Rule):
 
         self.name = get_type_name(link_type) + 'EvaluationRule'
 
+        self.probabilistic_inputs = False
+
     def temporal_compute(self, input_tuples):
         links_a = []
         links_b = []
@@ -81,6 +83,8 @@ class TemporalTransitivityRule(rules.Rule):
             )
 
         self.name = get_type_name(link_type) + 'TransitivityRule'
+
+        self.probabilistic_inputs = False
 
 # there should also be temporal modus ponens too (to predict that something will happen)
 
