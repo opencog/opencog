@@ -1,6 +1,6 @@
 
                              Example Agent
-                            ----------------
+                            ---------------
 
 In OpenCog, an "Agent" is a bit of code that is run repeatedly, on a
 regular schedule.  The CogServer maintains a list of active Agents, and
@@ -15,7 +15,7 @@ To test this agent, do the following:
 *) Connect to the server: telnet localhost 17001
 
 *) At the cogserver prompt, issue the command:
-   opencog> loadmodule examples/atomtypes/libexample_agent.so
+   opencog> loadmodule examples/agents/libexample_agent.so
    You should see 'done' printed on a line by itself.
 
 *) At the cogserver prompt, issue the command 'listmodules', and verify
@@ -33,8 +33,20 @@ To test this agent, do the following:
    printed:
    opencog::ExampleAgent {""}
 
+   The agent was automatically started when the module was loaded.
+
 *) Stop the example agent. At the cogserver prompt, issue the command 
    'agents-stop opencog::ExampleAgent', and verify thaat the example
    agent stopped (by issuing 'agents-active' again).
+
+   Note that, at this time, with the current cogserver design, that
+   "stopping an agent" means both stopping it, and calling its destructor.
+   Starting the agent will call the constructor again (i.e. create a
+   new instance of the agent.)
+
+*) Verify that the agent is running, or stopped, by looking at the 
+   cogserver.log file.  The example agent prints to the log file every
+   time that it's run method is called.
+
 
 
