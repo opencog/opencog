@@ -24,6 +24,9 @@ Steps:
 
 6) cat ./link-pipeline.scm |netcat localhost 17001
 
+   Better idea: edit build/lib/opencog.conf and add nlp/learn/link-pipeline.scm
+   to the list
+
 7) telnet localhost 17001
    opencog> sql-open learn-pairs linas asdf
    opencog> scm
