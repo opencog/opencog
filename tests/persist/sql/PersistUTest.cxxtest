@@ -295,6 +295,10 @@ void PersistUTest::test_atomspace(void)
 	add_to_space(idx++, _as, "DD-dd-wow ");
 	add_to_space(idx++, _as, "EE-ee-wow ");
 
+	/* Make sure UTF-8 works fine */
+	add_to_space(idx++, _as, "Попытка выбраться вызвала слабый стон ");
+	add_to_space(idx++, _as, "はにがうりだそうであってるのかはち ");
+
 	/* Verify that the atoms were added */
 	idx = 0;
 	check_space(idx++, _as);
