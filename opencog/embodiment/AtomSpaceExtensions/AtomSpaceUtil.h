@@ -330,7 +330,8 @@ public:
                           Type linkType,
                           const HandleSeq& outgoing,
                           bool permanent = false,
-                          bool renew_sti = true);
+                          bool renew_sti = true,
+                          TruthValuePtr tv = TruthValue::TRUE_TV());
 
     /**
     * Adds a reward predicate into the AtomSpace

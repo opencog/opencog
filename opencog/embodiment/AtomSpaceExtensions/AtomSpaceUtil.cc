@@ -102,11 +102,11 @@ Handle AtomSpaceUtil::addNode(AtomSpace& atomSpace,
 Handle AtomSpaceUtil::addLink(AtomSpace& atomSpace,
                               Type linkType,
                               const HandleSeq& outgoing,
-                              bool permanent, bool renew_sti)
+                              bool permanent, bool renew_sti, TruthValuePtr tv)
 {
     Handle result = atomSpace.getHandle(linkType, outgoing);
     if (result == Handle::UNDEFINED) {
-        result = atomSpace.addLink(linkType, outgoing,TruthValue::TRUE_TV());
+        result = atomSpace.addLink(linkType, outgoing,tv);
         if (permanent) {
             atomSpace.setLTI(result, 1);
         }
@@ -115,7 +115,7 @@ Handle AtomSpaceUtil::addLink(AtomSpace& atomSpace,
             atomSpace.setLTI(result, 1);
         }
     } else if (renew_sti) {
-        result = atomSpace.addLink(linkType, outgoing,TruthValue::TRUE_TV());
+        result = atomSpace.addLink(linkType, outgoing,tv);
     }
     return result;
 }
