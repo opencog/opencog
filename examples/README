@@ -1,9 +1,9 @@
 This directory contains various examples that use the OpenCog framework.
 
-modules      - shows you how to create a plugin module to the CogServer/OpenCog.
-server       - shows how to extend the CogServer
-hopfield     - is a toy example for Economic Attention Allocation Networks,
-	       using OpenCog to emulate a associate memory neural network known
+agents       - Provides a template for creating a custom agent.
+atomtypes    - Shows how to define custom atom types.
+hopfield     - Provides a toy example for Economic Attention Allocation Networks,
+               using OpenCog to emulate a associate memory neural network known
                as a 'Hopfield network'.
-visual_demos - a number of demos to visually represent the dynamics of OpenCog.
+visual_demos - A number of demos to visually represent the dynamics of OpenCog.
 
