@@ -199,7 +199,7 @@ public:
     // all the hypotheticalLink will be stored in the planner, every time finish planning, will delete all of the hypotheticalLinks from the Atomspace
     Handle hypotheticalLink;
 
-    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1"; hardnessScore = -1; hypotheticalLink = 0;}
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1"; hardnessScore = -1; hypotheticalLink = Handle::UNDEFINED;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
@@ -275,7 +275,7 @@ public:
 
     ~StateNode()
     {
-        delete state;
+        delete state;          
     }
 
 };
@@ -365,8 +365,6 @@ protected:
      // every new rule node will be insurt into this list, and it will be removed from the set if it's deleted
      // this list will be sorted after a planning finised according to the order of dependency relations
      vector<RuleNode*> allRuleNodeInThisPlan;
-
-     HandleSeq hypotheticalLinks;
 
      int tryStepNum;
 

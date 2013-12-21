@@ -653,8 +653,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     OCPlanner::goalRuleNode.backwardLinks.clear();
     curStateNode = 0;
 
-    hypotheticalLinks.clear();
-
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
     // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
@@ -1581,13 +1579,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
 void OCPlanner::cleanUpEverythingAfterPlanning()
 {
-    // remove all the imaginary atoms in hypotheticalLinks
-    foreach (Handle h, hypotheticalLinks)
-    {
-        if (h)
-            atomSpace->removeAtom(h);
-    }
-
     // delete all rule nodes
     vector<RuleNode*>::iterator planRuleNodeIt;
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
@@ -1597,14 +1588,19 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
              delete rn;
     }
 
-    // delete all the state nodes
+    // delete all the state nodes, remove their hypotheticalLinks from Atomspace at the same time if any
 
     vector<StateNode*>::iterator sit;
     for (sit = satisfiedGoalStateNodes.begin(); sit != satisfiedGoalStateNodes.end(); ++ sit)
     {
         StateNode* sn = *sit;
         if (sn)
+        {
+            if (sn->hypotheticalLink != Handle::UNDEFINED)
+                atomSpace->removeAtom(sn->hypotheticalLink);
+
             delete sn;
+        }
     }
 
     list<StateNode*>::iterator unsit;
@@ -1612,7 +1608,12 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
     {
         StateNode* sn = *unsit;
         if (sn)
+        {
+            if (sn->hypotheticalLink != Handle::UNDEFINED)
+                atomSpace->removeAtom(sn->hypotheticalLink);
+
             delete sn;
+        }
     }
 
     list<StateNode*>::iterator tsit;
@@ -1620,7 +1621,12 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
     {
         StateNode* sn = *tsit;
         if (sn)
+        {
+            if (sn->hypotheticalLink != Handle::UNDEFINED)
+                atomSpace->removeAtom(sn->hypotheticalLink);
+
             delete sn;
+        }
     }
 
     list<StateNode*>::iterator stsit;
@@ -1628,9 +1634,13 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
     {
         StateNode* sn = *stsit;
         if (sn)
-            delete sn;
-    }
+        {
+            if (sn->hypotheticalLink != Handle::UNDEFINED)
+                atomSpace->removeAtom(sn->hypotheticalLink);
 
+            delete sn;
+        }
+    }
 }
 
 void OCPlanner::cleanUpContextBeforeRollBackToPreviousStep()
@@ -2181,7 +2191,6 @@ void OCPlanner::addHypotheticalLinkForStateNode(StateNode *stateNode)
        hEvalLink  = AtomSpaceUtil::addLink(*atomSpace,EVALUATION_LINK, evalLinkOutgoings,true);
 
     stateNode->hypotheticalLink = hEvalLink;
-    this->hypotheticalLinks.push_back(hEvalLink);
 
 }
 
