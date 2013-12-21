@@ -141,29 +141,12 @@ class AbstractChainer(Logic):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
-#        if atom.type in [types.InheritanceLink, types.SubsetLink, types.SimilarityLink]:
-#            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
-#            not_self_link    = atom.out[0] != atom.out[1]
-#            return not_self_link
         if atom.arity == 2:
             # heuristically assume that all selflinks are invalid!
             self_link = atom.out[0] == atom.out[1]
             # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
             both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
             return not self_link and not both_variables
-        elif atom.type in rules.BOOLEAN_LINKS:
-            # see if it has semantically sensible arguments (e.g you don't want MemberLinks inside AndLinks)
-            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.EvaluationLink) for arg in atom.out)
-            return suitable
-        elif atom.type in rules.FIRST_ORDER_LINKS:
-            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.ObjectNode) or arg.type in rules.BOOLEAN_LINKS)
-            return suitable
-        elif atom.type in rules.HIGHER_ORDER_LINKS:
-            suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
-        elif atom.is_a(types.MemberLink):
-            # Assume the domain of all predicates is objects or concepts or variables
-            element = atom.out[0]
-            return element.is_a(types.ObjectNode) or element.is_a(types.ConceptNode) or element.is_a(types.VariableNode)
         else:
             return True
 
