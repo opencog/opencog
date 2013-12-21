@@ -74,24 +74,47 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
      spaceMap = &(spaceServer().getLatestMap());
  }
 
+ Handle Inquery::getStateOwnerHandle(ParamValue &stateOwnerParamValue)
+ {
+    Entity *entity = boost::get<Entity>(&stateOwnerParamValue);
+    if (entity)
+        return AtomSpaceUtil::getEntityHandle(*atomSpace,entity->id);
+    else
+    {
+        string *concept = boost::get<string>(&stateOwnerParamValue);
+        if (concept)
+            return atomSpace->getHandle(CONCEPT_NODE, *concept);
+    }
+
+    return Handle::UNDEFINED;
+
+ }
+
  ParamValue Inquery::getParamValueFromAtomspace( State& state)
  {
      vector<ParamValue> stateOwnerList = state.stateOwnerList;
-     Entity entity1, entity2, entity3;
+
+     if (stateOwnerList.size() < 1)
+         return UNDEFINED_VALUE;
+
      Handle a, b, c = Handle::UNDEFINED;
 
-     entity1 = boost::get<Entity>(stateOwnerList[0]);
-     a = AtomSpaceUtil::getEntityHandle(*atomSpace,entity1.id);
+     a = getStateOwnerHandle(stateOwnerList[0]);
+
+     if (a == Handle::UNDEFINED)
+         return UNDEFINED_VALUE;
 
      if(stateOwnerList.size() > 1)
      {
-         entity2 = boost::get<Entity>(stateOwnerList[1]);
-         b = AtomSpaceUtil::getEntityHandle(*atomSpace,entity2.id);
+        b = getStateOwnerHandle(stateOwnerList[1]);
+        if (b == Handle::UNDEFINED)
+            return UNDEFINED_VALUE;
      }
      if(stateOwnerList.size() > 2)
-     {
-         entity3 = boost::get<Entity>(stateOwnerList[2]);
-         c = AtomSpaceUtil::getEntityHandle(*atomSpace,entity3.id);
+     {         
+         c = getStateOwnerHandle(stateOwnerList[2]);
+         if (c == Handle::UNDEFINED)
+             return UNDEFINED_VALUE;
      }
 
      Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c);
@@ -265,6 +288,45 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          return UNDEFINED_VALUE;
      }
 
+}
+
+ParamValue Inquery::inqueryUnknowableState(const vector<ParamValue>& stateOwnerList)
+{
+    return UNDEFINED_VALUE;
+}
+
+ParamValue Inquery::inqueryIsSame(const vector<ParamValue>& stateOwnerList)
+{
+    if (stateOwnerList.size() != 2)
+        return opencog::oac::SV_FALSE;;
+
+    ParamValue var1 = stateOwnerList.front();
+    ParamValue var2 = stateOwnerList.back();
+
+    Entity* entity1 = boost::get<Entity>(&var1);
+
+    Entity* entity2 = boost::get<Entity>(&var2);
+
+    if (entity1 && entity2)
+    {
+        if (entity1->id == entity2->id)
+            return opencog::oac::SV_TRUE;
+        else
+            return opencog::oac::SV_FALSE;
+    }
+
+    string* concept1 = boost::get<string>(&var1);
+    string* concept2 = boost::get<string>(&var2);
+
+    if (concept1 && concept2)
+    {
+        if ((*concept1) == (*concept2))
+            return opencog::oac::SV_TRUE;
+        else
+            return opencog::oac::SV_FALSE;
+    }
+
+    return opencog::oac::SV_FALSE;
 }
 
 ParamValue Inquery::getParamValueFromHandle(string var, Handle& valueH)
@@ -590,6 +652,11 @@ vector<ParamValue> Inquery::inqueryAdjacentAccessPosition(const vector<ParamValu
 
                 if (spaceMap->checkIsSolid(pos1.x + x,pos1.y + y,pos1.z + z))
                     continue;
+
+                // cannot stand on water
+                spatial::Block3D* block = spaceMap->getBlockAtLocation(pos1.x + x,pos1.y + y,pos1.z + z -1);
+                if ( (block) && (block->getBlockMaterial().materialType == "water"))
+                     continue;
 
                 if ( spatial::Pathfinder3D::checkNeighbourAccessable(spaceMap,pos1,x, y, z))
                     values.push_back(Vector(pos1.x + x,pos1.y + y,pos1.z + z));
@@ -1189,7 +1256,16 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     evalLinkOutgoings.push_back(predicateListLink);
     Handle hEvalLink = AtomSpaceUtil::addLink(*atomSpace,EVALUATION_LINK, evalLinkOutgoings);
 
-    return hEvalLink;
+    // If the state is STATE_NOT_EQUAL_TO, need to use a NotLink wrap the EvaluationLink
+    if (state->stateType == STATE_NOT_EQUAL_TO)
+    {
+        HandleSeq notLinkOutgoings;
+        notLinkOutgoings.push_back(hEvalLink);
+        Handle hNotLink = AtomSpaceUtil::addLink(*atomSpace,NOT_LINK, notLinkOutgoings);
+        return hNotLink;
+    }
+    else
+        return hEvalLink;
 
 }
 
@@ -1224,6 +1300,7 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
             UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
             std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
             andLinkOutgoings.push_back(record.PMLink);
+
         }
 
         // remove the repeated elements
@@ -1252,8 +1329,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;
@@ -1261,11 +1338,32 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
+    std::cout<<"Debug: pattern matching results: " << std::endl
+            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+
     // Get result
     // Note: Don't forget remove the hResultListLink
     HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
     atomSpace->removeAtom(hResultListLink);
 
-    return resultSet;
+    // loop through all the result groups, remove the groups that bind the same variables to different variables
+    if (allVariables.size() > 1)
+    {
+        HandleSeq nonDuplicatedResultSet;
+        foreach (Handle listH , resultSet)
+        {
+            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+            sort(oneGroup.begin(),oneGroup.end());
+
+            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
+                nonDuplicatedResultSet.push_back(listH);
+
+        }
+        return nonDuplicatedResultSet;
+    }
+    else
+       return resultSet;
+
+
 
 }

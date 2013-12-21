@@ -180,7 +180,7 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
     std::vector<std::string> agents;
 
     if (args.size() == 0)
-        return "Error: No agents to start specified";
+        return "Error: No agents to start specified\n";
 
     for (std::list<std::string>::const_iterator it = args.begin();
          it != args.end(); ++it) {
@@ -189,7 +189,7 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
         if (availableAgents.end() ==
          find(availableAgents.begin(), availableAgents.end(), *it)) {
             std::ostringstream oss;
-            oss << "Invalid Agent ID (" << *it << ")";
+            oss << "Invalid Agent ID \"" << *it << "\"\n";
             return oss.str();
         }
 
@@ -201,7 +201,7 @@ std::string BuiltinRequestsModule::do_startAgents(Request *dummy, std::list<std:
         _cogserver.createAgent(*it, true);
     }
 
-    return "Successfully started agents";
+    return "Successfully started agents\n";
 }
 
 std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::string> args)
@@ -211,7 +211,7 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
     std::vector<std::string> agents;
 
     if (args.size() == 0)
-        return "Error: No agents to stop specified";
+        return "Error: No agents to stop specified\n";
 
     for (std::list<std::string>::const_iterator it = args.begin();
          it != args.end(); ++it) {
@@ -220,24 +220,22 @@ std::string BuiltinRequestsModule::do_stopAgents(Request *dummy, std::list<std::
         if (availableAgents.end() ==
          find(availableAgents.begin(), availableAgents.end(), *it)) {
             std::ostringstream oss;
-            oss << "Invalid Agent ID (" << *it << ")";
+            oss << "Invalid Agent ID \"" << *it << "\"\n";
             return oss.str();
         }
 
         agents.push_back(agent_type);
     }
-    // doesn't give an error if there is no instance of that agent type running
 
+    // Doesn't give an error if there is no instance of that agent type
+    // running.  TODO FIXME.  Should check.
     for (std::vector<std::string>::const_iterator it = agents.begin();
-         it != agents.end(); ++it) {
-        // Check if this Agent instance is also a module
-        if (_cogserver.getModule(*it) != NULL) {
-            // delete the Agent instance if it is not
-            _cogserver.destroyAllAgents(*it);
-        }
+         it != agents.end(); ++it)
+    {
+        _cogserver.destroyAllAgents(*it);
     }
 
-    return "Successfully stopped agents";
+    return "Successfully stopped agents\n";
 }
 
 std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::string> args)
@@ -249,7 +247,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
              it != agents.end(); ++it) {
             (*it)->run();
         }
-        return "Ran a step of each active agent";
+        return "Ran a step of each active agent\n";
     } else {
         std::list<std::string> unknownAgents;
         int numberAgentsRun = 0;
@@ -281,7 +279,7 @@ std::string BuiltinRequestsModule::do_stepAgents(Request *dummy, std::list<std::
         std::stringstream returnMsg;
         for (std::list<std::string>::iterator it = unknownAgents.begin();
                 it != unknownAgents.end(); ++it) {
-            returnMsg << "Unknown agent " << *it << std::endl;
+            returnMsg << "Unknown agent \"" << *it << "\"" << std::endl;
         }
         returnMsg << "Successfully ran a step of " << numberAgentsRun <<
             "/" << args.size() << " agents." << std::endl;
@@ -293,14 +291,14 @@ std::string BuiltinRequestsModule::do_stopAgentLoop(Request *dummy, std::list<st
 {
     _cogserver.stopAgentLoop();
 
-    return "Stopped agent loop";
+    return "Stopped agent loop\n";
 }
 
 std::string BuiltinRequestsModule::do_startAgentLoop(Request *dummy, std::list<std::string> args)
 {
     _cogserver.startAgentLoop();
 
-    return "Started agent loop";
+    return "Started agent loop\n";
 }
 
 std::string BuiltinRequestsModule::do_listAgents(Request *dummy, std::list<std::string> args)

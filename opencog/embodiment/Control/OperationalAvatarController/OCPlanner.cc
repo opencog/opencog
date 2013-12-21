@@ -41,6 +41,7 @@
 #include <math.h>
 #include <cstdio>
 #include <sstream>
+#include <boost/bind.hpp>
 #include "OAC.h"
 
 using namespace opencog::oac;
@@ -537,13 +538,13 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 
 // basically, we only care about the satisfied degree of the numberic state
-bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree,  State* original_state)
+bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree, bool &isUnknownValue, State* original_state)
 {
     // if this goal doesn't really require an exact value, just return fully achieved
     if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
     {
         satisfiedDegree = 1.0f;
-        return 1.0f;
+        return true;
     }
 
 //    // First search this state in the temporaryStateNodes list
@@ -563,10 +564,19 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     {
         // call its inquery funciton
         InqueryStateFun f = oneGoal.inqueryStateFun;
-        ParamValue inqueryValue = f(oneGoal.stateOwnerList);
-        OC_ASSERT(!(inqueryValue == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
-                  oneGoal.name().c_str());
+        ParamValue inqueryValue;
+        if (f == 0)
+            inqueryValue = UNDEFINED_VALUE;
+        else
+            inqueryValue = f(oneGoal.stateOwnerList);
+
+        if (inqueryValue == UNDEFINED_VALUE)
+        {
+            // there is not information in Atomspace about this state. We don't know the state, so just return false
+            isUnknownValue = true;
+            satisfiedDegree = 0.0f;
+            return false;
+        }
 
         return oneGoal.isSatisfiedMe(inqueryValue,satisfiedDegree,original_state);
 
@@ -575,9 +585,14 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     {
         // TODO
         ParamValue value = Inquery::getParamValueFromAtomspace(oneGoal);
-        OC_ASSERT(!(value == UNDEFINED_VALUE),
-                  "OCPlanner::checkIsGoalAchievedInRealTime: the inqueried value for state: %s is invalid.\n",
-                  oneGoal.name().c_str());
+        if (value == UNDEFINED_VALUE)
+        {
+            // there is not information in Atomspace about this state. We don't know the state, so just return false
+            isUnknownValue = true;
+            satisfiedDegree = 0.0f;
+            return false;
+        }
+
 
         // put this state into the cache, so we don't need to search for it next time
         State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
@@ -609,6 +624,9 @@ ActionPlanID OCPlanner::doPlanningForPsiDemandingGoal(Handle& goalHandle,opencog
     goal.push_back(goalState);
 
     knownStates.push_back(knownState);
+
+    // test :
+    loadFacts(knownStates);
 
     return doPlanning(goal,knownStates,server);
 
@@ -676,6 +694,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         bool found;
         StateNode* knownStateNode;
+        bool isUnknownValue;
 
         if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode, 0,false))
         {
@@ -687,7 +706,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             unsatisfiedStateNodes.push_back(newStateNode);
         }
-        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree))
+        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree, isUnknownValue))
         {
             satisfiedGoalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
@@ -768,11 +787,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // if there is one rule related to this goal,
                 // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
-                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle;
+                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle, contradictoryOtherGoal;
                 int negativeNum,satisfiedPreconNum;
-                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle, true);
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal, true);
 
-                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle) // if this rule will negative this goal, we should not choose to apply it.
+                if (isNegativeGoal || isDiffStateOwnerType || willAddCirle || contradictoryOtherGoal) // if this rule will negative this goal, we should not choose to apply it.
                     continue;
 
                 // this rule is positive for this goal, apply it.
@@ -793,6 +812,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // recursive rules have higher priority, so the score of a recursive rule will plus 0.5
                 // will also check the fitness of this rule , see checkRuleFitnessRoughly
 
+
                 multimap<float,Rule*> ::iterator ruleIt;
 
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
@@ -811,16 +831,27 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
-                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle,contradictoryOtherGoal;
                     int negativeNum,satisfiedPreconNum;
-                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle);
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal);
 
                     //  its effect will negative this current selected goal state, or it has any unsatisfied precondition which is impossible to achieve,
                     //  then it should not add it into candidate rules
-                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType)
+                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType || contradictoryOtherGoal)
                         continue;
 
-                    curRuleScore -= negativeNum*1.2;
+                    // todo: check rule direct help this goal or not
+                    bool directHelp;
+
+                    // if this rule will negative this goal, we should not choose to apply it.
+                    r->isRulePossibleToHelpToAchieveGoal(curStateNode->state,directHelp);
+
+                    if (directHelp)
+                        curRuleScore += 2.0f;
+
+                    curRuleScore -= (r->paraIndexMap.size()) * 0.3f;
+
+                    curRuleScore -= negativeNum*1.2f;
                     curRuleScore += satisfiedPreconNum;
 
                     while(true)
@@ -871,7 +902,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 RuleNode* forwardRuleNode = curStateNode->forwardRuleNode;
 
-                if (forwardRuleNode == 0)
+                if (forwardRuleNode == (&OCPlanner::goalRuleNode))
                 {
                     // oh, this state node is already the goal state node, and it's impossible to achieve, return planning fail
                     return "";
@@ -1067,7 +1098,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         // And then is possible to still have some variables cannot be grounded by just copy from the forward state
         // So we need to select suitable variables to ground them.
-        groundARuleNodeBySelectingNonNumericValues(ruleNode);
+        if (! groundARuleNodeBySelectingNonNumericValues(ruleNode))
+        {
+            // fail to ground all non numeric variables, roll back to previous step
+            cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
+            cleanUpContextBeforeRollBackToPreviousStep();
+            continue;
+
+        }
 
         if (ruleNode->ParamCandidates.size() > 0)
         {
@@ -1093,8 +1131,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         // ToBeImproved: currently it can only solve the numeric state with only one ungrounded Numeric variable
         if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
         {
-            cout << "SelectValueForGroundingNumericState failded!"<< std::endl;
-            // todo
+            cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
+            cleanUpContextBeforeRollBackToPreviousStep();
+            continue;
         }
 
         // out put all the bindings:
@@ -1118,7 +1157,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             Effect* e = (Effect*)(((EffectPair)(*effectItor)).second);
 
-            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,true,false,(*oldValItor));
+            State* effState =  Rule::groundAStateByRuleParamMap(e->state, ruleNode->currentAllBindings,false,false,(*oldValItor));
             OC_ASSERT( ( effState != 0),
                       "OCPlanner::doPlanning: effect state: %s is not able to be grounded.\n",
                        e->state->name().c_str());
@@ -1268,6 +1307,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         int preConNum = 1;
         int unsatisfiedPreconNum = 0;
 
+        list<StateNode*> unsatisfiedPreconList;
+        unsatisfiedPreconList.clear();
+
         itpre = ruleNode->originalRule->preconditionList.begin();
         for (; itpre != ruleNode->originalRule->preconditionList.end();  ++itpre, ++preConNum)
         {
@@ -1325,9 +1367,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             }
             else
             {
+                bool isUnknownValue;
                 // cannot find this state in the temporaryStateNodes list, need to check it in real time
                 // check real time
-                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
                 {
                     isSat = false;
                 }
@@ -1348,11 +1391,23 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             else
             {
                 // add it to unsatisfied list
-                unsatisfiedStateNodes.push_back(newStateNode);
+                getHardnessScoreOfPrecon(newStateNode);
+                unsatisfiedPreconList.push_back(newStateNode);
+
                 cout << " is unsatisfied :(" << std::endl;
                 unsatisfiedPreconNum ++;
             }
         }
+
+        // when the preconditions is not order dependent , need to check the easiness of each unsatisfied preconditions
+        if ( (! ruleNode->originalRule->precondOrderDependent)  && (unsatisfiedPreconNum > 1) )
+        {
+            // if the order of preconds doesn't matter ,we sort the preconds from hard to easy
+            unsatisfiedPreconList.sort(PreconHarder());
+        }
+
+        // add the unsatisfiedPreconList to the end of unsatisfiedStateNodes
+        unsatisfiedStateNodes.insert(unsatisfiedStateNodes.end(), unsatisfiedPreconList.begin(), unsatisfiedPreconList.end());
 
 //        // there is a tricky logic here: if it's an recursive rule, switch its two precons in the unsatisfiedStateNodes list if it  has two
 //        // , so that the precon which is more closer to current state will be put in the end of  the unsatisfiedStateNodes list, so that it will be dealt with next loop
@@ -1519,10 +1574,71 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     return planID;
 }
 
-int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule* orginalRule)
+void OCPlanner::cleanUpContextBeforeRollBackToPreviousStep()
+{
+    allRuleNodeInThisPlan.erase(allRuleNodeInThisPlan.begin());
+    delete(curStateNode->backwardRuleNode);
+    curStateNode->backwardRuleNode = 0;
+}
+
+int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
+{
+    map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(stateNode->state->name());
+
+    if ( it == ruleEffectIndexes.end())
+        return 999999;
+
+    multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
+    multimap<float,Rule*> ::iterator ruleIt;
+    bool ruleToHelp = false;
+    bool directHelp = false;
+    int numOfUngroundedVars = 1000; // the more variables this rule has, the more difficult to use it
+
+    // at least one of the related rules should not be negative this subgoal
+    for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
+    {
+        Rule* r = ruleIt->second;
+
+        bool _directHelp;
+        // if this rule will negative this goal, we should not choose to apply it.
+        if (r->isRulePossibleToHelpToAchieveGoal(stateNode->state ,_directHelp))
+        {
+            ruleToHelp = true;
+            if (_directHelp)
+                directHelp =true;
+
+            int varNum = r->paraIndexMap.size();
+            if (varNum < numOfUngroundedVars)
+                numOfUngroundedVars = varNum;
+        }
+
+    }
+
+    if (! ruleToHelp)
+        return 999999;
+
+    int hardnessScore = 1000;
+
+    if (directHelp)
+        hardnessScore = 0;
+
+    hardnessScore += numOfUngroundedVars * 10;
+
+    if (stateNode->state->isNumbericState())
+        hardnessScore += 2000;
+
+    return hardnessScore;
+}
+
+
+int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork,
+                                        bool &hasDirectHelpRule, bool &contradictoryOtherGoal, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
+    preconImpossible = false;
     willCauseCirleNetWork = false;
+    hasDirectHelpRule = false;
+    contradictoryOtherGoal = false;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
@@ -1534,7 +1650,7 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
     for (itpre = precondList.begin(); itpre != precondList.end(); ++ itpre)
     {
         State* ps = *itpre;
-        State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings);
+        State* groundPs = Rule::groundAStateByRuleParamMap(ps, ruleNode->currentAllBindings,false);
         if (! groundPs)
             continue;
 
@@ -1554,15 +1670,12 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 ++ satisfiedPreconNum;
                 satisfied = true;
             }
-            else
+            else if (groundPs->permanent)
             {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
-                {
-                    delete groundPs;
-                    preconImpossible = true;
-                    return -999;
-                }
+                // this goal has been found in TempStates but not satisfied, and this goal is permanent (change not be changed), which means this goal will never be satified
+                delete groundPs;
+                preconImpossible = true;
+                return -999;
             }
 
         }
@@ -1571,15 +1684,48 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
             // cannot find this state in the temporaryStateNodes list, need to check it in real time
             // check real time
             float satisfiedDegree;
-            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree))
+            bool isUnknownValue;
+            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
             {
                 ++ satisfiedPreconNum;
                 satisfied = true;
             }
+
+        }
+
+        if (! satisfied)
+        {
+            // check if there is any rule related to achieve this unsatisfied precondition
+            map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(groundPs->name());
+            if ( it == ruleEffectIndexes.end())
+            {
+                delete groundPs;
+                preconImpossible = true;
+                return -999;
+            }
             else
             {
-                // check if there is any rule related to achieve this unsatisfied precondition
-                if (ruleEffectIndexes.find(groundPs->name()) == ruleEffectIndexes.end())
+                multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
+                multimap<float,Rule*> ::iterator ruleIt;
+                bool ruleImpossibleToHelp = true;
+
+                // at least one of the related rules should not be negative this subgoal
+                for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
+                {
+                    Rule* r = ruleIt->second;
+                    bool directHelp;
+                    // if this rule will negative this goal, we should not choose to apply it.
+                    if (r->isRulePossibleToHelpToAchieveGoal(groundPs,directHelp))
+                    {
+                        ruleImpossibleToHelp = false;
+
+                        if (directHelp)
+                            hasDirectHelpRule = true;
+
+                    }
+                }
+
+                if (ruleImpossibleToHelp)
                 {
                     delete groundPs;
                     preconImpossible = true;
@@ -1587,10 +1733,6 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 }
             }
 
-        }
-
-        if (! satisfied)
-        {
             // check if this precond will add a cirle to the planning network
             // if this precond is unsatified and exactly the same with one of its previous / forward state node,
             // which is expectly to be satisfied partly by this effect directly or undirectly.
@@ -1609,36 +1751,61 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
                     continue;
 
-//                if ((tempStateNode->state->stateName == "existPath")&&(groundPs->stateName == "existPath"))
-//                {
-
-//                        ParamValue p1 = tempStateNode->state->stateOwnerList[0];
-//                        ParamValue p2 = tempStateNode->state->stateOwnerList[1];
-
-//                        Vector* v1 = boost::get<Vector>(&p1);
-//                        Vector* v2 = boost::get<Vector>(&p2);
-
-//                        ParamValue p3 = groundPs->stateOwnerList[0];
-//                        ParamValue p4 = groundPs->stateOwnerList[1];
-
-//                        Vector* v3 = boost::get<Vector>(&p3);
-//                        Vector* v4 = boost::get<Vector>(&p4);
-
-//                        if (v1 == v3)
-//                        {
-//                            if (v2 == v4)
-//                            {
-//                                int i =0;
-//                                i++;
-//                            }
-//                        }
-
-//                }
-
-                if (groundPs->isSameState( *(tempStateNode)->state ))
+                // a little hack here, only check willCauseCirleNetWork for the States that is not permanent
+                if ((! groundPs->permanent)  && (groundPs->isSameState( *(tempStateNode->state) )))
                 {
-                    willCauseCirleNetWork = true;
-                    return -999;
+                    if (groundPs->stateVariable->getValue() == tempStateNode->state->stateVariable->getValue())
+                    {
+                        delete groundPs;
+                        willCauseCirleNetWork = true;
+                        return -999;
+                    }
+                }
+
+                // todo: recursively check if the future backward branch to achieve this subgoal contains any precondition impossibilities
+
+            }
+
+            // check if unsatisifed subgoals will be contradictory by this effect
+            for (sait = unsatisfiedStateNodes.begin(); sait != unsatisfiedStateNodes.end(); ++ sait)
+            {
+                StateNode* tempStateNode = (StateNode*)(*sait);
+
+                // skip the current state node
+                if (fowardState == tempStateNode)
+                    continue;
+
+                // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+                if (tempStateNode->forwardRuleNode == 0)
+                   continue;
+
+                // only check the state nodes without backward rule node,
+                // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+                if (tempStateNode->backwardRuleNode != 0)
+                    continue;
+
+    //            // only check the StateNode which is more backward than the input fowardState
+    //            // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+    //            // so this state node will not be affected by this effect.
+    //            if ((*fowardState) < (*tempStateNode))
+    //            {
+    //                // need to check if it's the same level with fowardState,
+    //                if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+    //                    continue;
+    //            }
+
+                if (tempStateNode->state->isSameState(*groundPs))
+                {
+                    // check if this effect unsatisfy this state
+                    float satDegree;
+                    if (! groundPs->isSatisfied(*(tempStateNode->state ),satDegree))
+                    {
+                        delete groundPs;
+                        contradictoryOtherGoal = true;
+                        return -999;
+                    }
+                    else
+                        continue;
                 }
 
             }
@@ -1695,7 +1862,10 @@ int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardSt
         float sd;
 
         // check if this state has been negative
-        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd))
+
+        bool permanent;
+
+        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd, permanent))
             negativeNum ++;
 
     }
@@ -1787,7 +1957,63 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
                 float satDegree;
                 if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
                 {
-                    negateveStateNum ++;
+                    if (effState->permanent)
+                    {
+                        negativeGoal = true;
+                        delete effState;
+                        return 1000;
+                    }
+                    else
+                        negateveStateNum ++;
+                }
+                else
+                    continue;
+            }
+
+        }
+
+        // check how many unsatisifed subgoals will be negated by this effect
+        for (sait = unsatisfiedStateNodes.begin(); sait != unsatisfiedStateNodes.end(); ++ sait)
+        {
+            StateNode* tempStateNode = (StateNode*)(*sait);
+
+            // skip the current state node
+            if (fowardState == tempStateNode)
+                continue;
+
+            // if a state node has not any forward rule, it means it is not used by any rule node yet, so it doesn't matter if it's affected or not
+            if (tempStateNode->forwardRuleNode == 0)
+               continue;
+
+            // only check the state nodes without backward rule node,
+            // because we are doing backward chaining, the state node which has backward rule node will be satisfied later
+            if (tempStateNode->backwardRuleNode != 0)
+                continue;
+
+//            // only check the StateNode which is more backward than the input fowardState
+//            // if this effect state node has a lower depth than this state node, it means the effect will happen after this state node
+//            // so this state node will not be affected by this effect.
+//            if ((*fowardState) < (*tempStateNode))
+//            {
+//                // need to check if it's the same level with fowardState,
+//                if ((fowardState->forwardRuleNode != tempStateNode->forwardRuleNode))
+//                    continue;
+//            }
+
+            if (tempStateNode->state->isSameState(*effState))
+            {
+                // check if this effect unsatisfy this state
+                float satDegree;
+                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
+                {
+                    if (effState->permanent)
+                    {
+                        negativeGoal = true;
+                        delete effState;
+                        return 1000;
+                    }
+                    else
+                        negateveStateNum ++;
                 }
                 else
                     continue;
@@ -1803,7 +2029,7 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 }
 
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
-                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool onlyCheckIfNegativeGoal)
+                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool &contradictoryOtherGoal, bool onlyCheckIfNegativeGoal)
 {
 
     RuleNode* tmpRuleNode = new RuleNode(rule);
@@ -1831,6 +2057,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     isDiffStateOwnerType = false;
     preconImpossible = false;
     willAddCirle = false;
+    contradictoryOtherGoal = false;
 
 
     // check all the effects:
@@ -1842,8 +2069,11 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
         return;
     }
 
+    bool hasDirectHelpRule;
+
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle);
+
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
 
     delete tmpRuleNode;
 
@@ -1881,7 +2111,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             Handle targetH = AtomSpaceUtil::getAgentHandle(*atomSpace,target.id);
             // get new location it moves tol
             spatial::BlockVector targetLocation = iSpaceMap->getObjectLocation(targetH);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation,curtimeStamp,true);
             break;
         }
         case pai::WALK_CODE:
@@ -1895,7 +2125,7 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
             string newPosVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
             Vector movedToVec = boost::get<Vector>((ruleNode->currentAllBindings)[newPosVarName]);
             spatial::BlockVector newPos(movedToVec.x,movedToVec.y,movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp);
+            iSpaceMap->updateNoneBLockEntityLocation(agentH,newPos,curtimeStamp,true);
 
             break;
         }
@@ -1916,70 +2146,70 @@ void OCPlanner::executeActionInImaginarySpaceMap(RuleNode* ruleNode, SpaceServer
 
 }
 
-void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
-{
-    // currently we just cheat to enable the following actions
-    // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
+//void OCPlanner::undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap)
+//{
+//    // currently we just cheat to enable the following actions
+//    // ToBeImproved: this function is very ugly...the right way is to add a callback function for each action to auto execute
 
-    switch (ruleNode->originalRule->action->getType().getCode())
-    {
-        case pai::EAT_CODE:
-        {
-            // get the handle of the food to eat
-            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
-            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
-            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
-            // get the location last time it appeared
-            iSpaceMap->addNoneBlockEntity(foodH,iSpaceMap->getLastAppearedLocation(foodH),1,1,1,0.0,foodEntity.id,foodEntity.type,false,curtimeStamp);
+//    switch (ruleNode->originalRule->action->getType().getCode())
+//    {
+//        case pai::EAT_CODE:
+//        {
+//            // get the handle of the food to eat
+//            string foodVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+//            Entity foodEntity =  boost::get<Entity>((ruleNode->currentAllBindings)[foodVarName]);
+//            Handle foodH = AtomSpaceUtil::getEntityHandle(*atomSpace,foodEntity.id);
+//            // get the location last time it appeared
+//            iSpaceMap->addNoneBlockEntity(foodH,iSpaceMap->getLastAppearedLocation(foodH),1,1,1,0.0,foodEntity.id,foodEntity.type,false,curtimeStamp);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::MOVE_TO_OBJ_CODE:
-        {
-            // get the actor entity handle
-            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
-            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
+//        case pai::MOVE_TO_OBJ_CODE:
+//        {
+//            // get the actor entity handle
+//            string actorVarName0 = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+//            Entity agent0 =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName0]);
+//            Handle agentH0 = AtomSpaceUtil::getAgentHandle(*atomSpace,agent0.id);
 
-            // get old location from the record before execute this effect
-            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
-            spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp);
+//            // get old location from the record before execute this effect
+//            Vector movedToVec0 = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
+//            spatial::BlockVector targetLocation0(movedToVec0.x, movedToVec0.y, movedToVec0.z);
+//            iSpaceMap->updateNoneBLockEntityLocation(agentH0,targetLocation0,curtimeStamp,true);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::WALK_CODE:
-        {
-            // get the actor entity handle
-            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
-            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
-            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
+//        case pai::WALK_CODE:
+//        {
+//            // get the actor entity handle
+//            string actorVarName = ActionParameter::ParamValueToString(ruleNode->originalRule->actor);
+//            Entity agent =  boost::get<Entity>((ruleNode->currentAllBindings)[actorVarName]);
+//            Handle agentH = AtomSpaceUtil::getAgentHandle(*atomSpace,agent.id);
 
-            // get old location from the record before execute this effect
-            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
-            spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
-            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp);
+//            // get old location from the record before execute this effect
+//            Vector movedToVec = boost::get<Vector>((ruleNode->orginalGroundedParamValues)[1]);
+//            spatial::BlockVector targetLocation(movedToVec.x, movedToVec.y, movedToVec.z);
+//            iSpaceMap->updateNoneBLockEntityLocation(agentH,targetLocation,curtimeStamp,true);
 
-            break;
-        }
+//            break;
+//        }
 
-        case pai::BUILD_BLOCK_CODE:
-        {
-            // get the  location the new block is to be build at
-            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
-            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
-            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
+//        case pai::BUILD_BLOCK_CODE:
+//        {
+//            // get the  location the new block is to be build at
+//            string blockBuildPposVarName = (ruleNode->originalRule->action->getParameters().front()).stringRepresentation();
+//            Vector buildVec = boost::get<Vector>((ruleNode->currentAllBindings)[blockBuildPposVarName]);
+//            spatial::BlockVector buildPos(buildVec.x,buildVec.y,buildVec.z);
 
-            iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
-            break;
-        }
-        default:
-            // TODO: TNick: is this the right way of handling other codes?
-            break;
-    }
-}
+//            iSpaceMap->removeSolidUnitBlock(iSpaceMap->getUnitBlockHandleFromPosition(buildPos));
+//            break;
+//        }
+//        default:
+//            // TODO: TNick: is this the right way of handling other codes?
+//            break;
+//    }
+//}
 
 void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings)
 {
@@ -2029,7 +2259,8 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     }
 
     deleteRuleNodeInAllRuleNodeList(ruleNode);
-    delete ruleNode;
+    if (ruleNode)
+        delete ruleNode;
 
 }
 
@@ -2314,7 +2545,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
             {
                 State* forward_cost_state = ((CostHeuristic)(*costIt)).cost_cal_state;
                 State* cost_state = new State(forward_cost_state->name(),forward_cost_state->stateVariable->getType(),forward_cost_state->stateType,
-                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun);
+                                              forward_cost_state->stateVariable->getValue(),forward_cost_state->need_inquery,forward_cost_state->inqueryStateFun,forward_cost_state->permanent);
                 vector<ParamValue>::iterator ownerIt;
                 for (ownerIt = forward_cost_state->stateOwnerList.begin(); ownerIt != forward_cost_state->stateOwnerList.end(); ++ ownerIt)
                 {
@@ -2501,6 +2732,8 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     bool isDiffStateOwnerType = false;
     bool preconImpossible = false;
     bool willAddCirle = false;
+    bool hasDirectHelpRule = false;
+    bool contradictoryOtherGoal = false;
 
     impossible = false;
 
@@ -2508,18 +2741,21 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle);
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
 
     // ruleNode resetbinding
     ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
 
     fitnessScore = fitnessScore - negateveStateNum*100.0f + satisfiedPreconNum*100.0f;
 
-    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle)
+    if (isDiffStateOwnerType || negativeGoal || preconImpossible || willAddCirle || contradictoryOtherGoal)
     {
         impossible = true;
         fitnessScore -= 999999;
     }
+
+    if (hasDirectHelpRule)
+        fitnessScore += 50.0f;
 
     return fitnessScore;
 
@@ -2560,6 +2796,12 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
         }
     }
 
+    if (number_easy_state == 0)
+    {
+        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues(): There is no non numeric variable in this rule. Doesn't need to be grounded!"<<std::endl;
+        return true;
+    }
+
     // ToBeImproved: Is it possible that some non-need-real-time-inquery states contains some variables that need to be grounded by other need_real-time-inquery states?
 
     // find all the canditates meet as many as possible preconditions, and put all the candidates in ParamCandidates
@@ -2571,9 +2813,18 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
     // ToBeImproved: in fact we don't need to generate all the possible groups of candidates at this moment,
     //               we can just allow it generateNextCandidates every time one group failed in a planning step
     // we generate the candidates by trying full combination calculation
+
+    // record the varaible number
+    unsigned int var_total_num;
+    bool firstCombination = true;
+    bool cannotGroundAllVaraibles = false;
+
     for (int n_gram = n_max; n_gram >= 1; -- n_gram)
     {
         // Use the binary method to generate all combinations:
+
+        if (cannotGroundAllVaraibles)
+            break;
 
         // generate the first combination
         for (int i = 0; i < n_gram; ++ i)
@@ -2598,13 +2849,26 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             }
             vector<string> varNames;
             HandleSeq candidateListHandles = Inquery::findCandidatesByPatternMatching(ruleNode,indexesVector,varNames);
-            int candidateGroupNum = 1;
 
-            if (ruleNode->originalRule->ruleName == "eatFoodtoAchieveEnergyDemand")
+            if (firstCombination)
             {
-                int oo = 0;
-                oo ++;
+                var_total_num = varNames.size();
+                firstCombination = false;
             }
+
+            // means that this group of results can't ground it all the ungrounded variables
+            if ( varNames.size() < var_total_num)
+            {
+                cannotGroundAllVaraibles = true;
+                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+                    break;
+
+                generateNextCombinationGroup(indexes, n_max);
+
+                continue;
+            }
+
+            int candidateGroupNum = 1;
 
             if (candidateListHandles.size() != 0)
             {
@@ -2615,27 +2879,31 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     ParamGroundedMapInARule oneGroupCandidate;
                     int index = 0;
 
-                    cout<<"CandidateGroup "<< candidateGroupNum ++ << std::endl;
+                    string outputVarStr;
 
                     foreach (Handle h, candidateHandlesInOneGroup)
                     {
                         ParamValue v = Inquery::getParamValueFromHandle(varNames[index],h);
                         oneGroupCandidate.insert(std::pair<string, ParamValue>(varNames[index],v));
-                        cout<<varNames[index]<< "= " << ActionParameter::ParamValueToString(v) << std::endl;
+                        outputVarStr += varNames[index] + "= " + ActionParameter::ParamValueToString(v) + "\n";
                         index ++;
                     }
 
                     bool impossile;
                     float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
 
-                    cout << "Fitness score = " << fitnessScore ;
-                    if (impossile)
-                        cout << " , impossible bindings, would not be put into candidate list. " ;
-
-                    cout << std::endl;
+//                    cout << "Fitness score = " << fitnessScore ;
+//                    if (impossile)
+//                        cout << " , impossible bindings, would not be put into candidate list. " ;
 
                     if (! impossile)
+                    {
+                        cout<< "CandidateGroup "<< candidateGroupNum ++ << std::endl;
+                        cout<< outputVarStr;
+                        cout << "Fitness score = " << fitnessScore << std::endl;
+
                         tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
+                    }
 
                 }
 
@@ -2659,18 +2927,28 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
         for(tmpIt = tmpcandidates.begin(); tmpIt != tmpcandidates.end(); ++ tmpIt)
             ruleNode->ParamCandidates.push_back(((TmpParamCandidate&)(*tmpIt)).aGroupOfParmCandidate);
 
+        // test
+        if (tmpcandidates.size() > 0)
+            break;
+
     }
 
     delete indexes;
 
-    cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() found candidate group number totally: "<<ruleNode->ParamCandidates.size()<<std::endl;
+    if (ruleNode->ParamCandidates.size() == 0)
+    {
+        return false;
+    }
+    else
+    {
+        cout<<"Debug: groundARuleNodeBySelectingNonNumericValues() found candidate group number totally: "<<ruleNode->ParamCandidates.size()<<std::endl;
 
+        // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
+        // we won't ground the numeric states here, because it's too time-consuming,
+        // we won't give all the possible combinations of numeric values and non-numeric values for candidates
 
-    // Till now,  all the easy states have been dealed with, now we need to deal with numberic states if any
-    // we won't ground the numeric states here, because it's too time-consuming,
-    // we won't give all the possible combinations of numeric values and non-numeric values for candidates
-
-    return true;
+        return true;
+    }
 }
 
 // this should be called only after the currentAllBindings has been chosen
@@ -2781,24 +3059,21 @@ bool OCPlanner::selectValueForGroundingNumericState(Rule* rule, ParamGroundedMap
     //  select the best one in this vector<ParamValue> that get the highest score according to the heuristics cost calculations
     ParamValue bestValue;
 
-    if (values.size() == 1)
-        bestValue = values.front();
+
+    if (rule->CostHeuristics.size() != 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
+    }
+    else if (ruleNode->costHeuristics.size()!= 0)
+    {
+        bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
+    }
     else
     {
-        if (rule->CostHeuristics.size() != 0)
-        {
-            bestValue = selectBestNumericValueFromCandidates(rule,rule->basic_cost, rule->CostHeuristics,currentbindings, beIt->first,values);
-        }
-        else if (ruleNode->costHeuristics.size()!= 0)
-        {
-            bestValue = selectBestNumericValueFromCandidates(rule,0.0f, ruleNode->costHeuristics,currentbindings, beIt->first,values,ruleNode->originalRule,false);
-        }
-        else
-        {
-            cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
-            bestValue = values.front();
-        }
+        cout<< "Debug: OCPlanner::selectValueForGroundingNumericState: this rule doesn't have any costHeuristics for calculation! Randomly select one for it." <<std::endl;
+        bestValue = values.front();
     }
+
 
     if (bestValue == UNDEFINED_VALUE)
     {
@@ -2826,6 +3101,8 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
 
     for (vit = values.begin(); vit != values.end(); ++ vit)
     {
+//        Vector* vector1 = boost::get<Vector>(&(*vit));
+
         // calculate the cost
         currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
         float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
@@ -2853,19 +3130,20 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         // check how many preconditions will be satisfied
 
         bool preconImpossible;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,orginalRule);
+        bool hasDirectHelpRule;
+        bool contradictoryOtherGoal;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule, contradictoryOtherGoal, orginalRule);
 
-        if (preconImpossible)
-            score -= 99999.9f;
-
-        if (willAddCirle)
+        if (preconImpossible || willAddCirle || contradictoryOtherGoal)
             score -= 99999.9f;
 
         if (checkPrecons)
         {
             score += satisfiedPreconNum * 10.0f;
-        }
 
+            if(hasDirectHelpRule)
+                score += 5.0f;
+        }
 
         tmpRuleNode->currentAllBindings.erase(varName);
 
@@ -2981,27 +3259,6 @@ void OCPlanner::loadTestRulesFromCodes()
     // define a special action: do nothing
     PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
 
-    //----------------------------Begin Rule: if energy value is high enough, the energy goal is achieved-------------------------------------------
-//    ParamValue var_avatar = entity_var[1];
-//    ParamValue var_achieve_energy_goal = bool_var[1];
-
-//    // precondition 1:
-//    vector<ParamValue> energyStateOwnerList0;
-//    energyStateOwnerList0.push_back(var_avatar);
-//    State* energyState0 = new State("Energy",ActionParamType::FLOAT(),STATE_GREATER_THAN ,ParamValue("0.8"), energyStateOwnerList0);
-//    // effect1: energy increases
-//    State* energyGoalState = new State("EnergyGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_energy_goal, energyStateOwnerList0);
-
-//    Effect* energyGoalAchievedEffect = new Effect(energyGoalState, OP_ASSIGN, SV_TRUE);
-
-//    Rule* highEnergyAchieveEnergyGoalRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.0f);
-//    highEnergyAchieveEnergyGoalRule->addPrecondition(energyState0);
-
-//    highEnergyAchieveEnergyGoalRule->addEffect(EffectPair(1.0f,energyGoalAchievedEffect));
-
-//    this->AllRules.push_back(highEnergyAchieveEnergyGoalRule);
-
-    //----------------------------End Rule: increase energy is to achieve energygoal-------------------------------------------
 
     //----------------------------Begin Rule: eat food to achieve energy demanding goal -------------------------------------------
     // define variables:
@@ -3412,7 +3669,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* becomeExistPathEffect2 = new Effect(existPathState6, OP_ASSIGN, "true", false);
 
     // add rule:
-    Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f);
+    Rule* pathTransmitRule = new Rule(doNothingAction,boost::get<Entity>(varAvatar),0.0f,true);
     pathTransmitRule->ruleName = "IfExistpathAtoBandBtoCthenExistpathAtoC";
     // note: the order of adding pos_2 -> pos_3 before adding pos_1 -> pos_2 ,
     // becuase when execute, the agent will move from pos_1 -> pos_2 before pos_2 -> pos_3
@@ -3431,7 +3688,532 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
 
+
+    //----------------------------Begin Einstein puzzle rules---------------------------------------------------------------------
+    //----------------------------Begin Rule: The person who keeps fish drinks water.------------------------------------------------------
+    // define variables:
+    ParamValue var_drink = str_var[0];
+    ParamValue var_man_x = entity_var[0];
+
+    // precondition 1: var_man_x is people
+    vector<ParamValue> peopleStateOwnerList1;
+    peopleStateOwnerList1.push_back(var_man_x);
+    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0, true);
+
+    // precondition 3: var_man_x keeps fish
+    vector<ParamValue> keepFishStateOwnerList1;
+    keepFishStateOwnerList1.push_back(var_man_x);
+    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
+
+    // effect1: var_man_x drinks water
+    vector<ParamValue> drinkWaterStateOwnerList1;
+    drinkWaterStateOwnerList1.push_back(var_man_x);
+    State* drinkWaterState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkWaterStateOwnerList1, true, 0, true);
+    Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
+
+    // add rule:
+    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
+    fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
+    fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
+
+    fishKeeperDrinkWaterRule->addEffect(EffectPair(1.0f,drinkWaterStateEffect1));
+
+    this->AllRules.push_back(fishKeeperDrinkWaterRule);
+    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+    //----------------------------Begin Rule: The person who drinks water keeps fish------------------------------------------------------
+    // define variables:
+    ParamValue var_pet = str_var[0];
+
+    // precondition 1: var_man_x is people
+
+    // precondition 3: var_man_x  drinks water
+    vector<ParamValue> drinkWaterStateOwnerList2;
+    drinkWaterStateOwnerList2.push_back(var_man_x);
+    State* drinkWaterState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"water", drinkWaterStateOwnerList2, true, 0, true);
+
+    // effect1: var_man_x keeps fish
+    vector<ParamValue> keepFishStateOwnerList2;
+    keepFishStateOwnerList2.push_back(var_man_x);
+    State* keepFishState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepFishStateOwnerList2, false,0,true);
+    Effect* keepFishStateEffect2 = new Effect(keepFishState2, OP_ASSIGN, "fish",true);
+
+    // add rule:
+    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    waterDrinkerKeepsFishRule->ruleName = "waterDrinkerKeepsFishRule";
+    waterDrinkerKeepsFishRule->addPrecondition(peopleState1);
+    waterDrinkerKeepsFishRule->addPrecondition(drinkWaterState2);
+
+    waterDrinkerKeepsFishRule->addEffect(EffectPair(1.0f,keepFishStateEffect2));
+
+    this->AllRules.push_back(waterDrinkerKeepsFishRule);
+    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+
+    //----------------------------Begin Rule: The person who drinks tea keeps cats------------------------------------------------------
+    // define variables:
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x drinks tea
+    vector<ParamValue> drinkTeaStateOwnerList1;
+    drinkTeaStateOwnerList1.push_back(var_man_x);
+    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, true, 0, true);
+
+    // effect1: var_man_x keeps cats
+    vector<ParamValue> keepCatsStateOwnerList1;
+    keepCatsStateOwnerList1.push_back(var_man_x);
+    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, true);
+    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
+
+    // add rule:
+    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
+    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
+    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
+
+    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
+
+    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
+    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+    //----------------------------Begin Rule: The person who keeps cats drinks tea -----------------------------------------------------
+    // define variables:
+    // precondition 1: var_man_x is people
+
+    // precondition 2: var_man_x keeps cats
+    vector<ParamValue> keepCatsStateOwnerList2;
+    keepCatsStateOwnerList2.push_back(var_man_x);
+    State* keepCatsStateState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList2, true);
+
+    // effect1: var_man_x drinks tea
+    vector<ParamValue> drinkTeaStateOwnerList2;
+    drinkTeaStateOwnerList2.push_back(var_man_x);
+    State* drinkTeaState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkTeaStateOwnerList2, true, 0, true);
+    Effect* drinkTeaEffect2 = new Effect(drinkTeaState2, OP_ASSIGN, "tea",true);
+
+    // add rule:
+    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    catsKeeperDrinksTeaRule->ruleName = "catsKeeperDrinksTeaRule";
+    catsKeeperDrinksTeaRule->addPrecondition(peopleState1);
+    catsKeeperDrinksTeaRule->addPrecondition(keepCatsStateState2);
+
+    catsKeeperDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect2));
+
+    this->AllRules.push_back(catsKeeperDrinksTeaRule);
+    //----------------------------End Rule: The person who keeps cats drinks tea-------------------------------------------------
+
+    //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+    // define variables:
+    ParamValue var_fish_keeper = entity_var[0];
+    ParamValue var_achieve_integrity_goal = bool_var[0];
+
+    // precondition 1: var_fish_keeper is people
+    vector<ParamValue> peopleStateOwnerList;
+    peopleStateOwnerList.push_back(var_fish_keeper);
+    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0, true);
+
+    // precondition 2: var_fish_keeper keeps fish
+    vector<ParamValue> keepFishStateOwnerList;
+    keepFishStateOwnerList.push_back(var_fish_keeper);
+    State* keepFishState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList, true,0, true);
+
+    // precondition 3: closed to var_fish_keeper
+    vector<ParamValue> closedToFishKeeperStateOwnerList;
+    closedToFishKeeperStateOwnerList.push_back(var_avatar);
+    closedToFishKeeperStateOwnerList.push_back(var_fish_keeper);
+    State* closedToFishKeeperState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedToFishKeeperStateOwnerList, true, &Inquery::inqueryDistance);
+
+    // energy state:
+    vector<ParamValue> IntegrityStateOwnerList;
+    IntegrityStateOwnerList.push_back(var_avatar);
+    State* IntegrityGoalState = new State("IntegrityDemandGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_integrity_goal, IntegrityStateOwnerList);
+
+    // effect1: Integrity Goal Achieved
+    Effect* IntegrityGoalAchievedEffect = new Effect(IntegrityGoalState, OP_ASSIGN, SV_TRUE);
+
+    Rule* IntegrityRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.2f);
+    IntegrityRule->ruleName = "ClosedToFishKeeperIIntegrityRule";
+    IntegrityRule->addPrecondition(fishKeeperPeopleState);
+    IntegrityRule->addPrecondition(keepFishState);
+    IntegrityRule->addPrecondition(closedToFishKeeperState);
+
+    IntegrityRule->addEffect(EffectPair(1.0f,IntegrityGoalAchievedEffect));
+
+    this->AllRules.push_back(IntegrityRule);
+
+    //----------------------------End Rule:closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+
+
+    //----------------------------Begin Rule: if other people do not keep pet_x, then man_1 keeps it--------------------------------------
+    // define variables:
+    ParamValue man_1 = entity_var[0];
+    ParamValue man_2 = entity_var[1];
+    ParamValue man_3 = entity_var[2];
+    ParamValue man_1_pet = str_var[3];
+    ParamValue pet_x = str_var[4];
+    ParamValue pet_y = str_var[5];
+    ParamValue pet_z = str_var[6];
+
+    // precondition 1 -5 : man_1-5 are people
+    vector<ParamValue> ispeopleStateOwnerList1;
+    ispeopleStateOwnerList1.push_back(man_1);
+    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0, true);
+
+    vector<ParamValue> ispeopleStateOwnerList2;
+    ispeopleStateOwnerList2.push_back(man_2);
+    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0,true);
+
+    vector<ParamValue> ispeopleStateOwnerList3;
+    ispeopleStateOwnerList3.push_back(man_3);
+    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0, true);
+
+
+    // additional preconditions: man_2, man_3,  are not the same to man_1
+    vector<ParamValue> isNotSameOwnerList1;
+    isNotSameOwnerList1.push_back(man_1);
+    isNotSameOwnerList1.push_back(man_2);
+    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    vector<ParamValue> isNotSameOwnerList2;
+    isNotSameOwnerList2.push_back(man_1);
+    isNotSameOwnerList2.push_back(man_3);
+    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame, true);
+
+
+    // precondition 0: pet_x y z are pets
+    vector<ParamValue> isPetStateOwnerList1;
+    isPetStateOwnerList1.push_back(pet_x);
+    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0,true);
+
+    vector<ParamValue> isPetStateOwnerList2;
+    isPetStateOwnerList2.push_back(pet_y);
+    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0,true);
+
+    vector<ParamValue> isPetStateOwnerList3;
+    isPetStateOwnerList3.push_back(pet_z);
+    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0,true);
+
+    // precondition 1 -5 : man_1-3 are people
+
+    // precondition: pet_y z are different from pet_x
+    vector<ParamValue> isNotSamePetOwnerList1;
+    isNotSamePetOwnerList1.push_back(pet_x);
+    isNotSamePetOwnerList1.push_back(pet_y);
+    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    vector<ParamValue> isNotSamePetOwnerList2;
+    isNotSamePetOwnerList2.push_back(pet_x);
+    isNotSamePetOwnerList2.push_back(pet_y);
+    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame, true);
+
+    // precondition 6-9 : other people do not keep pet_x
+    vector<ParamValue> notkeepXStateOwnerList1;
+    notkeepXStateOwnerList1.push_back(man_2);
+    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, notkeepXStateOwnerList1, true,0, true);
+
+    vector<ParamValue> notkeepXStateOwnerList2;
+    notkeepXStateOwnerList2.push_back(man_3);
+    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_z, notkeepXStateOwnerList2, true,0, true);
+
+    // effect1: man_1 keeps pet_x
+    vector<ParamValue> keepXStateOwnerList;
+    keepXStateOwnerList.push_back(man_1);
+    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList, true,0, true);
+    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
+
+    // add rule:
+    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(isPetState3);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
+    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet1);
+    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet2);
+
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
+    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
+
+    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
+    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
+
+    //----------------------------Begin Rule: if other people do not drink drink_x, then man_1 drinks it--------------------------------------
+    // define variables:
+    ParamValue drink_man_1 = str_var[0];
+    ParamValue drink_x = str_var[1];
+    ParamValue drink_y = str_var[2];
+    ParamValue drink_z = str_var[3];
+
+    // precondition 0: drink_x y z are drink
+    vector<ParamValue> isDrinkStateOwnerList1;
+    isDrinkStateOwnerList1.push_back(drink_x);
+    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0, true);
+
+    vector<ParamValue> isDrinkStateOwnerList2;
+    isDrinkStateOwnerList2.push_back(drink_y);
+    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0, true);
+
+    vector<ParamValue> isDrinkStateOwnerList3;
+    isDrinkStateOwnerList3.push_back(drink_z);
+    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0, true);
+
+    // precondition 1 -5 : man_1-3 are people and different
+
+    //  precondition:  drink_y and  drink_z are different
+    vector<ParamValue> isNotSameDrinkOwnerList1;
+    isNotSameDrinkOwnerList1.push_back(drink_x);
+    isNotSameDrinkOwnerList1.push_back(drink_y);
+    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    //  precondition:  drink_y and  drink_z are different
+    vector<ParamValue> isNotSameDrinkOwnerList2;
+    isNotSameDrinkOwnerList2.push_back(drink_x);
+    isNotSameDrinkOwnerList2.push_back(drink_z);
+    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame, true);
+
+    // precondition 6-9 : other people do not drink drink_x
+    vector<ParamValue> notdrinkXStateOwnerList1;
+    notdrinkXStateOwnerList1.push_back(man_2);
+    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_y, notdrinkXStateOwnerList1, true, 0, true);
+
+    vector<ParamValue> notdrinkXStateOwnerList2;
+    notdrinkXStateOwnerList2.push_back(man_3);
+    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_z, notdrinkXStateOwnerList2, true, 0, true);
+
+    // effect1: man_1 drinks drink_x
+    vector<ParamValue> drinkXStateOwnerList;
+    drinkXStateOwnerList.push_back(man_1);
+    State* drinkXState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_man_1, drinkXStateOwnerList, true, 0, true);
+    Effect* drinkXEffect = new Effect(drinkXState, OP_ASSIGN, drink_x,true);
+
+
+    // add rule:
+    Rule* notDrinkOtherPeoplesDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    notDrinkOtherPeoplesDrinkRule->ruleName = "notDrinkOtherPeoplesDrinkRule";
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState3);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState2);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState2);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState2);
+
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
+    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
+
+    notDrinkOtherPeoplesDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
+
+    this->AllRules.push_back(notDrinkOtherPeoplesDrinkRule);
+    //----------------------------End Rule:  if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------------------
+
+
+    //----------------------------Begin Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+    // define variables:
+
+    // precondition 0: pet_x pet_y is pet
+
+    // precondition 1: man_1 keepsl pet_x
+    vector<ParamValue> keepXStateOwnerList2;
+    keepXStateOwnerList2.push_back(man_1);
+    State* keepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_x, keepXStateOwnerList2, true,0, true);
+
+    // precondition 2: pet_x is not the same to pet_y
+    vector<ParamValue> petXYisNotSameOwnerList1;
+    petXYisNotSameOwnerList1.push_back(pet_x);
+    petXYisNotSameOwnerList1.push_back(pet_y);
+    State* petXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    // effect 1: man_1 doesn't keep pet_y
+    Effect* notkeepYStateEffect = new Effect(keepXState2, OP_ASSIGN_NOT_EQUAL_TO, pet_y,true);
+
+    // add rule:
+    Rule* ifKeepsPetXThenNotKeepYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifKeepsPetXThenNotKeepYRule->ruleName = "ifKeepsPetXThenNotKeepYRule";
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(ispeopleState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState1);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState2);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(keepXState2);
+    ifKeepsPetXThenNotKeepYRule->addPrecondition(petXYisNotSameState1);
+
+    ifKeepsPetXThenNotKeepYRule->addEffect(EffectPair(1.0f,notkeepYStateEffect));
+
+    this->AllRules.push_back(ifKeepsPetXThenNotKeepYRule);
+    //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+
+    //----------------------------Begin Rule:  if man_1 drinks drink_x, and drink_x is not the same to drink_y, then man_1 doesn't drink drink_y----
+
+    // precondition 0: peopleState1
+
+    // precondition 1: drink_x drink_y are drink
+
+    // precondition 2: man_1 drinks drink_x
+    vector<ParamValue> drinkXStateOwnerList1;
+    drinkXStateOwnerList1.push_back(man_1);
+    State* drinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_x, drinkXStateOwnerList1, true, 0, true);
+
+    // precondition 3: brand_x is not the same to brand_y
+    vector<ParamValue> drinkXYisNotSameOwnerList1;
+    drinkXYisNotSameOwnerList1.push_back(drink_x);
+    drinkXYisNotSameOwnerList1.push_back(drink_y);
+    State* drinkXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    // effect1: man_1 drinks drink_x
+    Effect* notdrinkYEffect = new Effect(drinkXState1, OP_ASSIGN_NOT_EQUAL_TO, drink_y,true);
+
+    // add rule:
+    Rule* ifDrinkXThenNotDrinkYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifDrinkXThenNotDrinkYRule->ruleName = "ifDrinkXThenNotDrinkYRule";
+    ifDrinkXThenNotDrinkYRule->addPrecondition(ispeopleState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState2);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXState1);
+    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXYisNotSameState1);
+
+    ifDrinkXThenNotDrinkYRule->addEffect(EffectPair(1.0f,notdrinkYEffect));
+
+    this->AllRules.push_back(ifDrinkXThenNotDrinkYRule);
+    //----------------------------ENd Rule:  if man_1 drinks drink_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
+
+    //----------------------------Begin Rule: if man_1 keeps pet_x, man_1 and man_2 are not the same, so man_2 doesn't keep pet_x----------------------
+    // define variables:
+    // precondition 0: man_1 and man_2 are people, pet_x and pet_y are pet
+    // precondition 1: man_1 keepsl pet_x
+
+    // precondition 2: man_1 is not the same to man_2
+    vector<ParamValue> man12isNotSameOwnerList1;
+    man12isNotSameOwnerList1.push_back(man_1);
+    man12isNotSameOwnerList1.push_back(man_2);
+    State* man12isNotSameSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", man12isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+
+    // effect 1: man_2 doesn't keep pet_x
+    vector<ParamValue> man2notkeepPetXStateOwnerList;
+    man2notkeepPetXStateOwnerList.push_back(man_2);
+    State* man2notkeepPetXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, man2notkeepPetXStateOwnerList, true,0, true);
+    Effect* man2notkeepPetXStateEffect = new Effect(man2notkeepPetXState, OP_ASSIGN_NOT_EQUAL_TO, pet_x,true);
+
+    // add rule:
+    Rule* ifMan1KeepsPetXThenMan2NotKeepXRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->ruleName = "ifMan1KeepsPetXThenMan2NotKeepXRule";
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState1);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState2);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState1);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState2);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(keepXState2);
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(man12isNotSameSameState1);
+
+    ifMan1KeepsPetXThenMan2NotKeepXRule->addEffect(EffectPair(1.0f,man2notkeepPetXStateEffect));
+
+    this->AllRules.push_back(ifMan1KeepsPetXThenMan2NotKeepXRule);
+    //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+
+//    //----------------------------Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
+//    // define variables:
+//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
+//    // precondition 1: man_1 keepsl pet_x
+
+//    // effect 1: man_1 drinks drink_x
+
+//    // add rule:
+//    Rule* aManKeepSomePetAlsoDrinkSomeDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->ruleName = "aManKeepSomePetAlsoDrinkSomeDrinkRule";
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(ispeopleState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isPetState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isDrinkState1);
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(keepXState2);
+
+//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
+
+//    this->AllRules.push_back(aManKeepSomePetAlsoDrinkSomeDrinkRule);
+//    //----------------------------End Rule: Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
+
+//    //----------------------------Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
+//    // define variables:
+//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
+//    // precondition 1: man_1 keepsl pet_x
+
+//    // effect 1: man_1 drinks drink_x
+
+//    // add rule:
+//    Rule* aManDrinkSomeDrinkAlsoKeepSomePetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->ruleName = "aManDrinkSomeDrinkAlsoKeepSomePetRule";
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(ispeopleState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isPetState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isDrinkState1);
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(drinkXState1);
+
+//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+//    this->AllRules.push_back(aManDrinkSomeDrinkAlsoKeepSomePetRule);
+//    //----------------------------End Rule: Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
+
+
+
 }
 
 
+void OCPlanner::loadFacts(vector<State*> &knownStates)
+{
+    // test simplified Einstein puzzle facts:
+//    ; The German doesn't drink milk
+//    (EvaluationLink (stv 0 1)
+//       (PredicateNode "drink")
+//       (ListLink
+//          (AvatarNode "id_German_man")
+//          (ConceptNode "milk")
+//       )
+//    )
 
+//    ; The British doesn't drink water
+//    (EvaluationLink (stv 0 1)
+//       (PredicateNode "drink")
+//       (ListLink
+//          (AvatarNode "id_British_man")
+//          (ConceptNode "water")
+//       )
+//    )
+
+//    ; The British doesn't keep dogs
+//    (EvaluationLink (stv 0 1)
+//       (PredicateNode "drink")
+//       (ListLink
+//          (AvatarNode "id_British_man")
+//          (ConceptNode "dogs")
+//       )
+//    )
+
+    ParamValue GermanEntity = Entity("id_German_man","avatar");
+    ParamValue BritishEntity = Entity("id_British_man","avatar");
+
+    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
+    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
+    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, true, 0, true);
+
+    knownStates.push_back(GermanDoesntDrinkMilkState);
+
+    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
+    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
+    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, true, 0, true);
+    knownStates.push_back(BritishDoesntDrinkWaterState);
+
+    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
+    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
+    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, true, 0, true);
+    knownStates.push_back(BritishDoesntKeepDogsState);
+
+}

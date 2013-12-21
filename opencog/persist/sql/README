@@ -145,7 +145,7 @@ Download and install Postgres.  The current design does not support
 MySQL, because it uses SQL features that MySQL is missing.  Same
 holds true for SQLite.
 
-Be sure to install the postgres server, the postgress client, and the
+Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
 
 
@@ -382,7 +382,7 @@ commands:
     opencog> sql-store
     SQL data store thread started
 
-At this point, a progress indicator will be printed by the opencog
+At this point, a progres indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 

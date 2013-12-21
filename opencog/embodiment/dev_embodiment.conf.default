@@ -124,7 +124,7 @@ ATOM_SPACE_DUMP = atomSpace.dump
 PSI_MODULATORS =      Activation, Resolution, SecuringThreshold, SelectionThreshold 
 
 # Demands currently available in unity world
-PSI_DEMANDS = Energy, Integrity #, Certainty, Competence, Affiliation
+PSI_DEMANDS = Energy # Integrity , Certainty, Competence, Affiliation
 # Complete list of demands (all availabe in multiverse world)
 #PSI_DEMANDS = Energy, Water, Integrity, Affiliation, Certainty, Competence
 #PSI_DEMANDS = TestEnergy
@@ -150,7 +150,7 @@ PSI_MODULATOR_UPDATER_CYCLE_PERIOD =   2
 PSI_DEMAND_UPDATER_ENABLED =           true
 PSI_DEMAND_UPDATER_CYCLE_PERIOD =      1
 
-PSI_ACTION_SELECTION_ENABLED =         true
+PSI_ACTION_SELECTION_ENABLED =         false
 PSI_ACTION_SELECTION_CYCLE_PERIOD =    1
 
 PSI_RELATION_UPDATER_ENABLED =         true
@@ -160,8 +160,8 @@ PSI_FEELING_UPDATER_ENABLED =          true
 PSI_FEELING_UPDATER_CYCLE_PERIOD =     3
 
 # if use OCPlanningAgent, please turn off PSI_ACTION_SELECTION agent
-OCPLANNING_AGENT_ENABLED = false
-OCPLANNING_AGENT_CYCLE_PERIOD =    1
+OCPLANNING_AGENT_ENABLED = true
+OCPLANNING_AGENT_CYCLE_PERIOD =    2
 
 MONITOR_CHANGES_ENABLED = false
 MONITOR_CHANGES_CYCLE_PERIOD = 5
@@ -512,5 +512,9 @@ UPDATE_SPATIAL_PREDICATES_ONLY_ABOUT_AVATAR = true
 
 # consider all kind of objects: options: all_objects, block_entity_and_non_block_entity, only_non_block_entity
 UPDATE_SPATIAL_PREDICATES_FOR = only_non_block_entity
+
+# in 3D SpaceMap, if turn on BlockEntities segmentation, when percepting the block world. This is very consuming.
+ENABLE_BLOCKENTITY_SEGMENTATION = false
+
 
 

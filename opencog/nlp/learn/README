@@ -14,14 +14,26 @@ Steps:
    Edit and setup ~/.odbc.ini
 4) Start the cogserver
 
-5) Run the RelEx opencog-server.sh shell script
+5) Copy the RelEx opencog-server.sh shell script to some other name.
+   Edit it, and replace the final line with this:
+   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 999 --link --port 4444
+   Run the new shell script.
+
+   The above tells relex to use the 'any' language, and return up to 999
+   different parses.
 
 6) cat ./link-pipeline.scm |netcat localhost 17001
+
+   Better idea: edit build/lib/opencog.conf and add nlp/learn/link-pipeline.scm
+   to the list
 
 7) telnet localhost 17001
    opencog> sql-open learn-pairs linas asdf
    opencog> scm
    guile> (observe-text "this is a test")
+
+   Better yet:
+   echo -e "scm\n (observe-text \"this is a another test\")" |nc localhost 17001
 
 8) psql learn-pairs
    learn-pairs=# SELECT * from atoms;
@@ -31,5 +43,29 @@ Steps:
 That's all for now, folks!
 
 
+TODO
+----
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+* Can we start a guile thread for each incoming sentence?
+
+DONE
+----
+* Make sure that link-parser fully randomizes linkage choices for
+  long sentences. Done. See the rand_state and predictable_rand
+  flags in version 4.8.3.
+
+
 Notes:
 ------
+The relex parse is extreely fast, the cogserver part is extremely slow ... 
+Non-linear, even.
+4-word sentence: 53 parses, 3-4 seconds elapsed
+
+5-word sentence, 373 parses,
+32 second elapsed,
+postgres runs at 36% cpu
+cogserver runs at 56% cpu for a while then drops to 26% cpu
+
+8-word sentence, max of 999 parses,
+2 minutes elapsed.  Same CPU usage as above...

@@ -52,16 +52,16 @@ const char* opencog::oac::STATE_TYPE_NAME[5] =
 };
 
 State::State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
-             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateOwnerList(_stateOwnerList),stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             vector<ParamValue> _stateOwnerList, bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateOwnerList(_stateOwnerList),stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun), permanent(_permanent)
 {
     this->stateName = _stateName;
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
 }
 
 State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
-             bool _need_inquery, InqueryStateFun _inqueryStateFun)
-    : stateType(_stateType),need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun)
+             bool _need_inquery, InqueryStateFun _inqueryStateFun, bool _permanent)
+    : stateType(_stateType), need_inquery(_need_inquery),inqueryStateFun(_inqueryStateFun),permanent(_permanent)
 {
     stateVariable = new ActionParameter(_stateName,_valuetype,_ParamValue);
     stateOwnerList.clear();
@@ -92,7 +92,12 @@ ParamValue State::getParamValue()
         return this->stateVariable->getValue();
 
     if (need_inquery)
-        return inqueryStateFun(stateOwnerList);
+    {
+        if (inqueryStateFun != 0)
+            return inqueryStateFun(stateOwnerList);
+        else
+            return UNDEFINED_VALUE;
+    }
     else
         return (Inquery::getParamValueFromAtomspace(*this));
 
@@ -1017,8 +1022,8 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
         }
     }
 
-    // check the state value
-    if (toGroundStateValue && isParameterUnGrounded(*(s->stateVariable)))
+    // try to ground the state value if it is ungrounded
+    if (isParameterUnGrounded(*(s->stateVariable)))
     {
         // if the state value is assigned
         if ( !(knownStateVal == UNDEFINED_VALUE))
@@ -1032,8 +1037,17 @@ State* Rule::groundAStateByRuleParamMap(State* s, ParamGroundedMapInARule& groun
             if (paramMapIt != groundings.end())
                 groundedState->stateVariable->assignValue(paramMapIt->second);
             else if (ifRealTimeQueryStateValue)
-                groundedState->stateVariable->assignValue(groundedState->getParamValue());
-            else
+            {
+                ParamValue value = groundedState->getParamValue();
+                if ((value == UNDEFINED_VALUE) && toGroundStateValue)
+                {
+                    delete groundedState;
+                    return 0;
+                }
+
+                groundedState->stateVariable->assignValue(value);
+            }
+            else if (toGroundStateValue)
             {
                 delete groundedState;
                 return 0;
@@ -1193,13 +1207,16 @@ void Rule::_preProcessRuleParameterIndexes()
                 _addParameterIndex(s,*ownerIt);
         }
 
-        // check the state value
-        if (isParameterUnGrounded( *(s->stateVariable)))
-                _addParameterIndex(s,s->stateVariable->getValue());
 
         // check the effect value
         if (isParamValueUnGrounded(e->opParamValue))
             _addParameterIndex(s,e->opParamValue);
+
+        //  not need to add the old state value in index
+//        // check the old state value
+//        if (isParameterUnGrounded( *(s->stateVariable)))
+//                _addParameterIndex(s,s->stateVariable->getValue());
+
     }
 
     // Check if all the cost calcuation states parameters grounded
@@ -1220,4 +1237,74 @@ void Rule::_preProcessRuleParameterIndexes()
 
     }
 
+}
+
+// todo: this is not complete. if other users have more requiment, need to implment his own cases.
+bool  Rule::isRulePossibleToHelpToAchieveGoal(State* goal, bool &directHelp)
+{
+    vector<EffectPair>::iterator effectIt;
+    for(effectIt = effectList.begin(); effectIt != effectList.end(); ++effectIt)
+    {
+        bool help = false;
+        Effect* e = effectIt->second;
+        State* s = e->state;
+        if (s->name() == goal->name())
+        {
+            help = true;
+            directHelp = false;
+            switch (e->effectOp)
+            {
+            case OP_ASSIGN:
+                if (goal->stateType == STATE_NOT_EQUAL_TO)
+                {
+                    help = false;
+
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        help = !(e->opParamValue == goal->getParamValue());
+                    }
+
+                }
+                else if (goal->stateType == STATE_EQUAL_TO)
+                {
+                    if (! isParamValueUnGrounded(e->opParamValue))
+                    {
+                        directHelp = e->opParamValue == goal->getParamValue();
+                        help = directHelp;
+                    }
+                }
+                break;
+
+            case OP_ASSIGN_NOT_EQUAL_TO:
+                if (goal->stateType == STATE_EQUAL_TO)
+                    help = false;
+                break;
+
+            case OP_ASSIGN_GREATER_THAN:
+                if (goal->stateType != STATE_GREATER_THAN)
+                    help = false;
+                break;
+            case OP_ASSIGN_LESS_THAN:
+                if (goal->stateType != STATE_LESS_THAN)
+                    help = false;
+                break;
+            case OP_REVERSE:
+            case OP_ADD:
+            case OP_SUB:
+            case OP_MUL:
+            case OP_DIV:
+            case OP_NUM_OPS:
+            default:
+                help = true;
+                break;
+
+            }
+
+        }
+
+        if (help == true)
+            return true;
+    }
+
+    return false;
 }

@@ -1,5 +1,5 @@
 /*
- * examples/extending/DerivedCogServer.h
+ * examples/modules/ExampleAgent.h
  *
  * Copyright (C) 2008 by Singularity Institute for Artificial Intelligence
  * All Rights Reserved
@@ -22,21 +22,53 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OPENCOG_DERIVED_COGSERVER_H
-#define _OPENCOG_DERIVED_COGSERVER_H
+#ifndef _OPENCOG_EXAMPLE_AGENT_H
+#define _OPENCOG_EXAMPLE_AGENT_H
 
-#include <opencog/server/CogServer.h>
+#include <string>
 
-class DerivedCogServer : public opencog::CogServer
+#include <opencog/server/Agent.h>
+#include <opencog/server/Factory.h>
+#include <opencog/server/Module.h>
+
+namespace opencog
 {
 
+class CogServer;
+
+class ExampleAgent : public Agent
+{
 public:
-    static opencog::BaseServer* derivedCreateInstance(void);
 
-    DerivedCogServer();
-    virtual ~DerivedCogServer();
-    virtual void serverLoop(void);
+    virtual const ClassInfo& classinfo() const { return info(); }
+    static const ClassInfo& info() {
+        static const ClassInfo _ci("opencog::ExampleAgent");
+        return _ci;
+    }
 
+    ExampleAgent(CogServer&);
+    virtual ~ExampleAgent();
+    virtual void run();
+
+private:
+    int thing_a_ma_bob;
+
+}; // class
+
+class ExampleModule : public Module
+{
+private:
+
+    Factory<ExampleAgent, Agent> factory;
+
+public:
+
+    ExampleModule(CogServer&);
+    virtual ~ExampleModule();
+    virtual void init();
+    virtual const char* id();
 };
 
-#endif // _OPENCOG_DERIVED_COGSERVER_H
+} // namespace opencog
+
+#endif // _OPENCOG_EXAMPLE_AGENT_H

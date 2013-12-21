@@ -28,6 +28,13 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
+
+		// I don't get it .. started seeing these recently. I'm just
+		// going to silently ignore thse, for now, don't know what
+		// they mean. XXX TODO figure out and fix if needed. Or document.
+		case 0:
+			return SCM_BOOL_F;
+
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
 			        "don't know how to mark this type: %d\n",
@@ -112,7 +119,7 @@ std::string SchemeSmob::misc_to_string(SCM node)
 		case COG_EXTEND:
 		{
 			// return "#<opencog extension>\n";
-			// Hmm. Is this really the right thing to return ?? I'm not sure .. 
+			// Hmm. Is this really the right thing to return ?? I'm not sure ..
 			PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
 			return pe->get_name();
 		}
