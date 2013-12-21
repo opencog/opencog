@@ -583,8 +583,9 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
     }
     else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
     {
-        // TODO
-        ParamValue value = Inquery::getParamValueFromAtomspace(oneGoal);
+
+        bool is_true;
+        ParamValue value = Inquery::getParamValueFromAtomspace(oneGoal,is_true);
         if (value == UNDEFINED_VALUE)
         {
             // there is not information in Atomspace about this state. We don't know the state, so just return false
@@ -593,9 +594,10 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
             return false;
         }
 
-
-        // put this state into the cache, so we don't need to search for it next time
         State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
+
+        if ((!is_true) && (oneGoal.stateType != STATE_NOT_EQUAL_TO))
+            curState.stateType = STATE_NOT_EQUAL_TO;
 
         return curState.isSatisfied(oneGoal, satisfiedDegree,original_state);
 
@@ -668,6 +670,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         newStateNode->forwardRuleNode = 0;
         // A node that is Deepest is the orginal starting state, it's the deepest in our backward planning network, the most far away from the goal state
         newStateNode->depth = "Deepest";
+
+        if (newStateNode->state->permanent)
+            addHypotheticalLinkForStateNode(newStateNode);
 
         startStateNodes.push_front(newStateNode);
 
@@ -4312,23 +4317,23 @@ void OCPlanner::loadFacts(vector<State*> &knownStates)
 //       )
 //    )
 
-//    ParamValue GermanEntity = Entity("id_German_man","avatar");
-//    ParamValue BritishEntity = Entity("id_British_man","avatar");
+    ParamValue GermanEntity = Entity("id_German_man","avatar");
+    ParamValue BritishEntity = Entity("id_British_man","avatar");
 
-//    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
-//    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
-//    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
+    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
+    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
+    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
 
-//    knownStates.push_back(GermanDoesntDrinkMilkState);
+    knownStates.push_back(GermanDoesntDrinkMilkState);
 
-//    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
-//    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
-//    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
-//    knownStates.push_back(BritishDoesntDrinkWaterState);
+    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
+    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
+    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
+    knownStates.push_back(BritishDoesntDrinkWaterState);
 
-//    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
-//    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
-//    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
-//    knownStates.push_back(BritishDoesntKeepDogsState);
+    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
+    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
+    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
+    knownStates.push_back(BritishDoesntKeepDogsState);
 
 }

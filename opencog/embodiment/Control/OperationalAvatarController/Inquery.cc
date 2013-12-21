@@ -90,9 +90,11 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
  }
 
- ParamValue Inquery::getParamValueFromAtomspace( State& state)
+ ParamValue Inquery::getParamValueFromAtomspace( State& state, bool &is_true)
  {
      vector<ParamValue> stateOwnerList = state.stateOwnerList;
+
+     is_true = true;
 
      if (stateOwnerList.size() < 1)
          return UNDEFINED_VALUE;
@@ -117,13 +119,26 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
              return UNDEFINED_VALUE;
      }
 
-     Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c);
+     bool getPositiveResult = true;
+
+     if (state.stateType == STATE_NOT_EQUAL_TO)
+         getPositiveResult = false;
+
+     Handle evalLink = AtomSpaceUtil::getLatestEvaluationLink(*atomSpace, state.name(), a , b, c, getPositiveResult);
      if (evalLink == Handle::UNDEFINED)
      {
          logger().error("Inquery::getParamValueFromAtomspace : There is no evaluation link for predicate: "
                   + state.name() );
          return UNDEFINED_VALUE;
      }
+
+     std::cout<<"Debug: evalLink from the Atomspace: " << std::endl
+             << atomSpace->atomAsString(evalLink).c_str() <<std::endl;
+
+     if (atomSpace->getMean( evalLink ) >= 0.5f )
+         is_true = true;
+     else
+         is_true = false;
 
      Handle listLink = atomSpace->getOutgoing(evalLink, 1);
 
@@ -1268,7 +1283,6 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
     }
     else
         return hEvalLink;
-
 }
 
 HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames)

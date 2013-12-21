@@ -99,7 +99,16 @@ ParamValue State::getParamValue()
             return UNDEFINED_VALUE;
     }
     else
-        return (Inquery::getParamValueFromAtomspace(*this));
+    {
+        bool is_true;
+        ParamValue value = Inquery::getParamValueFromAtomspace(*this,  is_true);
+        if ( (! is_true) &&  (stateType !=  STATE_NOT_EQUAL_TO))
+            return UNDEFINED_VALUE;
+        else if ((stateType ==  STATE_NOT_EQUAL_TO) && ( is_true))
+            return UNDEFINED_VALUE;
+
+        return value;
+    }
 
 }
 

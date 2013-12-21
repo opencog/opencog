@@ -69,7 +69,8 @@ public:
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static ParamValue getParamValueFromAtomspace(State &state);
+    // sometimes there is only resutls that has a truth value lower than 0.5, in such case, is_true will be assign false.
+    static ParamValue getParamValueFromAtomspace(State &state, bool &is_true);
 
     // for that kind of States that do not exist in Atomspace, nor in real time system, just simply return UNDEFINED_VALUE
     static ParamValue inqueryUnknowableState(const vector<ParamValue>& stateOwnerList);
