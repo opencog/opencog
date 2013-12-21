@@ -156,6 +156,9 @@ public:
 
     static ParamValue getParamValueFromHandle(string var, Handle& valueH);
 
+ private:
+    static  HandleSeq _findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames);
+
 
 };
 

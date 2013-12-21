@@ -54,6 +54,7 @@
 using namespace opencog::oac;
 using namespace opencog::pai;
 
+
 AtomSpace* Inquery::atomSpace= 0;
 SpaceServer::SpaceMap* Inquery::spaceMap = 0;
 
@@ -132,8 +133,8 @@ SpaceServer::SpaceMap* Inquery::spaceMap = 0;
          return UNDEFINED_VALUE;
      }
 
-     std::cout<<"Debug: evalLink from the Atomspace: " << std::endl
-             << atomSpace->atomAsString(evalLink).c_str() <<std::endl;
+//     std::cout<<"Debug: evalLink from the Atomspace: " << std::endl
+//             << atomSpace->atomAsString(evalLink).c_str() <<std::endl;
 
      if (atomSpace->getMean( evalLink ) >= 0.5f )
          is_true = true;
@@ -1285,7 +1286,7 @@ Handle Inquery::generatePMLinkFromAState(State* state, RuleNode* ruleNode)
         return hEvalLink;
 }
 
-HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames)
+HandleSeq Inquery::_findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames)
 {
     HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
     vector<string> allVariables;
@@ -1304,7 +1305,6 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     }
     else
     {
-        // contains mutiple conditions, so add them one by one
         for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
         {
             int index = stateIndexes[i];
@@ -1345,8 +1345,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     bindLinkOutgoings.push_back(hImplicationLink);
     Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
     // Run pattern matcher
     PatternMatch pm;
@@ -1354,8 +1354,8 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
-    std::cout<<"Debug: pattern matching results: " << std::endl
-            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+//    std::cout<<"Debug: pattern matching results: " << std::endl
+//            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
 
     // Get result
     // Note: Don't forget remove the hResultListLink
@@ -1379,7 +1379,202 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     }
     else
        return resultSet;
+}
 
+HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames)
+{
+    typedef map<int,UngroundedVariablesInAState&> ConnectedGroup;
+    typedef list<ConnectedGroup> DisConnectedGroupList;
+    typedef DisConnectedGroupList::iterator DisConnectedGroupListIterator;
+
+    // map<index,record>
+    DisConnectedGroupList splitPreconList;
+
+    if (stateIndexes.size() != 1)
+    {      
+        // contains mutiple conditions
+        // first check if there are disconnected graphs, if any, need to separate them into different BindLinks
+        // disconnected graphs means the precondidtions break into few parts, which do no share any variables
+
+
+        for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
+        {
+            int index = stateIndexes[i];
+            list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+            for(int x = 0; x < index; ++x)
+                 ++ it;
+
+            UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+
+
+            list<DisConnectedGroupListIterator> shareSameVarGroups;
+            shareSameVarGroups.clear();
+
+            DisConnectedGroupListIterator splitListIt;
+
+            for (splitListIt = splitPreconList.begin(); splitListIt != splitPreconList.end(); ++ splitListIt)
+            {
+                ConnectedGroup& oneGroup = *splitListIt;
+                ConnectedGroup::iterator groupIt;
+                bool foundShared = false;
+
+                for (groupIt = oneGroup.begin(); groupIt != oneGroup.end(); ++groupIt)
+                {
+                    UngroundedVariablesInAState& otherRecord = groupIt->second;
+                    set<string>::iterator setIt;
+                    for (setIt = record.vars.begin(); setIt != record.vars.end(); ++ setIt)
+                    {
+                        if (otherRecord.vars.find(*setIt) != otherRecord.vars.end())
+                        {
+                            // these two share the same variable
+                            // find next group that also share same variable with this precondition
+                            DisConnectedGroupListIterator shareSameVarIt = splitListIt;
+                            shareSameVarGroups.push_back(shareSameVarIt);
+                            foundShared = true;
+                            break;
+
+                        }
+                    }
+
+                    if (foundShared)
+                        break;
+
+                }
+
+            }
+
+
+            // if this precondition doesn't share any same varaible with the old groups, add a new group for it
+            if (shareSameVarGroups.size() == 0)
+            {
+                ConnectedGroup newGroup;
+                newGroup.insert(std::pair<int,UngroundedVariablesInAState&>(index, record));
+                splitPreconList.push_back(newGroup);
+            }
+            else if (shareSameVarGroups.size() == 1)
+            {
+                //only has one group share same variable with this new precondition, add this new precondition at the end of this group
+                DisConnectedGroupListIterator shareIt = shareSameVarGroups.front();
+                ConnectedGroup& group =  *shareIt;
+                group.insert(std::pair<int,UngroundedVariablesInAState&>(index, record));
+            }
+            else
+            {
+                // there are more than one group share same variable with this new precondition
+                // add all the groups together into the first group
+
+                list<DisConnectedGroupListIterator>::iterator shareListit = shareSameVarGroups.end();
+                shareListit --;
+
+                DisConnectedGroupListIterator shareIt = shareSameVarGroups.front();
+                ConnectedGroup& firstGroup =  *shareIt;
+
+                for (; shareListit != shareSameVarGroups.begin(); -- shareListit)
+                {
+                    DisConnectedGroupListIterator cshareIt = *shareListit;
+                    ConnectedGroup& curGroup =  *cshareIt;
+                    firstGroup.insert(curGroup.begin(), curGroup.end());
+                    splitPreconList.erase(cshareIt);
+                }
+
+                // and then lput this new precondition at the end of this big group
+                firstGroup.insert(std::pair<int,UngroundedVariablesInAState&>(index, record));
+
+            }
+
+        }
+
+    }
+
+    if (splitPreconList.size() < 1) // all the preconditions are able to connect as one BindLink
+    {
+        // just generate one BindLink and call pattern matcher once
+        return _findCandidatesByPatternMatching(ruleNode, stateIndexes, varNames);
+    }
+    else
+    {
+//        std::cout<<"Debug: Inquery::findCandidatesByPatternMatching: split into " << splitPreconList.size() << " Bindlinks:" << std::endl;
+
+        // contans disconnected graphs, generate multiple BindLinks and call pattern matcher separately
+        DisConnectedGroupListIterator disIt;
+        HandleSeqSeq resultSets;
+        HandleSeq result;
+
+        bool fail = false;
+        for (disIt = splitPreconList.begin(); disIt != splitPreconList.end(); ++ disIt)
+        {
+            ConnectedGroup& oneGroup = *disIt;
+            vector<int> oneGroupStateIndexes;
+            vector<string> oneGroupVarNames;
+
+            for (ConnectedGroup::iterator oit = oneGroup.begin(); oit != oneGroup.end(); ++ oit)
+                oneGroupStateIndexes.push_back(oit->first);
+
+            HandleSeq oneGroupResults = _findCandidatesByPatternMatching(ruleNode, oneGroupStateIndexes,oneGroupVarNames);
+            varNames.insert(varNames.end(),oneGroupVarNames.begin(), oneGroupVarNames.end());
+
+            if (oneGroupResults.size() == 0)
+                fail = true;
+            else
+                resultSets.push_back(oneGroupResults);
+        }
+
+        if (fail)
+        {
+            // remove all the list links
+            foreach (HandleSeq hs,resultSets)
+            {
+                foreach (Handle listH, hs)
+                {
+                    atomSpace->removeAtom(listH);
+                }
+            }
+        }
+        else
+        {
+            // generate all the possible combinations for each group of results together
+            HandleSeqSeq::iterator ssi,second;
+            second = ++ resultSets.begin();
+
+            HandleSeqSeq tmpResult; // every element is a vector of outgoings for a list link
+            foreach (Handle listH, resultSets.front())
+            {
+                HandleSeq candidateHandlesInOneGroup = atomSpace->getOutgoing(listH);
+                tmpResult.push_back(candidateHandlesInOneGroup);
+                atomSpace->removeAtom(listH);
+            }
+
+            for (ssi = second; ssi != resultSets.end(); ssi ++)
+            {
+                HandleSeq& addToSeq = *ssi;
+                HandleSeqSeq tmptmpResult;
+
+                foreach (HandleSeq sq, tmpResult)
+                {
+                    foreach (Handle listH, addToSeq)
+                    {
+                        HandleSeq handlesInOneGroup = atomSpace->getOutgoing(listH);
+                        HandleSeq combination = sq;
+                        combination.insert(combination.end(),handlesInOneGroup.begin(), handlesInOneGroup.end());
+                        tmptmpResult.push_back(combination);
+                        atomSpace->removeAtom(listH);
+                    }
+                }
+
+                tmpResult.clear();
+                tmpResult = tmptmpResult;
+            }
+
+            foreach (HandleSeq hs,tmpResult)
+            {
+                Handle listLink = atomSpace->addLink(LIST_LINK, hs);
+                result.push_back(listLink);
+            }
+
+        }
+
+        return result;
+    }
 
 
 }
