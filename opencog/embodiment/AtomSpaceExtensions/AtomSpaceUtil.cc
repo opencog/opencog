@@ -533,7 +533,8 @@ Handle AtomSpaceUtil::getLatestEvaluationLink(AtomSpace &atomSpace,
                              std::string predicateName,
                              Handle a,
                              Handle b,
-                             Handle c)
+                             Handle c,
+                             bool getPositiveResult)
 throw(opencog::NotFoundException)
 {
     HandleSeq seq0;
@@ -591,7 +592,25 @@ throw(opencog::NotFoundException)
         evalLinkHandleset = getEvaluationLinks(atomSpace,predicateName,seq0);
     }
 
-    return getLatestHandle(atomSpace,evalLinkHandleset);
+
+    //  try to get the EvaluationLink with truth value >= 0.5 if any, if not, return the one < 0.5. vice versa
+    HandleSeq handleset;
+    foreach (Handle eh, evalLinkHandleset)
+    {
+        if ( atomSpace.getMean(eh) >= 0.5)
+        {
+            if (getPositiveResult)
+                handleset.push_back(eh);
+        }
+        else if (! getPositiveResult)
+            handleset.push_back(eh);
+    }
+
+    // and then get the lastest one
+    if (handleset.size() == 0)
+        return getLatestHandle(atomSpace,evalLinkHandleset);
+    else
+        return getLatestHandle(atomSpace,handleset);
 
 }
 

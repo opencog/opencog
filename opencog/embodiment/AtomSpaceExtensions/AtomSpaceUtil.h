@@ -476,12 +476,13 @@ public:
      * @param a The handle of the first object
      * @param b The handle of the second object (optional). If this handle is
      *        not informed then a unary predicate is assumed
+     * @param getPositiveResult: try to get the EvaluationLink with truth value >= 0.5 if any, if not, return the one < 0.5. vice versa
      */
     static Handle getLatestEvaluationLink(AtomSpace &atomSpace,
                                  std::string predicateName,
                                  Handle a,
                                  Handle b = Handle::UNDEFINED,
-                                 Handle c = Handle::UNDEFINED) throw(opencog::NotFoundException);
+                                 Handle c = Handle::UNDEFINED, bool getPositiveResult = true) throw(opencog::NotFoundException);
 
     /**
      * Return the handle of the value node the given predicate, with its objects
