@@ -2977,16 +2977,16 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             }
 
             // means that this group of results can't ground it all the ungrounded variables
-            if ( varNames.size() < var_total_num)
-            {
-                cannotGroundAllVaraibles = true;
-                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
-                    break;
+//            if ( varNames.size() < var_total_num)
+//            {
+//                cannotGroundAllVaraibles = true;
+//                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+//                    break;
 
-                generateNextCombinationGroup(indexes, n_max);
+//                generateNextCombinationGroup(indexes, n_max);
 
-                continue;
-            }
+//                continue;
+//            }
 
             int candidateGroupNum = 1;
 
@@ -3012,9 +3012,9 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     bool impossile;
                     float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
 
-//                    cout << "Fitness score = " << fitnessScore ;
-//                    if (impossile)
-//                        cout << " , impossible bindings, would not be put into candidate list. " ;
+                    cout << "Fitness score = " << fitnessScore ;
+                    if (impossile)
+                        cout << " , impossible bindings, would not be put into candidate list. " ;
 
                     if (! impossile)
                     {
@@ -3024,6 +3024,8 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
 
                         tmpcandidates.push_back(TmpParamCandidate(fitnessScore, oneGroupCandidate));
                     }
+
+                    atomSpace->removeAtom(listH);
 
                 }
 
@@ -3993,12 +3995,12 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSameOwnerList1;
     isNotSameOwnerList1.push_back(man_1);
     isNotSameOwnerList1.push_back(man_2);
-    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameOwnerList1,false, 0, true);
 
     vector<ParamValue> isNotSameOwnerList2;
     isNotSameOwnerList2.push_back(man_1);
     isNotSameOwnerList2.push_back(man_3);
-    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameState2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameOwnerList2,false, 0, true);
 
 
     // precondition 0: pet_x y z are pets
@@ -4020,12 +4022,12 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSamePetOwnerList1;
     isNotSamePetOwnerList1.push_back(pet_x);
     isNotSamePetOwnerList1.push_back(pet_y);
-    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSamePet1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSamePetOwnerList1,false, 0, true);
 
     vector<ParamValue> isNotSamePetOwnerList2;
     isNotSamePetOwnerList2.push_back(pet_x);
     isNotSamePetOwnerList2.push_back(pet_y);
-    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSamePet2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSamePetOwnerList2,false, 0, true);
 
     // precondition 6-9 : other people do not keep pet_x
     vector<ParamValue> notkeepXStateOwnerList1;
@@ -4093,13 +4095,13 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSameDrinkOwnerList1;
     isNotSameDrinkOwnerList1.push_back(drink_x);
     isNotSameDrinkOwnerList1.push_back(drink_y);
-    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameDrinkState = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameDrinkOwnerList1,false, 0, true);
 
     //  precondition:  drink_y and  drink_z are different
     vector<ParamValue> isNotSameDrinkOwnerList2;
     isNotSameDrinkOwnerList2.push_back(drink_x);
     isNotSameDrinkOwnerList2.push_back(drink_z);
-    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameDrinkState2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameDrinkOwnerList2,false, 0, true);
 
     // precondition 6-9 : other people do not drink drink_x
     vector<ParamValue> notdrinkXStateOwnerList1;
@@ -4157,7 +4159,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> petXYisNotSameOwnerList1;
     petXYisNotSameOwnerList1.push_back(pet_x);
     petXYisNotSameOwnerList1.push_back(pet_y);
-    State* petXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* petXYisNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     // effect 1: man_1 doesn't keep pet_y
     Effect* notkeepYStateEffect = new Effect(keepXState2, OP_ASSIGN_NOT_EQUAL_TO, pet_y,true);
@@ -4191,7 +4193,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> drinkXYisNotSameOwnerList1;
     drinkXYisNotSameOwnerList1.push_back(drink_x);
     drinkXYisNotSameOwnerList1.push_back(drink_y);
-    State* drinkXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* drinkXYisNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     // effect1: man_1 drinks drink_x
     Effect* notdrinkYEffect = new Effect(drinkXState1, OP_ASSIGN_NOT_EQUAL_TO, drink_y,true);
@@ -4219,7 +4221,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> man12isNotSameOwnerList1;
     man12isNotSameOwnerList1.push_back(man_1);
     man12isNotSameOwnerList1.push_back(man_2);
-    State* man12isNotSameSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", man12isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* man12isNotSameSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", man12isNotSameOwnerList1,false, 0, true);
 
     // effect 1: man_2 doesn't keep pet_x
     vector<ParamValue> man2notkeepPetXStateOwnerList;

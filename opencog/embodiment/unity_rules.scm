@@ -971,5 +971,167 @@
    )
 )
 
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_British_man")
+      (AvatarNode "id_German_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_German_man")
+      (AvatarNode "id_British_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_German_man")
+      (AvatarNode "id_American_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_American_man")
+      (AvatarNode "id_German_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_British_man")
+      (AvatarNode "id_American_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "id_American_man")
+      (AvatarNode "id_British_man")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "fish")
+      (AvatarNode "dogs")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "dogs")
+      (AvatarNode "fish")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "dogs")
+      (AvatarNode "cats")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "cats")
+      (AvatarNode "dogs")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "cats")
+      (AvatarNode "fish")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "fish")
+      (AvatarNode "cats")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "milk")
+      (AvatarNode "water")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "water")
+      (AvatarNode "milk")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "water")
+      (AvatarNode "tea")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "tea")
+      (AvatarNode "water")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "tea")
+      (AvatarNode "milk")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_different")
+   (ListLink
+      (AvatarNode "milk")
+      (AvatarNode "tea")
+      (ConceptNode "true")
+   )
+)
+
 
 
