@@ -48,11 +48,13 @@ using namespace std;
 static const char* DEFAULT_CONFIG_FILENAME = "opencog.conf";
 static const char* DEFAULT_CONFIG_PATHS[] = 
 {
-    CONFDIR,
+    // Search order for the config file:
+    "lib",       // First, we look in the build directory (cmake puts it here)
+    "../lib",    // Next, we look at the source directory
+    CONFDIR,     // Next, the install directory
 #ifndef WIN32
-    "/etc",
+    "/etc",      // Finally, in the standard ssytem directory.
 #endif // !WIN32
-    "../lib",
     NULL
 };
 
@@ -64,8 +66,8 @@ static const char* DEFAULT_MODULE_PATHS[] =
     "../build/opencog",    // autogened scm files go into the build dir!
     "../bin/opencog",      // an alternate name for a build dir.
 #ifndef WIN32
+    "/usr/local/share/opencog",  // search local first, then system.
     "/usr/share/opencog",
-    "/usr/local/share/opencog",
 #endif // !WIN32
     NULL
 };

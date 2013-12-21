@@ -116,12 +116,14 @@ void ConsoleSocket::OnLine(const std::string& line)
     CogServer& cogserver = static_cast<CogServer&>(server());
     _request = cogserver.createRequest(cmdName);
 
-    // If the command starts with an open-paren, assume its
-    // a scheme command. Pop into the scheme shell, and try again.
-    if (_request == NULL and cmdName[0] == '(') {
+    // If the command starts with an open-paren, or a semi-colon, assume
+    // its a scheme command. Pop into the scheme shell, and try again.
+    if (_request == NULL and 
+        (cmdName[0] == '(' or cmdName[0] == ';')) {
         OnLine("scm");
 
         // Re-issue the command, but only if we sucessfully got a shell.
+        // (We might not get a shell if scheme is not installed.)
         if (_shell) {
             OnLine(line);
             return;
