@@ -1191,6 +1191,8 @@ HandleSeq Inquery::generateNodeForGroundedParamValue(ParamValue* realValue)
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_low).c_str()));
         results.push_back(AtomSpaceUtil::addNode(*atomSpace,NUMBER_NODE, opencog::toString(fuzzyFloat->bound_high).c_str()));
     }
+
+    return results;
 }
 
 HandleSeq Inquery::generatePMNodeFromeAParamValue(ParamValue& paramValue, RuleNode* ruleNode)
@@ -1289,7 +1291,6 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
     else
     {
         // contains mutiple conditions, so add them one by one
-        vector<string> _allVariables;
         for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
         {
             int index = stateIndexes[i];
@@ -1298,13 +1299,14 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
                  ++ it;
 
             UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
-            std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(_allVariables));
+            std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
             andLinkOutgoings.push_back(record.PMLink);
 
         }
 
         // remove the repeated elements
-        std::unique_copy(_allVariables.begin(),_allVariables.end(),std::back_inserter(allVariables));
+        std::sort(allVariables.begin(), allVariables.end());
+        allVariables.erase(std::unique(allVariables.begin(), allVariables.end()),allVariables.end());
         Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
 
         implicationLinkOutgoings.push_back(hAndLink);
