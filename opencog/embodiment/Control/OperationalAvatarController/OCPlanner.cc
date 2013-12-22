@@ -306,10 +306,11 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
         {
             //  check if this state has beed satisfied by the previous state nodes
             float satisfiedDegree;
+            bool known;
             found = true;
 
             State* vState = satstateNode->state;
-            if (vState->isSatisfied(goalState,satisfiedDegree))
+            if (vState->isSatisfied(goalState,satisfiedDegree,known))
             {
                 return true;
             }
@@ -331,9 +332,10 @@ bool OCPlanner::checkIfThisGoalIsSatisfiedByTempStates(State& goalState, bool &f
         //  check if this state has beed satisfied by the previous state nodes
         float satisfiedDegree;
         found = true;
+        bool known;
 
         State* vState = satstateNode->state;
-        if (vState->isSatisfied(goalState,satisfiedDegree))
+        if (vState->isSatisfied(goalState,satisfiedDegree, known))
         {
             return true;
         }
@@ -538,8 +540,10 @@ void OCPlanner::addNewRule(Rule& newRule)
 
 
 // basically, we only care about the satisfied degree of the numberic state
-bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree, bool &isUnknownValue, State* original_state)
+bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDegree, bool &isUnknownValue, bool &known, State* original_state)
 {
+    known = false;
+
     // if this goal doesn't really require an exact value, just return fully achieved
     if (oneGoal.stateVariable->getValue() == UNDEFINED_VALUE)
     {
@@ -578,8 +582,10 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
             return false;
         }
 
-        return oneGoal.isSatisfiedMe(inqueryValue,satisfiedDegree,original_state);
+        State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,inqueryValue,oneGoal.stateOwnerList);
+        curState.permanent = oneGoal.permanent;
 
+        return curState.isSatisfied(oneGoal, satisfiedDegree,known, original_state);
     }
     else // it doesn't need real time calculation, then we search for its latest evaluation link value in the atomspace
     {
@@ -595,11 +601,12 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
         }
 
         State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,value,oneGoal.stateOwnerList);
+        curState.permanent = oneGoal.permanent;
 
         if ((!is_true) && (oneGoal.stateType != STATE_NOT_EQUAL_TO))
             curState.stateType = STATE_NOT_EQUAL_TO;
 
-        return curState.isSatisfied(oneGoal, satisfiedDegree,original_state);
+        return curState.isSatisfied(oneGoal, satisfiedDegree,known, original_state);
 
     }
 
@@ -672,7 +679,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         newStateNode->depth = "Deepest";
 
         if (newStateNode->state->permanent)
+        {
             addHypotheticalLinkForStateNode(newStateNode);
+            temporaryStateNodes.push_front(newStateNode);
+        }
 
         startStateNodes.push_front(newStateNode);
 
@@ -698,7 +708,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
         bool found;
         StateNode* knownStateNode;
-        bool isUnknownValue;
+        bool isUnknownValue, known;
 
         if (checkIfThisGoalIsSatisfiedByTempStates(*(newStateNode->state), found, knownStateNode, 0,false))
         {
@@ -710,7 +720,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             unsatisfiedStateNodes.push_back(newStateNode);
         }
-        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree, isUnknownValue))
+        else if (checkIsGoalAchievedInRealTime(*(newStateNode->state), satisfiedDegree, isUnknownValue,known))
         {
             satisfiedGoalStateNodes.push_back(newStateNode);
             temporaryStateNodes.push_front(newStateNode);
@@ -1206,8 +1216,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 {
                     // check if this effect can satisfy this unsatisfiedState
                     float satDegree;
+                    bool known;
                     StateNode* unsatStateNode = (StateNode*)(*unsait);
-                    if (effState->isSatisfied(*(unsatStateNode->state ),satDegree))
+                    if (effState->isSatisfied(*(unsatStateNode->state ),satDegree, known))
                     {
                         ruleNode->forwardLinks.push_back(unsatStateNode);
                         unsatisfiedStateNodes.erase(unsait);
@@ -1248,8 +1259,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 {
                     // check if this effect unsatisfy this state
                     float satDegree;
+                    bool known;
                     StateNode* satStateNode = (StateNode*)(*sait);
-                    if (! effState->isSatisfied(*(satStateNode->state ),satDegree))
+                    if (! effState->isSatisfied(*(satStateNode->state ),satDegree, known))
                     {
                         ruleNode->negativeForwardLinks.insert(satStateNode);
 
@@ -1282,8 +1294,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 if (effState->isSameState( *(goalNode->state) ))
                 {
                     float satDegree;
+                    bool known;
 
-                    if (! effState->isSatisfied(*(goalNode->state) ,satDegree))
+                    if (! effState->isSatisfied(*(goalNode->state) ,satDegree, known))
                     {
                         // This effect dissatisfied this goal, put this goal into the unsatisfied state node list and remove it from goal list
                         unsatisfiedStateNodes.push_back(goalNode);
@@ -1329,8 +1342,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             newStateNode->forwardEffectState = ps;
             ruleNode->backwardLinks.push_back(newStateNode);
             newStateNode->calculateNodesDepth();
-            if (groundPs->permanent)
-                addHypotheticalLinkForStateNode(newStateNode);
 
             // first check if this state has beed satisfied by the previous state nodes
             bool found = false;
@@ -1375,10 +1386,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             }
             else
             {
-                bool isUnknownValue;
+                bool isUnknownValue, known;
                 // cannot find this state in the temporaryStateNodes list, need to check it in real time
                 // check real time
-                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
+                if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue,known))
                 {
                     isSat = false;
                 }
@@ -1405,6 +1416,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 cout << " is unsatisfied :(" << std::endl;
                 unsatisfiedPreconNum ++;
             }
+
+            if (groundPs->permanent)
+                addHypotheticalLinkForStateNode(newStateNode);
         }
 
         // when the preconditions is not order dependent , need to check the easiness of each unsatisfied preconditions
@@ -1660,7 +1674,10 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
     map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(stateNode->state->name());
 
     if ( it == ruleEffectIndexes.end())
+    {
+        stateNode->hardnessScore = 999999;
         return 999999;
+    }
 
     multimap<float,Rule*>& rules = (multimap<float,Rule*>&)(it->second);
     multimap<float,Rule*> ::iterator ruleIt;
@@ -1689,7 +1706,10 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
     }
 
     if (! ruleToHelp)
+    {
+        stateNode->hardnessScore = 999999;
         return 999999;
+    }
 
     int hardnessScore = 1000;
 
@@ -1701,6 +1721,7 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
     if (stateNode->state->isNumbericState())
         hardnessScore += 2000;
 
+    stateNode->hardnessScore = hardnessScore;
     return hardnessScore;
 }
 
@@ -1758,8 +1779,8 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
             // cannot find this state in the temporaryStateNodes list, need to check it in real time
             // check real time
             float satisfiedDegree;
-            bool isUnknownValue;
-            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue))
+            bool isUnknownValue, known;
+            if ( checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue, known))
             {
                 ++ satisfiedPreconNum;
                 satisfied = true;
@@ -1825,15 +1846,36 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 if (tempStateNode->isTheSameDepthLevelWithMe(*fowardState))
                     continue;
 
-                // a little hack here, only check willCauseCirleNetWork for the States that is not permanent
-                if ((! groundPs->permanent)  && (groundPs->isSameState( *(tempStateNode->state) )))
+
+                if (groundPs->isSameState( *(tempStateNode->state) ))
                 {
-                    if (groundPs->stateVariable->getValue() == tempStateNode->state->stateVariable->getValue())
+                    if ((! groundPs->permanent) )
                     {
-                        delete groundPs;
-                        willCauseCirleNetWork = true;
-                        return -999;
+                        // a little hack here, only check willCauseCirleNetWork for the States that is not permanent
+                        if (groundPs->stateVariable->getValue() == tempStateNode->state->stateVariable->getValue())
+                        {
+                            delete groundPs;
+                            willCauseCirleNetWork = true;
+                            return -999;
+                        }
                     }
+                    else
+                    {
+                        // check if permanent temporaryStateNodes negative this subgoal , then subgoal is impossible to be achieved
+                        float sd;
+                        bool known;
+                        if (! tempStateNode->state->isSatisfied(*groundPs, sd, known))
+                        {
+                            if (known)
+                            {
+                                delete groundPs;
+                                preconImpossible = true;
+                                return -999;
+                            }
+                        }
+
+                    }
+
                 }
 
                 // todo: recursively check if the future backward branch to achieve this subgoal contains any precondition impossibilities
@@ -1872,11 +1914,15 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
                 {
                     // check if this effect unsatisfy this state
                     float satDegree;
-                    if (! groundPs->isSatisfied(*(tempStateNode->state ),satDegree))
+                    bool known;
+                    if (! groundPs->isSatisfied(*(tempStateNode->state ),satDegree,known))
                     {
-                        delete groundPs;
-                        contradictoryOtherGoal = true;
-                        return -999;
+                        if (known)
+                        {
+                            delete groundPs;
+                            contradictoryOtherGoal = true;
+                            return -999;
+                        }
                     }
                     else
                         continue;
@@ -1937,9 +1983,9 @@ int OCPlanner::checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardSt
 
         // check if this state has been negative
 
-        bool permanent;
+        bool unknownvalue, known;
 
-        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd, permanent))
+        if (! checkIsGoalAchievedInRealTime(*(tempStateNode->state), sd, unknownvalue, known))
             negativeNum ++;
 
     }
@@ -1988,7 +2034,9 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
             }
 
             float satDegree;
-            if (! effState->isSatisfied(*(fowardState->state),satDegree))
+            bool known;
+
+            if (! effState->isSatisfied(*(fowardState->state),satDegree, known))
             {
                 negativeGoal = true;
                 delete effState;
@@ -2029,7 +2077,9 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
             {
                 // check if this effect unsatisfy this state
                 float satDegree;
-                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
+                bool known;
+
+                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree, known))
                 {
                     if (effState->permanent)
                     {
@@ -2078,7 +2128,9 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
             {
                 // check if this effect unsatisfy this state
                 float satDegree;
-                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree))
+                bool known;
+
+                if (! effState->isSatisfied(*(tempStateNode->state ),satDegree,known))
                 {
                     if (effState->permanent)
                     {
@@ -2977,16 +3029,16 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
             }
 
             // means that this group of results can't ground it all the ungrounded variables
-//            if ( varNames.size() < var_total_num)
-//            {
-//                cannotGroundAllVaraibles = true;
-//                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
-//                    break;
+            if ( varNames.size() < var_total_num)
+            {
+                cannotGroundAllVaraibles = true;
+                if (isLastNElementsAllTrue(indexes, n_max, n_gram))
+                    break;
 
-//                generateNextCombinationGroup(indexes, n_max);
+                generateNextCombinationGroup(indexes, n_max);
 
-//                continue;
-//            }
+                continue;
+            }
 
             int candidateGroupNum = 1;
 
@@ -3012,9 +3064,9 @@ bool OCPlanner::groundARuleNodeBySelectingNonNumericValues(RuleNode *ruleNode)
                     bool impossile;
                     float fitnessScore = checkNonNumericValueFitness(ruleNode, curStateNode, oneGroupCandidate, impossile);
 
-                    cout << "Fitness score = " << fitnessScore ;
-                    if (impossile)
-                        cout << " , impossible bindings, would not be put into candidate list. " ;
+//                    cout << "Fitness score = " << fitnessScore ;
+//                    if (impossile)
+//                        cout << " , impossible bindings, would not be put into candidate list. " ;
 
                     if (! impossile)
                     {
@@ -3995,12 +4047,12 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSameOwnerList1;
     isNotSameOwnerList1.push_back(man_1);
     isNotSameOwnerList1.push_back(man_2);
-    State* isNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameOwnerList1,false, 0, true);
+    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     vector<ParamValue> isNotSameOwnerList2;
     isNotSameOwnerList2.push_back(man_1);
     isNotSameOwnerList2.push_back(man_3);
-    State* isNotSameState2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameOwnerList2,false, 0, true);
+    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame, true);
 
 
     // precondition 0: pet_x y z are pets
@@ -4022,12 +4074,12 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSamePetOwnerList1;
     isNotSamePetOwnerList1.push_back(pet_x);
     isNotSamePetOwnerList1.push_back(pet_y);
-    State* isNotSamePet1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSamePetOwnerList1,false, 0, true);
+    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     vector<ParamValue> isNotSamePetOwnerList2;
     isNotSamePetOwnerList2.push_back(pet_x);
-    isNotSamePetOwnerList2.push_back(pet_y);
-    State* isNotSamePet2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSamePetOwnerList2,false, 0, true);
+    isNotSamePetOwnerList2.push_back(pet_z);
+    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame, true);
 
     // precondition 6-9 : other people do not keep pet_x
     vector<ParamValue> notkeepXStateOwnerList1;
@@ -4095,13 +4147,13 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSameDrinkOwnerList1;
     isNotSameDrinkOwnerList1.push_back(drink_x);
     isNotSameDrinkOwnerList1.push_back(drink_y);
-    State* isNotSameDrinkState = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameDrinkOwnerList1,false, 0, true);
+    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     //  precondition:  drink_y and  drink_z are different
     vector<ParamValue> isNotSameDrinkOwnerList2;
     isNotSameDrinkOwnerList2.push_back(drink_x);
     isNotSameDrinkOwnerList2.push_back(drink_z);
-    State* isNotSameDrinkState2 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isNotSameDrinkOwnerList2,false, 0, true);
+    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame, true);
 
     // precondition 6-9 : other people do not drink drink_x
     vector<ParamValue> notdrinkXStateOwnerList1;
@@ -4159,7 +4211,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> petXYisNotSameOwnerList1;
     petXYisNotSameOwnerList1.push_back(pet_x);
     petXYisNotSameOwnerList1.push_back(pet_y);
-    State* petXYisNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* petXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     // effect 1: man_1 doesn't keep pet_y
     Effect* notkeepYStateEffect = new Effect(keepXState2, OP_ASSIGN_NOT_EQUAL_TO, pet_y,true);
@@ -4193,7 +4245,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> drinkXYisNotSameOwnerList1;
     drinkXYisNotSameOwnerList1.push_back(drink_x);
     drinkXYisNotSameOwnerList1.push_back(drink_y);
-    State* drinkXYisNotSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* drinkXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
 
     // effect1: man_1 drinks drink_x
     Effect* notdrinkYEffect = new Effect(drinkXState1, OP_ASSIGN_NOT_EQUAL_TO, drink_y,true);
@@ -4221,7 +4273,7 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> man12isNotSameOwnerList1;
     man12isNotSameOwnerList1.push_back(man_1);
     man12isNotSameOwnerList1.push_back(man_2);
-    State* man12isNotSameSameState1 = new State("is_different",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", man12isNotSameOwnerList1,false, 0, true);
+    State* man12isNotSameSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", man12isNotSameOwnerList1,false, 0, true);
 
     // effect 1: man_2 doesn't keep pet_x
     vector<ParamValue> man2notkeepPetXStateOwnerList;

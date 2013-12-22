@@ -395,7 +395,8 @@ protected:
      // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, State *original_state = 0);
+     // @ known: when return false, it will still return if it's unknow, if it's unknow, it suggest it still has chance to be satisfied
+     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, bool &known, State *original_state = 0);
 
      // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
@@ -486,6 +487,7 @@ protected:
 
      // for sorting the preconds in this list, in the order of from hard to easy, because in next loop the planner will select the subgoal from the end of the queue to solve
      // put all the numeric  in front first, and because all these preconds are grouned, we can find possible rules for each precon, and see which precon is easier to be solved
+     // will assign the hardness score to this stateNode, and also return the hardness score.
      int getHardnessScoreOfPrecon(StateNode *stateNode);
 
      SpaceServer::SpaceMap* getClosestBackwardSpaceMap(StateNode* stateNode);
