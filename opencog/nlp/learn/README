@@ -47,16 +47,22 @@ That's all for now, folks!
 
 TODO
 ----
-* Need a mutli-language sentence splitter; the maxent splitter only
-  works for English sentences.  Probably something simple will do ...
 * Can we start a guile thread for each incoming sentence?
   Threading will require more subtle sentence cleanup.
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug?
+* Table counts need to be more than 32-bit. Looks like the 
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
 
 DONE
 ----
 * Make sure that link-parser fully randomizes linkage choices for
   long sentences. Done. See the rand_state and predictable_rand
   flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it into a relex subdirectory
 
 
 Notes:
