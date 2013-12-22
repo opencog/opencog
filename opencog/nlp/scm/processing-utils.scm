@@ -60,7 +60,7 @@
 	
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
-			(system (string-join (list "echo Info: send to parser: " sent-txt)))
+			(system (string-join (list "echo \"Info: send to parser: " sent-txt "\"")))
 			(exec-scm-from-port s)
 			(system (string-join (list "echo Info: close socket to parser" )))
 			(close-port s)
