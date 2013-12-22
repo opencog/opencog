@@ -84,9 +84,15 @@ void ConsoleSocket::OnConnection()
     logger().debug("[ConsoleSocket] OnConnection");
     if (!isClosed()) {
 
+#ifdef NOT_RIGHT_NOW
         // Crude attempt to negotiate for a utf-8 clean channel.
         // Using RFC 2066 protocols.  Not robust.  We're just praying
         // for non-garbled UTF-8 goodness, here.
+
+        // Anyway, this won't work for netcat, socat, because they'll
+        // just pass all this crap back to the user, and we don't want
+        // that.  I'm not sure how to tell if we're talking to a true
+        // RFC telnet.
         char utf_plz[20];
         utf_plz[0] = IAC;
         utf_plz[1] = WILL;
@@ -109,6 +115,7 @@ void ConsoleSocket::OnConnection()
         utf_plz[10] = SE;
         utf_plz[11] = 0;
         Send(utf_plz);
+#endif
 
         sendPrompt();
     }
