@@ -66,7 +66,7 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	//	some scheme threading somehow doesn't work somewhere.
 	//	buncha crap. fix this shit.
 	if (!evaluator) evaluator = &SchemeEval::instance(&cogserver().getAtomSpace());
-	evaluator->eval("(setlocale LC_ALL "")");
+	evaluator->eval("(setlocale LC_CTYPE \"\")");
 }
 
 #endif
