@@ -20,7 +20,8 @@ def tv_seq_to_tv_tuple_seq(tvs):
 # There are also some divide-by-zero errors where a TV is 0 (or 1, because NOT(A) is used in some formulas). If the formulas are designed well enough, that can still be compatible with indefinite TVs.
 
 def makeUpCount(tvs):
-    return min(tv.count for tv in tvs)
+    ArbitraryDiscountFactor = 0.9
+    return min(tv.count for tv in tvs)*ArbitraryDiscountFactor
 
 def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
@@ -68,7 +69,7 @@ def abductionFormula(tvs):
 def modusPonensFormula(tvs):
     [AB, A] = tvs
 
-    sNotAB=0.2
+    NotAB=TruthValue(0.2, 1)
 
     return preciseModusPonensFormula([AB, NotAB, A])
 
@@ -79,7 +80,7 @@ def preciseModusPonensFormula(tvs):
     
     n = makeUpCount(tvs)
 
-    return [TruthValue(sB, nB)]
+    return [TruthValue(sB, n)]
 
 def symmetricModusPonensFormula(tvs):
     (simAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
