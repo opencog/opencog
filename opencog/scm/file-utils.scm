@@ -52,7 +52,7 @@
 ;
 (define (exec-scm-from-port port)
 
-	; Suck in a bunch of ASCII text off of a port, until the port is
+	; Suck in a bunch of UTF-8 text off of a port, until the port is
 	; empty (#eof) and return a string holding the port (file) contents.
 	; Use read-string!/partial for speed.
 	(define (speedy-suck-in-text port str)
@@ -67,9 +67,9 @@
 		)
 	)
 
-	; Suck in a bunch of ASCII text off of a port, until the port is
+	; Suck in a bunch of UTF-8 text off of a port, until the port is
 	; empty (#eof) and return a string holding the port (file) contents.
-	; This is *painfully slowwww* !!!
+	; The code blow is "obvious" but *painfully slowwww* !!!
 ;	(define (suck-in-text port str)
 ;		(let ((one-line (read-line port)))
 ;			(if (eof-object? one-line)
