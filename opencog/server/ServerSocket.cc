@@ -85,6 +85,8 @@ typedef boost::asio::buffers_iterator<
 #define WILL 0xfb // Telnet WILL
 #define DO 0xfd   // Telnet DO
 #define TIMING_MARK 0x6 // Telnet RFC 860 timing mark
+#define TRANSMIT_BINARY 0x0 // Telnet RFC 856 8-bit-clean
+#define CHARSET 0x2A // Telnet RFC 2066 
 
 
 // Goal: if the user types in a ctrl-C or a ctrl-D, we want to 
