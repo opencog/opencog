@@ -171,11 +171,19 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree, bool &unknown, Sta
                    unknown = true;
                    return false;
                }
-               else if ( (goal.stateType == STATE_EQUAL_TO) && (!(stateVariable->getValue() == goal.stateVariable->getValue())))
+               else if ( (goal.stateType == STATE_EQUAL_TO))
                {
-                   satisfiedDegree = 0.0f;
-                   unknown = true;
-                   return false;
+                   if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+                   {
+                       satisfiedDegree = 0.0f;
+                       unknown = true;
+                       return false;
+                   }
+                   else
+                   {
+                       satisfiedDegree = 0.0f;
+                       return false;
+                   }
                }
            }
        }
