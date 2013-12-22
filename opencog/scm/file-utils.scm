@@ -2,12 +2,13 @@
 ; file-utils.scm
 ;
 ; Assorted file and directory utils.
-; Copyright (c) 2008 Linas Vepstas
+; Copyright (c) 2008, 2013 Linas Vepstas
 ;
 
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
 (use-modules (ice-9 rw))
+(use-modules (rnrs io ports))
 
 ; ---------------------------------------------------------------------
 ; Given a directory, return a list of all of the files in the directory
@@ -46,45 +47,19 @@
 ; ---------------------------------------------------------------------
 ; exec-scm-from-port port
 ;
-; Load data read from the indicated port
+; Load (UTF-8 encoded) data read from the indicated port
 ; The port should contain valid scheme; this routine will read and 
 ; execute that scheme data.
 ;
 (define (exec-scm-from-port port)
 
-	; Suck in a bunch of UTF-8 text off of a port, until the port is
-	; empty (#eof) and return a string holding the port (file) contents.
-	; Use read-string!/partial for speed.
-	(define (speedy-suck-in-text port str)
-		(let* ((str-buff (make-string 1123123))
-		       (line-len (read-string!/partial str-buff port)))
-			(if (eq? #f line-len)
-				str 
-				(speedy-suck-in-text port 
-					(string-append str (substring/shared str-buff 0 line-len))
-				)
-			)
-		)
-	)
-
-	; Suck in a bunch of UTF-8 text off of a port, until the port is
-	; empty (#eof) and return a string holding the port (file) contents.
-	; The code blow is "obvious" but *painfully slowwww* !!!
-;	(define (suck-in-text port str)
-;		(let ((one-line (read-line port)))
-;			(if (eof-object? one-line)
-;				str
-;				(suck-in-text port 
-;					(string-join (list str one-line "\n"))
-;				)
-;			)
-;		)
-;	)
-;
-	(let ((data (speedy-suck-in-text port "")))
-		; read data from port
-		(eval-string data)
-	)
+	; get-string-all is a new r6rs proceedure, usck in all bytes until
+	; EOF on the port. Seems like TCP/IP ports end up being textual in
+	; guile, and the default r6rs transcoder is UTF8 and soe everyone
+	; is happy, these days.  Note, in the good-old bad days, we used
+	; ice-9 rw read-string!/partial for this, which went buggy, and
+	; started mangling at some point.
+	(eval-string (get-string-all port))
 )
 
 ; ---------------------------------------------------------------------
