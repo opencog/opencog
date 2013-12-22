@@ -507,6 +507,8 @@ protected:
      // if cannot unify it , return 0
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
 
+     bool checkHasNoCoexistenceRuleInPlanningNetWork(Rule* r);
+
      void outputStateInfo(State* s, bool outPutStateValue);
      void outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes = true);
 

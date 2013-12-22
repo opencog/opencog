@@ -804,8 +804,14 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             if ( rules.size() == 1)
             {
                 // if there is one rule related to this goal,
-                // check if it's negative or positive for this goal:
                 Rule* r = (((multimap<float,Rule*>)(it->second)).begin())->second;
+
+                // check if this rule has any NoCoexistenceRule already been used in previous steps, if yes, should not use this rule
+                if (checkHasNoCoexistenceRuleInPlanningNetWork(r))
+                    continue;
+
+
+                // check if it's negative or positive for this goal:
                 bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle, contradictoryOtherGoal;
                 int negativeNum,satisfiedPreconNum;
                 checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal);
@@ -837,6 +843,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 for (ruleIt = rules.begin(); ruleIt != rules.end(); ruleIt ++)
                 {
                     Rule* r = ruleIt->second;
+
+                    // check if this rule has any NoCoexistenceRule already been used in previous steps, if yes, should not use this rule
+                    if (checkHasNoCoexistenceRuleInPlanningNetWork(r))
+                        continue;
 
                     // Because grounding every rule fully is time consuming, but some cost of rule requires the calculation of grounded variables.
                     // So here we just use the basic cost of every rule as the cost value.
@@ -929,7 +939,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 if (forwardRuleNode->ParamCandidates.size() == 0)
                 {
-                    // we have tried all the Candidate bindings in previous steps,
+                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : have tried all the Candidate bindings in previous steps. Roll back! " << std::endl;
                     // so it means this rule doesn't work, we have to go back to its forward state node
 
                     // Remove this rule from the candidate rules of all its foward state nodes
@@ -3378,6 +3388,29 @@ void OCPlanner::recordOrginalParamValuesAfterGroundARule(RuleNode* ruleNode)
     }
 }
 
+bool OCPlanner::checkHasNoCoexistenceRuleInPlanningNetWork(Rule* r)
+{
+    if (r->noCoexisenceOtherRules.size() == 0)
+        return false;
+
+    vector<RuleNode*>::iterator ruleItInNetWork;
+    vector<Rule*>::iterator nocoRuleIt;
+
+    for (nocoRuleIt = r->noCoexisenceOtherRules.begin(); nocoRuleIt != r->noCoexisenceOtherRules.end(); ++ nocoRuleIt)
+    {
+        Rule* nocoRule = *nocoRuleIt;
+        for (ruleItInNetWork = allRuleNodeInThisPlan.begin(); ruleItInNetWork != allRuleNodeInThisPlan.end(); ++ ruleItInNetWork)
+        {
+            RuleNode* ruleNode = *ruleItInNetWork;
+            if (nocoRule == ruleNode->originalRule)
+                return true;
+        }
+
+    }
+
+    return false;
+}
+
 void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
 {
     cout<< "State: "<< s->name() << " ( " ;
@@ -3774,7 +3807,6 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: build a block in a position to make it possible to stand on it-----------------------------------------
 
 
-
     //----------------------------Begin Rule: if a position is standable and adjacent(neighbour) then there is possible existing a path from here to this adjacent postion------------------
     // define variables:
     ParamValue var_pos_from = vector_var[0];
@@ -3869,30 +3901,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
 
     //----------------------------Begin Einstein puzzle rules---------------------------------------------------------------------
-//    //----------------------------Begin Rule: The person who keeps fish drinks water.------------------------------------------------------
 
-
-//    // precondition 3: var_man_x keeps fish
-//    vector<ParamValue> keepFishStateOwnerList1;
-//    keepFishStateOwnerList1.push_back(var_man_x);
-//    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
-
-//    // effect1: var_man_x drinks water
-//    vector<ParamValue> drinkWaterStateOwnerList1;
-//    drinkWaterStateOwnerList1.push_back(var_man_x);
-//    State* drinkWaterState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkWaterStateOwnerList1, false, 0, true);
-//    Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
-
-//    // add rule:
-//    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
-//    fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
-//    fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
-
-//    fishKeeperDrinkWaterRule->addEffect(EffectPair(1.0f,drinkWaterStateEffect1));
-
-//    this->AllRules.push_back(fishKeeperDrinkWaterRule);
-//    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
 
     //----------------------------Begin Rule: The person who drinks water keeps fish------------------------------------------------------
     // define variables:
@@ -3929,36 +3938,65 @@ void OCPlanner::loadTestRulesFromCodes()
     this->AllRules.push_back(waterDrinkerKeepsFishRule);
     //----------------------------End Rule: The person who drinks water keeps fish--------------------------------------------------
 
+    //----------------------------Begin Rule: The person who keeps fish drinks water.------------------------------------------------------
+    // define variables:
+    ParamValue var_drink = str_var[0];
+
+    // precondition 3: var_man_x keeps fish
+    vector<ParamValue> keepFishStateOwnerList1;
+    keepFishStateOwnerList1.push_back(var_man_x);
+    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
+
+    // effect1: var_man_x drinks water
+    vector<ParamValue> drinkWaterStateOwnerList1;
+    drinkWaterStateOwnerList1.push_back(var_man_x);
+    State* drinkWaterState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkWaterStateOwnerList1, false, 0, true);
+    Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
+
+    // add rule:
+    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
+    fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
+    fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
+
+    fishKeeperDrinkWaterRule->addEffect(EffectPair(1.0f,drinkWaterStateEffect1));
+
+    this->AllRules.push_back(fishKeeperDrinkWaterRule);
+
+    waterDrinkerKeepsFishRule->noCoexisenceOtherRules.push_back(fishKeeperDrinkWaterRule);
+    fishKeeperDrinkWaterRule->noCoexisenceOtherRules.push_back(waterDrinkerKeepsFishRule);
+    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
 
     //----------------------------Begin Rule: The person who drinks tea keeps cats------------------------------------------------------
     // define variables:
+
     // precondition 1: var_man_x is people
 
     // precondition 2: var_man_x drinks tea
-//    vector<ParamValue> drinkTeaStateOwnerList1;
-//    drinkTeaStateOwnerList1.push_back(var_man_x);
-//    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, false, 0, true);
+    vector<ParamValue> drinkTeaStateOwnerList1;
+    drinkTeaStateOwnerList1.push_back(var_man_x);
+    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, false, 0, true);
 
-//    // effect1: var_man_x keeps cats
-//    vector<ParamValue> keepCatsStateOwnerList1;
-//    keepCatsStateOwnerList1.push_back(var_man_x);
-//    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, false, 0, true);
-//    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
+    // effect1: var_man_x keeps cats
+    vector<ParamValue> keepCatsStateOwnerList1;
+    keepCatsStateOwnerList1.push_back(var_man_x);
+    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, false, 0, true);
+    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
 
-//    // add rule:
-//    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
-//    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
-//    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
+    // add rule:
+    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
+    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
+    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
 
-//    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
+    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
 
-//    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
-//    //----------------------------End Rule: The person who drinks tea keeps cats--------------------------------------------------
+    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
+    //----------------------------End Rule: The person who drinks tea keeps cats--------------------------------------------------
 
     //----------------------------Begin Rule: The person who keeps cats drinks tea -----------------------------------------------------
     // define variables:
-    ParamValue var_drink = str_var[0];
 
     // precondition 1: var_man_x is people
 
@@ -3982,6 +4020,9 @@ void OCPlanner::loadTestRulesFromCodes()
     catsKeeperDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect2));
 
     this->AllRules.push_back(catsKeeperDrinksTeaRule);
+
+    teaDrinkerKeepsCatsRule->noCoexisenceOtherRules.push_back(catsKeeperDrinksTeaRule);
+    catsKeeperDrinksTeaRule->noCoexisenceOtherRules.push_back(teaDrinkerKeepsCatsRule);
     //----------------------------End Rule: The person who keeps cats drinks tea-------------------------------------------------
 
     //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
