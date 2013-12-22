@@ -131,8 +131,14 @@ void BasicSCMUTest::setUp(void)
 void BasicSCMUTest::test_utf8(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
 	eval->eval("(display \"Ćićolina\")");
 	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+
+	eval->eval("(display \"Lietuvos žydų kilmės žurnalistas\")");
+	eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
 }
