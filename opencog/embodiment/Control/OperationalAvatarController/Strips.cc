@@ -76,7 +76,7 @@ State::~State()
 State* State::clone()
 {
     State* cloneState = new State(this->stateName,this->getActionParamType(),this->stateType, this->stateVariable->getValue(),
-                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun );
+                                  this->stateOwnerList,this->need_inquery, this->inqueryStateFun, this->permanent );
     return cloneState;
 }
 
@@ -112,16 +112,11 @@ ParamValue State::getParamValue()
 
 }
 
-// I am the goal, I want to check if this @param value is satisfied me
-bool State::isSatisfiedMe( ParamValue& value, float &satisfiedDegree,  State *original_state)
-{
-    State other(this->name(),this->getActionParamType(),STATE_EQUAL_TO,value,this->stateOwnerList);
-    return other.isSatisfied(*this,satisfiedDegree,original_state);
-}
-
 // pls make sure the goal describes the same state content with this state first
-bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_state)
+bool State::isSatisfied( State &goal, float& satisfiedDegree, bool &unknown, State *original_state)
 {
+    unknown = false;
+
     if ((goal.stateType == stateType)&&(stateVariable->getValue() == goal.stateVariable->getValue()))
     {
        satisfiedDegree = 1.0f;
@@ -153,17 +148,35 @@ bool State::isSatisfied( State &goal, float& satisfiedDegree,  State *original_s
                }
            }
        }
-       else if ((stateType == STATE_NOT_EQUAL_TO) && (goal.getActionParamType().getCode() == BOOLEAN_CODE))
+       else if (stateType == STATE_NOT_EQUAL_TO)
        {
-           if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+           if (goal.getActionParamType().getCode() == BOOLEAN_CODE)
            {
-               satisfiedDegree = 1.0f;
-               return true;
+               if (!(stateVariable->getValue() == goal.stateVariable->getValue()))
+               {
+                   satisfiedDegree = 1.0f;
+                   return true;
+               }
+               else
+               {
+                   satisfiedDegree = 0.0f;
+                   return false;
+               }
            }
            else
            {
-               satisfiedDegree = 0.0f;
-               return false;
+               if (goal.stateType == STATE_NOT_EQUAL_TO)
+               {
+                   satisfiedDegree = 1.0f;
+                   unknown = true;
+                   return false;
+               }
+               else if ( (goal.stateType == STATE_EQUAL_TO) && (!(stateVariable->getValue() == goal.stateVariable->getValue())))
+               {
+                   satisfiedDegree = 0.0f;
+                   unknown = true;
+                   return false;
+               }
            }
        }
        else

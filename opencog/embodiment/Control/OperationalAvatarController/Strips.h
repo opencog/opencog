@@ -180,8 +180,7 @@ namespace opencog { namespace oac {
         // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
         //                  to calculate its satisfiedDegree value.
         // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-        bool isSatisfiedMe( ParamValue& value, float& satisfiedDegree,  State *original_state = 0);
-        bool isSatisfied( State& goal, float &satisfiedDegree,  State *original_state = 0) ;
+        bool isSatisfied( State& goal, float &satisfiedDegree, bool& unknown, State *original_state = 0) ;
 
         // To get int,float value or fuzzy int or float value from a state
         // For convenience, we will also consider int value as float value
