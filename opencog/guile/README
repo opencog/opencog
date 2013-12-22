@@ -787,3 +787,9 @@ ToDo
    data corruption. However, guile needs to be fixed to change this 
    behaviour.
 
+
+-- list all proceedures in a module:
+   (module-for-each (lambda (symbol value) (display symbol) (newline))
+   (resolve-interface '(guile)))
+
+   Make the above easier for users.
