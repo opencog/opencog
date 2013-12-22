@@ -34,6 +34,8 @@ Steps:
 
    Better yet:
    echo -e "scm\n (observe-text \"this is a another test\")" |nc localhost 17001
+   echo -e "scm\n (observe-text \"Bernstein () (1876\")" |nc localhost 17001
+   echo -e "scm\n (observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17001
 
 8) psql learn-pairs
    learn-pairs=# SELECT * from atoms;
@@ -45,15 +47,22 @@ That's all for now, folks!
 
 TODO
 ----
-* Need a mutli-language sentence splitter; the maxent splitter only
-  works for English sentences.  Probably something simple will do ...
 * Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug?
+* Table counts need to be more than 32-bit. Looks like the 
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
 
 DONE
 ----
 * Make sure that link-parser fully randomizes linkage choices for
   long sentences. Done. See the rand_state and predictable_rand
   flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it into a relex subdirectory
 
 
 Notes:
@@ -69,3 +78,73 @@ cogserver runs at 56% cpu for a while then drops to 26% cpu
 
 8-word sentence, max of 999 parses,
 2 minutes elapsed.  Same CPU usage as above...
+
+
+Wikipedia processing
+--------------------
+createdb fr_pairs lt_pairs pl_pairs simple_pairs
+cat opencog/persist/sql/atom.sql | psql
+vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+
+cleanup files in relex: src/perl
+
+cd /storage/wikipedia
+
+mkdir wiki-stripped
+time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
+cd wiki-stripped
+find |wc
+/home/linas/src/relex/src/perl/wiki-clean.sh
+find |wc
+cd ..
+mkdir alpha-pages
+cd alpha-pages
+/home/linas/src/relex/src/perl/wiki-alpha.sh
+
+simple:
+find |wc     gives 131434 total files
+find |wc     gives 98825 files after cat/template removal.
+
+lt:
+7 mins to unpack
+find |wc gives 190364 total files
+find |wc gives 161463 after cat/template removal
+
+pl:
+1 hour to unpack (15 minutes each part)
+find | wc gives 1097612 articles
+52K are categories
+35K are templates
+find |wc gives 1007670 files after cat/template removal
+
+fr:
+3 hours to unpack (25-60 minutes per glob)
+find |wc gives 1764813 articles
+214K are categories
+55K are templates
+find |wc gives 1452739 files after cat/template removal
+
+
+Sentence Splitting
+------------------
+Needs to be multi-language
+NLTK
+https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
+Has french, polish, latvian
+its LGPL
+Copy this over into relex, for now.
+
+cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+
+
+A question mark or exclamation mark always ends a sentence.  A period followed by an
+upper-case letter generally ends a sentence, but there are a number of exceptions.  For
+example, if the period is part of an abbreviated title ("Mr.", "Gen.", ...), it does not end a
+sentence.  A period following a single capitalized letter is assumed to be a person's initial,
+and is not considered the end of a sentence.
+
+
+(setlocale LC_ALL "")
+ (display "Ćićolina")
+
+
