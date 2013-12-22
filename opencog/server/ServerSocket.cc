@@ -49,8 +49,12 @@ void ServerSocket::Send(const std::string& cmd)
 {
     boost::system::error_code error;
     boost::asio::write(socket, boost::asio::buffer(cmd), boost::asio::transfer_all(), error);
+
+    // The most likely cause of an error is that the remote side has
+    // closed the socket, and we just don't know it yet.  We should
+    // maybe not log those errors?
     if (error && !closed) {
-        logger().error("ServerSocket::Send(): Error transfering data.");
+        logger().warn("ServerSocket::Send(): %s", error.message().c_str());
     }
 }
 
