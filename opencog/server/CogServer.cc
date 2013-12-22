@@ -737,7 +737,11 @@ void CogServer::loadSCMModules(const char* config_paths[])
 void CogServer::openDatabase(void)
 {
     // No-op if the user has not configured a storage backend
-    if (!config().has("STORAGE")) return;
+    if (!config().has("STORAGE")) {
+        logger().warn("No database persistant storage configured! "
+                      "Use the STORAGE config keyword to define.");
+        return;
+    }
 
 #ifdef HAVE_SQL_STORAGE
     const std::string &dbname = config()["STORAGE"];
