@@ -1565,10 +1565,24 @@ HandleSeq Inquery::findCandidatesByPatternMatching(RuleNode *ruleNode, vector<in
                 tmpResult = tmptmpResult;
             }
 
+            HandleSeq tmpResultSet;
             foreach (HandleSeq hs,tmpResult)
             {
                 Handle listLink = atomSpace->addLink(LIST_LINK, hs);
-                result.push_back(listLink);
+                tmpResultSet.push_back(listLink);
+            }
+
+            // loop through all the result groups, remove the groups that bind the same variables to different variables
+            foreach (Handle listH , tmpResultSet)
+            {
+                HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+                sort(oneGroup.begin(),oneGroup.end());
+
+                if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
+                    result.push_back(listH);
+                else
+                    atomSpace->removeAtom(listH);
+
             }
 
         }
