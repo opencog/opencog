@@ -396,7 +396,7 @@ protected:
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
      // @ known: when return false, it will still return if it's unknow, if it's unknow, it suggest it still has chance to be satisfied
-     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, bool &known, State *original_state = 0);
+     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, bool &unknown, State *original_state = 0);
 
      // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
