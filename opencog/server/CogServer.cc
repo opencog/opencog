@@ -503,7 +503,9 @@ bool CogServer::loadModule(const std::string& filename)
 #endif
     const char* dlsymError = dlerror();
     if ((dynLibrary == NULL) || (dlsymError)) {
-        logger().error("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
+        // This is almost surely due to a user configuration error.
+        // User errors are always logged as warnings.
+        logger().warn("Unable to load module \"%s\": %s", filename.c_str(), dlsymError);
         return false;
     }
 
