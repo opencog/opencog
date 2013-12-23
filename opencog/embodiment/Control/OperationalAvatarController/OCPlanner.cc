@@ -1291,6 +1291,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             newStateNode->forwardEffectState = 0;
             temporaryStateNodes.push_front(newStateNode);
             newStateNode->calculateNodesDepth();
+
             if (newStateNode->state->permanent)
                 addHypotheticalLinkForStateNode(newStateNode);
 
@@ -1479,6 +1480,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 if (! checkIsGoalAchievedInRealTime(*groundPs,satisfiedDegree,isUnknownValue,unknown))
                 {
                     isSat = false;
+
+                    if (groundPs->permanent)
+                        addHypotheticalLinkForStateNode(newStateNode);
                 }
                 else
                 {
@@ -1504,8 +1508,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 unsatisfiedPreconNum ++;
             }
 
-            if (groundPs->permanent)
-                addHypotheticalLinkForStateNode(newStateNode);
         }
 
         // when the preconditions is not order dependent , need to check the easiness of each unsatisfied preconditions
@@ -1538,7 +1540,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // finished planning!
 
     // generate the action series according to the planning network we have constructed in this planning process
-    planID = oac->getPAI().createActionPlan();
+    planID = "";
 
     std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
 
@@ -1549,6 +1551,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     vector<RuleNode*>::iterator planRuleNodeIt, lastStepIt;
     int stepNum = 1;
     SpaceServer::SpaceMap* backwardStepMap = curMap->clone();
+    bool notRealActionRequired = true;
 
     for (planRuleNodeIt = allRuleNodeInThisPlan.begin(); planRuleNodeIt != allRuleNodeInThisPlan.end(); ++ planRuleNodeIt)
     {
@@ -1566,6 +1569,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         PetAction* originalAction = r->originalRule->action;
         if (originalAction->getType().getCode() == DO_NOTHING_CODE)
             continue;
+
+        notRealActionRequired = false;
+
+        if (planID == "")
+        {
+            planID = oac->getPAI().createActionPlan();
+        }
 
         // ground the parameter according to the current bindings
         PetAction action(originalAction->getType());
@@ -1680,6 +1690,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     cleanUpEverythingAfterPlanning();
 
+    if (notRealActionRequired)
+    {
+        std::cout << "It's able to achieve the goal without doing any action! Not need a plan!" << std::endl;
+    }
+
     return planID;
 }
 
@@ -1707,6 +1722,7 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+                sleep(1);
             }
 
             delete sn;
@@ -1724,6 +1740,7 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+                sleep(1);
             }
 
             delete sn;
@@ -1741,6 +1758,7 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+                sleep(1);
             }
 
             delete sn;
@@ -1758,6 +1776,7 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+                sleep(1);
             }
 
             delete sn;
@@ -2520,8 +2539,6 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
         if(forwardForwardSN->forwardRuleNode == 0)
         {
-            if (forwardForwardSN == forwardStateNode)
-                continue;
 
             if (forwardForwardSN->hypotheticalLink != Handle::UNDEFINED)
             {
@@ -2530,8 +2547,12 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
                atomSpace->removeAtom(forwardForwardSN->hypotheticalLink);
                forwardForwardSN->hypotheticalLink = Handle::UNDEFINED;
+               sleep(1);
 
             }
+
+            if (forwardForwardSN == forwardStateNode)
+                continue;
 
             delete forwardForwardSN;
         }
@@ -2553,6 +2574,7 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
                 << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
 
            atomSpace->removeAtom(forwardStateNode->hypotheticalLink);
+           sleep(1);
         }
         delete forwardStateNode;
     }
