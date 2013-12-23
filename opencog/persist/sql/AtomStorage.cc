@@ -251,7 +251,7 @@ class AtomStorage::Response
 		}
 
 		// Get all handles in the database.
-		std::set<Handle> *id_set;
+		std::set<UUID> *id_set;
 		bool note_id_cb(void)
 		{
 			rs->foreach_column(&Response::note_id_column_cb, this);
@@ -261,8 +261,7 @@ class AtomStorage::Response
 		{
 			// we're not going to bother to check the column name ...
 			UUID id = strtoul(colvalue, NULL, 10);
-			Handle h(id);
-			id_set->insert(h);
+			id_set->insert(id);
 			return false;
 		}
 
@@ -779,7 +778,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	local_id_cache.insert(atom->getHandle());
+	local_id_cache.insert(atom->getHandle().value());
 }
 
 /* ================================================================ */
@@ -902,7 +901,7 @@ bool AtomStorage::atomExists(Handle h)
 	return idExists(buff);
 #else
 	// look at the local cache of id's to see if the atom is in storage or not.
-	return local_id_cache.count(h);
+	return local_id_cache.count(h.value());
 #endif
 }
 
@@ -1188,7 +1187,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 		fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
 	}
 
-	local_id_cache.insert(h);
+	local_id_cache.insert(h.value());
 	return atom;
 }
 

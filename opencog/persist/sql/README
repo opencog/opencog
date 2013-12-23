@@ -184,7 +184,9 @@ Failure to do this will result in disastrous load and store times.
 (The notes below date to 2008; perhaps things have changed?)
 
 Edit postgresql.conf (a typical location is
-/etc/postgresql/8.4/main/postgresql.conf) and make the following changes:
+/etc/postgresql/8.4/main/postgresql.conf) and make the changes below.
+The first two changes are recommended by
+http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
    shared_buffers = default was 32MB, change to 25% of install RAM
    effective_cache_size = default was 128MB, change to 50% of installed RAM
