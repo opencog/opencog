@@ -30,6 +30,8 @@
 #include <math.h>
 #include <string.h>
 
+#include <boost/bind.hpp>
+
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
