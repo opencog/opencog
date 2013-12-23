@@ -32,8 +32,6 @@
 #include <vector>
 #include <tr1/memory>
 
-#include <pthread.h>
-
 #include <opencog/util/concurrent_queue.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
@@ -121,7 +119,7 @@ protected:
     void processAgents();
 
     std::mutex processRequestsMutex;
-    pthread_mutex_t agentsLock;
+    std::mutex agentsMutex;
     concurrent_queue<Request*> requestQueue;
 
     NetworkServer _networkServer;

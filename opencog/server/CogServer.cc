@@ -111,8 +111,6 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
 
-    pthread_mutex_init(&agentsLock, NULL);
-
     agentsRunning = true;
 }
 
@@ -305,14 +303,13 @@ void CogServer::runAgent(AgentPtr agent)
 
 void CogServer::processAgents(void)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     AgentSeq::const_iterator it;
     for (it = agents.begin(); it != agents.end(); ++it) {
         AgentPtr agent = *it;
         if ((cycleCount % agent->frequency()) == 0)
             runAgent(agent);
     }
-    pthread_mutex_unlock(&agentsLock);
 }
 
 bool CogServer::registerAgent(const std::string& id, AbstractFactory<Agent> const* factory)
@@ -341,18 +338,17 @@ AgentPtr CogServer::createAgent(const std::string& id, const bool start)
 
 void CogServer::startAgent(AgentPtr agent)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     agents.push_back(agent);
-    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::stopAgent(AgentPtr agent)
 {
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     AgentSeq::iterator ai = std::find(agents.begin(), agents.end(), agent);
     if (ai != agents.end())
         agents.erase(ai);
-    pthread_mutex_unlock(&agentsLock);
+    lock.unlock();
     logger().debug("[CogServer] stopped agent \"%s\"", agent->to_string().c_str());
 }
 
@@ -368,7 +364,7 @@ void CogServer::destroyAllAgents(const std::string& id)
     // constrained to only running every N cognitive cycles. I.e. when
     // they have their own thread they'll have to be stopped and their threads
     // "joined"
-    pthread_mutex_lock(&agentsLock);
+    std::unique_lock<std::mutex> lock(agentsMutex);
     // place agents with classinfo().id == id at the end of the container
     AgentSeq::iterator last =
         std::partition(agents.begin(), agents.end(),
@@ -388,7 +384,6 @@ void CogServer::destroyAllAgents(const std::string& id)
     // after the 'agents.erase' call above, because the agent's destructor might
     // include a recursive call to destroyAllAgents
     // std::for_each(to_delete.begin(), to_delete.end(), safe_deleter<Agent>());
-    pthread_mutex_unlock(&agentsLock);
 }
 
 void CogServer::startAgentLoop(void)
