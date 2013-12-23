@@ -667,6 +667,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     OCPlanner::goalRuleNode.backwardLinks.clear();
     curStateNode = 0;
 
+    removedHypotheticalLinkCount = 0;
+
     // we use the basic idea of the graph planner for plan searching:
     // alternated state layers with action layers
     // But we use backward depth-first chaining, instead of forward breadth-frist reasoning
@@ -684,12 +686,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         newStateNode->depth = "Deepest";
 
         if (newStateNode->state->permanent)
-        {
             addHypotheticalLinkForStateNode(newStateNode);
-            temporaryStateNodes.push_front(newStateNode);
-        }
 
-        startStateNodes.push_front(newStateNode);
+            startStateNodes.push_front(newStateNode);
 
     }
 
@@ -754,7 +753,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         curtimeStamp ++;
 
         tryStepNum ++;
-        if (tryStepNum > 999)
+        if (tryStepNum > 200)
         {
             std::cout << "Planning failed! Has tried more than 999 steps of planning, cannot find a plan!" << std::endl;
             return "";
@@ -813,9 +812,9 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
 
                 // check if it's negative or positive for this goal:
-                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle, contradictoryOtherGoal;
+                bool isNegativeGoal, isDiffStateOwnerType, preconImpossible, willAddCirle, contradictoryOtherGoal, needRollback;
                 int negativeNum,satisfiedPreconNum;
-                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal);
+                checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal,needRollback);
 
                 if (isNegativeGoal || isDiffStateOwnerType || willAddCirle || contradictoryOtherGoal || willAddCirle || preconImpossible)
                     continue;
@@ -823,6 +822,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // this rule is positive for this goal, apply it.
                 selectedRule = r;
                 curStateNode->ruleHistory.push_back(selectedRule);
+                curStateNode->candidateRules.push_back(pair<float, Rule*>(0.0f,selectedRule));
             }
             else
             {
@@ -861,13 +861,20 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     // ground it only by this current state node,  to check if its effect will negative this current selected goal state
                     // and also check if other effects negative some of the other temporaryStateNodes
-                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle,contradictoryOtherGoal;
+                    bool isNegativeGoal, isDiffStateOwnerType, preconImpossible,willAddCirle,contradictoryOtherGoal, needRollback;
                     int negativeNum,satisfiedPreconNum;
-                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal);
+                    checkRuleFitnessRoughly(r,curStateNode,satisfiedPreconNum,negativeNum,isNegativeGoal,isDiffStateOwnerType,preconImpossible,willAddCirle,contradictoryOtherGoal,needRollback);
+
+                    if (needRollback)
+                    {
+                        std::cout << "Rule: " << r->ruleName <<" implys that this subgoal could never be achieved. " << std::endl;
+                        curStateNode->candidateRules.clear();
+                        break;
+                    }
 
                     //  its effect will negative this current selected goal state, or it has any unsatisfied precondition which is impossible to achieve,
                     //  then it should not add it into candidate rules
-                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType || contradictoryOtherGoal || willAddCirle || contradictoryOtherGoal)
+                    if (isNegativeGoal || preconImpossible || isDiffStateOwnerType || contradictoryOtherGoal || willAddCirle)
                         continue;
 
                     // todo: check rule direct help this goal or not
@@ -910,7 +917,6 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 selectedRule = (curStateNode->candidateRules.begin())->second;
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.begin())->second);
-                curStateNode->candidateRules.pop_front();
 
             }
 
@@ -923,10 +929,10 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 selectedRule = (curStateNode->candidateRules.front()).second;
                 curStateNode->ruleHistory.push_back((curStateNode->candidateRules.front()).second);
-                curStateNode->candidateRules.erase(curStateNode->candidateRules.begin());
             }
             else
             {
+                cout<< std::endl << "Debug planning step " << tryStepNum <<" : current subgoal has not any candidate rules left to try. Roll back! " << std::endl;
                 // we have tried all the candidate rules, still cannot achieve this state, which means this state is impossible to be achieved here
                 // so go back to the its foward rule which produce this state to check if we can apply another bindings to the same rule or we shoud try another rule
 
@@ -940,10 +946,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 if (forwardRuleNode->ParamCandidates.size() == 0)
                 {
-                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : have tried all the Candidate bindings in previous steps. Roll back! " << std::endl;
-                    // so it means this rule doesn't work, we have to go back to its forward state node
+                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : its foward RuleNode: " << forwardRuleNode->originalRule->ruleName
+                        << " has tried all the candidate bindings. Roll back again! " << std::endl;
 
-                    deleteRuleNodeRecursively(forwardRuleNode);
+                    // so it means this rule doesn't work, we have to go back to its forward state node
+                    deleteRuleNodeRecursively(forwardRuleNode);                                  
 
                     continue; // continue to next big loop for next unsatisfied subgoal
 
@@ -958,29 +965,45 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                     forwardRuleNode->updateCurrentAllBindings();
 
-                    // check all its backward state nodes
-                    // delete them recursively
-                    vector<StateNode*>::iterator backwardStateIt;
-                    for (backwardStateIt = forwardRuleNode->backwardLinks.begin(); backwardStateIt != forwardRuleNode->backwardLinks.end(); ++ backwardStateIt)
-                    {
-                        StateNode* curSNode = (StateNode*)(*backwardStateIt);
+                    curStateNode = selectedRuleNode->forAchieveThisSubgoal;
 
-                        deleteStateNodeInTemporaryList(curSNode);
+                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : reselected subgoal: ";
+                    outputStateInfo(curStateNode->state, true);
+                    cout<< std::endl;
 
-                        if (curSNode->hypotheticalLink != Handle::UNDEFINED)
-                        {
-                           atomSpace->removeAtom(curSNode->hypotheticalLink);
-                           curSNode->hypotheticalLink = Handle::UNDEFINED;
-                        }
-
-                         if (curSNode->backwardRuleNode != 0)
-                             deleteRuleNodeRecursively(curSNode->backwardRuleNode, curSNode);
-                         else
-                             delete curSNode;
-
-                    }
+                    // clear up the previous context of this rule node without delete this rule node
+                    deleteRuleNodeRecursively(selectedRuleNode,curStateNode,false,false);
 
                     selectedRuleNode->backwardLinks.clear();
+                    selectedRuleNode->forwardLinks.clear();
+
+                    selectedRuleNode->forwardLinks.push_back(curStateNode);
+                    curStateNode->backwardRuleNode = selectedRuleNode;
+
+
+//                    // check all its backward state nodes
+//                    // delete them recursively
+//                    vector<StateNode*>::iterator backwardStateIt;
+//                    for (backwardStateIt = forwardRuleNode->backwardLinks.begin(); backwardStateIt != forwardRuleNode->backwardLinks.end(); ++ backwardStateIt)
+//                    {
+//                        StateNode* curSNode = (StateNode*)(*backwardStateIt);
+
+//                        deleteStateNodeInTemporaryList(curSNode);
+
+//                        if (curSNode->hypotheticalLink != Handle::UNDEFINED)
+//                        {
+//                           atomSpace->removeAtom(curSNode->hypotheticalLink);
+//                           curSNode->hypotheticalLink = Handle::UNDEFINED;
+//                        }
+
+//                         if (curSNode->backwardRuleNode != 0)
+//                             deleteRuleNodeRecursively(curSNode->backwardRuleNode, curSNode);
+//                         else
+//                             delete curSNode;
+
+//                    }
+
+
 
 //                    // check which states of the preconditions of this forwardRuleNode have been sovled , which still remand unsloved.
 //                    vector<StateNode*>::iterator preconItor;
@@ -1116,14 +1139,17 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         RuleNode* ruleNode;
+
         // Till now have selected one unsatisfied state and the rule to applied to try to do one step backward chaining to satisfy it
         // out put selected rule debug info:
         if (selectedRuleNode == 0)
         {
             cout<<"Debug planning step " << tryStepNum <<": Selected rule :"<< selectedRule->ruleName << std::endl;
 
+            curStateNode->candidateRules.pop_front();
+
             // create a new RuleNode to apply this selected rule
-            ruleNode = new RuleNode(selectedRule);
+            ruleNode = new RuleNode(selectedRule, curStateNode);
             ruleNode->number = ruleNodeCount ++;
             ruleNode->forwardLinks.push_back(curStateNode);
             curStateNode->backwardRuleNode = ruleNode; // the depth of curStateNode has been calculated when it created as a precondition of its forward rule node
@@ -1142,6 +1168,31 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 // fail to ground all non numeric variables, roll back to previous step
                 cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
+
+//                if (curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+//                {
+//                    bool needRollBack = false;
+//                    vector<StateNode*> forwardLinkEffectIt;
+//                    for (forwardLinkEffectIt = curStateNode->forwardRuleNode->forwardLinks.begin(); forwardLinkEffectIt!= curStateNode->forwardRuleNode->forwardLinks.end(); ++ forwardLinkEffectIt)
+//                    {
+//                        StateNode* forwardEffectSN = *forwardLinkEffectIt;
+//                        if (forwardEffectSN->forwardRuleNode == 0)
+//                            continue;
+
+//                        bool directHelp;
+//                        curStateNode->forwardRuleNode->originalRule->isRulePossibleToHelpToAchieveGoal(forwardEffectSN,directHelp);
+
+//                        if(directHelp)
+//                        {
+//                            cout<<"This fail also imply that its foward state :";
+//                            outputStateInfo(forwardEffectSN->state, true);
+//                            cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+//                            needRollBack = true;
+//                            break;
+//                        }
+//                    }
+//                }
+
                 cleanUpContextBeforeRollBackToPreviousStep();
                 continue;
 
@@ -1179,6 +1230,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         else
         {
             ruleNode = selectedRuleNode;
+            allRuleNodeInThisPlan.insert(allRuleNodeInThisPlan.begin(),ruleNode);
             cout<<"Debug planning step " << tryStepNum <<": Selected rule again:"<< selectedRuleNode->originalRule->ruleName <<" : Trying another group of bindings" << std::endl;
             // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
             // so we just simply ground it as the self agent.
@@ -1660,7 +1712,11 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
+            {
+                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+            }
 
             delete sn;
         }
@@ -1673,7 +1729,11 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
+            {
+                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+            }
 
             delete sn;
         }
@@ -1686,7 +1746,11 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
+            {
+                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+            }
 
             delete sn;
         }
@@ -1699,7 +1763,11 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
+            {
+                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
+            }
 
             delete sn;
         }
@@ -2199,10 +2267,10 @@ int OCPlanner::checkEffectFitness(RuleNode* ruleNode, StateNode* fowardState, bo
 }
 
 void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal,
-                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool &contradictoryOtherGoal, bool onlyCheckIfNegativeGoal)
+                                        bool &isDiffStateOwnerType, bool &preconImpossible, bool &willAddCirle, bool &contradictoryOtherGoal, bool &needRollBack)
 {
 
-    RuleNode* tmpRuleNode = new RuleNode(rule);
+    RuleNode* tmpRuleNode = new RuleNode(rule,fowardState);
 
     groundARuleNodeParametersFromItsForwardState(tmpRuleNode,fowardState);
 
@@ -2228,22 +2296,26 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     preconImpossible = false;
     willAddCirle = false;
     contradictoryOtherGoal = false;
-
+    needRollBack = false;
 
     // check all the effects:
     negateveStateNum = checkEffectFitness(tmpRuleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
-//    if (onlyCheckIfNegativeGoal)
-//    {
-//        delete tmpRuleNode;
-//        return;
-//    }
 
     bool hasDirectHelpRule;
 
     // check how many preconditions will be satisfied
 
     satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
+
+    if (preconImpossible && rule->action->getType().getCode() == DO_NOTHING_CODE)
+    {
+        bool directHelp;
+        rule->isRulePossibleToHelpToAchieveGoal(fowardState->state,directHelp);
+
+        if(directHelp)
+            needRollBack = true;
+    }
 
     delete tmpRuleNode;
 
@@ -2292,6 +2364,10 @@ void OCPlanner::addHypotheticalLinkForStateNode(StateNode *stateNode)
        hEvalLink  = AtomSpaceUtil::addLink(*atomSpace,EVALUATION_LINK, evalLinkOutgoings,true);
 
     stateNode->hypotheticalLink = hEvalLink;
+
+    static int count = 1;
+
+    cout <<std::endl << "Added HypotheticalLink " << count++ << std::endl << atomSpace->atomAsString(hEvalLink).c_str() << std::endl;
 
 }
 
@@ -2435,7 +2511,7 @@ void OCPlanner::reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& n
 }
 
 // delete a rule node and recursivly delete all its backward state nodes and rule nodes
-void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode, bool deleteThisforwardStateNode)
+void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode, bool deleteThisforwardStateNode, bool deleteThisRuleNode)
 {
 
     // For the other forward state node of this rule node which is not the given forwardStateNode,
@@ -2453,27 +2529,42 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
         if(forwardForwardSN->forwardRuleNode == 0)
         {
+            if (forwardForwardSN == forwardStateNode)
+                continue;
 
             if (forwardForwardSN->hypotheticalLink != Handle::UNDEFINED)
             {
+               cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                   << atomSpace->atomAsString(forwardForwardSN->hypotheticalLink).c_str() << std::endl;
+
                atomSpace->removeAtom(forwardForwardSN->hypotheticalLink);
                forwardForwardSN->hypotheticalLink = Handle::UNDEFINED;
-            }
 
-            if (forwardForwardSN == forwardStateNode)
-                continue;
+            }
 
             delete forwardForwardSN;
         }
         else
         {
             unsatisfiedStateNodes.push_back(forwardForwardSN);
+            forwardForwardSN->backwardRuleNode = 0;
         }
 
     }
 
+    ruleNode->forwardLinks.clear();
+
     if (forwardStateNode && deleteThisforwardStateNode)
+    {
+        if (forwardStateNode->hypotheticalLink != Handle::UNDEFINED)
+        {
+            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
+
+           atomSpace->removeAtom(forwardStateNode->hypotheticalLink);
+        }
         delete forwardStateNode;
+    }
 
     // check all its backward state nodes
     // delete them recursively
@@ -2483,25 +2574,45 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
         StateNode* curSNode = (StateNode*)(*backwardStateIt);
 
         deleteStateNodeInTemporaryList(curSNode);
+        deleteStateNodeInUnsatisfedNodeList(curSNode);
 
         if (curSNode->hypotheticalLink != Handle::UNDEFINED)
         {
-           atomSpace->removeAtom(curSNode->hypotheticalLink);
+            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+                << atomSpace->atomAsString(curSNode->hypotheticalLink).c_str() << std::endl;
+
            curSNode->hypotheticalLink = Handle::UNDEFINED;
         }
 
          if (curSNode->backwardRuleNode != 0)
              deleteRuleNodeRecursively(curSNode->backwardRuleNode, curSNode);
          else
+         {
              delete curSNode;
+         }
 
     }
 
+    ruleNode->backwardLinks.clear();
+
     deleteRuleNodeInAllRuleNodeList(ruleNode);
 
-    if (ruleNode)
+    if (ruleNode && deleteThisRuleNode)
         delete ruleNode;
 
+}
+
+void OCPlanner::deleteStateNodeInUnsatisfedNodeList(StateNode* stateNode)
+{
+    list<StateNode*>::iterator it;
+    for (it = unsatisfiedStateNodes.begin(); it != unsatisfiedStateNodes.end(); ++it)
+    {
+        if ((*it) == stateNode)
+        {
+            unsatisfiedStateNodes.erase(it);
+            break;
+        }
+    }
 }
 
 void OCPlanner::deleteStateNodeInTemporaryList(StateNode* stateNode)
@@ -3334,7 +3445,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
                                                            string varName, vector<ParamValue>& values, Rule *orginalRule, bool checkPrecons)
 {
     // check how many preconditions will be satisfied
-    RuleNode* tmpRuleNode = new RuleNode(rule);
+    RuleNode* tmpRuleNode = new RuleNode(rule,0);
     tmpRuleNode->currentAllBindings = currentbindings;
 
     vector<ParamValue>::iterator vit;
@@ -3964,7 +4075,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1: var_man_x is people
     vector<ParamValue> peopleStateOwnerList1;
     peopleStateOwnerList1.push_back(var_man_x);
-    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0, true);
+    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0);
 
 
     // precondition 1: var_man_x is people
@@ -3981,7 +4092,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* keepFishStateEffect2 = new Effect(keepFishState2, OP_ASSIGN, "fish",true);
 
     // add rule:
-    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
     waterDrinkerKeepsFishRule->ruleName = "waterDrinkerKeepsFishRule";
     waterDrinkerKeepsFishRule->addPrecondition(peopleState1);
     waterDrinkerKeepsFishRule->addPrecondition(drinkWaterState2);
@@ -4007,7 +4118,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
 
     // add rule:
-    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
     fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
     fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
     fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
@@ -4038,7 +4149,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
 
     // add rule:
-    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
     teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
     teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
     teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
@@ -4065,7 +4176,7 @@ void OCPlanner::loadTestRulesFromCodes()
     Effect* drinkTeaEffect2 = new Effect(drinkTeaState2, OP_ASSIGN, "tea",true);
 
     // add rule:
-    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
     catsKeeperDrinksTeaRule->ruleName = "catsKeeperDrinksTeaRule";
     catsKeeperDrinksTeaRule->addPrecondition(peopleState1);
     catsKeeperDrinksTeaRule->addPrecondition(keepCatsStateState2);
@@ -4086,7 +4197,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1: var_fish_keeper is people
     vector<ParamValue> peopleStateOwnerList;
     peopleStateOwnerList.push_back(var_fish_keeper);
-    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0, true);
+    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0);
 
     // precondition 2: var_fish_keeper keeps fish
     vector<ParamValue> keepFishStateOwnerList;
@@ -4133,41 +4244,41 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 1 -5 : man_1-5 are people
     vector<ParamValue> ispeopleStateOwnerList1;
     ispeopleStateOwnerList1.push_back(man_1);
-    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0, true);
+    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0);
 
     vector<ParamValue> ispeopleStateOwnerList2;
     ispeopleStateOwnerList2.push_back(man_2);
-    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0,true);
+    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0);
 
     vector<ParamValue> ispeopleStateOwnerList3;
     ispeopleStateOwnerList3.push_back(man_3);
-    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0, true);
+    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0);
 
 
     // additional preconditions: man_2, man_3,  are not the same to man_1
     vector<ParamValue> isNotSameOwnerList1;
     isNotSameOwnerList1.push_back(man_1);
     isNotSameOwnerList1.push_back(man_2);
-    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame);
 
     vector<ParamValue> isNotSameOwnerList2;
     isNotSameOwnerList2.push_back(man_1);
     isNotSameOwnerList2.push_back(man_3);
-    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame);
 
 
     // precondition 0: pet_x y z are pets
     vector<ParamValue> isPetStateOwnerList1;
     isPetStateOwnerList1.push_back(pet_x);
-    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0,true);
+    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0);
 
     vector<ParamValue> isPetStateOwnerList2;
     isPetStateOwnerList2.push_back(pet_y);
-    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0,true);
+    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0);
 
     vector<ParamValue> isPetStateOwnerList3;
     isPetStateOwnerList3.push_back(pet_z);
-    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0,true);
+    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0);
 
     // precondition 1 -5 : man_1-3 are people
 
@@ -4175,12 +4286,12 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSamePetOwnerList1;
     isNotSamePetOwnerList1.push_back(pet_x);
     isNotSamePetOwnerList1.push_back(pet_y);
-    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame);
 
     vector<ParamValue> isNotSamePetOwnerList2;
     isNotSamePetOwnerList2.push_back(pet_x);
     isNotSamePetOwnerList2.push_back(pet_z);
-    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame);
 
     // precondition 6-9 : other people do not keep pet_x
     vector<ParamValue> notkeepXStateOwnerList1;
@@ -4232,15 +4343,15 @@ void OCPlanner::loadTestRulesFromCodes()
     // precondition 0: drink_x y z are drink
     vector<ParamValue> isDrinkStateOwnerList1;
     isDrinkStateOwnerList1.push_back(drink_x);
-    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0, true);
+    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0);
 
     vector<ParamValue> isDrinkStateOwnerList2;
     isDrinkStateOwnerList2.push_back(drink_y);
-    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0, true);
+    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0);
 
     vector<ParamValue> isDrinkStateOwnerList3;
     isDrinkStateOwnerList3.push_back(drink_z);
-    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0, true);
+    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0);
 
     // precondition 1 -5 : man_1-3 are people and different
 
@@ -4248,13 +4359,13 @@ void OCPlanner::loadTestRulesFromCodes()
     vector<ParamValue> isNotSameDrinkOwnerList1;
     isNotSameDrinkOwnerList1.push_back(drink_x);
     isNotSameDrinkOwnerList1.push_back(drink_y);
-    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame);
 
     //  precondition:  drink_y and  drink_z are different
     vector<ParamValue> isNotSameDrinkOwnerList2;
     isNotSameDrinkOwnerList2.push_back(drink_x);
     isNotSameDrinkOwnerList2.push_back(drink_z);
-    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame, true);
+    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame);
 
     // precondition 6-9 : other people do not drink drink_x
     vector<ParamValue> notdrinkXStateOwnerList1;
