@@ -1,7 +1,6 @@
-; random-string, random-atom-name and choose-var-name can be moved to utilities.scm
+; random-string, random-node-name and choose-var-name can be moved to utilities.scm
 (define (random-string str-length) 
 	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-	;(define name-length 5)
 	(define str "")
 	(while (> str-length 0)
 		(set! str (string-append str (string (string-ref alphanumeric (random (string-length alphanumeric))))))
@@ -10,35 +9,59 @@
 	str
 )
 
-(define (random-atom-name atom-type name-length)
-	(define atom-name (random-string name-length))
-	(if (equal? atom-type 'VariableNode)
-		(set! atom-name (string-append "$" atom-name))
+; Return #t if there is a node of type node-type with a name "node-name"
+(define (check-name? node-name node-type)
+	(> (length (filter-map (lambda (a-string) (string=? node-name a-string)) (map cog-name (cog-get-atoms node-type)))) 0)
+)
+
+(define (random-node-name node-type name-length)
+	(define node-name (random-string name-length))
+	(if (equal? node-type 'VariableNode)
+		(set! node-name (string-append "$" node-name))
 	)
-	(while (> (length (filter-map (lambda (a-string) (string=? atom-name a-string)) (map cog-name (cog-get-atoms atom-type)))) 0)
-		(if (equal? atom-type 'VariableNode)
-			(set! atom-name (string-append "$" (random-string name-length)))
-			(set! atom-name (random-string name-length))
+	(while (check-name? node-name node-type)
+		(if (equal? node-type 'VariableNode)
+			(set! node-name (string-append "$" (random-string name-length)))
+			(set! node-name (random-string name-length))
 		)
 	)
-	atom-name
+	node-name
 )
 
-(define (choose-var-name) (random-atom-name 'VariableNode 36))
+(define (choose-var-name) (random-node-name 'VariableNode 36))
 
-(define (check-lemma word win)
-	(equal? word (cog-name (list-ref (cog-chase-link 'LemmaLink 'WordNode win) 0)))
+(define (check-lemma? word word-inst)
+	(string=? word (cog-name (word-inst-get-lemma word-inst)))
 )
 
-; 'win' refers to WordInstanceNode
+; 'word-inst' refers to WordInstanceNode
+(define (get-word-inst-nodes word parse-node)
+	(define word-inst-list (parse-get-words parse-node))
+	(append-map (lambda (a-predicate a-word-inst) (if a-predicate (list a-word-inst) '()))
+		(map (lambda (a-word-inst) (check-lemma? word a-word-inst)) word-inst-list)
+		word-inst-list
+	)
+)
+
+; gets the occurence count of the a word node in a parse
+(define (get-word-inst-index word-inst)
+	(define parse-node (car (cog-chase-link 'WordInstanceLink 'ParseNode word-inst)))
+	(define word (word-inst-get-word-str word-inst))
+	(+ 1 (list-index (lambda (a-node) (equal? word-inst a-node)) (get-word-inst-nodes word parse-node)))
+)
+
+; Returns the word-instance name when its word-lemma, word-index and parse-node is inputed.
+; It also checks whether an atom name is a word-instance name for the given parse-node and
+; word lemma and returns the word-instance name.
+
 (define (get-instance-name word word-index parse-node)
-	(define win-list (cog-get-reference parse-node))
-	(cog-name (list-ref 
-			(append-map (lambda (a-predicate a-win) (if a-predicate (list a-win) '()))
-				(map (lambda (a-win) (check-lemma word a-win)) win-list)
-				win-list
-			)
-			(- word-index 1)
+	(cond	((number? word-index)
+			(cog-name (list-ref (get-word-inst-nodes word parse-node) (- word-index 1)))
+		)
+		((and (string? word-index) (check-name? word-index 'WordInstanceNode))
+			(cog-name (list-ref
+					(get-word-inst-nodes word parse-node)
+					(- (get-word-inst-index (WordInstanceNode word-index)) 1)))
 		)
 	)
 )
