@@ -27,20 +27,12 @@
 #ifndef _OPENCOG_LOGGER_H
 #define _OPENCOG_LOGGER_H
 
-#include <string>
-
 #include <cstdarg>
-#include <pthread.h>
+#include <mutex>
+#include <string>
+#include <thread>
 
-#define ASYNC_LOGGING
-
-#ifdef ASYNC_LOGGING
-#include <boost/thread.hpp>
 #include <opencog/util/concurrent_queue.h>
-#endif
-
-//#undef ERROR
-//#undef DEBUG
 
 namespace opencog
 {
@@ -53,9 +45,7 @@ class Logger
 {
 
     void set(const Logger&);
-#ifdef ASYNC_LOGGING
     bool writingLoopActive;
-#endif
 public:
 
     // WARNING: if you change the levels don't forget to update
@@ -261,18 +251,14 @@ public:
      * avoiding unnecessary code for logger. For example:
      * if (isDebugEnabled())  debug(...);
      */
-    bool isEnabled(Level level) const;
-    bool isErrorEnabled() const;
-    bool isWarnEnabled() const;
-    bool isInfoEnabled() const;
-    bool isDebugEnabled() const;
-    bool isFineEnabled() const;
+    bool isEnabled(Level level) const { return level <= currentLevel; }
+    bool isErrorEnabled() const { return ERROR <= currentLevel; }
+    bool isWarnEnabled() const { return WARN <= currentLevel; }
+    bool isInfoEnabled() const { return INFO <= currentLevel; }
+    bool isDebugEnabled() const { return DEBUG <= currentLevel; }
+    bool isFineEnabled() const { return FINE <= currentLevel; } 
 
-#ifdef ASYNC_LOGGING
     void flush();
-#else
-    inline void flush() {}
-#endif
 
 private:
 
@@ -282,21 +268,20 @@ private:
     Level backTraceLevel;
     bool logEnabled;
     bool printToStdout;
-    pthread_mutex_t lock;
     FILE *f;
 
-#ifdef ASYNC_LOGGING
-    /** This thread does all writing of log messages */
-    boost::thread m_Thread;
+    /** One single thread does all writing of log messages */
+    std::thread writer_thread;
+    std::mutex the_mutex;
 
     /** Queue for log messages */
-    concurrent_queue< std::string* > pendingMessagesToWrite;
+    concurrent_queue< std::string* > msg_queue;
+    bool pending_write;
 
     void startWriteLoop();
     void stopWriteLoop();
     void writingLoop();
     void writeMsg(std::string &msg);
-#endif
 
     /**
      * Enable logging messages.

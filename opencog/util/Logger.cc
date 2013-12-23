@@ -56,7 +56,6 @@
 #ifdef HAVE_VALGRIND
 #include <valgrind/drd.h>
 #endif
-#include <boost/algorithm/string.hpp>
 
 #include <opencog/util/backtrace-symbols.h>
 #include <opencog/util/platform.h>
@@ -143,35 +142,30 @@ static void prt_backtrace(std::ostringstream& oss)
 
 Logger::~Logger()
 {
-#ifdef ASYNC_LOGGING
     // Wait for queue to empty
     flush();
     stopWriteLoop();
-#endif
 
     if (f != NULL) fclose(f);
 }
 
-#ifdef ASYNC_LOGGING
 void Logger::startWriteLoop()
 {
-    pthread_mutex_lock(&lock);
+    std::unique_lock<std::mutex> lock(the_mutex);
     if (!writingLoopActive)
     {
         writingLoopActive = true;
-        m_Thread = boost::thread(&Logger::writingLoop, this);
+        writer_thread = std::thread(&Logger::writingLoop, this);
     }
-    pthread_mutex_unlock(&lock);
 }
 
 void Logger::stopWriteLoop()
 {
-    pthread_mutex_lock(&lock);
-    pendingMessagesToWrite.cancel();
+    std::unique_lock<std::mutex> lock(the_mutex);
+    msg_queue.cancel();
     // rejoin thread
-    m_Thread.join();
+    writer_thread.join();
     writingLoopActive = false;
-    pthread_mutex_unlock(&lock);
 }
 
 void Logger::writingLoop()
@@ -185,9 +179,11 @@ void Logger::writingLoop()
             // causing flush to report an empty queue, even though the
             // message has not actually been written yet.
             std::string* msg;
-            pendingMessagesToWrite.wait_and_get(msg);
+            msg_queue.wait_and_get(msg);
+            pending_write = true;
             writeMsg(*msg);
-            pendingMessagesToWrite.pop();
+            pending_write = false;
+            msg_queue.pop();
             delete msg;
         }
     }
@@ -199,20 +195,19 @@ void Logger::writingLoop()
 
 void Logger::flush()
 {
-    while (!pendingMessagesToWrite.is_empty())
+    while (pending_write or not msg_queue.is_empty())
     {
         sched_yield();
         usleep(100);
     }
 }
-#endif
 
 void Logger::writeMsg(std::string &msg)
 {
-    pthread_mutex_lock(&lock);
-    // delay opening the file until the first logging statement is issued;
+    std::unique_lock<std::mutex> lock(the_mutex);
+    // Delay opening the file until the first logging statement is issued;
     // this allows us to set the main logger's filename without creating
-    // a useless log file with the default filename
+    // a useless log file with the default filename.
     if (f == NULL)
     {
         if ((f = fopen(fileName.c_str(), "a")) == NULL)
@@ -227,7 +222,7 @@ void Logger::writeMsg(std::string &msg)
         enable();
 
         // Log the config file location. We do that here, because
-        // wwe can't do it any earlier, because the config file
+        // we can't do it any earlier, because the config file
         // specifies the log location.
         if (INFO <= currentLevel)
         {
@@ -240,12 +235,14 @@ void Logger::writeMsg(std::string &msg)
         }
     }
 
-    // write to file
+    // Write to file.
     fprintf(f, "%s", msg.c_str());
     fflush(f);
-    pthread_mutex_unlock(&lock);
 
-    // write to stdout
+    // Stdout writing ust be unlocked.
+    lock.unlock();
+
+    // Write to stdout.
     if (printToStdout)
     {
         std::cout << msg;
@@ -265,39 +262,32 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
     this->logEnabled = true;
 #ifdef HAVE_VALGRIND
     DRD_IGNORE_VAR(this->logEnabled);
+    DRD_IGNORE_VAR(this->msg_queue);
 #endif
     this->f = NULL;
-
-    pthread_mutex_init(&lock, NULL);
-#ifdef ASYNC_LOGGING
-#ifdef HAVE_VALGRIND
-    DRD_IGNORE_VAR(this->pendingMessagesToWrite);
-#endif
+    this->pending_write = false;
     this->writingLoopActive = false;
+
     startWriteLoop();
-#endif // ASYNC_LOGGING
 }
 
 Logger::Logger(const Logger& log)
     : error(*this), warn(*this), info(*this), debug(*this), fine(*this)
 {
-    pthread_mutex_init(&lock, NULL);
     set(log);
 }
 
 Logger& Logger::operator=(const Logger& log)
 {
-#ifdef ASYNC_LOGGING
     this->stopWriteLoop();
-    pendingMessagesToWrite.cancel_reset();
-#endif // ASYNC_LOGGING
+    msg_queue.cancel_reset();
     this->set(log);
     return *this;
 }
 
 void Logger::set(const Logger& log)
 {
-    pthread_mutex_lock(&lock);
+    std::unique_lock<std::mutex> lock(the_mutex);
     this->fileName.assign(log.fileName);
     this->currentLevel = log.currentLevel;
     this->backTraceLevel = log.backTraceLevel;
@@ -306,11 +296,9 @@ void Logger::set(const Logger& log)
 
     this->logEnabled = log.logEnabled;
     this->f = log.f;
-    pthread_mutex_unlock(&lock);
+    lock.unlock();
 
-#ifdef ASYNC_LOGGING
     startWriteLoop();
-#endif // ASYNC_LOGGING
 }
 
 // ***********************************************/
@@ -340,10 +328,10 @@ void Logger::setFilename(const std::string& s)
 {
     fileName.assign(s);
 
-    pthread_mutex_lock(&lock);
+    std::unique_lock<std::mutex> lock(the_mutex);
     if (f != NULL) fclose(f);
     f = NULL;
-    pthread_mutex_unlock(&lock);
+    lock.unlock();
 
     enable();
 }
@@ -363,7 +351,8 @@ void Logger::setPrintToStdoutFlag(bool flag)
     printToStdout = flag;
 }
 
-void Logger::setPrintErrorLevelStdout() {
+void Logger::setPrintErrorLevelStdout()
+{
     setPrintToStdoutFlag(true);
     setLevel(Logger::ERROR);
 }
@@ -380,9 +369,7 @@ void Logger::disable()
 
 void Logger::log(Logger::Level level, const std::string &txt)
 {
-#ifdef ASYNC_LOGGING
     static const unsigned int max_queue_size_allowed = 1024;
-#endif
     // Don't log if not enabled, or level is too low.
     if (!logEnabled) return;
     if (level > currentLevel) return;
@@ -413,18 +400,15 @@ void Logger::log(Logger::Level level, const std::string &txt)
         prt_backtrace(oss);
 #endif
     }
-#ifdef ASYNC_LOGGING
-    pendingMessagesToWrite.push(new std::string(oss.str()));
+
+    msg_queue.push(new std::string(oss.str()));
 
     // If the queue gets too full, block until it's flushed to file or
-    // stdout
-    if (pendingMessagesToWrite.size() > max_queue_size_allowed) {
+    // stdout. This can sometimes happen, if some component is spewing
+    // lots of debugging messages in a tight loop.
+    if (msg_queue.size() > max_queue_size_allowed) {
         flush();
     }
-#else
-    std::string temp(oss.str());
-    writeMsg(temp);
-#endif
 }
 
 void Logger::logva(Logger::Level level, const char *fmt, va_list args)
@@ -441,57 +425,31 @@ void Logger::log(Logger::Level level, const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logva(level, fmt, args); va_end(args);
 }
+
 void Logger::Error::operator()(const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logger.logva(ERROR, fmt, args); va_end(args);
 }
+
 void Logger::Warn::operator()(const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logger.logva(WARN,  fmt, args); va_end(args);
 }
+
 void Logger::Info::operator()(const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logger.logva(INFO,  fmt, args); va_end(args);
 }
+
 void Logger::Debug::operator()(const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logger.logva(DEBUG, fmt, args); va_end(args);
 }
+
 void Logger::Fine::operator()(const char *fmt, ...)
 {
     va_list args; va_start(args, fmt); logger.logva(FINE,  fmt, args); va_end(args);
 }
-
-bool Logger::isEnabled(Level level) const
-{
-    return level <= currentLevel;
-}
-
-bool Logger::isErrorEnabled() const
-{
-    return ERROR <= currentLevel;
-}
-
-bool Logger::isWarnEnabled() const
-{
-    return WARN <= currentLevel;
-}
-
-bool Logger::isInfoEnabled() const
-{
-    return INFO <= currentLevel;
-}
-
-bool Logger::isDebugEnabled() const
-{
-    return DEBUG <= currentLevel;
-}
-
-bool Logger::isFineEnabled() const
-{
-    return FINE <= currentLevel;
-}
-
 
 const char* Logger::getLevelString(const Logger::Level level)
 {
@@ -505,7 +463,7 @@ const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 {
     unsigned int nLevels = sizeof(levelStrings) / sizeof(levelStrings[0]);
     for (unsigned int i = 0; i < nLevels; ++i) {
-        if (boost::iequals(levelStrings[i], levelStr))
+        if (0 == levelStr.compare(levelStrings[i]))
             return (Logger::Level) i;
     }
     return BAD_LEVEL;
