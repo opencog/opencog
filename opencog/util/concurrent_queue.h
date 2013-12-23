@@ -35,11 +35,11 @@
  */
 
 //! Represents a thread-safe first in-first out list.
-template<typename Data>
+template<typename Element>
 class concurrent_queue
 {
 private:
-    std::deque<Data> the_queue;
+    std::deque<Element> the_queue;
     mutable std::mutex the_mutex;
     std::condition_variable the_condition_variable;
     bool is_canceled;
@@ -50,7 +50,9 @@ public:
     {
         const char * what() { return "Cancellation of wait on concurrent_queue"; }
     };
-    void push(Data const& data)
+
+    /// Push the Element onto the queue.
+    void push(Element const& data)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
@@ -59,20 +61,22 @@ public:
         the_condition_variable.notify_one();
     }
 
-    bool empty() const
+    /// Return true if teh queue is empty.
+    bool is_empty() const
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
         return the_queue.empty();
     }
 
-    unsigned int approx_size() const
+    // Return the (approximate) size of the queue.
+    unsigned int size() const
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         return the_queue.size();
     }
 
-    bool try_get(Data& value)
+    bool try_get(Element& value)
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
@@ -91,7 +95,7 @@ public:
     // with the value, and then, only when done working with the value,
     // should one pop. Doing things this way will allow the empty()
     // function to correctly report the state of the work queue.
-    void wait_and_get(Data& value)
+    void wait_and_get(Element& value)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
@@ -110,7 +114,7 @@ public:
         the_queue.pop_front();
     }
 
-    std::deque<Data> wait_and_take_all()
+    std::deque<Element> wait_and_take_all()
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
@@ -120,7 +124,7 @@ public:
         }
         if (is_canceled) throw Canceled();
 
-        std::deque<Data> retval;
+        std::deque<Element> retval;
         std::swap(retval, the_queue);
         return retval;
     }

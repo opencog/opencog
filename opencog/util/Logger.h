@@ -78,7 +78,7 @@ public:
      * @param timestampEnabled If true, a timestamp will be prefixed to
               every log message
      */
-    Logger(const std::string &fileName = "opencog.log", 
+    Logger(const std::string &fileName = "opencog.log",
            Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
@@ -103,7 +103,7 @@ public:
     Level getLevel() const;
 
     /**
-     * Set the level of messages which should be logged with back trace. 
+     * Set the level of messages which should be logged with back trace.
      * Every message with log-level lower than or equals to the given argument
      * will have back trace.
      */
@@ -111,7 +111,7 @@ public:
 
     /**
      * Get the current back trace log level that determines which messages
-     * should be logged with back trace. 
+     * should be logged with back trace.
      */
     Level getBackTraceLevel() const;
 
@@ -155,7 +155,7 @@ public:
      * if and only if passed level is lower than or equals to the current
      * log level of this Logger instance.
      *
-     * You may use these methods as any printf-style call, eg: 
+     * You may use these methods as any printf-style call, eg:
      * fine("Count = %d", count)
      */
     void logva(Level level, const char *, va_list args);
@@ -256,9 +256,9 @@ public:
     Fine fine;
 
 public:
-    /** 
+    /**
      * Methods to check if a given log level is enabled. This is useful for
-     * avoiding unnecessary code for logger. For example: 
+     * avoiding unnecessary code for logger. For example:
      * if (isDebugEnabled())  debug(...);
      */
     bool isEnabled(Level level) const;

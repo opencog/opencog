@@ -199,7 +199,7 @@ void Logger::writingLoop()
 
 void Logger::flush()
 {
-    while (!pendingMessagesToWrite.empty())
+    while (!pendingMessagesToWrite.is_empty())
     {
         sched_yield();
         usleep(100);
@@ -418,7 +418,7 @@ void Logger::log(Logger::Level level, const std::string &txt)
 
     // If the queue gets too full, block until it's flushed to file or
     // stdout
-    if (pendingMessagesToWrite.approx_size() > max_queue_size_allowed) {
+    if (pendingMessagesToWrite.size() > max_queue_size_allowed) {
         flush();
     }
 #else
