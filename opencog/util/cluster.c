@@ -37,9 +37,16 @@
 #  include <windows.h>
 #endif
 
-//#ifdef __cplusplus
-//extern ("C") {
-//#endif
+#ifndef min
+#define min(x, y)      ((x) < (y) ? (x) : (y))
+#endif
+#ifndef max
+#define        max(x, y)       ((x) > (y) ? (x) : (y))
+#endif
+
+#ifdef __cplusplus
+extern ("C") {
+#endif
 /* ************************************************************************ */
 
 #ifdef WINDOWS
@@ -3957,6 +3964,6 @@ double clusterdistance (int nrows, int ncolumns, double** data,
   /* Never get here */
   return -2.0;
 }
-//#ifdef __cplusplus
-//}
-//#endif
+#ifdef __cplusplus
+}
+#endif
