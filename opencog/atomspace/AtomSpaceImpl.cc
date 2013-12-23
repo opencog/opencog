@@ -20,14 +20,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpaceImpl.h"
-
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <list>
 
 #include <stdlib.h>
+
+#include <boost/bind.hpp>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
@@ -36,6 +36,8 @@
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/oc_assert.h>
+
+#include "AtomSpaceImpl.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
