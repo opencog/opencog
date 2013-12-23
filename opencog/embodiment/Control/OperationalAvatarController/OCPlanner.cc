@@ -1169,29 +1169,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // fail to ground all non numeric variables, roll back to previous step
                 cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
 
-//                if (curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
-//                {
-//                    bool needRollBack = false;
-//                    vector<StateNode*> forwardLinkEffectIt;
-//                    for (forwardLinkEffectIt = curStateNode->forwardRuleNode->forwardLinks.begin(); forwardLinkEffectIt!= curStateNode->forwardRuleNode->forwardLinks.end(); ++ forwardLinkEffectIt)
-//                    {
-//                        StateNode* forwardEffectSN = *forwardLinkEffectIt;
-//                        if (forwardEffectSN->forwardRuleNode == 0)
-//                            continue;
-
-//                        bool directHelp;
-//                        curStateNode->forwardRuleNode->originalRule->isRulePossibleToHelpToAchieveGoal(forwardEffectSN,directHelp);
-
-//                        if(directHelp)
-//                        {
-//                            cout<<"This fail also imply that its foward state :";
-//                            outputStateInfo(forwardEffectSN->state, true);
-//                            cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
-//                            needRollBack = true;
-//                            break;
-//                        }
-//                    }
-//                }
+                if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                {
+                    cout<<"This fail also imply that its foward state :";
+                    outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
+                    cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                    curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                }
 
                 cleanUpContextBeforeRollBackToPreviousStep();
                 continue;
@@ -1223,6 +1207,13 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
             {
                 cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
+                if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                {
+                    cout<<"This fail also imply that its foward state :";
+                    outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
+                    cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                    curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                }
                 cleanUpContextBeforeRollBackToPreviousStep();
                 continue;
             }
