@@ -45,23 +45,43 @@ Much of this README is reproduced at http://opencog.org/wiki/Scheme
 
 == Running ==
 --------------
-The shell may be invoked by typing "scm" at the opencog prompt; however,
-the shell is available only if 1) opencog has been compiled with guile
-support, and 2) the scheme shell module is loaded!  To load the module,
-start the opencog server as follows:
+There are '''two''' scheme shells available for opencog. One is the 
+low-level, built-in shell, the other is a high-level, bells-n-whistles
+shell that is a bit easier to use, since it provides the standard 
+guile REPL.
 
-  bin/opencog/server/cogserver -c lib/opencog.conf
+The shells are available only if the [[cogserver]] was compiled with
+guile support, and the guile module was loaded. The guile module should 
+be loaded automatically; it is specified in <tt>lib/opencog.conf</tt>.
 
-The "opencog.conf" file specifies a bunch of defaults for the opencog
-server, including modules that need to be loaded.  If the module has
-been loaded, then typing "help" at the opencog prompt should list "scm"
-as one of the possible commands.
+=== The high-level shell ===
+---------------------------
 
+The high-level shell may be accessed via telnet, at port 18001,
+(''not'' port 17001).
+
+   telnet localhost 18001
+
+or
+
+   rlwrap telnet localhost 18001
+
+This second form will provide an editable command-line history.
+
+To leave the shell, type ,q on a line all by itself.
+
+Scheme scripts can be loaded by using netcat or socat; it is recommended
+that the low-level shell be used for this. The high-level shell is 
+implemented in <tt>opencog/scm/repl-shell.scm</tt>.
+
+=== The low-level shell ===
+---------------------------
+The low-level shell may be invoked by typing "scm" at the opencog prompt.
 To get to the opencog shell, say 
 
    telnet localhost 17001
 
-or 
+or
 
    rlwrap telnet localhost 17001
 
@@ -69,6 +89,15 @@ This second form will provide an editable command-line history.
 
 To leave the shell, place a single . on the line, and hit enter.
 Alternately, hit ^D.
+
+
+== On-line documentation ==
+---------------------------
+
+Documentation for some (a small number, but growing) routines and
+utilities can be pulled up at the scheme shell prompt, by saying
+<tt>(procedure-documentation name-of-proc)</tt>.  Otherwise, you'll
+have to consult the individual scm files for more info.
 
 
 == Core Functions ==
@@ -787,3 +816,9 @@ ToDo
    data corruption. However, guile needs to be fixed to change this 
    behaviour.
 
+
+-- list all proceedures in a module:
+   (module-for-each (lambda (symbol value) (display symbol) (newline))
+   (resolve-interface '(guile)))
+
+   Make the above easier for users.

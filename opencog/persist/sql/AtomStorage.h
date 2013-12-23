@@ -73,7 +73,7 @@ class AtomStorage
 		void create_tables(void);
 
 		bool local_id_cache_is_inited;
-		std::set<Handle> local_id_cache;
+		std::set<UUID> local_id_cache;
 		void get_ids(void);
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
