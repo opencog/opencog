@@ -29,6 +29,7 @@
 
 #include <cstdarg>
 #include <mutex>
+#include <sstream>
 #include <string>
 #include <thread>
 

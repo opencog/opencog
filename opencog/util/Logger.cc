@@ -39,7 +39,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <pthread.h>
 #include <sched.h>
 #include <stdarg.h>
 #include <stdlib.h>
@@ -176,7 +175,7 @@ void Logger::writingLoop()
         {
             // The pending_write flag prevents Logger::flush()
             // from returning prematurely.
-            std::string* msg = msg_queue.value_pop();
+            std::string* msg = msg_queue.pop();
             pending_write = true;
             writeMsg(*msg);
             pending_write = false;
@@ -212,7 +211,7 @@ void Logger::writeMsg(std::string &msg)
         {
             fprintf(stderr, "[ERROR] Unable to open log file \"%s\"\n",
                     fileName.c_str());
-            pthread_mutex_unlock(&lock);
+            lock.unlock();
             disable();
             return;
         }
