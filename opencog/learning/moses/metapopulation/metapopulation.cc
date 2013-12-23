@@ -166,9 +166,9 @@ void metapopulation::set_diversity()
 
         // // debug
         // logger().fine("Pool =");
-        // for (pbscored_combo_tree* ptr : pool) {
+        // for (pbscored_combo_tree& pbs_tr : pool) {
         //     stringstream ss;
-        //     ostream_pbscored_combo_tree(ss, *ptr, true, true, true);
+        //     ostream_pbscored_combo_tree(ss, pbs_tr, true, true, true);
         //     logger().fine(ss.str());
         // }
         // // ~debug
