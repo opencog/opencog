@@ -71,7 +71,7 @@ void TimeServer::add(Handle h, const Temporal& t)
     //   temporalSet.insert(t);
     //   cout << "Total unique entrys: " << temporalSet.size() << endl;
     //}
-    boost::mutex::scoped_lock lock(ts_mutex);
+    std::unique_lock<std::mutex> lock(ts_mutex);
     table->add(h, t);
     if (t.getUpperBound() > latestTimestamp) {
         latestTimestamp = t.getUpperBound();
@@ -80,13 +80,13 @@ void TimeServer::add(Handle h, const Temporal& t)
 
 bool TimeServer::remove(Handle h, const Temporal& t, TemporalTable::TemporalRelationship criterion)
 {
-    boost::mutex::scoped_lock lock(ts_mutex);
+    std::unique_lock<std::mutex>  lock(ts_mutex);
     return table->remove(h, t, criterion);
 }
 
 unsigned long TimeServer::getLatestTimestamp() const
 {
-    boost::mutex::scoped_lock lock(ts_mutex);
+    std::unique_lock<std::mutex> lock(ts_mutex);
     return latestTimestamp;
 }
 
@@ -104,7 +104,7 @@ TimeServer::TimeServer(const TimeServer& other)
 
 void TimeServer::clear()
 {
-    boost::mutex::scoped_lock lock(ts_mutex);
+    std::unique_lock<std::mutex> lock(ts_mutex);
     delete table;
     init();
 }
