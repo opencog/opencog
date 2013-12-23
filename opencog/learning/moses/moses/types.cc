@@ -62,7 +62,6 @@ bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
     // Arghh, still tied!  The above already used complexity to break
     // the tie.  We're grasping at straws, here.
     return size_tree_order<vertex>()(get_tree(bs_tr1), get_tree(bs_tr2));
-    return res;
 }
 
 // the empty composite_score ctor returns the worst composite score
