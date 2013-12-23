@@ -68,6 +68,8 @@ or
 
 This second form will provide an editable command-line history.
 
+To leave the shell, type ,q on a line all by itself.
+
 Scheme scripts can be loaded by using netcat or socat; it is recommended
 that the low-level shell be used for this. The high-level shell is 
 implemented in <tt>opencog/scm/repl-shell.scm</tt>.

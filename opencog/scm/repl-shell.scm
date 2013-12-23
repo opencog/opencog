@@ -8,7 +8,10 @@
 ; --------------------------------------------------------------------
 
 (use-modules (system repl server))
+(use-modules (system repl common))
 
 ; localhost, port number 18001
 (spawn-server (make-tcp-server-socket  #:port 18001))
+
+(repl-default-prompt-set! "opencog-scheme>")
 ; --------------------------------------------------------------------
