@@ -34,6 +34,7 @@
 
 #include <pthread.h>
 
+#include <opencog/util/concurrent_queue.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/BaseServer.h>
 #include <opencog/server/Module.h>
@@ -119,10 +120,9 @@ protected:
 
     void processAgents();
 
-    pthread_mutex_t messageQueueLock;
     pthread_mutex_t processRequestsLock;
     pthread_mutex_t agentsLock;
-    std::queue<Request*> requestQueue;
+    concurrent_queue<Request*> requestQueue;
 
     NetworkServer _networkServer;
 
@@ -285,13 +285,13 @@ public:
     virtual const RequestClassInfo& requestInfo(const std::string& id) const;
 
     /** Adds request to the end of the requests queue. */
-    virtual void pushRequest(Request* request);
+    void pushRequest(Request* request) { requestQueue.push(request); }
 
     /** Removes and returns the first request from the requests queue. */
-    virtual Request* popRequest(void);
+    Request* popRequest(void) { return requestQueue.pop(); }
 
     /** Returns the requests queue size. */
-    virtual int getRequestQueueSize(void);
+    int getRequestQueueSize(void) { return requestQueue.size(); }
 
     /** Force drain of all outstanding requests */
     void processRequests(void);

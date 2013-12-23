@@ -111,7 +111,6 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
 
-    pthread_mutex_init(&messageQueueLock, NULL);
     pthread_mutex_init(&processRequestsLock, NULL);
     pthread_mutex_init(&agentsLock, NULL);
 
@@ -437,38 +436,6 @@ long CogServer::getCycleCount()
 void CogServer::stop()
 {
     running = false;
-}
-
-Request* CogServer::popRequest()
-{
-
-    Request* request;
-
-    pthread_mutex_lock(&messageQueueLock);
-    if (requestQueue.empty()) {
-        request = NULL;
-    } else {
-        request = requestQueue.front();
-        requestQueue.pop();
-    }
-    pthread_mutex_unlock(&messageQueueLock);
-
-    return request;
-}
-
-void CogServer::pushRequest(Request* request)
-{
-    pthread_mutex_lock(&messageQueueLock);
-    requestQueue.push(request);
-    pthread_mutex_unlock(&messageQueueLock);
-}
-
-int CogServer::getRequestQueueSize()
-{
-    pthread_mutex_lock(&messageQueueLock);
-    int size = requestQueue.size();
-    pthread_mutex_unlock(&messageQueueLock);
-    return size;
 }
 
 bool CogServer::loadModule(const std::string& filename)
