@@ -4,6 +4,7 @@ INSTALL (FILES
 	file-utils.scm
 	example-dbi.scm
 	persistence.scm
+	repl-shell.scm
 	utilities.scm
 	DESTINATION "${DATADIR}/scm"
 )
