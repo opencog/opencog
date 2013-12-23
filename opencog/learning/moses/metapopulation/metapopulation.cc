@@ -104,6 +104,8 @@ void metapopulation::set_diversity()
     // mean is replaced by the max
     bool dp_max = params.diversity.exponent <= 0.0;
 
+    // Update the diversity penalty of the candidate according to its
+    // diversity distance to the pool
     auto update_diversity_penalty = [&](bsct_dp_pair& v) {
 
         if (!pool.empty()) { // only do something if the pool is
@@ -175,9 +177,10 @@ void metapopulation::set_diversity()
         OMP_ALGO::for_each(tmp.begin(), tmp.end(), update_diversity_penalty);
 
         // take the max score, insert in the pool and remove from tmp
+
+        // Define less function to compare bsct_dp_pair
         pbscored_combo_tree_greater bsct_gt;
-        auto gt = [&](const bsct_dp_pair& l,
-                      const bsct_dp_pair& r) {
+        auto gt = [&](const bsct_dp_pair& l, const bsct_dp_pair& r) {
             return bsct_gt(*l.first, *r.first);
         };
         // note although we do use min_element it returns the

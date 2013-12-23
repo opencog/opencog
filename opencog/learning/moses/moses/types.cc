@@ -40,8 +40,10 @@ bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
 {
     composite_score csc1 = get_composite_score(bs_tr1);
     composite_score csc2 = get_composite_score(bs_tr2);
+
     bool gt = (csc1 > csc2);
     if (gt) return true;
+
     bool lt = (csc1 < csc2);
     if (lt) return false;
 
@@ -50,14 +52,17 @@ bool pbscored_combo_tree_greater::operator()(const pbscored_combo_tree& bs_tr1,
     // anything that compares equal, and we really don't want that.
     score_t sc1 = get_score(csc1);
     score_t sc2 = get_score(csc2);
+
     gt = (sc1 > sc2);
     if (gt) return true;
+
     lt = (sc1 < sc2);
     if (lt) return false;
 
     // Arghh, still tied!  The above already used complexity to break
     // the tie.  We're grasping at straws, here.
     return size_tree_order<vertex>()(get_tree(bs_tr1), get_tree(bs_tr2));
+    return res;
 }
 
 // the empty composite_score ctor returns the worst composite score
