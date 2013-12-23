@@ -258,6 +258,9 @@ public:
     bool isDebugEnabled() const { return DEBUG <= currentLevel; }
     bool isFineEnabled() const { return FINE <= currentLevel; } 
 
+    /**
+     * Block until all messages have been written out.
+     */
     void flush();
 
 private:

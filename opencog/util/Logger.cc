@@ -174,16 +174,12 @@ void Logger::writingLoop()
     {
         while (true)
         {
-            // Must not pop until *after* the message has been written,
-            // as otherwise, the flush() call will race with the write,
-            // causing flush to report an empty queue, even though the
-            // message has not actually been written yet.
-            std::string* msg;
-            msg_queue.wait_and_get(msg);
+            // The pending_write flag prevents Logger::flush()
+            // from returning prematurely.
+            std::string* msg = msg_queue.value_pop();
             pending_write = true;
             writeMsg(*msg);
             pending_write = false;
-            msg_queue.pop();
             delete msg;
         }
     }
@@ -195,6 +191,8 @@ void Logger::writingLoop()
 
 void Logger::flush()
 {
+    // Perhaps we could do this with semaphors, but this is not
+    // really critical code, so a busy-wait is good enough.
     while (pending_write or not msg_queue.is_empty())
     {
         sched_yield();

@@ -4,7 +4,9 @@
  * Based off of http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
  * Original version by Anthony Williams
  * Modifications by Michael Anderson
- * Modified by Linas Vepstas; the original code had race-conditions in it.
+ * Modified by Linas Vepstas
+ * Updated API to more closely resemble the proposed
+ * ISO/IEC JTC1 SC22 WG21 N3533 C++ Concurrent Queues
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -41,24 +43,39 @@ class concurrent_queue
 private:
     std::deque<Element> the_queue;
     mutable std::mutex the_mutex;
-    std::condition_variable the_condition_variable;
+    std::condition_variable the_cond;
     bool is_canceled;
 
 public:
-    concurrent_queue() : the_queue(), the_mutex(), the_condition_variable(), is_canceled(false) {}
+    concurrent_queue()
+        : the_queue(), the_mutex(), the_cond(), is_canceled(false)
+    {}
+    concurrent_queue(const concurrent_queue&) = delete;  // disable copying
+    concurrent_queue& operator=(const concurrent_queue&) = delete; // no assign
+
     struct Canceled : public std::exception
     {
         const char * what() { return "Cancellation of wait on concurrent_queue"; }
     };
 
     /// Push the Element onto the queue.
-    void push(Element const& data)
+    void push(const Element& item)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
-        the_queue.push_back(data);
+        the_queue.push_back(item);
         lock.unlock();
-        the_condition_variable.notify_one();
+        the_cond.notify_one();
+    }
+
+    /// Push the Element onto the queue, by moving it.
+    void push(Element&& item)
+    {
+        std::unique_lock<std::mutex> lock(the_mutex);
+        if (is_canceled) throw Canceled();
+        the_queue.push_back(std::move(item));
+        lock.unlock();
+        the_cond.notify_one();
     }
 
     /// Return true if teh queue is empty.
@@ -69,7 +86,9 @@ public:
         return the_queue.empty();
     }
 
-    // Return the (approximate) size of the queue.
+    /// Return the size of the queue.
+    /// Since the queue is time-varying, the size may become incorrect
+    /// shortly after this method returns.
     unsigned int size() const
     {
         std::lock_guard<std::mutex> lock(the_mutex);
@@ -89,40 +108,50 @@ public:
         return true;
     }
 
-    // The code originally had a wait_and_pop() primitive.
-    // Unfortunately, this will race against the empty() primitive.
-    // The correct solution is to wait_and_get the value, do things
-    // with the value, and then, only when done working with the value,
-    // should one pop. Doing things this way will allow the empty()
-    // function to correctly report the state of the work queue.
-    void wait_and_get(Element& value)
+    /// Pop an item off the queue. Block if the queue is empty.
+    void pop(Element& value)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
-        while(the_queue.empty() && !is_canceled)
+        // Use two nested loops here.  It can happen that the cond
+        // wakes up, and yet the queue is empty.  And calling front()
+        // on an empty dequeue is undefined and/or throws ick.
+        do
         {
-            the_condition_variable.wait(lock);
+            while (the_queue.empty() and not is_canceled)
+            {
+                the_cond.wait(lock);
+            }
+            if (is_canceled) throw Canceled();
         }
-        if (is_canceled) throw Canceled();
+        while (the_queue.empty());
 
         value = the_queue.front();
+        the_queue.pop_front();
     }
 
-    void pop()
+    Element pop()
     {
-        std::lock_guard<std::mutex> lock(the_mutex);
-        the_queue.pop_front();
+        Element value;
+        pop(value);
+        return value;
     }
 
     std::deque<Element> wait_and_take_all()
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
-        while(the_queue.empty() && !is_canceled)
+        // Use two nested loops here.  It can happen that the cond
+        // wakes up, and yet the queue is empty.
+        do
         {
-            the_condition_variable.wait(lock);
+            while (the_queue.empty() and not is_canceled)
+            {
+                the_cond.wait(lock);
+            }
+            if (is_canceled) throw Canceled();
         }
-        if (is_canceled) throw Canceled();
+        while (the_queue.empty());
 
         std::deque<Element> retval;
         std::swap(retval, the_queue);
@@ -136,16 +165,16 @@ public:
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
-        while(the_queue.empty() && !is_canceled)
+        while (the_queue.empty() && !is_canceled)
         {
-            the_condition_variable.wait(lock);
+            the_cond.wait(lock);
         }
         if (is_canceled) throw Canceled();
     }
 
     void cancel_reset()
     {
-       // this doesn't lose data, but it instead allows new calls
+       // This doesn't lose data, but it instead allows new calls
        // to not throw Canceled exceptions
        std::lock_guard<std::mutex> lock(the_mutex);
        is_canceled = false;
@@ -157,7 +186,7 @@ public:
        if (is_canceled) throw Canceled();
        is_canceled = true;
        lock.unlock();
-       the_condition_variable.notify_all();
+       the_cond.notify_all();
     }
 
 };
