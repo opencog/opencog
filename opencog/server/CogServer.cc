@@ -111,7 +111,6 @@ CogServer::CogServer() : cycleCount(1)
     atomSpace = new AtomSpace();
     _systemActivityTable.init(this);
 
-    pthread_mutex_init(&processRequestsLock, NULL);
     pthread_mutex_init(&agentsLock, NULL);
 
     agentsRunning = true;
@@ -250,13 +249,12 @@ bool CogServer::customLoopRun(void)
 
 void CogServer::processRequests(void)
 {
-    pthread_mutex_lock(&processRequestsLock);
-    Request* request;
-    while ((request = popRequest()) != NULL) {
+    std::unique_lock<std::mutex> lock(processRequestsMutex);
+    while (0 < getRequestQueueSize()) {
+        Request* request = popRequest();
         request->execute();
         delete request;
     }
-    pthread_mutex_unlock(&processRequestsLock);
 }
 
 void CogServer::runAgent(AgentPtr agent)

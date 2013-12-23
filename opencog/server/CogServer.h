@@ -28,7 +28,7 @@
 #define _OPENCOG_COGSERVER_H
 
 #include <map>
-#include <queue>
+#include <mutex>
 #include <vector>
 #include <tr1/memory>
 
@@ -120,7 +120,7 @@ protected:
 
     void processAgents();
 
-    pthread_mutex_t processRequestsLock;
+    std::mutex processRequestsMutex;
     pthread_mutex_t agentsLock;
     concurrent_queue<Request*> requestQueue;
 
