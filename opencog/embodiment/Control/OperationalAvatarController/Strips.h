@@ -386,15 +386,17 @@ namespace opencog { namespace oac {
         // the other rules that , once use one of the rules in noCoexisenceOtherRules, should not use this rule
         vector<Rule*> noCoexisenceOtherRules;
 
+        bool isReversibleRule;
+
         // constructors
-        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false):
+        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent)
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent), isReversibleRule(_isReversibleRule)
         {noCoexisenceOtherRules.clear();}
 
-        Rule(PetAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false):
+        Rule(PetAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
-            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent)
+            CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent),isReversibleRule(_isReversibleRule)
         {noCoexisenceOtherRules.clear();}
 
         float getBasicCost();

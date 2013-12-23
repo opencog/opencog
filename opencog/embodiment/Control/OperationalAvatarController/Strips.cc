@@ -70,7 +70,10 @@ State::State(string _stateName, ActionParamType _valuetype ,StateType _stateType
 
 State::~State()
 {
-    delete stateVariable;
+    if (stateVariable)
+        delete stateVariable;
+
+    stateVariable = 0;
 }
 
 State* State::clone()
