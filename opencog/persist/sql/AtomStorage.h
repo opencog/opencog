@@ -79,9 +79,6 @@ class AtomStorage
 		int getMaxObservedHeight(void);
 		bool idExists(const char *);
 
-		UUID getMaxUUID(void);
-		void setMaxUUID(UUID);
-
 		// TYPEMAP_SZ is defined as the maximum number of possible opencog Types
 		// (65536 as Type is a short int)
 		#define TYPEMAP_SZ (1 << (8 * sizeof(Type)))

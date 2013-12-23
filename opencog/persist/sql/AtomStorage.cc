@@ -374,7 +374,6 @@ AtomStorage::~AtomStorage()
 		return;
 	}
 
-	setMaxUUID(getMaxObservedUUID());
 	setMaxHeight(getMaxObservedHeight());
 	delete db_conn;
 	db_conn = NULL;
@@ -923,7 +922,7 @@ void AtomStorage::get_ids(void)
 	// the memory fragmentation (and/or there's a memory leak in odbc??)
 #define USTEP 12003
 	unsigned long rec;
-	unsigned long max_nrec = getMaxUUID();
+	unsigned long max_nrec = getMaxObservedUUID();
 	for (rec = 0; rec <= max_nrec; rec += USTEP)
 	{
 		char buff[BUFSZ];
@@ -1195,7 +1194,7 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 
 void AtomStorage::load(AtomTable &table)
 {
-	unsigned long max_nrec = getMaxUUID();
+	unsigned long max_nrec = getMaxObservedUUID();
 	TLB::reserve_range(0,max_nrec);
 	fprintf(stderr, "Max UUID is %lu\n", max_nrec);
 	load_count = 0;
@@ -1269,7 +1268,6 @@ void AtomStorage::store(const AtomTable &table)
 
 	get_ids();
 	UUID max_uuid = TLB::getMaxUUID();
-	setMaxUUID(max_uuid);
 	fprintf(stderr, "Max UUID is %lu\n", max_uuid);
 
 	setup_typemap();
@@ -1301,12 +1299,6 @@ void AtomStorage::store(const AtomTable &table)
 
 	setMaxHeight(getMaxObservedHeight());
 	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
-
-	// Now that we're done storing, reserve a more conservative
-	// UUID value, based on what's actually in the database.
-	max_uuid = getMaxObservedUUID();
-	setMaxUUID(max_uuid);
-	fprintf(stderr, "Set Max observed UUID to %lu\n", max_uuid);
 }
 
 /* ================================================================ */
@@ -1384,31 +1376,6 @@ void AtomStorage::kill_data(void)
 }
 
 /* ================================================================ */
-/*
- * XXX the table Global is a cache of values that can be obtained more
- * directly from the "observed" getters. I suspect that this table is 
- * not really needed; it just adds complexity to the code, and should
- * probably be eliminated.
- */
-
-UUID AtomStorage::getMaxUUID(void)
-{
-	Response rp;
-	rp.rs = db_conn->exec("SELECT max_uuid FROM Global;");
-	rp.rs->foreach_row(&Response::intval_cb, &rp);
-	rp.rs->release();
-	return rp.intval;
-}
-
-void AtomStorage::setMaxUUID(UUID uuid)
-{
-	char buff[BUFSZ];
-	snprintf(buff, BUFSZ, "UPDATE Global SET max_uuid = %lu;", uuid);
-
-	Response rp;
-	rp.rs = db_conn->exec(buff);
-	rp.rs->release();
-}
 
 void AtomStorage::setMaxHeight(int sqmax)
 {
