@@ -690,3 +690,14 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
+
+-- Provide asynchronous atom store. This seems tobe a significant
+   bottleneck for single-atom updates.
+
+Async IO Notes
+==============
+* Use util/concurrent_queue.h to create queue.
+* Need ability of have multipe ODBCCon's running.
+* Need a shared typemap across all threads.
+* Need a shared uuidExists across all threads.
+
