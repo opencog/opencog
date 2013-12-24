@@ -49,6 +49,9 @@
 ; to the "*new-parsed-sent-anchor*" via a ListLink; the set of newly added
 ; sentences can be fetched with the "get-new-parsed-sentences" call.
 ;
+; The relex-server-host and port are set in config.scm, and default to
+; localhost 127.0.0.1 and port 4444
+;
 (define (relex-parse plain-txt)
 
 	; A little short routine that sends the plain-text to the
@@ -56,7 +59,7 @@
 	; atomspace (using exec-scm-from-port to do the load)
 	(define (do-sock-io sent-txt)
 		(let ((s (socket PF_INET SOCK_STREAM 0)))
-			(connect s AF_INET (inet-aton "127.0.0.1") 4444)
+			(connect s AF_INET (inet-aton relex-server-host) relex-server-port)
 	
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
