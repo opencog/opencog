@@ -507,6 +507,34 @@ that:
 That's all!
 
 
+Threading
+=========
+The AtomStorage class sould be completely thread-safe (I think ... only
+lightly tested). By default, the class maintains a pool of four database
+connections, which can be used to drive the database. (The number of 
+connections can be raised by editing the AtomStorage constructor, and
+recompiling).  Every thread using this class will temporarily make use
+of one of these connections; if all connections are in use, the calling
+thread will block until one is free.
+
+
+Asynchronous Writing
+====================
+The AtomStorage::storeAtom() method is implemented using a fire-n-forget
+algo: the atom to be stored is queued up, and stored at some later time
+by another concurrently running thread.  If the backlog of unwritten atoms
+gets too large, the storeAtom() method may stall. Its currently designed
+to stall if there's a backlog of 100 or more unwritten atoms.  This can
+be changed by searching for HIGH_WATER_MARK, changing it and recompiling.
+
+Currently, there is only one writer thread.  Perhaps this is not enough;
+more writer threads can be started, just call the startWriterThread()
+method to have additional ones.  Note that multiple writer threads may
+end up storing atoms out of order; hopefully, this shouldn't matter (?)
+
+Anyway, the above two settings might need tweaking, depending on the job.
+
+
 Experimental Diary & Results
 ============================
 Diary entries from June 2008
@@ -690,14 +718,4 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
-
--- Provide asynchronous atom store. This seems tobe a significant
-   bottleneck for single-atom updates.
-
-Async IO Notes
-==============
-* Use util/concurrent_queue.h to create queue.
-* Need ability of have multipe ODBCCon's running.
-* Need a shared typemap across all threads.
-* Need a shared uuidExists across all threads.
 

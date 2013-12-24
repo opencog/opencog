@@ -47,6 +47,7 @@
 #include <opencog/atomspace/TLB.h>
 #include <opencog/atomspace/TruthValue.h>
 
+
 using namespace opencog;
 
 #define USE_INLINE_EDGES
@@ -267,13 +268,40 @@ class AtomStorage::Response
 
 };
 
+/* ================================================================ */
+/// XXX TODO Make the connection pointer scoped.
+/// That is, we should define a ConnPtr class here, and it's destructor
+/// should do the conn_pool.push(). Doing this can help avoid mem leaks,
+/// e.g. failure to put because of a throw.  I'm just kind of lazy now,
+/// and the code below works ... so maybe it shouldn't be messed with.
+///
+/// XXX Should do the same for Response rp.rs->release() to auto-release.
+
+/// Get an ODBC connection
+ODBCConnection* AtomStorage::get_conn()
+{
+	std::unique_lock<std::mutex> lock(conn_mutex);
+	return conn_pool.pop();
+}
+
+/// Put an ODBC connection back into the pool.
+void AtomStorage::put_conn(ODBCConnection* db_conn)
+{
+	std::unique_lock<std::mutex> lock(conn_mutex);
+	conn_pool.push(db_conn);
+}
+
+/* ================================================================ */
+
 bool AtomStorage::idExists(const char * buff)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.row_exists = false;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 	return rp.row_exists;
 }
 
@@ -336,7 +364,12 @@ void AtomStorage::init(const char * dbname,
                        const char * username,
                        const char * authentication)
 {
-	db_conn = new ODBCConnection(dbname, username, authentication);
+	// Create four, by default ... maybe make more? 
+	for (int i=0; i<4; i++)
+	{
+		ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
+		conn_pool.push(db_conn);
+	}
 	type_map_was_loaded = false;
 	max_height = 0;
 
@@ -349,6 +382,11 @@ void AtomStorage::init(const char * dbname,
 	if (!connected()) return;
 
 	reserve();
+
+	stopping_writers = false;
+	thread_count = 0;
+	busy_writers = 0;
+	startWriterThread();
 }
 
 AtomStorage::AtomStorage(const char * dbname,
@@ -367,18 +405,18 @@ AtomStorage::AtomStorage(const std::string& dbname,
 
 AtomStorage::~AtomStorage()
 {
-	if (!connected())
+	if (connected())
+		setMaxHeight(getMaxObservedHeight());
+
+	stopWriterThreads();
+
+	while (not conn_pool.is_empty())
 	{
+		ODBCConnection* db_conn = conn_pool.pop();
 		delete db_conn;
-		db_conn = NULL;
-		return;
 	}
 
-	setMaxHeight(getMaxObservedHeight());
-	delete db_conn;
-	db_conn = NULL;
-
-	for (int i=0; i< TYPEMAP_SZ; i++)
+	for (int i=0; i<TYPEMAP_SZ; i++)
 	{
 		if (db_typename[i]) free(db_typename[i]);
 	}
@@ -386,11 +424,15 @@ AtomStorage::~AtomStorage()
 
 /**
  * connected -- return true if a successful connection to the 
- * database exists; else return false.
+ * database exists; else return false.  Note that this may block,
+ * if all database connections are in use...
  */
 bool AtomStorage::connected(void)
 {
-	return db_conn->connected();
+	ODBCConnection* db_conn = get_conn();
+	bool have_connection = db_conn->connected();
+	put_conn(db_conn);
+	return have_connection;
 }
 
 /* ================================================================ */
@@ -580,25 +622,148 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 }
 
 /* ================================================================ */
+
+/// Start a single writer thread.
+/// May be called multiple times.
+void AtomStorage::startWriterThread()
+{
+	std::unique_lock<std::mutex> lock(write_mutex);
+	if (stopping_writers)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot start; AtomsStorage writer threads are being stopped!");
+
+	write_threads.push_back(std::thread(&AtomStorage::writeLoop, this));
+	thread_count ++;
+}
+
+/// Stop all writer threads, but only after they are done wroting.
+void AtomStorage::stopWriterThreads()
+{
+	std::unique_lock<std::mutex> lock(write_mutex);
+	stopping_writers = true;
+
+	// Spin a while, until the writeer threads are (mostly) done.
+	while (not store_queue.is_empty())
+	{
+		sched_yield();
+		usleep(100);
+	}
+
+	// Now tell all the threads that they are done.
+	// I.e. cancel all the threads.
+	store_queue.cancel();
+	while (0 < write_threads.size())
+	{
+		write_threads.back().join();
+		write_threads.pop_back();
+		thread_count --;
+	}
+
+	// OK, so we've joined all the threads, but the queue
+	// might not be totally empty; some dregs might remain.
+	// Drain it now, single-threadedly.
+	store_queue.cancel_reset();
+	while (not store_queue.is_empty())
+	{
+		AtomPtr atom = store_queue.pop();
+		do_store_atom(atom);
+	}
+	
+	// Its now OK to start new threads, if desired ...(!)
+	stopping_writers = false;
+}
+
+/// A Single write thread. Reds atoms from queue, and stores them.
+void AtomStorage::writeLoop()
+{
+	try
+	{
+		while (true)
+		{
+			AtomPtr atom = store_queue.pop();
+			busy_writers ++; // Bad -- window after pop returns, before increment!
+			do_store_atom(atom);
+			busy_writers --;
+		}
+	}
+	catch (concurrent_queue<AtomPtr>::Canceled& e)
+	{
+		// We are so out of here. Nothing to do, just exit this thread.
+		return;
+	}
+}
+
+/// Drain the pending store queue.
+/// Caution: this is slightly racy; a writer could still be busy
+/// even though this returns. (There's a window in writeLoop, between
+/// the dequeue, and the busy_writer increment. I guess we should fix
+// this...
+void AtomStorage::flushStoreQueue()
+{
+	sched_yield();
+	usleep(1);
+	while (0 < store_queue.size() or 0 < busy_writers);
+	{
+		sched_yield();
+		usleep(100);
+	}
+}
+
+/* ================================================================ */
 /**
  * Recursively store the indicated atom, and all that it points to.
  * Store its truth values too. The recursive store is unconditional;
  * its assumed that all sorts of underlying truuth values have changed, 
  * so that the whole thing needs to be stored.
+ *
+ * By default, the actual store is done asynchronously (in a different
+ * thread); this routine merely queues up the atom. If the synchronous
+ * flag is set, then the store is done in this thread.
  */
-void AtomStorage::storeAtom(AtomPtr atom)
+void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 {
 	get_ids();
-	do_store_atom(atom);
-}
 
-void AtomStorage::storeAtom(Handle h)
-{
-	get_ids();
-	do_store_atom(h);
+	// If a synchronous store, avoid the queues entirely.
+	if (synchronous)
+	{
+		do_store_atom(atom);
+		return;
+	}
+
+	// Sanity checks.
+	if (stopping_writers)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; AtomStorage writer threads are being stopped!");
+	if (0 == thread_count)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; No writer threads are running!");
+
+	store_queue.push(atom);
+
+	// If the writer threads are falling behind, mitigate.
+	// Right now, this will be real simple: just spin and wait
+	// for things to catch up.  Maybe we should launch more threads!?
+#define HIGH_WATER_MARK 100
+#define LOW_WATER_MARK 10
+
+	if (HIGH_WATER_MARK < store_queue.size())
+	{
+		unsigned long cnt = 0;
+		do
+		{
+			sched_yield();
+			usleep(1000);
+			cnt++;
+		}
+		while (LOW_WATER_MARK < store_queue.size());
+		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!\n", cnt);
+	}
 }
 
 /**
+ * Synchronously store a single atom. That is, the actual store is done
+ * in the calling thread.
  * Returns the height of the atom.
  */
 int AtomStorage::do_store_atom(AtomPtr atom)
@@ -631,6 +796,7 @@ int AtomStorage::do_store_atom(AtomPtr atom)
 /**
  * Store the single, indicated atom.
  * Store its truth values too.
+ * The store is performed synchnously (in the calling thread).
  */
 void AtomStorage::storeSingleAtom(AtomPtr atom)
 {
@@ -762,9 +928,11 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	}
 
 	std::string qry = cols + vals + coda;
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
+	put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
 	// Store the outgoing handles only if we are storing for the first
@@ -777,7 +945,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	local_id_cache.insert(atom->getHandle().value());
+	add_id_to_cache(atom->getHandle().value());
 }
 
 /* ================================================================ */
@@ -827,6 +995,7 @@ void AtomStorage::setup_typemap(void)
 		db_typename[i] = NULL;
 	}
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
 	rp.store = this;
@@ -861,6 +1030,7 @@ void AtomStorage::setup_typemap(void)
 
 				if (TYPEMAP_SZ <= sqid)
 				{
+					put_conn(db_conn);
 					fprintf(stderr, "Fatal Error: type table overflow!\n");
 					abort();
 				}
@@ -876,6 +1046,7 @@ void AtomStorage::setup_typemap(void)
 			set_typemap(sqid, tname);
 		}
 	}
+	put_conn(db_conn);
 }
 
 void AtomStorage::set_typemap(int dbval, const char * tname)
@@ -890,6 +1061,7 @@ void AtomStorage::set_typemap(int dbval, const char * tname)
 /* ================================================================ */
 /**
  * Return true if the indicated handle exists in the storage.
+ * Thread-safe.
  */
 bool AtomStorage::atomExists(Handle h)
 {
@@ -899,9 +1071,19 @@ bool AtomStorage::atomExists(Handle h)
 	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
 	return idExists(buff);
 #else
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
 	// look at the local cache of id's to see if the atom is in storage or not.
 	return local_id_cache.count(h.value());
 #endif
+}
+
+/**
+ * Add a single UUID to the ID cache. Thread-safe.
+ */
+void AtomStorage::add_id_to_cache(UUID uuid)
+{
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
+	local_id_cache.insert(uuid);
 }
 
 /**
@@ -909,10 +1091,14 @@ bool AtomStorage::atomExists(Handle h)
  */
 void AtomStorage::get_ids(void)
 {
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
+
 	if (local_id_cache_is_inited) return;
 	local_id_cache_is_inited = true;
 
+
 	local_id_cache.clear();
+	ODBCConnection* db_conn = get_conn();
 
 	// It appears that, when the select statment returns more than
 	// about a 100K to a million atoms or so, some sort of heap
@@ -936,6 +1122,7 @@ void AtomStorage::get_ids(void)
 		rp.rs->foreach_row(&Response::note_id_cb, &rp);
 		rp.rs->release();
 	}
+	put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -947,11 +1134,13 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 	UUID uuid = h.value();
 	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.outvec = &outv;
 	rp.rs->foreach_row(&Response::create_edge_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 }
 #endif /* USE_INLINE_EDGES */
 
@@ -960,6 +1149,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* One-size-fits-all atom fetcher */
 AtomPtr  AtomStorage::getAtom(const char * query, int height)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.handle = Handle::UNDEFINED;
 	rp.rs = db_conn->exec(query);
@@ -970,12 +1160,14 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	if (rp.handle.value() == Handle::UNDEFINED.value())
 	{
 		rp.rs->release();
+		put_conn(db_conn);
 		return NULL;
 	}
 
 	rp.height = height;
 	AtomPtr atom(makeAtom(rp, rp.handle));
 	rp.rs->release();
+	put_conn(db_conn);
 	return atom;
 }
 
@@ -1011,6 +1203,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.store = this;
 	rp.height = -1;
@@ -1018,6 +1211,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::load_incoming_set_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 
 	return iset;
 }
@@ -1183,10 +1377,10 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	load_count ++;
 	if (load_count%10000 == 0)
 	{
-		fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
+		fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
 	}
 
-	local_id_cache.insert(h.value());
+	add_id_to_cache(h.value());
 	return atom;
 }
 
@@ -1196,13 +1390,14 @@ void AtomStorage::load(AtomTable &table)
 {
 	unsigned long max_nrec = getMaxObservedUUID();
 	TLB::reserve_range(0,max_nrec);
-	fprintf(stderr, "Max UUID is %lu\n", max_nrec);
+	fprintf(stderr, "Max observed UUID is %lu\n", max_nrec);
 	load_count = 0;
 	max_height = getMaxHeight();
 	fprintf(stderr, "Max Height is %d\n", max_height);
 
 	setup_typemap();
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.table = &table;
 	rp.store = this;
@@ -1242,7 +1437,9 @@ void AtomStorage::load(AtomTable &table)
 #endif
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
-	fprintf(stderr, "Finished loading %lu atoms in total\n", load_count);
+	put_conn(db_conn);
+	fprintf(stderr, "Finished loading %lu atoms in total\n",
+		(unsigned long) load_count);
 }
 
 bool AtomStorage::store_cb(AtomPtr atom)
@@ -1251,7 +1448,7 @@ bool AtomStorage::store_cb(AtomPtr atom)
 	store_count ++;
 	if (store_count%1000 == 0)
 	{
-		fprintf(stderr, "\tStored %lu atoms.\n", store_count);
+		fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
 	}
 	return false;
 }
@@ -1272,6 +1469,7 @@ void AtomStorage::store(const AtomTable &table)
 
 	setup_typemap();
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 #ifndef USE_INLINE_EDGES
@@ -1296,15 +1494,18 @@ void AtomStorage::store(const AtomTable &table)
 
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
+	put_conn(db_conn);
 
 	setMaxHeight(getMaxObservedHeight());
-	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
+	fprintf(stderr, "\tFinished storing %lu atoms total.\n",
+		(unsigned long) store_count);
 }
 
 /* ================================================================ */
 
 void AtomStorage::rename_tables(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
@@ -1317,10 +1518,12 @@ void AtomStorage::rename_tables(void)
 	rp.rs->release();
 	rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 	rp.rs->release();
+	put_conn(db_conn);
 }
 
 void AtomStorage::create_tables(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
@@ -1353,6 +1556,7 @@ void AtomStorage::create_tables(void)
 	                      "max_uuid INT,"
 	                      "max_height INT);");
 	rp.rs->release();
+	put_conn(db_conn);
 }
 
 /**
@@ -1362,6 +1566,7 @@ void AtomStorage::create_tables(void)
  */
 void AtomStorage::kill_data(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
@@ -1373,6 +1578,7 @@ void AtomStorage::kill_data(void)
 	rp.rs->release();
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
 	rp.rs->release();
+	put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -1385,37 +1591,45 @@ void AtomStorage::setMaxHeight(int sqmax)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
 
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->release();
+	put_conn(db_conn);
 }
 
 int AtomStorage::getMaxHeight(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec("SELECT max_height FROM Global;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 	return rp.intval;
 }
 
 UUID AtomStorage::getMaxObservedUUID(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 	return rp.intval;
 }
 
 int AtomStorage::getMaxObservedHeight(void)
 {
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
+	put_conn(db_conn);
 	return rp.intval;
 }
 

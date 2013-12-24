@@ -1,5 +1,5 @@
 /*
- * opencog/util/concurrent_queue.h
+ * opencog/util/concurrent_stack.h
  *
  * Based off of http://www.justsoftwaresolutions.co.uk/threading/implementing-a-thread-safe-queue-using-condition-variables.html
  * Original version by Anthony Williams
@@ -24,11 +24,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _OC_CONCURRENT_QUEUE_H
-#define _OC_CONCURRENT_QUEUE_H
+#ifndef _OC_CONCURRENT_STACK_H
+#define _OC_CONCURRENT_STACK_H
 
 #include <condition_variable>
-#include <deque>
+#include <stack>
 #include <exception>
 #include <mutex>
 
@@ -38,96 +38,96 @@
 
 //! Represents a thread-safe first in-first out list.
 template<typename Element>
-class concurrent_queue
+class concurrent_stack
 {
 private:
-    std::deque<Element> the_queue;
+    std::stack<Element> the_stack;
     mutable std::mutex the_mutex;
     std::condition_variable the_cond;
     bool is_canceled;
 
 public:
-    concurrent_queue()
-        : the_queue(), the_mutex(), the_cond(), is_canceled(false)
+    concurrent_stack()
+        : the_stack(), the_mutex(), the_cond(), is_canceled(false)
     {}
-    concurrent_queue(const concurrent_queue&) = delete;  // disable copying
-    concurrent_queue& operator=(const concurrent_queue&) = delete; // no assign
+    concurrent_stack(const concurrent_stack&) = delete;  // disable copying
+    concurrent_stack& operator=(const concurrent_stack&) = delete; // no assign
 
     struct Canceled : public std::exception
     {
-        const char * what() { return "Cancellation of wait on concurrent_queue"; }
+        const char * what() { return "Cancellation of wait on concurrent_stack"; }
     };
 
-    /// Push the Element onto the queue.
+    /// Push the Element onto the stack.
     void push(const Element& item)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
-        the_queue.push_back(item);
+        the_stack.push(item);
         lock.unlock();
         the_cond.notify_one();
     }
 
-    /// Push the Element onto the queue, by moving it.
+    /// Push the Element onto the stack, by moving it.
     void push(Element&& item)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
-        the_queue.push_back(std::move(item));
+        the_stack.push(std::move(item));
         lock.unlock();
         the_cond.notify_one();
     }
 
-    /// Return true if the queue is empty.
+    /// Return true if the stack is empty.
     bool is_empty() const
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
-        return the_queue.empty();
+        return the_stack.empty();
     }
 
-    /// Return the size of the queue.
-    /// Since the queue is time-varying, the size may become incorrect
+    /// Return the size of the stack.
+    /// Since the stack is time-varying, the size may become incorrect
     /// shortly after this method returns.
     unsigned int size() const
     {
         std::lock_guard<std::mutex> lock(the_mutex);
-        return the_queue.size();
+        return the_stack.size();
     }
 
     bool try_get(Element& value)
     {
         std::lock_guard<std::mutex> lock(the_mutex);
         if (is_canceled) throw Canceled();
-        if (the_queue.empty())
+        if (the_stack.empty())
         {
             return false;
         }
 
-        value = the_queue.front();
+        value = the_stack.front();
         return true;
     }
 
-    /// Pop an item off the queue. Block if the queue is empty.
+    /// Pop an item off the stack. Block if the stack is empty.
     void pop(Element& value)
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
         // Use two nested loops here.  It can happen that the cond
-        // wakes up, and yet the queue is empty.  And calling front()
-        // on an empty dequeue is undefined and/or throws ick.
+        // wakes up, and yet the stack is empty.  And calling front()
+        // on an empty stack is undefined and/or throws ick.
         do
         {
-            while (the_queue.empty() and not is_canceled)
+            while (the_stack.empty() and not is_canceled)
             {
                 the_cond.wait(lock);
             }
             if (is_canceled) throw Canceled();
         }
-        while (the_queue.empty());
+        while (the_stack.empty());
 
-        value = the_queue.front();
-        the_queue.pop_front();
+        value = the_stack.top();
+        the_stack.pop();
     }
 
     Element pop()
@@ -137,24 +137,24 @@ public:
         return value;
     }
 
-    std::deque<Element> wait_and_take_all()
+    std::stack<Element> wait_and_take_all()
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
         // Use two nested loops here.  It can happen that the cond
-        // wakes up, and yet the queue is empty.
+        // wakes up, and yet the stack is empty.
         do
         {
-            while (the_queue.empty() and not is_canceled)
+            while (the_stack.empty() and not is_canceled)
             {
                 the_cond.wait(lock);
             }
             if (is_canceled) throw Canceled();
         }
-        while (the_queue.empty());
+        while (the_stack.empty());
 
-        std::deque<Element> retval;
-        std::swap(retval, the_queue);
+        std::stack<Element> retval;
+        the_stack.swap(retval);
         return retval;
     }
 
@@ -165,7 +165,7 @@ public:
     {
         std::unique_lock<std::mutex> lock(the_mutex);
 
-        while (the_queue.empty() && !is_canceled)
+        while (the_stack.empty() && !is_canceled)
         {
             the_cond.wait(lock);
         }
@@ -192,4 +192,4 @@ public:
 };
 /** @}*/
 
-#endif // __CONCURRENT_QUEUE__
+#endif // __CONCURRENT_STACK__
