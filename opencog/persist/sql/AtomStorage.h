@@ -87,6 +87,12 @@ class AtomStorage
 		std::set<UUID> local_id_cache;
 		void add_id_to_cache(UUID);
 		void get_ids(void);
+
+		std::mutex id_create_mutex;
+		std::unique_lock<std::mutex> id_create_lock;
+		std::set<UUID> id_create_cache;
+		bool maybe_exists_id(UUID);
+
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
 		bool idExists(const char *);
