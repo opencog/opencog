@@ -35,6 +35,7 @@
 
 #include <memory>
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ClassServer.h>
@@ -382,6 +383,11 @@ void AtomStorage::init(const char * dbname,
 	{
 		db_typename[i] = NULL;
 	}
+
+	// Associate the create lock with the create mutex,
+	// but leave it unlocked.
+	std::unique_lock<std::mutex> crl(id_create_mutex, std::defer_lock);
+	id_create_lock.swap(crl);
 
 	local_id_cache_is_inited = false;
 	if (!connected()) return;
@@ -824,15 +830,14 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 
 	// Use the TLB Handle as the UUID.
 	char uuidbuff[BUFSZ];
-	// UUID uuid = atom->_uuid;
-	Handle h = atom->getHandle();
+	Handle h(atom->getHandle());
 	if (TLB::isInvalidHandle(h))
 		throw RuntimeException(TRACE_INFO, "Trying to save atom with an invalid handle!");
 
-	UUID uuid = h.value();  // XXX cheesy hack, fixme
+	UUID uuid = h.value();
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = atomExists(h);
+	bool update = maybe_exists_id(uuid);
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -953,7 +958,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	add_id_to_cache(atom->getHandle().value());
+	add_id_to_cache(uuid);
 }
 
 /* ================================================================ */
@@ -1087,11 +1092,70 @@ bool AtomStorage::atomExists(Handle h)
 
 /**
  * Add a single UUID to the ID cache. Thread-safe.
+ * This also unlocks the id-creation lock, if it was being held.
  */
 void AtomStorage::add_id_to_cache(UUID uuid)
 {
 	std::unique_lock<std::mutex> lock(id_cache_mutex);
 	local_id_cache.insert(uuid);
+
+	// If we were previously making this ID, then we are done.
+	// The other half of this is in maybe_exists_id() below.
+	if (0 < id_create_cache.count(uuid))
+	{
+		id_create_cache.erase(uuid);
+		id_create_lock.unlock();
+	}
+}
+
+/**
+ * This returns true, or false, depending on whether we think that the
+ * database already knows about this UUID, or not.  We do this because,
+ * we need to use an SQL UPDATE vs SQL INSERT depending on which case it
+ * is.  Note that SQL INSERT can be used once and only once-ever, so we
+ * have to avoid teh case of two threads, each trying to perform an INSERT
+ * in the same ID. We do this by locking, so that only one writer ever
+ * gets told that its a new ID.
+ */
+bool AtomStorage::maybe_exists_id(UUID uuid)
+{
+	std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
+	// Look at the local cache of id's to see if the atom is in storage or not.
+	if (0 < local_id_cache.count(uuid))
+		return true;
+
+	// Is some other thread in the process of adding this ID?
+	bool id_is_being_made = (0 < id_create_cache.count(uuid));
+	if (id_is_being_made)
+	{
+		cache_lock.unlock();
+		while (true)
+		{
+			// If we are here, some other thread is making this UUID, 
+			// and so we need to wait till they're done. Wait by stalling
+			// on the creation lock.
+			id_create_lock.lock();
+			// If we are here, then someone finished creating some UUID.
+			// Was it our ID? If so, we are done; if not, wait some more.
+			cache_lock.lock();
+			if (0 == id_create_cache.count(uuid))
+			{
+				id_create_lock.unlock();
+
+				OC_ASSERT(0 < local_id_cache.count(uuid),
+					"Atom for UUID was not created!");
+
+				return true;
+			}
+			cache_lock.unlock();
+		} 
+	}
+
+	// If we are here, then no one has attempted to make this UUID before.
+	// Grab the maker lock, and make the damned thing already.
+	id_create_lock.lock();
+	id_create_cache.insert(uuid);
+	return false;
 }
 
 /**
@@ -1490,7 +1554,7 @@ void AtomStorage::store(const AtomTable &table)
 #endif
 
 	table.foreachHandleByType(
-       [&](Handle h)->void { store_cb(h); }, ATOM, true);
+	    [&](Handle h)->void { store_cb(h); }, ATOM, true);
 
 #ifndef USE_INLINE_EDGES
 	// Create indexes
