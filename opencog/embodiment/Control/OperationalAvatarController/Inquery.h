@@ -69,7 +69,8 @@ public:
 
     // If this is an simple state, which requires no real time calculation.
     // There is EvaluationLink in the atomspace for this state, we can just get its latest value from the atomspace
-    static ParamValue getParamValueFromAtomspace(State &state);
+    // sometimes there is only resutls that has a truth value lower than 0.5, in such case, is_true will be assign false.
+    static ParamValue getParamValueFromAtomspace(State &state, bool &is_true);
 
     // for that kind of States that do not exist in Atomspace, nor in real time system, just simply return UNDEFINED_VALUE
     static ParamValue inqueryUnknowableState(const vector<ParamValue>& stateOwnerList);
@@ -144,6 +145,9 @@ public:
     // this function is used by generatePMLinkFromAState()
     static HandleSeq generatePMNodeFromeAParamValue(ParamValue& ParamValue, RuleNode* ruleNode);
 
+    // only for grounded paramvalue
+    static HandleSeq generateNodeForGroundedParamValue(ParamValue* realValue);
+
     // generate a link for one matching condition for using Pattern Matching, from a state in the precondition list of a RuleNode
     static Handle generatePMLinkFromAState(State* state, RuleNode* ruleNode);
 
@@ -151,6 +155,9 @@ public:
     static HandleSeq findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string> &varNames);
 
     static ParamValue getParamValueFromHandle(string var, Handle& valueH);
+
+ private:
+    static  HandleSeq _findCandidatesByPatternMatching(RuleNode *ruleNode, vector<int> &stateIndexes, vector<string>& varNames);
 
 
 };
