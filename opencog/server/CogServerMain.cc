@@ -28,6 +28,7 @@
 #include <langinfo.h>
 #include <locale.h>
 #include <signal.h>
+#include <string.h>
 
 #include <boost/filesystem/operations.hpp>
 
@@ -84,7 +85,7 @@ static void usage(const char* progname)
 // Catch and report sigsegv
 void sighand(int sig)
 {
-	logger().error("Caught signal %d\n", sig);
+	logger().error("Caught signal %d %s\n", sig, strsignal(sig));
 }
 
 int main(int argc, char *argv[])
