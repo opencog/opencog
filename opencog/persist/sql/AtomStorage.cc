@@ -29,7 +29,6 @@
  */
 #ifdef HAVE_SQL_STORAGE
 
-#include <sched.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -641,6 +640,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 /// May be called multiple times.
 void AtomStorage::startWriterThread()
 {
+	logger().info("AtomStorage: starting a writer thread");
 	std::unique_lock<std::mutex> lock(write_mutex);
 	if (stopping_writers)
 		throw RuntimeException(TRACE_INFO,
@@ -653,13 +653,14 @@ void AtomStorage::startWriterThread()
 /// Stop all writer threads, but only after they are done wroting.
 void AtomStorage::stopWriterThreads()
 {
+	logger().info("AtomStorage: stopping all writer threads");
 	std::unique_lock<std::mutex> lock(write_mutex);
 	stopping_writers = true;
 
 	// Spin a while, until the writeer threads are (mostly) done.
 	while (not store_queue.is_empty())
 	{
-		sched_yield();
+		std::this_thread::yield();
 		usleep(100);
 	}
 
@@ -714,11 +715,11 @@ void AtomStorage::writeLoop()
 // this...
 void AtomStorage::flushStoreQueue()
 {
-	sched_yield();
+	std::this_thread::yield();
 	usleep(1);
 	while (0 < store_queue.size() or 0 < busy_writers);
 	{
-		sched_yield();
+		std::this_thread::yield();
 		usleep(100);
 	}
 }
@@ -766,7 +767,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 		unsigned long cnt = 0;
 		do
 		{
-			sched_yield();
+			std::this_thread::yield();
 			usleep(1000);
 			cnt++;
 		}
