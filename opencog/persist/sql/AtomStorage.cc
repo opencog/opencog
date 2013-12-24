@@ -366,8 +366,11 @@ void AtomStorage::init(const char * dbname,
                        const char * username,
                        const char * authentication)
 {
-	// Create four, by default ... maybe make more? 
-	for (int i=0; i<4; i++)
+	// Create six, by default ... maybe make more? 
+	// There should probably be a few more here, than the number of
+	// startWriterThread() calls below.
+#define DEFAULT_NUM_CONNS 6
+	for (int i=0; i<DEFAULT_NUM_CONNS; i++)
 	{
 		ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
@@ -388,6 +391,9 @@ void AtomStorage::init(const char * dbname,
 	stopping_writers = false;
 	thread_count = 0;
 	busy_writers = 0;
+	startWriterThread();
+	startWriterThread();
+	startWriterThread();
 	startWriterThread();
 }
 
@@ -759,7 +765,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < store_queue.size());
-		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!\n", cnt);
+		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
 
