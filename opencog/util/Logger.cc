@@ -2,9 +2,8 @@
  * opencog/util/Logger.cc
  *
  * Copyright (C) 2002-2007 Novamente LLC
- * Copyright (C) 2008 by OpenCog Foundation
- * Copyright (C) 2009, 2011 Linas Vepstas
- * Copyright (C) 2010 OpenCog Foundation
+ * Copyright (C) 2008, 2010 OpenCog Foundation
+ * Copyright (C) 2009, 2011, 2013 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Andre Senna <senna@vettalabs.com>
@@ -41,6 +40,7 @@
 #include <stdlib.h>
 #include <strings.h>
 #include <time.h>
+#include <unistd.h>
 
 #ifdef WIN32_NOT_UNIX
 #include <winsock2.h>
