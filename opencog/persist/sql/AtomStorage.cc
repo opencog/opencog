@@ -1135,14 +1135,12 @@ bool AtomStorage::maybe_exists_id(UUID uuid)
 			// If we are here, some other thread is making this UUID, 
 			// and so we need to wait till they're done. Wait by stalling
 			// on the creation lock.
-			id_create_lock.lock();
+			std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
 			// If we are here, then someone finished creating some UUID.
 			// Was it our ID? If so, we are done; if not, wait some more.
 			cache_lock.lock();
 			if (0 == id_create_cache.count(uuid))
 			{
-				id_create_lock.unlock();
-
 				OC_ASSERT(0 < local_id_cache.count(uuid),
 					"Atom for UUID was not created!");
 
