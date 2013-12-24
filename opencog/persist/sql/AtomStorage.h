@@ -28,6 +28,7 @@
 #include <set>
 #include <vector>
 
+#include <opencog/util/concurrent_stack.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
@@ -44,7 +45,7 @@ namespace opencog
 class AtomStorage
 {
 	private:
-		ODBCConnection *db_conn;
+		concurrent_stack<ODBCConnection*> conn_pool;
 
 		// Utility for handling responses on stack.
 		class Response;
