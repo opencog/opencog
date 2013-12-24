@@ -7,18 +7,23 @@
 #
 # Set up assorted cnstants needed to run.
 
-lang=lt
+lang=$1
+filename="$2"
+
 splitter=/home/linas/src/relex/src/split-sentences/split-sentences.pl
 splitdir=split-articles
 subdir=submitted-articles
-
-filename="$1"
 
 # Punt if the cogserver has crashed
 haveserver=`ps aux |grep cogserver |grep opencog-$lang`
 if [[ -z "$haveserver" ]] ; then
 	exit 1
 fi
+haveserver=`ps aux |grep relex |grep linkgram`
+if [[ -z "$haveserver" ]] ; then
+	exit 1
+fi
+
 
 # Split the filename into two parts
 base=`echo $filename | cut -d \/ -f 1`
@@ -33,6 +38,10 @@ cat "$splitdir/$rest" | ./submit-one.pl
 # Punt if the cogserver has crashed (second test,
 # before doing teh mv and rm below)
 haveserver=`ps aux |grep cogserver |grep opencog-$lang`
+if [[ -z "$haveserver" ]] ; then
+	exit 1
+fi
+haveserver=`ps aux |grep relex |grep linkgram`
 if [[ -z "$haveserver" ]] ; then
 	exit 1
 fi
