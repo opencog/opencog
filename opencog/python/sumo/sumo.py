@@ -7,8 +7,9 @@ DEFAULT_PREDICATE_TV = TruthValue(0.1, 100)
 def skip_comments(myfile):
     '''You can't use this function directly because it would break parsing of multiline expressions'''
     for line in myfile:
-        if not line.strip().startswith(';;'):
-            yield line
+        line = line.partition(';;')[0]
+        line = line.rstrip()
+        yield line
 
 def read_file(filename):
     with open (filename, 'rt') as myfile:
@@ -35,6 +36,9 @@ def convert_expression(expression, link_tv=DEFAULT_LINK_TV):
 def convert_token(token):
     if token.startswith('?'):
         return atomspace.add_node(types.VariableNode, token)
+    elif token.startswith('"'):
+        word = token[1:-2]
+        return atomspace.add_node(types.ConceptNode, word, tv=DEFAULT_NODE_TV)
     else:
         return atomspace.add_node(types.ConceptNode, token, tv=DEFAULT_NODE_TV)
 
@@ -93,14 +97,14 @@ def special_link_type(predicate):
 def print_links():
     for atom in atomspace:
         if atom.is_a(types.Link) and atom.tv.count > 0:
-            print atom
+            print repr(atom)
 
 if __name__ == '__main__':
     import sys
     filename = sys.argv[1]
 
     expressions = parse_kif_string(read_file(filename))
-    #print expressions
+#    print expressions
 
     atomspace = AtomSpace()
     convert_multiple_expressions(expressions)

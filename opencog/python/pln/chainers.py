@@ -291,8 +291,6 @@ class Chainer(AbstractChainer):
             if subst is None:
                 return None
             # set the outputs after you've found all the inputs
-            print subst
-            print generic_outputs
             # In Modus Ponens for example: if variable B refers to (Member $T Trains) and $T refers to Thomas
             # The first line will replace B with (Member $T Trains)
             specific_outputs = self.substitute_list(subst, generic_outputs)
@@ -406,8 +404,6 @@ class Chainer(AbstractChainer):
         else:
             for (template, atom) in zip(generic_outputs, target_outputs):
                 subst = self.unify(template, atom, subst)
-
-        print 'initial outputs (target and substitution)', generic_outputs, subst
 
         if not subst:
             self.delete_queries(created_vars, subst)
@@ -642,10 +638,32 @@ class Chainer(AbstractChainer):
         print 'Testing',rule,'in forward chainer'
 
         for i in xrange(0, sample_count):
-            self.forward_step(rule=rule)
+            results= self.forward_step(rule=rule)
+            if results: print results
 
         print 'Testing',rule,'in backward chainer'
 
         for i in xrange(0, sample_count):
-            self.backward_step(rule=rule)
+            results= self.backward_step(rule=rule)
+            if results: print results
+
+    def find_atom(self, atom, time_allowed=300):
+        # Run inference until atom is proved with >0 count, or time runs out (measured in seconds)
+
+        import time
+        start_time = time.time()
+
+        while time.time() - start_time < time_allowed:
+            #self._give_stimulus(atom)
+
+            self.backward_step()
+            self.forward_step()
+
+            if atom.tv.count > 0:
+                print 'Target produced!'
+                print repr(atom)
+                return True
+
+        print 'Failed to find target in', time_allowed, 'seconds'
+        return False
 

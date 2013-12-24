@@ -26,7 +26,12 @@ def makeUpCount(tvs):
 def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
 
-    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/(1-sB)
+    sNotB = 1-sB
+
+    if sNotB == 0:
+        return [TruthValue(0, 0)]
+
+    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/sNotB
 
     n = makeUpCount(tvs)*INDEPENDENCE_ASSUMPTION_DISCOUNT
 
@@ -160,6 +165,16 @@ def andExclusionFormula(tvs):
     return [TruthValue(s, makeUpCount(tvs))]
 
 def orFormula(tvs):
+    assert len(tvs) >= 2
+
+    total_s = 1.0
+    for tv in tvs[1:]:
+        andAB=total_s*tv.mean
+        total_s = total_s + tv.mean - andAB
+
+    return [TruthValue(total_s, makeUpCount(tvs))]
+
+def binaryOrFormula(tvs):
     (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
 
     # Uses the inclusion-exclusion formula.
@@ -400,10 +415,10 @@ Use I2M to get the tv of: Evaluation is_idiot Ben
 def evaluationImplicationFormula(tvs):
     [eval_B_A, impl_B_C, B, C] = tvs
 
-    [impl_A_B] = mem2InhFormula(eval_B_A)
+    [impl_A_B] = mem2InhFormula([eval_B_A])
     [impl_A_C] = deductionIndependenceBasedFormula(
         [impl_A_B, impl_B_C, B, C])
-    [eval_C_A] = inh2MemFormula(impl_A_C)
+    [eval_C_A] = inh2MemFormula([impl_A_C])
 
     return [eval_C_A]
 
