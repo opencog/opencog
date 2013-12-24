@@ -139,7 +139,7 @@ void SchemeEval::thread_lock(void)
 	long cnt = (long) pthread_getspecific(ser_key);
 	if (0 >= cnt)
 	{
-			pthread_mutex_lock(&serialize_lock);
+		pthread_mutex_lock(&serialize_lock);
 	}
 	cnt ++;
 	pthread_setspecific(ser_key, (const void *) cnt);
@@ -307,8 +307,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 
 			scm_puts ("Backtrace:\n", port);
 			scm_display_backtrace_with_highlights (captured_stack, port,
-												   SCM_BOOL_F, SCM_BOOL_F,
-												   highlights);
+			                                       SCM_BOOL_F, SCM_BOOL_F,
+			                                       highlights);
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
@@ -502,7 +502,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, prt(sexpr).c_str());
+		               __FUNCTION__, str, prt(sexpr).c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);
@@ -602,7 +602,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, expr.c_str());
+		               __FUNCTION__, str, expr.c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);
