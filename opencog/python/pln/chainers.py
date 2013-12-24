@@ -258,7 +258,6 @@ class Chainer(AbstractChainer):
     def forward_step(self, rule=None):
         if rule is None:
             rule = self._select_rule()
-        print rule
 
         results = self._apply_forward(rule)
 
@@ -347,7 +346,7 @@ class Chainer(AbstractChainer):
                 return_inputs[i] = atom
             else:
                 if not allow_zero_tv:
-                    print 'unable to match:',template
+                    #print 'unable to match:',template
                     return None
                 # This means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
                 # Just specialize the rest of the inputs. These "input" will actually just be 0-tv atoms, and it can become a BC target later.
@@ -659,8 +658,10 @@ class Chainer(AbstractChainer):
         while time.time() - start_time < time_allowed:
             #self._give_stimulus(atom)
 
-            self.backward_step()
-            self.forward_step()
+            res = self.backward_step()
+            if res: print res
+            res = self.forward_step()
+            if res: print res
 
             if atom.tv.count > 0:
                 print 'Target produced!'
