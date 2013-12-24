@@ -328,6 +328,9 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 
 ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
+	// If _conn is null, then this is null, too.
+	if (NULL == _conn) return;
+
 	conn = _conn;
 	ncols = -1;
 	arrsize = 0;
