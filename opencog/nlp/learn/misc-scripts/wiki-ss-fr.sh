@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Batch parsing script.
+# Batch parsing script for French.
 # Loop over all the files in 'beta-pages', sentence-split them
 # and submit them for parsing.
 #
