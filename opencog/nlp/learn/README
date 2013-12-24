@@ -14,14 +14,28 @@ Steps:
    Edit and setup ~/.odbc.ini
 4) Start the cogserver
 
-5) Run the RelEx opencog-server.sh shell script
+5) Copy the RelEx opencog-server.sh shell script to some other name.
+   Edit it, and replace the final line with this:
+   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 999 --link --port 4444
+   Run the new shell script.
+
+   The above tells relex to use the 'any' language, and return up to 999
+   different parses.
 
 6) cat ./link-pipeline.scm |netcat localhost 17001
+
+   Better idea: edit build/lib/opencog.conf and add nlp/learn/link-pipeline.scm
+   to the list
 
 7) telnet localhost 17001
    opencog> sql-open learn-pairs linas asdf
    opencog> scm
    guile> (observe-text "this is a test")
+
+   Better yet:
+   echo -e "scm\n (observe-text \"this is a another test\")" |nc localhost 17001
+   echo -e "scm\n (observe-text \"Bernstein () (1876\")" |nc localhost 17001
+   echo -e "scm\n (observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17001
 
 8) psql learn-pairs
    learn-pairs=# SELECT * from atoms;
@@ -31,5 +45,110 @@ Steps:
 That's all for now, folks!
 
 
+TODO
+----
+* Handle database write asynchronously: have a thread collect
+  up the atoms, and write them. Maybe even multiple threads.
+  This is OK due to the atomptr design.
+* Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+* Table counts need to be more than 32-bit. Looks like the 
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
+
+DONE
+----
+* Make sure that link-parser fully randomizes linkage choices for
+  long sentences. Done. See the rand_state and predictable_rand
+  flags in version 4.8.3.
+* Need a mutli-language sentence splitter; the maxent splitter only
+  works for English sentences.  Probably something simple will do ...
+  Done: copied one from moses-smt and put it into a relex subdirectory
+* Raw psql seems not to be utf8.  Were the tables created wrong,
+  or is this a client bug? 
+  Fixed: turned out to be a guile-related bug.
+
+
 Notes:
 ------
+The relex parse is extreely fast, the cogserver part is extremely slow ... 
+Non-linear, even.
+4-word sentence: 53 parses, 3-4 seconds elapsed
+
+5-word sentence, 373 parses,
+32 second elapsed,
+postgres runs at 36% cpu
+cogserver runs at 56% cpu for a while then drops to 26% cpu
+
+8-word sentence, max of 999 parses,
+2 minutes elapsed.  Same CPU usage as above...
+
+
+Wikipedia processing
+--------------------
+createdb fr_pairs lt_pairs pl_pairs simple_pairs
+cat opencog/persist/sql/atom.sql | psql
+vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+
+cleanup files in relex: src/perl
+
+cd /storage/wikipedia
+
+mkdir wiki-stripped
+time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
+cd wiki-stripped
+find |wc
+/home/linas/src/relex/src/perl/wiki-clean.sh
+find |wc
+cd ..
+mkdir alpha-pages
+cd alpha-pages
+/home/linas/src/relex/src/perl/wiki-alpha.sh
+
+simple:
+find |wc     gives 131434 total files
+find |wc     gives 98825 files after cat/template removal.
+
+lt:
+7 mins to unpack
+find |wc gives 190364 total files
+find |wc gives 161463 after cat/template removal
+
+pl:
+1 hour to unpack (15 minutes each part)
+find | wc gives 1097612 articles
+52K are categories
+35K are templates
+find |wc gives 1007670 files after cat/template removal
+
+fr:
+3 hours to unpack (25-60 minutes per glob)
+find |wc gives 1764813 articles
+214K are categories
+55K are templates
+find |wc gives 1452739 files after cat/template removal
+
+
+Sentence Splitting
+------------------
+Needs to be multi-language
+NLTK
+https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
+Has french, polish, latvian
+its LGPL
+Copy this over into relex, for now.
+
+cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+
+
+A question mark or exclamation mark always ends a sentence.  A period followed by an
+upper-case letter generally ends a sentence, but there are a number of exceptions.  For
+example, if the period is part of an abbreviated title ("Mr.", "Gen.", ...), it does not end a
+sentence.  A period following a single capitalized letter is assumed to be a person's initial,
+and is not considered the end of a sentence.
+
+
+(setlocale LC_ALL "")
+ (display "Ćićolina")
+
+

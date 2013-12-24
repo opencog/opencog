@@ -145,7 +145,7 @@ Download and install Postgres.  The current design does not support
 MySQL, because it uses SQL features that MySQL is missing.  Same
 holds true for SQLite.
 
-Be sure to install the postgres server, the postgress client, and the
+Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
 
 
@@ -184,7 +184,9 @@ Failure to do this will result in disastrous load and store times.
 (The notes below date to 2008; perhaps things have changed?)
 
 Edit postgresql.conf (a typical location is
-/etc/postgresql/8.4/main/postgresql.conf) and make the following changes:
+/etc/postgresql/8.4/main/postgresql.conf) and make the changes below.
+The first two changes are recommended by
+http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
    shared_buffers = default was 32MB, change to 25% of install RAM
    effective_cache_size = default was 128MB, change to 50% of installed RAM
@@ -382,7 +384,7 @@ commands:
     opencog> sql-store
     SQL data store thread started
 
-At this point, a progress indicator will be printed by the opencog
+At this point, a progres indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 
@@ -503,6 +505,34 @@ that:
    $ pg_dump mycogdata
 
 That's all!
+
+
+Threading
+=========
+The AtomStorage class sould be completely thread-safe (I think ... only
+lightly tested). By default, the class maintains a pool of four database
+connections, which can be used to drive the database. (The number of 
+connections can be raised by editing the AtomStorage constructor, and
+recompiling).  Every thread using this class will temporarily make use
+of one of these connections; if all connections are in use, the calling
+thread will block until one is free.
+
+
+Asynchronous Writing
+====================
+The AtomStorage::storeAtom() method is implemented using a fire-n-forget
+algo: the atom to be stored is queued up, and stored at some later time
+by another concurrently running thread.  If the backlog of unwritten atoms
+gets too large, the storeAtom() method may stall. Its currently designed
+to stall if there's a backlog of 100 or more unwritten atoms.  This can
+be changed by searching for HIGH_WATER_MARK, changing it and recompiling.
+
+Currently, there is only one writer thread.  Perhaps this is not enough;
+more writer threads can be started, just call the startWriterThread()
+method to have additional ones.  Note that multiple writer threads may
+end up storing atoms out of order; hopefully, this shouldn't matter (?)
+
+Anyway, the above two settings might need tweaking, depending on the job.
 
 
 Experimental Diary & Results
@@ -688,3 +718,4 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
+

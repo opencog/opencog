@@ -27,20 +27,13 @@
 #ifndef _OPENCOG_LOGGER_H
 #define _OPENCOG_LOGGER_H
 
-#include <string>
-
 #include <cstdarg>
-#include <pthread.h>
+#include <mutex>
+#include <sstream>
+#include <string>
+#include <thread>
 
-#define ASYNC_LOGGING
-
-#ifdef ASYNC_LOGGING
-#include <boost/thread.hpp>
 #include <opencog/util/concurrent_queue.h>
-#endif
-
-//#undef ERROR
-//#undef DEBUG
 
 namespace opencog
 {
@@ -53,9 +46,7 @@ class Logger
 {
 
     void set(const Logger&);
-#ifdef ASYNC_LOGGING
     bool writingLoopActive;
-#endif
 public:
 
     // WARNING: if you change the levels don't forget to update
@@ -78,7 +69,7 @@ public:
      * @param timestampEnabled If true, a timestamp will be prefixed to
               every log message
      */
-    Logger(const std::string &fileName = "opencog.log", 
+    Logger(const std::string &fileName = "opencog.log",
            Level level = INFO, bool timestampEnabled = true);
 
     Logger(const Logger&);
@@ -103,7 +94,7 @@ public:
     Level getLevel() const;
 
     /**
-     * Set the level of messages which should be logged with back trace. 
+     * Set the level of messages which should be logged with back trace.
      * Every message with log-level lower than or equals to the given argument
      * will have back trace.
      */
@@ -111,7 +102,7 @@ public:
 
     /**
      * Get the current back trace log level that determines which messages
-     * should be logged with back trace. 
+     * should be logged with back trace.
      */
     Level getBackTraceLevel() const;
 
@@ -155,7 +146,7 @@ public:
      * if and only if passed level is lower than or equals to the current
      * log level of this Logger instance.
      *
-     * You may use these methods as any printf-style call, eg: 
+     * You may use these methods as any printf-style call, eg:
      * fine("Count = %d", count)
      */
     void logva(Level level, const char *, va_list args);
@@ -256,23 +247,22 @@ public:
     Fine fine;
 
 public:
-    /** 
+    /**
      * Methods to check if a given log level is enabled. This is useful for
-     * avoiding unnecessary code for logger. For example: 
+     * avoiding unnecessary code for logger. For example:
      * if (isDebugEnabled())  debug(...);
      */
-    bool isEnabled(Level level) const;
-    bool isErrorEnabled() const;
-    bool isWarnEnabled() const;
-    bool isInfoEnabled() const;
-    bool isDebugEnabled() const;
-    bool isFineEnabled() const;
+    bool isEnabled(Level level) const { return level <= currentLevel; }
+    bool isErrorEnabled() const { return ERROR <= currentLevel; }
+    bool isWarnEnabled() const { return WARN <= currentLevel; }
+    bool isInfoEnabled() const { return INFO <= currentLevel; }
+    bool isDebugEnabled() const { return DEBUG <= currentLevel; }
+    bool isFineEnabled() const { return FINE <= currentLevel; } 
 
-#ifdef ASYNC_LOGGING
+    /**
+     * Block until all messages have been written out.
+     */
     void flush();
-#else
-    inline void flush() {}
-#endif
 
 private:
 
@@ -282,21 +272,20 @@ private:
     Level backTraceLevel;
     bool logEnabled;
     bool printToStdout;
-    pthread_mutex_t lock;
     FILE *f;
 
-#ifdef ASYNC_LOGGING
-    /** This thread does all writing of log messages */
-    boost::thread m_Thread;
+    /** One single thread does all writing of log messages */
+    std::thread writer_thread;
+    std::mutex the_mutex;
 
     /** Queue for log messages */
-    concurrent_queue< std::string* > pendingMessagesToWrite;
+    concurrent_queue< std::string* > msg_queue;
+    bool pending_write;
 
     void startWriteLoop();
     void stopWriteLoop();
     void writingLoop();
     void writeMsg(std::string &msg);
-#endif
 
     /**
      * Enable logging messages.

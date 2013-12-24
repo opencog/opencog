@@ -78,6 +78,8 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	void tearDown(void) { }
 
+	void test_utf8(void);
+
 	// TVs
 	void check_truth_value(const TruthValue& tv);
 	void test_truth_value(void);
@@ -122,6 +124,23 @@ void BasicSCMUTest::setUp(void)
 	// eval->eval("(setlocale LC_ALL \"\")");
 	eval->eval("(setlocale LC_CTYPE \"\")");
 	eval->clear_pending();
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_utf8(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(display \"Ćićolina\")");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+
+	eval->eval("(display \"Lietuvos žydų kilmės žurnalistas\")");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
 }
 
 // ============================================================

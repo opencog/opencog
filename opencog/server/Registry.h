@@ -119,12 +119,15 @@ public:
         emptyClassInfo.help = "Error: No such command";
         FactoryMapConstIterator it = factories.find(id);
         if (it == factories.end()) {
-            // not found
-            logger().error("unknown %s id: %s",
+            // Not found
+            // Log only as 'info', not 'error' since the most likely
+            // cause is user-error, i.e. mis-typed something at the
+            // terminal. And even 'info' is maybe too strong for that.
+            logger().info("unknown %s id: %s",
                     demangle(typeid(Request).name()).c_str(), id.c_str());
             return emptyClassInfo;
         }
-        // invoke the description function
+        // Invoke the description function
         logger().debug("returning %s classinfo with id \"%s\"",
                 demangle(typeid(Request).name()).c_str(), id.c_str());
         return it->second->info();

@@ -24,6 +24,8 @@
 #include <vector>
 #include <cstdlib>
 
+#include <boost/bind.hpp>
+
 #include <opencog/util/Logger.h>
 #include <opencog/util/StringTokenizer.h>
 #include <opencog/util/StringManipulator.h>
