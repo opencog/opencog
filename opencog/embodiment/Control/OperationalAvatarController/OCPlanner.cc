@@ -587,7 +587,8 @@ bool OCPlanner::checkIsGoalAchievedInRealTime(State& oneGoal, float& satisfiedDe
             return false;
         }
 
-        State curState(oneGoal.name(),oneGoal.getActionParamType(),oneGoal.stateType,inqueryValue,oneGoal.stateOwnerList);
+        // the real time inquery interface only return STATE_EQUAL_TO type
+        State curState(oneGoal.name(),oneGoal.getActionParamType(),STATE_EQUAL_TO,inqueryValue,oneGoal.stateOwnerList);
         curState.permanent = oneGoal.permanent;
 
         return curState.isSatisfied(oneGoal, satisfiedDegree,unknown, original_state);
@@ -1728,8 +1729,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
-                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
+//                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
             }
 
@@ -1745,8 +1746,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
-                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
+//                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
             }
 
@@ -1762,8 +1763,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
-                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
+//                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
             }
 
@@ -1779,8 +1780,8 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
             {
-                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
+//                cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                    << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
             }
 
@@ -2380,9 +2381,8 @@ void OCPlanner::addHypotheticalLinkForStateNode(StateNode *stateNode)
 
     stateNode->hypotheticalLink = hEvalLink;
 
-    static int count = 1;
-
-    cout <<std::endl << "Added HypotheticalLink " << count++ << std::endl << atomSpace->atomAsString(hEvalLink).c_str() << std::endl;
+//    static int count = 1;
+//    cout <<std::endl << "Added HypotheticalLink " << count++ << std::endl << atomSpace->atomAsString(hEvalLink).c_str() << std::endl;
 
 }
 
@@ -2549,12 +2549,11 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
             if (forwardForwardSN->hypotheticalLink != Handle::UNDEFINED)
             {
-               cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                   << atomSpace->atomAsString(forwardForwardSN->hypotheticalLink).c_str() << std::endl;
+//               cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                   << atomSpace->atomAsString(forwardForwardSN->hypotheticalLink).c_str() << std::endl;
 
                atomSpace->removeAtom(forwardForwardSN->hypotheticalLink);
                forwardForwardSN->hypotheticalLink = Handle::UNDEFINED;
-               sleep(1);
 
             }
 
@@ -2574,8 +2573,8 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
     {
         if (forwardStateNode->hypotheticalLink != Handle::UNDEFINED)
         {
-            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
+//            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
 
            atomSpace->removeAtom(forwardStateNode->hypotheticalLink);
         }
@@ -2594,8 +2593,8 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
         if (curSNode->hypotheticalLink != Handle::UNDEFINED)
         {
-            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
-                << atomSpace->atomAsString(curSNode->hypotheticalLink).c_str() << std::endl;
+//            cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
+//                << atomSpace->atomAsString(curSNode->hypotheticalLink).c_str() << std::endl;
 
             atomSpace->removeAtom(curSNode->hypotheticalLink);
 
@@ -3616,7 +3615,7 @@ void OCPlanner::outputStateInfo(State* s,bool outPutStateValue)
 
 void OCPlanner::outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes)
 {
-    cout << std::endl << "RuleNode:" << ruleNode->originalRule->ruleName << " Action:" << ruleNode->originalRule->action->getName() <<  std::endl;
+    cout << std::endl << std::endl << "RuleNode:" << ruleNode->originalRule->ruleName << " Action:" << ruleNode->originalRule->action->getName() <<  std::endl;
 
     if (outputForwardStateNodes)
     {
@@ -3644,7 +3643,7 @@ void OCPlanner::outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNo
         }
     }
 
-    cout << " Rule node dept = " << lastedStateNode->depth << std::endl;
+    cout << " Rule node dept = " << lastedStateNode->depth ;
 }
 
 // a bunch of rules for test, load from c++ codes
