@@ -934,7 +934,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 cout<< std::endl << "Debug planning step " << tryStepNum <<" : current subgoal has not any candidate rules left to try. Roll back! " << std::endl;
                 // we have tried all the candidate rules, still cannot achieve this state, which means this state is impossible to be achieved here
-                // so go back to the its foward rule which produce this state to check if we can apply another bindings to the same rule or we shoud try another rule
+                // so go back to the its forward rule which produce this state to check if we can apply another bindings to the same rule or we shoud try another rule
 
                 RuleNode* forwardRuleNode = curStateNode->forwardRuleNode;
 
@@ -946,11 +946,19 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 if (forwardRuleNode->ParamCandidates.size() == 0)
                 {
-                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : its foward RuleNode: " << forwardRuleNode->originalRule->ruleName
+                    cout<< std::endl << "Debug planning step " << tryStepNum <<" : its forward RuleNode: " << forwardRuleNode->originalRule->ruleName
                         << " has tried all the candidate bindings. Roll back again! " << std::endl;
 
+                    if (forwardRuleNode->originalRule->isReversibleRule && forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                    {
+                        cout<<"This fail also imply that its forward state :";
+                        outputStateInfo(forwardRuleNode->forAchieveThisSubgoal->state, true);
+                        cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
+                        forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
+                    }
+
                     // so it means this rule doesn't work, we have to go back to its forward state node
-                    deleteRuleNodeRecursively(forwardRuleNode);                                  
+                    deleteRuleNodeRecursively(forwardRuleNode);
 
                     continue; // continue to next big loop for next unsatisfied subgoal
 
@@ -1171,7 +1179,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
                 if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
                 {
-                    cout<<"This fail also imply that its foward state :";
+                    cout<<"This fail also imply that its forward state :";
                     outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
                     cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
                     curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
@@ -1209,7 +1217,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
                 if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
                 {
-                    cout<<"This fail also imply that its foward state :";
+                    cout<<"This fail also imply that its forward state :";
                     outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
                     cout<< " is impossile to be achieved by other rules. So clean up other candidate rules if any. "<< std::endl;
                     curStateNode->forwardRuleNode->forAchieveThisSubgoal->candidateRules.clear();
@@ -1225,6 +1233,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             cout<<"Debug planning step " << tryStepNum <<": Selected rule again:"<< selectedRuleNode->originalRule->ruleName <<" : Trying another group of bindings" << std::endl;
             // if the actor of this rule has not been grounded till now, it indicates it doesn't matter who is to be the actor
             // so we just simply ground it as the self agent.
+
             if (Rule::isParamValueUnGrounded(ruleNode->originalRule->actor))
             {
                 // look for the value of this variable in the parameter map
@@ -1542,7 +1551,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     // generate the action series according to the planning network we have constructed in this planning process
     planID = "";
 
-    std::cout<<std::endl<<"OCPlanner::Planning success! Plan ID = "<< planID <<std::endl;
+    std::cout<<std::endl<<"OCPlanner::Planning success! "<< std::endl;
 
     // sort the list of rule node
     sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
@@ -1722,7 +1731,6 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
-                sleep(1);
             }
 
             delete sn;
@@ -1740,7 +1748,6 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
-                sleep(1);
             }
 
             delete sn;
@@ -1758,7 +1765,6 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
-                sleep(1);
             }
 
             delete sn;
@@ -1776,7 +1782,6 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
                 cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                     << atomSpace->atomAsString(sn->hypotheticalLink).c_str() << std::endl;
                 atomSpace->removeAtom(sn->hypotheticalLink);
-                sleep(1);
             }
 
             delete sn;
@@ -2318,7 +2323,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
     satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
 
-    if (preconImpossible && rule->action->getType().getCode() == DO_NOTHING_CODE)
+    if (preconImpossible && rule->isReversibleRule && rule->action->getType().getCode() == DO_NOTHING_CODE)
     {
         bool directHelp;
         rule->isRulePossibleToHelpToAchieveGoal(fowardState->state,directHelp);
@@ -2539,6 +2544,8 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
 
         if(forwardForwardSN->forwardRuleNode == 0)
         {
+            if (forwardForwardSN == forwardStateNode)
+                continue;
 
             if (forwardForwardSN->hypotheticalLink != Handle::UNDEFINED)
             {
@@ -2550,9 +2557,6 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
                sleep(1);
 
             }
-
-            if (forwardForwardSN == forwardStateNode)
-                continue;
 
             delete forwardForwardSN;
         }
@@ -2574,7 +2578,6 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
                 << atomSpace->atomAsString(forwardStateNode->hypotheticalLink).c_str() << std::endl;
 
            atomSpace->removeAtom(forwardStateNode->hypotheticalLink);
-           sleep(1);
         }
         delete forwardStateNode;
     }
@@ -2594,7 +2597,9 @@ void OCPlanner::deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forward
             cout <<std::endl << "Removed HypotheticalLink " << ++removedHypotheticalLinkCount << std::endl
                 << atomSpace->atomAsString(curSNode->hypotheticalLink).c_str() << std::endl;
 
-           curSNode->hypotheticalLink = Handle::UNDEFINED;
+            atomSpace->removeAtom(curSNode->hypotheticalLink);
+
+            curSNode->hypotheticalLink = Handle::UNDEFINED;
         }
 
          if (curSNode->backwardRuleNode != 0)
