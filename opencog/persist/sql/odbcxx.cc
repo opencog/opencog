@@ -328,9 +328,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 
 ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
-	if (!_conn) return;
 	conn = _conn;
-
 	ncols = -1;
 	arrsize = 0;
 	column_labels = NULL;
@@ -350,6 +348,9 @@ ODBCRecordSet::release(void)
 	// these cases ... we want to just keep going like normal.
 	if (!this) return;
 
+	// Avoid accidental double-release
+	if (NULL == sql_hstmt) return;
+
 	// SQLFreeStmt(sql_hstmt, SQL_UNBIND);
 	// SQLFreeStmt(sql_hstmt, SQL_CLOSE);
 	SQLFreeHandle(SQL_HANDLE_STMT, sql_hstmt);
@@ -362,11 +363,11 @@ ODBCRecordSet::release(void)
 
 ODBCRecordSet::~ODBCRecordSet()
 {
-	int i;
+	release();  // shouldn't be needed ... but just in case.
 
 	conn = NULL;
 
-	for (i=0; i<arrsize; i++)
+	for (int i=0; i<arrsize; i++)
 	{
 		delete[] column_labels[i];
 		delete[] values[i];
