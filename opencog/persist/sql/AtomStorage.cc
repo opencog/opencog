@@ -269,16 +269,39 @@ class AtomStorage::Response
 };
 
 /* ================================================================ */
+/// XXX TODO Make the connection pointer scoped.
+/// That is, we should define a ConnPtr class here, and it's destructor
+/// should do the conn_pool.push(). Doing this can help avoid mem leaks,
+/// e.g. failure to put because of a throw.  I'm just kind of lazy now,
+/// and the code below works ... so maybe it shouldn't be messed with.
+///
+/// XXX Should do the same for Response rp.rs->release() to auto-release.
+
+/// Get an ODBC connection
+ODBCConnection* AtomStorage::get_conn()
+{
+	std::unique_lock<std::mutex> lock(conn_mutex);
+	return conn_pool.pop();
+}
+
+/// Put an ODBC connection back into the pool.
+void AtomStorage::put_conn(ODBCConnection* db_conn)
+{
+	std::unique_lock<std::mutex> lock(conn_mutex);
+	conn_pool.push(db_conn);
+}
+
+/* ================================================================ */
 
 bool AtomStorage::idExists(const char * buff)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.row_exists = false;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::row_exists_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return rp.row_exists;
 }
 
@@ -341,8 +364,8 @@ void AtomStorage::init(const char * dbname,
                        const char * username,
                        const char * authentication)
 {
-	// Create three, by default ... maybe make more? 
-	for (int i=0; i<3; i++)
+	// Create four, by default ... maybe make more? 
+	for (int i=0; i<4; i++)
 	{
 		ODBCConnection* db_conn = new ODBCConnection(dbname, username, authentication);
 		conn_pool.push(db_conn);
@@ -406,9 +429,9 @@ AtomStorage::~AtomStorage()
  */
 bool AtomStorage::connected(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	bool have_connection = db_conn->connected();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return have_connection;
 }
 
@@ -905,11 +928,11 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	}
 
 	std::string qry = cols + vals + coda;
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(qry.c_str());
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 
 #ifndef USE_INLINE_EDGES
 	// Store the outgoing handles only if we are storing for the first
@@ -972,7 +995,7 @@ void AtomStorage::setup_typemap(void)
 		db_typename[i] = NULL;
 	}
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec("SELECT * FROM TypeCodes;");
 	rp.store = this;
@@ -1007,7 +1030,7 @@ void AtomStorage::setup_typemap(void)
 
 				if (TYPEMAP_SZ <= sqid)
 				{
-					conn_pool.push(db_conn);
+					put_conn(db_conn);
 					fprintf(stderr, "Fatal Error: type table overflow!\n");
 					abort();
 				}
@@ -1023,7 +1046,7 @@ void AtomStorage::setup_typemap(void)
 			set_typemap(sqid, tname);
 		}
 	}
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 void AtomStorage::set_typemap(int dbval, const char * tname)
@@ -1075,7 +1098,7 @@ void AtomStorage::get_ids(void)
 
 
 	local_id_cache.clear();
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 
 	// It appears that, when the select statment returns more than
 	// about a 100K to a million atoms or so, some sort of heap
@@ -1099,7 +1122,7 @@ void AtomStorage::get_ids(void)
 		rp.rs->foreach_row(&Response::note_id_cb, &rp);
 		rp.rs->release();
 	}
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -1111,13 +1134,13 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 	UUID uuid = h.value();
 	snprintf(buff, BUFSZ, "SELECT * FROM Edges WHERE src_uuid = %lu;", uuid);
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.outvec = &outv;
 	rp.rs->foreach_row(&Response::create_edge_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 #endif /* USE_INLINE_EDGES */
 
@@ -1126,7 +1149,7 @@ void AtomStorage::getOutgoing(std::vector<Handle> &outv, Handle h)
 /* One-size-fits-all atom fetcher */
 AtomPtr  AtomStorage::getAtom(const char * query, int height)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.handle = Handle::UNDEFINED;
 	rp.rs = db_conn->exec(query);
@@ -1137,14 +1160,14 @@ AtomPtr  AtomStorage::getAtom(const char * query, int height)
 	if (rp.handle.value() == Handle::UNDEFINED.value())
 	{
 		rp.rs->release();
-		conn_pool.push(db_conn);
+		put_conn(db_conn);
 		return NULL;
 	}
 
 	rp.height = height;
 	AtomPtr atom(makeAtom(rp, rp.handle));
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return atom;
 }
 
@@ -1180,7 +1203,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.store = this;
 	rp.height = -1;
@@ -1188,7 +1211,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	rp.rs = db_conn->exec(buff);
 	rp.rs->foreach_row(&Response::load_incoming_set_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 
 	return iset;
 }
@@ -1374,7 +1397,7 @@ void AtomStorage::load(AtomTable &table)
 
 	setup_typemap();
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.table = &table;
 	rp.store = this;
@@ -1414,7 +1437,7 @@ void AtomStorage::load(AtomTable &table)
 #endif
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	fprintf(stderr, "Finished loading %lu atoms in total\n",
 		(unsigned long) load_count);
 }
@@ -1446,7 +1469,7 @@ void AtomStorage::store(const AtomTable &table)
 
 	setup_typemap();
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 #ifndef USE_INLINE_EDGES
@@ -1471,7 +1494,7 @@ void AtomStorage::store(const AtomTable &table)
 
 	rp.rs = db_conn->exec("VACUUM ANALYZE;");
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 
 	setMaxHeight(getMaxObservedHeight());
 	fprintf(stderr, "\tFinished storing %lu atoms total.\n",
@@ -1482,7 +1505,7 @@ void AtomStorage::store(const AtomTable &table)
 
 void AtomStorage::rename_tables(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	rp.rs = db_conn->exec("ALTER TABLE Atoms RENAME TO Atoms_Backup;");
@@ -1495,12 +1518,12 @@ void AtomStorage::rename_tables(void)
 	rp.rs->release();
 	rp.rs = db_conn->exec("ALTER TABLE TypeCodes RENAME TO TypeCodes_Backup;");
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 void AtomStorage::create_tables(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
@@ -1533,7 +1556,7 @@ void AtomStorage::create_tables(void)
 	                      "max_uuid INT,"
 	                      "max_height INT);");
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 /**
@@ -1543,7 +1566,7 @@ void AtomStorage::create_tables(void)
  */
 void AtomStorage::kill_data(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 
 	// See the file "atom.sql" for detailed documentation as to the 
@@ -1555,7 +1578,7 @@ void AtomStorage::kill_data(void)
 	rp.rs->release();
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 /* ================================================================ */
@@ -1568,45 +1591,45 @@ void AtomStorage::setMaxHeight(int sqmax)
 	char buff[BUFSZ];
 	snprintf(buff, BUFSZ, "UPDATE Global SET max_height = %d;", max_height);
 
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec(buff);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 }
 
 int AtomStorage::getMaxHeight(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.rs = db_conn->exec("SELECT max_height FROM Global;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return rp.intval;
 }
 
 UUID AtomStorage::getMaxObservedUUID(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT uuid FROM Atoms ORDER BY uuid DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return rp.intval;
 }
 
 int AtomStorage::getMaxObservedHeight(void)
 {
-	ODBCConnection* db_conn = conn_pool.pop();
+	ODBCConnection* db_conn = get_conn();
 	Response rp;
 	rp.intval = 0;
 	rp.rs = db_conn->exec("SELECT height FROM Atoms ORDER BY height DESC LIMIT 1;");
 	rp.rs->foreach_row(&Response::intval_cb, &rp);
 	rp.rs->release();
-	conn_pool.push(db_conn);
+	put_conn(db_conn);
 	return rp.intval;
 }
 
