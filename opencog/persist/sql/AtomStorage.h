@@ -25,9 +25,13 @@
 #ifndef _OPENCOG_PERSITENT_ATOM_STORAGE_H
 #define _OPENCOG_PERSITENT_ATOM_STORAGE_H
 
+#include <atomic>
+#include <mutex>
 #include <set>
+#include <thread>
 #include <vector>
 
+#include <opencog/util/concurrent_queue.h>
 #include <opencog/util/concurrent_stack.h>
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
@@ -45,6 +49,7 @@ namespace opencog
 class AtomStorage
 {
 	private:
+		// Pool of shared connections
 		concurrent_stack<ODBCConnection*> conn_pool;
 
 		// Utility for handling responses on stack.
@@ -67,18 +72,25 @@ class AtomStorage
 		void storeOutgoing(AtomPtr, Handle);
 		void getOutgoing(HandleSeq&, Handle);
 		bool store_cb(AtomPtr);
-		unsigned long load_count;
-		unsigned long store_count;
+		std::atomic<unsigned long> load_count;
+		std::atomic<unsigned long> store_count;
 
 		void rename_tables(void);
 		void create_tables(void);
 
+		// Track UUID's that are in use.
+		std::mutex id_cache_mutex;
 		bool local_id_cache_is_inited;
 		std::set<UUID> local_id_cache;
+		void add_id_to_cache(UUID);
 		void get_ids(void);
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
 		bool idExists(const char *);
+
+		// The typemap translates between opencog type numbers and
+		// the database type numbers.  Initially, they match up, but
+		// might get askew if new types are added or deleted.
 
 		// TYPEMAP_SZ is defined as the maximum number of possible opencog Types
 		// (65536 as Type is a short int)
@@ -99,6 +111,16 @@ class AtomStorage
 		TruthValue * getTV(int);
 #endif /* OUT_OF_LINE_TVS */
 
+		// Stuff to support asynchronous store of atoms.
+		concurrent_queue<AtomPtr> store_queue;
+		std::vector<std::thread> write_threads;
+		std::mutex write_mutex;
+		unsigned int thread_count;
+		void startWriterThread();
+		void stopWriterThreads();
+		bool stopping_writers;
+		void writeLoop();
+
 	public:
 		AtomStorage(const std::string& dbname, 
 		            const std::string& username,
@@ -106,6 +128,8 @@ class AtomStorage
 		AtomStorage(const char * dbname, 
 		            const char * username,
 		            const char * authentication);
+		AtomStorage(const AtomStorage&) = delete; // disable copying
+		AtomStorage& operator=(const AtomStorage&) = delete; // disable assignment
 		~AtomStorage();
 		bool connected(void); // connection to DB is alive
 
@@ -113,7 +137,6 @@ class AtomStorage
 
 		// Store atoms to DB
 		void storeSingleAtom(AtomPtr);
-		void storeAtom(Handle);
 		void storeAtom(AtomPtr);
 
 		// Fetch atoms from DB

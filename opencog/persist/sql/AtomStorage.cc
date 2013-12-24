@@ -268,6 +268,8 @@ class AtomStorage::Response
 
 };
 
+/* ================================================================ */
+
 bool AtomStorage::idExists(const char * buff)
 {
 	ODBCConnection* db_conn = conn_pool.pop();
@@ -357,6 +359,10 @@ void AtomStorage::init(const char * dbname,
 	if (!connected()) return;
 
 	reserve();
+
+	stopping_writers = false;
+	thread_count = 0;
+	startWriterThread();
 }
 
 AtomStorage::AtomStorage(const char * dbname,
@@ -378,13 +384,15 @@ AtomStorage::~AtomStorage()
 	if (connected())
 		setMaxHeight(getMaxObservedHeight());
 
+	stopWriterThreads();
+
 	while (not conn_pool.is_empty())
 	{
 		ODBCConnection* db_conn = conn_pool.pop();
 		delete db_conn;
 	}
 
-	for (int i=0; i< TYPEMAP_SZ; i++)
+	for (int i=0; i<TYPEMAP_SZ; i++)
 	{
 		if (db_typename[i]) free(db_typename[i]);
 	}
@@ -590,6 +598,75 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 }
 
 /* ================================================================ */
+
+/// Start a single writer thread.
+/// May be called multiple times.
+void AtomStorage::startWriterThread()
+{
+	std::unique_lock<std::mutex> lock(write_mutex);
+	if (stopping_writers)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot start; AtomsStorage writer threads are being stopped!");
+
+	write_threads.push_back(std::thread(&AtomStorage::writeLoop, this));
+	thread_count ++;
+}
+
+/// Stop all writer threads, but only after they are done wroting.
+void AtomStorage::stopWriterThreads()
+{
+	std::unique_lock<std::mutex> lock(write_mutex);
+	stopping_writers = true;
+
+	// Spin a while, until the writeer threads are (mostly) done.
+	while (not store_queue.is_empty())
+	{
+		sched_yield();
+		usleep(100);
+	}
+
+	// Now tell all the threads that they are done.
+	// I.e. cancel all the threads.
+	store_queue.cancel();
+	while (0 < write_threads.size())
+	{
+		write_threads.back().join();
+		write_threads.pop_back();
+		thread_count --;
+	}
+
+	// OK, so we've joined all the threads, but the queue
+	// might not be totally empty; some dregs might remain.
+	// Drain it now, single-threadedly.
+	store_queue.cancel_reset();
+	while (not store_queue.is_empty())
+	{
+		AtomPtr atom = store_queue.pop();
+		do_store_atom(atom);
+	}
+	
+	// Its now OK to start new threads, if desired ...(!)
+	stopping_writers = false;
+}
+
+void AtomStorage::writeLoop()
+{
+	try
+	{
+		while (true)
+		{
+			AtomPtr atom = store_queue.pop();
+			do_store_atom(atom);
+		}
+	}
+	catch (concurrent_queue<AtomPtr>::Canceled& e)
+	{
+		// We are so out of here. Nothing to do, just exit this thread.
+		return;
+	}
+}
+
+/* ================================================================ */
 /**
  * Recursively store the indicated atom, and all that it points to.
  * Store its truth values too. The recursive store is unconditional;
@@ -599,16 +676,39 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 void AtomStorage::storeAtom(AtomPtr atom)
 {
 	get_ids();
-	do_store_atom(atom);
-}
 
-void AtomStorage::storeAtom(Handle h)
-{
-	get_ids();
-	do_store_atom(h);
+	// Sanity checks.
+	if (stopping_writers)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; AtomStorage writer threads are being stopped!");
+	if (0 == thread_count)
+		throw RuntimeException(TRACE_INFO,
+			"Cannot store; No writer threads are running!");
+
+	store_queue.push(atom);
+
+	// If the writer threads are falling behind, mitigate.
+	// Right now, this will be real simple: just spin and wait
+	// for things to catch up.  Maybe we should launch more threads!?
+#define HIGH_WATER_MARK 100
+#define LOW_WATER_MARK 10
+
+	if (HIGH_WATER_MARK < store_queue.size())
+	{
+		unsigned long cnt = 0;
+		do
+		{
+			sched_yield();
+			usleep(1000);
+			cnt++;
+		}
+		while (LOW_WATER_MARK < store_queue.size());
+		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!\n", cnt);
+	}
 }
 
 /**
+ * Synchronously store a single atom.
  * Returns the height of the atom.
  */
 int AtomStorage::do_store_atom(AtomPtr atom)
@@ -789,7 +889,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 #endif /* USE_INLINE_EDGES */
 
 	// Make note of the fact that this atom has been stored.
-	local_id_cache.insert(atom->getHandle().value());
+	add_id_to_cache(atom->getHandle().value());
 }
 
 /* ================================================================ */
@@ -905,6 +1005,7 @@ void AtomStorage::set_typemap(int dbval, const char * tname)
 /* ================================================================ */
 /**
  * Return true if the indicated handle exists in the storage.
+ * Thread-safe.
  */
 bool AtomStorage::atomExists(Handle h)
 {
@@ -914,9 +1015,19 @@ bool AtomStorage::atomExists(Handle h)
 	snprintf(buff, BUFSZ, "SELECT uuid FROM Atoms WHERE uuid = %lu;", uuid);
 	return idExists(buff);
 #else
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
 	// look at the local cache of id's to see if the atom is in storage or not.
 	return local_id_cache.count(h.value());
 #endif
+}
+
+/**
+ * Add a single UUID to the ID cache. Thread-safe.
+ */
+void AtomStorage::add_id_to_cache(UUID uuid)
+{
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
+	local_id_cache.insert(uuid);
 }
 
 /**
@@ -924,8 +1035,11 @@ bool AtomStorage::atomExists(Handle h)
  */
 void AtomStorage::get_ids(void)
 {
+	std::unique_lock<std::mutex> lock(id_cache_mutex);
+
 	if (local_id_cache_is_inited) return;
 	local_id_cache_is_inited = true;
+
 
 	local_id_cache.clear();
 	ODBCConnection* db_conn = conn_pool.pop();
@@ -1207,10 +1321,10 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 	load_count ++;
 	if (load_count%10000 == 0)
 	{
-		fprintf(stderr, "\tLoaded %lu atoms.\n", load_count);
+		fprintf(stderr, "\tLoaded %lu atoms.\n", (unsigned long) load_count);
 	}
 
-	local_id_cache.insert(h.value());
+	add_id_to_cache(h.value());
 	return atom;
 }
 
@@ -1268,7 +1382,8 @@ void AtomStorage::load(AtomTable &table)
 		fprintf(stderr, "Loaded %lu atoms at height %d\n", load_count - cur, hei);
 	}
 	conn_pool.push(db_conn);
-	fprintf(stderr, "Finished loading %lu atoms in total\n", load_count);
+	fprintf(stderr, "Finished loading %lu atoms in total\n",
+		(unsigned long) load_count);
 }
 
 bool AtomStorage::store_cb(AtomPtr atom)
@@ -1277,7 +1392,7 @@ bool AtomStorage::store_cb(AtomPtr atom)
 	store_count ++;
 	if (store_count%1000 == 0)
 	{
-		fprintf(stderr, "\tStored %lu atoms.\n", store_count);
+		fprintf(stderr, "\tStored %lu atoms.\n", (unsigned long) store_count);
 	}
 	return false;
 }
@@ -1326,7 +1441,8 @@ void AtomStorage::store(const AtomTable &table)
 	conn_pool.push(db_conn);
 
 	setMaxHeight(getMaxObservedHeight());
-	fprintf(stderr, "\tFinished storing %lu atoms total.\n", store_count);
+	fprintf(stderr, "\tFinished storing %lu atoms total.\n",
+		(unsigned long) store_count);
 }
 
 /* ================================================================ */
