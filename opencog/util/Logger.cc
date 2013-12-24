@@ -28,9 +28,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "Logger.h"
-#include "Config.h"
-
 #ifndef CYGWIN
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -42,6 +39,7 @@
 #include <sched.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <strings.h>
 #include <time.h>
 
 #ifdef WIN32_NOT_UNIX
@@ -58,6 +56,9 @@
 
 #include <opencog/util/backtrace-symbols.h>
 #include <opencog/util/platform.h>
+
+#include "Logger.h"
+#include "Config.h"
 
 using namespace opencog;
 
@@ -253,6 +254,7 @@ Logger::Logger(const std::string &fname, Logger::Level level, bool tsEnabled)
     this->fileName.assign(fname);
     this->currentLevel = level;
     this->backTraceLevel = getLevelFromString(opencog::config()["BACK_TRACE_LOG_LEVEL"]);
+
     this->timestampEnabled = tsEnabled;
     this->printToStdout = false;
 
@@ -459,8 +461,9 @@ const char* Logger::getLevelString(const Logger::Level level)
 const Logger::Level Logger::getLevelFromString(const std::string& levelStr)
 {
     unsigned int nLevels = sizeof(levelStrings) / sizeof(levelStrings[0]);
+    const char* lstr = levelStr.c_str();
     for (unsigned int i = 0; i < nLevels; ++i) {
-        if (0 == levelStr.compare(levelStrings[i]))
+        if (0 == strcasecmp(lstr, levelStrings[i]))
             return (Logger::Level) i;
     }
     return BAD_LEVEL;
