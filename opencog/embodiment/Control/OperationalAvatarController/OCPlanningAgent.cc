@@ -155,7 +155,10 @@ void OCPlanningAgent::run()
             waitToStart ++;
 
             if (waitToStart > 10)
+            {
                 startPlanning = true;
+                std::cout<<"OCPlanningAgent start!" <<std::endl;
+            }
         }
 
         return;
