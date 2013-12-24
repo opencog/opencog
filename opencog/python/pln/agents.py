@@ -9,7 +9,8 @@ class ForwardInferenceAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+        # Note: using stimulateAtoms will cause a segfault if you create the Agent from the Python shell (use the agents-start command in the cogserver shell)
+        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self, learnRuleFrequencies=True)
 
         # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
 #        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]

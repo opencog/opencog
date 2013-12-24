@@ -221,7 +221,7 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False):
+    def __init__(self, atomspace, stimulateAtoms=True, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
@@ -677,7 +677,7 @@ class Chainer(AbstractChainer):
         start_time = time.time()
 
         while time.time() - start_time < time_allowed:
-            #self._give_stimulus(atom)
+            self._give_stimulus(atom)
 
             res = self.backward_step()
             if res: print res
