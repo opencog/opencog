@@ -49,6 +49,9 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
+        for template in rule._inputs+rule._outputs:
+            template.av = {'vlti':1}
+
     def log_failed_inference(self,message):
         print 'Attempted invalid inference:',message
 

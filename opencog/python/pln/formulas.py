@@ -386,9 +386,6 @@ def revisionFormula(tvs):
 def andBreakdownFormula(tvs):
     [A, AND_AB] = tvs
 
-    if A.mean == 0:
-        return [TruthValue(0, 0)]
-
     sB = AND_AB.mean / A.mean
     nB = makeUpCount(tvs)
 
@@ -397,7 +394,9 @@ def andBreakdownFormula(tvs):
 def orBreakdownFormula(tvs):
     [A, OR_AB] = tvs
 
-    sB = OR_AB.mean / (1-A.mean)
+    sNotA = (1-A.mean)
+
+    sB = OR_AB.mean / sNotA
     nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]

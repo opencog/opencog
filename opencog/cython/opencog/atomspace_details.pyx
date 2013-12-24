@@ -343,7 +343,11 @@ cdef class AtomSpace:
             if "vlti" in av_dict: vlti = av_dict["vlti"]
         if sti: self.atomspace.setSTI(deref(h.h),sti)
         if lti: self.atomspace.setLTI(deref(h.h),lti)
-        if vlti: self.atomspace.incVLTI(deref(h.h))
+        if vlti != None:
+            if vlti >= 1: 
+                self.atomspace.incVLTI(deref(h.h))
+            if vlti < 1:
+                self.atomspace.decVLTI(deref(h.h))
 
     def get_atom_string(self, Handle h, terse=False):
         return self.atomspace.atomAsString(deref(h.h),terse).c_str()

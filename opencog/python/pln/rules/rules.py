@@ -46,11 +46,14 @@ class Rule(object):
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
         tvs = [atom.tv for atom in input_atoms]
-        result_tvs = self.formula(tvs)
-        if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs):
+        try:
+            result_tvs = self.formula(tvs)
+            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs) or len(result_tvs) == 0:
+                return None
+            else:
+                return result_tvs
+        except ZeroDivisionError:
             return None
-        else:
-            return result_tvs
 
     def standardize_apart_input_output(self, chainer):
         new_inputs = []

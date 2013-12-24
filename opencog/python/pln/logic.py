@@ -86,6 +86,9 @@ class Logic(object):
 
     def wanted_atom(self, atom, template, s={}, allow_zero_tv=False, ground=False):
 
+        if atom.av['vlti']:
+            return False
+
         tv_ok = (allow_zero_tv or atom.tv.count > 0)
         unifies_ok = self.unify_together(atom, template, s)
         grounded_ok = not ground or len(self.variables(atom)) == 0
