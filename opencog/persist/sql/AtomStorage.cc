@@ -362,6 +362,7 @@ void AtomStorage::init(const char * dbname,
 
 	stopping_writers = false;
 	thread_count = 0;
+	busy_writers = 0;
 	startWriterThread();
 }
 
@@ -649,6 +650,7 @@ void AtomStorage::stopWriterThreads()
 	stopping_writers = false;
 }
 
+/// A Single write thread. Reds atoms from queue, and stores them.
 void AtomStorage::writeLoop()
 {
 	try
@@ -656,7 +658,9 @@ void AtomStorage::writeLoop()
 		while (true)
 		{
 			AtomPtr atom = store_queue.pop();
+			busy_writers ++; // Bad -- window after pop returns, before increment!
 			do_store_atom(atom);
+			busy_writers --;
 		}
 	}
 	catch (concurrent_queue<AtomPtr>::Canceled& e)
@@ -666,16 +670,43 @@ void AtomStorage::writeLoop()
 	}
 }
 
+/// Drain the pending store queue.
+/// Caution: this is slightly racy; a writer could still be busy
+/// even though this returns. (There's a window in writeLoop, between
+/// the dequeue, and the busy_writer increment. I guess we should fix
+// this...
+void AtomStorage::flushStoreQueue()
+{
+	sched_yield();
+	usleep(1);
+	while (0 < store_queue.size() or 0 < busy_writers);
+	{
+		sched_yield();
+		usleep(100);
+	}
+}
+
 /* ================================================================ */
 /**
  * Recursively store the indicated atom, and all that it points to.
  * Store its truth values too. The recursive store is unconditional;
  * its assumed that all sorts of underlying truuth values have changed, 
  * so that the whole thing needs to be stored.
+ *
+ * By default, the actual store is done asynchronously (in a different
+ * thread); this routine merely queues up the atom. If the synchronous
+ * flag is set, then the store is done in this thread.
  */
-void AtomStorage::storeAtom(AtomPtr atom)
+void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 {
 	get_ids();
+
+	// If a synchronous store, avoid the queues entirely.
+	if (synchronous)
+	{
+		do_store_atom(atom);
+		return;
+	}
 
 	// Sanity checks.
 	if (stopping_writers)
@@ -708,7 +739,8 @@ void AtomStorage::storeAtom(AtomPtr atom)
 }
 
 /**
- * Synchronously store a single atom.
+ * Synchronously store a single atom. That is, the actual store is done
+ * in the calling thread.
  * Returns the height of the atom.
  */
 int AtomStorage::do_store_atom(AtomPtr atom)
@@ -741,6 +773,7 @@ int AtomStorage::do_store_atom(AtomPtr atom)
 /**
  * Store the single, indicated atom.
  * Store its truth values too.
+ * The store is performed synchnously (in the calling thread).
  */
 void AtomStorage::storeSingleAtom(AtomPtr atom)
 {

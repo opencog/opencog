@@ -116,6 +116,7 @@ class AtomStorage
 		std::vector<std::thread> write_threads;
 		std::mutex write_mutex;
 		unsigned int thread_count;
+		std::atomic<unsigned long> busy_writers;
 		void startWriterThread();
 		void stopWriterThreads();
 		bool stopping_writers;
@@ -137,7 +138,8 @@ class AtomStorage
 
 		// Store atoms to DB
 		void storeSingleAtom(AtomPtr);
-		void storeAtom(AtomPtr);
+		void storeAtom(AtomPtr, bool synchronous = false);
+		void flushStoreQueue();
 
 		// Fetch atoms from DB
 		bool atomExists(Handle);
