@@ -271,9 +271,9 @@ template<typename Int> Int ndigits(Int x, Int base = 10) {
 }
 
 //! returns true iff x >= min and x <= max
-template<typename FloatT> bool isBetween(FloatT x, FloatT min, FloatT max)
+template<typename FloatT> bool isBetween(FloatT x, FloatT min_, FloatT max_)
 {
-    return x >= min && x <= max;
+    return x >= min_ && x <= max_;
 }
 
 //! returns true iff abs(x - y) <= epsilon
@@ -308,10 +308,6 @@ template<typename FloatT> bool isApproxEq(FloatT x, FloatT y)
 template<typename Float>
 Float bound(Float x, Float l, Float u)
 {
-// undef min and max, because some of the C header files define
-// these as ordinary macros, which is NOT what we want.
-#undef max
-#undef min
     return std::max(l, std::min(u, x));
 }
     

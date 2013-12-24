@@ -30,8 +30,6 @@
 #include <map>
 #include <vector>
 
-#include <pthread.h>
-
 #include <opencog/server/Agent.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/util/Logger.h>
