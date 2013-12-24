@@ -568,6 +568,27 @@ class Chainer(AbstractChainer):
 
         return False
 
+    def find_trail(self, atom, trail=[]):
+        inputs = self.trails[atom]
+        trail.append((atom, inputs))
+
+        for input in inputs:
+            self.find_trail(input, trail)
+
+        return trail
+
+    def display_trail(self, trail):
+        for (number, line) in enumerate(reversed(trail)):
+            (output_atom, input_set) = line
+            print '\nStep',number+1
+            if len(input_set):
+                for input in input_set:
+                    print input
+                print '|='
+                print output_atom
+            else:
+                print 'Premise', output_atom
+
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
         # produced multiple ways using different Rules and inputs.)
@@ -666,6 +687,10 @@ class Chainer(AbstractChainer):
             if atom.tv.count > 0:
                 print 'Target produced!'
                 print repr(atom)
+
+                print 'Inference steps'
+                print self.display_trail(self.find_trail(atom))
+
                 return True
 
         print 'Failed to find target in', time_allowed, 'seconds'
