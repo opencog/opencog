@@ -383,11 +383,6 @@ void AtomStorage::init(const char * dbname,
 		db_typename[i] = NULL;
 	}
 
-	// Associate the create lock with the create mutex,
-	// but leave it unlocked.
-	std::unique_lock<std::mutex> crl(id_create_mutex, std::defer_lock);
-	id_create_lock.swap(crl);
-
 	local_id_cache_is_inited = false;
 	if (!connected()) return;
 
@@ -838,7 +833,8 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	UUID uuid = h.value();
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = maybe_exists_id(uuid);
+	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
+	bool update = not lck.owns_lock();
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -1101,33 +1097,33 @@ void AtomStorage::add_id_to_cache(UUID uuid)
 	local_id_cache.insert(uuid);
 
 	// If we were previously making this ID, then we are done.
-	// The other half of this is in maybe_exists_id() below.
+	// The other half of this is in maybe_create_id() below.
 	if (0 < id_create_cache.count(uuid))
 	{
 		id_create_cache.erase(uuid);
-		id_create_lock.unlock();
 	}
 }
 
 /**
- * This returns true, or false, depending on whether we think that the
- * database already knows about this UUID, or not.  We do this because,
- * we need to use an SQL UPDATE vs SQL INSERT depending on which case it
- * is.  Note that SQL INSERT can be used once and only once-ever, so we
- * have to avoid teh case of two threads, each trying to perform an INSERT
- * in the same ID. We do this by locking, so that only one writer ever
- * gets told that its a new ID.
+ * This returns a lock that is either locked, or not, depending on
+ * whether we think that the database already knows about this UUID,
+ * or not.  We do this because we need to use an SQL INSERT instead
+ * of an SQL UPDATE when putting a given atom in the database the first
+ * time ever.  Since SQL INSERT can be used once and only once, we have
+ * to avoid the case of two threads, each trying to perform an INSERT
+ * in the same ID. We do this by taking the id_create_mutex, so that
+ * only one writer ever gets told that its a new ID.
  */
-bool AtomStorage::maybe_exists_id(UUID uuid)
+std::unique_lock<std::mutex> AtomStorage::maybe_create_id(UUID uuid)
 {
+	std::unique_lock<std::mutex> create_lock(id_create_mutex);
 	std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
 	// Look at the local cache of id's to see if the atom is in storage or not.
 	if (0 < local_id_cache.count(uuid))
-		return true;
+		return std::unique_lock<std::mutex>();
 
 	// Is some other thread in the process of adding this ID?
-	bool id_is_being_made = (0 < id_create_cache.count(uuid));
-	if (id_is_being_made)
+	if (0 < id_create_cache.count(uuid))
 	{
 		cache_lock.unlock();
 		while (true)
@@ -1143,8 +1139,7 @@ bool AtomStorage::maybe_exists_id(UUID uuid)
 			{
 				OC_ASSERT(0 < local_id_cache.count(uuid),
 					"Atom for UUID was not created!");
-
-				return true;
+				return std::unique_lock<std::mutex>();
 			}
 			cache_lock.unlock();
 		} 
@@ -1152,9 +1147,8 @@ bool AtomStorage::maybe_exists_id(UUID uuid)
 
 	// If we are here, then no one has attempted to make this UUID before.
 	// Grab the maker lock, and make the damned thing already.
-	id_create_lock.lock();
 	id_create_cache.insert(uuid);
-	return false;
+	return create_lock;
 }
 
 /**
@@ -1166,7 +1160,6 @@ void AtomStorage::get_ids(void)
 
 	if (local_id_cache_is_inited) return;
 	local_id_cache_is_inited = true;
-
 
 	local_id_cache.clear();
 	ODBCConnection* db_conn = get_conn();
