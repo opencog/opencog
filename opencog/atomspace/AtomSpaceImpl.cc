@@ -1,7 +1,8 @@
 /*
  * opencog/atomspace/AtomSpaceImpl.cc
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
+ * Copyright (c) 2008-2010 OpenCog Foundation
+ * Copyright (c) 2009, 2013 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -269,39 +270,44 @@ void AtomSpaceImpl::storeAtom(Handle h)
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)
 {
-    // Maybe the backing store knows about this atom.
-    if (backing_store)
-    {
-        // If the atom correspondig to the UUID isn't available, then
-        // got get it. But in fact, we may already have it, from a
-        // previous recusrive call to getIncomingSet(), so don't waste
-        // any CPU sycles getting it again.
-        if (NULL == h.operator->())
-            h = backing_store->getAtom(h);
+    if (NULL == backing_store)
+        return Handle::UNDEFINED;
 
-        // For links, must perform a recursive fetch, as otherwise
-        // the atomtable.add below will throw an error.
-        LinkPtr l(LinkCast(h));
-        if (l) {
-           const HandleSeq& ogs = l->getOutgoingSet();
-           size_t arity = ogs.size();
-           for (size_t i=0; i<arity; i++)
-           {
-              Handle oh = fetchAtom(ogs[i]);
-              if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
-                  "Unexpected handle mismatch! Expected %lu got %lu\n",
-                  ogs[i].value(), oh.value());
-           }
-        }
-        if (h) return atomTable.add(h);
+    // If the atom correspondig to the UUID isn't available, then
+    // got get it. But in fact, we may already have it, from a
+    // previous recusrive call to getIncomingSet(), so don't waste
+    // any CPU sycles getting it again.
+    if (NULL == h.operator->())
+        h = backing_store->getAtom(h);
+
+    // For links, must perform a recursive fetch, as otherwise
+    // the atomtable.add below will throw an error.
+    LinkPtr l(LinkCast(h));
+    if (l) {
+       const HandleSeq& ogs = l->getOutgoingSet();
+       size_t arity = ogs.size();
+       for (size_t i=0; i<arity; i++)
+       {
+          Handle oh = fetchAtom(ogs[i]);
+          if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
+              "Unexpected handle mismatch! Expected %lu got %lu\n",
+              ogs[i].value(), oh.value());
+       }
     }
+    if (h) return atomTable.add(h);
 
     return Handle::UNDEFINED;
 }
 
+Handle AtomSpaceImpl::getAtom(Handle h)
+{
+    if (atomTable.holds(h)) return h;
+    return fetchAtom(h);
+}
+
 Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
 {
-    h = fetchAtom(h);
+    h = getAtom(h);
 
     if (Handle::UNDEFINED == h) return Handle::UNDEFINED;
 
@@ -314,7 +320,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
             if (recursive) {
                 fetchIncomingSet(hi, true);
             } else {
-                fetchAtom(hi);
+                getAtom(hi);
             }
         }
     }
