@@ -21,12 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PersistModule.h"
-#include "AtomStorage.h"
-
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/BackingStore.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/nlp/types/atom_types.h>
+
+#include "PersistModule.h"
+#include "AtomStorage.h"
 
 using namespace opencog;
 
@@ -87,6 +88,28 @@ DECLARE_MODULE(PersistModule);
 PersistModule::PersistModule(CogServer& cs) : Module(cs), _store(NULL)
 {
 	_backing = new SQLBackingStore();
+
+	// XXX FIXME Huge hack alert.
+	// As of 2013, no one uses this thing, except for NLP processing.
+	// Since I'm too lazy to find an elegant solution right now, I'm
+	// just going to hack this in.  Fix this someday.
+	//
+	// Anyway, what the below does is to ignore these certain types,
+	// when they are to be fetched from the backing store.  This can
+	// speed up document processing, since we know that word instances
+	// and documents and sentences will not be stored in the database.
+	// Thus, we don't even try to fetch these.
+
+#define NLP_HACK 1
+#ifdef NLP_HACK
+	_backing->_ignored_types.insert(DOCUMENT_NODE);
+	_backing->_ignored_types.insert(SENTENCE_NODE);
+	_backing->_ignored_types.insert(PARSE_NODE);
+	_backing->_ignored_types.insert(PARSE_LINK);
+	_backing->_ignored_types.insert(WORD_INSTANCE_NODE);
+	_backing->_ignored_types.insert(WORD_INSTANCE_LINK);
+#endif // NLP_HACK
+
 	do_close_register();
 	do_load_register();
 	do_open_register();

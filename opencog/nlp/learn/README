@@ -47,6 +47,7 @@ That's all for now, folks!
 
 TODO
 ----
+* Remove the NLP_HACK from persist/sql/PersistModule.cc
 * Optimize the scm scripts to not pound the database so hard.
 * Investigate crash: while writing truuth value, stv_confidence 
   was pure virtual (circa line 920 of AtomStorage.cc
