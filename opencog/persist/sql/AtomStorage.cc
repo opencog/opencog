@@ -1594,13 +1594,15 @@ void AtomStorage::create_tables(void)
 	// See the file "atom.sql" for detailed documentation as to the 
 	// structure of teh SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid	INT PRIMARY KEY,"
+	                      "uuid	BIGINT PRIMARY KEY,"
 	                      "type  SMALLINT,"
+	                      "type_tv SMALLINT,"
 	                      "stv_mean FLOAT,"
+	                      "stv_confidence FLOAT,"
 	                      "stv_count FLOAT,"
-	                      "height INT,"
+	                      "height SMALLINT,"
 	                      "name    TEXT,"
-	                      "outgoing INT[]);");
+	                      "outgoing BIGINT[]);");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1618,7 +1620,6 @@ void AtomStorage::create_tables(void)
 	type_map_was_loaded = false;
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
-	                      "max_uuid INT,"
 	                      "max_height INT);");
 	rp.rs->release();
 	put_conn(db_conn);

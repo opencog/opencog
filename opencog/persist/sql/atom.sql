@@ -6,7 +6,8 @@
 CREATE TABLE Atoms (
 	-- the uuid maps to the atom handle
 	-- must be unique, and must be non-null. ergo, primary key.
-	uuid	INT PRIMARY KEY,
+	-- Use 64-bit int to match the C++ range.
+	uuid	BIGINT PRIMARY KEY,
 
 	-- Atom type, e.g. Link, Node, etc.
 	type  SMALLINT,
@@ -30,7 +31,7 @@ CREATE TABLE Atoms (
 	name    TEXT,
 
 	-- An array of the ougoing edges; non-empty only for links
-	outgoing INT[]
+	outgoing BIGINT[]
 );
 
 -- Indexes, needed for fast node and link lookup.
@@ -38,6 +39,10 @@ CREATE INDEX nodeidx ON Atoms(type, name);
 CREATE INDEX linkidx ON Atoms(type, outgoing);
 
 -- -----------------------------------------------------------
+-- Edge table is not used by the postgres driver.
+-- COuld be useful for a mysql driver, though, or any DB
+-- that does not support edge arrays.
+--
 -- Table of the edges of the Levi craph corresponding 
 -- to the hypergraph. An edge is a (src,dst) pair. The
 -- pair, understood as going src->dst, for a fixed src,
@@ -46,14 +51,14 @@ CREATE INDEX linkidx ON Atoms(type, outgoing);
 --
 -- Outgoing edges are understood to be ordered. "pos" is
 -- is the order, starting with 0.
-
-CREATE TABLE Edges (
-	src_uuid  INT,
-	dst_uuid  INT,
-	pos INT
-);
-CREATE INDEX inidx ON Edges(src_uuid);
-CREATE INDEX outidx ON Edges(dst_uuid);
+--
+-- CREATE TABLE Edges (
+-- 	src_uuid  BIGINT,
+-- 	dst_uuid  BIGINT,
+-- 	pos INT
+-- );
+-- CREATE INDEX inidx ON Edges(src_uuid);
+-- CREATE INDEX outidx ON Edges(dst_uuid);
 
 -- -----------------------------------------------------------
 -- Table associating type names to stored integer values. The list of
@@ -69,11 +74,10 @@ CREATE TABLE TypeCodes (
 -- Global state
 
 CREATE TABLE Global (
-	max_uuid INT,           -- sequentially issued UUID
 	max_height INT          -- max height of all links.
 );
 
-INSERT INTO Global (max_uuid, max_height) VALUES (501, 0);     -- initial, sequentially issued UUID
+INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
 
 -- -----------------------------------------------------------
 -- Simple truth values
