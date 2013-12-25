@@ -77,12 +77,14 @@ public:
     void storeAtom(Handle h);
 
     /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
+     * Unconditionally fetch an atom from the backingstore.
+     * If there is no backingstore, then Handle::UNDEINFED is returned.
+     * If the atom is found in the backingstore, then it is placed in
+     * the atomtable before returning.  The fetch is 'unconditional'
+     * in that it is fetched, even if it already is in the atomspace.
+     * Also, the ignored-types of the backing store are not used.
+     * 
+     * If 
      */
     Handle fetchAtom(Handle);
 

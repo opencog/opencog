@@ -163,7 +163,8 @@ Handle AtomSpaceImpl::addNode(Type t, const string& name, TruthValuePtr tvn)
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    if (backing_store) {
+    if (backing_store and not backing_store->ignoreType(t)) {
+
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
             Handle result = atomTable.add(n);
@@ -185,7 +186,8 @@ Handle AtomSpaceImpl::getNode(Type t, const string& name)
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    if (backing_store) {
+    if (backing_store and not backing_store->ignoreType(t))
+    {
         NodePtr n(backing_store->getNode(t, name.c_str()));
         if (n) {
             return atomTable.add(n);
@@ -209,15 +211,21 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    if (backing_store)
+    if (backing_store and not backing_store->ignoreType(t))
     {
-        LinkPtr l(backing_store->getLink(t, outgoing));
-        if (l) {
-            // register the atom with the atomtable (so it gets placed in
-            // indices)
-            Handle result = atomTable.add(l);
-            result->merge(tvn);
-            return result;
+        // If any of the outgoing set is ignorable, we will not
+        // fetch the thing from the backing store.
+        if (not std::any_of(outgoing.begin(), outgoing.end(),
+            [backing_store](Handle ho) { return backing_store->ignoreAtom(ho); }))
+        {
+            LinkPtr l(backing_store->getLink(t, outgoing));
+            if (l) {
+                // Put the atom into the atomtable, so it gets placed
+                // in indices, so we can find it quickly next time.
+                Handle result = atomTable.add(l);
+                result->merge(tvn);
+                return result;
+            }
         }
     }
 
@@ -234,13 +242,19 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
 
     // If we are here, the AtomTable does not yet know about this atom.
     // Maybe the backing store knows about this atom.
-    if (backing_store)
+    if (backing_store and not backing_store->ignoreType(t))
     {
-        LinkPtr l(backing_store->getLink(t, outgoing));
-        if (l) {
-            // register the atom with the atomtable (so it gets placed in
-            // indices)
-            return atomTable.add(l);
+        // If any of the outgoing set is ignorable, we will not
+        // fetch the thing from the backing store.
+        if (not std::any_of(outgoing.begin(), outgoing.end(),
+            [backing_store](Handle ho) { return backing_store->ignoreAtom(ho); }))
+        {
+            LinkPtr l(backing_store->getLink(t, outgoing));
+            if (l) {
+                // Register the atom with the atomtable (so it gets placed in
+                // indices)
+                return atomTable.add(l);
+            }
         }
     }
 
@@ -255,11 +269,6 @@ void AtomSpaceImpl::storeAtom(Handle h)
 
 Handle AtomSpaceImpl::fetchAtom(Handle h)
 {
-    // No-op if we've already got this handle.
-    // XXX But perhaps we want to update the truth value from the
-    // remote storage?? The semantics of this are totally unclear.
-    if (atomTable.holds(h)) return h;
-
     // Maybe the backing store knows about this atom.
     if (backing_store)
     {
