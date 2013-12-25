@@ -19,6 +19,7 @@ ADD_LIBRARY (atomspace SHARED
     AtomTable.cc
     AttentionValue.cc
     AttentionBank.cc
+    BackingStore.cc
     ClassServer.cc
     CompositeTruthValue.cc
     CountTruthValue.cc

@@ -3,7 +3,7 @@
  *
  * Implements an interface class for storage providers.
  *
- * Copyright (C) 2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,6 +23,8 @@
 
 #ifndef _OPENCOG_BACKING_STORE_H
 #define _OPENCOG_BACKING_STORE_H
+
+#include <set>
 
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/Link.h>
@@ -76,6 +78,28 @@ class BackingStore
 		 * truth value, etc. 
 		 */
 		virtual void storeAtom(Handle) = 0;
+
+      /**
+       * Returns true if the backing store will ignore this type.
+       * This is used for performance optimization, as asking the
+       * backend to retreive an atom can take a long time. If an atom
+       * is of this given type, it will not be fetched.
+       */
+      virtual bool ignoreType(Type t) const {
+          return (_ignored_types.end() != _ignored_types.find(t));
+      }
+
+      /**
+       * Returns true if the backing store will ignore this atom,
+       * either because it is of an ignorable type, or is a link
+       * which contains an atom that is of an ignorable type.
+       */
+      virtual bool ignoreAtom(Handle) const;
+
+      /**
+       * The set of ignored atom types.
+       */
+      std::set<Type> _ignored_types;
 };
 
 /** @}*/
