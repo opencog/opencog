@@ -655,7 +655,6 @@ void AtomStorage::stopWriterThreads()
 	// Spin a while, until the writeer threads are (mostly) done.
 	while (not store_queue.is_empty())
 	{
-		std::this_thread::yield();
 		usleep(100);
 	}
 
@@ -710,11 +709,9 @@ void AtomStorage::writeLoop()
 // this...
 void AtomStorage::flushStoreQueue()
 {
-	std::this_thread::yield();
 	usleep(1);
 	while (0 < store_queue.size() or 0 < busy_writers);
 	{
-		std::this_thread::yield();
 		usleep(100);
 	}
 }
@@ -762,7 +759,6 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 		unsigned long cnt = 0;
 		do
 		{
-			std::this_thread::yield();
 			usleep(1000);
 			cnt++;
 		}
