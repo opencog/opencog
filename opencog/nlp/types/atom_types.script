@@ -61,13 +61,6 @@ DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
 PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
 
-// Frame related stuff, almost certainly will be changed soon
-// These are semi-obsolete, probably need to be redesigned.
-// These are emitted by RelEx.
-DEFINED_FRAME_NODE <- CONCEPT_NODE
-DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
-FRAME_ELEMENT_LINK <- ORDERED_LINK
-
 // New wordnet-import nodes, added by Linas.
 // These are subject to change, pending review.
 // See nlp/wordnet-import/README and nlp/wsd/README for details.
