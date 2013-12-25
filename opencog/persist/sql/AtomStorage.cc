@@ -8,8 +8,7 @@
  * system here depends on the handles in the TLB and in the SQL DB
  * to be consistent (i.e. kept in sync).
  *
- * HISTORY:
- * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009,2013 Linas Vepstas <linas@linas.org>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -32,7 +31,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <chrono>
 #include <memory>
+#include <thread>
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
@@ -655,7 +656,8 @@ void AtomStorage::stopWriterThreads()
 	// Spin a while, until the writeer threads are (mostly) done.
 	while (not store_queue.is_empty())
 	{
-		usleep(100);
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		usleep(1000);
 	}
 
 	// Now tell all the threads that they are done.
@@ -709,10 +711,12 @@ void AtomStorage::writeLoop()
 // this...
 void AtomStorage::flushStoreQueue()
 {
-	usleep(1);
+	// std::this_thread::sleep_for(std::chrono::microseconds(10));
+	usleep(10);
 	while (0 < store_queue.size() or 0 < busy_writers);
 	{
-		usleep(100);
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		usleep(1000);
 	}
 }
 
@@ -759,6 +763,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 		unsigned long cnt = 0;
 		do
 		{
+			// std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			usleep(1000);
 			cnt++;
 		}
