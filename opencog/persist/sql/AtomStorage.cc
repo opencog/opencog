@@ -1640,8 +1640,6 @@ void AtomStorage::kill_data(void)
 	rp.rs = db_conn->exec("DELETE from Atoms;");
 	rp.rs->release();
 
-	rp.rs = db_conn->exec("UPDATE Global SET max_uuid = 500;");
-	rp.rs->release();
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
 	rp.rs->release();
 	put_conn(db_conn);
