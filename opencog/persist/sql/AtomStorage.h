@@ -164,6 +164,8 @@ class AtomStorage
 			return getLink(l.getType(), l.getOutgoingSet());
 		}
 
+		// Large-scale loads and saves
+		void loadType(AtomTable &, Type); // Load *all* atoms of type
 		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's

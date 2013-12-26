@@ -147,6 +147,23 @@ class AtomStorage::Response
 			return false;
 		}
 
+		// Load an atom into the atom table, but only if its not in
+		// it already.  The goal is to avoid clobbering the truth value,
+		// since normally atom-table adds of an existing atom cause the
+		// truth value to be merged, which is probably undesired.
+		bool load_if_not_exists_cb(void)
+		{
+			// printf ("---- New atom found ----\n");
+			rs->foreach_column(&Response::create_atom_column_cb, this);
+
+			if (not table->holds(handle))
+			{
+				AtomPtr atom(store->makeAtom(*this, handle));
+				table->add(atom);
+			}
+			return false;
+		}
+
 		std::vector<Handle> *hvec;
 		bool load_incoming_set_cb(void)
 		{
@@ -1504,6 +1521,71 @@ void AtomStorage::load(AtomTable &table)
 	}
 	put_conn(db_conn);
 	fprintf(stderr, "Finished loading %lu atoms in total\n",
+		(unsigned long) load_count);
+}
+
+void AtomStorage::loadType(AtomTable &table, Type atom_type)
+{
+	unsigned long max_nrec = getMaxObservedUUID();
+	TLB::reserve_range(0,max_nrec);
+	logger().debug("AtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
+	load_count = 0;
+
+	// For links, assume a worst-case height.
+	// For nodes, its easy ... max_height is zero.
+	if (classserver().isNode(atom_type))
+		max_height = 0;
+	else
+		max_height = getMaxObservedHeight();
+	logger().debug("AtomStorage::loadType: Max Height is %d\n", max_height);
+
+	setup_typemap();
+
+	ODBCConnection* db_conn = get_conn();
+	Response rp;
+	rp.table = &table;
+	rp.store = this;
+
+	for (int hei=0; hei<=max_height; hei++)
+	{
+		unsigned long cur = load_count;
+
+#if GET_ONE_BIG_BLOB
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT * FROM Atoms WHERE height = %d AND type = %d;",
+			 hei, atom_type);
+		rp.height = hei;
+		rp.rs = db_conn->exec(buff);
+		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+		rp.rs->release();
+#else
+		// It appears that, when the select statment returns more than
+		// about a 100K to a million atoms or so, some sort of heap
+		// corruption occurs in the iodbc code, causing future mallocs
+		// to fail. So limit the number of records processed in one go.
+		// It also appears that asking for lots of records increases
+		// the memory fragmentation (and/or there's a memory leak in iodbc??)
+		// XXX Not clear is UnixODBC suffers from this same problem.
+#define STEP 12003
+		unsigned long rec;
+		for (rec = 0; rec <= max_nrec; rec += STEP)
+		{
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
+			        "AND height = %d AND uuid > %lu AND uuid <= %lu;",
+			         atom_type, hei, rec, rec+STEP);
+			rp.height = hei;
+			rp.rs = db_conn->exec(buff);
+			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+			rp.rs->release();
+		}
+#endif
+		logger().debug("AtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
+			load_count - cur, atom_type, hei);
+	}
+	put_conn(db_conn);
+	logger().debug("AtomStorage::loadType: Finished loading %lu atoms in total\n",
 		(unsigned long) load_count);
 }
 

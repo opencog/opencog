@@ -205,3 +205,22 @@ Wild guess:
 
 I don't get it; performance sucks and I don't see why.  Or rather: postmaster
 is chewing up vast amounts of cpu time for no apparent reason...
+
+
+select * from pg_stat_user_tables;
+select * from pg_stat_all_tables;
+select * from pg_statio_user_tables;
+select * from pg_database;
+
+pg_stat_user_indexes
+pg_stat_all_indexes
+
+select * from pg_catalog.pg_stat_activity;
+select * from pg_catalog.pg_locks;
+
+
+-- WOW!!!   VACUUM ANALYZE; had a huge effect!!
+
+-- vacuum tells em to do following:
+   change max_fsm_pages to 600K
+   chage max_fsm_relations to 10K
