@@ -105,9 +105,14 @@ static void * do_bogus_scm(void *p)
  * multi-threaded operation. Currently, the most serious of these is
  * a parallel-define bug, documented in
  * https://savannah.gnu.org/bugs/index.php?24867
+ *
  * Until that bug is fixed and released, this work-around is needed.
  * The work-around serializes all guile-mode thread execution, by
  * means of a mutex lock.
+ *
+ * As of December 2013, the bug still seems to be there: the test
+ * case provided in the bug report crashes, when linked against
+ * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
  */
 static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
