@@ -37,6 +37,7 @@
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceTime.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/AtomSpaceExtensions/PredefinedProcedureNames.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PAIUtils.h>

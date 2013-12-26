@@ -28,14 +28,15 @@
 #include <langinfo.h>
 #include <locale.h>
 #include <signal.h>
+#include <string.h>
 
-#include <boost/filesystem/operations.hpp>
+#include <string>
+#include <thread>
+#include <utility>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/foreach.hpp>
-
-#include <utility>
-#include <string>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
@@ -84,7 +85,12 @@ static void usage(const char* progname)
 // Catch and report sigsegv
 void sighand(int sig)
 {
-	logger().error("Caught signal %d\n", sig);
+    logger().setPrintToStdoutFlag(true);
+    logger().error() << "Caught signal " << sig << " (" << strsignal(sig)
+        << ") on thread " << std::this_thread::get_id();
+    logger().flush();
+    sleep(3);
+    exit(1);
 }
 
 int main(int argc, char *argv[])

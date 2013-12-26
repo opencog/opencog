@@ -47,14 +47,15 @@ That's all for now, folks!
 
 TODO
 ----
-* Handle database write asynchronously: have a thread collect
-  up the atoms, and write them. Maybe even multiple threads.
-  This is OK due to the atomptr design.
-* Can we start a guile thread for each incoming sentence?
-  Threading will require more subtle sentence cleanup.
-* Table counts need to be more than 32-bit. Looks like the 
-  any-language goes hog-wild and creates huge counts for just
-  one sentence ... is this desired?  Anyway, they'll overflow...
+* Remove the NLP_HACK from persist/sql/PersistModule.cc
+* Optimize the scm scripts to not pound the database so hard.
+  (How? Lots of word pushes, but really, there's not much repeat
+  traffic ...)
+* Investigate crash: while writing truuth value, stv_confidence 
+  was pure virtual (circa line 920 of AtomStorage.cc)
+  -- this only happened when I allowed the atomspace to get
+     bigger, by not agressively deleting old sentences!
+     I don't see what this has to do with it ...
 
 DONE
 ----
@@ -67,6 +68,17 @@ DONE
 * Raw psql seems not to be utf8.  Were the tables created wrong,
   or is this a client bug? 
   Fixed: turned out to be a guile-related bug.
+* Handle database write asynchronously: have a thread collect
+  up the atoms, and write them. Maybe even multiple threads.
+  This is OK due to the atomptr design.
+  Done.  Not just one, but multiple writers.
+* Can we start a guile thread for each incoming sentence?
+  Threading will require more subtle sentence cleanup.
+  No. The main guile bug, opened 5 years ago, is still not fixed.
+* Table counts need to be more than 32-bit. Looks like the 
+  any-language goes hog-wild and creates huge counts for just
+  one sentence ... is this desired?  Anyway, they'll overflow...
+  Done. atoms.sql now uses bigint 64-bit uuids.
 
 
 Notes:
@@ -140,15 +152,75 @@ Copy this over into relex, for now.
 
 cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
 
-
 A question mark or exclamation mark always ends a sentence.  A period followed by an
 upper-case letter generally ends a sentence, but there are a number of exceptions.  For
 example, if the period is part of an abbreviated title ("Mr.", "Gen.", ...), it does not end a
 sentence.  A period following a single capitalized letter is assumed to be a person's initial,
 and is not considered the end of a sentence.
 
-
 (setlocale LC_ALL "")
  (display "Ćićolina")
 
+Crash
+-----
+        11: AtomStorage.cc:920
+opencog::AtomStorage::do_store_single_atom(std::shared_ptr<opencog::Atom>, int)
+STMTF("stv_confidence", tv->getConfidence());
 
+
+Performance
+-----------
+Performance seems to suck: 
+-- two parsers, each takes maybe 4% cpu time total. Load avg of about 0.03
+-- each parser runs 4 async write threads pushing atoms to postgres. 
+   each one complains about it taking too long to flush the write queues.
+-- postmaster is running 10 threads, load-avg of about 2.00  so about
+   2 cpu's at 100%
+-- vmstat shows 500 blks per second written. This is low...
+-- top shows maybe 0.2% wait state. So its not disk-bound.
+-- what is taking so long?
+
+So, take a tcpdump:
+-- a typical tcpdump packet:
+   UPDATE Atoms SET tv_type = 2, stv_mean = 0 , stv_confidence = 0, stv_count = 54036 WHERE uuid = 367785;
+   its maybe 226 bytes long.
+-- this gets one response from server, about 96 bytes long.
+-- then one more req, one more repsonse, seems to be a 'were'done' mesg
+   or something ...  which I guess is due to SQLFreeHandle(SQL_HANDLE_STMT ???
+-- time delta in seconds, of tcpdump of traffic packets, between update, and 
+   response from server:
+   0.0006  0.0002 0.0002 0.0002 0.028 (yow!!) 0.001 0.0002
+
+-- so it looks like about every 8-10 packets are replied to failry quick,
+   then there's one that takes 0.025 seconds to reply.... stairsteps in
+   response time like this all the way through the capture.
+
+Wild guess:
+-- Hmm ... this seems to be related to the commit delay in postgresql.conf
+   Change commit_delay to 1 second
+   change wal_bufers to 32MB since its mostly update traffic.
+   change checkpoint_segments to 32 (each one takes up 16MB of disk space.)
+
+-- Making these changes has no obvious effect ... bummer.
+
+I don't get it; performance sucks and I don't see why.  Or rather: postmaster
+is chewing up vast amounts of cpu time for no apparent reason...
+
+
+select * from pg_stat_user_tables;
+select * from pg_stat_all_tables;
+select * from pg_statio_user_tables;
+select * from pg_database;
+
+pg_stat_user_indexes
+pg_stat_all_indexes
+
+select * from pg_catalog.pg_stat_activity;
+select * from pg_catalog.pg_locks;
+
+
+-- WOW!!!   VACUUM ANALYZE; had a huge effect!!
+
+-- vacuum tells em to do following:
+   change max_fsm_pages to 600K
+   chage max_fsm_relations to 10K

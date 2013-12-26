@@ -8,6 +8,13 @@
  * makes VARCHAR difficult (impossible ??) to support correctly!
  * Blame it on SQLBindCol(), which is a terrible idea.  @#$%^ Microsoft.
  *
+ * Threading:
+ * ----------
+ * This class is thread-enabled but not thread-safe. Two threads should
+ * not try to use one instance of this class at the same time. Each
+ * thread should construct it's own instance of this class. This class
+ * uses no globals.
+ *
  * HISTORY:
  * Copyright (c) 2002,2008 Linas Vepstas <linas@linas.org>
  * created by Linas Vepstas  March 2002
@@ -88,8 +95,8 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 	}
 
 	/* set the ODBC version */
-	rc = SQLSetEnvAttr(sql_henv, SQL_ATTR_ODBC_VERSION, 
-			       (void*)SQL_OV_ODBC3, 0); 
+	rc = SQLSetEnvAttr(sql_henv, SQL_ATTR_ODBC_VERSION,
+	                   (void*)SQL_OV_ODBC3, 0);
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR("Can't SQLSetEnv, rc=%d", rc);
@@ -100,7 +107,7 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 	}
 
 	/* allocate the connection handle */
-	rc = SQLAllocConnect(sql_henv, &sql_hdbc); 
+	rc = SQLAllocConnect(sql_henv, &sql_hdbc);
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
 		PERR ("Can't SQLAllocConnect handle rc=%d", rc);
@@ -114,10 +121,10 @@ ODBCConnection::ODBCConnection(const char * _dbname,
 	// SQLSetConnectAttr(sql_hdbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER *)5, 0);
 
 	if (NULL == _authentication) _authentication = "";
-	rc = SQLConnect(sql_hdbc, 
-			 (SQLCHAR*) _dbname, SQL_NTS,
-			 (SQLCHAR*) _username, SQL_NTS,
-			 (SQLCHAR*) _authentication, SQL_NTS);
+	rc = SQLConnect(sql_hdbc,
+	                (SQLCHAR*) _dbname, SQL_NTS,
+	                (SQLCHAR*) _username, SQL_NTS,
+	                (SQLCHAR*) _authentication, SQL_NTS);
 
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
@@ -220,7 +227,7 @@ ODBCConnection::exec(const char * buff)
 		return NULL;
 	}
 
-	/* Use numbr of columns to indicate that the query hasn't 
+	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
 	return rs;
@@ -283,7 +290,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 			vsizes[i] = 0;
 		}
 
-		arrsize = new_ncols; 
+		arrsize = new_ncols;
 	}
 
 	rc = SQLAllocStmt (conn->sql_hdbc, &sql_hstmt);
@@ -311,7 +318,7 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 			vsizes[i] = DEFAULT_VARCHAR_SIZE;
 			values[i][0] = 0;
 		}
-		rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR, 
+		rc = SQLBindCol(sql_hstmt, i+1, SQL_C_CHAR,
 			values[i], vsizes[i], &bogus);
 		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 		{
@@ -328,6 +335,9 @@ ODBCRecordSet::alloc_and_bind_cols(int new_ncols)
 
 ODBCRecordSet::ODBCRecordSet(ODBCConnection *_conn)
 {
+	// If _conn is null, then this is null, too.
+	if (NULL == _conn) return;
+
 	conn = _conn;
 	ncols = -1;
 	arrsize = 0;
@@ -396,9 +406,9 @@ ODBCRecordSet::get_column_labels(void)
 
 	if (0 <= ncols) return;
 
-	/* If number of columns is negative, then we haven't 
-	 * gotten any results back yet.  Start by getting the 
-	 * column labels. 
+	/* If number of columns is negative, then we haven't
+	 * gotten any results back yet.  Start by getting the
+	 * column labels.
 	 */
 
 	rc = SQLNumResultCols(sql_hstmt, &_ncols);
@@ -425,8 +435,8 @@ ODBCRecordSet::get_column_labels(void)
 		SQLSMALLINT nullable;
 
 		rc = SQLDescribeCol (sql_hstmt, i+1,
-				(SQLCHAR *) namebuff, 299, &namelen,
-   			 &datatype, &column_size, &decimal_digits, &nullable);
+		          (SQLCHAR *) namebuff, 299, &namelen,
+		          &datatype, &column_size, &decimal_digits, &nullable);
 		if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 		{
 			PERR ("Can't describe col rc=%d", rc);
@@ -460,7 +470,7 @@ ODBCRecordSet::fetch_row(void)
 {
 	if (!this) return 0;
 
-	SQLRETURN rc = SQLFetch(sql_hstmt);  
+	SQLRETURN rc = SQLFetch(sql_hstmt);
 
 	/* no more data */
 	if (SQL_NO_DATA == rc) return 0;
@@ -509,9 +519,9 @@ ODBCRecordSet::get_value(const char * fieldname)
 	if (!this) return NULL;
 	int column;
 
-	/* If number of columns is negative, then we haven't 
-	 * gotten any results back yet.  Start by getting the 
-	 * column labels. 
+	/* If number of columns is negative, then we haven't
+	 * gotten any results back yet.  Start by getting the
+	 * column labels.
 	 */
 	if (0 > ncols)
 	{
@@ -621,7 +631,7 @@ dui_odbc_connection_tables (DuiDBConnection *dbc)
 	}
 
 	LEAVE ("(conn=%p)", conn);
-	/* Use numbr of columns to indicate that the query hasn't 
+	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
 	return &rs->recset;
@@ -630,7 +640,7 @@ dui_odbc_connection_tables (DuiDBConnection *dbc)
 /* =========================================================== */
 
 DuiDBRecordSet *
-dui_odbc_connection_table_columns (DuiDBConnection *dbc, 
+dui_odbc_connection_table_columns (DuiDBConnection *dbc,
                                    const char * tablename)
 {
 	DuiODBCConnection *conn = (DuiODBCConnection *) dbc;
@@ -643,8 +653,8 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	rs = dui_odbc_recordset_new (conn);
 	if (!rs) return NULL;
 
-   rc=SQLColumns (rs->sql_hstmt,NULL, 0, NULL, 0, 
-                  (char *) tablename, SQL_NTS, NULL, 0);
+	rc = SQLColumns (rs->sql_hstmt,NULL, 0, NULL, 0,
+	                 (char *) tablename, SQL_NTS, NULL, 0);
 
 	if ((SQL_SUCCESS != rc) && (SQL_SUCCESS_WITH_INFO != rc))
 	{
@@ -655,7 +665,7 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 	}
 
 	LEAVE ("(conn=%p, table=%s)", conn, tablename);
-	/* Use numbr of columns to indicate that the query hasn't 
+	/* Use numbr of columns to indicate that the query hasn't
 	 * given results yet. */
 	rs->ncols = -1;
 	return &rs->recset;
@@ -665,4 +675,4 @@ dui_odbc_connection_table_columns (DuiDBConnection *dbc,
 
 #endif /* HAVE_SQL_STORAGE */
 /* ============================= END OF FILE ================= */
- 
+

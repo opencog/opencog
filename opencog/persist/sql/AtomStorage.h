@@ -89,9 +89,8 @@ class AtomStorage
 		void get_ids(void);
 
 		std::mutex id_create_mutex;
-		std::unique_lock<std::mutex> id_create_lock;
 		std::set<UUID> id_create_cache;
-		bool maybe_exists_id(UUID);
+		std::unique_lock<std::mutex> maybe_create_id(UUID);
 
 		UUID getMaxObservedUUID(void);
 		int getMaxObservedHeight(void);
@@ -165,6 +164,8 @@ class AtomStorage
 			return getLink(l.getType(), l.getOutgoingSet());
 		}
 
+		// Large-scale loads and saves
+		void loadType(AtomTable &, Type); // Load *all* atoms of type
 		void load(AtomTable &); // Load entire contents of DB
 		void store(const AtomTable &); // Store entire contents of AtomTable
 		void reserve(void);     // reserve range of UUID's

@@ -8,8 +8,7 @@
  * system here depends on the handles in the TLB and in the SQL DB
  * to be consistent (i.e. kept in sync).
  *
- * HISTORY:
- * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009,2013 Linas Vepstas <linas@linas.org>
  *
  * LICENSE:
  * This program is free software; you can redistribute it and/or modify
@@ -29,11 +28,12 @@
  */
 #ifdef HAVE_SQL_STORAGE
 
-#include <sched.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+#include <chrono>
 #include <memory>
+#include <thread>
 
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/platform.h>
@@ -144,6 +144,23 @@ class AtomStorage::Response
 
 			AtomPtr atom(store->makeAtom(*this, handle));
 			table->add(atom);
+			return false;
+		}
+
+		// Load an atom into the atom table, but only if its not in
+		// it already.  The goal is to avoid clobbering the truth value,
+		// since normally atom-table adds of an existing atom cause the
+		// truth value to be merged, which is probably undesired.
+		bool load_if_not_exists_cb(void)
+		{
+			// printf ("---- New atom found ----\n");
+			rs->foreach_column(&Response::create_atom_column_cb, this);
+
+			if (not table->holds(handle))
+			{
+				AtomPtr atom(store->makeAtom(*this, handle));
+				table->add(atom);
+			}
 			return false;
 		}
 
@@ -383,11 +400,6 @@ void AtomStorage::init(const char * dbname,
 	{
 		db_typename[i] = NULL;
 	}
-
-	// Associate the create lock with the create mutex,
-	// but leave it unlocked.
-	std::unique_lock<std::mutex> crl(id_create_mutex, std::defer_lock);
-	id_create_lock.swap(crl);
 
 	local_id_cache_is_inited = false;
 	if (!connected()) return;
@@ -641,6 +653,7 @@ std::string AtomStorage::oset_to_string(const std::vector<Handle>& out,
 /// May be called multiple times.
 void AtomStorage::startWriterThread()
 {
+	logger().info("AtomStorage: starting a writer thread");
 	std::unique_lock<std::mutex> lock(write_mutex);
 	if (stopping_writers)
 		throw RuntimeException(TRACE_INFO,
@@ -653,14 +666,15 @@ void AtomStorage::startWriterThread()
 /// Stop all writer threads, but only after they are done wroting.
 void AtomStorage::stopWriterThreads()
 {
+	logger().info("AtomStorage: stopping all writer threads");
 	std::unique_lock<std::mutex> lock(write_mutex);
 	stopping_writers = true;
 
 	// Spin a while, until the writeer threads are (mostly) done.
 	while (not store_queue.is_empty())
 	{
-		sched_yield();
-		usleep(100);
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		usleep(1000);
 	}
 
 	// Now tell all the threads that they are done.
@@ -714,12 +728,12 @@ void AtomStorage::writeLoop()
 // this...
 void AtomStorage::flushStoreQueue()
 {
-	sched_yield();
-	usleep(1);
+	// std::this_thread::sleep_for(std::chrono::microseconds(10));
+	usleep(10);
 	while (0 < store_queue.size() or 0 < busy_writers);
 	{
-		sched_yield();
-		usleep(100);
+		// std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		usleep(1000);
 	}
 }
 
@@ -766,7 +780,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 		unsigned long cnt = 0;
 		do
 		{
-			sched_yield();
+			// std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			usleep(1000);
 			cnt++;
 		}
@@ -837,7 +851,8 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	UUID uuid = h.value();
 	snprintf(uuidbuff, BUFSZ, "%lu", uuid);
 
-	bool update = maybe_exists_id(uuid);
+	std::unique_lock<std::mutex> lck = maybe_create_id(uuid);
+	bool update = not lck.owns_lock();
 	if (update)
 	{
 		cols = "UPDATE Atoms SET ";
@@ -1100,33 +1115,33 @@ void AtomStorage::add_id_to_cache(UUID uuid)
 	local_id_cache.insert(uuid);
 
 	// If we were previously making this ID, then we are done.
-	// The other half of this is in maybe_exists_id() below.
+	// The other half of this is in maybe_create_id() below.
 	if (0 < id_create_cache.count(uuid))
 	{
 		id_create_cache.erase(uuid);
-		id_create_lock.unlock();
 	}
 }
 
 /**
- * This returns true, or false, depending on whether we think that the
- * database already knows about this UUID, or not.  We do this because,
- * we need to use an SQL UPDATE vs SQL INSERT depending on which case it
- * is.  Note that SQL INSERT can be used once and only once-ever, so we
- * have to avoid teh case of two threads, each trying to perform an INSERT
- * in the same ID. We do this by locking, so that only one writer ever
- * gets told that its a new ID.
+ * This returns a lock that is either locked, or not, depending on
+ * whether we think that the database already knows about this UUID,
+ * or not.  We do this because we need to use an SQL INSERT instead
+ * of an SQL UPDATE when putting a given atom in the database the first
+ * time ever.  Since SQL INSERT can be used once and only once, we have
+ * to avoid the case of two threads, each trying to perform an INSERT
+ * in the same ID. We do this by taking the id_create_mutex, so that
+ * only one writer ever gets told that its a new ID.
  */
-bool AtomStorage::maybe_exists_id(UUID uuid)
+std::unique_lock<std::mutex> AtomStorage::maybe_create_id(UUID uuid)
 {
+	std::unique_lock<std::mutex> create_lock(id_create_mutex);
 	std::unique_lock<std::mutex> cache_lock(id_cache_mutex);
 	// Look at the local cache of id's to see if the atom is in storage or not.
 	if (0 < local_id_cache.count(uuid))
-		return true;
+		return std::unique_lock<std::mutex>();
 
 	// Is some other thread in the process of adding this ID?
-	bool id_is_being_made = (0 < id_create_cache.count(uuid));
-	if (id_is_being_made)
+	if (0 < id_create_cache.count(uuid))
 	{
 		cache_lock.unlock();
 		while (true)
@@ -1134,18 +1149,15 @@ bool AtomStorage::maybe_exists_id(UUID uuid)
 			// If we are here, some other thread is making this UUID, 
 			// and so we need to wait till they're done. Wait by stalling
 			// on the creation lock.
-			id_create_lock.lock();
+			std::unique_lock<std::mutex> local_create_lock(id_create_mutex);
 			// If we are here, then someone finished creating some UUID.
 			// Was it our ID? If so, we are done; if not, wait some more.
 			cache_lock.lock();
 			if (0 == id_create_cache.count(uuid))
 			{
-				id_create_lock.unlock();
-
 				OC_ASSERT(0 < local_id_cache.count(uuid),
 					"Atom for UUID was not created!");
-
-				return true;
+				return std::unique_lock<std::mutex>();
 			}
 			cache_lock.unlock();
 		} 
@@ -1153,9 +1165,8 @@ bool AtomStorage::maybe_exists_id(UUID uuid)
 
 	// If we are here, then no one has attempted to make this UUID before.
 	// Grab the maker lock, and make the damned thing already.
-	id_create_lock.lock();
 	id_create_cache.insert(uuid);
-	return false;
+	return create_lock;
 }
 
 /**
@@ -1167,7 +1178,6 @@ void AtomStorage::get_ids(void)
 
 	if (local_id_cache_is_inited) return;
 	local_id_cache_is_inited = true;
-
 
 	local_id_cache.clear();
 	ODBCConnection* db_conn = get_conn();
@@ -1514,6 +1524,71 @@ void AtomStorage::load(AtomTable &table)
 		(unsigned long) load_count);
 }
 
+void AtomStorage::loadType(AtomTable &table, Type atom_type)
+{
+	unsigned long max_nrec = getMaxObservedUUID();
+	TLB::reserve_range(0,max_nrec);
+	logger().debug("AtomStorage::loadType: Max observed UUID is %lu\n", max_nrec);
+	load_count = 0;
+
+	// For links, assume a worst-case height.
+	// For nodes, its easy ... max_height is zero.
+	if (classserver().isNode(atom_type))
+		max_height = 0;
+	else
+		max_height = getMaxObservedHeight();
+	logger().debug("AtomStorage::loadType: Max Height is %d\n", max_height);
+
+	setup_typemap();
+
+	ODBCConnection* db_conn = get_conn();
+	Response rp;
+	rp.table = &table;
+	rp.store = this;
+
+	for (int hei=0; hei<=max_height; hei++)
+	{
+		unsigned long cur = load_count;
+
+#if GET_ONE_BIG_BLOB
+		char buff[BUFSZ];
+		snprintf(buff, BUFSZ,
+			"SELECT * FROM Atoms WHERE height = %d AND type = %d;",
+			 hei, atom_type);
+		rp.height = hei;
+		rp.rs = db_conn->exec(buff);
+		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+		rp.rs->release();
+#else
+		// It appears that, when the select statment returns more than
+		// about a 100K to a million atoms or so, some sort of heap
+		// corruption occurs in the iodbc code, causing future mallocs
+		// to fail. So limit the number of records processed in one go.
+		// It also appears that asking for lots of records increases
+		// the memory fragmentation (and/or there's a memory leak in iodbc??)
+		// XXX Not clear is UnixODBC suffers from this same problem.
+#define STEP 12003
+		unsigned long rec;
+		for (rec = 0; rec <= max_nrec; rec += STEP)
+		{
+			char buff[BUFSZ];
+			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
+			        "AND height = %d AND uuid > %lu AND uuid <= %lu;",
+			         atom_type, hei, rec, rec+STEP);
+			rp.height = hei;
+			rp.rs = db_conn->exec(buff);
+			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
+			rp.rs->release();
+		}
+#endif
+		logger().debug("AtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
+			load_count - cur, atom_type, hei);
+	}
+	put_conn(db_conn);
+	logger().debug("AtomStorage::loadType: Finished loading %lu atoms in total\n",
+		(unsigned long) load_count);
+}
+
 bool AtomStorage::store_cb(AtomPtr atom)
 {
 	storeSingleAtom(atom);
@@ -1601,13 +1676,15 @@ void AtomStorage::create_tables(void)
 	// See the file "atom.sql" for detailed documentation as to the 
 	// structure of teh SQL tables.
 	rp.rs = db_conn->exec("CREATE TABLE Atoms ("
-	                      "uuid	INT PRIMARY KEY,"
+	                      "uuid	BIGINT PRIMARY KEY,"
 	                      "type  SMALLINT,"
+	                      "type_tv SMALLINT,"
 	                      "stv_mean FLOAT,"
+	                      "stv_confidence FLOAT,"
 	                      "stv_count FLOAT,"
-	                      "height INT,"
+	                      "height SMALLINT,"
 	                      "name    TEXT,"
-	                      "outgoing INT[]);");
+	                      "outgoing BIGINT[]);");
 	rp.rs->release();
 
 #ifndef USE_INLINE_EDGES
@@ -1625,7 +1702,6 @@ void AtomStorage::create_tables(void)
 	type_map_was_loaded = false;
 
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
-	                      "max_uuid INT,"
 	                      "max_height INT);");
 	rp.rs->release();
 	put_conn(db_conn);
@@ -1646,8 +1722,6 @@ void AtomStorage::kill_data(void)
 	rp.rs = db_conn->exec("DELETE from Atoms;");
 	rp.rs->release();
 
-	rp.rs = db_conn->exec("UPDATE Global SET max_uuid = 500;");
-	rp.rs->release();
 	rp.rs = db_conn->exec("UPDATE Global SET max_height = 0;");
 	rp.rs->release();
 	put_conn(db_conn);

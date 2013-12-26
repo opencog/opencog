@@ -1,7 +1,7 @@
 /*
- * opencog/atomspace/TLB.cc
+ * opencog/atomspace/BackingStore.cc
  *
- * Copyright (C) 2011 OpenCog Foundation
+ * Copyright (C) 2013 Linas Vepstas
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,11 +20,29 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "TLB.h"
+#include <algorithm>
+
+#include "BackingStore.h"
 
 using namespace opencog;
 
-UUID TLB::_brk_uuid = 1;
 
-std::mutex TLB::_mtx;
+bool BackingStore::ignoreAtom(Handle h) const
+{
+	// If the handle is a uuid only, and no atom, we can't ignore it.
+	AtomPtr a(h);
+	if (NULL == a) return false;
+
+	// If the atom is of an ignoreable type, then ignore.
+	if (ignoreType(a->getType())) return true;
+
+	// If its a link, then scan the outgoing set.
+	LinkPtr l(LinkCast(a));
+	if (NULL == l) return false;
+
+	const HandleSeq& hs = l->getOutgoingSet();
+	if (std::any_of(hs.begin(), hs.end(), [this](Handle ho) { return ignoreAtom(ho); }))
+		return true;
+	return false;
+}
 

@@ -41,8 +41,6 @@
 #include <opencog/spacetime/Temporal.h>
 #include <opencog/spacetime/TemporalTable.h>
 
-#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
-
 using namespace opencog;
 
 class AtomSpaceUtil

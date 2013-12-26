@@ -236,7 +236,7 @@ void PersistUTest::add_to_space(int idx, AtomSpace *as, std::string id)
 	hvec.push_back(h2[idx]);
 	hvec.push_back(h3[idx]);
 
-	hl[idx] = as->addLink(PARSE_LINK, hvec);
+	hl[idx] = as->addLink(WORD_SENSE_LINK, hvec);
 	l[idx] = LinkCast(hl[idx]);
 }
 
@@ -316,6 +316,7 @@ void PersistUTest::test_atomspace(void)
 	 * the SQL storage, though; to do that, they must be deleted, not
     * removed.
 	 */
+	_as->barrier();
 	_as->clear();
 	TSM_ASSERT("Non-empty atomspace", 0 == _as->getSize());
 

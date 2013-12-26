@@ -12,10 +12,14 @@ ADD_LIBRARY (persist SHARED
 	PersistModule.cc
 )
 
+# XXX FIXME We've added a depedency on the NLP atom types.
+# this should be removed when the NLP_HACK in PersistModule is removed.
 ADD_DEPENDENCIES(persist opencog_atom_types)
+ADD_DEPENDENCIES(persist nlp_atom_types)
 
 TARGET_LINK_LIBRARIES(persist
 	atomspace
+	nlp-types
 	${ODBC_LIBRARIES}
 )
 

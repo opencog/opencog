@@ -48,6 +48,8 @@
 #include <opencog/spacetime/TimeServer.h>
 #include <opencog/spacetime/SpaceTime.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+
 #include "AtomSpaceUtil.h"
 #include "PredefinedProcedureNames.h"
 #include "CompareAtomTreeTemplate.h"
