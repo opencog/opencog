@@ -85,8 +85,12 @@ static void usage(const char* progname)
 // Catch and report sigsegv
 void sighand(int sig)
 {
+    logger().setPrintToStdoutFlag(true);
     logger().error() << "Caught signal " << sig << " (" << strsignal(sig)
         << ") on thread " << std::this_thread::get_id();
+    logger().flush();
+    sleep(3);
+    exit(1);
 }
 
 int main(int argc, char *argv[])
