@@ -26,7 +26,6 @@ Missing features/ToDo items
 -- Add full support for CompositeTruthValue.
 -- Add full support for attention values. (??)
 -- Add full support for Atom deletion.
--- Add full support for 64-bit systems, including >4Gigs of atoms.
 -- Provide optimized table layout for EvaluationLinks.
 -- Add support for Space/TimeServer data.
 
@@ -111,7 +110,8 @@ is a good idea. Forcing the server to guess when an atom should be saved
 can lead to inefficiendies. If an atom is going to have a short life, it
 would be pointless to save it to disk. Fetching atoms only when they are
 needed, instead of fetching them earlier, can lead to bottlenecks and
-stalls.  All this remains an open problem.
+stalls.  All this remains an open problem.  Proposal is to auto-fetch
+and write-back only when the AV VLTI is positive.
 
 The current design avoids UUID collisions, and automatically thunks
 UUID's as needed if an accidental collision with the database occurs.
@@ -120,6 +120,20 @@ the SQL database should be opened immediately on cogserver start, before
 any atoms are created.  This will automatically reserve the range of
 UUID's that are stored in the DB, and thus avoid collisions as new atoms
 are created.
+
+ * The TV merge issue. Right now, the AtomSpace/AtomTable is designed to
+merge truth values between an atom that is added to the table, and any
+atom that is already present in the table.  This can lead to unexpected
+truth-value changes when atoms are being fetched from the backend.  The
+correct solution is probably to change the table to not auto-merge. This
+still leaves the question of what to do with the two TV's, since users
+doing add may want merge, but users fetching from backend may not ...
+
+ * The AV issue.  Two issues, here.  First, if the AV changes to a non
+zero VLTI, the atom should be auto-saved to the backend.  Second, if the
+VLTI is positive, and the TV changes, should this trigger an auto-save?
+Conceptually, it probably should; practically, it may hurt performance.
+Thus, these kinds of writebacks should be carefully managed.
 
 
 Install, Setup and Usage HOWTO

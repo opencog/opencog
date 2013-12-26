@@ -84,6 +84,8 @@ private:
     Handle fetch_atom(Handle);
     Handle fetch_incoming_set(Handle);
     Handle store_atom(Handle);
+    void load_type(Type);
+    void barrier(void);
 
 public:
     const char* id(void);

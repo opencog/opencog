@@ -88,6 +88,14 @@ public:
     void storeAtom(Handle h);
 
     /**
+     * Load *all* atoms of the given type, but only if they are not
+     * already in the AtomTable. 
+     */
+    void loadType(Type t) {
+        if (backing_store) backing_store->loadType(atomTable, t);
+    }
+
+    /**
      * Unconditionally fetch an atom from the backingstore.
      * If there is no backingstore, then Handle::UNDEINFED is returned.
      * If the atom is found in the backingstore, then it is placed in

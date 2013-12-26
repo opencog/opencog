@@ -80,6 +80,14 @@ class BackingStore
 		virtual void storeAtom(Handle) = 0;
 
 		/**
+		 * Load *all* atoms of the given type, but only if they are not
+		 * already in the AtomTable.  (This avoids truth value merges
+		 * between truth values stored in the backend, and truth values
+		 * in the atomspace.)
+		 */
+		virtual void loadType(AtomTable&, Type) = 0;
+
+		/**
 		 * Read-write synchronization barrier.
 		 * All writes will be completed before this routine returns.
 		 * This allows the backend to implement asynchronous writes,

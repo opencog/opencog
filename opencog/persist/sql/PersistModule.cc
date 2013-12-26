@@ -45,6 +45,7 @@ class SQLBackingStore : public BackingStore
 		virtual AtomPtr getAtom(Handle) const;
 		virtual HandleSeq getIncomingSet(Handle) const;
 		virtual void storeAtom(Handle);
+		virtual void loadType(AtomTable&, Type);
 		virtual void barrier();
 };
 };
@@ -82,6 +83,11 @@ HandleSeq SQLBackingStore::getIncomingSet(Handle h) const
 void SQLBackingStore::storeAtom(Handle h)
 {
 	_store->storeAtom(h);
+}
+
+void SQLBackingStore::loadType(AtomTable& at, Type t)
+{
+	_store->loadType(at, t);
 }
 
 void SQLBackingStore::barrier()
@@ -122,12 +128,14 @@ PersistModule::PersistModule(CogServer& cs) : Module(cs), _store(NULL)
 	do_store_register();
 
 #ifdef HAVE_GUILE
-	// XXX These probably should be declared by the atom-space directly,
-	// instead of being declared here ... but I guess this is an OK
-	// home for now.
+	// XXX These should be declared in some generic persistance module,
+	// as they are not specific to the SQL backend only.
+	// But I guess this is an OK home for now.
 	define_scheme_primitive("fetch-atom", &PersistModule::fetch_atom, this);
 	define_scheme_primitive("fetch-incoming-set", &PersistModule::fetch_incoming_set, this);
 	define_scheme_primitive("store-atom", &PersistModule::store_atom, this);
+	define_scheme_primitive("load-atoms-of-type", &PersistModule::load_type, this);
+	define_scheme_primitive("barrier", &PersistModule::barrier, this);
 #endif
 }
 
@@ -219,8 +227,9 @@ std::string PersistModule::do_store(Request *dummy, std::list<std::string> args)
 	return "Database store completed\n";
 }
 
-// XXX TODO: the three methods  below really belong in their own
-// module, independent of this SQL module; they would be applicable for
+// =====================================================================
+// XXX TODO: the methods  below really belong in their own module,
+// independent of this SQL module; they would be applicable for
 // any backend, not just the SQL backend.
 Handle PersistModule::fetch_atom(Handle h)
 {
@@ -245,5 +254,17 @@ Handle PersistModule::store_atom(Handle h)
 	AtomSpace *as = &_cogserver.getAtomSpace();
 	as->getImpl().storeAtom(h);
 	return h;
+}
+
+void PersistModule::load_type(Type t)
+{
+	AtomSpace *as = &_cogserver.getAtomSpace();
+	as->getImpl().loadType(t);
+}
+
+void PersistModule::barrier(void)
+{
+	AtomSpace *as = &_cogserver.getAtomSpace();
+	as->getImpl().barrier();
 }
 
