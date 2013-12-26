@@ -167,6 +167,42 @@ Crash
 opencog::AtomStorage::do_store_single_atom(std::shared_ptr<opencog::Atom>, int)
 STMTF("stv_confidence", tv->getConfidence());
 
+again.... 26 December, no stack-trace, but got "called pure virtual" error msg.
+
+All new crash. Note:
+1) This is with the old scheme singleton-instance.
+2) This one received when defining a function with an unbound variable
+   in it.  It should have just been a standard stack trace, but wasn't.
+3) Sometimes, when doing this, and parser is running, I get 
+
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on threa
+d 47486186035520
+        Stack Trace:
+        2: CogServerMain.cc:92  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::string::append(std::string const&)
+        5: basic_string.h:290     std::string::_M_data() const
+        6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
+        7: continuations.c:511  c_body()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: continuations.c:456 scm_i_with_continuation_barrier()
+        11: continuations.c:550 scm_c_with_continuation_barrier()
+        12: pthread_support.c:1272      GC_call_with_gc_active()
+        13: threads.c:937       with_guile_and_parent()
+        14: misc.c:1835 GC_call_with_stack_base()
+        15: threads.c:959       scm_with_guile()
+        16: SchemeEval.cc:372     opencog::SchemeEval::eval(std::string const&)
+        17: basic_string.h:536  ~basic_string()
+        18: GenericShell.cc:157   opencog::GenericShell::eval(std::string const&, opencog::ConsoleSocket*)
+        19: ConsoleSocket.cc:232          opencog::ConsoleSocket::OnLine(std::string const&)
+        20: basic_string.h:536  ~basic_string()
+        21: thread.cpp:0        thread_proxy()
+        22: pthread_create.c:0  start_thread()
+        23: ??:0        __clone()
+
+
+
 
 Performance
 -----------
@@ -224,3 +260,11 @@ select * from pg_catalog.pg_locks;
 -- vacuum tells em to do following:
    change max_fsm_pages to 600K
    chage max_fsm_relations to 10K
+
+Misc 
+----
+
+Loaded 10000 atoms.  Oh, OK.
+
+Change load-atoms to return a count?
+

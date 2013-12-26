@@ -95,7 +95,8 @@
 ;
 ; If the current truth value on the atom is not a CountTruthValue,
 ; then the truth value is replaced by a CountTruthValue, with the 
-; count set to "cnt".
+; count set to "cnt".  The mean and confidence values are left
+; untouched.
 ;
 ; XXX this implementation is slow/wasteful, a native C++ would
 ; be considerably faster.
