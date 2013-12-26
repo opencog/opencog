@@ -217,7 +217,7 @@ Handle AtomSpaceImpl::addLink(Type t, const HandleSeq& outgoing,
         // If any of the outgoing set is ignorable, we will not
         // fetch the thing from the backing store.
         if (not std::any_of(outgoing.begin(), outgoing.end(),
-            [backing_store](Handle ho) { return backing_store->ignoreAtom(ho); }))
+            [this](Handle ho) { return backing_store->ignoreAtom(ho); }))
         {
             LinkPtr l(backing_store->getLink(t, outgoing));
             if (l) {
@@ -248,7 +248,7 @@ Handle AtomSpaceImpl::getLink(Type t, const HandleSeq& outgoing)
         // If any of the outgoing set is ignorable, we will not
         // fetch the thing from the backing store.
         if (not std::any_of(outgoing.begin(), outgoing.end(),
-            [backing_store](Handle ho) { return backing_store->ignoreAtom(ho); }))
+            [this](Handle ho) { return backing_store->ignoreAtom(ho); }))
         {
             LinkPtr l(backing_store->getLink(t, outgoing));
             if (l) {
