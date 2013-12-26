@@ -79,27 +79,36 @@ class BackingStore
 		 */
 		virtual void storeAtom(Handle) = 0;
 
-      /**
-       * Returns true if the backing store will ignore this type.
-       * This is used for performance optimization, as asking the
-       * backend to retreive an atom can take a long time. If an atom
-       * is of this given type, it will not be fetched.
-       */
-      virtual bool ignoreType(Type t) const {
-          return (_ignored_types.end() != _ignored_types.find(t));
-      }
+		/**
+		 * Read-write synchronization barrier.
+		 * All writes will be completed before this routine returns.
+		 * This allows the backend to implement asynchronous writes,
+		 * while still providing some control to those who need it.
+		 * (Mostly the unit tests, at this time.)
+		 */
+		virtual void barrier() = 0;
 
-      /**
-       * Returns true if the backing store will ignore this atom,
-       * either because it is of an ignorable type, or is a link
-       * which contains an atom that is of an ignorable type.
-       */
-      virtual bool ignoreAtom(Handle) const;
+		/**
+		 * Returns true if the backing store will ignore this type.
+		 * This is used for performance optimization, as asking the
+		 * backend to retreive an atom can take a long time. If an atom
+		 * is of this given type, it will not be fetched.
+		 */
+		virtual bool ignoreType(Type t) const {
+			 return (_ignored_types.end() != _ignored_types.find(t));
+		}
 
-      /**
-       * The set of ignored atom types.
-       */
-      std::set<Type> _ignored_types;
+		/**
+		 * Returns true if the backing store will ignore this atom,
+		 * either because it is of an ignorable type, or is a link
+		 * which contains an atom that is of an ignorable type.
+		 */
+		virtual bool ignoreAtom(Handle) const;
+
+		/**
+		 * The set of ignored atom types.
+		 */
+		std::set<Type> _ignored_types;
 };
 
 /** @}*/

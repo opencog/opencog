@@ -71,6 +71,16 @@ public:
     void unregisterBackingStore(BackingStore *);
 
     /**
+     * Read-write synchronization barrier.
+     * If there is a backing store, then make sure all writes have
+     * been completed.
+     * NB: at this time,we don't distinguish barrier and flush.
+     * Although this is named 'barrier', its actually implemented
+     * as a flush.  This may change in the future.
+     */
+    void barrier(void) { if (backing_store) backing_store->barrier(); }
+
+    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.

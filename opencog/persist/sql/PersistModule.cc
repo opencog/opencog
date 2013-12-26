@@ -45,6 +45,7 @@ class SQLBackingStore : public BackingStore
 		virtual AtomPtr getAtom(Handle) const;
 		virtual HandleSeq getIncomingSet(Handle) const;
 		virtual void storeAtom(Handle);
+		virtual void barrier();
 };
 };
 
@@ -81,6 +82,11 @@ HandleSeq SQLBackingStore::getIncomingSet(Handle h) const
 void SQLBackingStore::storeAtom(Handle h)
 {
 	_store->storeAtom(h);
+}
+
+void SQLBackingStore::barrier()
+{
+	_store->flushStoreQueue();
 }
 
 DECLARE_MODULE(PersistModule);
