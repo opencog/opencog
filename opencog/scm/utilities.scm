@@ -54,6 +54,11 @@
     (if (pair? head) (cog-set-vtv! (mtv tail) (car head) (cdr head))
         (cog-new-mtv head (cadr x)))))
 
+; Fetch the mean, confidence and count of a TV.
+(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
+(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))
+(define (tv-count tv) (assoc-ref (cog-tv->alist tv) 'count))
+
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))

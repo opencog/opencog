@@ -6,34 +6,27 @@
 ; Copyright (c) 2013 Linas Vepstas
 ;
 ; ----------------------------------------------------
-; Count the total number of times that all words have been observed.
-;
-; Do this by obtaining all WordNodes, and adding up the 'count' values
-; on their CountTruthValue.
+; Count the total number of times that the atoms in the atom-list have
+; been observed.  The observation-count for a single atom is stored in
+; the 'count' value of its CountTruthValue. This routine just fetches
+; those, and addes them up.
 
-(define (get-total-word-count)
+(define (get-total-atom-count atom-list)
 	(let ((cnt 0))
-		(define (inc atom)
-			(set! cnt
-				(+ cnt
-					(assoc-ref (cog-tv->alist (cog-tv atom)) 'count)
-				)
-			)
-			#f
-		)
-		(cog-map-type inc 'WordNode)
+		(define (inc atom) (set! cnt (+ cnt (tv-count (cog-tv atom)))))
+		(for-each inc atom-list)
 		cnt
 	)
 )
 
 ; ----------------------------------------------------
-; Compute log liklihood of having observed a given word.
+; Compute log liklihood of having observed a given atom.
 ;
 ; The liklihood will be stored in the atom's TV 'confidence' location.
 ; The log liklihood is -log_2(frequency), with the frequency computed
 ; by simply taking the atom's count value, and dividing by the total.
 
-(define (compute-word-logli atom total)
+(define (compute-atom-logli atom total)
 	(let* (
 			(atv (cog-tv->alist (cog-tv atom)))
 			(meen (assoc-ref atv 'mean))
@@ -57,9 +50,9 @@
 	(begin
 		; Make sure that all word-nodes are in the atom table.
 		(load-atoms-of-type 'WordNode)
-		(let ((total (get-total-word-count)))
+		(let ((total (get-total-atom-count (cog-get-atoms 'WordNode))))
 			(cog-map-type
-				(lambda (atom) (compute-word-logli atom total) #f)
+				(lambda (atom) (compute-atom-logli atom total) #f)
 				'WordNode
 			)
 		)
@@ -108,10 +101,41 @@
 ; persistant store. After doing the above, we delete these atoms, as they
 ; are too numerous to keep around.
 
-(define (compute-left-pair-logli word lgrel)
+(define (compute-left-pair-logli word lg_rel)
+	(define bind-link 
+		(BindLink
+			(TypedVariableLink
+				(VariableNode "$left-word")
+				(VariableTypeNode "WordNode")
+			)
+			(ImplicationLink
+				(EvaluationLink
+					lg_rel
+					(ListLink
+						(VariableNode "$left-word")
+						word
+					)
+				)
+				(EvaluationLink
+					lg_rel
+					(ListLink
+						(VariableNode "$left-word")
+						word
+					)
+				)
+			)
+		)
+	)
 	(let* (
-			(junk (fetch-incoming-set word))
-			(inset (cog-incoming-set word))
+			; inset is a list of ListLink's of word-pairs
+			(inset (cog-incoming-set (fetch-incoming-set word)))
+			; relset is a list of EvaluationLinks of word-pairs
+			(relset (append-map 
+					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
+					inset)
+			)
+			; lefties are those with the varyig left side only.
+			(lefties (cog-bind bind-link))
 		)
 	)
 )
@@ -123,7 +147,8 @@
 
 (load-atoms-of-type 'WordNode)
 (define wc (cog-count-atoms 'WordNode))
-(define wc (get-total-word-count))
+(define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
+
 
 (compute-word-prob x wc)
 
