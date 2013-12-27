@@ -40,7 +40,16 @@ Steps:
 8) psql learn-pairs
    learn-pairs=# SELECT * from atoms;
 
-9) She works!
+   The above shows that the database now contains word-counts for
+   pair-wise linkages for the above sentences.
+
+9) Get ready to feed it text.  For example, parse wikipedia.
+   a) Download lang-wiki-pages-articles for some lanugage lang.
+   b) See 'Wikipedia processing' section below. Do the stuff there.
+   c) See the section 'Sentence Splitting'. Set that up.
+   d) See Wikipedia 'Processing, part II' below.
+
+10) Do the stuff in section "Mutual Information".
 
 That's all for now, folks!
 
@@ -98,24 +107,25 @@ cogserver runs at 56% cpu for a while then drops to 26% cpu
 
 Wikipedia processing
 --------------------
-createdb fr_pairs lt_pairs pl_pairs simple_pairs
-cat opencog/persist/sql/atom.sql | psql
-vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+Do the following:
+    createdb fr_pairs lt_pairs pl_pairs simple_pairs
+    cat opencog/persist/sql/atom.sql | psql
+    vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
 
 cleanup files in relex: src/perl
 
-cd /storage/wikipedia
+    cd /storage/wikipedia
 
-mkdir wiki-stripped
-time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
-cd wiki-stripped
-find |wc
-/home/linas/src/relex/src/perl/wiki-clean.sh
-find |wc
-cd ..
-mkdir alpha-pages
-cd alpha-pages
-/home/linas/src/relex/src/perl/wiki-alpha.sh
+    mkdir wiki-stripped
+    time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
+    cd wiki-stripped
+    find |wc
+    /home/linas/src/relex/src/perl/wiki-clean.sh
+    find |wc
+    cd ..
+    mkdir alpha-pages
+    cd alpha-pages
+    /home/linas/src/relex/src/perl/wiki-alpha.sh
 
 simple:
 find |wc     gives 131434 total files
@@ -144,11 +154,15 @@ find |wc gives 1452739 files after cat/template removal
 Sentence Splitting
 ------------------
 Needs to be multi-language
-NLTK
+Maybe NLTK ? .. Not today, but you can experiment.
+Long-term goal is to have opencog know how to sentence-split itself,
+but this is secondary prioruity.
+
+Here's a simple one, easy-to-use:
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
 Has french, polish, latvian
 its LGPL
-Copy this over into relex, for now.
+Copy this over into relex, for now. (Its in the RelEx sources)
 
 cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
 
@@ -161,11 +175,65 @@ and is not considered the end of a sentence.
 (setlocale LC_ALL "")
  (display "Ćićolina")
 
+
+Wikipedia Parsing, part II
+--------------------------
+Now, build some working directories (so that we don't mess up
+alpha-pages after all that work)
+
+    cp -pr alpha-pages beta-pages
+
+* Copy scripts from opencog/nlp/learn/misc-scripts into working dir.
+* Modify as needed for chosen language. 
+* Make sure the scripts point at the RelEx parse server.
+* Copy opencog-lang.conf to opencog build dir.
+  Start cogserver -c opencog-lang.conf 
+* Go back to the wikipedia dir, and run ./wiki-ss-lang.sh
+* Wait a few days.
+* Be sure to psql lang_pairs -c "VACUUM ANALYZE;" every 4 hours or so,
+  as otherwise, performance craters.  Be sure to perform the postgres
+  tuning recommendations fount in postgress peformance wiis, or in
+  the opencog/persist/sql/README file.  See also 'Performance' section
+  below.
+
+Some handy SQL commands:
+SELECT count(uuid) FROM Atoms;
+select count(uuid) from  atoms where type = 77;
+
+type 77 is WordNode for me; verify with
+SELECT * FROM Typecodes;
+
+
+Mutual Information
+------------------
+Compute mutual information, manually, by runnning these scripts:
+compute-mi.scm
+
+
 Crash
 -----
+pure virtual method called
+terminate called without an active exception
+[2013-12-27 03:13:59:571] [ERROR] Caught signal 6 (Aborted) on thread
+
         11: AtomStorage.cc:920
 opencog::AtomStorage::do_store_single_atom(std::shared_ptr<opencog::Atom>, int)
 STMTF("stv_confidence", tv->getConfidence());
+
+Again: 
+        9: ??:0 __cxa_pure_virtual()
+        10: AtomStorage.cc:929    opencog::AtomStorage::do_store_single_atom(std
+::shared_ptr<opencog::Atom>, int)
+        11: AtomStorage.cc:802
+opencog::AtomStorage::do_store_atom(std::shared_ptr<opencog::Atom>)
+
+this time, line 929 is:
+926        // Store the truth value
+927        TruthValuePtr tv = atom->getTruthValue();
+928        TruthValueType tvt = NULL_TRUTH_VALUE;
+929        if (tv) tvt = tv->getType();
+
+
 
 again.... 26 December, no stack-trace, but got "called pure virtual" error msg.
 
@@ -267,4 +335,6 @@ Misc
 Loaded 10000 atoms.  Oh, OK.
 
 Change load-atoms to return a count?
+
+`inet-aton' is deprecated.  Use `inet-pton' instead.
 

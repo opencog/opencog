@@ -14,8 +14,8 @@
 (define (get-total-word-count)
 	(let ((cnt 0))
 		(define (inc atom)
-			(set! cnt 
-				(+ cnt 
+			(set! cnt
+				(+ cnt
 					(assoc-ref (cog-tv->alist (cog-tv atom)) 'count)
 				)
 			)
@@ -27,28 +27,30 @@
 )
 
 ; ----------------------------------------------------
-; Compute frequency of having observed a given word.
+; Compute log liklihood of having observed a given word.
 ;
-; The frequency will be stored in the atom's TV 'confidence' location.
-; The frequency is computed by simply taking the atom's count value,
-; and dividing by the total.
+; The liklihood will be stored in the atom's TV 'confidence' location.
+; The log liklihood is -log_2(frequency), with the frequency computed
+; by simply taking the atom's count value, and dividing by the total.
 
-(define (compute-word-freq atom total)
+(define (compute-word-logli atom total)
 	(let* (
 			(atv (cog-tv->alist (cog-tv atom)))
 			(meen (assoc-ref atv 'mean))
 			(cnt (assoc-ref atv 'count))
-			(ntv (cog-new-ctv meen (/ cnt total) cnt))
+			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
+			(ln2 (* -1.4426950408889634 (log (/ cnt total))))
+			(ntv (cog-new-ctv meen ln2 cnt))
 		)
 		(cog-set-tv! atom ntv)
 	)
 )
 
 ; ----------------------------------------------------
-; Compute the occurance frequencies for all words.
+; Compute the occurance logliklihoods for all words.
 ;
 ; Load all word-nodes into the atomspace, first, so that an accurate
-; count of wrd-occurances can be obtained.  The frequency for a given
+; count of word-occurances can be obtained.  The loglikli for a given
 ; word node is stored in the 'confidence' slot of the CountTruthValue.
 
 (define (compute-all-word-freqs)
@@ -57,12 +59,22 @@
 		(load-atoms-of-type 'WordNode)
 		(let ((total (get-total-word-count)))
 			(cog-map-type
-				(lambda (atom) (compute-word-freq atom total) #f)
+				(lambda (atom) (compute-word-logli atom total) #f)
 				'WordNode
 			)
 		)
 	)
 )
+
+; ----------------------------------------------------
+; Compute the left and right word-pair logliklihoods.
+; Pairs 
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         WordNode "bird"
+
 
 ; ----------------------------------------------------
 ; misc hand debug stuff
