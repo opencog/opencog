@@ -140,8 +140,3 @@ FINISHED_BY_LINK <- ORDERED_LINK
 // processing.
 ANCHOR_NODE <- NODE
 
-// Holder of statistical truth values. 
-// XXX not clear if this is used anywhere ... maybe should remove this.
-COUNT_LINK <- ORDERED_LINK
-
-
