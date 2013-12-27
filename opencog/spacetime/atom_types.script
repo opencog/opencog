@@ -9,8 +9,12 @@ STRUCTURE_NODE <- OBJECT_NODE
 IMAGINARY_STRUCTURE_NODE <- OBJECT_NODE
 
 // Time-related atoms:
-AT_TIME_LINK <- ORDERED_LINK
 TIME_NODE <- NODE
+AT_TIME_LINK <- ORDERED_LINK
+LATEST_LINK <- ORDERED_LINK
+
+// ====================================================================
+// Allen Interval algebra links
 
 // XXX TODO Perhaps "overlaps", "equals" and "contains" should be renamed
 // to make it clear that these apply to time intervals, only.
