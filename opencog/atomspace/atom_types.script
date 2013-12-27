@@ -102,36 +102,6 @@ EXECUTION_LINK <- ORDERED_LINK
 EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 
 // ====================================================================
-// Temporal Links used by Python PLN  XXXXXXXXXXX KILL THIS STUFF XXXXXXXXX
-// XXX Thise should be moved out of the core atomspace typespace,
-// and put into some kind of temporal module. XXX FIXME.  
-
-AT_TIME_LINK <- ORDERED_LINK
-TIME_NODE <- NODE
-
-// Time Interval Calculus links.
-// XXXXXXXXXXX KILL THIS STUFF XXXXXXXXX
-// This stuff needs to be moved to some temporal-module or somewhere,
-// but not here, in the core atomspace.
-//
-// XXX TODO Perhaps "overlaps", "equals" and "contains" should be renamed
-// to make it clear that these apply to time intervals, only.
-BEFORE_LINK <- ORDERED_LINK
-OVERLAPS_LINK <- ORDERED_LINK
-DURING_LINK <- ORDERED_LINK
-MEETS_LINK <- ORDERED_LINK
-STARTS_LINK <- ORDERED_LINK
-FINISHES_LINK <- ORDERED_LINK
-EQUALS_LINK <- ORDERED_LINK
-AFTER_LINK <- ORDERED_LINK
-OVERLAPPED_BY_LINK <- ORDERED_LINK
-CONTAINS_LINK <- ORDERED_LINK
-MET_BY_LINK <- ORDERED_LINK
-STARTED_BY_LINK <- ORDERED_LINK
-FINISHED_BY_LINK <- ORDERED_LINK
-
-
-// ====================================================================
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
