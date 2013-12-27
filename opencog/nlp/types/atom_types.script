@@ -32,7 +32,7 @@
 
 WORD_NODE <- NODE
 ANY_NODE <- NODE    // Explicit wildcard node. 
-REFERENCE_LINK <- ASSOCIATIVE_LINK
+REFERENCE_LINK <- ORDERED_LINK
 
 // Custom atoms to identify documents, sentences, word instances
 // These are emitted by RelEx and are used to input text into OpenCog.
@@ -81,11 +81,12 @@ SEME_NODE <- CONCEPT_NODE
 SEMANTIC_RELATION_NODE <- SEME_NODE
 // CONTEXT_NODE <- CONCEPT_NODE // apparently useless
 
-
 // Atoms to identify different interpreations of a single parse.
-// Added for Relex2Logic processing of meanings of sentences.
-INTERPRETATION_NODE <- CONCEPT_NODE
-INTERPRETATION_LINK <- INTENSIONAL_INHERITANCE_LINK
+// Added for Relex2Logic processing of meanings in sentences.
+INTERPRETATION_NODE <- NODE
+INTERPRETATION_LINK <- LINK
+
+// Links for describing different binary-relations in Relex.
 POSSESSION_LINK <- ORDERED_LINK
 QUANTITY_LINK <- ORDERED_LINK
 
