@@ -21,3 +21,16 @@ def function_convolution_uniform(bounds_1, bounds_2):
     result = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0}, FUNCTION_ZERO)
     result.is_normalised = True
     return result
+
+
+if __name__ == '__main__':
+    from numpy import PINF, NINF
+    from math import fabs
+    a, b = 101, 102
+    c, d = 1, 101
+    f = function_convolution_uniform((a, b), (c, d))
+    overlap = max(a, c) - min(b, d)
+    print 'same:', f.integral(-overlap / 2.0, overlap / 2.0)
+    print 'same:', f.integral(NINF, -overlap / 2.0)
+    print 'same:', f.integral(-overlap / 2.0, overlap / 2.0)
+    f.plot().show()

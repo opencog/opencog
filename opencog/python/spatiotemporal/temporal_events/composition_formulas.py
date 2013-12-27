@@ -184,8 +184,8 @@ def learn_lasso():
     from random import randrange
     import numpy as np
 
-    clf = ElasticNet(alpha=0.001)
-    clf.fit(np.array([train_a_b, train_b_c]).T, train_a_c)
+    # clf = ElasticNet(alpha=0.001)
+    # clf.fit(np.array([train_a_b, train_b_c]).T, train_a_c)
 
     csv_reader = csv.reader(open(os.path.dirname(os.path.abspath(__file__)) + '/data.csv~'))
     predicate_index = TemporalRelation.all_relations.index('p')
@@ -223,7 +223,7 @@ def learn_lasso():
     ax.set_zlabel('A{p}C')
     # http://matplotlib.org/examples/color/colormaps_reference.html
     # rstride=1, cstride=1,
-    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.gist_stern_r, linewidth=0, antialiased=False)
+    ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.gist_stern_r, linewidth=0, antialiased=True)
 
     # http://stackoverflow.com/questions/11777381/invert-an-axis-in-a-matplotlib-grafic
     ax = plt.gca()
@@ -301,6 +301,6 @@ if __name__ == '__main__':
 
     start = time.time()
 
-    learn_lasso()
+    new(size=3000000)
 
     print 'Performance:', time.time() - start, 'seconds'
