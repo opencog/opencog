@@ -8,6 +8,8 @@
 ;
 ;--------------------------------------------------------------
 ; Turn on debugging prints -- this generally makes life easier.
+; This only works for guile-1.8 and has no effect for guile-2.0
+; and should be removed 'any day now'.
 (turn-on-debugging)
 
 ;--------------------------------------------------------------

@@ -251,6 +251,8 @@ d 47486186035520
         4: ??:0   std::string::append(std::string const&)
         5: basic_string.h:290     std::string::_M_data() const
         6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
+line 381 is  self->answer = self->do_eval(*(self->pexpr));
+So maybe p is null, or self->pexpr is null..
         7: continuations.c:511  c_body()
         8: vm-i-system.c:855    vm_regular_engine()
         9: eval.c:508   scm_call_4()
