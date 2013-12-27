@@ -340,3 +340,15 @@ Change load-atoms to return a count?
 
 `inet-aton' is deprecated.  Use `inet-pton' instead.
 
+Crap:
+# select * from atoms where outgoing @> ARRAY[2908473];
+ERROR:  operator does not exist: bigint[] @> integer[]
+
+# select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
+ERROR:  operator does not exist: bigint[] @> bigint[]
+
+ERROR:  operator does not exist: bigint[] && bigint[]
+
+Arghh .. postges 8.1 doesn't have this operator!
+Need postgres 8.3
+Full stop.

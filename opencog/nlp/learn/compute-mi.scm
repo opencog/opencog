@@ -67,14 +67,54 @@
 )
 
 ; ----------------------------------------------------
-; Compute the left and right word-pair logliklihoods.
-; Pairs 
+; Compute the left and right word-pair log liklihoods.
+;
+; The computation is performed relative to the LinkGrammar relationship
+; node. (Currently "ANY", but will change as learning progresses.)
+; Thus, a word pair is currently represented as:
+; 
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         WordNode "word"
 ;         WordNode "bird"
+;
+; To compute the left and right frequencies, we do an ad-hoc pattern
+; match to the pattern below (ad-hoc because we don't bother with the
+; pattern matccher here, the patten is too simple. In other cases, for
+; structures more complex than word-pairs, we will need the matcher...)
+; The match pattern for the left-frequencies is:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         VariableNode of type WordNode
+;
+; while that for right-frequencies is:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         VariableNode of type WordNode
+;         WordNode "bird"
+;
+; Sums are performed over all matching patterns (i.e. all values of the
+; VariableNode) Normalization is with respect to the count on the fixed
+; WordNode.
+;
+; Before the above is accomplished, we have to make sure that all links
+; of the above type; are in the atomtable, viz, have been loaded from
+; persistant store. After doing the above, we delete these atoms, as they
+; are too numerous to keep around.
 
+(define (compute-left-pair-logli word lgrel)
+	(let* (
+			(junk (fetch-incoming-set word))
+			(inset (cog-incoming-set word))
+		)
+	)
+)
 
 ; ----------------------------------------------------
 ; misc hand debug stuff
@@ -90,4 +130,9 @@
 select count(uuid) from  atoms where type = 77;
 12199 in fr
 19781 in lt
+
+select * from atoms where name='famille';
+uuid is 2908473
+select * from atoms where outgoing @> ARRAY[2908473];
+select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
 
