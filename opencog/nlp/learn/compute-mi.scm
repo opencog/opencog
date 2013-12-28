@@ -139,9 +139,14 @@
 ; persistant store. After doing the above, we delete these atoms, as they
 ; are too numerous to keep around.
 
-(define (compute-left-pair-logli word lg_rel)
+(define (compute-pair-any-logli word lg_rel)
+
+	; Define the bind links that we'll use with the pattern matcher.
+	; left-bind has the wildcard on the left.
 	(define left-bind-link
 		(BindLink
+			; Be careful to ask for WordNode, since there are also
+			; eval links with AnyNode floating around ...
 			(TypedVariableLink
 				(VariableNode "$left-word")
 				(VariableTypeNode "WordNode")
@@ -164,6 +169,7 @@
 			)
 		)
 	)
+	; right-bind has the wildcard on the right.
 	(define right-bind-link
 		(BindLink
 			(TypedVariableLink
@@ -196,7 +202,7 @@
 					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
 					inset)
 			)
-			; lefties are those with the varying left side only.
+			; lefties are those with the wildcard on the left side.
 			; XXX It would be more efficient to not use the pattern
 			; matcher here, but to instead filter the given relset.
 			; But I'm lazy, for just right now.
@@ -208,7 +214,6 @@
 			; the total occurance counts
 			(left-total (get-total-atom-count lefties))
 			(right-total (get-total-atom-count righties))
-
 		)
 		(begin
 			; Create the two evaluation links to hold the counts.
@@ -241,9 +246,28 @@
 			(delete-hypergraph right-bind-link)
 			(cog-delete left-list)
 			(cog-delete right-list)
-			(for-each cog-delete relset)
+
+			; OK, we want to do this: (for-each cog-delete relset)
+			; but we can't, because this would also delete the wildcard
+			; evaluation links. We want to keep those around. So ugly
+			; filter.
+			(for-each 
+				(lambda (x) 
+					; Returns true if either the left or right side is
+					; the any-node
+					(define (is-any? evl) 
+						(define (zany atom) (eq? (cog-type atom) 'AnyNode))
+						(if (zany (gadr evl)) #t (zany (gddr evl)))
+					)
+
+					(if (not (is-any? x)) (cog-delete x))
+				)
+				relset
+			)
+
 			(for-each cog-delete inset)
 
+			; what the hell, return the two things
 			(list left-star right-star)
 		)
 	)
@@ -254,7 +278,7 @@
 ;
 ; (define x (WordNode "famille"))
 ; (define y (LinkGrammarRelationshipNode "ANY"))
-; (compute-left-pair-logli  x y)
+; (compute-pair-any-logli  x y)
 ;
 ; (load-atoms-of-type 'WordNode)
 ; (define wc (cog-count-atoms 'WordNode))
@@ -275,5 +299,12 @@
 ; 43464154
 ; duuude left-star handle is 
 ; 43464157duuude good by
+;
+; (define wtfl  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
+;   (ListLink (AnyNode "left-word") (WordNode "famille"))))
+;
+; (define wtfr  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
+;     (ListLink (WordNode "famille") (AnyNode "right-word"))))
+
 
 
