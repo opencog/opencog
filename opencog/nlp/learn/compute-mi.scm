@@ -83,10 +83,17 @@
 )
 
 ; ----------------------------------------------------
-; Compute the left and right word-pair log liklihoods.
+; Compute the left and right word-pair wildcard counts.
+; That is, compute the summations N(w,*) and N(*,w) where * denotes
+; a wildcard, and ranges over all words observed in that slot.
+; Store the resulting counts in a wild-card count structure, described
+; below.
 ;
-; The computation is performed relative to the LinkGrammar relationship
-; node. (Currently "ANY", but will change as learning progresses.)
+; To be precise, the summation is performed relative to the given
+; LinkGrammar relationship node.  That is, the sumation only occurs
+; over word pairs connected by the given link-grammar link.
+; (Link grammar links are encoded with LinkGrammarRelationshipNode's).
+;
 ; Thus, a word pair is currently represented as:
 ;
 ;   EvaluationLink
@@ -95,29 +102,31 @@
 ;         WordNode "word"
 ;         WordNode "bird"
 ;
-; To compute the left and right frequencies, we do an ad-hoc pattern
+; To compute the left and right counts, we do an ad-hoc pattern
 ; match to the pattern below (ad-hoc because we don't bother with the
-; pattern matccher here, the patten is too simple. In other cases, for
+; pattern matcher here, the patten is too simple. In other cases, for
 ; structures more complex than word-pairs, we will need the matcher...)
-; The match pattern for the left-frequencies is:
+; (Err, actually, we *do* use the pattern matcher, but the code would
+; be faster and more efficient if we didn't. This should be fixed...)
+;
+; The match pattern for the right-counts is:
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         WordNode "word"
-;         VariableNode of type WordNode
+;         VariableNode of type WordNode   ; i.e. a wildcard here.
 ;
-; while that for right-frequencies is:
+; while that for left-counts is:
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
-;         VariableNode of type WordNode
+;         VariableNode of type WordNode  ; i.e. a wildcard on the left.
 ;         WordNode "bird"
 ;
 ; Sums are performed over all matching patterns (i.e. all values of the
-; VariableNode) Normalization is with respect to the count on the fixed
-; WordNode.
+; VariableNode).
 ;
 ; The resulting sums are stored in the CountTruthValues (on the
 ; EvaluationLink) of the following structures:
@@ -125,21 +134,20 @@
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
-;         AnyNode "right-word"
+;         AnyNode "left-word"
 ;         WordNode "bird"
 ;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
 ;         WordNode "word"
-;         AnyNode "left-word"
+;         AnyNode "right-word"
 ;
-; Before the above is accomplished, we have to make sure that all links
-; of the above type; are in the atomtable, viz, have been loaded from
-; persistant store. After doing the above, we delete these atoms, as they
-; are too numerous to keep around.
+; This routine assumes that all relevant atoms are already in the atomspace.
+; If they're not, incorrect counts will be obtained.
+; Use the fetch-and-compute-pair-wildcard-counts below to fetch.
 
-(define (compute-pair-any-logli word lg_rel)
+(define (compute-pair-wildcard-counts word lg_rel)
 
 	; Define the bind links that we'll use with the pattern matcher.
 	; left-bind has the wildcard on the left.
@@ -195,13 +203,6 @@
 		)
 	)
 	(let* (
-			; inset is a list of ListLink's of word-pairs
-			(inset (cog-incoming-set (fetch-incoming-set word)))
-			; relset is a list of EvaluationLinks of word-pairs
-			(relset (append-map
-					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
-					inset)
-			)
 			; lefties are those with the wildcard on the left side.
 			; XXX It would be more efficient to not use the pattern
 			; matcher here, but to instead filter the given relset.
@@ -240,13 +241,43 @@
 			(store-atom left-star)
 			(store-atom right-star)
 
-			; And now ... delete all the atoms we fetched, so we don't
-			; glom up the atomspace.
+			; And now ... delete some of the crap we created.
+			; Don't want to pollute the atomspace.
+			; Note that cog-delete only goes one level deep, it does not recurse.
 			(delete-hypergraph left-bind-link)
 			(delete-hypergraph right-bind-link)
 			(cog-delete left-list)
 			(cog-delete right-list)
 
+			; What the hell, return the two things
+			(list left-star right-star)
+		)
+	)
+)
+
+; ----------------------------------------------------
+; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
+; compute-pair-wildcard-counts
+;
+; Before compute-pair-wildcard-counts can do it's stuff, we have to
+; make sure that all the relevant word-pairs are in the atomspace
+; (viz. loaded from persistant store.)  After loading and computing,
+; we delete these atoms, as they are too numerous to keep around.
+;
+(define (fetch-and-compute-pair-wildcard-counts word lg_rel)
+	(let* (
+			; inset is a list of ListLink's of word-pairs
+			(inset (cog-incoming-set (fetch-incoming-set word)))
+			; relset is a list of EvaluationLinks of word-pairs
+			(relset (append-map
+					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
+					inset)
+			)
+			; The main, wrapped routine.
+			(result (compute-pair-wildccard-counts word lg_rel))
+		)
+		(begin
+			; Now, delete all the crap that we fetched.
 			; OK, we want to do this: (for-each cog-delete relset)
 			; but we can't, because this would also delete the wildcard
 			; evaluation links. We want to keep those around. So ugly
@@ -266,9 +297,7 @@
 			)
 
 			(for-each cog-delete inset)
-
-			; what the hell, return the two things
-			(list left-star right-star)
+			result
 		)
 	)
 )
