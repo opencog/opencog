@@ -5,7 +5,7 @@
 ;
 ; Copyright (c) 2013 Linas Vepstas
 ;
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
 ; the 'count' value of its CountTruthValue. This routine just fetches
@@ -21,7 +21,7 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; Compute log liklihood of having observed a given atom.
 ;
 ; The liklihood will be stored in the atom's TV 'confidence' location.
@@ -43,7 +43,7 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; Compute the occurance logliklihoods for a list of atoms.
 ;
 ; This sums up the occurance-count over the entire list of atoms,
@@ -65,7 +65,7 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; Compute the occurance logliklihoods for all words.
 ;
 ; Load all word-nodes into the atomspace, first, so that an accurate
@@ -82,7 +82,7 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; Compute the left and right word-pair wildcard counts.
 ; That is, compute the summations N(w,*) and N(*,w) where * denotes
 ; a wildcard, and ranges over all words observed in that slot.
@@ -243,9 +243,10 @@
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
-			; Note that cog-delete only goes one level deep, it does not recurse.
 			(delete-hypergraph left-bind-link)
 			(delete-hypergraph right-bind-link)
+			; Note that cog-delete only goes one level deep, it does not
+			; recurse; so the below only delete the ListLink at the top.
 			(cog-delete left-list)
 			(cog-delete right-list)
 
@@ -255,7 +256,7 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
 ; fetch-and-compute-pair-wildcard-counts -- fetch wrapper around
 ; compute-pair-wildcard-counts
 ;
@@ -302,24 +303,134 @@
 	)
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
+; Compute wildcard counts for all word-pairs, for the relation lg_rel.
+; lg_rel is a link-grammar link type.
 ;
-; loop over all words.
-(define (all-pairs lg_rel)
-	(load-atoms-of-type 'WordNode)
-	(for-each 
-		(lambda (word) 
-			(fetch-and-compute-pair-wildcard-counts word lg_rel)
+; This loops over all words, and computes the one-sided wild-card
+; counts for these. Only the counts for the link-grammar link type
+; lg_rel are computed.
+;
+; Caution: this can take hours or days to run.
+;
+(define (all-pair-wildcard-counts lg_rel)
+	(begin
+		; Make sure all words are in the atomspace
+		(load-atoms-of-type 'WordNode)
+
+		; For each word, fetch the word-pairs it occurs in, compute
+		; the counts, and then delete the word-pairs. (saving teh counts).
+		(for-each 
+			(lambda (word) 
+				(fetch-and-compute-pair-wildcard-counts word lg_rel)
+			)
+			(cog-get-atoms 'WordNode)
 		)
-		(cog-get-atoms 'WordNode)
 	)
 )
 
 (define (do-em-all)
-	(all-pairs (LinkGrammarRelationshipNode "ANY"))
+	(all-pair-wildcard-counts (LinkGrammarRelationshipNode "ANY"))
 )
 
-; ----------------------------------------------------
+; ---------------------------------------------------------------------
+; Do it all.
+;
+(define (batch-all-pair-wildcard-counts lg_rel)
+	(begin
+		; Make sure all words are in the atomspace
+		(load-atoms-of-type 'WordNode)
+		; Make sure all word-pairs are in the atomspace.
+		(fetch-incoming-set lg_rel)
+		; Compute the counts
+		(for-each 
+			(lambda (word) 
+				(compute-pair-wildcard-counts word lg_rel)
+			)
+			(cog-get-atoms 'WordNode)
+		)
+	)
+)
+
+(define (batch-all-pair-count lg_rel)
+	(define l-cnt 0)
+	(define r-cnt 0)
+	(begin
+		; First, get the left and right wildcard counts.
+		(batch-all-pair-wildcard-counts lg_rel)
+
+		; Now, loop over all words, totalling up the counts.
+		(for-each 
+			(lambda (word) 
+				(set! l-cnt
+					(+ l-cnt (get_left_wildcard_count word lg_rel))
+				)
+				(set! r-cnt
+					(+ r-cnt (get_right_wildcard_count word lg_rel))
+				)
+			)
+			(cog-get-atoms 'WordNode)
+		)
+
+		; The left and right counts should be equal
+		(if (not (eq? l-cnt r-cnt))
+			(display "Error: word-pair-counts unequal: ")
+			(display l-cnt)
+			(display " ")
+			(display r-cnt)
+			(display "\n")
+		)
+
+		; Create and save the grand-total count.
+		(store-atom 
+			(EvaluationLink (cog-new-ctv 0 0 r-cnt)
+				lg_rel
+				(ListLink
+					(AnyNode "left-word")
+					(AnyNode "right-word")
+				)
+			)
+		)
+	)
+)
+
+(define (batch-all-pair-wildcard-logli lg_rel)
+	(begin
+		; First, get the counts.
+		(batch-all-pair-wildcard-counts lg_rel)
+
+		; Now, total up the counts.
+		(for-each 
+			(lambda (word) 
+			)
+			(cog-get-atoms 'WordNode)
+		)
+	)
+)
+
+; ---------------------------------------------------------------------
+; Get the left wild-card count for word and lg_rel.
+; (that is, the wildcard is on the left side)
+
+(define (get_left_wildcard_count word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+	)
+	(tv-count (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
+; Get the right wild-card count for word and lg_rel.
+; (that is, the wildcard is on the right side)
+
+(define (get_right_wildcard_count word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
+	)
+	(tv-count (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
 ; misc hand debug stuff
 ;
 ; (define x (WordNode "famille"))
@@ -331,12 +442,10 @@
 ; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
 ;
-;
-;
 ; (compute-word-prob x wc)
 ;
-; select count(uuid) from  atoms where type = 77;
-; 12199 in fr
+; select count(*) from  atoms where type = 77;
+; 16785 in fr
 ; 19781 in lt
 ;
 ; select * from atoms where name='famille';
@@ -353,6 +462,12 @@
 ;
 ; (define wtfr  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
 ;     (ListLink (WordNode "famille") (AnyNode "right-word"))))
-
-
+;
+;
+; anynode is type 105
+;  select * from atoms where type=105;
+; uuid is 43464152
+;         43464155
+; select count(*) from atoms where outgoing @> ARRAY[cast(43464152 as bigint)];
+; returns the number of word-pairs which we've wild-carded.
 
