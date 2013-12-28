@@ -785,7 +785,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < store_queue.size());
-		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
+		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
 
