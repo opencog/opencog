@@ -10,7 +10,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "Nationality")
 	(ListLink
-		(AvatarNode "person1")
+		(FeatureNode "person1") ; AvatarNode
 		(ConceptNode "British")
 	)
 )
@@ -18,7 +18,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
-		(AvatarNode "person1")
+		(FeatureNode "person1") ; AvatarNode
 		(ConceptNode "red_house")
 	)
 )
@@ -27,7 +27,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
-		(AvatarNode "person2")
+		(FeatureNode "person2")
 		(ConceptNode "red_house")
 	)
 )
@@ -35,7 +35,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "KeepsPet")
 	(ListLink
-		(AvatarNode "person2")
+		(FeatureNode "person2")
 		(ConceptNode "fish")
 	)
 )
