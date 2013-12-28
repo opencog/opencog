@@ -112,7 +112,16 @@ public:
 
         _logger.flush();
 
-        TS_ASSERT_LESS_THAN_EQUALS(nLines, countLines(filename));
+        // Hmm. I don't get it. Logger::flush calls fdatasync(),
+        // appearently this is not enough to prevent a race condition
+        // between the logger write, and the read to count the lines.
+        // I really don't get it .. the fdatasync should have been enough.
+        // To work around this, force a sync() below to avoid spurious
+        // test-case failures.
+        sync();
+
+        int found = countLines(filename);
+        TS_ASSERT_LESS_THAN_EQUALS(nLines, found);
         remove(filename);
     }
 

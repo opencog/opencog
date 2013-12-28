@@ -35,7 +35,6 @@
 #include <iostream>
 #include <sstream>
 
-#include <sched.h>
 #include <stdarg.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -191,13 +190,21 @@ void Logger::writingLoop()
 
 void Logger::flush()
 {
+    // There is a timing window between when pending_write is set,
+    // and the msg_queue being empty. We could fall through that
+    // window. Yes, its stupid, but too low-importance to fix.
+    // try to work around it by sleeping.
+    usleep(10);
+
     // Perhaps we could do this with semaphors, but this is not
     // really critical code, so a busy-wait is good enough.
     while (pending_write or not msg_queue.is_empty())
     {
-        sched_yield();
         usleep(100);
     }
+
+    // Force a write to the disk. Don't need to update metadata, though.
+    if (f) fdatasync(fileno(f));
 }
 
 void Logger::writeMsg(std::string &msg)
@@ -235,9 +242,12 @@ void Logger::writeMsg(std::string &msg)
 
     // Write to file.
     fprintf(f, "%s", msg.c_str());
+
+    // Flush, because log messages are important, especially if we
+    // are about to crash. So we don't want to have these buffered up.
     fflush(f);
 
-    // Stdout writing ust be unlocked.
+    // Stdout writing must be unlocked.
     lock.unlock();
 
     // Write to stdout.
