@@ -785,7 +785,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < store_queue.size());
-		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
+		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
 
@@ -1544,6 +1544,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("AtomStorage::loadType: Max Height is %d\n", max_height);
 
 	setup_typemap();
+	int db_atom_type = storing_typemap[atom_type];
 
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
@@ -1558,7 +1559,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ,
 			"SELECT * FROM Atoms WHERE height = %d AND type = %d;",
-			 hei, atom_type);
+			 hei, db_atom_type);
 		rp.height = hei;
 		rp.rs = db_conn->exec(buff);
 		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
@@ -1578,7 +1579,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
 			        "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         atom_type, hei, rec, rec+STEP);
+			         db_atom_type, hei, rec, rec+STEP);
 			rp.height = hei;
 			rp.rs = db_conn->exec(buff);
 			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
@@ -1586,7 +1587,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 		}
 #endif
 		logger().debug("AtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
-			load_count - cur, atom_type, hei);
+			load_count - cur, db_atom_type, hei);
 	}
 	put_conn(db_conn);
 	logger().debug("AtomStorage::loadType: Finished loading %lu atoms in total\n",

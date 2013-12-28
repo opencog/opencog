@@ -31,7 +31,7 @@
 //
 
 WORD_NODE <- NODE
-ANY_NODE <- NODE  // This is the Kleene star 
+ANY_NODE <- NODE    // Explicit wildcard node. 
 REFERENCE_LINK <- ASSOCIATIVE_LINK
 
 // Custom atoms to identify documents, sentences, word instances

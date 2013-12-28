@@ -235,6 +235,8 @@ this time, line 929 is:
 
 again... 26 December, no stack-trace, but got "called pure virtual" error msg.
 again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
+again... 27 Dec, 929        if (tv) tvt = tv->getType();
+again... 28 Dec, didn't get a stack...
 
 All new crash. Note:
 1) This is with the old scheme singleton-instance.
@@ -330,6 +332,13 @@ select * from pg_catalog.pg_locks;
    change max_fsm_pages to 600K
    chage max_fsm_relations to 10K
 
+Anyway ... performance measured as of 27 Dec 2013:
+
+Takes about 105 millisecs to clear 90 eval-links from the write-back
+queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
+so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
+which is still pretty pathetic... 
+
 Misc 
 ----
 
@@ -337,17 +346,7 @@ Loaded 10000 atoms.  Oh, OK.
 
 Change load-atoms to return a count?
 
-`inet-aton' is deprecated.  Use `inet-pton' instead.
+handle SIGPWR nostop noprint
+handle SIGXCPU nostop noprint
 
-Crap:
-# select * from atoms where outgoing @> ARRAY[2908473];
-ERROR:  operator does not exist: bigint[] @> integer[]
 
-# select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
-ERROR:  operator does not exist: bigint[] @> bigint[]
-
-ERROR:  operator does not exist: bigint[] && bigint[]
-
-Arghh .. postges 8.1 doesn't have this operator!
-Need postgres 8.3
-Full stop.
