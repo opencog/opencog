@@ -329,12 +329,17 @@
 	)
 )
 
-(define (do-em-all)
-	(all-pair-wildcard-counts (LinkGrammarRelationshipNode "ANY"))
-)
-
 ; ---------------------------------------------------------------------
-; Do it all.
+; Compute wildcard counts for all word-pairs, for the relation lg_rel.
+; lg_rel is a link-grammar link type.
+;
+; This loops over all words, and computes the one-sided wild-card
+; counts for these. Only the counts for the link-grammar link type
+; lg_rel are computed.
+;
+; The computation is done batch-style; all word-pairs are pulled into
+; the atomspace first, and then the sums are taken. This can blow up
+; RAM usage.
 ;
 (define (batch-all-pair-wildcard-counts lg_rel)
 	(begin
@@ -352,13 +357,29 @@
 	)
 )
 
+; ---------------------------------------------------------------------
+; Compute the total number of observed word-pairs for the link-grammar
+; link (relation) lg_rel.
+;
+; The resulting total count is stored as the count on the EvaluationLink
+; for the structure
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "Blah"
+;      ListLink
+;         AnyNode "left-word"
+;         AnyNode "right-word"
+;
+; where lg_rel is (LinkGrammarRelationshipNode "Blah")
+;
+; The computation is performed batch-style. This function assumes that
+; all word-pairs are already loaded in the atom table; it will get
+; incorrect counts if this is not the case.
+;
 (define (batch-all-pair-count lg_rel)
 	(define l-cnt 0)
 	(define r-cnt 0)
 	(begin
-		; First, get the left and right wildcard counts.
-		(batch-all-pair-wildcard-counts lg_rel)
-
 		; Now, loop over all words, totalling up the counts.
 		(for-each 
 			(lambda (word) 
@@ -394,18 +415,79 @@
 	)
 )
 
-(define (batch-all-pair-wildcard-logli lg_rel)
-	(begin
-		; First, get the counts.
-		(batch-all-pair-wildcard-counts lg_rel)
+; ---------------------------------------------------------------------
+; Compute the log-liklihood for all wild-card wordpairs, for lg_rel.
+; lg_rel is a link-gramar link (LinkGrammarRelationshipNode)
+;
+; This computes the logliklihood for all wild-card pairs of the form:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "Blah"
+;      ListLink
+;         WordNode "some-word"
+;         AnyNode "right-word"
+;
+; and also for the flipped version (exchange WordNode and AnyNode)
+; Here, lg_rel is (LinkGrammarRelationshipNode "Blah")
+;
+; The log likelihood is stored in the 'confidence' slot on the eval
+; link truth value (where logli's are always stored).
+;
+; The computation is performed "batch style", it assumes that all
+; words in the atomspace; missing words will cause the corresponding
+; pairs to be missed.
 
-		; Now, total up the counts.
-		(for-each 
-			(lambda (word) 
+(define (batch-all-pair-wildcard-logli lg_rel)
+
+	; Get the word-pair grand-total
+	(define pair-total
+		; Return the count for all pairs.
+		(tv-count (cog-tv 
+			(EvaluationLink lg_rel
+				(ListLink (AnyNode "left-word") (AnyNode "right-word"))
 			)
-			(cog-get-atoms 'WordNode)
-		)
+		))
 	)
+
+	; For each wild-card pair associated with the word,
+	; obtain the log likelihood.
+	(for-each 
+		(lambda (word)
+			; log-likelihood for the left wildcard
+			(store-atom 
+ 				(compute-atom-logli
+					(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+					pair-total
+				)
+			)
+			; log-likelihood for the right wildcard
+			(store-atom 
+ 				(compute-atom-logli
+					(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
+					pair-total
+				)
+			)
+		)
+		(cog-get-atoms 'WordNode)
+	)
+)
+
+; ---------------------------------------------------------------------
+
+(define (batch-all-pair-mi lg_rel)
+		(begin
+			; First, get the left and right wildcard counts.
+			(batch-all-pair-wildcard-counts lg_rel)
+(display "duuuuude done with pair wildcards\n")
+
+			; Now, get the grand-total
+			(batch-all-pair-count lg_rel)
+(display "duuuuude done with grand-total\n")
+
+)
+
+(define (do-em-all)
+	(batch-all-pair-wildcard-logli (LinkGrammarRelationshipNode "ANY"))
 )
 
 ; ---------------------------------------------------------------------
