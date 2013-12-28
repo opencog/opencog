@@ -88,7 +88,7 @@
 ; The computation is performed relative to the LinkGrammar relationship
 ; node. (Currently "ANY", but will change as learning progresses.)
 ; Thus, a word pair is currently represented as:
-; 
+;
 ;   EvaluationLink
 ;      LinkGrammarRelationshipNode "ANY"
 ;      ListLink
@@ -119,7 +119,7 @@
 ; VariableNode) Normalization is with respect to the count on the fixed
 ; WordNode.
 ;
-; The resulting sums are stored in the CountTruthValues (on the 
+; The resulting sums are stored in the CountTruthValues (on the
 ; EvaluationLink) of the following structures:
 ;
 ;   EvaluationLink
@@ -140,7 +140,7 @@
 ; are too numerous to keep around.
 
 (define (compute-left-pair-logli word lg_rel)
-	(define left-bind-link 
+	(define left-bind-link
 		(BindLink
 			(TypedVariableLink
 				(VariableNode "$left-word")
@@ -164,7 +164,7 @@
 			)
 		)
 	)
-	(define right-bind-link 
+	(define right-bind-link
 		(BindLink
 			(TypedVariableLink
 				(VariableNode "$right-word")
@@ -192,7 +192,7 @@
 			; inset is a list of ListLink's of word-pairs
 			(inset (cog-incoming-set (fetch-incoming-set word)))
 			; relset is a list of EvaluationLinks of word-pairs
-			(relset (append-map 
+			(relset (append-map
 					(lambda (ll) (cog-incoming-set (fetch-incoming-set ll)))
 					inset)
 			)
@@ -209,8 +209,10 @@
 			(left-total (get-total-atom-count lefties))
 			(right-total (get-total-atom-count righties))
 
+		)
+		(begin
 			; Create the two evaluation links to hold the counts.
-			(left-star
+			(define left-star
 				(EvaluationLink (cog-new-ctv 0 0 left-total)
 					lg_rel
 					(ListLink
@@ -219,7 +221,7 @@
 					)
 				)
 			)
-			(right-star
+			(define right-star
 				(EvaluationLink (cog-new-ctv 0 0 right-total)
 					lg_rel
 					(ListLink
@@ -228,41 +230,50 @@
 					)
 				)
 			)
+
+			; Save these hard-won counts to the database.
+			(store-atom left-star)
+			(store-atom right-star)
+
+			; And now ... delete all the atoms we fetched, so we don't
+			; glom up the atomspace.
+			(delete-hypergraph left-bind-link)
+			(delete-hypergraph right-bind-link)
+			(cog-delete left-list)
+			(cog-delete right-list)
+			(for-each cog-delete relset)
+			(for-each cog-delete inset)
+
+			(list left-star right-star)
 		)
-
-		; Save these hard-won counts to the database.
-		(store-atom left-star)
-		(store-atom right-star)
-
-		; And now ... delete all the atoms we fetched, so we don't
-		; glom up the atomspace.
-		(cog-delete left-bind-link)
-		(cog-delete right-bind-link)
-		(cog-delete left-list)
-		(cog-delete right-list)
-		(for-each cog-delete relset)
-		(for-each cog-delete inset)
 	)
 )
 
 ; ----------------------------------------------------
 ; misc hand debug stuff
+;
+; (define x (WordNode "famille"))
+; (define y (LinkGrammarRelationshipNode "ANY"))
+; (compute-left-pair-logli  x y)
+;
+; (load-atoms-of-type 'WordNode)
+; (define wc (cog-count-atoms 'WordNode))
+; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
+;
+;
+; (compute-word-prob x wc)
+;
+; select count(uuid) from  atoms where type = 77;
+; 12199 in fr
+; 19781 in lt
+;
+; select * from atoms where name='famille';
+; uuid is 2908473
+; select * from atoms where outgoing @> ARRAY[2908473];
+; select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
+;
+; 43464154
+; duuude left-star handle is 
+; 43464157duuude good by
 
-(define x (WordNode "famille"))
-
-(load-atoms-of-type 'WordNode)
-(define wc (cog-count-atoms 'WordNode))
-(define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
-
-
-(compute-word-prob x wc)
-
-select count(uuid) from  atoms where type = 77;
-12199 in fr
-19781 in lt
-
-select * from atoms where name='famille';
-uuid is 2908473
-select * from atoms where outgoing @> ARRAY[2908473];
-select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
 
