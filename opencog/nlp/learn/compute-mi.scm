@@ -274,7 +274,7 @@
 					inset)
 			)
 			; The main, wrapped routine.
-			(result (compute-pair-wildccard-counts word lg_rel))
+			(result (compute-pair-wildcard-counts word lg_rel))
 		)
 		(begin
 			; Now, delete all the crap that we fetched.
@@ -303,15 +303,34 @@
 )
 
 ; ----------------------------------------------------
+;
+; loop over all words.
+(define (all-pairs lg_rel)
+	(load-atoms-of-type 'WordNode)
+	(for-each 
+		(lambda (word) 
+			(fetch-and-compute-pair-wildcard-counts word lg_rel)
+		)
+		(cog-get-atoms 'WordNode)
+	)
+)
+
+(define (do-em-all)
+	(all-pairs (LinkGrammarRelationshipNode "ANY"))
+)
+
+; ----------------------------------------------------
 ; misc hand debug stuff
 ;
 ; (define x (WordNode "famille"))
 ; (define y (LinkGrammarRelationshipNode "ANY"))
-; (compute-pair-any-logli  x y)
+; (fetch-and-compute-pair-wildcard-counts x y)
 ;
 ; (load-atoms-of-type 'WordNode)
 ; (define wc (cog-count-atoms 'WordNode))
+; (length (cog-get-atoms 'WordNode))
 ; (define wc (get-total-atom-count (cog-get-atoms 'WordNode)))
+;
 ;
 ;
 ; (compute-word-prob x wc)
