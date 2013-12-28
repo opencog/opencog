@@ -9,7 +9,6 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(
 	cogutil
-	comboreduct
 )
 
 ADD_CXXTEST(ConfigUTest)
