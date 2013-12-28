@@ -112,7 +112,7 @@
 ; That is, get the count, for wild-cards on both the left and right.
 
 (define (get-pair-total lg_rel)
-	(tv-count (cog-tv 
+	(tv-count (cog-tv
 		(EvaluationLink lg_rel
 			(ListLink (AnyNode "left-word") (AnyNode "right-word"))
 		)
@@ -342,11 +342,11 @@
 			; but we can't, because this would also delete the wildcard
 			; evaluation links. We want to keep those around. So ugly
 			; filter.
-			(for-each 
-				(lambda (x) 
+			(for-each
+				(lambda (x)
 					; Returns true if either the left or right side is
 					; the any-node
-					(define (is-any? evl) 
+					(define (is-any? evl)
 						(define (zany atom) (eq? (cog-type atom) 'AnyNode))
 						(if (zany (gadr evl)) #t (zany (gddr evl)))
 					)
@@ -379,8 +379,8 @@
 
 		; For each word, fetch the word-pairs it occurs in, compute
 		; the counts, and then delete the word-pairs. (saving teh counts).
-		(for-each 
-			(lambda (word) 
+		(for-each
+			(lambda (word)
 				(fetch-and-compute-pair-wildcard-counts word lg_rel)
 			)
 			(cog-get-atoms 'WordNode)
@@ -407,8 +407,8 @@
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
 		; Compute the counts
-		(for-each 
-			(lambda (word) 
+		(for-each
+			(lambda (word)
 				(compute-pair-wildcard-counts word lg_rel)
 			)
 			(cog-get-atoms 'WordNode)
@@ -440,8 +440,8 @@
 	(define r-cnt 0)
 	(begin
 		; Now, loop over all words, totalling up the counts.
-		(for-each 
-			(lambda (word) 
+		(for-each
+			(lambda (word)
 				(set! l-cnt
 					(+ l-cnt (get_left_wildcard_count word lg_rel))
 				)
@@ -462,7 +462,7 @@
 		)
 
 		; Create and save the grand-total count.
-		(store-atom 
+		(store-atom
 			(EvaluationLink (cog-new-ctv 0 0 r-cnt)
 				lg_rel
 				(ListLink
@@ -503,17 +503,17 @@
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
-	(for-each 
+	(for-each
 		(lambda (word)
 			; log-likelihood for the left wildcard
-			(store-atom 
+			(store-atom
  				(compute-atom-logli
 					(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
 					pair-total
 				)
 			)
 			; log-likelihood for the right wildcard
-			(store-atom 
+			(store-atom
  				(compute-atom-logli
 					(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
 					pair-total
@@ -525,6 +525,9 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+; Compute word-pair mutual information, for all word-pairs with the given
+; word being on the right...
 ;
 (define (compute-pair-mi right-word lg_rel)
 
@@ -562,30 +565,35 @@
 		)
 		(begin
 			(for-each
+
+				; This lambda sets the mutual information for each word-pair.
 				(lambda (pair)
 					(let* (
-						; the left-word of the word-pair
-						(left-word (gadr pair))
-						; the count truth value bits n pieces
-						(atv (cog-tv->alist (cog-tv atom)))
-						(meen (assoc-ref atv 'mean))
-						(cnt (assoc-ref atv 'count))
+							; the left-word of the word-pair
+							(left-word (gadr pair))
+							(r-logli (get_right_wildcard_logli left-word lg_rel))
+							(l-logli (get_left_wildcard_logli right-word lg_rel))
 
-					; Compute the logli log_2 P(l,r)/P(*,*)
- 					(compute-atom-logli pair pair-total)
-					; Subtract the left and right loglis.
-					(get_left_wildcard_count right-word lg_rel)
-			(ntv (cog-new-ctv meen ln2 cnt))
-		)
-		(cog-set-tv! atom ntv)
-	)
+							; Compute the logli log_2 P(l,r)/P(*,*)
+ 							(atom (compute-atom-logli pair pair-total))
+
+							; the count truth value bits n pieces
+							(atv (cog-tv->alist (cog-tv atom)))
+							(meen (assoc-ref atv 'mean))
+							(ll (assoc-ref atv 'confidence))
+							(cnt (assoc-ref atv 'count))
+
+							; Subtract the left and right loglis to get the
+							; mutual information (at last!)
+							(mi (- (- ll r-logli) l-logli))
+							(ntv (cog-new-ctv meen mi cnt))
+						)
+						; Save the hard-won MI to the database.
+						(store-atom (cog-set-tv! atom ntv))
+					)
 				)
 				lefties
 			)
-
-xxxxxxxxxxx
-			; Save these hard-won counts to the database.
-			(store-atom left-star)
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
@@ -593,9 +601,6 @@ xxxxxxxxxxx
 			; Note that cog-delete only goes one level deep, it does not
 			; recurse; so the below only delete the ListLink at the top.
 			(cog-delete left-list)
-
-			; What the hell, return the two things
-			(list left-star right-star)
 		)
 	)
 )
@@ -615,6 +620,14 @@ xxxxxxxxxxx
 		(batch-all-pair-wildcard-logli lg_rel)
 
 		; Enfin, the word-pair mi's
+		(for-each
+			(lambda (right-word)
+				(compute-pair-mi right-word lg_rel)
+(display "\nduuude done with MI for right-word\n")
+(display (cog-name right-word))
+			)
+			(cog-get-atoms 'WordNode)
+		)
 	)
 )
 
@@ -646,7 +659,7 @@ xxxxxxxxxxx
 ; select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
 ;
 ; 43464154
-; duuude left-star handle is 
+; duuude left-star handle is
 ; 43464157duuude good by
 ;
 ; (define wtfl  (EvaluationLink  (LinkGrammarRelationshipNode "ANY")
