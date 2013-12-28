@@ -119,6 +119,21 @@
 ; VariableNode) Normalization is with respect to the count on the fixed
 ; WordNode.
 ;
+; The resulting sums are stored in the CountTruthValues (on the 
+; EvaluationLink) of the following structures:
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         AnyNode "right-word"
+;         WordNode "bird"
+;
+;   EvaluationLink
+;      LinkGrammarRelationshipNode "ANY"
+;      ListLink
+;         WordNode "word"
+;         AnyNode "left-word"
+;
 ; Before the above is accomplished, we have to make sure that all links
 ; of the above type; are in the atomtable, viz, have been loaded from
 ; persistant store. After doing the above, we delete these atoms, as they
@@ -189,7 +204,23 @@
 			(left-total (get-total-atom-count lefties))
 			(right-total (get-total-atom-count righties))
 		)
-		;(compute-all-logli (cog-get-atoms 'WordNode))
+		; Create he two evaluation links to hold the counts.
+		(EvaluationLink (cog-new-ctv 0 0 left-total)
+			lg_rel
+			(ListLink
+				(AnyNode "left-word")
+				word
+			)
+		)
+		(EvaluationLink (cog-new-ctv 0 0 right-total)
+			lg_rel
+			(ListLink
+				word
+				(AnyNode "right-word")
+			)
+		)
+		; And now ... delete all the atoms we feteched, so we don't
+		; glom up the atomspace.
 	)
 )
 
