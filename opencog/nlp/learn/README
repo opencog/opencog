@@ -236,6 +236,7 @@ this time, line 929 is:
 again... 26 December, no stack-trace, but got "called pure virtual" error msg.
 again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
 again... 27 Dec, 929        if (tv) tvt = tv->getType();
+again... 28 Dec, didn't get a stack...
 
 All new crash. Note:
 1) This is with the old scheme singleton-instance.

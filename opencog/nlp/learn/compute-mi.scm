@@ -83,6 +83,65 @@
 )
 
 ; ---------------------------------------------------------------------
+; ---------------------------------------------------------------------
+; Word-pair stuff below.
+; ---------------------------------------------------------------------
+; Get the left wild-card count for word and lg_rel.
+; (that is, the wildcard is on the left side)
+
+(define (get_left_wildcard_count word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+	)
+	(tv-count (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
+; Get the right wild-card count for word and lg_rel.
+; (that is, the wildcard is on the right side)
+
+(define (get_right_wildcard_count word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
+	)
+	(tv-count (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
+; Get the total word-pair count for lg_rel.
+; That is, get the count, for wild-cards on both the left and right.
+
+(define (get-pair-total lg_rel)
+	(tv-count (cog-tv 
+		(EvaluationLink lg_rel
+			(ListLink (AnyNode "left-word") (AnyNode "right-word"))
+		)
+	))
+)
+
+; ---------------------------------------------------------------------
+; Get the left wild-card logli for word and lg_rel.
+; (that is, the wildcard is on the left side)
+
+(define (get_left_wildcard_logli word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
+	)
+	(tv-conf (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
+; Get the right wild-card logli for word and lg_rel.
+; (that is, the wildcard is on the right side)
+
+(define (get_right_wildcard_logli word lg_rel)
+	(define evl
+		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
+	)
+	(tv-conf (cog-tv evl))
+)
+
+; ---------------------------------------------------------------------
 ; Compute the left and right word-pair wildcard counts.
 ; That is, compute the summations N(w,*) and N(*,w) where * denotes
 ; a wildcard, and ranges over all words observed in that slot.
@@ -440,14 +499,7 @@
 (define (batch-all-pair-wildcard-logli lg_rel)
 
 	; Get the word-pair grand-total
-	(define pair-total
-		; Return the count for all pairs.
-		(tv-count (cog-tv 
-			(EvaluationLink lg_rel
-				(ListLink (AnyNode "left-word") (AnyNode "right-word"))
-			)
-		))
-	)
+	(define pair-total (get-pair-total lg_rel))
 
 	; For each wild-card pair associated with the word,
 	; obtain the log likelihood.
@@ -473,43 +525,101 @@
 )
 
 ; ---------------------------------------------------------------------
+;
+(define (compute-pair-mi right-word lg_rel)
+
+	; Define the bind link that we'll use with the pattern matcher.
+	; left-bind has the wildcard on the left.
+	(define left-bind-link
+		(BindLink
+			; Be careful to ask for WordNode, since there are also
+			; eval links with AnyNode floating around ...
+			(TypedVariableLink
+				(VariableNode "$left-word")
+				(VariableTypeNode "WordNode")
+			)
+			(ImplicationLink
+				(EvaluationLink lg_rel
+					(ListLink (VariableNode "$left-word") right-word)
+				)
+				(EvaluationLink lg_rel
+					(ListLink (VariableNode "$left-word") right-word)
+				)
+			)
+		)
+	)
+
+	; Get the word-pair grand-total
+	(define pair-total (get-pair-total lg_rel))
+
+	(let* (
+			; lefties are those with the wildcard on the left side.
+			; XXX It would be more efficient to not use the pattern
+			; matcher here, but to instead filter the given relset.
+			; But I'm lazy, for just right now.
+			(left-list (cog-bind left-bind-link))
+			(lefties (cog-outgoing-set left-list))
+		)
+		(begin
+			(for-each
+				(lambda (pair)
+					(let* (
+						; the left-word of the word-pair
+						(left-word (gadr pair))
+						; the count truth value bits n pieces
+						(atv (cog-tv->alist (cog-tv atom)))
+						(meen (assoc-ref atv 'mean))
+						(cnt (assoc-ref atv 'count))
+
+					; Compute the logli log_2 P(l,r)/P(*,*)
+ 					(compute-atom-logli pair pair-total)
+					; Subtract the left and right loglis.
+					(get_left_wildcard_count right-word lg_rel)
+			(ntv (cog-new-ctv meen ln2 cnt))
+		)
+		(cog-set-tv! atom ntv)
+	)
+				)
+				lefties
+			)
+
+xxxxxxxxxxx
+			; Save these hard-won counts to the database.
+			(store-atom left-star)
+
+			; And now ... delete some of the crap we created.
+			; Don't want to pollute the atomspace.
+			(delete-hypergraph left-bind-link)
+			; Note that cog-delete only goes one level deep, it does not
+			; recurse; so the below only delete the ListLink at the top.
+			(cog-delete left-list)
+
+			; What the hell, return the two things
+			(list left-star right-star)
+		)
+	)
+)
+
 
 (define (batch-all-pair-mi lg_rel)
-		(begin
-			; First, get the left and right wildcard counts.
-			(batch-all-pair-wildcard-counts lg_rel)
+	(begin
+		; First, get the left and right wildcard counts.
+		(batch-all-pair-wildcard-counts lg_rel)
 (display "duuuuude done with pair wildcards\n")
 
-			; Now, get the grand-total
-			(batch-all-pair-count lg_rel)
+		; Now, get the grand-total
+		(batch-all-pair-count lg_rel)
 (display "duuuuude done with grand-total\n")
 
+		; Compute the left and right wildcard logli's
+		(batch-all-pair-wildcard-logli lg_rel)
+
+		; Enfin, the word-pair mi's
+	)
 )
 
 (define (do-em-all)
-	(batch-all-pair-wildcard-logli (LinkGrammarRelationshipNode "ANY"))
-)
-
-; ---------------------------------------------------------------------
-; Get the left wild-card count for word and lg_rel.
-; (that is, the wildcard is on the left side)
-
-(define (get_left_wildcard_count word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
-	)
-	(tv-count (cog-tv evl))
-)
-
-; ---------------------------------------------------------------------
-; Get the right wild-card count for word and lg_rel.
-; (that is, the wildcard is on the right side)
-
-(define (get_right_wildcard_count word lg_rel)
-	(define evl
-		(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-	)
-	(tv-count (cog-tv evl))
+	(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
 )
 
 ; ---------------------------------------------------------------------
