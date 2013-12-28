@@ -331,6 +331,13 @@ select * from pg_catalog.pg_locks;
    change max_fsm_pages to 600K
    chage max_fsm_relations to 10K
 
+Anyway ... performance measured as of 27 Dec 2013:
+
+Takes about 105 millisecs to clear 90 eval-links from the write-back
+queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
+so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
+which is still pretty pathetic... 
+
 Misc 
 ----
 

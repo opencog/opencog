@@ -197,30 +197,51 @@
 					inset)
 			)
 			; lefties are those with the varying left side only.
-			(lefties (cog-outgoing-set (cog-bind left-bind-link)))
-			(righties (cog-outgoing-set (cog-bind right-bind-link)))
+			; XXX It would be more efficient to not use the pattern
+			; matcher here, but to instead filter the given relset.
+			; But I'm lazy, for just right now.
+			(left-list (cog-bind left-bind-link))
+			(right-list (cog-bind right-bind-link))
+			(lefties (cog-outgoing-set left-list))
+			(righties (cog-outgoing-set right-list))
 
 			; the total occurance counts
 			(left-total (get-total-atom-count lefties))
 			(right-total (get-total-atom-count righties))
-		)
-		; Create he two evaluation links to hold the counts.
-		(EvaluationLink (cog-new-ctv 0 0 left-total)
-			lg_rel
-			(ListLink
-				(AnyNode "left-word")
-				word
+
+			; Create the two evaluation links to hold the counts.
+			(left-star
+				(EvaluationLink (cog-new-ctv 0 0 left-total)
+					lg_rel
+					(ListLink
+						(AnyNode "left-word")
+						word
+					)
+				)
+			)
+			(right-star
+				(EvaluationLink (cog-new-ctv 0 0 right-total)
+					lg_rel
+					(ListLink
+						word
+						(AnyNode "right-word")
+					)
+				)
 			)
 		)
-		(EvaluationLink (cog-new-ctv 0 0 right-total)
-			lg_rel
-			(ListLink
-				word
-				(AnyNode "right-word")
-			)
-		)
-		; And now ... delete all the atoms we feteched, so we don't
+
+		; Save these hard-won counts to the database.
+		(store-atom left-star)
+		(store-atom right-star)
+
+		; And now ... delete all the atoms we fetched, so we don't
 		; glom up the atomspace.
+		(cog-delete left-bind-link)
+		(cog-delete right-bind-link)
+		(cog-delete left-list)
+		(cog-delete right-list)
+		(for-each cog-delete relset)
+		(for-each cog-delete inset)
 	)
 )
 
