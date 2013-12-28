@@ -67,17 +67,19 @@ public:
         Handle gotLink = atomSpace.getHandle(LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
         TruthValuePtr tv1 = gotLink->getTruthValue();
-        TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::DEFAULT_TV()->getMean());
-        TS_ASSERT_EQUALS(tv1->getConfidence(), TruthValue::DEFAULT_TV()->getConfidence());
+        TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::TRUE_TV()->getMean());
+        TS_ASSERT_EQUALS(tv1->getConfidence(), TruthValue::TRUE_TV()->getConfidence());
         addedLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
         TruthValuePtr tv2 = addedLink->getTruthValue();
-        TS_ASSERT_EQUALS(tv2->getMean(), TruthValue::DEFAULT_TV()->getMean());
-        TS_ASSERT_EQUALS(tv2->getConfidence(), TruthValue::DEFAULT_TV()->getConfidence());
+        TS_ASSERT_EQUALS(tv2->getMean(), TruthValue::TRUE_TV()->getMean());
+        TS_ASSERT_EQUALS(tv2->getConfidence(), TruthValue::TRUE_TV()->getConfidence());
     }
 
     void testAddRewardPredicate() {
-        AtomSpace atomSpace;
+        server(SpaceTimeCogServer::createInstance);
+        SpaceTimeCogServer srv;
+        AtomSpace atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -99,7 +101,9 @@ public:
     }
 
     void testAddPunishmentPredicate() {
-        AtomSpace atomSpace;
+        server(SpaceTimeCogServer::createInstance);
+        SpaceTimeCogServer srv;
+        AtomSpace atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -121,6 +125,7 @@ public:
     }
 
     void testIsActionPredicatePresent() {
+        server(SpaceTimeCogServer::createInstance);
         SpaceTimeCogServer srv;
         AtomSpace atomSpace = srv.getAtomSpace();
         TimeServer& timeServer = srv.getTimeServer();
