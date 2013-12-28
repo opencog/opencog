@@ -2,7 +2,7 @@
 // PLN atoms that are also used in embodiment:
 // (we should be including the PLN atom_types.h file, except that the
 // build of PLN was disabled sometime in 2011 and so we specify these
-// explicitly below.  If/when PLN is resurrected, these wuold be removed.)
+// explicitly below.  If/when PLN is resurrected, these would be removed.)
 
 // Actually a PLN types, needed by embodiment:
 SIMULTANEOUS_EQUIVALENCE_LINK <- UNORDERED_LINK
@@ -13,16 +13,29 @@ TAIL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK
 // used in unity_rules.scm
 SEQUENTIAL_AND_LINK <- ORDERED_LINK //AND_LINK
 
+// ====================================================================
+// Assorted fine-grained logic links, used by PLN.
+// Perhaps these should be removed, since the C++ PLN is just about dead.
+
+PREDICTIVE_ATTRACTION_LINK <- ORDERED_LINK
+SIMULTANEOUS_AND_LINK <- ORDERED_LINK //AND_LINK
+
+EVENTUAL_SEQUENTIAL_AND_LINK <- ORDERED_LINK "EventualSequentialAND"
+EVENTUAL_PREDICTIVE_IMPLICATION_LINK <- ORDERED_LINK "EventualSequentialImplication"
+
+// ExtInh is redundant with SUBSET_LINK and officially disabled
+// EXTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
+EXTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
+INTENSIONAL_SIMILARITY_LINK <- UNORDERED_LINK
+INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
+
 
 // ====================================================================
 // Embodiment atoms
 
-// XXX what are these ?
+// XXX what are these ? Should be removed, I guess ... 
 // CW_PIXEL_PERCEPT_NODE <- NODE "CWPixelPerceptNode"
 // CW_COLOR_NODE <- NODE "CWColorNode"
-
-BEFORE_LINK <- ORDERED_LINK
-LATEST_LINK <- ORDERED_LINK
 
 PET_NODE <- OBJECT_NODE
 AVATAR_NODE <- OBJECT_NODE
@@ -33,6 +46,7 @@ UNKNOWN_OBJECT_NODE <- OBJECT_NODE
 // Perception specific terms
 IS_ACCEPTABLE_SECOND_ARG_LINK <- ORDERED_LINK
 
+ONTOLOGICAL_INHERITANCE_LINK <- ORDERED_LINK
 
 
 WR_LINK <- ASSOCIATIVE_LINK "WRLink"
@@ -48,7 +62,7 @@ DIALOG_NODE <- CONCEPT_NODE
 UTTERANCE_NODE <- CONCEPT_NODE
 
 // Frame nodes and links used by embodiment.
-// These are differrent than the old, obsolete frame types
+// These are different than the old, obsolete frame types
 // that RelEx used to generate, and are instead defined in
 // opencog/embodiment/frames.list and framesInheritance.list
 // and are manipulated in 

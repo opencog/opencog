@@ -1280,10 +1280,14 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	setup_typemap();
 	char buff[BUFSZ];
 	UUID uuid = h.value();
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE outgoing @> ARRAY[%lu];", uuid);
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];", uuid);
 
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
+	// Could also use && here instead of @> Don't know if one is faster or not.
+	// The cast to BIGINT is needed, as otherwise on gets
+	// ERROR:  operator does not exist: bigint[] @> integer[]
 
 	ODBCConnection* db_conn = get_conn();
 	Response rp;

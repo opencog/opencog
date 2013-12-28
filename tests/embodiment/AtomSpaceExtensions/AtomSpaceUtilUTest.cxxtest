@@ -1,5 +1,5 @@
 /*
- * tests/atomspace/AtomSpaceUtilUTest.cxxtest
+ * tests/embodimentAtomSpaceExtensions/AtomSpaceUtilUTest.cxxtest
  *
  * Copyright (C) 2002-2007 Novamente LLC
  * All Rights Reserved
@@ -22,8 +22,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <opencog/atomspace/AtomSpaceUtil.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/spacetime/SpaceTime.h>
+#include <opencog/spacetime/atom_types.h>
+#include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 
 using namespace opencog;
 
@@ -46,14 +48,14 @@ public:
         Handle addedNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "test1");
         Handle gotNode = atomSpace.getHandle(CONCEPT_NODE, "test1");
         TS_ASSERT(addedNode == gotNode);
-        const TruthValue& tv1 = gotNode->getTruthValue();
-        TS_ASSERT_EQUALS(tv1.getMean(), TruthValue::DEFAULT_TV().getMean());
-        TS_ASSERT_EQUALS(tv1.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
+        TruthValuePtr tv1 = gotNode->getTruthValue();
+        TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::DEFAULT_TV()->getMean());
+        TS_ASSERT_EQUALS(tv1->getConfidence(), TruthValue::DEFAULT_TV()->getConfidence());
         addedNode = AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "test1");
         TS_ASSERT(addedNode == gotNode);
-        const TruthValue& tv2 = addedNode->getTruthValue();
-        TS_ASSERT_EQUALS(tv2.getMean(), TruthValue::DEFAULT_TV().getMean());
-        TS_ASSERT_EQUALS(tv2.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
+        TruthValuePtr tv2 = addedNode->getTruthValue();
+        TS_ASSERT_EQUALS(tv2->getMean(), TruthValue::DEFAULT_TV()->getMean());
+        TS_ASSERT_EQUALS(tv2->getConfidence(), TruthValue::DEFAULT_TV()->getConfidence());
     }
 
     void testAddLink() {
@@ -64,18 +66,20 @@ public:
         Handle addedLink =  AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
         Handle gotLink = atomSpace.getHandle(LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
-        const TruthValue& tv1 = gotLink->getTruthValue();
-        TS_ASSERT_EQUALS(tv1.getMean(), TruthValue::DEFAULT_TV().getMean());
-        TS_ASSERT_EQUALS(tv1.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
+        TruthValuePtr tv1 = gotLink->getTruthValue();
+        TS_ASSERT_EQUALS(tv1->getMean(), TruthValue::TRUE_TV()->getMean());
+        TS_ASSERT_EQUALS(tv1->getConfidence(), TruthValue::TRUE_TV()->getConfidence());
         addedLink = AtomSpaceUtil::addLink(atomSpace, LIST_LINK, outgoing);
         TS_ASSERT(addedLink == gotLink);
-        const TruthValue& tv2 = addedLink->getTruthValue();
-        TS_ASSERT_EQUALS(tv2.getMean(), TruthValue::DEFAULT_TV().getMean());
-        TS_ASSERT_EQUALS(tv2.getConfidence(), TruthValue::DEFAULT_TV().getConfidence());
+        TruthValuePtr tv2 = addedLink->getTruthValue();
+        TS_ASSERT_EQUALS(tv2->getMean(), TruthValue::TRUE_TV()->getMean());
+        TS_ASSERT_EQUALS(tv2->getConfidence(), TruthValue::TRUE_TV()->getConfidence());
     }
 
     void testAddRewardPredicate() {
-        AtomSpace atomSpace;
+        server(SpaceTimeCogServer::createInstance);
+        SpaceTimeCogServer srv;
+        AtomSpace atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addRewardPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -97,7 +101,9 @@ public:
     }
 
     void testAddPunishmentPredicate() {
-        AtomSpace atomSpace;
+        server(SpaceTimeCogServer::createInstance);
+        SpaceTimeCogServer srv;
+        AtomSpace atomSpace = srv.getAtomSpace();
         Handle evalLink = AtomSpaceUtil::addPunishmentPredicate(atomSpace, "1", 1000);
         TS_ASSERT(evalLink != Handle::UNDEFINED);
         Handle timeNode = atomSpace.getHandle(TIME_NODE, Temporal::getTimeNodeName(1000));
@@ -119,7 +125,10 @@ public:
     }
 
     void testIsActionPredicatePresent() {
-        AtomSpace atomSpace;
+        server(SpaceTimeCogServer::createInstance);
+        SpaceTimeCogServer srv;
+        AtomSpace atomSpace = srv.getAtomSpace();
+        TimeServer& timeServer = srv.getTimeServer();
         HandleSeq execListLinkOutgoing;
         execListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "arg1"));
         execListLinkOutgoing.push_back(AtomSpaceUtil::addNode(atomSpace, CONCEPT_NODE, "arg2"));
@@ -166,7 +175,7 @@ public:
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        atomSpace.addTimeInfo(triedEvalLink, 10);
+        timeServer.addTimeInfo(triedEvalLink, 10);
 
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
@@ -175,7 +184,7 @@ public:
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        atomSpace.addTimeInfo(triedEvalLink, 101);
+        timeServer.addTimeInfo(triedEvalLink, 101);
 
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
@@ -184,7 +193,7 @@ public:
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        atomSpace.addTimeInfo(doneEvalLink, 150);
+        timeServer.addTimeInfo(doneEvalLink, 150);
 
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
@@ -193,7 +202,7 @@ public:
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
         TS_ASSERT(!AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        atomSpace.addTimeInfo(doneEvalLink, 201);
+        timeServer.addTimeInfo(doneEvalLink, 201);
 
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));
@@ -202,7 +211,7 @@ public:
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 100));
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionDone", execLink, 200));
 
-        atomSpace.addTimeInfo(triedEvalLink, ULONG_MAX);
+        timeServer.addTimeInfo(triedEvalLink, ULONG_MAX);
 
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 0));
         TS_ASSERT(AtomSpaceUtil::isActionPredicatePresent(atomSpace, "ActionTried", execLink, 100));

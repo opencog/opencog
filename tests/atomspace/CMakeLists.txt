@@ -11,7 +11,7 @@ LINK_LIBRARIES(
 
 IF(HAVE_GUILE)
 	ADD_CXXTEST(AtomTableUTest HandleEntry.cc)
-	TARGET_LINK_LIBRARIES(AtomTableUTest smob server)
+	TARGET_LINK_LIBRARIES(AtomTableUTest smob server spacetime)
 ENDIF(HAVE_GUILE)
 
 ADD_CXXTEST(ClassServerUTest)

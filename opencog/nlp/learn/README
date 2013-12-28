@@ -40,7 +40,16 @@ Steps:
 8) psql learn-pairs
    learn-pairs=# SELECT * from atoms;
 
-9) She works!
+   The above shows that the database now contains word-counts for
+   pair-wise linkages for the above sentences.
+
+9) Get ready to feed it text.  For example, parse wikipedia.
+   a) Download lang-wiki-pages-articles for some lanugage lang.
+   b) See 'Wikipedia processing' section below. Do the stuff there.
+   c) See the section 'Sentence Splitting'. Set that up.
+   d) See Wikipedia 'Processing, part II' below.
+
+10) Do the stuff in section "Mutual Information".
 
 That's all for now, folks!
 
@@ -98,24 +107,25 @@ cogserver runs at 56% cpu for a while then drops to 26% cpu
 
 Wikipedia processing
 --------------------
-createdb fr_pairs lt_pairs pl_pairs simple_pairs
-cat opencog/persist/sql/atom.sql | psql
-vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
+Do the following:
+    createdb fr_pairs lt_pairs pl_pairs simple_pairs
+    cat opencog/persist/sql/atom.sql | psql
+    vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
 
 cleanup files in relex: src/perl
 
-cd /storage/wikipedia
+    cd /storage/wikipedia
 
-mkdir wiki-stripped
-time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
-cd wiki-stripped
-find |wc
-/home/linas/src/relex/src/perl/wiki-clean.sh
-find |wc
-cd ..
-mkdir alpha-pages
-cd alpha-pages
-/home/linas/src/relex/src/perl/wiki-alpha.sh
+    mkdir wiki-stripped
+    time cat blahwiki.xml.bz2 |bunzip2 | /home/linas/src/relex/src/perl/wiki-scrub.pl
+    cd wiki-stripped
+    find |wc
+    /home/linas/src/relex/src/perl/wiki-clean.sh
+    find |wc
+    cd ..
+    mkdir alpha-pages
+    cd alpha-pages
+    /home/linas/src/relex/src/perl/wiki-alpha.sh
 
 simple:
 find |wc     gives 131434 total files
@@ -144,11 +154,15 @@ find |wc gives 1452739 files after cat/template removal
 Sentence Splitting
 ------------------
 Needs to be multi-language
-NLTK
+Maybe NLTK ? .. Not today, but you can experiment.
+Long-term goal is to have opencog know how to sentence-split itself,
+but this is secondary prioruity.
+
+Here's a simple one, easy-to-use:
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
 Has french, polish, latvian
 its LGPL
-Copy this over into relex, for now.
+Copy this over into relex, for now. (Its in the RelEx sources)
 
 cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
 
@@ -161,11 +175,102 @@ and is not considered the end of a sentence.
 (setlocale LC_ALL "")
  (display "Ćićolina")
 
+
+Wikipedia Parsing, part II
+--------------------------
+Now, build some working directories (so that we don't mess up
+alpha-pages after all that work)
+
+    cp -pr alpha-pages beta-pages
+
+* Copy scripts from opencog/nlp/learn/misc-scripts into working dir.
+* Modify as needed for chosen language. 
+* Make sure the scripts point at the RelEx parse server.
+* Copy opencog-lang.conf to opencog build dir.
+  Start cogserver -c opencog-lang.conf 
+* Go back to the wikipedia dir, and run ./wiki-ss-lang.sh
+* Wait a few days.
+* Be sure to psql lang_pairs -c "VACUUM ANALYZE;" every 4 hours or so,
+  as otherwise, performance craters.  Be sure to perform the postgres
+  tuning recommendations fount in postgress peformance wiis, or in
+  the opencog/persist/sql/README file.  See also 'Performance' section
+  below.
+
+Some handy SQL commands:
+SELECT count(uuid) FROM Atoms;
+select count(uuid) from  atoms where type = 77;
+
+type 77 is WordNode for me; verify with
+SELECT * FROM Typecodes;
+
+
+Mutual Information
+------------------
+Compute mutual information, manually, by runnning these scripts:
+compute-mi.scm
+
+
 Crash
 -----
+pure virtual method called
+terminate called without an active exception
+[2013-12-27 03:13:59:571] [ERROR] Caught signal 6 (Aborted) on thread
+
         11: AtomStorage.cc:920
 opencog::AtomStorage::do_store_single_atom(std::shared_ptr<opencog::Atom>, int)
 STMTF("stv_confidence", tv->getConfidence());
+
+Again: 
+        9: ??:0 __cxa_pure_virtual()
+        10: AtomStorage.cc:929    opencog::AtomStorage::do_store_single_atom(std
+::shared_ptr<opencog::Atom>, int)
+        11: AtomStorage.cc:802
+opencog::AtomStorage::do_store_atom(std::shared_ptr<opencog::Atom>)
+
+this time, line 929 is:
+926        // Store the truth value
+927        TruthValuePtr tv = atom->getTruthValue();
+928        TruthValueType tvt = NULL_TRUTH_VALUE;
+929        if (tv) tvt = tv->getType();
+
+again... 26 December, no stack-trace, but got "called pure virtual" error msg.
+again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
+
+All new crash. Note:
+1) This is with the old scheme singleton-instance.
+2) This one received when defining a function with an unbound variable
+   in it.  It should have just been a standard stack trace, but wasn't.
+3) Sometimes, when doing this, and parser is running, I get 
+
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on threa
+d 47486186035520
+        Stack Trace:
+        2: CogServerMain.cc:92  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::string::append(std::string const&)
+        5: basic_string.h:290     std::string::_M_data() const
+        6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
+line 381 is  self->answer = self->do_eval(*(self->pexpr));
+So maybe p is null, or self->pexpr is null..
+        7: continuations.c:511  c_body()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: continuations.c:456 scm_i_with_continuation_barrier()
+        11: continuations.c:550 scm_c_with_continuation_barrier()
+        12: pthread_support.c:1272      GC_call_with_gc_active()
+        13: threads.c:937       with_guile_and_parent()
+        14: misc.c:1835 GC_call_with_stack_base()
+        15: threads.c:959       scm_with_guile()
+        16: SchemeEval.cc:372     opencog::SchemeEval::eval(std::string const&)
+        17: basic_string.h:536  ~basic_string()
+        18: GenericShell.cc:157   opencog::GenericShell::eval(std::string const&, opencog::ConsoleSocket*)
+        19: ConsoleSocket.cc:232          opencog::ConsoleSocket::OnLine(std::string const&)
+        20: basic_string.h:536  ~basic_string()
+        21: thread.cpp:0        thread_proxy()
+        22: pthread_create.c:0  start_thread()
+        23: ??:0        __clone()
+
+
 
 
 Performance
@@ -224,3 +329,25 @@ select * from pg_catalog.pg_locks;
 -- vacuum tells em to do following:
    change max_fsm_pages to 600K
    chage max_fsm_relations to 10K
+
+Misc 
+----
+
+Loaded 10000 atoms.  Oh, OK.
+
+Change load-atoms to return a count?
+
+`inet-aton' is deprecated.  Use `inet-pton' instead.
+
+Crap:
+# select * from atoms where outgoing @> ARRAY[2908473];
+ERROR:  operator does not exist: bigint[] @> integer[]
+
+# select * from atoms where outgoing @> ARRAY[cast(2908473 as bigint)];
+ERROR:  operator does not exist: bigint[] @> bigint[]
+
+ERROR:  operator does not exist: bigint[] && bigint[]
+
+Arghh .. postges 8.1 doesn't have this operator!
+Need postgres 8.3
+Full stop.

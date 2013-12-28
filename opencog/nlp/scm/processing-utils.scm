@@ -59,7 +59,9 @@
 	; atomspace (using exec-scm-from-port to do the load)
 	(define (do-sock-io sent-txt)
 		(let ((s (socket PF_INET SOCK_STREAM 0)))
-			(connect s AF_INET (inet-aton relex-server-host) relex-server-port)
+			; inet-aton is deprecated, so don't use it (as of 2013)
+			; (connect s AF_INET (inet-aton relex-server-host) relex-server-port)
+			(connect s AF_INET (inet-pton AF_INET relex-server-host) relex-server-port)
 	
 			(display sent-txt s)
 			(display "\n" s) ; must send newline to flush socket
