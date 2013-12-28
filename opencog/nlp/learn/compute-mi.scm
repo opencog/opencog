@@ -454,11 +454,13 @@
 
 		; The left and right counts should be equal
 		(if (not (eq? l-cnt r-cnt))
-			(display "Error: word-pair-counts unequal: ")
-			(display l-cnt)
-			(display " ")
-			(display r-cnt)
-			(display "\n")
+			(begin
+				(display "Error: word-pair-counts unequal: ")
+				(display l-cnt)
+				(display " ")
+				(display r-cnt)
+				(display "\n")
+			)
 		)
 
 		; Create and save the grand-total count.
