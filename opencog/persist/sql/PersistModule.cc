@@ -241,8 +241,8 @@ Handle PersistModule::fetch_atom(Handle h)
 Handle PersistModule::fetch_incoming_set(Handle h)
 {
 	AtomSpace *as = &_cogserver.getAtomSpace();
-	// The "true" flag here means "fetch recursive".
-	h = as->getImpl().fetchIncomingSet(h, true);
+	// The "false" flag here means that the fetch is NOT recursive.
+	h = as->getImpl().fetchIncomingSet(h, false);
 	return h;
 }
 
