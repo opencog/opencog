@@ -554,18 +554,17 @@
 	; obtain the log likelihood.
 	(for-each
 		(lambda (word)
-			; log-likelihood for the left wildcard
-			(store-atom
- 				(compute-atom-logli
-					(EvaluationLink lg_rel (ListLink (AnyNode "left-word") word))
-					pair-total
+			(let (
+					(lefty (EvaluationLink lg_rel (ListLink (AnyNode "left-word") word)))
+					(righty (EvaluationLink lg_rel (ListLink word (AnyNode "right-word"))))
 				)
-			)
-			; log-likelihood for the right wildcard
-			(store-atom
- 				(compute-atom-logli
-					(EvaluationLink lg_rel (ListLink word (AnyNode "right-word")))
-					pair-total
+				; log-likelihood for the left wildcard
+				(if (< 0 (tv-count (cog-tv lefty)))
+					(store-atom (compute-atom-logli lefty pair-total))
+				)
+				; log-likelihood for the right wildcard
+				(if (< 0 (tv-count (cog-tv righty)))
+					(store-atom (compute-atom-logli righty pair-total))
 				)
 			)
 		)
