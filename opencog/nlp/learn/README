@@ -221,7 +221,9 @@ So this is about 1.2KB per atom, all included. Atoms are a bit fat...
 
 Wild-card pair-count is taking about 30 per minute, so total time will
 be  17K minutes/30 = 580 minutes = 10 hours!  Oy vey...
-This is utterly single-threaed...
+This is utterly single-threaded...
+
+all-pair count was fast.
 
 
 
@@ -379,4 +381,55 @@ thread 22: lockwait AtomTable::getHandle as above.
 
 why are all resolving ???
 
+Handle:: h._ptr.get();   h._uuid;
+
+NodeCast
+
+PatternMatchEngine
+
+boost::shared_lock  for reading,
+unique_lock for writing ... 
+
+upgrade_lock<shared_mutex> lock(workerAccess); 
+        upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
+
+
+
+shared_mutex 
+write uses:  unique_lock<shared_mutex>
+readers use shared_lock<shared_mutex>
+
+writer does:
+
+  // get upgradable access
+  boost::upgrade_lock<boost::shared_mutex> lock(_access);
+
+  // get exclusive access
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  // now we have exclusive access
+}
+
+am using boost1.49 on cray
+
+-----------
+alternative:
+
+Handle *hp = new Handle(xxx);
+take_handle(hp)
+
+cog_handle_tag
+
+
+---------------
+43484355  has zero count .. 
+its an eval link:  {199, 43484354}
+list link is  {41620150 , 43464155}
+
+contiguïté is 41620150  count=302 conf=16.804607
+right-word is 43464155 is AnyNode
+
+select * from atoms where outgoing @> ARRAY[cast(41620150 as bigint)];
+has
+
+... zero ...
 

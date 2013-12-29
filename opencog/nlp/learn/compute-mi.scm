@@ -281,28 +281,31 @@
 		)
 		(begin
 			; Create the two evaluation links to hold the counts.
-			(define left-star
-				(EvaluationLink (cog-new-ctv 0 0 left-total)
-					lg_rel
-					(ListLink
-						(AnyNode "left-word")
-						word
-					)
-				)
-			)
-			(define right-star
-				(EvaluationLink (cog-new-ctv 0 0 right-total)
-					lg_rel
-					(ListLink
-						word
-						(AnyNode "right-word")
-					)
-				)
-			)
+			(define left-star #f)
+			(define right-star #f)
 
-			; Save these hard-won counts to the database.
-			(store-atom left-star)
-			(store-atom right-star)
+			(if (< 0 left-total)
+				(begin
+					(set! left-star
+						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
+							(ListLink (AnyNode "left-word") word)
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom left-star)
+				)
+			)
+			(if (< 0 right-total)
+				(begin
+					(set! right-star
+						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
+							(ListLink word (AnyNode "right-word"))
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom right-star)
+				)
+			)
 
 			; And now ... delete some of the crap we created.
 			; Don't want to pollute the atomspace.
@@ -491,7 +494,6 @@
 				(set! r-cnt
 					(+ r-cnt (get_right_wildcard_count word lg_rel))
 				)
-				(trace-msg-cnt "All-pair count ")
 			)
 			(cog-get-atoms 'WordNode)
 		)
