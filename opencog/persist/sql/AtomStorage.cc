@@ -303,14 +303,12 @@ class AtomStorage::Response
 /// Get an ODBC connection
 ODBCConnection* AtomStorage::get_conn()
 {
-	std::unique_lock<std::mutex> lock(conn_mutex);
 	return conn_pool.pop();
 }
 
 /// Put an ODBC connection back into the pool.
 void AtomStorage::put_conn(ODBCConnection* db_conn)
 {
-	std::unique_lock<std::mutex> lock(conn_mutex);
 	conn_pool.push(db_conn);
 }
 
