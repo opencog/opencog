@@ -19,7 +19,7 @@ using namespace opencog;
 /**
  * Two scheme smob types are used to implement the interface.
  *
- * The cog_handle_tag is used to store atom handles only.
+ * The cog_uuid_tag is used to store atom handles as uuids.
  * The cog_misc_tag is used to store all other structures, such
  * as truth values. It is assumed that these structures are all
  * ephemeral (garbage-collected); this is in contrast to handles,
@@ -30,9 +30,25 @@ using namespace opencog;
  *
  * The type of the "misc" structure is stored in the flag bits;
  * thus, handling is dispatched based on these flags.
+ *
+ * XXX There are currently *two* ways of storing atoms: as UUID's
+ * and as Handle-based AtomPtr's. The first is compact, and is great
+ * if the atom has not yet been instantiated in RAM.  Unfortunately,
+ * any sort of references from it requires resolving the UUID into an
+ * AtomPtr, which requires finding it in an RB-tree in the AtomTable,
+ * which requires tacking a reader-lock on the table, which can be a
+ * serious bottle-neck when running atom-manipulating algorithms in
+ * scheme. Thus, the second type of storate: a fully resolved AtomPtr,
+ * which can quickly access atom attributes. The UUID form is 'rare'
+ * and is not currently needed.
+ *
+ * XXX TODO:
+ * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
+ * should have a separate tag for handles, tv's, etc.) This would
+ * simplify that code, and probably improive performance just a bit.
  */
 
-scm_t_bits SchemeSmob::cog_handle_tag;
+scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
 AtomSpace* SchemeSmob::atomspace = NULL;
@@ -60,7 +76,7 @@ SchemeSmob::SchemeSmob(AtomSpace *as)
 
 int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 {
-	std::string str = handle_to_string(node);
+	std::string str = uuid_to_string(node);
 	scm_puts (str.c_str(), port);
 	return 1; //non-zero means success
 }
@@ -81,11 +97,11 @@ size_t SchemeSmob::free_atom(SCM node)
 
 void SchemeSmob::init_smob_type(void)
 {
-	// a SMOB type for atom handles
-	cog_handle_tag = scm_make_smob_type ("opencog-handle", sizeof (scm_t_bits));
-	scm_set_smob_print (cog_handle_tag, print_atom);
-	scm_set_smob_equalp (cog_handle_tag, equalp_atom);
-	scm_set_smob_free (cog_handle_tag, free_atom);
+	// a SMOB type for atom uuids
+	cog_uuid_tag = scm_make_smob_type ("opencog-uuid", sizeof (scm_t_bits));
+	scm_set_smob_print (cog_uuid_tag, print_atom);
+	scm_set_smob_equalp (cog_uuid_tag, equalp_atom);
+	scm_set_smob_free (cog_uuid_tag, free_atom);
 
 	// A SMOB type for everything else
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));

@@ -23,6 +23,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 
 	switch (misctype)
 	{
+		case COG_HANDLE: // Nothing to do here ...
 		case COG_TV: // Nothing to do here ...
 		case COG_VH: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
@@ -67,6 +68,14 @@ size_t SchemeSmob::free_misc(SCM node)
 			delete av;
 			return 0;
 
+		case COG_HANDLE:
+			Handle* hp;
+			hp = (Handle*) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (hp,
+			                  sizeof(*hp), "opencog handle");
+			delete hp;
+			return 0;
+
 		case COG_TV:
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(node);
@@ -109,6 +118,9 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	{
 		case COG_AV:
 			return av_to_string((AttentionValue *) SCM_SMOB_DATA(node));
+
+		case COG_HANDLE:
+			return handle_to_string(node);
 
 		case COG_TV:
 			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));

@@ -27,10 +27,6 @@ Handle SchemeEval::do_apply(const std::string &func, Handle varargs)
 	SCM sresult = do_apply_scm (func, varargs);
 	
 	// If the result is a handle, return the handle.
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, sresult))
-	{
-		return Handle::UNDEFINED;
-	}
 	return SchemeSmob::scm_to_handle(sresult);
 }
 

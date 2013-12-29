@@ -225,6 +225,8 @@ This is utterly single-threaded...
 
 all-pair count was fast.
 
+Final mi compute: 2910 in 73 mins == 40 per minute ... again, pathetic.
+Will take 7 hours (420 minutes) to complete ...
 
 
 Crash
@@ -417,62 +419,13 @@ alternative:
 Handle *hp = new Handle(xxx);
 take_handle(hp)
 
-cog_handle_tag
+cog_handle_tag -> cot_uuid_tag
+equalp_atom
+free_atom ... 
 
+print_misc -> misc_to_string
+mark_misc
+free_misc
 
----------------
-43484355  has zero count .. 
-its an eval link:  {199, 43484354}
-list link is  {41620150 , 43464155}
-
-contiguïté is 41620150  count=302 conf=16.804607
-right-word is 43464155 is AnyNode
-
-select * from atoms where outgoing @> ARRAY[cast(41620150 as bigint)];
-has
-
-... zero ...
-
-select * from atoms where type=27 and stv_count=0;
-
-also drop ... 
-
----------
-select * from atoms where outgoing @> ARRAY[cast(43484354 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43538230 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43544804 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43545051 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43671571 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43690111 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43727845 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43731451 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43748532 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43757158 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43835559 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43844793 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43844888 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43844907 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43848004 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43855319 as bigint)];
-select * from atoms where outgoing @> ARRAY[cast(43872191 as bigint)];
-
----------
-delete from atoms where uuid=43484354;
-delete from atoms where uuid=43538230;
-delete from atoms where uuid=43544804;
-delete from atoms where uuid=43545051;
-delete from atoms where uuid=43671571;
-delete from atoms where uuid=43690111;
-delete from atoms where uuid=43727845;
-delete from atoms where uuid=43731451;
-delete from atoms where uuid=43748532;
-delete from atoms where uuid=43757158;
-delete from atoms where uuid=43835559;
-delete from atoms where uuid=43844793;
-delete from atoms where uuid=43844888;
-delete from atoms where uuid=43844907;
-delete from atoms where uuid=43848004;
-delete from atoms where uuid=43855319;
-delete from atoms where uuid=43872191;
 
 

@@ -41,18 +41,19 @@ class SchemeSmob
 	private:
 
 		enum {
-			COG_HANDLE = 1,
-			COG_TV,     // truth values
-			COG_VH,     // version handles
-			COG_AV,     // attention values
-			COG_EXTEND // callbacks into C++ code.
+			COG_UUID = 1, // unsigned long int
+			COG_HANDLE,   // msart pointer
+			COG_TV,       // truth values
+			COG_VH,       // version handles
+			COG_AV,       // attention values
+			COG_EXTEND    // callbacks into C++ code.
 		};
 
 		static bool is_inited;
 		static void register_procs(void);
 
-		// The handle tag is for opencog handles, only.
-		static scm_t_bits cog_handle_tag;
+		// The handle tag is for opencog UUIDs, only.
+		static scm_t_bits cog_uuid_tag;
 
 		// The cog_misc_tag are for all other opencog types, such
 		// as truth values, which are ephemeral (garbage-collected)
@@ -145,6 +146,7 @@ class SchemeSmob
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
+		static std::string uuid_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
 
@@ -168,8 +170,10 @@ class SchemeSmob
 	public:
 		// Helper functions XXX why are these public ??
 		// XXX Becuase the embodiment code uses them :-(
-		// The embodiment code should be refactored to no use these.
+		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
+		static SCM uuid_to_scm(UUID);
+		static Handle scm_uuid_to_handle(SCM);
 		static Handle scm_to_handle(SCM);
 
 		// Utility printing functions

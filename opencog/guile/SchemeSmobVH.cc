@@ -139,7 +139,7 @@ SCM SchemeSmob::ss_vh_get_value (SCM s)
 	UUID uuid = vh->substantive.value();
 	SCM suuid = scm_from_ulong(uuid);
 	SCM h;
-	SCM_NEWSMOB (h, cog_handle_tag, suuid);
+	SCM_NEWSMOB (h, cog_uuid_tag, suuid);
 	SCM sind = scm_from_locale_symbol("indicator");
 	SCM satom = scm_from_locale_symbol("atom");
 

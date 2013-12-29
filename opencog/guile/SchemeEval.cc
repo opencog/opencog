@@ -209,9 +209,9 @@ SchemeEval::~SchemeEval()
 
 std::string SchemeEval::prt(SCM node)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, node))
 	{
-		return SchemeSmob::handle_to_string(node);
+		return SchemeSmob::uuid_to_string(node);
 	}
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
