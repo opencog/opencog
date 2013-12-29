@@ -209,6 +209,21 @@ Mutual Information
 Compute mutual information, manually, by runnning these scripts:
 compute-mi.scm
 
+Example stats and performance:
+current fr_pairs db has 16785 words and 177960 pairs.
+
+This takes 17K + 2x 178K = 370K total atoms loaded.
+These load up in 10 seconds-ish or so.
+
+RSS for cogserver: 436MB, holding approx 370K atoms
+So this is about 1.2KB per atom, all included. Atoms are a bit fat...
+... loading all pairs is very manageable even for modest-sized machines.
+
+Wild-card pair-count is taking about 30 per minute, so total time will
+be  17K minutes/30 = 580 minutes = 10 hours!  Oy vey...
+This is utterly single-threaed...
+
+
 
 Crash
 -----
@@ -237,6 +252,7 @@ again... 26 December, no stack-trace, but got "called pure virtual" error msg.
 again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
 again... 27 Dec, 929        if (tv) tvt = tv->getType();
 again... 28 Dec, didn't get a stack...
+again... 28 Dec, line 953:  STMTF("stv_mean", tv->getMean()); on count tv
 
 All new crash. Note:
 1) This is with the old scheme singleton-instance.
@@ -338,6 +354,7 @@ Takes about 105 millisecs to clear 90 eval-links from the write-back
 queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
 so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
 which is still pretty pathetic... 
+
 
 Misc 
 ----

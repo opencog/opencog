@@ -389,6 +389,36 @@
 )
 
 ; ---------------------------------------------------------------------
+; temp debug support
+(define oport 0)
+(define dbg-cnt 0)
+(define (init-trace)
+	(set! oport (open-file "/tmp/progress" "w"))
+)
+(define (start-trace msg)
+	(set! dbg-cnt 0)
+	(display msg oport)
+	(force-output oport)
+)
+(define (trace-msg msg)
+	(display msg oport)
+	(force-output oport)
+)
+(define (trace-msg-num msg num)
+	(display msg oport)
+	(display num oport)
+	(display "\n" oport)
+	(force-output oport)
+)
+(define (trace-msg-cnt msg)
+	(display msg oport)
+	(set! dbg-cnt (+ dbg-cnt 1))
+	(display dbg-cnt oport)
+	(display "\n" oport)
+	(force-output oport)
+)
+
+; ---------------------------------------------------------------------
 ; Compute wildcard counts for all word-pairs, for the relation lg_rel.
 ; lg_rel is a link-grammar link type.
 ;
@@ -400,16 +430,22 @@
 ; the atomspace first, and then the sums are taken. This can blow up
 ; RAM usage.
 ;
+
 (define (batch-all-pair-wildcard-counts lg_rel)
 	(begin
+		(start-trace "Start wildcard-counting\n")
+
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type 'WordNode)
+		(trace-msg-num "In wildcard-count, num words="
+			(length (cog-get-atoms 'WordNode)))
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
 		; Compute the counts
 		(for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word lg_rel)
+				(trace-msg-cnt "Wildcard-count did ")
 			)
 			(cog-get-atoms 'WordNode)
 		)
@@ -439,6 +475,7 @@
 	(define l-cnt 0)
 	(define r-cnt 0)
 	(begin
+		(start-trace "Start all-pair-count\n")
 		; Now, loop over all words, totalling up the counts.
 		(for-each
 			(lambda (word)
@@ -448,11 +485,13 @@
 				(set! r-cnt
 					(+ r-cnt (get_right_wildcard_count word lg_rel))
 				)
+				(trace-msg-cnt "All-pair count ")
 			)
 			(cog-get-atoms 'WordNode)
 		)
 
 		; The left and right counts should be equal
+		; XXX TODO probably should do something more drastic here?
 		(if (not (eq? l-cnt r-cnt))
 			(begin
 				(display "Error: word-pair-counts unequal: ")
@@ -611,22 +650,23 @@
 (define (batch-all-pair-mi lg_rel)
 	(begin
 		; First, get the left and right wildcard counts.
+		(trace-msg "Going to batch-wildcard count\n")
 		(batch-all-pair-wildcard-counts lg_rel)
-(display "duuuuude done with pair wildcards\n")
 
 		; Now, get the grand-total
+		(trace-msg "Going to batch-count all-pairs\n")
 		(batch-all-pair-count lg_rel)
-(display "duuuuude done with grand-total\n")
 
 		; Compute the left and right wildcard logli's
+		(trace-msg "Going to batch-logli wildcards\n")
 		(batch-all-pair-wildcard-logli lg_rel)
 
 		; Enfin, the word-pair mi's
+		(start-trace "Going to do individual word-pair mi\n")
 		(for-each
 			(lambda (right-word)
 				(compute-pair-mi right-word lg_rel)
-(display "\nduuude done with MI for right-word\n")
-(display (cog-name right-word))
+				(trace-msg-cnt "Done with pair MI cnt=")
 			)
 			(cog-get-atoms 'WordNode)
 		)
@@ -634,7 +674,10 @@
 )
 
 (define (do-em-all)
-	(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
+	(begin
+		(init-trace)
+		(batch-all-pair-mi (LinkGrammarRelationshipNode "ANY"))
+	)
 )
 
 ; ---------------------------------------------------------------------
@@ -677,4 +720,17 @@
 ;         43464155
 ; select count(*) from atoms where outgoing @> ARRAY[cast(43464152 as bigint)];
 ; returns the number of word-pairs which we've wild-carded.
+; select * from atoms where outgoing = ARRAY[cast(43464152 as bigint), cast(43464155 as bigint)];
+;
+; How many atoms?
+; 16785  words in fr
+;
+; How many pairs ??
+; LinkGrammarRelationshipNode is 87
+; ANY is uuid 199
+; select count(*) from atoms where outgoing @> ARRAY[cast(199 as bigint)];
+; There are 177960 french pairs.
+; This should require  2x atoms per pair (eval, list)
+; viz 178K x 2 = 360K atom loads.
+; OK, that's good.
 
