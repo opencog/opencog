@@ -5,6 +5,8 @@
 ;
 ; Copyright (c) 2013 Linas Vepstas
 ;
+(use-modules (ice-9 threads))
+
 ; ---------------------------------------------------------------------
 ; Count the total number of times that the atoms in the atom-list have
 ; been observed.  The observation-count for a single atom is stored in
@@ -205,6 +207,8 @@
 ; This routine assumes that all relevant atoms are already in the atomspace.
 ; If they're not, incorrect counts will be obtained.
 ; Use the fetch-and-compute-pair-wildcard-counts below to fetch.
+;
+; Returns the two wild-card EvaluationLinks
 
 (define (compute-pair-wildcard-counts word lg_rel)
 
@@ -443,12 +447,14 @@
 		(fetch-incoming-set lg_rel)
 		; Compute the counts
 		(for-each
+		; (par-for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word lg_rel)
 				(trace-msg-cnt "Wildcard-count did ")
 			)
 			(cog-get-atoms 'WordNode)
 		)
+		(trace-msg "Done with wild-card count")
 	)
 )
 

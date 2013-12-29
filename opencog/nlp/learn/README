@@ -358,12 +358,25 @@ which is still pretty pathetic...
 
 Misc 
 ----
-
-Loaded 10000 atoms.  Oh, OK.
-
 Change load-atoms to return a count?
 
 handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
+
+
+thread 6: cond wait gc
+
+thread 21: AtomTable::getHandle find rbtree resolv_ptr
+linkCast ... isLink .. PME::tree_compare ... 
+
+thread 22: lockwait AtomTable::getHandle as above.
+24 ditto 
+
+25 getHandle table:174  .. resolve ... 
+
+26: line 174 .. resolve ... NodeCast .. isNode
+27 line 174: .. resolve ... 
+
+why are all resolving ???
 
 
