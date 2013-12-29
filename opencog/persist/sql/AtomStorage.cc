@@ -165,11 +165,14 @@ class AtomStorage::Response
 		}
 
 		std::vector<Handle> *hvec;
-		bool load_incoming_set_cb(void)
+		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
+			// Note, unlike the above 'load' routines, this merely fetches
+			// the atoms, and returns a vector of them.  The are loaded
+			// into the atomspace later, by the caller.
 			Handle h(store->makeAtom(*this, handle));
 			hvec->push_back(h);
 			return false;
@@ -1295,7 +1298,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	rp.height = -1;
 	rp.hvec = &iset;
 	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::load_incoming_set_cb, &rp);
+	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
 	rp.rs->release();
 	put_conn(db_conn);
 
