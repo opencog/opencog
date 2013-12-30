@@ -772,8 +772,9 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	iend = cnf_clauses.end();
 	for (i = cnf_clauses.begin(); i != iend; i++)
 	{
+		Handle h(*i);
 		printf("Clause %d: ", cl);
-		prt(*i);
+		prt(h);
 		cl++;
 	}
 
@@ -781,10 +782,10 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 	std::set<Handle>::const_iterator j;
 	for (j=bound_vars.begin(); j != bound_vars.end(); j++)
 	{
-		NodePtr n(NodeCast(*j));
-		if (n)
+		Handle h(*j);
+		if (NodeCast(h))
 		{
-			printf(" Bound var: "); prt(*j);
+			printf(" Bound var: "); prt(h);
 		}
 	}
 

@@ -262,6 +262,7 @@ again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
 again... 27 Dec, 929        if (tv) tvt = tv->getType();
 again... 28 Dec, didn't get a stack...
 again... 28 Dec, line 953:  STMTF("stv_mean", tv->getMean()); on count tv
+again... 30 Dec, line 954:  as above ... 
 
 All new crash. Note:
 1) This is with the old scheme singleton-instance.
