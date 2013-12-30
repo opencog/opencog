@@ -401,3 +401,21 @@ writer does:
 
 am using boost1.49 on cray
 
+
+W polu pierwszym o barwie czerwonej przedstawia zł
+otą sowę siedzącą na trójwzgórzu, w polu drugim o barwie złotej czerwony g
+ryf trzymający złoty kłos, w polu trzecim, błękitnym, złota gałązka oliwna
+.
+
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
+Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
+
+ABORT: encoding-error
+submit-one: Herb gminy Świdnica opracowano w Centrum Heraldyki Polskiej a zatwierdziła go Rada
+Gminy Świdnica uchwałą Nr XXXII/217/96 z 9 sierpnia 1996.
+
