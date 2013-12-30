@@ -105,17 +105,17 @@ public:
 
     // Allows expressions like "if(h)..." to work when h has a non-null pointer.
     explicit inline operator bool() const noexcept {
-        if (_ptr) return true;
+        if (_ptr.get()) return true;
         return NULL != cresolve(); // might be null because we haven't resolved it yet!
     }
 
     inline bool operator==(std::nullptr_t) const noexcept {
-        if (_ptr) return false;
+        if (_ptr.get()) return false;
         return NULL == cresolve(); // might be null because we haven't resolved it yet!
     }
 
     inline bool operator!=(std::nullptr_t) const noexcept {
-        if (_ptr) return true;
+        if (_ptr.get()) return true;
         return NULL != cresolve(); // might be null because we haven't resolved it yet!
     }
 
