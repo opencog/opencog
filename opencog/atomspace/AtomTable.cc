@@ -462,7 +462,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
         const HandleSeq ogs = lll->getOutgoingSet();
         size_t arity = ogs.size();
         for (size_t i = 0; i < arity; i++) {
-            Handle h = ogs[i];
+            Handle h(ogs[i]);
             // It can happen that the uuid is assigned, but the pointer
             // is NULL. In that case, we should at least know about this
             // uuid.
@@ -482,14 +482,13 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                     // sure its a user error if the user fails to serialize
                     // atom table adds appropriately for their app.
                     lll->_outgoing[i] = h;
-                    continue;
+                } else {
+                    throw RuntimeException(TRACE_INFO,
+                        "AtomTable - Atom in outgoing set must have been "
+                        "previously inserted into the atom table!");
                 }
-                throw RuntimeException(TRACE_INFO,
-                    "AtomTable - Atom in outgoing set must have been "
-                    "previously inserted into the atom table!");
             }
-
-            if (Handle::UNDEFINED == h) {
+            else if (Handle::UNDEFINED == h) {
                 throw RuntimeException(TRACE_INFO,
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");

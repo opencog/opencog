@@ -273,7 +273,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     if (NULL == backing_store)
         return Handle::UNDEFINED;
 
-    // If the atom correspondig to the UUID isn't available, then
+    // If the atom corresponding to the UUID isn't available, then
     // got get it. But in fact, we may already have it, from a
     // previous recusrive call to getIncomingSet(), so don't waste
     // any CPU sycles getting it again.
