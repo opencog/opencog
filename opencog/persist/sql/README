@@ -281,10 +281,9 @@ at the postgres prompt.  You should see this:
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
-     public | edges     | table | opencog_user
      public | global    | table | opencog_user
      public | typecodes | table | opencog_user
-    (4 rows)
+    (3 rows)
 
 If the above doesn't work, go back, and try again.
 
@@ -330,18 +329,16 @@ Be sure to adjust the username and passwd appropriately.
 
 Opencog Setup
 -------------
-Edit lib/opencog.conf and set the DB username and password there to the
-same values as in ~/.odbc.ini.  Better yet, copy lib/opencog.conf to
-your build directory, edit the copy, and start the opencog server as:
+Edit lib/opencog.conf and set the STORAGE, STORAGE_USERNAME and
+STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet, 
+copy lib/opencog.conf to your build directory, edit the copy, and 
+start the opencog server as:
 
    $ ./opencog/server/cogserver -c my.conf
 
 Verify that everything works. Start the cogserver, and bulk-save:
 
    $ telnet localhost 17001
-   opencog> sql-open mycogdata opencog_user cheese
-   Opened "mycogdata" as user "opencog_user"
-
    opencog> sql-store
    
 Some output should be printed in the cogserver window: 
@@ -358,12 +355,11 @@ is disabled by default, because it requires the above complicated setup.
 Please run this test.  To do this:
 
  -- edit tests/persist/sql/CMakeLists.txt and uncomment:
-    ADD_CXXTEST(BasicSaveUTest)
-    at the bottom.
+    SET(DB_IS_CONFIGURED 1)
  -- Read tests/persist/sql/README and follow the instructions there.
     They are almost identical to the instructions above, except that
     they call for a test user to be set up. You can do that, or you
-    can use yor current DB user.
+    can use your current DB user.
  -- To compile and run:
     $ make test
 
@@ -527,7 +523,7 @@ Sooner or later you will want to make a copy of your database, for
 backup purposes, or sharing. Here's the current 'best practices' for
 that:
 
-   $ pg_dump mycogdata
+   $ pg_dump mycogdata filename.sql
 
 That's all!
 
