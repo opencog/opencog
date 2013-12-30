@@ -188,10 +188,10 @@ public:
      * \note Does not apply the new predicate index to the atoms
      * inserted previously in the AtomTable.
      */
-    void addPredicateIndex(Handle h, PredicateEvaluator *pe)
+    void addPredicateIndex(Handle& h, PredicateEvaluator *pe)
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        predicateIndex.addPredicateIndex(h,pe);
+        predicateIndex.addPredicateIndex(h, pe);
     }
 
     /**
@@ -199,7 +199,7 @@ public:
      * GroundedPredicateNode Handle, if it is being used as a
      * lookup index. Otherwise, returns NULL.
      */
-    PredicateEvaluator* getPredicateEvaluator(Handle h) const
+    PredicateEvaluator* getPredicateEvaluator(Handle& h) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return predicateIndex.getPredicateEvaluator(h);
@@ -217,7 +217,7 @@ public:
                     const std::string& gpnNodeName,
                     VersionHandle vh = NULL_VERSION_HANDLE) const
     {
-        Handle gpnHandle = getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName);
+        Handle gpnHandle(getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName));
         return getHandlesByGPN(result, gpnHandle, vh);
     }
 
@@ -230,7 +230,7 @@ public:
      **/
     template <typename OutputIterator> OutputIterator
     getHandlesByGPN(OutputIterator result,
-                    Handle h,
+                    Handle& h,
                     VersionHandle vh = NULL_VERSION_HANDLE) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -254,26 +254,26 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(LinkPtr) const;
     Handle getHandle(AtomPtr) const;
-    Handle getHandle(Handle) const;
+    Handle getHandle(Handle&) const;
 
 protected:
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool isType(Handle h, Type t, bool subclass) const
+    bool isType(Handle& h, Type t, bool subclass) const
     {
         Type at = h->getType();
         if (not subclass) return t == at;
         return classserver().isA(at, t);
     }
-    bool containsVersionedTV(Handle h, VersionHandle vh) const
+    bool containsVersionedTV(Handle& h, VersionHandle vh) const
     {
         if (isNullVersionHandle(vh)) return true;
-        TruthValuePtr tv = h->getTruthValue();
+        TruthValuePtr tv(h->getTruthValue());
         return (not tv->isNullTv())
                and (tv->getType() == COMPOSITE_TRUTH_VALUE)
                and (not CompositeTVCast(tv)->getVersionedTV(vh)->isNullTv());
     }
-    bool hasNullName(Handle h) const
+    bool hasNullName(Handle& h) const
     {
         if (LinkCast(h)) return true;
         if (NodeCast(h)->getName().c_str()[0] == 0) return true;
@@ -413,7 +413,7 @@ public:
      * thus making it thread-safe against concurrent additions
      * or deletions by other threads.
      */
-    UnorderedHandleSet getIncomingSet(Handle h) const
+    UnorderedHandleSet getIncomingSet(Handle& h) const
     {
 #if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -427,7 +427,7 @@ public:
 
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result,
-                   Handle h) const
+                   Handle& h) const
     {
 #if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -453,7 +453,7 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
-                         Handle h,
+                         Handle& h,
                          Type type,
                          bool subclass = false) const
     {
@@ -474,7 +474,7 @@ public:
 
     template <typename OutputIterator> OutputIterator
     getIncomingSetByTypeVH(OutputIterator result,
-                           Handle h,
+                           Handle& h,
                            Type type,
                            bool subclass,
                            VersionHandle vh) const
@@ -517,7 +517,7 @@ public:
                          bool subclass = true) const
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetType, targetName);
+        Handle targh(getHandle(targetType, targetName));
         return getIncomingSetByType(result, targh, type, subclass);
     }
 
@@ -531,7 +531,7 @@ public:
                            VersionHandle targetVh) const
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetType, targetName);
+        Handle targh(getHandle(targetType, targetName));
         // XXX TODO what the heck with targetVH ?? Are we supposed to
         // check if targh above has it ?? And if not, I guess return
         // empty set ... Who needs this stuff, anyway?
@@ -715,7 +715,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle h) const {
+    bool holds(Handle& h) const {
         return (NULL != h) and h->getAtomTable() == this;
     }
 
@@ -725,7 +725,7 @@ public:
      * @return pointer to Node object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a link.
      */
-    inline NodePtr getNode(Handle h) const {
+    inline NodePtr getNode(Handle& h) const {
         h = getHandle(h); // force resolution of uuid into atom pointer.
         return NodeCast(h);
     }
@@ -736,7 +736,7 @@ public:
      * @return pointer to Link object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a node.
      */
-    inline LinkPtr getLink(Handle h) const {
+    inline LinkPtr getLink(Handle& h) const {
         h = getHandle(h); // force resolution of uuid into atom pointer.
         return LinkCast(h);
     }
@@ -756,7 +756,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    AtomPtrSet extract(Handle handle, bool recursive = true);
+    AtomPtrSet extract(Handle& handle, bool recursive = true);
 
     /**
      * Return a random atom in the AtomTable.
