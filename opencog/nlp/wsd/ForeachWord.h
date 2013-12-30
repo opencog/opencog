@@ -17,7 +17,9 @@
 #include <opencog/atomspace/Atom.h>
 #include <opencog/atomspace/ForeachChaseLink.h>
 #include <opencog/atomspace/FollowLink.h>
+#include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/atom_types.h>
 #include <opencog/nlp/types/atom_types.h>
 
 namespace opencog {
@@ -54,7 +56,7 @@ inline bool foreach_word_instance(Handle ha, bool (T::*cb)(Handle), T *data)
 {
 	FollowLink fl;
 	Handle h = fl.follow_binary_link(ha, REFERENCE_LINK);
-	return foreach_outgoing_handle (h, cb, data);
+	return foreach_outgoing_handle (LinkCast(h), cb, data);
 }
 
 /**
@@ -82,9 +84,8 @@ class PrivateUseOnlyEachSense
 		T *user_data;
 		bool sense_filter(Handle h, Handle l)
 		{
-            AtomSpace& as = atomspace();
 			// Rule out relations that aren't actual word-senses.
-			if (as.getType(h) != WORD_SENSE_NODE) return false;
+			if (h->getType() != WORD_SENSE_NODE) return false;
 			return (user_data->*user_cb)(h, l);
 		}
 };
@@ -146,14 +147,12 @@ class PrivateUseOnlyPOSFilter
 		const std::string *desired_pos;
 		bool pos_filter(Handle word_sense)
 		{
-			AtomSpace &as = atomspace();
-
 			// Find the part-of-speech for this word-sense.
 			FollowLink fl;
 			Handle h = fl.follow_binary_link(word_sense, PART_OF_SPEECH_LINK);
 
 			// The 'no-sense' special-case sense will not have a pos.
-			const std::string &sense_pos = as.getName(h);
+			const std::string &sense_pos = NodeCast(h)->getName();
 
 			// If there's no POS match, skip this sense.
 			if (desired_pos->compare(sense_pos)) return false;
@@ -198,13 +197,14 @@ inline bool foreach_dict_word_sense_pos(Handle h, const std::string &pos,
  */
 inline const std::string get_part_of_speech(Handle word_instance)
 {
-	//static std::string empty;
-	AtomSpace &as = atomspace();
+	static std::string empty;
 
 	// Find the part-of-speech for this word instance.
 	FollowLink fl;
 	Handle inst_pos = fl.follow_binary_link(word_instance, PART_OF_SPEECH_LINK);
-	return as.getName(inst_pos);
+	NodePtr n(NodeCast(inst_pos));
+	if (NULL == n) return empty;
+	return n->getName();
 }
 
 /**
@@ -282,22 +282,21 @@ template <typename T>
 class PrivateUseOnlyRelexRelationFinder
 {
 	private:
-		Handle listlink;
+		LinkPtr listlink;
 		bool look_for_eval_link(Handle h)
 		{
-			AtomSpace& as = atomspace();
-			Type t = as.getType(h);
+			Type t = h->getType();
 			if (t != EVALUATION_LINK) return false;
 
 			// If we are here, lets see if the first node is a ling rel.
-			Handle a = as.getOutgoing(h,0);
-			if (as.getType(a) != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
+			Handle a = LinkCast(h)->getOutgoingAtom(0);
+			if (a->getType() != DEFINED_LINGUISTIC_RELATIONSHIP_NODE) return false;
 
 			// OK, we've found a relationship. Get the second member of
 			// the list link, and call the user callback with it.
-			const std::string &relname = as.getName(a);
+			const std::string &relname = NodeCast(a)->getName();
 
-			const std::vector<Handle> outset = as.getOutgoing(listlink);
+			const std::vector<Handle> outset = listlink->getOutgoingSet();
 
 			// First arg must be first (avoid reporting twice with swapped order).
 			if (first_arg != outset[0]) return false;
@@ -313,9 +312,8 @@ class PrivateUseOnlyRelexRelationFinder
 
 		bool look_for_list_link(Handle h)
 		{
-			AtomSpace& as = atomspace();
-			if (as.getType(h) != LIST_LINK) return false;
-			listlink = h;
+			if (h->getType() != LIST_LINK) return false;
+			listlink = LinkCast(h);
 
 			// If we are here, lets see if the list link is in eval link.
 			foreach_incoming_handle(h, &PrivateUseOnlyRelexRelationFinder::look_for_eval_link, this);
@@ -347,8 +345,7 @@ foreach_relex_relation(Handle h,
  */
 inline Handle get_word_instance_of_sense_link(Handle h)
 {
-	AtomSpace& as = atomspace();
-	return as.getOutgoing(h,0);
+	return LinkCast(h)->getOutgoingAtom(0);
 }
 
 /**
@@ -363,8 +360,7 @@ inline Handle get_word_instance_of_sense_link(Handle h)
  */
 inline Handle get_word_sense_of_sense_link(Handle h)
 {
-	AtomSpace& as = atomspace();
-	return as.getOutgoing(h,1);
+	return LinkCast(h)->getOutgoingAtom(1);
 }
 
 } // namespace opencog

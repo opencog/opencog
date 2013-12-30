@@ -75,14 +75,17 @@ public:
         // Uncomment to enable logging
         //logger().setLevel(Logger::DEBUG);
         //logger().setPrintToStdoutFlag(true);
+
+        atomSpace = new AtomSpace();
+        table = (AtomTable*) & (atomSpace->getAtomTable());
     }
-    ~AtomTableUTest() {}
+    ~AtomTableUTest() {
+        delete atomSpace;
+    }
 
     void setUp()
     {
-        atomSpace = new AtomSpace();
-        table = (AtomTable*) & (atomSpace->getAtomTable());
-
+        atomSpace->clear();
         /* load scm files with all necessary nodes and links  */
         load_scm_file(*atomSpace, PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
@@ -93,59 +96,54 @@ public:
     }
 
     void tearDown() {
-        delete atomSpace;
+        atomSpace->clear();
     }
 
     void testSimple() {
-        AtomTable atomTable;
-        Handle time = atomTable.add(createNode(TIME_NODE, "1"));
-        Handle word = atomTable.add(createNode(NUMBER_NODE, "1"));
-        Handle sense = atomTable.add(createNode(CONCEPT_NODE, "28675194"));
+        Handle time = table->add(createNode(TIME_NODE, "1"));
+        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        Handle sense = table->add(createNode(CONCEPT_NODE, "28675194"));
         std::vector<Handle> os;
         os.push_back(time);
         os.push_back(word);
         os.push_back(sense);
-        atomTable.add(createLink(INHERITANCE_LINK, os));
+        table->add(createLink(INHERITANCE_LINK, os));
     }
 
     void testHolds() {
         Handle h(100101);
-        AtomTable atomTable;
-        Handle word = atomTable.add(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT(atomTable.holds(word));
-        TS_ASSERT(!atomTable.holds(h));
+        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        TS_ASSERT(table->holds(word));
+        TS_ASSERT(!table->holds(h));
     }
 
     void testIsCleared() {
-
-        AtomTable atomTable;
-        TS_ASSERT(atomTable.isCleared());
-        Handle word = atomTable.add(createNode(NUMBER_NODE, "1"));
-        TS_ASSERT(!atomTable.isCleared());
+        atomSpace->clear();
+        TS_ASSERT(table->isCleared());
+        Handle word = table->add(createNode(NUMBER_NODE, "1"));
+        TS_ASSERT(!table->isCleared());
     }
 
     void testGetRandom() {
-        AtomTable atomTable;
         ostringstream oss;
-        size_t numBuckets = atomTable.getSize() / 10;
+        size_t numBuckets = table->getSize() / 10;
         for (unsigned i=0; i < numBuckets + 10; i++){
             oss.clear();
             oss << i;
-            atomTable.add(createNode(NUMBER_NODE, oss.str()));
+            table->add(createNode(NUMBER_NODE, oss.str()));
         }
         RandGen* rng = new opencog::MT19937RandGen(0);
-        Handle h1 = atomTable.getRandom(rng);
-        Handle h2 = atomTable.getRandom(rng);
+        Handle h1 = table->getRandom(rng);
+        Handle h2 = table->getRandom(rng);
         int tries = 0;
         while (h1 == h2 && tries < 100) {
             // getting the same handle 100 times is extremely improbable
             // whereas one or two in a row may happen once every now and then.
-            Handle h2 = atomTable.getRandom(rng);
+            Handle h2 = table->getRandom(rng);
             tries+=1;
         }
         TS_ASSERT(h1 != h2);
         delete rng;
-
     }
 
     void REMOVEDtestPredicateIndices() {
@@ -432,28 +430,29 @@ public:
             std::remove(filename);
     }
 
-    void testImportanceUpdate() {
-        AtomTable atomTable;
+    void testImportanceUpdate()
+    {
+        atomSpace->clear();
 
         /* add a simple set of links & nodes */
         NodePtr wordNode(createNode(NUMBER_NODE, "1"));
         wordNode->setAttentionValue(createAV((AttentionValue::sti_t) - 10));
-        Handle wnHandle = atomTable.add(wordNode);
+        Handle wnHandle = table->add(wordNode);
 
         NodePtr senseNode(createNode(CONCEPT_NODE, "28675194"));
         senseNode->setAttentionValue(createAV((AttentionValue::sti_t) 30));
-        Handle snHandle = atomTable.add(senseNode);
+        Handle snHandle = table->add(senseNode);
 
         HandleSeq os;
         os.push_back(wnHandle);
         os.push_back(snHandle);
         LinkPtr inheritanceLink = createLink(INHERITANCE_LINK, os);
         inheritanceLink->setAttentionValue(createAV((AttentionValue::sti_t) 500));
-        Handle linkHandle = atomTable.add(inheritanceLink);
+        Handle linkHandle = table->add(inheritanceLink);
 
         // force sti decaying
         for (int i = 0; i < 10; i++)
-            atomTable.decayShortTermImportance();
+            table->decayShortTermImportance();
 
         // test the updated STIs
         TS_ASSERT(wnHandle->getAttentionValue()->getSTI()   == -20);
@@ -464,55 +463,51 @@ public:
     /* test the fix for the bug triggered whenever we had a link pointing to the
      * same atom twice (or more) */
     void testDoubleLink() {
-        AtomTable atomTable;
         NodePtr n1(createNode(NUMBER_NODE, "1"));
         NodePtr n2(createNode(NUMBER_NODE, "2"));
-        Handle hn1 = atomTable.add(n1);
-        Handle hn2 = atomTable.add(n2);
+        Handle hn1 = table->add(n1);
+        Handle hn2 = table->add(n2);
 
         std::vector<Handle> os; os.push_back(hn1); os.push_back(hn1); os.push_back(hn2);
         LinkPtr l1(createLink(LIST_LINK, os));
-        Handle hl1 = atomTable.add(l1);
+        Handle hl1 = table->add(l1);
 
-        atomTable.extract(hn1, true);
+        table->extract(hn1, true);
     }
 
     void testMerge() {
-        AtomTable atomTable;
-
         NodePtr n1(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.1f, 0.2f)));
-        Handle hn1 = atomTable.add(n1);
+        Handle hn1 = table->add(n1);
 
         NodePtr n2(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.3f, 0.4f)));
-        TS_ASSERT_THROWS_NOTHING(atomTable.add(n2));
+        TS_ASSERT_THROWS_NOTHING(table->add(n2));
 
         NodePtr n3(createNode(NUMBER_NODE, "1", SimpleTruthValue::createTV(0.8f, 0.3f)));
-        TS_ASSERT_THROWS_NOTHING(atomTable.add(n3));
+        TS_ASSERT_THROWS_NOTHING(table->add(n3));
 
-        Handle h = atomTable.getHandlex("1", NUMBER_NODE);
+        Handle h = table->getHandlex("1", NUMBER_NODE);
         TS_ASSERT(h == hn1);
         TS_ASSERT_DELTA(h->getTruthValue()->getMean(), 0.3f, 0.000001);
         TS_ASSERT_DELTA(h->getTruthValue()->getCount(), 0.4f, 0.000001);
     }
 
     void testSimpleWithCustomAtomTypes() {
-        AtomTable atomTable;
         Type MY_NUMBER_NODE = classserver().addType(NUMBER_NODE, "MyNumberNode");
         Type MY_CONCEPT_NODE = classserver().addType(CONCEPT_NODE, "MyConceptNode");
         Type MY_INHERITANCE_LINK = classserver().addType(INHERITANCE_LINK, "MyInheritanceLink");
         logger().debug("MY_NUMBER_NODE = %u, MY_CONCEPT_NODE = %u, MY_INHERITANCE_LINK = %u\n", MY_NUMBER_NODE, MY_CONCEPT_NODE, MY_INHERITANCE_LINK);
         NodePtr wp = createNode(MY_NUMBER_NODE, "1");
-        Handle word = atomTable.add(wp);
+        Handle word = table->add(wp);
         NodePtr sp = createNode(MY_CONCEPT_NODE, "28675194");
-        Handle sense = atomTable.add(sp);
+        Handle sense = table->add(sp);
         std::vector<Handle> os;
         os.push_back(word);
         os.push_back(sense);
         LinkPtr lp = createLink(MY_INHERITANCE_LINK, os);
-        Handle lh = atomTable.add(lp);
+        Handle lh = table->add(lp);
 
-        TS_ASSERT(atomTable.getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(atomTable.getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
-        TS_ASSERT(atomTable.getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
+        TS_ASSERT(table->getHandlex("1", MY_NUMBER_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(table->getHandlex("28675194", MY_CONCEPT_NODE) != Handle::UNDEFINED);
+        TS_ASSERT(table->getHandle(MY_INHERITANCE_LINK, os) != Handle::UNDEFINED);
     }
 };

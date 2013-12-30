@@ -57,7 +57,13 @@
 ; Fetch the mean, confidence and count of a TV.
 (define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
 (define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))
-(define (tv-count tv) (assoc-ref (cog-tv->alist tv) 'count))
+;
+; Simple truth values won't have a count. Its faster to just check
+; for #f than to call (cog-ctv? tv)
+(define (tv-count tv)
+	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
+	(if (eq? cnt #f) 0 cnt)
+)
 
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.

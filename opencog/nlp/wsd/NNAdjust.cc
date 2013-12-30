@@ -14,6 +14,7 @@
 #include <stdio.h>
 
 #include <opencog/util/platform.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/nlp/wsd/ForeachWord.h>
 
@@ -123,7 +124,7 @@ bool NNAdjust::sense_of_first_inst(Handle first_word_sense_h,
  *    )
  */
 bool NNAdjust::sense_of_second_inst(Handle second_word_sense_h,
-                                        Handle second_sense_link)
+                                    Handle second_sense_link)
 {
 	// printf("second sense %s!\n", sense->getName().c_str());
 	foreach_incoming_handle(second_sense_link, &NNAdjust::sense_pair, this);

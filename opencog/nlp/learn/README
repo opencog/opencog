@@ -209,6 +209,30 @@ Mutual Information
 Compute mutual information, manually, by runnning these scripts:
 compute-mi.scm
 
+Example stats and performance:
+current fr_pairs db has 16785 words and 177960 pairs.
+
+This takes 17K + 2x 178K = 370K total atoms loaded.
+These load up in 10 seconds-ish or so.
+
+RSS for cogserver: 436MB, holding approx 370K atoms
+So this is about 1.2KB per atom, all included. Atoms are a bit fat...
+... loading all pairs is very manageable even for modest-sized machines.
+
+Wild-card pair-count is taking about 30 per minute, so total time will
+be  17K minutes/30 = 580 minutes = 10 hours!  Oy vey...
+This is utterly single-threaded...
+
+all-pair count was fast.
+
+Final mi compute: 2910 in 73 mins == 40 per minute ... again, pathetic.
+Will take 7 hours (420 minutes) to complete ...
+
+Wooot!  After numerous fixes, to avoid the old atomspace brain-damage
+we are now up to about 250 per minute on wild-card, that's an 8x speedup!
+Although thats still slower than e.g. a perl script ... oh well,
+price of generality.  Avoiding the pattern matcher would go a long way.
+
 
 Crash
 -----
@@ -237,6 +261,8 @@ again... 26 December, no stack-trace, but got "called pure virtual" error msg.
 again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
 again... 27 Dec, 929        if (tv) tvt = tv->getType();
 again... 28 Dec, didn't get a stack...
+again... 28 Dec, line 953:  STMTF("stv_mean", tv->getMean()); on count tv
+again... 30 Dec, line 954:  as above ... 
 
 All new crash. Note:
 1) This is with the old scheme singleton-instance.
@@ -339,14 +365,57 @@ queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
 so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
 which is still pretty pathetic... 
 
+
 Misc 
 ----
-
-Loaded 10000 atoms.  Oh, OK.
-
 Change load-atoms to return a count?
 
 handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
 
+
+How about using a reader-writer lock?
+----------------------------------
+
+boost::shared_lock  for reading,
+unique_lock for writing ... 
+
+upgrade_lock<shared_mutex> lock(workerAccess); 
+        upgrade_to_unique_lock<shared_mutex> uniqueLock(lock);
+
+
+
+shared_mutex 
+write uses:  unique_lock<shared_mutex>
+readers use shared_lock<shared_mutex>
+
+writer does:
+
+  // get upgradable access
+  boost::upgrade_lock<boost::shared_mutex> lock(_access);
+
+  // get exclusive access
+  boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(lock);
+  // now we have exclusive access
+}
+
+am using boost1.49 on cray
+
+
+W polu pierwszym o barwie czerwonej przedstawia zł
+otą sowę siedzącą na trójwzgórzu, w polu drugim o barwie złotej czerwony g
+ryf trzymający złoty kłos, w polu trzecim, błękitnym, złota gałązka oliwna
+.
+
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
+Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
+
+ABORT: encoding-error
+submit-one: Herb gminy Świdnica opracowano w Centrum Heraldyki Polskiej a zatwierdziła go Rada
+Gminy Świdnica uchwałą Nr XXXII/217/96 z 9 sierpnia 1996.
 

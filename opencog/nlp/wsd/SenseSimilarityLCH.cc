@@ -23,7 +23,7 @@ using namespace opencog;
 
 #define DEBUG
 
-SenseSimilarityLCH::SenseSimilarityLCH(AtomSpace *_as) : as(_as)
+SenseSimilarityLCH::SenseSimilarityLCH()
 {
 	// Set 'max_follow_holo' to a small number to limit the total number
 	// of holonym relations to be followed. Setting this to a large number
@@ -131,8 +131,8 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 
 #ifdef DEBUG
 	printf("(%s, %s) dist=%d sim=%g\n",
-	       as->getName(first_sense).c_str(),
-	       as->getName(second_sense).c_str(),
+	       NodeCast(first_sense)->getName().c_str(),
+	       NodeCast(second_sense)->getName().c_str(),
 	       min_cnt, sim);
 	// printf("----\n");
 #endif
@@ -142,7 +142,7 @@ SimpleTruthValuePtr SenseSimilarityLCH::similarity(Handle fs, Handle ss)
 
 bool SenseSimilarityLCH::up_first(Handle up)
 {
-	if (as->getType(up) != WORD_SENSE_NODE) return false;
+	if (up->getType() != WORD_SENSE_NODE) return false;
 
 	first_cnt ++;
 	if (up == second_sense)
@@ -189,7 +189,7 @@ bool SenseSimilarityLCH::up_first(Handle up)
 
 bool SenseSimilarityLCH::up_second(Handle up)
 {
-	if (as->getType(up) != WORD_SENSE_NODE) return false;
+	if (up->getType() != WORD_SENSE_NODE) return false;
 
 	// Don't explore paths that are longer than the current shortest path.
 	int dist = first_cnt + second_cnt + 1;

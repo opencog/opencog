@@ -1044,10 +1044,10 @@ public:
         getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i;
-        for (i = handle_set.begin(); i != handle_set.end(); i++) {
-            Handle h = *i;
-            bool rc = (data->*cb)(h);
+        std::list<Handle>::iterator i = handle_set.begin();
+        std::list<Handle>::iterator iend = handle_set.end();
+        for (; i != iend; i++) {
+            bool rc = (data->*cb)(*i);
             if (rc) return rc;
         }
         return false;

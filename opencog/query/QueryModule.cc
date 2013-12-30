@@ -7,6 +7,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/guile/SchemePrimitive.h>
+#include <opencog/server/CogServer.h>
 
 #include "PatternMatch.h"
 #include "QueryModule.h"

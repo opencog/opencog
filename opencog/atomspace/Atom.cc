@@ -352,7 +352,7 @@ IncomingSet Atom::getIncomingSet()
     foreach(WinkPtr w, _incoming_set->_iset)
     {
         LinkPtr l(w.lock());
-        if (l) iset.insert(l);
+        if (l) iset.push_back(l);
     }
     return iset;
 }
