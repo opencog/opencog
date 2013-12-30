@@ -465,8 +465,9 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
             Handle h(ogs[i]);
             // It can happen that the uuid is assigned, but the pointer
             // is NULL. In that case, we should at least know about this
-            // uuid.
-            if (NULL == h and Handle::UNDEFINED != h) {
+            // uuid.  We explicitly test h._ptr.get() so as not to
+            // accidentally resolve during the test.
+            if (NULL == h._ptr.get() and Handle::UNDEFINED != h) {
                 auto it = _atom_set.find(h);
                 if (it != _atom_set.end()) {
                     h = *it;
