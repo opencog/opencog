@@ -84,11 +84,13 @@ void PatternMatch::match(PatternMatchCallback *cb,
                          Handle hnegates)
 {
 	// Both must be non-empty.
-	if (!atom_space->isLink(hclauses) || !atom_space->isLink(hvarbles)) return;
+	LinkPtr lclauses(LinkCast(hclauses));
+	LinkPtr lvarbles(LinkCast(hvarbles));
+	if (NULL == lclauses or NULL == lvarbles) return;
 
 	// Types must be as expected
-	Type tvarbles = atom_space->getType(hvarbles);
-	Type tclauses = atom_space->getType(hclauses);
+	Type tvarbles = hvarbles->getType();
+	Type tclauses = hclauses->getType();
 	if (LIST_LINK != tvarbles)
 	{
 		logger().warn("%s: expected ListLink for bound variable list",
@@ -101,19 +103,20 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		return;
 	}
 
-	const std::vector<Handle> &vars = atom_space->getOutgoing(hvarbles);
+	const std::vector<Handle> &vars = lvarbles->getOutgoingSet();
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
-	if (atom_space->isLink(hnegates))
+	LinkPtr lnegates(LinkCast(hnegates));
+	if (lnegates)
 	{
-		Type tnegates = atom_space->getType(hnegates);
+		Type tnegates = hnegates->getType();
 		if (AND_LINK != tnegates)
 		{
 			logger().warn("%s: expected AndLink for clause list", __FUNCTION__);
 			return;
 		}
-		negs = atom_space->getOutgoing(hnegates);
+		negs = lnegates->getOutgoingSet();
 		bool bogus = pme.validate(vars, negs);
 		if (bogus)
 		{
@@ -124,7 +127,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 
 	// Make sure that the user did not pass in bogus clauses
 	std::vector<Handle> clauses;
-	clauses = atom_space->getOutgoing(hclauses);
+	clauses = lclauses->getOutgoingSet();
 
 	bool bogus = pme.validate(vars, clauses);
 	if (bogus)
@@ -143,10 +146,8 @@ void PatternMatch::match(PatternMatchCallback *cb,
 namespace opencog {
 class FindVariables
 {
-		AtomSpace* as;
 	public:
 		std::vector<Handle> varlist;
-		FindVariables(AtomSpace *_as) : as(_as) { };
 
 		/**
 		 * Create a list of all of the VariableNodes that lie in the
@@ -154,7 +155,7 @@ class FindVariables
 		 */
 		inline bool find_vars(Handle h)
 		{
-			Type t = as->getType(h);
+			Type t = h->getType();
 			if (classserver().isNode(t))
 			{
 				if (t == VARIABLE_NODE)
@@ -164,7 +165,8 @@ class FindVariables
 				return false;
 			}
 
-			return foreach_outgoing_handle(h, &FindVariables::find_vars, this);
+			LinkPtr l(LinkCast(h));
+			return foreach_outgoing_handle(l, &FindVariables::find_vars, this);
 		}
 };
 
@@ -187,7 +189,7 @@ class Instantiator
 
 	public:
 		AtomSpace *as;
-		Handle instantiate(Handle expr, std::map<Handle, Handle> &vars);
+		Handle instantiate(Handle& expr, std::map<Handle, Handle> &vars);
 };
 
 Handle Instantiator::execution_link()
@@ -203,8 +205,9 @@ Handle Instantiator::execution_link()
 
 bool Instantiator::walk_tree(Handle expr)
 {
-	Type t = as->getType(expr);
-	if (as->isNode(expr))
+	Type t = expr->getType();
+	NodePtr nexpr(NodeCast(expr));
+	if (nexpr)
 	{
 		if (VARIABLE_NODE != t) {
 			oset.push_back(expr);
@@ -227,14 +230,15 @@ bool Instantiator::walk_tree(Handle expr)
 	oset.clear();
 
 	// Walk the subtree, substituting values for variables.
-	foreach_outgoing_handle(expr, &Instantiator::walk_tree, this);
+	LinkPtr lexpr(LinkCast(expr));
+	foreach_outgoing_handle(lexpr, &Instantiator::walk_tree, this);
 
 	// Fire execution links, if found.
 	did_exec = false;  // set flag on top-level only
 	if (t == EXECUTION_LINK)
 	{
 		did_exec = true;
-		Handle sh = execution_link();
+		Handle sh(execution_link());
 		oset = save_oset;
 		if (Handle::UNDEFINED != sh)
 		{
@@ -245,8 +249,8 @@ bool Instantiator::walk_tree(Handle expr)
 
 	// Now create a duplicate link, but with an outgoing set where
 	// the variables have been substituted by their values.
-	TruthValuePtr tv = as->getTV(expr);
-	Handle sh = as->addLink(t, oset, tv);
+	TruthValuePtr tv(expr->getTV());
+	Handle sh(as->addLink(t, oset, tv));
 
 	oset = save_oset;
 	oset.push_back(sh);
@@ -267,7 +271,7 @@ bool Instantiator::walk_tree(Handle expr)
  * with their values, creating a new expression. The new expression is
  * added to the atomspace, and its handle is returned.
  */
-Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
+Handle Instantiator::instantiate(Handle& expr, std::map<Handle, Handle> &vars)
 {
 	if (Handle::UNDEFINED == expr)
 	{
@@ -283,7 +287,7 @@ Handle Instantiator::instantiate(Handle expr, std::map<Handle, Handle> &vars)
 	{
 		logger().warn("%s: failure to ground expression (found %d groundings)\n"
 			"Ungrounded expr is %s\n",
-			__FUNCTION__, oset.size(), as->atomAsString(expr).c_str());
+			__FUNCTION__, oset.size(), expr->toShortString().c_str());
 	}
 	if (oset.size() >= 1)
 		return oset[0];
@@ -326,7 +330,7 @@ bool Implicator::solution(std::map<Handle, Handle> &pred_soln,
 	// PatternMatchEngine::print_solution(pred_soln,var_soln);
 	inst.as = as;
 	Handle h = inst.instantiate(implicand, var_soln);
-	if (as->isValidHandle(h))
+	if (Handle::UNDEFINED != h)
 	{
 		result_list.push_back(h);
 	}
@@ -427,52 +431,52 @@ Handle PatternMatch::do_imply (Handle himplication,
                                PatternMatchCallback *pmc,
                                std::vector<Handle> *varlist)
 {
-	AtomSpace *as = atom_space;
 	// Must be non-empty.
-	if (!as->isLink(himplication)) return Handle::UNDEFINED;
+	LinkPtr limplication(LinkCast(himplication));
+	if (NULL == limplication) return Handle::UNDEFINED;
 
 	// Type must be as expected
-	Type timpl = as->getType(himplication);
+	Type timpl = himplication->getType();
 	if (IMPLICATION_LINK != timpl)
 	{
 		logger().warn("%s: expected ImplicationLink", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	const std::vector<Handle>& oset = as->getOutgoing(himplication);
+	const std::vector<Handle>& oset = limplication->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		logger().warn("%s: ImplicationLink has wrong size", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	Handle hclauses = oset[0];
-	Handle implicand = oset[1];
+	Handle hclauses(oset[0]);
+	Handle implicand(oset[1]);
 
 	// Must be non-empty.
-	if (!as->isLink(hclauses)) return Handle::UNDEFINED;
+	LinkPtr lclauses(LinkCast(hclauses));
+	if (NULL == lclauses) return Handle::UNDEFINED;
 
 	// The predicate is either an AndList, or a single clause
 	// If its an AndList, then its a list of clauses.
 	// XXX Should an OrList be supported ??
 	std::vector<Handle> affirm, negate;
-	Type tclauses = as->getType(hclauses);
+	Type tclauses = hclauses->getType();
 	if (AND_LINK == tclauses)
 	{
 		// Input is in conjunctive normal form, consisting of clauses,
 		// or their negations. Split these into two distinct lists.
 		// Any clause that is a NotLink is "negated"; strip off the
 		// negation and put it into its own list.
-		const std::vector<Handle>& cset = as->getOutgoing(hclauses);
+		const std::vector<Handle>& cset = lclauses->getOutgoingSet();
 		size_t clen = cset.size();
 		for (size_t i=0; i<clen; i++)
 		{
-			Handle h = cset[i];
-			Type t = as->getType(h);
+			Handle h(cset[i]);
+			Type t = h->getType();
 			if (NOT_LINK == t)
 			{
-				h = as->getOutgoing(h,0);
-				negate.push_back(h);
+				negate.push_back(LinkCast(h)->getOutgoingAtom(0));
 			}
 			else
 			{
@@ -490,7 +494,7 @@ Handle PatternMatch::do_imply (Handle himplication,
 	// Extract a list of variables, if needed.
 	// This is used only by the deprecated imply() function, as the
 	// BindLink will include a list of variables up-front.
-	FindVariables fv(atom_space);
+	FindVariables fv;
 	if (NULL == varlist)
 	{
 		fv.find_vars(hclauses);
@@ -555,8 +559,7 @@ int PatternMatch::get_vartype(Handle htypelink,
                               std::vector<Handle> &vset,
                               VariableTypeMap &typemap)
 {
-	AtomSpace *as = atom_space;
-	const std::vector<Handle>& oset = as->getOutgoing(htypelink);
+	const std::vector<Handle>& oset = LinkCast(htypelink)->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		logger().warn("%s: TypedVariableLink has wrong size",
@@ -568,10 +571,10 @@ int PatternMatch::get_vartype(Handle htypelink,
 	Handle vartype = oset[1];
 
 	// The vartype is either a single type name, or a list of typenames.
-	Type t = as->getType(vartype);
+	Type t = vartype->getType();
 	if (VARIABLE_TYPE_NODE == t)
 	{
-		const std::string &tn = as->getName(vartype);
+		const std::string &tn = NodeCast(vartype)->getName();
 		Type vt = classserver().getType(tn);
 
 		if (NOTYPE == vt)
@@ -590,20 +593,20 @@ int PatternMatch::get_vartype(Handle htypelink,
 	{
 		std::set<Type> ts;
 
-		const std::vector<Handle>& tset = as->getOutgoing(vartype);
+		const std::vector<Handle>& tset = LinkCast(vartype)->getOutgoingSet();
 		size_t tss = tset.size();
 		for (size_t i=0; i<tss; i++)
 		{
-			Handle h = tset[i];
-			if (VARIABLE_TYPE_NODE != as->getType(h))
+			Handle h(tset[i]);
+			if (VARIABLE_TYPE_NODE != h->getType())
 			{
 				logger().warn("%s: TypedVariableLink has unexpected content:\n"
 				              "Expected VariableTypeNode, got %s",
 				              __FUNCTION__,
-				              classserver().getTypeName(as->getType(h)).c_str());
+				              classserver().getTypeName(h->getType()).c_str());
 				return 3;
 			}
-			const std::string &tn = as->getName(h);
+			const std::string &tn = NodeCast(h)->getName();
 			Type vt = classserver().getType(tn);
 			if (NOTYPE == vt)
 			{
@@ -655,14 +658,12 @@ int PatternMatch::get_vartype(Handle htypelink,
 Handle PatternMatch::do_bindlink (Handle hbindlink,
                                   PatternMatchCallback *pmc)
 {
-	AtomSpace *as = atom_space;
-	Handle h = hbindlink;
-
 	// Must be non-empty.
-	if (!as->isLink(h)) return Handle::UNDEFINED;
+	LinkPtr lbl(LinkCast(hbindlink));
+	if (NULL == lbl) return Handle::UNDEFINED;
 
 	// Type must be as expected
-	Type tscope = as->getType(h);
+	Type tscope = hbindlink->getType();
 	if (BIND_LINK != tscope)
 	{
 		const std::string& tname = classserver().getTypeName(tscope);
@@ -671,15 +672,15 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 		return Handle::UNDEFINED;
 	}
 
-	const std::vector<Handle>& oset = as->getOutgoing(h);
+	const std::vector<Handle>& oset = lbl->getOutgoingSet();
 	if (2 != oset.size())
 	{
 		logger().warn("%s: BindLink has wrong size", __FUNCTION__);
 		return Handle::UNDEFINED;
 	}
 
-	Handle hdecls = oset[0];  // VariableNode declarations
-	Handle himpl = oset[1];   // ImplicationLink
+	Handle hdecls(oset[0]);  // VariableNode declarations
+	Handle himpl(oset[1]);   // ImplicationLink
 
 	// vset is the vector of variables.
 	// typemap is the (possibly empty) list of restrictions on atom types.
@@ -688,9 +689,9 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 
 	// Expecting the declaration list to be either a single
 	// variable, or a list of variable declarations
-	Type tdecls = as->getType(hdecls);
-	if ((VARIABLE_NODE == tdecls) ||
-	    as->isNode(hdecls)) // allow *any* node as a variable
+	Type tdecls = hdecls->getType();
+	if ((VARIABLE_NODE == tdecls) or
+	    NodeCast(hdecls)) // allow *any* node as a variable
 	{
 		vset.push_back(hdecls);
 	}
@@ -702,12 +703,12 @@ Handle PatternMatch::do_bindlink (Handle hbindlink,
 	{
 		// The list of variable declarations should be .. a list of
 		// variables! Make sure its as expected.
-		const std::vector<Handle>& dset = as->getOutgoing(hdecls);
+		const std::vector<Handle>& dset = LinkCast(hdecls)->getOutgoingSet();
 		size_t dlen = dset.size();
 		for (size_t i=0; i<dlen; i++)
 		{
-			Handle h = dset[i];
-			Type t = as->getType(h);
+			Handle h(dset[i]);
+			Type t = h->getType();
 			if (VARIABLE_NODE == t)
 			{
 				vset.push_back(h);
@@ -786,7 +787,7 @@ bool CrispImplicator::solution(std::map<Handle, Handle> &pred_soln,
 
 		// Set truth value to true+confident
 		TruthValuePtr stv(SimpleTruthValue::createTV(1, SimpleTruthValue::confidenceToCount(1)));
-		pme->get_atomspace()->setTV(h, stv);
+		h->setTV(stv);
 	}
 	return false;
 }

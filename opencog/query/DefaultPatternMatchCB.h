@@ -61,7 +61,7 @@ class DefaultPatternMatchCB :
 		 *
 		 * By default, the nodes must be identical.
 		 */
-		virtual bool node_match(Handle npat_h, Handle nsoln_h)
+		virtual bool node_match(Handle& npat_h, Handle& nsoln_h)
 		{
 			// If equality, then a match.
 			if (npat_h == nsoln_h) return false;
@@ -77,10 +77,9 @@ class DefaultPatternMatchCB :
 		 * Return false if the nodes match, else return
 		 * true. (i.e. return true if mis-match).
 		 */
-		virtual bool variable_match(Handle npat_h, Handle nsoln_h)
+		virtual bool variable_match(Handle& npat_h, Handle& nsoln_h)
 		{
-			AtomSpace *as = pme->get_atomspace();
-			Type pattype = as->getType(npat_h);
+			Type pattype = npat_h->getType();
 
 			// If the ungrounded term is not of type VariableNode, then just
 			// accept the match. This allows any kind of node types to be
@@ -90,7 +89,7 @@ class DefaultPatternMatchCB :
 
 			// If the solution is variable too, reject it out-of-hand,
 			// even if its some variable in some utterly unrelated thing.
-			Type soltype = as->getType(nsoln_h);
+			Type soltype = nsoln_h->getType();
 			if (soltype == VARIABLE_NODE) return true;
 
 			// If the ungrounded term is a variable, then see if there
@@ -122,14 +121,13 @@ class DefaultPatternMatchCB :
 		 * By default, the link arity and the
 		 * link types must match.
 		 */
-		virtual bool link_match(Handle lpat_h, Handle lsoln_h)
+		virtual bool link_match(LinkPtr& lpat, LinkPtr& lsoln)
 		{
-			AtomSpace *as = pme->get_atomspace();
-			if (lpat_h == lsoln_h) return false;
+			if (lpat == lsoln) return false;
 
-			if (as->getArity(lpat_h) != as->getArity(lsoln_h)) return true;
-			Type pattype = as->getType(lpat_h);
-			Type soltype = as->getType(lsoln_h);
+			if (lpat->getArity() != lsoln->getArity()) return true;
+			Type pattype = lpat->getType();
+			Type soltype = lsoln->getType();
 
 			// If types differ, no match,
 			if (pattype != soltype) return true;
@@ -158,7 +156,7 @@ class DefaultPatternMatchCB :
 	private:
 		Handle root;
 		Handle starter_pred;
-		Handle find_starter(Handle);
+		Handle find_starter(Handle&);
 		bool loop_candidate(Handle);
 		VariableTypeMap *type_restrictions;
 	protected:
