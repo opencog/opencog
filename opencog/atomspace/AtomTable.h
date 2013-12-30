@@ -412,16 +412,20 @@ public:
      * Note that this returns a copy of the incoming set,
      * thus making it thread-safe against concurrent additions
      * or deletions by other threads.
+     *
+     * Return an std::vector, simply because its faster to put the
+     * elements into an std::vector than anything else. We don't need
+     * good delete or random-access performance for this.
      */
-    UnorderedHandleSet getIncomingSet(Handle& h) const
+    HandleSeq getIncomingSet(Handle& h) const
     {
 #if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return incomingIndex.getIncomingSet(h);
 #else
-        UnorderedHandleSet uhs;
-        h->getIncomingSet(inserter(uhs));
-        return uhs;
+        HandleSeq hs;
+        h->getIncomingSet(back_inserter(hs));
+        return hs;
 #endif
     }
 
@@ -464,8 +468,8 @@ public:
                             result,
 #else
         // XXX TODO it would be more efficient to move this to Atom.h
-        UnorderedHandleSet uhs(getIncomingSet(h));
-        return std::copy_if(uhs.begin(), uhs.end(), result,
+        HandleSeq hs(getIncomingSet(h));
+        return std::copy_if(hs.begin(), hs.end(), result,
 #endif
              [&](Handle h)->bool {
                      return isDefined(h)
@@ -486,8 +490,8 @@ public:
                             result,
 #else
         // XXX TODO it would be more efficient to move this to Atom.h
-        UnorderedHandleSet uhs(getIncomingSet(h));
-        return std::copy_if(uhs.begin(), uhs.end(), result,
+        HandleSeq hs(getIncomingSet(h));
+        return std::copy_if(hs.begin(), hs.end(), result,
 #endif
              [&](Handle h)->bool{
                    return isDefined(h)

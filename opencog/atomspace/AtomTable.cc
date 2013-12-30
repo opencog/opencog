@@ -236,7 +236,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     for (Arity i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             Handle h(handles[i]);
-            UnorderedHandleSet hs = getIncomingSet(h);
+            HandleSeq hs = getIncomingSet(h);
 
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 // sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
@@ -627,10 +627,11 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        UnorderedHandleSet is = getIncomingSet(handle);
+        HandleSeq is = getIncomingSet(handle);
 
-        UnorderedHandleSet::const_iterator is_it;
-        for (is_it = is.begin(); is_it != is.end(); ++is_it)
+        HandleSeq::iterator is_it = is.begin();
+        HandleSeq::iterator is_end = is.end();
+        for (; is_it != is_end; ++is_it)
         {
             Handle his(*is_it);
             DPRINTF("[AtomTable::extract] incoming set: %s",
@@ -665,9 +666,10 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
            "attempting to extract atom with non-empty incoming set: %s\n",
            atom->toShortString().c_str());
 
-        UnorderedHandleSet is = getIncomingSet(handle);
-        UnorderedHandleSet::const_iterator it;
-        for (it = is.begin(); it != is.end(); it++)
+        HandleSeq is = getIncomingSet(handle);
+        HandleSeq::iterator it = is.begin();
+        HandleSeq::iterator is_end = is.end();
+        for (; it != is_end; it++)
         {
             logger().warn("\tincoming: %s\n", (*it)->toShortString().c_str());
         }
