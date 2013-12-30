@@ -184,15 +184,13 @@ private:
 	 */
 	inline bool find_link_type(Handle link_h)
 	{
-		const AtomSpace &as = atomspace();
-
 		// Make sure the link is of the specified link type
-		if (link_type != as.getType(link_h)) return false;
+		if (link_type != link_h->getType()) return false;
 
 		cnt = -1;
 		to_atom = Handle::UNDEFINED;
 		// foreach_outgoing_handle(link_h, PrivateUseOnlyChaseLink::endpoint_matcher, this);
-		foreach_outgoing_handle(link_h, endpoint_matcher, this);
+		foreach_outgoing_handle(LinkCast(link_h), endpoint_matcher, this);
 
 		bool rc = false;
 		if (Handle::UNDEFINED != to_atom)
