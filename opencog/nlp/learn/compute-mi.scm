@@ -449,8 +449,8 @@
 		; Make sure all word-pairs are in the atomspace.
 		(fetch-incoming-set lg_rel)
 		; Compute the counts
-		(for-each
-		; (par-for-each
+		; (for-each
+		(par-for-each
 			(lambda (word)
 				(compute-pair-wildcard-counts word lg_rel)
 				(trace-msg-cnt "Wildcard-count did ")
@@ -670,13 +670,15 @@
 
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
-		(for-each
+		; (for-each
+		(par-for-each
 			(lambda (right-word)
 				(compute-pair-mi right-word lg_rel)
 				(trace-msg-cnt "Done with pair MI cnt=")
 			)
 			(cog-get-atoms 'WordNode)
 		)
+		(trace-msg "Finished with MI batch\n")
 	)
 )
 

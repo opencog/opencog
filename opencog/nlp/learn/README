@@ -228,6 +228,11 @@ all-pair count was fast.
 Final mi compute: 2910 in 73 mins == 40 per minute ... again, pathetic.
 Will take 7 hours (420 minutes) to complete ...
 
+Wooot!  After numerous fixes, to avoid the old atomspace brain-damage
+we are now up to about 250 per minute on wild-card, that's an 8x speedup!
+Although thats still slower than e.g. a perl script ... oh well,
+price of generality.  Avoiding the pattern matcher would go a long way.
+
 
 Crash
 -----
@@ -368,26 +373,8 @@ handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
 
 
-thread 6: cond wait gc
-
-thread 21: AtomTable::getHandle find rbtree resolv_ptr
-linkCast ... isLink .. PME::tree_compare ... 
-
-thread 22: lockwait AtomTable::getHandle as above.
-24 ditto 
-
-25 getHandle table:174  .. resolve ... 
-
-26: line 174 .. resolve ... NodeCast .. isNode
-27 line 174: .. resolve ... 
-
-why are all resolving ???
-
-Handle:: h._ptr.get();   h._uuid;
-
-NodeCast
-
-PatternMatchEngine
+How about using a reader-writer lock?
+----------------------------------
 
 boost::shared_lock  for reading,
 unique_lock for writing ... 
@@ -412,20 +399,4 @@ writer does:
 }
 
 am using boost1.49 on cray
-
------------
-alternative:
-
-Handle *hp = new Handle(xxx);
-take_handle(hp)
-
-cog_handle_tag -> cot_uuid_tag
-equalp_atom
-free_atom ... 
-
-print_misc -> misc_to_string
-mark_misc
-free_misc
-
-
 
