@@ -85,5 +85,4 @@ SEMANTIC_RELATION_NODE <- SEME_NODE
 // Added for Relex2Logic processing of meanings in sentences.
 INTERPRETATION_NODE <- NODE
 INTERPRETATION_LINK <- LINK
-
-// Links for describing different binary-relations in Relex.
+SPECIFIC_ENTITY_NODE <- NODE
