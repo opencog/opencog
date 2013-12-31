@@ -174,8 +174,8 @@
 	(InheritanceLink objectNode_ins objectNode) 
 	(InheritanceLink predicateNode_1_ins predicateNode_1) 
 	(InheritanceLink predicateNode_2_ins predicateNode_2) 
-	(EvaluationLink predicateNode_1_ins subjectNode_ins)
-	(EvaluationLink predicateNode_2_ins subjectNode_ins objectNode_ins)
+	(EvaluationLink predicateNode_1_ins subjectNode_ins
+	(EvaluationLink predicateNode_2_ins subjectNode_ins objectNode_ins))
 )
 
 (define (to-do-rule-2 v1 v1_instance v2 v2_instance s1 s1_instance s2 s2_instance o o_instance) 
@@ -194,8 +194,8 @@
 	(InheritanceLink objectNode_ins objectNode) 
 	(InheritanceLink predicateNode_1_ins predicateNode_1) 
 	(InheritanceLink predicateNode_2_ins predicateNode_2) 
-	(EvaluationLink predicateNode_1_ins subjectNode_1_ins)
-	(EvaluationLink predicateNode_2_ins subjectNode_2_ins objectNode_ins)
+	(EvaluationLink predicateNode_1_ins subjectNode_1_ins
+	(EvaluationLink predicateNode_2_ins subjectNode_2_ins objectNode_ins))
 )
 
 (define (to-be-rule verb verb_ins adj adj_ins subj subj_ins)
@@ -208,8 +208,8 @@
 	(InheritanceLink predicateNode_ins predicateNode)
 	(InheritanceLink subjNode_ins subjNode)
 	(InheritanceLink adjNode_ins adjNode)
-	(EvaluationLink predicateNode_ins)
-	(InheritanceLink subjNode_ins adjNode_ins)
+	(EvaluationLink predicateNode_ins
+	(InheritanceLink subjNode_ins adjNode_ins))
 )
 
 (define (all-rule noun  noun_instance)
