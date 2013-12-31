@@ -16,7 +16,7 @@
 // PHRASE_NODE <- NODE
 // COLLOCATION_NODE <- WORD_NODE
 // SEQUENCE_LINK <- ORDERED_LINK
-// 
+//
 // TENSE_LINK <- FEATURE_LINK
 // QUANTITY_LINK <- FEATURE_LINK
 // NOUN_NUMBER_LINK <- FEATURE_LINK
@@ -45,7 +45,7 @@ WORD_INSTANCE_LINK <- ASSOCIATIVE_LINK
 
 // Custom atoms to identify features, relations
 // Note that the feature links could (should ??) be replaced by
-// predicate links, where the feature type is encodeed in the 
+// predicate links, where the feature type is encodeed in the
 // predicate name, rather than in the link type.  However, there
 // is no immediate need for this, and custom link-types use less RAM.
 // So we define a bunch of custom link types.
@@ -87,6 +87,3 @@ INTERPRETATION_NODE <- NODE
 INTERPRETATION_LINK <- LINK
 
 // Links for describing different binary-relations in Relex.
-POSSESSION_LINK <- ORDERED_LINK
-QUANTITY_LINK <- ORDERED_LINK
-
