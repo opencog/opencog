@@ -41,23 +41,10 @@ class TruthValueUTest;
 namespace opencog
 {
 
-// define strength_t and strength_seq
+// Truth-value components
 typedef float strength_t;
-typedef std::vector<strength_t> strength_seq;
-typedef strength_seq::iterator strength_seq_it;
-typedef strength_seq::const_iterator strength_seq_const_it;
-
-// define count_t and count_seq
 typedef float count_t;
-typedef std::vector<count_t> count_seq;
-typedef strength_seq::iterator count_seq_it;
-typedef strength_seq::const_iterator count_seq_const_it;
-
-// define confidence_t and confidence_seq
 typedef float confidence_t;
-typedef std::vector<confidence_t> confidence_seq;
-typedef strength_seq::iterator confidence_seq_it;
-typedef strength_seq::const_iterator confidence_seq_const_it;
 
 //! TruthValue types
 //! XXX TODO This should probably be removed.
@@ -161,12 +148,12 @@ public:
     /**
      * Merge this TV object with the given TV object argument.
      * It always returns a new TV object with the result of the merge,
-     * even if it is equals to one of the merged TV objects.
+     * even if it is equal to one of the merged TV objects.
      *
      * Currently tv1.merge(tv2) works as follows:
      * If tv1 and tv2 are not CompositeTruthValue then
-     * the resulting TV is, either tv1 or tv2, the one with the highest
-     * confidence.
+     * the resulting TV is either tv1 or tv2, the result being the one
+     * with the highest confidence.
      * If tv1 is a CompositeTruthValue see CompositeTruthValue::merge.
      * If tv2 is a CompositeTruthValue but not tv1,
      * then tv2.CompositeTruthValue::merge(tv1) is called.
