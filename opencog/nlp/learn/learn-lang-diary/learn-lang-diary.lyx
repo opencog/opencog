@@ -73,6 +73,7 @@ Linas Vepstas
 
 \begin_layout Abstract
 Collection of thoughts and notes, pursuant to language learning.
+ Organized in mostly chronological order.
 \end_layout
 
 \begin_layout Section*
@@ -86,10 +87,23 @@ Easier said than done.
  via link-grammar.
  Definitions.
  Let 
-\begin_inset Formula $P(w_{l},w_{r},t)$
+\begin_inset Formula $P(R(w_{l},w_{r}))$
 \end_inset
 
- represent the probability (frequency) of observing a linkage of type 
+ represent the probability (frequency) of observing two words, 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ in some relationship or pattern 
+\begin_inset Formula $R$
+\end_inset
+
+.
+ Typically, its a (link-grammar) linkage of type 
 \begin_inset Formula $t$
 \end_inset
 
@@ -101,7 +115,11 @@ Easier said than done.
 \begin_inset Formula $w_{r}$
 \end_inset
 
- on the right.
+ on the right; however, 
+\begin_inset Formula $R$
+\end_inset
+
+can be more general than that.
 \end_layout
 
 \begin_layout Standard
@@ -110,7 +128,7 @@ The simplest model has only on type
 \end_inset
 
 , the ANY type, and assigns equal probabilities to all words.
- But we know all words are not equi-probabl, so let 
+ But we know all words are not equi-probable, so let 
 \begin_inset Formula $P(w)$
 \end_inset
 
@@ -314,6 +332,38 @@ and thus must conclude that
 \begin_layout Standard
 OK, after that side distraction, which helped clear up notation, back to
  the main show ...
+\end_layout
+
+\begin_layout Standard
+The main show is this: We want to model language, and specifically, find
+ a 'minimal' set of relations R that are accurately generative.
+ The meaning of 'minimal' seems obvious, intuitively, but a lot harder to
+ pin down mathematically.
+ We need to pin it down to get an algorithm that works in a trust-worthy,
+ understandable fashion.
+\end_layout
+
+\begin_layout Standard
+So: what is the total space of relations, and how do we find it? The simplest
+ model is then a Zipfian distribution of words, but placed in random order.
+ This model has a total entropy of 
+\begin_inset Formula 
+\[
+H=-\sum_{w}P(w)\log_{2}P(w)
+\]
+
+\end_inset
+
+For a recent swipe at parsing a few hundred articles from the French wikipedia,
+ I get H=7.2.
+ This is on 17K words, observed a total of XX times...
+\end_layout
+
+\begin_layout Standard
+How does one count the entropy of the rule-set? It seems that Markov Networks
+ provide the correct formalism, but its not clear how to convert this back
+ into something useful; elucidating this is the goal here.
+ 
 \end_layout
 
 \end_body
