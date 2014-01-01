@@ -73,66 +73,72 @@ Atom::~Atom()
 // Whole lotta truthiness going on here.  Does it really need to be
 // this complicated!?
 
-void Atom::setTruthValue(TruthValuePtr tv)
+void Atom::setTruthValue(TruthValuePtr newTV)
 {
-    // OK, I think the below is thread-safe, and nees no locking. Why?
-    // isNullTV is atomic, because the call-by-pointer is.
-    // The shared-pointer swap is atomic, I think (not 100% sure)
-    // The check for _atomTable is atomic, and nothing inside that needs
-    // to be serialized. So I think we're good (unless swap isn't atomic).
-    if (tv->isNullTv()) return;
-    _truthValue.swap(tv);  // after swap, tv points at old tv.
+    if (newTV->isNullTv()) return;
+
+    // We need to gauranteee that the signal goes out with the
+    // correct truth value.  That is, another setter could be changing
+    // this, even as we are.  So make a copy, first. No, we can't quite
+    // do this with swap() ... althouh swap is atomic, there's still a
+    // race between here and the signal-send.
+    TruthValuePtr oldTV(_truthValue);
+    _truthValue = newTV;
+
     if (_atomTable != NULL) {
         TVCHSigl& tvch = _atomTable->TVChangedSignal();
-        tvch(getHandle(), tv, _truthValue);
+        tvch(getHandle(), oldTV, newTV);
     }
 }
 
 void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
 {
-    // XXX lock here.  I don't get it, but running AtomSpaceAsyncUTest
-    // over and over in a loop eventually leads to a crash, deep inside
-    // of the smat pointer deref: _truthValue->getType() below.
-    // specifically: opencog::Atom::setTV <+528>: callq  *0x30(%rax)
-    // and rax contains a garbage value --  a string "node 1" from the
-    // unit test.  Looks to me like a bug in the shared_ptr code.
-    // Until gcc/boost fixes this ... I guess we have to lock, for now.
-    // I'm assuming this is a gcc bug, I just don't see any bug in the
-    // code here; it should all be thread-safe and atomic. November 2013
-    // This is with gcc version (Ubuntu/Linaro 4.6.4-1ubuntu1~12.04) 4.6.4
-    // With this lock, no crash after 150 minutes of testing.
-    // Anyway, the point is that this lock is wasteful, and should be
-    // un-needed.
-    std::unique_lock<std::mutex> lck (_mtx);
+    // The std::shared_ptr is *almost* atomic. Its subtle, but what it
+    // boils down to is that we must make a local copy, and access that
+    // because the global copy in _truthValue might be changed in a
+    // different thread, possibly causing us to refrence a freed pointer.
+    TruthValuePtr local(_truthValue);
+
     if (!isNullVersionHandle(vh))
     {
-        CompositeTruthValuePtr ctv = (_truthValue->getType() == COMPOSITE_TRUTH_VALUE) ?
-                            CompositeTruthValue::createCTV(_truthValue) :
-                            CompositeTruthValue::createCTV(_truthValue, NULL_VERSION_HANDLE);
+        CompositeTruthValuePtr ctv((local->getType() == COMPOSITE_TRUTH_VALUE) ?
+                            CompositeTruthValue::createCTV(local) :
+                            CompositeTruthValue::createCTV(local, NULL_VERSION_HANDLE));
         ctv->setVersionedTV(new_tv, vh);
         new_tv = std::static_pointer_cast<TruthValue>(ctv);
     }
-    else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE and
-                 new_tv->getType() != COMPOSITE_TRUTH_VALUE)
+    else if (local->getType() == COMPOSITE_TRUTH_VALUE and
+             new_tv->getType() != COMPOSITE_TRUTH_VALUE)
     {
-        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(_truthValue));
+        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(local));
         ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
         new_tv = std::static_pointer_cast<TruthValue>(ctv);
     }
-    // Release the lock before sending out signals, as otherwise
-    // deadlocks can happen in user code invoked by the signal handler.
-    lck.unlock();
     setTruthValue(new_tv); // always call setTruthValue to update indices
 }
 
 TruthValuePtr Atom::getTV(VersionHandle vh) const
 {
+    // OK. The atomic thread-safety of shared-pointers is subtle. See
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
+    // What it boils down to here is that we must *always* make a copy
+    // of _truthValue before we use it, since it can go out of scope
+    // because it can get set in another thread.  Viz, using it to
+    // dereference can return a raw pointer to an object that has been
+    // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
+    // the multi-threaded async atom store in the SQL peristance backend.
+    //
+    // So, make a copy:
+    TruthValuePtr local(_truthValue);
+
     if (isNullVersionHandle(vh)) {
-        return _truthValue;
+        return local;
     }
-    else if (_truthValue->getType() == COMPOSITE_TRUTH_VALUE)
+
+    if (local->getType() == COMPOSITE_TRUTH_VALUE)
     {
-        return std::dynamic_pointer_cast<CompositeTruthValue>(_truthValue)->getVersionedTV(vh);
+        return std::dynamic_pointer_cast<CompositeTruthValue>(local)->getVersionedTV(vh);
     }
     return TruthValue::NULL_TV();
 }
@@ -140,7 +146,7 @@ TruthValuePtr Atom::getTV(VersionHandle vh) const
 
 void Atom::setMean(float mean) throw (InvalidParamException)
 {
-    TruthValuePtr newTv = _truthValue;
+    TruthValuePtr newTv(_truthValue);
     if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
         // Since CompositeTV has no setMean() method, we must handle it differently
         CompositeTruthValuePtr ctv = std::static_pointer_cast<CompositeTruthValue>(newTv);

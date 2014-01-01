@@ -271,6 +271,18 @@ By contrast, the arithmetic average is:
     (P(de, famille) + P(et, famille))
   = 2.1230921666199825
 
+Change in entropy:
+MI(de, famille) * P(de, famille) + MI(et, famille) * P(et, famille) =  0.0012169
+
+MI(de+et, famille) * P(de+et, famille) = 1.476159343e-4
+
+Oh, wait ... 
+H(de, famille) * P(de, famille) + H(et, famille) * P(et, famille) =  0.001223328
+
+H(de+et, famille) * P(de+et, famille) = 0.00122097099
+
+Change in entropy = 0.00122097099 - 0.001223328 = -2.35701e-6
+
 -------
 H(de) = 4.3808608
 H(et) = 5.5862331
@@ -283,6 +295,17 @@ By contrast, the weighted average is
 
 (P(de)*H(de) + P(et)*H(et)) /(P(de) + P(et)) = 4.745465784790553
 
+Combinations:
+  P(de+et)*H(de+et) = 0.2657007
+  P(de)*H(de) + P(et)*H(et) = 0.32655303
+
+The change in entropy, from forming a union, is:
+  P(de+et)*H(de+et) - P(de)*H(de) - P(et)*H(et) = -0.060852316
+
+Recap: Delta(de+et) = -0.060852316
+       Delta(de+et, famille) = -2.35701e-6
+
+Entropy increases (strongly) if word-pair merged, words are separated,
 
 -------
 
@@ -302,8 +325,22 @@ H(et) = 5.5862331
 -----
 repeat, for vielle+nouveaux
 H(nouveaux) = 14.28815
-H(vieille) = 16.16037
+P(nouveaux) = 4.998483553100357e-5
 
+H(vieille) = 16.16037
+P(vieille) = 1.365349e-5
+
+P(nouveaux+vieille) = 6.363833e-5
+H(nouveaux+vieille) = 13.93974
+P(nouveaux+vieille)*H(nouveaux+vieille) = 8.87102088-4
+
+P(nouveaux)*H(nouveaux) + P(vieille)*H(vieille) = 9.3483638e-4
+
+Change in entropy is diff of the two: -4.7734297e-5
+
+
+-----
+repeat, for vielle+nouveaux
 H(*, famille) = 11.195548 
 
 H(nouveaux, *) = 13.974219
@@ -329,7 +366,30 @@ MI(vieille+nouveaux, famille) = 8.038503635332841
 so MI(nouveaux, famille) < MI(vieille+nouveaux, famille) < MI(vieille, famille)
          5.2966957       <         8.038503635332841     <       10.195547
 
+Change in entropy:
+P(nouveaux, famille)*H(nouveaux, famille)  + P(vieille, famille)*H(vieille, famille)
+    = 1.505100371e-4
+
+P(vieille+nouveaux, famille) * H(vieille+nouveaux, famille) = 1.459161549e-4
+
+Change = 1.459161549e-4 - 1.505100371e-4 = -4.5938821e-6
+
+To recap: Delta(vieille+nouveaux) = -4.7734297e-5
+               reduces the entropy more than
+          Delta(vieille+nouveaux, famille) = -4.5938821e-6
+
+i.e. entropy increses if the word-pairs are merged, the words are separated.
+
+
 ---------------
+
+Total entropy:
+(fold + 0 (map (lambda (atom)
+	(let ((ent (tv-conf (cog-tv atom))))
+	(* ent (exp (* (- ent) (log 2))))))
+	(cog-get-atoms 'WordNode)))
+
+gives: 7.2199274514956
 
 
 
@@ -365,7 +425,29 @@ again... 28 Dec, line 953:  STMTF("stv_mean", tv->getMean()); on count tv
 again... 30 Dec, line 954:  as above ... 
 again... 30 Dec, line 957:  tv->getMean() as above, now unwrapped.
 again... 31 Dec, this time typeid caught it.
+again... 31 Dec, this time typeid prints: N7opencog10TruthValueE which is
+          crazy, and adress 0x802ef558 which is sane,
+again... 31 Dec, tv-cnt=2 atom-cnt=504697
+again... 31 Dec, line 937: if (tv) tvt = tv->getType();
+again... 1 Jan,  addr=0x2b85a3c38 atom=ANY tv-cnt=1 atom-cnt=4050379  WHERE uuid = 185;
 
+Multi-issues:
+1) stv_count maxed at 16777216
+2) same bad tv ptr on two different threads.... two different atoms....
+   ListLink
+      WordNode fiksuojami
+      WordNode 50
+
+alter table atoms alter column stv_count type double precision;
+
+Ohhhh .. I get it ... getTV and setTV are not locked.
+Another thread is doing setTV even while this thread is doing getTV.  The
+use-count pointer drops to zero, destructor runs, then magically, use-count
+goes back up to one...  basically, shared_ptr's are not thread-safe.
+
+
+Crash 2
+-------
 All new crash. Note:
 1) This is with the old scheme singleton-instance.
 2) This one received when defining a function with an unbound variable
@@ -401,7 +483,7 @@ So maybe p is null, or self->pexpr is null..
         23: ??:0        __clone()
 
 
-Crash 2
+Crash 3
 -------
 30 Dec 2013:
 Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
@@ -409,6 +491,9 @@ Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
 24743 linas     15   0 30.1g  21g 8340 S  0.0 30.1 448:50.56 cogserver          
 
 31 Dec: again...
+1 Jan: again...
+  PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND            
+14550 linas     15   0 23.9g  16g 8344 S  0.0 23.1 337:22.45 cogserver
 
 bdwgc ./configure --with-large-heap=yes
 #ifndef LARGE_CONFIG
