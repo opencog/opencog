@@ -650,8 +650,101 @@ n?' Hmm.
  
 \end_layout
 
+\begin_layout Subsection*
+Counting Link-Grammar Relations
+\end_layout
+
 \begin_layout Standard
-Per link-grammar, each relation is decomposable into pair-wise relations
+Per link-grammar, each relation is decomposable into pair-wise relations;
+ this is the so-called 'parse' of a sentence.
+ If the relation is a single word-per-slot sentence relation, then the 'parse'
+ is literal.
+ We write 
+\begin_inset Formula 
+\begin{equation}
+R(w_{1},w_{2},\cdots,w_{n})=\prod_{j,k,m}R_{\alpha}(w_{j},w_{k},t_{m})\ Q(R_{\alpha},R_{\beta},\cdots,R_{\omega})\label{eq:pair-decompose}
+\end{equation}
+
+\end_inset
+
+ where 
+\begin_inset Formula $R_{\alpha}(w_{j},w_{k},t_{m})$
+\end_inset
+
+ is a single connected pair of words, connected by the connector 
+\begin_inset Formula $t_{m}$
+\end_inset
+
+.
+ The product symbol 
+\begin_inset Formula $\prod$
+\end_inset
+
+ implies that all such binary relations must hold.
+ The awkward 
+\begin_inset Formula $Q(R_{\alpha},R_{\beta},\cdots,R_{\omega})$
+\end_inset
+
+ at the end is the additional no-links-cross constraint in the current link-gram
+mar parser.
+ Its a non-local constraint involving all of the binary relations.
+ It also subsumes any 'post-processing' rules, although, for the language
+ learnign exercise, there won't be any post-processing rules.
+ At any rate, 
+\begin_inset Formula $Q$
+\end_inset
+
+ is a place where higher ordrer constraints can be applied.
+ In particular, the most genneral form for 
+\begin_inset Formula $Q$
+\end_inset
+
+ should be 
+\begin_inset Formula $Q(R_{\alpha},R_{\beta},\cdots,R_{\omega},w_{1},w_{2},\cdots,w_{n})$
+\end_inset
+
+ since, in principle, it could depend on the word-choice, although the no-links-
+cross constraint does not.
+ 
+\end_layout
+
+\begin_layout Standard
+Yuret proposes a way of discovering the pair-wise relations.
+ He makes the implicit, unvoiced assumption that there is a single, unique
+ connector type 
+\begin_inset Formula $t_{m}$
+\end_inset
+
+ for every ordered pair of words 
+\begin_inset Formula $w_{j},w_{k}$
+\end_inset
+
+; that is, that 
+\begin_inset Formula $t_{m}=t_{m}(w_{j},w_{k})$
+\end_inset
+
+.
+ Viz, specifically, that such connectors are in 1-1 correspondance with
+ work-pairs.
+ (I don't think he's aware of this assumption; I don't think anyone has
+ ever before realized that he's making such an assumption; certainly, I
+ haven't).
+ Yuret then makes two claims: first, that the only possible grammatically
+ correct parses are those of the above form (eqn 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "eq:pair-decompose"
+
+\end_inset
+
+) for which the relations 
+\begin_inset Formula $R_{\alpha}(w_{j},w_{k},t_{m}(w_{j},w_{k}))$
+\end_inset
+
+ have been previously observed; secondly, that there is a natural ranking
+ of such allowed parses by summing the total mutual information associated
+ with weach word-pair.
+ 
 \end_layout
 
 \begin_layout Standard
