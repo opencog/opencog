@@ -42,9 +42,15 @@ namespace opencog
 {
 
 // Truth-value components
+// For essentially all truth-value calculations, float is enough, so
+// we save space here, and use float. For counting, a float is not
+// enough -- it gets up to 16 million (24 bits) and then clamps. So
+// we use a double for counting, which should provide 48 bits. Since
+// SimpleTruthValue does not store count anyway, there is no storage
+// penalty associated with this.
 typedef float strength_t;
-typedef float count_t;
 typedef float confidence_t;
+typedef double count_t;
 
 //! TruthValue types
 //! XXX TODO This should probably be removed.
@@ -126,8 +132,8 @@ public:
 // PURE VIRTUAL METHODS:
 
     virtual strength_t getMean()  const = 0;
-    virtual count_t getCount()  const = 0;
     virtual confidence_t getConfidence()  const = 0;
+    virtual count_t getCount()  const = 0;
 
     virtual std::string toString() const  = 0;
     virtual TruthValueType getType() const  = 0;

@@ -90,7 +90,7 @@ std::string CountTruthValue::toString() const
     sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(getMean()),
             static_cast<float>(getCount()),
-            static_cast<float>(getConfidence()));
+            static_cast<double>(getConfidence()));
     return buf;
 }
 
