@@ -356,14 +356,83 @@ H=-\sum_{w}P(w)\log_{2}P(w)
 
 For a recent swipe at parsing a few hundred articles from the French wikipedia,
  I get H=7.2.
- This is on 17K words, observed a total of XX times...
+ This is on 17K words, observed a total of 35M times (actually, observerd
+ each sentence 100 times, so really just 350K 'true' observations of words).
 \end_layout
 
 \begin_layout Standard
-How does one count the entropy of the rule-set? It seems that Markov Networks
- provide the correct formalism, but its not clear how to convert this back
- into something useful; elucidating this is the goal here.
+How does one count the entropy of the rule-set? Elucidating this is the
+ goal-set.
+\end_layout
+
+\begin_layout Standard
+But first, step back: describe the rules.
  
+\end_layout
+
+\begin_layout Standard
+OK ...
+ so, once again ...
+ sentence structure is to be described via link-grammar, using disjoined
+ conjunctions of connectors.
+ This is theoretically sound, as it seems to be isomorphic to categorical
+ grammars (via type-theory of the connectors; need a formal proof of this
+ someday, but for now it seems 'obvious').
+ Also link-grammar is fully compatible with dependency grammar.
+ So lets move forward.
+ 
+\end_layout
+
+\begin_layout Standard
+Consider a sentence with 
+\begin_inset Formula $n$
+\end_inset
+
+ words in it, numbered 
+\begin_inset Formula $w_{1},w_{2},\cdots,w_{n}$
+\end_inset
+
+ left to right.
+ We want to constrain grammar by discovering a set of relations 
+\begin_inset Formula $R(w_{1},w_{2},\cdots,w_{n})$
+\end_inset
+
+ such that 
+\begin_inset Formula $P(R(w_{1},w_{2},\cdots,w_{n}))>0$
+\end_inset
+
+ when the sentence is gramatically valid (i.e.
+ such an 
+\begin_inset Formula $R$
+\end_inset
+
+ exists), and 
+\begin_inset Formula $P$
+\end_inset
+
+ is zero when no such 
+\begin_inset Formula $R$
+\end_inset
+
+ exists (i.e.
+ the sentence is not gramatically valid.) The first and most obvious simplificati
+on rule is to observe that 
+\begin_inset Formula $R$
+\end_inset
+
+ can be replaced by 
+\begin_inset Formula $R(W_{1},W_{2},\cdots,W_{n})$
+\end_inset
+
+ where each 
+\begin_inset Formula $W_{k}$
+\end_inset
+
+ is a set of words.
+\end_layout
+
+\begin_layout Standard
+ Per link-grammar, each relation is decomposable into pair-wise relations
 \end_layout
 
 \end_body
