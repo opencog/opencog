@@ -243,7 +243,77 @@ P(R(w_{l},w_{r})|w_{l},w_{r})=\frac{P(R(w_{l},w_{r}))\ P(R(w_{l},*)|w_{l})\ P(R(
 
 \end_inset
 
-so...
+Re-ordering this gives
+\begin_inset Formula 
+\begin{equation}
+\frac{P(R(w_{l},w_{r})|w_{l},w_{r})}{P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}=\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:basic pair}
+\end{equation}
+
+\end_inset
+
+The right hand side above is recognizable from Yurets work; he defines the
+ mutual information as 
+\begin_inset Formula 
+\[
+\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}
+\]
+
+\end_inset
+
+so that laarge positive MI is associated with word that occur together only
+ with themselves (e.g.
+ '
+\emph on
+Northern Ireland
+\emph default
+' from his examples.) So, on the right, we have that 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is usually very small, and that 
+\begin_inset Formula $P(w,*)\approx P(*,w)\approx P(w)$
+\end_inset
+
+ subject to the inequality given before.
+ 
+\end_layout
+
+\begin_layout Standard
+The LHS of eqn 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "eq:basic pair"
+
+\end_inset
+
+ is a stranger to me.
+ First, we have observationally seen that 
+\begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
+\end_inset
+
+and thus must conclude that 
+\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
+\end_inset
+
+ is 'large'; much larger than the accustomed word-pair frequencies.
+ Anyway, as an equation, its kind-of nicer, since it clearly isolates the
+ role of the relation, since, by defintion, we have 
+\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
+\end_inset
+
+ so that it functions like a real conditional probability, rather than this
+ implicit-word-order thingy that Yuret uses.
+ The Yuret notation is very convenient, but sometimes obscures things.
+ OK, I think I'm done with that.
+\end_layout
+
+\begin_layout Section*
+1 January 2014
+\end_layout
+
+\begin_layout Standard
+OK, after that side distraction, which helped clear up notation, back to
+ the main show ...
 \end_layout
 
 \end_body
