@@ -383,6 +383,10 @@ OK ...
  
 \end_layout
 
+\begin_layout Subsection*
+How to count relations
+\end_layout
+
 \begin_layout Standard
 Consider a sentence with 
 \begin_inset Formula $n$
@@ -609,7 +613,41 @@ OK, so the space of word-sequences is very concrete, and easy to describe
  Neither of these matches the entropy of the set of allowed sentences, so
  this seems paradoxical, and begs the questions 'did we count correctly?'
  and 'did we actually simplify anything by making the above change of descritpio
-n?' 
+n?' Hmm.
+ The correct answer seems to be 'no' and 'no'.
+ The correct counting methodology seems to be to subtract 1 from the cardinality
+ of every set.
+ This would then give both 
+\begin_inset Formula $\log_{2}N$
+\end_inset
+
+ as the entropy for both the before and after relation-sets.
+ Thus, before, we had 
+\begin_inset Formula $N$
+\end_inset
+
+ relations and 
+\begin_inset Formula $N+3$
+\end_inset
+
+ sets, each of weight zero, for a total wieghted-relation count of 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ After, we have one relation and four sets; three of the sets have wieght
+ zero, one set has a weight of 
+\begin_inset Formula $N-1$
+\end_inset
+
+ so the total wieghted relations is again 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ This seems to resolve the paradox.
+ Lets move on to more challenging domains.
+ 
 \end_layout
 
 \begin_layout Standard
