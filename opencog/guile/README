@@ -659,25 +659,38 @@ interface.
          guile> (cog-map-type prt-atom 'ConceptNode)
 
 === Ad Hoc commands ===
-      There are a number of scheme primitive functions defined which
-      call into C++ code in assorted opencog modules. The C++ programmer
-      may define such primitive by using the "define_scheme_primitive"
-      function in "opencog/guile/SchemePrimitive.h".  
+      The scheme module provides a generic mechanism to declare new
+      scheme "primitive functions" ''i.e.'' functions which call methods
+      on a C++ object. New primitives may be defined by  using the
+      "define_scheme_primitive" function in "opencog/guile/SchemePrimitive.h".
 
-      Currently-implemented primtives are:
-      do-wsd                -- run word-sense disambiguation
+      Some of the currently-implemented primtives are:
+
+      Available when the [[pattern matcher]] module is loaded:
       cog-bind handle       -- run pattern matcher on handle.
                                handle must be a BindLink.
       cog-bind-crisp handle -- run pattern matcher on handle.
                                handle must be a BindLink.
-                               Use crisp logic during implication.
-      store-atom handle     -- store indicated atom to SQL/persistent 
-                               storage.
+                               Use crisp logic during implication.  This
+                               allows [[NotLink]] clauses to be used to
+                               exclude certain patterns.
+
+      Available when the PersistModule is loaded, and connected to a
+      database:
       fetch-atom handle     -- fetch indicated atom from SQL/persistent 
                                storage.
       fetch-incoming-set    -- fetch the incoming set of the atom from 
                                SQL storage. The fetch is recursive.
-      pln-bc                -- perform PLN back-chaining.
+      store-atom handle     -- store indicated atom to SQL/persistent 
+                               storage.
+      load-atoms-of-type type -- fetch atoms of the given type from
+                               SQL/persistent storage.
+      barrier               -- block until the SQL Atom write queues
+                               are empty.
+
+      Word-sense disambiguation.  This command requires a considerable
+      amount of infrastructure to be set up:
+      do-wsd                -- run word-sense disambiguation
 
 
 = Flow control =

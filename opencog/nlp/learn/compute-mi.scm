@@ -95,7 +95,7 @@
 ;
 ; The mutual information between a pair of words is defined as
 ;
-;     MI(wl,wr) = H(wl,wr) - H(wl,*) - H(*,wr)
+;     MI(wl,wr) = -(H(wl,wr) - H(wl,*) - H(*,wr))
 ;
 ; This is computed by the script batch-all-pair-mi below. Again, this
 ; is stored in the "confidence" slot.  Thus, the "confidence" slot
@@ -749,7 +749,7 @@
 
 							; Subtract the left and right entropies to get the
 							; mutual information (at last!)
-							(mi (- (- ll r-logli) l-logli))
+							(mi (- (+ l-logli r-logli) ll))
 							(ntv (cog-new-ctv meen mi cnt))
 						)
 						; Save the hard-won MI to the database.

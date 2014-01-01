@@ -19,7 +19,7 @@ CREATE TABLE Atoms (
 	tv_type  SMALLINT,
 	stv_mean FLOAT,
 	stv_confidence FLOAT,
-	stv_count FLOAT,
+	stv_count DOUBLE PRECISION,
 
 	-- distance from this link to farthest Node in the outgoing
 	-- set of this atom. 

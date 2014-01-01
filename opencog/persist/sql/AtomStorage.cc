@@ -925,7 +925,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	}
 
 	// Store the truth value
-	TruthValuePtr tv = atom->getTruthValue();
+	TruthValuePtr tv(atom->getTruthValue());
 	TruthValueType tvt = NULL_TRUTH_VALUE;
 	if (tv) tvt = tv->getType();
 	STMTI("tv_type", tvt);
