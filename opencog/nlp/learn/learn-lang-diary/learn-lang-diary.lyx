@@ -429,10 +429,219 @@ on rule is to observe that
 \end_inset
 
  is a set of words.
+ That is, instead of listing each sentences individually, we list certain
+ classes of sentences.
+ In other words, the relations 
+\begin_inset Formula $R(w_{1},w_{2},\cdots,w_{n})$
+\end_inset
+
+ are in one-to-one correspondance with a list of grammatical sentences 
+\begin_inset Formula $(w_{1},w_{2},\cdots,w_{n})$
+\end_inset
+
+, so simply listing all possible sentences is a very verbose way of specifying
+ a grammar.
+ It is linguistically 'obvious' that sentences fall into classes, and so
+ the two relations 
+\begin_inset Formula $R('this','is','a','dog')$
+\end_inset
+
+ and 
+\begin_inset Formula $R('this','is','a','cat')$
+\end_inset
+
+ can be replaced by 
+\begin_inset Formula $R('this','is','a',W_{n})$
+\end_inset
+
+ where 
+\begin_inset Formula $W_{n}=\{'dog','cat'\}$
+\end_inset
+
+.
+ In fact, 
+\begin_inset Formula $W_{n}$
+\end_inset
+
+ can be a rather large set of nouns.
+ 
 \end_layout
 
 \begin_layout Standard
- Per link-grammar, each relation is decomposable into pair-wise relations
+So ...
+ the question is: what is the reduction of complexity, by performing this
+ classification? What is the correct way of counting? I assume that 'complexity'
+ is a synonym for 'entropy', so we are looking to do two things: enumerate
+ the states of the system, and proivde a measure for complexity.
+ So, lets consider a language with 
+\begin_inset Formula $N$
+\end_inset
+
+ nouns, so that the cardinality of 
+\begin_inset Formula $W_{n}$
+\end_inset
+
+ is 
+\begin_inset Formula $|W_{n}|=N$
+\end_inset
+
+ and the only valid sentences are 
+\begin_inset Formula $('this','is','a',w)$
+\end_inset
+
+ with 
+\begin_inset Formula $w\in W_{n}$
+\end_inset
+
+ .
+ Before simplification, we had 
+\begin_inset Formula $N$
+\end_inset
+
+ relations 
+\begin_inset Formula $R$
+\end_inset
+
+, one per sentence.
+ We also had 
+\begin_inset Formula $N+3$
+\end_inset
+
+ sets, each set containing a single word; the 
+\begin_inset Formula $N$
+\end_inset
+
+ nouns, and the three words 
+\begin_inset Formula $'this','is','a'$
+\end_inset
+
+.
+ After simplification, we have one relation 
+\begin_inset Formula $R$
+\end_inset
+
+, and four sets; three of the sets have cardinality 1, the fourth set has
+ cardinality 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+I think the correct counting rule is to count set-membership relations on
+ equal footing with structural relations.
+ Thus, before simplification, we had 
+\begin_inset Formula $N+3$
+\end_inset
+
+ sets, each a singleton, and thus 
+\begin_inset Formula $N+3$
+\end_inset
+
+ set membership relations.
+ After simplification, we have four sets, but still have 
+\begin_inset Formula $N+3$
+\end_inset
+
+ set membership relations.
+ Thus, this particular simplification step does not reduce the number of
+ membership relations at all.
+ I think this is the right way to count.
+ Let provisionally go with this and see what happens.
+ Thus, before simplification, we had 
+\begin_inset Formula $2N+3$
+\end_inset
+
+ relations grand-total, and afterwords, we have 
+\begin_inset Formula $N+4$
+\end_inset
+
+ relations grand-total.
+\end_layout
+
+\begin_layout Standard
+What is the correct 'thermodynamic' picture of what's going on? In this
+ toy problem, we have a grand-total state space of size 
+\begin_inset Formula $(N+3)^{4}$
+\end_inset
+
+ since any of the 
+\begin_inset Formula $N+3$
+\end_inset
+
+ words can appear in any of the four slots in a four-word sentence (micro-canonn
+ical ensemble).
+ The entropy, at 'infinite temperature' where all possible four-word sequences
+ occur with equal probability is then 
+\begin_inset Formula $4\log_{2}(N+3)$
+\end_inset
+
+.
+ The entropy of the set of grammatical sentences is 
+\begin_inset Formula $\log_{2}N$
+\end_inset
+
+ since there are only 
+\begin_inset Formula $N$
+\end_inset
+
+ possible grammatical sentences.
+ In this toy grammar, there are also invalid setences of length 1,2,3,5,6,7,...
+ and so the total size of the space of word-sequences is clearly infinite.
+ 
+\end_layout
+
+\begin_layout Standard
+OK, so the space of word-sequences is very concrete, and easy to describe
+ and measure, at least for toy grammars.
+ What about the space of relations? Well, the claim is that the entropies
+ of the before-and-after models are 
+\begin_inset Formula $\log_{2}(2N+3)$
+\end_inset
+
+ and 
+\begin_inset Formula $\log_{2}(N+4)$
+\end_inset
+
+, respectively.
+ Neither of these matches the entropy of the set of allowed sentences, so
+ this seems paradoxical, and begs the questions 'did we count correctly?'
+ and 'did we actually simplify anything by making the above change of descritpio
+n?' 
+\end_layout
+
+\begin_layout Standard
+Per link-grammar, each relation is decomposable into pair-wise relations
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
+\end_layout
+
+\begin_layout Standard
+x
 \end_layout
 
 \end_body
