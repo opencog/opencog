@@ -61,7 +61,7 @@ class CompositeRenumber;
 //! a TruthValue that consists of a number of VersionHandles paired with TruthValues
 class CompositeTruthValue: public TruthValue
 {
-    friend class CompositeRenumber; // XXX ugly hack
+    friend class CompositeRenumber; // XXX ugly hack from file persistence
 
 private:
     TruthValuePtr primaryTV;
