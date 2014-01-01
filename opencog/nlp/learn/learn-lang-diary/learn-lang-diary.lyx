@@ -81,6 +81,63 @@ Collection of thoughts and notes, pursuant to language learning.
 
 \begin_layout Standard
 Easier said than done.
+ Seems 'obvious' but its not.
+ Goal: constraint set of link rules to model only the observed language,
+ via link-grammar.
+ Definitions.
+ Let 
+\begin_inset Formula $P(w_{l},w_{r},t)$
+\end_inset
+
+ represent the probability (frequency) of observing a linkage of type 
+\begin_inset Formula $t$
+\end_inset
+
+ connecting word 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ on the left to word 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ on the right.
+\end_layout
+
+\begin_layout Standard
+The simplest model has only on type 
+\begin_inset Formula $t$
+\end_inset
+
+, the ANY type, and assigns equal probabilities to all words.
+ But we know all words are not equi-probabl, so let 
+\begin_inset Formula $P(w)$
+\end_inset
+
+ be the probability of observing word 
+\begin_inset Formula $w$
+\end_inset
+
+.
+ We know from experiece this is a Zipfian distribution.
+ We are then interested in the conditional probability 
+\begin_inset Formula $P(w_{l},w_{r},t|w_{l},w_{r})$
+\end_inset
+
+ of observing the word-pair 
+\begin_inset Formula $(w_{l},w_{r})$
+\end_inset
+
+ given the two individual words were observed.
+ From Bayes theorem, we get 
+\begin_inset Formula 
+\[
+P(w_{l},w_{r},t)=P(w_{l},w_{r},t|w_{l},w_{r})P(w_{l})P(w_{r})
+\]
+
+\end_inset
+
+
 \end_layout
 
 \end_body
