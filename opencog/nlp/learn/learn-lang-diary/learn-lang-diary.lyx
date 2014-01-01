@@ -148,7 +148,7 @@ P(R)=P(R|w_{l},w_{r})P(w_{l})P(w_{r})
 Or that 
 \begin_inset Formula 
 \[
-P(w_{l},w_{r},R|w_{l},w_{r})=\frac{P(w_{l},w_{r},R)}{P(w_{l})P(w_{r})}
+P(R|w_{l},w_{r})=\frac{P(R)}{P(w_{l})P(w_{r})}
 \]
 
 \end_inset
@@ -159,11 +159,28 @@ Here, the relation
 
  encompases several facts: that one word is to the left of the other, and
  that they are connected by a certain link-type, as well as capturing other
- 'ambient' information, such as other nearby words.
+ 'ambient' information, perhaps such as other nearby words.
 \end_layout
 
 \begin_layout Standard
-What does this have to do with the usual probabilities 
+We need to harmonize here a little bit with the Deniz Yuret concepts and
+ notation.
+ He defines a probability 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ of seeing the ordered pair; that is, the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ is implicit.
+ To make it explicit, we should write: 
+\begin_inset Formula $P(w_{l},w_{r})=P(R(w_{l},w_{r}))$
+\end_inset
+
+ to indicate the relation explicitly, and to note that the order of the
+ positions in the relation matter.
+ Yuret also uses the notation 
 \begin_inset Formula $P(w_{l},*)$
 \end_inset
 
@@ -171,20 +188,15 @@ What does this have to do with the usual probabilities
 \begin_inset Formula $P(*,w_{r})$
 \end_inset
 
- defined as 
+ for wild-card summations, defined as 
 \begin_inset Formula 
 \[
-P(w_{l},*)=\sum_{w_{r}}P(w_{l},w_{r})
+P(w_{l},*)=\sum_{w_{r}}P(w_{l},w_{r})\qquad\mbox{and}\qquad P(*,w_{r})=\sum_{w_{l}}P(w_{l},w_{r})
 \]
 
 \end_inset
 
-where 
-\begin_inset Formula $P(w_{l},w_{r})$
-\end_inset
-
- is the probability of seeing the ordered pair.
- So 
+In practical use, one quickly observes that 
 \begin_inset Formula $P(w_{l},*)$
 \end_inset
 
@@ -200,42 +212,33 @@ where
 \begin_inset Formula $w_{l}$
 \end_inset
 
- within a certain relationship or pattern (i.e.
- 
+ within the certain relationship or pattern, which must be less than the
+ probability of observing 
 \begin_inset Formula $w_{l}$
 \end_inset
 
- being to the left, for this case.) Thus, in general, one has 
+ in general.
+ Thus, one has 
 \begin_inset Formula $P(w_{l},*)\le P(w_{l})$
 \end_inset
 
  which can be viewed as a conditional probability:
 \begin_inset Formula 
 \[
-P(w_{l},*)=P(R|w_{l})P(w_{l})
+P(w_{l},*)=P(R(w_{l},*))=P(R(w_{l},*)|w_{l})P(w_{l})
 \]
 
 \end_inset
 
-so that 
+In practice, then, for word-pairs, one has that 
 \begin_inset Formula $P(R|w_{l})$
 \end_inset
 
- is almost equal to 1, but not quite ...
- it sort of an oddball interpretation: probability of seeing a pair relation
- 
-\begin_inset Formula $R$
-\end_inset
-
-, given that 
-\begin_inset Formula $w_{l}$
-\end_inset
-
- is the left word of the pair.
+ is almost equal to 1, but not quite.
  Inserting this into the above gives 
 \begin_inset Formula 
 \[
-P(w_{l},w_{r},t|w_{l},w_{r})=\frac{P(w_{l},w_{r},t)P(R|w_{l})P(R|w_{r})}{P(w_{l},*)P(*,w_{r})}
+P(R(w_{l},w_{r})|w_{l},w_{r})=\frac{P(R(w_{l},w_{r}))\ P(R(w_{l},*)|w_{l})\ P(R(*,w_{r})|w_{r})}{P(w_{l},*)P(*,w_{r})}
 \]
 
 \end_inset
