@@ -121,23 +121,126 @@ The simplest model has only on type
 .
  We know from experiece this is a Zipfian distribution.
  We are then interested in the conditional probability 
-\begin_inset Formula $P(w_{l},w_{r},t|w_{l},w_{r})$
+\begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
 \end_inset
 
- of observing the word-pair 
-\begin_inset Formula $(w_{l},w_{r})$
+ of observing the two words 
+\begin_inset Formula $w_{l}$
 \end_inset
 
- given the two individual words were observed.
- From Bayes theorem, we get 
+ and 
+\begin_inset Formula $w_{r}$
+\end_inset
+
+ in a relation 
+\begin_inset Formula $R=R(w_{l},w_{r})$
+\end_inset
+
+, given that the two individual words were observed.
+ From the definition of conditional probabilities, we get 
 \begin_inset Formula 
 \[
-P(w_{l},w_{r},t)=P(w_{l},w_{r},t|w_{l},w_{r})P(w_{l})P(w_{r})
+P(R)=P(R|w_{l},w_{r})P(w_{l})P(w_{r})
 \]
 
 \end_inset
 
+Or that 
+\begin_inset Formula 
+\[
+P(w_{l},w_{r},R|w_{l},w_{r})=\frac{P(w_{l},w_{r},R)}{P(w_{l})P(w_{r})}
+\]
 
+\end_inset
+
+Here, the relation 
+\begin_inset Formula $R$
+\end_inset
+
+ encompases several facts: that one word is to the left of the other, and
+ that they are connected by a certain link-type, as well as capturing other
+ 'ambient' information, such as other nearby words.
+\end_layout
+
+\begin_layout Standard
+What does this have to do with the usual probabilities 
+\begin_inset Formula $P(w_{l},*)$
+\end_inset
+
+ and 
+\begin_inset Formula $P(*,w_{r})$
+\end_inset
+
+ defined as 
+\begin_inset Formula 
+\[
+P(w_{l},*)=\sum_{w_{r}}P(w_{l},w_{r})
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is the probability of seeing the ordered pair.
+ So 
+\begin_inset Formula $P(w_{l},*)$
+\end_inset
+
+ is almost equal to 
+\begin_inset Formula $P(w_{l})$
+\end_inset
+
+ but not quite, since 
+\begin_inset Formula $P(w_{l},*)$
+\end_inset
+
+ is the probability of seeing 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ within a certain relationship or pattern (i.e.
+ 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ being to the left, for this case.) Thus, in general, one has 
+\begin_inset Formula $P(w_{l},*)\le P(w_{l})$
+\end_inset
+
+ which can be viewed as a conditional probability:
+\begin_inset Formula 
+\[
+P(w_{l},*)=P(R|w_{l})P(w_{l})
+\]
+
+\end_inset
+
+so that 
+\begin_inset Formula $P(R|w_{l})$
+\end_inset
+
+ is almost equal to 1, but not quite ...
+ it sort of an oddball interpretation: probability of seeing a pair relation
+ 
+\begin_inset Formula $R$
+\end_inset
+
+, given that 
+\begin_inset Formula $w_{l}$
+\end_inset
+
+ is the left word of the pair.
+ Inserting this into the above gives 
+\begin_inset Formula 
+\[
+P(w_{l},w_{r},t|w_{l},w_{r})=\frac{P(w_{l},w_{r},t)P(R|w_{l})P(R|w_{r})}{P(w_{l},*)P(*,w_{r})}
+\]
+
+\end_inset
+
+so...
 \end_layout
 
 \end_body
