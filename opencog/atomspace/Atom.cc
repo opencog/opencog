@@ -83,7 +83,14 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     // do this with swap() ... althouh swap is atomic, there's still a
     // race between here and the signal-send.
     TruthValuePtr oldTV(_truthValue);
+
+    // ... and we still need to make sure that only one thread is
+    // writing this at a time. std:shared_ptr is NOT thread-safe against
+    // multiple writers: see "Example 5" in
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    std::unique_lock<std::mutex> lck (_mtx);
     _truthValue = newTV;
+    lck.unlock();
 
     if (_atomTable != NULL) {
         TVCHSigl& tvch = _atomTable->TVChangedSignal();
