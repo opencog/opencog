@@ -41,9 +41,9 @@ class NullTruthValue : public TruthValue
 public:
     NullTruthValue();
     bool isNullTv() const;
-    float getMean() const throw (RuntimeException);
-    float getCount() const throw (RuntimeException);
-    float getConfidence() const  throw (RuntimeException);
+    strength_t getMean() const throw (RuntimeException);
+    count_t getCount() const throw (RuntimeException);
+    confidence_t getConfidence() const  throw (RuntimeException);
     std::string toString() const;
     TruthValueType getType() const throw (RuntimeException);
     TruthValuePtr clone() const;
