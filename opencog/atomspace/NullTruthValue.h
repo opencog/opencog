@@ -26,9 +26,6 @@
 #define _OPENCOG_NULL_TRUTH_VALUE_TV_H
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -39,11 +36,7 @@ namespace opencog
 //! a special type of TruthValue
 class NullTruthValue : public TruthValue
 {
-
     friend class TruthValue;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
 
 public:
     NullTruthValue();

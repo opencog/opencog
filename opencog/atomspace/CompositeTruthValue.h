@@ -35,10 +35,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/VersionHandle.h>
 
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
-
 namespace opencog
 {
 /** \addtogroup grp_atomspace
@@ -66,9 +62,6 @@ class CompositeRenumber;
 class CompositeTruthValue: public TruthValue
 {
     friend class CompositeRenumber; // XXX ugly hack
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
 
 private:
     TruthValuePtr primaryTV;
