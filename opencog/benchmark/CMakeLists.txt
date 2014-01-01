@@ -7,8 +7,8 @@ IF (HAVE_CYTHON)
 ENDIF (HAVE_CYTHON)
 
 ADD_EXECUTABLE (atomspace_bm
-	AtomSpaceBenchmark
-	atomspace_bm
+	AtomSpaceBenchmark.cc
+	atomspace_bm.cc
 )
 
 IF (HAVE_GUILE)
