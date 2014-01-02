@@ -180,7 +180,9 @@ public:
                 TS_ASSERT(mergedTv != indefiniteTv);
                 TS_ASSERT(fabs(mergedTv->getMean()  - indefiniteMeans[i]) <= FLOAT_ACCEPTABLE_ERROR);
                 //logger().debug("mergedTv->getCount() =%f, indefiniteCounts[i] = %f", mergedTv->getCount(), indefiniteCounts[i]);
-                TS_ASSERT(fabs(mergedTv->getCount() - indefiniteCounts[i]) < 0.5); // TODO: Specific case where float values are huge. So error must be higher as well. The ideal solution would be a float comparision considering N significative digits.
+                // Counts can be huge.  So take a ratio, and count significant digits.
+                TS_ASSERT(fabs((mergedTv->getCount() / indefiniteCounts[i]) - 1.0d) < 0.000001);
+
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
                 if (tvs[i]->getType() != COMPOSITE_TRUTH_VALUE) {
                     TS_ASSERT(mergedTv.get() != tv);

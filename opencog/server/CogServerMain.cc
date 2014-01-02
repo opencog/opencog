@@ -27,14 +27,16 @@
 #include <getopt.h>
 #include <langinfo.h>
 #include <locale.h>
+#include <signal.h>
+#include <string.h>
 
-#include <boost/filesystem/operations.hpp>
+#include <string>
+#include <thread>
+#include <utility>
 
 #include <boost/algorithm/string.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <boost/foreach.hpp>
-
-#include <utility>
-#include <string>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
@@ -78,6 +80,17 @@ static void usage(const char* progname)
     std::cerr << "Each config file is loaded sequentially, with the values in \n"
         << " later files overwriting earlier. Then each singular option overrides \n" 
         << " options in config files. " << std::endl;
+}
+
+// Catch and report sigsegv
+void sighand(int sig)
+{
+    logger().setPrintToStdoutFlag(true);
+    logger().error() << "Caught signal " << sig << " (" << strsignal(sig)
+        << ") on thread " << std::this_thread::get_id();
+    logger().flush();
+    sleep(3);
+    exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -179,6 +192,15 @@ int main(int argc, char *argv[])
     logger().setBackTraceLevel(Logger::getLevelFromString(config()["BACK_TRACE_LOG_LEVEL"]));
     logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
     //logger().setLevel(Logger::DEBUG);
+
+    // Start catching signals
+    signal(SIGSEGV, sighand);
+    signal(SIGBUS, sighand);
+    signal(SIGFPE, sighand);
+    signal(SIGILL, sighand);
+    signal(SIGABRT, sighand);
+    signal(SIGTRAP, sighand);
+    signal(SIGQUIT, sighand);
     
     CogServer& cogserve = cogserver();
 

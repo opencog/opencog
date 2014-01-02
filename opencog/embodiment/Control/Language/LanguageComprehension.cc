@@ -36,6 +36,7 @@
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
 using namespace opencog::oac;
 using namespace opencog::spatial;

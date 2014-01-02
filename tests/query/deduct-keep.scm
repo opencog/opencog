@@ -10,7 +10,7 @@
 		(ListLink
 			(TypedVariableLink
 				(VariableNode "$person")
-				(VariableTypeNode "AvatarNode")
+				(VariableTypeNode "FeatureNode")
 			)
 			(VariableNode "$nationality")
 			(VariableNode "$house")

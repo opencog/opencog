@@ -92,8 +92,10 @@
 	(define (count-one-link link)
 		(let ((rel (make-lg-rel link)))
 			(begin
-				(fetch-atom rel) ; get from SQL
-				(cog-atom-incr rel 1) ; inrmenet relation
+				; Explicit fetch not needed; it already happens implicitly.
+				; (Assuming there are no other servers modifying SQL.)
+				; (fetch-atom rel) ; get from SQL
+				(cog-atom-incr rel 1) ; increment relation
 				(cog-atom-incr (gar rel) 1)  ; increment link type
 				(cog-atom-incr (gadr rel) 1) ; increment left word
 				(cog-atom-incr (gddr rel) 1) ; increment right work.
@@ -117,7 +119,7 @@
 		(relex-parse plain-text)  ;; send plain-text to server
 		(update-link-counts (get-new-parsed-sentences))
 		(release-new-parsed-sents)
-      (delete-sentences)
+		(delete-sentences)
 	)
 )
 

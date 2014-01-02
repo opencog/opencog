@@ -30,9 +30,6 @@
 #include <vector>
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -52,10 +49,6 @@ static inline IndefiniteTruthValuePtr IndefiniteTVCast(TruthValuePtr tv)
  */
 class IndefiniteTruthValue : public TruthValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
-
 private:
 
     strength_t U;

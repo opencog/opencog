@@ -78,6 +78,8 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	void tearDown(void) { }
 
+	void test_utf8(void);
+
 	// TVs
 	void check_truth_value(const TruthValue& tv);
 	void test_truth_value(void);
@@ -98,11 +100,9 @@ class BasicSCMUTest :  public CxxTest::TestSuite
 
 	// Relex links
 	void check_parse_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
-	void check_frame_link(const char *, Type, const char *, const char *, const char *, const char *, float, float);
 	void test_parse_link(void);
 	void test_lemma_link(void);
 	void test_part_of_speech_link(void);
-	void test_frame_element_link(void);
 };
 
 /*
@@ -122,6 +122,23 @@ void BasicSCMUTest::setUp(void)
 	// eval->eval("(setlocale LC_ALL \"\")");
 	eval->eval("(setlocale LC_CTYPE \"\")");
 	eval->clear_pending();
+}
+
+// ============================================================
+
+void BasicSCMUTest::test_utf8(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	eval->eval("(display \"Ćićolina\")");
+	bool eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
+
+	eval->eval("(display \"Lietuvos žydų kilmės žurnalistas\")");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to eval a UTF-8 string", !eval_err);
 }
 
 // ============================================================
@@ -469,68 +486,6 @@ void BasicSCMUTest::test_lemma_link()
 	check_parse_link("LemmaLink", LEMMA_LINK, "WordInstanceNode", "WordNode",
 	                 "blue@6fdd848e-a69c-4b6c-a9a2-376e09789096",
 	                 "blue", 1.0, 1.0);
-
-	logger().debug("END TEST: %s", __FUNCTION__);
-}
-
-// ============================================================
-
-void BasicSCMUTest::check_frame_link(const char * tipo, Type type,
-                               const char * nodename1, const char * nodename2,
-                               const char * value1, const char * value2,
-                               float truth, float conf)
-{
-	printf("check_frame_link(%s,%s,%s,%f,%f)\n",
-	        tipo, nodename1, nodename2, truth, conf);
-
-	char buff[500];
-	snprintf(buff, 500, "(%s (%s \"%s\") (%s \"%s\") )",
-	         tipo, nodename1, value1, nodename2, value2);
-
-	eval->eval(buff);
-	bool eval_err = eval->eval_error();
-	eval->clear_pending();
-	TSM_ASSERT("Failed to create a frame link", !eval_err);
-
-	HandleSeq links;
-	as->getHandlesByType(back_inserter(links), type, true);
-	//printf("Number of links found: %d\n",links.size());
-
-	HandleSeq::const_iterator i;
-	for (i = links.begin(); i != links.end(); ++i)
-	{
-		TruthValuePtr tv = as->getTV(*i);
-		float m = tv->getMean();
-		float c = tv->getConfidence();
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(m - truth), 1.0e-6);
-		TS_ASSERT_LESS_THAN_EQUALS(fabs(c - conf), 1.0e-6);
-		//printf("Link TruthValue: %f -- %f\n", m, c);
-	}
-
-	Type t1 = classserver().getType(nodename1);
-	Handle h1 = as->getHandle(t1, value1);
-	TSM_ASSERT("Failed to find handle", h1 != NULL);
-
-	NodePtr n1 = NodeCast(h1);
-	TSM_ASSERT("Failed to find node", n1 != NULL);
-
-	Type t2 = classserver().getType(nodename2);
-	Handle h2 = as->getHandle(t2, value2 );
-	TSM_ASSERT("Failed to find handle", h2 != NULL);
-
-	NodePtr n2 = NodeCast(h2);
-	TSM_ASSERT("Failed to find node", n2 != NULL);
-
-}
-
-void BasicSCMUTest::test_frame_element_link()
-{
-	logger().debug("BEGIN TEST: %s", __FUNCTION__);
-
-	check_frame_link("FrameElementLink", PARSE_LINK,
-	                 "DefinedFrameNode", "DefinedFrameElementNode",
-	                 "#Temporal_colocation", "#Temporal_colocation:Time",
-	                 0.0, 0.0);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

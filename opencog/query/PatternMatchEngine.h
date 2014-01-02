@@ -45,8 +45,8 @@ class PatternMatchEngine
 		AtomSpace *atom_space;
 
 	private:
-		bool prt(Handle h);
-		void prtmsg(const char *msg, Handle h);
+		bool prt(Handle& h);
+		void prtmsg(const char *msg, Handle& h);
 
 		// -------------------------------------------
 		// predicate to be solved.
@@ -67,7 +67,7 @@ class PatternMatchEngine
 
 		bool pred_up(Handle);
 		bool soln_up(Handle);
-		bool do_soln_up(Handle);
+		bool do_soln_up(Handle&);
 		bool clause_accepted;
 		OutgoingTree ot;
 		Handle curr_soln_handle;
@@ -110,13 +110,13 @@ class PatternMatchEngine
 		void clear(void);
 
 		// Examine each candidate for a match, in turn.
-		bool do_candidate(Handle, Handle, Handle);
+		bool do_candidate(Handle&, Handle&, Handle&);
 
 		bool validate(const std::vector<Handle> &vars,
 		              std::vector<Handle> &clauses);
 
 		bool validate(const std::vector<Handle> &vars,
-		              Handle clause);
+		              Handle& clause);
 
 		void match(PatternMatchCallback *,
 		           const std::vector<Handle> &vars,

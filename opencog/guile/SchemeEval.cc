@@ -16,7 +16,7 @@
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
-
+#include <opencog/util/oc_assert.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -105,9 +105,18 @@ static void * do_bogus_scm(void *p)
  * multi-threaded operation. Currently, the most serious of these is
  * a parallel-define bug, documented in
  * https://savannah.gnu.org/bugs/index.php?24867
+ *
  * Until that bug is fixed and released, this work-around is needed.
  * The work-around serializes all guile-mode thread execution, by
  * means of a mutex lock.
+ *
+ * As of December 2013, the bug still seems to be there: the test
+ * case provided in the bug report crashes, when linked against
+ * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
+ *
+ * Its claimed that the bug only happens for top-level defines.
+ * Thus, in principle, theading should be OK after all scripts have
+ * been loaded.
  */
 static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
@@ -139,7 +148,7 @@ void SchemeEval::thread_lock(void)
 	long cnt = (long) pthread_getspecific(ser_key);
 	if (0 >= cnt)
 	{
-			pthread_mutex_lock(&serialize_lock);
+		pthread_mutex_lock(&serialize_lock);
 	}
 	cnt ++;
 	pthread_setspecific(ser_key, (const void *) cnt);
@@ -200,9 +209,9 @@ SchemeEval::~SchemeEval()
 
 std::string SchemeEval::prt(SCM node)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, node))
 	{
-		return SchemeSmob::handle_to_string(node);
+		return SchemeSmob::uuid_to_string(node);
 	}
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
@@ -307,8 +316,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 
 			scm_puts ("Backtrace:\n", port);
 			scm_display_backtrace_with_highlights (captured_stack, port,
-												   SCM_BOOL_F, SCM_BOOL_F,
-												   highlights);
+			                                       SCM_BOOL_F, SCM_BOOL_F,
+			                                       highlights);
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
@@ -373,6 +382,13 @@ std::string SchemeEval::eval(const std::string &expr)
 void * SchemeEval::c_wrap_eval(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
+
+	// Normally, neither of these are ever null.
+	// But sometimes, a heavily loaded server can crash here.
+	// Trying to figure out why ...
+	OC_ASSERT(self, "c_wrap_eval got null pointer!");
+	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
+
 	self->answer = self->do_eval(*(self->pexpr));
 	return self;
 }
@@ -502,7 +518,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, prt(sexpr).c_str());
+		               __FUNCTION__, str, prt(sexpr).c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);
@@ -602,7 +618,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, expr.c_str());
+		               __FUNCTION__, str, expr.c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);

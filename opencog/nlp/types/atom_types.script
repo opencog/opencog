@@ -29,11 +29,9 @@
 //
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
 //
-// New RelEx nodes, added by Linas per names used by Ben
-// These are subject to change or deletion pending review.
-// Some of the link types may go away.
 
 WORD_NODE <- NODE
+ANY_NODE <- NODE    // Explicit wildcard node. 
 REFERENCE_LINK <- ASSOCIATIVE_LINK
 
 // Custom atoms to identify documents, sentences, word instances
@@ -60,13 +58,6 @@ LINK_GRAMMAR_DISJUNCT_NODE <- PREDICATE_NODE       // e.g. "S- O+ "
 DEFINED_LINGUISTIC_CONCEPT_NODE <- FEATURE_NODE
 DEFINED_LINGUISTIC_RELATIONSHIP_NODE <- PREDICATE_NODE // e.g. _subj, _obj
 PREPOSITIONAL_RELATIONSHIP_NODE <- PREDICATE_NODE  // e.g. of, next, to
-
-// Frame related stuff, almost certainly will be changed soon
-// These are semi-obsolete, probably need to be redesigned.
-// These are emitted by RelEx.
-DEFINED_FRAME_NODE <- CONCEPT_NODE
-DEFINED_FRAME_ELEMENT_NODE <- PREDICATE_NODE
-FRAME_ELEMENT_LINK <- ORDERED_LINK
 
 // New wordnet-import nodes, added by Linas.
 // These are subject to change, pending review.

@@ -22,10 +22,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BuiltinRequestsModule.h"
+#include <iomanip>
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/ansi.h>
+
+#include "BuiltinRequestsModule.h"
 
 using namespace opencog;
 

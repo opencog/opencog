@@ -134,8 +134,8 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-link (append (list 'InheritanceLink) x)))\n"
 	"(define (ImplicationLink . x)\n"
 	"   (apply cog-new-link (append (list 'ImplicationLink) x)))\n"
-	"(define (DefinedFrameNode . x)\n"
-	"   (apply cog-new-node (append (list 'DefinedFrameNode) x)))\n"
+	"(define (WordSenseNode . x)\n"
+	"   (apply cog-new-node (append (list 'WordSenseNode) x)))\n"
 	"(define (ConceptNode . x)\n"
 	"   (apply cog-new-node (append (list 'ConceptNode) x)))\n"
 	"(define (PredicateNode . x)\n"
@@ -157,11 +157,11 @@ void ImplicationUTest::setUp(void)
 	"   (AndLink\n"
 	"      (InheritanceLink\n"
 	"         (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
@@ -176,7 +176,7 @@ void ImplicationUTest::setUp(void)
 	"(ImplicationLink\n"
 	"   (InheritanceLink (stv 1 1)\n"
 	"      (VariableNode \"$predNode\")\n"
-	"      (DefinedFrameNode \"#Manipulation\")\n"
+	"      (WordSenseNode \"#Manipulation\")\n"
 	"   )\n"
 	"   (VariableNode \"$predNode\")\n"
 	")\n"
@@ -192,7 +192,7 @@ void ImplicationUTest::setUp(void)
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (VariableNode \"$predNode\")\n"
 	"   )\n"
@@ -212,7 +212,7 @@ void ImplicationUTest::setUp(void)
 	"   (ImplicationLink\n"
 	"      (InheritanceLink (stv 1 1)\n"
 	"         (VariableNode \"$predNode\")\n"
-	"         (DefinedFrameNode \"#Manipulation\")\n"
+	"         (WordSenseNode \"#Manipulation\")\n"
 	"      )\n"
 	"      (VariableNode \"$predNode\")\n"
 	"   )\n"
@@ -232,18 +232,18 @@ void ImplicationUTest::setUp(void)
 	"      )\n"
 	"      (TypedVariableLink\n"
 	"         (VariableNode \"$framNode\")\n"
-	"         (VariableTypeNode \"DefinedFrameNode\")\n"
+	"         (VariableTypeNode \"WordSenseNode\")\n"
 	"      )\n"
 	"   )\n"
 	"   (ImplicationLink\n"
 	"      (AndLink\n"
 	"         (InheritanceLink (stv 1 1)\n"
 	"            (VariableNode \"$predNode\")\n"
-	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"            (WordSenseNode \"#Manipulation\")\n"
 	"         )\n"
 	"         (InheritanceLink (stv 1 1)\n"
 	"            (VariableNode \"$framNode\")\n"
-	"            (DefinedFrameNode \"#Manipulation\")\n"
+	"            (WordSenseNode \"#Manipulation\")\n"
 	"         )\n"
 	"      )\n"
 	"      (ListLink\n"
@@ -259,12 +259,12 @@ void ImplicationUTest::setUp(void)
 	// Create data on which the above pattern should match
 	const char * str = 
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
-	"   (DefinedFrameNode \"#Ingestion\")\n"
-	"   (DefinedFrameNode \"#Manipulation\")\n"
+	"   (WordSenseNode \"#Ingestion\")\n"
+	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n"
 	"(InheritanceLink (stv 1.0 1.0) (cog-new-av 1 0 0)\n"
 	"   (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
-	"   (DefinedFrameNode \"#Manipulation\")\n"
+	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n";
 	SchemeEval::instance( ).eval(str);
 }
@@ -275,7 +275,7 @@ void ImplicationUTest::setUp(void)
  * Expect to get the following result, given the above data:
  *
  *    ListLink
- *       DefinedFrameNode #Ingestion
+ *       WordSenseNode #Ingestion
  *       PredicateNode grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation
  */
 #define getlink(hand,pos) as->getOutgoing(hand,pos)

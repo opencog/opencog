@@ -1,4 +1,3 @@
-scm
 ;
 ; parse-rank.scm
 ;

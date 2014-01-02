@@ -21,12 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpace.h"
-
 #include <stdlib.h>
 #include <string>
 
+#include <boost/bind.hpp>
+
 #include <opencog/util/Logger.h>
+#include "AtomSpace.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)

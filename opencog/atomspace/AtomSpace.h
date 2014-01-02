@@ -266,6 +266,16 @@ public:
     }
 
     /**
+     * Make sure all atom writes have completed, before returning.
+     * This only has an effect when the atomspace is backed by some
+     * sort of storage, or is sending atoms to some remote location
+     * asynchronously. This simply guarantees that the asynch
+     * operations have completed.
+     * NB: at this time, we don't distinguish barrier and flush.
+     */
+    void barrier(void) { getImpl().barrier(); }
+
+    /**
      * Remove an atom from the atomspace.  Note that this only purges
      * the atom from the AtomSpace; it may still remain in persistent
      * storage.  To also delete from persistant storage, use the
@@ -1034,10 +1044,10 @@ public:
         getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i;
-        for (i = handle_set.begin(); i != handle_set.end(); i++) {
-            Handle h = *i;
-            bool rc = (data->*cb)(h);
+        std::list<Handle>::iterator i = handle_set.begin();
+        std::list<Handle>::iterator iend = handle_set.end();
+        for (; i != iend; i++) {
+            bool rc = (data->*cb)(*i);
             if (rc) return rc;
         }
         return false;

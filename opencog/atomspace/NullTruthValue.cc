@@ -47,17 +47,17 @@ std::string NullTruthValue::toString() const
     return "(null TV)";
 }
 
-float NullTruthValue::getMean() const throw (RuntimeException)
+strength_t NullTruthValue::getMean() const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call getMean() method of a NullTruthvalue");
 }
 
-float NullTruthValue::getCount() const throw (RuntimeException)
+count_t NullTruthValue::getCount() const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call getCount() method of a NullTruthvalue");
 }
 
-float NullTruthValue::getConfidence() const throw (RuntimeException)
+confidence_t NullTruthValue::getConfidence() const throw (RuntimeException)
 {
     throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
 }

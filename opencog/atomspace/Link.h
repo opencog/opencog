@@ -145,7 +145,7 @@ public:
      * @return A const reference to this atom's outgoing set.
      */
     inline const HandleSeq& getOutgoingSet() const
-	 {
+    {
         return _outgoing;
     }
     /**

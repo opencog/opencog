@@ -1,7 +1,8 @@
 /*
  * opencog/atomspace/AtomSpaceImpl.h
  *
- * Copyright (C) 2010-2011 OpenCog Foundation
+ * Copyright (c) 2010-2011 OpenCog Foundation
+ * Copyright (c) 2009, 2013 Linas Vepstas
  * All Rights Reserved
  *
  * Written by Joel Pitt <joel@opencog.org>
@@ -70,6 +71,16 @@ public:
     void unregisterBackingStore(BackingStore *);
 
     /**
+     * Read-write synchronization barrier.
+     * If there is a backing store, then make sure all writes have
+     * been completed.
+     * NB: at this time,we don't distinguish barrier and flush.
+     * Although this is named 'barrier', its actually implemented
+     * as a flush.  This may change in the future.
+     */
+    void barrier(void) { if (backing_store) backing_store->barrier(); }
+
+    /**
      * Recursively store the atom to the backing store.
      * I.e. if the atom is a link, then store all of the atoms
      * in its outgoing set as well, recursively.
@@ -77,14 +88,36 @@ public:
     void storeAtom(Handle h);
 
     /**
-     * Return the atom with the indicated handle. This method will
-     * explicitly use the backing store to obtain an instance of the
-     * atom. If an atom corresponding to the handle cannot be found,
-     * then an undefined handle is returned. If the atom is found, 
-     * then the corresponding atom is guaranteed to have been
-     * instantiated in the atomspace.
+     * Load *all* atoms of the given type, but only if they are not
+     * already in the AtomTable. 
+     */
+    void loadType(Type t) {
+        if (backing_store) backing_store->loadType(atomTable, t);
+    }
+
+    /**
+     * Unconditionally fetch an atom from the backingstore.
+     * If there is no backingstore, then Handle::UNDEINFED is returned.
+     * If the atom is found in the backingstore, then it is placed in
+     * the atomtable before returning.  If the atom is already in the
+     * atomtable, and is also found in the backingstore, then the TV's
+     * are merged.
+     *
+     * The fetch is 'unconditional', in that it is fetched, even if it
+     * already is in the atomspace.  Also, the ignored-types of the
+     * backing store are not used.
+     * 
+     * To avoid a fetch if the atom already is in the atomtable, use the
+     * getAtom() method instead.
      */
     Handle fetchAtom(Handle);
+
+    /**
+     * Get an atom from the AtomTable. If not found there, get it from
+     * the backingstore (and add it to the AtomTable).  If the atom is
+     * not found in either place, return Handle::UNDEFINED.
+     */
+    Handle getAtom(Handle);
 
     /**
      * Use the backing store to load the entire incoming set of the atom.
@@ -104,13 +137,21 @@ public:
      */
     Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
-    /** Get a node from the atom taable, if it's in there */
+    /**
+     * Get a node from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
+     *
+     * See also the getAtom() method.
+     */
     Handle getNode(Type t, const std::string& name = "");
 
     /**
-     * Add a new link to the Atom Table
-     * If the atom already exists then the old and the new truth value
-     * is merged
+     * Add a new link to the AtomTable.
+     * If the atom already exists in the AtomTable, then the old and
+     * the new truth values are merged.
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
@@ -120,7 +161,15 @@ public:
     Handle addLink(Type t, const HandleSeq& outgoing,
                    TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
-    /** Get a link from the atom taable, if it's in there */
+    /**
+     * Get a link from the AtomTable, if it's in there. If its not found
+     * in the AtomTable, and there's a backing store, then the atom will
+     * be fetched from the backingstore (and added to the AtomTable). If
+     * the atom can't be found in either place, Handle::UNDEFINED will be
+     * returned.
+     *
+     * See also the getAtom() method.
+     */
     Handle getLink(Type t, const HandleSeq& outgoing);
 
     /** Retrieve the incoming set of a given atom */

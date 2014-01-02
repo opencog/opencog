@@ -37,20 +37,20 @@ using namespace opencog;
 
 /* ======================================================== */
 
-Handle DefaultPatternMatchCB::find_starter(Handle h)
+Handle DefaultPatternMatchCB::find_starter(Handle& h)
 {
-	AtomSpace *as = pme->get_atomspace();
-	Type t = as->getType(h);
+	Type t = h->getType();
 	if (classserver().isNode(t)) {
 		if (t != VARIABLE_NODE) return h;
 		return Handle::UNDEFINED;
 	}
 
 	starter_pred = h;
-	const std::vector<Handle> &vh = as->getOutgoing(h);
+	LinkPtr ll(LinkCast(h));
+	const std::vector<Handle> &vh = ll->getOutgoingSet();
 	for (size_t i = 0; i < vh.size(); i++) {
-		Handle hout = vh[i];
-		Handle s = find_starter(hout);
+		Handle ho(vh[i]);
+		Handle s(find_starter(ho));
 		if (s != Handle::UNDEFINED) return s;
 	}
 
@@ -60,7 +60,7 @@ Handle DefaultPatternMatchCB::find_starter(Handle h)
 bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
 	dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
-	dbgprt("Loop candidate: %s\n", pme->get_atomspace()->atomAsString(h).c_str());
+	dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
 	return pme->do_candidate(root, starter_pred, h);
 }
 
@@ -120,13 +120,13 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	// screwed, and must search over all links that have the same 
 	// type as the first clause.  Alternately, if there are *no*
 	// variables at all, then we must assume a very general match.
-	Handle h = clauses[0];
+	Handle h(clauses[0]);
 	root = h;
 	Handle start = find_starter(h);
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
-		dbgprt("Search start node: %s\n", pme->get_atomspace()->atomAsString(start).c_str());
-		dbgprt("Start pred is: %s\n", pme->get_atomspace()->atomAsString(starter_pred).c_str());
+		dbgprt("Search start node: %s\n", start->toShortString().c_str());
+		dbgprt("Start pred is: %s\n", starter_pred->toShortString().c_str());
 		foreach_incoming_handle(start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
@@ -134,13 +134,13 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	{
 		starter_pred = root;
 
-		dbgprt("Start pred is: %s\n", pme->get_atomspace()->atomAsString(starter_pred).c_str());
+		dbgprt("Start pred is: %s\n", starter_pred->toShortString().c_str());
 		// Get type of the first item in the predicate list.
-		AtomSpace *as = pme->get_atomspace();
-		Type ptype = as->getType(h);
+		Type ptype = h->getType();
 
 		// Plunge into the deep end - start looking at all viable
 		// candidates in the AtomSpace.
+		AtomSpace *as = pme->get_atomspace();
 		as->foreach_handle_of_type(ptype,
 		      &DefaultPatternMatchCB::loop_candidate, this);
 	}

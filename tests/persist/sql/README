@@ -76,6 +76,13 @@ To run this test, perform the following steps:
 
     If the above doesn't work, go back, and try again.
 
+    One "typical" reason for failure at this point is that the tables
+    aren't owned by 'opencog_tester'. There are two ways to fix this:
+    drop the tables, and create them again with the right owner, or
+    issue the SQL statement
+        ALTER TABLE typecodes OWNER TO opencog_tester;
+    and likewise for the other three tables.
+
 2j) Edit ~/.odbc.ini and add something similar to the below. Pay special
     attention to the username, the password, and the name of the database
     to connect to.

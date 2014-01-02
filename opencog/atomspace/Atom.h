@@ -52,10 +52,16 @@ namespace opencog
 
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
-typedef std::set<LinkPtr> IncomingSet;
+typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
 typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+
+// We use a std:vector instead of std::set for IncomingSet, because
+// virtually all access will be either insert, or iterate, so we get
+// O(1) performance. We use std::set for WincomingSet, because we want
+// both good insert and good remove performance.  Note that sometimes
+// incoming sets can be huge (millions of atoms).
 
 /**
  * Atoms are the basic implementational unit in the system that

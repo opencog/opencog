@@ -54,6 +54,17 @@
     (if (pair? head) (cog-set-vtv! (mtv tail) (car head) (cdr head))
         (cog-new-mtv head (cadr x)))))
 
+; Fetch the mean, confidence and count of a TV.
+(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
+(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))
+;
+; Simple truth values won't have a count. Its faster to just check
+; for #f than to call (cog-ctv? tv)
+(define (tv-count tv)
+	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
+	(if (eq? cnt #f) 0 cnt)
+)
+
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
 ; (define (gar x) (if (cog-atom? x) (car (cog-outgoing-set x)) (car x)))
@@ -95,7 +106,8 @@
 ;
 ; If the current truth value on the atom is not a CountTruthValue,
 ; then the truth value is replaced by a CountTruthValue, with the 
-; count set to "cnt".
+; count set to "cnt".  The mean and confidence values are left
+; untouched.
 ;
 ; XXX this implementation is slow/wasteful, a native C++ would
 ; be considerably faster.

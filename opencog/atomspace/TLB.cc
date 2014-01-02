@@ -22,11 +22,7 @@
 
 #include "TLB.h"
 
-#include <opencog/util/platform.h>
-
 using namespace opencog;
-using std::cout;
-using std::endl;
 
 UUID TLB::_brk_uuid = 1;
 

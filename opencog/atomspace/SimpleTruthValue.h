@@ -28,9 +28,6 @@
 #define _OPENCOG_SIMPLE_TRUTH_VALUE_H_
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -44,13 +41,6 @@ typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 //! a TruthValue that stores a mean and the number of observations (strength and confidance)
 class SimpleTruthValue : public TruthValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-
-private:
-    SimpleTruthValue() {};
-#endif
-
 protected:
 
     /// Mean of the strength of the TV over all observations

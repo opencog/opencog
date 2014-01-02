@@ -151,11 +151,12 @@ void BasicSaveUTest::setUp(void)
 
 // ============================================================
 
-static void atomCompare(AtomPtr a, AtomPtr b)
+static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
 {
 	LinkPtr la(LinkCast(a));
 	LinkPtr lb(LinkCast(b));
 
+	printf("Testing at %s\n", where);
 	TSM_ASSERT("No atom found", b != NULL);
 	if (NULL == b) return;
 
@@ -221,21 +222,26 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	a->setTruthValue(stv);
 	TLB::addAtom(a);
 
+	Handle h = a->getHandle();
+	UUID uuid = h.value();
+
+	TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
+
 	// Store the atom ... 
-	store->storeAtom(a);
+	store->storeAtom(a, true);
 
 	// Fetch it back ...
-	Handle h = a->getHandle();
-	AtomPtr b = store->getAtom(h);
+	Handle hb(uuid);
+	AtomPtr b = store->getAtom(hb);
 
 	// Are they equal ??
-	atomCompare(a,b);
+	atomCompare(a, b, "Single node save-restore");
 
 	// Create a second atom, connect it to the first
 	// with a link. Save it, fetch it ... are they equal?
 	AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
 	TLB::addAtom(a2);
-	store->storeAtom(a2);
+	store->storeAtom(a2, true);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a->getHandle());
@@ -243,10 +249,11 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 	LinkPtr l(createLink(SET_LINK, hvec));
 	TLB::addAtom(l);
-	store->storeAtom(l);
+	store->storeAtom(l, true);
 
-	AtomPtr lb = store->getAtom(l->getHandle());
-	atomCompare(l, lb);
+	UUID ul = l->getHandle().value();
+	AtomPtr lb = store->getAtom(Handle(ul));
+	atomCompare(l, lb, "Single link save-restore");
 
 	store->kill_data();
 	delete store;
@@ -288,13 +295,13 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 {
 	Handle hb1 = table->getHandle(n1[idx]);
-	atomCompare(a1[idx], hb1);
+	atomCompare(a1[idx], hb1, "check_table hb1");
 
 	Handle hb2 = table->getHandle(n2[idx]);
-	atomCompare(a2[idx], hb2);
+	atomCompare(a2[idx], hb2, "check_table hb2");
 
 	Handle hb3 = table->getHandle(n3[idx]);
-	atomCompare(a3[idx], hb3);
+	atomCompare(a3[idx], hb3, "check_table hb3");
 
 	std::vector<Handle> hvec;
 	hvec.push_back(hb1);
@@ -303,7 +310,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 
 	LinkPtr lb(createLink(PARSE_LINK, hvec));
 	Handle hlb = table->getHandle(lb);
-	atomCompare(al[idx], hlb);
+	atomCompare(al[idx], hlb, "check_table hlb");
 }
 
 // ============================================================

@@ -126,8 +126,6 @@
 	(apply cog-new-link (append (list 'ExtensionalEquivalenceLink) x)))
 (define (DistinguishedNode . x)
 	(apply cog-new-node (append (list 'DistinguishedNode) x)))
-(define (CountLink . x)
-	(apply cog-new-link (append (list 'CountLink) x)))
 (define (WordNode . x)
 	(apply cog-new-node (append (list 'WordNode) x)))
 (define (ReferenceLink . x)

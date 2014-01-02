@@ -25,6 +25,7 @@
 #ifndef _OPENCOG_TIME_SERVER_H
 #define _OPENCOG_TIME_SERVER_H
 
+#include <mutex>
 #include <set>
 #include <boost/signal.hpp>
 
@@ -63,7 +64,7 @@ class TimeServer
     SpaceServer* spaceServer;
 
     // TS-wide mutex, since add/remove atom signals are called from AtomSpace event-loop
-    mutable boost::mutex ts_mutex;
+    mutable std::mutex ts_mutex;
 
 public:
 
@@ -98,7 +99,7 @@ public:
     get(OutputIterator outIt, Handle h, const Temporal& t = UNDEFINED_TEMPORAL,
         TemporalTable::TemporalRelationship criterion = TemporalTable::EXACT) const {
 
-        boost::mutex::scoped_lock lock(ts_mutex);
+        std::unique_lock<std::mutex> lock(ts_mutex);
         HandleTemporalPairEntry* hte = table->get(h, t, criterion);
         HandleTemporalPairEntry* toRemove = hte;
 

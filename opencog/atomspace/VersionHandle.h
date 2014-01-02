@@ -27,9 +27,6 @@
 
 #include <opencog/atomspace/Handle.h>
 #include <opencog/util/exceptions.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -41,9 +38,6 @@ enum IndicatorType {HYPOTHETICAL = 1, CONTEXTUAL, UNKNOWN};
 
 struct VersionHandle
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
     IndicatorType indicator;
     //! substantive is a Handle corresponding to the context or hypothesis
     //! (i.e.it would be the first argument of the context of hypothetical link)
