@@ -5,8 +5,6 @@
 ;
 ; Copyright (c) 2013 Linas Vepstas
 ;
-(use-modules (ice-9 threads))
-
 ; ---------------------------------------------------------------------
 ; OVERVIEW
 ; --------
@@ -105,6 +103,11 @@
 ; That's all there's to this. The batch-all-pair-mi is the main entry
 ; point; its given at the bottom.
 ;
+; ---------------------------------------------------------------------
+;
+(use-modules (srfi srfi-1))
+(use-modules (ice-9 threads))
+
 ; ---------------------------------------------------------------------
 ; Define the "things" that will be pair-summed over.
 ; These are set as globals here, they really should be local to the
