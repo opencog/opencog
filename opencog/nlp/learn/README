@@ -445,6 +445,11 @@ Another thread is doing setTV even while this thread is doing getTV.  The
 use-count pointer drops to zero, destructor runs, then magically, use-count
 goes back up to one...  basically, shared_ptr's are not thread-safe.
 
+OK, so fixed all the above, and it should work, right?
+
+again... 1 Jan, even after the fixes... WTF???
+again... 2 Jan, even after the fixes... WTF???
+
 
 Crash 2
 -------
@@ -500,6 +505,39 @@ bdwgc ./configure --with-large-heap=yes
 #define LARGE_CONFIG
 #endif
 
+Crash 4
+-------
+#<catch-closure ef95a0> wrong-type-arg ...]
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure /: Wrong type argument in position 1: #f
+
+Despite this, have 12 cpu threads spinning at 100% .. what are they doing?
+most in __lll_lock_wait in ClassServer::getTypeName from Node::toShortString
+from PatternMatchEngine.cc:133 from OC_ASSERT.   Ooops .. this is a bug,
+fix it ... its hit twice ... three
+But also PatternMatchEngine.cc:177 hits the lock. twice, three times...
+
+EvaluationLink is 27
+select count(*) from atoms where type=27 and tv_type !=2;
+returns zero ... 
+555
+(compute-pair-mi (WordNode "Jinsei") lg_any)  or "onimotsu" "affluent"
+HandleSeq iset = backing_store->getIncomingSet(h);
+which returns atoms .. with truth values, etc !?
+foreach fetchAtom  .. store::getAtom
+
+(define lg_any (LinkGrammarRelationshipNode "ANY"))
+(init-trace)
+(load-atoms-of-type item-type)
+(fetch-incoming-set lg_any)
+
+(define wtf2 (EvaluationLink lg_any (ListLink (WordNode "," ) (WordNode "l'occasion") )))
+(cog-tv wtf2)
+ (fetch-atom wtf2)
+
+OK, fixed, the atomspace ws totally buggy in how it handled Default TV
+values .. the tv merge routines were clobbering the count values. Aieee.
 
 
 Performance
@@ -571,6 +609,7 @@ Misc
 ----
 Change load-atoms to return a count?
 
+gdb:
 handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
 

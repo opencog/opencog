@@ -142,7 +142,7 @@ public:
 
     void testSignals()
     {
-        // connect signals
+        // Connect signals
         boost::signals::connection add1 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
         boost::signals::connection add2 =
@@ -156,16 +156,17 @@ public:
         boost::signals::connection remove2 =
             atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1));
 
-        /* add and remove a simple node */
+        /* Add and remove a simple node */
         __testSignalsCounter = 0;
         logger().debug("before first atom add");
         Handle wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         TS_ASSERT(__testSignalsCounter == 11);
         TS_ASSERT(atomSpace->getSize() == 1);
 
-        /* Since we're adding *exactly* the same atom, we should get a merged signal */
+        /* Since we're adding *exactly* the same atom, we should get a tv-merged signal */
         logger().debug("before second atom add");
-        atomSpace->getImpl().addNode(NUMBER_NODE, "1");
+        TruthValuePtr tv(SimpleTruthValue::createTV(0.5, 1.0));
+        atomSpace->getImpl().addNode(NUMBER_NODE, "1", tv);
         TS_ASSERT(__testSignalsCounter == 1111);
         TS_ASSERT(atomSpace->getSize() == 1);
 
@@ -213,9 +214,9 @@ public:
         remove1.disconnect();
         wnHandle = atomSpace->getImpl().addNode(NUMBER_NODE, "1");
         atomSpace->getImpl().addNode(NUMBER_NODE, "1");
-        TS_ASSERT(__testSignalsCounter == 1010);
+        TS_ASSERT(__testSignalsCounter == 10);
         atomSpace->getImpl().removeAtom(wnHandle);
-        TS_ASSERT(__testSignalsCounter == 101010);
+        TS_ASSERT(__testSignalsCounter == 100010);
 
         __testSignalsCounter = 0;
         add2.disconnect();
@@ -418,7 +419,9 @@ public:
 
         testThreadedDuplicateAdd();
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
-        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1));
+        // subtract 1, because first time through, there is no change signal,
+        // only an add signal.
+        TS_ASSERT_EQUALS((int) __totalChanged, (num_atoms-1) * (n_threads-1));
     }
 
     // =================================================================

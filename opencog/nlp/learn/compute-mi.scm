@@ -143,7 +143,15 @@
 	(let* (
 			(atv (cog-tv->alist (cog-tv atom)))
 			(meen (assoc-ref atv 'mean))
-			(cnt (assoc-ref atv 'count))
+			(rawcnt (assoc-ref atv 'count))
+			(cnt
+				(if (eq? rawcnt #f)
+					;; This is nuts, this should never happen....
+					;; But it did, due to bug on atomspace default TV code.
+					(begin (trace-msg-num "Crazy atom has no count TV!" atom) 1)
+					rawcnt
+				)
+			)
 			; 1.4426950408889634 is 1/0.6931471805599453 is 1/log 2
 			(ln2 (* -1.4426950408889634 (log (/ cnt total))))
 			(ntv (cog-new-ctv meen ln2 cnt))
@@ -564,7 +572,7 @@
 			)
 			(cog-get-atoms item-type)
 		)
-		(trace-msg "Done with wild-card count")
+		(trace-msg "Done with wild-card count\n")
 	)
 )
 
@@ -627,6 +635,7 @@
 				)
 			)
 		)
+		(trace-msg "Done with all-pair count\n")
 	)
 )
 
