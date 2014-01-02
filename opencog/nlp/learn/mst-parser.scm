@@ -36,8 +36,11 @@
 ; periods, and other punctuation.  Returned is a list of words.
 ;
 (define (tokenize-text plain-text)
+	; Prefix and suffix lists taken from the link-grammar ANY
+	; language 4.0.affix file
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†††‡§¶©®℗№#")
 	(define prefix "(")
-	(define suffix ".,)")
+	(define suffix ")}]>»〉）〕》】］』」’'%,.。:;?!‽؟？！…”–‐、～¢₵™℠")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 
@@ -45,10 +48,11 @@
       (if (null? sufli)
 			(list word)
 			(let* ((punct (car sufli))
-					(loc (string-rindex word punct)))
-				(if loc 
+					(len (- (string-length word) 1))
+					(tail (string-ref word len)))
+				(if (eq? punct tail)
 					(append 
-						(strip-suffix (substring word 0 loc))
+						(strip-suffix (substring word 0 len))
 						(list (string punct))
 					)
 					(strip-sufli word (cdr sufli))
