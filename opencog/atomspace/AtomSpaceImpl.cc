@@ -291,7 +291,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
 
     // Case 1:
     Handle hb(atomTable.getHandle(h));
-    if (Handle::UNDEFINED != hb)
+    if (atomTable.holds(hb))
         return hb;
 
     // Case 2 & 3:
@@ -344,7 +344,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
         HandleSeq iset = backing_store->getIncomingSet(h);
         size_t isz = iset.size();
         for (size_t i=0; i<isz; i++) {
-            Handle hi = iset[i];
+            Handle hi(iset[i]);
             if (recursive) {
                 fetchIncomingSet(hi, true);
             } else {
