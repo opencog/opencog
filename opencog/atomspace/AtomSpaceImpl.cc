@@ -273,19 +273,40 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     if (NULL == backing_store)
         return Handle::UNDEFINED;
 
-    // If the atom corresponding to the UUID isn't available, then
-    // go get it. But in fact, we may already have it, from a
-    // previous call to getIncomingSet(), so don't waste any CPU
-    // cycles getting it again.
+    // OK, we have to handle three distinct cases.
+    // 1) If atom table already knows about this uuid or atom, then
+    //    this function returns the atom-table's version of the atom.
+    //    In particular, no attempt is made to reconcile the possibly
+    //    differing truth values in the atomtable vs. backing store.
+    // 2) If the handle h holds a UUID but no atom pointer, then get 
+    //    the corresponding atom from storage, and add it to the atom
+    //    table.
+    // 3) If the handle h contains a pointer to an atom (that is not
+    //    in the atom table), then assume that atom is from some previous
+    //    (recursive) query, and add it to the atomtable.
+    // For both case 2 & 3, if the atom is a link, then it's outgoing
+    // set is fetched as well, as currently, a link cannot be added to
+    // the atomtable, unless all of its outgoing set already is in the
+    // atomtable.
+
+    // Case 1:
+    Handle hb(atomTable.getHandle(h));
+    if (Handle::UNDEFINED != hb)
+        return hb;
+
+    // Case 2 & 3:
+    // If we don't have the atom for this UUID, then go get it.
     if (NULL == h.operator->()) {
-        h = backing_store->getAtom(h);
+        Handle hb(backing_store->getAtom(h));
 
         // If we still don't have an atom, then the requested UUID
-        // was "insane", or at least, unknown by the backend.
-        if (NULL == h.operator->())
+        // was "insane", that is, unknown by either the atom table
+        // (case 1) or the backend.
+        if (NULL == hb.operator->())
             throw RuntimeException(TRACE_INFO,
                 "Asked backend for an unknown handle; UUID=%lu\n",
                 h.value());
+        h = hb;
     }
 
     // For links, must perform a recursive fetch, as otherwise
@@ -302,6 +323,7 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
               ogs[i].value(), oh.value());
        }
     }
+
     return atomTable.add(h);
 }
 
