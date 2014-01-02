@@ -39,20 +39,43 @@
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
 	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†††‡§¶©®℗№#")
-	(define prefix "(")
 	(define suffix ")}]>»〉）〕》】］』」’'%,.。:;?!‽؟？！…”–‐、～¢₵™℠")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
 
+	; Tail-recursive helper function. Strip off any prefixes appearing
+	; in the list prefli, and return a list of the stripped prefixes,
+	; and the remaining word.
+	(define (strip-prefli word prefli)
+      (if (null? prefli)
+			(list word)  ; prefix list is empty, return the word.
+			(let* ((punct (car prefli))
+					(head (string-ref word 0)))
+				(if (eq? punct head) ; it there's a match, then split
+					(append 
+						(list (string punct))
+						(strip-prefix (substring word 1)) ; loop again.
+					)
+					(strip-prefli word (cdr prefli)) ; if no match, recurse.
+				)
+			)
+		)
+	)
+	; Main entry point for the recursive prefix splitter
+	(define (strip-prefix word) (strip-prefli word prefix-list))
+
+	; Tail-recursive helper function. Strip off any suffixes appearing
+	; in the list sufli, and return a list of the stripped prefixes,
+	; the remaining word, and the stripped suffixes.
 	(define (strip-sufli word sufli)
       (if (null? sufli)
-			(list word)
+			(strip-prefix word)
 			(let* ((punct (car sufli))
 					(len (- (string-length word) 1))
 					(tail (string-ref word len)))
 				(if (eq? punct tail)
 					(append 
-						(strip-suffix (substring word 0 len))
+						(strip-affix (substring word 0 len))
 						(list (string punct))
 					)
 					(strip-sufli word (cdr sufli))
@@ -60,10 +83,11 @@
 			)
 		)
 	)
-	(define (strip-suffix word) (strip-sufli word suffix-list))
-		
+	; Main entry point for the recursive splitter
+	(define (strip-affix word) (strip-sufli word suffix-list))
+
 	(let* ((word-list (string-split plain-text #\ )))
-		(concatenate (map strip-suffix word-list))
+		(concatenate (map strip-affix word-list))
 	)
 )
 
