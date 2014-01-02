@@ -171,7 +171,7 @@ class AtomStorage::Response
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
 			// Note, unlike the above 'load' routines, this merely fetches
-			// the atoms, and returns a vector of them.  The are loaded
+			// the atoms, and returns a vector of them.  They are loaded
 			// into the atomspace later, by the caller.
 			Handle h(store->makeAtom(*this, handle));
 			hvec->push_back(h);

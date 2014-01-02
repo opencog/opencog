@@ -274,11 +274,19 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
         return Handle::UNDEFINED;
 
     // If the atom corresponding to the UUID isn't available, then
-    // got get it. But in fact, we may already have it, from a
-    // previous recusrive call to getIncomingSet(), so don't waste
-    // any CPU sycles getting it again.
-    if (NULL == h.operator->())
+    // go get it. But in fact, we may already have it, from a
+    // previous call to getIncomingSet(), so don't waste any CPU
+    // cycles getting it again.
+    if (NULL == h.operator->()) {
         h = backing_store->getAtom(h);
+
+        // If we still don't have an atom, then the requested UUID
+        // was "insane", or at least, unknown by the backend.
+        if (NULL == h.operator->())
+            throw RuntimeException(TRACE_INFO,
+                "Asked backend for an unknown handle; UUID=%lu\n",
+                h.value());
+    }
 
     // For links, must perform a recursive fetch, as otherwise
     // the atomtable.add below will throw an error.
@@ -288,15 +296,13 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
        size_t arity = ogs.size();
        for (size_t i=0; i<arity; i++)
        {
-          Handle oh = fetchAtom(ogs[i]);
+          Handle oh(fetchAtom(ogs[i]));
           if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
               "Unexpected handle mismatch! Expected %lu got %lu\n",
               ogs[i].value(), oh.value());
        }
     }
-    if (h) return atomTable.add(h);
-
-    return Handle::UNDEFINED;
+    return atomTable.add(h);
 }
 
 Handle AtomSpaceImpl::getAtom(Handle h)
