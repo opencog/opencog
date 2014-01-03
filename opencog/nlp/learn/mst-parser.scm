@@ -217,11 +217,37 @@
 		)
 	)
 
+	; Given a word list, and a pair of two words from that list, split
+	; the list into three parts: the part that is strictly to the left
+	; of the pair, the part in the middle, and the part strictly to the
+	; right of right of the pair. Return a list containing these three
+	; lists.
+	(define (split-list word-pair word-list)
+		(define left-word (car word-pair))
+		(define right-word (cadr word-pair))
+		(define left-sp 
+			(break (lambda (word) (equal? word left-word)) word-list)
+		)
+		(define lefty (car left-sp))
+		(define rest (cadr left-sp))
+		(define mid-sp
+			(if (null? rest)
+				(list '() '())
+				(break (lambda (word) (equal? word right-word)) (car rest))
+			)
+		)
+		(define midy (car mid-sp))
+		(define rrest (cadr mid-sp))
+		(define righty (if (null? rrest) '() (cdr rrest)))
+
+		(list lefty midy righty)
+	)
+
 	(let* ((word-strs (tokenize-text plain-text))
 			(word-list (map (lambda (str) (cog-node 'WordNode str)) word-strs))
+			(start-pair (pick-best-cost-pair lg_any word-list))
 		)
-(display word-list)
-		(best-cost lg_any (car word-list) (cdr word-list))
+(display start-pair)
 	)
 )
 
@@ -230,6 +256,7 @@
 ; (load-atoms-of-type item-type)
 ; (fetch-incoming-set lg_any)
 ; (mst-parse-text "faire un test")
+; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;
 ; (define my-word-list (map (lambda (str) (cog-node 'WordNode str))
 ;      (tokenize-text "Elle jouit notamment du monopole de la restauration ferroviaire")))
@@ -237,3 +264,6 @@
 ;      (tokenize-text "faire un test entre quelques mots")))
 ; answer: faire quelques 12.62707805633545
 ;      (tokenize-text "grande petit mot liste pour tout occasion")))
+;
+; (define my-start-pair (pick-best-cost-pair lg_any my-word-list))
+; (split-list (cadr my-start-pair) my-word-list)
