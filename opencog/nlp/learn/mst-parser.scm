@@ -153,13 +153,35 @@
 	; Define a losing score.
 	(define bad-mi -1000)
 
-	; Given a left-word, and a list of words to the right of it, return
-	; a list containing the cost and the word-pair with the best cost 
-	; (highest MI, in this case). The search is made over word pairs
-	; united by lg_rel.
+	; Given a left-word, and a list of words to the right of it, pick
+	; a word from the list that has the highest-MI attachment to the left
+	; word.  Return a list containing that cost and the selected word-pair
+	; (i.e. the specified left-word, and the chosen right-word).
+	; The search is made over word pairs united by lg_rel.
 	(define (pick-best-cost-left-pair lg_rel left-word word-list)
 		(fold
 			(lambda (right-word max-pair)
+				(define max-mi (car max-pair))
+				(define best-pair (cdr max-pair))
+				(define cur-mi (get-pair-mi lg_rel left-word right-word))
+				(if (< max-mi cur-mi)
+					(list cur-mi (list left-word right-word))
+					max-pair
+				)
+			)
+			(list bad-mi '())
+			word-list
+		)
+	)
+
+	; Given a right-word, and a list of words to the left of it, pick
+	; a word from the list that has the highest-MI attachment to the 
+	; right word.  Return a list containing that cost and the selected
+	; word-pair (i.e. the chosen left-word, and the specified right-word).
+	; The search is made over word pairs united by lg_rel.
+	(define (pick-best-cost-right-pair lg_rel right-word word-list)
+		(fold
+			(lambda (left-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
 				(define cur-mi (get-pair-mi lg_rel left-word right-word))
@@ -193,10 +215,6 @@
 				)
 			)
 		)
-	)
-
-	(define (start-pair lg_rel word-list)
-		(start-pair-cost lg_rel word-list bad-mi)
 	)
 
 	(let* ((word-strs (tokenize-text plain-text))
