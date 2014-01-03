@@ -154,40 +154,43 @@
 	(define bad-mi -1000)
 
 	; Given a left-word, and a list of words to the right of it, return
-	; the right-word with the best cost (highest MI, in this case). The
-	; search is made over word pairs united by lg_rel.  It is assumed that
-	; the relevant word pairs are already in the atomspace, and do not
-	; need to be loaded from storage.
-	(define (best-word-cost lg_rel left-word word-list)
+	; a list containing the cost and the word-pair with the best cost 
+	; (highest MI, in this case). The search is made over word pairs
+	; united by lg_rel.
+	(define (pick-best-cost-left-pair lg_rel left-word word-list)
 		(fold
-			(lambda (right-word max-mi)
-				(max max-mi (get-pair-mi lg_rel left-word right-word))
+			(lambda (right-word max-pair)
+				(define max-mi (car max-pair))
+				(define best-pair (cdr max-pair))
+				(define cur-mi (get-pair-mi lg_rel left-word right-word))
+				(if (< max-mi cur-mi)
+					(list cur-mi (list left-word right-word))
+					max-pair
+				)
 			)
-			bad-mi
+			(list bad-mi '())
 			word-list
 		)
 	)
 
-	; Given an ordered list of words, return the highest MI found
-	; between any two words.
-	(define (best-cost lg_rel word-list)
-		; If the list is two words long, we are done.
-		(if (eq? 2 (length word-list))
-			(best-word-cost lg_rel (car word-list) (cdr word-list))
-			; else the list is longer than two words.
-			(max
-				(best-word-cost lg_rel (car word-list) (cdr word-list))
-				(best-cost lg_rel (cdr word-list))
-			)
-		)
-	)
+	; Given a list of words, return a list containing the cost and the
+	; word-pair with the best cost (highest MI, in this case). The search
+	; is made over word pairs united by lg_rel.
+	(define (pick-best-cost-pair lg_rel word-list)
 
-	(define (best-pair-cost lg_rel word-list cost)
-		; If the list is two words long, we are done.
+		; scan from left-most word to the right.
+		(define best-left (pick-best-cost-left-pair lg_rel (car word-list) (cdr word-list)))
 		(if (eq? 2 (length word-list))
-			word-list
-			; else the list is longer than two words.
-			(begin
+			; If the list is two words long, we are done.
+			best-left
+			; else the list is longer than two words. Pick between two
+			; possibilities -- those that start with left-most word, and
+			; something else.
+			(let ((best-rest (pick-best-cost-pair lg_rel (cdr word-list))))
+				(if (< (car best-left) (car best-rest))
+					best-rest
+					best-left
+				)
 			)
 		)
 	)
