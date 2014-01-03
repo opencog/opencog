@@ -150,14 +150,15 @@
 (define (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
 
+	; Define a losing score.
+	(define bad-mi -1000)
+
 	; Given a left-word, and a list of words to the right of it, return
 	; the right-word with the best cost (highest MI, in this case). The
 	; search is made over word pairs united by lg_rel.  It is assumed that
 	; the relevant word pairs are already in the atomspace, and do not
 	; need to be loaded from storage.
-	(define (best-cost lg_rel left-word word-list)
-		; Define a losing score.
-		(define bad-mi -1000)
+	(define (best-word-cost lg_rel left-word word-list)
 		(fold
 			(lambda (right-word max-mi)
 				(max max-mi (get-pair-mi lg_rel left-word right-word))
@@ -165,6 +166,34 @@
 			bad-mi
 			word-list
 		)
+	)
+
+	; Given an ordered list of words, return the highest MI found
+	; between any two words.
+	(define (best-cost lg_rel word-list)
+		; If the list is two words long, we are done.
+		(if (eq? 2 (length word-list))
+			(best-word-cost lg_rel (car word-list) (cdr word-list))
+			; else the list is longer than two words.
+			(max
+				(best-word-cost lg_rel (car word-list) (cdr word-list))
+				(best-cost lg_rel (cdr word-list))
+			)
+		)
+	)
+
+	(define (best-pair-cost lg_rel word-list cost)
+		; If the list is two words long, we are done.
+		(if (eq? 2 (length word-list))
+			word-list
+			; else the list is longer than two words.
+			(begin
+			)
+		)
+	)
+
+	(define (start-pair lg_rel word-list)
+		(start-pair-cost lg_rel word-list bad-mi)
 	)
 
 	(let* ((word-strs (tokenize-text plain-text))
@@ -180,4 +209,10 @@
 ; (load-atoms-of-type item-type)
 ; (fetch-incoming-set lg_any)
 ; (mst-parse-text "faire un test")
-
+;
+; (define my-word-list (map (lambda (str) (cog-node 'WordNode str))
+;      (tokenize-text "Elle jouit notamment du monopole de la restauration ferroviaire")))
+; answer: du monopole 5.786411762237549
+;      (tokenize-text "faire un test entre quelques mots")))
+; answer: faire quelques 12.62707805633545
+;      (tokenize-text "grande petit mot liste pour tout occasion")))
