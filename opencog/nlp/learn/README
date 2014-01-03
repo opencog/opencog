@@ -643,3 +643,12 @@ am using boost1.49 on cray
 
 ------------------------------------------
 
+kruskal reverse:  O(E log V (log log V)3) 
+kruskal: O(E log E)
+
+prim is real easy: it just adds greedy edges  its obviously sucky.
+kruskal is harder, ..but ... 
+
+Use Borůvka's
+
+

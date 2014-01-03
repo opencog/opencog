@@ -47,12 +47,12 @@
 	; in the list prefli, and return a list of the stripped prefixes,
 	; and the remaining word.
 	(define (strip-prefli word prefli)
-      (if (null? prefli)
+		(if (null? prefli)
 			(list word)  ; prefix list is empty, return the word.
 			(let* ((punct (car prefli))
 					(head (string-ref word 0)))
 				(if (eq? punct head) ; it there's a match, then split
-					(append 
+					(append
 						(list (string punct))
 						(strip-prefix (substring word 1)) ; loop again.
 					)
@@ -68,13 +68,13 @@
 	; in the list sufli, and return a list of the stripped prefixes,
 	; the remaining word, and the stripped suffixes.
 	(define (strip-sufli word sufli)
-      (if (null? sufli)
+		(if (null? sufli)
 			(strip-prefix word)
 			(let* ((punct (car sufli))
 					(len (- (string-length word) 1))
 					(tail (string-ref word len)))
 				(if (eq? punct tail)
-					(append 
+					(append
 						(strip-affix (substring word 0 len))
 						(list (string punct))
 					)
@@ -92,7 +92,64 @@
 )
 
 ; ---------------------------------------------------------------------
+; Return the mutual information for a pair of words.
+;
+; The pair of words are presumed to be connected by the relationship
+; lg_rel.  The left and right words are presumed to be strings.
+; If the word-pair cannot be found, then a default value of -1000 is
+; returned.
+
+(define (get-pair-mi lg_rel left-word-str right-word-str)
+
+	; Define a loosing score.
+	(define bad-mi -1000)
+
+	; We take care here to not actually create the atoms,
+	; if they aren't already in the atomspace. cog-node returns
+	; nil if the atoms can't be found.
+	(define left-word (cog-node 'WordNode left-word-str))
+	(define right-word (cog-node 'WordNode right-word-str))
+	(define wpr 
+		(if (and (not (null? left-word)) (not (null? right-word)))
+			(cog-link 'ListLink left-word right-word) #f))
+	(define evl
+		(if wpr
+			(cog-link 'EvaluationLink lg_rel wpr) #f))
+	(if evl
+		(tv-conf (cog-tv evl))
+		bad-mi
+	)
+)
+
+; ---------------------------------------------------------------------
+;
+; Minimum Spanning Tree parser.
+;
+; Choice of algorithms:
+; Prim is very easy; but seems too easy to give good results.
+; Kruskal is good, but seems hard to control a no-link-cross contraint.
+; Settle on a variant of Borůvka's algo, together with a no-links-cross
+; constraint.
 
 (define (mst-parse-text plain-text)
+	(define lg_any (LinkGrammarRelationshipNode "ANY"))
+
+	; Given a word, and a list of words, return the word with the best
+	; cost (highest MI, in this case). The search is made over word
+	; pairs united by lg_rel.  It is assumed that the relevant word
+	; pairs are already in the atomspace, and do not need to be loaded
+	; from storage.
+	(define (best-cost word word-list lg_rel)
+	)
+
+	(let* ((word-list (tokenize-text plain-text)))
+
+word-list
+	)
 )
+
+; (define lg_any (LinkGrammarRelationshipNode "ANY"))
+; (init-trace)
+; (load-atoms-of-type item-type)
+; (fetch-incoming-set lg_any)
 
