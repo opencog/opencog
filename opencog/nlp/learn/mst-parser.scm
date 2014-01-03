@@ -95,29 +95,45 @@
 ; Return the mutual information for a pair of words.
 ;
 ; The pair of words are presumed to be connected by the relationship
-; lg_rel.  The left and right words are presumed to be strings.
-; If the word-pair cannot be found, then a default value of -1000 is
-; returned.
+; lg_rel.  The left and right words are presumed to be WordNodes, or nil.
+; If either word is nill, or if the word-pair cannot be found, then a
+; default value of -1000 is returned.
 
-(define (get-pair-mi lg_rel left-word-str right-word-str)
+(define (get-pair-mi lg_rel left-word right-word)
 
-	; Define a loosing score.
+	; Define a losing score.
 	(define bad-mi -1000)
 
 	; We take care here to not actually create the atoms,
 	; if they aren't already in the atomspace. cog-node returns
 	; nil if the atoms can't be found.
-	(define left-word (cog-node 'WordNode left-word-str))
-	(define right-word (cog-node 'WordNode right-word-str))
 	(define wpr 
 		(if (and (not (null? left-word)) (not (null? right-word)))
-			(cog-link 'ListLink left-word right-word) #f))
+			(cog-link 'ListLink left-word right-word)
+			'()))
 	(define evl
-		(if wpr
-			(cog-link 'EvaluationLink lg_rel wpr) #f))
-	(if evl
+		(if (not (null? wpr))
+			(cog-link 'EvaluationLink lg_rel wpr)
+			'()))
+	(if (not (null? evl))
 		(tv-conf (cog-tv evl))
 		bad-mi
+	)
+)
+
+; ---------------------------------------------------------------------
+; Return the mutual information for a pair of words.
+;
+; The pair of words are presumed to be connected by the relationship
+; lg_rel.  The left and right words are presumed to be strings.
+; If the word-pair cannot be found, then a default value of -1000 is
+; returned.
+
+(define (get-pair-mi-str lg_rel left-word-str right-word-str)
+
+	(get-pair-mi lg_rel
+		(cog-node 'WordNode left-word-str)
+		(cog-node 'WordNode right-word-str)
 	)
 )
 
@@ -134,17 +150,28 @@
 (define (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
 
-	; Given a word, and a list of words, return the word with the best
-	; cost (highest MI, in this case). The search is made over word
-	; pairs united by lg_rel.  It is assumed that the relevant word
-	; pairs are already in the atomspace, and do not need to be loaded
-	; from storage.
-	(define (best-cost word word-list lg_rel)
+	; Given a left-word, and a list of words to the right of it, return
+	; the right-word with the best cost (highest MI, in this case). The
+	; search is made over word pairs united by lg_rel.  It is assumed that
+	; the relevant word pairs are already in the atomspace, and do not
+	; need to be loaded from storage.
+	(define (best-cost lg_rel left-word word-list)
+		; Define a losing score.
+		(define bad-mi -1000)
+		(fold
+			(lambda (right-word max-mi)
+				(max max-mi (get-pair-mi lg_rel left-word right-word))
+			)
+			bad-mi
+			word-list
+		)
 	)
 
-	(let* ((word-list (tokenize-text plain-text)))
-
-word-list
+	(let* ((word-strs (tokenize-text plain-text))
+			(word-list (map (lambda (str) (cog-node 'WordNode str)) word-strs))
+		)
+(display word-list)
+		(best-cost lg_any (car word-list) (cdr word-list))
 	)
 )
 
@@ -152,4 +179,5 @@ word-list
 ; (init-trace)
 ; (load-atoms-of-type item-type)
 ; (fetch-incoming-set lg_any)
+; (mst-parse-text "faire un test")
 
