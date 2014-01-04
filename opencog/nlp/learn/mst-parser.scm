@@ -262,7 +262,10 @@
 	)
 
 	; Split the list into two lists: those stictly to the left, and 
-	; strictly to the right of the break-word.
+	; those strictly to the right of the break-word. The break-word is
+	; not included in either list. (This is almost the same as srfi-1
+	; break, except that the break-word is removed, and a list is
+	; returned, rather than values.)
 	(define (split-list brk-word word-list)
 		(let-values (
 				((left-list right-list)
@@ -316,37 +319,41 @@
 	; 
 	(define (*pick-em lg_rel word-list pair-list nected-words)
 
-		; If word-list is null, then we are done.
-		(if (null? word-list)
-			(append pair-list (list best-pair))
+		; Given a single break-word, return a list of connections to each
+		; of the other words in the sentence. 
+		(define (connect-word lg_rel brk-word wrd-list)
 			(let* (
-					; list of solutions
-					(soln-list (append pair-list (list best-pair)))
-
-					; The two words of the input word-pair.
-					(left-word (car (cadr start-pair)))
-					(right-word (cadr (cadr start-pair)))
-
 					; split the list into two, using the left-word to break
-					(l-split (split-list left-word word-list))
-					(ll-list (car l-split))
-					(lr-list (cut-from-list right-word (cadr l-split)))
-
-					; split the list into two, using the right-word to break
-					(r-split (split-list right-word word-list))
-					(rl-list (cut-from-list left-word (car r-split)))
-					(rr-list (cadr r-split))
-
+					(w-split (split-list brk-word wrd-list))
+					(left-list (car w-split))
+					(right-list (cadr w-split))
 					; Find the best links that attach to either side
-					; the left-word becomes the right-most word for the ll-list
-					(best-ll (pick-best-cost-right-pair lg_rel left-word ll-list))
-					; the left-word becomes the left-most word for the lr-list
-					(best-lr (pick-best-cost-left-pair lg_rel left-word lr-list))
+					; The break word becomes the right-most word for the left-list
+					(best-left (pick-best-cost-right-pair lg_rel word left-list))
+					; The break-word becomes the left-most word for the right-list
+					(best-right (pick-best-cost-left-pair lg_rel word right-list))
+				)
+				(list best-left best-right)
+			)
+		)
 
-					; the right-word becomes the right-most word for the rl-list
-					(best-rl (pick-best-cost-right-pair lg_rel right-word rl-list))
-					; the right-word becomes the left-most word for the rr-list
-					(best-rr (pick-best-cost-left-pair lg_rel right-word rr-list))
+		; For each connected word, find two connections between that
+		; and the unconnected words.  Return a list of connections.
+		; The 'bare-words' is a list of the unconnected words, in sentence
+		; order.  The graph-words is a set (in unspecified order) of words
+		; that are already a part of the spanning tree.
+		(define (connect-to-graph lg_rel bare-words graph-words)
+			(append-map
+				(lambda (grph-word) (connect-word lg_rel grph-word bare-words))
+				graph-words
+			)
+		)
+		
+
+		; If word-list is null, then we are done. Otherwise, trawl.
+		(if (null? word-list)
+			pair-list
+			(let* (
 
 					; Define the next-best link
 					(next-best

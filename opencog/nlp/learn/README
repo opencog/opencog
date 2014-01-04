@@ -459,6 +459,9 @@ again... 3 Jan, even after the fixes... WTF???
        N7opencog10TruthValueE addr=0x28ecc9658 tv-cnt=2 atom-cnt=247 atom-type=27
        name=(not-node) cols=UPDATE Atoms SET  vals= coda= WHERE uuid = 175787728; 
        Very recent atom being added.
+again... 4 Jan, even after the fixes... WTF???
+       Its the (LinkGrammarRelationshipNode "ANY") as usual.
+
 
 
 Crash 2
