@@ -145,8 +145,9 @@
 ; Choice of algorithms:
 ; Prim is very easy; but seems too easy to give good results.
 ; Kruskal is good, but seems hard to control a no-link-cross contraint.
-; Settle on a variant of Borůvka's algo, together with a no-links-cross
-; constraint.
+; Settle on a variant of Borůvka's algo.
+; A no-links-cross constraint is not required, see
+; R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
 
 (define (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
@@ -154,11 +155,27 @@
 	; Define a losing score.
 	(define bad-mi -1000)
 
+	; Given a list of strings, create a numbered list of word-nodes.
+	; The numbering provides a unique ID, needed for the graph algos.
+	(define (str-list->numbered-word-list word-strs)
+		(define cnt 0)
+		(map
+			(lambda (str)
+				(set! cnt (+ cnt 1))
+				(list cnt (cog-node 'WordNode str))
+			)
+			word-strs
+		)
+	)
 	; Given a left-word, and a list of words to the right of it, pick
 	; a word from the list that has the highest-MI attachment to the left
 	; word.  Return a list containing that cost and the selected word-pair
 	; (i.e. the specified left-word, and the chosen right-word).
 	; The search is made over word pairs united by lg_rel.
+	;
+	; The left-word is assumed to be an list, consisting of an ID, and
+	; a WordNode; thus the WordNode is the cadr of the left-word.
+	; The word-list is likewise assumed to be a list of numbered WordNodes.   
 	;
 	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-left-pair lg_rel left-word word-list)
@@ -166,7 +183,9 @@
 			(lambda (right-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi lg_rel left-word right-word))
+				(define cur-mi (get-pair-mi lg_rel (cadr left-word) (cadr right-word)))
+				; Use strict inequality, so that a shorter dependency
+				; length is always prefered.
 				(if (< max-mi cur-mi)
 					(list cur-mi (list left-word right-word))
 					max-pair
@@ -183,14 +202,20 @@
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
 	; The search is made over word pairs united by lg_rel.
 	;
+	; The right-word is assumed to be an list, consisting of an ID, and
+	; a WordNode; thus the WordNode is the cadr of the right-word.
+	; The word-list is likewise assumed to be a list of numbered WordNodes.   
+	;
 	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-right-pair lg_rel right-word word-list)
 		(fold
 			(lambda (left-word max-pair)
 				(define max-mi (car max-pair))
 				(define best-pair (cdr max-pair))
-				(define cur-mi (get-pair-mi lg_rel left-word right-word))
-				(if (< max-mi cur-mi)
+				(define cur-mi (get-pair-mi lg_rel (cadr left-word) (cadr right-word)))
+				; Use less-or-equal, so that a shorter dependency
+				; length is always prefered.
+				(if (<= max-mi cur-mi)
 					(list cur-mi (list left-word right-word))
 					max-pair
 				)
@@ -224,11 +249,12 @@
 		)
 	)
 
+xxxxx the below is junk
 	; Given a word list, and a pair of two words from that list, split
 	; the list into three parts: the part that is strictly to the left
 	; of the pair, the part in the middle, and the part strictly to the
-	; right of right of the pair. Return a list containing these three
-	; lists.
+	; right of right of the pair. Return a values containing these three
+	; lists (any of which might be empty).
 	(define (split-list word-pair word-list)
 		(define left-word (car word-pair))
 		(define right-word (cadr word-pair))
@@ -247,8 +273,53 @@
 		)
 	)
 
+	(define (grr lg_rel left-list break-left mid-list break-right right-list)
+		(define best-ll
+			(if (null? left-list)
+				(list bad-mi (list '() '()))
+				; the break-left becomes the right-most-word for left-list
+				(pick-best-cost-right-pair lg_rel break-left left-list)
+			)
+		)
+		(define best-rl
+			(if (null? left-list)
+				(list bad-mi (list '() '()))
+				; the break-right becomes the right-most-word for left-list
+				(pick-best-cost-right-pair lg_rel break-right left-list)
+			)
+		)
+		(define best-lr
+			(if (null? right-list)
+				(list bad-mi (list '() '()))
+				; the break-left becomes the left-most-word for right-list
+				(pick-best-cost-left-pair lg_rel break-left right-list)
+			)
+		)
+		(define best-rr
+			(if (null? right-list)
+				(list bad-mi (list '() '()))
+				; the break-right becomes the left-most-word for right-list
+				(pick-best-cost-left-pair lg_rel break-right right-list)
+			)
+		)
+(display (list "duuuude best-ll " best-ll "\n"))
+(display (list "duuuude best-rl " best-rl "\n"))
+(display (list "duuuude best-lr " best-lr "\n"))
+(display (list "duuuude best-rr " best-rr "\n"))
+	)
+
+	(define (prr lg_rel word-pair word-list)
+		(define break-left (car word-pair))
+		(define break-right (cadr word-pair))
+		(let*-values (
+				((left-list mid-list right-list) (split-list word-pair word-list))
+			)
+			(grr lg_rel left-list break-left mid-list break-right right-list)
+		)
+	)
+
 	(let* ((word-strs (tokenize-text plain-text))
-			(word-list (map (lambda (str) (cog-node 'WordNode str)) word-strs))
+			(word-list (str-list->numbered-word-list word-strs))
 			(start-cost-pair (pick-best-cost-pair lg_any word-list))
 		)
 (display start-cost-pair)
@@ -262,7 +333,7 @@
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
 ;
-; (define my-word-list (map (lambda (str) (cog-node 'WordNode str))
+; (define my-word-list (str-list->numbered-word-list
 ;      (tokenize-text "Elle jouit notamment du monopole de la restauration ferroviaire")))
 ; answer: du monopole 5.786411762237549
 ;      (tokenize-text "faire un test entre quelques mots")))
@@ -271,3 +342,4 @@
 ;
 ; (define my-start-pair (pick-best-cost-pair lg_any my-word-list))
 ; (split-list (cadr my-start-pair) my-word-list)
+; (prr lg_any (cadr my-start-pair) my-word-list)

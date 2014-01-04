@@ -453,6 +453,12 @@ OK, so fixed all the above, and it should work, right?
 
 again... 1 Jan, even after the fixes... WTF???
 again... 2 Jan, even after the fixes... WTF???
+again... 3 Jan, even after the fixes... WTF???
+       except this time, it wasn't (LinkGrammarRelationshipNode "ANY")
+       but instead some link ... 
+       N7opencog10TruthValueE addr=0x28ecc9658 tv-cnt=2 atom-cnt=247 atom-type=27
+       name=(not-node) cols=UPDATE Atoms SET  vals= coda= WHERE uuid = 175787728; 
+       Very recent atom being added.
 
 
 Crash 2
