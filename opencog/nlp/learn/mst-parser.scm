@@ -249,74 +249,31 @@
 		)
 	)
 
-xxxxx the below is junk
-	; Given a word list, and a pair of two words from that list, split
-	; the list into three parts: the part that is strictly to the left
-	; of the pair, the part in the middle, and the part strictly to the
-	; right of right of the pair. Return a values containing these three
-	; lists (any of which might be empty).
-	(define (split-list word-pair word-list)
-		(define left-word (car word-pair))
-		(define right-word (cadr word-pair))
-		(let*-values (
-		 		((lefty rest) 
-					(break (lambda (word) (equal? word left-word)) word-list))
-				((midy rrest)
-					(if (null? rest)
-						(values '() '())
-						(break (lambda (word) (equal? word right-word)) (cdr rest))
+	; Given a cost-word-pair (mi & numbered-word-pair) and a word-list
+	; remove both words of the pair from the word-list. Return the
+	; trimmed word-list.
+	(define (trim-list cost-word-pair word-list)
+		(let ((left-word (car (cadr cost-word-pair)))
+				(right-word (cadr (cadr cost-word-pair)))
+			)
+			(filter
+				(lambda (word)
+					(and
+						(not (eq? word left-word))
+						(not (eq? word right-word))
 					)
 				)
+				word-list
 			)
-			(define righty (if (null? rrest) '() (cdr rrest)))
-			(values lefty midy righty)
 		)
 	)
 
-	(define (grr lg_rel left-list break-left mid-list break-right right-list)
-		(define best-ll
-			(if (null? left-list)
-				(list bad-mi (list '() '()))
-				; the break-left becomes the right-most-word for left-list
-				(pick-best-cost-right-pair lg_rel break-left left-list)
-			)
-		)
-		(define best-rl
-			(if (null? left-list)
-				(list bad-mi (list '() '()))
-				; the break-right becomes the right-most-word for left-list
-				(pick-best-cost-right-pair lg_rel break-right left-list)
-			)
-		)
-		(define best-lr
-			(if (null? right-list)
-				(list bad-mi (list '() '()))
-				; the break-left becomes the left-most-word for right-list
-				(pick-best-cost-left-pair lg_rel break-left right-list)
-			)
-		)
-		(define best-rr
-			(if (null? right-list)
-				(list bad-mi (list '() '()))
-				; the break-right becomes the left-most-word for right-list
-				(pick-best-cost-left-pair lg_rel break-right right-list)
-			)
-		)
-(display (list "duuuude best-ll " best-ll "\n"))
-(display (list "duuuude best-rl " best-rl "\n"))
-(display (list "duuuude best-lr " best-lr "\n"))
-(display (list "duuuude best-rr " best-rr "\n"))
+	(define (pick-em lg_rel word-list)
+		(define pair-list '())
+		(define start-pair (pick-best-cost-pair lg_rel word-list))
+		(define trimmed-list (trim-list start-pair word-list))
 	)
 
-	(define (prr lg_rel word-pair word-list)
-		(define break-left (car word-pair))
-		(define break-right (cadr word-pair))
-		(let*-values (
-				((left-list mid-list right-list) (split-list word-pair word-list))
-			)
-			(grr lg_rel left-list break-left mid-list break-right right-list)
-		)
-	)
 
 	(let* ((word-strs (tokenize-text plain-text))
 			(word-list (str-list->numbered-word-list word-strs))
