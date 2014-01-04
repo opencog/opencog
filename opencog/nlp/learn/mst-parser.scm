@@ -249,35 +249,17 @@
 		)
 	)
 
-	; Given a word-list and a set of words, remove any word that occurs
-	; in the set from the list.  Return the trimmed word-list. The list
-	; order is maintained.
-	(define (trim-list word-list rm-set)
+	; Set-subtraction. 
+	; Given set-a and set-b, return set-a with all elts of set-b removed.
+	; It is assumed that equal? can be used to compare elements.  This
+	; should work fine for sets of ordinal-numbered words, and also for
+	; MI-costed word-pairs.
+	(define (set-sub set rm-set)
 		(filter
-			(lambda (word)
-				(not (any (lambda (rjct) (equal? rjct word)) rm-set))
+			(lambda (item)
+				(not (any (lambda (rjct) (equal? rjct item)) rm-set))
 			)
-			word-list
-		)
-	)
-
-xxxx the split-list is not neeed 
-	; Split the list into two lists: those stictly to the left, and 
-	; those strictly to the right of the break-word. The break-word is
-	; not included in either list. (This is almost the same as srfi-1
-	; break, except that the break-word is removed, and a list is
-	; returned, rather than values.)
-	(define (split-list brk-word word-list)
-		(let-values (
-				((left-list right-list)
-					(break (lambda (word) (equal? word brk-word)) word-list))
-			)
-			; XXX right-list should never be null, because brk-word
-			; should always appear in the list. Should we throw??
-			(if (null? right-list)
-				(list left-list '())
-				(list left-list (cdr right-list))
-			)
+			set
 		)
 	)
 
@@ -311,6 +293,87 @@ xxxx the split-list is not neeed
 		(*pick-best choice-list bad-pair)
 	)
 
+	; Given a single break-word, return a list of connections to each
+	; of the other words in the sentence.  The break-word is assumed
+	; to be ordinal-numered, i.e. an integer, followed by a WordNode.
+	; The word-list is assumed to be ordinal-numbered as well.
+	; The returned list is a list of costed-pairs.
+	;
+	; It is presumed that the brk-word does not occur in the word-list.
+	(define (connect-word lg_rel brk-word word-list)
+		; The ordinal number of the break-word.
+		(define brk-num (car brk-word))
+		; The WordNode of the break-word
+		(define brk-node (cadr brk-word))
+		(map
+			(lambda (word)
+				; try-num is the ordinal number of the trial word.
+				(define try-num (car word))
+				; try-node is the actual WordNode of the trial word.
+				(define try-node (cadr word))
+				(if (< try-num brk-num)
+					; returned value: the MI value for the pair, then the pair.
+					(list (get-pair-mi lg_rel try-node brk-node)
+						(list word brk-word)
+					)
+					(list (get-pair-mi lg_rel brk-node try-node)
+						(list brk-word word)
+					)
+				)
+			)
+			word-list
+		)
+	)
+
+	; For each connected word, find connections between that and the
+	; unconnected words.  Return a list of MI-costed connections.
+	; The 'bare-words' is a set of the unconnected words, labelled by
+	; an ordinal number denoting sentence order.  The graph-words is a
+	; set of words that are already a part of the spanning tree.
+	; It is assumed that these two sets have no words in common.
+	(define (connect-to-graph lg_rel bare-words graph-words)
+		(append-map
+			(lambda (grph-word) (connect-word lg_rel grph-word bare-words))
+			graph-words
+		)
+	)
+
+	; Return true if a pair of links cross, else return false.
+	(define (cross? cost-pair-a cost-pair-b)
+		(define pair-a (cadr cost-pair-a)) ; throw away MI
+		(define pair-b (cadr cost-pair-b)) ; throw away MI
+		(define lwa (car pair-a))  ; left word of word-pair
+		(define rwa (cadr pair-a)) ; right word of word-pair
+		(define lwb (car pair-b))
+		(define rwb (cadr pair-b))
+		(define ila (car lwa))     ; ordinal number of the word
+		(define ira (car rwa))
+		(define ilb (car lwb))
+		(define irb (car rwb))
+		(or
+			; All inequalities are strict.
+			(and (< ila ilb) (< ilb ira) (< ira irb))
+			(and (< ilb ila) (< ila irb) (< irb ira))
+		)
+	)
+
+	; Return true if the pair crosses over any pairs in the pair-list
+	(define (cross-any? cost-pair cost-pair-list)
+		(any (lambda (pr) (cross? pr cost-pair)) cost-pair-list)
+	)
+
+	; Find the highest-MI link that doesn't cross.
+	(define (pick-no-cross-best candidates graph-pairs)
+		; Despite the recursive nature of this call, we always expect
+		; that best isn't nil, unless there's a bug somewhere ...
+		(define best (pick-best-cost-pair candidates))
+		(if (not (cross-any? best graph-pairs))
+			best
+			; Else, remove best from list, and try again.
+			(pick-no-cross-best (set-sub candidates (list best)) graph-pairs)
+		)
+	)
+		
 	; Find the maximum spanning tree. 
 	; word-list is the list of unconnected words, to be added to the tree.
 	; pair-list is a list of edges found so far, joining things together.
@@ -320,72 +383,6 @@ xxxx the split-list is not neeed
 	; 
 	(define (*pick-em lg_rel word-list pair-list nected-words)
 
-		; Given a single break-word, return a list of connections to each
-		; of the other words in the sentence.  The break-word is assumed
-		; to be ordinal-numered, i.e. an integer, followed by a WordNode.
-		; The word-list is assumed to be ordinal-numbered as well.
-		; The returned list is a list of costed-pairs.
-		;
-		; It is presumed that the brk-word does not occur in the word-list.
-		(define (connect-word lg_rel brk-word wrd-list)
-			; The ordinal number of the break-word.
-			(define brk-num (car brk-word))
-			; The WordNode of the break-word
-			(define brk-node (cadr brk-word))
-			(map
-				(lambda (word)
-					; try-num is the ordinal number of the trial word.
-					(define try-num (car word))
-					; try-node is the actual WordNode of the trial word.
-					(define try-node (cadr word))
-					(if (< try-num brk-num)
-						; returned value: the MI value for the pair, then the pair.
-						(list (get-pair-mi lg_rel try-node brk-node)
-							(list word brk-word)
-						)
-						(list (get-pair-mi lg_rel brk-node try-node)
-							(list brk-word word)
-						)
-					)
-				)
-				wrd-list
-			)
-		)
-
-		; For each connected word, find connections between that and the
-		; unconnected words.  Return a list of MI-costed connections.
-		; The 'bare-words' is a set of the unconnected words, labelled by
-		; an ordinal number denoting sentence order.  The graph-words is a
-		; set of words that are already a part of the spanning tree.
-		; It is assumed that these two sets have no words in common.
-		(define (connect-to-graph lg_rel bare-words graph-words)
-			(append-map
-				(lambda (grph-word) (connect-word lg_rel grph-word bare-words))
-				graph-words
-			)
-		)
-
-		; Return true if a pair of links cross, else return false.
-		(define (cross? cost-pair-a cost-pair-b)
-			(define pair-a (cadr cost-pair-a)) ; throw away MI
-			(define pair-b (cadr cost-pair-b)) ; throow away MI
-			(define lwa (car pair-a))  ; left word of pair
-			(define rwa (cadr pair-a)) ; right word of pair
-			(define lwb (car pair-b))
-			(define rwb (cadr pair-b))
-			(define ila (car lwa))     ; ordinal number of the word
-			(define ira (car rwa))
-			(define ilb (car lwb))
-			(define irb (car rwb))
-			(or
-				; All inequalities are strict.
-				(and (< ila ilb) (< ilb ira) (< ira irb))
-				(and (< ilb ila) (< ila irb) (< irb ira))
-			)
-		)
-
-		; Find th highest-MI link that doesn't cross.
-		
 		; If word-list is null, then we are done. Otherwise, trawl.
 		(if (null? word-list)
 			pair-list
@@ -435,5 +432,3 @@ xxxx the split-list is not neeed
 ;      (tokenize-text "grande petit mot liste pour tout occasion")))
 ;
 ; (define my-start-pair (pick-best-cost-pair lg_any my-word-list))
-; (split-list (cadr my-start-pair) my-word-list)
-; (prr lg_any (cadr my-start-pair) my-word-list)
