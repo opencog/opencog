@@ -49,7 +49,7 @@ using namespace opencog;
 #define TV3_U 0.5f
 
 
-// converting from confidence to count and back again using single-prcision
+// Converting from confidence to count and back again using single-precision
 // float is a real accuracy killer.  In particular, 2/802 = 0.002494 but
 // converting back gives 800*0.002494/(1.0-0.002494) = 2.000188 and so
 // comparison tests can only be accurate to about 0.000188 or thereabouts.

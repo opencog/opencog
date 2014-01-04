@@ -98,9 +98,13 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;
-    if (mean != ctv->mean) return false;
-    if (confidence != ctv->confidence) return false;
-    if (count != ctv->count) return false;
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(mean - ctv->mean)) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - ctv->confidence)) return false;
+#define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->count/count))) return false;
+
     return true;
 }
 
