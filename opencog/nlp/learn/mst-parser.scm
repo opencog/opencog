@@ -315,11 +315,31 @@
 		(define best-rr (pick-best-cost-left-pair lg_rel right-word rr-list))
 
 		; Of the four possibilities above, pick the one with the highest MI
-		; (define next-best)
-(display (list "its bestll " best-ll "\n"))
-(display (list "its bestlr " best-lr "\n"))
-(display (list "its bestrl " best-rl "\n"))
-(display (list "its bestrr " best-rr "\n"))
+		(define (pick-best choice-list best-so-far)
+			(define so-far-mi (car best-so-far))
+			(if (null? choice-list)
+				best-so-far  ; we are done!
+				(let* ((first-choice (car choice-list))
+						(first-mi (car first-choice))
+						(curr-best
+							(if (< so-far-mi first-mi)
+								first-choice
+								best-so-far
+							)
+						)
+					)
+					(pick-best (cdr choice-list) curr-best)
+				)
+			)
+		)
+
+		(define next-best
+			(pick-best
+				(list best-ll best-lr best-rl best-rr)
+				(list bad-mi (list (list 0 '()) (list 0 '())))
+			)
+		)
+(display (list "its next " next-best "\n"))
 
 		; (define trimmed-list (trim-list start-pair word-list))
 	)
