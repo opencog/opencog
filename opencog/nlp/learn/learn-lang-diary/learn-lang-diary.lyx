@@ -788,7 +788,7 @@ The goal, the next step, is then to reduce the total number of disjuncts,
 \end_layout
 
 \begin_layout Section*
-3 January 2013
+3 January 2014
 \end_layout
 
 \begin_layout Subsection*
@@ -837,7 +837,7 @@ Crossings are rare: Havelka, J.
 
 \begin_layout Itemize
 Hubbiness is a better model of sentence complexity than mean dependency
- distance: Ramon Ferrer-i-Cancho (2103) 
+ distance: Ramon Ferrer-i-Cancho (2013) 
 \begin_inset Quotes eld
 \end_inset
 
@@ -845,7 +845,7 @@ Hubiness, length, crossings and their relationships in dependency trees
 \begin_inset Quotes erd
 \end_inset
 
- ArXiv 1304.4086 --- also states: maximum number of crossings is bounded
+, ArXiv 1304.4086 --- also states: maximum number of crossings is bounded
  above by mean dependency length.
  Also, mean dependency length is bounded below by variance of degrees of
  vertexes (i.e.
