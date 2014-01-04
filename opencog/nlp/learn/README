@@ -648,3 +648,11 @@ writer does:
 am using boost1.49 on cray
 
 ------------------------------------------
+
+(list
+(list 2.7646899223327637 (list (list 3 (WordNode "notamment")) (list 4 (WordNode "du")))) 
+(list 2.2642931938171387 (list (list 4 (WordNode "du")) (list 6 (WordNode "de")))) 
+(list -1000 (list (list 3 (WordNode "notamment")) (list 5 (WordNode "monopole")))) 
+(list 4.096433639526367 (list (list 5 (WordNode "monopole")) (list 6 (WordNode "de"))))
+)
+

@@ -249,22 +249,15 @@
 		)
 	)
 
-	; Given a cost-word-pair (mi & numbered-word-pair) and a word-list
-	; remove both words of the pair from the word-list. Return the
-	; trimmed word-list.
-	(define (trim-list cost-word-pair word-list)
-		(let ((left-word (car (cadr cost-word-pair)))
-				(right-word (cadr (cadr cost-word-pair)))
+	; Given a word-list and a set of words, remove any word that occurs
+	; in the set from the list.  Return the trimmed word-list. The list
+	; order is maintained.
+	(define (trim-list word-list rm-set)
+		(filter
+			(lambda (word)
+				(not (any (lambda (rjct) (equal? rjct word)) rm-set))
 			)
-			(filter
-				(lambda (word)
-					(and
-						(not (equal? word left-word))
-						(not (equal? word right-word))
-					)
-				)
-				word-list
-			)
+			word-list
 		)
 	)
 
@@ -284,37 +277,44 @@
 		)
 	)
 
-	; remove the given word from the list
-	(define (cut-from-list cut-word word-list)
-		(remove (lambda (word) (equal? word cut-word)) word-list)
-	)
+	; Of multiple possibilities, pick the one with the highest MI
+	; The choice-list is assumed to be a list of costed word-pairs,
+	; as usual: cost first, then the pair.
+	(define (pick-best-cost-pair choice-list)
+		; An awful word-pair
+		(define bad-pair (list bad-mi (list (list 0 '()) (list 0 '()))))
 
-	; This is almost right but not quite; its only allowing
-	; connections to the pair, when it should allow connections 
-	; to any in the connected-vertex list.  Argh.  Tomorrow.
-	;
-	(define (*pick-em lg_rel word-list best-pair pair-list)
-
-		; Of multiple possibilities, pick the one with the highest MI
-		; The choice-list is assumed to be a list of costed word-pairs,
-		; as usual: cost first, then the pair.
-		(define (pick-best choice-list best-so-far)
+		; The tail-recursive helper that does all the work.
+		(define (*pick-best choice-list best-so-far)
 			(define so-far-mi (car best-so-far))
 			(if (null? choice-list)
 				best-so-far  ; we are done!
 				(let* ((first-choice (car choice-list))
 						(first-mi (car first-choice))
 						(curr-best
-							(if (< so-far-mi first-mi)
+							; use greater-than-or-equal; want to reject
+							; bad-pair as soon as possible.
+							(if (<= so-far-mi first-mi)
 								first-choice
 								best-so-far
 							)
 						)
 					)
-					(pick-best (cdr choice-list) curr-best)
+					(*pick-best (cdr choice-list) curr-best)
 				)
 			)
 		)
+		(*pick-best choice-list bad-pair)
+	)
+
+	; Find the maximum spanning tree. 
+	; word-list is the list of unconnected words, to be added to the tree.
+	; pair-list is a list of edges found so far, joining things together.
+	; nected-words is a list words that are part of the tree.
+	;
+	; When the word-list become empty, the pair-list is returned.
+	; 
+	(define (*pick-em lg_rel word-list pair-list nected-words)
 
 		; If word-list is null, then we are done.
 		(if (null? word-list)
