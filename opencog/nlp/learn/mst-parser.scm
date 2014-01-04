@@ -27,6 +27,7 @@
 ; ---------------------------------------------------------------------
 ;
 (use-modules (srfi srfi-1))
+(use-modules (srfi srfi-11))
 
 ; ---------------------------------------------------------------------
 ;
@@ -158,6 +159,8 @@
 	; word.  Return a list containing that cost and the selected word-pair
 	; (i.e. the specified left-word, and the chosen right-word).
 	; The search is made over word pairs united by lg_rel.
+	;
+	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-left-pair lg_rel left-word word-list)
 		(fold
 			(lambda (right-word max-pair)
@@ -179,6 +182,8 @@
 	; right word.  Return a list containing that cost and the selected
 	; word-pair (i.e. the chosen left-word, and the specified right-word).
 	; The search is made over word pairs united by lg_rel.
+	;
+	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-right-pair lg_rel right-word word-list)
 		(fold
 			(lambda (left-word max-pair)
@@ -198,6 +203,8 @@
 	; Given a list of words, return a list containing the cost and the
 	; word-pair with the best cost (highest MI, in this case). The search
 	; is made over word pairs united by lg_rel.
+	;
+	; to-do: might be better to use values for the return value....
 	(define (pick-best-cost-pair lg_rel word-list)
 
 		; scan from left-most word to the right.
@@ -225,29 +232,26 @@
 	(define (split-list word-pair word-list)
 		(define left-word (car word-pair))
 		(define right-word (cadr word-pair))
-		(define left-sp 
-			(break (lambda (word) (equal? word left-word)) word-list)
-		)
-		(define lefty (car left-sp))
-		(define rest (cadr left-sp))
-		(define mid-sp
-			(if (null? rest)
-				(list '() '())
-				(break (lambda (word) (equal? word right-word)) (car rest))
+		(let*-values (
+		 		((lefty rest) 
+					(break (lambda (word) (equal? word left-word)) word-list))
+				((midy rrest)
+					(if (null? rest)
+						(values '() '())
+						(break (lambda (word) (equal? word right-word)) (cdr rest))
+					)
+				)
 			)
+			(define righty (if (null? rrest) '() (cdr rrest)))
+			(values lefty midy righty)
 		)
-		(define midy (car mid-sp))
-		(define rrest (cadr mid-sp))
-		(define righty (if (null? rrest) '() (cdr rrest)))
-
-		(list lefty midy righty)
 	)
 
 	(let* ((word-strs (tokenize-text plain-text))
 			(word-list (map (lambda (str) (cog-node 'WordNode str)) word-strs))
-			(start-pair (pick-best-cost-pair lg_any word-list))
+			(start-cost-pair (pick-best-cost-pair lg_any word-list))
 		)
-(display start-pair)
+(display start-cost-pair)
 	)
 )
 
