@@ -29,7 +29,7 @@
 #include <set>
 #include <vector>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/CompositeTruthValue.h>
@@ -60,10 +60,10 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-typedef boost::signal<void (Handle)> AtomSignal;
-typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
-typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
-typedef boost::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
+typedef boost::signals2::signal<void (Handle)> AtomSignal;
+typedef boost::signals2::signal<void (AtomPtr)> AtomPtrSignal;
+typedef boost::signals2::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
+typedef boost::signals2::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -112,7 +112,7 @@ private:
      * signal connection used to find out about atom type additions in the
      * ClassServer
      */
-    boost::signals::connection addedTypeConnection;
+    boost::signals2::connection addedTypeConnection;
 
     /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);

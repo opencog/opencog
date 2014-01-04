@@ -80,7 +80,7 @@ protected:
     AgentActivityTable _agentActivityTable;
     size_t _maxAgentActivityTableSeqSize;
     CogServer* _cogServer;
-    boost::signals::connection _conn;
+    boost::signals2::connection _conn;
 
     /** called by AtomSpaceImpl via a boost:signal when an atom is removed. */
     void atomRemoved(AtomPtr);

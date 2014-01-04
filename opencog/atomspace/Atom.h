@@ -32,7 +32,7 @@
 #include <set>
 #include <string>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/util/exceptions.h>
 
@@ -55,7 +55,7 @@ typedef std::shared_ptr<Link> LinkPtr;
 typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
-typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
 
 // We use a std:vector instead of std::set for IncomingSet, because
 // virtually all access will be either insert, or iterate, so we get

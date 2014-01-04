@@ -149,6 +149,10 @@ FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex se
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
+
+	# Boost.Signals2 requires this in signal_type.hpp
+	SET(BOOST_PARAMETER_MAX_ARITY 7)
+	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
 	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
