@@ -259,8 +259,8 @@
 			(filter
 				(lambda (word)
 					(and
-						(not (eq? word left-word))
-						(not (eq? word right-word))
+						(not (equal? word left-word))
+						(not (equal? word right-word))
 					)
 				)
 				word-list
@@ -268,10 +268,60 @@
 		)
 	)
 
+	; Split the list into two lists: those stictly to the left, and 
+	; strictly to the right of the break-word.
+	(define (split-list brk-word word-list)
+		(let-values (
+				((left-list right-list)
+					(break (lambda (word) (equal? word brk-word)) word-list))
+			)
+			; XXX right-list should never be null, because brk-word
+			; should always appear in the list. Should we throw??
+			(if (null? right-list)
+				(list left-list '())
+				(list left-list (cdr right-list))
+			)
+		)
+	)
+
+	; remove the given word from the list
+	(define (cut-from-list cut-word word-list)
+		(remove (lambda (word) (equal? word cut-word)) word-list)
+	)
+
 	(define (pick-em lg_rel word-list)
 		(define pair-list '())
 		(define start-pair (pick-best-cost-pair lg_rel word-list))
-		(define trimmed-list (trim-list start-pair word-list))
+
+		(define left-word (car (cadr start-pair)))
+		(define right-word (cadr (cadr start-pair)))
+
+		(define l-split (split-list left-word word-list))
+		(define ll-list (car l-split))
+		(define lr-list (cut-from-list right-word (cadr l-split)))
+
+		(define r-split (split-list right-word word-list))
+		(define rl-list (cut-from-list left-word (car r-split)))
+		(define rr-list (cadr r-split))
+
+		; the left-word becomes the right-most word for the ll-list
+		(define best-ll (pick-best-cost-right-pair lg_rel left-word ll-list))
+		; the left-word becomes the left-most word for the lr-list
+		(define best-lr (pick-best-cost-left-pair lg_rel left-word lr-list))
+
+		; the right-word becomes the right-most word for the rl-list
+		(define best-rl (pick-best-cost-right-pair lg_rel right-word rl-list))
+		; the right-word becomes the left-most word for the rr-list
+		(define best-rr (pick-best-cost-left-pair lg_rel right-word rr-list))
+
+		; Of the four possibilities above, pick the one with the highest MI
+		; (define next-best)
+(display (list "its bestll " best-ll "\n"))
+(display (list "its bestlr " best-lr "\n"))
+(display (list "its bestrl " best-rl "\n"))
+(display (list "its bestrr " best-rr "\n"))
+
+		; (define trimmed-list (trim-list start-pair word-list))
 	)
 
 
