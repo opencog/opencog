@@ -261,6 +261,7 @@
 		)
 	)
 
+xxxx the split-list is not neeed 
 	; Split the list into two lists: those stictly to the left, and 
 	; those strictly to the right of the break-word. The break-word is
 	; not included in either list. (This is almost the same as srfi-1
@@ -320,42 +321,77 @@
 	(define (*pick-em lg_rel word-list pair-list nected-words)
 
 		; Given a single break-word, return a list of connections to each
-		; of the other words in the sentence. 
+		; of the other words in the sentence.  The break-word is assumed
+		; to be ordinal-numered, i.e. an integer, followed by a WordNode.
+		; The word-list is assumed to be ordinal-numbered as well.
+		; The returned list is a list of costed-pairs.
+		;
+		; It is presumed that the brk-word does not occur in the word-list.
 		(define (connect-word lg_rel brk-word wrd-list)
-			(let* (
-					; split the list into two, using the left-word to break
-					(w-split (split-list brk-word wrd-list))
-					(left-list (car w-split))
-					(right-list (cadr w-split))
-					; Find the best links that attach to either side
-					; The break word becomes the right-most word for the left-list
-					(best-left (pick-best-cost-right-pair lg_rel word left-list))
-					; The break-word becomes the left-most word for the right-list
-					(best-right (pick-best-cost-left-pair lg_rel word right-list))
+			; The ordinal number of the break-word.
+			(define brk-num (car brk-word))
+			; The WordNode of the break-word
+			(define brk-node (cadr brk-word))
+			(map
+				(lambda (word)
+					; try-num is the ordinal number of the trial word.
+					(define try-num (car word))
+					; try-node is the actual WordNode of the trial word.
+					(define try-node (cadr word))
+					(if (< try-num brk-num)
+						; returned value: the MI value for the pair, then the pair.
+						(list (get-pair-mi lg_rel try-node brk-node)
+							(list word brk-word)
+						)
+						(list (get-pair-mi lg_rel brk-node try-node)
+							(list brk-word word)
+						)
+					)
 				)
-				(list best-left best-right)
+				wrd-list
 			)
 		)
 
-		; For each connected word, find two connections between that
-		; and the unconnected words.  Return a list of connections.
-		; The 'bare-words' is a list of the unconnected words, in sentence
-		; order.  The graph-words is a set (in unspecified order) of words
-		; that are already a part of the spanning tree.
+		; For each connected word, find connections between that and the
+		; unconnected words.  Return a list of MI-costed connections.
+		; The 'bare-words' is a set of the unconnected words, labelled by
+		; an ordinal number denoting sentence order.  The graph-words is a
+		; set of words that are already a part of the spanning tree.
+		; It is assumed that these two sets have no words in common.
 		(define (connect-to-graph lg_rel bare-words graph-words)
 			(append-map
 				(lambda (grph-word) (connect-word lg_rel grph-word bare-words))
 				graph-words
 			)
 		)
-		
 
+		; Return true if a pair of links cross, else return false.
+		(define (cross? cost-pair-a cost-pair-b)
+			(define pair-a (cadr cost-pair-a)) ; throw away MI
+			(define pair-b (cadr cost-pair-b)) ; throow away MI
+			(define lwa (car pair-a))  ; left word of pair
+			(define rwa (cadr pair-a)) ; right word of pair
+			(define lwb (car pair-b))
+			(define rwb (cadr pair-b))
+			(define ila (car lwa))     ; ordinal number of the word
+			(define ira (car rwa))
+			(define ilb (car lwb))
+			(define irb (car rwb))
+			(or
+				; All inequalities are strict.
+				(and (< ila ilb) (< ilb ira) (< ira irb))
+				(and (< ilb ila) (< ila irb) (< irb ira))
+			)
+		)
+
+		; Find th highest-MI link that doesn't cross.
+		
 		; If word-list is null, then we are done. Otherwise, trawl.
 		(if (null? word-list)
 			pair-list
 			(let* (
-
-					; Define the next-best link
+					(trial-pairs (connect-to-graph lg_rel word-list nected-words))
+					; Find the Define the next-best link
 					(next-best
 						(pick-best
 							(list best-ll best-lr best-rl best-rr)
