@@ -8,11 +8,11 @@
 
 #ifdef HAVE_GUILE
 
-#include "SchemeSmob.h"
-
 #include <libguile.h>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include "SchemePrimitive.h"
+#include "SchemeSmob.h"
 
 using namespace opencog;
 
@@ -83,7 +83,7 @@ int SchemeSmob::print_atom(SCM node, SCM port, scm_print_state * ps)
 
 SCM SchemeSmob::equalp_atom(SCM a, SCM b)
 {
-	// Two atoms are equal if their handles are the same.
+	// Two atoms are equal if their UUIDs are the same.
 	if (SCM_SMOB_OBJECT(a) == SCM_SMOB_OBJECT(b)) return SCM_BOOL_T;
 	return SCM_BOOL_F;
 }
@@ -106,8 +106,68 @@ void SchemeSmob::init_smob_type(void)
 	// A SMOB type for everything else
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
+	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
 	scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
+}
+
+/* ============================================================== */
+
+SCM SchemeSmob::equalp_misc(SCM a, SCM b)
+{
+	// If they're not something we know about, let scheme sort it out.
+	// (Actualy, this should never happen ...)
+	if (not SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, a))
+		return scm_equal_p(a, b);
+
+	// If the types don't match, they can't be equal.
+	scm_t_bits ta = SCM_SMOB_FLAGS(a);
+	scm_t_bits tb = SCM_SMOB_FLAGS(b);
+	if (ta != tb)
+		return SCM_BOOL_F;
+
+	switch (ta)
+	{
+		default: // Should never happen.
+		case 0:  // Should never happen.
+			return SCM_BOOL_F;
+      case COG_AV:
+		{
+			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
+			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
+			if (*av == *bv) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+      case COG_EXTEND:
+		{
+			// We compare pointers here, only.
+			PrimitiveEnviron* av = (PrimitiveEnviron *) SCM_SMOB_DATA(a);
+			PrimitiveEnviron* bv = (PrimitiveEnviron *) SCM_SMOB_DATA(b);
+			if (av == bv) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+		case COG_HANDLE:
+		{
+			Handle ha(scm_to_handle(a));
+			Handle hb(scm_to_handle(b));
+			if (ha == hb) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+      case COG_TV:
+		{
+			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
+			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
+			if (*av == *bv) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+      case COG_VH:
+		{
+			VersionHandle* av = (VersionHandle *) SCM_SMOB_DATA(a);
+			VersionHandle* bv = (VersionHandle *) SCM_SMOB_DATA(b);
+			if (*av == *bv) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+	}
 }
 
 /* ============================================================== */

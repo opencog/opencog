@@ -234,8 +234,12 @@ Although thats still slower than e.g. a perl script ... oh well,
 price of generality.  Avoiding the pattern matcher would go a long way.
 
 
-MI Results, Next steps
-----------------------
+Next step: minimum spanning tree parsing
+----------------------------------------
+
+
+Some typical entropies for word-pairs
+-------------------------------------
 (WordNode "famille") entropy H=11.185
 
 H(*, famille) = 11.195548 
@@ -459,8 +463,7 @@ All new crash. Note:
    in it.  It should have just been a standard stack trace, but wasn't.
 3) Sometimes, when doing this, and parser is running, I get 
 
-[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on threa
-d 47486186035520
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
         Stack Trace:
         2: CogServerMain.cc:92  _Z7sighandi()
         3: sigaction.c:0        __restore_rt()
@@ -505,39 +508,36 @@ bdwgc ./configure --with-large-heap=yes
 #define LARGE_CONFIG
 #endif
 
-Crash 4
--------
-#<catch-closure ef95a0> wrong-type-arg ...]
+Irritation 4
+------------
+Occasionally see this: 
 
-ERROR: In procedure apply-smob/1:
-ERROR: In procedure /: Wrong type argument in position 1: #f
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 294a63c0> ...]
 
-Despite this, have 12 cpu threads spinning at 100% .. what are they doing?
-most in __lll_lock_wait in ClassServer::getTypeName from Node::toShortString
-from PatternMatchEngine.cc:133 from OC_ASSERT.   Ooops .. this is a bug,
-fix it ... its hit twice ... three
-But also PatternMatchEngine.cc:177 hits the lock. twice, three times...
+   ?: 3 [apply-smob/1 #<catch-closure 294a62a0>]
+   ?: 2 [call-with-input-string "(observe-text \"Cheopso piramid\u0117, arba Did
+\u017eioji Gizos piramid\u0117 \u2013 Egipto piramid\u0117, faraono Cheopso kapa
+s.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 193e5c80 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encodi
+ng-error ...]
 
-EvaluationLink is 27
-select count(*) from atoms where type=27 and tv_type !=2;
-returns zero ... 
-555
-(compute-pair-mi (WordNode "Jinsei") lg_any)  or "onimotsu" "affluent"
-HandleSeq iset = backing_store->getIncomingSet(h);
-which returns atoms .. with truth values, etc !?
-foreach fetchAtom  .. store::getAtom
+-----------
+another:
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
+Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
 
-(define lg_any (LinkGrammarRelationshipNode "ANY"))
-(init-trace)
-(load-atoms-of-type item-type)
-(fetch-incoming-set lg_any)
+Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord
+Wydawnictwo Oskar, Gdańsk 2010 r.
 
-(define wtf2 (EvaluationLink lg_any (ListLink (WordNode "," ) (WordNode "l'occasion") )))
-(cog-tv wtf2)
- (fetch-atom wtf2)
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
 
-OK, fixed, the atomspace ws totally buggy in how it handled Default TV
-values .. the tv merge routines were clobbering the count values. Aieee.
+ABORT: encoding-error
+
 
 
 Performance
@@ -642,17 +642,3 @@ writer does:
 am using boost1.49 on cray
 
 ------------------------------------------
-
- "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
-Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
-
-Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord
-Wydawnictwo Oskar, Gdańsk 2010 r.
-
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
-
-ABORT: encoding-error
-

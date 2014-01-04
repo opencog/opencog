@@ -815,12 +815,15 @@ particular, in the server socket connection handling. Caveat Emptor.
 
 ToDo
 ----
+-- Change cog-tv, cog-av to use values and let-values
+	because the alist interface is klunky.
+
 -- support readline/editline (uparrows, etc.) on input.
    Note, however, 'rlwrap telnet localhost 17001' does the trick...
 
 -- change cog-delete to also accept a list of atoms 
 -- change cog-delete to return null, not #t (?why?)
--- add ability to create CompositeTruthValue
+-- add ability to create CompositeTruthValue .. No, don't do this.
 
 -- It would be nice to be able to use continuations; however, the
    scm_with_guile() call has a continuation barrier in it.  I beleive
