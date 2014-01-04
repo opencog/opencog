@@ -236,6 +236,14 @@ price of generality.  Avoiding the pattern matcher would go a long way.
 
 Next step: minimum spanning tree parsing
 ----------------------------------------
+Minimum spanning tree code is in mst-parser.scm
+
+he MST parser discovers the minimum spanning tree that connects the
+words together in a sentence, the mutual information between word-pairs
+is used as the link-cost. (actually, we're maximizing, not minimizing MI).
+
+The algorithm works. The next step is to store the results, and start
+clustering them to auto-discover link-grammar links.
 
 
 Some typical entropies for word-pairs
@@ -652,10 +660,4 @@ am using boost1.49 on cray
 
 ------------------------------------------
 
-(list
-(list 2.7646899223327637 (list (list 3 (WordNode "notamment")) (list 4 (WordNode "du")))) 
-(list 2.2642931938171387 (list (list 4 (WordNode "du")) (list 6 (WordNode "de")))) 
-(list -1000 (list (list 3 (WordNode "notamment")) (list 5 (WordNode "monopole")))) 
-(list 4.096433639526367 (list (list 5 (WordNode "monopole")) (list 6 (WordNode "de"))))
-)
 
