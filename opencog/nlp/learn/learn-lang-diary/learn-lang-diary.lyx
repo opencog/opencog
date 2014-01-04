@@ -836,6 +836,23 @@ Crossings are rare: Havelka, J.
 \end_layout
 
 \begin_layout Itemize
+Hubbiness is a better model of sentence complexity than mean dependency
+ distance: Ramon Ferrer-i-Cancho (2103) 
+\begin_inset Quotes eld
+\end_inset
+
+Hubiness, length, crossings and their relationships in dependency trees
+\begin_inset Quotes erd
+\end_inset
+
+ ArXiv 1304.4086 --- also states: maximum number of crossings is bounded
+ above by mean dependency length.
+ Also, mean dependency length is bounded below by variance of degrees of
+ vertexes (i.e.
+ variance in number of connectors a word can have).
+\end_layout
+
+\begin_layout Itemize
 Languages tends to be close to the theoretical minimum possible dependency
  distance, if it was legal to re-arrange words arbitrarily.
  See Temperley, D.
@@ -870,8 +887,8 @@ y.
 \end_layout
 
 \begin_layout Itemize
-Mean dependency distance is a good measure of sentence complexity -- for
- 20 languages -- give overview startgin from Yngve.
+(Cite this, its good) Mean dependency distance is a good measure of sentence
+ complexity -- for 20 languages -- give overview startgin from Yngve.
  Haitao Liu (2008) 
 \begin_inset Quotes eld
 \end_inset
@@ -882,19 +899,6 @@ Dependency distance as a metric of language comprehension difficulty
 
  Journal of Cognitive Science, 2008 9(2): 159-191.
  
-\end_layout
-
-\begin_layout Itemize
-Hubbiness is a better model of sentence complexity than mean dependency
- distance: Ramon Ferrer-i-Cancho (2103) 
-\begin_inset Quotes eld
-\end_inset
-
-Hubiness, length, crossings and their relationships in dependency trees
-\begin_inset Quotes erd
-\end_inset
-
- ArXiv 1304.4086
 \end_layout
 
 \begin_layout Itemize
