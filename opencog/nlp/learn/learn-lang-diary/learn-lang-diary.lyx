@@ -787,6 +787,10 @@ The goal, the next step, is then to reduce the total number of disjuncts,
  and the total number of types, by clustering and discovering similarities.
 \end_layout
 
+\begin_layout Section*
+3 January 2013
+\end_layout
+
 \begin_layout Subsection*
 No-crossing Minimum Spanning Trees
 \end_layout
@@ -817,8 +821,112 @@ key "Ferrer2006"
 \end_layout
 
 \begin_layout Standard
-xR.
- Ferrer i Cancho
+Other related references:
+\end_layout
+
+\begin_layout Itemize
+Crossings are rare: Havelka, J.
+ (2007).
+ Beyond projectivity: multilingual evaluation of constraints and measures
+ on non-projective structures.
+ In: Proceedings of the 45th Annual Meeting of the Association of Computational
+ Linguistics (ACL-07): 608-615.
+ Prague, Czech Republic: Association for Computational Linguistics.
+ 
+\end_layout
+
+\begin_layout Itemize
+Languages tends to be close to the theoretical minimum possible dependency
+ distance, if it was legal to re-arrange words arbitrarily.
+ See Temperley, D.
+ (2008).
+ Dependency length minimization in natural and artificial languages.
+ Journal of Quantitative Linguistics, 15(3):256-282.
+ 
+\end_layout
+
+\begin_layout Itemize
+Park, Y.
+ A.
+ and Levy, R.
+ (2009).
+ Minimal-length linearizations for mildly context-sensitive dependency trees.
+ In Proceedings of the North American Chapter of the Association for Computation
+al Linguistics - Human Language Technologies (NAACL-HLT) conference.
+ 
+\end_layout
+
+\begin_layout Itemize
+Sentences with long dependencies are hard to understand: The original claim
+ is from Yngve, 1960, having to do with phrase-structure depth.
+ See -- Gibson, E.
+ (2000).
+ The dependency locality theory: A distance-based theory of linguistic complexit
+y.
+ In Marantz, A., Miyashita, Y., and O'Neil, W., editors, Image, Language, Brain.
+ Papers from the first Mind Articulation Project Symposium.
+ MIT Press, Cambridge, MA.
+ 
+\end_layout
+
+\begin_layout Itemize
+Mean dependency distance is a good measure of sentence complexity -- for
+ 20 languages -- give overview startgin from Yngve.
+ Haitao Liu (2008) 
+\begin_inset Quotes eld
+\end_inset
+
+Dependency distance as a metric of language comprehension difficulty
+\begin_inset Quotes erd
+\end_inset
+
+ Journal of Cognitive Science, 2008 9(2): 159-191.
+ 
+\end_layout
+
+\begin_layout Itemize
+Hubbiness is a better model of sentence complexity than mean dependency
+ distance: Ramon Ferrer-i-Cancho (2103) 
+\begin_inset Quotes eld
+\end_inset
+
+Hubiness, length, crossings and their relationships in dependency trees
+\begin_inset Quotes erd
+\end_inset
+
+ ArXiv 1304.4086
+\end_layout
+
+\begin_layout Itemize
+Sentences with long dependencies are rarely spoken: Hawkins, J.
+ A.
+ (1994).
+ A Performance Theory of Order and Constituency.
+ Cambridge University Press, Cambridge, UK.
+ ----Hawkins, J.
+ A.
+ (2004).
+ Efficiency and Complexity in Grammars.
+ Oxford University Press, Oxford, UK.
+ ----Wasow, T.
+ (2002).
+ Postverbal Behavior.
+ CSLI Publications, Stanford, CA.
+ Distributed by University of Chicago Press.
+ 
+\end_layout
+
+\begin_layout Standard
+So, ratherr than imposing no-crossing as a constraint on the parser, instead,
+ let it find its own way into the grammar.
+ Just implement a plain-old MST parser, punt on crossing.
+\end_layout
+
+\begin_layout Section*
+The End 
+\end_layout
+
+\begin_layout Standard
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "lang"
@@ -827,30 +935,6 @@ options "alpha"
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
-\end_layout
-
-\begin_layout Standard
-x
 \end_layout
 
 \end_body
