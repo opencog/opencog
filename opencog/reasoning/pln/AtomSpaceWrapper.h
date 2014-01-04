@@ -248,8 +248,8 @@ class AtomSpaceWrapper : public iAtomSpaceWrapper
     //! Whether AtomSpaceWrapper is listening for AtomSpace signals.
     bool watchingAtomSpace;
 
-    boost::signals::connection c_add; //! Connection to add atom signals
-    boost::signals::connection c_remove; //! Connection to remove atom signals
+    boost::signals2::connection c_add; //! Connection to add atom signals
+    boost::signals2::connection c_remove; //! Connection to remove atom signals
 
 protected:
 

@@ -135,7 +135,7 @@ protected:
 
     boost::signals2::connection conn;
 
-    /** called by AtomTable via a boost:signal when an atom is removed. */
+    /** called by AtomTable via a boost::signals2::signal when an atom is removed. */
     void atomRemoved(AtomPtr);
 
 public:
