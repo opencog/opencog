@@ -373,47 +373,73 @@
 			(pick-no-cross-best (set-sub candidates (list best)) graph-pairs)
 		)
 	)
+
+	; Which word of the pair is in the word-list?
+	(define (get-fresh cost-pair word-list)
+		(define word-pair (cadr cost-pair)) ; thorw away MI
+		(define left-word (car word-pair))
+		(define right-word (cadr word-pair))
+		(if (any (lambda (word) (equal? word left-word)) word-list)
+			left-word
+			right-word
+		)
+	)
 		
 	; Find the maximum spanning tree. 
 	; word-list is the list of unconnected words, to be added to the tree.
-	; pair-list is a list of edges found so far, joining things together.
+	; graph-links is a list of edges found so far, joining things together.
 	; nected-words is a list words that are part of the tree.
 	;
 	; When the word-list become empty, the pair-list is returned.
+	;
+	; The word-list is assumed to be a set of ordinal-numbered WordNodes;
+	; i.e. an ordinal number denoting word-order in sentence, and then
+	; the word-node.
+	;
+	; The nected-words are likewise.  It is assumed that the word-list and
+	; the nected-words are disjoint sets.
+	;
+	; The graph-links are assumed to be a set of MI-costed word-pairs.
+	; That is, an float-point MI value, followed by a pair of words.
 	; 
-	(define (*pick-em lg_rel word-list pair-list nected-words)
+	(define (*pick-em lg_rel word-list graph-links nected-words)
 
 		; If word-list is null, then we are done. Otherwise, trawl.
 		(if (null? word-list)
 			pair-list
 			(let* (
+					; Generate a set of possible links
 					(trial-pairs (connect-to-graph lg_rel word-list nected-words))
-					; Find the Define the next-best link
-					(next-best
-						(pick-best
-							(list best-ll best-lr best-rl best-rr)
-							(list bad-mi (list (list 0 '()) (list 0 '())))
-						)
-					)
-					(trimmed-list (trim-list start-pair word-list))
+					; Find the best link that doesn't cross existing links.
+					(best (pick-no-cross-best trial-pairs graph-links))
+					; Add the best to the list of graph-links.
+					(bigger-graph (append graph-links (list best)))
+					; Find the freshly-connected word.
+					(fresh-word (get-fresh best word-list))
+					; Remove the freshly-connected word from the word-list.
+					(shorter-list (set-sub word-list fresh-word))
+					; Add the freshly-connected word to the cnoonected-list
+					(more-nected (append nected-words (list fresh-word)))
 				)
 				; recurse
-				(pick-em lg_rel trimmed-list next-best soln-list)
+				(*pick-em lg_rel shorter-list bigger-graph more-nected)
 			)
 		)
 	)
 
-
-	(define (do-it lg_rel word-list)
-		(define start-pair (pick-best-cost-pair lg_rel word-list))
-		(*pick-em lg_rel word-list start-pair '())
-	)
-
-	(let* ((word-strs (tokenize-text plain-text))
+	(let* (
+			; Tokenize the sentence into a list of words.
+			(word-strs (tokenize-text plain-text))
+			; Number the words in sentence-order.
 			(word-list (str-list->numbered-word-list word-strs))
+			; Find a pair of words connected with the largest MI in the sentence.
 			(start-cost-pair (pick-best-cost-pair lg_any word-list))
+			; Add both of these words to the connected-list.
+			(nected-list (cadr start-cost-pair)) ; discard the MI
+			; remove both of these words from the word-list
+			(smaller-list (set-sub word-list nected-list))
 		)
-(display start-cost-pair)
+		(*pick-em smaller-list (list start-cost-pair) nected-list)
 	)
 )
 
