@@ -289,32 +289,15 @@
 		(remove (lambda (word) (equal? word cut-word)) word-list)
 	)
 
-	(define (pick-em lg_rel word-list)
-		(define pair-list '())
-		(define start-pair (pick-best-cost-pair lg_rel word-list))
+	; This is almost right but not quite; its only allowing
+	; connections to the pair, when it should allow connections 
+	; to any in the connected-vertex list.  Argh.  Tomorrow.
+	;
+	(define (*pick-em lg_rel word-list best-pair pair-list)
 
-		(define left-word (car (cadr start-pair)))
-		(define right-word (cadr (cadr start-pair)))
-
-		(define l-split (split-list left-word word-list))
-		(define ll-list (car l-split))
-		(define lr-list (cut-from-list right-word (cadr l-split)))
-
-		(define r-split (split-list right-word word-list))
-		(define rl-list (cut-from-list left-word (car r-split)))
-		(define rr-list (cadr r-split))
-
-		; the left-word becomes the right-most word for the ll-list
-		(define best-ll (pick-best-cost-right-pair lg_rel left-word ll-list))
-		; the left-word becomes the left-most word for the lr-list
-		(define best-lr (pick-best-cost-left-pair lg_rel left-word lr-list))
-
-		; the right-word becomes the right-most word for the rl-list
-		(define best-rl (pick-best-cost-right-pair lg_rel right-word rl-list))
-		; the right-word becomes the left-most word for the rr-list
-		(define best-rr (pick-best-cost-left-pair lg_rel right-word rr-list))
-
-		; Of the four possibilities above, pick the one with the highest MI
+		; Of multiple possibilities, pick the one with the highest MI
+		; The choice-list is assumed to be a list of costed word-pairs,
+		; as usual: cost first, then the pair.
 		(define (pick-best choice-list best-so-far)
 			(define so-far-mi (car best-so-far))
 			(if (null? choice-list)
@@ -333,17 +316,58 @@
 			)
 		)
 
-		(define next-best
-			(pick-best
-				(list best-ll best-lr best-rl best-rr)
-				(list bad-mi (list (list 0 '()) (list 0 '())))
+		; If word-list is null, then we are done.
+		(if (null? word-list)
+			(append pair-list (list best-pair))
+			(let* (
+					; list of solutions
+					(soln-list (append pair-list (list best-pair)))
+
+					; The two words of the input word-pair.
+					(left-word (car (cadr start-pair)))
+					(right-word (cadr (cadr start-pair)))
+
+					; split the list into two, using the left-word to break
+					(l-split (split-list left-word word-list))
+					(ll-list (car l-split))
+					(lr-list (cut-from-list right-word (cadr l-split)))
+
+					; split the list into two, using the right-word to break
+					(r-split (split-list right-word word-list))
+					(rl-list (cut-from-list left-word (car r-split)))
+					(rr-list (cadr r-split))
+
+					; Find the best links that attach to either side
+					; the left-word becomes the right-most word for the ll-list
+					(best-ll (pick-best-cost-right-pair lg_rel left-word ll-list))
+					; the left-word becomes the left-most word for the lr-list
+					(best-lr (pick-best-cost-left-pair lg_rel left-word lr-list))
+
+					; the right-word becomes the right-most word for the rl-list
+					(best-rl (pick-best-cost-right-pair lg_rel right-word rl-list))
+					; the right-word becomes the left-most word for the rr-list
+					(best-rr (pick-best-cost-left-pair lg_rel right-word rr-list))
+
+					; Define the next-best link
+					(next-best
+						(pick-best
+							(list best-ll best-lr best-rl best-rr)
+							(list bad-mi (list (list 0 '()) (list 0 '())))
+						)
+					)
+					(trimmed-list (trim-list start-pair word-list))
+				)
+				; recurse
+				(pick-em lg_rel trimmed-list next-best soln-list)
 			)
 		)
-(display (list "its next " next-best "\n"))
-
-		; (define trimmed-list (trim-list start-pair word-list))
 	)
 
+
+	(define (do-it lg_rel word-list)
+		(define start-pair (pick-best-cost-pair lg_rel word-list))
+		(*pick-em lg_rel word-list start-pair '())
+	)
 
 	(let* ((word-strs (tokenize-text plain-text))
 			(word-list (str-list->numbered-word-list word-strs))
