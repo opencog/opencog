@@ -266,7 +266,7 @@
 	; Of multiple possibilities, pick the one with the highest MI
 	; The choice-list is assumed to be a list of costed word-pairs,
 	; as usual: cost first, then the pair.
-	(define (pick-best-cost-pair choice-list)
+	(define (max-of-pair-list choice-list)
 		; An awful word-pair
 		(define bad-pair (list bad-mi (list (list 0 '()) (list 0 '()))))
 
@@ -366,7 +366,7 @@
 	(define (pick-no-cross-best candidates graph-pairs)
 		; Despite the recursive nature of this call, we always expect
 		; that best isn't nil, unless there's a bug somewhere ...
-		(define best (pick-best-cost-pair candidates))
+		(define best (max-of-pair-list candidates))
 		(if (not (cross-any? best graph-pairs))
 			best
 			; Else, remove best from list, and try again.
@@ -439,7 +439,7 @@
 			; remove both of these words from the word-list
 			(smaller-list (set-sub word-list nected-list))
 		)
-		(*pick-em smaller-list (list start-cost-pair) nected-list)
+		(*pick-em lg_any smaller-list (list start-cost-pair) nected-list)
 	)
 )
 
