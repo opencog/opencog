@@ -135,11 +135,12 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
 			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
-			if (av == bv) return SCM_BOOL_T;
+			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
       case COG_EXTEND:
 		{
+			// We compare pointers here, only.
 			PrimitiveEnviron* av = (PrimitiveEnviron *) SCM_SMOB_DATA(a);
 			PrimitiveEnviron* bv = (PrimitiveEnviron *) SCM_SMOB_DATA(b);
 			if (av == bv) return SCM_BOOL_T;
@@ -156,14 +157,14 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
 			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
-			if (av == bv) return SCM_BOOL_T;
+			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
       case COG_VH:
 		{
 			VersionHandle* av = (VersionHandle *) SCM_SMOB_DATA(a);
 			VersionHandle* bv = (VersionHandle *) SCM_SMOB_DATA(b);
-			if (av == bv) return SCM_BOOL_T;
+			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
 	}
