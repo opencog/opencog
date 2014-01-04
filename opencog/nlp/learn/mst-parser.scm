@@ -148,6 +148,16 @@
 ; Settle on a variant of Borůvka's algo.
 ; A no-links-cross constraint is not required, see
 ; R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
+;
+; Well. but we force no-link-cross anyway, as otherwise, the pair-MI
+; scores alone get rather unruly.  In the long-run, it might be better
+; to instead pick something that combines MI scores with 
+; mean-dependency-distance or with hubbiness. See, for example:
+; Haitao Liu (2008) “Dependency distance as a metric of language
+; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191. 
+; or also:
+; Ramon Ferrer-i-Cancho (2013) “Hubiness, length, crossings and their
+; relationships in dependency trees”, ArXiv 1304.4086
 
 (define (mst-parse-text plain-text)
 	(define lg_any (LinkGrammarRelationshipNode "ANY"))
@@ -404,20 +414,31 @@
 	; 
 	(define (*pick-em lg_rel word-list graph-links nected-words)
 
+		;(trace-msg (list "----------------------- \nenter pick-em with wordlist="
+		;	word-list "\nand graph-links=" graph-links "\nand nected=" nected-words "\n"))
+
 		; If word-list is null, then we are done. Otherwise, trawl.
 		(if (null? word-list)
-			pair-list
+			graph-links
 			(let* (
 					; Generate a set of possible links
 					(trial-pairs (connect-to-graph lg_rel word-list nected-words))
+					; (ja (trace-msg (list "trial pairs=" trial-pairs "\n")))
+
 					; Find the best link that doesn't cross existing links.
 					(best (pick-no-cross-best trial-pairs graph-links))
+					; (jb (trace-msg (list "best-pair=" best "\n")))
+
 					; Add the best to the list of graph-links.
 					(bigger-graph (append graph-links (list best)))
+
 					; Find the freshly-connected word.
 					(fresh-word (get-fresh best word-list))
+					; (jd (trace-msg (list "fresh word=" fresh-word "\n")))
+
 					; Remove the freshly-connected word from the word-list.
-					(shorter-list (set-sub word-list fresh-word))
+					(shorter-list (set-sub word-list (list fresh-word)))
+
 					; Add the freshly-connected word to the cnoonected-list
 					(more-nected (append nected-words (list fresh-word)))
 				)
@@ -443,9 +464,10 @@
 	)
 )
 
-; (define lg_any (LinkGrammarRelationshipNode "ANY"))
+; ---------------------------------------------------------------------
 ; (init-trace)
 ; (load-atoms-of-type item-type)
+; (define lg_any (LinkGrammarRelationshipNode "ANY"))
 ; (fetch-incoming-set lg_any)
 ; (mst-parse-text "faire un test")
 ; (mst-parse-text "Elle jouit notamment du monopole de la restauration ferroviaire")
