@@ -66,6 +66,7 @@ class SchemeSmob
 		static SCM equalp_atom(SCM, SCM);
 		static size_t free_atom(SCM);
 		static int print_misc(SCM, SCM, scm_print_state *);
+		static SCM equalp_misc(SCM, SCM);
 		static SCM mark_misc(SCM);
 		static size_t free_misc(SCM);
 
