@@ -709,7 +709,14 @@ cross constraint does not.
 \end_layout
 
 \begin_layout Standard
-Yuret proposes a way of discovering the pair-wise relations.
+Yuret proposes a way of discovering the pair-wise relations
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Yuret1998"
+
+\end_inset
+
+.
  He makes the implicit, unvoiced assumption that there is a single, unique
  connector type 
 \begin_inset Formula $t_{m}$
@@ -743,12 +750,83 @@ reference "eq:pair-decompose"
 
  have been previously observed; secondly, that there is a natural ranking
  of such allowed parses by summing the total mutual information associated
- with weach word-pair.
- 
+ with each word-pair.
 \end_layout
 
 \begin_layout Standard
-x
+These two concepts give rise to the idea of minimum-spanning-tree parsers.
+ Such parsers work in a two-step process: a training phase, and a parse
+ phase.
+ In the training phase, one gathers a lot of statistics about mutual information.
+ The important point here is that this is unsupervised training.
+ To parse, one first creates a graph clique, with every word connected to
+ every other.
+ One uses the gathered MI to define graph edge lengths.
+ Finally, the corrrect parse is then the maximum spanning tree of the graph
+ (maximizing the MI, summed over the tree edges in the graph).
+\end_layout
+
+\begin_layout Standard
+Here, we use the same idea, but then take the next step.
+ The spanning tree can be decomposed into a set of link-grammar disjuncts,
+ one disjunct per word.
+ The disjunct is merely a list of the connections that one word makes.
+ It consists of the type, and the direction.
+ The direction is left or right.
+ The type is the 
+\begin_inset Formula $t_{m}=t_{m}(w_{j},w_{k})$
+\end_inset
+
+ defined above.
+ By parsing a large number of sentences, we can now automatically discover
+ a large number of disjuncts, in an unsupervised manner.
+\end_layout
+
+\begin_layout Standard
+The goal, the next step, is then to reduce the total number of disjuncts,
+ and the total number of types, by clustering and discovering similarities.
+\end_layout
+
+\begin_layout Subsection*
+No-crossing Minimum Spanning Trees
+\end_layout
+
+\begin_layout Standard
+It turns out that writing an algorithm for a no-crossing minimum spanning
+ tree is surprisingly painful; enforcing the no-crossing constraint requies
+ treatment of a number of special cases.
+ But perhaps this is not actually rquired! R.
+ Ferrer i Cancho in 
+\begin_inset Quotes eld
+\end_inset
+
+Why do syntactic links not cross?
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Ferrer2006"
+
+\end_inset
+
+ shows that, when attempting to arrange a random set of points on a line,
+ in such a way as to minimize euclidean distances between connected points,
+ one ends up with trees that almost never cross!
+\end_layout
+
+\begin_layout Standard
+xR.
+ Ferrer i Cancho
+\begin_inset CommandInset bibtex
+LatexCommand bibtex
+bibfiles "lang"
+options "alpha"
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
