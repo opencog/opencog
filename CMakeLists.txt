@@ -145,7 +145,7 @@ SET(Boost_USE_MULTITHREADED ON)
 # boost-1.49 no longer has a libboost_iostreams
 # 1.46 is minimum for required filesystem support
 # program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)

@@ -15,7 +15,6 @@ LINK_LIBRARIES(
 	atomspace
 	persist
 	server
-	${Boost_SIGNALS_LIBRARY}
 )
 
 # The two tests below currrently work and pass, as of 10 December 2013.

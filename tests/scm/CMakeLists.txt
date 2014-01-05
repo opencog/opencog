@@ -14,7 +14,6 @@ LINK_LIBRARIES(
 	nlp-types
 	atomspace
 	server
-	${Boost_SIGNALS_LIBRARY}
 )
 
 ADD_CXXTEST(BasicSCMUTest)
