@@ -5,27 +5,81 @@
 
 Current project, under construction.
 
-Steps:
-1) Install the 'any' language for link-grammar
-2) Set up and configure postgres, as described in 
+Summary
+-------
+The goal of the project is to build a system that can learn parse
+dictionaries for different languages, and possibly do some rudimentary
+semantic extraction.  The primary design point is that the learning is
+to be done in an unsupervised fashion.  A sketch of the theory that
+enables this can be found in the paper "Language Learning", B. Goertzel
+and L, Vepstas (2014) on ArXiv XXXX.XXXX An even shorter sketch is given
+below.  Most of this README concerns the practical details of operating
+the system, and some diary-like notes about partial and preliminary
+results.
+
+The basic algorithmic steps, as implemented so far, are as follows:
+A) Ingest a lot of raw text, such as Wikipedia articles, and count the
+   occurance of nearby word-pairs.
+B) Compute the mutual information (mutual entropy) between the word-pairs.
+C) Use a Minimum-Spanning-Tree algorithm to obtain provisional parses
+   of sentences.  This requires ingesting a lot of raw text, again.
+   (Independently of step A)
+D) Extract linkage disjuncts from the parses, and count their frequency.
+E) Use maximum-entropy principles to merge similar linkage disjuncts.
+   This will also result in sets of similar words. Presumably, the 
+   sets will roughly correspond to nouns, verbs, adjectives, and so-on.
+
+Currently, the software implements steps A & B, and part of step C.
+The automation of step C for large-scale parsing is not yet done. 
+Steps D & E are planned. The remainder of step C and all of step D
+are technically straight-forward.  The theoretical details step E are
+incomplete; its not entirely clear what the best merging algorithm might
+be, or how it will work.  Steps D and E are the new parts. Steps A-C have
+been done before, and are "well known" in the literature.
+
+
+System Processing Steps
+-----------------------
+Perform these steps to make the system go.
+
+Processing is done with the cogserver; the large amount of data
+generated requires storing it. (Millions of atoms will be generated.
+Although these could fit into RAM, the data would be lost if the
+cogserver crashes or is rebooted. Parsing will require weeks or 
+months of CPU effort. Thus, SQL persistance is used to store the atoms.
+So, set that up:
+
+1) Set up and configure postgres, as described in 
    opencog/persist/sql/README
-3) createdb learn-pairs
+2) createdb learn-pairs
    cat atom.sql | psql learn-pairs
    Edit and setup ~/.odbc.ini
-4) Start the cogserver
+3) Start the cogserver, verify that connections to the database work.
 
+Obtaining word-pair counts requires digesting a lot of text, and
+counting the word-pairs that occur in the text.  The easiest way of
+doing this, at the moment, is to parse the text with link-grammar and
+RelEx, using the "any" language.  This pseudo-language will ink any
+word to any other, and is simply a convenient way of extracting word
+pairs from text.  Although this might seem to be a very concoluted way
+of extracting word pairs, it actually "make sense", for two reasons:
+a) it already works; little or no new code required. b) later processing
+steps will require passing text through the link-grammar parser anyway,
+so we may as well start using it right away. So, set that up:
+
+4) Install link-grammar-4.8.4 or newer.
 5) Copy the RelEx opencog-server.sh shell script to some other name.
    Edit it, and replace the final line with this:
-   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 999 --link --port 4444
+   java $VM_OPTS $RELEX_OPTS $CLASSPATH relex.Server --lang any -n 99 --link
    Run the new shell script.
 
-   The above tells relex to use the 'any' language, and return up to 999
-   different parses.
+   The above tells relex to use the 'any' language, and return up to 99
+   different parses. This should generate plenty of word-pairs.
 
-6) cat ./link-pipeline.scm |netcat localhost 17001
-
-   Better idea: edit build/lib/opencog.conf and add nlp/learn/link-pipeline.scm
-   to the list
+6) Copy one of the opencog-??.conf files from the misc-scripts directory
+   to the cogserver directory. Modify as desired.  (current experiments
+   are being run on French, Polish and Lithuanian. Try other languages,
+   if desired.
 
 7) telnet localhost 17001
    opencog> sql-open learn-pairs linas asdf
@@ -37,7 +91,13 @@ Steps:
    echo -e "scm\n (observe-text \"Bernstein () (1876\")" |nc localhost 17001
    echo -e "scm\n (observe-text \"Lietuvos žydų kilmės žurnalistas\")" |nc localhost 17001
 
-8) psql learn-pairs
+   This should result in activity on the RelEx server, on the cogserver,
+   and on the database: the "observe text" scheme code sends the text to
+   RelEx for parsing, counts the returned word-pairs, and stores them in
+   the database.
+
+8) Verify that the above resulted in data sent to the SQL database. So:
+   psql learn-pairs
    learn-pairs=# SELECT * from atoms;
 
    The above shows that the database now contains word-counts for
@@ -49,22 +109,25 @@ Steps:
    c) See the section 'Sentence Splitting'. Set that up.
    d) See Wikipedia 'Processing, part II' below.
 
-10) Do the stuff in section "Mutual Information".
+10) After doing at least several days worth of parsing  (i.e. at least
+   hundreds of articles, tens of thousands of sentences) the word-pair
+   mutual information can be extracted. Do the stuff in section "Mutual
+   Information" section below.
+
+11) MST parsing can now be started. See below.
 
 That's all for now, folks!
 
 
-TODO
-----
+Misc TODO
+---------
 * Remove the NLP_HACK from persist/sql/PersistModule.cc
 * Optimize the scm scripts to not pound the database so hard.
   (How? Lots of word pushes, but really, there's not much repeat
-  traffic ...)
+  traffic ...) Not sure this is much of a problem, any more.
 * Investigate crash: while writing truuth value, stv_confidence 
-  was pure virtual (circa line 920 of AtomStorage.cc)
-  -- this only happened when I allowed the atomspace to get
-     bigger, by not agressively deleting old sentences!
-     I don't see what this has to do with it ...
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
 
 DONE
 ----
@@ -90,8 +153,8 @@ DONE
   Done. atoms.sql now uses bigint 64-bit uuids.
 
 
-Notes:
-------
+Misc Notes about batch processing
+----------------------------------
 The relex parse is extreely fast, the cogserver part is extremely slow ... 
 Non-linear, even.
 4-word sentence: 53 parses, 3-4 seconds elapsed
@@ -104,15 +167,24 @@ cogserver runs at 56% cpu for a while then drops to 26% cpu
 8-word sentence, max of 999 parses,
 2 minutes elapsed.  Same CPU usage as above...
 
+Solution: 999 parses are not needed.  Asorted tuning was done since
+the above was written. 
+
 
 Wikipedia processing
 --------------------
-Do the following:
+Notes below are for four languages: French, Lithuanian, Polish, and
+"Simple English".  Adjust as desired.
+
+Set up distinct databases, one for each language:
     createdb fr_pairs lt_pairs pl_pairs simple_pairs
     cat opencog/persist/sql/atom.sql | psql
     vi .odbc.ini  learn-fr learn-lt learn-pl learn-simple
 
-cleanup files in relex: src/perl
+The wikipedia articles need to be scrubbed of stray wiki markup, so
+that we send (mostly) plain text into the system.  There's a set of
+cleanup files in the RelEx source distribution, in the src/perl
+directory.  Use these as follows:
 
     cd /storage/wikipedia
 
@@ -150,30 +222,32 @@ find |wc gives 1764813 articles
 55K are templates
 find |wc gives 1452739 files after cat/template removal
 
+Wikipedia processing continues in Part II below.  But first, an interruption.
+
 
 Sentence Splitting
 ------------------
-Needs to be multi-language
-Maybe NLTK ? .. Not today, but you can experiment.
-Long-term goal is to have opencog know how to sentence-split itself,
-but this is secondary prioruity.
+Raw text needs to be split up into sentences.  Some distant future day,
+opencog will do this automatically. For now, we hack it.
+
+The sentence splitter needs to work for any language.
+Maybe use NLTK ? ... OK, but not today, ... you can experiment.
 
 Here's a simple one, easy-to-use:
 https://github.com/moses-smt/mosesdecoder/tree/master/scripts/share/nonbreaking_prefixes
 Has french, polish, latvian
-its LGPL
-Copy this over into relex, for now. (Its in the RelEx sources)
+Its LGPL.  Copy this over into RelEx, for now. (Its now in the RelEx sources)
 
-cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+Verify that it works: e.g.
 
+   cat /storage/wikipedia/ltwiki-20131216-pages-articles/alpha-pages/A/./Akiduobė | /home/linas/src/relex/src/split-sentences/split-sentences.pl -l lt > x
+
+Some typical sentence-splitting concerns:
 A question mark or exclamation mark always ends a sentence.  A period followed by an
 upper-case letter generally ends a sentence, but there are a number of exceptions.  For
 example, if the period is part of an abbreviated title ("Mr.", "Gen.", ...), it does not end a
 sentence.  A period following a single capitalized letter is assumed to be a person's initial,
 and is not considered the end of a sentence.
-
-(setlocale LC_ALL "")
- (display "Ćićolina")
 
 
 Wikipedia Parsing, part II
@@ -186,14 +260,18 @@ alpha-pages after all that work)
 * Copy scripts from opencog/nlp/learn/misc-scripts into working dir.
 * Modify as needed for chosen language. 
 * Make sure the scripts point at the RelEx parse server.
+  (The RelEx location is given in config-*.scm Make sure that its right,
+  and that its loaded... i.e. is listed in opencog-*.conf)
 * Copy opencog-lang.conf to opencog build dir.
-  Start cogserver -c opencog-lang.conf 
+  Start like this:    cogserver -c opencog-lang.conf 
 * Go back to the wikipedia dir, and run ./wiki-ss-lang.sh
 * Wait a few days.
-* Be sure to psql lang_pairs -c "VACUUM ANALYZE;" every 4 hours or so,
-  as otherwise, performance craters.  Be sure to perform the postgres
-  tuning recommendations fount in postgress peformance wiis, or in
-  the opencog/persist/sql/README file.  See also 'Performance' section
+* This requires postgres 8.4 or newer, for multiple reasons. One reason
+  is that older postgres don't automatically VACUUM (see "performance"
+  below) The other is the list membership functions are needed.
+* Be sure to perform the postgres tuning recommendations found in 
+  various online postgres peformance wikis, or in the 
+  opencog/persist/sql/README file.  See also 'Performance' section
   below.
 
 Some handy SQL commands:
@@ -206,44 +284,72 @@ SELECT * FROM Typecodes;
 
 Mutual Information
 ------------------
-Compute mutual information, manually, by runnning these scripts:
-compute-mi.scm Go to the bottom, and run (do-em-all)
+After accumulating a few million word pairs, we're ready to compute
+the mutual entropy between them.  This is done manually, by runnning
+these scripts:
+
+load:
+   compute-mi.scm  Look at it. Go to the bottom, and run (do-em-all)
 
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.
 
 This takes 17K + 2x 178K = 370K total atoms loaded.
-These load up in 10 seconds-ish or so.
+These load up in 10-20 seconds-ish or so.
 
 RSS for cogserver: 436MB, holding approx 370K atoms
 So this is about 1.2KB per atom, all included. Atoms are a bit fat...
 ... loading all pairs is very manageable even for modest-sized machines.
 
-Wild-card pair-count is taking about 30 per minute, so total time will
-be  17K minutes/30 = 580 minutes = 10 hours!  Oy vey...
-This is utterly single-threaded...
+Wild-card pair-count was taking about 30 per minute.  After extensive
+bug fixing and tuning in the cogserver, its now running at hundreds
+per minute (maybe 10x faster than before). This is still very slow:
+if your goal was to only compute word-pair MI, you could do it a lot
+faster by not using opencog, and writing some custom perl scripts.
+The goal here is to not script-hack, but use an integrated environment,
+and so we use opencog, and deal with some slowness.
 
-all-pair count was fast.
+So total processing time will be  17K words x (minute/300 words) = 
+60 minutes = 1 hour .. be patient.
 
-Final mi compute: 2910 in 73 mins == 40 per minute ... again, pathetic.
-Will take 7 hours (420 minutes) to complete ...
+If tracing is turnied on, a trace file is written to /tmp/progress.
+
+After the single-word counts complete, and all-pair count is done. This
+is fast, takes a couple of minutes.
+
+Finally, an MI comppute stage.  Currently, it did 2910 words in 73 mins
+== 40 per minute ... again, pathetic.  Will take 7 hours (420 minutes)
+to complete ...
 
 Wooot!  After numerous fixes, to avoid the old atomspace brain-damage
 we are now up to about 250 per minute on wild-card, that's an 8x speedup!
 Although thats still slower than e.g. a perl script ... oh well,
 price of generality.  Avoiding the pattern matcher would go a long way.
 
+(This script currently uses the patten matcher cause I got lazy. 
+It could be speeded up by avoiding the pattern matcher, since the desired
+patterns are really quite simple).
 
-Next step: minimum spanning tree parsing
+
+Next step: Minimum Spanning Tree parsing
 ----------------------------------------
 Minimum spanning tree code is in mst-parser.scm
 
-he MST parser discovers the minimum spanning tree that connects the
-words together in a sentence, the mutual information between word-pairs
-is used as the link-cost. (actually, we're maximizing, not minimizing MI).
+The MST parser discovers the minimum spanning tree that connects the
+words together in a sentence.  The link-cost used is (minus) the mutual
+information between word-pairs (so we are miximizing MI).
 
-The algorithm works. The next step is to store the results, and start
-clustering them to auto-discover link-grammar links.
+The algorithm implemented in mst-parser.scm works. 
+
+Here's what's not yet implemented: The next step is to pick apart the
+parse, back into link-grammar style disjuncts, and store these in the
+atom space.  This is to be followed by a second parse phase, so that
+we now MST-parse gobs and gobs of text.
+
+One a bunch of statistics are accumulated for these super-fine-grained
+disjuncts, the next step is to coarse-grain them, by clustering together
+similar ones.  The goal is that clusters will auto-rediscover link-grammar
+links. 
 
 
 Some typical entropies for word-pairs
@@ -469,6 +575,12 @@ again... 3 Jan, even after the fixes... WTF???
        Very recent atom being added.
 again... 4 Jan, even after the fixes... WTF???
        Its the (LinkGrammarRelationshipNode "ANY") as usual.
+again... 4 Jan, even after the fixes... WTF??? .. ANY as usual
+again... 4 Jan, even after the fixes... WTF??? .. ANY as usual
+       This time, immediately followed by glibc malloc corruption:
+       *** glibc detected *** opencog/server/cogserver: malloc(): smallbin
+       double linked list corrupted: 0x000000002ec2e140 ***
+
 
 
 
@@ -524,6 +636,9 @@ bdwgc ./configure --with-large-heap=yes
 #ifndef LARGE_CONFIG
 #define LARGE_CONFIG
 #endif
+
+Core issue: cogserver should not be getting this big, anyway. Why
+is it so big?
 
 Irritation 4
 ------------
@@ -627,6 +742,7 @@ Misc
 Change load-atoms to return a count?
 
 gdb:
+---
 handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
 
@@ -656,7 +772,7 @@ writer does:
   // now we have exclusive access
 }
 
-am using boost1.49 on cray
+am using boost-1.49 on cray
 
 ------------------------------------------
 
