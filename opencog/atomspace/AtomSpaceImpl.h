@@ -236,8 +236,8 @@ private:
     /**
      * signal connections used to keep track of atom removal in the AtomTable
      */
-    boost::signals::connection removedAtomConnection; 
-    boost::signals::connection addedAtomConnection; 
+    boost::signals2::connection removedAtomConnection;
+    boost::signals2::connection addedAtomConnection;
 
     /** Handler for the 'atom removed' signal */
     void atomRemoved(AtomPtr);

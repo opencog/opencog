@@ -116,7 +116,7 @@ void ClassServer::setParentRecursively(Type parent, Type type)
     }
 }
 
-boost::signal<void (Type)>& ClassServer::addTypeSignal()
+boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 {
     return _addTypeSignal;
 }

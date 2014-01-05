@@ -143,17 +143,17 @@ public:
     void testSignals()
     {
         // Connect signals
-        boost::signals::connection add1 =
+        boost::signals2::connection add1 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded1, this, _1));
-        boost::signals::connection add2 =
+        boost::signals2::connection add2 =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomAdded2, this, _1));
-        boost::signals::connection merge1 =
+        boost::signals2::connection merge1 =
             atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged1, this, _1, _2, _3));
-        boost::signals::connection merge2 =
+        boost::signals2::connection merge2 =
             atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::atomMerged2, this, _1, _2, _3));
-        boost::signals::connection remove1 =
+        boost::signals2::connection remove1 =
             atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved1, this, _1));
-        boost::signals::connection remove2 =
+        boost::signals2::connection remove2 =
             atomSpace->removeAtomSignal(boost::bind(&AtomSpaceAsyncUTest::atomRemoved2, this, _1));
 
         /* Add and remove a simple node */
@@ -408,10 +408,10 @@ public:
     void testThreadedSignals()
     {
         // connect signals
-        boost::signals::connection add =
+        boost::signals2::connection add =
             atomSpace->addAtomSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomAdded, this, _1));
 
-        boost::signals::connection chg =
+        boost::signals2::connection chg =
             atomSpace->TVChangedSignal(boost::bind(&AtomSpaceAsyncUTest::countAtomChanged, this, _1, _2, _3));
 
         __totalAdded = 0;

@@ -97,7 +97,6 @@ SET(PLN_LINK_LIBS
 	server
 	cogutil
 	pln-types
-	#${Boost_SIGNALS_LIBRARY}
 )
 
 IF (HAVE_CYTHON)

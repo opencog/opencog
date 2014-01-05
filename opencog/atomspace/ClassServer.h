@@ -26,7 +26,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 #include <boost/thread/shared_mutex.hpp>
 
 #include <opencog/atomspace/types.h>
@@ -47,7 +47,7 @@ typedef ClassServer* ClassServerFactory(void);
  * The current implementation is hardwired. Future versions may include
  * different structures based on run-time type identification.
  */
-typedef boost::signal<void (Type)> TypeSignal;
+typedef boost::signals2::signal<void (Type)> TypeSignal;
 class ClassServer
 {
 private:

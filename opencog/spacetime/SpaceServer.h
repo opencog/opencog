@@ -40,7 +40,7 @@
 #include <string>
 #include <map>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/util/exceptions.h>
 
@@ -217,8 +217,8 @@ private:
     /**
      * signal connections used to keep track of atom removal in the SpaceMap
      */
-    boost::signals::connection removedAtomConnection;
-    boost::signals::connection addedAtomConnection;
+    boost::signals2::connection removedAtomConnection;
+    boost::signals2::connection addedAtomConnection;
 
     void atomRemoved(AtomPtr);
     void atomAdded(Handle);

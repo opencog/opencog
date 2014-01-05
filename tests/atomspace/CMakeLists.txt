@@ -6,7 +6,6 @@ OPENCOG_ADD_ATOM_TYPES(atom_types.script
 
 LINK_LIBRARIES(
 	atomspace
-	${Boost_SIGNALS_LIBRARY}
 )
 
 IF(HAVE_GUILE)
