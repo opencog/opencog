@@ -187,18 +187,22 @@ void Atom::setMean(float mean) throw (InvalidParamException)
 
 void Atom::merge(TruthValuePtr tvn)
 {
-    if (NULL == tvn or tvn->isNullTv()) return;
+    if (NULL == tvn or tvn->isDefaultTV() or tvn->isNullTv()) return;
 
-    // As far as I can tell, there is no need to lock this
-    // section of the code; all changes to the TV are essentially
-    // atomic, from what I can tell (right?)
-    TruthValuePtr currentTV = getTruthValue();
-    TruthValuePtr mergedTV;
-    if (currentTV->isNullTv()) {
-        mergedTV = tvn;
-    } else {
-        mergedTV = currentTV->merge(tvn);
+    // No locking to be done here. It is possible that between the time
+    // that we read the TV here (i.e. set currentTV) and the time that
+    // we look to see if currentTV is default, that some other thread
+    // will have changed _truthValue. This is a race, but we don't care,
+    // because if two threads are trying to simultaneously set the TV on
+    // one atom, without co-operating with one-anothr, they get what
+    // they deserve -- a race.
+    TruthValuePtr currentTV(_truthValue);
+    if (currentTV->isDefaultTV() or currentTV->isNullTv()) {
+        setTruthValue(tvn);
+        return;
     }
+
+    TruthValuePtr mergedTV(currentTV->merge(tvn));
     setTruthValue(mergedTV);
 }
 

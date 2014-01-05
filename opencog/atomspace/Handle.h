@@ -81,7 +81,18 @@ public:
     }
 
     inline Handle& operator=(const Handle& h) {
-        if (this == &h) return *this;
+        if (this->_uuid == h._uuid) {
+            Atom* a = h._ptr.get();
+            // The 'typical' case here is where a isn't null,
+            // but this is.  The weirdo case is where both
+            // aren't null, and yet differ.
+            // Mostly, we want to avoid the CPU overhead of calling
+            // resolve(), it we can; so the goal of this if-stmt is
+            // to upgrade the ptr from null to non-null.
+            if (a != NULL and a != this->_ptr.get())
+                this->_ptr = h._ptr;
+            return *this;
+        }
         this->_uuid = h._uuid;
         this->_ptr = h._ptr;
         return *this;

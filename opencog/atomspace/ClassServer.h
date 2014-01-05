@@ -23,11 +23,11 @@
 #ifndef _OPENCOG_CLASS_SERVER_H
 #define _OPENCOG_CLASS_SERVER_H
 
-#include <mutex>
 #include <unordered_map>
 #include <vector>
 
 #include <boost/signal.hpp>
+#include <boost/thread/shared_mutex.hpp>
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/atom_types.h>
@@ -55,8 +55,10 @@ private:
     /** Private default constructor for this class to make it a singleton. */
     ClassServer();
 
-    mutable std::mutex type_mutex;
-    mutable std::mutex signal_mutex;
+    /* Use boost, because we need a reader-writer implementation, which
+     * is not offered by C++11 ... but expected in C++14 ?? */
+    mutable boost::shared_mutex type_mutex;
+    mutable boost::mutex signal_mutex;
 
     Type nTypes;
 
@@ -128,7 +130,12 @@ public:
      */
     bool isA(Type sub, Type super)
     {
-        std::lock_guard<std::mutex> l(type_mutex);
+        /* Because this metod is called extremely often, we want
+         * the best-case fast-path for it.  Since updates are extremely
+         * unlikely after initialization, we use a multi-reader lock,
+         * and don't care at all about writer starvation, since there
+         * will almost never be writers. */
+        boost::shared_lock<boost::shared_mutex> l(type_mutex);
         if ((sub >= nTypes) || (super >= nTypes)) return false;
         return recursiveMap[super][sub];
     }

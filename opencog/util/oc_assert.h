@@ -44,8 +44,12 @@
 ///@{
 
 #ifndef IGNORE_OC_ASSERT
-#define OC_ASSERT(...) \
-    opencog::cassert(TRACE_INFO, __VA_ARGS__)
+#define OC_ASSERT(cond,...) \
+    /* Test cond first, so that __VA_ARGS__ are NOT evaluated */ \
+    /* unless cond is false! (Sometimes, evaluating the args is */ \
+    /* CPU intensive, and/or requires taking locks!) */ \
+    { bool test = (cond); \
+    if (not test) opencog::cassert(TRACE_INFO, test, ##__VA_ARGS__); }
 #else
 #define OC_ASSERT(...) \
     ((void)0)

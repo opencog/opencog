@@ -234,8 +234,20 @@ Although thats still slower than e.g. a perl script ... oh well,
 price of generality.  Avoiding the pattern matcher would go a long way.
 
 
-MI Results, Next steps
-----------------------
+Next step: minimum spanning tree parsing
+----------------------------------------
+Minimum spanning tree code is in mst-parser.scm
+
+he MST parser discovers the minimum spanning tree that connects the
+words together in a sentence, the mutual information between word-pairs
+is used as the link-cost. (actually, we're maximizing, not minimizing MI).
+
+The algorithm works. The next step is to store the results, and start
+clustering them to auto-discover link-grammar links.
+
+
+Some typical entropies for word-pairs
+-------------------------------------
 (WordNode "famille") entropy H=11.185
 
 H(*, famille) = 11.195548 
@@ -445,6 +457,20 @@ Another thread is doing setTV even while this thread is doing getTV.  The
 use-count pointer drops to zero, destructor runs, then magically, use-count
 goes back up to one...  basically, shared_ptr's are not thread-safe.
 
+OK, so fixed all the above, and it should work, right?
+
+again... 1 Jan, even after the fixes... WTF???
+again... 2 Jan, even after the fixes... WTF???
+again... 3 Jan, even after the fixes... WTF???
+       except this time, it wasn't (LinkGrammarRelationshipNode "ANY")
+       but instead some link ... 
+       N7opencog10TruthValueE addr=0x28ecc9658 tv-cnt=2 atom-cnt=247 atom-type=27
+       name=(not-node) cols=UPDATE Atoms SET  vals= coda= WHERE uuid = 175787728; 
+       Very recent atom being added.
+again... 4 Jan, even after the fixes... WTF???
+       Its the (LinkGrammarRelationshipNode "ANY") as usual.
+
+
 
 Crash 2
 -------
@@ -454,8 +480,7 @@ All new crash. Note:
    in it.  It should have just been a standard stack trace, but wasn't.
 3) Sometimes, when doing this, and parser is running, I get 
 
-[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on threa
-d 47486186035520
+[2013-12-26 22:50:57:680] [ERROR] Caught signal 11 (Segmentation fault) on thread 47486186035520
         Stack Trace:
         2: CogServerMain.cc:92  _Z7sighandi()
         3: sigaction.c:0        __restore_rt()
@@ -499,6 +524,36 @@ bdwgc ./configure --with-large-heap=yes
 #ifndef LARGE_CONFIG
 #define LARGE_CONFIG
 #endif
+
+Irritation 4
+------------
+Occasionally see this: 
+
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 294a63c0> ...]
+
+   ?: 3 [apply-smob/1 #<catch-closure 294a62a0>]
+   ?: 2 [call-with-input-string "(observe-text \"Cheopso piramid\u0117, arba Did
+\u017eioji Gizos piramid\u0117 \u2013 Egipto piramid\u0117, faraono Cheopso kapa
+s.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 193e5c80 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encodi
+ng-error ...]
+
+-----------
+another:
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
+Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+
+Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord
+Wydawnictwo Oskar, Gdańsk 2010 r.
+
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
+
+ABORT: encoding-error
 
 
 
@@ -571,6 +626,7 @@ Misc
 ----
 Change load-atoms to return a count?
 
+gdb:
 handle SIGPWR nostop noprint
 handle SIGXCPU nostop noprint
 
@@ -604,16 +660,4 @@ am using boost1.49 on cray
 
 ------------------------------------------
 
- "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
-Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
-
-Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord
-Wydawnictwo Oskar, Gdańsk 2010 r.
-
-In ice-9/boot-9.scm:
- 102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
-In unknown file:
-   ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
-
-ABORT: encoding-error
 
