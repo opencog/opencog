@@ -6,7 +6,7 @@ from optparse import OptionParser
 def parse_log(logFileName, options):
     of = open(options.output_file, "w") if options.output_file else sys.stdout
     prefix = options.prefix
-    prefix_delim = " " + options.prefix + ":"
+    prefix_delim = options.prefix + ":"
     header_written = False
     has_init_time = False
     for l in open(logFileName):
