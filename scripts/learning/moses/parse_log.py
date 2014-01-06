@@ -2,30 +2,46 @@
 import sys
 from common import datetime_from_str
 from optparse import OptionParser
+import re
 
 def parse_log(logFileName, options):
     of = open(options.output_file, "w") if options.output_file else sys.stdout
     prefix = options.prefix
-    prefix_delim = options.prefix + ":"
     header_written = False
     has_init_time = False
+
+    # Define the regex for header and content
+    timestamp_re = r'\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}:\d{3}\]'
+    info_re = r'\[INFO\]'
+    header_re = r'{}: # (\w+(?:\t\w+)+)'.format(prefix)
+    content_re = r'{}: ([^#\t]+(?:\t.+))+'.format(prefix)
+    all_header_re = r'(?:{} {} )?{}'.format(timestamp_re, info_re, header_re)
+    all_content_re = r'({}) {} {}'.format(timestamp_re, info_re, content_re)
+    all_header_cre = re.compile(all_header_re)
+    all_content_cre = re.compile(all_content_re)
+
+    # Read all lines of the log file and fill header and content
     for l in open(logFileName):
+        ls = l.strip()
         # write header
-        if (not header_written) and all(x in l for x in [prefix_delim, "#", "\t"]):
-            header = ["time"] + l.partition("#")[2].strip().split("\t")
-            of.write(",".join(header) + "\n")
-            header_written = True
-        elif (prefix_delim in l) and ("#" not in l):
-            dp = l.partition(prefix_delim)
-            # get time
-            time_str = dp[0].partition("[INFO]")[0].strip()[1:-1]
-            if not has_init_time:
-                init_time = datetime_from_str(time_str)
-                has_init_time = True
-            time = datetime_from_str(time_str)
-            rel_time = (time - init_time).total_seconds()
-            content = [str(rel_time)] + dp[2].strip().split("\t")
-            of.write(",".join(content) + "\n")
+        if not header_written:
+            hm = all_header_cre.match(ls)
+            if hm:
+                header = ["time"] + hm.group(1).split('\t')
+                of.write(",".join(header) + "\n")
+                header_written = True
+        else:
+            cm = all_content_cre.match(ls)
+            if cm:
+                # get time
+                time_str = cm.group(1)[1:-1]
+                if not has_init_time:
+                    init_time = datetime_from_str(time_str)
+                    has_init_time = True
+                time = datetime_from_str(time_str)
+                rel_time = (time - init_time).total_seconds()
+                content = [str(rel_time)] + cm.group(2).split('\t')
+                of.write(",".join(content) + "\n")
 
 if __name__ == "__main__":
     # define options
