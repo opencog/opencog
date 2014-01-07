@@ -1207,20 +1207,19 @@ public:
         AttentionValue::lti_t threshold;
     };
 
-    // TODO XXX FIXME convert to boost::signals2 ASAP for thread safety.
-    boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function)
+    boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
         return getImpl().atomTable.addAtomSignal().connect(function);
     }
-    boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
+    boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
     {
         return getImpl().atomTable.removeAtomSignal().connect(function);
     }
-    boost::signals::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
     {
         return getImpl().atomTable.AVChangedSignal().connect(function);
     }
-    boost::signals::connection TVChangedSignal(const TVCHSigl::slot_type& function)
+    boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
         return getImpl().atomTable.TVChangedSignal().connect(function);
     }
@@ -1230,7 +1229,7 @@ public:
     std::list<Handle> addAtomSignalQueue;
 
 private:
-    boost::signals::connection c_add; //! Connection to add atom signals
+    boost::signals2::connection c_add; //! Connection to add atom signals
     bool handleAddSignal(Handle);
 };
 

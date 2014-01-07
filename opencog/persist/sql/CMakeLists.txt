@@ -35,7 +35,6 @@ TARGET_LINK_LIBRARIES(sniff
 	persist
 	server
 	atomspace
-	${Boost_SIGNALS_LIBRARY}
 	${ODBC_LIBRARIES}
 )
 

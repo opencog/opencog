@@ -1,7 +1,6 @@
 LINK_LIBRARIES (
 	server
     attention
-	${Boost_SIGNALS_LIBRARY}
 	${GSL_LIBRARIES}
 )
 

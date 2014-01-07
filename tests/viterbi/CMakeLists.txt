@@ -15,7 +15,6 @@ LINK_LIBRARIES(
 	query
 	server
 	${LINK_GRAMMAR_LIBRARY}
-	${Boost_SIGNALS_LIBRARY}
 )
 
 # We want to run the tests in the order below;

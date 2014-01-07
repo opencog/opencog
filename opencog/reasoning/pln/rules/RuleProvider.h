@@ -98,8 +98,8 @@ class ReferenceRuleProvider : public RuleProvider
     bool handleAddSignal(AtomSpaceImpl *a, Handle h); //!< Signal handler for atom adds.
     bool handleRemoveSignal(AtomSpaceImpl *a, Handle h); //!< Signal handler for atom removals.
 
-    boost::signals::connection c_add; //! Connection to add atom signals
-    boost::signals::connection c_remove; //! Connection to remove atom signals
+    boost::signals2::connection c_add; //! Connection to add atom signals
+    boost::signals2::connection c_remove; //! Connection to remove atom signals
 
     std::map<std::string,RulePtr> rules; //! name to rule mapping
 

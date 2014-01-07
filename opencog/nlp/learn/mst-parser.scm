@@ -17,9 +17,11 @@
 ; previously).
 ;
 ; The algorithm implemented is a basic minimum spanning tree algorithm.
-; Initially, a graph clique is constructed from the words in the
-; sentence, with every word connected to every other word. The mutual
-; information betweeen wrd-pairs is used to determine graph edge lengths.
+; Conceptually, the graph to be spanned by the tree is a clique, with 
+; with every word in the sentence being connected to every other word.
+; The edge-lengths are given by the mutual information betweeen word-pairs
+; (although perhaps other metrics are possible; see below).
+;
 ; The spanning tree is then obtained. Finally, disjuncts are created from
 ; the resulting parse, by looking at how each word is attached to the
 ; other words.  The disjuncts are then recorded.
@@ -39,7 +41,7 @@
 (define (tokenize-text plain-text)
 	; Prefix and suffix lists taken from the link-grammar ANY
 	; language 4.0.affix file
-	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†††‡§¶©®℗№#")
+	(define prefix "({[<«〈（〔《【［『「``„“‘'''…...¿¡$£₤€¤₳฿₡₢₠₫৳ƒ₣₲₴₭₺ℳ₥₦₧₱₰₹₨₪﷼₸₮₩¥៛호점†‡§¶©®℗№#")
 	(define suffix ")}]>»〉）〕》】］』」’'%,.。:;?!‽؟？！…”–‐、～¢₵™℠")
 	(define prefix-list (string->list prefix))
 	(define suffix-list (string->list suffix))
@@ -141,17 +143,31 @@
 ; ---------------------------------------------------------------------
 ;
 ; Minimum Spanning Tree parser.
+; Given a raw-text sentence, it splits apart the sentence into distinct
+; words, and finds an (unlabelled) dependency parse of the sentence, by
+; finding a dependency tree that minimizes minus the mutual information.
+; A list of word-pairs, together with the associated mutual information,
+; is returned.
 ;
-; Choice of algorithms:
-; Prim is very easy; but seems too easy to give good results.
-; Kruskal is good, but seems hard to control a no-link-cross contraint.
-; Settle on a variant of Borůvka's algo.
-; A no-links-cross constraint is not required, see
+; There are many MST algorithms; the choice was made as follows:
+; Prim is very easy; but seems too simple to give good results.
+; Kruskal is good, but seems hard to control a no-link-cross constraint. (?)
+; Settle on a variant of Borůvka's algo, which seems to be robust,
+; and fast enough for the current needs.
+;
+; The no-links-cross constraint might not be required, see
 ; R. Ferrer-i-Cancho (2006) “Why do syntactic links not cross?”
+; However, that would require changing the metric from mutual information
+; to something else, perhaps incorporating the dependency distance
+; (as defined by Ferrer-i-Cancho), or possibly the "hubiness", or some
+; combination.  Since I really, really want to stick to entropy concepts,
+; the mean-dependency-distance metric needs to be re-phrased as some
+; sort of graph entropy. Hmmm...
 ;
-; Well. but we force no-link-cross anyway, as otherwise, the pair-MI
-; scores alone get rather unruly.  In the long-run, it might be better
-; to instead pick something that combines MI scores with 
+; So, for now, a no-links-corss constraint is handed-coded into the algo.
+; Without it, it seems that the pair-MI scores alone give rather unruly
+; dependencies (unclear, needs exploration).  So, in the long-run, it
+; might be better to instead pick something that combines MI scores with 
 ; mean-dependency-distance or with hubbiness. See, for example:
 ; Haitao Liu (2008) “Dependency distance as a metric of language
 ; comprehension difficulty” Journal of Cognitive Science, 2008 9(2): 159-191. 
