@@ -888,16 +888,16 @@ y.
 
 \begin_layout Itemize
 (Cite this, its good) Mean dependency distance is a good measure of sentence
- complexity -- for 20 languages -- give overview startgin from Yngve.
- Haitao Liu (2008) 
-\begin_inset Quotes eld
+ complexity -- for 20 languages -- Haitao Liu gives overview starting from
+ Yngve.
+ 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Liu2008"
+
 \end_inset
 
-Dependency distance as a metric of language comprehension difficulty
-\begin_inset Quotes erd
-\end_inset
-
- Journal of Cognitive Science, 2008 9(2): 159-191.
+.
  
 \end_layout
 

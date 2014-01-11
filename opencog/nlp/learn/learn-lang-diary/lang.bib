@@ -47,7 +47,20 @@
 	lockkey = {Y}
 }
 
-@article{Ferrer2006
+@inproceedings{Domingos2006,
+	author = {Domingos, Pedro and Kok, Stanley and Poon, Hoifung and Richardson, Matthew and Singla, Parag},
+	title = {Unifying logical and statistical AI},
+	booktitle = {AAAI'06: Proceedings of the 21st national conference on Artificial intelligence},
+	pages = {2--7},
+	year = 2006,
+	publisher = {AAAI Press},
+	abstract = {Intelligent agents must be able to handle the complexity and uncertainty of the real world. Logical AI has focused mainly on the former, and statistical AI on the latter. Markov logic combines the two by attaching weights to first-order formulas and viewing them as templates for features of Markov networks. Inference algorithms for Markov logic draw on ideas from satisfiability, Markov chain Monte Carlo and knowledge-based model construction. Learning algorithms are based on the voted perceptron, pseudo-likelihood and inductive logic programming. Markov logic has been successfully applied to problems in entity resolution, link prediction, information extraction and others, and is the basis of the open-source Alchemy system.},
+	isbn = {978-1-57735-281-5},
+	location = {Boston, Massachusetts},
+	lockkey = {Y}
+}
+
+@article{Ferrer2006,
 	author = {R. Ferrer i Cancho},
 	title = {Why do syntactic links not cross?},
 	journal = {EPL (Europhysics Letters) },
@@ -75,6 +88,17 @@
 		The absence of crossings in syntactic trees may be universal just
 		because all human brains have limited resources.}
 }
+
+@article{Gibson1998,
+	author = {Edward Gibson},
+	title = {Linguistic complexity: locality of syntactic dependencies},
+	journal = {Cognition},
+	volume = {68},
+	pages={1-76},
+	url={http://www.linguistics.pomona.edu/lgcs121spring2005/reading/gibson98.pdf},
+	year={1998},
+}
+
 
 @BOOK{Goertzel1994,
   title = {Chaotic Logic},
@@ -193,6 +217,49 @@
 	lockkey = {Y}
 }
 
+@inproceedings{klein2003fast,
+	author = {Dan Klein and Christopher D. Manning},
+	title = {Fast Exact Inference with a Factored Model for Natural Language Parsing},
+	booktitle = {Advances in Neural Information Processing Systems},
+	year = 2003,
+	volume = 15,
+	publisher = {MIT Press},
+	keywords = {NT2OD nlp parser stanford},
+	url = {http://www-nlp.stanford.edu/~manning/papers/lex-parser.pdf},
+	abstract = {We present a novel generative model for natural language
+tree structures in which semantic (lexical dependency) and syntactic
+(PCFG) structures are scored with separate models. This factorization
+provides conceptual simplicity, straightforward opportunities for
+separately improving the component models, and a level of performance
+comparable to similar, non-factored models. Most importantly, unlike
+other modern parsing models, the factored model admits an extremely
+effective A* parsing algorithm, which enables efficient, exact
+inference.},
+	biburl = {http://www.bibsonomy.org/bibtex/2505045157cd1142aec85fa272f937559/butonic},
+	school = {The Stanford Natural Language Processing Group}
+}
+
+@inproceedings{Klein2004,
+	author = {Dan Klein and Christopher D. Manning},
+	title = {Corpus-Based Induction of Syntactic Structure: Models of Dependency and Constituency},
+
+	booktitle = {ACL '04 Proceedings of the 42nd Annual Meeting on Association for Computational Linguistics},
+	pages = {479--486},
+	year = 2004,
+	publisher = {Association for Computational Linguistics},
+   url = {http:/http://www.cs.berkeley.edu/~klein/papers/acl04-factored_induction.pdf},
+	doi = {10.3115/1218955.1219016},
+	lockkey = {Y}
+}
+
+@book{Kuc67,
+	author = {Henry Kucera and W. Nelson Francis},
+	title = {Computational Analysis of Present-Day American English},
+	publisher = {Brown University},
+	year = 1967,
+
+}
+
 
 @ARTICLE{Lian2010,
   author = {Lian, Ruiting and Goertzel, Ben and Et, Al},
@@ -208,6 +275,50 @@
   publisher = {Springer},
   year = {2012},
   author = {Ruiting Lian and Ben Goertzel and  Shujing Ke and  Jade O�Neill and Keyvan Sadeghi and Simon Shiu and  Dingjie Wang and Oliver Watkins and  Gino Yu},
+}
+
+@inproceedings{Lin1998,
+	author = {Lin, Dekang},
+	title = {Automatic retrieval and clustering of similar words},
+	booktitle = {Proceedings of the 17th international conference on Computational linguistics},
+	pages = {768--774},
+	year = 1998,
+	address = {Morristown, NJ, USA},
+	publisher = {Association for Computational Linguistics},
+	doi = {http://dx.doi.org/10.3115/980691.980696},
+
+}
+
+@inproceedings{Lin1998minipar,
+	author = {Dekang Lin},
+	title = {Dependency-based Evaluation of MINIPAR},
+	booktitle = {Proc. Workshop on the Evaluation of Parsing Systems},
+	year = 1998,
+	series = {Granada},
+	biburl = {http://www.bibsonomy.org/bibtex/241c0fe4de5685916d5590b532a6aaf21/diego_ma},
+	lockkey = {Y}
+}
+
+@inproceedings{Lin2001,
+	author = {Lin, Dekang and Pantel, Patrick},
+	title = {DIRT: Discovery of Inference Rules from Text},
+	booktitle = {Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD'01)},
+	pages = {323--328},
+	year = 2001,
+	publisher = {ACM Press},
+	doi = {10.1145/502512.502559},
+	lockkey = {Y}
+}
+
+@article{Liu2008,
+	author = {Haitao Liu},
+	title = {Dependency distance as a metric of language comprehension difficulty},
+	journal = {Journal of Cognitive Science},
+	volume = {9},
+   number = {2},
+	pages={159-191},
+	url={http://www.lingviko.net/JCS.pdf},
+	year={2008},
 }
 
 @book{Looks2006,
@@ -242,14 +353,6 @@
   bibsource = {DBLP, http://dblp.uni-trier.de}
 }
 
-@book{Kuc67,
-	author = {Henry Kucera and W. Nelson Francis},
-	title = {Computational Analysis of Present-Day American English},
-	publisher = {Brown University},
-	year = 1967,
-
-}
-
 @article{Li92,
 	author = {Wentian Li},
 	title = {Random Texts Exhibit Zipf's-Law-Like Word Frequency Distribution},
@@ -275,14 +378,6 @@
 }
 #  journal={한국사전학},
 #  publisher={한국사전학회}
-
-@proceedings{Steele1990,
-	title = {Meaning-Text Theory: Linguistics, Lexicography, and Implications},
-	year = 1990,
-	editor = {James Steele},
-	publisher = {University of Ottowa Press},
-
-}
 
 @article{Mel'cuk1987,
 	author = {Igor A. Mel'cuk and Alain Polguere},
@@ -329,74 +424,6 @@
 	lockkey = {Y}
 }
 
-@inproceedings{klein2003fast,
-	author = {Dan Klein and Christopher D. Manning},
-	title = {Fast Exact Inference with a Factored Model for Natural Language Parsing},
-	booktitle = {Advances in Neural Information Processing Systems},
-	year = 2003,
-	volume = 15,
-	publisher = {MIT Press},
-	keywords = {NT2OD nlp parser stanford},
-	url = {http://www-nlp.stanford.edu/~manning/papers/lex-parser.pdf},
-	abstract = {We present a novel generative model for natural language
-tree structures in which semantic (lexical dependency) and syntactic
-(PCFG) structures are scored with separate models. This factorization
-provides conceptual simplicity, straightforward opportunities for
-separately improving the component models, and a level of performance
-comparable to similar, non-factored models. Most importantly, unlike
-other modern parsing models, the factored model admits an extremely
-effective A* parsing algorithm, which enables efficient, exact
-inference.},
-	biburl = {http://www.bibsonomy.org/bibtex/2505045157cd1142aec85fa272f937559/butonic},
-	school = {The Stanford Natural Language Processing Group}
-}
-
-@inproceedings{Klein2004,
-	author = {Dan Klein and Christopher D. Manning},
-	title = {Corpus-Based Induction of Syntactic Structure: Models of Dependency and Constituency},
-
-	booktitle = {ACL '04 Proceedings of the 42nd Annual Meeting on Association for Computational Linguistics},
-	pages = {479--486},
-	year = 2004,
-	publisher = {Association for Computational Linguistics},
-   url = {http:/http://www.cs.berkeley.edu/~klein/papers/acl04-factored_induction.pdf},
-	doi = {10.3115/1218955.1219016},
-	lockkey = {Y}
-}
-
-@inproceedings{Lin1998,
-	author = {Lin, Dekang},
-	title = {Automatic retrieval and clustering of similar words},
-	booktitle = {Proceedings of the 17th international conference on Computational linguistics},
-	pages = {768--774},
-	year = 1998,
-	address = {Morristown, NJ, USA},
-	publisher = {Association for Computational Linguistics},
-	doi = {http://dx.doi.org/10.3115/980691.980696},
-
-}
-
-@inproceedings{Lin1998minipar,
-	author = {Dekang Lin},
-	title = {Dependency-based Evaluation of MINIPAR},
-	booktitle = {Proc. Workshop on the Evaluation of Parsing Systems},
-	year = 1998,
-	series = {Granada},
-	biburl = {http://www.bibsonomy.org/bibtex/241c0fe4de5685916d5590b532a6aaf21/diego_ma},
-	lockkey = {Y}
-}
-
-@inproceedings{Lin2001,
-	author = {Lin, Dekang and Pantel, Patrick},
-	title = {DIRT: Discovery of Inference Rules from Text},
-	booktitle = {Proceedings of the Seventh ACM SIGKDD International Conference on Knowledge Discovery and Data Mining (KDD'01)},
-	pages = {323--328},
-	year = 2001,
-	publisher = {ACM Press},
-	doi = {10.1145/502512.502559},
-	lockkey = {Y}
-}
-
 @inproceedings{Marneffe2006stanford,
 	author = {Marie-Catherine de Marneffe, Bill MacCartney and Christopher D. Manning},
 	title = {Generating typed dependency parses from phrase structure parses},
@@ -419,32 +446,6 @@ inference.},
 	lockkey = {Y}
 }
 
-@inproceedings{Domingos2006,
-	author = {Domingos, Pedro and Kok, Stanley and Poon, Hoifung and Richardson, Matthew and Singla, Parag},
-	title = {Unifying logical and statistical AI},
-	booktitle = {AAAI'06: Proceedings of the 21st national conference on Artificial intelligence},
-	pages = {2--7},
-	year = 2006,
-	publisher = {AAAI Press},
-	abstract = {Intelligent agents must be able to handle the complexity and uncertainty of the real world. Logical AI has focused mainly on the former, and statistical AI on the latter. Markov logic combines the two by attaching weights to first-order formulas and viewing them as templates for features of Markov networks. Inference algorithms for Markov logic draw on ideas from satisfiability, Markov chain Monte Carlo and knowledge-based model construction. Learning algorithms are based on the voted perceptron, pseudo-likelihood and inductive logic programming. Markov logic has been successfully applied to problems in entity resolution, link prediction, information extraction and others, and is the basis of the open-source Alchemy system.},
-	isbn = {978-1-57735-281-5},
-	location = {Boston, Massachusetts},
-	lockkey = {Y}
-}
-
-@inproceedings{Poon2009,
-	author = {Poon, Hoifung and Domingos, Pedro},
-	title = {Unsupervised Semantic Parsing},
-	booktitle = {Proceedings of the 2009 Conference on Empirical Methods in Natural Language Processing},
-	pages = {1--10},
-	year = 2009,
-	address = {Singapore},
-	month = {August},
-	publisher = {Association for Computational Linguistics},
-	url = {http://www.aclweb.org/anthology/D/D09/D09-1001},
-	lockkey = {Y}
-}
-
 @inproceedings{Meza-Ruiz2009,
 	author = {Meza-Ruiz, Ivan and Riedel, Sebastian},
 	title = {Jointly identifying predicates, arguments and senses using Markov logic},
@@ -458,16 +459,6 @@ inference.},
 	lockkey = {Y}
 }
 
-@book{Nivre2006,
-	author = {Nivre, Joakim},
-	title = {Inductive Dependency Parsing (Text, Speech and Language Technology)},
-	publisher = {Springer-Verlag New York, Inc.},
-	year = 2006,
-	address = {Secaucus, NJ, USA},
-	isbn = {1402048882},
-	lockkey = {Y}
-}
-
 @inproceedings{McDonald2006,
 	author = {McDonald, Ryan and Lerman, Kevin and Pereira, Fernando},
 	title = {Multilingual dependency analysis with a two-stage discriminative parser},
@@ -477,6 +468,16 @@ inference.},
 	address = {Morristown, NJ, USA},
 	publisher = {Association for Computational Linguistics},
 	location = {New York City, New York},
+	lockkey = {Y}
+}
+
+@book{Nivre2006,
+	author = {Nivre, Joakim},
+	title = {Inductive Dependency Parsing (Text, Speech and Language Technology)},
+	publisher = {Springer-Verlag New York, Inc.},
+	year = 2006,
+	address = {Secaucus, NJ, USA},
+	isbn = {1402048882},
 	lockkey = {Y}
 }
 
@@ -509,6 +510,19 @@ inference.},
   year = {2008},
   author = {Goertzel, B. and M. Ikle and I. Goertzel and Heljakka, A.},
   
+}
+
+@inproceedings{Poon2009,
+	author = {Poon, Hoifung and Domingos, Pedro},
+	title = {Unsupervised Semantic Parsing},
+	booktitle = {Proceedings of the 2009 Conference on Empirical Methods in Natural Language Processing},
+	pages = {1--10},
+	year = 2009,
+	address = {Singapore},
+	month = {August},
+	publisher = {Association for Computational Linguistics},
+	url = {http://www.aclweb.org/anthology/D/D09/D09-1001},
+	lockkey = {Y}
 }
 
 
@@ -565,6 +579,24 @@ of the Association for Computational Linguistics},
    publisher = {Association for Computational Linguistics},
    address = {Stroudsburg, PA, USA},
 	lockkey = {Y}
+}
+
+@proceedings{Steele1990,
+	title = {Meaning-Text Theory: Linguistics, Lexicography, and Implications},
+	year = 1990,
+	editor = {James Steele},
+	publisher = {University of Ottowa Press},
+
+}
+
+@article{Temper2007,
+	author = {David Temperley},
+	title = {Minimization of dependency length in written English},
+	journal = {Cognition},
+	volume = {105},
+	pages={300-333},
+	url={http://theory.esm.rochester.edu/temperley/papers/temperley-cog07.pdf},
+	year={2007},
 }
 
 @book{Tesn1959,
@@ -633,7 +665,18 @@ of the Association for Computational Linguistics},
 	note = {$http://en.wikipedia.org/wiki/Arguments_(linguistics)$},
 }
 
+@unpublished{WP-DPLL,
+	title = {DPLL algorithm},
+	note = {$http://en.wikipedia.org/wiki/DPLL_algorithm$},
+}
+
 @unpublished{WP-Predicate,
 	title = {Predicate},
 	note = {$http://en.wikipedia.org/wiki/Predicate_(grammar)$},
 }
+
+@unpublished{WP-SAT,
+	title = {Boolean satisfiability problem},
+	note = {$http://en.wikipedia.org/wiki/Boolean_satisfiability_problem$},
+}
+
