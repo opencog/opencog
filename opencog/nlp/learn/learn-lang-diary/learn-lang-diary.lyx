@@ -667,7 +667,7 @@ R(w_{1},w_{2},\cdots,w_{n})=\prod_{j,k,m}R_{\alpha}(w_{j},w_{k},t_{m})\ Q(R_{\al
 
 \end_inset
 
- where 
+where 
 \begin_inset Formula $R_{\alpha}(w_{j},w_{k},t_{m})$
 \end_inset
 
@@ -924,6 +924,19 @@ Sentences with long dependencies are rarely spoken: Hawkins, J.
 So, ratherr than imposing no-crossing as a constraint on the parser, instead,
  let it find its own way into the grammar.
  Just implement a plain-old MST parser, punt on crossing.
+\end_layout
+
+\begin_layout Section*
+11 January 2014
+\end_layout
+
+\begin_layout Subsection*
+Clustering Redux
+\end_layout
+
+\begin_layout Standard
+OK, so what is the very next algorithmic step? Up to here, we've generated
+ a large number of unique disjuncts.
 \end_layout
 
 \begin_layout Section*
