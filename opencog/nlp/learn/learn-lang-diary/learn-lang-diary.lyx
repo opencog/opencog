@@ -937,6 +937,22 @@ Clustering Redux
 \begin_layout Standard
 OK, so what is the very next algorithmic step? Up to here, we've generated
  a large number of unique disjuncts.
+ Now what?
+\end_layout
+
+\begin_layout Standard
+Back to counting.
+ Lets do the French dictionary.
+ The database fr_pairs contains table atoms_mi_snapshot.
+ So:
+\end_layout
+
+\begin_layout Itemize
+
+\family typewriter
+select count(*) from atoms_mi_snapshot;
+\family default
+ returns 415532
 \end_layout
 
 \begin_layout Section*
