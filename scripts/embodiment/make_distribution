@@ -86,7 +86,7 @@ set schemeOpencogFiles [list \
 $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
-$pdh/opencog/scm/debug.scm \
+$pdh/opencog/scm/config.scm \
 $binDirH/opencog/atomspace/core_types.scm \
 $binDirH/opencog/nlp/types/nlp_types.scm \
 $binDirH/opencog/spacetime/spacetime_types.scm \
