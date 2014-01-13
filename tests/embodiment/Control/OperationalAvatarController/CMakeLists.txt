@@ -117,10 +117,10 @@ IF (TCL_TCLSH)
         SET(PASA_TEST_LINK_LIBS
             ${PASA_TEST_LINK_LIBS}
             PythonEval
-                    PythonModule
+            PythonModule
             atomspace
             cogutil
-		    ${PYTHON_LIBRARIES})
+            ${PYTHON_LIBRARIES})
     ENDIF (HAVE_CYTHON)
 
 #	TARGET_LINK_LIBRARIES(PsiActionSelectionAgentUTest
