@@ -109,5 +109,3 @@ EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
-
-INTENSIONAL_INHERITANCE_LINK <- ORDERED_LINK
