@@ -41,12 +41,6 @@ IF (HAVE_SERVER)
 		${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
 		DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
-
-	add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
-		COMMAND
-		${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
-		DEPENDS "opencog/atomspace.pxd" opencog_atom_types)
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
