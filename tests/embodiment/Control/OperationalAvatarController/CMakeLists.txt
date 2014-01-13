@@ -26,25 +26,7 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 IF(WIN32)
     TARGET_LINK_LIBRARIES(AvatarUTest winmm)
 ENDIF(WIN32)
-
-# Can't run language comprehension without guile.
-IF (HAVE_GUILE)
-	ADD_CXXTEST(LanguageComprehensionUTest)
-	TARGET_LINK_LIBRARIES(LanguageComprehensionUTest
-		oac
-		behavior
-		${Boost_THREAD_LIBRARY}
-	)
-
-	IF(WIN32)
-		TARGET_LINK_LIBRARIES(LanguageComprehensionUTest winmm)
-	ENDIF(WIN32)
-ELSE (HAVE_GUILE)
-	SUMMARY_ADD("LanguageComprehensionUTest" "Requires Guile" HAVE_GUILE)
-ENDIF (HAVE_GUILE)
-
 ENDIF(0)
-
 
 # Can't run the Psi*AgentUTest tests without loading the OAC stuff
 # first, and loading the OAC requires a tclsh being in the search path.
