@@ -123,17 +123,6 @@ public:
 
         config(EmbodimentConfig::embodimentCreateInstance, true);
 
-        // The PLN module sets various settings to defaults; if you loaded
-        // the EmbodimentConfig _after_ that, it would lose the PLN module settings,
-        // causing errors when PLN code tries to look them up.
-        try {
-            config().load("pln-test.conf", false);
-        } catch (RuntimeException &e) {
-            std::cerr << e.getMessage() << std::endl;
-        }
-        cogserver.loadModule( "libpln.so" );
-
-
         //set the frames2relex file to be load by the FramesToRelexRuleEngine
         config().set("FRAMES_2_RELEX_RULES_FILE", PROJECT_SOURCE_DIR"/opencog/embodiment/frames2relex.rules");
 

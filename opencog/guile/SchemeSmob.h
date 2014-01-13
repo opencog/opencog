@@ -140,7 +140,6 @@ class SchemeSmob
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
-		static SCM pln_bc(SCM, SCM);
 
 		// Misc utilities
 		static std::string to_string(SCM);
