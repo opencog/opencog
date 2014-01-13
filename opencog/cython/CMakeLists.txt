@@ -167,21 +167,6 @@ TARGET_LINK_LIBRARIES(PythonEval
 	${PYTHON_LIBRARIES}
 )
 
-# utility library for PythonModule
-ADD_LIBRARY(logic_wrapper SHARED
-	logic_wrapper.cpp
-)
-
-TARGET_LINK_LIBRARIES(logic_wrapper
-	atomspace
-)
-
-ADD_DEPENDENCIES(logic_wrapper atomspace_cython)
-
-SET_TARGET_PROPERTIES(logic_wrapper PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME logic_wrapper)
-
 IF(HAVE_GUILE)
 	ADD_LIBRARY(scheme_wrapper SHARED
 		scheme_wrapper.cpp
@@ -204,7 +189,6 @@ ADD_LIBRARY (PythonModule SHARED
 	PyMindAgent.cc
 	PyRequest.cc
 )
-#ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
 SET(PYTHONMODULE_LINK_LIBS server PythonEval ${PYTHON_LIBRARIES})
