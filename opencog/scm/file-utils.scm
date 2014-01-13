@@ -17,7 +17,7 @@
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
 (use-modules (ice-9 rw))
-; (use-modules (rnrs io ports))
+(use-modules (rnrs io ports))
 
 ; ---------------------------------------------------------------------
 (define (list-files dir)
