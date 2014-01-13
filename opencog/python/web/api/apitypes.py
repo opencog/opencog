@@ -25,7 +25,8 @@ class TypesAPI(Resource):
         {"types": ["TrueLink", "NumberNode", "OrLink", "PrepositionalRelationshipNode"]}
         """
 
-        json_data = {'types': filter(lambda x: not x.startswith('__') and not x.endswith('__') and not x=='NO_TYPE', types.__dict__.keys())}
+        json_data = {'types': filter(lambda x: not x.startswith('__') and not x.endswith('__') and not x == 'NO_TYPE',
+                                     types.__dict__.keys())}
 
         # if callback function supplied, pad the JSON data (i.e. JSONP):
         args = self.reqparse.parse_args()
