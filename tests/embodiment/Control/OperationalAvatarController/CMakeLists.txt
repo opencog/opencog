@@ -117,8 +117,7 @@ IF (TCL_TCLSH)
         SET(PASA_TEST_LINK_LIBS
             ${PASA_TEST_LINK_LIBS}
             PythonEval
-		    PythonModule
-            logic_wrapper
+                    PythonModule
             atomspace
             cogutil
 		    ${PYTHON_LIBRARIES})
