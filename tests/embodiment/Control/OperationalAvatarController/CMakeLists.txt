@@ -26,6 +26,7 @@ TARGET_LINK_LIBRARIES(AvatarUTest
 IF(WIN32)
     TARGET_LINK_LIBRARIES(AvatarUTest winmm)
 ENDIF(WIN32)
+ENDIF(0)
 
 # Can't run the Psi*AgentUTest tests without loading the OAC stuff
 # first, and loading the OAC requires a tclsh being in the search path.
