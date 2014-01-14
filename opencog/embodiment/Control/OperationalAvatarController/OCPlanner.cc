@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <sstream>
 #include <boost/bind.hpp>
+#include <sys/time.h>
 #include "OAC.h"
 
 using namespace opencog::oac;
@@ -745,6 +746,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     }
 
     tryStepNum = 0;
+
+    timeval t1;
+    gettimeofday(&t1, NULL);
+
+    long startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 
     while(unsatisfiedStateNodes.size() != 0)
     {
@@ -1549,10 +1555,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // finished planning!
 
+    timeval t2;
+    gettimeofday(&t2, NULL);
+
+    long endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
+
     // generate the action series according to the planning network we have constructed in this planning process
     planID = "";
 
-    std::cout<<std::endl<<"OCPlanner::Planning success! "<< std::endl;
+    std::cout<<std::endl<<"OCPlanner::Planning success! Total steps = "<< tryStepNum <<", Cost time = "<< endTime - startTime << "ms" << std::endl;
 
     // sort the list of rule node
     sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
