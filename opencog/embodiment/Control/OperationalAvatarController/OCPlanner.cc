@@ -4611,23 +4611,23 @@ void OCPlanner::loadFacts(vector<State*> &knownStates)
 //       )
 //    )
 
-    ParamValue GermanEntity = Entity("id_German_man","avatar");
-    ParamValue BritishEntity = Entity("id_British_man","avatar");
+//    ParamValue GermanEntity = Entity("id_German_man","avatar");
+//    ParamValue BritishEntity = Entity("id_British_man","avatar");
 
-    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
-    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
-    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
+//    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
+//    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
+//    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
 
-    knownStates.push_back(GermanDoesntDrinkMilkState);
+//    knownStates.push_back(GermanDoesntDrinkMilkState);
 
-    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
-    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntDrinkWaterState);
+//    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
+//    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntDrinkWaterState);
 
-    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
-    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntKeepDogsState);
+//    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
+//    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntKeepDogsState);
 
 }
