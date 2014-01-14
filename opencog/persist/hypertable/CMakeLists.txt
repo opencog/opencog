@@ -43,7 +43,6 @@ TARGET_LINK_LIBRARIES(hypertable-test
     # Are all of these really needed ??
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_IOSTREAMS_LIBRARY}
-    ${Boost_SIGNALS_LIBRARY}
     ${Boost_REGEX_LIBRARY}
     ${Boost_DATE_TIME_LIBRARY}
     ${Boost_THREAD_LIBRARY}

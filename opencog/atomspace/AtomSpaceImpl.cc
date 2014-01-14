@@ -273,12 +273,41 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
     if (NULL == backing_store)
         return Handle::UNDEFINED;
 
-    // If the atom correspondig to the UUID isn't available, then
-    // got get it. But in fact, we may already have it, from a
-    // previous recusrive call to getIncomingSet(), so don't waste
-    // any CPU sycles getting it again.
-    if (NULL == h.operator->())
-        h = backing_store->getAtom(h);
+    // OK, we have to handle three distinct cases.
+    // 1) If atom table already knows about this uuid or atom, then
+    //    this function returns the atom-table's version of the atom.
+    //    In particular, no attempt is made to reconcile the possibly
+    //    differing truth values in the atomtable vs. backing store.
+    // 2) If the handle h holds a UUID but no atom pointer, then get 
+    //    the corresponding atom from storage, and add it to the atom
+    //    table.
+    // 3) If the handle h contains a pointer to an atom (that is not
+    //    in the atom table), then assume that atom is from some previous
+    //    (recursive) query, and add it to the atomtable.
+    // For both case 2 & 3, if the atom is a link, then it's outgoing
+    // set is fetched as well, as currently, a link cannot be added to
+    // the atomtable, unless all of its outgoing set already is in the
+    // atomtable.
+
+    // Case 1:
+    Handle hb(atomTable.getHandle(h));
+    if (atomTable.holds(hb))
+        return hb;
+
+    // Case 2 & 3:
+    // If we don't have the atom for this UUID, then go get it.
+    if (NULL == h.operator->()) {
+        Handle hb(backing_store->getAtom(h));
+
+        // If we still don't have an atom, then the requested UUID
+        // was "insane", that is, unknown by either the atom table
+        // (case 1) or the backend.
+        if (NULL == hb.operator->())
+            throw RuntimeException(TRACE_INFO,
+                "Asked backend for an unknown handle; UUID=%lu\n",
+                h.value());
+        h = hb;
+    }
 
     // For links, must perform a recursive fetch, as otherwise
     // the atomtable.add below will throw an error.
@@ -288,15 +317,14 @@ Handle AtomSpaceImpl::fetchAtom(Handle h)
        size_t arity = ogs.size();
        for (size_t i=0; i<arity; i++)
        {
-          Handle oh = fetchAtom(ogs[i]);
+          Handle oh(fetchAtom(ogs[i]));
           if (oh != ogs[i]) throw RuntimeException(TRACE_INFO,
               "Unexpected handle mismatch! Expected %lu got %lu\n",
               ogs[i].value(), oh.value());
        }
     }
-    if (h) return atomTable.add(h);
 
-    return Handle::UNDEFINED;
+    return atomTable.add(h);
 }
 
 Handle AtomSpaceImpl::getAtom(Handle h)
@@ -316,7 +344,7 @@ Handle AtomSpaceImpl::fetchIncomingSet(Handle h, bool recursive)
         HandleSeq iset = backing_store->getIncomingSet(h);
         size_t isz = iset.size();
         for (size_t i=0; i<isz; i++) {
-            Handle hi = iset[i];
+            Handle hi(iset[i]);
             if (recursive) {
                 fetchIncomingSet(hi, true);
             } else {
@@ -336,8 +364,8 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     }
     HandleSeq answer;
 
-    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
-    for (UnorderedHandleSet::const_iterator it = iset.begin();
+    HandleSeq iset = atomTable.getIncomingSet(h);
+    for (HandleSeq::iterator it = iset.begin();
          it != iset.end(); it++)
     {
         LinkPtr link(LinkCast(*it));
@@ -346,7 +374,7 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
         if ((linkType == desiredLinkType) || (subClasses && classserver().isA(linkType, desiredLinkType))) {
             Arity linkArity = link->getArity();
             for (Arity i = 0; i < linkArity; i++) {
-                Handle handle = link->getOutgoingSet()[i];
+                Handle handle(link->getOutgoingSet()[i]);
                 if (handle == h) continue;
                 if (!fanout && link->isSource(h)) continue;
                 if (!fanin && link->isTarget(h)) continue;
@@ -359,8 +387,8 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
 
 HandleSeq AtomSpaceImpl::getIncoming(Handle h)
 {
-    // It is possible that the incoming set that we currently
-    // hold is much smaller than what is in storage. In this case,
+    // It is possible that the incoming set that we currently hold is
+    // much smaller than what is in persistant storage. In this case,
     // we would like to automatically pull all of those other atoms
     // into here (using fetchIncomingSet(h,true) to do so). However,
     // maybe the incoming set is up-to-date, in which case polling
@@ -368,12 +396,9 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // h = fetchIncomingSet(h, true);
     //
-    // TODO: solution where user can specify whether to poll storage/repository
+    // Anyway, the user can call fetch explicitly, if desired.
 
-    const UnorderedHandleSet& iset = atomTable.getIncomingSet(h);
-    HandleSeq hs;
-    std::copy(iset.begin(), iset.end(), back_inserter(hs));
-    return hs;
+    return atomTable.getIncomingSet(h);
 }
 
 bool AtomSpaceImpl::deleteAtom(Handle h, bool recursive)

@@ -86,20 +86,12 @@ set schemeOpencogFiles [list \
 $pdh/opencog/scm/utilities.scm \
 $pdh/opencog/scm/file-utils.scm \
 $pdh/opencog/scm/persistence.scm \
-$pdh/opencog/scm/debug.scm \
+$pdh/opencog/scm/config.scm \
 $binDirH/opencog/atomspace/core_types.scm \
 $binDirH/opencog/nlp/types/nlp_types.scm \
 $binDirH/opencog/spacetime/spacetime_types.scm \
 $binDirH/opencog/dynamics/attention/attention_types.scm \
 $binDirH/opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm \
-]
-
-set schemeEmbodimentFiles [list \
-$pdh/opencog/embodiment/scm/predicates-frames.scm \
-$pdh/opencog/embodiment/scm/language-comprehension.scm \
-$pdh/opencog/embodiment/scm/reference-resolution-rules.scm \
-$pdh/opencog/embodiment/scm/command-resolution-rules.scm \
-$pdh/opencog/embodiment/scm/question-answering.scm \
 ]
 
 if {$type_dist == "dev"} {
@@ -150,14 +142,9 @@ exec cp -r $embodimentConf $distDir/embodiment.conf
 
 # copy scheme sripts
 exec mkdir -p $distDir/scm
-exec mkdir -p $distDir/scm/embodiment
 
 foreach file $schemeOpencogFiles {
     exec cp $file $distDir/scm/
-}
-
-foreach file $schemeEmbodimentFiles {
-    exec cp $file $distDir/scm/embodiment/
 }
 
 # copy python scripts of the monitor

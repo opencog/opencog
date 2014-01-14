@@ -69,10 +69,10 @@ class AtomSpacePublisherModule : public Module
 {
     private:
         AtomSpace* as;
-        boost::signals::connection removeAtomConnection;
-        boost::signals::connection addAtomConnection;
-        boost::signals::connection TVChangedConnection;
-        boost::signals::connection AVChangedConnection;
+        boost::signals2::connection removeAtomConnection;
+        boost::signals2::connection addAtomConnection;
+        boost::signals2::connection TVChangedConnection;
+        boost::signals2::connection AVChangedConnection;
 
         zmq::context_t * context;
         zmq::socket_t * publisher;

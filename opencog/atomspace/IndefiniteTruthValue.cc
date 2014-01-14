@@ -38,10 +38,10 @@
 
 using namespace opencog;
 
-float IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
-float IndefiniteTruthValue::DEFAULT_K = 2.0;
-float IndefiniteTruthValue::diffError = 0.001;
-float IndefiniteTruthValue::s = 0.5;
+confidence_t IndefiniteTruthValue::DEFAULT_CONFIDENCE_LEVEL = 0.9;
+count_t IndefiniteTruthValue::DEFAULT_K = 2.0;
+strength_t IndefiniteTruthValue::diffError = 0.001;
+strength_t IndefiniteTruthValue::s = 0.5;
 
 
 // Formula defined in the integral of step one [(x-L1)^ks * (U1-x)^k(1-s)

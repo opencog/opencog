@@ -28,9 +28,6 @@
 #define _OPENCOG_COUNT_TRUTH_VALUE_H_
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -44,13 +41,6 @@ typedef std::shared_ptr<CountTruthValue> CountTruthValuePtr;
 //! a TruthValue that stores a mean, a confidence and the number of observations
 class CountTruthValue : public TruthValue
 {
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-
-private:
-    CountTruthValue() {};
-#endif
-
 protected:
 
     strength_t mean;

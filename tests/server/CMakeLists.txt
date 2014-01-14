@@ -12,7 +12,6 @@ LINK_DIRECTORIES(
 
 LINK_LIBRARIES(#CogServerUTest
 	server
-	${Boost_SIGNALS_LIBRARY}
 )
 
 ADD_CXXTEST(CogServerUTest)

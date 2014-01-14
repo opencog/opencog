@@ -62,10 +62,9 @@ IF (CXXTEST_FOUND)
 	ADD_SUBDIRECTORY (comboreduct)
 
 	# learning requires a working comboreduct.
-	ADD_SUBDIRECTORY (learning)
-	ADD_SUBDIRECTORY (reasoning)
+        ADD_SUBDIRECTORY (learning)
 
-	# Embodiment requires that learning, reasoning, spatial, etc.
+        # Embodiment requires that learning, spatial, etc.
 	# all works fine. So run this last.
 	IF (HAVE_EMBODIMENT)
 		ADD_SUBDIRECTORY (embodiment)

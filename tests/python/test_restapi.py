@@ -280,3 +280,10 @@ class TestRESTApi():
         get_result = json.loads(get_response.data)['result']['atoms']
         assert len(get_result) == 1
         assert set([atom['handle'] for atom in get_result]) == set([self.bird_animal.h.value()])
+
+    def test_get_types(self):
+        # Verify that a list of valid atom types was returned
+        get_response = self.client.get(self.uri + 'types')
+        get_result = json.loads(get_response.data)['types']
+        assert len(get_result) > 0
+        assert get_result.__contains__('ConceptNode')

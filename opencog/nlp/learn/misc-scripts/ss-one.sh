@@ -29,6 +29,8 @@ fi
 base=`echo $filename | cut -d \/ -f 1`
 rest=`echo $filename | cut -d \/ -f 2-6`
 
+echo "Processing file $rest"
+
 # Sentence split the article itself
 cat "$filename" | $splitter -l $lang >  "$splitdir/$rest" 
 

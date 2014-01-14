@@ -29,11 +29,9 @@
 //
 // QUERY_VARIABLE_LINK <- ORDERED_LINK
 //
-// New RelEx nodes, added by Linas per names used by Ben
-// These are subject to change or deletion pending review.
-// Some of the link types may go away.
 
 WORD_NODE <- NODE
+ANY_NODE <- NODE    // Explicit wildcard node. 
 REFERENCE_LINK <- ASSOCIATIVE_LINK
 
 // Custom atoms to identify documents, sentences, word instances

@@ -27,7 +27,7 @@
 
 #include <mutex>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/util/recent_val.h>
 #include <opencog/atomspace/AttentionValue.h>
@@ -43,7 +43,7 @@ class AtomTable;
 class AttentionBank
 {
     /** The connection by which we are notified of AV changes */
-    boost::signals::connection AVChangedConnection;
+    boost::signals2::connection AVChangedConnection;
     void AVChanged(Handle, AttentionValuePtr, AttentionValuePtr);
 
     /**

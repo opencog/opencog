@@ -165,11 +165,14 @@ class AtomStorage::Response
 		}
 
 		std::vector<Handle> *hvec;
-		bool load_incoming_set_cb(void)
+		bool fetch_incoming_set_cb(void)
 		{
 			// printf ("---- New atom found ----\n");
 			rs->foreach_column(&Response::create_atom_column_cb, this);
 
+			// Note, unlike the above 'load' routines, this merely fetches
+			// the atoms, and returns a vector of them.  They are loaded
+			// into the atomspace later, by the caller.
 			Handle h(store->makeAtom(*this, handle));
 			hvec->push_back(h);
 			return false;
@@ -300,14 +303,12 @@ class AtomStorage::Response
 /// Get an ODBC connection
 ODBCConnection* AtomStorage::get_conn()
 {
-	std::unique_lock<std::mutex> lock(conn_mutex);
 	return conn_pool.pop();
 }
 
 /// Put an ODBC connection back into the pool.
 void AtomStorage::put_conn(ODBCConnection* db_conn)
 {
-	std::unique_lock<std::mutex> lock(conn_mutex);
 	conn_pool.push(db_conn);
 }
 
@@ -785,7 +786,7 @@ void AtomStorage::storeAtom(AtomPtr atom, bool synchronous)
 			cnt++;
 		}
 		while (LOW_WATER_MARK < store_queue.size());
-		logger().info("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
+		logger().debug("AtomStorage overfull queue; had to sleep %d millisecs to drain!", cnt);
 	}
 }
 
@@ -924,7 +925,7 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 	}
 
 	// Store the truth value
-	TruthValuePtr tv = atom->getTruthValue();
+	TruthValuePtr tv(atom->getTruthValue());
 	TruthValueType tvt = NULL_TRUTH_VALUE;
 	if (tv) tvt = tv->getType();
 	STMTI("tv_type", tvt);
@@ -1280,10 +1281,14 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	setup_typemap();
 	char buff[BUFSZ];
 	UUID uuid = h.value();
-	snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE outgoing @> ARRAY[%lu];", uuid);
+	snprintf(buff, BUFSZ,
+		"SELECT * FROM Atoms WHERE outgoing @> ARRAY[CAST(%lu AS BIGINT)];", uuid);
 
 	// Note: "select * from atoms where outgoing@>array[556];" will return
 	// all links with atom 556 in the outgoing set -- i.e. the incoming set of 556.
+	// Could also use && here instead of @> Don't know if one is faster or not.
+	// The cast to BIGINT is needed, as otherwise on gets
+	// ERROR:  operator does not exist: bigint[] @> integer[]
 
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
@@ -1291,7 +1296,7 @@ std::vector<Handle> AtomStorage::getIncomingSet(Handle h)
 	rp.height = -1;
 	rp.hvec = &iset;
 	rp.rs = db_conn->exec(buff);
-	rp.rs->foreach_row(&Response::load_incoming_set_cb, &rp);
+	rp.rs->foreach_row(&Response::fetch_incoming_set_cb, &rp);
 	rp.rs->release();
 	put_conn(db_conn);
 
@@ -1540,6 +1545,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 	logger().debug("AtomStorage::loadType: Max Height is %d\n", max_height);
 
 	setup_typemap();
+	int db_atom_type = storing_typemap[atom_type];
 
 	ODBCConnection* db_conn = get_conn();
 	Response rp;
@@ -1554,7 +1560,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 		char buff[BUFSZ];
 		snprintf(buff, BUFSZ,
 			"SELECT * FROM Atoms WHERE height = %d AND type = %d;",
-			 hei, atom_type);
+			 hei, db_atom_type);
 		rp.height = hei;
 		rp.rs = db_conn->exec(buff);
 		rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
@@ -1574,7 +1580,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 			char buff[BUFSZ];
 			snprintf(buff, BUFSZ, "SELECT * FROM Atoms WHERE type = %d "
 			        "AND height = %d AND uuid > %lu AND uuid <= %lu;",
-			         atom_type, hei, rec, rec+STEP);
+			         db_atom_type, hei, rec, rec+STEP);
 			rp.height = hei;
 			rp.rs = db_conn->exec(buff);
 			rp.rs->foreach_row(&Response::load_if_not_exists_cb, &rp);
@@ -1582,7 +1588,7 @@ void AtomStorage::loadType(AtomTable &table, Type atom_type)
 		}
 #endif
 		logger().debug("AtomStorage::loadType: Loaded %lu atoms of type %d at height %d\n",
-			load_count - cur, atom_type, hei);
+			load_count - cur, db_atom_type, hei);
 	}
 	put_conn(db_conn);
 	logger().debug("AtomStorage::loadType: Finished loading %lu atoms in total\n",

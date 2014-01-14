@@ -16,7 +16,7 @@
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
-
+#include <opencog/util/oc_assert.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -113,6 +113,10 @@ static void * do_bogus_scm(void *p)
  * As of December 2013, the bug still seems to be there: the test
  * case provided in the bug report crashes, when linked against
  * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
+ *
+ * Its claimed that the bug only happens for top-level defines.
+ * Thus, in principle, theading should be OK after all scripts have
+ * been loaded.
  */
 static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
@@ -205,9 +209,9 @@ SchemeEval::~SchemeEval()
 
 std::string SchemeEval::prt(SCM node)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, node))
 	{
-		return SchemeSmob::handle_to_string(node);
+		return SchemeSmob::uuid_to_string(node);
 	}
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
@@ -378,6 +382,13 @@ std::string SchemeEval::eval(const std::string &expr)
 void * SchemeEval::c_wrap_eval(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
+
+	// Normally, neither of these are ever null.
+	// But sometimes, a heavily loaded server can crash here.
+	// Trying to figure out why ...
+	OC_ASSERT(self, "c_wrap_eval got null pointer!");
+	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
+
 	self->answer = self->do_eval(*(self->pexpr));
 	return self;
 }

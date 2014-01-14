@@ -53,7 +53,6 @@ class AtomStorage
 		ODBCConnection* get_conn();
 		void put_conn(ODBCConnection*);
 		concurrent_stack<ODBCConnection*> conn_pool;
-		std::mutex conn_mutex;
 
 		// Utility for handling responses on stack.
 		class Response;

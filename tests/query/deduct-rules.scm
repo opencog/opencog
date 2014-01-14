@@ -18,7 +18,7 @@
 (define VN VariableNode)
 (define PN PredicateNode)
 (define CN ConceptNode)
-(define AN AvatarNode)
+(define AN FeatureNode) ; AvatarNode
 
 ;; Clause containing relating three things of three types
 (define (clause t1 v1 t2 v2 t3 v3)
@@ -47,8 +47,8 @@
 		;; variable declarations
 		(ListLink
 			(decl-var "PredicateNode" "$predicate")
-			(decl-var "AvatarNode" "$person_a")
-			(decl-var "AvatarNode" "$person_b")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
 		(ImplicationLink
@@ -79,8 +79,8 @@
 		;; variable declarations
 		(ListLink
 			(decl-var "PredicateNode" "$predicate")
-			(decl-var "AvatarNode" "$person_a")
-			(decl-var "AvatarNode" "$person_b")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$attribute")
 		)
 		(ImplicationLink
@@ -110,8 +110,8 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(decl-var "AvatarNode" "$person_a")
-			(decl-var "AvatarNode" "$person_b")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_b")
 		)
 		(ImplicationLink
@@ -143,8 +143,8 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(decl-var "AvatarNode" "$person_a")
-			(decl-var "AvatarNode" "$person_b")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
 			(decl-var "ConceptNode" "$addr_a")
 			(decl-var "ConceptNode" "$addr_b")
 		)
@@ -171,8 +171,8 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(decl-var "AvatarNode" "$person_a")
-			(decl-var "AvatarNode" "$person_b")
+			(decl-var "FeatureNode" "$person_a")
+			(decl-var "FeatureNode" "$person_b")
 		)
 		(ImplicationLink
 			;; body -- if all parts of AndLink hold true ... then
@@ -197,7 +197,7 @@
 	(BindLink
 		;; variable declarations
 		(ListLink
-			(decl-var "AvatarNode" "$person")
+			(decl-var "FeatureNode" "$person")
 			(decl-var "ConceptNode" "$nationality")
 			(decl-var "ConceptNode" "$drink")
 			(decl-var "ConceptNode" "$smoke")

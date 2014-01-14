@@ -66,7 +66,7 @@
 (SimilarityLink (stv 1.0 1.0)
 	(GroundedSchemaNode "ActivationModulatorUpdater")
 	(FeatureNode "here kitty kitty")
-	(CountLink (stv 1.0 1.0)
+	(EvaluationLink (stv 1.0 1.0)
 		(GroundedSchemaNode "ActivationModulatorUpdater")
 		(ListLink
 			(LemmaNode "thing1")

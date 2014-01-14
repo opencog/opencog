@@ -51,10 +51,12 @@
 namespace opencog { namespace combo {
 
 /**
- * Get indices (aka positions or offsets) of a list of labels given a header
+ * Get indices (aka positions or offsets) of a list of labels given a
+ * header. The labels can be sequenced in any order, it will always
+ * return the order consistent with the header.
  */
 std::vector<unsigned> get_indices(const std::vector<std::string>& labels,
-                                  const std::vector<std::string>& sub_labels);
+                                  const std::vector<std::string>& header);
         
 ///////////////////
 // Generic table //
@@ -350,7 +352,7 @@ struct multi_type_seq : public boost::less_than_comparable<multi_type_seq>,
     // I set it as mutable because the FUCKING boost::variant
     // apply_visitor doesn't allow to deal with const variants. For
     // the same reason I cannot define multi_type_seq as an inherited
-    // class from multi_type_variant (boost::variant kinda suck!).
+    // class from multi_type_variant (boost::variant kinda sucks!).
     mutable multi_type_variant _variant;
 };
 

@@ -5,10 +5,6 @@
 ; General cog-server configuration, for scheme.
 ;
 ;--------------------------------------------------------------
-; Turn on debugging prints -- this generally makes life easier.
-(turn-on-debugging)
-
-;--------------------------------------------------------------
 ; The scheme shell listen port.
 (define shell-port 18003)
 

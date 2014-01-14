@@ -36,12 +36,10 @@ using namespace opencog;
 
 Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
 {
-	if (!SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, satom))
+	Handle h(scm_to_handle(satom));
+	if (Handle::UNDEFINED == h)
 		scm_wrong_type_arg_msg(subrname, pos, satom, "opencog atom");
 
-	SCM shandle = SCM_SMOB_OBJECT(satom);
-	UUID uuid = scm_to_ulong(shandle);
-	Handle h(uuid);
 	return h;
 }
 

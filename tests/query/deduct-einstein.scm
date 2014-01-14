@@ -19,8 +19,8 @@
 	(EvaluationLink (stv 1 1)
 		(PredicateNode "IsSamePerson")
 		(ListLink
-			(AvatarNode person)
-			(AvatarNode person)
+			(FeatureNode person) ; AvatarNode
+			(FeatureNode person) ; AvatarNode
 		)
 	)
 )
@@ -31,7 +31,7 @@
 	(EvaluationLink (stv 1 1)
 		(PredicateNode pred)
 		(ListLink
-			(AvatarNode person)
+			(FeatureNode person)
 			(ConceptNode value)
 		)
 	)
@@ -44,8 +44,8 @@
 	(EvaluationLink (stv 1 1)
 		(PredicateNode "Neighbor")
 		(ListLink
-			(AvatarNode person1)
-			(AvatarNode person2)
+			(FeatureNode person1)
+			(FeatureNode person2)
 		)
 	)
 )

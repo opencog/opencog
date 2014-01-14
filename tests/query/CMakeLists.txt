@@ -16,7 +16,6 @@ LINK_LIBRARIES(
 	nlp-types
 	query
 	server
-	${Boost_SIGNALS_LIBRARY}
 )
 
 # We want to run the tests in the order below;

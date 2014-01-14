@@ -40,7 +40,7 @@ private:
     /**
      * signal connections used to keep track of atom merge in the AtomSpace
      */
-    boost::signals::connection mergedAtomConnection;
+    boost::signals2::connection mergedAtomConnection;
 
     /**
      * Method to receive atom merge signals from AtomSpace

@@ -10,7 +10,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
-		(AvatarNode "person1")
+		(FeatureNode "person1") ; AvatarNode
 		(ConceptNode "red_house")
 	)
 )
@@ -19,7 +19,7 @@
 (EvaluationLink (stv 1 1)
 	(PredicateNode "LivesIn")
 	(ListLink
-		(AvatarNode "person2")
+		(FeatureNode "person2")
 		(ConceptNode "red_house")
 	)
 )
@@ -37,11 +37,11 @@
 			)
 			(TypedVariableLink
 				(VariableNode "$person_a")
-				(VariableTypeNode "AvatarNode")
+				(VariableTypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$person_b")
-				(VariableTypeNode "AvatarNode")
+				(VariableTypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$property")
@@ -96,11 +96,11 @@
 		(ListLink
 			(TypedVariableLink
 				(VariableNode "$person_a")
-				(VariableTypeNode "AvatarNode")
+				(VariableTypeNode "FeatureNode")
 			)
 			(TypedVariableLink
 				(VariableNode "$person_b")
-				(VariableTypeNode "AvatarNode")
+				(VariableTypeNode "FeatureNode")
 			)
 		)
 		(ImplicationLink

@@ -155,9 +155,12 @@ below.
 
 Database Install
 ----------------
-Download and install Postgres.  The current design does not support
-MySQL, because it uses SQL features that MySQL is missing.  Same
-holds true for SQLite.
+Download and install Postgres version 8.3 or newer.  The current design
+simply won't work with older versions of postgres (because of a lack of
+array membership support) or MySQL (because of a lack of array support,
+in general). Same holds true for SQLite.  There is some work in the
+code-base to support these other databases, but the work-arounds for
+the missing features are kind-of complicated, and likely to be slow.
 
 Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
@@ -195,7 +198,6 @@ Performance tweaks
 ------------------
 The Postgres default configuration needs to be tweaked for performance.
 Failure to do this will result in disastrous load and store times.
-(The notes below date to 2008; perhaps things have changed?)
 
 Edit postgresql.conf (a typical location is
 /etc/postgresql/8.4/main/postgresql.conf) and make the changes below.
@@ -203,13 +205,22 @@ The first two changes are recommended by
 http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
    shared_buffers = default was 32MB, change to 25% of install RAM
-   effective_cache_size = default was 128MB, change to 50% of installed RAM
    work_mem = default was 1MB change to 32MB
+   effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
    fsync = default on  change to off
    synchronous_commit = default on change to off
-   wal_buffers = default 64kB change to 512kB
+   wal_buffers = default 64kB change to 2MB or even 32MB
    commit_delay = default 0 change to 10000 (10K) microseconds
-   ssl = default true change to false
+   checkpoint_segments = 32 (each one takes up 16MB disk space)
+   ssl = off
+   autovacuum = on
+   track_counts = on
+
+A large value for wal_buffers is needed because much of the database
+traffic consists of updates.  Enabling vacuum is very important, for
+the same reason; performance degrades substantially (by factors of 
+3x-10x) without regular vacuuming.
+
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by:
@@ -270,10 +281,9 @@ at the postgres prompt.  You should see this:
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
-     public | edges     | table | opencog_user
      public | global    | table | opencog_user
      public | typecodes | table | opencog_user
-    (4 rows)
+    (3 rows)
 
 If the above doesn't work, go back, and try again.
 
@@ -319,18 +329,16 @@ Be sure to adjust the username and passwd appropriately.
 
 Opencog Setup
 -------------
-Edit lib/opencog.conf and set the DB username and password there to the
-same values as in ~/.odbc.ini.  Better yet, copy lib/opencog.conf to
-your build directory, edit the copy, and start the opencog server as:
+Edit lib/opencog.conf and set the STORAGE, STORAGE_USERNAME and
+STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet, 
+copy lib/opencog.conf to your build directory, edit the copy, and 
+start the opencog server as:
 
    $ ./opencog/server/cogserver -c my.conf
 
 Verify that everything works. Start the cogserver, and bulk-save:
 
    $ telnet localhost 17001
-   opencog> sql-open mycogdata opencog_user cheese
-   Opened "mycogdata" as user "opencog_user"
-
    opencog> sql-store
    
 Some output should be printed in the cogserver window: 
@@ -347,12 +355,11 @@ is disabled by default, because it requires the above complicated setup.
 Please run this test.  To do this:
 
  -- edit tests/persist/sql/CMakeLists.txt and uncomment:
-    ADD_CXXTEST(BasicSaveUTest)
-    at the bottom.
+    SET(DB_IS_CONFIGURED 1)
  -- Read tests/persist/sql/README and follow the instructions there.
     They are almost identical to the instructions above, except that
     they call for a test user to be set up. You can do that, or you
-    can use yor current DB user.
+    can use your current DB user.
  -- To compile and run:
     $ make test
 
@@ -516,7 +523,7 @@ Sooner or later you will want to make a copy of your database, for
 backup purposes, or sharing. Here's the current 'best practices' for
 that:
 
-   $ pg_dump mycogdata
+   $ pg_dump mycogdata filename.sql
 
 That's all!
 

@@ -53,7 +53,6 @@ ADD_DEPENDENCIES(atomspace opencog_atom_types)
 TARGET_LINK_LIBRARIES(atomspace
 	cogutil
 	${GSL_LIBRARIES}
-	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
 )
 

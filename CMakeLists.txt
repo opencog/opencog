@@ -145,10 +145,14 @@ SET(Boost_USE_MULTITHREADED ON)
 # boost-1.49 no longer has a libboost_iostreams
 # 1.46 is minimum for required filesystem support
 # program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
+
+	# Boost.Signals2 requires this in signal_type.hpp
+	SET(BOOST_PARAMETER_MAX_ARITY 7)
+	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
 	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
@@ -484,8 +488,6 @@ ENDIF(Boost_FOUND)
 IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
-    # PLN won't compile with gcc-4.7
-    # SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
@@ -715,7 +717,6 @@ SUMMARY_ADD("Feature selection" "MOSES based feature selection tool" HAVE_FEATUR
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
-SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)

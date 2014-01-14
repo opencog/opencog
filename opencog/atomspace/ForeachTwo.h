@@ -32,20 +32,16 @@ inline bool foreach_atom_pair(const std::vector<Handle> &va,
     size_t minsz = std::min(vasz, vbsz);
 
     for (size_t i = 0; i < minsz; i++) {
-        Handle ha = va[i];
-        Handle hb = vb[i];
-        bool rc = (data->*cb)(ha, hb);
+        bool rc = (data->*cb)(va[i], vb[i]);
         if (rc) return rc;
     }
 
     for (size_t i = vasz; i < vbsz; i++) {
-        Handle hb = vb[i];
-        bool rc = (data->*cb)(Handle::UNDEFINED, hb);
+        bool rc = (data->*cb)(Handle::UNDEFINED, vb[i]);
         if (rc) return rc;
     }
     for (size_t i = vbsz; i < vasz; i++) {
-        Handle ha = va[i];
-        bool rc = (data->*cb)(ha, Handle::UNDEFINED);
+        bool rc = (data->*cb)(va[i], Handle::UNDEFINED);
         if (rc) return rc;
     }
     return false;
