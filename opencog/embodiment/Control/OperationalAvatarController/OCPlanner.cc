@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <sstream>
 #include <boost/bind.hpp>
+#include <sys/time.h>
 #include "OAC.h"
 
 using namespace opencog::oac;
@@ -745,6 +746,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     }
 
     tryStepNum = 0;
+
+    timeval t1;
+    gettimeofday(&t1, NULL);
+
+    long startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 
     while(unsatisfiedStateNodes.size() != 0)
     {
@@ -1549,10 +1555,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // finished planning!
 
+    timeval t2;
+    gettimeofday(&t2, NULL);
+
+    long endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
+
     // generate the action series according to the planning network we have constructed in this planning process
     planID = "";
 
-    std::cout<<std::endl<<"OCPlanner::Planning success! "<< std::endl;
+    std::cout<<std::endl<<"OCPlanner::Planning success! Total steps = "<< tryStepNum <<", Cost time = "<< endTime - startTime << "ms" << std::endl;
 
     // sort the list of rule node
     sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
@@ -4600,23 +4611,23 @@ void OCPlanner::loadFacts(vector<State*> &knownStates)
 //       )
 //    )
 
-    ParamValue GermanEntity = Entity("id_German_man","avatar");
-    ParamValue BritishEntity = Entity("id_British_man","avatar");
+//    ParamValue GermanEntity = Entity("id_German_man","avatar");
+//    ParamValue BritishEntity = Entity("id_British_man","avatar");
 
-    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
-    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
-    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
+//    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
+//    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
+//    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
 
-    knownStates.push_back(GermanDoesntDrinkMilkState);
+//    knownStates.push_back(GermanDoesntDrinkMilkState);
 
-    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
-    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntDrinkWaterState);
+//    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
+//    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntDrinkWaterState);
 
-    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
-    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntKeepDogsState);
+//    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
+//    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntKeepDogsState);
 
 }
