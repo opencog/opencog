@@ -119,11 +119,11 @@ Easier said than done.
 \begin_inset Formula $R$
 \end_inset
 
-can be more general than that.
+ can be more general than that.
 \end_layout
 
 \begin_layout Standard
-The simplest model has only on type 
+The simplest model has only one type 
 \begin_inset Formula $t$
 \end_inset
 
@@ -175,7 +175,7 @@ Here, the relation
 \begin_inset Formula $R$
 \end_inset
 
- encompases several facts: that one word is to the left of the other, and
+ encompasses several facts: that one word is to the left of the other, and
  that they are connected by a certain link-type, as well as capturing other
  'ambient' information, perhaps such as other nearby words.
 \end_layout
@@ -231,7 +231,7 @@ In practical use, one quickly observes that
 \end_inset
 
  within the certain relationship or pattern, which must be less than the
- probability of observing 
+ prior probability of observing 
 \begin_inset Formula $w_{l}$
 \end_inset
 
@@ -269,8 +269,8 @@ Re-ordering this gives
 
 \end_inset
 
-The right hand side above is recognizable from Yurets work; he defines the
- mutual information as 
+The right hand side above is recognizable from Yuret's work; he defines
+ the mutual information as 
 \begin_inset Formula 
 \[
 \mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}
@@ -278,8 +278,8 @@ The right hand side above is recognizable from Yurets work; he defines the
 
 \end_inset
 
-so that laarge positive MI is associated with word that occur together only
- with themselves (e.g.
+so that laarge positive MI is associated with words that occur together
+ only with themselves (e.g.
  '
 \emph on
 Northern Ireland
@@ -309,11 +309,11 @@ reference "eq:basic pair"
 \begin_inset Formula $P(R(w_{l},*)|w_{l})\approx P(R(*,w_{r})|w_{r})\approx1$
 \end_inset
 
-and thus must conclude that 
+, and thus must conclude that 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})$
 \end_inset
 
- is 'large'; much larger than the accustomed word-pair frequencies.
+ is 'large'; much larger than (unconditional) word-pair frequencies.
  Anyway, as an equation, its kind-of nicer, since it clearly isolates the
  role of the relation, since, by defintion, we have 
 \begin_inset Formula $P(R(w_{l},w_{r})|w_{l},w_{r})=P(R(w_{l},w_{r})|w_{r},w_{l})$
