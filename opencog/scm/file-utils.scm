@@ -17,7 +17,7 @@
 (use-modules (ice-9 rdelim))
 (use-modules (ice-9 popen))
 (use-modules (ice-9 rw))
-; (use-modules (rnrs io ports))
+(use-modules (rnrs io ports))
 
 ; ---------------------------------------------------------------------
 (define (list-files dir)
@@ -66,10 +66,10 @@
  execute that scheme data.
 "
 
-	; get-string-all is a new r6rs proceedure, usck in all bytes until
+	; get-string-all is a new r6rs proceedure, sucks in all bytes until
 	; EOF on the port. Seems like TCP/IP ports end up being textual in
-	; guile, and the default r6rs transcoder is UTF8 and soe everyone
-	; is happy, these days.  Note, in the good-old bad days, we used
+	; guile, and the default r6rs transcoder is UTF8 and so everyone
+	; is happy, these days.  Note: in the good-old bad days, we used
 	; ice-9 rw read-string!/partial for this, which went buggy, and
 	; started mangling at some point.
 	(eval-string (get-string-all port))

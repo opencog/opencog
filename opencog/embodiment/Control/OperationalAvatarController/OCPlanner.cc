@@ -42,6 +42,7 @@
 #include <cstdio>
 #include <sstream>
 #include <boost/bind.hpp>
+#include <sys/time.h>
 #include "OAC.h"
 
 using namespace opencog::oac;
@@ -745,6 +746,11 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
     }
 
     tryStepNum = 0;
+
+    timeval t1;
+    gettimeofday(&t1, NULL);
+
+    long startTime = t1.tv_sec*1000 + t1.tv_usec/1000;
 
     while(unsatisfiedStateNodes.size() != 0)
     {
@@ -1549,10 +1555,15 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
     // finished planning!
 
+    timeval t2;
+    gettimeofday(&t2, NULL);
+
+    long endTime = t2.tv_sec*1000 + t2.tv_usec/1000;
+
     // generate the action series according to the planning network we have constructed in this planning process
     planID = "";
 
-    std::cout<<std::endl<<"OCPlanner::Planning success! "<< std::endl;
+    std::cout<<std::endl<<"OCPlanner::Planning success! Total steps = "<< tryStepNum <<", Cost time = "<< endTime - startTime << "ms" << std::endl;
 
     // sort the list of rule node
     sort(allRuleNodeInThisPlan.begin(), allRuleNodeInThisPlan.end(),compareRuleNodeDepth );
@@ -1599,6 +1610,8 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         {
             spatial::BlockVector startPos,targetPos;
 
+            bool includesLastStep;
+
             ActionParameter oparam = (ActionParameter)params.front();
 
             ParamValue value;
@@ -1619,6 +1632,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 Vector v1 = boost::get<Vector>(value);
                 targetPos = SpaceServer::SpaceMapPoint(v1.x,v1.y,v1.z);
+                includesLastStep = true;
 
                 std::cout<< ActionParameter::ParamValueToString(v1)<<std::endl;
             }
@@ -1626,6 +1640,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             {
                 Entity entity1 = boost::get<Entity>(value);
                 targetPos = backwardStepMap->getObjectLocation(entity1.id);
+                includesLastStep = false;
 
                 std::cout<< entity1.stringRepresentation()<<std::endl;
             }
@@ -1653,7 +1668,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
 
             startPos = backwardStepMap->getObjectLocation(actor->id);
 
-            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),*backwardStepMap,startPos,targetPos,planID);
+            opencog::world::PAIWorldWrapper::createNavigationPlanAction(oac->getPAI(),*backwardStepMap,startPos,targetPos,planID,includesLastStep);
 
         }
         else
@@ -3764,7 +3779,7 @@ void OCPlanner::loadTestRulesFromCodes()
 
     //----------------------------End Rule: to pick up an object if closed enough-------------------------------------------
 
-    //----------------------------Begin Rule: Move_to an object to get closed to it-----------------------------------------
+    //----------------------------Begin Rule: Move_to an object to get closed to it -----------------------------------------
     // define variables:
     ParamValue var_obj = entity_var[0];
     ParamValue float_dis = float_var[0];
@@ -4081,490 +4096,350 @@ void OCPlanner::loadTestRulesFromCodes()
     //----------------------------End Rule: if there exist a path from pos1 to pos2, and also exist a path from pos2 to pos3, then there should exist a path from pos1 to pos3---
 
 
-    //----------------------------Begin Einstein puzzle rules---------------------------------------------------------------------
+//    //----------------------------Begin Einstein puzzle rules---------------------------------------------------------------------
 
 
-    //----------------------------Begin Rule: The person who drinks water keeps fish------------------------------------------------------
-    // define variables:
-    ParamValue var_pet = str_var[0];
-    ParamValue var_man_x = entity_var[0];
-
-    // precondition 1: var_man_x is people
-    vector<ParamValue> peopleStateOwnerList1;
-    peopleStateOwnerList1.push_back(var_man_x);
-    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0);
-
-
-    // precondition 1: var_man_x is people
-
-    // precondition 3: var_man_x  drinks water
-    vector<ParamValue> drinkWaterStateOwnerList2;
-    drinkWaterStateOwnerList2.push_back(var_man_x);
-    State* drinkWaterState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"water", drinkWaterStateOwnerList2, false, 0, true);
-
-    // effect1: var_man_x keeps fish
-    vector<ParamValue> keepFishStateOwnerList2;
-    keepFishStateOwnerList2.push_back(var_man_x);
-    State* keepFishState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepFishStateOwnerList2, false,0,true);
-    Effect* keepFishStateEffect2 = new Effect(keepFishState2, OP_ASSIGN, "fish",true);
-
-    // add rule:
-    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
-    waterDrinkerKeepsFishRule->ruleName = "waterDrinkerKeepsFishRule";
-    waterDrinkerKeepsFishRule->addPrecondition(peopleState1);
-    waterDrinkerKeepsFishRule->addPrecondition(drinkWaterState2);
-
-    waterDrinkerKeepsFishRule->addEffect(EffectPair(1.0f,keepFishStateEffect2));
-
-    this->AllRules.push_back(waterDrinkerKeepsFishRule);
-    //----------------------------End Rule: The person who drinks water keeps fish--------------------------------------------------
-
-    //----------------------------Begin Rule: The person who keeps fish drinks water.------------------------------------------------------
-    // define variables:
-    ParamValue var_drink = str_var[0];
-
-    // precondition 3: var_man_x keeps fish
-    vector<ParamValue> keepFishStateOwnerList1;
-    keepFishStateOwnerList1.push_back(var_man_x);
-    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
-
-    // effect1: var_man_x drinks water
-    vector<ParamValue> drinkWaterStateOwnerList1;
-    drinkWaterStateOwnerList1.push_back(var_man_x);
-    State* drinkWaterState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkWaterStateOwnerList1, false, 0, true);
-    Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
-
-    // add rule:
-    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
-    fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
-    fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
-    fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
-
-    fishKeeperDrinkWaterRule->addEffect(EffectPair(1.0f,drinkWaterStateEffect1));
-
-    this->AllRules.push_back(fishKeeperDrinkWaterRule);
-
-    waterDrinkerKeepsFishRule->noCoexisenceOtherRules.push_back(fishKeeperDrinkWaterRule);
-    fishKeeperDrinkWaterRule->noCoexisenceOtherRules.push_back(waterDrinkerKeepsFishRule);
-    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
-
-
-    //----------------------------Begin Rule: The person who drinks tea keeps cats------------------------------------------------------
-    // define variables:
-
-    // precondition 1: var_man_x is people
-
-    // precondition 2: var_man_x drinks tea
-    vector<ParamValue> drinkTeaStateOwnerList1;
-    drinkTeaStateOwnerList1.push_back(var_man_x);
-    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, false, 0, true);
-
-    // effect1: var_man_x keeps cats
-    vector<ParamValue> keepCatsStateOwnerList1;
-    keepCatsStateOwnerList1.push_back(var_man_x);
-    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, false, 0, true);
-    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
-
-    // add rule:
-    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
-    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
-    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
-    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
-
-    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
-
-    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
-    //----------------------------End Rule: The person who drinks tea keeps cats--------------------------------------------------
-
-    //----------------------------Begin Rule: The person who keeps cats drinks tea -----------------------------------------------------
-    // define variables:
-
-    // precondition 1: var_man_x is people
-
-    // precondition 2: var_man_x keeps cats
-    vector<ParamValue> keepCatsStateOwnerList2;
-    keepCatsStateOwnerList2.push_back(var_man_x);
-    State* keepCatsStateState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList2, false, 0, true);
-
-    // effect1: var_man_x drinks tea
-    vector<ParamValue> drinkTeaStateOwnerList2;
-    drinkTeaStateOwnerList2.push_back(var_man_x);
-    State* drinkTeaState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkTeaStateOwnerList2, false, 0, true);
-    Effect* drinkTeaEffect2 = new Effect(drinkTeaState2, OP_ASSIGN, "tea",true);
-
-    // add rule:
-    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
-    catsKeeperDrinksTeaRule->ruleName = "catsKeeperDrinksTeaRule";
-    catsKeeperDrinksTeaRule->addPrecondition(peopleState1);
-    catsKeeperDrinksTeaRule->addPrecondition(keepCatsStateState2);
-
-    catsKeeperDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect2));
-
-    this->AllRules.push_back(catsKeeperDrinksTeaRule);
-
-    teaDrinkerKeepsCatsRule->noCoexisenceOtherRules.push_back(catsKeeperDrinksTeaRule);
-    catsKeeperDrinksTeaRule->noCoexisenceOtherRules.push_back(teaDrinkerKeepsCatsRule);
-    //----------------------------End Rule: The person who keeps cats drinks tea-------------------------------------------------
-
-    //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
-    // define variables:
-    ParamValue var_fish_keeper = entity_var[0];
-    ParamValue var_achieve_integrity_goal = bool_var[0];
-
-    // precondition 1: var_fish_keeper is people
-    vector<ParamValue> peopleStateOwnerList;
-    peopleStateOwnerList.push_back(var_fish_keeper);
-    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0);
-
-    // precondition 2: var_fish_keeper keeps fish
-    vector<ParamValue> keepFishStateOwnerList;
-    keepFishStateOwnerList.push_back(var_fish_keeper);
-    State* keepFishState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList, false,0, true);
-
-    // precondition 3: closed to var_fish_keeper
-    vector<ParamValue> closedToFishKeeperStateOwnerList;
-    closedToFishKeeperStateOwnerList.push_back(var_avatar);
-    closedToFishKeeperStateOwnerList.push_back(var_fish_keeper);
-    State* closedToFishKeeperState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedToFishKeeperStateOwnerList, true, &Inquery::inqueryDistance);
-
-    // energy state:
-    vector<ParamValue> IntegrityStateOwnerList;
-    IntegrityStateOwnerList.push_back(var_avatar);
-    State* IntegrityGoalState = new State("IntegrityDemandGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_integrity_goal, IntegrityStateOwnerList);
-
-    // effect1: Integrity Goal Achieved
-    Effect* IntegrityGoalAchievedEffect = new Effect(IntegrityGoalState, OP_ASSIGN, SV_TRUE);
-
-    Rule* IntegrityRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.2f);
-    IntegrityRule->ruleName = "ClosedToFishKeeperIIntegrityRule";
-    IntegrityRule->addPrecondition(fishKeeperPeopleState);
-    IntegrityRule->addPrecondition(keepFishState);
-    IntegrityRule->addPrecondition(closedToFishKeeperState);
-
-    IntegrityRule->addEffect(EffectPair(1.0f,IntegrityGoalAchievedEffect));
-
-    this->AllRules.push_back(IntegrityRule);
-
-    //----------------------------End Rule:closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
-
-
-    //----------------------------Begin Rule: if other people do not keep pet_x, then man_1 keeps it--------------------------------------
-    // define variables:
-    ParamValue man_1 = entity_var[0];
-    ParamValue man_2 = entity_var[1];
-    ParamValue man_3 = entity_var[2];
-    ParamValue man_1_pet = str_var[3];
-    ParamValue pet_x = str_var[4];
-    ParamValue pet_y = str_var[5];
-    ParamValue pet_z = str_var[6];
-
-    // precondition 1 -5 : man_1-5 are people
-    vector<ParamValue> ispeopleStateOwnerList1;
-    ispeopleStateOwnerList1.push_back(man_1);
-    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0);
-
-    vector<ParamValue> ispeopleStateOwnerList2;
-    ispeopleStateOwnerList2.push_back(man_2);
-    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0);
-
-    vector<ParamValue> ispeopleStateOwnerList3;
-    ispeopleStateOwnerList3.push_back(man_3);
-    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0);
-
-
-    // additional preconditions: man_2, man_3,  are not the same to man_1
-    vector<ParamValue> isNotSameOwnerList1;
-    isNotSameOwnerList1.push_back(man_1);
-    isNotSameOwnerList1.push_back(man_2);
-    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame);
-
-    vector<ParamValue> isNotSameOwnerList2;
-    isNotSameOwnerList2.push_back(man_1);
-    isNotSameOwnerList2.push_back(man_3);
-    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame);
-
-
-    // precondition 0: pet_x y z are pets
-    vector<ParamValue> isPetStateOwnerList1;
-    isPetStateOwnerList1.push_back(pet_x);
-    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0);
-
-    vector<ParamValue> isPetStateOwnerList2;
-    isPetStateOwnerList2.push_back(pet_y);
-    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0);
-
-    vector<ParamValue> isPetStateOwnerList3;
-    isPetStateOwnerList3.push_back(pet_z);
-    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0);
-
-    // precondition 1 -5 : man_1-3 are people
-
-    // precondition: pet_y z are different from pet_x
-    vector<ParamValue> isNotSamePetOwnerList1;
-    isNotSamePetOwnerList1.push_back(pet_x);
-    isNotSamePetOwnerList1.push_back(pet_y);
-    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame);
-
-    vector<ParamValue> isNotSamePetOwnerList2;
-    isNotSamePetOwnerList2.push_back(pet_x);
-    isNotSamePetOwnerList2.push_back(pet_z);
-    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame);
-
-    // precondition 6-9 : other people do not keep pet_x
-    vector<ParamValue> notkeepXStateOwnerList1;
-    notkeepXStateOwnerList1.push_back(man_2);
-    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, notkeepXStateOwnerList1, false,0, true);
-
-    vector<ParamValue> notkeepXStateOwnerList2;
-    notkeepXStateOwnerList2.push_back(man_3);
-    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_z, notkeepXStateOwnerList2, false,0, true);
-
-    // effect1: man_1 keeps pet_x
-    vector<ParamValue> keepXStateOwnerList;
-    keepXStateOwnerList.push_back(man_1);
-    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList, false,0, true);
-    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
-
-    // add rule:
-    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
-    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(isPetState2);
-    notKeepOtherPeoplesPetRule->addPrecondition(isPetState3);
-
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
-    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
-
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
-
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet1);
-    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet2);
-
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
-    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
-
-    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
-
-    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
-    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
-
-    //----------------------------Begin Rule: if other people do not drink drink_x, then man_1 drinks it--------------------------------------
-    // define variables:
-    ParamValue drink_man_1 = str_var[0];
-    ParamValue drink_x = str_var[1];
-    ParamValue drink_y = str_var[2];
-    ParamValue drink_z = str_var[3];
-
-    // precondition 0: drink_x y z are drink
-    vector<ParamValue> isDrinkStateOwnerList1;
-    isDrinkStateOwnerList1.push_back(drink_x);
-    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0);
-
-    vector<ParamValue> isDrinkStateOwnerList2;
-    isDrinkStateOwnerList2.push_back(drink_y);
-    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0);
-
-    vector<ParamValue> isDrinkStateOwnerList3;
-    isDrinkStateOwnerList3.push_back(drink_z);
-    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0);
-
-    // precondition 1 -5 : man_1-3 are people and different
-
-    //  precondition:  drink_y and  drink_z are different
-    vector<ParamValue> isNotSameDrinkOwnerList1;
-    isNotSameDrinkOwnerList1.push_back(drink_x);
-    isNotSameDrinkOwnerList1.push_back(drink_y);
-    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame);
-
-    //  precondition:  drink_y and  drink_z are different
-    vector<ParamValue> isNotSameDrinkOwnerList2;
-    isNotSameDrinkOwnerList2.push_back(drink_x);
-    isNotSameDrinkOwnerList2.push_back(drink_z);
-    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame);
-
-    // precondition 6-9 : other people do not drink drink_x
-    vector<ParamValue> notdrinkXStateOwnerList1;
-    notdrinkXStateOwnerList1.push_back(man_2);
-    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_y, notdrinkXStateOwnerList1, false, 0, true);
-
-    vector<ParamValue> notdrinkXStateOwnerList2;
-    notdrinkXStateOwnerList2.push_back(man_3);
-    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_z, notdrinkXStateOwnerList2, false, 0, true);
-
-    // effect1: man_1 drinks drink_x
-    vector<ParamValue> drinkXStateOwnerList;
-    drinkXStateOwnerList.push_back(man_1);
-    State* drinkXState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_man_1, drinkXStateOwnerList, false, 0, true);
-    Effect* drinkXEffect = new Effect(drinkXState, OP_ASSIGN, drink_x,true);
-
-
-    // add rule:
-    Rule* notDrinkOtherPeoplesDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-    notDrinkOtherPeoplesDrinkRule->ruleName = "notDrinkOtherPeoplesDrinkRule";
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState1);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState2);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState3);
-
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState1);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState2);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
-
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState1);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState2);
-
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState2);
-
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
-    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
-
-    notDrinkOtherPeoplesDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
-
-    this->AllRules.push_back(notDrinkOtherPeoplesDrinkRule);
-    //----------------------------End Rule:  if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------------------
-
-
-//    //----------------------------Begin Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+//    //----------------------------Begin Rule: The person who drinks water keeps fish------------------------------------------------------
 //    // define variables:
+//    ParamValue var_pet = str_var[0];
+//    ParamValue var_man_x = entity_var[0];
 
-//    // precondition 0: pet_x pet_y is pet
+//    // precondition 1: var_man_x is people
+//    vector<ParamValue> peopleStateOwnerList1;
+//    peopleStateOwnerList1.push_back(var_man_x);
+//    State* peopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList1,false,0);
 
-//    // precondition 1: man_1 keepsl pet_x
-//    vector<ParamValue> keepXStateOwnerList2;
-//    keepXStateOwnerList2.push_back(man_1);
-//    State* keepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_x, keepXStateOwnerList2, false,0, true);
 
-//    // precondition 2: pet_x is not the same to pet_y
-//    vector<ParamValue> petXYisNotSameOwnerList1;
-//    petXYisNotSameOwnerList1.push_back(pet_x);
-//    petXYisNotSameOwnerList1.push_back(pet_y);
-//    State* petXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", petXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+//    // precondition 1: var_man_x is people
 
-//    // effect 1: man_1 doesn't keep pet_y
-//    Effect* notkeepYStateEffect = new Effect(keepXState2, OP_ASSIGN_NOT_EQUAL_TO, pet_y,true);
+//    // precondition 3: var_man_x  drinks water
+//    vector<ParamValue> drinkWaterStateOwnerList2;
+//    drinkWaterStateOwnerList2.push_back(var_man_x);
+//    State* drinkWaterState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"water", drinkWaterStateOwnerList2, false, 0, true);
+
+//    // effect1: var_man_x keeps fish
+//    vector<ParamValue> keepFishStateOwnerList2;
+//    keepFishStateOwnerList2.push_back(var_man_x);
+//    State* keepFishState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepFishStateOwnerList2, false,0,true);
+//    Effect* keepFishStateEffect2 = new Effect(keepFishState2, OP_ASSIGN, "fish",true);
 
 //    // add rule:
-//    Rule* ifKeepsPetXThenNotKeepYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    ifKeepsPetXThenNotKeepYRule->ruleName = "ifKeepsPetXThenNotKeepYRule";
-//    ifKeepsPetXThenNotKeepYRule->addPrecondition(ispeopleState1);
-//    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState1);
-//    ifKeepsPetXThenNotKeepYRule->addPrecondition(isPetState2);
-//    ifKeepsPetXThenNotKeepYRule->addPrecondition(keepXState2);
-//    ifKeepsPetXThenNotKeepYRule->addPrecondition(petXYisNotSameState1);
+//    Rule* waterDrinkerKeepsFishRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
+//    waterDrinkerKeepsFishRule->ruleName = "waterDrinkerKeepsFishRule";
+//    waterDrinkerKeepsFishRule->addPrecondition(peopleState1);
+//    waterDrinkerKeepsFishRule->addPrecondition(drinkWaterState2);
 
-//    ifKeepsPetXThenNotKeepYRule->addEffect(EffectPair(1.0f,notkeepYStateEffect));
+//    waterDrinkerKeepsFishRule->addEffect(EffectPair(1.0f,keepFishStateEffect2));
 
-//    this->AllRules.push_back(ifKeepsPetXThenNotKeepYRule);
-//    //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
+//    this->AllRules.push_back(waterDrinkerKeepsFishRule);
+//    //----------------------------End Rule: The person who drinks water keeps fish--------------------------------------------------
 
-//    //----------------------------Begin Rule:  if man_1 drinks drink_x, and drink_x is not the same to drink_y, then man_1 doesn't drink drink_y----
+//    //----------------------------Begin Rule: The person who keeps fish drinks water.------------------------------------------------------
+//    // define variables:
+//    ParamValue var_drink = str_var[0];
 
-//    // precondition 0: peopleState1
+//    // precondition 3: var_man_x keeps fish
+//    vector<ParamValue> keepFishStateOwnerList1;
+//    keepFishStateOwnerList1.push_back(var_man_x);
+//    State* keepFishState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList1, false,0,true);
 
-//    // precondition 1: drink_x drink_y are drink
+//    // effect1: var_man_x drinks water
+//    vector<ParamValue> drinkWaterStateOwnerList1;
+//    drinkWaterStateOwnerList1.push_back(var_man_x);
+//    State* drinkWaterState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkWaterStateOwnerList1, false, 0, true);
+//    Effect* drinkWaterStateEffect1 = new Effect(drinkWaterState1, OP_ASSIGN, "water",true);
 
-//    // precondition 2: man_1 drinks drink_x
-//    vector<ParamValue> drinkXStateOwnerList1;
-//    drinkXStateOwnerList1.push_back(man_1);
-//    State* drinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_x, drinkXStateOwnerList1, false, 0, true);
+//    // add rule:
+//    Rule* fishKeeperDrinkWaterRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
+//    fishKeeperDrinkWaterRule->ruleName = "fishKeeperDrinkWaterRule";
+//    fishKeeperDrinkWaterRule->addPrecondition(peopleState1);
+//    fishKeeperDrinkWaterRule->addPrecondition(keepFishState1);
 
-//    // precondition 3: brand_x is not the same to brand_y
-//    vector<ParamValue> drinkXYisNotSameOwnerList1;
-//    drinkXYisNotSameOwnerList1.push_back(drink_x);
-//    drinkXYisNotSameOwnerList1.push_back(drink_y);
-//    State* drinkXYisNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", drinkXYisNotSameOwnerList1,true, &Inquery::inqueryIsSame, true);
+//    fishKeeperDrinkWaterRule->addEffect(EffectPair(1.0f,drinkWaterStateEffect1));
+
+//    this->AllRules.push_back(fishKeeperDrinkWaterRule);
+
+//    waterDrinkerKeepsFishRule->noCoexisenceOtherRules.push_back(fishKeeperDrinkWaterRule);
+//    fishKeeperDrinkWaterRule->noCoexisenceOtherRules.push_back(waterDrinkerKeepsFishRule);
+//    //----------------------------End Rule: The person who keeps fish drinks water--------------------------------------------------
+
+
+//    //----------------------------Begin Rule: The person who drinks tea keeps cats------------------------------------------------------
+//    // define variables:
+
+//    // precondition 1: var_man_x is people
+
+//    // precondition 2: var_man_x drinks tea
+//    vector<ParamValue> drinkTeaStateOwnerList1;
+//    drinkTeaStateOwnerList1.push_back(var_man_x);
+//    State* drinkTeaState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,"tea", drinkTeaStateOwnerList1, false, 0, true);
+
+//    // effect1: var_man_x keeps cats
+//    vector<ParamValue> keepCatsStateOwnerList1;
+//    keepCatsStateOwnerList1.push_back(var_man_x);
+//    State* keepCatsStateState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,var_pet, keepCatsStateOwnerList1, false, 0, true);
+//    Effect* keepCatsEffect1 = new Effect(keepCatsStateState1, OP_ASSIGN, "cats",true);
+
+//    // add rule:
+//    Rule* teaDrinkerKeepsCatsRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
+//    teaDrinkerKeepsCatsRule->ruleName = "teaDrinkerKeepsCatsRule";
+//    teaDrinkerKeepsCatsRule->addPrecondition(peopleState1);
+//    teaDrinkerKeepsCatsRule->addPrecondition(drinkTeaState1);
+
+//    teaDrinkerKeepsCatsRule->addEffect(EffectPair(1.0f,keepCatsEffect1));
+
+//    this->AllRules.push_back(teaDrinkerKeepsCatsRule);
+//    //----------------------------End Rule: The person who drinks tea keeps cats--------------------------------------------------
+
+//    //----------------------------Begin Rule: The person who keeps cats drinks tea -----------------------------------------------------
+//    // define variables:
+
+//    // precondition 1: var_man_x is people
+
+//    // precondition 2: var_man_x keeps cats
+//    vector<ParamValue> keepCatsStateOwnerList2;
+//    keepCatsStateOwnerList2.push_back(var_man_x);
+//    State* keepCatsStateState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"cats", keepCatsStateOwnerList2, false, 0, true);
+
+//    // effect1: var_man_x drinks tea
+//    vector<ParamValue> drinkTeaStateOwnerList2;
+//    drinkTeaStateOwnerList2.push_back(var_man_x);
+//    State* drinkTeaState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,var_drink, drinkTeaStateOwnerList2, false, 0, true);
+//    Effect* drinkTeaEffect2 = new Effect(drinkTeaState2, OP_ASSIGN, "tea",true);
+
+//    // add rule:
+//    Rule* catsKeeperDrinksTeaRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f, false, true);
+//    catsKeeperDrinksTeaRule->ruleName = "catsKeeperDrinksTeaRule";
+//    catsKeeperDrinksTeaRule->addPrecondition(peopleState1);
+//    catsKeeperDrinksTeaRule->addPrecondition(keepCatsStateState2);
+
+//    catsKeeperDrinksTeaRule->addEffect(EffectPair(1.0f,drinkTeaEffect2));
+
+//    this->AllRules.push_back(catsKeeperDrinksTeaRule);
+
+//    teaDrinkerKeepsCatsRule->noCoexisenceOtherRules.push_back(catsKeeperDrinksTeaRule);
+//    catsKeeperDrinksTeaRule->noCoexisenceOtherRules.push_back(teaDrinkerKeepsCatsRule);
+//    //----------------------------End Rule: The person who keeps cats drinks tea-------------------------------------------------
+
+//    //----------------------------Begin Rule: closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+//    // define variables:
+//    ParamValue var_fish_keeper = entity_var[0];
+//    ParamValue var_achieve_integrity_goal = bool_var[0];
+
+//    // precondition 1: var_fish_keeper is people
+//    vector<ParamValue> peopleStateOwnerList;
+//    peopleStateOwnerList.push_back(var_fish_keeper);
+//    State* fishKeeperPeopleState = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", peopleStateOwnerList,false,0);
+
+//    // precondition 2: var_fish_keeper keeps fish
+//    vector<ParamValue> keepFishStateOwnerList;
+//    keepFishStateOwnerList.push_back(var_fish_keeper);
+//    State* keepFishState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,"fish", keepFishStateOwnerList, false,0, true);
+
+//    // precondition 3: closed to var_fish_keeper
+//    vector<ParamValue> closedToFishKeeperStateOwnerList;
+//    closedToFishKeeperStateOwnerList.push_back(var_avatar);
+//    closedToFishKeeperStateOwnerList.push_back(var_fish_keeper);
+//    State* closedToFishKeeperState = new State("Distance",ActionParamType::FLOAT(),STATE_LESS_THAN ,ACCESS_DISTANCE, closedToFishKeeperStateOwnerList, true, &Inquery::inqueryDistance);
+
+//    // energy state:
+//    vector<ParamValue> IntegrityStateOwnerList;
+//    IntegrityStateOwnerList.push_back(var_avatar);
+//    State* IntegrityGoalState = new State("IntegrityDemandGoal",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,var_achieve_integrity_goal, IntegrityStateOwnerList);
+
+//    // effect1: Integrity Goal Achieved
+//    Effect* IntegrityGoalAchievedEffect = new Effect(IntegrityGoalState, OP_ASSIGN, SV_TRUE);
+
+//    Rule* IntegrityRule = new Rule(doNothingAction,boost::get<Entity>(var_avatar),0.2f);
+//    IntegrityRule->ruleName = "ClosedToFishKeeperIIntegrityRule";
+//    IntegrityRule->addPrecondition(fishKeeperPeopleState);
+//    IntegrityRule->addPrecondition(keepFishState);
+//    IntegrityRule->addPrecondition(closedToFishKeeperState);
+
+//    IntegrityRule->addEffect(EffectPair(1.0f,IntegrityGoalAchievedEffect));
+
+//    this->AllRules.push_back(IntegrityRule);
+
+//    //----------------------------End Rule:closed to person who keep fish to achieve Integrity demanding goal -------------------------------------------
+
+
+//    //----------------------------Begin Rule: if other people do not keep pet_x, then man_1 keeps it--------------------------------------
+//    // define variables:
+//    ParamValue man_1 = entity_var[0];
+//    ParamValue man_2 = entity_var[1];
+//    ParamValue man_3 = entity_var[2];
+//    ParamValue man_1_pet = str_var[3];
+//    ParamValue pet_x = str_var[4];
+//    ParamValue pet_y = str_var[5];
+//    ParamValue pet_z = str_var[6];
+
+//    // precondition 1 -5 : man_1-5 are people
+//    vector<ParamValue> ispeopleStateOwnerList1;
+//    ispeopleStateOwnerList1.push_back(man_1);
+//    State* ispeopleState1 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList1,false,0);
+
+//    vector<ParamValue> ispeopleStateOwnerList2;
+//    ispeopleStateOwnerList2.push_back(man_2);
+//    State* ispeopleState2 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList2, false,0);
+
+//    vector<ParamValue> ispeopleStateOwnerList3;
+//    ispeopleStateOwnerList3.push_back(man_3);
+//    State* ispeopleState3 = new State("class",ActionParamType::STRING(),STATE_EQUAL_TO , "people", ispeopleStateOwnerList3,false,0);
+
+
+//    // additional preconditions: man_2, man_3,  are not the same to man_1
+//    vector<ParamValue> isNotSameOwnerList1;
+//    isNotSameOwnerList1.push_back(man_1);
+//    isNotSameOwnerList1.push_back(man_2);
+//    State* isNotSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList1,true, &Inquery::inqueryIsSame);
+
+//    vector<ParamValue> isNotSameOwnerList2;
+//    isNotSameOwnerList2.push_back(man_1);
+//    isNotSameOwnerList2.push_back(man_3);
+//    State* isNotSameState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameOwnerList2,true, &Inquery::inqueryIsSame);
+
+
+//    // precondition 0: pet_x y z are pets
+//    vector<ParamValue> isPetStateOwnerList1;
+//    isPetStateOwnerList1.push_back(pet_x);
+//    State* isPetState1 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList1, false, 0);
+
+//    vector<ParamValue> isPetStateOwnerList2;
+//    isPetStateOwnerList2.push_back(pet_y);
+//    State* isPetState2 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList2, false, 0);
+
+//    vector<ParamValue> isPetStateOwnerList3;
+//    isPetStateOwnerList3.push_back(pet_z);
+//    State* isPetState3 = new State("is_pet",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isPetStateOwnerList3, false, 0);
+
+//    // precondition 1 -5 : man_1-3 are people
+
+//    // precondition: pet_y z are different from pet_x
+//    vector<ParamValue> isNotSamePetOwnerList1;
+//    isNotSamePetOwnerList1.push_back(pet_x);
+//    isNotSamePetOwnerList1.push_back(pet_y);
+//    State* isNotSamePet1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList1,true, &Inquery::inqueryIsSame);
+
+//    vector<ParamValue> isNotSamePetOwnerList2;
+//    isNotSamePetOwnerList2.push_back(pet_x);
+//    isNotSamePetOwnerList2.push_back(pet_z);
+//    State* isNotSamePet2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSamePetOwnerList2,true, &Inquery::inqueryIsSame);
+
+//    // precondition 6-9 : other people do not keep pet_x
+//    vector<ParamValue> notkeepXStateOwnerList1;
+//    notkeepXStateOwnerList1.push_back(man_2);
+//    State* notkeepXState1 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, notkeepXStateOwnerList1, false,0, true);
+
+//    vector<ParamValue> notkeepXStateOwnerList2;
+//    notkeepXStateOwnerList2.push_back(man_3);
+//    State* notkeepXState2 = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_z, notkeepXStateOwnerList2, false,0, true);
+
+//    // effect1: man_1 keeps pet_x
+//    vector<ParamValue> keepXStateOwnerList;
+//    keepXStateOwnerList.push_back(man_1);
+//    State* keepXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,man_1_pet, keepXStateOwnerList, false,0, true);
+//    Effect* keepXEffect = new Effect(keepXState, OP_ASSIGN, pet_x,true);
+
+//    // add rule:
+//    Rule* notKeepOtherPeoplesPetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    notKeepOtherPeoplesPetRule->ruleName = "notKeepOtherPeoplesPetRule";
+//    notKeepOtherPeoplesPetRule->addPrecondition(isPetState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isPetState2);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isPetState3);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState2);
+//    notKeepOtherPeoplesPetRule->addPrecondition(ispeopleState3);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSameState2);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(isNotSamePet2);
+
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState1);
+//    notKeepOtherPeoplesPetRule->addPrecondition(notkeepXState2);
+
+//    notKeepOtherPeoplesPetRule->addEffect(EffectPair(1.0f,keepXEffect));
+
+//    this->AllRules.push_back(notKeepOtherPeoplesPetRule);
+//    //----------------------------End Rule:  if other 4 people do not keep pet_x, then man_1 keeps it-------------------------------------------------
+
+//    //----------------------------Begin Rule: if other people do not drink drink_x, then man_1 drinks it--------------------------------------
+//    // define variables:
+//    ParamValue drink_man_1 = str_var[0];
+//    ParamValue drink_x = str_var[1];
+//    ParamValue drink_y = str_var[2];
+//    ParamValue drink_z = str_var[3];
+
+//    // precondition 0: drink_x y z are drink
+//    vector<ParamValue> isDrinkStateOwnerList1;
+//    isDrinkStateOwnerList1.push_back(drink_x);
+//    State* isDrinkState1 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList1,false, 0);
+
+//    vector<ParamValue> isDrinkStateOwnerList2;
+//    isDrinkStateOwnerList2.push_back(drink_y);
+//    State* isDrinkState2 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList2,false, 0);
+
+//    vector<ParamValue> isDrinkStateOwnerList3;
+//    isDrinkStateOwnerList3.push_back(drink_z);
+//    State* isDrinkState3 = new State("is_drink",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", isDrinkStateOwnerList3,false, 0);
+
+//    // precondition 1 -5 : man_1-3 are people and different
+
+//    //  precondition:  drink_y and  drink_z are different
+//    vector<ParamValue> isNotSameDrinkOwnerList1;
+//    isNotSameDrinkOwnerList1.push_back(drink_x);
+//    isNotSameDrinkOwnerList1.push_back(drink_y);
+//    State* isNotSameDrinkState = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList1,true, &Inquery::inqueryIsSame);
+
+//    //  precondition:  drink_y and  drink_z are different
+//    vector<ParamValue> isNotSameDrinkOwnerList2;
+//    isNotSameDrinkOwnerList2.push_back(drink_x);
+//    isNotSameDrinkOwnerList2.push_back(drink_z);
+//    State* isNotSameDrinkState2 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "false", isNotSameDrinkOwnerList2,true, &Inquery::inqueryIsSame);
+
+//    // precondition 6-9 : other people do not drink drink_x
+//    vector<ParamValue> notdrinkXStateOwnerList1;
+//    notdrinkXStateOwnerList1.push_back(man_2);
+//    State* notdrinkXState1 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_y, notdrinkXStateOwnerList1, false, 0, true);
+
+//    vector<ParamValue> notdrinkXStateOwnerList2;
+//    notdrinkXStateOwnerList2.push_back(man_3);
+//    State* notdrinkXState2 = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_z, notdrinkXStateOwnerList2, false, 0, true);
 
 //    // effect1: man_1 drinks drink_x
-//    Effect* notdrinkYEffect = new Effect(drinkXState1, OP_ASSIGN_NOT_EQUAL_TO, drink_y,true);
+//    vector<ParamValue> drinkXStateOwnerList;
+//    drinkXStateOwnerList.push_back(man_1);
+//    State* drinkXState = new State("drink",ActionParamType::STRING(),STATE_EQUAL_TO ,drink_man_1, drinkXStateOwnerList, false, 0, true);
+//    Effect* drinkXEffect = new Effect(drinkXState, OP_ASSIGN, drink_x,true);
+
 
 //    // add rule:
-//    Rule* ifDrinkXThenNotDrinkYRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    ifDrinkXThenNotDrinkYRule->ruleName = "ifDrinkXThenNotDrinkYRule";
-//    ifDrinkXThenNotDrinkYRule->addPrecondition(ispeopleState1);
-//    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState1);
-//    ifDrinkXThenNotDrinkYRule->addPrecondition(isDrinkState2);
-//    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXState1);
-//    ifDrinkXThenNotDrinkYRule->addPrecondition(drinkXYisNotSameState1);
+//    Rule* notDrinkOtherPeoplesDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
+//    notDrinkOtherPeoplesDrinkRule->ruleName = "notDrinkOtherPeoplesDrinkRule";
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState1);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState2);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isDrinkState3);
 
-//    ifDrinkXThenNotDrinkYRule->addEffect(EffectPair(1.0f,notdrinkYEffect));
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState1);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState2);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(ispeopleState3);
 
-//    this->AllRules.push_back(ifDrinkXThenNotDrinkYRule);
-//    //----------------------------ENd Rule:  if man_1 drinks drink_x, and brand_x is not the same to brand_y, then man_1 doesn't smokes brand_y----
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState1);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameState2);
 
-//    //----------------------------Begin Rule: if man_1 keeps pet_x, man_1 and man_2 are not the same, so man_2 doesn't keep pet_x----------------------
-//    // define variables:
-//    // precondition 0: man_1 and man_2 are people, pet_x and pet_y are pet
-//    // precondition 1: man_1 keepsl pet_x
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(isNotSameDrinkState2);
 
-//    // precondition 2: man_1 is not the same to man_2
-//    vector<ParamValue> man12isNotSameOwnerList1;
-//    man12isNotSameOwnerList1.push_back(man_1);
-//    man12isNotSameOwnerList1.push_back(man_2);
-//    State* man12isNotSameSameState1 = new State("is_same",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", man12isNotSameOwnerList1,false, 0, true);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState1);
+//    notDrinkOtherPeoplesDrinkRule->addPrecondition(notdrinkXState2);
 
-//    // effect 1: man_2 doesn't keep pet_x
-//    vector<ParamValue> man2notkeepPetXStateOwnerList;
-//    man2notkeepPetXStateOwnerList.push_back(man_2);
-//    State* man2notkeepPetXState = new State("keep_pet",ActionParamType::STRING(),STATE_EQUAL_TO ,pet_y, man2notkeepPetXStateOwnerList, false, 0, true);
-//    Effect* man2notkeepPetXStateEffect = new Effect(man2notkeepPetXState, OP_ASSIGN_NOT_EQUAL_TO, pet_x,true);
+//    notDrinkOtherPeoplesDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
 
-//    // add rule:
-//    Rule* ifMan1KeepsPetXThenMan2NotKeepXRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->ruleName = "ifMan1KeepsPetXThenMan2NotKeepXRule";
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState1);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(ispeopleState2);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState1);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(isPetState2);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(keepXState2);
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addPrecondition(man12isNotSameSameState1);
-
-//    ifMan1KeepsPetXThenMan2NotKeepXRule->addEffect(EffectPair(1.0f,man2notkeepPetXStateEffect));
-
-//    this->AllRules.push_back(ifMan1KeepsPetXThenMan2NotKeepXRule);
-//    //----------------------------End Rule: if man_1 keeps pet_x, and pet_x is not the same to pet_y, then man_1 doesn't keep pet_y----------------------
-
-//    //----------------------------Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
-//    // define variables:
-//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
-//    // precondition 1: man_1 keepsl pet_x
-
-//    // effect 1: man_1 drinks drink_x
-
-//    // add rule:
-//    Rule* aManKeepSomePetAlsoDrinkSomeDrinkRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->ruleName = "aManKeepSomePetAlsoDrinkSomeDrinkRule";
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(ispeopleState1);
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isPetState1);
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(isDrinkState1);
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addPrecondition(keepXState2);
-
-//    aManKeepSomePetAlsoDrinkSomeDrinkRule->addEffect(EffectPair(1.0f,drinkXEffect));
-
-//    this->AllRules.push_back(aManKeepSomePetAlsoDrinkSomeDrinkRule);
-//    //----------------------------End Rule: Begin Rule: if man_1 keeps pet_x, he also drinks drink_x----------------------
-
-//    //----------------------------Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
-//    // define variables:
-//    // precondition 0: man_1 is people, pet_x is pet, drink_x is drink
-//    // precondition 1: man_1 keepsl pet_x
-
-//    // effect 1: man_1 drinks drink_x
-
-//    // add rule:
-//    Rule* aManDrinkSomeDrinkAlsoKeepSomePetRule = new Rule(doNothingAction,boost::get<Entity>(selfEntityParamValue),0.0f);
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->ruleName = "aManDrinkSomeDrinkAlsoKeepSomePetRule";
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(ispeopleState1);
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isPetState1);
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(isDrinkState1);
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addPrecondition(drinkXState1);
-
-//    aManDrinkSomeDrinkAlsoKeepSomePetRule->addEffect(EffectPair(1.0f,keepXEffect));
-
-//    this->AllRules.push_back(aManDrinkSomeDrinkAlsoKeepSomePetRule);
-//    //----------------------------End Rule: Begin Rule: if man_1 drinks drink_x, he also keeps pet_x ----------------------
-
+//    this->AllRules.push_back(notDrinkOtherPeoplesDrinkRule);
+//    //----------------------------End Rule:  if other 4 people do not drink drink_x, then man_1 drinks it--------------------------------------------------
+//    //----------------------------End Einstein puzzle rules--------------------------------------------------
 
 
 }
@@ -4600,23 +4475,23 @@ void OCPlanner::loadFacts(vector<State*> &knownStates)
 //       )
 //    )
 
-    ParamValue GermanEntity = Entity("id_German_man","avatar");
-    ParamValue BritishEntity = Entity("id_British_man","avatar");
+//    ParamValue GermanEntity = Entity("id_German_man","avatar");
+//    ParamValue BritishEntity = Entity("id_British_man","avatar");
 
-    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
-    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
-    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
+//    vector<ParamValue> GermanDoesntDrinkMilkStateOwnerList;
+//    GermanDoesntDrinkMilkStateOwnerList.push_back(GermanEntity);
+//    State* GermanDoesntDrinkMilkState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"milk", GermanDoesntDrinkMilkStateOwnerList, false, 0, true);
 
-    knownStates.push_back(GermanDoesntDrinkMilkState);
+//    knownStates.push_back(GermanDoesntDrinkMilkState);
 
-    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
-    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntDrinkWaterState);
+//    vector<ParamValue> BritishDoesntDrinkWaterStateOwnerList;
+//    BritishDoesntDrinkWaterStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntDrinkWaterState = new State("drink",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"water", BritishDoesntDrinkWaterStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntDrinkWaterState);
 
-    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
-    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
-    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
-    knownStates.push_back(BritishDoesntKeepDogsState);
+//    vector<ParamValue> BritishDoesntKeepDogsStateOwnerList;
+//    BritishDoesntKeepDogsStateOwnerList.push_back(BritishEntity);
+//    State* BritishDoesntKeepDogsState = new State("keep_pet",ActionParamType::STRING(),STATE_NOT_EQUAL_TO ,"dogs", BritishDoesntKeepDogsStateOwnerList, false, 0, true);
+//    knownStates.push_back(BritishDoesntKeepDogsState);
 
 }

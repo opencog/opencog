@@ -41,12 +41,6 @@ IF (HAVE_SERVER)
 		${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
 		DEPENDS "agent_finder.pyx" "opencog/atomspace.pxd" "opencog/cogserver.pxd")
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
-
-	add_custom_command(OUTPUT logic_wrapper.cpp logic_wrapper_api.h
-		COMMAND
-		${CYTHON_EXECUTABLE} -f -o logic_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logic_wrapper.pyx"
-		DEPENDS "opencog/atomspace.pxd" opencog_atom_types)
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logic_wrapper.cpp" "logic_wrapper_api.h")
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
@@ -173,21 +167,6 @@ TARGET_LINK_LIBRARIES(PythonEval
 	${PYTHON_LIBRARIES}
 )
 
-# utility library for PythonModule
-ADD_LIBRARY(logic_wrapper SHARED
-	logic_wrapper.cpp
-)
-
-TARGET_LINK_LIBRARIES(logic_wrapper
-	atomspace
-)
-
-ADD_DEPENDENCIES(logic_wrapper atomspace_cython)
-
-SET_TARGET_PROPERTIES(logic_wrapper PROPERTIES
-	PREFIX ""
-	OUTPUT_NAME logic_wrapper)
-
 IF(HAVE_GUILE)
 	ADD_LIBRARY(scheme_wrapper SHARED
 		scheme_wrapper.cpp
@@ -210,7 +189,6 @@ ADD_LIBRARY (PythonModule SHARED
 	PyMindAgent.cc
 	PyRequest.cc
 )
-#ADD_DEPENDENCIES(PythonModule agent_finder PythonEval logic_wrapper)
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
 SET(PYTHONMODULE_LINK_LIBS server PythonEval ${PYTHON_LIBRARIES})

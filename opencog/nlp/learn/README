@@ -354,6 +354,24 @@ links.
 
 Some typical entropies for word-pairs
 -------------------------------------
+Three experiments:
+1) Get H(de,*) H(*,de)  H(en,*) H(*,en) and compare to
+   H(de+en,*) H(*, de+en)
+
+2) H(vieux,*) H(* vieux) H(nouveaux, *) H(*, nouveaux)
+
+3) H(vieille, *) etc + vieux
+
+4) H(le, *) H(la,*)  vs. H(le+la)
+
+5) H(le,*) H(famille,*) which should fail ...!?
+
+
+
+Some typical entropies for word-pairs
+-------------------------------------
+The below is arithmeticaly correct, but theoretically garbage.
+
 (WordNode "famille") entropy H=11.185
 
 H(*, famille) = 11.195548 
@@ -580,6 +598,10 @@ again... 4 Jan, even after the fixes... WTF??? .. ANY as usual
        This time, immediately followed by glibc malloc corruption:
        *** glibc detected *** opencog/server/cogserver: malloc(): smallbin
        double linked list corrupted: 0x000000002ec2e140 ***
+again... 5 Jan, even after the fixes... WTF??? .. ANY as usual
+again... 5 Jan, even after the fixes... WTF??? .. ANY as usual
+
+again... this time, *after* tv->getMean() successfully ran!
 
 
 
@@ -601,6 +623,7 @@ All new crash. Note:
         6: SchemeEval.cc:381      opencog::SchemeEval::c_wrap_eval(void*)
 line 381 is  self->answer = self->do_eval(*(self->pexpr));
 So maybe p is null, or self->pexpr is null..
+...
         7: continuations.c:511  c_body()
         8: vm-i-system.c:855    vm_regular_engine()
         9: eval.c:508   scm_call_4()
@@ -618,6 +641,28 @@ So maybe p is null, or self->pexpr is null..
         21: thread.cpp:0        thread_proxy()
         22: pthread_create.c:0  start_thread()
         23: ??:0        __clone()
+
+again 7 Jan 2014 but this time its different:
+
+[2014-01-07 00:58:32:234] [ERROR] Caught signal 11 (Segmentation fault) on threa
+d 47389012408640
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: vm-i-system.c:887    vm_regular_engine()
+        5: eval.c:508   scm_call_4()
+        6: backtrace.c:163      scm_display_error()
+        7: inline.h:131 scm_puts()
+        8: vm-i-system.c:855    vm_regular_engine()
+        9: eval.c:508   scm_call_4()
+        10: SchemeEval.cc:433     opencog::SchemeEval::do_eval(std::string const&)
+        11: SchemeEval.cc:392     opencog::SchemeEval::c_wrap_eval(void*)
+        12: continuations.c:511 c_body()
+        13: vm-i-system.c:855   vm_regular_engine()
+        14: eval.c:508  scm_call_4()
+
+
+
 
 
 Crash 3
@@ -639,6 +684,9 @@ bdwgc ./configure --with-large-heap=yes
 
 Core issue: cogserver should not be getting this big, anyway. Why
 is it so big?
+
+Again 7 Jan 2014
+Again 13 Jan 2014
 
 Irritation 4
 ------------

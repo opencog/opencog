@@ -1,5 +1,0 @@
-(ConceptNode "___PLN___")
-(ConceptNode "transitiveRelation" (stv 1 0))
-(InheritanceLink (stv 0.99000001 0.99000001) (PredicateNode "friendOf" (stv 1 0))
-    (ConceptNode "transitiveRelation" (stv 1 0)))
-(PredicateNode "friendOf" (stv 1 0))
