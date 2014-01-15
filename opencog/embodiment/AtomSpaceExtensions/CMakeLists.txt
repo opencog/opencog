@@ -1,4 +1,3 @@
-
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h
 	atom_types.definitions
