@@ -577,7 +577,7 @@ void AtomTable::print(std::ostream& output, Type type, bool subclass) const
 {
     foreachHandleByType(
         [&](Handle h)->void {
-            output << h << ": " << h->toString() << std::endl;
+            output << h->toString() << std::endl;
         },
         type, subclass);
 }
