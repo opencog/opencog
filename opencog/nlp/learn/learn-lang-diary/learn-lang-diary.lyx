@@ -29,7 +29,16 @@
 \index_command default
 \paperfontsize default
 \spacing single
-\use_hyperref false
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
 \papersize default
 \use_geometry false
 \use_amsmath 2
@@ -299,7 +308,7 @@ Northern Ireland
 \begin_layout Standard
 The LHS of eqn 
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand eqref
 reference "eq:basic pair"
 
 \end_inset
@@ -332,7 +341,7 @@ Update 14 Jan 2014
 \begin_layout Standard
 OK, The LHS of equation 
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand eqref
 reference "eq:basic pair"
 
 \end_inset
@@ -785,7 +794,7 @@ key "Yuret1998"
  Yuret then makes two claims: first, that the only possible grammatically
  correct parses are those of the above form (eqn 
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand eqref
 reference "eq:pair-decompose"
 
 \end_inset
@@ -1240,14 +1249,14 @@ We know
  So, instead we make the uniform distribution assumption, that they're all
  the same, and thus get eqn 
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand eqref
 reference "eq:MST entropy"
 
 \end_inset
 
  instead of 
 \begin_inset CommandInset ref
-LatexCommand nameref
+LatexCommand eqref
 reference "eq:wrong MST entropy"
 
 \end_inset
