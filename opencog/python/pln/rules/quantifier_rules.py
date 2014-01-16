@@ -121,3 +121,163 @@ class VariableInstantiationRule(rules.Rule):
     The other inputs are A and SimilarityLink $X A'''
     pass
 
+
+class ScholemRule(rules.Rule):
+    '''Exist VariableNode:$cat
+           Eval PredicateNode:is_grey VariableNode:$cat
+       |-
+       Eval PredicateNode:is_grey ConceptNode:cat_instance_1234
+    '''
+    def __init__(self, chainer):
+        quantified_var = chainer.new_variable()
+        expr = chainer.new_variable()
+
+        self._chainer = chainer
+
+        rules.Rule.__init__(self,
+            formula=None,
+            inputs=[chainer.link(types.ExistsLink, [quantified_var, expr])],
+            # output is not produced, it just makes backchaining easier
+            outputs=[expr])
+    
+    def custom_compute(self, inputs, outputs):
+        [exist_link] = inputs
+        [var, expr] = exist_link.out
+        
+        prefix='scholem_'+var.name+'_instance_'
+        node = self._chainer.atomspace.add_node(types.ConceptNode, prefix, prefixed=True)
+        
+        new_expr = self._chainer.substitute({var:node}, expr)
+
+        return [new_expr, exist_link.tv]
+
+# Another really fun thing.
+# Skolemization.
+'''
+Exists $cat: Inherits $cat cat
+|-
+Inherits cat_1 cat
+
+You can do something similar for other expressions too. It's really cool and possibly even useful! (For making inference less annoying by removing variables!)
+
+AverageLink $person
+    Implication
+        Member $person person
+        Member $person breathing
+
+AverageLink $thing (stv 0.5 0.1234)
+    Eval I_know_about $thing
+
+Eval PredicateNode:I_know_about ConceptNode:things_i_know_about
+
+ForAll $person
+    ImplicationLink
+        AndLink
+            Member $person parent
+            Member $person female
+    Member $person mother
+|-
+#InheritanceLink (AndLink parent female) mother
+
+ForAll $mother
+    ImplicationLink
+        Eval isMother $mother
+        Eval isFemale $mother
+<=>
+InheritanceLink mother female
+or...
+
+ImplicationLink
+    Eval isMother Mothers
+    Eval isFemale Mothers
+
+Eval isMother Mothers (stv 1 1)
+|-
+Eval isFemale Mothers
+
+M2I|-
+Inheritance Mothers Female
+
+
+
+ForAll $person (stv 1 1)
+    EquivalenceLink
+        AndLink
+            Member $mother parent
+            Member $mother female
+    Member $mother mother
+|- (convert ForAll to Average)
+AverageLink $person (stv 1 1)
+    EquivalenceLink
+        AndLink
+            Member $mother parent
+            Member $mother female
+    Member $mother mother
+|- (average skolemization)
+EquivalenceLink
+    AndLink
+        Member mothers parent
+        Member mothers female
+    Member mothers mother
+
+
+or, automatically use the LHS (or RHS) of the EquivalenceLink as a concept:
+
+ForAll $person (stv 1 1)
+    EquivalenceLink
+        Member $mother mother
+        AndLink
+            Member $mother parent
+            Member $mother female
+
+SimilarityLink (stv 1 1)
+    mother
+    AndLink
+        parent
+        female
+
+# since animals are non-human persons
+AverageLink (stv 0.01 1)
+    EquivalenceLink
+        Member $person person
+        Member $person human
+
+EquivalenceLink
+    Member asdf person
+    Member asdf human
+
+
+
+AverageLink $thing <0.5>
+    AndLink
+        Inheritance $thing meaningless
+        Inheritance $thing hopeless
+        Inheritance $thing made_by_humans
+
+(ConceptNode "1234" (stv 0.5))
+[ i.e. Subset Universe 1234 <0.5>]
+
+Inheritance ConceptNode:1234 meaningless <1.0>
+Inheritance ConceptNode:1234 hopeless <1.0>
+
+
+# then use deduction/inversion to find the probability of
+# Subset duck 1234
+# Subset robot 1234
+
+
+# having concepts with an intension and extension would be MUCH more useful than SUMO-style definitions!
+
+
+#AverageLink $anything <0.5>
+#    Member $anything 1234
+
+
+
+converting it into opencog-ish concepts would make inference easier (maybe?)
+(if support for variables is broken somehow)
+it would mean you could do deduction and induction and calculating similarity links more easily.
+
+except there's not enough properties info to direct-evaluate interesting similarity links, probably
+'''
+

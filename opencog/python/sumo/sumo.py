@@ -4,6 +4,8 @@ DEFAULT_NODE_TV = TruthValue(0.01, 1000)
 DEFAULT_LINK_TV = TruthValue(0.9, 100)
 DEFAULT_PREDICATE_TV = TruthValue(0.1, 100)
 
+atomspace=None
+
 def skip_comments(myfile):
     '''You can't use this function directly because it would break parsing of multiline expressions'''
     for line in myfile:
@@ -18,8 +20,19 @@ def read_file(filename):
 def parse_kif_string(inputdata):
     '''Returns a list containing the ()-expressions in the file.
     Each list expression is converted into a Python list of strings. Nested expressions become nested lists''' 
+    # Very simple one which can't handle quotes properly for example
     from pyparsing import OneOrMore, nestedExpr
     data = OneOrMore(nestedExpr()).parseString(inputdata)
+
+    # The sExpression (i.e. lisp) parser is cool, but doesn't work for some reason (it might be the '?' characters at the start of variable names?)
+
+    #from sExpParser import sexp, ParseFatalException, OneOrMore
+    #try:
+    #    sexprs = OneOrMore(sexp).parseString(inputdata, parseAll=True)
+    #    data = sexprs.asList()
+    #except ParseFatalException, pfe:
+    #    print "Error:", pfe.msg
+    #    print pfe.markInputline('^')
 
     return data
 
@@ -80,8 +93,8 @@ def special_link_type(predicate):
         'or':types.OrLink,
         'not':types.NotLink,
         'instance':types.MemberLink,
-        # This might break it
-#        'attribute':types.MemberLink,
+        # This might break some of the formal precision of SUMO, but who cares
+        'attribute':types.InheritanceLink,
         'member':types.MemberLink,
         'subclass':types.InheritanceLink,
         'exists':types.ExistsLink,
@@ -94,20 +107,29 @@ def special_link_type(predicate):
     else:
         return None
 
-def print_links():
+def print_links(file):
     for atom in atomspace:
         if atom.is_a(types.Link) and atom.tv.count > 0:
-            print repr(atom)
+            file.write(repr(atom))
+
+def loadSUMO(atomspace_, filename):
+    global atomspace
+    atomspace = atomspace_
+
+    file_str = read_file(filename)
+    expressions = parse_kif_string(file_str)
+    convert_multiple_expressions(expressions)
 
 if __name__ == '__main__':
     import sys
     filename = sys.argv[1]
 
-    expressions = parse_kif_string(read_file(filename))
-#    print expressions
+    output_filename = filename[0:-4]+'.scm'
+    print output_filename
 
     atomspace = AtomSpace()
-    convert_multiple_expressions(expressions)
+    loadSUMO(atomspace, filename)
 
-    print_links()
+    with open(output_filename, 'w') as out:
+        print_links(out)
 
