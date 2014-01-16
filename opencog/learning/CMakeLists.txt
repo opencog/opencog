@@ -15,3 +15,7 @@ ENDIF (HAVE_DIMEMBED)
 # over to the modern combo interfaces.
 #
 ADD_SUBDIRECTORY (pleasure)
+
+IF (HAVE_CYTHON)
+    ADD_SUBDIRECTORY (pln)
+ENDIF (HAVE_CYTHON)
