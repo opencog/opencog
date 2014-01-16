@@ -1,7 +1,6 @@
 from math import fabs, sqrt
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.stats.distributions import uniform_gen
-from spatiotemporal.temporal_events.trapezium_formulas import function_convolution_uniform
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
@@ -138,6 +137,24 @@ class FormulaCreator(object):
 
 
 class RelationFormulaConvolution(BaseRelationFormula):
+    def function_convolution_uniform(self, bounds_1, bounds_2):
+        a1, b1 = bounds_1
+        a2, b2 = bounds_2
+        length_1 = fabs(a1 - b1)
+        length_2 = fabs(a2 - b2)
+
+        convolution_bounds_a, convolution_bounds_b = a1 - b2, b1 - a2
+
+        trapezium_0, trapezium_1 = convolution_bounds_a, convolution_bounds_a + min(length_2, length_1)
+        trapezium_2, trapezium_3 = trapezium_1 + fabs(length_1 - length_2), convolution_bounds_b
+        #assert trapezium_2 + min(length_2, length_1) == trapezium_3
+
+        p = min(1 / length_1, 1 / length_2)
+
+        result = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0}, FUNCTION_ZERO)
+        result.is_normalised = True
+        return result
+
     def function_convolution(self, dist_1, dist_2, bins=50):
         a_1, b_1, a_2, b_2 = 0, 0, 0, 0
         if dist_1 in self.bounds:
@@ -152,7 +169,7 @@ class RelationFormulaConvolution(BaseRelationFormula):
             self.bounds[dist_2] = a_2, b_2
 
         if (type(dist_1.dist), type(dist_2.dist)) == (uniform_gen, uniform_gen):
-            return function_convolution_uniform((a_1, b_1), (a_2, b_2))
+            return self.function_convolution_uniform((a_1, b_1), (a_2, b_2))
 
         convolution_bounds_a, convolution_bounds_b = min(a_1, a_2), max(b_1, b_2)
 
@@ -229,43 +246,11 @@ class RelationFormulaGeometricMean(BaseRelationFormula):
         return 1.0 - same - after, same, after
 
 
-class RelationFormulaTrapezium(BaseRelationFormula):
-    def compare(self, dist_1, dist_2):
-        a_1, b_1 = self.bounds_of(dist_1)
-        a_2, b_2 = self.bounds_of(dist_2)
-
-        dist_1_duration, dist_2_duration = self.duration_of(dist_1), self.duration_of(dist_2)
-        dist_1_uniform_probability = 1.0 / dist_1_duration
-        dist_2_uniform_probability = 1.0 / dist_2_duration
-
-        same_a = max(a_1, a_2)
-        same_b = min(b_1, b_2)
-
-        same = 0
-        if same_a < same_b:
-            same = sqrt(dist_1_uniform_probability * dist_2_uniform_probability) * (same_b - same_a)
-
-        l = fabs(dist_1_duration - dist_2_duration)
-
-        dictionary_bounds_function = {(l / 2.0, POSITIVE_INFINITY): FUNCTION_ONE}
-        if l > 0:
-            dictionary_bounds_function[(-l / 2.0, l / 2.0)] = FunctionLinear(x_0=- l / 2.0, y_0=0, x_1=l / 2.0, y_1=1)
-        proportion_function = FunctionComposite(dictionary_bounds_function, function_undefined=FUNCTION_ZERO)
-
-        non_same_portion = 1.0 - same
-        after = proportion_function(dist_1.mean() - dist_2.mean()) * non_same_portion
-        return 1 - same - after, same, after
-
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from scipy.stats import norm, uniform, expon
     from spatiotemporal.temporal_events import TemporalEvent, TemporalEventPiecewiseLinear
     import matplotlib.pyplot as plt
-
-    a = uniform(loc=1000, scale=2)
-    m, s, k = a.stats(moments='msk')
-    print m, s, k
-    quit()
 
     figure_number = 1
     for event_1, event_2 in [
@@ -285,14 +270,14 @@ if __name__ == '__main__':
         # ),
         #
         # (
+        #     TemporalEvent(uniform(loc=0, scale=7), uniform(loc=8, scale=7)),
         #     TemporalEvent(uniform(loc=4, scale=1), uniform(loc=11, scale=2)),
-        #     TemporalEvent(uniform(loc=0, scale=7), uniform(loc=8, scale=7))
         # ),
-
-        (
-            TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
-            TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
-        ),
+        #
+        # (
+        #     TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
+        #     TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
+        # ),
 
         # (
         #     TemporalEvent(uniform(loc=1, scale=8), uniform(loc=6, scale=8)),
@@ -329,24 +314,22 @@ if __name__ == '__main__':
         #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
         # ),
         #
-        # (
-        #    TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
-        #    TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
-        # ),
-        #
-        # (
-        #    TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
-        #    TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
-        # ),
-        #
-        # (
-        #    TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-        #    TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
-        #                                 {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
-        # ),
+        (
+           TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+           TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+        ),
+
+        (
+           TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+           TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+        ),
+
+        (
+           TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+           TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+                                        {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+        ),
     ]:
-        tfc = TemporalFormulaConvolution()
-        fc = FormulaCreator(tfc)
 
         temporal_relations = event_1 * event_2
 
