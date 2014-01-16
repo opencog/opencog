@@ -17,7 +17,7 @@ Currently, the following examples are available:
 The main intended usage of PLN is within a MindAgent. The high-level steps are:
 
 -   **Create an agent that implements a PLN chainer**
--   **Ensure that the directory path of the agent is in PTYHON_EXTENSION_DIRS in the cogserver configuration file**
+-   **Ensure that the directory path of the agent is in PYTHON_EXTENSION_DIRS in the cogserver configuration file**
 -   **Load atoms into the atomspace**
 -   **Load the agent**
 -   **Start the agent**

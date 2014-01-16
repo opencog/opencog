@@ -7,6 +7,8 @@ import math
 '''Some Rules evaluate various kinds of logical links based explicitly on set membership. A set = a ConceptNode.
 Other Rules calculate them heuristically, based on set probabilities and logical links.'''
 
+__VERBOSE__ = False
+
 BOOLEAN_LINKS = [types.AndLink, types.OrLink, types.NotLink]
 FIRST_ORDER_LINKS = [types.InheritanceLink, types.SubsetLink, types.IntensionalInheritanceLink, types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
 HIGHER_ORDER_LINKS = [types.ImplicationLink, types.EquivalenceLink]
@@ -36,7 +38,8 @@ class Rule(object):
         self.full_name=self.name+ ' (' +self._get_type_names(inputs)+ ' -> '
         self.full_name+= self._get_type_names(outputs)+')'
 
-        print self.full_name
+        if __VERBOSE__:
+            print self.full_name
 
     def _get_type_names(self, templates):
         return ' '.join(template.type_name for template in templates)

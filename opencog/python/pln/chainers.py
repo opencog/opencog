@@ -37,6 +37,9 @@ And any time you find Inheritance A B, also calculate the intensional and extens
 * You can probably get past toddler-level AI without having to use predicate logic much. And it may be easier to convert 2+ place predicates into 1-place predicates (see EvaluationToMemberRule)
 '''
 
+__VERBOSE__ = False
+
+
 class AbstractChainer(Logic):
     '''Has important utility methods for chainers.'''
     def __init__(self, atomspace):
@@ -50,7 +53,8 @@ class AbstractChainer(Logic):
         self.rules.append(rule)
 
     def log_failed_inference(self,message):
-        print 'Attempted invalid inference:',message
+        if __VERBOSE__:
+            print 'Attempted invalid inference:', message
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
@@ -267,7 +271,9 @@ class Chainer(AbstractChainer):
     def forward_step(self, rule=None):
         if rule is None:
             rule = self._select_rule()
-        print rule
+
+        if __VERBOSE__:
+            print rule
 
         results = self._apply_forward(rule)
 
@@ -353,7 +359,8 @@ class Chainer(AbstractChainer):
                 return_inputs[i] = atom
             else:
                 if not allow_zero_tv:
-                    print 'unable to match:',template
+                    if __VERBOSE__:
+                        print 'unable to match:',template
                     return None
                 # This means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
                 # Just specialize the rest of the inputs. These "input" will actually just be 0-tv atoms, and it can become a BC target later.
