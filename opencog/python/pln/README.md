@@ -9,7 +9,7 @@ The code is located in the [opencog/python/pln directory][]. It is still in-prog
 
 ## Tutorial
 
-Prerequisites:
+### Prerequisites:
 
 1) Be sure to pull the latest version of the code from the repository
 
@@ -25,7 +25,7 @@ https://github.com/opencog/opencog/issues/484
 
 https://github.com/opencog/external-tools/tree/master/AtomViewer
 
-Let's get started:
+### Let's get started:
 
 1) Read the PLN module documentation below to understand the structure of the module.
 
