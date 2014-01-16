@@ -1771,9 +1771,24 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
     }
 
     list<StateNode*>::iterator tsit;
+    // remove duplicate elements if any
+    set<StateNode*>::iterator setSit;
+    set<StateNode*> setTempStateNodes;
     for (tsit = temporaryStateNodes.begin(); tsit != temporaryStateNodes.end(); ++ tsit)
     {
-        StateNode* sn = *tsit;
+        if (setTempStateNodes.find(*tsit) == setTempStateNodes.end())
+            setTempStateNodes.insert(*tsit);
+        else
+        {
+            cout <<std::endl << "Warning: Found duplicate elements in temporaryStateNodes:";
+            outputStateInfo(((StateNode*)(*tsit))->state,true);
+            cout << std::endl;
+        }
+    }
+
+    for (setSit = setTempStateNodes.begin(); setSit != setTempStateNodes.end(); ++ setSit)
+    {
+        StateNode* sn = *setSit;
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
