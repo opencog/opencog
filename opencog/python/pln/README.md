@@ -12,9 +12,19 @@ For example code, see the **opencog/python/pln/examples** folder.
 Currently, the following examples are available:
 -   **deduction** - illustrates how to create a forward chaining agent in **deduction_example.py** utilizing **deduction_agent.py**
 
+### Setup
+
+The main intended usage of PLN is within a MindAgent. The high-level steps are:
+
+-   **Create an agent that implements a PLN chainer**
+-   **Ensure that the directory path of the agent is in PTYHON_EXTENSION_DIRS in the cogserver configuration file**
+-   **Load atoms into the atomspace**
+-   **Load the agent**
+-   **Start the agent**
+
 ### Example usage
 
-Here the basic usage pattern is described.
+Although the primary intension is to use PLN within a MindAgent, the PLN classes can also be interacted with directly in Python. Here, the basic usage pattern is described.
 
 ##### Prerequisites
 
