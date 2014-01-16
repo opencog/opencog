@@ -21,6 +21,8 @@ There is an outstanding issue, after which this will no longer be necessary:
 
 https://github.com/opencog/opencog/issues/484
 
+Run cmake and make
+
 3) Clone the external-tools repository so that you can use the AtomSpace Viewer:
 
 https://github.com/opencog/external-tools/tree/master/AtomViewer
@@ -279,3 +281,4 @@ If set, the \_give\_stimulus method is called, to be applied by the
   [STI]: STI "wikilink"
   [this mailing list thread]: https://groups.google.com/d/msg/opencog/uA5Ig_wJaT4/1eEsslH0WE8J
   [ImportanceUpdatingAgent]: http://wiki.opencog.org/w/ImportanceUpdatingAgent
+
