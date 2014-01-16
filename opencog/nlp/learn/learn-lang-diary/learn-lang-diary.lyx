@@ -272,9 +272,9 @@ Re-ordering this gives
 The right hand side above is recognizable from Yuret's work; he defines
  the mutual information as 
 \begin_inset Formula 
-\[
-\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}
-\]
+\begin{equation}
+\mbox{MI}(w_{l},w_{r})=\log_{2}\,\frac{P(w_{l},w_{r})}{P(w_{l},*)P(*,w_{r})}\label{eq:Yuret's MI}
+\end{equation}
 
 \end_inset
 
@@ -323,6 +323,52 @@ reference "eq:basic pair"
  implicit-word-order thingy that Yuret uses.
  The Yuret notation is very convenient, but sometimes obscures things.
  OK, I think I'm done with that.
+\end_layout
+
+\begin_layout Subsubsection*
+Update 14 Jan 2014
+\end_layout
+
+\begin_layout Standard
+OK, The LHS of equation 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "eq:basic pair"
+
+\end_inset
+
+ then demonstrates how to obtain conditional entropies in general.
+ Thus, given an 
+\begin_inset Formula $n$
+\end_inset
+
+-point relation 
+\begin_inset Formula $R(x_{1},x_{2,}\cdots,x_{n})$
+\end_inset
+
+ one computes first the unconditional probability 
+\begin_inset Formula $P(R(x_{1},x_{2,}\cdots,x_{n}))$
+\end_inset
+
+.
+ The conditional probability is then obtained as usual:
+\begin_inset Formula 
+\[
+P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n})=\frac{P(R(x_{1},x_{2,}\cdots,x_{n}))}{P(x_{1})P(x_{2})\cdots P(x_{n})}
+\]
+
+\end_inset
+
+The entropy is then build recursively by normalizing by the probability
+ of wild-card relations:
+\begin_inset Formula 
+\[
+MI(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))=\log_{2}\frac{P(R(x_{1},x_{2,}\cdots,x_{n})\,|\, x_{1},x_{2,}\cdots,x_{n}))}{P(R(*,x_{2,}\cdots,x_{n})\,|\, x_{2,}\cdots,x_{n}))\, P(R(x_{1},*,\cdots,x_{n})\,|\, x_{1},x_{3,}\cdots,x_{n}))\cdots}
+\]
+
+\end_inset
+
+(Right? We're not dividing by multiple *'s here, yes?) 
 \end_layout
 
 \begin_layout Section*
@@ -953,6 +999,270 @@ Back to counting.
 select count(*) from atoms_mi_snapshot;
 \family default
  returns 415532
+\end_layout
+
+\begin_layout Section*
+15 January 2014
+\end_layout
+
+\begin_layout Subsection*
+Embodied Learning
+\end_layout
+
+\begin_layout Standard
+OK, so maybe learning syntax before emantics puts the cart before the horse.
+ Can we learn a world-model first, and then gradually annotate and correct
+ it as our linguistic comprehension improves? So, for example, can we start
+ with a world-model obtained via document summarization? How do we annotate
+ this model with newly discovered data?
+\end_layout
+
+\begin_layout Standard
+Related question: how to automatically discover ontologies? Automated, unsupervi
+sed concept, entity extraction? Semantic context change over time?
+\end_layout
+
+\begin_layout Standard
+Steps: 
+\end_layout
+
+\begin_layout Enumerate
+How do I extract entities out of a text? The extraction doesn't have to
+ be perfect; having candidate entities is enough.
+ How do I put a confidence rating on the entiy, and how do I discard the
+ low-cnfidence ones?
+\end_layout
+
+\begin_layout Enumerate
+Once entities are extracted, I want to start decorating them with attributes
+ (adjectives, modifiers), to build a network.
+\end_layout
+
+\begin_layout Enumerate
+Once a network is built, it needs to be factually reconciled, using logical
+ reasoning and an ontology (is-a and has-a relations).
+ Need to do this so that upon reading 
+\begin_inset Quotes eld
+\end_inset
+
+colorless green ideas
+\begin_inset Quotes erd
+\end_inset
+
+, we can deduce that ideas are either colorless or green, but not both.
+\end_layout
+
+\begin_layout Enumerate
+How to automatically extract an ontolofy from free text?
+\end_layout
+
+\begin_layout Standard
+The above seem to be the central steps/core issues for creating a world-model,
+ unsupervised, from text.
+\end_layout
+
+\begin_layout Subsection*
+Entropy
+\end_layout
+
+\begin_layout Standard
+Some refresher notes: 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+The Boltzmann distribution is the so-called canonical distribution, meaning
+ it maximizes entropy subject to a constraint on the expected value of energy.
+\begin_inset Quotes erd
+\end_inset
+
+ (viz, this is the MaxEnt principle.
+ except for MaxEnt, the constraint is not on energy but a set of features.)
+\end_layout
+
+\begin_layout Itemize
+Define 
+\begin_inset Quotes eld
+\end_inset
+
+Shanon Entropy
+\begin_inset Quotes erd
+\end_inset
+
+ as 
+\begin_inset Formula $S_{s}=-k_{B}\sum p\log p$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+The 
+\begin_inset Quotes eld
+\end_inset
+
+Boltzmann Entropy
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Formula $S_{B}$
+\end_inset
+
+ is the shanon entrpy of the microcanonical esemble: it maximizes the entropy
+ (MaxEnt) for a fixed value of the energy.
+ (MaxEnt: not the energy, but for a fixed set of features).
+ (viz, 
+\begin_inset Formula $S_{B}=k_{B}\log\left(\epsilon\frac{d\Omega}{dE}\right)$
+\end_inset
+
+ with 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ being number of states, E the energy, 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ a constant of dimension energy to make arg of the log dimensionless.)
+\end_layout
+
+\begin_layout Itemize
+The 
+\begin_inset Quotes eld
+\end_inset
+
+Gibbs Entropy
+\begin_inset Quotes erd
+\end_inset
+
+ is the shanon entropy, maximized for a system held to constraint that energy
+ is less-than-or-equal to E.
+ (!) This gives 
+\begin_inset Formula $S_{G}=k_{B}\log\Omega$
+\end_inset
+
+ (duhh, take 
+\begin_inset Formula $p=1/\Omega$
+\end_inset
+
+ for 
+\begin_inset Formula $\Omega$
+\end_inset
+
+ states.
+ For a non-sharp cutoff, the Shannon entropy is primal.).
+ 
+\end_layout
+
+\begin_layout Itemize
+Gibbs and Boltzmann entropies give different results for N-particle systems
+ when N is very small.
+ Viz, an off-by-one error for N.
+ In some ways, 
+\begin_inset Formula $S_{G}$
+\end_inset
+
+ is more correct (at low temp, quantum systems).
+ See Jörn Dunkel and Stefan Hilbert (2014) 
+\begin_inset Quotes eld
+\end_inset
+
+Consistent thermostatistics forbids negative absolute temperatures
+\begin_inset Quotes erd
+\end_inset
+
+ Nature Physics DOI: 10.1038/NPHYS2815 
+\end_layout
+
+\begin_layout Subsection*
+Why does Yuret's MST work?
+\end_layout
+
+\begin_layout Standard
+There is an interesting simplification that happens with minimum-spanning
+ tree parsers driven by entropy.
+ If we use Yuret's definition of the MI of word-pairs, then, Yuret says
+ (I should re-read his stuff) that we should maximize the entropy 
+\begin_inset Formula 
+\begin{equation}
+\sum_{w_{l,}w_{r}}MI(w_{l},w_{r})\label{eq:MST entropy}
+\end{equation}
+
+\end_inset
+
+Wy? Why this, instead of the maybe 
+\begin_inset Quotes eld
+\end_inset
+
+more obviously correct
+\begin_inset Quotes erd
+\end_inset
+
+ sum: 
+\begin_inset Formula 
+\begin{equation}
+\sum_{w_{l,}w_{r}}P(w_{l},w_{r})MI(w_{l},w_{r})\label{eq:wrong MST entropy}
+\end{equation}
+
+\end_inset
+
+I think I can hand-wave the answer.
+ The answer is that we don't really know the probability of 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ 
+\emph on
+for the given sentence! 
+\emph default
+We know 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ for a large corpus, but its somewhat of a mistake to assume that this identical
+ to what it would be for expressing a particular idea in a certain specific
+ way.
+ Its possible that, to express the idea, the only sentences that one could
+ ever possibly use would have 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ that strongly deviate from a large-corpus average.
+ Unfortunately, there is no easy way of knowing what this sentence-specific
+ 
+\begin_inset Formula $P(w_{l},w_{r})$
+\end_inset
+
+ is.
+ So, instead we make the uniform distribution assumption, that they're all
+ the same, and thus get eqn 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "eq:MST entropy"
+
+\end_inset
+
+ instead of 
+\begin_inset CommandInset ref
+LatexCommand nameref
+reference "eq:wrong MST entropy"
+
+\end_inset
+
+.
+ Does Yuret ever make this argument himself? Dunno.
+\end_layout
+
+\begin_layout Standard
+A supporting argument is that we also ignored 3,4,5-point interactions as
+ well.
+ Which brings us to the next point: why should we expect a link-parse to
+ work better than an MST parse? Because Yuret-MST ignores the valence of
+ words, whereas the disjuncts don't! The disjuncts provide a better, more
+ accurate way of capturing valency!
 \end_layout
 
 \begin_layout Section*
