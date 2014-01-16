@@ -36,10 +36,6 @@ https://github.com/opencog/external-tools/tree/master/AtomViewer
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
 
-3) Start the REST API:
-
-http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
-
 3) Run **deduction_example.py** in a Python interpreter and examine the output
 
 4) Load **deduction_agent.py** in the CogServer
@@ -52,23 +48,27 @@ After starting the CogServer:
 
 ```loadpy deduction_agent```
 
-5) Populate the atomspace with some sample contents
+5) Start the REST API:
+
+http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
+
+6) Populate the atomspace with some sample contents
 
 For example:
 
 ```(load-scm-from-file "/home/cosmo/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm")```
 
-6) Load the atomspace in the AtomSpace viewer and view the subgraph centered around the ConceptNode named Peter:
+7) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
 
 https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
 
-7) Start the deduction_agent:
+8) Start the deduction_agent:
 
 ```agents-start deduction_agent.DeductionAgent```
 
-8) Refresh the atomspace in the AtomSpace viewer. Observe how the subgraph has changed around the ConceptNode named Peter.
+9) Refresh the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Observe how the subgraph has become more complex with the additional knowledge gained via forward inference.
 
-9) Review the structure of **ForwardInferenceAgent** and **BackwardInferenceAgent** in **agents.py**
+10) Review the structure of the **ForwardInferenceAgent** and **BackwardInferenceAgent** implementations in **agents.py**
 
 ## Documentation
 
