@@ -1,9 +1,64 @@
 PLN Documentation
 =================
 
+## Summary
+
 There is a [new PLN design][] that is currently under development.
 
 The code is located in the [opencog/python/pln directory][]. It is still in-progress.
+
+## Tutorial
+
+Prerequisites:
+
+1) Be sure to pull the latest version of the code from the repository
+
+2) Then, you need to replace the contents of the opencog/atomspace/atom_types.script file with the following file:
+https://gist.github.com/cosmoharrigan/8453760
+
+There is an outstanding issue, after which this will no longer be necessary: 
+https://github.com/opencog/opencog/issues/484
+
+3) Clone the external-tools repository so that you can use the AtomSpace Viewer:
+https://github.com/opencog/external-tools/tree/master/AtomViewer
+
+Let's get started:
+
+1) Read the PLN module documentation below to understand the structure of the module.
+
+2) Read 'Elements of PLN' and 'Forward and backward chaining':
+http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
+http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
+
+3) Start the REST API:
+http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
+
+3) Run deduction_example.py in a Python interpreter and examine the output
+
+4) Load deduction_agent.py in the CogServer
+
+The opencog.conf file needs to include the '../opencog/python/pln/examples/deduction' path:
+PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction
+
+After starting the CogServer:
+loadpy deduction_agent
+
+5) Populate the atomspace with some sample contents
+
+For example:
+(load-scm-from-file "/home/cosmo/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm")
+
+6) Load the atomspace in the AtomSpace viewer and view the subgraph centered around the ConceptNode named Peter:
+https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
+
+7) Start the deduction_agent:
+agents-start deduction_agent.DeductionAgent
+
+8) Refresh the atomspace in the AtomSpace viewer. Observe how the subgraph has changed around the ConceptNode named Peter.
+
+9) Review the structure of ForwardInferenceAgent and BackwardInferenceAgent in agents.py
+
+## Documentation
 
 ### Examples
 

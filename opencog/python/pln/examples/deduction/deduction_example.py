@@ -39,7 +39,7 @@ atomspace.add_link(types.InheritanceLink, [peter, frog], TruthValue(0.9, 100))
 
 # Test multiple steps of forward inference on the AtomSpace
 deduction_agent = deduction_agent.DeductionAgent()
-for i in range(1, 20):
+for i in range(1, 500):
     result = deduction_agent.run(atomspace)
 
     output = None
