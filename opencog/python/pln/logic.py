@@ -56,7 +56,7 @@ class Logic(object):
         return attentional_focus
 
     def find(self, template):
-        atoms = self.lookup_atoms(template)
+        atoms = self.lookup_atoms(template, {})
 
         atoms = self.filter_attentional_focus(atoms)
         atoms = [atom for atom in atoms if wanted_atom(atom, template, ground=True)]

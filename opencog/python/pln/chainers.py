@@ -672,6 +672,8 @@ class Chainer(AbstractChainer):
 
     def find_atom(self, atom, time_allowed=300):
         # Run inference until atom is proved with >0 count, or time runs out (measured in seconds)
+        print 'Trying to produce truth values for atom:'
+        print repr(atom)
 
         import time
         start_time = time.time()
@@ -695,4 +697,13 @@ class Chainer(AbstractChainer):
 
         print 'Failed to find target in', time_allowed, 'seconds'
         return False
+
+    def get_query(self):
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, "query"), self.link(types.ListLink, [var])])
+
+        queries = self.lookup_atoms(template, {})
+        queries = [query for query in queries if query.tv.count > 0]
+        assert len(queries) == 1
+        return queries[0].out[1].out[0]
 

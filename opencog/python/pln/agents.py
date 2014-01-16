@@ -4,13 +4,14 @@ from opencog.atomspace import types
 from pln.chainers import Chainer
 from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules, predicate_rules
 
-class ForwardInferenceAgent(MindAgent):
+class InferenceAgent(MindAgent):
     def __init__(self):
         self.chainer = None
+        self.num_steps_per_cycle = 100
 
     def create_chainer(self, atomspace):
         # Note: using stimulateAtoms will cause a segfault if you create the Agent from the Python shell (use the agents-start command in the cogserver shell)
-        self.chainer = Chainer(atomspace, stimulateAtoms = True, agent = self, learnRuleFrequencies=True)
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=True)
 
         # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
 #        similarity_types = [types.SimilarityLink, types.ExtensionalSimilarityLink, types.IntensionalSimilarityLink]
@@ -71,7 +72,9 @@ class ForwardInferenceAgent(MindAgent):
         # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))
 
-        self.chainer.add_rule(rules.OntologicalInheritanceRule(self.chainer))
+        self.chainer.add_rule(quantifier_rules.ScholemRule(self.chainer))
+
+        #self.chainer.add_rule(rules.OntologicalInheritanceRule(self.chainer))
 
 #        for rule in temporal_rules.create_temporal_rules(self.chainer):
 #            self.chainer.add_rule(rule)
@@ -90,13 +93,6 @@ class ForwardInferenceAgent(MindAgent):
 #        self.chainer.add_rule(context_rules.AndToContextRule(self.chainer, types.InheritanceLink))
 
     def run(self, atomspace):
-        # incredibly exciting futuristic display!
-        #import os
-        #os.system('cls' if os.name=='nt' else 'clear')
-
-        def show_atoms(atoms):
-            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
-
         if self.chainer is None:
             self.create_chainer(atomspace)
             # For simplicity, do nothing the first time. Silly APIs mean you have to call run to set the atomspace
@@ -105,110 +101,24 @@ class ForwardInferenceAgent(MindAgent):
         # Update all of the node probabilities at each step
         #self.chainer.update_all_node_probabilities()
 
+        for i in xrange(0, self.num_steps_per_cycle):
+            self.step()
+
+    def step(self):
         result = self.chainer.forward_step()
-        if result:
-            (rule, inputs, outputs) = result
-
-            print '==== Inference ===='
-            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
-
-            #print
-            #print '==== Attentional Focus ===='
-            #for atom in get_attentional_focus(atomspace)[0:30]:
-            #    print str(atom), atom.av
-
-            #print '==== Result ===='
-            #print output
-            #print '==== Trail ===='
-            #print_atoms( self.chainer.trails[output] )
-        else:
-            print 'Invalid inference attempted'
-
-        try:
-            pass
-        except AssertionError:
-            import sys,traceback
-            _,_,tb = sys.exc_info()
-            traceback.print_tb(tb) # Fixed format
-
-            tbInfo = traceback.extract_tb(tb)
-            filename,line,func,text = tbInfo[-1]
-            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
-            exit(1)
-        except Exception, e:
-            print e
-            print e.args
-            e.print_traceback()
-
-            import sys,traceback
-            _,_,tb = sys.exc_info()
-            traceback.print_tb(tb) # Fixed format
-
-            tbInfo = traceback.extract_tb(tb)
-            filename,line,func,text = tbInfo[-1]
-            print ('An error occurred on line ' + str(line) + ' in statement ' + text)
-            exit(1)
-
-    def monte_carlo_one_atom(self, atom, sample_count=100):
-        old_tv = atom.tv
-        print old_tv
-        for i in xrange(0, sample_count):
-            self.chainer.backward_step(target_atoms=[atom])
-        print 'tv before sampling', old_tv
-        print 'tv after sampling', atom.tv
-
-    def embodied_inference(self, sample_count=1000):
-        '''Do the series of inferences that is typically useful for embodied inference.
-           Create a variety of MemberLinks from EvaluationLinks, and then use those to derive
-           SubsetLinks, and use those to derive IntensionalInheritanceLinks, and use those to derive
-           (Mixed)InheritanceLinks, then use those InheritanceLinks to find lots of InheritanceLinks.
-           The reason to do it in this order is that doing the later stages first, you would find few results'''
-        # Store those rules, in that order
-        rules=[]
-        rules+= self.member_rules
-        rules.append(self.chainer.lookup_rule("ExtensionalLinkEvaluationRule"))
-        rules.append(self.chainer.lookup_rule("AttractionRule"))
-        rules.append(self.chainer.lookup_rule("IntensionalLinkEvaluationRule"))
-        rules.append(self.chainer.lookup_rule("InheritanceRule"))
-
-        for rule in rules:
-            self.chainer.update_all_node_probabilities()
-            if len(rule._inputs) == 1:
-                self.chainer.apply_bulk(rule=rule)
-            else:
-                for i in xrange(0, sample_count):
-                    self.chainer.forward_step(rule=rule)            
-
-def print_atoms(atoms):
-    for atom in atoms:
-        print atom
-
-def show_atoms(atoms):
-    return ' '.join(str(atom)+str(atom.av) for atom in atoms)
-
-class BackwardInferenceAgent(ForwardInferenceAgent):
-    def run(self, atomspace):
-        # incredibly exciting futuristic display!
-        #import os
-        #os.system('cls' if os.name=='nt' else 'clear')
-
-        def show_atoms(atoms):
-            return ' '.join(str(atom)+str(atom.av) for atom in atoms)
-
-        if self.chainer is None:
-            self.create_chainer(atomspace)
-
         result = self.chainer.backward_step()
-        if result:
-            (rule, inputs, outputs) = result
-
-            print '==== Inference ===='
-            print rule.name, show_atoms(outputs), '<=', show_atoms(inputs)
-
 
 '''
 # test it with forgetting, updating and diffusion
 scm-eval (load-scm-from-file "../wordpairs.scm")
 loadpy pln
-agents-start pln.ForwardInferenceAgent opencog::ForgettingAgent opencog::ImportanceUpdatingAgent opencog::ImportanceDiffusionAgent
+agents-start pln.InferenceAgent opencog::ForgettingAgent opencog::ImportanceUpdatingAgent opencog::ImportanceDiffusionAgent
 '''
+
+class TestInferenceAgent(InferenceAgent):
+    def run(self, atomspace):
+        if self.chainer is None:
+            self.create_chainer(atomspace)
+
+        self.chainer.find_atom(self.chainer.get_query(), time_allowed=300)
+
