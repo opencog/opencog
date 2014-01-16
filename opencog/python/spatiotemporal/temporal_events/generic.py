@@ -1,5 +1,5 @@
 from scipy.stats.distributions import rv_frozen
-from spatiotemporal.temporal_events.formulas import FormulaCreator, TemporalFormulaConvolution
+from spatiotemporal.temporal_events.formulas import FormulaCreator, RelationFormulaGeometricMean
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution, DISTRIBUTION_INTEGRAL_LIMIT
 from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
@@ -40,7 +40,7 @@ class TemporalEvent(list, TimeInterval):
         self.interval_ending = TimeInterval(ending, b, bins_ending)
         list.__init__(self, self.interval_beginning + self.interval_ending)
         TimeInterval.__init__(self, a, b, bins)
-        self._formula_creator = FormulaCreator(TemporalFormulaConvolution())
+        self._formula_creator = FormulaCreator(RelationFormulaGeometricMean())
 
     def degree(self, time_step=None, a=None, b=None, interval=None):
         """

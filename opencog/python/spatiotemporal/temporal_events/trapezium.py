@@ -1,4 +1,5 @@
 from scipy.stats import t, uniform
+from spatiotemporal.temporal_events.formulas import RelationFormulaTrapezium
 from spatiotemporal.temporal_events.generic import TemporalEvent
 from spatiotemporal.unix_time import UnixTime, random_time
 
@@ -53,6 +54,7 @@ class TemporalEventTrapezium(TemporalEvent):
                 )
         TemporalEvent.__init__(self, uniform(loc=a, scale=UnixTime(beginning - a)),
                                uniform(loc=ending, scale=UnixTime(b - ending)), bins=4)
+        self._formula_creator = RelationFormulaTrapezium()
 
 
 def generate_random_events(size=20):
