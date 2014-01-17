@@ -122,3 +122,11 @@ class TestInferenceAgent(InferenceAgent):
 
         self.chainer.find_atom(self.chainer.get_query(), time_allowed=300)
 
+class ForwardInferenceAgent(InferenceAgent):
+    def step(self):
+        result = self.chainer.forward_step()
+
+class BackwardInferenceAgent(InferenceAgent):
+    def step(self):
+        result = self.chainer.backward_step()
+
