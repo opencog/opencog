@@ -402,7 +402,8 @@ namespace opencog { namespace oac {
         float getBasicCost();
 
         // the cost calculation is : basic_cost + cost_coefficient1 * value(cost_cal_state1) + cost_coefficient2 * value(cost_cal_state2) + ...
-        static float getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings);
+        // isRecursivePrecon0Sat and isRecursivePrecon1Sat are only for recursive rules, only calculate the unsatisfied preconditons cost for recursive rules.
+        static float getCost(Rule* r,float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings, bool isRecursivePrecon0Sat, bool isRecursivePrecon1Sat);
 
         void addEffect(EffectPair effect)
         {
