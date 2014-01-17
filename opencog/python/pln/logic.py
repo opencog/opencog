@@ -56,7 +56,7 @@ class Logic(object):
         return attentional_focus
 
     def find(self, template):
-        atoms = self.lookup_atoms(template)
+        atoms = self.lookup_atoms(template, {})
 
         atoms = self.filter_attentional_focus(atoms)
         atoms = [atom for atom in atoms if wanted_atom(atom, template, ground=True)]
@@ -85,6 +85,9 @@ class Logic(object):
         return atoms
 
     def wanted_atom(self, atom, template, s={}, allow_zero_tv=False, ground=False):
+
+        if atom.av['vlti']:
+            return False
 
         tv_ok = (allow_zero_tv or atom.tv.count > 0)
         unifies_ok = self.unify_together(atom, template, s)

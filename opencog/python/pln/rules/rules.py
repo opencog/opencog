@@ -41,17 +41,22 @@ class Rule(object):
         if __VERBOSE__:
             print self.full_name
 
+        self.probabilistic_inputs = True
+
     def _get_type_names(self, templates):
         return ' '.join(template.type_name for template in templates)
 
     def calculate(self, input_atoms):
         '''Compute the output TV(s) based on the input atoms'''
         tvs = [atom.tv for atom in input_atoms]
-        result_tvs = self.formula(tvs)
-        if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs):
+        try:
+            result_tvs = self.formula(tvs)
+            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0) for tv in result_tvs) or len(result_tvs) == 0:
+                return None
+            else:
+                return result_tvs
+        except ZeroDivisionError:
             return None
-        else:
-            return result_tvs
 
     def standardize_apart_input_output(self, chainer):
         new_inputs = []
@@ -152,12 +157,10 @@ class AbductionRule(Rule):
 
 class TransitiveSimilarityRule(Rule):
     '''Similarity A B, Similarity B C => Similarity A C'''
-    def __init__(self, chainer):
+    def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()
-
-        link_type = types.SimilarityLink
 
         Rule.__init__(self,
             formula= formulas.transitiveSimilarityFormula,
@@ -261,6 +264,8 @@ class MembershipBasedEvaluationRule(Rule):
             outputs= [chainer.link(output_type, [A, B])],
             inputs=  inputs)
 
+        self.probabilistic_inputs = False
+
 class SubsetEvaluationRule(MembershipBasedEvaluationRule):
     '''Compute Subset(A B) which is equivalent to P(x in B| x in A).'''
     def __init__(self, chainer):
@@ -288,6 +293,8 @@ class NegatedSubsetEvaluationRule(MembershipBasedEvaluationRule):
             formula= formulas.negatedSubsetEvaluationFormula,
             outputs= [chainer.link(output_type, [notA, B])],
             inputs=  inputs)
+
+        self.probabilistic_inputs = False
 
 class IntensionalInheritanceEvaluationRule(MembershipBasedEvaluationRule):
     '''Evaluates IntensionalInheritance(A B) from the definition.
@@ -378,6 +385,8 @@ TODO the forward chainer will work fine with this rule, but the backward chainer
             inputs=inputs,
             outputs=outputs)
 
+        self.probabilistic_inputs = False
+
 class IntensionalLinkEvaluationRule(Rule):
     '''Using (AttractionLink A x) and (AttractionLink B x), evaluate (IntensionalInheritance A B), (IntensionalInheritance B A), and (IntensionalSimilarityLink A B).'''
     def __init__(self, chainer):
@@ -411,6 +420,8 @@ class EvaluationToMemberRule(Rule):
                       formula= None,
                       inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
                       outputs= [])
+
+        self.probabilistic_inputs = False
 
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
@@ -460,6 +471,8 @@ sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
                       inputs=  [chainer.link(types.EvaluationLink, [pred, list_link])],
                       outputs= [])
 
+        self.probabilistic_inputs = False
+
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, list_link] = eval_link.out
@@ -499,6 +512,8 @@ $x where (AtTimeLink ? EvaluationLink near jade $x)
                       inputs=  [at_time],
                       outputs= [])
 
+        self.probabilistic_inputs = False
+
     def custom_compute(self, inputs, outputs):
         [at_time] = inputs
         [time, eval_link] = at_time.out
@@ -535,6 +550,8 @@ class MemberToInheritanceRule(LinkToLinkRule):
         LinkToLinkRule.__init__(self, chainer, from_type=types.MemberLink, to_type=types.InheritanceLink,
             formula= formulas.mem2InhFormula)
         self.chainer=chainer
+
+        self.probabilistic_inputs = False
 
 class InheritanceToMemberRule(LinkToLinkRule):
     '''InheritanceLink(Jade robot) => MemberLink(Jade robot).'''

@@ -20,12 +20,18 @@ def tv_seq_to_tv_tuple_seq(tvs):
 # There are also some divide-by-zero errors where a TV is 0 (or 1, because NOT(A) is used in some formulas). If the formulas are designed well enough, that can still be compatible with indefinite TVs.
 
 def makeUpCount(tvs):
-    return min(tv.count for tv in tvs)
+    ArbitraryDiscountFactor = 0.9
+    return min(tv.count for tv in tvs)*ArbitraryDiscountFactor
 
 def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
 
-    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/(1-sB)
+    sNotB = 1-sB
+
+    if sNotB == 0:
+        return [TruthValue(0, 0)]
+
+    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/sNotB
 
     n = makeUpCount(tvs)*INDEPENDENCE_ASSUMPTION_DISCOUNT
 
@@ -68,7 +74,7 @@ def abductionFormula(tvs):
 def modusPonensFormula(tvs):
     [AB, A] = tvs
 
-    sNotAB=0.2
+    NotAB=TruthValue(0.2, 1)
 
     return preciseModusPonensFormula([AB, NotAB, A])
 
@@ -79,7 +85,7 @@ def preciseModusPonensFormula(tvs):
     
     n = makeUpCount(tvs)
 
-    return [TruthValue(sB, nB)]
+    return [TruthValue(sB, n)]
 
 def symmetricModusPonensFormula(tvs):
     (simAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
@@ -90,7 +96,7 @@ def symmetricModusPonensFormula(tvs):
 
     n = makeUpCount(tvs)
 
-    return [TruthValue(sB, nB)]
+    return [TruthValue(sB, n)]
 
 def termProbabilityFormula(tvs):
     # sB = sA*sAB/sBA
@@ -159,6 +165,16 @@ def andExclusionFormula(tvs):
     return [TruthValue(s, makeUpCount(tvs))]
 
 def orFormula(tvs):
+    assert len(tvs) >= 2
+
+    total_s = 1.0
+    for tv in tvs[1:]:
+        andAB=total_s*tv.mean
+        total_s = total_s + tv.mean - andAB
+
+    return [TruthValue(total_s, makeUpCount(tvs))]
+
+def binaryOrFormula(tvs):
     (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
 
     # Uses the inclusion-exclusion formula.
@@ -370,9 +386,6 @@ def revisionFormula(tvs):
 def andBreakdownFormula(tvs):
     [A, AND_AB] = tvs
 
-    if A.mean == 0:
-        return [TruthValue(0, 0)]
-
     sB = AND_AB.mean / A.mean
     nB = makeUpCount(tvs)
 
@@ -381,7 +394,9 @@ def andBreakdownFormula(tvs):
 def orBreakdownFormula(tvs):
     [A, OR_AB] = tvs
 
-    sB = OR_AB.mean / (1-A.mean)
+    sNotA = (1-A.mean)
+
+    sB = OR_AB.mean / sNotA
     nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
@@ -399,10 +414,10 @@ Use I2M to get the tv of: Evaluation is_idiot Ben
 def evaluationImplicationFormula(tvs):
     [eval_B_A, impl_B_C, B, C] = tvs
 
-    [impl_A_B] = mem2InhFormula(eval_B_A)
+    [impl_A_B] = mem2InhFormula([eval_B_A])
     [impl_A_C] = deductionIndependenceBasedFormula(
         [impl_A_B, impl_B_C, B, C])
-    [eval_C_A] = inh2MemFormula(impl_A_C)
+    [eval_C_A] = inh2MemFormula([impl_A_C])
 
     return [eval_C_A]
 
