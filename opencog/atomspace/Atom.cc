@@ -315,7 +315,7 @@ void Atom::keep_incoming_set()
 
 /// Stop tracking the incoming set for this atom.
 /// After this call, the incoming set for this atom can no longer
-/// be queried; it si erased.
+/// be queried; it is erased.
 void Atom::drop_incoming_set()
 {
     if (NULL == _incoming_set) return;
