@@ -101,13 +101,13 @@ void SchemeSmob::init_smob_type(void)
 	cog_uuid_tag = scm_make_smob_type ("opencog-uuid", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_uuid_tag, print_atom);
 	scm_set_smob_equalp (cog_uuid_tag, equalp_atom);
-	scm_set_smob_free (cog_uuid_tag, free_atom);
+	// scm_set_smob_free (cog_uuid_tag, free_atom);
 
 	// A SMOB type for everything else
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
-	scm_set_smob_mark (cog_misc_tag, mark_misc);
+	// scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
 }
 
