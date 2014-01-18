@@ -12,10 +12,10 @@ dictionaries for different languages, and possibly do some rudimentary
 semantic extraction.  The primary design point is that the learning is
 to be done in an unsupervised fashion.  A sketch of the theory that
 enables this can be found in the paper "Language Learning", B. Goertzel
-and L, Vepstas (2014) on ArXiv XXXX.XXXX An even shorter sketch is given
-below.  Most of this README concerns the practical details of operating
-the system, and some diary-like notes about partial and preliminary
-results.
+and L, Vepstas (2014) on ArXiv abs/1401.3372  An even shorter sketch is
+given below.  Most of this README concerns the practical details of
+operating the system, and some diary-like notes about partial and
+preliminary results.
 
 The basic algorithmic steps, as implemented so far, are as follows:
 A) Ingest a lot of raw text, such as Wikipedia articles, and count the
@@ -688,6 +688,82 @@ is it so big?
 Again 7 Jan 2014
 Again 13 Jan 2014
 
+Google says:
+set the GC_PRINT_STATS or GC_PRINT_VERBOSE_STATS environment variables
+try also (gc) and (gc-stats)
+
+(gc-stats) seems it indicate 133MB allocated ... so that's not it ... 
+
+using 8GB, with 122K atoms total 
+57K EvalLinks
+57K ListLinks
+6.7K WordNodes
+
+So its not the atomspace contents that is zooming up the RAM...
+So what is?
+
+cogserver=4.4GB
+atom ctor called 18M times
+atom delete called 12M times: a total of 7.65M atoms outstanding
+size of atoms (not counting TV, indexes, etc): 1040 MB
+or 1040/7.65 = 136 bytes/atom  but apparently 4x that for indexes, etc. 
+but the atomspace is reporting only 72K atoms in it, so there's a huge
+memory leak ...
+guile is not leaking; the calls to gc_register and gc_unregister are
+balanced. Diff rarely exceeds 100K, hovers around 20K-50K
+
+after lotsa time:
+guile has seen 350M handles, holds 200K of them.
+table has seen 17M atoms added, holds 181K of them
+atoms: 40M have been created, 17M not freed.
+
+vast leak of handles. 
+56M handles created, 1.3M outstanding, for 260K atoms outstanding.
+
+leaks:
+AtomTable.cc:552 _addSignal()  IIIII II
+Link.cc:58 _outgoing=          I
+AtomTable:524 nodeIndex rbtree III
+
+Again: this time with signals2 not signals:
+AtomTable.cc:529 linkIndex     IIIII I
+AtomTable.cc:552 _addSignal()  IIIII IIIII I 78
+Link.cc:58 _outgoing=          IIIII IIII
+
+this time with const Handle& 
+AtomTable.cc:529 linkIndex     IIIII IIIII IIIII I
+AtomTable.cc:552 _addSignal()  IIIII IIIII IIIII IIIII
+Link.cc:58 _outgoing=          IIIII I
+
+All these leaks are in boost-1.49 ...
+boost::detail::function::void_function_obj_invoker1
+boost::_bi::bind_t
+
+This time, with boost-1.55 ... something still seems to be leaking. WTF
+3.5 handles per signal.  or maybe closer to 3.0
+exactly one atom leaked, per atom put into atomtable ...
+
+AtomTable.cc:529 linkIndex     IIIII IIIII
+Link.cc:58 _outgoing=          IIIII III
+SchemeSmobNew.cc:363           I
+
+Ah HA! boost stopped leaking, so boost 1.49 has a mem leak.
+This exposes an atom table leak: _atom_set was not being handled
+correctly.
+
+Victory! 
+table holds 33K atoms, 2.4M have been added/removed
+guile holds 10K   49M have been touched by guile.
+atoms 37K are live, 5.6M have been created/destroyed
+handles 250K outstasngind 480M creted/eestroyed
+cogserver is running at 512MB
+
+Looks like all mem leaks are now fixed.
+
+
+
+
+
 Irritation 4
 ------------
 Occasionally see this: 
@@ -717,6 +793,8 @@ In unknown file:
    ?: 0 [apply-smob/1 #<catch-closure 3be53c40> encoding-error ...]
 
 ABORT: encoding-error
+
+ERROR: In procedure scm_to_stringn: Error while printing exception.
 
 
 

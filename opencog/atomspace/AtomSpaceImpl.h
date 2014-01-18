@@ -30,8 +30,6 @@
 #include <list>
 #include <vector>
 
-#include <boost/signal.hpp>
-
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AttentionBank.h>

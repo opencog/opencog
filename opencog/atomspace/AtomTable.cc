@@ -690,6 +690,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     size--;
+    _atom_set.erase(handle);
 
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);

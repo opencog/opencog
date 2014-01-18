@@ -1230,7 +1230,7 @@ public:
 
 private:
     boost::signals2::connection c_add; //! Connection to add atom signals
-    bool handleAddSignal(Handle);
+    void handleAddSignal(Handle);
 };
 
 /** @}*/

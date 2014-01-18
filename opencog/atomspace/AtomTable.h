@@ -60,10 +60,14 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-typedef boost::signals2::signal<void (Handle)> AtomSignal;
-typedef boost::signals2::signal<void (AtomPtr)> AtomPtrSignal;
-typedef boost::signals2::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
-typedef boost::signals2::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
+typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
+typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
+typedef boost::signals2::signal<void (const Handle&,
+                                      const AttentionValuePtr&,
+                                      const AttentionValuePtr&)> AVCHSigl;
+typedef boost::signals2::signal<void (const Handle&, 
+                                      const TruthValuePtr&,
+                                      const TruthValuePtr&)> TVCHSigl;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
