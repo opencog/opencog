@@ -27,6 +27,7 @@
 #include <map>
 #include <vector>
 #include "Pattern.h"
+#include <opencog/atomspace/AtomSpace.h>
 
 using namespace std;
 
@@ -41,6 +42,7 @@ namespace opencog
  {
  public:
     Skeleton* skeleton;
+    map<Pattern*, HandleSeqSeq> PatternsToInstances;
     vector<HTreeNode*> parentLinks;
     vector<HTreeNode*> childLinks;
     HTreeNode(Skeleton* _skeleton):skeleton(_skeleton)
