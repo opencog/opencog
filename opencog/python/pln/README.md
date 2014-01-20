@@ -25,7 +25,7 @@ Run cmake and make
 
 3) Clone the external-tools repository so that you can use the AtomSpace Viewer:
 
-https://github.com/opencog/external-tools/tree/master/AtomViewer
+```git clone https://github.com/opencog/external-tools.git```
 
 ### Let's get started:
 
