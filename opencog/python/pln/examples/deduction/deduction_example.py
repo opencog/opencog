@@ -65,7 +65,7 @@ print('--- History:')
 history = deduction_agent.get_history()
 pprint(vars(history))
 
-with open('./examples/deduction/pln_log.txt', 'w') as logfile:
+with open('pln_log.txt', 'w') as logfile:
     all_atoms = atomspace.get_atoms_by_type(t=types.Atom)
     print('; Number of atoms in atomspace after inference: %d' % len(all_atoms), file=logfile)
     for atom in all_atoms:
