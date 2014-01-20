@@ -47,7 +47,7 @@ const std::string& Node::getName() const
     return name;
 }
 
-std::string Node::toShortString(std::string indent) const
+std::string Node::toShortString(std::string indent)
 {
     std::string tmpname = name;
     if (name == "")
@@ -60,7 +60,7 @@ std::string Node::toShortString(std::string indent) const
     return nam;
 }
 
-std::string Node::toString(std::string indent) const
+std::string Node::toString(std::string indent)
 {
 #define BUFSZ 1024
     char buf[BUFSZ];

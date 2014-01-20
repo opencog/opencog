@@ -191,7 +191,7 @@ public:
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
-    AttentionValuePtr getAttentionValue() const { return _attentionValue; }
+    AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
@@ -200,14 +200,14 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue() const { return _truthValue; }
+    TruthValuePtr getTruthValue();
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
 
     //! The get,setTV methods deal with versioning. Yuck.
-    void setTV(TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
-    TruthValuePtr getTV(VersionHandle = NULL_VERSION_HANDLE) const;
+    void setTV(TruthValuePtr, VersionHandle);
+    TruthValuePtr getTV(VersionHandle);
 
     /** Change the primary TV's mean */
     void setMean(float) throw (InvalidParamException);
@@ -241,9 +241,10 @@ public:
     /** Returns a string representation of the node.
      *
      * @return A string representation of the node.
+     * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent = "") const = 0;
-    virtual std::string toShortString(std::string indent = "") const = 0;
+    virtual std::string toString(std::string indent = "") = 0;
+    virtual std::string toShortString(std::string indent = "") = 0;
 
     /** Returns whether two atoms are equal.
      *

@@ -74,7 +74,7 @@ class TruthValue;
 typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
-    public std::enable_shared_from_this<TruthValue>
+    : public std::enable_shared_from_this<TruthValue>
 {
     friend class CompositeTruthValue;
     friend class SavingLoading;

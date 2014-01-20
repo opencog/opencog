@@ -26,6 +26,7 @@
 #ifndef _OPENCOG_NODE_H
 #define _OPENCOG_NODE_H
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Atom.h>
 
 namespace opencog
@@ -45,6 +46,9 @@ private:
     std::string name;
     void init(const std::string&) throw (InvalidParamException, AssertionException);
 
+    Node(const Node &l) : Atom(0)
+    { OC_ASSERT(false, "Node: bad use of copy ctor"); }
+
 public:
     /**
      * Constructor for this class.
@@ -61,8 +65,12 @@ public:
         init(s);
     }
 
-    /** Copy constructor, does not copy atom table membership! */
-    Node(const Node &n)
+    /**
+     * Copy constructor, does not copy atom table membership!
+     * Cannot be const, because the get() functions can't be,
+     * because thread-safe locking required in the gets.
+     */
+    Node(Node &n)
         : Atom(n.getType(), n.getTruthValue(), n.getAttentionValue()) {
         init(n.name);
     }
@@ -79,8 +87,8 @@ public:
      *
      * @return A string representation of the node.
      */
-    std::string toString(std::string indent = "") const;
-    std::string toShortString(std::string indent = "") const;
+    std::string toString(std::string indent = "");
+    std::string toShortString(std::string indent = "");
 
     /**
      * Returns whether a given atom is equal to the current node.
