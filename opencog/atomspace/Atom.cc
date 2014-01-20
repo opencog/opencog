@@ -242,29 +242,29 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     if (av == local) return;
     if (*av == *local) return;
 
-    // Need to lock, swap is NOT atomic!
+    // Need to lock, shared_ptr is NOT atomic!
     std::unique_lock<std::mutex> lck (_avmtx);
-    _attentionValue.swap(av);
+    local = _attentionValue; // Get it again, to avoid races.
+    _attentionValue = av;
+    lck.unlock();
 
     // If the atom free-floating, we are done.
     if (NULL == _atomTable) return;
 
-    // gets old and new bins
-    int oldBin = ImportanceIndex::importanceBin(av->getSTI());
-    int newBin = ImportanceIndex::importanceBin(local->getSTI());
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(local->getSTI());
+    int newBin = ImportanceIndex::importanceBin(av->getSTI());
 
-    // if the atom importance has changed its bin,
-    // updates the importance index
+    // If the atom importance has changed its bin,
+    // update the importance index.
     if (oldBin != newBin) {
         AtomPtr a(shared_from_this());
         _atomTable->updateImportanceIndex(a, oldBin);
     }
-    // Must unlock before sending signals, to avoid future deadlocks.
-    lck.unlock();
 
     // Notify any interested parties that the AV changed.
     AVCHSigl& avch = _atomTable->AVChangedSignal();
-    avch(getHandle(), av, local);  // av is old, after swap.
+    avch(getHandle(), local, av);
 }
 
 // ==============================================================
