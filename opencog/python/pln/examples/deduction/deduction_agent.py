@@ -19,7 +19,7 @@ class DeductionAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace)
+        self.chainer = Chainer(atomspace, stimulateAtoms=False)
 
         link_types = [types.InheritanceLink]
 
