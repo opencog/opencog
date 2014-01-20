@@ -53,7 +53,7 @@ TruthValuePtr SenseCache::similarity(Handle sense_a, Handle sense_b)
 	                         &SenseCache::find_sense, this);
 
 	if (!found) return TruthValue::DEFAULT_TV();
-	return atom_space->getTV(found_link);
+	return found_link->getTruthValue();
 }
 
 bool SenseCache::find_sense(Handle sense, Handle link)

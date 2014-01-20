@@ -165,12 +165,12 @@ Handle addRealAtom(AtomSpaceImpl& as, AtomPtr atom,
             return as.addLink(link->getType(), link->getOutgoingSet(), newTV);
         }
     }
-    TruthValuePtr currentTV = result->getTV();
+    TruthValuePtr currentTV = result->getTruthValue();
     if (currentTV->isNullTv()) {
-        result->setTV(newTV);
+        result->setTruthValue(newTV);
     } else {
         TruthValuePtr mergedTV = currentTV->merge(newTV);
-        result->setTV(mergedTV);
+        result->setTruthValue(mergedTV);
     }
     return result;
 }
@@ -271,17 +271,18 @@ public:
         // Check primary and versioned TVS
         for (int i = 0; i < NUM_NODES; i++) {
             int vhIdx = i % NUM_VHS;
-            TruthValuePtr tv = h[i]->getTV();
+            TruthValuePtr tv = h[i]->getTruthValue();
             logger().debug("tv initialized to TV object with pointer %p => &(getTV(h[i])) = %p\n",
-tv.get(), h[i]->getTV().get());
+tv.get(), h[i]->getTruthValue().get());
             TS_ASSERT(not tv->isNullTv());
-            logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), h[i]->getTV()->getMean());
+            logger().debug("h: tv mean = %f, getTV(h[i]) = %f\n", tv->getMean(),
+h[i]->getTruthValue()->getMean());
             TS_ASSERT(fabs(tv->getMean() - 0.001) < FLOAT_ACCEPTABLE_ERROR);
             logger().debug("h: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
             TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             if (i < NUM_FORCEUSER_LINKS) {
-                TruthValuePtr tv = FU[i]->getTV();
-                //logger().debug("AFTER ASSIGN THE reference tv to another TV: &tv = %p, &(atomSpace->getTV(h[i]) = %p &(atomSpace->getTV(FU[i])) = %p\n", tv.get(), atomSpace->getTV(h[i].get()), atomSpace->getTV(FU[i]).get());
+                TruthValuePtr tv = FU[i]->getTruthValue();
+                //logger().debug("AFTER ASSIGN THE reference tv to another TV: &tv = %p, getTV(h[i] = %p getTV(FU[i]) = %p\n", tv.get(), atomSpace->getTV(h[i].get()), atomSpace->getTV(FU[i]).get());
                 TS_ASSERT(not tv->isNullTv());
                 // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
@@ -290,7 +291,7 @@ tv.get(), h[i]->getTV().get());
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
             if (i < NUM_HUMAN_LINKS) {
-                TruthValuePtr tv = H[i]->getTV();
+                TruthValuePtr tv = H[i]->getTruthValue();
                 TS_ASSERT(not tv->isNullTv());
                 // logger().debug("h: tv mean = %f, atomSpace->getTV(h[i]) = %f\n", tv->getMean(), atomSpace->getTV(h[i])->getMean());
                 // logger().debug("FU: tv mean = %f, atomSpace->getTV(FU[i]) = %f\n", tv->getMean(), atomSpace->getTV(FU[i])->getMean());
@@ -885,7 +886,7 @@ tv.get(), h[i]->getTV().get());
         // Ensure that context link removal removes the TV from the associated
         // CompositeTV
         Handle h = atomSpace->addNode(CONCEPT_NODE,"blah");
-        h->setTV(SimpleTruthValue::createTV(0.5,0.5));
+        h->setTruthValue(SimpleTruthValue::createTV(0.5,0.5));
         Handle ch = atomSpace->addNode(CONCEPT_NODE,"context");
         HandleSeq oset;
         oset.push_back(ch);
@@ -906,9 +907,9 @@ tv.get(), h[i]->getTV().get());
         h->setTV(TruthValue::DEFAULT_TV(), vh);
         CompositeTruthValuePtr ctv = CompositeTVCast(CompositeTruthValue::createTV(TruthValue::DEFAULT_TV(), vh));
         ctv->setVersionedTV(SimpleTruthValue::createTV(0.5,0.5),vh1);
-        h->setTV(ctv);
+        h->setTruthValue(ctv);
         ctv->setVersionedTV(SimpleTruthValue::createTV(0.6,0.5),vh1);
-        h->setTV(ctv);
+        h->setTruthValue(ctv);
         TS_ASSERT(*h->getTV(vh1) == SimpleTruthValue(0.6,0.5));
     }
 

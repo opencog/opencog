@@ -443,7 +443,7 @@ public:
             bogus %= N;
 
             TruthValuePtr tv(SimpleTruthValue::createTV((double) bogus / (double) N, bogus+i));
-            h->setTV(tv); 
+            h->setTruthValue(tv); 
         }
     }
 
