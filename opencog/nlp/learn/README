@@ -661,12 +661,30 @@ d 47389012408640
         13: vm-i-system.c:855   vm_regular_engine()
         14: eval.c:508  scm_call_4()
 
+19 Jan 2014: again: same but different:
+
+[2014-01-19 06:06:32:335] [ERROR] Caught signal 11 (Segmentation fault)
+on threa
+d 47820857940288
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0 strlen()  
+        5: strings.c:1518       scm_from_stringn()
+        6: strports.c:517       scm_c_eval_string()
+        7: vm-i-system.c:855    vm_regular_engine()
+        8: eval.c:508   scm_call_4()
+        9: SchemeEval.cc:433
+opencog::SchemeEval::do_eval(std::string const&)
+        10: SchemeEval.cc:392
+opencog::SchemeEval::c_wrap_eval(void*)
 
 
 
 
-Crash 3
--------
+
+Crash 3 Fixed
+-------------
 30 Dec 2013:
 Too many heap sections: Increase MAXHINCR or MAX_HEAP_SECTS
   PID USER      PR  NI  VIRT  RES  SHR S %CPU %MEM    TIME+  COMMAND            
@@ -759,6 +777,8 @@ handles 250K outstasngind 480M creted/eestroyed
 cogserver is running at 512MB
 
 Looks like all mem leaks are now fixed.
+
+typical atom size: 4820384 / 35444 = 136 Bytes/atom
 
 
 

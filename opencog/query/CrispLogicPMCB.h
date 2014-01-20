@@ -57,7 +57,7 @@ class CrispLogicPMCB :
  		 */
 		virtual bool clause_match(Handle& pattrn, Handle& grnd)
 		{
-			TruthValuePtr tv(grnd->getTV());
+			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>>>>>> clause match tv=%f\n", tv.getMean());
 			if (tv->getMean() < 0.5) return true;
 			return false;
@@ -79,7 +79,7 @@ class CrispLogicPMCB :
 		{
 			// printf (">>>>>>>>>> hello optional term!! %p\n", grnd);
 			if (Handle::UNDEFINED == grnd) return false;
-			TruthValuePtr tv(grnd->getTV());
+			TruthValuePtr tv(grnd->getTruthValue());
 			// printf (">>>> optional tv=%f\n", tv.getMean());
 			if (tv->getMean() > 0.5) return true;
 			return false;

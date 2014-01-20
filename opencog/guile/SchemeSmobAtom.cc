@@ -79,7 +79,7 @@ SCM SchemeSmob::ss_arity (SCM satom)
 SCM SchemeSmob::ss_tv (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-tv");
-	TruthValuePtr tv = atomspace->getTV(h);
+	TruthValuePtr tv(h->getTruthValue());
 	TruthValue *stv = tv->rawclone();
 	return take_tv(stv);
 }
@@ -89,15 +89,14 @@ SCM SchemeSmob::ss_set_tv (SCM satom, SCM stv)
 	Handle h = verify_handle(satom, "cog-set-tv!");
 	TruthValue *tv = verify_tv(stv, "cog-set-tv!", 2);
 
-	atomspace->setTV(h, tv->clone());
+	h->setTruthValue(tv->clone());
 	return satom;
 }
 
 SCM SchemeSmob::ss_av (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-av");
-	AttentionValuePtr av = atomspace->getAV(h);
-	AttentionValue *sav = av->rawclone();
+	AttentionValue *sav = h->getAttentionValue()->rawclone();
 	return take_av(sav);
 }
 
@@ -106,7 +105,7 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 	Handle h = verify_handle(satom, "cog-set-av!");
 	AttentionValue *av = verify_av(sav, "cog-set-av!", 2);
 
-	atomspace->setAV(h, av->clone());
+	h->setAttentionValue(av->clone());
 	return satom;
 }
 

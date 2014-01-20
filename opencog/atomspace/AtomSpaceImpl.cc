@@ -98,7 +98,7 @@ void AtomSpaceImpl::atomAdded(Handle h)
     if (lll->getArity() == 2) {
         Handle cx = lll->getOutgoingAtom(0); // context
         Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-        ca->setTV(lll->getTV(), VersionHandle(CONTEXTUAL, cx));
+        ca->setTV(lll->getTruthValue(), VersionHandle(CONTEXTUAL, cx));
     } else
         throw RuntimeException(TRACE_INFO,
             "AtomSpaceImpl::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", 
@@ -119,13 +119,13 @@ void AtomSpaceImpl::atomRemoved(AtomPtr atom)
         lll->getArity());
     Handle cx = lll->getOutgoingAtom(0); // context
     Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-    TruthValuePtr tv = ca->getTV();
+    TruthValuePtr tv(ca->getTruthValue());
     CompositeTruthValuePtr new_ctv(CompositeTruthValue::createCTV(tv));
     new_ctv->removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
     // @todo: one may want improve that code by converting back
     // the CompositeTV into a simple or indefinite TV when it has
     // no more VersionedTV
-    ca->setTV(new_ctv);
+    ca->setTruthValue(new_ctv);
 }
 
 // ====================================================================
