@@ -1,5 +1,3 @@
-from xapian import InvalidOperationError
-
 __author__ = 'Keyvan'
 
 from opencog.atomspace import TruthValue

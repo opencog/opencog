@@ -82,6 +82,15 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
     #        else:
     #            upper_bound = target
 
+    def std(self):
+        # Not properly implemented
+        return 0
+
+    def stats(self, moments='mv'):
+        # Not properly implemented
+        # m, s, k
+        return self.mean(), 0, 0
+
     def mean(self):
         return self._mean
 
