@@ -722,6 +722,29 @@ ERROR: In procedure scm_to_stringn: Error while printing exception.
 ABORT: encoding-error
 
 
+Crash 6
+-------
+All new 21 jan 2014
+
+[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault)
+on threa
+d 47570270030144
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
+        5: AtomSpaceImpl.cc:402
+opencog::AtomSpaceImpl::getIncoming(opencog::H
+andle)
+        6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
+        7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
+
+terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
+  what():  boost shared_lock has no mutex: Operation not permitted
+
+WTF ... where is the above shared_lock coming from????
+
+
 
 
 
@@ -755,6 +778,15 @@ In unknown file:
 ABORT: encoding-error
 
 ERROR: In procedure scm_to_stringn: Error while printing exception.
+
+
+Irritation 5
+------------
+
+(observe-text "Savoir-vivre, roman, Gallimard, collection Blanche et collection Folio.")
+ERROR: In procedure car:
+ERROR: In procedure car: Wrong type (expecting pair): ()
+
 
 
 

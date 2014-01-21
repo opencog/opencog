@@ -2,7 +2,7 @@
 
 IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES (
-		${PYTHON_INCLUDE_PATH}
+		${PYTHON_INCLUDE_DIRS}
 	)
 ENDIF (HAVE_CYTHON)
 
@@ -23,4 +23,5 @@ TARGET_LINK_LIBRARIES (atomspace_bm
 	server
 	atomspace
 	cogutil
+	${PYTHON_LIBRARIES}
 )
