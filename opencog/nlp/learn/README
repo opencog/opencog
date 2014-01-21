@@ -678,10 +678,51 @@ d 47820857940288
         6: strports.c:517       scm_c_eval_string()
         7: vm-i-system.c:855    vm_regular_engine()
         8: eval.c:508   scm_call_4()
-        9: SchemeEval.cc:433
-opencog::SchemeEval::do_eval(std::string const&)
-        10: SchemeEval.cc:392
-opencog::SchemeEval::c_wrap_eval(void*)
+        9: SchemeEval.cc:433    opencog::SchemeEval::do_eval(std::string const&)
+        10: SchemeEval.cc:392   opencog::SchemeEval::c_wrap_eval(void*)
+
+Got exactly above, again 21 Jan. 
+
+Preceeded a few minutes earlier by below.
+
+opencog-fr> Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 25dd04e0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 25dd04e0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure 25d2ff20> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure 25d2ff20>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure cfebf00 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure 25d2fee0> encoding-error ...]
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+Backtrace:
+In ice-9/boot-9.scm:
+ 157: 6 [catch #t #<catch-closure 174c8ac0> ...]
+In unknown file:
+   ?: 5 [apply-smob/1 #<catch-closure 174c8ac0>]
+In ice-9/boot-9.scm:
+ 157: 4 [catch #t #<catch-closure ac0b5e0> ...]
+In unknown file:
+   ?: 3 [apply-smob/1 #<catch-closure ac0b5e0>]
+   ?: 2 [call-with-input-string "(observe-text \"Hvozdnica est un village de Slovaquie situé dans la région de \u017dilina.\")\n" ...]
+In ice-9/boot-9.scm:
+ 102: 1 [#<procedure a82f4c0 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
+In unknown file:
+   ?: 0 [apply-smob/1 #<catch-closure ac0b5a0> encoding-error ...]
+
+ERROR: In procedure apply-smob/1:
+ERROR: In procedure scm_to_stringn: Error while printing exception.
+ABORT: encoding-error
+
+
+
 
 
 
@@ -702,11 +743,9 @@ ng-error ...]
 
 -----------
 another:
- "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf
-Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
+ "(observe-text \"Andrzej G\u0105siorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gda\u0144sk 2010 r.\")\n" .
 
-Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord
-Wydawnictwo Oskar, Gdańsk 2010 r.
+Andrzej Gąsiorowski i Krzysztof Steyer, Tajna Organizacja Wojskowa Gryf Pomorski, Polnord Wydawnictwo Oskar, Gdańsk 2010 r.
 
 In ice-9/boot-9.scm:
  102: 1 [#<procedure 3db5240 at ice-9/boot-9.scm:97:6 (thrown-k . args)> encoding-error ...]
