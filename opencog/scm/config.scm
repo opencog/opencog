@@ -15,6 +15,10 @@
 ;--------------------------------------------------------------
 ; The scheme shell listen port.
 (define shell-port 18001)
+; A plain simple prompt
+; (define shell-prompt "opencog-scheme> ")
+; An ANSI-terminal colorized prompt!  This one is blue.
+(define shell-prompt "[0;34mopencog-scheme[1;34m> [0m")
 
 ;--------------------------------------------------------------
 ; The relex server host and port

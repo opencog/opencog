@@ -6,7 +6,7 @@
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 INCLUDE_DIRECTORIES(
-	${PYTHON_INCLUDE_PATH}
+	${PYTHON_INCLUDE_DIRS}
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 )
@@ -69,6 +69,7 @@ IF (HAVE_MOSES)
 		cogutil
 		comboreduct
 		feature_selection
+		${PYTHON_LIBRARIES}
 		${Boost_PROGRAM_OPTIONS_LIBRARY}
 		${Boost_THREAD_LIBRARY}
 	)
@@ -95,6 +96,7 @@ ADD_LIBRARY(atomspace_cython SHARED
 TARGET_LINK_LIBRARIES(atomspace_cython
 	atomspace
 	cogutil
+	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 )
@@ -112,6 +114,7 @@ ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
 
 TARGET_LINK_LIBRARIES(cogserver_cython
 	server
+	${PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(cogserver_cython PROPERTIES
@@ -124,10 +127,8 @@ ADD_LIBRARY(util_cython SHARED
 )
 
 TARGET_LINK_LIBRARIES(util_cython
-	#${Boost_THREAD_LIBRARY}
-	#${Boost_SYSTEM_LIBRARY}
-	#atomspace
 	cogutil
+	${PYTHON_LIBRARIES}
 )
 
 SET_TARGET_PROPERTIES(util_cython PROPERTIES
@@ -147,6 +148,7 @@ ADD_LIBRARY(agent_finder SHARED
 )
 
 TARGET_LINK_LIBRARIES(agent_finder
+	${PYTHON_LIBRARIES}
 	${Boost_THREAD_LIBRARY}
 	${Boost_SYSTEM_LIBRARY}
 )
@@ -173,7 +175,9 @@ IF(HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
-		scheme-shell smob
+		scheme-shell
+		smob
+		${PYTHON_LIBRARIES}
 	)
 	
 	ADD_DEPENDENCIES(scheme_wrapper scheme-shell)
@@ -191,10 +195,10 @@ ADD_LIBRARY (PythonModule SHARED
 )
 ADD_DEPENDENCIES(PythonModule agent_finder)
 
-SET(PYTHONMODULE_LINK_LIBS server PythonEval ${PYTHON_LIBRARIES})
-
 TARGET_LINK_LIBRARIES(PythonModule
-	${PYTHONMODULE_LINK_LIBS}
+	PythonEval
+	server
+	${PYTHON_LIBRARIES}
 )
 
 IF (WIN32)

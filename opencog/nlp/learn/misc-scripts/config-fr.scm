@@ -7,6 +7,7 @@
 ;--------------------------------------------------------------
 ; The scheme shell listen port.
 (define shell-port 18002)
+(define shell-prompt "[0;34mscheme-fr[1;34m> [0m")
 
 ;--------------------------------------------------------------
 ; The relex server host and port
