@@ -726,24 +726,37 @@ Crash 6
 -------
 All new 21 jan 2014
 
-[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault)
-on threa
-d 47570270030144
+[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault) on thread 47570270030144
         Stack Trace:
         2: CogServerMain.cc:91  _Z7sighandi()
         3: sigaction.c:0        __restore_rt()
         4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
-        5: AtomSpaceImpl.cc:402
-opencog::AtomSpaceImpl::getIncoming(opencog::H
+        5: AtomSpaceImpl.cc:402 opencog::AtomSpaceImpl::getIncoming(opencog::H
 andle)
         6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
         7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
 
+Again, same exact trace:
+[2014-01-22 07:42:21:675] [ERROR] Caught signal 11
+Again, smae exact trace .. again, only for french. Why is french
+different???
+
+But this time without the weirdo message:
 terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
   what():  boost shared_lock has no mutex: Operation not permitted
 
 WTF ... where is the above shared_lock coming from????
 
+
+
+Crash 7
+-------
+[2014-01-22 10:18:24:103] [ERROR] Caught signal 11 (Segmentation fault)
+on thread 47155674880320
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ConsoleSocket.cc:211 opencog::ConsoleSocket::OnLine(std::string const&)
 
 
 
@@ -778,42 +791,6 @@ In unknown file:
 ABORT: encoding-error
 
 ERROR: In procedure scm_to_stringn: Error while printing exception.
-
-
-Irritation 5
-------------
-
-(observe-text "Savoir-vivre, roman, Gallimard, collection Blanche et collection Folio.")
-ERROR: In procedure car:
-ERROR: In procedure car: Wrong type (expecting pair): ()
-
-(update-link-counts (get-new-parsed-sentences))
-sets it off
-
-(define (cnt-link x) (begin (set! cnt (+ cnt 1)) #f))
-(map-lg-links cnt-link (get-new-parsed-sentences))
-1935912
-
-(define (cnt-link lnk) (begin (make-lg-rel lnk) (set! cnt (+ cnt 1)) #f))
-(define (cnt-link lnk) (begin 
-   (if (not (pair? (word-inst-get-word (gadr lnk))))
-       (display lnk)
-       (set! cnt (+ cnt 1)))
-   #f))
-
-1936336  wtf how'd it get bigger? 
-
-(word-inst-get-word  (WordInstanceNode "(@31b9968c-6dd9-4283-9471-7b6164f68ba4"))
- fails
-
-(catch 'wrong-type-arg (lambda () (car '()))  (lambda (key . args)
-(display "ehhhhh\n")))
-
-(catch 'wrong-type-arg (lambda () (car  (word-inst-get-word  (WordInstanceNode
-"(@31b9968c-6dd9-4283-9471-7b6164f68ba4"))))  (lambda (key . args) (begin
-(display "duuude key is \n") (display key) (newline)
-(display args) (newline))))
-
 
 
 

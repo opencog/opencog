@@ -166,6 +166,7 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "CountTruthValue = " << sizeof(CountTruthValue) << endl;
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
     cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
+    cout << "VersionHandle = " << sizeof(VersionHandle) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
     cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
     cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
@@ -613,7 +614,9 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
 {
     Handle h = getRandomHandle();
-    while (0 < h->getIncomingSetSize()) {
+    // operator->() can return NULL when there's no atom for the uuid,
+    // because the atom was deleted in a previous pass! Dohh!
+    while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
         h = getRandomHandle();
     }
     clock_t t_begin;
@@ -627,7 +630,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -646,7 +649,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -681,12 +684,6 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    //tRandomStart = clock();
-    // We need this TLB access as the only alternative to
-    // getting a random handle this way scales badly:
-    // (... plus we are not allowed access to the AtomTable either)
-    //Handle h = asp->getAtomTable().getRandom(rng);
-    //tRandomEnd = clock();
     return Handle(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
 }
 
