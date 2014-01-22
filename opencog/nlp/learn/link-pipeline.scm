@@ -7,7 +7,7 @@
 ;
 ; This code is part of a language-learning effort.  The goal is to
 ; observe a lot of text, and then perform clustering to min-max the
-; entropy. Right now, nly the observe part is supported.
+; entropy. Right now, only the observe part is supported.
 ;
 ; Main entry point: (observe-text plain-text)
 ; Call this entry point with exactly one sentance as plain text.
@@ -104,7 +104,22 @@
 			)
 		)
 	)
-	(map-lg-links count-one-link sents)
+
+	; Under weird circumstances, the above can fail. Specifically,
+	; sometimes RelEx doesn't generate the needed (ReferenceLink
+	; connecting (WordInstanceNode "(@4bf5e341-c6b") to the desired
+	; (WordNode "(") ... Either that, some paren-counter somewhere
+	; gets confused. Beats me why. We should fix this. In the meanhile,
+	; we hack around this here by catching.  What happens is that the
+	; call (word-inst-get-word ...) returns nothing, so the car in 
+	; make-lg-rel throws 'wrong-type-arg and everything gets borken.
+	(define (try-count-one-link link)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-link link))
+			(lambda (key . args) #f)
+		)
+	)
+	(map-lg-links try-count-one-link sents)
 )
 
 ; ---------------------------------------------------------------------
