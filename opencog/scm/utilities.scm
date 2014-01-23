@@ -20,7 +20,6 @@
 ; -- cog-get-partner -- Return other atom of a link conecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
 ; -- cog-filter -- return a list of atoms of given type.
-; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
@@ -282,9 +281,9 @@
 ; atom in the listLink.
 ;
 (define (cog-pred-get-partner rel atom)
-	; The 'car' appears here because 'cog-filter-outgoing' is returning
+	; The 'car' appears here because 'cog-filter' is returning
 	; a list, and we want just one atom (the only one in the list)
-	(cog-get-partner (car (cog-filter-outgoing 'ListLink rel)) atom)
+	(cog-get-partner (car (cog-filter 'ListLink (cog-outgoing-set rel))) atom)
 )
 
 ; -----------------------------------------------------------------------
@@ -294,14 +293,6 @@
 (define (cog-filter atom-type atom-list) 
 	(define (is-type? atom) (eq? atom-type (cog-type atom)))
 	(filter is-type? atom-list)
-)
-
-; cog-filter-outgoing -- filter atoms of given type from outgoing set.
-;
-; Given an atom, return a list of atoms from its outgoing set that 
-; are of type 'atom-type'
-(define (cog-filter-outgoing atom-type atom)
-	(cog-filter atom-type (cog-outgoing-set atom))
 )
 
 ; -----------------------------------------------------------------------
