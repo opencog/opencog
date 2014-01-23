@@ -391,23 +391,18 @@ public:
      *         (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByTargetTypeVH(OutputIterator result,
+    getHandlesByTargetType(OutputIterator result,
                              Type type,
                              Type targetType,
                              bool subclass,
-                             bool targetSubclass,
-                             VersionHandle vh = NULL_VERSION_HANDLE,
-                             VersionHandle targetVh = NULL_VERSION_HANDLE) const
+                             bool targetSubclass) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
                             targetTypeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                 return isDefined(h)
-                    and isType(h, type, subclass)
-                    and containsVersionedTV(h, vh)
-                    and containsVersionedTV(h, targetVh);
+                 return isDefined(h) and isType(h, type, subclass);
              });
     }
 
@@ -480,28 +475,6 @@ public:
                         and isType(h, type, subclass); });
     }
 
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByTypeVH(OutputIterator result,
-                           Handle& h,
-                           Type type,
-                           bool subclass,
-                           VersionHandle vh) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
-#else
-        // XXX TODO it would be more efficient to move this to Atom.h
-        HandleSeq hs(getIncomingSet(h));
-        return std::copy_if(hs.begin(), hs.end(), result,
-#endif
-             [&](Handle h)->bool{
-                   return isDefined(h)
-                      and isType(h, type, subclass)
-                      and containsVersionedTV(h, vh); });
-    }
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one
@@ -645,8 +618,7 @@ public:
      * criteria in their outgoing set.
      */
     UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true,
-                              VersionHandle vh = NULL_VERSION_HANDLE) const
+                              Type type = ATOM, bool subclass = true) const
     throw (RuntimeException);
 
     /**
@@ -669,9 +641,8 @@ public:
      * criteria in their outgoing set.
      */
     UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
-                              Type type = ATOM, bool subclass = true,
-                              VersionHandle vh = NULL_VERSION_HANDLE) const
-    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass, vh); }
+                              Type type = ATOM, bool subclass = true) const
+    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass); }
 
     /**
      * Returns the set of atoms within the given importance range.

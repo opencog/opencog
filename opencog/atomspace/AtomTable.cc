@@ -253,7 +253,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
 
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             bool sub = subclasses == NULL ? false : subclasses[i];
-            getHandlesByTargetTypeVH(inserter(sets[i]), type, types[i], subclass, sub);
+            getHandlesByTargetType(inserter(sets[i]), type, types[i], subclass, sub);
             if (sets[i].size() == 0)
                 return UnorderedHandleSet();
         } else {
@@ -323,10 +323,10 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass,
-                                     VersionHandle vh)
+                                     bool subclass)
     const throw (RuntimeException)
 {
+    VersionHandle vh = NULL_VERSION_HANDLE;
     std::vector<UnorderedHandleSet> sets(arity);
 
     int countdown = 0;
@@ -378,7 +378,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             UnorderedHandleSet hs;
-            getHandlesByTargetTypeVH(inserter(hs), type, types[i], subclass, sub);
+            getHandlesByTargetType(inserter(hs), type, types[i], subclass, sub);
             // sets[i] = HandleEntry::filterSet(sets[i], types[i], sub, i, arity);
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 [&](Handle h)->bool {
