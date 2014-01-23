@@ -20,7 +20,6 @@
 ; -- cog-get-partner -- Return other atom of a link conecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
 ; -- cog-filter -- return a list of atoms of given type.
-; -- cog-filter-incoming -- filter atoms of given type from incoming set.
 ; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
@@ -297,14 +296,6 @@
 	(filter is-type? atom-list)
 )
 
-; cog-filter-incoming -- filter atoms of given type from incoming set.
-;
-; Given an atom, return a list of atoms from its incoming set that 
-; are of type 'atom-type'
-(define (cog-filter-incoming atom-type atom)
-	(cog-filter atom-type (cog-incoming-set atom))
-)
-
 ; cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ;
 ; Given an atom, return a list of atoms from its outgoing set that 
@@ -547,7 +538,8 @@
 		(append!
 			(map
 				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
-				(append! (cog-filter-incoming 'ListLink inst)) ;; append removes null's
+				;; append removes null's
+				(append! (cog-filter 'ListLink (cog-incoming-set inst)))
 			)
 		)
 	)
