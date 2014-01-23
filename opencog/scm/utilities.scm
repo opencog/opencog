@@ -355,7 +355,8 @@
 ;
 ; Starting at the atom 'anchor', chase its incoming links of
 ; 'link-type', and return a list of all of the atoms of type 
-; 'node-type' in those links. For example, given:
+; 'node-type' in those links. For example, if 'anchor' is the
+; node 'GivenNode "a"', and the atomspace contains
 ;
 ;    SomeLink
 ;        GivenNode "a"
@@ -365,8 +366,8 @@
 ;        GivenNode "a"
 ;        WantedNode  "q"
 ;
-; then this method will return the two WantedNodes's given the
-; GivenNode, and the link-type 'SomeLink.
+; then this method will return the two WantedNodes's, given the
+; GivenNode as anchor, and the link-type 'SomeLink.
 ;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
@@ -412,7 +413,8 @@
 ; Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
 ; Starting at the atom 'anchor', chase its incoming links of
 ; 'link-type', and call proceedure 'proc' on all of the atoms of
-; type 'node-type' in those links. For example, given:
+; type 'node-type' in those links. For example, if 'anchor' is the
+; node 'GivenNode "a"', and the atomspace contains
 ;
 ;    SomeLink
 ;        GivenNode "a"
@@ -424,25 +426,23 @@
 ;
 ; then 'proc' will be called twice, with each of the WantedNodes's
 ; as the argument. These wanted nodes were found by following the
-; link type 'SomeLink, starting at GivenNode.
+; link type 'SomeLink, starting at the anchor GivenNode "a".
 ;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
 ; the links of 'link-type' in this set. They presumably link to all 
 ; sorts of things. Find all of the things that are of 'endpoint-type'.
-; Return a list of all of these.
+; Apply proc to each of these.
 ;
 (define (cog-map-chase-link link-type endpoint-type proc anchor)
 	(define (get-endpoint w)
-		; cog-filter-map returns the return value from proc, we pass it on
-		; in turn, so make sure this is last statement
-		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
+		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
 	)
-	; cog-filter-map returns the return value from proc, we pass it on
-	; in turn, so make sure this is last statement
+
+	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+		(map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
 	)
 )
 
