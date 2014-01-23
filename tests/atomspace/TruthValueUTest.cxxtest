@@ -24,7 +24,6 @@
 
 #include <math.h>
 
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
@@ -84,7 +83,7 @@ public:
     void setUp() {
         tvs[0] = new SimpleTruthValue(means[0], counts[0]);
         tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
-        tvs[2] = new CompositeTruthValue(SimpleTruthValue::createTV(means[2], counts[2]), NULL_VERSION_HANDLE);
+        tvs[2] = new SimpleTruthValue::createTV(means[2], counts[2]);
     }
 
     void tearDown() {
@@ -134,8 +133,8 @@ public:
         float lowerConfidence = simpleConfidences[1] - 0.01f;
         float upperConfidence = simpleConfidences[1] + 0.01f;
         TruthValuePtr otherTypeTv;
-        // Merging SimpleTruthValue and CompositeTruthValue objects
-        otherTypeTv = CompositeTruthValue::createTV(SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence)), NULL_VERSION_HANDLE);
+        // Merging SimpleTruthValue objects
+        otherTypeTv = SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(lowerConfidence));
         mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);

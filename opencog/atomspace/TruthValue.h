@@ -66,7 +66,6 @@ enum TruthValueType
     SIMPLE_TRUTH_VALUE = 1,
     COUNT_TRUTH_VALUE,
     INDEFINITE_TRUTH_VALUE,
-    COMPOSITE_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
@@ -76,7 +75,6 @@ typedef std::shared_ptr<TruthValue> TruthValuePtr;
 class TruthValue
     : public std::enable_shared_from_this<TruthValue>
 {
-    friend class CompositeTruthValue;
     friend class SavingLoading;
     friend class Atom;
 
@@ -158,12 +156,8 @@ public:
      * even if it is equal to one of the merged TV objects.
      *
      * Currently tv1.merge(tv2) works as follows:
-     * If tv1 and tv2 are not CompositeTruthValue then
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
-     * If tv1 is a CompositeTruthValue see CompositeTruthValue::merge.
-     * If tv2 is a CompositeTruthValue but not tv1,
-     * then tv2.CompositeTruthValue::merge(tv1) is called.
      */
     virtual TruthValuePtr merge(TruthValuePtr) const;
 

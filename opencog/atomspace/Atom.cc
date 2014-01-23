@@ -32,6 +32,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -96,33 +97,6 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     }
 }
 
-void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
-{
-    // The std::shared_ptr is *almost* atomic. Its subtle, but what it
-    // boils down to is that we must make a local copy, and access that
-    // because the global copy in _truthValue might be changed in a
-    // different thread, possibly causing us to refrence a freed pointer.
-    // Use getTruthValue() to guarantee atomic access.
-    TruthValuePtr local(getTruthValue());
-
-    if (!isNullVersionHandle(vh))
-    {
-        CompositeTruthValuePtr ctv((local->getType() == COMPOSITE_TRUTH_VALUE) ?
-                            CompositeTruthValue::createCTV(local) :
-                            CompositeTruthValue::createCTV(local, NULL_VERSION_HANDLE));
-        ctv->setVersionedTV(new_tv, vh);
-        new_tv = std::static_pointer_cast<TruthValue>(ctv);
-    }
-    else if (local->getType() == COMPOSITE_TRUTH_VALUE and
-             new_tv->getType() != COMPOSITE_TRUTH_VALUE)
-    {
-        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(local));
-        ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
-        new_tv = std::static_pointer_cast<TruthValue>(ctv);
-    }
-    setTruthValue(new_tv); // always call setTruthValue to update indices
-}
-
 TruthValuePtr Atom::getTruthValue()
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
@@ -139,58 +113,6 @@ TruthValuePtr Atom::getTruthValue()
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
     return local;
-}
-
-TruthValuePtr Atom::getTV(VersionHandle vh)
-{
-    // So, make a local copy to avoid assignment races.
-    // Use getTruthValue above to do locks correctly.
-    TruthValuePtr local(getTruthValue());
-
-    if (isNullVersionHandle(vh)) {
-        return local;
-    }
-
-    if (local->getType() == COMPOSITE_TRUTH_VALUE)
-    {
-        return std::dynamic_pointer_cast<CompositeTruthValue>(local)->getVersionedTV(vh);
-    }
-    return TruthValue::NULL_TV();
-}
-
-
-void Atom::setMean(float mean) throw (InvalidParamException)
-{
-    TruthValuePtr newTv(getTruthValue());
-    if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
-        // Since CompositeTV has no setMean() method, we must handle it differently
-        CompositeTruthValuePtr ctv = std::static_pointer_cast<CompositeTruthValue>(newTv);
-
-        TruthValuePtr primaryTv = ctv->getPrimaryTV();
-        if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
-            primaryTv = SimpleTruthValue::createTV(mean, primaryTv->getCount());
-        } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(primaryTv);
-            itv->setMean(mean);
-            primaryTv = itv;
-        } else {
-            throw InvalidParamException(TRACE_INFO,
-               "Atom::setMean(): Got a primaryTV with an invalid or unknown type");
-        }
-        ctv->setVersionedTV(primaryTv, NULL_VERSION_HANDLE);
-    } else {
-        if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
-            newTv = SimpleTruthValue::createTV(mean, newTv->getCount());
-        } else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(newTv);
-            itv->setMean(mean);
-            newTv = itv;
-        } else {
-            throw InvalidParamException(TRACE_INFO,
-               "Atom::setMean(): - Got a TV with an invalid or unknown type");
-        }
-    }
-    setTruthValue(newTv);
 }
 
 void Atom::merge(TruthValuePtr tvn)
@@ -393,7 +315,7 @@ IncomingSet Atom::getIncomingSet()
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    foreach(WinkPtr w, _incoming_set->_iset)
+    foreach (WinkPtr w, _incoming_set->_iset)
     {
         LinkPtr l(w.lock());
         if (l) iset.push_back(l);

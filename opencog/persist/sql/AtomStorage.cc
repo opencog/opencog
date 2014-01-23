@@ -948,9 +948,6 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			STMTF("stv_confidence", itv->getConfidenceLevel());
 			break;
 		}
-		case COMPOSITE_TRUTH_VALUE:
-			fprintf(stderr, "Error: Composite truth values are not handled\n");
-			break;
 		default:
 			throw RuntimeException(TRACE_INFO,
 				"Error: store_single: Unknown truth value type\n");
@@ -1453,9 +1450,6 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			atom->setTruthValue(itv);
 			break;
 		}
-		case COMPOSITE_TRUTH_VALUE:
-			fprintf(stderr, "Error: Composite truth values are not handled\n");
-			break;
 		default:
 			throw RuntimeException(TRACE_INFO,
 				"Error: makeAtom: Unknown truth value type\n");

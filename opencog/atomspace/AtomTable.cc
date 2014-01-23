@@ -27,6 +27,7 @@
 
 #include "AtomTable.h"
 
+#include <iterator>
 #include <set>
 
 #include <stdlib.h>
@@ -38,6 +39,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 
 //#define DPRINTF printf

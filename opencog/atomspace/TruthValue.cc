@@ -29,7 +29,6 @@
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/NullTruthValue.h>
@@ -76,9 +75,7 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
 
 TruthValuePtr TruthValue::merge(TruthValuePtr other) const
 {
-    if (other->getType() == COMPOSITE_TRUTH_VALUE) {
-        return other->merge(clone());
-    } else if (other->getConfidence() > getConfidence()) {
+    if (other->getConfidence() > getConfidence()) {
         return other->clone();
     }
     return clone();

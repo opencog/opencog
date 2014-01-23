@@ -23,7 +23,6 @@ Features
 
 Missing features/ToDo items
 ---------------------------
--- Add full support for CompositeTruthValue.
 -- Add full support for attention values. (??)
 -- Add full support for Atom deletion.
 -- Provide optimized table layout for EvaluationLinks.
@@ -726,10 +725,6 @@ clear.
 
 TODO
 ====
--- Fix storage of CompositeTruthValues by storing the equivalent
-   atoms, i.e. creating a ContextLink for each Composite context.
-   This does NOT require modifying the SQL table! Yay!
-
 -- Store attention values. (??) maybe ??
 
 -- Create custom table, tailored for EvaluationLink triples.

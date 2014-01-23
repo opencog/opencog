@@ -46,6 +46,7 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
 #include <opencog/util/misc.h>
+#include <opencog/util/platform.h>
 
 #ifdef HAVE_SQL_STORAGE
 #include <opencog/persist/sql/PersistModule.h>

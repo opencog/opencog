@@ -1,7 +1,6 @@
 
 ADD_LIBRARY (savable SHARED
 	CoreUtils.cc
-	CompositeRenumber.cc
 	SavingLoading.cc
 	SpaceServerSavable.cc
 	TimeServerSavable.cc

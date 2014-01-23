@@ -31,10 +31,8 @@
 
 #include <boost/signals2.hpp>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
@@ -44,6 +42,7 @@
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/PredicateIndex.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/util/Logger.h>

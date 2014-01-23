@@ -26,6 +26,7 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/foreach.h>
 
 using namespace opencog;
 

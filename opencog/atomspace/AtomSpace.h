@@ -462,13 +462,6 @@ public:
         h->setTruthValue(tv);
     }
 
-    /** Change the primary TV's mean of a given Handle
-     * @note By Joel: this makes no sense to me, how can you generally set a mean
-     * across all TV types. I think a better solution would be to remove this
-     * enforce the use of setTV.
-     */
-    void setMean(Handle h, float mean) { h->setMean(mean); }
-
     /**
      * Return true if the handle belongs to *this* atomspace; else
      * return false.  Note that the handle might still be valid in
