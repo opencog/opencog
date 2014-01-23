@@ -43,13 +43,13 @@
 using namespace opencog;
 using namespace std;
 
-#define NUM_VHS 4
-
 #define FLOAT_ACCEPTABLE_ERROR 0.000001
 
 #define NUM_NODES 6
 #define NUM_FORCEUSER_LINKS 4
 #define NUM_HUMAN_LINKS 4
+#define NUM_VHS 4
+#define NUM_VH_NODES 3
 
 // deliberately out of order to test getSortedHandleSet.
 #define AV1_STI 20000
@@ -113,8 +113,6 @@ class AtomSpaceUTest :  public CxxTest::TestSuite
 private:
 
     static AtomSpace *atomSpace;
-    VersionHandle VHs[NUM_VHS];
-
 
 public:
     AtomSpaceUTest() {
@@ -123,13 +121,7 @@ public:
     }
 
     void setUp() {
-// Number of nodes added for setting version handles
-#define NUM_VH_NODES 3
         atomSpace = new AtomSpace();
-        VHs[0] = NULL_VERSION_HANDLE;
-        VHs[1] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL1"));
-        VHs[2] = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL2"));
-        VHs[3] = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
     }
 
     void tearDown() {
@@ -185,23 +177,8 @@ public:
         }
         //logger().debug("Human links created\n");
 
-        // Add versioned TVS
+        // Check TVS
         for (int i = 0; i < NUM_NODES; i++) {
-            int vhIdx = i % NUM_VHS;
-            if (vhIdx) {
-                VersionHandle vh = VHs[vhIdx];
-                atomSpace->setTV(h[i], TruthValue::DEFAULT_TV(), vh);
-                if (i < NUM_FORCEUSER_LINKS)
-                    atomSpace->setTV(FU[i], TruthValue::DEFAULT_TV(), vh);
-                if (i < NUM_HUMAN_LINKS)
-                    atomSpace->setTV(H[i], TruthValue::DEFAULT_TV(), vh);
-            }
-        }
-        //logger().debug("Versioned TVS added\n");
-
-        // Check primary and versioned TVS
-        for (int i = 0; i < NUM_NODES; i++) {
-            int vhIdx = i % NUM_VHS;
             TruthValuePtr tv = atomSpace->getTV(h[i]);
             TS_ASSERT(!tv->isNullTv());
             logger().debug("h: tv mean = %f, atomSpace->getMean(h[i]) = %f\n", tv->getMean(), atomSpace->getMean(h[i]));
@@ -227,53 +204,31 @@ public:
                 logger().debug("H: confidence = %f, diff = %f, error = %f\n", tv->getConfidence(), fabs(tv->getConfidence() - 0.99), FLOAT_ACCEPTABLE_ERROR);
                 TS_ASSERT(fabs(tv->getConfidence() - 0.99) < FLOAT_ACCEPTABLE_ERROR);
             }
-            if (vhIdx) {
-                TruthValuePtr expectedTv = TruthValue::DEFAULT_TV();
-                VersionHandle vh = VHs[vhIdx];
-                TruthValuePtr tv = atomSpace->getTV(h[i], vh);
-                TS_ASSERT(!tv->isNullTv());
-                TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
-                TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-                if (i < NUM_FORCEUSER_LINKS) {
-                    TruthValuePtr tv = atomSpace->getTV(FU[i], vh);
-                    TS_ASSERT(!tv->isNullTv());
-                    TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-                }
-                if (i < NUM_HUMAN_LINKS) {
-                    TruthValuePtr tv = atomSpace->getTV(H[i], vh);
-                    TS_ASSERT(!tv->isNullTv());
-                    TS_ASSERT(fabs(tv->getMean() - expectedTv->getMean()) < FLOAT_ACCEPTABLE_ERROR);
-                    TS_ASSERT(fabs(tv->getConfidence() - expectedTv->getConfidence()) < FLOAT_ACCEPTABLE_ERROR);
-                }
-            }
         }
-        //logger().debug("Primary and versioned TVS checked\n");
+        //logger().debug("TVS checked\n");
 
         TS_ASSERT(atomSpace->getNumNodes() == (NUM_NODES + NUM_VH_NODES));
         TS_ASSERT(atomSpace->getNumLinks() == 8);
 
         // Test filters
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
-            //logger().debug("Checking against VersionHandle %d\n", vhIdx);
 
             mean m;
-            HandleSeq high_mean = atomSpace->filter(&m, VHs[vhIdx]);
-            //std::cout << "Version handle " << VHs[vhIdx] << std::endl;
+            HandleSeq high_mean = atomSpace->filter(&m);
             //std::cout << "high mean size " << high_mean.size() << std::endl;
             //for (int jj = 0; jj < high_mean.size(); jj++) {
             //    std::cout << atomSpace->atomAsString(high_mean[jj],false) << std::endl;
             //}
 
             HandleSeq nodes;
-            atomSpace->getHandlesByTypeVH(back_inserter(nodes), NODE, true, VHs[vhIdx]);
+            atomSpace->getHandlesByType(back_inserter(nodes), NODE, true);
 
             HandleSeq links;
-            atomSpace->getHandlesByTypeVH(back_inserter(links), LINK, true, VHs[vhIdx]);
+            atomSpace->getHandlesByType(back_inserter(links), LINK, true);
 
             HandleSeq all;
             everything e;
-            atomSpace->filter(back_inserter(all), &e, VHs[vhIdx]);
+            atomSpace->filter(back_inserter(all), &e);
 
             HandleSeq AF_nodes = atomSpace->filter_InAttentionalFocus(nodes.begin(), nodes.end());
             HandleSeq AF_links = atomSpace->filter_InAttentionalFocus(links.begin(), links.end());
@@ -337,13 +292,12 @@ public:
         }
 
         // Test getHandleSet
-        // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true, VersionHandle = NULL_VERSION_HANDLE) const;
+        // OutputIterator getHandleSet(OutputIterator, Type, const string& name, bool acceptSubTypes=true) const;
 
         for (int vhIdx = 0; vhIdx < NUM_VHS; vhIdx++) {
-            VersionHandle vh = VHs[vhIdx];
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
-                atomSpace->getHandlesByNameVH(back_inserter(nodes), nodeNames[i], NODE, true, vh);
+                atomSpace->getHandlesByName(back_inserter(nodes), nodeNames[i], NODE, true);
                 bool mustMatch = (vhIdx == 0 || (i % 4 == vhIdx));
                 TS_ASSERT_EQUALS(nodes.size(), (mustMatch ? 1 : 0));
                 for (int j = 0; j < NUM_NODES; j++) {
@@ -359,30 +313,30 @@ public:
 
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
-            atomSpace->getHandlesByNameVH(back_inserter(links), "", LINK, true, vh);
+            atomSpace->getHandlesByName(back_inserter(links), "", LINK, true);
             logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
             TS_ASSERT(links.size() == (vhIdx == 0 ? 8 : 2));
             links.clear();
-            atomSpace->getHandlesByNameVH(back_inserter(links), "", LINK, false, vh);
+            atomSpace->getHandlesByName(back_inserter(links), "", LINK, false);
             //logger().debug("2) links.size() = %d\n", links.size());
             TS_ASSERT(links.size() == 0);
             HandleSeq allInhLinks;
-            atomSpace->getHandlesByNameVH(back_inserter(allInhLinks), "", INHERITANCE_LINK, true, vh);
+            atomSpace->getHandlesByName(back_inserter(allInhLinks), "", INHERITANCE_LINK, true);
             //logger().info("4) allInhLinks.size() = %d (vhIdx: %d)\n", allInhLinks.size(), vhIdx);
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
             TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
             HandleSeq justInhLinks;
-            atomSpace->getHandlesByNameVH(back_inserter(justInhLinks), "", INHERITANCE_LINK, false, vh);
+            atomSpace->getHandlesByName(back_inserter(justInhLinks), "", INHERITANCE_LINK, false);
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
             TS_ASSERT(justInhLinks.size() == (vhIdx == 0 ? 4 : 1));
             HandleSeq partOfLinks;
-            atomSpace->getHandlesByNameVH(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true, vh);
+            atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
             partOfLinks.clear();
-            atomSpace->getHandlesByNameVH(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false, vh);
+            atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
             TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
         }
@@ -584,8 +538,6 @@ public:
      * @param The desired type.
      * @param Whether type subclasses should be considered.
      * @param The comparison struct to use in the sort.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
@@ -650,8 +602,6 @@ public:
      * @param The desired type.
      * @param Whether type subclasses should be considered.
      * @param A criterion for including atoms. It must be something that returns a bool when called.
-     * @param if returns only atoms that contains versioned TVS with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *

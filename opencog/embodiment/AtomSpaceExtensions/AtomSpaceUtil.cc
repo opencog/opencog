@@ -2937,8 +2937,7 @@ float AtomSpaceUtil::getRuleImplicationLinkStrength(AtomSpace& atomSpace,
     } // if
 
     // strength is given by link TruthValue
-    return (atomSpace.getTV(implicationLink, VersionHandle( CONTEXTUAL,
-                            agentModeNode ) )->getMean());
+    return (atomSpace.getTV(implicationLink)->getMean());
 }
 
 spatial::math::Vector3 AtomSpaceUtil::getMostRecentObjectVelocity( const AtomSpace& atomSpace, const std::string& objectId, unsigned long afterTimestamp )

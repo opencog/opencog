@@ -305,6 +305,31 @@ public:
     }
 
     /**
+     * Returns all atoms satisfying the predicate
+     */
+    template <typename OutputIterator> OutputIterator
+    getHandlesByTypePred(OutputIterator result,
+                         Type type,
+                         bool subclass,
+                         AtomPredicate* pred) const
+    {
+        std::lock_guard<std::recursive_mutex> lck(_mtx);
+        return std::copy_if(typeIndex.begin(type, subclass),
+                            typeIndex.end(),
+                            result,
+             [&](Handle h)->bool {
+                  return isDefined(h) and (*pred)(h);
+             });
+    }
+
+    template <typename OutputIterator> OutputIterator
+    getHandlesByPred(OutputIterator result,
+                     AtomPredicate* pred) const
+    {
+        return getHandlesByTypePred(result, ATOM, true, pred);
+    }
+
+    /**
      * Returns the set of atoms of a given type which have atoms of a
      * given target type in their outgoing set (subclasses optionally).
      *

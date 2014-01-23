@@ -34,7 +34,6 @@
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/types.h>
-#include <opencog/atomspace/VersionHandle.h>
 
 using std::string;
 
@@ -363,52 +362,6 @@ public:
      * @return Filtered linked-list.
      */
     static HandleEntry* filterSet(HandleEntry*, AttentionValue::sti_t, AttentionValue::sti_t);
-
-
-    /**
-     * Filters a linked-list. The atoms kept have versioned TVs associated
-     * to the given VersionHandle.
-     *
-     * @param Linked-list to be filtered.
-     * @param VersionHandle the remaining atoms must have
-     * @return Filtered linked-list.
-     */
-    static HandleEntry* filterSet(HandleEntry*, VersionHandle);
-
-    /**
-     * Filters a linked-list. The atoms kept have an atom of the given Type (or, optionally,
-     * any subclass of it) in its outgoing set with a versioned TVs associated to the
-     * given VersionHandle.
-     *
-     * @param Linked-list to be filtered. It must already have at least 1 target that
-     * matches with the Type and bool arguments, i.e., this linked-list must be a result
-     * from a buildSet operation that uses the corresponding target indices
-     * @param the Type that the target atom must have
-     * @param if the target atom can have any subclasses of the given Type argument
-     * @param VersionHandle the matched atom at outgoing set must have
-     * @return Filtered linked-list.
-     */
-    static HandleEntry* filterSet(HandleEntry*, Type, bool, VersionHandle);
-
-    /**
-     * Filters a linked-list. The atoms kept have an atom of the given Name and Type in
-     * its outgoing set with a versioned TVs associated to the given VersionHandle.
-     *
-     * @param Linked-list to be filtered. It must already have at least 1 target that
-     * matches with the Name and Type arguments, i.e., this linked-list must be a result
-     * from a buildSet operation that uses the corresponding target indices
-     * @param the Name that the target atom must have
-     * @param the Type that the target atom must have
-     * @param VersionHandle the matched atom at outgoing set must have
-     * @return Filtered linked-list.
-     */
-    static HandleEntry* filterSet(HandleEntry*, const char*, Type, VersionHandle);
-
-    static bool matchesFilterCriteria(AtomPtr atom, Type targetType,
-            bool targetSubclasses, VersionHandle vh);
-
-    static bool matchesFilterCriteria(AtomPtr atom, const char* targetName,
-            Type targetType, VersionHandle vh);
 };
 
 
