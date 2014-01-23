@@ -185,8 +185,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass,
-                                     VersionHandle vh) const
+                                     bool subclass) const
 {
     // Check if it is the special case of looking for an specific atom
     if (classserver().isA(type, LINK) and
@@ -203,7 +202,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             Handle h(getHandle(type, handles));
 
             UnorderedHandleSet result;
-            if (TLB::isValidHandle(h) and containsVersionedTV(h, vh)) {
+            if (TLB::isValidHandle(h)) {
                 result.insert(h);
             }
             DPRINTF("Returning HandleSet by using atom hash_set!\n");
@@ -221,8 +220,8 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             [&](Handle h)->bool {
                 LinkPtr l(LinkCast(h));
                 // If a Node, then accept it.
-                if (NULL == l) return containsVersionedTV(h, vh);
-                return (0 == l->getArity()) and containsVersionedTV(h, vh);
+                if (NULL == l) return true;
+                return (0 == l->getArity());
         });
         return result;
     }
@@ -304,11 +303,10 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                     [&](Handle h)->bool {
                         LinkPtr l(LinkCast(h));
                         // If a Node, then accept it.
-                        if (NULL == l) return containsVersionedTV(h, vh);
+                        if (NULL == l) return true;
                         if (l->getArity() != arity) return false;
                         Handle hosi(l->getOutgoingSet()[i]);
-                        return isType(hosi, types[i], sub)
-                               and containsVersionedTV(h, vh);
+                        return isType(hosi, types[i], sub);
                     });
                 set = filt;
             }
@@ -326,7 +324,6 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                                      bool subclass)
     const throw (RuntimeException)
 {
-    VersionHandle vh = NULL_VERSION_HANDLE;
     std::vector<UnorderedHandleSet> sets(arity);
 
     int countdown = 0;
