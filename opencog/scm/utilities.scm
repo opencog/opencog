@@ -19,7 +19,6 @@
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-partner -- Return other atom of a link conecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
-; -- cog-filter-map -- call proceedure on list of atoms.
 ; -- cog-filter -- return a list of atoms of given type.
 ; -- cog-filter-incoming -- filter atoms of given type from incoming set.
 ; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
@@ -290,40 +289,6 @@
 )
 
 ; -----------------------------------------------------------------------
-; cog-filter-map -- call proceedure on list of atoms
-;
-; cog-filter-map atom-type proc atom-list
-;
-; Apply the proceedure 'proc' to every atom of 'atom-list' that is
-; of type 'atom-type'. Application halts if proc returns any value 
-; other than #f. Return the last value returned by proc; that is,
-; return #f if proc always returned #f, otherwise return the value
-; that halted the application.
-;
-; Exmaple usage:
-; (cog-filter-map 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
-; 
-; See also: cgw-filter-atom-type, which does the same thing, but for wires.
-;
-; XXX TODO This is not really a map, because of the #f behaviour. This
-; should be fixed someday ...
-;
-(define (cog-filter-map atom-type proc atom-list) 
-	(define rc #f)
-	(cond 
-		((null? atom-list) #f)
-		((eq? (cog-type (car atom-list)) atom-type) 
-			(set! rc (proc (car atom-list))) 
-			(if (eq? #f rc) 
-				(cog-filter-map atom-type proc (cdr atom-list))
-				rc
-			)
-		) 
-		(else (cog-filter-map atom-type proc (cdr atom-list))
-		)
-	)
-)
-
 ; cog-filter -- return a list of atoms of given type.
 ;
 ; Given a list of atoms, return a list of atoms that are of 'atom-type'
@@ -510,16 +475,12 @@
 (define (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 	(define (get-endpoint w)
 		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
-		; cog-filter-map returns the return value from proc, we pass it on
-		; in turn, so make sure this is last statement
-		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
+		(for-each proc (cog-filter endpoint-type (cog-outgoing-set w)))
 	)
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
-	; cog-filter-map returns the return value from proc, we pass it on
-	; in turn, so make sure this is last statement
 	(if (null? anchor)
 		'()
-		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+		(for-each get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
 	)
 )
 
@@ -535,9 +496,9 @@
 		(define (apply-link e)
 			(proc l)
 		)
-		(cog-filter-map endpoint-type apply-link (cog-outgoing-set l))
+		(for-each apply-link (cog-filter endpoint-type (cog-outgoing-set l)))
 	)
-	(cog-filter-map link-type get-link (cog-incoming-set anchor))
+	(for-each get-link (cog-filter link-type (cog-incoming-set anchor)))
 )
 
 ;
