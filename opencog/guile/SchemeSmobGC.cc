@@ -11,7 +11,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/VersionHandle.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -25,7 +24,6 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 	{
 		case COG_HANDLE: // Nothing to do here ...
 		case COG_TV: // Nothing to do here ...
-		case COG_VH: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
@@ -84,14 +82,6 @@ size_t SchemeSmob::free_misc(SCM node)
 			delete tv;
 			return 0;
 
-		case COG_VH:
-			VersionHandle *vh;
-			vh = (VersionHandle *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (vh,
-			                  sizeof(*vh), "opencog vh");
-			delete vh;
-			return 0;
-
 		case COG_EXTEND:
 			PrimitiveEnviron *pe;
 			pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
@@ -124,9 +114,6 @@ std::string SchemeSmob::misc_to_string(SCM node)
 
 		case COG_TV:
 			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
-
-		case COG_VH:
-			return vh_to_string((VersionHandle *) SCM_SMOB_DATA(node));
 
 		case COG_EXTEND:
 		{

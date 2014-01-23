@@ -235,25 +235,25 @@ public:
         Handle contextExampleNode2 = as->addNode(CONCEPT_NODE, "ContextExampleNode2");
         Handle exampleNode = as->addNode(CONCEPT_NODE, "ExampleNodeWithContextualTV");
 
-        TruthValuePtr simpleTV1 = SimpleTruthValue::createTV(4.1, 6.1);
-        TruthValuePtr simpleTV2 = SimpleTruthValue::createTV(5.1, 8.1);
+        // TruthValuePtr simpleTV1 = SimpleTruthValue::createTV(4.1, 6.1);
+        // TruthValuePtr simpleTV2 = SimpleTruthValue::createTV(5.1, 8.1);
 
         // Receive the event corresponding to the first of the two TruthValue changes, and disregard it
-        s_recv (*subscriberTVChanged);
-        s_recv (*subscriberTVChanged);
+        // s_recv (*subscriberTVChanged);
+        // s_recv (*subscriberTVChanged);
 
         // Receive the event corresponding to the second of the two TruthValue changes
-        address = s_recv (*subscriberTVChanged);
-        contents = s_recv (*subscriberTVChanged);
-        ss << contents;
-        read_json(ss, pt);
-        ptAtom = pt.get_child("atoms");
+        // address = s_recv (*subscriberTVChanged);
+        // contents = s_recv (*subscriberTVChanged);
+        // ss << contents;
+        // read_json(ss, pt);
+        // ptAtom = pt.get_child("atoms");
 
         // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
-        TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNodeWithContextualTV");
-        TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
-        TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "composite");
-        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.strength", "") == "0");
-        TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.count", "") == "0");
+        // TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNodeWithContextualTV");
+        // TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
+        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "composite");
+        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.strength", "") == "0");
+        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.count", "") == "0");
     }
 };
