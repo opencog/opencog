@@ -207,7 +207,7 @@ public:
         }
         //logger().debug("TVS checked\n");
 
-        TS_ASSERT(atomSpace->getNumNodes() == (NUM_NODES + NUM_VH_NODES));
+        TS_ASSERT(atomSpace->getNumNodes() == NUM_NODES);
         TS_ASSERT(atomSpace->getNumLinks() == 8);
 
         // Test filters
@@ -236,29 +236,10 @@ public:
             TS_ASSERT(AF_nodes.size() == 0);
             TS_ASSERT(AF_links.size() == 0);
 
-            switch (vhIdx) {
-            case 0:
-                TS_ASSERT(high_mean.size() == 4);
-                TS_ASSERT(nodes.size() == NUM_NODES + NUM_VH_NODES);
-                TS_ASSERT(links.size() == 8);
-                TS_ASSERT(all.size() == 14 + NUM_VH_NODES);
-                break;
-            case 1:
-                TS_ASSERT(high_mean.size() == 2);
-                TS_ASSERT(nodes.size() == 2);
-                TS_ASSERT(links.size() == 2);
-                TS_ASSERT(all.size() == 4);
-                break;
-            case 2:
-            case 3:
-                TS_ASSERT(high_mean.size() == 0);
-                TS_ASSERT(nodes.size() == 1);
-                TS_ASSERT(links.size() == 2);
-                TS_ASSERT(all.size() == 3);
-                break;
-            default:
-                TS_ASSERT(false); // invalid vhIdx
-            }
+            TS_ASSERT(high_mean.size() == 4);
+            TS_ASSERT(nodes.size() == NUM_NODES);
+            TS_ASSERT(links.size() == 8);
+            TS_ASSERT(all.size() == 14);
 
             if (vhIdx == 0) {
                 TS_ASSERT(find(high_mean.begin(), high_mean.end(), FU[0]) != high_mean.end());
@@ -298,10 +279,9 @@ public:
             for (int i = 0; i < NUM_NODES; i++) {
                 HandleSeq nodes;
                 atomSpace->getHandlesByName(back_inserter(nodes), nodeNames[i], NODE, true);
-                bool mustMatch = (vhIdx == 0 || (i % 4 == vhIdx));
-                TS_ASSERT_EQUALS(nodes.size(), (mustMatch ? 1 : 0));
+                TS_ASSERT_EQUALS(nodes.size(), 1);
                 for (int j = 0; j < NUM_NODES; j++) {
-                    if (i == j && mustMatch) {
+                    if (i == j) {
                         TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) != nodes.end());
                     } else {
                         TS_ASSERT(find(nodes.begin(), nodes.end(), h[j]) == nodes.end());
@@ -314,8 +294,8 @@ public:
             // Note: SCHEMA_EXECUTION_LINK is a subType of INHERITANCE_LINK
             HandleSeq links;
             atomSpace->getHandlesByName(back_inserter(links), "", LINK, true);
-            logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), (vhIdx == 0 ? 8 : 2));
-            TS_ASSERT(links.size() == (vhIdx == 0 ? 8 : 2));
+            logger().debug("1) links.size() = %d Expected = %d\n", (int) links.size(), 8);
+            TS_ASSERT(links.size() == 8);
             links.clear();
             atomSpace->getHandlesByName(back_inserter(links), "", LINK, false);
             //logger().debug("2) links.size() = %d\n", links.size());
@@ -326,19 +306,19 @@ public:
             //for (unsigned int x = 0; x < allInhLinks.size(); ++x) {
             //    logger().info("allInhLinks[x]: %s\n", allInhLinks[x]->toString().c_str());
             //}
-            TS_ASSERT(allInhLinks.size() == (vhIdx == 0 ? 8 : 2));
+            TS_ASSERT(allInhLinks.size() == 8);
             HandleSeq justInhLinks;
             atomSpace->getHandlesByName(back_inserter(justInhLinks), "", INHERITANCE_LINK, false);
             //logger().info("5) justInhLinks.size() = %d (vhIdx: %d)\n", justInhLinks.size(), vhIdx);
-            TS_ASSERT(justInhLinks.size() == (vhIdx == 0 ? 4 : 1));
+            TS_ASSERT(justInhLinks.size() == 4);
             HandleSeq partOfLinks;
             atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, true);
             //logger().debug("5) partOfLinks.size() = %d\n", partOfLinks.size());
-            TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
+            TS_ASSERT(partOfLinks.size() == 4);
             partOfLinks.clear();
             atomSpace->getHandlesByName(back_inserter(partOfLinks), "", SCHEMA_EXECUTION_LINK, false);
             //logger().debug("6) partOfLinks.size() = %d\n", partOfLinks.size());
-            TS_ASSERT(partOfLinks.size() == (vhIdx == 0 ? 4 : 1));
+            TS_ASSERT(partOfLinks.size() == 4);
         }
 
     }
@@ -708,7 +688,7 @@ public:
 
         HandleSeq namedAtoms;
         atomSpace->getHandlesByType(back_inserter(namedAtoms), NODE, true);
-        TS_ASSERT_EQUALS(namedAtoms.size(), 3 + NUM_VH_NODES);
+        TS_ASSERT_EQUALS(namedAtoms.size(), 3);
     }
 };
 
