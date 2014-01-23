@@ -336,7 +336,7 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # Python needed for embodiment (!?) and for PLN
 FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
+FIND_PACKAGE(PythonLibs 2.7 REQUIRED)
 IF(PYTHONLIBS_FOUND)
 	MESSAGE(STATUS "Python libs found.")
 ELSE(PYTHONLIBS_FOUND)
