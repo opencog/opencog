@@ -30,7 +30,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
@@ -173,8 +172,6 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
 		   << " " << itv.getConfidence();
 		break;
 	}
-	case COMPOSITE_TRUTH_VALUE:
-		// @todo
 	default:
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);

@@ -83,7 +83,7 @@ public:
     void setUp() {
         tvs[0] = new SimpleTruthValue(means[0], counts[0]);
         tvs[1] = new IndefiniteTruthValue(TV2_L, TV2_U);
-        tvs[2] = new SimpleTruthValue::createTV(means[2], counts[2]);
+        tvs[2] = new SimpleTruthValue(means[2], counts[2]);
     }
 
     void tearDown() {
@@ -142,7 +142,7 @@ public:
         TS_ASSERT(fabs(mergedTv->getMean()  - simpleMeans[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getCount()  - simpleCounts[1]) <= FLOAT_ACCEPTABLE_ERROR);
         TS_ASSERT(fabs(mergedTv->getConfidence() - simpleConfidences[1]) < FLOAT_ACCEPTABLE_ERROR);
-        otherTypeTv = CompositeTruthValue::createTV(SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(upperConfidence)), NULL_VERSION_HANDLE);
+        otherTypeTv = SimpleTruthValue::createTV(0.333f, SimpleTruthValue::confidenceToCount(upperConfidence));
         mergedTv = simpleTvs[1]->merge(otherTypeTv);
         TS_ASSERT(mergedTv != simpleTvs[1]);
         TS_ASSERT(mergedTv != otherTypeTv);
@@ -183,12 +183,8 @@ public:
                 TS_ASSERT(fabs((mergedTv->getCount() / indefiniteCounts[i]) - 1.0d) < 0.000001);
 
                 TS_ASSERT(fabs(mergedTv->getConfidence() - indefiniteConfidences[i]) < FLOAT_ACCEPTABLE_ERROR);
-                if (tvs[i]->getType() != COMPOSITE_TRUTH_VALUE) {
-                    TS_ASSERT(mergedTv.get() != tv);
-                    TS_ASSERT(mergedTv->getType() == INDEFINITE_TRUTH_VALUE);
-                } else {
-                    TS_ASSERT(mergedTv->getType() == COMPOSITE_TRUTH_VALUE);
-                }
+                TS_ASSERT(mergedTv.get() != tv);
+                TS_ASSERT(mergedTv->getType() == INDEFINITE_TRUTH_VALUE);
             } else {
                 //logger().debug("mergedTv->getType() = %d(%s), tv->getType() = %d(%s)", mergedTv->getType(), TruthValue::typeToStr(mergedTv->getType()), tv->getType(), TruthValue::typeToStr(tv->getType()).c_str());
                 TS_ASSERT(mergedTv->getType() == tv->getType());

@@ -28,7 +28,6 @@
 #include <opencog/util/platform.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/util/exceptions.h>
@@ -769,10 +768,6 @@ HandleEntry* HandleEntry::filterSet(HandleEntry* set, AttentionValue::sti_t lowe
     // head contains the filtered list.
     return head;
 }
-
-
-
-
 
 std::string HandleEntry::toString(void)
 {

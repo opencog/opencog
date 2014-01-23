@@ -54,21 +54,6 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     count = source.count;
 }
 
-void CountTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-void CountTruthValue::setCount(count_t c)
-{
-    count = c;
-}
-
-void CountTruthValue::setConfidence(confidence_t c)
-{
-    confidence = c;
-}
-
 strength_t CountTruthValue::getMean() const
 {
     return mean;

@@ -79,8 +79,8 @@ public:
         tvs[0] = SimpleTruthValue::createTV(TV1_MEAN, TV1_COUNT);
         tvs[1] = IndefiniteTruthValue::createTV(TV2_L, TV2_U);
         tvs[2] = SimpleTruthValue::createTV(TV3_MEAN, TV3_COUNT);
-        tvs[3] = NULL;
-        tvs[4] = NULL;
+        tvs[3] = TruthValue::DEFAULT_TV();
+        tvs[4] = TruthValue::DEFAULT_TV();
     }
 
     ~SavingLoadingUTest() {

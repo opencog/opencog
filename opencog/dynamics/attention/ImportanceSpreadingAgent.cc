@@ -26,8 +26,9 @@
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
-#include <opencog/util/platform.h>
 #include <opencog/util/Config.h>
+#include <opencog/util/platform.h>
+#include <opencog/util/foreach.h>
 
 using namespace opencog;
 
