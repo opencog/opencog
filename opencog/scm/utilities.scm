@@ -23,7 +23,11 @@
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
 ; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
+; -- cog-par-chase-link -- call proc on atom connected via type. (parallel)
 ; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
+; -- cog-par-chase-links -- call proc on atoms connected via type. (parallel)
+; -- cog-map-chase-links-chk -- Invoke proc on atom connected through type.
+; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
 ; -- cog-get-link -- Get list of links connecting atom to atom type.
@@ -32,10 +36,11 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ;
 ;
-; Copyright (c) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 threads))  ; needed for par-map par-for-each
 
 (define (av sti lti vlti) (cog-new-av sti lti vlti))    
 
@@ -393,6 +398,22 @@
 	)
 )
 
+; cog-par-chase-link -- call proc on atom connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.
+(define (cog-par-chase-link link-type endpoint-type proc anchor)
+	(define (get-endpoint w)
+		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
+	)
+
+	; We assume that anchor is a single atom, or empty list...
+	(if (null? anchor)
+		'()
+		(par-map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; cog-map-chase-links -- Invoke proc on atom connected through type.
 ;
@@ -406,6 +427,24 @@
 			)
 		anchor)
 		(cog-map-chase-link link-type endpoint-type proc anchor)
+	)
+)
+
+; cog-par-chase-links -- call proc on atoms connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.  If anchor is a list, its still walked 
+; serially; the parallelism is in the incoming set of the anchor.
+; (which makes sense, since the incoming set is most likely to be
+; manifold).
+(define (cog-par-chase-links link-type endpoint-type proc anchor)
+	(if (list? anchor)
+		(map 
+			(lambda (one-of)
+				(cog-par-chase-links link-type endpoint-type proc one-of)
+			)
+		anchor)
+		(cog-par-chase-link link-type endpoint-type proc anchor)
 	)
 )
 
@@ -425,6 +464,27 @@
 		; If we are here, then its a singleton. Verify type.
 		(if (eq? (cog-type anchor) anchor-type)
 			(cog-map-chase-link link-type endpoint-type proc anchor)
+			(throw 'wrong-atom-type 'cog-map-chase-links
+				"Error: expecting atom:" anchor)
+		)
+	)
+)
+
+; cog-par-chase-links-chk -- call proc on atoms connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.
+(define (cog-par-chase-links-chk link-type endpoint-type proc anchor anchor-type)
+	(if (list? anchor)
+		; If we are here, then anchor is a list. Recurse.
+		(map 
+			(lambda (one-of)
+				(cog-par-chase-links-chk link-type endpoint-type proc one-of anchor-type)
+			)
+		anchor)
+		; If we are here, then its a singleton. Verify type.
+		(if (eq? (cog-type anchor) anchor-type)
+			(cog-par-chase-link link-type endpoint-type proc anchor)
 			(throw 'wrong-atom-type 'cog-map-chase-links
 				"Error: expecting atom:" anchor)
 		)

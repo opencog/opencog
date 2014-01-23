@@ -666,7 +666,8 @@ andle)
 Again, same exact trace:
 [2014-01-22 07:42:21:675] [ERROR] Caught signal 11
 * Again, same exact trace .. again, only for french. Why is french different???
-* Again, same exact trace .. 
+* Again, same exact trace ..  22 Jan
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
 
 
 But this time without the weirdo message:
@@ -826,6 +827,3 @@ am using boost-1.49 on cray
 
 ------------------------------------------
 
-
-cog-map-chase-link calls
-cog-filter-map

@@ -31,14 +31,12 @@
 ;
 ; Note -- as currently written, this double-counts.
 (define (map-lg-links proc sent-list)
-	(map-parses
+	; Do each parse in it's own thread.
+	(parallel-map-parses
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
-					(begin
-						(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
-						#f
-					)
+					(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
 				)
 				parse
 			)
@@ -100,7 +98,6 @@
 				(cog-atom-incr (gadr rel) 1) ; increment left word
 				(cog-atom-incr (gddr rel) 1) ; increment right work.
 				(store-atom rel) ; save to SQL
-				#f ; need to return #f so that map-lg-links doesn't stop.
 			)
 		)
 	)
@@ -142,7 +139,7 @@
 ;
 ; Some generic hand-testing code for this stuff:
 ;
-; (define (prt x) (begin (display x) #f))
+; (define (prt x) (display x))
 ; 
 ; (relex-parse "this is")
 ; (get-new-parsed-sentences)
