@@ -268,7 +268,7 @@ code.
 
 === TODO ===
 
-* Support VersionHandles and contextual truth values
 * Support add/remove signals (but depends on changing from boost::signals to ZeroMQ messaging first)
+  (Why? ZMQ messgng is about 50x-200x slower than boost::signals ... )
 * It'd also be nice to somehow import types using "<tt>from opencog.atomspace.types import ConceptNode</tt>" (or use a * import)
 

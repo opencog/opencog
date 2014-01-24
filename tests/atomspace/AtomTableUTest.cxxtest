@@ -36,7 +36,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -56,9 +55,6 @@ using namespace std;
 const char* gpnNames[] = {"GPN1", "GPN2", "GPN3", "GPN4", "GNP5", "GNP6"};
 int numberOfExpectedMatches[] = {26, 26, 26, 1, 1, 1};
 
-int numberOfExpectedMatchesWithVH1[] = {15, 15, 15, 0, 0, 0};
-int numberOfExpectedMatchesWithVH2[] = {15, 15, 15, 1, 1, 1};
-
 class AtomTableUTest : public CxxTest::TestSuite
 {
 
@@ -66,8 +62,6 @@ private:
 
     AtomTable* table;
     AtomSpace* atomSpace;
-    VersionHandle VH1;
-    VersionHandle VH2;
 
 public:
 
@@ -89,10 +83,6 @@ public:
         /* load scm files with all necessary nodes and links  */
         load_scm_file(*atomSpace, PROJECT_SOURCE_DIR"/tests/scm/typedefs.scm");
         load_scm_file(*atomSpace, ATOM_TABLE_TEST_SCM_FILE);
-
-        // Check for existing links because there are 2 identical links in the test xml file
-        VH1 = VersionHandle(HYPOTHETICAL, atomSpace->addNode(CONCEPT_NODE, "HYPOTHETICAL"));
-        VH2 = VersionHandle(CONTEXTUAL, atomSpace->addNode(CONCEPT_NODE, "CONTEXTUAL"));
     }
 
     void tearDown() {
@@ -168,7 +158,7 @@ public:
             //logger().debug("\ncount = %d, expected count = %d", matchCount, numberOfExpectedMatches[index]);
             TS_ASSERT(matchCount == numberOfExpectedMatches[index]);
         }
-        //logger().debug("testPredicateIndices with NULL_VERSION_HANDLE");
+        //logger().debug("testPredicateIndices");
         for (int index = 0; index < 6; index++) {
             HandleSeq hs;
             table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
@@ -186,34 +176,10 @@ public:
             TS_ASSERT(!expectedEntry);
             //logger().debug("");
         }
-        // test with non-null VersionHandles
-        //logger().debug("adding versioned TVs");
-        for (int index = 0; index < 6; index++) {
-            HandleEntry* expectedEntry = expectedEntries[index];
-            int count = 0;
-            while (expectedEntry != NULL) {
-                if (count < numberOfExpectedMatchesWithVH1[index]) {
-                    //logger().debug("adding versioned tv with VH1");
-                    AtomPtr atom(expectedEntry->handle);
-                    TruthValuePtr tv = CompositeTruthValue(TruthValue::NULL_TV(), VH1).merge(atom->getTruthValue());
-                    atom->setTruthValue(tv);
-                    //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
-                }
-                if (numberOfExpectedMatches[index] - count <=  numberOfExpectedMatchesWithVH2[index]) {
-                    //logger().debug("adding versioned tv with VH2");
-                    AtomPtr atom(expectedEntry->handle);
-                    TruthValuePtr tv = CompositeTruthValue(TruthValue::NULL_TV(), VH2).merge(atom->getTruthValue());
-                    atom->setTruthValue(tv);
-                    //logger().debug("resulting tv = %s", atom->getTruthValue()->toString().c_str());
-                }
-                expectedEntry = expectedEntry->next;
-                count++;
-            }
-        }
-        //logger().debug("testPredicateIndices with VH1");
+        //logger().debug("testPredicateIndices");
         for (int index = 0; index < 6; index++) {
             HandleSeq hs;
-            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH1);
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
             HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
@@ -221,8 +187,6 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue().toString().c_str());
-                TS_ASSERT(indexedHandles->handle->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -236,15 +200,15 @@ public:
             //logger().debug("count after = %d", count);
             TS_ASSERT(!expectedEntry);
         }
-        //logger().debug("testPredicateIndices with VH2");
+        //logger().debug("testPredicateIndices");
         for (int index = 0; index < 6; index++) {
             HandleSeq hs;
-            table->getHandlesByGPN(back_inserter(hs), gpnNames[index], VH2);
+            table->getHandlesByGPN(back_inserter(hs), gpnNames[index]);
             HandleEntry* indexedHandles = HandleEntry::fromHandleVector(hs);
             //logger().debug("indexedHandles for index = %d => %p", index, indexedHandles);
             HandleEntry* expectedEntry = expectedEntries[index];
             int count = 0;
-            while (numberOfExpectedMatches[index] - count > numberOfExpectedMatchesWithVH2[index]) {
+            while (numberOfExpectedMatches[index] - count > numberOfExpectedMatches[index]) {
                 TS_ASSERT(expectedEntry);
                 expectedEntry = expectedEntry->next;
                 count++;
@@ -253,8 +217,6 @@ public:
             while (indexedHandles != NULL) {
                 TS_ASSERT(expectedEntry);
                 TS_ASSERT(expectedEntry->handle == indexedHandles->handle);
-                //logger().debug("Checking atom with TV = %s", indexedHandles->handle->getTruthValue()->toString().c_str());
-                TS_ASSERT(indexedHandles->handle->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE);
                 indexedHandles = indexedHandles->next;
                 expectedEntry = expectedEntry->next;
                 count++;

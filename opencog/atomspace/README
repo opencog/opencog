@@ -35,13 +35,7 @@ Anyway, for the most part, what the code usually does is this:
 -- For count truth values, the counts are summed.  This may not be
    correct, since the confidence slot might store entropy, which needs
    adjusting after such a merge.
--- Simple and composite truth values are probably merged correctly, maybe.
 -- Merger of any of the other types is undefined.
-
-One a related note, Composite truth values should probably be exterminated.
-They are a premature optimization for context-dependent truth values; 
-unfortunately, they add vast amounts of complexity to the system, making
-it difficult to determine if things are working correctly.
 
 
 ======================================================================

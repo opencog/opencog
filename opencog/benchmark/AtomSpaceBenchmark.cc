@@ -14,7 +14,6 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -102,9 +101,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
                 break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
-                break;
             default:
                 break;
             }
@@ -122,9 +118,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
                 break;
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
-                break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
                 break;
             default:
                 break;
@@ -165,8 +158,6 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "SimpleTruthValue = " << sizeof(SimpleTruthValue) << endl;
     cout << "CountTruthValue = " << sizeof(CountTruthValue) << endl;
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
-    cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
-    cout << "VersionHandle = " << sizeof(VersionHandle) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
     cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
     cout << "AtomSignal = " << sizeof(AtomSignal) << endl;

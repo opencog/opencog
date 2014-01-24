@@ -26,6 +26,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
@@ -164,6 +165,27 @@ StorkeyAgent::w_t StorkeyAgent::getCurrentWeights()
     return w;
 }
 
+static void setMean(Handle h, float mean)
+{
+    TruthValuePtr oldtv(h->getTruthValue());
+    switch (oldtv->getType())
+    {
+        case SIMPLE_TRUTH_VALUE: {
+            TruthValuePtr newtv(SimpleTruthValue::createTV(mean, oldtv->getCount()));
+            h->setTruthValue(newtv);
+            break;
+        }
+        case INDEFINITE_TRUTH_VALUE: {
+            IndefiniteTruthValuePtr newtv(IndefiniteTruthValue::createITV(oldtv));
+            newtv->setMean(mean);
+            h->setTruthValue(newtv);
+            break;
+        }
+        default:
+            throw InvalidParamException(TRACE_INFO, "Unsupported TV type");
+    }
+}
+
 void StorkeyAgent::setCurrentWeights(w_t& w)
 {
     HopfieldServer& hs = static_cast<HopfieldServer&>(_cogserver);
@@ -185,7 +207,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                     a.addLink(SYMMETRIC_INVERSE_HEBBIAN_LINK, outgoing,
                             SimpleTruthValue::createTV(-w[i][j],100));
                 } else {
-                    a.setMean(heb,w[i][j]);
+                    setMean(heb, w[i][j]);
                 }
             } else {
                 heb = a.getHandle(SYMMETRIC_INVERSE_HEBBIAN_LINK,outgoing);
@@ -195,7 +217,7 @@ void StorkeyAgent::setCurrentWeights(w_t& w)
                         a.addLink(SYMMETRIC_HEBBIAN_LINK, outgoing,
                                 SimpleTruthValue::createTV(w[i][j],100));
                     } else {
-                        a.setMean(heb,-w[i][j]);
+                        setMean(heb, -w[i][j]);
                     }
                 }
                 // If both == Handle::UNDEFINED, then don't add weight. Link

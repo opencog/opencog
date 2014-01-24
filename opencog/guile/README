@@ -21,7 +21,7 @@ available online for free from MIT Press.
 
 Documented below are the core interface functions implemented by the
 guile binding -- these provide for the creation and deletion of OpenCog
-Nodes, Links, TruthValues and VersionHandles, as well as ways to get 
+Nodes, Links, TruthValues, as well as ways to get 
 properties (such as the names of Nodes, or the outgoing sets of Links).  
 Although the core interface is documented below, it is important to notice
 that scheme makes "syntactic sugar" very easy to use.  Some default sugar
@@ -569,46 +569,6 @@ interface.
          guile> (cog-av->alist x)
          ((sti . 99) (lti . 88) (vlti . 0))
 
-=== cog-new-vh indicator atom ===
-      Create a VersionHandle of the indicated type, refering to the 
-      indicated atom. Possible indicator types are: "HYPOTHETICAL",
-      "CONTEXTUAL" and "UNKNOWN".
-
-      Throws errors if the type or handle is invalid.
-      Example:
-         ; Define a node
-         guile> (define n (cog-new-node 'ConceptNode "abc"))
-         ; Define a version handle holding that node
-         guile> (cog-new-vh "HYPOTHETICAL" n)
-
-=== cog-vh? exp ===
-      Return #t if exp is a version handle, else return #f
-
-      Example:
-         ; Define a node
-         guile> (define n (cog-new-node 'ConceptNode "abc"))
-         ; Define a version handle holding that node
-         guile> (define x (cog-new-vh "HYPOTHETICAL" n))
-         guile> (define y (+ 2 2))
-         guile> (cog-vh? x)
-         #t
-         guile> (cog-tv? y)
-         #f
-
-=== cog-vh->alist ===
-      Convert a version handle to an association list (alist).
-      This allows scheme code to access the two parts of the 
-      version handle by name, the two parts being the handle 
-      and the version indicator.
-
-      Example:
-         ; Define a node
-         guile> (define n (cog-new-node 'ConceptNode "abc"))
-         ; Define a version handle holding that node
-         guile> (define x (cog-new-vh "HYPOTHETICAL" n))
-         guile> (cog-vh->alist x)
-         ((indicator . HYPOTHETICAL) (atom . (ConceptNode "abc")))
-
 === cog-get-types ===
       Return a list of all of the atom types in the system.
 
@@ -823,7 +783,6 @@ ToDo
 
 -- change cog-delete to also accept a list of atoms 
 -- change cog-delete to return null, not #t (?why?)
--- add ability to create CompositeTruthValue .. No, don't do this.
 
 -- It would be nice to be able to use continuations; however, the
    scm_with_guile() call has a continuation barrier in it.  I beleive

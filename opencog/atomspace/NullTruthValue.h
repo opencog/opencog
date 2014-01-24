@@ -45,7 +45,7 @@ public:
     count_t getCount() const throw (RuntimeException);
     confidence_t getConfidence() const  throw (RuntimeException);
     std::string toString() const;
-    TruthValueType getType() const throw (RuntimeException);
+    TruthValueType getType() const;
     TruthValuePtr clone() const;
     TruthValue* rawclone() const;
 

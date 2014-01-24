@@ -25,6 +25,7 @@
 #include <vector>
 #include <boost/lexical_cast.hpp>
 
+#include <opencog/util/foreach.h>
 #include <opencog/util/StringTokenizer.h>
 
 // Arghhh! the NMXML stuff is obsolete, please do not use in new code!

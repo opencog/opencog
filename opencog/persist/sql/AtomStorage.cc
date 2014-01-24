@@ -566,10 +566,10 @@ int AtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 int AtomStorage::TVID(const TruthValue &tv)
 {
 	if (tv == TruthValue::NULL_TV()) return 0;
-	if (tv == TruthValue::DEFAULT_TV()) return 1;
+	if (tv == TruthValue::TRIVIAL_TV()) return 1;
 	if (tv == TruthValue::FALSE_TV()) return 2;
 	if (tv == TruthValue::TRUE_TV()) return 3;
-	if (tv == TruthValue::TRIVIAL_TV()) return 4;
+	if (tv == TruthValue::DEFAULT_TV()) return 4;
 
 	Response rp;
 	rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");
@@ -948,9 +948,6 @@ void AtomStorage::do_store_single_atom(AtomPtr atom, int aheight)
 			STMTF("stv_confidence", itv->getConfidenceLevel());
 			break;
 		}
-		case COMPOSITE_TRUTH_VALUE:
-			fprintf(stderr, "Error: Composite truth values are not handled\n");
-			break;
 		default:
 			throw RuntimeException(TRACE_INFO,
 				"Error: store_single: Unknown truth value type\n");
@@ -1453,9 +1450,6 @@ AtomPtr AtomStorage::makeAtom(Response &rp, Handle h)
 			atom->setTruthValue(itv);
 			break;
 		}
-		case COMPOSITE_TRUTH_VALUE:
-			fprintf(stderr, "Error: Composite truth values are not handled\n");
-			break;
 		default:
 			throw RuntimeException(TRACE_INFO,
 				"Error: makeAtom: Unknown truth value type\n");

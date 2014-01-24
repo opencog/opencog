@@ -61,9 +61,6 @@ public:
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
-    void setMean(strength_t);
-    void setCount(count_t);
-    void setConfidence(confidence_t);
 
     virtual TruthValuePtr merge(TruthValuePtr) const;
 

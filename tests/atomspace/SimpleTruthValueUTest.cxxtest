@@ -24,7 +24,6 @@
 
 #include <math.h>
 
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/util/Logger.h>

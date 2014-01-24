@@ -37,7 +37,6 @@
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
@@ -204,13 +203,6 @@ public:
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
-
-    //! The get,setTV methods deal with versioning. Yuck.
-    void setTV(TruthValuePtr, VersionHandle);
-    TruthValuePtr getTV(VersionHandle);
-
-    /** Change the primary TV's mean */
-    void setMean(float) throw (InvalidParamException);
 
     /** merge truth value into this */
     void merge(TruthValuePtr);

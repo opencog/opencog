@@ -30,7 +30,6 @@
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/load-file.h>
@@ -173,8 +172,6 @@ void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
 		   << " " << itv.getConfidence();
 		break;
 	}
-	case COMPOSITE_TRUTH_VALUE:
-		// @todo
 	default:
 		ss << "Wrong Truth Value Type (" << tvt << ")";
 		TSM_ASSERT(ss.str().c_str(), false);
@@ -451,8 +448,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0
-		TS_ASSERT_EQUALS(m,0.0);
-		TS_ASSERT_EQUALS(c,0.0);
+		TS_ASSERT_EQUALS(m, 1.0); // DEFAULT_TV is true with no confidence
+		TS_ASSERT_EQUALS(c, 0.0);
 	}
 
 	Type t1 = classserver().getType(nodename1);
