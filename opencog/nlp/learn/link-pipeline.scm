@@ -32,7 +32,8 @@
 ; Note -- as currently written, this double-counts.
 (define (map-lg-links proc sent-list)
 	; Do each parse in it's own thread.
-	(parallel-map-parses
+	; (parallel-map-parses
+	(map-parses
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
