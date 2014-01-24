@@ -221,7 +221,7 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=True, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
