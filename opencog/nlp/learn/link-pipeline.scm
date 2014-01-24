@@ -7,7 +7,7 @@
 ;
 ; This code is part of a language-learning effort.  The goal is to
 ; observe a lot of text, and then perform clustering to min-max the
-; entropy. Right now, nly the observe part is supported.
+; entropy. Right now, only the observe part is supported.
 ;
 ; Main entry point: (observe-text plain-text)
 ; Call this entry point with exactly one sentance as plain text.
@@ -31,14 +31,13 @@
 ;
 ; Note -- as currently written, this double-counts.
 (define (map-lg-links proc sent-list)
+	; Do each parse in it's own thread.
+	; (parallel-map-parses
 	(map-parses
 		(lambda (parse)
 			(map-word-instances
 				(lambda (word-inst)
-					(begin
-						(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
-						#f
-					)
+					(map proc (cog-get-pred word-inst 'LinkGrammarRelationshipNode))
 				)
 				parse
 			)
@@ -100,11 +99,25 @@
 				(cog-atom-incr (gadr rel) 1) ; increment left word
 				(cog-atom-incr (gddr rel) 1) ; increment right work.
 				(store-atom rel) ; save to SQL
-				#f ; need to return #f so that map-lg-links doesn't stop.
 			)
 		)
 	)
-	(map-lg-links count-one-link sents)
+
+	; Under weird circumstances, the above can fail. Specifically,
+	; sometimes RelEx doesn't generate the needed (ReferenceLink
+	; connecting (WordInstanceNode "(@4bf5e341-c6b") to the desired
+	; (WordNode "(") ... Either that, some paren-counter somewhere
+	; gets confused. Beats me why. We should fix this. In the meanhile,
+	; we hack around this here by catching.  What happens is that the
+	; call (word-inst-get-word ...) returns nothing, so the car in 
+	; make-lg-rel throws 'wrong-type-arg and everything gets borken.
+	(define (try-count-one-link link)
+		(catch 'wrong-type-arg
+			(lambda () (count-one-link link))
+			(lambda (key . args) #f)
+		)
+	)
+	(map-lg-links try-count-one-link sents)
 )
 
 ; ---------------------------------------------------------------------
@@ -127,7 +140,7 @@
 ;
 ; Some generic hand-testing code for this stuff:
 ;
-; (define (prt x) (begin (display x) #f))
+; (define (prt x) (display x))
 ; 
 ; (relex-parse "this is")
 ; (get-new-parsed-sentences)

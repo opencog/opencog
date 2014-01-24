@@ -348,7 +348,7 @@
 	; TRUTH-QUERY flags, if present.  This list will be promoted, below.
 	(define (get-truqu-flags wrd-inst)
 		(filter! is-truqu?
-			(cog-filter-incoming 'InheritanceLink wrd-inst)
+			(cog-filter 'InheritanceLink (cog-incoming-set wrd-inst))
 		)
 	)
 

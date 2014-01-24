@@ -561,3 +561,30 @@ Summary:
   removeAtom        161         156
 
 
+22 January 2014
+---------------
+Remeasure, because locks had to be added to the truth-value getters.
+Upshot: adding locks to the getTV path did not affect performance.
+The setTV path got faster, probably due to cleaner impl.
+
+Significant improvments in getIncoming/OutgoingSet ... not sure why.
+
+Big drop in getNodesHandles, don't know why.
+
+ 
+                   -A -X         -A          -A -g
+   test           AtomTable    AtomSpace    Scheme
+   name           K-ops/sec    K-ops/sec   K-ops/sec
+   ----           ---------    ---------   ---------
+  noop            10000        3333      
+  addNode           217          93.5         
+  addLink            88          54.3       
+  getType          1000         833        
+  getTV             769         833    
+  setTV             769         476      
+  getHandleSet        0.423       0.401        
+  getNodeHandles     41.8        30.5
+  getOutgoingSet    833         666          
+  getIncomingSet    714         555         
+  removeAtom        145         130
+

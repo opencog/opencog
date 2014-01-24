@@ -533,81 +533,8 @@ gives: 7.2199274514956
 
 
 
-
-Crash
------
-pure virtual method called
-terminate called without an active exception
-[2013-12-27 03:13:59:571] [ERROR] Caught signal 6 (Aborted) on thread
-
-        11: AtomStorage.cc:920
-opencog::AtomStorage::do_store_single_atom(std::shared_ptr<opencog::Atom>, int)
-STMTF("stv_confidence", tv->getConfidence());
-
-Again: 
-        9: ??:0 __cxa_pure_virtual()
-        10: AtomStorage.cc:929    opencog::AtomStorage::do_store_single_atom(std
-::shared_ptr<opencog::Atom>, int)
-        11: AtomStorage.cc:802
-opencog::AtomStorage::do_store_atom(std::shared_ptr<opencog::Atom>)
-
-this time, line 929 is:
-926        // Store the truth value
-927        TruthValuePtr tv = atom->getTruthValue();
-928        TruthValueType tvt = NULL_TRUTH_VALUE;
-929        if (tv) tvt = tv->getType();
-
-again... 26 December, no stack-trace, but got "called pure virtual" error msg.
-again... 27 December line 939: STMTF("stv_confidence", tv->getConfidence());
-again... 27 Dec, 929        if (tv) tvt = tv->getType();
-again... 28 Dec, didn't get a stack...
-again... 28 Dec, line 953:  STMTF("stv_mean", tv->getMean()); on count tv
-again... 30 Dec, line 954:  as above ... 
-again... 30 Dec, line 957:  tv->getMean() as above, now unwrapped.
-again... 31 Dec, this time typeid caught it.
-again... 31 Dec, this time typeid prints: N7opencog10TruthValueE which is
-          crazy, and adress 0x802ef558 which is sane,
-again... 31 Dec, tv-cnt=2 atom-cnt=504697
-again... 31 Dec, line 937: if (tv) tvt = tv->getType();
-again... 1 Jan,  addr=0x2b85a3c38 atom=ANY tv-cnt=1 atom-cnt=4050379  WHERE uuid = 185;
-
-Multi-issues:
-1) stv_count maxed at 16777216
-2) same bad tv ptr on two different threads.... two different atoms....
-   ListLink
-      WordNode fiksuojami
-      WordNode 50
-
-alter table atoms alter column stv_count type double precision;
-
-Ohhhh .. I get it ... getTV and setTV are not locked.
-Another thread is doing setTV even while this thread is doing getTV.  The
-use-count pointer drops to zero, destructor runs, then magically, use-count
-goes back up to one...  basically, shared_ptr's are not thread-safe.
-
-OK, so fixed all the above, and it should work, right?
-
-again... 1 Jan, even after the fixes... WTF???
-again... 2 Jan, even after the fixes... WTF???
-again... 3 Jan, even after the fixes... WTF???
-       except this time, it wasn't (LinkGrammarRelationshipNode "ANY")
-       but instead some link ... 
-       N7opencog10TruthValueE addr=0x28ecc9658 tv-cnt=2 atom-cnt=247 atom-type=27
-       name=(not-node) cols=UPDATE Atoms SET  vals= coda= WHERE uuid = 175787728; 
-       Very recent atom being added.
-again... 4 Jan, even after the fixes... WTF???
-       Its the (LinkGrammarRelationshipNode "ANY") as usual.
-again... 4 Jan, even after the fixes... WTF??? .. ANY as usual
-again... 4 Jan, even after the fixes... WTF??? .. ANY as usual
-       This time, immediately followed by glibc malloc corruption:
-       *** glibc detected *** opencog/server/cogserver: malloc(): smallbin
-       double linked list corrupted: 0x000000002ec2e140 ***
-again... 5 Jan, even after the fixes... WTF??? .. ANY as usual
-again... 5 Jan, even after the fixes... WTF??? .. ANY as usual
-
-again... this time, *after* tv->getMean() successfully ran!
-
-
+======================================================================
+Crashes and bugs
 
 
 Crash 2
@@ -726,24 +653,40 @@ Crash 6
 -------
 All new 21 jan 2014
 
-[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault)
-on threa
-d 47570270030144
+[2014-01-21 20:30:03:348] [ERROR] Caught signal 11 (Segmentation fault) on thread 47570270030144
         Stack Trace:
         2: CogServerMain.cc:91  _Z7sighandi()
         3: sigaction.c:0        __restore_rt()
         4: ??:0   std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > opencog::Atom::getIncomingSet<std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > > >(std::back_insert_iterator<std::vector<opencog::Handle, std::allocator<opencog::Handle> > >)
-        5: AtomSpaceImpl.cc:402
-opencog::AtomSpaceImpl::getIncoming(opencog::H
+        5: AtomSpaceImpl.cc:402 opencog::AtomSpaceImpl::getIncoming(opencog::H
 andle)
         6: ??:0   opencog::AtomSpace::getIncoming(opencog::Handle)
         7: SchemeSmobNew.cc:538   opencog::SchemeSmob::ss_delete(scm_u
 
+Again, same exact trace:
+[2014-01-22 07:42:21:675] [ERROR] Caught signal 11
+* Again, same exact trace .. again, only for french. Why is french different???
+* Again, same exact trace ..  22 Jan
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
+* Again, same exact trace ..  23 Jan  Only in french ... wtf ... 
+
+
+But this time without the weirdo message:
 terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::lock_error> >'
   what():  boost shared_lock has no mutex: Operation not permitted
 
 WTF ... where is the above shared_lock coming from????
 
+
+
+Crash 7
+-------
+[2014-01-22 10:18:24:103] [ERROR] Caught signal 11 (Segmentation fault)
+on thread 47155674880320
+        Stack Trace:
+        2: CogServerMain.cc:91  _Z7sighandi()
+        3: sigaction.c:0        __restore_rt()
+        4: ConsoleSocket.cc:211 opencog::ConsoleSocket::OnLine(std::string const&)
 
 
 
@@ -778,15 +721,6 @@ In unknown file:
 ABORT: encoding-error
 
 ERROR: In procedure scm_to_stringn: Error while printing exception.
-
-
-Irritation 5
-------------
-
-(observe-text "Savoir-vivre, roman, Gallimard, collection Blanche et collection Folio.")
-ERROR: In procedure car:
-ERROR: In procedure car: Wrong type (expecting pair): ()
-
 
 
 
@@ -893,5 +827,4 @@ writer does:
 am using boost-1.49 on cray
 
 ------------------------------------------
-
 
