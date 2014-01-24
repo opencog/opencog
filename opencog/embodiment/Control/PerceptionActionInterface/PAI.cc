@@ -46,6 +46,7 @@
 #include <xercesc/sax2/XMLReaderFactory.hpp>
 
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/macros.h>
 #include <opencog/util/Logger.h>

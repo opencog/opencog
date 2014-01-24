@@ -54,21 +54,6 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     count = source.count;
 }
 
-void CountTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-void CountTruthValue::setCount(count_t c)
-{
-    count = c;
-}
-
-void CountTruthValue::setConfidence(confidence_t c)
-{
-    confidence = c;
-}
-
 strength_t CountTruthValue::getMean() const
 {
     return mean;
@@ -123,8 +108,6 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
     // value with a count of 1?  In which case, we should add a merge
     // routine to SimpleTruthValue to do likewise... Anyway, for now,
     // just ignore this possible complication to the semantics.
-    // Also, if someone is trying to merge CompositeTV into a count,
-    // WTF ... for just right now, we're going to blow that off.
     if (NULL == oc) return std::static_pointer_cast<TruthValue>(clone());
     
     // If both this and other are counts, then accumulate to get the

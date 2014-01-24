@@ -23,7 +23,7 @@ using namespace opencog;
  * Return a string holding the scheme representation of an atom/truthvalue.
  *
  * The input is assumed to be pointing at a Handle, a TruthValue,
- * an AttentionValue, or a VersionHandle. Returned is a valid scheme
+ * an AttentionValue or a UUID. Returned is a valid scheme
  * expression that represents that Handle, etc.
  */
 std::string SchemeSmob::to_string(SCM node)

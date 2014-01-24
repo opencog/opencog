@@ -29,6 +29,7 @@
 #include <time.h>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/mt19937ar.h>
 
 using namespace opencog;

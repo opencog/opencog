@@ -23,6 +23,7 @@
 #include <algorithm>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/functional.h>
 #include <opencog/util/oc_assert.h>
 
 #include <opencog/atomspace/ImportanceIndex.h>

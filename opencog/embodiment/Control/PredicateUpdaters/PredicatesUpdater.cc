@@ -21,7 +21,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/util/foreach.h>
 #include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
+#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 #include "PredicatesUpdater.h"
 #include "SpatialPredicateUpdater.h"
@@ -32,7 +34,6 @@
 #include "IsPeePlacePredicateUpdater.h"
 #include "IsPickupablePredicateUpdater.h"
 #include "PetPsychePredicatesUpdater.h"
-#include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 // this time frame corresponde to one minute
 static const unsigned long timeWindow = 600;
