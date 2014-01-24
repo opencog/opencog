@@ -566,10 +566,10 @@ int AtomStorage::storeTruthValue(AtomPtr atom, Handle h)
 int AtomStorage::TVID(const TruthValue &tv)
 {
 	if (tv == TruthValue::NULL_TV()) return 0;
-	if (tv == TruthValue::DEFAULT_TV()) return 1;
+	if (tv == TruthValue::TRIVIAL_TV()) return 1;
 	if (tv == TruthValue::FALSE_TV()) return 2;
 	if (tv == TruthValue::TRUE_TV()) return 3;
-	if (tv == TruthValue::TRIVIAL_TV()) return 4;
+	if (tv == TruthValue::DEFAULT_TV()) return 4;
 
 	Response rp;
 	rp.rs = db_conn->exec("SELECT NEXTVAL('tvid_seq');");

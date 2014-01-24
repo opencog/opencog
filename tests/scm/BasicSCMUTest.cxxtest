@@ -448,8 +448,8 @@ void BasicSCMUTest::check_parse_link(const char * tipo, Type type,
 		float m = tv->getMean();
 		float c = tv->getConfidence();
 		//the link has TV 0.0
-		TS_ASSERT_EQUALS(m,0.0);
-		TS_ASSERT_EQUALS(c,0.0);
+		TS_ASSERT_EQUALS(m, 1.0); // DEFAULT_TV is true with no confidence
+		TS_ASSERT_EQUALS(c, 0.0);
 	}
 
 	Type t1 = classserver().getType(nodename1);

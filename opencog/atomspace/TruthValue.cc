@@ -51,7 +51,7 @@ TruthValuePtr TruthValue::NULL_TV()
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0, 0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
     return instance;
 }
 
@@ -69,7 +69,7 @@ TruthValuePtr TruthValue::FALSE_TV()
 
 TruthValuePtr TruthValue::TRIVIAL_TV()
 {
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
     return instance;
 }
 

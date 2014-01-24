@@ -421,7 +421,7 @@ public:
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
         // subtract 1, because first time through, there is no change signal,
         // only an add signal.
-        TS_ASSERT_EQUALS((int) __totalChanged, (num_atoms-1) * (n_threads-1));
+        TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1));
     }
 
     // =================================================================
