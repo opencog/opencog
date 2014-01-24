@@ -29,7 +29,6 @@
 #include <stdlib.h>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/NullTruthValue.h>
@@ -52,7 +51,7 @@ TruthValuePtr TruthValue::NULL_TV()
 
 TruthValuePtr TruthValue::DEFAULT_TV()
 {
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0, 0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
     return instance;
 }
 
@@ -70,15 +69,13 @@ TruthValuePtr TruthValue::FALSE_TV()
 
 TruthValuePtr TruthValue::TRIVIAL_TV()
 {
-    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(MAX_TRUTH, 0.0));
+    static TruthValuePtr instance(std::make_shared<SimpleTruthValue>(0.0, 0.0));
     return instance;
 }
 
 TruthValuePtr TruthValue::merge(TruthValuePtr other) const
 {
-    if (other->getType() == COMPOSITE_TRUTH_VALUE) {
-        return other->merge(clone());
-    } else if (other->getConfidence() > getConfidence()) {
+    if (other->getConfidence() > getConfidence()) {
         return other->clone();
     }
     return clone();

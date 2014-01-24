@@ -83,14 +83,14 @@
 	; containing a link-grammar relation, just return the relation name,
 	; as a string.
 	(define (get-name rel)
-		(cog-name (car (cog-filter-outgoing 'LinkGrammarRelationshipNode rel)))
+		(cog-name (car (cog-filter 'LinkGrammarRelationshipNode (cog-outgoing-set rel))))
 	)
 
 	; Get the direction of the link ...
 	; It is either to the left(-) or right(+)
 	(define (get-direction rel)
 		(if (equal? word
-			(car (cog-outgoing-set (car (cog-filter-outgoing 'ListLink rel)))))
+			(car (cog-outgoing-set (car (cog-filter 'ListLink (cog-outgoing-set rel))))))
 			"+" "-"
 		)
 	)

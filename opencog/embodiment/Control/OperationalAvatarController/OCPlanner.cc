@@ -1184,7 +1184,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
                 // fail to ground all non numeric variables, roll back to previous step
                 cout<< "GroundARuleNodeBySelectingNonNumericValues failed! This rule doesn't work!"<< std::endl;
 
-                if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
                 {
                     cout<<"This fail also imply that its forward state :";
                     outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
@@ -1222,7 +1222,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
             if (! selectValueForGroundingNumericState(ruleNode->originalRule,ruleNode->currentAllBindings,ruleNode))
             {
                 cout << "SelectValueForGroundingNumericState failed! This rule doesn't work!"<< std::endl;
-                if (curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
+                if ((curStateNode->forwardRuleNode != (&OCPlanner::goalRuleNode)) && curStateNode->forwardRuleNode->originalRule->isReversibleRule && curStateNode->forwardRuleNode->originalRule->action->getType().getCode() == DO_NOTHING_CODE)
                 {
                     cout<<"This fail also imply that its forward state :";
                     outputStateInfo(curStateNode->forwardRuleNode->forAchieveThisSubgoal->state, true);
@@ -1771,9 +1771,24 @@ void OCPlanner::cleanUpEverythingAfterPlanning()
     }
 
     list<StateNode*>::iterator tsit;
+    // remove duplicate elements if any
+    set<StateNode*>::iterator setSit;
+    set<StateNode*> setTempStateNodes;
     for (tsit = temporaryStateNodes.begin(); tsit != temporaryStateNodes.end(); ++ tsit)
     {
-        StateNode* sn = *tsit;
+        if (setTempStateNodes.find(*tsit) == setTempStateNodes.end())
+            setTempStateNodes.insert(*tsit);
+        else
+        {
+            cout <<std::endl << "Warning: Found duplicate elements in temporaryStateNodes:";
+            outputStateInfo(((StateNode*)(*tsit))->state,true);
+            cout << std::endl;
+        }
+    }
+
+    for (setSit = setTempStateNodes.begin(); setSit != setTempStateNodes.end(); ++ setSit)
+    {
+        StateNode* sn = *setSit;
         if (sn)
         {
             if (sn->hypotheticalLink != Handle::UNDEFINED)
@@ -1870,13 +1885,15 @@ int OCPlanner::getHardnessScoreOfPrecon(StateNode* stateNode)
 
 
 int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork,
-                                        bool &hasDirectHelpRule, bool &contradictoryOtherGoal, Rule* orginalRule)
+                                        bool &hasDirectHelpRule, bool &contradictoryOtherGoal, bool& isRecursivePrecon0Sat, bool& isRecursivePrecon1Sat, Rule* orginalRule)
 {
     int satisfiedPreconNum = 0;
     preconImpossible = false;
     willCauseCirleNetWork = false;
     hasDirectHelpRule = false;
     contradictoryOtherGoal = false;
+    isRecursivePrecon0Sat = true;
+    isRecursivePrecon1Sat = true;
 
     // check how many preconditions will be satisfied
     vector<State*>::iterator itpre;
@@ -1933,6 +1950,14 @@ int OCPlanner::checkPreconditionFitness(RuleNode* ruleNode, StateNode* fowardSta
 
         if (! satisfied)
         {
+            if (ruleNode->originalRule->IsRecursiveRule)
+            {
+                if (itpre == precondList.begin())
+                    isRecursivePrecon0Sat = false;
+                else
+                    isRecursivePrecon1Sat = false;
+            }
+
             // check if there is any rule related to achieve this unsatisfied precondition
             map<string,multimap<float,Rule*> >::iterator it = ruleEffectIndexes.find(groundPs->name());
             if ( it == ruleEffectIndexes.end())
@@ -2328,6 +2353,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
     willAddCirle = false;
     contradictoryOtherGoal = false;
     needRollBack = false;
+    bool isRecursivePrecon0Sat,isRecursivePrecon1Sat;
 
     // check all the effects:
     negateveStateNum = checkEffectFitness(tmpRuleNode,fowardState,isDiffStateOwnerType,negativeGoal);
@@ -2337,7 +2363,7 @@ void OCPlanner::checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int 
 
     // check how many preconditions will be satisfied
 
-    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
+    satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal,isRecursivePrecon0Sat,isRecursivePrecon1Sat);
 
     if (preconImpossible && rule->isReversibleRule && rule->action->getType().getCode() == DO_NOTHING_CODE)
     {
@@ -2914,10 +2940,8 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
         // we can copy the cost_state from forward Rule to every precondition of this recursive rule , and then add up them as the total cost heuristics of this rule node
         // e.g.: the forward rule is Move(x,y), precondition is ExistAPath(x,y), costheuristics is Distance(x,y)
         //       current recursive rule is if ExistAPath(x,m) & ExistAPath(m,y) then ExistAPath(x,y), has not costheuristics
-        //       so that we can borrow from the "Move" rule, the number of this recursive rule's preconditions is 2, so the coefficient for each is 1/2 = 0.5
-        //       so the total cost of this recursive rule = 0.5*Distance(x,m) + 0.5*(m,y)
-
-        float coefficient = 1.0f / (ruleNode->originalRule->preconditionList.size());
+        //       so the total cost of this recursive rule = Distance(x,m) + Distance(m,y)
+        //       but when really calculate the cost, only the unsatisfied preconditions cost will be calculated
 
         vector<State*>::iterator itpre;
         for (itpre = ruleNode->originalRule->preconditionList.begin(); itpre != ruleNode->originalRule->preconditionList.end(); ++ itpre)
@@ -2975,7 +2999,7 @@ bool OCPlanner::groundARuleNodeFromItsForwardState(RuleNode* ruleNode, StateNode
 
                 }
 
-                ruleNode->AddCostHeuristic(cost_state, ((CostHeuristic)(*costIt)).cost_coefficient * coefficient);
+                ruleNode->AddCostHeuristic(cost_state, ((CostHeuristic)(*costIt)).cost_coefficient);
 
             }
 
@@ -3117,6 +3141,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     bool willAddCirle = false;
     bool hasDirectHelpRule = false;
     bool contradictoryOtherGoal = false;
+    bool isRecursivePrecon0Sat,isRecursivePrecon1Sat;
 
     impossible = false;
 
@@ -3124,7 +3149,7 @@ float OCPlanner::checkNonNumericValueFitness(RuleNode *ruleNode, StateNode* fowa
     negateveStateNum = checkEffectFitness(ruleNode,fowardState,isDiffStateOwnerType,negativeGoal);
 
     // check how many preconditions will be satisfied
-    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal);
+    satisfiedPreconNum = checkPreconditionFitness(ruleNode,fowardState,preconImpossible,willAddCirle, hasDirectHelpRule, contradictoryOtherGoal,isRecursivePrecon0Sat,isRecursivePrecon1Sat);
 
     // ruleNode resetbinding
     ruleNode->currentAllBindings = ruleNode->currentBindingsFromForwardState;
@@ -3488,17 +3513,7 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
     {
 //        Vector* vector1 = boost::get<Vector>(&(*vit));
 
-        // calculate the cost
-        currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
-        float cost = Rule::getCost(basic_cost, costHeuristics, currentbindings);
-        if (cost < -0.00001f)
-        {
-            logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
-            return UNDEFINED_VALUE;
-        }
-
-        float score = 0.0f-cost*100;
-        currentbindings.erase(varName);
+        float score = 0.0f;
 
         // check effect
         bool isDiffStateOwnerType,  negativeGoal, willAddCirle;
@@ -3517,10 +3532,26 @@ ParamValue OCPlanner::selectBestNumericValueFromCandidates(Rule* rule, float bas
         bool preconImpossible;
         bool hasDirectHelpRule;
         bool contradictoryOtherGoal;
-        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule, contradictoryOtherGoal, orginalRule);
+        bool isRecursivePrecon0Sat,isRecursivePrecon1Sat;
+        int satisfiedPreconNum = checkPreconditionFitness(tmpRuleNode,curStateNode,preconImpossible,willAddCirle,hasDirectHelpRule,
+                                                          contradictoryOtherGoal, isRecursivePrecon0Sat, isRecursivePrecon1Sat, orginalRule);
+
 
         if (preconImpossible || willAddCirle || contradictoryOtherGoal)
             score -= 99999.9f;
+
+        // calculate the cost
+        // for recursive rules, only the unsatisfied preconditions cost will be calculated
+        currentbindings.insert(std::pair<string, ParamValue>(varName,*vit));
+        float cost = Rule::getCost(rule, basic_cost, costHeuristics, currentbindings,isRecursivePrecon0Sat, isRecursivePrecon1Sat);
+        if (cost < -0.00001f)
+        {
+            logger().error("OCPlanner::selectBestNumericValueFromCandidates: this rule has not been grounded fully!" );
+            return UNDEFINED_VALUE;
+        }
+
+        score -= cost*100;
+        currentbindings.erase(varName);
 
         if (checkPrecons)
         {

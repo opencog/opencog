@@ -65,7 +65,7 @@ Link::~Link()
     DPRINTF("Deleting link:\n%s\n", this->toString().c_str());
 }
 
-std::string Link::toShortString(std::string indent) const
+std::string Link::toShortString(std::string indent)
 {
     std::stringstream answer;
     std::string more_indent = indent + "  ";
@@ -84,7 +84,7 @@ std::string Link::toShortString(std::string indent) const
     return answer.str();
 }
 
-std::string Link::toString(std::string indent) const
+std::string Link::toString(std::string indent)
 {
     std::string answer;
     std::string more_indent = indent + "  ";

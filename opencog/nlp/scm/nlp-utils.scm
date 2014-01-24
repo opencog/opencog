@@ -77,6 +77,13 @@
 		proc sent-or-list 'SentenceNode)
 )
 
+; Same as above, but multi-threaded -- each parse dispatched to its own
+; thread, on a distinct CPU.
+(define (parallel-map-parses proc sent-or-list)
+	(cog-par-chase-links-chk 'ParseLink 'ParseNode
+		proc sent-or-list 'SentenceNode)
+)
+
 ; ---------------------------------------------------------------------
 ; map-word-instances   Call proc on each word-instance of parse.
 ;

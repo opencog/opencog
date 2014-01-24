@@ -66,7 +66,6 @@ enum TruthValueType
     SIMPLE_TRUTH_VALUE = 1,
     COUNT_TRUTH_VALUE,
     INDEFINITE_TRUTH_VALUE,
-    COMPOSITE_TRUTH_VALUE,
     NUMBER_OF_TRUTH_VALUE_TYPES
 };
 
@@ -74,8 +73,8 @@ class TruthValue;
 typedef std::shared_ptr<TruthValue> TruthValuePtr;
 
 class TruthValue
+    : public std::enable_shared_from_this<TruthValue>
 {
-    friend class CompositeTruthValue;
     friend class SavingLoading;
     friend class Atom;
 
@@ -95,32 +94,33 @@ public:
 
     /**
      * The shared reference to a special NullTruthValue object.
-     * This is supposed to be used as a Flag only and so,
-     * it cannot be used as a normal TV object, as for setting the TV
-     * object of an Atom, for example.
+     * This is supposed to be used only for book-keeping, and it must
+     * not be used as a normal TV object. Calling methods on it will
+     * throw exceptions.
      */
     static TruthValuePtr NULL_TV();
     /**
-     * The shared reference to a special default (Simple) TruthValue
-     * object with both mean and count set to default values
-     * (currently 0 and 0).  This is supposed to be used as a
-     * temporary TV object (in Formulae and Rules internal
-     * TV arrays, for instance).
-     */
-    static TruthValuePtr DEFAULT_TV();
-    /**
      * The shared reference to a special TRUE (Simple) TruthValue
-     * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count.
+     * object with MAX_TRUTH mean and MAX_TV_CONFIDENCE count. That is,
+     * its true with absolute confidence.
      */
     static TruthValuePtr TRUE_TV();
     /**
+     * The shared reference to a special default (Simple) TruthValue
+     * object with MAX_TRUTH mean and 0 count.  That is, its true,
+     * but with no confidence.
+     */
+    static TruthValuePtr DEFAULT_TV();
+    /**
      * The shared reference to a special FALSE (Simple) TruthValue
-     * object with 0 mean and MAX_TV_CONFIDENCE count.
+     * object with 0 mean and MAX_TV_CONFIDENCE count. That is, its
+     * false with absolute confidence.
      */
     static TruthValuePtr FALSE_TV();
     /**
      * The shared reference to a special TRIVIAL (Simple) TruthValue
-     * object with 0 count.
+     * object with 0 mean and 0 count. That is, its false, but with
+     * no confidence.
      */
     static TruthValuePtr TRIVIAL_TV();
 
@@ -157,12 +157,8 @@ public:
      * even if it is equal to one of the merged TV objects.
      *
      * Currently tv1.merge(tv2) works as follows:
-     * If tv1 and tv2 are not CompositeTruthValue then
      * the resulting TV is either tv1 or tv2, the result being the one
      * with the highest confidence.
-     * If tv1 is a CompositeTruthValue see CompositeTruthValue::merge.
-     * If tv2 is a CompositeTruthValue but not tv1,
-     * then tv2.CompositeTruthValue::merge(tv1) is called.
      */
     virtual TruthValuePtr merge(TruthValuePtr) const;
 

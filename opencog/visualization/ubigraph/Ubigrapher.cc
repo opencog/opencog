@@ -30,10 +30,11 @@
 #include <limits.h>
 #include <unistd.h>
 
-#include <opencog/util/Logger.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/server/CogServer.h>
+#include <opencog/util/foreach.h>
+#include <opencog/util/Logger.h>
 
 using namespace std;
 

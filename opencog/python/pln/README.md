@@ -25,7 +25,7 @@ Run cmake and make
 
 3) Clone the external-tools repository so that you can use the AtomSpace Viewer:
 
-https://github.com/opencog/external-tools/tree/master/AtomViewer
+```git clone https://github.com/opencog/external-tools.git```
 
 ### Let's get started:
 
@@ -257,11 +257,11 @@ If set, the \_give\_stimulus method is called, to be applied by the
   [opencog/python/pln directory]: https://github.com/opencog/opencog/tree/master/opencog/python/pln
   [atomspace]: http://wiki.opencog.org/w/Python#MindAgents_in_Python
 
-  [AtomSpace]: AtomSpace "wikilink"
-  [InheritanceLink]: InheritanceLink "wikilink"
+  [AtomSpace]: http://wiki.opencog.org/w/Atomspace
+  [InheritanceLink]: http://wiki.opencog.org/w/InheritanceLink
   [MindAgent]: http://wiki.opencog.org/w/Python#MindAgents_in_Python
   [ForwardInferenceAgent class]: http://buildbot.opencog.org/doxygen/d3/d06/classpython_1_1pln_1_1agents_1_1ForwardInferenceAgent.html
-  [CogServer]: CogServer "wikilink"
+  [CogServer]: http://wiki.opencog.org/w/CogServer
   [Chainer class]: http://buildbot.opencog.org/doxygen/db/d69/classpython_1_1pln_1_1chainers_1_1Chainer.html
 
   [rules]: http://wiki.opencog.org/w/New_PLN_Design,_2013#Rules_and_formulas
@@ -278,7 +278,7 @@ If set, the \_give\_stimulus method is called, to be applied by the
   [here]: http://wiki.opencog.org/w/New_PLN_Implementation_Guide,_2013#STEP_1:_BASIC_FIRST-ORDER_PLN
   [1]: http://wiki.opencog.org/w/New_PLN_Design,_2013#The_Atomspace_AttentionalFocus_as_PLN.27s_Working_Memory
   [C++ AttentionBank class]: http://buildbot.opencog.org/doxygen/df/d07/classopencog_1_1AttentionBank.html
-  [STI]: STI "wikilink"
+  [STI]: http://wiki.opencog.org/w/Short-Term_Importance
   [this mailing list thread]: https://groups.google.com/d/msg/opencog/uA5Ig_wJaT4/1eEsslH0WE8J
   [ImportanceUpdatingAgent]: http://wiki.opencog.org/w/ImportanceUpdatingAgent
 

@@ -157,8 +157,8 @@ void EdgeThin::thin_parse(Handle h, int _keep)
  */
 static bool sense_compare(Handle ha, Handle hb)
 {
-	double sa = ha->getTV()->getCount();
-	double sb = hb->getTV()->getCount();
+	double sa = ha->getTruthValue()->getCount();
+	double sb = hb->getTruthValue()->getCount();
 	if (sa > sb) return true;
 	return false;
 }

@@ -145,7 +145,8 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
         # get from AttentionalFocus
         output_iterator getHandleSetInAttentionalFocus(output_iterator)
 
-        # vector[chandle].iterator getHandleSet(output_iterator,Type t,string name,bint subclass,cVersionHandle vh)
+        # vector[chandle].iterator getHandlesByName(output_iterator, Type t, string name, bint subclass)
+        # vector[chandle].iterator getHandlesByType(output_iterator, Type t, xxx bint subclass)
 
         void clear()
         bint removeAtom(cHandle h, bint recursive) 

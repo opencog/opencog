@@ -30,8 +30,6 @@
 #include <list>
 #include <vector>
 
-#include <boost/signal.hpp>
-
 #include <opencog/atomspace/AtomTable.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/AttentionBank.h>
@@ -232,18 +230,6 @@ private:
      * Used to fetch atoms from disk.
      */
     BackingStore *backing_store;
-
-    /**
-     * signal connections used to keep track of atom removal in the AtomTable
-     */
-    boost::signals2::connection removedAtomConnection;
-    boost::signals2::connection addedAtomConnection;
-
-    /** Handler for the 'atom removed' signal */
-    void atomRemoved(AtomPtr);
-
-    /** Handler for the 'atom added' signal */
-    void atomAdded(Handle);
 
 public:
     /**

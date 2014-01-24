@@ -32,6 +32,7 @@
 
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/misc.h>
 #include <opencog/util/platform.h>
 
@@ -53,15 +54,13 @@ using namespace opencog;
 #define _avmtx _mtx
 
 Atom::Atom(Type t, TruthValuePtr tv, AttentionValuePtr av)
-{
-    _uuid = Handle::UNDEFINED.value();
-    _flags = 0;
-    _atomTable = NULL;
-    _type = t;
-    _attentionValue = av;
-
-    if (tv and not tv->isNullTv()) _truthValue = tv;
-}
+  : _uuid(Handle::UNDEFINED.value()),
+    _atomTable(NULL),
+    _type(t),
+    _flags(0),
+    _truthValue(tv),
+    _attentionValue(av)
+{}
 
 Atom::~Atom()
 {
@@ -79,10 +78,8 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 
     // We need to gauranteee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
-    // this, even as we are.  So make a copy, first. No, we can't quite
-    // do this with swap() ... althouh swap is atomic, there's still a
-    // race between here and the signal-send.
-    TruthValuePtr oldTV(_truthValue);
+    // this, even as we are.  So make a copy, first. 
+    TruthValuePtr oldTV(getTruthValue());
 
     // ... and we still need to make sure that only one thread is
     // writing this at a time. std:shared_ptr is NOT thread-safe against
@@ -98,33 +95,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
     }
 }
 
-void Atom::setTV(TruthValuePtr new_tv, VersionHandle vh)
-{
-    // The std::shared_ptr is *almost* atomic. Its subtle, but what it
-    // boils down to is that we must make a local copy, and access that
-    // because the global copy in _truthValue might be changed in a
-    // different thread, possibly causing us to refrence a freed pointer.
-    TruthValuePtr local(_truthValue);
-
-    if (!isNullVersionHandle(vh))
-    {
-        CompositeTruthValuePtr ctv((local->getType() == COMPOSITE_TRUTH_VALUE) ?
-                            CompositeTruthValue::createCTV(local) :
-                            CompositeTruthValue::createCTV(local, NULL_VERSION_HANDLE));
-        ctv->setVersionedTV(new_tv, vh);
-        new_tv = std::static_pointer_cast<TruthValue>(ctv);
-    }
-    else if (local->getType() == COMPOSITE_TRUTH_VALUE and
-             new_tv->getType() != COMPOSITE_TRUTH_VALUE)
-    {
-        CompositeTruthValuePtr ctv(CompositeTruthValue::createCTV(local));
-        ctv->setVersionedTV(new_tv, NULL_VERSION_HANDLE);
-        new_tv = std::static_pointer_cast<TruthValue>(ctv);
-    }
-    setTruthValue(new_tv); // always call setTruthValue to update indices
-}
-
-TruthValuePtr Atom::getTV(VersionHandle vh) const
+TruthValuePtr Atom::getTruthValue()
 {
     // OK. The atomic thread-safety of shared-pointers is subtle. See
     // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
@@ -135,54 +106,11 @@ TruthValuePtr Atom::getTV(VersionHandle vh) const
     // dereference can return a raw pointer to an object that has been
     // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
     // the multi-threaded async atom store in the SQL peristance backend.
-    //
-    // So, make a copy:
+    // Furthermore, we must ake a copy while holding the lock! Got that?
+
+    std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
-
-    if (isNullVersionHandle(vh)) {
-        return local;
-    }
-
-    if (local->getType() == COMPOSITE_TRUTH_VALUE)
-    {
-        return std::dynamic_pointer_cast<CompositeTruthValue>(local)->getVersionedTV(vh);
-    }
-    return TruthValue::NULL_TV();
-}
-
-
-void Atom::setMean(float mean) throw (InvalidParamException)
-{
-    TruthValuePtr newTv(_truthValue);
-    if (newTv->getType() == COMPOSITE_TRUTH_VALUE) {
-        // Since CompositeTV has no setMean() method, we must handle it differently
-        CompositeTruthValuePtr ctv = std::static_pointer_cast<CompositeTruthValue>(newTv);
-
-        TruthValuePtr primaryTv = ctv->getPrimaryTV();
-        if (primaryTv->getType() == SIMPLE_TRUTH_VALUE) {
-            primaryTv = SimpleTruthValue::createTV(mean, primaryTv->getCount());
-        } else if (primaryTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(primaryTv);
-            itv->setMean(mean);
-            primaryTv = itv;
-        } else {
-            throw InvalidParamException(TRACE_INFO,
-               "Atom::setMean(): Got a primaryTV with an invalid or unknown type");
-        }
-        ctv->setVersionedTV(primaryTv, NULL_VERSION_HANDLE);
-    } else {
-        if (newTv->getType() == SIMPLE_TRUTH_VALUE) {
-            newTv = SimpleTruthValue::createTV(mean, newTv->getCount());
-        } else if (newTv->getType() == INDEFINITE_TRUTH_VALUE) {
-            IndefiniteTruthValuePtr itv = IndefiniteTruthValue::createITV(newTv);
-            itv->setMean(mean);
-            newTv = itv;
-        } else {
-            throw InvalidParamException(TRACE_INFO,
-               "Atom::setMean(): - Got a TV with an invalid or unknown type");
-        }
-    }
-    setTV(newTv);
+    return local;
 }
 
 void Atom::merge(TruthValuePtr tvn)
@@ -194,9 +122,10 @@ void Atom::merge(TruthValuePtr tvn)
     // we look to see if currentTV is default, that some other thread
     // will have changed _truthValue. This is a race, but we don't care,
     // because if two threads are trying to simultaneously set the TV on
-    // one atom, without co-operating with one-anothr, they get what
-    // they deserve -- a race.
-    TruthValuePtr currentTV(_truthValue);
+    // one atom, without co-operating with one-another, they get what
+    // they deserve -- a race. (We still use getTruthValue() to avoid a
+    // read-write race on the shared_pointer itself!)
+    TruthValuePtr currentTV(getTruthValue());
     if (currentTV->isDefaultTV() or currentTV->isNullTv()) {
         setTruthValue(tvn);
         return;
@@ -208,36 +137,54 @@ void Atom::merge(TruthValuePtr tvn)
 
 // ==============================================================
 
+AttentionValuePtr Atom::getAttentionValue()
+{
+    // OK. The atomic thread-safety of shared-pointers is subtle. See
+    // http://www.boost.org/doc/libs/1_53_0/libs/smart_ptr/shared_ptr.htm#ThreadSafety
+    // and http://cppwisdom.quora.com/shared_ptr-is-almost-thread-safe
+    // What it boils down to here is that we must *always* make a copy
+    // of _attentionValue before we use it, since it can go out of scope
+    // because it can get set in another thread.  Viz, using it to
+    // dereference can return a raw pointer to an object that has been
+    // deconstructed. Furthermore, we must ake a copy while holding
+    // the lock! Got that?
+
+    std::lock_guard<std::mutex> lck(_mtx);
+    AttentionValuePtr local(_attentionValue);
+    return local;
+}
+
 void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
 {
-    if (av == _attentionValue) return;
-    if (*av == *_attentionValue) return;
+    // Must obtain a local copy of the AV, since there may be
+    // parallel writers in other threads.
+    AttentionValuePtr local(getAttentionValue());
+    if (av == local) return;
+    if (*av == *local) return;
 
-    // I don't think we need to lock here, since I believe that swap
-    // is atomic (right??)
-    _attentionValue.swap(av);
+    // Need to lock, shared_ptr is NOT atomic!
+    std::unique_lock<std::mutex> lck (_avmtx);
+    local = _attentionValue; // Get it again, to avoid races.
+    _attentionValue = av;
+    lck.unlock();
 
     // If the atom free-floating, we are done.
     if (NULL == _atomTable) return;
 
-    std::unique_lock<std::mutex> lck (_avmtx);
+    // Get old and new bins.
+    int oldBin = ImportanceIndex::importanceBin(local->getSTI());
+    int newBin = ImportanceIndex::importanceBin(av->getSTI());
 
-    // gets old and new bins
-    int oldBin = ImportanceIndex::importanceBin(av->getSTI());
-    int newBin = ImportanceIndex::importanceBin(_attentionValue->getSTI());
-
-    // if the atom importance has changed its bin,
-    // updates the importance index
+    // If the atom importance has changed its bin,
+    // update the importance index.
     if (oldBin != newBin) {
         AtomPtr a(shared_from_this());
         _atomTable->updateImportanceIndex(a, oldBin);
     }
-    // Must unlock before sending signals, to avoid future deadlocks.
-    lck.unlock();
 
     // Notify any interested parties that the AV changed.
     AVCHSigl& avch = _atomTable->AVChangedSignal();
-    avch(getHandle(), av, _attentionValue);  // av is old, after swap.
+    avch(getHandle(), local, av);
 }
 
 // ==============================================================
@@ -281,7 +228,7 @@ void Atom::setAtomTable(AtomTable *tb)
     if (NULL == tb and NULL != _atomTable) {
         // remove, as far as the old table is concerned
         AVCHSigl& avch = _atomTable->AVChangedSignal();
-        avch(getHandle(), _attentionValue, AttentionValue::DEFAULT_AV());
+        avch(getHandle(), getAttentionValue(), AttentionValue::DEFAULT_AV());
 
         // UUID's belong to the atom table, not the atom. Reclaim it.
         _uuid = Handle::UNDEFINED.value();
@@ -290,7 +237,7 @@ void Atom::setAtomTable(AtomTable *tb)
     if (NULL != tb) {
         // add, as far as the old table is concerned
         AVCHSigl& avch = tb->AVChangedSignal();
-        avch(getHandle(), AttentionValue::DEFAULT_AV(), _attentionValue);
+        avch(getHandle(), AttentionValue::DEFAULT_AV(), getAttentionValue());
     }
 }
 
@@ -315,7 +262,7 @@ void Atom::keep_incoming_set()
 
 /// Stop tracking the incoming set for this atom.
 /// After this call, the incoming set for this atom can no longer
-/// be queried; it si erased.
+/// be queried; it is erased.
 void Atom::drop_incoming_set()
 {
     if (NULL == _incoming_set) return;
@@ -366,7 +313,7 @@ IncomingSet Atom::getIncomingSet()
     // Prevent update of set while a copy is being made.
     std::lock_guard<std::mutex> lck (_mtx);
     IncomingSet iset;
-    foreach(WinkPtr w, _incoming_set->_iset)
+    foreach (WinkPtr w, _incoming_set->_iset)
     {
         LinkPtr l(w.lock());
         if (l) iset.push_back(l);

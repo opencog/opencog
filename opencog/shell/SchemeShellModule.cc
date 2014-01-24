@@ -25,7 +25,7 @@
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
+#include <opencog/util/foreach.h>
 
 #include "SchemeShellModule.h"
 

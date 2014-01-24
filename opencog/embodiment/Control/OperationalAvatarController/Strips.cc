@@ -819,7 +819,7 @@ float Rule::getBasicCost()
 }
 
 
-float Rule::getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings)
+float Rule::getCost(Rule* r, float basic_cost,vector<CostHeuristic>& CostHeuristics, ParamGroundedMapInARule& groudings,bool isRecursivePrecon0Sat, bool isRecursivePrecon1Sat)
 {
     // the cost calculation is : basic_cost + cost_cal_state.value1 * cost_coefficient1 + cost_cal_state.value2 * cost_coefficient2 + ...
     // the cost_cal_state is the state related to the cost, e.g.: if an action is move from A to B, then the cost will depend on the state distanceOf(A,B)
@@ -832,6 +832,21 @@ float Rule::getCost(float basic_cost,vector<CostHeuristic>& CostHeuristics, Para
         vector<CostHeuristic>::iterator costIt;
         for (costIt = CostHeuristics.begin(); costIt != CostHeuristics.end(); ++ costIt)
         {
+            if (r->IsRecursiveRule)
+            {
+                if (costIt == CostHeuristics.begin())
+                {
+                    if (isRecursivePrecon0Sat)
+                        continue;
+                }
+                else
+                {
+                    if (isRecursivePrecon1Sat)
+                        continue;
+                }
+
+            }
+
             State* cost_cal_state = ((CostHeuristic)(*costIt)).cost_cal_state;
             // get numberic value from this cost_cal_state
             if (! cost_cal_state->isNumbericState())

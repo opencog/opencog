@@ -221,6 +221,9 @@ public:
      */
     stim_t getAtomStimulus(Handle h) const;
 
+    /** The following two are NOT thread-safe! Neither can be called
+     * safely from multiple threads!
+     */
     AttentionValuePtr getAV() { return _attentionValue; }
     void setAV(AttentionValuePtr new_av) { _attentionValue = new_av; }
 }; // class

@@ -24,6 +24,7 @@
 #include <set>
 #include <boost/variant.hpp>
 
+#include <opencog/util/foreach.h>
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/spacetime/SpaceTime.h>

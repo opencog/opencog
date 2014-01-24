@@ -27,6 +27,7 @@
 
 #include "AtomTable.h"
 
+#include <iterator>
 #include <set>
 
 #include <stdlib.h>
@@ -38,6 +39,7 @@
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/TLB.h>
 #include <opencog/util/exceptions.h>
+#include <opencog/util/functional.h>
 #include <opencog/util/Logger.h>
 
 //#define DPRINTF printf
@@ -185,8 +187,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass,
-                                     VersionHandle vh) const
+                                     bool subclass) const
 {
     // Check if it is the special case of looking for an specific atom
     if (classserver().isA(type, LINK) and
@@ -203,7 +204,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             Handle h(getHandle(type, handles));
 
             UnorderedHandleSet result;
-            if (TLB::isValidHandle(h) and containsVersionedTV(h, vh)) {
+            if (TLB::isValidHandle(h)) {
                 result.insert(h);
             }
             DPRINTF("Returning HandleSet by using atom hash_set!\n");
@@ -221,8 +222,8 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             [&](Handle h)->bool {
                 LinkPtr l(LinkCast(h));
                 // If a Node, then accept it.
-                if (NULL == l) return containsVersionedTV(h, vh);
-                return (0 == l->getArity()) and containsVersionedTV(h, vh);
+                if (NULL == l) return true;
+                return (0 == l->getArity());
         });
         return result;
     }
@@ -253,7 +254,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
 
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             bool sub = subclasses == NULL ? false : subclasses[i];
-            getHandlesByTargetTypeVH(inserter(sets[i]), type, types[i], subclass, sub);
+            getHandlesByTargetType(inserter(sets[i]), type, types[i], subclass, sub);
             if (sets[i].size() == 0)
                 return UnorderedHandleSet();
         } else {
@@ -304,11 +305,10 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                     [&](Handle h)->bool {
                         LinkPtr l(LinkCast(h));
                         // If a Node, then accept it.
-                        if (NULL == l) return containsVersionedTV(h, vh);
+                        if (NULL == l) return true;
                         if (l->getArity() != arity) return false;
                         Handle hosi(l->getOutgoingSet()[i]);
-                        return isType(hosi, types[i], sub)
-                               and containsVersionedTV(h, vh);
+                        return isType(hosi, types[i], sub);
                     });
                 set = filt;
             }
@@ -323,8 +323,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                                      bool* subclasses,
                                      Arity arity,
                                      Type type,
-                                     bool subclass,
-                                     VersionHandle vh)
+                                     bool subclass)
     const throw (RuntimeException)
 {
     std::vector<UnorderedHandleSet> sets(arity);
@@ -378,7 +377,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
             }
         } else if ((types != NULL) && (types[i] != NOTYPE)) {
             UnorderedHandleSet hs;
-            getHandlesByTargetTypeVH(inserter(hs), type, types[i], subclass, sub);
+            getHandlesByTargetType(inserter(hs), type, types[i], subclass, sub);
             // sets[i] = HandleEntry::filterSet(sets[i], types[i], sub, i, arity);
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 [&](Handle h)->bool {
@@ -690,6 +689,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
 
     // Decrements the size of the table
     size--;
+    _atom_set.erase(handle);
 
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);

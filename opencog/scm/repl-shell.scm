@@ -13,5 +13,5 @@
 ; localhost, port number 18001  (shell-port is set in config.scm)
 (spawn-server (make-tcp-server-socket  #:port shell-port))
 
-(repl-default-prompt-set! "opencog-scheme>")
+(repl-default-prompt-set! shell-prompt)
 ; --------------------------------------------------------------------

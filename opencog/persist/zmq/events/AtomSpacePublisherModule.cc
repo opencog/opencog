@@ -223,32 +223,6 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
             break;
         }
 
-        case COMPOSITE_TRUTH_VALUE:
-        {
-            CompositeTruthValuePtr ctv = CompositeTVCast(tvp);
-            ptTV.put("type", "composite");
-
-            TruthValuePtr primaryTvp = ctv->getPrimaryTV();
-            ptree ptPrimaryTv = tvToPtree(primaryTvp);
-            ptTV.add_child("details.primary", ptPrimaryTv);
-
-            ptree ptVersionedTruthValueMap;
-            foreach(VersionHandle vh, ctv->vh_range()) {
-                ptree ptVersionedTV;
-
-                ptVersionedTV.put("handle", std::to_string(vh.substantive.value()));
-                ptVersionedTV.put("indicator", VersionHandle::indicatorToStr(vh.indicator));
-                ptree ptVersionedTVInstance = tvToPtree(ctv->getVersionedTV(vh));
-                ptVersionedTV.add_child("truthvalue", ptVersionedTVInstance);
-
-                ptVersionedTruthValueMap.push_back(std::make_pair("", ptVersionedTV));
-            }
-
-            ptTV.add_child("details.versionedtruthvaluemap", ptVersionedTruthValueMap);
-
-            break;
-        }
-
         case NULL_TRUTH_VALUE:
         case NUMBER_OF_TRUTH_VALUE_TYPES:
         {

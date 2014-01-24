@@ -422,7 +422,9 @@ protected:
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
      // @ hasDirectHelpRule: return if there is any rule that dirctly help to achieve this goal
-     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, bool &hasDirectHelpRule,bool &contradictoryOtherGoal, Rule *orginalRule = 0);
+     // @ isRecursivePrecon0Sat and isRecursivePrecon1Sat are only for recursive rules, return the satisfication of each preconditon.
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, bool &hasDirectHelpRule,
+                                  bool &contradictoryOtherGoal, bool& isRecursivePrecon0Sat, bool& isRecursivePrecon1Sat,Rule *orginalRule = 0);
 
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy

@@ -21,8 +21,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "HopfieldServer.h"
-
 #include <sstream>
 #include <iomanip>
 #include <float.h>
@@ -35,17 +33,18 @@
 #endif
 #include <unistd.h>
 
-//#include <opencog/atomspace/utils.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/dynamics/attention/ImportanceUpdatingAgent.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 #include <opencog/util/mt19937ar.h>
+#include <opencog/util/platform.h>
 
 #include "HopfieldOptions.h"
-#include "StorkeyAgent.h"
+#include "HopfieldServer.h"
 #include "ImprintAgent.h"
+#include "StorkeyAgent.h"
 
 #ifdef HAVE_UBIGRAPH
 #include "HopfieldUbigrapher.h"

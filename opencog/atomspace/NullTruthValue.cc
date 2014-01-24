@@ -62,9 +62,9 @@ confidence_t NullTruthValue::getConfidence() const throw (RuntimeException)
     throw RuntimeException(TRACE_INFO, "Cannot call getConfidence() method of a NullTruthvalue");
 }
 
-TruthValueType NullTruthValue::getType() const throw (RuntimeException)
+TruthValueType NullTruthValue::getType() const
 {
-    throw RuntimeException(TRACE_INFO, "Cannot call getType() method of a NullTruthvalue");
+    return NULL_TRUTH_VALUE;
 }
 
 TruthValuePtr NullTruthValue::merge(TruthValuePtr) throw (RuntimeException)

@@ -94,10 +94,10 @@ INSERT INTO Global (max_height) VALUES (0); -- largest height observed.
 -- 
 -- 
 -- INSERT INTO SimpleTVs VALUES (0, 0.0, 0.0);     -- NULL_TV
--- INSERT INTO SimpleTVs VALUES (1, 0.0, 0.0);     -- DEFAULT_TV
+-- INSERT INTO SimpleTVs VALUES (1, 0.0, 0.0);     -- TRIVIAL_TV
 -- INSERT INTO SimpleTVs VALUES (2, 0.0, 10000.0); -- FALSE_TV
 -- INSERT INTO SimpleTVs VALUES (3, 1.0, 10000.0); -- TRUE_TV
--- INSERT INTO SimpleTVs VALUES (4, 1.0, 0.0);     -- TRIVIAL_TV
+-- INSERT INTO SimpleTVs VALUES (4, 1.0, 0.0);     -- DEFAULT_TV
 -- 
 -- CREATE SEQUENCE tvid_seq START WITH 5;
 -- 

@@ -101,13 +101,13 @@ void SchemeSmob::init_smob_type(void)
 	cog_uuid_tag = scm_make_smob_type ("opencog-uuid", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_uuid_tag, print_atom);
 	scm_set_smob_equalp (cog_uuid_tag, equalp_atom);
-	scm_set_smob_free (cog_uuid_tag, free_atom);
+	// scm_set_smob_free (cog_uuid_tag, free_atom);
 
 	// A SMOB type for everything else
 	cog_misc_tag = scm_make_smob_type ("opencog-misc", sizeof (scm_t_bits));
 	scm_set_smob_print (cog_misc_tag, print_misc);
 	scm_set_smob_equalp (cog_misc_tag, equalp_misc);
-	scm_set_smob_mark (cog_misc_tag, mark_misc);
+	// scm_set_smob_mark (cog_misc_tag, mark_misc);
 	scm_set_smob_free (cog_misc_tag, free_misc);
 }
 
@@ -160,13 +160,6 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_VH:
-		{
-			VersionHandle* av = (VersionHandle *) SCM_SMOB_DATA(a);
-			VersionHandle* bv = (VersionHandle *) SCM_SMOB_DATA(b);
-			if (*av == *bv) return SCM_BOOL_T;
-			return SCM_BOOL_F;
-		}
 	}
 }
 
@@ -212,19 +205,11 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-new-stv",           2, 0, 0, C(ss_new_stv));
 	scm_c_define_gsubr("cog-new-ctv",           3, 0, 0, C(ss_new_ctv));
 	scm_c_define_gsubr("cog-new-itv",           3, 0, 0, C(ss_new_itv));
-	scm_c_define_gsubr("cog-new-mtv",           2, 0, 0, C(ss_new_mtv));
-	scm_c_define_gsubr("cog-set-vtv!",          3, 0, 0, C(ss_set_vtv));
 	scm_c_define_gsubr("cog-tv?",               1, 0, 0, C(ss_tv_p));
 	scm_c_define_gsubr("cog-stv?",              1, 0, 0, C(ss_stv_p));
 	scm_c_define_gsubr("cog-ctv?",              1, 0, 0, C(ss_ctv_p));
 	scm_c_define_gsubr("cog-itv?",              1, 0, 0, C(ss_itv_p));
-	scm_c_define_gsubr("cog-mtv?",              1, 0, 0, C(ss_mtv_p));
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
-
-	// Version handles
-	scm_c_define_gsubr("cog-new-vh",            2, 0, 0, C(ss_new_vh));
-	scm_c_define_gsubr("cog-vh?",               1, 0, 0, C(ss_vh_p));
-	scm_c_define_gsubr("cog-vh->alist",         1, 0, 0, C(ss_vh_get_value));
 
 	// Attention values
 	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));

@@ -31,7 +31,6 @@
 #include <boost/bind.hpp>
 
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
 #include <opencog/atomspace/types.h>
@@ -57,19 +56,11 @@ AtomSpaceImpl::AtomSpaceImpl(void)
     : bank(&atomTable)
 {
     backing_store = NULL;
-
-    // connect signals
-    addedAtomConnection = atomTable.addAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomAdded, this, _1));
-    removedAtomConnection = atomTable.removeAtomSignal().connect(boost::bind(&AtomSpaceImpl::atomRemoved, this, _1));
-
     DPRINTF("AtomSpaceImpl::Constructor AtomTable address: %p\n", &atomTable);
 }
 
 AtomSpaceImpl::~AtomSpaceImpl()
 {
-    // disconnect signals
-    addedAtomConnection.disconnect();
-    removedAtomConnection.disconnect();
 }
 
 // ====================================================================
@@ -82,50 +73,6 @@ void AtomSpaceImpl::registerBackingStore(BackingStore *bs)
 void AtomSpaceImpl::unregisterBackingStore(BackingStore *bs)
 {
     if (bs == backing_store) backing_store = NULL;
-}
-
-// ====================================================================
-
-void AtomSpaceImpl::atomAdded(Handle h)
-{
-    if (h->getType() != CONTEXT_LINK) return;
-
-    LinkPtr lll(LinkCast(h));
-    // Add corresponding VersionedTV to the contextualized atom
-    // Note that when a VersionedTV is added to a
-    // CompositeTruthValue it will not automatically add a
-    // corresponding ContextLink
-    if (lll->getArity() == 2) {
-        Handle cx = lll->getOutgoingAtom(0); // context
-        Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-        ca->setTV(lll->getTV(), VersionHandle(CONTEXTUAL, cx));
-    } else
-        throw RuntimeException(TRACE_INFO,
-            "AtomSpaceImpl::atomAdded: Invalid arity for a ContextLink: %d (expected: 2)\n", 
-        lll->getArity());
-}
-
-void AtomSpaceImpl::atomRemoved(AtomPtr atom)
-{
-    if (atom->getType() != CONTEXT_LINK) return;
-
-    // Remove corresponding VersionedTV to the contextualized atom
-    // Note that when a VersionedTV is removed from a
-    // CompositeTruthValue it will not automatically remove the
-    // corresponding ContextLink
-    LinkPtr lll(LinkCast(atom));
-    OC_ASSERT(lll->getArity() == 2,
-        "AtomSpaceImpl::atomRemoved: Got invalid arity for removed ContextLink = %d\n",
-        lll->getArity());
-    Handle cx = lll->getOutgoingAtom(0); // context
-    Handle ca = lll->getOutgoingAtom(1); // contextualized atom
-    TruthValuePtr tv = ca->getTV();
-    CompositeTruthValuePtr new_ctv(CompositeTruthValue::createCTV(tv));
-    new_ctv->removeVersionedTV(VersionHandle(CONTEXTUAL, cx));
-    // @todo: one may want improve that code by converting back
-    // the CompositeTV into a simple or indefinite TV when it has
-    // no more VersionedTV
-    ca->setTV(new_ctv);
 }
 
 // ====================================================================
@@ -416,8 +363,6 @@ void AtomSpaceImpl::clear()
 
     atomTable.getHandlesByType(back_inserter(allAtoms), ATOM, true);
 
-    DPRINTF("%d nodes %d links to erase\n", Nodes(NULL_VERSION_HANDLE),
-            Links(NULL_VERSION_HANDLE));
     DPRINTF("atoms in allAtoms: %lu\n", allAtoms.size());
 
     Logger::Level save = logger().getLevel();
@@ -425,15 +370,9 @@ void AtomSpaceImpl::clear()
 
     // XXX FIXME TODO This is a stunningly inefficient way to clear the
     // atomspace! This will take minutes on any decent-sized atomspace!
-    size_t j = 0;
     std::vector<Handle>::iterator i;
     for (i = allAtoms.begin(); i != allAtoms.end(); ++i) {
-        bool result = removeAtom(*i, true);
-        if (result) {
-            DPRINTF("%d: Atom %lu removed, %d nodes %d links left to delete\n",
-                j, i->value(), Nodes(NULL_VERSION_HANDLE), Links(NULL_VERSION_HANDLE));
-            j++;
-        }
+        removeAtom(*i, true);
     }
 
     allAtoms.clear();

@@ -23,7 +23,7 @@ using namespace opencog;
  * Return a string holding the scheme representation of an atom/truthvalue.
  *
  * The input is assumed to be pointing at a Handle, a TruthValue,
- * an AttentionValue, or a VersionHandle. Returned is a valid scheme
+ * an AttentionValue or a UUID. Returned is a valid scheme
  * expression that represents that Handle, etc.
  */
 std::string SchemeSmob::to_string(SCM node)
@@ -67,14 +67,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += "\"";
 
         // Print the truth value only after the node name
-        TruthValuePtr tv(atomspace->getTV(h));
+        TruthValuePtr tv(h->getTruthValue());
         if (!tv->isDefaultTV()) {
             ret += " ";
             ret += tv_to_string (tv.get());
         }
 
         // Print the attention value after the truth value
-        AttentionValuePtr av = atomspace->getAV(h);
+        AttentionValuePtr av(h->getAttentionValue());
         if (av != AttentionValue::DEFAULT_AV()) {
             ret += " ";
             ret += av_to_string (av.get());
@@ -84,14 +84,14 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
     }
     else if (atomspace->isLink(h)) {
         // If there's a truth value, print it before the other atoms
-        TruthValuePtr tv(atomspace->getTV(h));
+        TruthValuePtr tv(h->getTruthValue());
         if (!tv->isDefaultTV()) {
             ret += " ";
             ret += tv_to_string (tv.get());
         }
 
         // Print the attention value after the truth value
-        AttentionValuePtr av = atomspace->getAV(h);
+        AttentionValuePtr av(h->getAttentionValue());
         if (av != AttentionValue::DEFAULT_AV()) {
             ret += " ";
             ret += av_to_string (av.get());
@@ -355,10 +355,10 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
     // If so, then we've got to set it.
     AttentionValue *av = get_av_from_list(kv_pairs);
     if (av) {
-        atomspace->setAV(h, av->clone());
+        h->setAttentionValue(av->clone());
     }
 
-    return handle_to_scm (h);
+    return handle_to_scm(h);
 }
 
 /**
@@ -379,13 +379,13 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
     if (tv) {
-        atomspace->setTV(h, tv->clone());
+        h->setTruthValue(tv->clone());
     }
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(kv_pairs);
     if (av) {
-        atomspace->setAV(h, av->clone());
+        h->setAttentionValue(av->clone());
     }
     return handle_to_scm (h);
 }
@@ -486,14 +486,14 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
     // method is too stupid to set the truth value correctly.
     const TruthValue *tv = get_tv_from_list(satom_list);
     if (tv) {
-        atomspace->setTV(h, tv->clone());
+        h->setTruthValue(tv->clone());
     }
 
     // Was an attention value explicitly specified?
     // If so, then we've got to set it.
     const AttentionValue *av = get_av_from_list(satom_list);
     if (av) {
-        atomspace->setAV(h, av->clone());
+        h->setAttentionValue(av->clone());
     }
     return handle_to_scm (h);
 }
@@ -511,16 +511,16 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
     outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
     // Now, look to find the actual link... in the actual atom space.
-    Handle h = atomspace->getHandle(t, outgoing_set);
+    Handle h(atomspace->getHandle(t, outgoing_set));
     if (!atomspace->isValidHandle(h)) return SCM_EOL; // NIL
 
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(satom_list);
-    if (tv) atomspace->setTV(h, tv->clone());
+    if (tv) h->setTruthValue(tv->clone());
 
     // If there was an attention value, change it.
     const AttentionValue *av = get_av_from_list(satom_list);
-    if (av) atomspace->setAV(h, av->clone());
+    if (av) h->setAttentionValue(av->clone());
 
     return handle_to_scm (h);
 }
