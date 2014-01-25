@@ -534,8 +534,13 @@ SCM SchemeSmob::ss_delete (SCM satom)
 {
     Handle h = verify_handle(satom, "cog-delete");
 
+    // It can happen that the atom has already been deleted, but we're
+    // still holding on to its UUID.  This is rare... but possible. So
+    // don't crash when it happens.
+    if (NULL == h.operator->()) return SCM_BOOL_F;
+
     // The remove will fail/log warning if the incoming set isn't null.
-    if (atomspace->getIncoming(h).size() > 0) return SCM_BOOL_F;
+    if (h->getIncomingSetSize() > 0) return SCM_BOOL_F;
 
     // AtomSpace::removeAtom() returns true if atom was deleted,
     // else returns false
