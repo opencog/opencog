@@ -1,0 +1,16 @@
+(MemberLink (stv 0.900000 0.111111)
+  (ConceptNode "Train1")
+  (ConceptNode "Trains")
+)
+
+(ImplicationLink (stv 0.900000 0.111111)
+  (MemberLink (stv 0.900000 0.111111)
+    (ConceptNode "Train1")
+    (ConceptNode "Trains")
+  )
+  (MemberLink (stv 0.000000 0.000000)
+    (ConceptNode "Train1")
+    (ConceptNode "CuteThings")
+  )
+)
+
