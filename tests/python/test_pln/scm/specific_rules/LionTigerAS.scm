@@ -44,4 +44,6 @@
 (SubsetLink (stv 0.3 dc) (NotLink predator) tiger)
 (SubsetLink (stv 0.37 dc) (NotLink facingExtincion) tiger)
 
+(EvaluationLink (PredicateNode "query") (ListLink (IntensionalInheritanceLink lion tiger)))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "IntensionalInheritanceEvaluationRule")))
 

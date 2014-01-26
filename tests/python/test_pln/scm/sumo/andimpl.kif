@@ -1,30 +1,10 @@
-(MemberLink (stv 0.900000 0.111111)
-  (ConceptNode "Thomas")
-  (ConceptNode "Train")
-)
-
-(MemberLink (stv 0.900000 0.111111)
-  (ConceptNode "Frankston Line")
-  (ConceptNode "Track")
-)
-
-(ImplicationLink (stv 0.900000 0.111111)
-  (AndLink
-    (MemberLink
-      (ConceptNode "?TRAIN")
-      (ConceptNode "Train")
+(member Thomas Train)
+(member FrankstonLine Track)
+(=>
+    (and
+        (member ?TRAIN Train)
+        (member ?TRACK Track)
     )
-    (MemberLink
-      (ConceptNode "?TRACK")
-      (ConceptNode "Track")
-    )
-  )
-  (EvaluationLink
-    (PredicateNode "goesOn")
-    (ListLink
-        (VariableNode "?TRAIN")
-        (VariableNode "?TRACK")
-    )
-  )
+    (goesOn ?TRAIN ?TRACK)
 )
 

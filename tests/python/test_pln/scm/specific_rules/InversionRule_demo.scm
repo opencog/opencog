@@ -5,3 +5,6 @@
 ; target for InversionRule
 (define inh_ba (InheritanceLink b a (av 1 1 0)))
 
+(EvaluationLink (PredicateNode "query") (ListLink inh_ba))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "InversionRule")))
+

@@ -33,3 +33,6 @@
   )
 )
 
+(EvaluationLink (PredicateNode "query") (ListLink wakeUpBeforeLeaveHouse))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "BeforeLinkTransitivityRule")))
+

@@ -7,3 +7,6 @@
 
 (define imp_ac (ImplicationLink a c))
 
+(EvaluationLink (PredicateNode "query") (ListLink imp_ac))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "DeductionRule")))
+

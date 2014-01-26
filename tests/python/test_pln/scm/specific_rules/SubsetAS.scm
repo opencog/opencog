@@ -1,5 +1,5 @@
 ; define concept nodes and elements.
-; sub and super must have TVs, or they will be ignored by the BIT (specifically by TableGather)
+; sub and super must have TVs, or they will be ignored
 (define sub (ConceptNode "sub" (stv 0.5 0.999)))
 (define super (ConceptNode "super" (stv 0.5 0.999)))
 (define e0 (Node "e0"))
@@ -28,6 +28,10 @@
 (MemberLink (stv 0.4 dc) e6 super)
 (MemberLink (stv 0.6 dc) e8 super)
 (MemberLink (stv 0.0 dc) e9 super)
+
+(define target (SubsetLink sub super))
+(EvaluationLink (PredicateNode "query") (ListLink target))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "SubsetEvaluationRule")))
 
 ;(EvaluationLink (stv 0.0 dc) super
 ;    (ListLink e9)
