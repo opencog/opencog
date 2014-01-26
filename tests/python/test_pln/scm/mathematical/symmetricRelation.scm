@@ -1,4 +1,3 @@
-; Adapted from bigdemo.scm by JaredW
 (ForAllLink (stv 0.99000001 0.99000001)
     (ListLink (stv 1 0)
         (VariableNode "X007" (stv 1 0))
@@ -31,7 +30,9 @@
 (InheritanceLink (stv 0.99900001 0.99900001) (PredicateNode "friendOf" (stv 1 0))
     (ConceptNode "symmetricRelation" (stv 1 0)))
 
-(define t (EvaluationLink (PredicateNode "friendOf")
+(define target (EvaluationLink (PredicateNode "friendOf")
     (ListLink (ConceptNode "Ted")
        (ConceptNode "Bill"))))
 
+(EvaluationLink (PredicateNode "query") (ListLink target))
+;(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "

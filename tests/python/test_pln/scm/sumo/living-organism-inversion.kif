@@ -11,4 +11,5 @@
   (instance ?X Organism))
   (attribute ?X Living)
 )
+(rules ModusPonensRule)
 

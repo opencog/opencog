@@ -21,5 +21,3 @@
    (instance ?WOMAN Woman) 
    (attribute ?WOMAN Female))
 
-
-

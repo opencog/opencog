@@ -1,4 +1,3 @@
-; Adapted from bigdemo.scm by JaredW
 (ForAllLink (stv 1 0.99900001) (ListLink (stv 1 0) (VariableNode "X011" (stv 1 0))
     (VariableNode "X010" (stv 1 0))
     (VariableNode "X009" (stv 1 0))
@@ -25,7 +24,7 @@
     (ListLink (stv 1 0) (ConceptNode "Ted" (stv 1 0))
        (ConceptNode "John" (stv 1 0))))
 
-(define t (EvaluationLink (PredicateNode "friendOf" (stv 1 0))
+(define target (EvaluationLink (PredicateNode "friendOf" (stv 1 0))
     (ListLink (stv 1 0) (ConceptNode "Bill" (stv 1 0))
        (ConceptNode "John" (stv 1 0)))))
 

@@ -4,4 +4,6 @@
 )
 (member Train1 Trains)
 
+(query (member Train1 CuteThings))
+(rules ModusPonensRule)
 

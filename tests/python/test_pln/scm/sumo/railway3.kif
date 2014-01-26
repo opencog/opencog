@@ -15,4 +15,5 @@
 )
 
 (query (member Train1 Robots))
+(rules ModusPonensRule)
 

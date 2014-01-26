@@ -8,3 +8,6 @@
     (goesOn ?TRAIN ?TRACK)
 )
 
+(query (goesOn Thomas ?TRACK))
+(rules AndRule ModusPonensRule)
+

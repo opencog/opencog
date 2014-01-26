@@ -1,4 +1,3 @@
-; PLN Scheme wrapper, for building forward inference step-by-step 
 ; example to proof a >~ c using that ForAll x,y if x >~ y and y >~ z then x >~ z
 (define agt (PredicateNode "AboutGreaterThan"))
 ; axiom
@@ -21,10 +20,10 @@
 ; Inference
 ; csn stands from conclusion of step n
 ;
-(define cs1 (ForAllInstantiationRule axiom a b c))
-(define cs2 (SimpleAndRule a_agt_b b_agt_c))
-(define target (ModusPonensRule cs1 cs2))
+;(define cs1 (ForAllInstantiationRule axiom a b c))
+;(define cs2 (SimpleAndRule a_agt_b b_agt_c))
+;(define target (ModusPonensRule cs1 cs2))
 
-; return the target, necessary so it can be automatically tested by
-; PLNSchemeWrapperUTest.cxxtest
-target
+(EvaluationLink (PredicateNode "query") (ListLink target))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ForAllInstantiationRule") (ConceptNode "AndRule") (ConceptNode "ModusPonensRule"))
+
