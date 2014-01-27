@@ -1,167 +1,151 @@
 '''Runs PLN examples, similar to PLNUTest. Currently only works from the cogserver due
 to linking issues.'''
-import ConfigParser
 from time import time
 from pprint import pprint
 
 import util
-from opencog.atomspace import AtomSpace, Atom, Handle
+from opencog.atomspace import AtomSpace, Atom
+from pln.chainers import Chainer
 
 import scheme_wrapper
 
-files_list = ('''
-future_fc/7_test.conf
-future_fc/InheritanceOsamaAbu_test.conf
-future_fc/6_test.conf
-future_fc/InheritanceMuhammadTerrorist_test.conf
-#psi/water_test.conf
-psi/psi_planning_one_step_test.conf
-#psi/psi_planning_two_step_test.conf
-# The obsolete agisim tests are known not to work.
-#agisim_planning/19_test.conf
-#agisim_planning/23_test.conf
-#agisim_planning/FetchDemo5_test.conf
-#agisim_planning/FetchDemo5_subgoal_test.conf
-#agisim_planning/11_test.conf
-bc/new/NotEvaluatorRule_test.conf
-bc/new/and_test.conf
-bc/new/or_test.conf
-bc/new/LookupRule_test.conf
-bc/targetslist/4_test.conf
-bc/targetslist/9_test.conf
-bc/targetslist/0_test.conf
-#bc/targetslist/30_test.conf
-bc/multiple_roots_spawning_test.conf
-bc/PsiActionSelection_test.conf
-both/new/ModusPonensRule_test.conf
-both/new/ModusPonensRule_3steps_test.conf
-both/new/ModusPonensRule_2steps_test.conf
-both/new/BasicForAllDemo_test.conf
-both/new/BasicForAllDemo2_test.conf
-both/new/DeductionRule_test.conf
-both/new/InversionRule_test.conf
-#both/inverse_binding_test.conf
-both/targetslist/21_test.conf
-#both/woa_demo_test.conf
-bc/AnotBdemo_full_test.conf
-both/AnotBdemo_partial_test.conf
-both/28_test.conf
-bc/plus_test.conf
-#bc/new/pathfinding_test.conf
-#bc/new/before_test.conf
-bc/new/subset_test.conf
-temporal_before_test.conf
-temporal_deduction_test.conf
-''')
+class PLNExamples(object):
+    def __init__(self, atomspace):
+        self.atomspace = atomspace
+        self.passed = []
+        self.failed = []
 
-#files_list = '''psi/psi_planning_one_step_test.conf'''
+    def test_all(self):
+        import plop.collector
+        plop_collector = plop.collector.Collector()
+        plop_collector.start()
 
-#files_list = '''bc/new/destin_test.conf'''
-#files_list = '''bc/new/subset_test.conf'''
+        start = time()
 
-#files_list = '''bc/new/before_test.conf'''
+        examples_directory = '../tests/python/test_pln/scm/'
+        scheme_files = []
 
-#files_list = '''bc/plus_test.conf'''
-#files_list ='''
-#both/new/BasicForAllDemo_test.conf
-#both/new/BasicForAllDemo2_test.conf
-#'''
-
-files = files_list.split('\n')
-
-def test_all(a):
-    import plop.collector
-    plop_collector = plop.collector.Collector()
-    plop_collector.start()
-
-    start = time()
-    
-    for f in files:
-        if f != '' and not f.startswith('#'):
-            run_pln_example(a, f)
-
-    print 'Passed %s out of %s tests' % (len(passed), len(passed+failed))
-    if len(failed):
-        print 'Failed tests:'
-        for f in failed:
-            print f
-    
-    print "Total time:",time() - start
-
-    plop_collector.stop()
-    profile_data = repr(dict(plop_collector.stack_counts))
-    f = open('pln_examples.plop_profile','w')
-    f.write(profile_data)
-    f.close()
-
-passed = []
-failed = []
-
-def run_pln_example(a, f):
-    a.clear()
-    
-    testdir = '../tests/reasoning/pln/targets/'
-    datadirs = ['../tests/reasoning/pln/scm/',
-                '../opencog/']
-    fname = testdir+f
-    config = ConfigParser.ConfigParser()
-    read_files = config.read(fname)
-    
-    if not read_files:
-        raise Exception("no such file:",fname)
-    
-    def get(field):
-        return config.get('PLN_TEST',field)
-
-    print f
-    
-    def load_axioms(fname):
-        for d in datadirs:
-            kf = d+fname+'.scm'
-            try:
-                tmp = open(kf,'r')
-                scheme_wrapper.load_scm(a, kf)
-                print kf
-                return
-            except IOError:
-                continue
-        raise IOError("missing data file: "+kf)
+        import os
+        from os.path import join
+        for root, dirs, files in os.walk(examples_directory):
+            for name in files:
+                if name.endswith('.scm'):
+                    scheme_files.append(os.path.join(root, name))
         
-    data_files = get('load').replace(' ','').split(',')
-    for fname in data_files:
-        load_axioms(fname)
-    scm_target = '(cog-handle %s)' % (get('target'),)
-    print scm_target
-    handle_str = scheme_wrapper.scheme_eval(scm_target)
-    try:
-        h = int(handle_str)
-    except ValueError:
-        print handle_str
-        raise Exception("Scheme error in target")
+        scheme_files.sort() 
+        print scheme_files
 
-    nsteps = int(get('max_steps'))
-    
-    target = Atom(Handle(h), a)
-    
-    print target
-    
-    import logic
-    import tree
+        for f in scheme_files:
+            self.run_pln_example(f)
 
-    c = logic.Chainer(a)
-    target_tr = tree.tree_from_atom(target)
+        print 'Passed %s out of %s tests' % (len(passed), len(passed+failed))
+        if len(failed):
+            print 'Failed tests:'
+            for f in failed:
+                print f
+        
+        print "Total time:",time() - start
 
-    # hack - won't work if the Scheme target is some variable that doesn't contain "Demand"
-    if "Demand" in scm_target:
-        res = logic.do_planning(a, target_tr,c)
-    else:
-        res = c.bc(target_tr, nsteps)
+        plop_collector.stop()
+        profile_data = repr(dict(plop_collector.stack_counts))
+        f = open('pln_examples.plop_profile','w')
+        f.write(profile_data)
+        f.close()
 
-    print map(str, res)
+    def run_pln_example(self, filename):
+        self.atomspace.clear()
+            
+        tmp = open(filename,'r')
+        scheme_wrapper.load_scm(self.atomspace, filename)
+        print filename
 
-    if len(res):
-        print 'PASSED'
-        passed.append(f)
-    else:
-        print 'FAILED'
-        failed.append(f)
+        chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+
+        try:
+            query = chainer.get_predicate_arguments('query')[0]
+            rules_nodes = chainer.get_predicate_arguments('rules')
+        except ValueError, e:
+            print e
+            return
+        print query
+        print rules_nodes
+
+        all_rules = AllRules(self.atomspace)
+        for r in rules_nodes:
+            chainer.add_rule(all_rules.lookup_rule(r))
+
+        chainer.find_atom(query)
+
+        if len(res):
+            print 'PASSED'
+            passed.append(f)
+        else:
+            print 'FAILED'
+            failed.append(f)
+
+class AllRules(object):
+    def __init__(self, atomspace):
+        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+
+        conditional_probability_types = [types.InheritanceLink, types.ImplicationLink, types.PredictiveImplicationLink]
+        similarity_types = [types.SimilarityLink, types.EquivalenceLink]
+
+        for link_type in conditional_probability_types:
+            self.chainer.add_rule(rules.InversionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.InductionRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.AbductionRule(self.chainer, link_type))
+            # Seems better than Modus Ponens - it doesn't make anything up
+            self.chainer.add_rule(rules.TermProbabilityRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.ModusPonensRule(self.chainer, link_type))
+
+        for link_type in similarity_types:
+            # SimilarityLinks don't require an InversionRule obviously
+            self.chainer.add_rule(rules.TransitiveSimilarityRule(self.chainer, link_type))
+            self.chainer.add_rule(rules.SymmetricModusPonensRule(self.chainer, link_type))
+
+        self.chainer.add_rule(predicate_rules.EvaluationImplicationRule(self.chainer))
+
+        # These two Rules create mixed links out of intensional and extensional links
+        self.chainer.add_rule(rules.InheritanceRule(self.chainer))
+        self.chainer.add_rule(rules.SimilarityRule(self.chainer))
+
+        # boolean links
+        for rule in boolean_rules.create_and_or_rules(self.chainer, 2, 8):
+            self.chainer.add_rule(rule)
+
+        # create probabilistic logical links out of MemberLinks
+
+        self.chainer.add_rule(rules.AndEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.OrEvaluationRule(self.chainer))
+
+        self.chainer.add_rule(rules.ExtensionalLinkEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalLinkEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.SubsetEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.NegatedSubsetEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.ExtensionalSimilarityEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
+        self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
+
+        self.member_rules = [rules.EvaluationToMemberRule(self.chainer)]
+        self.member_rules += rules.create_general_evaluation_to_member_rules(self.chainer)
+        for rule in self.member_rules:
+            self.chainer.add_rule(rule)
+
+        # It's important to have both of these
+        self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
+#        self.chainer.add_rule(rules.InheritanceToMemberRule(self.chainer))
+
+        # AttractionLink could be useful for causality
+        self.chainer.add_rule(rules.AttractionRule(self.chainer))
+
+        self.chainer.add_rule(quantifier_rules.ScholemRule(self.chainer))
+
+    def lookup_rule(self, rule_schema_node):
+        return self.chainer.lookup_rule(rule_schema_node.name)
+
+#if __name__ == '__main__':
+#    atomspace = AtomSpace()
+#    examplesRunner = PLNExamples(atomspace)
+#    examplesRunner.test_all()
+

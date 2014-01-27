@@ -699,11 +699,5 @@ class Chainer(AbstractChainer):
         return False
 
     def get_query(self):
-        var = self.new_variable()
-        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, "query"), self.link(types.ListLink, [var])])
-
-        queries = self.lookup_atoms(template, {})
-        queries = [query for query in queries if query.tv.count > 0]
-        assert len(queries) == 1
-        return queries[0].out[1].out[0]
+        return self.get_predicate_arguments('query')[0]
 

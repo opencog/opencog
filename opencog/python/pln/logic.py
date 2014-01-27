@@ -264,3 +264,14 @@ class Logic(object):
     def _all_nonzero_tvs(self, atom_list):
         return all(atom.tv.count > 0 for atom in atom_list)
 
+    def get_predicate_arguments(self, predicate_name):
+        "Find the EvaluationLink for the predicate, and return the list of arguments (as a python list of Atoms). There must be only one EvaluationLink for it"
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, predicate_name), self.link(types.ListLink, [var])])
+
+        queries = self.lookup_atoms(template, {})
+        queries = [query for query in queries if query.tv.count > 0]
+        if len(queries) != 1:
+            raise ValueError("Predicate "+predicate_name+" must have 1 EvaluationLink")
+        return queries[0].out[1].out
+
