@@ -47,3 +47,7 @@
 ;        )
 ;    )
 ;)
+
+(EvaluationLink (PredicateNode "query") (ListLink target))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ModusPonensRule"))) ; also needs some quantifier rules that aren't done yet
+

@@ -267,11 +267,14 @@ class Logic(object):
     def get_predicate_arguments(self, predicate_name):
         "Find the EvaluationLink for the predicate, and return the list of arguments (as a python list of Atoms). There must be only one EvaluationLink for it"
         var = self.new_variable()
-        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, predicate_name), self.link(types.ListLink, [var])])
+        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, predicate_name), var])
 
         queries = self.lookup_atoms(template, {})
-        queries = [query for query in queries if query.tv.count > 0]
+        # It will often find the original template in the results!
+        queries.remove(template)
+        #queries = [query for query in queries if query.tv.count > 0]
         if len(queries) != 1:
+            import pdb; pdb.set_trace()
             raise ValueError("Predicate "+predicate_name+" must have 1 EvaluationLink")
         return queries[0].out[1].out
 

@@ -50,3 +50,7 @@
         (ListLink fact_42)
     )
 )
+
+(EvaluationLink (PredicateNode "query") (ListLink target))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "DeductionRule"))) ; also needs some quantifier rules that aren't done yet
+

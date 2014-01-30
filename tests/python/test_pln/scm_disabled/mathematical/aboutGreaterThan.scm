@@ -25,5 +25,5 @@
 ;(define target (ModusPonensRule cs1 cs2))
 
 (EvaluationLink (PredicateNode "query") (ListLink target))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ForAllInstantiationRule") (ConceptNode "AndRule") (ConceptNode "ModusPonensRule"))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ForAllInstantiationRule") (ConceptNode "AndEvaluationRule") (ConceptNode "ModusPonensRule"))
 

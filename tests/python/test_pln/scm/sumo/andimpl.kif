@@ -9,5 +9,5 @@
 )
 
 (query (goesOn Thomas ?TRACK))
-(rules AndRule ModusPonensRule)
+(rules AndEvaluationRule ModusPonensRule)
 

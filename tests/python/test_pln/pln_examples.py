@@ -6,6 +6,7 @@ from pprint import pprint
 import util
 from opencog.atomspace import AtomSpace, Atom
 from pln.chainers import Chainer
+import pln.rules as rules
 
 import scheme_wrapper
 
@@ -38,10 +39,10 @@ class PLNExamples(object):
         for f in scheme_files:
             self.run_pln_example(f)
 
-        print 'Passed %s out of %s tests' % (len(passed), len(passed+failed))
-        if len(failed):
+        print 'Passed %s out of %s tests' % (len(self.passed), len(self.passed+self.failed))
+        if len(self.failed):
             print 'Failed tests:'
-            for f in failed:
+            for f in self.failed:
                 print f
         
         print "Total time:",time() - start
@@ -54,9 +55,11 @@ class PLNExamples(object):
 
     def run_pln_example(self, filename):
         self.atomspace.clear()
+        import random; random.seed(0)
             
         tmp = open(filename,'r')
-        scheme_wrapper.load_scm(self.atomspace, filename)
+        if not scheme_wrapper.load_scm(self.atomspace, filename):
+            return
         print filename
 
         chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
@@ -70,22 +73,25 @@ class PLNExamples(object):
         print query
         print rules_nodes
 
-        all_rules = AllRules(self.atomspace)
+        all_rules = AllRules(self.atomspace, chainer)
         for r in rules_nodes:
             chainer.add_rule(all_rules.lookup_rule(r))
 
-        chainer.find_atom(query)
+        print [r.full_name for r in chainer.rules]
 
-        if len(res):
-            print 'PASSED'
-            passed.append(f)
+        if chainer.find_atom(query, time_allowed=10):
+            self.passed.append(filename)
         else:
-            print 'FAILED'
-            failed.append(f)
+            self.failed.append(filename)
 
 class AllRules(object):
-    def __init__(self, atomspace):
+    def __init__(self, atomspace, chainer):
+        from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules, predicate_rules
+
+        # contains every rule
         self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+        # contains only some rules
+        self.test_chainer = chainer
 
         conditional_probability_types = [types.InheritanceLink, types.ImplicationLink, types.PredictiveImplicationLink]
         similarity_types = [types.SimilarityLink, types.EquivalenceLink]
@@ -142,7 +148,9 @@ class AllRules(object):
         self.chainer.add_rule(quantifier_rules.ScholemRule(self.chainer))
 
     def lookup_rule(self, rule_schema_node):
-        return self.chainer.lookup_rule(rule_schema_node.name)
+        rule = self.chainer.lookup_rule(rule_schema_node.name)
+        rule._chainer = self.test_chainer
+        return rule
 
 #if __name__ == '__main__':
 #    atomspace = AtomSpace()

@@ -510,9 +510,10 @@ class Chainer(AbstractChainer):
         atom.tv = revised_tv
 
     def _give_stimulus(self, atom):
-        # Arbitrary
-        STIMULUS_PER_ATOM = 10
-        self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
+        if self._stimulateAtoms:
+            # Arbitrary
+            STIMULUS_PER_ATOM = 10
+            self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
 
     ### automatically reject some inferences based on various problems
 
@@ -679,7 +680,8 @@ class Chainer(AbstractChainer):
         start_time = time.time()
 
         while time.time() - start_time < time_allowed:
-            self._give_stimulus(atom)
+            if self._stimulateAtoms:
+                self._give_stimulus(atom)
 
             res = self.backward_step()
             if res: print res

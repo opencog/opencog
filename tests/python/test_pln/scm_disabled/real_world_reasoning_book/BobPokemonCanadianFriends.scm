@@ -1,5 +1,5 @@
-;; Example to proove that Bob's new interest in Pokemon cards is the
-;; cause of it's new Canadian friendships.
+;; Example to prove that Bob's new interest in Pokemon cards is the
+;; cause of his new Canadian friendships.
 
 ;; Before March 2007, Bob never had any Canadian friends except those
 ;; who were also friends of his wife.  After March 2007, Bob started
@@ -14,11 +14,12 @@
 ;; Temporal reasoning definitions ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define HoldAt (PredicateNode "HoldAt"))
-(define HoldThroughout (PredicateNode "HoldThroughtout"))
+(define HoldThroughout (PredicateNode "HoldThroughout"))
 (define InitiatedAt (PredicateNode "InitiatedAt"))
 (define InitiatedThroughout (PredicateNode "InitiatedThroughout"))
 (define TerminatedAt (PredicateNode "TerminatedAt"))
 (define TerminatedThroughout (PredicateNode "TerminatedThroughout"))
+(define InitialTime (TimeNode "0"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -145,7 +146,7 @@
 ;; Before March 2007, Bob never had any Canadian friends except those
 ;; who were also friends of his wife.
 (define axiom1 (EvaluationLink (stv 0 0.9)
-                               HoldThroughtout
+                               HoldThroughout
                                (ListLink InitialTime
                                          March2007
                                          AverageCFBNW)))
@@ -173,7 +174,7 @@
 ;; Most of the new Canadian friends Bob made after March 2007 who are
 ;; not friends of his wife are associated with Pokemon cards.
 (define axiom5 (EvaluationLink (stv 0.6 0.8)
-                               HoldTrhoughout
+                               HoldThroughout
                                (ListLink March2007
                                          End2007
                                          CFBNWPokemonCards)))
@@ -199,7 +200,7 @@
                                          CFBNWQuebecois)))
 
 ;; Quebecois are assicated with French Language
-(define axiom9 (Inheritance Quebecois FrenchLanguage))
+(define axiom9 (InheritanceLink Quebecois FrenchLanguage))
 
 ;; Bob's Pokemon cards interest is the cause of Bob's new Canadian
 ;; friendships
