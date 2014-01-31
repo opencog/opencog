@@ -60,17 +60,17 @@ class AbstractChainer(Logic):
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
-    def _select_one_matching(self, template, s = {}, allow_zero_tv = False):
+    def _select_one_matching(self, template, s = {}, allow_zero_tv = False, rule, other_inputs):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
             return template
 
         atoms = self.atomspace.get_atoms_in_attentional_focus()
-        atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv)
+        atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv, rule, other_inputs)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace. (it actually still uses indexes to find a subset of the links, that is more likely to be useful)
             atoms = self.lookup_atoms(template, s)
-            atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv)
+            atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv, rule, other_inputs)
 
         return atom
 
@@ -85,7 +85,7 @@ class AbstractChainer(Logic):
 
         return self._selectOne(atoms)
 
-    def _select_atom(self, template, substitution, atoms, allow_zero_tv):
+    def _select_atom(self, template, substitution, atoms, allow_zero_tv, rule=None, other_inputs=None):
         # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
 
         # The atomspace lookup and the shuffle are both O(N)...
@@ -99,7 +99,8 @@ class AbstractChainer(Logic):
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
             if self.wanted_atom(atom, template, substitution, ground=False, allow_zero_tv = allow_zero_tv):
-                return atom
+                if rule is None or rule.valid_inputs(other_inputs+[atom])):
+                    return atom
         return None
 
     def _selectOne(self, atoms):
@@ -147,15 +148,16 @@ class AbstractChainer(Logic):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
+        # Reject And(And(...) ...)
         if atom.type in rules.BOOLEAN_LINKS:
             nested_boolean = any(outgoing_atom.type == atom.type for outgoing_atom in atom.out)
-            return not nested_boolean
+            if nested_boolean: return False
         if atom.arity == 2:
             # heuristically assume that all selflinks are invalid!
             self_link = atom.out[0] == atom.out[1]
             # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
             both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
-            return not self_link and not both_variables
+            if both_variables: return False
         else:
             return True
 
