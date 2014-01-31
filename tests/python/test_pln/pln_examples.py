@@ -55,7 +55,6 @@ class PLNExamples(object):
 
     def run_pln_example(self, filename):
         self.atomspace.clear()
-        import random; random.seed(0)
             
         tmp = open(filename,'r')
         if not scheme_wrapper.load_scm(self.atomspace, filename):

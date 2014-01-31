@@ -44,6 +44,7 @@ class AbstractChainer(Logic):
     def __init__(self, atomspace):
         Logic.__init__(self, atomspace)
         self.rules = []
+        self.random = random.Random(0)
 
     def add_rule(self, rule):
         assert isinstance(rule, Rule)
@@ -92,8 +93,8 @@ class AbstractChainer(Logic):
         # The correct option would be to do it inside the atomspace.
         # Sample without replacement, or shuffle a little bit at a time.
         # Or even being able to get results N atoms at a time would help a lot!
-        random.shuffle(atoms)
-        #atoms = random.sample(atoms, len(atoms))
+        self.random.shuffle(atoms)
+        #atoms = self.random.sample(atoms, len(atoms))
 
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
@@ -117,7 +118,7 @@ class AbstractChainer(Logic):
         assert type(atoms[0]) == Atom
 
         total = sum([score(atom) for atom in atoms])
-        pick = random.randrange(0, total)
+        pick = self.random.randrange(0, total)
         current = 0
         for atom in atoms:
             current += score(atom)
@@ -128,13 +129,13 @@ class AbstractChainer(Logic):
 
     def _select_rule(self):
         if not self.learnRuleFrequencies:
-            return random.choice(self.rules)
+            return self.random.choice(self.rules)
         else:
             def score(rule):
                 return self.rule_count[rule]
 
             max = sum([score(rule) for rule in self.rules])
-            pick = random.randrange(0, max)
+            pick = self.random.randrange(0, max)
             current = 0
             for rule in self.rules:
                 current += score(rule)
@@ -595,7 +596,7 @@ class Chainer(AbstractChainer):
             (output_atom, input_set) = line
 
             if output_atom not in self.atomspace:
-                import pdb; pdb.set_trace()
+                print 'warning: trail contains nonexistent atom (caused by some bug)'
                 continue
 
             print '\nStep',number+1
@@ -674,8 +675,7 @@ class Chainer(AbstractChainer):
 
     def test_rule(self, rule, sample_count):
         # Do a series of samples; different atoms with the same rules.
-        import random; random.seed(0)
-
+        self.random.seed(0)
         print 'Testing',rule,'in forward chainer'
 
         for i in xrange(0, sample_count):
