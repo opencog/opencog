@@ -17,9 +17,9 @@ class PLNExamples(object):
         self.failed = []
 
     def test_all(self):
-        import plop.collector
-        plop_collector = plop.collector.Collector()
-        plop_collector.start()
+#        import plop.collector
+#        plop_collector = plop.collector.Collector()
+#        plop_collector.start()
 
         start = time()
 
@@ -47,11 +47,11 @@ class PLNExamples(object):
         
         print "Total time:",time() - start
 
-        plop_collector.stop()
-        profile_data = repr(dict(plop_collector.stack_counts))
-        f = open('pln_examples.plop_profile','w')
-        f.write(profile_data)
-        f.close()
+#        plop_collector.stop()
+#        profile_data = repr(dict(plop_collector.stack_counts))
+#        f = open('pln_examples.plop_profile','w')
+#        f.write(profile_data)
+#        f.close()
 
     def run_pln_example(self, filename):
         self.atomspace.clear()
@@ -59,8 +59,11 @@ class PLNExamples(object):
             
         tmp = open(filename,'r')
         if not scheme_wrapper.load_scm(self.atomspace, filename):
+            print 'unable to load file',filename
             return
         print filename
+
+        if not filename.endswith('OrRule.scm'): return
 
         chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 

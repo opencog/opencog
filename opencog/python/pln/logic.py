@@ -262,6 +262,9 @@ class Logic(object):
             return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
     def _all_nonzero_tvs(self, atom_list):
+        for atom in atom_list:
+            assert atom in self._atomspace
+
         return all(atom.tv.count > 0 for atom in atom_list)
 
     def get_predicate_arguments(self, predicate_name):

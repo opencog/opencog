@@ -3,5 +3,5 @@
 (define NotA (NotLink A))
 
 (EvaluationLink (PredicateNode "query") (ListLink NotA))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "NotRule")))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "NotCreationRule")))
 

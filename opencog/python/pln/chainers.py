@@ -10,6 +10,8 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
+DEBUG=True
+
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
 The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
@@ -221,7 +223,7 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False, delete_temporary_variables=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
@@ -231,6 +233,7 @@ class Chainer(AbstractChainer):
         self.learnRuleFrequencies = learnRuleFrequencies
         self._allow_output_with_variables = allow_output_with_variables
         self._allow_backchaining_with_variables = allow_backchaining_with_variables
+        self._delete_temporary_variables = delete_temporary_variables
 
         self.atomspace = atomspace
 
@@ -302,8 +305,10 @@ class Chainer(AbstractChainer):
             # delete the query atoms after you've finished using them.
             # recursive means it will delete the new variable nodes and the links
             # containing them (but not the existing nodes and links)
-            for var in created_vars:
-                self.atomspace.remove(var, recursive=True)
+            if self._delete_temporary_variables:
+                for var in created_vars:
+                    if var in self.atomspace:
+                        self.atomspace.remove(var, recursive=False)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
@@ -362,9 +367,10 @@ class Chainer(AbstractChainer):
     def delete_queries(self, created_vars, subst):
         # Delete any variables that have been bound to something (they're no longer required).
         # Variables that haven't been bound become backward chaining queries
-        for var in created_vars:
-            if subst is None or (var in subst and subst[var] != var):
-                self.atomspace.remove(var, recursive=True)
+        if self._delete_temporary_variables:
+            for var in created_vars:
+                if subst is None or (var in subst and subst[var] != var):
+                    self.atomspace.remove(var, recursive=True)
 
     def _apply_backward(self, rule, target_outputs=None):
         # target outputs is the exact series of outputs to produce. If you don't specify, it will choose outputs for you
@@ -509,6 +515,10 @@ class Chainer(AbstractChainer):
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
 
+        # atom.tv= actually uses the "truth value merging" function in the atomspace,
+        # which will always use the tv with the higher confidence (which is always the revised TV, at least with the current revisionFormula)
+        assert atom.tv == revised_tv
+
     def _give_stimulus(self, atom):
         if self._stimulateAtoms:
             # Arbitrary
@@ -570,6 +580,8 @@ class Chainer(AbstractChainer):
         return False
 
     def find_trail(self, atom, trail=[]):
+        """Compute the inference trail for atom. It's represented as a
+        list of tuples, tuples of the form (atom produced, set(atoms used to produce it))."""
         inputs = self.trails[atom]
         trail.append((atom, inputs))
 
@@ -581,14 +593,19 @@ class Chainer(AbstractChainer):
     def display_trail(self, trail):
         for (number, line) in enumerate(reversed(trail)):
             (output_atom, input_set) = line
+
+            if output_atom not in self.atomspace:
+                import pdb; pdb.set_trace()
+                continue
+
             print '\nStep',number+1
             if len(input_set):
                 for input in input_set:
-                    print input
+                    print input.h, input
                 print '|='
-                print output_atom
+                print output_atom.h, output_atom
             else:
-                print 'Premise', output_atom
+                print 'Premise', output_atom.h, output_atom
 
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
@@ -683,8 +700,8 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-            res = self.backward_step()
-            if res: print res
+#            res = self.backward_step()
+#            if res: print res
             res = self.forward_step()
             if res: print res
 
