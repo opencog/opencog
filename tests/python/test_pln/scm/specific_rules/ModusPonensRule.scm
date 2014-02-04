@@ -9,5 +9,5 @@
 (define imp_evc_evd (ImplicationLink eval_c eval_d (stv 0.85 0.79)))
 
 (EvaluationLink (PredicateNode "query") (ListLink eval_d))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ModusPonensRule")))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)")))
 

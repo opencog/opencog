@@ -275,7 +275,6 @@ class Logic(object):
         queries.remove(template)
         #queries = [query for query in queries if query.tv.count > 0]
         if len(queries) != 1:
-            import pdb; pdb.set_trace()
             raise ValueError("Predicate "+predicate_name+" must have 1 EvaluationLink")
         return queries[0].out[1].out
 

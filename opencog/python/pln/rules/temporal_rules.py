@@ -28,7 +28,7 @@ class TemporalRule(rules.Rule):
         ta = chainer.new_variable()
         tb = chainer.new_variable()
 
-        Rule.__init__(self,
+        rules.Rule.__init__(self,
             formula= formula,
             outputs= [chainer.link(link_type, [A, B])],
             inputs=  [chainer.link(types.AtTimeLink, [ta, A]),
@@ -76,7 +76,7 @@ class TemporalTransitivityRule(rules.Rule):
         B = chainer.new_variable()
         C = chainer.new_variable()
 
-        Rule.__init__(self, formula=formula,
+        rules.Rule.__init__(self, formula=formula,
             outputs= [chainer.link(link_type, [A, C])],
             inputs=  [chainer.link(link_type, [A, B]),
                       chainer.link(link_type, [B, C])]
@@ -92,7 +92,7 @@ class PredictiveAttractionRule(rules.Rule):
     def __init__(self, chainer):
         A = chainer.new_variable()
         B = chainer.new_variable()
-        Rule.__init__(self, formula=formulas.identityFormula,
+        rules.Rule.__init__(self, formula=formulas.identityFormula,
             outputs= [chainer.link(types.PredictiveAttractionLink, [A, B])],
             inputs= [chainer.link(types.AndLink, [
                 chainer.link(types.AttractionLink, [A, B]),
@@ -122,9 +122,9 @@ def create_temporal_rules(chainer):
         rules.append(TemporalTransitivityRule(chainer, type))
 
     # Use the wrong formula to predict events
-    rules.append(ModusPonensRule(chainer, types.BeforeLink))
+    #rules.append(ModusPonensRule(chainer, types.BeforeLink))
 
-    rules.append(PredictiveAttractionRule(chainer))
+    #rules.append(PredictiveAttractionRule(chainer))
 
     return rules 
 

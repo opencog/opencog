@@ -149,6 +149,9 @@ class AllRules(object):
 
         self.chainer.add_rule(quantifier_rules.ScholemRule(self.chainer))
 
+        for rule in temporal_rules.create_temporal_rules(self.chainer):
+            self.chainer.add_rule(rule)
+
     def lookup_rule(self, rule_schema_node):
         rule = self.chainer.lookup_rule(rule_schema_node.name)
         rule._chainer = self.test_chainer
