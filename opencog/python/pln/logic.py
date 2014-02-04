@@ -64,8 +64,6 @@ class Logic(object):
         return atoms
 
     def lookup_atoms(self, template, substitution):
-        template = self.substitute(substitution, template)
-
         if len(self.variables(template)) == 0:
             return [template]
 
@@ -262,5 +260,21 @@ class Logic(object):
             return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
     def _all_nonzero_tvs(self, atom_list):
+        for atom in atom_list:
+            assert atom in self._atomspace
+
         return all(atom.tv.count > 0 for atom in atom_list)
+
+    def get_predicate_arguments(self, predicate_name):
+        "Find the EvaluationLink for the predicate, and return the list of arguments (as a python list of Atoms). There must be only one EvaluationLink for it"
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, predicate_name), var])
+
+        queries = self.lookup_atoms(template, {})
+        # It will often find the original template in the results!
+        queries.remove(template)
+        #queries = [query for query in queries if query.tv.count > 0]
+        if len(queries) != 1:
+            raise ValueError("Predicate "+predicate_name+" must have 1 EvaluationLink")
+        return queries[0].out[1].out
 

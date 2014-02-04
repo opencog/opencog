@@ -1,0 +1,19 @@
+(=>
+    (member ?TRAIN Trains)
+    (member ?TRAIN CuteThings)
+)
+(member Train1 Trains)
+
+(=>
+    (member ?CUTE CuteThings)
+    (member ?CUTE Girls)
+)
+
+(=>
+    (member ?CUTE Girls)
+    (member ?CUTE Robots)
+)
+
+(query (member Train1 Robots))
+(rules ModusPonensRule)
+

@@ -10,7 +10,7 @@ class InferenceAgent(MindAgent):
         self.num_steps_per_cycle = 100
 
     def create_chainer(self, atomspace):
-        # Note: using stimulateAtoms will cause a segfault if you create the Agent from the Python shell (use the agents-start command in the cogserver shell)
+        # Note: using stimulateAtoms will cause a segfault if you create the Agent from the Python shell (use the agents-start command in the cogserver shell). It's because giving atoms stimulus only works if the MindAgent is added to the CogServer's list of agents.
         self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=True)
 
         # ImplicationLink is MixedImplicationLink, you could also have Extensional and Intensional Implication. etc. but that's a bit much.
@@ -121,4 +121,12 @@ class TestInferenceAgent(InferenceAgent):
             self.create_chainer(atomspace)
 
         self.chainer.find_atom(self.chainer.get_query(), time_allowed=300)
+
+class ForwardInferenceAgent(InferenceAgent):
+    def step(self):
+        result = self.chainer.forward_step()
+
+class BackwardInferenceAgent(InferenceAgent):
+    def step(self):
+        result = self.chainer.backward_step()
 

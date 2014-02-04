@@ -75,6 +75,21 @@ class Rule(object):
 
         return (new_inputs, new_outputs, created_vars)
 
+    def valid_inputs(self, inputs):
+        '''Takes all of the inputs found so far, and tells you if they are valid.
+           e.g. for OrCreationRule, [A] or [A,B] are valid, but [A,A] is invalid because Or(A,A) is silly.'''
+        # Don't allow the same input to be used twice.
+        # This function is called incrementally, so you only need to test the last input on the list.
+        atom = inputs[-1]
+        if atom in inputs[:-1]: return False
+        if atom.type in FIRST_ORDER_LINKS or atom.type in HIGHER_ORDER_LINKS:
+            # Reject (Subset A A)
+            self_link = atom.out[0] == atom.out[1]
+            if self_link: return False
+            # Reject [(Subset A B), (Subset B A)]
+            # Reject [(Subset A B), (Subset B B)]
+        return True
+
 # Inheritance Rules
 
 class InversionRule(Rule):
