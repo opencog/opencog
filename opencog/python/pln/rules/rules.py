@@ -81,8 +81,8 @@ class Rule(object):
         # Don't allow the same input to be used twice.
         # This function is called incrementally, so you only need to test the last input on the list.
         atom = inputs[-1]
-        if atom in inputs[:-2]: return False
-        if atom.type in rules.FIRST_ORDER_LINKS or atom.type in rules.HIGHER_ORDER_LINKS:
+        if atom in inputs[:-1]: return False
+        if atom.type in FIRST_ORDER_LINKS or atom.type in HIGHER_ORDER_LINKS:
             # Reject (Subset A A)
             self_link = atom.out[0] == atom.out[1]
             if self_link: return False

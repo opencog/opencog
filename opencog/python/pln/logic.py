@@ -64,8 +64,6 @@ class Logic(object):
         return atoms
 
     def lookup_atoms(self, template, substitution):
-        template = self.substitute(substitution, template)
-
         if len(self.variables(template)) == 0:
             return [template]
 

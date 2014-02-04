@@ -10,7 +10,7 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-DEBUG=True
+_VERBOSE=False
 
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
@@ -60,17 +60,17 @@ class AbstractChainer(Logic):
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
-    def _select_one_matching(self, template, s = {}, allow_zero_tv = False, rule, other_inputs):
+    def _select_one_matching(self, template, s = {}, rule=None, other_inputs=None, allow_zero_tv = False):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
             return template
 
         atoms = self.atomspace.get_atoms_in_attentional_focus()
-        atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv, rule, other_inputs)
+        atom = self._select_atom(template, s, atoms, allow_zero_tv, rule, other_inputs)
         if not atom:
             # if it can't find anything in the attentional focus, try the whole atomspace. (it actually still uses indexes to find a subset of the links, that is more likely to be useful)
             atoms = self.lookup_atoms(template, s)
-            atom = self._select_atom(template, s, atoms, allow_zero_tv=allow_zero_tv, rule, other_inputs)
+            atom = self._select_atom(template, s, atoms, allow_zero_tv, rule, other_inputs)
 
         return atom
 
@@ -99,8 +99,12 @@ class AbstractChainer(Logic):
         # O(N*the percentage of atoms that are useful)
         for atom in atoms:
             if self.wanted_atom(atom, template, substitution, ground=False, allow_zero_tv = allow_zero_tv):
-                if rule is None or rule.valid_inputs(other_inputs+[atom])):
+                if rule is None:
                     return atom
+                if rule.valid_inputs(other_inputs+[atom]):
+                    return atom
+                else:
+                    self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
         return None
 
     def _selectOne(self, atoms):
@@ -152,14 +156,14 @@ class AbstractChainer(Logic):
         if atom.type in rules.BOOLEAN_LINKS:
             nested_boolean = any(outgoing_atom.type == atom.type for outgoing_atom in atom.out)
             if nested_boolean: return False
-        if atom.arity == 2:
+        elif atom.arity == 2:
             # heuristically assume that all selflinks are invalid!
             self_link = atom.out[0] == atom.out[1]
             # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
             both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
-            if both_variables: return False
-        else:
-            return True
+            if self_link or both_variables: return False
+
+        return True
 
     def count_objects(self):
         all_object_nodes = self.atomspace.get_atoms_by_type(types.ObjectNode)
@@ -291,11 +295,12 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
+        if _VERBOSE: print str(rule)
         try:
             (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
             specific_inputs = []
             empty_substitution = {}
-            subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
+            subst = self._choose_inputs(rule, specific_inputs, generic_inputs, empty_substitution)
             if subst is None:
                 return None
             # set the outputs after you've found all the inputs
@@ -335,14 +340,15 @@ class Chainer(AbstractChainer):
 
         return output_atoms
 
-    def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
+    def _choose_inputs(self, rule, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
         return_inputs += [x for x in input_templates]
 
         for i in xrange(0, len(input_templates)):
+            input_templates = self.substitute_list(subst_so_far, input_templates)
             template = input_templates[i]
 
-            atom = self._select_one_matching(template, subst_so_far)
+            atom = self._select_one_matching(template, subst_so_far, rule, input_templates[0:i])
             
             if atom != None:
                 # Find the substitution that would change 'template' to 'atom'
@@ -421,7 +427,7 @@ class Chainer(AbstractChainer):
             return None
 
         specific_inputs = []
-        subst = self._choose_inputs(specific_inputs, generic_inputs, subst, allow_zero_tv = True)
+        subst = self._choose_inputs(rule, specific_inputs, generic_inputs, subst, allow_zero_tv = True)
         found = len(subst) > 0
 
         final_outputs = self.substitute_list(subst, generic_outputs)
@@ -539,7 +545,7 @@ class Chainer(AbstractChainer):
             return False
 
         if not self.valid_structure(outputs[0]):
-            self.log_failed_inference('invalid structure')
+            self.log_failed_inference('invalid structure %s %s %s' % (rule, inputs, outputs))
             return False
 
         if self._compute_trail_and_check_cycles(outputs[0], inputs):
