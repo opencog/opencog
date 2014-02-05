@@ -10,7 +10,7 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-_VERBOSE=False
+_VERBOSE=True
 
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
@@ -104,7 +104,7 @@ class AbstractChainer(Logic):
                 if rule.valid_inputs(other_inputs+[atom]):
                     return atom
                 else:
-                    self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
+                    if _VERBOSE: self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
         return None
 
     def _selectOne(self, atoms):
@@ -708,10 +708,10 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-#            res = self.backward_step()
-#            if res: print res
-            res = self.forward_step()
+            res = self.backward_step()
             if res: print res
+            res = self.forward_step()
+            if _VERBOSE and res: print res
 
             if atom.tv.count > 0:
                 print 'Target produced!'
