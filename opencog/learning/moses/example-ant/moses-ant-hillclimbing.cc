@@ -58,6 +58,10 @@ int main(int argc,char** argv)
         exit(1);
     }
 
+    // Logger setting
+    logger().setLevel(Logger::FINE);
+    logger().setFilename("moses-ant-hillclimbing.log");
+
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(),id::action_result_type,1);
 
