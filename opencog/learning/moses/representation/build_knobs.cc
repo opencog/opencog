@@ -1195,6 +1195,9 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 
         perms.push_back(v);
     }
+
+    if (logger().isFineEnabled())
+        ostreamContainer(logger().fine() << "Perms:" << std::endl, perms, "\n");
 }
 
 
