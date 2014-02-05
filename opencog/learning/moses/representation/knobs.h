@@ -520,7 +520,6 @@ struct simple_action_subtree_knob : public discrete_knob<2>
                                    combo_tree::iterator& parent_dst,
                                    int idx) const
     {
-        std::cout << "Mother fucker!" << std::endl;
         OC_ASSERT(false, "Not implemented yet");
         return combo_tree::iterator();
     }
