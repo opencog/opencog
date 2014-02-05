@@ -120,16 +120,21 @@ def loadSUMO(atomspace_, filename):
     expressions = parse_kif_string(file_str)
     convert_multiple_expressions(expressions)
 
-if __name__ == '__main__':
-    import sys
-    filename = sys.argv[1]
+def loadSumoAndExportToScheme(atomspace, filename):
+    atomspace.clear()
 
     output_filename = filename[0:-4]+'.scm'
     print output_filename
 
-    atomspace = AtomSpace()
     loadSUMO(atomspace, filename)
 
     with open(output_filename, 'w') as out:
         print_links(out)
+
+if __name__ == '__main__':
+    import sys
+    filename = sys.argv[1]
+    atomspace = AtomSpace()
+
+    loadSumoAndExportToScheme(atomspace, filename)
 

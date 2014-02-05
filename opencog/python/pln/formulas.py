@@ -20,8 +20,9 @@ def tv_seq_to_tv_tuple_seq(tvs):
 # There are also some divide-by-zero errors where a TV is 0 (or 1, because NOT(A) is used in some formulas). If the formulas are designed well enough, that can still be compatible with indefinite TVs.
 
 def makeUpCount(tvs):
-    ArbitraryDiscountFactor = 0.9
-    return min(tv.count for tv in tvs)*ArbitraryDiscountFactor
+    #ArbitraryDiscountFactor = 0.9
+    #return min(tv.count for tv in tvs)*ArbitraryDiscountFactor
+    return min(tv.count for tv in tvs)
 
 def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)

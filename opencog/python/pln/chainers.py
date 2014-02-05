@@ -10,7 +10,7 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
-_VERBOSE=False
+_VERBOSE=True
 
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
@@ -104,7 +104,7 @@ class AbstractChainer(Logic):
                 if rule.valid_inputs(other_inputs+[atom]):
                     return atom
                 else:
-                    self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
+                    if _VERBOSE: self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
         return None
 
     def _selectOne(self, atoms):
@@ -708,22 +708,30 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-#            res = self.backward_step()
-#            if res: print res
-            res = self.forward_step()
+            res = self.backward_step()
             if res: print res
+            res = self.forward_step()
+            if _VERBOSE and res: print res
 
-            if atom.tv.count > 0:
-                print 'Target produced!'
-                print repr(atom)
+            target_instances = self.get_target_instances(atom)
+            if target_instances:
+                for instance in target_instances:
+                    print 'Target produced!'
+                    print repr(atom)
 
-                print 'Inference steps'
-                print self.display_trail(self.find_trail(atom))
+                    print 'Inference steps'
+                    print self.display_trail(self.find_trail(atom))
 
                 return True
 
         print 'Failed to find target in', time_allowed, 'seconds'
         return False
+
+    def get_target_instances(self, target):
+        '''Ask the atomspace whether the target has been found (i.e. a TV with >0 confidence has already been produced by inference). The target is allowed to contain variables, in which case any instance of it is accepted (an instance is the target but with variables bound)'''
+        atoms = self.lookup_atoms(target, {})
+        atoms = [a for a in atoms if a.tv.count > 0]
+        return atoms
 
     def get_query(self):
         return self.get_predicate_arguments('query')[0]

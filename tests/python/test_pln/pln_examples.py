@@ -62,7 +62,7 @@ class PLNExamples(object):
             return
         print filename
 
-#        if not filename.endswith('OrRule.scm'): return
+#        if not filename.endswith('andimpl-ground.scm'): return
 
         chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 
