@@ -146,10 +146,8 @@ struct contin_knob : public knob_base
     }
 
     /**
-     * Append the right content (determined by idx) to parent_dst. If
-     * candidate is empty then it sets the content as head. If
-     * anything is appended then parent_dst will be overwritten with
-     * the iterator pointing to that new content.
+     * Append the content (a contin value) as child of parent_dst. If
+     * candidate is empty then it sets the content as head.
      *
      * @param candidate  candidate destination
      * @param parent_dst iterator pointing to the parent of the future
