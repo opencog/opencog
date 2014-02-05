@@ -29,6 +29,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
+#include <opencog/util/random.h>
 
 #include <opencog/comboreduct/combo/convert_ann_combo.h>
 #include <opencog/comboreduct/reduct/meta_rules.h>
@@ -1167,29 +1168,19 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
     const int number_of_actions = _actions->size();
     int n = number_of_actions; // controls the number of perms
 
-    for (combo_tree_ns_set_it i = _actions->begin(); i != _actions->end(); ++i)
-        perms.push_back(*i);
-
-    // lazy_random_selector sel(number_of_actions);
-    // dorepeat(n) {  // add n builtin actions
-    //   int i=sel();  // since this argument is varied, it doesn't matter what was the initial value
-    // }
+    for (const combo_tree& tr : *_actions)
+        perms.push_back(tr);
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    lazy_random_selector randpair(number_of_actions*(number_of_actions - 1));
+    lazy_random_selector randpair(n * (n - 1));
 
     dorepeat(n) {
         combo_tree v(id::action_boolean_if);
         pre_it iv = v.begin();
 
-        int rand_int = randGen().randint(_perceptions->size());
-        combo_tree_ns_set_it p_it = _perceptions->begin();
-        for (int ind = 0; ind < rand_int; ++ind)
-            ++p_it;
-
-        combo_tree vp(*p_it);
-        v.append_child(iv, vp.begin());
+        // append a randomly picked perception
+        v.append_child(iv, randset(*_perceptions).begin());
 
         int x = randpair();
         int a = x / (number_of_actions - 1);
