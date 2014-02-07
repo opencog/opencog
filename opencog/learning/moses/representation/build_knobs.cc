@@ -1224,7 +1224,7 @@ void build_knobs::action_cleanup()
 {
     combo_tree::post_order_iterator it = _exemplar.begin_post();
     while (it != _exemplar.end_post())
-        if ((*it == id::sequential_and || *it == id::sequential_and || *it == id::sequential_exec) && it.is_childless())
+        if ((*it == id::sequential_and || *it == id::sequential_or || *it == id::sequential_exec) && it.is_childless())
             _exemplar.erase(it++);
         else
             ++it;
