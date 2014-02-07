@@ -32,7 +32,7 @@ namespace opencog { namespace moses {
 using namespace ant_combo;
 
 // Knob specifically designed for the Sante Fe Trail problem.
-// Note - children aren't cannonized when parents are called.
+// Note - children aren't canonized when parents are called.
 struct ant_action_subtree_knob : public discrete_knob<4> {
     static const int none    = 0;
     static const int forward = 1;

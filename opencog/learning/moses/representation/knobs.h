@@ -252,7 +252,7 @@ protected:
 // or something like that, as it is a unary logical function ... err...
 // well, I guess all combo opers are unary, due to Currying.
 //
-// note - children aren't cannonized when parents are called (??? huh ???)
+// note - children aren't canonized when parents are called (??? huh ???)
 struct logical_subtree_knob : public discrete_knob<3>
 {
     static const int absent = 0;
@@ -397,7 +397,7 @@ private:
 
 #define MAX_PERM_ACTIONS 128
 
-// Note - children aren't cannonized when parents are called.
+// Note - children aren't canonized when parents are called.
 // XXX what does the above comment mean ???
 struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
 {

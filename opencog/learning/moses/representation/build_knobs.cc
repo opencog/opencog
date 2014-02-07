@@ -183,7 +183,7 @@ void build_knobs::logical_canonize(pre_it it)
         _exemplar.insert_above(it, id::logical_or);
     }
     else {
-        OC_ASSERT(0, "Error: during logical_cannonize, got unexpected "
+        OC_ASSERT(0, "Error: during logical_canonize, got unexpected "
              " type in logical expression.");
     }
 }
@@ -607,7 +607,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
 /**
  * build_logical -- add knobs to an exemplar that contains boolean
  * and logic terms, and predicates.  If a predicate is found, it is
- * cannonized, and knobs are added to that.
+ * canonized, and knobs are added to that.
  *
  * @subtree -- pointer to a subtree of the exemplar that consists of
  *             logical elements.
@@ -697,9 +697,9 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
 }
 
 // ***********************************************************************
-/// contin_cannonize -- add knobs to create canonical contin expr.
+/// contin_canonize -- add knobs to create canonical contin expr.
 ///
-/// Given a pointer @it into the exemplar, the contin_cannonize()
+/// Given a pointer @it into the exemplar, the contin_canonize()
 /// method will insert a "canonical form" above this pointer.
 ///
 /// The canonical form we want for a contin-valued term is a linear-
@@ -840,7 +840,7 @@ void build_knobs::linear_canonize_times(pre_it it)
 ///
 /// The recursive aspect of this is such that, if it encounters terms
 /// that are functions, it will canonize their arguments as well.  Thus,
-/// sin(), exp(), log() will all get their args cannonized.  Note that
+/// sin(), exp(), log() will all get their args canonized.  Note that
 /// the function impulse() returns contin but take a boolean expr: in
 /// this case, we call logical_canonize on it's arg.
 //
@@ -1004,7 +1004,7 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 // For now, we only handle enumerated types on output, and not on input.
 // TODO: implement support for enumerated types in the input.
 
-/// enum_cannonize: make sure that the exemplar is in cannonical form.
+/// enum_canonize: make sure that the exemplar is in canonical form.
 /// The canonical form will be of the form
 ///       cond(p1 x1  p2 x2 ... pn xn y)
 /// where each possible enum is likely to appear in at least one of the
@@ -1038,7 +1038,7 @@ void build_knobs::enum_canonize(pre_it it)
         _exemplar.insert(last, enum_t::get_random_enum());
     }
 
-    // Cannonize every predicate.
+    // Canonize every predicate.
     // This loop is strangely structured because the logical_canonize()
     // does an insert_above, and thus wrecks the iterator.
     sib_it sib = it.begin();
