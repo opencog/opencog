@@ -404,7 +404,7 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                        vector<combo_tree>& perms)
+                        const vector<combo_tree>& perms)
         : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
 
         OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
