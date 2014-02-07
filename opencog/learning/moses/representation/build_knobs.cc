@@ -133,7 +133,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
  * An operator is permitted, if it is not one of those that we were
  * told to ignore, i.e. that should be omitted from the tree.
  */
-bool build_knobs::permitted_op(const vertex& v)
+bool build_knobs::permitted_op(const vertex& v) const
 {
     return _ignore_ops.find(v) == _ignore_ops.end();
 }

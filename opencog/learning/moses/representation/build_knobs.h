@@ -105,7 +105,7 @@ protected:
 protected:
     // Misc protected methods
     // Return true if the operator is allowed for knob building.
-    bool permitted_op(const vertex& v);
+    bool permitted_op(const vertex& v) const;
 
     // ------------------------------------------------------
     // logical knob building
