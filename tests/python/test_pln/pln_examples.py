@@ -1,10 +1,21 @@
-'''Runs PLN examples, similar to PLNUTest. Currently only works from the cogserver due
-to linking issues.'''
+"""
+Runs PLN examples, similar to PLNUTest. Currently only works from the cogserver due
+to linking issues.
+
+Instructions:
+Run the cogserver
+loadpy pln_examples
+py
+from pln_examples import *
+pln_examples = PLNExamples(ATOMSPACE)
+pln_examples.test_all()
+"""
+
 from time import time
 from pprint import pprint
 
-import util
-from opencog.atomspace import AtomSpace, Atom
+#import util
+from opencog.atomspace import AtomSpace, Atom, types
 from pln.chainers import Chainer
 import pln.rules as rules
 
@@ -64,7 +75,7 @@ class PLNExamples(object):
 
         if not filename.endswith('LionTigerAS.scm'): return
 
-        chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+        chainer = Chainer(self.atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 
         try:
             query = chainer.get_predicate_arguments('query')[0]
