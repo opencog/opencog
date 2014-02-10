@@ -37,7 +37,9 @@ class AtomCollectionAPI(Resource):
     def get(self):
         """
         Returns a list of atoms matching the specified criteria
-        Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&callback=[callback]
+        Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&tvStrengthMin=[tvStrengthMin]
+            &tvConfidenceMin=[tvConfidenceMin]&tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
+            &includeOutgoing=[includeOutgoing]&callback=[callback]
 
         :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
         :param name: (optional, string, not allowed for Link types) Atom name
@@ -145,12 +147,10 @@ class AtomCollectionAPI(Resource):
             atoms = [atom for atom in atoms if atom.tv.count >= tv_count_min]
 
         # Optionally, include the incoming set
-        print 'Include incoming: {0}'.format(include_incoming)
         if include_incoming in ['True', 'true', '1']:
             atoms = self.atomspace.include_incoming(atoms)
 
         # Optionally, include the outgoing set
-        print 'Include incoming: {0}'.format(include_outgoing)
         if include_outgoing in ['True', 'true', '1']:
             atoms = self.atomspace.include_outgoing(atoms)
 

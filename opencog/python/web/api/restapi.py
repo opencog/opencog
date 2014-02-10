@@ -32,8 +32,8 @@ class Start(opencog.cogserver.Request):
     "Starts the OpenCog REST API. This will provide a REST interface to the Atomspace,\n" \
     "allowing you to create, read, update and delete atoms across the network using\n" \
     "HTTP requests/responses with JSON-formatted data.\n\n" \
-    "Default endpoint: http://127.0.0.1:5000/api/v1.0/\n" \
-    "Example request: http://127.0.0.1:5000/api/v1.0/atoms?type=ConceptNode"
+    "Default endpoint: http://127.0.0.1:5000/api/v1.1/\n" \
+    "Example request: http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode"
 
     def run(self, args, atomspace):
         """
