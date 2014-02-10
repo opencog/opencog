@@ -15,6 +15,10 @@ class AtomAPI(Resource):
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('includeIncoming', type=str, location='args',
+                                   choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument('includeOutgoing', type=str, location='args',
+                                   choices=['true', 'false', 'True', 'False', '0', '1'])
         self.reqparse.add_argument('callback', type=str, location='args')
         super(AtomAPI, self).__init__()
 
@@ -23,51 +27,75 @@ class AtomAPI(Resource):
     def get(self, id):
         """
         Returns the atom for the given handle
-        Uri: atoms/[id]
+        Uri: atoms/[id]?includeIncoming=[includeIncoming]&includeOutgoing[includeOutgoing]
 
         :param id: Atom handle
+        :param includeIncoming: (optional, boolean) Returns the conjunction of the set of atoms and their incoming sets
+        :param includeOutgoing: (optional, boolean) Returns the conjunction of the set of atoms and their outgoing sets
+            Useful in combination with includeIncoming.
 
         :return atoms: Returns a JSON representation of an atom list containing the atom.
 
         Example:
 
         {
-          'atoms':
+          'result':
           {
-            'handle': 6,
-            'name': '',
-            'type': 'InheritanceLink',
-            'outgoing': [2, 1],
-            'incoming': [],
-            'truthvalue':
+            'complete': 'true',
+            'skipped': 'false',
+            'total': 1,
+            'atoms':
               {
-                'type': 'simple',
-                'details':
+                'handle': 6,
+                'name': '',
+                'type': 'InheritanceLink',
+                'outgoing': [2, 1],
+                'incoming': [],
+                'truthvalue':
                   {
-                    'count': '0.4000000059604645',
-                    'confidence': '0.0004997501382604241',
-                    'strength': '0.5'
-                  }
-              },
-          'attentionvalue':
-            {
-              'lti': 0,
-              'sti': 0,
-              'vlti': false
-            }
+                    'type': 'simple',
+                    'details':
+                      {
+                        'count': '0.4000000059604645',
+                        'confidence': '0.0004997501382604241',
+                        'strength': '0.5'
+                      }
+                  },
+              'attentionvalue':
+                {
+                  'lti': 0,
+                  'sti': 0,
+                  'vlti': false
+                }
+              }
           }
         }
         """
+
+        args = self.reqparse.parse_args()
+
+        include_incoming = args.get('includeIncoming')
+        include_outgoing = args.get('includeOutgoing')
 
         try:
             atom = self.atomspace[Handle(id)]
         except IndexError:
             abort(404, 'Handle not found')
 
-        json_data = {'atoms': marshal(atom, atom_fields)}
-        
+        atoms = [atom]
+
+        # Optionally, include the incoming set
+        if include_incoming in ['True', 'true', '1']:
+            atoms = self.atomspace.include_incoming(atoms)
+
+        # Optionally, include the outgoing set
+        if include_outgoing in ['True', 'true', '1']:
+            atoms = self.atomspace.include_outgoing(atoms)
+
+        atom_list = AtomListResponse(atoms)
+        json_data = {'result': atom_list.format()}
+
         # if callback function supplied, pad the JSON data (i.e. JSONP):
-        args = self.reqparse.parse_args()
         callback = args.get('callback')
         if callback is not None:
             response = str(callback) + '(' + json.dumps(json_data) + ');'
