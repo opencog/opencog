@@ -396,15 +396,41 @@ cdef class AtomSpace:
         self.atomspace.getHandleSet(back_inserter(o_vect),deref(target_h.h),t,subt)
         return convert_handle_seq_to_python_list(o_vect,self)
 
+    @classmethod
+    def include_incoming(cls, atoms):
+        """
+        Returns the conjunction of a set of atoms and their incoming sets.
+
+        Example:
+        self.atomspace.include_incoming(self.atomspace.get_atoms_by_type(types.ConceptNode))
+        """
+        return list(set(atoms +
+                [item for sublist in [atom.incoming for atom in atoms if len(atom.incoming) > 0] for item in sublist]))
+
+    @classmethod
+    def include_outgoing(cls, atoms):
+        """
+        Returns the conjunction of a set of atoms and their outgoing sets.
+        Useful when used in combination with include_incoming.
+
+        Example:
+        self.atomspace.include_outgoing(
+            self.atomspace.include_incoming(self.atomspace.get_atoms_by_type(types.ConceptNode)))
+        """
+        return list(set(atoms +
+                [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
+
     def print_list(self):
         self.atomspace.print_list()
 
     def next_new_atom(self):
-        '''Function to get atoms that have been added to the AtomSpace.
+        """
+        Function to get atoms that have been added to the AtomSpace.
         There's a list of newly added ones, and this method will pop the
         first atom from the list. You should use it to update a separate
         list for each Python MindAgent that wants to use it. It returns
-        either a Cython Atom or None (if there are none left).'''
+        either a Cython Atom or None (if there are none left).
+        """
         cdef cHandle ch
         cdef Handle h
         cdef Atom atom
