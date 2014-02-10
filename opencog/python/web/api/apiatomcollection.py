@@ -22,6 +22,13 @@ class AtomCollectionAPI(Resource):
                                    choices=['stirange', 'attentionalfocus'])
         self.reqparse.add_argument('stimin', type=int, location='args')
         self.reqparse.add_argument('stimax', type=int, location='args')
+        self.reqparse.add_argument('tvStrengthMin', type=float, location='args')
+        self.reqparse.add_argument('tvConfidenceMin', type=float, location='args')
+        self.reqparse.add_argument('tvCountMin', type=float, location='args')
+        self.reqparse.add_argument('includeIncoming', type=str, location='args',
+                                   choices=['true', 'false', 'True', 'False', '0', '1'])
+        self.reqparse.add_argument('includeOutgoing', type=str, location='args',
+                                   choices=['true', 'false', 'True', 'False', '0', '1'])
 
         super(AtomCollectionAPI, self).__init__()
 
@@ -33,12 +40,19 @@ class AtomCollectionAPI(Resource):
         Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&callback=[callback]
 
         :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
-        :param name: (optional, not allowed for Link types) Atom name
+        :param name: (optional, string, not allowed for Link types) Atom name
         If neither type or name are provided, all atoms will be retrieved
         :param filterby: (optional, can't be combined with type or name) Allows certain predefined filters
-          - The filter 'stirange' allows the additional parameters 'stimin' (required) and 'stimax' (optional) and
-            returns the atoms in a given STI range
-          - The filter 'attentionalfocus' returns the atoms in the AttentionalFocus
+          - The filter 'stirange' allows the additional parameters 'stimin' (required, int) and 'stimax' (optional, int)
+            and returns the atoms in a given STI range
+          - The filter 'attentionalfocus' (boolean) returns the atoms in the AttentionalFocus
+        :param tvStrengthMin: (optional, float) Only return atoms with TruthValue strength greater than this amount
+        :param tvConfidenceMin: (optional, float) Only return atoms with TruthValue confidence greater than this amount
+        :param tvCountMin: (optional, float) Only return atoms with TruthValue count greater than this amount
+        :param includeIncoming: (optional, boolean) Returns the conjunction of the set of atoms and their incoming sets
+        :param includeOutgoing: (optional, boolean) Returns the conjunction of the set of atoms and their outgoing sets
+            Useful in combination with includeIncoming.
+
         :param callback: (optional) JavaScript callback function for JSONP support
 
         :return result: Returns a JSON representation of an atom list.
@@ -89,6 +103,13 @@ class AtomCollectionAPI(Resource):
         sti_min = args.get('stimin')
         sti_max = args.get('stimax')
 
+        tv_strength_min = args.get('tvStrengthMin')
+        tv_confidence_min = args.get('tvConfidenceMin')
+        tv_count_min = args.get('tvCountMin')
+
+        include_incoming = args.get('includeIncoming')
+        include_outgoing = args.get('includeOutgoing')
+
         # First, check if there is a valid filter type, and give it precedence if it exists
         valid_filter = False
         if filter_by is not None:
@@ -112,6 +133,26 @@ class AtomCollectionAPI(Resource):
                 if type is None:
                     type = 'Node'
                 atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
+
+        # Optionally, filter by TruthValue
+        if tv_strength_min is not None:
+            atoms = [atom for atom in atoms if atom.tv.mean >= tv_strength_min]
+
+        if tv_confidence_min is not None:
+            atoms = [atom for atom in atoms if atom.tv.confidence >= tv_confidence_min]
+
+        if tv_count_min is not None:
+            atoms = [atom for atom in atoms if atom.tv.count >= tv_count_min]
+
+        # Optionally, include the incoming set
+        print 'Include incoming: {0}'.format(include_incoming)
+        if include_incoming in ['True', 'true', '1']:
+            atoms = self.atomspace.include_incoming(atoms)
+
+        # Optionally, include the outgoing set
+        print 'Include incoming: {0}'.format(include_outgoing)
+        if include_outgoing in ['True', 'true', '1']:
+            atoms = self.atomspace.include_outgoing(atoms)
 
         atom_list = AtomListResponse(atoms)
         json_data = {'result': atom_list.format()}
