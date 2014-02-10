@@ -73,8 +73,6 @@ class PLNExamples(object):
             return
         print filename
 
-        if not filename.endswith('LionTigerAS.scm'): return
-
         chainer = Chainer(self.atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 
         try:
@@ -94,8 +92,10 @@ class PLNExamples(object):
 
         if chainer.find_atom(query, time_allowed=10):
             self.passed.append(filename)
+            return True
         else:
             self.failed.append(filename)
+            return False
 
 class AllRules(object):
     def __init__(self, atomspace, chainer):
