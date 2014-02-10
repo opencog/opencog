@@ -27,12 +27,14 @@ class TestRESTApi():
 
         # Populate a test AtomSpace
         self.atomspace = AtomSpace()
-        self.animal = self.atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .9))
+        self.animal = self.atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .95))
         self.bird = self.atomspace.add_node(types.ConceptNode, 'bird', TruthValue(.01, .9))
         self.swan = self.atomspace.add_node(types.ConceptNode, 'swan', TruthValue(.001, .9))
+        self.frog = self.atomspace.add_node(types.ConceptNode, 'frog', TruthValue(.001, 2000))
         self.swan_bird = self.atomspace.add_link(types.InheritanceLink, [self.swan, self.bird], TruthValue(1, .9))
         self.bird_animal = self.atomspace.add_link(types.InheritanceLink, [self.bird, self.animal], TruthValue(1, .9))
         self.bird.av = {'sti': 9}
+        self.swan.av = {'sti': 9}
 
         self.api = RESTAPI(self.atomspace)
         self.client = self.api.test()
@@ -287,3 +289,36 @@ class TestRESTApi():
         get_result = json.loads(get_response.data)['types']
         assert len(get_result) > 0
         assert get_result.__contains__('ConceptNode')
+
+    def test_tv_filter(self):
+        # Should return animal, swan_bird, bird_animal (3 atoms)
+        get_response = self.client.get(self.uri + 'atoms?tvStrengthMin=0.1')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 3
+
+        # Should return frog (1 atom)
+        get_response = self.client.get(self.uri + 'atoms?tvConfidenceMin=0.7')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 1
+
+        # Should return frog (1 atom)
+        get_response = self.client.get(self.uri + 'atoms?tvCountMin=2000')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 1
+
+    def test_include_incoming_outgoing(self):
+        # Should return bird and swan (2 atoms)
+        get_response = self.client.get(self.uri + 'atoms?filterby=stirange&stimin=1&includeIncoming=false')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 2
+
+        # Should additionally return swan_bird and bird_animal (4 atoms)
+        get_response = self.client.get(self.uri + 'atoms?filterby=stirange&stimin=1&includeIncoming=true')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 4
+
+        # Should additionally return animal (5 atoms)
+        get_response = self.client.get(self.uri +
+                                       'atoms?filterby=stirange&stimin=1&includeIncoming=true&includeOutgoing=true')
+        get_result = json.loads(get_response.data)['result']['atoms']
+        assert len(get_result) == 5
