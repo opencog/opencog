@@ -603,18 +603,18 @@ class Chainer(AbstractChainer):
         for (number, line) in enumerate(reversed(trail)):
             (output_atom, input_set) = line
 
-            if output_atom not in self.atomspace:
-                print 'warning: trail contains nonexistent atom (caused by some bug)'
-                continue
-
-            print '\nStep',number+1
             if len(input_set):
+                if output_atom not in self.atomspace:
+                    print 'warning: trail contains nonexistent atom (caused by some bug)'
+                    continue
+
+                print '\nStep',number+1
                 for input in input_set:
                     print input.h, input
                 print '|='
                 print output_atom.h, output_atom
-            else:
-                print 'Premise', output_atom.h, output_atom
+            #else:
+            #    print 'Premise', output_atom.h, output_atom
 
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
