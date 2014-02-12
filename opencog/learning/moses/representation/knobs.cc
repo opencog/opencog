@@ -259,8 +259,16 @@ combo_tree::iterator action_subtree_knob::append_to(combo_tree& candidate,
                                                     combo_tree::iterator& parent_dst,
                                                     int idx) const
 {
-    OC_ASSERT(false, "Not implemented yet");
-    return combo_tree::iterator();
+    idx = map_idx(idx);
+    OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+
+    if (idx != 0)
+        if (candidate.empty())
+            candidate = _perms[idx-1];
+        else
+            candidate.append_child(parent_dst, _perms[idx-1].begin());
+
+    return parent_dst.end();    // there is no child knobs
 }
 
 field_set::disc_spec action_subtree_knob::spec() const {
@@ -274,9 +282,11 @@ std::string action_subtree_knob::toStr() const {
         int idx = map_idx(i);
         OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
         if (idx == 0)
-            ss << "nil ";
+            ss << "nil";
         else
             ss << _perms[idx-1];
+        if (i+1 < multiplicity())
+            ss << "|";
     }
     ss << "]";
     return ss.str();
