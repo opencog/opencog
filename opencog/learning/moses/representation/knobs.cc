@@ -327,8 +327,11 @@ std::string action_subtree_knob::toStr() const {
         OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
         if (idx == 0)
             ss << "nil";
-        else
-            ss << _perms[idx-1];
+        else {
+            std::stringstream tr_ss;
+            tr_ss << _perms[idx-1];
+            ss << tr_ss.str().substr(0, tr_ss.str().size()-1);
+        }
         if (i+1 < multiplicity())
             ss << "|";
     }
