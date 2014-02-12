@@ -59,8 +59,10 @@ int main(int argc,char** argv)
     }
 
     // Logger setting
+    static const string log_file = "moses-ant-hillclimbing.log";
+    remove(log_file.c_str());
     logger().setLevel(Logger::FINE);
-    logger().setFilename("moses-ant-hillclimbing.log");
+    logger().setFilename(log_file);
 
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(),id::action_result_type,1);
