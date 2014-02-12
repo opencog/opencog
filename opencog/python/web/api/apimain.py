@@ -34,11 +34,9 @@ class RESTAPI(object):
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = Api(self.app)
-        atom_api = AtomAPI.new(self.atomspace)
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
         atom_types_api = TypesAPI()
-        self.api.add_resource(atom_collection_api, '/api/v1.1/atoms', endpoint='atoms')
-        self.api.add_resource(atom_api, '/api/v1.1/atoms/<int:id>', endpoint='atom')
+        self.api.add_resource(atom_collection_api, '/api/v1.1/atoms', '/api/v1.1/atoms/<int:id>', endpoint='atoms')
         self.api.add_resource(atom_types_api, '/api/v1.1/types', endpoint='types')
 
     def run(self, host='127.0.0.1', port=5000):

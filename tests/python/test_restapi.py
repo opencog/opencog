@@ -22,7 +22,7 @@ class TestRESTApi():
     """
 
     def setUp(self):
-        self.uri = '/api/v1.0/'
+        self.uri = '/api/v1.1/'
         self.headers = {'content-type': 'application/json'}
 
         # Populate a test AtomSpace
@@ -71,7 +71,7 @@ class TestRESTApi():
         # Get by handle and compare
         handle = post_result['handle']
         get_response_handle = self.client.get(self.uri + 'atoms/' + str(handle))
-        get_result_handle = json.loads(get_response_handle.data)['atoms']
+        get_result_handle = json.loads(get_response_handle.data)['result']['atoms'][0]
         assert post_result == get_result_handle
 
         # Get by name and compare
@@ -115,7 +115,7 @@ class TestRESTApi():
         # Get by handle and compare
         handle = post_result['handle']
         get_response_handle = self.client.get(self.uri + 'atoms/' + str(handle))
-        get_result_handle = json.loads(get_response_handle.data)['atoms']
+        get_result_handle = json.loads(get_response_handle.data)['result']['atoms'][0]
         assert post_result == get_result_handle
 
         # Check if the link is in the incoming set of each of the nodes
@@ -150,7 +150,7 @@ class TestRESTApi():
 
         # Get by handle and compare
         get_response = self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
-        get_result = json.loads(get_response.data)['atoms']
+        get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
     def test_put_and_get_tv_av_link(self):
@@ -182,7 +182,7 @@ class TestRESTApi():
 
         # Get by handle and compare
         get_response = self.client.get(self.uri + 'atoms/' + str(atom.h.value()))
-        get_result = json.loads(get_response.data)['atoms']
+        get_result = json.loads(get_response.data)['result']['atoms'][0]
         assert put_result == get_result
 
     def test_post_revise_existing_node(self):
@@ -234,7 +234,7 @@ class TestRESTApi():
         atom = self.swan
         handle = atom.h.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
-        get_result = json.loads(get_response.data)['atoms']
+        get_result = json.loads(get_response.data)['result']['atoms'][0]
 
         delete_response = self.client.delete(self.uri + 'atoms/' + str(atom.h.value()))
         delete_result = json.loads(delete_response.data)['result']
@@ -250,7 +250,7 @@ class TestRESTApi():
         atom = self.bird_animal
         handle = atom.h.value()
         get_response = self.client.get(self.uri + 'atoms/' + str(handle))
-        get_result = json.loads(get_response.data)['atoms']
+        get_result = json.loads(get_response.data)['result']['atoms'][0]
 
         delete_response = self.client.delete(self.uri + 'atoms/' + str(atom.h.value()))
         delete_result = json.loads(delete_response.data)['result']
