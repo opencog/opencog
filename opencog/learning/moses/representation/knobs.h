@@ -319,67 +319,27 @@ protected:
     const vector<combo_tree> _perms;
 };
 
-
+// Binary knob for action subtree, present or absent
 struct simple_action_subtree_knob : public discrete_knob<2>
 {
     static const int present = 0;
     static const int absent = 1;
 
-    simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt)
-        : discrete_knob<2>(tr, tgt)
-   {
-        _current = present;
-        _default = present;
-    }
+    simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt);
 
-    complexity_t complexity_bound() const {
-        return (_current == absent ? 0 : tree_complexity(_loc));
-    }
+    complexity_t complexity_bound() const;
 
-    void clear_exemplar() {
-//      if (in_exemplar())
-        turn(0);
-//      else
-// _tr.erase(_loc);
-    }
+    void clear_exemplar();
 
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 2), "Index greater than 1.");
-
-        if (idx == _current) //already set, nothing to
-            return;
-
-        switch (idx) {
-        case present:
-            _loc = _tr.erase(_tr.flatten(_loc));
-            break;
-        case absent:
-            _loc = _tr.insert_above(_loc, id::null_vertex);
-            break;
-        }
-
-        _current = idx;
-    }
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        OC_ASSERT(false, "Not implemented yet");
-        return combo_tree::iterator();
-    }
+                                   int idx) const;
 
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
-    std::string toStr() const {
-        std::stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
-        return ss.str();
-    }
+    std::string toStr() const;
 };
 
 // The disc_knob may be any one of a number of different discrete

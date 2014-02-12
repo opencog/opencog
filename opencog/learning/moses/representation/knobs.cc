@@ -292,5 +292,66 @@ std::string action_subtree_knob::toStr() const {
     return ss.str();
 }
 
+////////////////////////////////
+// simple_action_subtree_knob //
+////////////////////////////////
+
+simple_action_subtree_knob::simple_action_subtree_knob(combo_tree& tr,
+                                                       combo_tree::iterator tgt)
+    : discrete_knob<2>(tr, tgt)
+{
+    _current = present;
+    _default = present;
+}
+
+complexity_t csimple_action_subtree_knob::omplexity_bound() const {
+    return (_current == absent ? 0 : tree_complexity(_loc));
+}
+
+void simple_action_subtree_knob::clear_exemplar() {
+    //      if (in_exemplar())
+    turn(0);
+    //      else
+    // _tr.erase(_loc);
+}
+
+void simple_action_subtree_knob::turn(int idx)
+{
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 2), "Index greater than 1.");
+
+    if (idx == _current) //already set, nothing to
+        return;
+
+    switch (idx) {
+    case present:
+        _loc = _tr.erase(_tr.flatten(_loc));
+        break;
+    case absent:
+        _loc = _tr.insert_above(_loc, id::null_vertex);
+        break;
+    }
+
+    _current = idx;
+}
+
+combo_tree::iterator simple_action_subtree_knob::append_to(combo_tree& candidate,
+                                                           combo_tree::iterator& parent_dst,
+                                                           int idx) const
+{
+    OC_ASSERT(false, "Not implemented yet");
+    return combo_tree::iterator();
+}
+
+field_set::disc_spec simple_action_subtree_knob::spec() const {
+    return field_set::disc_spec(multiplicity());
+}
+
+std::string simple_action_subtree_knob::toStr() const {
+    std::stringstream ss;
+    ss << "[" << *_loc << " TODO ]";
+    return ss.str();
+}
+
 } //~namespace moses
 } //~namespace opencog
