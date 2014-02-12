@@ -128,22 +128,14 @@ struct contin_knob : public knob_base
 {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
-                field_set::width_t depth)
-        : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
-                                    step_size, expansion, depth) { }
+                field_set::width_t depth);
 
-    bool in_exemplar() const
-    {
-        return true;
-    }
+    bool in_exemplar() const;
 
     // @todo: it does not go back to the initiale state
-    void clear_exemplar() { }
+    void clear_exemplar();
 
-    void turn(contin_t x)
-    {
-        *_loc = x;
-    }
+    void turn(contin_t x);
 
     /**
      * Append the content (a contin value) as child of parent_dst. If
@@ -155,28 +147,14 @@ struct contin_knob : public knob_base
      * @param c          contin constant to be append
      */
     void append_to(combo_tree& candidate, combo_tree::iterator parent_dst,
-                   contin_t c) const
-    {
-        if (candidate.empty())
-            candidate.set_head(c);
-        else
-            candidate.append_child(parent_dst, c);
-    }
+                   contin_t c) const;
 
     // Return the spec describing the space spanned by the knob
     // Note that this spec is *not* a part of the field set that is
     // being used by the representation!
-    const field_set::contin_spec& spec() const
-    {
-        return _spec;
-    }
+    const field_set::contin_spec& spec() const;
 
-    std::string toStr() const
-    {
-        std::stringstream ss;
-        ss << "[" << *_loc << "]";
-        return ss.str();
-    }
+    std::string toStr() const;
 
 protected:
     field_set::contin_spec _spec;

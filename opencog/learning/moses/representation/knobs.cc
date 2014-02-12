@@ -25,6 +25,49 @@
 
 namespace opencog { namespace moses {
 
+/////////////////
+// contin_knob //
+/////////////////
+
+contin_knob::contin_knob(combo_tree& tr, combo_tree::iterator tgt,
+                         contin_t step_size, contin_t expansion,
+                         field_set::width_t depth)
+    : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
+                                step_size, expansion, depth) { }
+
+bool contin_knob::in_exemplar() const
+{
+    return true;
+}
+
+void contin_knob::clear_exemplar() { }
+
+void contin_knob::turn(contin_t x)
+{
+    *_loc = x;
+}
+
+void contin_knob::append_to(combo_tree& candidate, combo_tree::iterator parent_dst,
+                            contin_t c) const
+{
+    if (candidate.empty())
+        candidate.set_head(c);
+    else
+        candidate.append_child(parent_dst, c);
+}
+
+const field_set::contin_spec& contin_knob::spec() const
+{
+    return _spec;
+}
+
+std::string contin_knob::toStr() const
+{
+    std::stringstream ss;
+    ss << "[" << *_loc << "]";
+    return ss.str();
+}
+
 //////////////////////////
 // logical_subtree_knob //
 //////////////////////////
