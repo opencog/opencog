@@ -305,11 +305,12 @@ combo_tree::iterator action_subtree_knob::append_to(combo_tree& candidate,
     idx = map_idx(idx);
     OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
 
-    if (idx != 0)
+    if (idx != 0) {
         if (candidate.empty())
             candidate = _perms[idx-1];
         else
             candidate.append_child(parent_dst, _perms[idx-1].begin());
+    }
 
     return parent_dst.end();    // there is no child knobs
 }
@@ -347,7 +348,7 @@ simple_action_subtree_knob::simple_action_subtree_knob(combo_tree& tr,
     _default = present;
 }
 
-complexity_t csimple_action_subtree_knob::omplexity_bound() const {
+complexity_t simple_action_subtree_knob::complexity_bound() const {
     return (_current == absent ? 0 : tree_complexity(_loc));
 }
 
