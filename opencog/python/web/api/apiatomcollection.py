@@ -34,7 +34,7 @@ class AtomCollectionAPI(Resource):
 
     # Set CORS headers to allow cross-origin access (https://github.com/twilio/flask-restful/pull/131):
     @cors.crossdomain(origin='*')
-    def get(self):
+    def get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
         Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&tvStrengthMin=[tvStrengthMin]
@@ -112,39 +112,46 @@ class AtomCollectionAPI(Resource):
         include_incoming = args.get('includeIncoming')
         include_outgoing = args.get('includeOutgoing')
 
-        # First, check if there is a valid filter type, and give it precedence if it exists
-        valid_filter = False
-        if filter_by is not None:
-            if filter_by == 'stirange':
-                if sti_min is not None:
+        if id != "":
+            try:
+                atom = self.atomspace[Handle(id)]
+                atoms = [atom]
+            except IndexError:
+                abort(404, 'Handle not found')
+        else:
+            # First, check if there is a valid filter type, and give it precedence if it exists
+            valid_filter = False
+            if filter_by is not None:
+                if filter_by == 'stirange':
+                    if sti_min is not None:
+                        valid_filter = True
+                        atoms = self.atomspace.get_atoms_by_av(sti_min, sti_max)
+                    else:
+                        abort(400, 'Invalid request: stirange filter requires stimin parameter')
+                elif filter_by == 'attentionalfocus':
                     valid_filter = True
-                    atoms = self.atomspace.get_atoms_by_av(sti_min, sti_max)
+                    atoms = self.atomspace.get_atoms_in_attentional_focus()
+
+            # If there is not a valid filter type, proceed to select by type or name
+            if not valid_filter:
+                if type is None and name is None:
+                    atoms = self.atomspace.get_atoms_by_type(types.Atom)
+                elif name is None:
+                    atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
                 else:
-                    abort(400, 'Invalid request: stirange filter requires stimin parameter')
-            elif filter_by == 'attentionalfocus':
-                valid_filter = True
-                atoms = self.atomspace.get_atoms_in_attentional_focus()
+                    if type is None:
+                        type = 'Node'
+                    atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
 
-        # If there is not a valid filter type, proceed to select by type or name
-        if not valid_filter:
-            if type is None and name is None:
-                atoms = self.atomspace.get_atoms_by_type(types.Atom)
-            elif name is None:
-                atoms = self.atomspace.get_atoms_by_type(types.__dict__.get(type))
-            else:
-                if type is None:
-                    type = 'Node'
-                atoms = self.atomspace.get_atoms_by_name(t=types.__dict__.get(type), name=name)
+            # Optionally, filter by TruthValue
+            if tv_strength_min is not None:
+                atoms = [atom for atom in atoms if atom.tv.mean >= tv_strength_min]
 
-        # Optionally, filter by TruthValue
-        if tv_strength_min is not None:
-            atoms = [atom for atom in atoms if atom.tv.mean >= tv_strength_min]
+            if tv_confidence_min is not None:
+                atoms = [atom for atom in atoms if atom.tv.confidence >= tv_confidence_min]
 
-        if tv_confidence_min is not None:
-            atoms = [atom for atom in atoms if atom.tv.confidence >= tv_confidence_min]
-
-        if tv_count_min is not None:
-            atoms = [atom for atom in atoms if atom.tv.count >= tv_count_min]
+            if tv_count_min is not None:
+                atoms = [atom for atom in atoms if atom.tv.count >= tv_count_min]
 
         # Optionally, include the incoming set
         if include_incoming in ['True', 'true', '1']:
@@ -280,3 +287,122 @@ class AtomCollectionAPI(Resource):
             abort(500, 'Error while processing your request. Check your parameters.')
 
         return {'atoms': marshal(atom, atom_fields)}
+
+    def put(self, id):
+        """
+        Updates the AttentionValue (STI, LTI, VLTI) or TruthValue of an atom
+        Uri: atoms/[id]
+
+        :param id: Atom handle
+        Include data with the PUT request providing a JSON representation of the updated attributes.
+        Valid data elements:
+
+        truthvalue (optional) TruthValue, formatted as follows:
+            type (required) TruthValue type (only 'simple' is currently available)
+                            see http://wiki.opencog.org/w/TruthValue
+            details (required) TruthValue parameters, formatted as follows:
+                strength (required)
+                count (required)
+        attentionvalue (optional) AttentionValue, formatted as follows:
+            sti (optional) Short-Term Importance
+            lti (optional) Long-Term Importance
+            vlti (optional) Very-Long Term Importance
+
+        Example:
+
+        {
+          'truthvalue':
+          {
+            'type': 'simple',
+            'details':
+              {
+                'strength': 0.005,
+                'count': 0.8
+              }
+          },
+        'attentionvalue':
+          {
+            'sti': 9,
+            'lti': 2,
+            'vlti': True
+          }
+        }
+
+        :return atoms: Returns a JSON representation of an atom list containing the atom.
+        Example:
+
+        { 'atoms':
+          {
+            'handle': 6,
+            'name': '',
+            'type': 'InheritanceLink',
+            'outgoing': [2, 1],
+            'incoming': [],
+            'truthvalue':
+              {
+                'type': 'simple',
+                'details':
+                  {
+                    'count': '0.4000000059604645',
+                    'confidence': '0.0004997501382604241',
+                    'strength': '0.5'
+                  }
+              },
+            'attentionvalue':
+              {
+                'lti': 0,
+                'sti': 0,
+                'vlti': false
+              }
+            }
+          }
+        }
+        """
+
+        if Handle(id) not in self.atomspace:
+            abort(404, 'Handle not found')
+
+        # Prepare the atom data
+        data = reqparse.request.get_json()
+
+        if 'truthvalue' not in data and 'attentionvalue' not in data:
+            abort(400, 'Invalid request: you must include a truthvalue or attentionvalue parameter')
+
+        if 'truthvalue' in data:
+            tv = ParseTruthValue.parse(data)
+            self.atomspace.set_tv(h=Handle(id), tv=tv)
+
+        if 'attentionvalue' in data:
+            (sti, lti, vlti) = ParseAttentionValue.parse(data)
+            self.atomspace.set_av(h=Handle(id), sti=sti, lti=lti, vlti=vlti)
+
+        atom = self.atomspace[Handle(id)]
+        return {'atoms': marshal(atom, atom_fields)}
+
+    def delete(self, id):
+        """
+        Removes an atom from the AtomSpace
+        Uri: atoms/[id]
+
+        :param id: Atom handle
+
+        :return result:  Returns a JSON representation of the result, indicating success or failure.
+        Example:
+
+        {
+          'result':
+          {
+            'handle': 2,
+            'success': 'true'
+          }
+        }
+        """
+
+        if Handle(id) not in self.atomspace:
+            abort(404, 'Handle not found')
+        else:
+            atom = self.atomspace[Handle(id)]
+
+        status = self.atomspace.remove(atom)
+        response = DeleteAtomResponse(id, status)
+        return {'result': response.format()}
