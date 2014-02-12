@@ -262,126 +262,22 @@ struct logical_subtree_knob : public discrete_knob<3>
 
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                         const logical_subtree_knob& lsk)
-        : discrete_knob<3>(tr)
-    {
-        // logger().debug("lsk = %s", lsk.toStr().c_str());
-        // stringstream ss;
-        // ss << "*tgt = " << *tgt;
-        // logger().debug(ss.str());
-
-        if (lsk.in_exemplar())
-            _loc = _tr.child(tgt, lsk._tr.sibling_index(lsk._loc));
-        else
-            _loc = _tr.append_child(tgt, lsk._loc);
-        _disallowed = lsk._disallowed;
-        _default = lsk._default;
-        _current = lsk._current;
-    }
+                         const logical_subtree_knob& lsk);
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                         combo_tree::iterator subtree)
-        : discrete_knob<3>(tr)
-    {
-        typedef combo_tree::sibling_iterator sib_it;
-        typedef combo_tree::pre_order_iterator pre_it;
+                         combo_tree::iterator subtree);
 
-        // compute the negation of the subtree
-        combo_tree negated_subtree(subtree);
-        negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
+    complexity_t complexity_bound() const;
 
-        reduct::logical_reduction r;
-        r(1)(negated_subtree);
+    void clear_exemplar();
 
-        for (sib_it sib = tgt.begin(); sib != tgt.end(); ++sib) {
-            if (_tr.equal_subtree(pre_it(sib), subtree) ||
-                _tr.equal_subtree(pre_it(sib), negated_subtree.begin())) {
-                _loc = sib;
-                _current = present;
-                _default = present;
-                return;
-            }
-        }
-
-        _loc = _tr.append_child(tgt, id::null_vertex);
-        _tr.append_child(_loc, subtree);
-    }
-
-    complexity_t complexity_bound() const
-    {
-        return (_current == absent ? 0 : tree_complexity(_loc));
-    }
-
-    void clear_exemplar()
-    {
-        if (in_exemplar())
-            turn(0);
-        else
-            _tr.erase(_loc);
-    }
-
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
-
-        if (idx == _current) // already set, nothing to do
-            return;
-
-        switch (idx) {
-        case absent:
-            // flag subtree to be ignored with a null_vertex, replace
-            // negation if present
-            if (_current == negated)
-                *_loc = id::null_vertex;
-            else
-                _loc = _tr.insert_above(_loc, id::null_vertex);
-            break;
-        case present:
-            _loc = _tr.erase(_tr.flatten(_loc));
-            break;
-        case negated:
-            if (_current == present)
-                _loc = _tr.insert_above(_loc, id::logical_not);
-            else
-                *_loc = id::logical_not;
-            break;
-        }
-
-        _current = idx;
-    }
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        typedef combo_tree::iterator pre_it;
+                                   int idx) const;
 
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
-
-        // append v to parent_dst's children. If candidate is empty
-        // then set it as head. Return the iterator pointing to the
-        // new content.
-        auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
-        {
-            return candidate.empty()? candidate.set_head(v)
-            : candidate.append_child(parent_dst, v);
-        };
-
-        pre_it new_src = parent_dst.end();
-        if (idx == negated)
-            parent_dst = append_child(parent_dst, id::logical_not);
-        if (idx != absent) {
-            new_src = _default == present ? _loc : (pre_it)_loc.begin();
-            parent_dst = append_child(parent_dst, *new_src);
-        }
-        return new_src;
-    }
-
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
     std::string toStr() const;
 private:
