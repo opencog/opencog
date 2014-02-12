@@ -25,6 +25,10 @@
 
 namespace opencog { namespace moses {
 
+//////////////////////////
+// logical_subtree_knob //
+//////////////////////////
+
 std::string logical_subtree_knob::toStr() const
 {
     std::stringstream ss;
@@ -77,6 +81,83 @@ std::string logical_subtree_knob::posStr(int pos, bool tag_current) const
     }
     return pos == _current && tag_current?
         std::string("(") + ss.str() + ")" : ss.str();
+}
+
+/////////////////////////
+// action_subtree_knob //
+/////////////////////////
+
+action_subtree_knob::action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+                                         const vector<combo_tree>& perms)
+    : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
+
+    OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
+
+    for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;++i)
+        disallow(i);
+
+    _default = 0;
+    _current = _default;
+    _loc = _tr.append_child(tgt, id::null_vertex);
+}
+
+complexity_t action_subtree_knob::complexity_bound() const {
+    return tree_complexity(_loc);
+}
+
+void action_subtree_knob::clear_exemplar() {
+    if (in_exemplar())
+        turn(0);
+    else
+        _tr.erase(_loc);
+}
+
+void action_subtree_knob::turn(int idx)
+{
+    idx = map_idx(idx);
+    OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+    
+    if (idx == _current) //already set, nothing to
+        return;
+    
+    if (idx == 0) {
+        if (_current != 0) {
+            combo_tree t(id::null_vertex);
+            _loc = _tr.replace(_loc, t.begin());
+        }
+    } else {
+        pre_it ite = (_perms[idx-1]).begin();
+        _loc = _tr.replace(_loc, ite);
+    }
+    _current = idx;
+}
+
+
+combo_tree::iterator action_subtree_knob::append_to(combo_tree& candidate,
+                                                    combo_tree::iterator& parent_dst,
+                                                    int idx) const
+{
+    OC_ASSERT(false, "Not implemented yet");
+    return combo_tree::iterator();
+}
+
+field_set::disc_spec action_subtree_knob::spec() const {
+    return field_set::disc_spec(multiplicity());
+}
+
+std::string action_subtree_knob::toStr() const {
+    std::stringstream ss;
+    ss << "[";
+    for(int i = 0; i < multiplicity(); ++i) {
+        int idx = map_idx(i);
+        OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+        if (idx == 0)
+            ss << "nil ";
+        else
+            ss << _perms[idx-1];
+    }
+    ss << "]";
+    return ss.str();
 }
 
 } //~namespace moses

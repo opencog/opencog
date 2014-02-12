@@ -404,68 +404,21 @@ struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                        const vector<combo_tree>& perms)
-        : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
+                        const vector<combo_tree>& perms);
 
-        OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
+    complexity_t complexity_bound() const;
 
-        for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;++i)
-            disallow(i);
+    void clear_exemplar();
 
-        _default = 0;
-        _current = _default;
-        _loc = _tr.append_child(tgt, id::null_vertex);
-    }
-
-    complexity_t complexity_bound() const {
-        return tree_complexity(_loc);
-    }
-
-    void clear_exemplar() {
-        if (in_exemplar())
-            turn(0);
-        else
-            _tr.erase(_loc);
-    }
-
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
-
-        if (idx == _current) //already set, nothing to
-            return;
-
-        if (idx == 0) {
-            if (_current != 0) {
-                combo_tree t(id::null_vertex);
-                _loc = _tr.replace(_loc, t.begin());
-            }
-        } else {
-            pre_it ite = (_perms[idx-1]).begin();
-            _loc = _tr.replace(_loc, ite);
-        }
-        _current = idx;
-    }
-
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        OC_ASSERT(false, "Not implemented yet");
-        return combo_tree::iterator();
-    }
+                                   int idx) const;
 
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
-    std::string toStr() const {
-        std::stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
-        return ss.str();
-    }
+    std::string toStr() const;
 protected:
     const vector<combo_tree> _perms;
 };
