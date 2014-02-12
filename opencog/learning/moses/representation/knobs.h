@@ -318,6 +318,10 @@ struct simple_action_subtree_knob : public discrete_knob<2>
     field_set::disc_spec spec() const;
 
     std::string toStr() const;
+
+private:
+    // return << *_loc or << *_loc.begin() if it is null_vertex
+    std::string locStr() const;
 };
 
 // The disc_knob may be any one of a number of different discrete

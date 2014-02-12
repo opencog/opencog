@@ -393,7 +393,20 @@ field_set::disc_spec simple_action_subtree_knob::spec() const {
 
 std::string simple_action_subtree_knob::toStr() const {
     std::stringstream ss;
-    ss << "[" << *_loc << " TODO ]";
+    ss << "[nil|" << locStr() << "]";
+    return ss.str();
+}
+
+std::string simple_action_subtree_knob::locStr() const
+{
+    OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
+              "if _loc is null_vertex then it must have only one child");
+    std::stringstream ss;
+    combo_tree::iterator it;
+    if (*_loc == id::null_vertex)
+        it = _loc.begin();
+    else it = _loc;
+    ss << *it;
     return ss.str();
 }
 
