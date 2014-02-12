@@ -37,9 +37,16 @@ class AtomCollectionAPI(Resource):
     def get(self, id=""):
         """
         Returns a list of atoms matching the specified criteria
-        Uri: atoms?type=[type]&name=[name]&filterby=[filterby]&tvStrengthMin=[tvStrengthMin]
+        Uri:
+
+        atoms/[id]
+        (or)
+        atoms?type=[type]&name=[name]&filterby=[filterby]&tvStrengthMin=[tvStrengthMin]
             &tvConfidenceMin=[tvConfidenceMin]&tvCountMin=[tvCountMin]&includeIncoming=[includeIncoming]
             &includeOutgoing=[includeOutgoing]&callback=[callback]
+
+        :param id: (optional, int, to specifically request an atom by handle, can be combined with includeIncoming or
+            includeOutgoing only; if specified, other query parameters will have no effect) Atom handle
 
         :param type: (optional) Atom type, see http://wiki.opencog.org/w/OpenCog_Atom_types
         :param name: (optional, string, not allowed for Link types) Atom name
