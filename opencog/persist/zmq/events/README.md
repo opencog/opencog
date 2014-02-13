@@ -8,7 +8,7 @@ pattern.
 
 Clients can subscribe to the events by subscribing to a ZeroMQ socket.
 
-Supported events are:
+##### Supported events:
 
 *   **add**        (Atom added)
 *   **remove**     (Atom removed)
@@ -20,7 +20,7 @@ Supported events are:
 The message is a JSON-formatted string that follows the same conventions
 as the [REST API](http://wiki.opencog.org/w/Web_interface).
 
-##### Potential usage examples
+##### Potential usage examples:
 
 - Debugging
 - Monitoring the dynamics of the AttentionAllocation system as it propagates STI and LTI throughout the network and the AttentionalFocus changes
@@ -320,6 +320,8 @@ To enable this server, follow the instructions in this file:
 An example client application is available in this file:
 
 <https://github.com/opencog/opencog/blob/master/opencog/python/web/socketio/index.html>
+
+***
 
 ##### Todo
 
