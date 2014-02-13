@@ -1,7 +1,7 @@
 /*
  * opencog/persist/zmq/events/AtomSpacePublisherModule.cc
  *
- * Copyright (C) 2013 OpenCog Foundation
+ * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Cosmo Harrigan
@@ -106,20 +106,54 @@ void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
     std::string payload = atomMessage(atomToPtree(atom->getHandle()));
     s_sendmore (*publisher, "remove");
     s_send (*publisher, payload);
+
+    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you remove an atom
+    //   https://github.com/opencog/opencog/issues/394
+    // After that bug is resolved, it may be necessary to check if the atom was in the
+    // AttentionalFocus before being deleted, and then publish a 'removeAF' signal
 }
 
 void AtomSpacePublisherModule::AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new)
-{      
-    std::string payload = avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
-    s_sendmore (*publisher, "avchanged");
-    s_send (*publisher, payload);
+{
+    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you add an atom
+    //   https://github.com/opencog/opencog/issues/394
+    // Until that bug is fixed, this will ignore the simple case where the atom is created with no AttentionValue defined. However,
+    // if the atom is created with an AttentionValue defined, that dummy signal will still be published.
+    if (av_old != av_new)
+    {
+        // Publish signal: avchanged
+        std::string payload = avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
+        s_sendmore (*publisher, "avChanged");
+        s_send (*publisher, payload);
+
+        // Check whether atom was added or removed from the AttentionalFocus
+        if (av_old->getSTI() < as->getAttentionalFocusBoundary() && av_new->getSTI() >= as->getAttentionalFocusBoundary())
+        {
+            // Publish signal: addAF
+            s_sendmore (*publisher, "addAF");
+            s_send (*publisher, payload);
+        }
+        else if (av_new->getSTI() < as->getAttentionalFocusBoundary() && av_old->getSTI() >= as->getAttentionalFocusBoundary())
+        {
+            // Publish signal: removeAF
+            s_sendmore (*publisher, "removeAF");
+            s_send (*publisher, payload);
+        }
+    }
 }
 
 void AtomSpacePublisherModule::TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
 {
-    std::string payload = tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
-    s_sendmore (*publisher, "tvchanged");
-    s_send (*publisher, payload);
+    // The AtomSpace API fires a dummy 'TVChangedSignal' signal when you add a link
+    //   https://github.com/opencog/opencog/issues/394
+    // Until that bug is fixed, this will ignore the simple case where the link is created with no TruthValue defined. However,
+    // if the link is created with a TruthValue defined, that dummy signal will still be published.
+    if (tv_old != tv_new)
+    {
+        std::string payload = tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
+        s_sendmore (*publisher, "tvChanged");
+        s_send (*publisher, payload);
+    }
 }
 
 ptree AtomSpacePublisherModule::atomToPtree(Handle h)
