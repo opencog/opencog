@@ -59,7 +59,7 @@ cp "$OC_PATH/CMakeLists.txt" "$ABS_MOSES_DIR/CMakeLists.txt.orig"
 cp "$OC_PATH/lib/Summary.cmake" "$ABS_MOSES_DIR/lib"
 
 # libUtil
-UTIL_FILES=(algorithm.h based_variant.h concurrent_queue.h Config.cc Config.h Counter.h digraph.h dorepeat.h exceptions.cc exceptions.h foreach.h functional.h hashing.h iostreamContainer.h KLD.h lazy_normal_selector.cc lazy_normal_selector.h lazy_random_selector.cc lazy_random_selector.h lazy_selector.cc lazy_selector.h Logger.cc Logger.h log_prog_name.h log_prog_name.cc lru_cache.h macros.h MannWhitneyU.h mt19937ar.cc mt19937ar.h numeric.h oc_assert.cc oc_assert.h oc_omp.cc oc_omp.h platform.cc platform.h pool.h RandGen.h random.h ranking.h selection.h tree.cc tree.h comprehension.h)
+UTIL_FILES=(algorithm.h based_variant.h concurrent_queue.h Config.cc Config.h Counter.h digraph.h dorepeat.h exceptions.cc exceptions.h foreach.h functional.h hashing.h iostreamContainer.h KLD.h lazy_normal_selector.cc lazy_normal_selector.h lazy_random_selector.cc lazy_random_selector.h lazy_selector.cc lazy_selector.h Logger.cc Logger.h log_prog_name.h log_prog_name.cc lru_cache.h macros.h MannWhitneyU.h mt19937ar.cc mt19937ar.h numeric.h oc_assert.cc oc_assert.h oc_omp.cc oc_omp.h platform.cc platform.h pool.h RandGen.h random.h ranking.h selection.h tree.cc tree.h comprehension.h backtrace-symbols.c backtrace-symbols.c)
 # copy all files but replace all instances of opencog by moses
 for f in ${UTIL_FILES[@]}; do
     sed s/opencog/"$PROJECT"/g "$OC_PATH"/opencog/util/$f > "$ABS_MOSES_DIR/$PROJECT/util/$f"
