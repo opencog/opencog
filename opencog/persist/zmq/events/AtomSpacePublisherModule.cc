@@ -96,33 +96,33 @@ void AtomSpacePublisherModule::InitZeroMQ()
 
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
 {
-    std::string payload = atomToJSON(h);
+    std::string payload = atomMessage(atomToPtree(h));
     s_sendmore (*publisher, "add");
     s_send (*publisher, payload);
 }
 
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
-    std::string payload = atomToJSON(atom->getHandle());
+    std::string payload = atomMessage(atomToPtree(atom->getHandle()));
     s_sendmore (*publisher, "remove");
     s_send (*publisher, payload);
 }
 
 void AtomSpacePublisherModule::AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new)
 {      
-    std::string payload = atomToJSON(h);
+    std::string payload = avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
     s_sendmore (*publisher, "avchanged");
     s_send (*publisher, payload);
 }
 
 void AtomSpacePublisherModule::TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
 {
-    std::string payload = atomToJSON(h);
+    std::string payload = tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
     s_sendmore (*publisher, "tvchanged");
     s_send (*publisher, payload);
 }
 
-std::string AtomSpacePublisherModule::atomToJSON(Handle h)
+ptree AtomSpacePublisherModule::atomToPtree(Handle h)
 {
     // Type
     Type type = as->getType(h);
@@ -136,9 +136,8 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
 
     // AttentionValue
     AttentionValuePtr av = as->getAV(h);
-    std::string stiString = std::to_string(av->getSTI());
-    std::string ltiString = std::to_string(av->getLTI());
-    std::string vltiString = av->getVLTI() != 0 ? "true" : "false";
+    ptree ptAV;
+    ptAV = avToPtree(av);
 
     // TruthValue
     TruthValuePtr tvp = as->getTV(h);
@@ -164,26 +163,28 @@ std::string AtomSpacePublisherModule::atomToJSON(Handle h)
     }
 
     // Use Boost property trees for JSON serialization
-    ptree ptAtoms;
     ptree pt;
 
     pt.put("handle", handleString);
     pt.put("type", typeNameString);
     pt.put("name", nameString);
-    pt.put("attentionvalue.sti", stiString);
-    pt.put("attentionvalue.lti", ltiString);
-    pt.put("attentionvalue.vlti", vltiString);
+    pt.add_child("attentionvalue", ptAV);
     pt.add_child("truthvalue", ptTV);
     pt.add_child("outgoing", ptOutgoing);
     pt.add_child("incoming", ptIncoming);
 
-    ptAtoms.add_child("atoms", pt);
+    return pt;
+}
 
-    std::ostringstream buf;
-    write_json (buf, ptAtoms, false); // false = don't use pretty print
-    std::string json = buf.str();
+ptree AtomSpacePublisherModule::avToPtree(AttentionValuePtr av)
+{
+    ptree ptAV;
 
-    return json;
+    ptAV.put("sti", std::to_string(av->getSTI()));
+    ptAV.put("lti", std::to_string(av->getLTI()));
+    ptAV.put("vlti", av->getVLTI() != 0 ? "true" : "false");
+
+    return ptAV;
 }
 
 ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
@@ -231,4 +232,45 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
     }
 
     return ptTV;
+}
+
+std::string AtomSpacePublisherModule::atomMessage(ptree ptAtom)
+{
+    ptree ptAtomMessage;
+
+    ptAtomMessage.add_child("atom", ptAtom);
+
+    return ptToJSON(ptAtomMessage);
+}
+
+std::string AtomSpacePublisherModule::avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew)
+{
+    ptree ptAVMessage;
+
+    ptAVMessage.put("handle", ptAtom.get<std::string>("handle", ""));
+    ptAVMessage.add_child("avOld", ptAVOld);
+    ptAVMessage.add_child("avNew", ptAVNew);
+    ptAVMessage.add_child("atom", ptAtom);
+
+    return ptToJSON(ptAVMessage);
+}
+
+std::string AtomSpacePublisherModule::tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew)
+{
+    ptree ptTVMessage;
+
+    ptTVMessage.put("handle", ptAtom.get<std::string>("handle", ""));
+    ptTVMessage.add_child("tvOld", ptTVOld);
+    ptTVMessage.add_child("tvNew", ptTVNew);
+    ptTVMessage.add_child("atom", ptAtom);
+
+    return ptToJSON(ptTVMessage);
+}
+
+std::string AtomSpacePublisherModule::ptToJSON(ptree pt)
+{
+    std::ostringstream buf;
+    write_json (buf, pt, true); // true = use pretty print formatting
+    std::string json = buf.str();
+    return json;
 }

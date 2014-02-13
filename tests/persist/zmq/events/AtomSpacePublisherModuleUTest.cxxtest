@@ -143,8 +143,13 @@ public:
         InitZeroMQ();
 
         std::stringstream ss;
+        std::string handle;
         ptree pt;
         ptree ptAtom;
+        ptree ptTVOld;
+        ptree ptTVNew;
+        ptree ptAVOld;
+        ptree ptAVNew;
 
         // Add an atom
         TruthValuePtr tv = SimpleTruthValue::createTV(2.1, 3.1);
@@ -161,7 +166,8 @@ public:
         s_recv (*subscriberAVChanged);
         ss << contents;
         read_json(ss, pt);
-        ptAtom = pt.get_child("atoms");
+
+        ptAtom = pt.get_child("atom");
 
         // Assert that the subscriber socket received the properly formatted atomspace 'add' event
         TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
@@ -179,14 +185,27 @@ public:
         contents = s_recv (*subscriberTVChanged);
         ss << contents;
         read_json(ss, pt);
-        ptAtom = pt.get_child("atoms");
+        handle = pt.get<std::string>("handle");
+        ptAtom = pt.get_child("atom");
+        ptTVOld = pt.get_child("tvOld");
+        ptTVNew = pt.get_child("tvNew");
 
         // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
+        TS_ASSERT(handle == std::to_string(h.value()));
+
         TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
         TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.strength", "") == "5.1");
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
+
+        TS_ASSERT(ptTVOld.get<std::string>("type", "") == "simple");
+        TS_ASSERT(ptTVOld.get<std::string>("details.strength", "") == "2.1");
+        TS_ASSERT(ptTVOld.get<std::string>("details.count", "") == "3.1");
+
+        TS_ASSERT(ptTVNew.get<std::string>("type", "") == "simple");
+        TS_ASSERT(ptTVNew.get<std::string>("details.strength", "") == "5.1");
+        TS_ASSERT(ptTVNew.get<std::string>("details.count", "") == "7.1");
 
         // Modify the atom's AttentionValue
         AttentionValuePtr av = createAV(30, 50, 0);
@@ -196,9 +215,15 @@ public:
         contents = s_recv (*subscriberAVChanged);
         ss << contents;
         read_json(ss, pt);
-        ptAtom = pt.get_child("atoms");
+
+        handle = pt.get<std::string>("handle");
+        ptAtom = pt.get_child("atom");
+        ptAVOld = pt.get_child("avOld");
+        ptAVNew = pt.get_child("avNew");
 
         // Assert that the subscriber socket received the properly formatted atomspace 'avchanged' event
+        TS_ASSERT(handle == std::to_string(h.value()))
+
         TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNode");
         TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "simple");
@@ -206,6 +231,15 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
+        TS_ASSERT(ptAtom.get<std::string>("attentionvalue.vlti", "") == "false");
+
+        TS_ASSERT(ptAVOld.get<std::string>("sti", "") == "0");
+        TS_ASSERT(ptAVOld.get<std::string>("lti", "") == "0");
+        TS_ASSERT(ptAVOld.get<std::string>("vlti", "") == "false");
+
+        TS_ASSERT(ptAVNew.get<std::string>("sti", "") == "30");
+        TS_ASSERT(ptAVNew.get<std::string>("lti", "") == "50");
+        TS_ASSERT(ptAVNew.get<std::string>("vlti", "") == "false");
 
         // Remove the atom
         as->removeAtom(h);
@@ -228,32 +262,5 @@ public:
         TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.count", "") == "7.1");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.sti", "") == "30");
         TS_ASSERT(ptAtom.get<std::string>("attentionvalue.lti", "") == "50");
-
-        // Add an atom and test that the associated
-        // JSON object from the event is properly formatted
-        Handle contextExampleNode1 = as->addNode(CONCEPT_NODE, "ContextExampleNode1");
-        Handle contextExampleNode2 = as->addNode(CONCEPT_NODE, "ContextExampleNode2");
-        Handle exampleNode = as->addNode(CONCEPT_NODE, "ExampleNodeWithContextualTV");
-
-        // TruthValuePtr simpleTV1 = SimpleTruthValue::createTV(4.1, 6.1);
-        // TruthValuePtr simpleTV2 = SimpleTruthValue::createTV(5.1, 8.1);
-
-        // Receive the event corresponding to the first of the two TruthValue changes, and disregard it
-        // s_recv (*subscriberTVChanged);
-        // s_recv (*subscriberTVChanged);
-
-        // Receive the event corresponding to the second of the two TruthValue changes
-        // address = s_recv (*subscriberTVChanged);
-        // contents = s_recv (*subscriberTVChanged);
-        // ss << contents;
-        // read_json(ss, pt);
-        // ptAtom = pt.get_child("atoms");
-
-        // Assert that the subscriber socket received the properly formatted atomspace 'tvchanged' event
-        // TS_ASSERT(ptAtom.get<std::string>("name", "") == "ExampleNodeWithContextualTV");
-        // TS_ASSERT(ptAtom.get<std::string>("type", "") == "ConceptNode");
-        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.type", "") == "composite");
-        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.strength", "") == "0");
-        // TS_ASSERT(ptAtom.get<std::string>("truthvalue.details.primary.details.count", "") == "0");
     }
 };

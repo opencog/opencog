@@ -45,8 +45,7 @@ class CogServer;
  * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using ZeroMQ
  * to allow for external clients to receive updates from the AtomSpace via a publish/subscribe pattern.
  *
- * Full documentation is available here:
- *   http://wiki.opencog.org/w/AtomSpace_Event_Publisher
+ * Full documentation is available in README.md
  *
  * Clients can subscribe to the events by subscribing to the ZeroMQ socket defined in the
  * ZMQ_EVENT_PORT parameter set in the OpenCog configuration file.
@@ -79,6 +78,14 @@ class AtomSpacePublisherModule : public Module
 
         void InitZeroMQ();
 
+        ptree atomToPtree(Handle h);
+        ptree tvToPtree(TruthValuePtr tv);
+        ptree avToPtree(AttentionValuePtr av);
+        std::string atomMessage(ptree ptAtom);
+        std::string avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew);
+        std::string tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew);
+        std::string ptToJSON(ptree pt);
+
     public:
         AtomSpacePublisherModule(CogServer&);
         virtual ~AtomSpacePublisherModule();
@@ -91,9 +98,6 @@ class AtomSpacePublisherModule : public Module
         void atomRemoveSignal(AtomPtr atom);
         void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
         void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
-
-        std::string atomToJSON(Handle h);
-        ptree tvToPtree(TruthValuePtr tv);
 };
 
 }
