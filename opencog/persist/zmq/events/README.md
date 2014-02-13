@@ -20,15 +20,22 @@ Supported events are:
 The message is a JSON-formatted string that follows the same conventions
 as the [REST API](http://wiki.opencog.org/w/Web_interface).
 
+Potential usage examples include:
+
+- debugging
+- monitoring the dynamics of the AttentionAllocation system as it propagates STI and LTI throughout the network
+- monitoring PLN
+- allowing external modules such as the AtomSpace Visualizer to subscribe to real-time updates
+
 Configuration
 =============
 
 Prerequisites
 -------------
 
-Requires ZeroMQ 3.2.4 (libzmq3-dev)
+Requires ZeroMQ version 3.2.4 (libzmq3-dev) or higher.
 
-This will be installed automatically if you are using ocpkg, or can be
+This will be installed automatically if you are using [ocpkg](https://github.com/opencog/ocpkg), or can be
 installed manually here: <http://zeromq.org/intro:get-the-software>
 
 Module
@@ -196,7 +203,7 @@ Triggered whenever an atom is added.
 
 ZeroMQ subscription channel name: **add**
 
-### Format
+#### Format
 
     {
         "atom": ATOM
@@ -209,7 +216,7 @@ Triggered whenever an atom is removed.
 
 ZeroMQ subscription channel name: **remove**
 
-### Format
+#### Format
 
     {
         "atom": ATOM
@@ -222,7 +229,7 @@ Triggered whenever the AttentionValue of an atom is changed.
 
 ZeroMQ subscription channel name: **avChanged**
 
-### Format
+#### Format
 
     {
         "handle": HANDLE,
@@ -238,7 +245,7 @@ Triggered whenever the TruthValue of an atom is changed.
 
 ZeroMQ subscription channel name: **tvChanged**
 
-### Format
+#### Format
 
     {
         "handle": HANDLE,
@@ -253,9 +260,9 @@ addAF
 Triggered whenever the AttentionValue of an atom changes, if the new STI value
 is within the AttentionalFocus boundary and the old STI value is not.
 
-ZeroMQ subscription channel name: **tvChanged**
+ZeroMQ subscription channel name: **addAF**
 
-### Format
+#### Format
 
     {
         "handle": HANDLE,
@@ -264,15 +271,15 @@ ZeroMQ subscription channel name: **tvChanged**
         "atom": ATOM
     }
 
-addAF
+removeAF
 ---------
 
 Triggered whenever the AttentionValue of an atom changes, if the old STI value
 is within the AttentionalFocus boundary and the new STI value is not.
 
-ZeroMQ subscription channel name: **tvChanged**
+ZeroMQ subscription channel name: **removeAF**
 
-### Format
+#### Format
 
     {
         "handle": HANDLE,
@@ -280,13 +287,6 @@ ZeroMQ subscription channel name: **tvChanged**
         "avNew": ATTENTIONVALUETYPE,
         "atom": ATOM
     }
-
-Important note regarding redundant events in the AtomSpace API
---------------------------------------------------------------
-
-Currently, the **AtomSpace** class triggers redundant events under certain
-circumstances. This has been noted in this open issue:
-<https://github.com/opencog/opencog/issues/394>
 
 Example clients
 ===============
@@ -302,9 +302,9 @@ C++
 ---
 
 Detailed examples of how to subscribe to events and parse the JSON using
-Boost Property Trees can be found in the unit tests, located in:
+Boost Property Trees can be found in the unit tests, located here:
 
-`  tests/persist/zmq/events/AtomSpacePublisherModuleUTest.cxxtest`
+<https://github.com/opencog/opencog/blob/master/tests/persist/zmq/events/AtomSpacePublisherModuleUTest.cxxtest#L140>
 
 JavaScript
 ----------
@@ -315,18 +315,22 @@ across domains.
 
 To enable this server, follow the instructions in this file:
 
-`  opencog/python/web/socketio/atomspace_publisher.py`
+<https://github.com/opencog/opencog/blob/master/opencog/python/web/socketio/atomspace_publisher.py>
 
 An example client application is available in this file:
 
-`  opencog/python/web/socketio/index.html`
+<https://github.com/opencog/opencog/blob/master/opencog/python/web/socketio/index.html>
 
 TODO
 ====
 
-There is a need in the AtomSpace for a new Boost Signals2 signal type,
+- There is a need in the AtomSpace for a new Boost Signals2 signal type,
 AttentionalFocusBoundaryChanged. It should contain the old boundary and the new
 boundary. Without that, there can be a case where the AttentionalFocusBoundary
 changes, and as a result the publisher does not publish all of the addAF and
 removeAF events that should have occured, because those events are currently
 only triggered by the AVChangedSignal.
+
+- Currently, the **AtomSpace** class triggers redundant events under certain
+circumstances. This has been noted in this open issue:
+<https://github.com/opencog/opencog/issues/394>
