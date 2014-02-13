@@ -20,12 +20,12 @@ Supported events are:
 The message is a JSON-formatted string that follows the same conventions
 as the [REST API](http://wiki.opencog.org/w/Web_interface).
 
-Potential usage examples include:
+##### Potential usage examples
 
-- debugging
-- monitoring the dynamics of the AttentionAllocation system as it propagates STI and LTI throughout the network
-- monitoring PLN
-- allowing external modules such as the AtomSpace Visualizer to subscribe to real-time updates
+- Debugging
+- Monitoring the dynamics of the AttentionAllocation system as it propagates STI and LTI throughout the network and the AttentionalFocus changes
+- Monitoring PLN
+- Allowing external modules such as the AtomSpace Visualizer to subscribe to real-time updates
 
 Configuration
 =============
@@ -68,7 +68,7 @@ Message format
 Atom object
 -----------
 
-### Format
+##### Format
 
     {
             "atom": {
@@ -203,7 +203,7 @@ Triggered whenever an atom is added.
 
 ZeroMQ subscription channel name: **add**
 
-#### Format
+##### Format
 
     {
         "atom": ATOM
@@ -216,7 +216,7 @@ Triggered whenever an atom is removed.
 
 ZeroMQ subscription channel name: **remove**
 
-#### Format
+##### Format
 
     {
         "atom": ATOM
@@ -229,7 +229,7 @@ Triggered whenever the AttentionValue of an atom is changed.
 
 ZeroMQ subscription channel name: **avChanged**
 
-#### Format
+##### Format
 
     {
         "handle": HANDLE,
@@ -245,7 +245,7 @@ Triggered whenever the TruthValue of an atom is changed.
 
 ZeroMQ subscription channel name: **tvChanged**
 
-#### Format
+##### Format
 
     {
         "handle": HANDLE,
@@ -262,7 +262,7 @@ is within the AttentionalFocus boundary and the old STI value is not.
 
 ZeroMQ subscription channel name: **addAF**
 
-#### Format
+##### Format
 
     {
         "handle": HANDLE,
@@ -279,7 +279,7 @@ is within the AttentionalFocus boundary and the new STI value is not.
 
 ZeroMQ subscription channel name: **removeAF**
 
-#### Format
+##### Format
 
     {
         "handle": HANDLE,
@@ -321,8 +321,7 @@ An example client application is available in this file:
 
 <https://github.com/opencog/opencog/blob/master/opencog/python/web/socketio/index.html>
 
-TODO
-====
+##### Todo
 
 - There is a need in the AtomSpace for a new Boost Signals2 signal type,
 AttentionalFocusBoundaryChanged. It should contain the old boundary and the new
