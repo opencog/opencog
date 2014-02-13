@@ -528,10 +528,6 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
 
-    // XXX Setting the atom table causes AVchagned signals to be sent.
-    // Ideally we should unlock, send the AVCH signal, lock, set the table,
-    // unlock and send the other AVCH signal.  But right now, I'm too lazy
-    // to fix this.  I'm figuring no one will notice.
     atom->setAtomTable(this);
 
     // We can now unlock, since we are done. In particular, the signals

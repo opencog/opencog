@@ -224,21 +224,11 @@ void Atom::setAtomTable(AtomTable *tb)
 {
     if (tb == _atomTable) return;
 
-    // Notify any interested parties that the AV changed.
-    if (NULL == tb and NULL != _atomTable) {
-        // remove, as far as the old table is concerned
-        AVCHSigl& avch = _atomTable->AVChangedSignal();
-        avch(getHandle(), getAttentionValue(), AttentionValue::DEFAULT_AV());
-
+    if (NULL != _atomTable) {
         // UUID's belong to the atom table, not the atom. Reclaim it.
         _uuid = Handle::UNDEFINED.value();
     }
     _atomTable = tb;
-    if (NULL != tb) {
-        // add, as far as the old table is concerned
-        AVCHSigl& avch = tb->AVChangedSignal();
-        avch(getHandle(), AttentionValue::DEFAULT_AV(), getAttentionValue());
-    }
 }
 
 // ==============================================================
