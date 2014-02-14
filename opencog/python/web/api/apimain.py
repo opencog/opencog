@@ -19,10 +19,10 @@ class RESTAPI(object):
     Prerequisites:
     Flask, mock, flask-restful, six
 
-    Default endpoint: http://127.0.0.1:5000/api/v1.0/
+    Default endpoint: http://127.0.0.1:5000/api/v1.1/
     (Replace 127.0.0.1 with the IP address of the server if necessary)
 
-    Example request: http://127.0.0.1:5000/api/v1.0/atoms?type=ConceptNode
+    Example request: http://127.0.0.1:5000/api/v1.1/atoms?type=ConceptNode
 
     See: opencog/python/web/api/exampleclient.py for detailed examples of usage, and review
     the method definitions in each resource for request/response specifications.
@@ -34,12 +34,10 @@ class RESTAPI(object):
         # Initialize the web server and set the routing
         self.app = Flask(__name__, static_url_path="")
         self.api = Api(self.app)
-        atom_api = AtomAPI.new(self.atomspace)
         atom_collection_api = AtomCollectionAPI.new(self.atomspace)
         atom_types_api = TypesAPI()
-        self.api.add_resource(atom_collection_api, '/api/v1.0/atoms', endpoint='atoms')
-        self.api.add_resource(atom_api, '/api/v1.0/atoms/<int:id>', endpoint='atom')
-        self.api.add_resource(atom_types_api, '/api/v1.0/types', endpoint='types')
+        self.api.add_resource(atom_collection_api, '/api/v1.1/atoms', '/api/v1.1/atoms/<int:id>', endpoint='atoms')
+        self.api.add_resource(atom_types_api, '/api/v1.1/types', endpoint='types')
 
     def run(self, host='127.0.0.1', port=5000):
         """

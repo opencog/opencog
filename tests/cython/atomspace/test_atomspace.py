@@ -201,6 +201,20 @@ class AtomSpaceTest(TestCase):
         result = self.space.get_atoms_by_target_atom(types.Link, h3)
         self.assertTrue(l1 not in result)
 
+    def test_include_incoming_outgoing(self):
+        frog = self.space.add_node(types.ConceptNode, "Frog")
+        thing = self.space.add_node(types.ConceptNode, "Thing")
+        animal = self.space.add_node(types.ConceptNode, "Animal")
+        self.space.add_node(types.ConceptNode, "SeparateThing")
+        self.space.add_link(types.InheritanceLink, [frog, animal])
+        self.space.add_link(types.InheritanceLink, [animal, thing])
+
+        assert len(self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog"))) == 2
+        assert len(self.space.include_incoming(self.space.get_atoms_by_type(types.ConceptNode))) == 6
+        assert len(self.space.include_outgoing(self.space.get_atoms_by_type(types.InheritanceLink))) == 5
+        assert len(self.space.include_outgoing(
+            self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog")))) == 3
+
     def test_remove(self):
         h1 = self.space.add_node(types.Node, "test1")
         h2 = self.space.add_node(types.ConceptNode, "test2")
