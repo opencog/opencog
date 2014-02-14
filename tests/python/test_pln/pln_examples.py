@@ -156,7 +156,8 @@ class AllRules(object):
         self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
-        self.member_rules = [rules.EvaluationToMemberRule(self.chainer)]
+        self.member_rules = [rules.EvaluationToMemberRule(self.chainer),
+            rules.MemberToEvaluationRule(self.chainer)]
         self.member_rules += rules.create_general_evaluation_to_member_rules(self.chainer)
         for rule in self.member_rules:
             self.chainer.add_rule(rule)
