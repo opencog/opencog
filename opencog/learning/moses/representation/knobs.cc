@@ -386,8 +386,26 @@ combo_tree::iterator simple_action_subtree_knob::append_to(combo_tree& candidate
                                                            combo_tree::iterator& parent_dst,
                                                            int idx) const
 {
-    OC_ASSERT(false, "Not implemented yet");
-    return combo_tree::iterator();
+    typedef combo_tree::iterator pre_it;
+
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 2), "Index greater than 1.");
+
+    // append v to parent_dst's children. If candidate is empty
+    // then set it as head. Return the iterator pointing to the
+    // new content.
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+    {
+        return candidate.empty()? candidate.set_head(v)
+        : candidate.append_child(parent_dst, v);
+    };
+
+    pre_it new_src = parent_dst.end();
+    if (idx == present) {
+        new_src = _default == present ? _loc : (pre_it)_loc.begin();
+        parent_dst = append_child(parent_dst, *new_src);
+    };
+    return new_src;
 }
 
 field_set::disc_spec simple_action_subtree_knob::spec() const {
