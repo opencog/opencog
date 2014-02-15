@@ -29,6 +29,7 @@
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/numeric.h>
+#include <opencog/util/oc_omp.h>
 
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
@@ -61,7 +62,7 @@ int main(int argc,char** argv)
     // Logger setting
     static const string log_file = "moses-ant-hillclimbing.log";
     remove(log_file.c_str());
-    logger().setLevel(Logger::FINE);
+    logger().setLevel(Logger::DEBUG);
     logger().setFilename(log_file);
 
     type_tree tt(id::lambda_type);
@@ -88,9 +89,12 @@ int main(int argc,char** argv)
                            scorer, bscorer, hc, metaparms);
   
     boost::program_options::variables_map vm;
-    jobs_t jobs;
+    static const string localhost = "localhost";
+    unsigned n_jobs = 3;
+    jobs_t jobs{{localhost, n_jobs}};
+    setting_omp(jobs[localhost]);
 
-    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0);
+    moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
     moses_statistics st;
     run_moses(metapop, moses_param, st);
 }
