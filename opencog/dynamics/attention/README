@@ -21,12 +21,12 @@ allocation among atoms within OpenCog.
 
 - MindAgents
   - ImportanceUpdatingAgent - pays "wages" and collects "rent" from atoms in the
-    form of Short term importance (STI) and Long term importance (LTI).
+    form of Short Term Importance (STI) and Long Term Importance (LTI).
   - ImportanceDiffusionAgent - spreads STI along HebbianLinks.
   - ImportanceSpreadingAgent - alternative way to spread STI along HebbianLinks.
   - ForgettingAgent - "forgets" atoms with low LTI.
   - HebbianUpdatingAgent - updates the weights of HebbianLinks based on what
-    is in the Attentional focus of the OpenCog instance at the time it's run. 
+    is in the Attentional Focus of the OpenCog instance at the time it's run.
   - STIDecayingAgent - simplified forgetting mechanism (Used by Embodiment).
 
 - AttentionValues - Each atom has an AttentionValue to record it's Short
@@ -96,7 +96,7 @@ Every thought cycle It pays out wages in the form of Short Term Importance (STI)
 and Long Term Importance (LTI) to atoms that are currently in use, and also
 collects rent from an atoms STI and LTI.
 
-==== Converting Stimulusa ====
+==== Converting Stimulus ====
 
 As atoms are used in mind processes they are endowed with stimulus. MindAgents
 should explicit grant atoms stimulus when they make use of them, although it's
