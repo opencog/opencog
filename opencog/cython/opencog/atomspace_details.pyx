@@ -53,7 +53,7 @@ cdef class TruthValue:
 
     def __cinit__(self, strength=0.0, count=0.0):
         # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength,count))
+        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, count))
 
     def __dealloc__(self):
         # This deletes the *smart pointer*, not the actual pointer
@@ -93,15 +93,12 @@ cdef class TruthValue:
     def __str__(self):
         return self._ptr().toString().c_str()
 
-# If you change the constant, make sure to replace it in SimpleTruthValue.cc
-def confidence_to_count(conf):
-    KKK = 800.0
-    conf = min(conf, 0.9999999)
-    return KKK * conf / (1.0 - conf)
+    def confidence_to_count(self, float conf):
+        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
 
-def count_to_confidence(count):
-    KKK = 800.0
-    return count / (count + KKK)
+    def count_to_confidence(self, float count):
+        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
+
 
 cdef class TimeServer:
     cdef cTimeServer *timeserver

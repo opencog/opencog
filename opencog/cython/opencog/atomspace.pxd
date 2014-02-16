@@ -63,6 +63,8 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
+        count_t confidenceToCount(float)
+        confidence_t countToConfidence(float)
         tv_ptr DEFAULT_TV()
         string toString()
         bint operator==(cTruthValue h)
