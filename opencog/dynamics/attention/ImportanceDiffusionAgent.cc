@@ -63,6 +63,21 @@ ImportanceDiffusionAgent::ImportanceDiffusionAgent(CogServer& cs) :
     setDiffusionThreshold((float) (config().get_double("ECAN_DIFFUSION_THRESHOLD")));
 
     allLinksSpread = config().get_bool("ECAN_ALL_LINKS_SPREAD");
+
+    // Provide a logger
+    log = NULL;
+    setLogger(new opencog::Logger("ImportanceDiffusionAgent.log", Logger::FINE, true));
+}
+
+void ImportanceDiffusionAgent::setLogger(Logger* _log)
+{
+    if (log) delete log;
+    log = _log;
+}
+
+Logger* ImportanceDiffusionAgent::getLogger()
+{
+    return log;
 }
 
 void ImportanceDiffusionAgent::setSpreadDecider(int type, float shape)
@@ -123,7 +138,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
     std::vector<Handle>::iterator hi;
 
 #ifdef DEBUG
-    logger().fine("Finding atoms involved with STI diffusion and their matrix indices");
+    log->fine("Finding atoms involved with STI diffusion and their matrix indices");
 #endif
     for (hi = links.begin(); hi != links.end(); ++hi) {
         // Get all atoms in outgoing set of links
@@ -142,7 +157,7 @@ int ImportanceDiffusionAgent::makeDiffusionAtomsMap(std::map<Handle,int> &diffus
             if (diffusionAtomsMap.find(*targetItr) == diffusionAtomsMap.end()) {
                 diffusionAtomsMap[*targetItr] = totalDiffusionAtoms;
 #ifdef DEBUG
-                logger().fine("%s = %d",
+                log->fine("%s = %d",
                         a->atomAsString(*targetItr).c_str(),
                         totalDiffusionAtoms);
 #endif
@@ -180,8 +195,8 @@ void ImportanceDiffusionAgent::makeSTIVector(bvector* &stiVector,
     }
     
 #ifdef DEBUG
-    if (logger().isFineEnabled()) {
-        logger().fine("Initial normalised STI values");
+    if (log->isFineEnabled()) {
+        log->fine("Initial normalised STI values");
         printVector(stiVector);
     }
 #endif
@@ -227,7 +242,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
 #ifdef DEBUG
             if (sourcePosItr == diffusionAtomsMap.end()) {
                 // This case should never occur
-                logger().warn("Can't find source in list of diffusionNodes. "
+                log->warn("Can't find source in list of diffusionNodes. "
                         "Something odd has happened");
             }
 #endif
@@ -238,7 +253,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             }
             sourceIndex = (*sourcePosItr).second;
 #ifdef DEBUG
-            logger().fine("Ordered link with source index %d.", sourceIndex);
+            log->fine("Ordered link with source index %d.", sourceIndex);
 #endif
             // Then spread from index 1 (since source is at index 0)
             
@@ -263,7 +278,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             // Add the indices of all targets as sources
             // then go through all pairwise combinations
 #ifdef DEBUG
-            logger().fine("Unordered link");
+            log->fine("Unordered link");
 #endif
             for (sourceItr = targets.begin(); sourceItr != targets.end();
                     ++sourceItr) {
@@ -292,7 +307,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     // Make sure columns sum to 1.0 and that no more than maxSpreadPercentage
     // is taken from source atoms
 #ifdef DEBUG
-    logger().fine("Sum probability for column:");
+    log->fine("Sum probability for column:");
 #endif
     for (unsigned int j = 0; j < connections.size2(); j++) {
         double sumProb = 0.0f;
@@ -300,7 +315,7 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             if (i != j) sumProb += connections(i,j);
         }
 #ifdef DEBUG
-        logger().fine("%d before - %1.3f", j, sumProb);
+        log->fine("%d before - %1.3f", j, sumProb);
 #endif
 
         if (sumProb > maxSpreadPercentage) {
@@ -311,15 +326,15 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
             sumProb = maxSpreadPercentage;
         }
 #ifdef DEBUG
-        logger().fine("%d after - %1.3f", j, sumProb);
+        log->fine("%d after - %1.3f", j, sumProb);
 #endif
         //gsl_matrix_set(connections,j,j,1.0-sumProb);
         connections(j,j) = 1.0-sumProb;
     }
     
 #ifdef DEBUG
-    logger().debug("Hebbian connection matrix");
-    if (logger().isFineEnabled()) {
+    log->debug("Hebbian connection matrix");
+    if (log->isFineEnabled()) {
         printMatrix(connections_);
     }
 #endif
@@ -340,7 +355,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     std::vector<Handle>::iterator hi;
     std::back_insert_iterator< std::vector<Handle> > out_hi(links);
 
-    logger().debug("Begin diffusive importance spread.");
+    log->debug("Begin diffusive importance spread.");
 
     // Get all HebbianLinks
     if (allLinksSpread) {
@@ -355,8 +370,8 @@ void ImportanceDiffusionAgent::spreadImportance()
     if (totalDiffusionAtoms == 0) { return; }
 
 #ifdef DEBUG
-    logger().debug("%d total diffusion atoms.", totalDiffusionAtoms);
-    logger().fine("Creating norm sti vector.");
+    log->debug("%d total diffusion atoms.", totalDiffusionAtoms);
+    log->fine("Creating norm sti vector.");
 #endif
 
     makeSTIVector(stiVector,totalDiffusionAtoms,diffusionAtomsMap);
@@ -374,10 +389,10 @@ void ImportanceDiffusionAgent::spreadImportance()
         logger().error("%s\n", gsl_strerror (errorNo)); // XXX
     }*/
 
-    if (logger().isFineEnabled()) {
+    if (log->isFineEnabled()) {
         float normAF;
         normAF = (a->getAttentionalFocusBoundary() - a->getMinSTI(false)) / (float) ( a->getMaxSTI(false) - a->getMinSTI(false) );
-        logger().fine("Result (AF at %.3f)\n",normAF);
+        log->fine("Result (AF at %.3f)\n",normAF);
         printVector(&result,normAF);
 //        printVector(result,0.5f);
     }
@@ -401,7 +416,7 @@ void ImportanceDiffusionAgent::spreadImportance()
     if (totalSTI != totalSTI_After) {
         // This warning is often logged because of floating point round offs
         // when converting from normalised to actual STI values after diffusion.
-        logger().warn("Total STI before diffusion (%d) != Total STI after (%d)",totalSTI,totalSTI_After);
+        log->warn("Total STI before diffusion (%d) != Total STI after (%d)",totalSTI,totalSTI_After);
     }
 #endif
 
@@ -444,7 +459,7 @@ void ImportanceDiffusionAgent::printMatrix(bmatrix* m) {
         }
         printf("\n");
     }*/
-    std::cout << m << std::endl;
+    std::cout << "[DEBUG: printing 'm']: " << m << std::endl;
 }
 
 void ImportanceDiffusionAgent::printVector(bvector* v, float threshold) {
@@ -456,7 +471,7 @@ void ImportanceDiffusionAgent::printVector(bvector* v, float threshold) {
             printf("%4.2f\n ", gsl_vector_get(m,i));
     }
     printf("]\n");*/
-    std::cout << v << std::endl;
+    std::cout << "[DEBUG: printing 'v']: " << v << std::endl;
 }
 
 // Static/Shared random number generator
