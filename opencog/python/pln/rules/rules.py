@@ -409,31 +409,30 @@ class IntensionalLinkEvaluationRule(Rule):
         A = chainer.new_variable()
         B = chainer.new_variable()
 
-        inputs= [chainer.link(types.AttractionLink, [A, x]),
-                 chainer.link(types.AttractionLink, [B, x])]
+        inputs= [chainer.link(types.AttractionLink, [x, A]),
+                 chainer.link(types.AttractionLink, [x, B])]
 
         outputs= [chainer.link(types.IntensionalInheritanceLink, [A, B]),
                   chainer.link(types.IntensionalInheritanceLink, [B, A]),
                   chainer.link(types.IntensionalSimilarityLink, [A, B])]
 
-        Rule.__init__(self, formula=formulas.extensionalEvaluationFormula,
+        Rule.__init__(self, formula=formulas.intensionalEvaluationFormula,
             inputs=inputs,
             outputs=outputs)
 
 
 class EvaluationToMemberRule(Rule):
-    '''Turns EvaluationLink(PredicateNode P, argument) into 
-       MemberLink(argument, ConceptNode "SatisfyingSet(P)".
-       The argument must be a single Node.
-       #The argument can either be a single Node/Link or a ListLink or arguments.'''
+    '''Turns EvaluationLink(PredicateNode Predicate:Z, argument) into 
+       MemberLink(argument, ConceptNode:Z).
+       The argument must be a single Node.'''
     def __init__(self, chainer):
-        P = chainer.new_variable()
+        Z = chainer.new_variable()
         ARG = chainer.new_variable()
 
         self.chainer = chainer
         Rule.__init__(self,
                       formula= None,
-                      inputs=  [chainer.link(types.EvaluationLink, [P, ARG])],
+                      inputs=  [chainer.link(types.EvaluationLink, [Z, ARG])],
                       outputs= [])
 
         self.probabilistic_inputs = False
@@ -449,13 +448,41 @@ class EvaluationToMemberRule(Rule):
             else:
                 return ([], [])
 
-        concept_name = 'SatisfyingSet(%s)' % (predicate.name,)
+        concept_name = predicate.name
         set_node = self.chainer.node(types.ConceptNode, concept_name)
 
         member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
 
         return ([member_link], [tv])
+
+class MemberToEvaluationRule(Rule):
+    '''Turns MemberLink(argument, ConceptNode:Z) into
+       EvaluationLink(PredicateNode Predicate:Z, argument).
+       The argument must be a single Node.'''
+    def __init__(self, chainer):
+        Z = chainer.new_variable()
+        ARG = chainer.new_variable()
+
+        self.chainer = chainer
+        Rule.__init__(self,
+                      formula= None,
+                      inputs=  [chainer.link(types.MemberLink, [ARG, Z])],
+                      outputs= [])
+
+        self.probabilistic_inputs = False
+
+    def custom_compute(self, inputs, outputs):
+        [member_link] = inputs
+        [arg, concept] = member_link.out
+
+        predicate_name = concept.name
+        predicate_node = self.chainer.node(types.PredicateNode, concept_name)
+
+        evaluation_link = self.chainer.link(types.EvaluationLink, [predicate_node, arg])
+        tv = member_link.tv
+
+        return ([evaluation_link], [tv])
 
 def create_general_evaluation_to_member_rules(chainer):
     rules = []

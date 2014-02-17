@@ -340,6 +340,18 @@ Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SubsetLink NOT(A) B.tv, SubsetLin
     tvs = subsetAB + subsetBA + subsetNotAB + subsetNotBA + similarityAB
     return tvs
 
+def intensionalEvaluationFormula(tvs):
+    '''Inputs: Attraction x A.tv, Attraction x B.tv
+Outputs: IntensionalInheritance A B.tv, IntensionalInheritance B A.tv, IntensionalSimilarityLink A B.tv'''
+    subsetAB = subsetEvaluationFormula(tvs)
+    subsetBA = subsetEvaluationFormula(reversed(tvs))
+
+    similarityAB = similarityEvaluationFormula(tvs)
+
+    # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
+    tvs = subsetAB + subsetBA + similarityAB
+    return tvs
+
 def extensionalSimilarityFormula(tvs):
     [and_tv, or_tv] = tvs
 

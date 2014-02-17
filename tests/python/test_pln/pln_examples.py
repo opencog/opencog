@@ -83,8 +83,6 @@ class PLNExamples(object):
             return
         print filename
 
-#        if not filename.endswith('andimpl-ground.scm'): return
-
         chainer = Chainer(self.atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
 
         try:
@@ -104,8 +102,10 @@ class PLNExamples(object):
 
         if chainer.find_atom(query, time_allowed=10):
             self.passed.append(filename)
+            return True
         else:
             self.failed.append(filename)
+            return False
 
 class AllRules(object):
     def __init__(self, atomspace, chainer):
@@ -156,7 +156,8 @@ class AllRules(object):
         self.chainer.add_rule(rules.IntensionalInheritanceEvaluationRule(self.chainer))
         self.chainer.add_rule(rules.IntensionalSimilarityEvaluationRule(self.chainer))
 
-        self.member_rules = [rules.EvaluationToMemberRule(self.chainer)]
+        self.member_rules = [rules.EvaluationToMemberRule(self.chainer),
+            rules.MemberToEvaluationRule(self.chainer)]
         self.member_rules += rules.create_general_evaluation_to_member_rules(self.chainer)
         for rule in self.member_rules:
             self.chainer.add_rule(rule)
