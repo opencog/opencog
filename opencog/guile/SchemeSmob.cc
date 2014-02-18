@@ -217,8 +217,8 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
     // AttentionalFocus and AttentionalFocus Boundary
-    scm_c_define_gsubr("cog-get-af-boundary",   0, 0, 0, C(ss_get_af_boundary));
-    scm_c_define_gsubr("cog-set-af-boundary",   1, 0, 0, C(ss_set_af_boundary));
+    scm_c_define_gsubr("cog-af-boundary",   0, 0, 0, C(ss_af_boundary));
+    scm_c_define_gsubr("cog-set-af-boundary!",   1, 0, 0, C(ss_set_af_boundary));
 
 	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));

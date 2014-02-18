@@ -34,7 +34,7 @@ using namespace opencog;
  * Return AttentionalFocus Boundary
  */
 
-SCM SchemeSmob::ss_get_af_boundary (void)
+SCM SchemeSmob::ss_af_boundary (void)
 {
     return scm_from_short(atomspace->getAttentionalFocusBoundary());
 }
