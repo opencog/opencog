@@ -170,11 +170,14 @@ class AbstractChainer(Logic):
         return len(all_object_nodes)
 
     def count_members(self, conceptnode):
+        return len(self.find_members(conceptnode))
+
+    def find_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
         members = self.find(template)
         self.atomspace.remove(var)
-        return len(members)
+        return members
 
     def node_tv(self, conceptnode):
         '''Calculate the probability of any object being a member of this conceptnode.

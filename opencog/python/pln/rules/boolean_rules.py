@@ -231,3 +231,35 @@ class NotEliminationRule(rules.Rule):
             inputs=  [chainer.link(types.NotLink, [A])])
 
 
+
+class AndBulkEvaluationRule(rules.Rule):
+    '''Bulk evaluate And(A B) based on MemberLinks. Unlike AndEvaluationRule this will find every MemberLink at the same time (much more efficient than doing it online at random)'''
+    def __init__(self, chainer):
+        self._chainer = chainer
+
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        rules.Rule.__init__(self,
+            formula= None,
+            outputs= [chainer.link(types.AndLink, [A, B])],
+            inputs= [])
+
+    def custom_compute(self, inputs, outputs):
+        # It must only be used in backward chaining. The inputs will be [] and the outputs will be [And(conceptNode123, conceptNode456)] or similar. It uses the Python set class and won't work with variables.
+        [and_link_target] = outputs
+        [conceptNodeA, conceptNodeB] = and_link_target.out
+
+        setA = set(self._chainer.find_members(conceptNodeA))
+        setB = set(self._chainer.find_members(conceptNodeB))
+
+        nIntersection = float(len(setA^setB))
+        nUnion = float(len(setA|setB))
+
+        sAnd = nIntersection / nUnion
+        and_link = chainer.link(types.AndLink, [conceptNodeA, conceptNodeB])
+
+        nAnd = nUnion
+
+        return ([and_link], [TruthValue(sAnd, nAnd)])
+
