@@ -12,6 +12,7 @@ ADD_LIBRARY (smob SHARED
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
 	SchemeSmobTV.cc
+        SchemeSmobAF.cc
 	load-file
 )
 

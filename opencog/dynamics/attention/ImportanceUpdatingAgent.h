@@ -72,7 +72,7 @@ class CogServer;
  * Agents need not go broke providing stimulus. Atoms also have to pay LTI rent
  * to exist in the the AtomSpace and STI rent to exist in the Attentional focus.
  *
- * STI rent is charged from atoms that are above the Attentional focus boundary
+ * STI rent is charged from atoms that are above the Attentional Focus boundary
  * and LTI rent for all atoms in the system (conceptually at least, once atoms
  * start being swapped to disk, LTI rent for these atoms might only be charged
  * periodically due to the expense involved in updating them). So, if the
@@ -88,10 +88,10 @@ class CogServer;
  * However, the number of atoms in the AtomSpace and in the attentional focus
  * will be constantly changing. In fact, an OpenCog instance may even have some
  * method of controlling the attentional focus boundary depending on how
- * focussed or quick thought and reaction needs to be. more atoms in the
- * attentional focus mean more atoms to consider during reasoning, although
+ * focussd or quick thought and reaction needs to be. More atoms in the
+ * Attentional Focus mean more atoms to consider during reasoning, although
  * reasoning methods can and do use atoms outside of the attentional focus if
- * the those in attention are insufficient to come up with suitable results. To
+ * those in attention are insufficient to come up with suitable results. To
  * manage the variable number of atoms in attention and in the Atom Space, the
  * ImportanceUpdatingAgent draws STI and LTI from a pool of funds managed by the
  * Atom Space. These pools have a homeostatic range that the
@@ -122,7 +122,7 @@ public:
      */
     enum rentType_t {
         RENT_FLAT, //!< Use a flat rent
-        RENT_EXP, //!< Use a exponential rent
+        RENT_EXP, //!< Use an exponential rent
         RENT_LOG //!< Use a logarithmic rent
     };
 
