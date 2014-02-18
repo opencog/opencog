@@ -333,8 +333,8 @@ void ImportanceDiffusionAgent::makeConnectionMatrix(bmatrix* &connections_,
     }
     
 #ifdef DEBUG
-    log->debug("Hebbian connection matrix");
     if (log->isFineEnabled()) {
+        log->debug("Hebbian connection matrix:");
         printMatrix(connections_);
     }
 #endif
@@ -371,7 +371,7 @@ void ImportanceDiffusionAgent::spreadImportance()
 
 #ifdef DEBUG
     log->debug("%d total diffusion atoms.", totalDiffusionAtoms);
-    log->fine("Creating norm sti vector.");
+    log->fine("Creating normalized STI vector.");
 #endif
 
     makeSTIVector(stiVector,totalDiffusionAtoms,diffusionAtomsMap);
@@ -448,30 +448,30 @@ void ImportanceDiffusionAgent::setScaledSTI(Handle h, float scaledSTI)
     
 }
 
-void ImportanceDiffusionAgent::printMatrix(bmatrix* m) {
+void ImportanceDiffusionAgent::printMatrix(bmatrix* m)
+{
+    typedef boost::numeric::ublas::compressed_matrix<float>::iterator1 it1_t;
+    typedef boost::numeric::ublas::compressed_matrix<float>::iterator2 it2_t;
 
-/*    for (unsigned int i = 0; i < m->size1; i++) {
-        for (unsigned int j = 0; j < m->size2; j++) {
-            float val = gsl_matrix_get(m,i,j);
-            if (val != 0.0) 
-                printf("%4.2f ", gsl_matrix_get(m,i,j));
-            else printf("---- ");
+    for (it1_t it1 = m->begin1(); it1 != m->end1(); it1++) {
+        for (it2_t it2 = it1.begin(); it2 != it1.end(); it2++) {
+            log->fine("(%d,%d) %f", it2.index1(), it2.index2(), *it2);
         }
-        printf("\n");
-    }*/
-    std::cout << "[DEBUG: printing 'm']: " << m << std::endl;
+    }
 }
 
-void ImportanceDiffusionAgent::printVector(bvector* v, float threshold) {
-/*    printf("[");
-    for (unsigned int i = 0; i < m->size; i++) {
-        if (gsl_vector_get(m,i) > threshold)
-            printf("%4.2f +\n ", gsl_vector_get(m,i));
-        else
-            printf("%4.2f\n ", gsl_vector_get(m,i));
+void ImportanceDiffusionAgent::printVector(bvector* v, float threshold)
+{
+    typedef boost::numeric::ublas::vector<float>::iterator it_t;
+
+    for (it_t it = v->begin(); it != v->end(); ++it) {
+        if (*it > threshold) {
+            log->fine("(%d) %f +", it.index(), *it);
+        }
+        else {
+            log->fine("(%d) %f", it.index(), *it);
+        }
     }
-    printf("]\n");*/
-    std::cout << "[DEBUG: printing 'v']: " << v << std::endl;
 }
 
 // Static/Shared random number generator
