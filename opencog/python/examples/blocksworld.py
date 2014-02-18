@@ -1,8 +1,8 @@
 try:
-    from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name, confidence_to_count
+    from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
     import opencog.cogserver
 except ImportError:
-    from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name, confidence_to_count
+    from atomspace_remote import AtomSpace, types, Atom, TruthValue, get_type_name
 
 from rules import evaluation_link_template, execution_link_template, actionDone_template
 
@@ -65,7 +65,7 @@ def new_rule(atomspace, action_str, pre_str, post_str):
             postconditions
         )
     )
-    atom_from_tree(pil, atomspace).tv = TruthValue(1, confidence_to_count(1))
+    atom_from_tree(pil, atomspace).tv = TruthValue(1, TruthValue().confidence_to_count(1))
 
     print pil
     return pil
@@ -152,7 +152,7 @@ def blocksworld_rules(atomspace):
         parse_conditions_list(blocks, 'ontable C | handempty | ontable A | ontable B | clear B | clear C')
     )
     atom = atom_from_tree(initial_conditions_and, atomspace)
-    atom.tv = TruthValue(1,confidence_to_count(1))
+    atom.tv = TruthValue(1, TruthValue().confidence_to_count(1))
 
 def blocksworld_test(atomspace):
     import blocksworld

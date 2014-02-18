@@ -4,7 +4,7 @@
 # @author Dingjie.Wang
 # @version 1.0
 # @date 2012-08-04
-from opencog.atomspace import types, TruthValue, AtomSpace, confidence_to_count
+from opencog.atomspace import types, TruthValue, AtomSpace
 from viz_graph import Viz_Graph
 from types_inheritance import name_type_dict, is_a
 from m_util import Logger, dict_sub
@@ -131,7 +131,7 @@ def load_scm_file(a, filename):
                         mean = float(temp[1])
                         confidence = float(temp[2])
                         # the value to stv!
-                        stv = TruthValue(mean,confidence_to_count(confidence))
+                        stv = TruthValue(mean, TruthValue().confidence_to_count(confidence))
 
                 if third:
                     third = third.strip()
@@ -145,7 +145,7 @@ def load_scm_file(a, filename):
                         mean = float(temp[1])
                         confidence = float(temp[2])
                         # the value to stv!
-                        stv = TruthValue(mean,confidence_to_count(confidence))
+                        stv = TruthValue(mean, TruthValue().confidence_to_count(confidence))
                 try:
                     t = first[0:first.index(' ')]
                     name = first[first.index(' ') + 1: -1].strip('"')
