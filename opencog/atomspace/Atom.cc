@@ -76,7 +76,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 {
     if (newTV->isNullTv()) return;
 
-    // We need to gauranteee that the signal goes out with the
+    // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
     // this, even as we are.  So make a copy, first. 
     TruthValuePtr oldTV(getTruthValue());

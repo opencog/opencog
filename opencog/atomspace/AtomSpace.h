@@ -1138,6 +1138,14 @@ public:
     {
         return getImpl().atomTable.TVChangedSignal().connect(function);
     }
+    boost::signals2::connection AddAFSignal(const AVCHSigl::slot_type& function)
+    {
+        return getAttentionBank().AddAFSignal().connect(function);
+    }
+    boost::signals2::connection RemoveAFSignal(const AVCHSigl::slot_type& function)
+    {
+        return getAttentionBank().RemoveAFSignal().connect(function);
+    }
 
     // Provide access to the atom-added signal in Python, but using a queue instead
     // of callbacks. It's accessible via the Cython wrapper.
