@@ -1,0 +1,65 @@
+/*
+* opencog/dynamics/attention/HebbianCreationModule.h
+*
+* Copyright (C) 2014 Cosmo Harrigan
+* All Rights Reserved
+*
+* Written by Cosmo Harrigan
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License v3 as
+* published by the Free Software Foundation and including the exceptions
+* at http://opencog.org/wiki/Licenses
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with this program; if not, write to:
+* Free Software Foundation, Inc.,
+* 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+#ifndef _OPENCOG_HEBBIAN_CREATION_MODULE_H
+#define _OPENCOG_HEBBIAN_CREATION_MODULE_H
+
+#include <algorithm>
+
+#include <opencog/server/Agent.h>
+#include <opencog/server/Module.h>
+#include <opencog/server/CogServer.h>
+
+namespace opencog
+{
+
+class CogServer;
+
+/**
+* The HebbianCreationModule creates Hebbian links between atoms in the
+* AttentionalFocus for updating by AttentionAllocation.
+**/
+class HebbianCreationModule;
+typedef std::shared_ptr<HebbianCreationModule> HebbianCreationModulePtr;
+
+class HebbianCreationModule : public Module
+{
+   private:
+       AtomSpace* as;
+       boost::signals2::connection addAFConnection;
+
+   public:
+       HebbianCreationModule(CogServer&);
+       virtual ~HebbianCreationModule();
+       virtual void run();
+
+       static const char *id(void);
+       virtual void init(void);
+
+       void addAFSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
+};
+
+}
+
+#endif
