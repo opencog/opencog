@@ -1,4 +1,4 @@
-from opencog.atomspace import count_to_confidence, confidence_to_count, TruthValue
+from opencog.atomspace import TruthValue
 
 import operator, functools, itertools
 
