@@ -37,6 +37,7 @@
 
 #include "../moses/moses_main.h"
 #include "../optimization/optimization.h"
+#include "../scoring/scoring_base.h"
 #include "ant_scoring.h"
 
 
@@ -59,6 +60,15 @@ int main(int argc,char** argv)
         exit(1);
     }
 
+    // Simplificity pressure
+    float simplicity_pressure = 1;
+
+    // Multi-thread
+    static const string localhost = "localhost";
+    unsigned n_jobs = 4;
+    jobs_t jobs{{localhost, n_jobs}};
+    setting_omp(jobs[localhost]);
+
     // Logger setting
     static const string log_file = "moses-ant-hillclimbing.log";
     remove(log_file.c_str());
@@ -68,8 +78,8 @@ int main(int argc,char** argv)
     type_tree tt(id::lambda_type);
     tt.append_children(tt.begin(),id::action_result_type,1);
 
-    ant_score scorer;
-    ant_bscore bscorer;
+    ant_bscore bscorer(simplicity_pressure);
+    bscore_based_cscore<ant_bscore> cscorer(bscorer);
 
     combo_tree_ns_set perceptions;
     combo_tree_ns_set actions;
@@ -86,13 +96,9 @@ int main(int argc,char** argv)
 
     hill_climbing hc;
     metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
-                           scorer, bscorer, hc, metaparms);
+                           cscorer, bscorer, hc, metaparms);
   
     boost::program_options::variables_map vm;
-    static const string localhost = "localhost";
-    unsigned n_jobs = 3;
-    jobs_t jobs{{localhost, n_jobs}};
-    setting_omp(jobs[localhost]);
 
     moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
     moses_statistics st;
