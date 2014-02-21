@@ -36,13 +36,18 @@ namespace opencog
 
 class CogServer;
 
-/**
-* The HebbianCreationModule creates Hebbian links between atoms in the
-* AttentionalFocus for updating by AttentionAllocation.
-**/
 class HebbianCreationModule;
 typedef std::shared_ptr<HebbianCreationModule> HebbianCreationModulePtr;
 
+/**
+* The HebbianCreationModule creates AsymmetricHebbianLinks between
+* atoms in the AttentionalFocus for updating by AttentionAllocation.
+*
+* It is notified of atoms that are added to the AttentionalFocus
+* by registering a slot with the Boost Signals2 events exposed by
+* the AtomSpace. When this slot is called, a separate handler thread
+* is created to do the work while allowing execution to continue.
+**/
 class HebbianCreationModule : public Module
 {
    private:
@@ -58,6 +63,7 @@ class HebbianCreationModule : public Module
        virtual void init(void);
 
        void addAFSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
+       void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
 };
 
 }
