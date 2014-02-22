@@ -104,7 +104,7 @@ public:
             CONCEPT_NODE, "Animal", SimpleTruthValue::createTV(0.1, conf90));
         Handle alive = as->addNode(
             PREDICATE_NODE, "alive", SimpleTruthValue::createTV(0.01, conf90));
-        Handle green = as->addNode(
+        Handle slimy = as->addNode(
             PREDICATE_NODE, "slimy", SimpleTruthValue::createTV(0.01, conf90));
 
         Handle kermitFrog = as->addLink(
@@ -113,7 +113,7 @@ public:
             INHERITANCE_LINK, frog, animal, SimpleTruthValue::createTV(0.9, conf90));
         Handle frogAlive = as->addLink(
             EVALUATION_LINK, frog, alive, SimpleTruthValue::createTV(0.9, conf90));
-        Handle frogAlive = as->addLink(
+        Handle frogSlimy = as->addLink(
             EVALUATION_LINK, frog, slimy, SimpleTruthValue::createTV(0.9, conf90));
 
         // Populate the AtomSpace with some additional dummy atoms
