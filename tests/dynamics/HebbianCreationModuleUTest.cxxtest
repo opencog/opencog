@@ -60,13 +60,14 @@ public:
             std::cerr << e.getMessage() << std::endl;
         }
 
-        config().set("MODULES", "opencog/dynamics/attention/libhebbiancreation.so");
+        config().set("MODULES",
+                     "opencog/dynamics/attention/libhebbiancreation.so");
 
         logger().setFilename(config()["LOG_FILE"]);
         logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
         logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
 
-        // Todo: The following operation is ugly. It was copied from existing tests.
+        // The following operation is ugly. It was copied from existing tests.
 
         // Blindly search a bunch of paths hoping to find the files
         // in one of them ...
@@ -108,21 +109,28 @@ public:
             PREDICATE_NODE, "slimy", SimpleTruthValue::createTV(0.01, conf90));
 
         Handle kermitFrog = as->addLink(
-            INHERITANCE_LINK, kermit, frog, SimpleTruthValue::createTV(0.9, conf90));
+                    INHERITANCE_LINK, kermit, frog,
+                    SimpleTruthValue::createTV(0.9, conf90));
         Handle frogAnimal = as->addLink(
-            INHERITANCE_LINK, frog, animal, SimpleTruthValue::createTV(0.9, conf90));
+                    INHERITANCE_LINK, frog, animal,
+                    SimpleTruthValue::createTV(0.9, conf90));
         Handle frogAlive = as->addLink(
-            EVALUATION_LINK, frog, alive, SimpleTruthValue::createTV(0.9, conf90));
+                    EVALUATION_LINK, frog, alive,
+                    SimpleTruthValue::createTV(0.9, conf90));
         Handle frogSlimy = as->addLink(
-            EVALUATION_LINK, frog, slimy, SimpleTruthValue::createTV(0.9, conf90));
+                    EVALUATION_LINK, frog, slimy,
+                    SimpleTruthValue::createTV(0.9, conf90));
 
         // Populate the AtomSpace with some additional dummy atoms
         Handle dummy1 = as->addNode(
-            CONCEPT_NODE, "Dummy1", SimpleTruthValue::createTV(0.001, conf90));
+                    CONCEPT_NODE, "Dummy1",
+                    SimpleTruthValue::createTV(0.001, conf90));
         Handle dummy2 = as->addNode(
-            CONCEPT_NODE, "Dummy1", SimpleTruthValue::createTV(0.001, conf90));
+                    CONCEPT_NODE, "Dummy1",
+                    SimpleTruthValue::createTV(0.001, conf90));
         Handle dummyLink = as->addLink(
-            INHERITANCE_LINK, dummy1, dummy2, SimpleTruthValue::createTV(0.9, conf90));
+                    INHERITANCE_LINK, dummy1, dummy2,
+                    SimpleTruthValue::createTV(0.9, conf90));
 
         // Put these atoms in the AttentionalFocus:
         // "Kermit", "Frog", "Animal", "alive"
@@ -137,19 +145,21 @@ public:
         // Allow the events to propagate
         sleep(1);
 
-        // Confirm that these atoms now have AsymmetricHebbianLinks between them:
-        // "Kermit", "Frog", "Animal", "alive"
+        // Confirm that these atoms now have AsymmetricHebbianLinks between
+        // them: "Kermit", "Frog", "Animal", "alive"
         foreach (Handle node, attentionalFocus) {
             HandleSeq existingAsSource =
-                    as->getNeighbors(node, false, true, ASYMMETRIC_HEBBIAN_LINK, false);
+                    as->getNeighbors(node, false, true,
+                                     ASYMMETRIC_HEBBIAN_LINK, false);
             HandleSeq existingAsTarget =
-                    as->getNeighbors(node, true, false, ASYMMETRIC_HEBBIAN_LINK, false);
+                    as->getNeighbors(node, true, false,
+                                     ASYMMETRIC_HEBBIAN_LINK, false);
             TS_ASSERT(existingAsSource.size() == 3);
             TS_ASSERT(existingAsTarget.size() == 3);
         }
 
         // Confirm that only n*(n-1) = 12 AsymmetricHebbianLinks were formed,
-        // indicating that none were incorrectly formed to the "slimy" or dummy atoms
+        // indicating that none incorrectly include "slimy" nor the dummy atoms
         HandleSeq hebbianLinks;
         as->getHandlesByType(back_inserter(hebbianLinks), ASYMMETRIC_HEBBIAN_LINK);
         TS_ASSERT(hebbianLinks.size() == 12);

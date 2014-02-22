@@ -58,6 +58,7 @@ void HebbianCreationModule::run()
 HebbianCreationModule::~HebbianCreationModule()
 {
    logger().info("Terminating HebbianCreationModule.");
+   addAFConnection.disconnect();
 }
 
 /*
@@ -102,18 +103,22 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // and the sets of existing sources and targets
     std::sort(existingAsSource.begin(), existingAsSource.end());
     std::sort(existingAsTarget.begin(), existingAsTarget.end());
-    HandleSeq needToBeSource = set_difference(attentionalFocus, existingAsSource);
-    HandleSeq needToBeTarget = set_difference(attentionalFocus, existingAsTarget);
+    HandleSeq needToBeSource = set_difference(attentionalFocus,
+                                              existingAsSource);
+    HandleSeq needToBeTarget = set_difference(attentionalFocus,
+                                              existingAsTarget);
 
     // Resulting in the sets of nodes that require
     // a new AsymmetricHebbianLink in either direction
     foreach (Handle node, needToBeSource) {
         as->addLink(ASYMMETRIC_HEBBIAN_LINK, node, source,
-            SimpleTruthValue::createTV(0, SimpleTruthValue::confidenceToCount(1)));
+                    SimpleTruthValue::createTV(
+                        0, SimpleTruthValue::confidenceToCount(1)));
     }
 
     foreach (Handle node, needToBeTarget) {
         as->addLink(ASYMMETRIC_HEBBIAN_LINK, source, node,
-            SimpleTruthValue::createTV(0, SimpleTruthValue::confidenceToCount(1)));
+                    SimpleTruthValue::createTV(
+                        0, SimpleTruthValue::confidenceToCount(1)));
     }
 }
