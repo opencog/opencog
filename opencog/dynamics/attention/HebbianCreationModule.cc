@@ -110,14 +110,14 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
 
     // Resulting in the sets of nodes that require
     // a new AsymmetricHebbianLink in either direction
-    foreach (Handle node, needToBeSource) {
-        as->addLink(ASYMMETRIC_HEBBIAN_LINK, node, source,
+    foreach (Handle atom, needToBeSource) {
+        as->addLink(ASYMMETRIC_HEBBIAN_LINK, atom, source,
                     SimpleTruthValue::createTV(
                         0, SimpleTruthValue::confidenceToCount(1)));
     }
 
-    foreach (Handle node, needToBeTarget) {
-        as->addLink(ASYMMETRIC_HEBBIAN_LINK, source, node,
+    foreach (Handle atom, needToBeTarget) {
+        as->addLink(ASYMMETRIC_HEBBIAN_LINK, source, atom,
                     SimpleTruthValue::createTV(
                         0, SimpleTruthValue::confidenceToCount(1)));
     }
