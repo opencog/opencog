@@ -62,8 +62,10 @@ class HebbianCreationModule : public Module
        static const char *id(void);
        virtual void init(void);
 
-       void addAFSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
-       void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
+       void addAFSignal(const Handle& h, const AttentionValuePtr& av_old,
+                        const AttentionValuePtr& av_new);
+       void addAFSignalHandler(const Handle& h, const AttentionValuePtr& av_old,
+                               const AttentionValuePtr& av_new);
 };
 
 }

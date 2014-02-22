@@ -1,6 +1,6 @@
 LINK_LIBRARIES (
 	server
-    attention
+        attention
 	${GSL_LIBRARIES}
 )
 
@@ -11,3 +11,4 @@ IF (GSL_FOUND)
 	ADD_CXXTEST(ImportanceDiffusionAgentUTest)
 ENDIF (GSL_FOUND)
 ADD_CXXTEST(STIDecayingAgentUTest)
+ADD_CXXTEST(HebbianCreationModuleUTest)
