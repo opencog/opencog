@@ -26,6 +26,7 @@
 
 #include <opencog/server/CogServer.h>
 #include <opencog/atomspace/types.h>
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/AtomSpace.h>

@@ -42,13 +42,15 @@ namespace opencog
 class CogServer;
 
 /**
- * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using ZeroMQ
- * to allow for external clients to receive updates from the AtomSpace via a publish/subscribe pattern.
+ * The AtomSpacePublisherModule class publishes AtomSpace change events across
+ * the network using ZeroMQ to allow for external clients to receive updates
+ * from the AtomSpace via a publish/subscribe pattern.
  *
  * API documentation is in: README.md
  *
- * Clients can subscribe to the events by subscribing to the ZeroMQ socket defined in the
- * ZMQ_EVENT_PORT parameter set in the OpenCog configuration file.
+ * Clients can subscribe to the events by subscribing to the ZeroMQ socket
+ * defined in the ZMQ_EVENT_PORT parameter set in the OpenCog configuration
+ * file.
  *
  * Supported events are:
  *
@@ -71,6 +73,8 @@ class AtomSpacePublisherModule : public Module
         boost::signals2::connection addAtomConnection;
         boost::signals2::connection TVChangedConnection;
         boost::signals2::connection AVChangedConnection;
+        boost::signals2::connection AddAFConnection;
+        boost::signals2::connection RemoveAFConnection;
 
         zmq::context_t * context;
         zmq::socket_t * publisher;
@@ -95,8 +99,12 @@ class AtomSpacePublisherModule : public Module
 
         void atomAddSignal(Handle h);
         void atomRemoveSignal(AtomPtr atom);
-        void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
-        void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
+        void AVChangedSignal(const Handle& h,
+                             const AttentionValuePtr& av_old,
+                             const AttentionValuePtr& av_new);
+        void TVChangedSignal(const Handle& h,
+                             const TruthValuePtr& tv_old,
+                             const TruthValuePtr& tv_new);
 };
 
 }

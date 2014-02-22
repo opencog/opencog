@@ -46,10 +46,24 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
 {
     logger().info("[AtomSpacePublisherModule] constructor");
     this->as = &cs.getAtomSpace();
-    addAtomConnection = as->addAtomSignal(boost::bind(&AtomSpacePublisherModule::atomAddSignal, this, _1));
-    removeAtomConnection = as->removeAtomSignal(boost::bind(&AtomSpacePublisherModule::atomRemoveSignal, this, _1));
-    TVChangedConnection = as->TVChangedSignal(boost::bind(&AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
-    AVChangedConnection = as->AVChangedSignal(boost::bind(&AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
+    addAtomConnection = as->addAtomSignal(
+                boost::bind(&AtomSpacePublisherModule::atomAddSignal,
+                            this, _1));
+    removeAtomConnection = as->removeAtomSignal(
+                boost::bind(&AtomSpacePublisherModule::atomRemoveSignal,
+                            this, _1));
+    TVChangedConnection = as->TVChangedSignal(
+                boost::bind(&AtomSpacePublisherModule::TVChangedSignal,
+                            this, _1, _2, _3));
+    AVChangedConnection = as->AVChangedSignal(
+                boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
+                            this, _1, _2, _3));
+    AddAFConnection = as->getAttentionBank().AddAFSignal(
+                boost::bind(&AtomSpacePublisherModule::AddAFSignal,
+                            this, _1, _2, _3));
+    RemoveAFConnection = as->getAttentionBank().RemoveAFSignal(
+                boost::bind(&AtomSpacePublisherModule::RemoveAFSignal,
+                            this, _1, _2, _3));
 }
 
 void AtomSpacePublisherModule::init(void)
@@ -85,7 +99,8 @@ void AtomSpacePublisherModule::InitZeroMQ()
     else
         zmq_ip = "*";
 
-    const char * zmq_address = ("tcp://" + zmq_ip + ":" + zmq_event_port).c_str();
+    const char * zmq_address =
+            ("tcp://" + zmq_ip + ":" + zmq_event_port).c_str();
 
     try {
         publisher->bind(zmq_address);
@@ -107,33 +122,43 @@ void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
     s_sendmore (*publisher, "remove");
     s_send (*publisher, payload);
 
-    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you remove an atom
+    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you remove
+    // an atom:
     //   https://github.com/opencog/opencog/issues/394
-    // After that bug is resolved, it may be necessary to check if the atom was in the
-    // AttentionalFocus before being deleted, and then publish a 'removeAF' signal
+    // After that bug is resolved, it may be necessary to check if the atom was
+    // in the AttentionalFocus before being deleted, and then publish a
+    // 'removeAF' signal
 }
 
-void AtomSpacePublisherModule::AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new)
+void AtomSpacePublisherModule::AVChangedSignal(const Handle& h,
+                                               const AttentionValuePtr& av_old,
+                                               const AttentionValuePtr& av_new)
 {
-    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you add an atom
+    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you add
+    // an atom:
     //   https://github.com/opencog/opencog/issues/394
-    // Until that bug is fixed, this will ignore the simple case where the atom is created with no AttentionValue defined. However,
-    // if the atom is created with an AttentionValue defined, that dummy signal will still be published.
+    // Until that bug is fixed, this will ignore the simple case where the atom
+    // is created with no AttentionValue defined. However, if the atom is
+    // created with an AttentionValue defined, that dummy signal will still be
+    // published.
     if (av_old != av_new)
     {
         // Publish signal: avchanged
-        std::string payload = avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
+        std::string payload =
+                avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
         s_sendmore (*publisher, "avChanged");
         s_send (*publisher, payload);
 
         // Check whether atom was added or removed from the AttentionalFocus
-        if (av_old->getSTI() < as->getAttentionalFocusBoundary() && av_new->getSTI() >= as->getAttentionalFocusBoundary())
+        if (av_old->getSTI() < as->getAttentionalFocusBoundary() &&
+                av_new->getSTI() >= as->getAttentionalFocusBoundary())
         {
             // Publish signal: addAF
             s_sendmore (*publisher, "addAF");
             s_send (*publisher, payload);
         }
-        else if (av_new->getSTI() < as->getAttentionalFocusBoundary() && av_old->getSTI() >= as->getAttentionalFocusBoundary())
+        else if (av_new->getSTI() < as->getAttentionalFocusBoundary() &&
+                 av_old->getSTI() >= as->getAttentionalFocusBoundary())
         {
             // Publish signal: removeAF
             s_sendmore (*publisher, "removeAF");
@@ -142,15 +167,20 @@ void AtomSpacePublisherModule::AVChangedSignal(const Handle& h, const AttentionV
     }
 }
 
-void AtomSpacePublisherModule::TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new)
+void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
+                                               const TruthValuePtr& tv_old,
+                                               const TruthValuePtr& tv_new)
 {
-    // The AtomSpace API fires a dummy 'TVChangedSignal' signal when you add a link
+    // The AtomSpace API fires a dummy 'TVChangedSignal' signal when you add
+    // a link:
     //   https://github.com/opencog/opencog/issues/394
-    // Until that bug is fixed, this will ignore the simple case where the link is created with no TruthValue defined. However,
-    // if the link is created with a TruthValue defined, that dummy signal will still be published.
+    // Until that bug is fixed, this will ignore the simple case where the link
+    // is created with no TruthValue defined. However, if the link is created
+    // with a TruthValue defined, that dummy signal will still be published.
     if (tv_old != tv_new)
     {
-        std::string payload = tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
+        std::string payload =
+                tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
         s_sendmore (*publisher, "tvChanged");
         s_send (*publisher, payload);
     }
@@ -160,7 +190,7 @@ ptree AtomSpacePublisherModule::atomToPtree(Handle h)
 {
     // Type
     Type type = as->getType(h);
-    std::string typeNameString = classserver().getTypeName(type);  //.c_str()
+    std::string typeNameString = classserver().getTypeName(type);
 
     // Name
     std::string nameString = as->getName(h);
@@ -277,7 +307,8 @@ std::string AtomSpacePublisherModule::atomMessage(ptree ptAtom)
     return ptToJSON(ptAtomMessage);
 }
 
-std::string AtomSpacePublisherModule::avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew)
+std::string AtomSpacePublisherModule::avMessage(
+        ptree ptAtom, ptree ptAVOld, ptree ptAVNew)
 {
     ptree ptAVMessage;
 
@@ -289,7 +320,8 @@ std::string AtomSpacePublisherModule::avMessage(ptree ptAtom, ptree ptAVOld, ptr
     return ptToJSON(ptAVMessage);
 }
 
-std::string AtomSpacePublisherModule::tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew)
+std::string AtomSpacePublisherModule::tvMessage(
+        ptree ptAtom, ptree ptTVOld, ptree ptTVNew)
 {
     ptree ptTVMessage;
 
