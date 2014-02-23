@@ -65,14 +65,16 @@ Type ClassServer::addType(Type parent, const std::string& name)
     // GroundedSchemeNode, which inherits from several types.
     Type type = getType(name);
     if (type != NOTYPE) {
-        std::lock_guard<std::mutex> l(type_mutex);
+        /* unique_lock here upgrades the shared mutex to a writer lock */
+        boost::unique_lock<boost::shared_mutex> l(type_mutex);
         DPRINTF("Type \"%s\" has already been added (%d)\n", name.c_str(), type);
         inheritanceMap[parent][type] = true;
         setParentRecursively(parent, type);
         return type;
     }
 
-    std::unique_lock<std::mutex> l(type_mutex);
+    /* unique_lock here upgrades the shared mutex to a writer lock */
+    std::unique_lock<boost::shared_mutex> l(type_mutex);
     // Assign type code and increment type counter.
     type = nTypes++;
 
@@ -98,7 +100,7 @@ Type ClassServer::addType(Type parent, const std::string& name)
 
     // Emit add type signal.
     // XXX TODO why are we locking here?  I don't get it ... 
-    std::lock_guard<std::mutex> s(signal_mutex);
+    boost::lock_guard<boost::mutex> s(signal_mutex);
     _addTypeSignal(type);
 
     return type;
@@ -114,7 +116,7 @@ void ClassServer::setParentRecursively(Type parent, Type type)
     }
 }
 
-boost::signal<void (Type)>& ClassServer::addTypeSignal()
+boost::signals2::signal<void (Type)>& ClassServer::addTypeSignal()
 {
     return _addTypeSignal;
 }
@@ -126,20 +128,20 @@ unsigned int ClassServer::getNumberOfClasses()
 
 bool ClassServer::isA_non_recursive(Type type, Type parent)
 {
-    std::lock_guard<std::mutex> l(type_mutex);
+    boost::shared_lock<boost::shared_mutex> l(type_mutex);
     if ((type >= nTypes) || (parent >= nTypes)) return false;
     return inheritanceMap[parent][type];
 }
 
 bool ClassServer::isDefined(const std::string& typeName)
 {
-    std::lock_guard<std::mutex> l(type_mutex);
+    boost::shared_lock<boost::shared_mutex> l(type_mutex);
     return name2CodeMap.find(typeName) != name2CodeMap.end();
 }
 
 Type ClassServer::getType(const std::string& typeName)
 {
-    std::lock_guard<std::mutex> l(type_mutex);
+    boost::shared_lock<boost::shared_mutex> l(type_mutex);
     std::unordered_map<std::string, Type>::iterator it = name2CodeMap.find(typeName);
     if (it == name2CodeMap.end()) {
         return NOTYPE;
@@ -149,8 +151,9 @@ Type ClassServer::getType(const std::string& typeName)
 
 const std::string& ClassServer::getTypeName(Type type)
 {
-    std::lock_guard<std::mutex> l(type_mutex);
     static std::string nullString = "*** Unknown Type! ***";
+
+    boost::shared_lock<boost::shared_mutex> l(type_mutex);
     std::unordered_map<Type, const std::string*>::iterator it;
     if ((it = code2NameMap.find(type)) != code2NameMap.end())
         return *(it->second);

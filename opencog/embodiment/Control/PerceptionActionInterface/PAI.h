@@ -422,6 +422,11 @@ public:
 
     static std::string getObjectTypeFromHandle(const AtomSpace& atomSpace, Handle objectH);
 
+    bool hasFinishFistTimeWorldPercetption() const
+    {
+        return (! isFirstPerceptTerrian) ;
+    }
+
 private:
 
     /**
@@ -922,6 +927,7 @@ private:
      * @return true if the object is an obstacle.
      */
     bool isObjectAnObstacle(Handle objectNode, const std::string& entityClass, const MapInfo& mapinfo) const;
+
 
     #endif
 

@@ -54,21 +54,6 @@ CountTruthValue::CountTruthValue(CountTruthValue const& source)
     count = source.count;
 }
 
-void CountTruthValue::setMean(strength_t m)
-{
-    mean = m;
-}
-
-void CountTruthValue::setCount(count_t c)
-{
-    count = c;
-}
-
-void CountTruthValue::setConfidence(confidence_t c)
-{
-    confidence = c;
-}
-
 strength_t CountTruthValue::getMean() const
 {
     return mean;
@@ -90,7 +75,7 @@ std::string CountTruthValue::toString() const
     sprintf(buf, "(ctv %f %f %f)",
             static_cast<float>(getMean()),
             static_cast<float>(getCount()),
-            static_cast<float>(getConfidence()));
+            static_cast<double>(getConfidence()));
     return buf;
 }
 
@@ -98,9 +83,13 @@ bool CountTruthValue::operator==(const TruthValue& rhs) const
 {
     const CountTruthValue *ctv = dynamic_cast<const CountTruthValue *>(&rhs);
     if (NULL == ctv) return false;
-    if (mean != ctv->mean) return false;
-    if (confidence != ctv->confidence) return false;
-    if (count != ctv->count) return false;
+
+#define FLOAT_ACCEPTABLE_ERROR 0.000001
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(mean - ctv->mean)) return false;
+    if (FLOAT_ACCEPTABLE_ERROR < fabs(confidence - ctv->confidence)) return false;
+#define DOUBLE_ACCEPTABLE_ERROR 1.0e-14
+    if (DOUBLE_ACCEPTABLE_ERROR < fabs(1.0 - (ctv->count/count))) return false;
+
     return true;
 }
 
@@ -109,28 +98,17 @@ TruthValueType CountTruthValue::getType() const
     return COUNT_TRUTH_VALUE;
 }
 
-TruthValuePtr CountTruthValue::fromString(const char* tvStr)
-{
-    float tmean, tcount, tconf;
-    sscanf(tvStr, "[%f,%f,%f]", &tmean, &tconf, &tcount);
-    CountTruthValuePtr ctv(std::make_shared<CountTruthValue>(
-        static_cast<strength_t>(tmean),
-        static_cast<confidence_t>(tconf),
-        static_cast<count_t>(tcount)));
-    return std::static_pointer_cast<TruthValue>(ctv);
-}
-
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
 {
     CountTruthValuePtr oc =
         std::dynamic_pointer_cast<CountTruthValue>(other);
 
-    // If other is a simple truth value, then perhaps we should 
-    // merge it in, as if it were a count truth value with a count 
-    // of 1?  In which case, we should add a merge routine to 
-    // SimpleTruthValue to do likewise... Anyway, for now, just
-    // ignore this possible complication to the semantics.
-    if (NULL == oc) return TruthValue::merge(other);
+    // If other is a simple truth value, *and* its not the default TV,
+    // then perhaps we should merge it in, as if it were a count truth
+    // value with a count of 1?  In which case, we should add a merge
+    // routine to SimpleTruthValue to do likewise... Anyway, for now,
+    // just ignore this possible complication to the semantics.
+    if (NULL == oc) return std::static_pointer_cast<TruthValue>(clone());
     
     // If both this and other are counts, then accumulate to get the
     // total count, and average together the strengths, using the 

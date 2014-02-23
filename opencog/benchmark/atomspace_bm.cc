@@ -5,6 +5,7 @@
 
 #include "AtomSpaceBenchmark.h"
 
+using namespace std;
 
 int main(int argc, char** argv)
 {
@@ -64,8 +65,8 @@ int main(int argc, char** argv)
              benchmarker.setMethod("getNodeHandles");
              benchmarker.setMethod("getOutgoingSet");
              benchmarker.setMethod("getIncomingSet");
-             benchmarker.setMethod("getHandleSet");
              benchmarker.setMethod("removeAtom");
+             benchmarker.setMethod("getHandleSet");
              break;
            case 'X':
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_TABLE;

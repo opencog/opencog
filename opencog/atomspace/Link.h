@@ -1,8 +1,8 @@
 /*
  * opencog/atomspace/Link.h
  *
- * Copyright (C) 2008-2010 OpenCog Foundation
  * Copyright (C) 2002-2007 Novamente LLC
+ * Copyright (C) 2008-2010 OpenCog Foundation
  * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,10 +26,8 @@
 
 #include <string>
 
+#include <opencog/util/oc_assert.h>
 #include <opencog/atomspace/Atom.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -55,6 +53,9 @@ class Link : public Atom
 
 private:
     void init(const HandleSeq&) throw (InvalidParamException);
+
+    Link(const Link &l) : Atom(0)
+    { OC_ASSERT(false, "Link: bad use of copy ctor"); }
 
 protected:
 
@@ -125,8 +126,11 @@ public:
         init(oset);
     }
 
-    /** Copy constructor, does NOT copy atom table membership! */
-    Link(const Link &l)
+    /**
+     * Copy constructor, does NOT copy atom table membership!
+     * Cannot be const, because the get() functions can't be,
+     * because thread-safe locking required in the gets. */
+    Link(Link &l)
         : Atom(l.getType(), l.getTruthValue(), l.getAttentionValue())
     {
         init(l.getOutgoingSet());
@@ -148,7 +152,7 @@ public:
      * @return A const reference to this atom's outgoing set.
      */
     inline const HandleSeq& getOutgoingSet() const
-	 {
+    {
         return _outgoing;
     }
     /**
@@ -172,7 +176,7 @@ public:
      *
      * @return A string representation of the link.
      */
-    std::string toString(std::string indent = "") const;
+    std::string toString(std::string indent = "");
 
     /**
      * Returns a short string representation of the link.
@@ -182,7 +186,7 @@ public:
      *
      * @return A short string representation of the link.
      */
-    std::string toShortString(std::string indent = "") const;
+    std::string toShortString(std::string indent = "");
 
     /**
      * Returns whether a given handle is a source of this link.

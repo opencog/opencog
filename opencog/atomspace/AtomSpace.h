@@ -266,7 +266,20 @@ public:
     }
 
     /**
-     * Removes an atom from the atomspace
+     * Make sure all atom writes have completed, before returning.
+     * This only has an effect when the atomspace is backed by some
+     * sort of storage, or is sending atoms to some remote location
+     * asynchronously. This simply guarantees that the asynch
+     * operations have completed.
+     * NB: at this time, we don't distinguish barrier and flush.
+     */
+    void barrier(void) { getImpl().barrier(); }
+
+    /**
+     * Remove an atom from the atomspace.  Note that this only purges
+     * the atom from the AtomSpace; it may still remain in persistent
+     * storage.  To also delete from persistant storage, use the
+     * deleteAtom() method. 
      *
      * @param h The Handle of the atom to be removed.
      * @param recursive Recursive-removal flag; the removal will
@@ -282,13 +295,31 @@ public:
     }
 
     /**
+     * Deletes an atom from the atomspace, and any attached storage.
+     * The permanently deletes the atom; to merely purge it from the
+     * atomspace, without altering storage, use removeAtom().
+     *
+     * @param h The Handle of the atom to be removed.
+     * @param recursive Recursive-removal flag; the removal will
+     *       fail if this flag is not set, and the atom has incoming
+     *       links (that are in the atomspace).  Set to false only if
+     *       you can guarantee that this atom does not appear in the
+     *       outgoing set of any link in the atomspace.
+     * @return True if the Atom for the given Handle was successfully
+     *         removed. False, otherwise.
+     */
+    bool deleteAtom(Handle h, bool recursive = true) {
+        return getImpl().deleteAtom(h, recursive);
+    }
+
+    /**
      * Retrieve from the Atom Table the Handle of a given node
      *
      * @param t     Type of the node
      * @param str   Name of the node
     */
-    Handle getHandle(Type t, const std::string& str) const {
-        return getAtomTable().getHandle(t, str);
+    Handle getHandle(Type t, const std::string& str) {
+        return getImpl().getNode(t, str);
     }
 
     /**
@@ -297,8 +328,8 @@ public:
      * @param outgoing a reference to a HandleSeq containing
      *        the outgoing set of the link.
     */
-    Handle getHandle(Type t, const HandleSeq& outgoing) const {
-        return getAtomTable().getHandle(t, outgoing);
+    Handle getHandle(Type t, const HandleSeq& outgoing) {
+        return getImpl().getLink(t, outgoing);
     }
 
     /** Get the atom referred to by Handle h represented as a string. */
@@ -413,30 +444,23 @@ public:
     }
 
     /** Retrieve the TruthValue of a given Handle */
-    TruthValuePtr getTV(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const
+    TruthValuePtr getTV(Handle h) const
     {
-        return h->getTV(vh);
+        return h->getTruthValue();
     }
 
-    strength_t getMean(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getTV(h, vh)->getMean();
+    strength_t getMean(Handle h) const {
+        return h->getTruthValue()->getMean();
     }
 
-    confidence_t getConfidence(Handle h, VersionHandle vh = NULL_VERSION_HANDLE) const {
-        return getTV(h, vh)->getConfidence();
+    confidence_t getConfidence(Handle h) const {
+        return h->getTruthValue()->getConfidence();
     }
 
     /** Change the TruthValue of a given Handle */
-    void setTV(Handle h, TruthValuePtr tv, VersionHandle vh = NULL_VERSION_HANDLE) {
-        h->setTV(tv, vh);
+    void setTV(Handle h, TruthValuePtr tv) {
+        h->setTruthValue(tv);
     }
-
-    /** Change the primary TV's mean of a given Handle
-     * @note By Joel: this makes no sense to me, how can you generally set a mean
-     * across all TV types. I think a better solution would be to remove this
-     * enforce the use of setTV.
-     */
-    void setMean(Handle h, float mean) { h->setMean(mean); }
 
     /**
      * Return true if the handle belongs to *this* atomspace; else
@@ -518,10 +542,8 @@ public:
      * @param type the type of the atoms to be searched
      * @param name the name of the atoms to be searched.
      *        For searching only links, use "" or a search by type.
-     * @param subclass if sub types of the given type are accepted in this search
-     * @param vh only atoms that contains versioned TVs with
-     *        the given VersionHandle are returned. If NULL_VERSION_HANDLE is given,
-     *        it does not restrict the result.
+     * @param subclass if sub types of the given type are accepted
+     *        in this search
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
@@ -542,46 +564,14 @@ public:
         return getAtomTable().getHandlesByName(result, name, type, subclass);
     }
 
-    /** Same as above, but a little slower because it does a VH check. */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByNameVH(OutputIterator result,
-                 const std::string& name,
-                 Type type = ATOM,
-                 bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
-    }
-
-    /**
-     * Returns the set of atoms of a given name (atom type and subclasses
-     * optionally).
-     *
-     * @param result An output iterator.
-     * @param name The desired name of the atoms.
-     * @param type The type of the atom.
-     * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     * @return The set of atoms of the given type and name.
-     *
-     * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.
-     *
-     * @note Example of call to this method, which would return all entries in AtomSpace:
-     * @code
-     *         std::list<Handle> ret;
-     *         atomSpace.getHandleSet(back_inserter(ret), ATOM, true);
-     * @endcode
-     */
+    /** Identical to above. Do not use in new code.  */
     template <typename OutputIterator> OutputIterator
     getHandleSet(OutputIterator result,
                  const char* name,
                  Type type,
-                 bool subclass = true,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 bool subclass = true) const
     {
-        return getAtomTable().getHandlesByNameVH(result, name, type, subclass, vh);
+        return getAtomTable().getHandlesByName(result, name, type, subclass);
     }
 
     /**
@@ -591,8 +581,6 @@ public:
      * @param result An output iterator.
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
@@ -611,17 +599,6 @@ public:
         return getAtomTable().getHandlesByType(result, type, subclass);
     }
 
-    /** Same as above, but slightly less efficient, since it requires
-     * a VH check. */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTypeVH(OutputIterator result,
-                 Type type,
-                 bool subclass = false,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
-    {
-        return getAtomTable().getHandlesByTypeVH(result, type, subclass, vh);
-    }
-
     /**
      * Returns the set of atoms of a given type which have atoms of a
      * given target type in their outgoing set (subclasses optionally).
@@ -631,10 +608,6 @@ public:
      * @param targetType The desired target type.
      * @param subclass Whether type subclasses should be considered.
      * @param targetSubclass Whether target type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
-     * @param targetVh only atoms whose target contains versioned TVs with the given VersionHandle are returned.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of a given type and target type (subclasses
      * optionally).
      *
@@ -650,26 +623,25 @@ public:
                  Type type,
                  Type targetType,
                  bool subclass,
-                 bool targetSubclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+                 bool targetSubclass) const
     {
-        return getAtomTable().getHandlesByTargetTypeVH(result,
-               type, targetType, subclass, targetSubclass, vh, targetVh);
+        return getAtomTable().getHandlesByTargetType(result,
+               type, targetType, subclass, targetSubclass);
     }
 
     /**
+     * DEPRECATED!!!
+     * Do not use this in new code: filter stuff yourself.
+     *
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
-     * i.e. returns the incoming set for that handle, but filtered by the Type you specify.
-     * Uses a special index, so it's more efficient than filtering it yourself.
+     * i.e. returns the incoming set for that handle, but filtered
+     * by the Type you specify.
      *
      * @param result An output iterator.
      * @param handle The handle that must be in the outgoing set of the atom.
      * @param type The type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      *
@@ -685,10 +657,10 @@ public:
     getHandleSet(OutputIterator result,
                  Handle handle,
                  Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 bool subclass) const
     {
-        return getAtomTable().getIncomingSetByTypeVH(result, handle, type, subclass, vh);
+        return getAtomTable().getIncomingSetByType(result,
+               handle, type, subclass);
     }
 
     /**
@@ -711,9 +683,6 @@ public:
      * @param arity The length of the outgoing set of the atoms being searched.
      * @param type The type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh only atoms that contains versioned TVs with the given
-     * VersionHandle are returned. If NULL_VERSION_HANDLE is given, it does not
-     * restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
@@ -732,11 +701,10 @@ public:
                  bool* subclasses,
                  Arity arity,
                  Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 bool subclass) const
     {
         UnorderedHandleSet hs = getAtomTable().getHandlesByOutgoing(handles,
-                types, subclasses, arity, type, subclass, vh);
+                types, subclasses, arity, type, subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -746,21 +714,18 @@ public:
      * optionally).
      *
      * @param result An output iterator.
-     * @param targetName The name of the atom in the outgoing set of the searched
-     * atoms.
-     * @param targetType The type of the atom in the outgoing set of the searched
-     * atoms.
+     * @param targetName The name of the atom in the outgoing set of
+     *        the searched atoms.
+     * @param targetType The type of the atom in the outgoing set of
+     *        the searched atoms.
      * @param type type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh return only atoms that contains versioned TVs with the given
-     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
-     * the result.
      * @return The set of atoms of the given type and name whose outgoing
      * set contains at least one atom of the given type and name.
      *
      * @note The matched entries are appended to a container whose
-     * OutputIterator is passed as the first argument.  Example of call to this
-     * method, which would return all entries in AtomSpace:
+     * OutputIterator is passed as the first argument.  Example of call to
+     * this method, which would return all entries in AtomSpace:
      *
      * @code
      * std::list<Handle> ret;
@@ -772,12 +737,10 @@ public:
                  const char* targetName,
                  Type targetType,
                  Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE,
-                 VersionHandle targetVh = NULL_VERSION_HANDLE) const
+                 bool subclass) const
     {
-        return getAtomTable().getIncomingSetByNameVH(result,
-               targetName, targetType, type, subclass, vh, targetVh);
+        return getAtomTable().getIncomingSetByName(result,
+               targetName, targetType, type, subclass);
     }
 
     /**
@@ -802,8 +765,6 @@ public:
      * @param arity The length of the outgoing set of the atoms being searched.
      * @param type The optional type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh return only atoms that contains versioned TVs with the given VersionHandle.
-     *        If NULL_VERSION_HANDLE is given, it does not restrict the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
@@ -821,11 +782,10 @@ public:
                  bool* subclasses,
                  Arity arity,
                  Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 bool subclass) const
     {
         UnorderedHandleSet hs = getAtomTable().getHandlesByNames(names,
-            types, subclasses, arity, type, subclass, vh);
+            types, subclasses, arity, type, subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -846,9 +806,6 @@ public:
      * @param arity The length of the outgoing set of the atoms being searched.
      * @param type The optional type of the atom.
      * @param subclass Whether atom type subclasses should be considered.
-     * @param vh returns only atoms that contains versioned TVs with the given
-     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
-     * the result.
      * @return The set of atoms of the given type with the matching
      * criteria in their outgoing set.
      *
@@ -867,11 +824,10 @@ public:
                  bool* subclasses,
                  Arity arity,
                  Type type,
-                 bool subclass,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 bool subclass) const
     {
         UnorderedHandleSet hs = getAtomTable().getHandlesByTypes(types,
-            subclasses, arity, type, subclass, vh);
+            subclasses, arity, type, subclass);
         return std::copy(hs.begin(), hs.end(), result);
     }
 
@@ -926,9 +882,6 @@ public:
      * @param subclass Whether type subclasses should be considered.
      * @param compare A criterion for including atoms. It must be something
      * that returns a bool when called.
-     * @param vh returns only atoms that contains versioned TVs with the given
-     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
-     * the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
@@ -944,16 +897,13 @@ public:
     getHandleSetFiltered(OutputIterator result,
                  Type type,
                  bool subclass,
-                 AtomPredicate* compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 AtomPredicate* compare) const
     {
         HandleSeq hs;
-        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByType(back_inserter(hs), type, subclass);
 
         return std::copy_if(hs.begin(), hs.end(), result,
-            [&](Handle h)->bool {
-                return (*compare)(h) and
-                    getAtomTable().containsVersionedTV(h, vh); } );
+            [&](Handle h)->bool { return (*compare)(h); } );
     }
 
     /**
@@ -965,9 +915,6 @@ public:
      * @param type The desired type.
      * @param subclass Whether type subclasses should be considered.
      * @param compare The comparison struct to use in the sort.
-     * @param vh returns only atoms that contains versioned TVs with the given
-     * VersionHandle.  If NULL_VERSION_HANDLE is given, it does not restrict
-     * the result.
      *
      * @return The set of atoms of a given type (subclasses optionally).
      *
@@ -984,13 +931,12 @@ public:
     getSortedHandleSet(OutputIterator result,
                  Type type,
                  bool subclass,
-                 Compare compare,
-                 VersionHandle vh = NULL_VERSION_HANDLE) const
+                 Compare compare) const
     {
         // get the handle set as a vector and sort it.
         std::vector<Handle> hs;
 
-        getHandlesByTypeVH(back_inserter(hs), type, subclass, vh);
+        getHandlesByType(back_inserter(hs), type, subclass);
         std::sort(hs.begin(), hs.end(), compareAtom<AtomComparator>(compare));
         return std::copy(hs.begin(), hs.end(), result);
     }
@@ -1013,10 +959,10 @@ public:
         getHandlesByType(back_inserter(handle_set), atype, subclass);
 
         // Loop over all handles in the handle set.
-        std::list<Handle>::iterator i;
-        for (i = handle_set.begin(); i != handle_set.end(); i++) {
-            Handle h = *i;
-            bool rc = (data->*cb)(h);
+        std::list<Handle>::iterator i = handle_set.begin();
+        std::list<Handle>::iterator iend = handle_set.end();
+        for (; i != iend; i++) {
+            bool rc = (data->*cb)(*i);
             if (rc) return rc;
         }
         return false;
@@ -1104,18 +1050,18 @@ public:
 // ---- filter templates
 
     // @deprecated do not use in new code!
-    HandleSeq filter(AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    HandleSeq filter(AtomPredicate* compare)
     {
         HandleSeq hs;
-        getHandleSetFiltered(back_inserter(hs), ATOM, true, compare, vh);
+        getHandleSetFiltered(back_inserter(hs), ATOM, true, compare);
         return hs;
     }
 
     // @deprecated do not use in new code!
     template<typename OutputIterator>
-    OutputIterator filter(OutputIterator result, AtomPredicate* compare, VersionHandle vh = NULL_VERSION_HANDLE)
+    OutputIterator filter(OutputIterator result, AtomPredicate* compare)
     {
-        return getHandleSetFiltered(result, ATOM, true, compare, vh);
+        return getHandleSetFiltered(result, ATOM, true, compare);
     }
 
     /**
@@ -1176,20 +1122,19 @@ public:
         AttentionValue::lti_t threshold;
     };
 
-    // TODO XXX FIXME convert to boost::signals2 ASAP for thread safety.
-    boost::signals::connection addAtomSignal(const AtomSignal::slot_type& function)
+    boost::signals2::connection addAtomSignal(const AtomSignal::slot_type& function)
     {
         return getImpl().atomTable.addAtomSignal().connect(function);
     }
-    boost::signals::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
+    boost::signals2::connection removeAtomSignal(const AtomPtrSignal::slot_type& function)
     {
         return getImpl().atomTable.removeAtomSignal().connect(function);
     }
-    boost::signals::connection AVChangedSignal(const AVCHSigl::slot_type& function)
+    boost::signals2::connection AVChangedSignal(const AVCHSigl::slot_type& function)
     {
         return getImpl().atomTable.AVChangedSignal().connect(function);
     }
-    boost::signals::connection TVChangedSignal(const TVCHSigl::slot_type& function)
+    boost::signals2::connection TVChangedSignal(const TVCHSigl::slot_type& function)
     {
         return getImpl().atomTable.TVChangedSignal().connect(function);
     }
@@ -1199,8 +1144,8 @@ public:
     std::list<Handle> addAtomSignalQueue;
 
 private:
-    boost::signals::connection c_add; //! Connection to add atom signals
-    bool handleAddSignal(Handle);
+    boost::signals2::connection c_add; //! Connection to add atom signals
+    void handleAddSignal(Handle);
 };
 
 /** @}*/

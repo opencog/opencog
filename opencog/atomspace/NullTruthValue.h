@@ -26,9 +26,6 @@
 #define _OPENCOG_NULL_TRUTH_VALUE_TV_H
 
 #include <opencog/atomspace/TruthValue.h>
-#ifdef ZMQ_EXPERIMENT
-#include "ProtocolBufferSerializer.h"
-#endif
 
 namespace opencog
 {
@@ -39,20 +36,16 @@ namespace opencog
 //! a special type of TruthValue
 class NullTruthValue : public TruthValue
 {
-
     friend class TruthValue;
-#ifdef ZMQ_EXPERIMENT
-    friend class ProtocolBufferSerializer;
-#endif
 
 public:
     NullTruthValue();
     bool isNullTv() const;
-    float getMean() const throw (RuntimeException);
-    float getCount() const throw (RuntimeException);
-    float getConfidence() const  throw (RuntimeException);
+    strength_t getMean() const throw (RuntimeException);
+    count_t getCount() const throw (RuntimeException);
+    confidence_t getConfidence() const  throw (RuntimeException);
     std::string toString() const;
-    TruthValueType getType() const throw (RuntimeException);
+    TruthValueType getType() const;
     TruthValuePtr clone() const;
     TruthValue* rawclone() const;
 

@@ -149,9 +149,9 @@ public:
 
        AtomSpace* as = &cogserver.getAtomSpace();
 	    // Check AtomSpace funds within bounds
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeSTIRange[0], as->getAttentionBank().getSTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getSTIFunds(), agent->acceptableLobeSTIRange[1]);
-	    TS_ASSERT_LESS_THAN_EQUALS( agent->acceptableLobeLTIRange[0], as->getAttentionBank().getLTIFunds());
+	    TS_ASSERT_LESS_THAN_EQUALS(agent->acceptableLobeLTIRange[0], as->getAttentionBank().getLTIFunds());
 	    TS_ASSERT_LESS_THAN_EQUALS(as->getAttentionBank().getLTIFunds(), agent->acceptableLobeLTIRange[1]);
 	}
 

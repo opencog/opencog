@@ -187,6 +187,8 @@ private:
 
     bool bInitialized; 
 
+    bool hasPsiDemandUpdaterForTheFirstTime;
+
 public:
 
     PsiDemandUpdaterAgent(CogServer&);
@@ -211,6 +213,9 @@ public:
     }
 
     double getDemandValue(string demanName) const;
+
+    bool getHasPsiDemandUpdaterForTheFirstTime() const {return hasPsiDemandUpdaterForTheFirstTime;}
+
 
 }; // class
 

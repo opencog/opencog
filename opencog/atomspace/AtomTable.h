@@ -29,12 +29,10 @@
 #include <set>
 #include <vector>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
-#include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
-#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/FixedIntegerIndex.h>
 #include <opencog/atomspace/ImportanceIndex.h>
 #include <opencog/atomspace/IncomingIndex.h>
@@ -44,6 +42,7 @@
 #include <opencog/atomspace/NodeIndex.h>
 #include <opencog/atomspace/PredicateEvaluator.h>
 #include <opencog/atomspace/PredicateIndex.h>
+#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/TypeIndex.h>
 #include <opencog/atomspace/TargetTypeIndex.h>
 #include <opencog/util/Logger.h>
@@ -60,10 +59,14 @@ namespace opencog
 
 typedef std::set<AtomPtr> AtomPtrSet;
 
-typedef boost::signal<void (Handle)> AtomSignal;
-typedef boost::signal<void (AtomPtr)> AtomPtrSignal;
-typedef boost::signal<void (Handle, AttentionValuePtr, AttentionValuePtr)> AVCHSigl;
-typedef boost::signal<void (Handle, TruthValuePtr, TruthValuePtr)> TVCHSigl;
+typedef boost::signals2::signal<void (const Handle&)> AtomSignal;
+typedef boost::signals2::signal<void (const AtomPtr&)> AtomPtrSignal;
+typedef boost::signals2::signal<void (const Handle&,
+                                      const AttentionValuePtr&,
+                                      const AttentionValuePtr&)> AVCHSigl;
+typedef boost::signals2::signal<void (const Handle&, 
+                                      const TruthValuePtr&,
+                                      const TruthValuePtr&)> TVCHSigl;
 
 /**
  * This class provides mechanisms to store atoms and keep indices for
@@ -112,7 +115,7 @@ private:
      * signal connection used to find out about atom type additions in the
      * ClassServer
      */
-    boost::signals::connection addedTypeConnection;
+    boost::signals2::connection addedTypeConnection;
 
     /** Handler of the 'type added' signal from ClassServer */
     void typeAdded(Type);
@@ -188,10 +191,10 @@ public:
      * \note Does not apply the new predicate index to the atoms
      * inserted previously in the AtomTable.
      */
-    void addPredicateIndex(Handle h, PredicateEvaluator *pe)
+    void addPredicateIndex(Handle& h, PredicateEvaluator *pe)
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
-        predicateIndex.addPredicateIndex(h,pe);
+        predicateIndex.addPredicateIndex(h, pe);
     }
 
     /**
@@ -199,7 +202,7 @@ public:
      * GroundedPredicateNode Handle, if it is being used as a
      * lookup index. Otherwise, returns NULL.
      */
-    PredicateEvaluator* getPredicateEvaluator(Handle h) const
+    PredicateEvaluator* getPredicateEvaluator(Handle& h) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return predicateIndex.getPredicateEvaluator(h);
@@ -209,34 +212,27 @@ public:
      * Returns a list of handles that matches the GroundedPredicateNode
      * with the given name (id).
      * @param the id of the predicate node.
-     * @param VersionHandle for filtering the resulting atoms by
-     *        context. NULL_VERSION_HANDLE indicates no filtering
      */
     template <typename OutputIterator> OutputIterator
     getHandlesByGPN(OutputIterator result,
-                    const std::string& gpnNodeName,
-                    VersionHandle vh = NULL_VERSION_HANDLE) const
+                    const std::string& gpnNodeName) const
     {
-        Handle gpnHandle = getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName);
-        return getHandlesByGPN(result, gpnHandle, vh);
+        Handle gpnHandle(getHandle(GROUNDED_PREDICATE_NODE, gpnNodeName));
+        return getHandlesByGPN(result, gpnHandle);
     }
 
     /**
      * Returns a list of handles that matches the GroundedPredicateNode
      * with the given Handle.
      * @param the Handle of the predicate node.
-     * @param VersionHandle for filtering the resulting atoms by
-     *       context. NULL_VERSION_HANDLE indicates no filtering
      **/
     template <typename OutputIterator> OutputIterator
     getHandlesByGPN(OutputIterator result,
-                    Handle h,
-                    VersionHandle vh = NULL_VERSION_HANDLE) const
+                    Handle& h) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         const UnorderedHandleSet& hs = predicateIndex.findHandlesByGPN(h);
-        return std::copy_if(hs.begin(), hs.end(), result,
-                 [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
+        return std::copy(hs.begin(), hs.end(), result);
     }
 
     /**
@@ -254,26 +250,18 @@ public:
     Handle getHandle(Type, const HandleSeq&) const;
     Handle getHandle(LinkPtr) const;
     Handle getHandle(AtomPtr) const;
-    Handle getHandle(Handle) const;
+    Handle getHandle(Handle&) const;
 
 protected:
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool isType(Handle h, Type t, bool subclass) const
+    bool isType(Handle& h, Type t, bool subclass) const
     {
         Type at = h->getType();
         if (not subclass) return t == at;
         return classserver().isA(at, t);
     }
-    bool containsVersionedTV(Handle h, VersionHandle vh) const
-    {
-        if (isNullVersionHandle(vh)) return true;
-        TruthValuePtr tv = h->getTruthValue();
-        return (not tv->isNullTv())
-               and (tv->getType() == COMPOSITE_TRUTH_VALUE)
-               and (not CompositeTVCast(tv)->getVersionedTV(vh)->isNullTv());
-    }
-    bool hasNullName(Handle h) const
+    bool hasNullName(Handle& h) const
     {
         if (LinkCast(h)) return true;
         if (NodeCast(h)->getName().c_str()[0] == 0) return true;
@@ -300,21 +288,6 @@ public:
                             isDefined);
     }
 
-    template <typename OutputIterator> OutputIterator
-    getHandlesByTypeVH(OutputIterator result,
-                       Type type,
-                       bool subclass,
-                       VersionHandle vh) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(typeIndex.begin(type, subclass),
-                            typeIndex.end(),
-                            result,
-             [&](Handle h)->bool{
-                  return isDefined(h) and containsVersionedTV(h, vh);
-             });
-    }
-
     /** Calls function 'func' on all atoms */
     template <typename Function> void
     foreachHandleByType(Function func,
@@ -330,49 +303,29 @@ public:
              });
     }
 
-    template <typename Function> void
-    foreachHandleByTypeVH(Function func,
-                        Type type,
-                        bool subclass,
-                        VersionHandle vh) const
-    {
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        std::for_each(typeIndex.begin(type, subclass),
-                      typeIndex.end(),
-             [&](Handle h)->void {
-                  if (not isDefined(h)) return;
-                  if (not containsVersionedTV(h, vh)) return;
-                  (func)(h);
-             });
-    }
-
     /**
      * Returns all atoms satisfying the predicate
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByTypePredVH(OutputIterator result,
-                           Type type,
-                           bool subclass,
-                           AtomPredicate* pred,
-                           VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByTypePred(OutputIterator result,
+                         Type type,
+                         bool subclass,
+                         AtomPredicate* pred) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(typeIndex.begin(type, subclass),
                             typeIndex.end(),
                             result,
              [&](Handle h)->bool {
-                  return isDefined(h)
-                      and (*pred)(h)
-                      and containsVersionedTV(h, vh);
+                  return isDefined(h) and (*pred)(h);
              });
     }
 
     template <typename OutputIterator> OutputIterator
-    getHandlesByPredVH(OutputIterator result,
-                       AtomPredicate* pred,
-                       VersionHandle vh = NULL_VERSION_HANDLE) const
+    getHandlesByPred(OutputIterator result,
+                     AtomPredicate* pred) const
     {
-        return getHandlesByTypePredVH(result, ATOM, true, pred, vh);
+        return getHandlesByTypePred(result, ATOM, true, pred);
     }
 
     /**
@@ -387,23 +340,18 @@ public:
      *         (subclasses optionally).
      */
     template <typename OutputIterator> OutputIterator
-    getHandlesByTargetTypeVH(OutputIterator result,
+    getHandlesByTargetType(OutputIterator result,
                              Type type,
                              Type targetType,
                              bool subclass,
-                             bool targetSubclass,
-                             VersionHandle vh = NULL_VERSION_HANDLE,
-                             VersionHandle targetVh = NULL_VERSION_HANDLE) const
+                             bool targetSubclass) const
     {
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return std::copy_if(targetTypeIndex.begin(targetType, targetSubclass),
                             targetTypeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                 return isDefined(h)
-                    and isType(h, type, subclass)
-                    and containsVersionedTV(h, vh)
-                    and containsVersionedTV(h, targetVh);
+                 return isDefined(h) and isType(h, type, subclass);
              });
     }
 
@@ -412,22 +360,26 @@ public:
      * Note that this returns a copy of the incoming set,
      * thus making it thread-safe against concurrent additions
      * or deletions by other threads.
+     *
+     * Return an std::vector, simply because its faster to put the
+     * elements into an std::vector than anything else. We don't need
+     * good delete or random-access performance for this.
      */
-    UnorderedHandleSet getIncomingSet(Handle h) const
+    HandleSeq getIncomingSet(Handle& h) const
     {
 #if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
         return incomingIndex.getIncomingSet(h);
 #else
-        UnorderedHandleSet uhs;
-        h->getIncomingSet(inserter(uhs));
-        return uhs;
+        HandleSeq hs;
+        h->getIncomingSet(back_inserter(hs));
+        return hs;
 #endif
     }
 
     template <typename OutputIterator> OutputIterator
     getIncomingSet(OutputIterator result,
-                   Handle h) const
+                   Handle& h) const
     {
 #if TABLE_INCOMING_INDEX
         std::lock_guard<std::recursive_mutex> lck(_mtx);
@@ -453,7 +405,7 @@ public:
      */
     template <typename OutputIterator> OutputIterator
     getIncomingSetByType(OutputIterator result,
-                         Handle h,
+                         Handle& h,
                          Type type,
                          bool subclass = false) const
     {
@@ -464,36 +416,14 @@ public:
                             result,
 #else
         // XXX TODO it would be more efficient to move this to Atom.h
-        UnorderedHandleSet uhs(getIncomingSet(h));
-        return std::copy_if(uhs.begin(), uhs.end(), result,
+        HandleSeq hs(getIncomingSet(h));
+        return std::copy_if(hs.begin(), hs.end(), result,
 #endif
              [&](Handle h)->bool {
                      return isDefined(h)
                         and isType(h, type, subclass); });
     }
 
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByTypeVH(OutputIterator result,
-                           Handle h,
-                           Type type,
-                           bool subclass,
-                           VersionHandle vh) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
-#else
-        // XXX TODO it would be more efficient to move this to Atom.h
-        UnorderedHandleSet uhs(getIncomingSet(h));
-        return std::copy_if(uhs.begin(), uhs.end(), result,
-#endif
-             [&](Handle h)->bool{
-                   return isDefined(h)
-                      and isType(h, type, subclass)
-                      and containsVersionedTV(h, vh); });
-    }
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one
@@ -517,25 +447,8 @@ public:
                          bool subclass = true) const
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetType, targetName);
+        Handle targh(getHandle(targetType, targetName));
         return getIncomingSetByType(result, targh, type, subclass);
-    }
-
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByNameVH(OutputIterator result,
-                           const std::string& targetName,
-                           Type targetType,
-                           Type type,
-                           bool subclass,
-                           VersionHandle vh,
-                           VersionHandle targetVh) const
-    {
-        // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh = getHandle(targetType, targetName);
-        // XXX TODO what the heck with targetVH ?? Are we supposed to
-        // check if targh above has it ?? And if not, I guess return
-        // empty set ... Who needs this stuff, anyway?
-        return getIncomingSetByTypeVH(result, targh, type, subclass, vh);
     }
 
     /**
@@ -565,8 +478,7 @@ public:
     UnorderedHandleSet getHandlesByOutgoing(const std::vector<Handle>&,
                               Type*, bool*, Arity,
                               Type type = ATOM,
-                              bool subclass = true,
-                              VersionHandle vh = NULL_VERSION_HANDLE) const;
+                              bool subclass = true) const;
 
     /**
      * Returns the set of atoms of a given name (atom type and subclasses
@@ -595,23 +507,6 @@ public:
         return std::copy(hs.begin(), hs.end(), result);
     }
 
-    /** Same as above, but a little slower, because it does a VH check. */
-    template <typename OutputIterator> OutputIterator
-    getHandlesByNameVH(OutputIterator result,
-                       const std::string& name,
-                       Type type,
-                       bool subclass,
-                       VersionHandle vh) const
-    {
-        if (name.c_str()[0] == 0)
-            return getHandlesByTypeVH(result, type, subclass, vh);
-
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        UnorderedHandleSet hs = nodeIndex.getHandleSet(type, name.c_str(), subclass);
-        return std::copy_if(hs.begin(), hs.end(), result,
-             [&](Handle h)->bool{ return containsVersionedTV(h, vh); });
-    }
-
     /**
      * Returns the set of atoms with the given target names and/or types
      * (order is considered) in their outgoing sets, where the type
@@ -637,8 +532,7 @@ public:
      * criteria in their outgoing set.
      */
     UnorderedHandleSet getHandlesByNames(const char**, Type*, bool*, Arity,
-                              Type type = ATOM, bool subclass = true,
-                              VersionHandle vh = NULL_VERSION_HANDLE) const
+                              Type type = ATOM, bool subclass = true) const
     throw (RuntimeException);
 
     /**
@@ -661,9 +555,8 @@ public:
      * criteria in their outgoing set.
      */
     UnorderedHandleSet getHandlesByTypes(Type* types, bool* subclasses, Arity arity,
-                              Type type = ATOM, bool subclass = true,
-                              VersionHandle vh = NULL_VERSION_HANDLE) const
-    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass, vh); }
+                              Type type = ATOM, bool subclass = true) const
+    { return getHandlesByNames((const char**) NULL, types, subclasses, arity, type, subclass); }
 
     /**
      * Returns the set of atoms within the given importance range.
@@ -715,7 +608,7 @@ public:
     /**
      * Return true if the atom table holds this handle, else return false.
      */
-    bool holds(Handle h) const {
+    bool holds(Handle& h) const {
         return (NULL != h) and h->getAtomTable() == this;
     }
 
@@ -725,7 +618,7 @@ public:
      * @return pointer to Node object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a link.
      */
-    inline NodePtr getNode(Handle h) const {
+    inline NodePtr getNode(Handle& h) const {
         h = getHandle(h); // force resolution of uuid into atom pointer.
         return NodeCast(h);
     }
@@ -736,7 +629,7 @@ public:
      * @return pointer to Link object, NULL if no atom within this AtomTable is
      * associated with handle or if the atom is a node.
      */
-    inline LinkPtr getLink(Handle h) const {
+    inline LinkPtr getLink(Handle& h) const {
         h = getHandle(h); // force resolution of uuid into atom pointer.
         return LinkCast(h);
     }
@@ -756,7 +649,7 @@ public:
      *        incoming set will also be extracted.
      * @return A set of the extracted atoms.
      */
-    AtomPtrSet extract(Handle handle, bool recursive = true);
+    AtomPtrSet extract(Handle& handle, bool recursive = true);
 
     /**
      * Return a random atom in the AtomTable.

@@ -31,11 +31,13 @@
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/spacetime/atom_types.h>
 #include <opencog/spacetime/SpaceServer.h>
+#include <opencog/util/foreach.h>
 
 #include <opencog/embodiment/Control/Language/LanguageComprehension.h>
 #include <opencog/embodiment/AtomSpaceExtensions/AtomSpaceUtil.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
+#include <opencog/embodiment/AtomSpaceExtensions/atom_types.h>
 
 using namespace opencog::oac;
 using namespace opencog::spatial;

@@ -107,7 +107,7 @@ throw (ComboException, AssertionException, std::bad_exception)
     _hasPlanFailed = false;
     planID = pai.createActionPlan();
 
-    const AtomSpace& as = pai.getAtomSpace();
+    AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
     // treat the case when the action is a compound
     if (WorldWrapperUtil::is_builtin_compound_action(*from)) {
@@ -672,12 +672,12 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
 }
 */
 bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceServer::SpaceMap& sm,const SpaceServer::SpaceMapPoint& startPoint,
-                                                  const SpaceServer::SpaceMapPoint& endPoint, opencog::pai::ActionPlanID _planID,  float customSpeed )
+                                                  const SpaceServer::SpaceMapPoint& endPoint, opencog::pai::ActionPlanID _planID, bool includingLastStep, float customSpeed )
 {
     std::vector<SpaceServer::SpaceMapPoint> actions;
 
     SpaceServer::SpaceMapPoint nearestPos,bestPos;
-    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos,bestPos))
+    if (spatial::Pathfinder3D::AStar3DPathFinder(&sm,startPoint,endPoint,actions,nearestPos,bestPos,false,false,true))
     {
         printf("Pathfinding successfully! From (%d,%d,%d) to (%d, %d, %d)",
                startPoint.x,startPoint.y,startPoint.z,endPoint.x, endPoint.y,endPoint.z);
@@ -702,13 +702,18 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
     if (_planID == "" ) {
         _planID = pai.createActionPlan( );
     } // if
-    vector<SpaceServer::SpaceMapPoint>::iterator it_point = actions.begin();
+    vector<SpaceServer::SpaceMapPoint>::iterator it_point,endPointIter;
+    it_point = actions.begin();
     it_point ++;
+
+    // get the endPoint
+    endPointIter = actions.end();
+    endPointIter --;
 
     while (it_point != actions.end()) {
         PetAction action;
 
-        // Now in Unity, we consider jump up one block as normal walking action:
+        // Now in Unity, we consider jump/climb up one block as normal walking action:
 
         // The agent need to jump when this pos is higher than last pos
         if (((SpaceServer::SpaceMapPoint)(*(it_point))).z > ((SpaceServer::SpaceMapPoint)(*(it_point-1))).z )
@@ -739,6 +744,9 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
         }
         pai.addAction( _planID, action );
         it_point++;
+
+        if ((!includingLastStep) && (it_point == endPointIter))
+            break;
     } // while
 
     return true;
@@ -747,7 +755,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
 bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
                                       Handle goBehind, float walkSpeed )
 {
-    const AtomSpace& atomSpace = pai.getAtomSpace();
+    AtomSpace& atomSpace = pai.getAtomSpace();
     const SpaceServer::SpaceMap& spaceMap = spaceServer().getLatestMap();
     std::string goalName = atomSpace.getName(goalHandle);
 

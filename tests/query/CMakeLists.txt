@@ -16,7 +16,6 @@ LINK_LIBRARIES(
 	nlp-types
 	query
 	server
-	${Boost_SIGNALS_LIBRARY}
 )
 
 # We want to run the tests in the order below;
@@ -36,9 +35,11 @@ IF (HAVE_GUILE)
 	ADD_CXXTEST(ExecutionUTest)
 	ADD_CXXTEST(BuggyStackUTest)
 	ADD_CXXTEST(VarTypeNotUTest)
+	ADD_CXXTEST(BuggyNotUTest)
 	ADD_CXXTEST(MatchLinkUTest)
 	ADD_CXXTEST(UnorderedUTest)
 	ADD_CXXTEST(StackMoreUTest)
+	ADD_CXXTEST(EinsteinUTest)
 
 	TARGET_LINK_LIBRARIES(VarTypeNotUTest
 		cogutil

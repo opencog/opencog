@@ -13,7 +13,6 @@ ADD_LIBRARY (atomspacepublishermodule SHARED
 
 LINK_LIBRARIES(
         server
-        ${Boost_SIGNALS_LIBRARY}
 )
 
 TARGET_LINK_LIBRARIES(atomspacepublishermodule

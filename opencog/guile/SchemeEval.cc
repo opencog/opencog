@@ -16,7 +16,7 @@
 #include <pthread.h>
 
 #include <opencog/util/Logger.h>
-
+#include <opencog/util/oc_assert.h>
 
 #include "SchemeEval.h"
 #include "SchemePrimitive.h"
@@ -44,9 +44,6 @@ void SchemeEval::init(void)
 	scm_set_current_output_port(outport);
 	in_shell = false;
 
-	pending_input = false;
-	caught_error = false;
-	input_line = "";
 	error_string = SCM_EOL;
 	captured_stack = SCM_BOOL_F;
 	pexpr = NULL;
@@ -108,9 +105,18 @@ static void * do_bogus_scm(void *p)
  * multi-threaded operation. Currently, the most serious of these is
  * a parallel-define bug, documented in
  * https://savannah.gnu.org/bugs/index.php?24867
+ *
  * Until that bug is fixed and released, this work-around is needed.
  * The work-around serializes all guile-mode thread execution, by
  * means of a mutex lock.
+ *
+ * As of December 2013, the bug still seems to be there: the test
+ * case provided in the bug report crashes, when linked against
+ * guile-2.0.5 and gc-7.1 from Ubuntu Precise.
+ *
+ * Its claimed that the bug only happens for top-level defines.
+ * Thus, in principle, theading should be OK after all scripts have
+ * been loaded.
  */
 static pthread_mutex_t serialize_lock;
 static pthread_key_t ser_key = 0;
@@ -142,7 +148,7 @@ void SchemeEval::thread_lock(void)
 	long cnt = (long) pthread_getspecific(ser_key);
 	if (0 >= cnt)
 	{
-			pthread_mutex_lock(&serialize_lock);
+		pthread_mutex_lock(&serialize_lock);
 	}
 	cnt ++;
 	pthread_setspecific(ser_key, (const void *) cnt);
@@ -203,9 +209,9 @@ SchemeEval::~SchemeEval()
 
 std::string SchemeEval::prt(SCM node)
 {
-	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_handle_tag, node))
+	if (SCM_SMOB_PREDICATE(SchemeSmob::cog_uuid_tag, node))
 	{
-		return SchemeSmob::handle_to_string(node);
+		return SchemeSmob::uuid_to_string(node);
 	}
 	else if (SCM_SMOB_PREDICATE(SchemeSmob::cog_misc_tag, node))
 	{
@@ -260,11 +266,11 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 	// Check for read error. If a read error, then wait for user to correct it.
 	SCM re = scm_symbol_to_string(tag);
 	char * restr = scm_to_locale_string(re);
-	pending_input = false;
+	_pending_input = false;
 
 	if (0 == strcmp(restr, "read-error"))
 	{
-		pending_input = true;
+		_pending_input = true;
 		free(restr);
 		return SCM_EOL;
 	}
@@ -279,7 +285,7 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 
 	// If it's not a read error, and it's not flow-control,
 	// then its a regular error; report it.
-	caught_error = true;
+	_caught_error = true;
 
 	/* get string port into which we write the error message and stack. */
 	SCM port = scm_open_output_string();
@@ -310,8 +316,8 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 
 			scm_puts ("Backtrace:\n", port);
 			scm_display_backtrace_with_highlights (captured_stack, port,
-												   SCM_BOOL_F, SCM_BOOL_F,
-												   highlights);
+			                                       SCM_BOOL_F, SCM_BOOL_F,
+			                                       highlights);
 			scm_newline (port);
 		}
 #ifdef HAVE_GUILE2
@@ -376,6 +382,13 @@ std::string SchemeEval::eval(const std::string &expr)
 void * SchemeEval::c_wrap_eval(void * p)
 {
 	SchemeEval *self = (SchemeEval *) p;
+
+	// Normally, neither of these are ever null.
+	// But sometimes, a heavily loaded server can crash here.
+	// Trying to figure out why ...
+	OC_ASSERT(self, "c_wrap_eval got null pointer!");
+	OC_ASSERT(self->pexpr, "c_wrap_eval got null expression!");
+
 	self->answer = self->do_eval(*(self->pexpr));
 	return self;
 }
@@ -394,10 +407,10 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 	/* Avoid a string buffer copy if there is no pending input */
 	const char *expr_str;
-	if (pending_input)
+	if (_pending_input)
 	{
-		input_line += expr;
-		expr_str = input_line.c_str();
+		_input_line += expr;
+		expr_str = _input_line.c_str();
 	}
 	else
 	{
@@ -405,8 +418,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 		newin = true;
 	}
 
-	caught_error = false;
-	pending_input = false;
+	_caught_error = false;
+	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
@@ -417,16 +430,16 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	/* An error is thrown if the input expression is incomplete,
 	 * in which case the error handler sets the pending_input flag
 	 * to true. */
-	if (pending_input)
+	if (_pending_input)
 	{
 		/* Save input for later */
-		if (newin) input_line += expr;
+		if (newin) _input_line += expr;
 		return "";
 	}
-	pending_input = false;
-	input_line = "";
+	_pending_input = false;
+	_input_line = "";
 
-	if (caught_error)
+	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
 		std::string rv = str;
@@ -460,35 +473,6 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 /* ============================================================== */
 
-/**
- * Return true if the expression was incomplete, and more is expected
- * (for example, more closing parens are expected)
- */
-bool SchemeEval::input_pending(void)
-{
-	return pending_input;
-}
-
-/**
- * Return true if an error occured during the evaluation of the expression
- */
-bool SchemeEval::eval_error(void)
-{
-	return caught_error;
-}
-
-/**
- * Clear the error state, the input buffers, etc.
- */
-void SchemeEval::clear_pending(void)
-{
-	input_line = "";
-	pending_input = false;
-	caught_error = false;
-}
-
-/* ============================================================== */
-
 SCM SchemeEval::wrap_scm_eval(void *expr)
 {
 	SCM sexpr = (SCM)expr;
@@ -510,14 +494,14 @@ SCM SchemeEval::wrap_scm_eval(void *expr)
  */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
-	caught_error = false;
+	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 						  (scm_t_catch_body) wrap_scm_eval, (void *) sexpr,
 						  SchemeEval::catch_handler_wrapper, this,
 						  SchemeEval::preunwind_handler_wrapper, this);
 
-	if (caught_error)
+	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
 		// Don't blank out the error string yet.... we need it later.
@@ -534,7 +518,7 @@ SCM SchemeEval::do_scm_eval(SCM sexpr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, prt(sexpr).c_str());
+		               __FUNCTION__, str, prt(sexpr).c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);
@@ -612,7 +596,7 @@ void * SchemeEval::c_wrap_eval_h(void * p)
  */
 SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 {
-	caught_error = false;
+	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
 	                      (scm_t_catch_body) scm_c_eval_string,
@@ -620,7 +604,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
-	if (caught_error)
+	if (_caught_error)
 	{
 		char * str = scm_to_locale_string(error_string);
 		error_string = SCM_EOL;
@@ -634,7 +618,7 @@ SCM SchemeEval::do_scm_eval_str(const std::string &expr)
 		Logger::Level save = logger().getBackTraceLevel();
 		logger().setBackTraceLevel(Logger::NONE);
 		logger().error("%s: guile error was: %s\nFailing expression was %s",
-					   __FUNCTION__, str, expr.c_str());
+		               __FUNCTION__, str, expr.c_str());
 		logger().setBackTraceLevel(save);
 
 		free(str);

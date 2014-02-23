@@ -42,6 +42,7 @@ typedef std::shared_ptr<AttentionValue> AttentionValuePtr;
 #define createAV std::make_shared<AttentionValue>
 
 class AttentionValue
+    : public std::enable_shared_from_this<AttentionValue>
 {
 public:
     typedef short sti_t;   //!< short-term importance type

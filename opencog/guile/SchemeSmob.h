@@ -23,7 +23,6 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/AttentionValue.h>
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/VersionHandle.h>
 
 namespace opencog {
 /** \addtogroup grp_smob
@@ -41,18 +40,18 @@ class SchemeSmob
 	private:
 
 		enum {
-			COG_HANDLE = 1,
-			COG_TV,     // truth values
-			COG_VH,     // version handles
-			COG_AV,     // attention values
-			COG_EXTEND // callbacks into C++ code.
+			COG_UUID = 1, // unsigned long int
+			COG_HANDLE,   // msart pointer
+			COG_TV,       // truth values
+			COG_AV,       // attention values
+			COG_EXTEND    // callbacks into C++ code.
 		};
 
 		static bool is_inited;
 		static void register_procs(void);
 
-		// The handle tag is for opencog handles, only.
-		static scm_t_bits cog_handle_tag;
+		// The handle tag is for opencog UUIDs, only.
+		static scm_t_bits cog_uuid_tag;
 
 		// The cog_misc_tag are for all other opencog types, such
 		// as truth values, which are ephemeral (garbage-collected)
@@ -65,6 +64,7 @@ class SchemeSmob
 		static SCM equalp_atom(SCM, SCM);
 		static size_t free_atom(SCM);
 		static int print_misc(SCM, SCM, scm_print_state *);
+		static SCM equalp_misc(SCM, SCM);
 		static SCM mark_misc(SCM);
 		static size_t free_misc(SCM);
 
@@ -113,22 +113,13 @@ class SchemeSmob
 		static SCM ss_new_stv(SCM, SCM);
 		static SCM ss_new_ctv(SCM, SCM, SCM);
 		static SCM ss_new_itv(SCM, SCM, SCM);
-		static SCM ss_new_mtv(SCM, SCM);
-		static SCM ss_set_vtv(SCM, SCM, SCM);
 		static SCM ss_tv_p(SCM);
 		static SCM tv_p(SCM, TruthValueType);
 		static SCM ss_stv_p(SCM);
 		static SCM ss_ctv_p(SCM);
 		static SCM ss_itv_p(SCM);
-		static SCM ss_mtv_p(SCM);
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
-
-		// Version handles
-		static SCM ss_new_vh(SCM, SCM);
-		static SCM ss_vh_p(SCM);
-		static SCM take_vh(VersionHandle *);
-		static SCM ss_vh_get_value(SCM);
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
@@ -136,15 +127,19 @@ class SchemeSmob
 		static SCM take_av(AttentionValue *);
 		static SCM ss_av_get_value(SCM);
 
+        // AttentionalFocus and AttentionalFocus Boundary
+        static SCM ss_af_boundary(void);
+        static SCM ss_set_af_boundary(SCM);
+
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
-		static SCM pln_bc(SCM, SCM);
 
 		// Misc utilities
 		static std::string to_string(SCM);
 		static std::string handle_to_string(SCM);
 		static std::string handle_to_string(Handle, int);
 		static std::string misc_to_string(SCM);
+		static std::string uuid_to_string(SCM);
 		static TruthValue *get_tv_from_list(SCM);
 		static AttentionValue *get_av_from_list(SCM);
 
@@ -152,7 +147,6 @@ class SchemeSmob
 		static Type verify_atom_type(SCM, const char *, int pos = 1);
 		static Type verify_node_type(SCM, const char *, int pos = 1);
 		static Handle verify_handle(SCM, const char *, int pos = 1);
-		static VersionHandle * verify_vh(SCM, const char *, int pos = 1);
 		static TruthValue * verify_tv(SCM, const char *, int pos = 1);
 		static AttentionValue * verify_av(SCM, const char *, int pos = 1);
 		static std::vector<Handle> verify_handle_list (SCM, const char *,
@@ -168,15 +162,16 @@ class SchemeSmob
 	public:
 		// Helper functions XXX why are these public ??
 		// XXX Becuase the embodiment code uses them :-(
-		// The embodiment code should be refactored to no use these.
+		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
+		static SCM uuid_to_scm(UUID);
+		static Handle scm_uuid_to_handle(SCM);
 		static Handle scm_to_handle(SCM);
 
 		// Utility printing functions
 		static std::string to_string(Handle);
 		static std::string av_to_string(const AttentionValue *);
 		static std::string tv_to_string(const TruthValue *);
-		static std::string vh_to_string(const VersionHandle *);
 };
 
 /** @}*/

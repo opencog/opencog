@@ -32,12 +32,11 @@
 #include <set>
 #include <string>
 
-#include <boost/signal.hpp>
+#include <boost/signals2.hpp>
 
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
@@ -52,10 +51,16 @@ namespace opencog
 
 class Link;
 typedef std::shared_ptr<Link> LinkPtr;
-typedef std::set<LinkPtr> IncomingSet;
+typedef std::vector<LinkPtr> IncomingSet; // use vector; see below.
 typedef std::weak_ptr<Link> WinkPtr;
 typedef std::set<WinkPtr, std::owner_less<WinkPtr> > WincomingSet;
-typedef boost::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+typedef boost::signals2::signal<void (AtomPtr, LinkPtr)> AtomPairSignal;
+
+// We use a std:vector instead of std::set for IncomingSet, because
+// virtually all access will be either insert, or iterate, so we get
+// O(1) performance. We use std::set for WincomingSet, because we want
+// both good insert and good remove performance.  Note that sometimes
+// incoming sets can be huge (millions of atoms).
 
 /**
  * Atoms are the basic implementational unit in the system that
@@ -185,7 +190,7 @@ public:
      * @return The const reference to the AttentionValue object
      * of the atom.
      */
-    AttentionValuePtr getAttentionValue() const { return _attentionValue; }
+    AttentionValuePtr getAttentionValue();
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
@@ -194,17 +199,10 @@ public:
      *
      * @return The const referent to the TruthValue object of the atom.
      */
-    TruthValuePtr getTruthValue() const { return _truthValue; }
+    TruthValuePtr getTruthValue();
 
     //! Sets the TruthValue object of the atom.
     void setTruthValue(TruthValuePtr);
-
-    //! The get,setTV methods deal with versioning. Yuck.
-    void setTV(TruthValuePtr, VersionHandle = NULL_VERSION_HANDLE);
-    TruthValuePtr getTV(VersionHandle = NULL_VERSION_HANDLE) const;
-
-    /** Change the primary TV's mean */
-    void setMean(float) throw (InvalidParamException);
 
     /** merge truth value into this */
     void merge(TruthValuePtr);
@@ -235,9 +233,10 @@ public:
     /** Returns a string representation of the node.
      *
      * @return A string representation of the node.
+     * cannot be const, because observing the TV and AV requires a lock.
      */
-    virtual std::string toString(std::string indent = "") const = 0;
-    virtual std::string toShortString(std::string indent = "") const = 0;
+    virtual std::string toString(std::string indent = "") = 0;
+    virtual std::string toShortString(std::string indent = "") = 0;
 
     /** Returns whether two atoms are equal.
      *

@@ -1,10 +1,9 @@
 /*
- * opencog/persist/PersistModule.h
+ * opencog/persist/sql/PersistModule.h
  *
- * Copyright (C) 2008 by OpenCog Foundation
+ * Copyright (c) 2008 by OpenCog Foundation
+ * Copyright (c) 2008, 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
- *
- * Written by Gustavo Gama <gama@vettalabs.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -44,9 +43,9 @@ class SQLBackingStore;
 class PersistModule : public Module
 {
 private:
-    AtomStorage *store;
+    AtomStorage *_store;
 
-    SQLBackingStore *backing;
+    SQLBackingStore *_backing;
 
     DECLARE_CMD_REQUEST(PersistModule, "sql-close", do_close, 
        "Close the SQL database", 
@@ -85,6 +84,8 @@ private:
     Handle fetch_atom(Handle);
     Handle fetch_incoming_set(Handle);
     Handle store_atom(Handle);
+    void load_type(Type);
+    void barrier(void);
 
 public:
     const char* id(void);

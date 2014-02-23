@@ -21,12 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "AtomSpace.h"
-
 #include <stdlib.h>
 #include <string>
 
+#include <boost/bind.hpp>
+
 #include <opencog/util/Logger.h>
+#include "AtomSpace.h"
 
 //#define DPRINTF printf
 #define DPRINTF(...)
@@ -71,11 +72,26 @@ AtomSpace::~AtomSpace()
         delete _atomSpaceImpl;
 }
 
-bool AtomSpace::handleAddSignal(Handle h)
+void AtomSpace::handleAddSignal(Handle h)
 {
+    // XXX TODO FIXME The design here is fundamentally broken!
+    // The queue below is used by python to get atom add signals.
+    // However, if there's no agent running to drain the queue,
+    // it will grow without bound, viz its a memory leak.
+    // Add insult to injury: chances are very high that the added
+    // atoms are removed a short time later, so this ends up
+    // holding a huge list of dead atoms. Add to that, the fact
+    // this contraption isn't even thread-safe.  Yuck.
+    // Some of this could be partly aleviated by using weak pointers
+    // instead of handles, so that dead atoms can die gracefully.
+    // But still, this design is basically just plain broken.
+
+    // Avoid bufferbloat. If no one is bothering to unqueue these
+    // atoms, don't keep adding more to the list.
+    if (1000 < addAtomSignalQueue.size()) return;
+
     // XXX TODO FIXME  this must be locked to avoid corruption!!!
     addAtomSignalQueue.push_back(h);
-    return false;
 }
 
 AtomSpace& AtomSpace::operator=(const AtomSpace& other)

@@ -1,4 +1,4 @@
-from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name, confidence_to_count
+from opencog.atomspace import AtomSpace, types, Atom, TruthValue, get_type_name
 import opencog.cogserver
 
 class AtomTrackingMindAgent(opencog.cogserver.MindAgent):

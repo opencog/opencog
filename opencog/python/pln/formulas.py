@@ -1,15 +1,14 @@
-from opencog.atomspace import count_to_confidence, confidence_to_count, TruthValue
+from opencog.atomspace import TruthValue
 
 import operator, functools, itertools
 
 from utility.util import concat_lists
 
 DEDUCTION_TERM_WEIGHT = 1.0
-INDEPENDENCE_ASSUMPTION_DISCOUNT = 1.0
-EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 1.0
-INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 1.0
-MembershipToExtensionalInheritanceCountDiscountFactor = 1.0
-CRISP_COUNT_THRESHOLD = 0.97
+INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
+EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
+INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 0.9
+MembershipToInheritanceCountDiscountFactor = 0.9
 
 def identityFormula(tvs):
     return tvs
@@ -17,37 +16,43 @@ def identityFormula(tvs):
 def tv_seq_to_tv_tuple_seq(tvs):
     return [(tv.mean, tv.count) for tv in tvs]
 
-def deductionSimpleFormula(tvs):
-    [(sAB, nAB), (sBC, nBC), (_, nA), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
+# I didn't incorporate count into the formulas, it just makes things tacky.
+# There are also some divide-by-zero errors where a TV is 0 (or 1, because NOT(A) is used in some formulas). If the formulas are designed well enough, that can still be compatible with indefinite TVs.
 
-    # Temporary filtering fix to make sure that nAB >= nA
-    nA = min(nA, nAB)
-    sDenominator = low(1 - sB)
-    nDenominator = low(nB)
-    
-    w1 = DEDUCTION_TERM_WEIGHT # strength
-    w2 = 2 - w1 # strength
-    sAC = (w1 * sAB * sBC
-               + w2 * (1 - sAB) * (sC - sB * sBC) / sDenominator)
-    
-    nAC = INDEPENDENCE_ASSUMPTION_DISCOUNT * nA * nBC / nDenominator
-    
-    return [TruthValue(sAC, nAC)]
+def makeUpCount(tvs):
+    #ArbitraryDiscountFactor = 0.9
+    #return min(tv.count for tv in tvs)*ArbitraryDiscountFactor
+    return min(tv.count for tv in tvs)
 
-# better deduction formula based on concept geometry
+def deductionIndependenceBasedFormula(tvs):
+    [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    sNotB = 1-sB
+
+    if sNotB == 0:
+        return [TruthValue(0, 0)]
+
+    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/sNotB
+
+    n = makeUpCount(tvs)*INDEPENDENCE_ASSUMPTION_DISCOUNT
+
+    return [TruthValue(sAC, n)]
+
+# better deduction formula based on concept geometry.
+# I swear that's not the formula in the book though
 def deductionGeometryFormula(tvs):
     [AB, BC] = tvs
 
     sAC = AB.mean*BC.mean / min(AB.mean+BC.mean, 1)
-    nAC = AB.count+BC.count
+    nAC = makeUpCount(tvs)
 
     return [TruthValue(sAC, nAC)]
 
 def inversionFormula(tvs):
-    [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+    [AB, A, B] = tvs
     
-    sBA = sAB * sA / low(sB)
-    nBA = nAB * nB / low(nA)
+    sBA = AB.mean * B.mean / low(A.mean)
+    nBA = makeUpCount(tvs)
     
     return [TruthValue(sBA, nBA)]
 
@@ -55,91 +60,130 @@ def inductionFormula(tvs):
     # InversionRule on the initial argument and then Deduction
     MS, ML, S, M, L = tvs
 
-    SM = inversionFormula(MS, M, S)
-    SL = deductionGeometryFormula(SM, ML)
+    [SM] = inversionFormula([MS, M, S])
+    SL = deductionIndependenceBasedFormula([SM, ML, M, L])
     return SL
 
 def abductionFormula(tvs):
     # InversionRUle on the final argument and then Deduction
     SM, LM, S, M, L = tvs
 
-    ML = inversionFormula(LM, L, M)
-    SL = deductionGeometryFormula(SM, ML)
+    [ML] = inversionFormula([LM, L, M])
+    SL = deductionIndependenceBasedFormula([SM, ML, M, L])
     return SL
 
-def crispModusPonensFormula(tvs):
-    (sAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
-
-    true = 0.5
-    if all(x >= true for x in [sAB, nAB, sA, nA]):
-        return [TruthValue(1, confidence_to_count(0.99))]
-    else:
-        return [TruthValue(0, 0)]
-
 def modusPonensFormula(tvs):
-    (sAB, nAB), (sNotAB, nNotAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+    [AB, A] = tvs
 
-#    if nAB > CRISP_COUNT_THRESHOLD and nA > CRISP_COUNT_THRESHOLD:
-#        return crispModusPonensFormula(tvs)
+    NotAB=TruthValue(0.2, 1)
 
-    # guess P(B|not A)
-    #    sNotAB, nNotAB = (0.5, 0.01)
-    
-    
+    return preciseModusPonensFormula([AB, NotAB, A])
 
-    n2 = min(nAB, nA)
-    if n2 + nNotAB > 0:
-        s2 = ((sAB * sA * n2 + nNotAB +
-                 sNotAB * (1 - sA) * nNotAB) /
-                 low(n2 + nNotAB))
-    else:
-        raise NotImplementedError
-        s2 = BNA.confidence
+def preciseModusPonensFormula(tvs):
+    (sAB, nAB), (sNotAB, _), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+
+    sB = sAB*sA + sNotAB*negate(sA)
     
-    return [TruthValue(s2, n2)]
+    n = makeUpCount(tvs)
+
+    return [TruthValue(sB, n)]
+
+def symmetricModusPonensFormula(tvs):
+    (simAB, nAB), (sA, nA) = tv_seq_to_tv_tuple_seq(tvs)
+
+    sNotAB = 0.2
+
+    sB = sA*simAB + sNotAB*negate(sA)*(1+simAB)
+
+    n = makeUpCount(tvs)
+
+    return [TruthValue(sB, n)]
+
+def termProbabilityFormula(tvs):
+    # sB = sA*sAB/sBA
+    # A, Inheritance A B, Inheritance B A => B
+
+    [AB, BA, A] = tvs
+    
+    sB = A.mean*AB.mean/BA.mean
+    nB = makeUpCount(tvs)
+
+    return [TruthValue(sB, nB)]
+
+def transitiveSimilarityFormula(tvs):
+    [AB, BC, A, B, C] = tvs
+    simAB = AB.mean
+    simBC = BC.mean
+    sA = A.mean
+    sB = B.mean
+    sC = C.mean
+
+    def deduction(freqAB, freqBC):
+        sAC = freqAB*freqBC + negate(freqAB)*(sC-sB*freqBC)/negate(sB)
+        return sAC
+
+    T1 = (1+sB/sA)*simAB / (1+simAB)
+    T2 = (1+sC/sB)*simBC / (1+simBC)
+    T3 = (1+sB/sC)*simBC / (1+simBC)
+    T4 = (1+sA/sB)*simAB / (1+simAB)
+    
+    inhAC = deduction(T1, T2)
+    inhCA = deduction(T3, T4)
+
+    # Given inhAC and inhCA you can estimate simAC
+    simAC = invert(invert(inhAC)+invert(inhCA)-1)
+
+    count = makeUpCount(tvs)
+
+    return [TruthValue(simAC, count)]
 
 def inheritanceFormula(tvs):
     tv_subset, tv_inh = tvs
 
     # simple average of subset and inheritance
     mean = (tv_subset.mean + tv_inh.mean) /2.0
-    count = (tv_subset.count + tv_inh.count) / 2.0
+    count = makeUpCount(tvs)
 
     return [TruthValue(mean, count)]
 
 def notFormula(tvs):
-    tv = tvs[0]
-    return [TruthValue(1.0 - tv.mean, tv.count)]
+    [notA] = tvs
+    return [TruthValue(negate(notA.mean), makeUpCount(tvs))]
 
-def andSymmetricFormula(tvs):
+def andFormula(tvs):
     total_strength = 1.0
-    total_confidence = 1.0
     
     for tv in tvs:
         total_strength *= tv.mean
-        total_confidence *= count_to_confidence(tv.count)
     
-    return [TruthValue(total_strength, confidence_to_count(total_confidence))]
+    return [TruthValue(total_strength, makeUpCount(tvs))]
+
+def andExclusionFormula(tvs):
+    [orAB, A, B] = tvs
+    # Use inclusion-exclusion.
+    s = A.mean+B.mean - orAB.mean
+
+    return [TruthValue(s, makeUpCount(tvs))]
 
 def orFormula(tvs):
-    N = len(tvs)
-    
-    if N == 1:
-        return [tvs[0]]
-    
-    if N > 2:
-        # TODO handle via divide-and-conquer or something
-        raise NotImplementedError("OR calculation not supported for arity > 2")
+    assert len(tvs) >= 2
 
+    total_s = 1.0
+    for tv in tvs[1:]:
+        andAB=total_s*tv.mean
+        total_s = total_s + tv.mean - andAB
+
+    return [TruthValue(total_s, makeUpCount(tvs))]
+
+def binaryOrFormula(tvs):
     (sA, nA), (sB, nB) = tv_seq_to_tv_tuple_seq(tvs)
+
+    # Uses the inclusion-exclusion formula.
+    andAB=sA*sB
+    s = sA + sB - andAB
+    n_tot = makeUpCount(tvs)
     
-    A = sA * nB
-    B = sB * nA
-    
-    s_tot = sA + sB
-    n_tot = nA + nB - (A + B) / 2
-    
-    return [TruthValue(s_tot, n_tot)]
+    return [TruthValue(s, n_tot)]
 
 def andPartitionFormula(tvs, U):
     [(sAndA, nAndA), (sAndB, nAndB)] = tvs
@@ -163,19 +207,39 @@ def inheritanceFormula(tvs, U):
 
     return [TruthValue(s, n)]
 
-def inheritance2SimilarityFormula(tvs, U):
-    [(sAB, nAB), (sBA, nBA)] = tvs
+def twoInheritanceToSimilarityFormula(tvs):
+    [(sAB, nAB), (sBA, nBA)] = tv_seq_to_tv_tuple_seq(tvs)
 
-    s = 1.0/ ( 1.0/sAB + 1.0/sBA -1)
+    s = invert( invert(sAB) + invert(sBA) -1)
     n = (nAB + nBA) / (1 + s)
 
     return [TruthValue(s, n)]
 
+def oneInheritanceToSimilarityFormula(tvs):
+    [(sAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    meat = (sA/sC+1)/sAC - 1
+
+    simAC = invert(meat)
+
+    return [TruthValue(simAC, makeUpCount(tvs))]  
+
+def similarityToInheritanceFormula(tvs):
+    '''Given simAB, sA and sB, estimate sAB. Could easily be turned around to
+       estimate sBA'''
+    [(simAB, nAB), (sA, nA), (sB, nB)] = tv_seq_to_tv_tuple_seq(tvs)
+
+    sAB = (1+sB/sA)*simAB / (1 + simAB)
+
+    return [TruthValue(sAB, makeUpCount(tvs))]
+
 def mem2InhFormula(tvs):
     [mem_tv] = tvs
-    count = mem_tv.count * MembershipToExtensionalInheritanceCountDiscountFactor
+    count = mem_tv.count * MembershipToInheritanceCountDiscountFactor
 
     return [TruthValue(mem_tv.mean, count)]
+
+inh2MemFormula = mem2InhFormula
 
 def fuzzy_and(mean0, mean1):
     return min(mean0, mean1)
@@ -274,7 +338,18 @@ Outputs: SubsetLink A B.tv, SubsetLink B A.tv, SubsetLink NOT(A) B.tv, SubsetLin
 
     # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
     tvs = subsetAB + subsetBA + subsetNotAB + subsetNotBA + similarityAB
-    for tv in tvs: print str(tv)
+    return tvs
+
+def intensionalEvaluationFormula(tvs):
+    '''Inputs: Attraction x A.tv, Attraction x B.tv
+Outputs: IntensionalInheritance A B.tv, IntensionalInheritance B A.tv, IntensionalSimilarityLink A B.tv'''
+    subsetAB = subsetEvaluationFormula(tvs)
+    subsetBA = subsetEvaluationFormula(reversed(tvs))
+
+    similarityAB = similarityEvaluationFormula(tvs)
+
+    # Each of those formulas returns a list containing one TV, and this formula returns a list containing 3 TVs
+    tvs = subsetAB + subsetBA + similarityAB
     return tvs
 
 def extensionalSimilarityFormula(tvs):
@@ -288,16 +363,25 @@ def extensionalSimilarityFormula(tvs):
         return [TruthValue(0, 0)]
 
     P = and_size / or_size
-    N = and_tv.count + or_tv.count
+    N = makeUpCount(tvs)
 
     return [TruthValue(P, N)]
 
 def attractionFormula(tvs):
     [ab, b] = tvs
 
-    mean = min(0, ab.mean - b.mean)
+    s = low(ab.mean - b.mean)
 
-    count = ab.count
+    count = makeUpCount(tvs)
+
+    return [TruthValue(s, count)]
+
+def ontoInhFormula(tvs):
+    [ab, ba] = tvs
+
+    mean = low(ab.mean - ba.mean)
+
+    count = makeUpCount(tvs)
 
     return [TruthValue(mean, count)]
 
@@ -315,22 +399,47 @@ def revisionFormula(tvs):
 def andBreakdownFormula(tvs):
     [A, AND_AB] = tvs
 
-    if A.mean == 0:
-        return [TruthValue(0, 0)]
-
     sB = AND_AB.mean / A.mean
-    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+    nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
 def orBreakdownFormula(tvs):
     [A, OR_AB] = tvs
 
-    sB = OR_AB.mean / (1-A.mean)
-    nB = 1 # bizarbitrary count to symbolize how innacurate this rule is!
+    sNotA = (1-A.mean)
+
+    sB = OR_AB.mean / sNotA
+    nB = makeUpCount(tvs)
 
     return [TruthValue(sB, nB)]
 
+'''
+Evaluation is_American Ben <fuzzy tv 1>
+Implication is_American is_idiot <strength tv 2>
+|-
+Evaluation is_idiot Ben <tv3>
+
+Use Mem2InhFormula to get the tv of: Implication is_Ben is_American
+Use DeductionFormula to get the tv of: Implication is_ben is_idiot
+Use I2M to get the tv of: Evaluation is_idiot Ben
+'''
+def evaluationImplicationFormula(tvs):
+    [eval_B_A, impl_B_C, B, C] = tvs
+
+    [impl_A_B] = mem2InhFormula([eval_B_A])
+    [impl_A_C] = deductionIndependenceBasedFormula(
+        [impl_A_B, impl_B_C, B, C])
+    [eval_C_A] = inh2MemFormula([impl_A_C])
+
+    return [eval_C_A]
+
 def low(n):
-    return max(n, 0.00001)
+    return max(n, 0)
+
+def invert(n):
+    return 1.0/n
+
+def negate(n):
+    return 1.0-n
 

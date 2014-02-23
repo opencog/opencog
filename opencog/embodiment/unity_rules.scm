@@ -895,6 +895,8 @@
 ;    )
 ;)
 ;
+
+
 ;(AverageLink (stv 1.0 1.0)
 ;    (ListLink EntityVar)
 ;
@@ -910,4 +912,66 @@
 ;        (add_gpn "angerWhenAttackedPrecondition")	      
 ;    )
 ;)
+
+
+;begin adding facts for Einstein puzzle:
+; Base concepts
+
+(ConceptNode "pet" (stv 0.05 1))
+(ConceptNode "drink" (stv 0.05 1))
+
+; Pets
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "dogs")
+      (ConceptNode "true")
+   )
+)
+
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "cats")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_pet")
+   (ListLink
+      (ConceptNode "fish")
+      (ConceptNode "true")
+   )
+)
+
+; Drinks
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "tea")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "water")
+      (ConceptNode "true")
+   )
+)
+
+(EvaluationLink (stv 1 1)
+   (PredicateNode "is_drink")
+   (ListLink
+      (ConceptNode "milk")
+      (ConceptNode "true")
+   )
+)
+
+
+
+
 

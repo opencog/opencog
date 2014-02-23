@@ -142,8 +142,6 @@ PredicateEvaluator* PredicateIndex::getPredicateEvaluator(Handle gpnHandle) cons
  * Returns a list of handles that matches the GroundedPredicateNode
  * with the given Handle.
  * @param the Handle of the predicate node.
- * @param VersionHandle for filtering the resulting atoms by
- *       context. NULL_VERSION_HANDLE indicates no filtering
  **/
 UnorderedHandleSet PredicateIndex::findHandlesByGPN(Handle gpnHandle) const
 {

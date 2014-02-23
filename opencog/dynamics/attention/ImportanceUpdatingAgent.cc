@@ -29,6 +29,7 @@
 #include <time.h>
 
 #include <opencog/util/Config.h>
+#include <opencog/util/foreach.h>
 #include <opencog/util/mt19937ar.h>
 
 using namespace opencog;
@@ -100,9 +101,9 @@ ImportanceUpdatingAgent::ImportanceUpdatingAgent(CogServer& cs) :
 
     rng = NULL;
 
-    // Provide a logger, but disable it initially
+    // Provide a logger
     log = NULL;
-    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::WARN, true));
+    setLogger(new opencog::Logger("ImportanceUpdatingAgent.log", Logger::FINE, true));
 }
 
 ImportanceUpdatingAgent::~ImportanceUpdatingAgent()

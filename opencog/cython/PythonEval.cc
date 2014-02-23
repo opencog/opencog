@@ -65,7 +65,6 @@ static const char* DEFAULT_PYTHON_MODULE_PATHS[] =
 void PythonEval::init(void)
 {
     logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
-    this->pending = false;
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -413,28 +412,33 @@ void PythonEval::addModuleFromPath(std::string path)
 
 }
 
-std::string PythonEval::eval(std::string expr)
+std::string PythonEval::eval(const std::string& partial_expr)
 {
     std::string result = "";
-    if (expr == "\n")
+    if (partial_expr == "\n")
     {
-        this->pending = false;
-        result = this->apply_script(this->expr);
-        this->expr = "";
+        _pending_input = false;
+        result = this->apply_script(_input_line);
+        _input_line = "";
     }
     else
     {
-        size_t size = expr.size();
-        size_t colun = expr.find_last_of(':');
+        // If the line ends with a colon, its not a complete expression,
+        // and we must wait for more input.
+        // XXX FIXME TODO: the same might be true if there was an open
+        // parenthesis, and no close parentheis.  This neds to be
+        // scanned for and fixed.
+        size_t size = partial_expr.size();
+        size_t colun = partial_expr.find_last_of(':');
         if (size-2 == colun)
-            pending = true;
+            _pending_input = true;
 
-        this->expr += expr;
+        _input_line += partial_expr;
 
-        if (not pending)
+        if (not _pending_input)
         {
-            result = this->apply_script(this->expr);
-            this->expr = "";
+            result = this->apply_script(_input_line);
+            _input_line = "";
         }
     }
     return result;

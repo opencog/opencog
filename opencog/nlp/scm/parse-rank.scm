@@ -1,4 +1,3 @@
-scm
 ;
 ; parse-rank.scm
 ;
@@ -200,9 +199,9 @@ scm
 	; in the sentence. Get those (filter on WordInstanceNode in order
 	; to ignore the SentenceNode), then map these to word nodes, 
 	; and then tack them onto our list.
-	(cog-filter-map 'WordInstanceNode 
+	(for-each 
 		(lambda (x) (map-word-node add-to-word-list x))
-		(cog-outgoing-set sentence)
+		(cog-filter 'WordInstanceNode (cog-outgoing-set sentence))
 	)
 
 	; (display word-list)
@@ -293,7 +292,7 @@ scm
 	)
 
 	; Get the mutual information for the various word-pairs
-	(cog-filter-map 'SentenceLink get-mi (cog-incoming-set sent-node))
+	(for-each get-mi (cog-filter 'SentenceLink (cog-incoming-set sent-node)))
 
 	; (display mi-edge-list) (newline)
 

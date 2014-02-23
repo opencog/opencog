@@ -14,7 +14,6 @@
 
 #include <opencog/atomspace/types.h>
 #include <opencog/atomspace/AttentionValue.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
 #include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
@@ -102,9 +101,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
                 break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
-                break;
             default:
                 break;
             }
@@ -122,9 +118,6 @@ size_t AtomSpaceBenchmark::estimateOfAtomSize(Handle h)
                 break;
             case INDEFINITE_TRUTH_VALUE:
                 total += sizeof(IndefiniteTruthValue);
-                break;
-            case COMPOSITE_TRUTH_VALUE:
-                total += sizeof(CompositeTruthValue);
                 break;
             default:
                 break;
@@ -165,7 +158,6 @@ void AtomSpaceBenchmark::printTypeSizes()
     cout << "SimpleTruthValue = " << sizeof(SimpleTruthValue) << endl;
     cout << "CountTruthValue = " << sizeof(CountTruthValue) << endl;
     cout << "IndefiniteTruthValue = " << sizeof(IndefiniteTruthValue) << endl;
-    cout << "CompositeTruthValue = " << sizeof(CompositeTruthValue) << endl;
     cout << "AttentionValue = " << sizeof(AttentionValue) << endl;
     cout << "IncomingSet = " << sizeof(IncomingSet) << endl;
     cout << "AtomSignal = " << sizeof(AtomSignal) << endl;
@@ -613,7 +605,9 @@ timepair_t AtomSpaceBenchmark::bm_addLink()
 timepair_t AtomSpaceBenchmark::bm_rmAtom()
 {
     Handle h = getRandomHandle();
-    while (0 < h->getIncomingSetSize()) {
+    // operator->() can return NULL when there's no atom for the uuid,
+    // because the atom was deleted in a previous pass! Dohh!
+    while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
         h = getRandomHandle();
     }
     clock_t t_begin;
@@ -627,7 +621,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -646,7 +640,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
             h = getRandomHandle();
             // XXX FIXME --- this may have trouble finding anything if
             // Nloops is bigger than the number of links in the atomspace !
-            while (0 < h->getIncomingSetSize()) {
+            while (NULL == h.operator->() or 0 < h->getIncomingSetSize()) {
                 h = getRandomHandle();
             }
         }
@@ -681,12 +675,6 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 
 Handle AtomSpaceBenchmark::getRandomHandle()
 {
-    //tRandomStart = clock();
-    // We need this TLB access as the only alternative to
-    // getting a random handle this way scales badly:
-    // (... plus we are not allowed access to the AtomTable either)
-    //Handle h = asp->getAtomTable().getRandom(rng);
-    //tRandomEnd = clock();
     return Handle(UUID_begin + rng->randint(UUID_end-1-UUID_begin));
 }
 

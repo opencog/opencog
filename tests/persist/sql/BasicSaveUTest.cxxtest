@@ -3,11 +3,11 @@
  *
  * Most basic, simplest sniff test, saves and restores a few atoms.
  *
- * If this test is failing for you, then be sure to read
- * ../../opencong/persist/README, and create/configure the SQL database
- * as described there. Next, edit ../../lib/test-opencog.conf 
- * appropriately, so as to indicate the location of your database.
- * This test will then pass.
+ * If this test is failing for you, then be sure to read the README in
+ * this directory, and also ../../opencong/persist/README, and then
+ * create and configure the SQL database as described there. Next,
+ * edit ../../lib/test-opencog.conf to add the database credentials
+ * (the username and passwd).
  *
  * Copyright (C) 2008, 2009 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -85,7 +85,7 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 			}
 			catch (InvalidParamException &e)
 			{
-				freindlyFailMessage();
+				freindlyFailMessage(false);
 			}
 		}
 
@@ -98,9 +98,9 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 
 		void setUp(void);
 
-		void freindlyFailMessage()
+		void freindlyFailMessage(bool ts)
 		{
-			TS_FAIL("The BasicSaveUTest failed.\n"
+			const char * fail = "The BasicSaveUTest failed.\n"
 				"This is probably because you do not have SQL installed\n"
 				"or configured the way that OpenCog expects.\n\n"
 				"SQL persistance is optional for OpenCog, so if you don't\n"
@@ -109,7 +109,12 @@ class BasicSaveUTest :  public CxxTest::TestSuite
 				"and create/configure the SQL database as described there.\n"
 				"Next, edit lib/opencog-test.conf appropriately, so as\n"
 				"to indicate the location of your database. If this is\n"
-				"done correctly, then this test will pass.\n");
+				"done correctly, then this test will pass.\n";
+
+			if (ts)
+				TS_FAIL(fail);
+			else
+				fprintf(stderr, "%s", fail);
 			exit(1);
 		}
 
@@ -135,7 +140,7 @@ void BasicSaveUTest::setUp(void)
 	if (!astore->connected())
 	{
 		logger().info("setUp: cannot connect to database");
-		freindlyFailMessage();
+		freindlyFailMessage(true);
 		exit(1);
 	}
 	logger().info("Connect to \"%s\" as \"%s\" passwd \"%s\"", dbname, username, passwd);
@@ -146,11 +151,12 @@ void BasicSaveUTest::setUp(void)
 
 // ============================================================
 
-static void atomCompare(AtomPtr a, AtomPtr b)
+static void atomCompare(AtomPtr a, AtomPtr b, const char* where)
 {
 	LinkPtr la(LinkCast(a));
 	LinkPtr lb(LinkCast(b));
 
+	printf("Testing at %s\n", where);
 	TSM_ASSERT("No atom found", b != NULL);
 	if (NULL == b) return;
 
@@ -198,8 +204,8 @@ static void atomCompare(AtomPtr a, AtomPtr b)
 
 // ============================================================
 /**
- * A simple test cases that tests the save and restore of 
- * a couple of nodes and a link. Does not test atomspaces at all.
+ * A simple test case that tests the save and restore of 
+ * a couple of nodes and a link. Does not test atomtable/atomspace at all.
  */
 void BasicSaveUTest::single_atom_save_restore(std::string id)
 {
@@ -216,21 +222,26 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 	a->setTruthValue(stv);
 	TLB::addAtom(a);
 
+	Handle h = a->getHandle();
+	UUID uuid = h.value();
+
+	TSM_ASSERT("Bad Handle", h != Handle::UNDEFINED);
+
 	// Store the atom ... 
-	store->storeAtom(a);
+	store->storeAtom(a, true);
 
 	// Fetch it back ...
-	Handle h = a->getHandle();
-	AtomPtr b = store->getAtom(h);
+	Handle hb(uuid);
+	AtomPtr b = store->getAtom(hb);
 
 	// Are they equal ??
-	atomCompare(a,b);
+	atomCompare(a, b, "Single node save-restore");
 
 	// Create a second atom, connect it to the first
 	// with a link. Save it, fetch it ... are they equal?
 	AtomPtr a2(createNode(SCHEMA_NODE, id + "otherNode"));
 	TLB::addAtom(a2);
-	store->storeAtom(a2);
+	store->storeAtom(a2, true);
 
 	std::vector<Handle> hvec;
 	hvec.push_back(a->getHandle());
@@ -238,10 +249,11 @@ void BasicSaveUTest::single_atom_save_restore(std::string id)
 
 	LinkPtr l(createLink(SET_LINK, hvec));
 	TLB::addAtom(l);
-	store->storeAtom(l);
+	store->storeAtom(l, true);
 
-	AtomPtr lb = store->getAtom(l->getHandle());
-	atomCompare(l, lb);
+	UUID ul = l->getHandle().value();
+	AtomPtr lb = store->getAtom(Handle(ul));
+	atomCompare(l, lb, "Single link save-restore");
 
 	store->kill_data();
 	delete store;
@@ -283,13 +295,13 @@ void BasicSaveUTest::add_to_table(int idx, AtomTable *table, std::string id)
 void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 {
 	Handle hb1 = table->getHandle(n1[idx]);
-	atomCompare(a1[idx], hb1);
+	atomCompare(a1[idx], hb1, "check_table hb1");
 
 	Handle hb2 = table->getHandle(n2[idx]);
-	atomCompare(a2[idx], hb2);
+	atomCompare(a2[idx], hb2, "check_table hb2");
 
 	Handle hb3 = table->getHandle(n3[idx]);
-	atomCompare(a3[idx], hb3);
+	atomCompare(a3[idx], hb3, "check_table hb3");
 
 	std::vector<Handle> hvec;
 	hvec.push_back(hb1);
@@ -298,7 +310,7 @@ void BasicSaveUTest::check_table(int idx, AtomTable *table, std::string id)
 
 	LinkPtr lb(createLink(PARSE_LINK, hvec));
 	Handle hlb = table->getHandle(lb);
-	atomCompare(al[idx], hlb);
+	atomCompare(al[idx], hlb, "check_table hlb");
 }
 
 // ============================================================

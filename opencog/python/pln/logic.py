@@ -40,8 +40,7 @@ class Logic(object):
             ret+= self.get_incoming_recursive(link)
         return ret
 
-    def new_variable(self):
-        prefix = '$pln_var_'
+    def new_variable(self, prefix='$pln_var_'):
         return self._atomspace.add_node(types.VariableNode, prefix, prefixed=True)
 
     def make_n_variables(self, N):
@@ -56,7 +55,18 @@ class Logic(object):
                 attentional_focus.append(atom)
         return attentional_focus
 
-    def find(self, template, s={}, useAF=False, allow_zero_tv=False, ground=False):
+    def find(self, template):
+        atoms = self.lookup_atoms(template, {})
+
+        atoms = self.filter_attentional_focus(atoms)
+        atoms = [atom for atom in atoms if wanted_atom(atom, template, ground=True)]
+
+        return atoms
+
+    def lookup_atoms(self, template, substitution):
+        if len(self.variables(template)) == 0:
+            return [template]
+
         if template.type == types.VariableNode:
             root_type = types.Atom
             atoms = self.atomspace.get_atoms_by_type(root_type)
@@ -70,18 +80,18 @@ class Logic(object):
             else:
                 atoms = self.get_incoming_recursive(first_node)
 
-        if useAF:
-            atoms = self.filter_attentional_focus(atoms)
+        return atoms
 
-        if not allow_zero_tv:
-            atoms = [atom for atom in atoms if atom.tv.count > 0]
+    def wanted_atom(self, atom, template, s={}, allow_zero_tv=False, ground=False):
 
-        results = [atom for atom in atoms if self.unify_together(atom, template, s)]
-        
-        if ground:
-            results = [atom for atom in results if len(self.variables(atom)) == 0]
+        if atom.av['vlti']:
+            return False
 
-        return results
+        tv_ok = (allow_zero_tv or atom.tv.count > 0)
+        unifies_ok = self.unify_together(atom, template, s)
+        grounded_ok = not ground or len(self.variables(atom)) == 0
+
+        return tv_ok and unifies_ok and grounded_ok
 
     def unify_together(self, x, y, s):
         return self.unify(x, y, s) != None
@@ -99,7 +109,7 @@ class Logic(object):
                 if atom in dic:
                     return dic[atom]
                 else:
-                    var = self.new_variable()
+                    var = self.new_variable(prefix='$standardize_apart_')
                     dic[atom] = var
                     return var
             else:
@@ -250,5 +260,21 @@ class Logic(object):
             return new_atomspace.add_link(atom.type, outgoing, tv=atom.tv)
 
     def _all_nonzero_tvs(self, atom_list):
+        for atom in atom_list:
+            assert atom in self._atomspace
+
         return all(atom.tv.count > 0 for atom in atom_list)
+
+    def get_predicate_arguments(self, predicate_name):
+        "Find the EvaluationLink for the predicate, and return the list of arguments (as a python list of Atoms). There must be only one EvaluationLink for it"
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [self.node(types.PredicateNode, predicate_name), var])
+
+        queries = self.lookup_atoms(template, {})
+        # It will often find the original template in the results!
+        queries.remove(template)
+        #queries = [query for query in queries if query.tv.count > 0]
+        if len(queries) != 1:
+            raise ValueError("Predicate "+predicate_name+" must have 1 EvaluationLink")
+        return queries[0].out[1].out
 

@@ -11,7 +11,6 @@
 #include <libguile.h>
 
 #include <opencog/atomspace/TruthValue.h>
-#include <opencog/atomspace/VersionHandle.h>
 #include <opencog/guile/SchemePrimitive.h>
 #include <opencog/guile/SchemeSmob.h>
 
@@ -23,11 +22,18 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 
 	switch (misctype)
 	{
+		case COG_HANDLE: // Nothing to do here ...
 		case COG_TV: // Nothing to do here ...
-		case COG_VH: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
+
+		// I don't get it .. started seeing these recently. I'm just
+		// going to silently ignore thse, for now, don't know what
+		// they mean. XXX TODO figure out and fix if needed. Or document.
+		case 0:
+			return SCM_BOOL_F;
+
 		default:
 			fprintf(stderr, "Error: opencog-guile: "
 			        "don't know how to mark this type: %d\n",
@@ -60,20 +66,20 @@ size_t SchemeSmob::free_misc(SCM node)
 			delete av;
 			return 0;
 
+		case COG_HANDLE:
+			Handle* hp;
+			hp = (Handle*) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (hp,
+			                  sizeof(*hp), "opencog handle");
+			delete hp;
+			return 0;
+
 		case COG_TV:
 			TruthValue *tv;
 			tv = (TruthValue *) SCM_SMOB_DATA(node);
 			scm_gc_unregister_collectable_memory (tv,
 			                  sizeof(*tv), "opencog tv");
 			delete tv;
-			return 0;
-
-		case COG_VH:
-			VersionHandle *vh;
-			vh = (VersionHandle *) SCM_SMOB_DATA(node);
-			scm_gc_unregister_collectable_memory (vh,
-			                  sizeof(*vh), "opencog vh");
-			delete vh;
 			return 0;
 
 		case COG_EXTEND:
@@ -103,16 +109,16 @@ std::string SchemeSmob::misc_to_string(SCM node)
 		case COG_AV:
 			return av_to_string((AttentionValue *) SCM_SMOB_DATA(node));
 
+		case COG_HANDLE:
+			return handle_to_string(node);
+
 		case COG_TV:
 			return tv_to_string((TruthValue *) SCM_SMOB_DATA(node));
-
-		case COG_VH:
-			return vh_to_string((VersionHandle *) SCM_SMOB_DATA(node));
 
 		case COG_EXTEND:
 		{
 			// return "#<opencog extension>\n";
-			// Hmm. Is this really the right thing to return ?? I'm not sure .. 
+			// Hmm. Is this really the right thing to return ?? I'm not sure ..
 			PrimitiveEnviron * pe = (PrimitiveEnviron *) SCM_SMOB_DATA(node);
 			return pe->get_name();
 		}

@@ -60,6 +60,7 @@ struct UngroundedVariablesInAState
     // the evalutionlink for this state for using pattern matching
     // default is undefined. only easy state that needs no real time inquery or contains no numeric variables will be generate such a link handle.
     Handle PMLink;
+
     UngroundedVariablesInAState(State* _state, string firstVar)
     {
         state = _state;
@@ -139,12 +140,16 @@ public:
     // some times, we need to mark a rule as not useful anymore after trying it and fail.(e.g. have tried every variable binding and still fail)
     bool still_useful;
 
-    RuleNode(Rule* _originalRule)
+    // the subgol statenode that this rule node is created for
+    StateNode* forAchieveThisSubgoal;
+
+    RuleNode(Rule* _originalRule, StateNode* _forAchieveThisSubgoal)
     {
         originalRule = _originalRule;
         costHeuristics.clear();
         still_useful = true;
         appliedTimes = 0;
+        forAchieveThisSubgoal = _forAchieveThisSubgoal;
     }
 
     RuleNode()
@@ -153,6 +158,7 @@ public:
         costHeuristics.clear();
         still_useful = true;
         appliedTimes = 0;
+        forAchieveThisSubgoal = 0;
     }
 
     void AddCostHeuristic(State* cost_cal_state,float cost_coefficient)
@@ -192,8 +198,13 @@ public:
     RuleNode* backwardRuleNode; // the backward rule node connect to this node in last rule layer
     State* forwardEffectState; // the corresponding state in the forward rule's effect list
     string depth; // depth = -1 means no rule node need this state node as a precondition, depth string composed of 0~9, A~Z, a~z, see calculateNodeDepth()
+    int hardnessScore; // the hardness to achieve this goal, only for unsatisfied goals
 
-    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1";}
+    // add a hypothetical link to the atomspace when a state node is created, only for states that permanent = true
+    // all the hypotheticalLink will be stored in the planner, every time finish planning, will delete all of the hypotheticalLinks from the Atomspace
+    Handle hypotheticalLink;
+
+    StateNode(State * _state){state = _state;forwardRuleNode = 0; forwardEffectState =0; hasFoundCandidateRules = false;depth = "-1"; hardnessScore = -1; hypotheticalLink = Handle::UNDEFINED;}
 
     // candidate rules to achieve this state, in the order of the priority to try the rule
     // the already be tried and failed rules will be removed from this list
@@ -269,10 +280,22 @@ public:
 
     ~StateNode()
     {
-        delete state;
+        if (state)
+            delete state;
+
+        state = 0;
     }
 
 };
+
+struct PreconHarder : public std::binary_function<StateNode*, StateNode*,bool>
+{
+    inline bool operator ()(const StateNode* a, const StateNode* b)
+    {
+        return (a->hardnessScore > b->hardnessScore);
+    }
+};
+
 
 struct TmpParamCandidate
 {
@@ -330,9 +353,6 @@ protected:
 
      StateNode* curStateNode; // the current selected subgoal node
 
-     // All the imaginary atoms put into the Atomspace during planning, which should be removed after planning
-     HandleSeq imaginaryHandles;
-
      // map <stateName, all rules have an effect to this state>
      // so that we can quickly find what rules have effect on a specific state during planning
      // map<float,Rule*> is map<probability, rule>
@@ -356,6 +376,8 @@ protected:
 
      int tryStepNum;
 
+     int removedHypotheticalLinkCount;
+
      // add the indexes to ruleEffectIndexes, about which states this rule has effects on
      void addRuleEffectIndex(Rule* r);
 
@@ -364,6 +386,13 @@ protected:
 
      // for test, load from c++ codes
      void loadTestRulesFromCodes();
+
+     // for test, load facts from c++ codes
+     void loadFacts(vector<State*> &knownStates);
+
+     void cleanUpContextBeforeRollBackToPreviousStep();
+
+     void cleanUpEverythingAfterPlanning();
 
 //     // to store the intermediate states which may be produced during planning stepps
 //     // this vector should be clear every time begin a new plan
@@ -376,22 +405,27 @@ protected:
      // @ original_state is the corresponding begin state of this goal state, so that we can compare the current state to both fo the goal and origninal states
      //                  to calculate its satisfiedDegree value.
      // when original_state is not given (defaultly 0), then no satisfiedDegree is going to be calculated
-     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, State *original_state = 0);
+     // @ known: when return false, it will still return if it's unknow, if it's unknow, it suggest it still has chance to be satisfied
+     bool checkIsGoalAchievedInRealTime(State &oneGoal, float& satisfiedDegree, bool &isUnknownValue, bool &unknown, State *original_state = 0);
 
      // @ satisfiedPreconNum: return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ negateveStateNum: return how many states in the temporaryStateNodes will be Negatived by this rule
      // @ negativeGoal: return if this rule after grounded will negative this forward goal state
      // @ isDiffStateOwnerType: return if the effect state owner types are differnt from its fowardState
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
-     // onlyCheckIfNegativeGoal is not to check preconditions
      // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
+     // @ needRollBack: it means some impossible precondition suggest that this subgoal is impossible to be achieved
      void checkRuleFitnessRoughly(Rule* rule, StateNode* fowardState, int &satisfiedPreconNum, int &negateveStateNum, bool &negativeGoal, bool &isDiffStateOwnerType,
-                                  bool &preconImpossible, bool &willAddCirle , bool onlyCheckIfNegativeGoal = false);
+                                  bool &preconImpossible, bool &willAddCirle ,bool &contradictoryOtherGoal, bool &needRollBack);
 
      // return how many preconditions of this rule will already been satisfied, by being simply grounded from its forward goal state node
      // @ preconImpossible: return if there is any precondition impossible to achieve - no rules is able to achieve it
      // @ willCauseCirleNetWork: return if will adpot this rule and its bindings cause cirle in the planning network
-     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, Rule *orginalRule = 0);
+     // @ hasDirectHelpRule: return if there is any rule that dirctly help to achieve this goal
+     // @ isRecursivePrecon0Sat and isRecursivePrecon1Sat are only for recursive rules, return the satisfication of each preconditon.
+     int checkPreconditionFitness(RuleNode* ruleNode,StateNode* fowardState, bool &preconImpossible, bool &willCauseCirleNetWork, bool &hasDirectHelpRule,
+                                  bool &contradictoryOtherGoal, bool& isRecursivePrecon0Sat, bool& isRecursivePrecon1Sat,Rule *orginalRule = 0);
+
 
      // return how many states in the temporaryStateNodes this rule will dissatisfy
      // @ isDiffStateOwnerType: return if the effect state's state owner type is different from the fowardState
@@ -400,6 +434,9 @@ protected:
 
      // return how many states in the temporaryStateNodes this rule will dissatisfied by the effect of this action when it's executed in the space map
      int checkSpaceMapEffectFitness(RuleNode* ruleNode,StateNode* fowardState);
+
+     // add hyptothetical link into the AtomSpace for a new StateNode , only for state that is permanent
+     void addHypotheticalLinkForStateNode(StateNode *stateNode);
 
      bool isActionChangeSPaceMap(PetAction* action);
 
@@ -455,19 +492,26 @@ protected:
                                                  RuleNode *forwardRuleNode, bool ifCheckSameRuleNode, StateNode* curSNode = 0);
 
      // delete a rule node and recursivly delete all its backward state nodes and rule nodes, given the forwardStateNode
-     void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true);
+     void deleteRuleNodeRecursively(RuleNode* ruleNode, StateNode* forwardStateNode = 0, bool deleteThisforwardStateNode = true, bool deleteThisRuleNode = true);
 
      // rebind a state node, replace the old state in this node with the new state generated by new bindings
      void reBindStateNode(StateNode* stateNode, ParamGroundedMapInARule& newBindings);
+
+     // for sorting the preconds in this list, in the order of from hard to easy, because in next loop the planner will select the subgoal from the end of the queue to solve
+     // put all the numeric  in front first, and because all these preconds are grouned, we can find possible rules for each precon, and see which precon is easier to be solved
+     // will assign the hardness score to this stateNode, and also return the hardness score.
+     int getHardnessScoreOfPrecon(StateNode *stateNode);
 
      SpaceServer::SpaceMap* getClosestBackwardSpaceMap(StateNode* stateNode);
 
      // execute the current rule action if any action that involved changing space map in the input iSpaceMap
      void executeActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap *iSpaceMap);
 
-     void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
+     // void undoActionInImaginarySpaceMap(RuleNode* ruleNode,SpaceServer::SpaceMap* iSpaceMap);
 
      void deleteStateNodeInTemporaryList(StateNode* stateNode);
+
+     void deleteStateNodeInUnsatisfedNodeList(StateNode* stateNode);
 
      void deleteRuleNodeInAllRuleNodeList(RuleNode *ruleNode);
 
@@ -476,6 +520,8 @@ protected:
      // the forwardState can be a ungrounded state from other rule
      // if cannot unify it , return 0
      Rule* unifyRuleVariableName(Rule* toBeUnifiedRule, State* forwardState );
+
+     bool checkHasNoCoexistenceRuleInPlanningNetWork(Rule* r);
 
      void outputStateInfo(State* s, bool outPutStateValue);
      void outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNodes = true);

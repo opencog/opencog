@@ -41,6 +41,8 @@ protected:
     // unless you call 'forceInitNextCycle' method.
     bool bInitialized;
 
+    bool startPlanning;
+
     OCPlanner* ocplanner;
 
     ActionPlanID currentOCPlanID; // only be used by ocplanner

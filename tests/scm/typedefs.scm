@@ -11,14 +11,6 @@
 (define (stv mean conf) (cog-new-stv mean conf))
 (define (itv lower upper conf) (cog-new-itv lower upper conf))
 (define (ctv mean conf count) (cog-new-ctv mean conf count))
-; Helper to create CompositeTV
-; one can use it 2 ways
-; 1) (mtv vh tv) where vh is a versionHandle and tv is TruthValue
-; 2) (mtv (cons vh1 tv1) ... (cons vhn tvn))
-(define (mtv . x)
-  (let ((head (car x)) (tail (cdr x)))
-    (if (pair? head) (cog-set-vtv! (mtv tail) (car head) (cdr head))
-        (cog-new-mtv head (cadr x)))))
 
 (define (Node . x)
 	(apply cog-new-node (append (list 'Node) x)))
@@ -126,8 +118,6 @@
 	(apply cog-new-link (append (list 'ExtensionalEquivalenceLink) x)))
 (define (DistinguishedNode . x)
 	(apply cog-new-node (append (list 'DistinguishedNode) x)))
-(define (CountLink . x)
-	(apply cog-new-link (append (list 'CountLink) x)))
 (define (WordNode . x)
 	(apply cog-new-node (append (list 'WordNode) x)))
 (define (ReferenceLink . x)

@@ -126,6 +126,16 @@ ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
 # ===================================================================
 # Check for existance of various required, optional packages.
 
+# Look for binutils-dev. Needed for pretty stack printing.
+FIND_PACKAGE(BFD)
+IF (BFD_FOUND)
+	MESSAGE(STATUS "Binutils found.")
+	ADD_DEFINITIONS(-DHAVE_BFD)
+	SET(HAVE_BFD 1)
+ELSE (BFD_FOUND)
+	MESSAGE(STATUS "Binutils-dev missing: No pretty stack-trace printing.")
+ENDIF (BFD_FOUND)
+
 # Check for boost. We need dynamic-linked, threaded libs by default.
 SET(Boost_USE_STATIC_LIBS OFF)
 SET(Boost_USE_MULTITHREADED ON)
@@ -135,10 +145,14 @@ SET(Boost_USE_MULTITHREADED ON)
 # boost-1.49 no longer has a libboost_iostreams
 # 1.46 is minimum for required filesystem support
 # program_options needed by some combo utilities
-FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization signals system thread REQUIRED)
+FIND_PACKAGE(Boost 1.46 COMPONENTS date_time filesystem program_options regex serialization system thread REQUIRED)
 
 IF(Boost_FOUND)
 	SET(Boost_FOUND_SAVE 1)
+
+	# Boost.Signals2 requires this in signal_type.hpp
+	SET(BOOST_PARAMETER_MAX_ARITY 7)
+	ADD_DEFINITIONS(-DBOOST_PARAMETER_MAX_ARITY=${BOOST_PARAMETER_MAX_ARITY})
 ELSE(Boost_FOUND)
 	MESSAGE(FATAL_ERROR "Boost 1.46 or newer is needed to build OpenCog!")
 ENDIF(Boost_FOUND)
@@ -322,7 +336,7 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # Python needed for embodiment (!?) and for PLN
 FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs)
+FIND_PACKAGE(PythonLibs 2.7 REQUIRED)
 IF(PYTHONLIBS_FOUND)
 	MESSAGE(STATUS "Python libs found.")
 ELSE(PYTHONLIBS_FOUND)
@@ -474,8 +488,6 @@ ENDIF(Boost_FOUND)
 IF(GSL_FOUND AND HAVE_UTIL)
     SET(HAVE_ATOMSPACE 1)
     SET(HAVE_ATTENTION 1)
-    # PLN won't compile with gcc-4.7
-    # SET(HAVE_PLN 1)
     SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
@@ -705,12 +717,12 @@ SUMMARY_ADD("Feature selection" "MOSES based feature selection tool" HAVE_FEATUR
 SUMMARY_ADD("GTK Visualizer" "GTK3-based Atomspace Visualizer" HAVE_GTK)
 SUMMARY_ADD("Hypertable" "HyperTable for scalable persistance (experimental)" HAVE_HYPERTABLE)
 SUMMARY_ADD("MOSES" "Meta-Optimizing Semantic Evolutionary Search" HAVE_MOSES)
-SUMMARY_ADD("PLN" "Probalistic Logic Networks" HAVE_PLN)
 SUMMARY_ADD("Python tests" "Python bindings nose tests" HAVE_NOSETESTS)
 SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
-SUMMARY_ADD("SQL persistance" "Interfaces for SQL persistance of the AtomSpace" HAVE_PERSIST)
+SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
+SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)

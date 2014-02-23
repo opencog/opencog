@@ -42,6 +42,8 @@ OCPlanningAgent::OCPlanningAgent(CogServer& cs) : Agent(cs)
 {
     this->cycleCount = 0;
 
+    startPlanning = false;
+
     // Force the Agent initialize itself during its first cycle.
     this->forceInitNextCycle();
 }
@@ -130,6 +132,7 @@ bool OCPlanningAgent::isMoveAction(string s)
         return false;
 }
 
+
 void OCPlanningAgent::run()
 {
     this->cycleCount = _cogserver.getCycleCount();
@@ -138,8 +141,28 @@ void OCPlanningAgent::run()
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
+    static int waitToStart =  0;
+
     if (!this->bInitialized)
         this->init();
+
+    if (! startPlanning)
+    {
+        if ( ( oac->getPAI().hasFinishFistTimeWorldPercetption()) &&
+             ( oac->getPsiDemandUpdaterAgent().get()->getHasPsiDemandUpdaterForTheFirstTime()))
+        {
+            // to wait for the PAI to finish more perception processing
+            waitToStart ++;
+
+            if (waitToStart > 10)
+            {
+                startPlanning = true;
+                std::cout<<"OCPlanningAgent start!" <<std::endl;
+            }
+        }
+
+        return;
+    }
 
     logger().debug( "OCPlanningAgent::%s - Executing run %d times",
                      __FUNCTION__, this->cycleCount);
@@ -281,9 +304,11 @@ void OCPlanningAgent::run()
         // if planning failed
         if (currentOCPlanID == "")
         {
+            std::cout<<std::endl;
             std::cout<<"OCPlanner can not find any suitable plan for the selected demand goal:"
                      <<oac->getAtomSpace().atomAsString(this->hSelectedDemandGoal).c_str()
                      <<std::endl;
+            std::cout<<std::endl;
         }
         else
         {

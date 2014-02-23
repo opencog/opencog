@@ -610,7 +610,7 @@ Procedure::RunningProcedureID PsiRuleUtil::applyPsiRule(const AtomSpace & atomSp
      *         ListLink (empty)
      *
      */
-Handle PsiRuleUtil::getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink)
+Handle PsiRuleUtil::getPreviousDemandGoal(AtomSpace & atomSpace, Handle & referenceLink)
 {
     // Get the (ConceptNode "PreviousDemandGoal")
     Handle hConceptNode = atomSpace.getHandle
@@ -669,7 +669,7 @@ Handle PsiRuleUtil::getPreviousDemandGoal(const AtomSpace & atomSpace, Handle & 
     return hDemandGoalEvaluationLink; 
 }
 
-Handle PsiRuleUtil::getCurrentDemandGoal(const AtomSpace & atomSpace, Handle & referenceLink)
+Handle PsiRuleUtil::getCurrentDemandGoal(AtomSpace & atomSpace, Handle & referenceLink)
 {
     // Get the (ConceptNode "CurrentDemandGoal")
     Handle hConceptNode = atomSpace.getHandle

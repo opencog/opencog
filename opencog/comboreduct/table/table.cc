@@ -462,7 +462,9 @@ std::istream& istreamRawITable(std::istream& in, ITable& tab,
 std::vector<std::string> get_header(const std::string& input_file);
 
 /**
- * Get indices (aka positions or offsets) of a list of labels given a header
+ * Get indices (aka positions or offsets) of a list of labels given a
+ * header. The labels can be sequenced in any order, it will always
+ * return the order consistent with the header.
  */
 vector<unsigned> get_indices(const vector<string>& labels,
                              const vector<string>& header) {

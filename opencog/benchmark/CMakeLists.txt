@@ -2,13 +2,13 @@
 
 IF (HAVE_CYTHON)
 	INCLUDE_DIRECTORIES (
-		${PYTHON_INCLUDE_PATH}
+		${PYTHON_INCLUDE_DIRS}
 	)
 ENDIF (HAVE_CYTHON)
 
 ADD_EXECUTABLE (atomspace_bm
-	AtomSpaceBenchmark
-	atomspace_bm
+	AtomSpaceBenchmark.cc
+	atomspace_bm.cc
 )
 
 IF (HAVE_GUILE)
@@ -23,4 +23,5 @@ TARGET_LINK_LIBRARIES (atomspace_bm
 	server
 	atomspace
 	cogutil
+	${PYTHON_LIBRARIES}
 )

@@ -1,1 +1,2 @@
-from agents import ForwardInferenceAgent, BackwardInferenceAgent
+from agents import InferenceAgent, TestInferenceAgent, BackwardInferenceAgent, ForwardInferenceAgent
+

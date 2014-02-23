@@ -23,10 +23,8 @@ Features
 
 Missing features/ToDo items
 ---------------------------
--- Add full support for CompositeTruthValue.
 -- Add full support for attention values. (??)
 -- Add full support for Atom deletion.
--- Add full support for 64-bit systems, including >4Gigs of atoms.
 -- Provide optimized table layout for EvaluationLinks.
 -- Add support for Space/TimeServer data.
 
@@ -111,7 +109,8 @@ is a good idea. Forcing the server to guess when an atom should be saved
 can lead to inefficiendies. If an atom is going to have a short life, it
 would be pointless to save it to disk. Fetching atoms only when they are
 needed, instead of fetching them earlier, can lead to bottlenecks and
-stalls.  All this remains an open problem.
+stalls.  All this remains an open problem.  Proposal is to auto-fetch
+and write-back only when the AV VLTI is positive.
 
 The current design avoids UUID collisions, and automatically thunks
 UUID's as needed if an accidental collision with the database occurs.
@@ -120,6 +119,20 @@ the SQL database should be opened immediately on cogserver start, before
 any atoms are created.  This will automatically reserve the range of
 UUID's that are stored in the DB, and thus avoid collisions as new atoms
 are created.
+
+ * The TV merge issue. Right now, the AtomSpace/AtomTable is designed to
+merge truth values between an atom that is added to the table, and any
+atom that is already present in the table.  This can lead to unexpected
+truth-value changes when atoms are being fetched from the backend.  The
+correct solution is probably to change the table to not auto-merge. This
+still leaves the question of what to do with the two TV's, since users
+doing add may want merge, but users fetching from backend may not ...
+
+ * The AV issue.  Two issues, here.  First, if the AV changes to a non
+zero VLTI, the atom should be auto-saved to the backend.  Second, if the
+VLTI is positive, and the TV changes, should this trigger an auto-save?
+Conceptually, it probably should; practically, it may hurt performance.
+Thus, these kinds of writebacks should be carefully managed.
 
 
 Install, Setup and Usage HOWTO
@@ -141,11 +154,14 @@ below.
 
 Database Install
 ----------------
-Download and install Postgres.  The current design does not support
-MySQL, because it uses SQL features that MySQL is missing.  Same
-holds true for SQLite.
+Download and install Postgres version 8.3 or newer.  The current design
+simply won't work with older versions of postgres (because of a lack of
+array membership support) or MySQL (because of a lack of array support,
+in general). Same holds true for SQLite.  There is some work in the
+code-base to support these other databases, but the work-arounds for
+the missing features are kind-of complicated, and likely to be slow.
 
-Be sure to install the postgres server, the postgress client, and the
+Be sure to install the postgres server, the postgres client, and the
 odbc-postgresql device driver.
 
 
@@ -181,19 +197,29 @@ Performance tweaks
 ------------------
 The Postgres default configuration needs to be tweaked for performance.
 Failure to do this will result in disastrous load and store times.
-(The notes below date to 2008; perhaps things have changed?)
 
 Edit postgresql.conf (a typical location is
-/etc/postgresql/8.4/main/postgresql.conf) and make the following changes:
+/etc/postgresql/8.4/main/postgresql.conf) and make the changes below.
+The first two changes are recommended by
+http://wiki.postgresql.org/wiki/Tuning_Your_PostgreSQL_Server
 
    shared_buffers = default was 32MB, change to 25% of install RAM
-   effective_cache_size = default was 128MB, change to 50% of installed RAM
    work_mem = default was 1MB change to 32MB
+   effective_cache_size = default was 128MB, change to 50%-75% of installed RAM
    fsync = default on  change to off
    synchronous_commit = default on change to off
-   wal_buffers = default 64kB change to 512kB
+   wal_buffers = default 64kB change to 2MB or even 32MB
    commit_delay = default 0 change to 10000 (10K) microseconds
-   ssl = default true change to false
+   checkpoint_segments = 32 (each one takes up 16MB disk space)
+   ssl = off
+   autovacuum = on
+   track_counts = on
+
+A large value for wal_buffers is needed because much of the database
+traffic consists of updates.  Enabling vacuum is very important, for
+the same reason; performance degrades substantially (by factors of 
+3x-10x) without regular vacuuming.
+
 
 Restarting the server might lead to errors stating that max shared mem
 usage has been exceeded. This can be fixed by:
@@ -254,10 +280,9 @@ at the postgres prompt.  You should see this:
      Schema |   Name    | Type  |     Owner
     --------+-----------+-------+----------------
      public | atoms     | table | opencog_user
-     public | edges     | table | opencog_user
      public | global    | table | opencog_user
      public | typecodes | table | opencog_user
-    (4 rows)
+    (3 rows)
 
 If the above doesn't work, go back, and try again.
 
@@ -303,18 +328,16 @@ Be sure to adjust the username and passwd appropriately.
 
 Opencog Setup
 -------------
-Edit lib/opencog.conf and set the DB username and password there to the
-same values as in ~/.odbc.ini.  Better yet, copy lib/opencog.conf to
-your build directory, edit the copy, and start the opencog server as:
+Edit lib/opencog.conf and set the STORAGE, STORAGE_USERNAME and
+STORAGE_PASSWD there to the same values as in ~/.odbc.ini.  Better yet, 
+copy lib/opencog.conf to your build directory, edit the copy, and 
+start the opencog server as:
 
    $ ./opencog/server/cogserver -c my.conf
 
 Verify that everything works. Start the cogserver, and bulk-save:
 
    $ telnet localhost 17001
-   opencog> sql-open mycogdata opencog_user cheese
-   Opened "mycogdata" as user "opencog_user"
-
    opencog> sql-store
    
 Some output should be printed in the cogserver window: 
@@ -331,12 +354,11 @@ is disabled by default, because it requires the above complicated setup.
 Please run this test.  To do this:
 
  -- edit tests/persist/sql/CMakeLists.txt and uncomment:
-    ADD_CXXTEST(BasicSaveUTest)
-    at the bottom.
+    SET(DB_IS_CONFIGURED 1)
  -- Read tests/persist/sql/README and follow the instructions there.
     They are almost identical to the instructions above, except that
     they call for a test user to be set up. You can do that, or you
-    can use yor current DB user.
+    can use your current DB user.
  -- To compile and run:
     $ make test
 
@@ -382,7 +404,7 @@ commands:
     opencog> sql-store
     SQL data store thread started
 
-At this point, a progress indicator will be printed by the opencog
+At this point, a progres indicator will be printed by the opencog
 server, on the OpenCog server's stdout. It  will say something like:
 Stored 236000 atoms. When finished, its nice to say:
 
@@ -467,6 +489,31 @@ which returns the UUID:
 
 Using SQL Persistence from Scheme
 ---------------------------------
+SQL fetch from storage is not fully automatic at this time. This is to
+allay performance concerns: we don't want to be constantly querying the
+database every time some atom is needed. In particular: NOTE THIS IS 
+IMPORTANT: the incoming set of an atom is not automatically fecthed from
+storage.  This must be done manually, using either C++:
+
+   AtomSpace::getImpl()->fetchIncomingSet(h, true);
+
+or the scheme call
+
+  (fetch-incoming-set atom)
+
+If the numeric uuid for an atom is known, but the atom itsself is not,
+then the scheme call
+
+   (fetch-atom atom)
+
+can be used to pull an atom into the AtomSpace from the database server.
+
+To force an atom to be saved, call:
+
+   (store-atom atom)
+
+XXX TODO: there is currently no day to delete an atom fromthe database,
+once its in there. This needs fixing ...
 
 
 Copying Databases
@@ -475,9 +522,37 @@ Sooner or later you will want to make a copy of your database, for
 backup purposes, or sharing. Here's the current 'best practices' for
 that:
 
-   $ pg_dump mycogdata
+   $ pg_dump mycogdata filename.sql
 
 That's all!
+
+
+Threading
+=========
+The AtomStorage class sould be completely thread-safe (I think ... only
+lightly tested). By default, the class maintains a pool of four database
+connections, which can be used to drive the database. (The number of 
+connections can be raised by editing the AtomStorage constructor, and
+recompiling).  Every thread using this class will temporarily make use
+of one of these connections; if all connections are in use, the calling
+thread will block until one is free.
+
+
+Asynchronous Writing
+====================
+The AtomStorage::storeAtom() method is implemented using a fire-n-forget
+algo: the atom to be stored is queued up, and stored at some later time
+by another concurrently running thread.  If the backlog of unwritten atoms
+gets too large, the storeAtom() method may stall. Its currently designed
+to stall if there's a backlog of 100 or more unwritten atoms.  This can
+be changed by searching for HIGH_WATER_MARK, changing it and recompiling.
+
+Currently, there is only one writer thread.  Perhaps this is not enough;
+more writer threads can be started, just call the startWriterThread()
+method to have additional ones.  Note that multiple writer threads may
+end up storing atoms out of order; hopefully, this shouldn't matter (?)
+
+Anyway, the above two settings might need tweaking, depending on the job.
 
 
 Experimental Diary & Results
@@ -650,10 +725,6 @@ clear.
 
 TODO
 ====
--- Fix storage of CompositeTruthValues by storing the equivalent
-   atoms, i.e. creating a ContextLink for each Composite context.
-   This does NOT require modifying the SQL table! Yay!
-
 -- Store attention values. (??) maybe ??
 
 -- Create custom table, tailored for EvaluationLink triples.
@@ -663,3 +734,4 @@ TODO
    decrease the SQL table sizes significantly, and decrease server I/O
    by factors of 2x-3x.  Another table, designed just for simple pairs,
    might help a lot, too.
+

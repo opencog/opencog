@@ -8,30 +8,30 @@
 ; Input data
 (InheritanceLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation")
-   (DefinedFrameNode "#Manipulation")
+   (WordSenseNode "#Manipulation")
 )
 (InheritanceLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation_Agent")
-   (DefinedFrameElementNode "#Manipulation:Agent")
+   (SemeNode "#Manipulation:Agent")
 )
 (InheritanceLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation_Depictive")
-   (DefinedFrameElementNode "#Manipulation:Depictive")
+   (SemeNode "#Manipulation:Depictive")
 )
 (InheritanceLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation_Entity")
-   (DefinedFrameElementNode "#Manipulation:Entity")
+   (SemeNode "#Manipulation:Entity")
 )
 
-(FrameElementLink (stv 1.0 1.0)
+(FeatureLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Agent")
 )
-(FrameElementLink (stv 1.0 1.0)
+(FeatureLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Depictive")
 )
-(FrameElementLink (stv 1.0 1.0)
+(FeatureLink (stv 1.0 1.0)
    (PredicateNode "grab@123_Manipulation")
    (PredicateNode "grab@123_Manipulation_Entity")
 )
@@ -88,31 +88,31 @@
     (AndLink
      (InheritanceLink
       (VariableNode "$framePredicateNode")
-      (DefinedFrameNode "#Manipulation")
+      (WordSenseNode "#Manipulation")
       )
      (InheritanceLink
       (VariableNode "$frameAgentPredicateNode")
-      (DefinedFrameElementNode "#Manipulation:Agent")
+      (SemeNode "#Manipulation:Agent")
       )
      (InheritanceLink
       (VariableNode "$frameDepictivePredicateNode")
-      (DefinedFrameElementNode "#Manipulation:Depictive")
+      (SemeNode "#Manipulation:Depictive")
       )
      (InheritanceLink
       (VariableNode "$frameEntityPredicateNode")
-      (DefinedFrameElementNode "#Manipulation:Entity")
+      (SemeNode "#Manipulation:Entity")
       )
       
     
-     (FrameElementLink
+     (FeatureLink
       (VariableNode "$framePredicateNode")
       (VariableNode "$frameEntityPredicateNode")
       )            
-     (FrameElementLink
+     (FeatureLink
       (VariableNode "$framePredicateNode")
       (VariableNode "$frameAgentPredicateNode")
       )            
-     (FrameElementLink
+     (FeatureLink
       (VariableNode "$framePredicateNode")
       (VariableNode "$frameDepictivePredicateNode")
       )

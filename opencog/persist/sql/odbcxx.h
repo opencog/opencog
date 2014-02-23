@@ -92,12 +92,12 @@ class ODBCRecordSet
 		int fetch_row(void); // return non-zero value if there's another row.
 		const char * get_value(const char * fieldname);
 
-		// call this, instead of the destructor, 
+		// call this, instead of the destructor,
 		// when done with this instance.
 		void release(void);
 
 		// Calls the callback once for each row.
-		template<class T> bool 
+		template<class T> bool
 			foreach_row(bool (T::*cb)(void), T *data)
 		{
 			while (fetch_row())
@@ -109,7 +109,7 @@ class ODBCRecordSet
 		}
 
 		// Calls the callback once for each column.
-		template<class T> bool 
+		template<class T> bool
 			foreach_column(bool (T::*cb)(const char *, const char *), T *data)
 		{
 			int i;
@@ -129,7 +129,7 @@ class ODBCRecordSet
 
 /**
  * Handy-dandy utility function: since SQL uses single-quotes
- * for delimiting strings, the strings themselves need to have 
+ * for delimiting strings, the strings themselves need to have
  * any single-quotes escaped, to avoid bad syntax.
  */
 inline void escape_single_quotes(std::string &str)

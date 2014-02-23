@@ -201,6 +201,20 @@ class AtomSpaceTest(TestCase):
         result = self.space.get_atoms_by_target_atom(types.Link, h3)
         self.assertTrue(l1 not in result)
 
+    def test_include_incoming_outgoing(self):
+        frog = self.space.add_node(types.ConceptNode, "Frog")
+        thing = self.space.add_node(types.ConceptNode, "Thing")
+        animal = self.space.add_node(types.ConceptNode, "Animal")
+        self.space.add_node(types.ConceptNode, "SeparateThing")
+        self.space.add_link(types.InheritanceLink, [frog, animal])
+        self.space.add_link(types.InheritanceLink, [animal, thing])
+
+        assert len(self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog"))) == 2
+        assert len(self.space.include_incoming(self.space.get_atoms_by_type(types.ConceptNode))) == 6
+        assert len(self.space.include_outgoing(self.space.get_atoms_by_type(types.InheritanceLink))) == 5
+        assert len(self.space.include_outgoing(
+            self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog")))) == 3
+
     def test_remove(self):
         h1 = self.space.add_node(types.Node, "test1")
         h2 = self.space.add_node(types.ConceptNode, "test2")
@@ -257,7 +271,7 @@ class AtomTest(TestCase):
     def test_creation(self):
         a = self.space.add_node(types.Node, "test1")
         self.assertEqual(a.name, "test1")
-        self.assertEqual(a.tv, TruthValue(0.0, 0.0))
+        self.assertEqual(a.tv, TruthValue(1.0, 0.0)) # default is true, no confidence
 
     def test_w_truthvalue(self):
         tv = TruthValue(0.5, 100)
@@ -355,13 +369,13 @@ class AtomTest(TestCase):
         # test string representation
         self.assertEqual(str(a2), "(Node \"test2\")\n")
         self.assertEqual(a2.long_string(), 
-                "(Node \"test2\" (av 10 1) (stv 0.100000 0.012346))\n")
+                "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346))\n")
         self.assertEqual(str(l), 
-                "(Link (stv 0 0)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
+                "(Link (stv 1.000000 0.000000)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
         self.assertEqual(l.long_string(), 
-                "(Link (av 0 0) (stv 0.000000 0.000000)\n" +
-                "  (Node \"test1\" (av 0 0) (stv 0.500000 0.111111))\n" +
-                "  (Node \"test2\" (av 10 1) (stv 0.100000 0.012346))\n)\n")
+                "(Link (av 0 0 0) (stv 1.000000 0.000000)\n" +
+                "  (Node \"test1\" (av 0 0 0) (stv 0.500000 0.111111))\n" +
+                "  (Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346))\n)\n")
 
 class TypeTest(TestCase):
 

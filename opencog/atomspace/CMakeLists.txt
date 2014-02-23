@@ -19,8 +19,8 @@ ADD_LIBRARY (atomspace SHARED
     AtomTable.cc
     AttentionValue.cc
     AttentionBank.cc
+    BackingStore.cc
     ClassServer.cc
-    CompositeTruthValue.cc
     CountTruthValue.cc
     FixedIntegerIndex.cc
     Handle.cc
@@ -43,21 +43,15 @@ ADD_LIBRARY (atomspace SHARED
     TLB.cc
     TruthValue.cc
     TypeIndex.cc
-    VersionHandle.cc
 )
 
 # Without this, parallel make will race and crap up the generated files.
 ADD_DEPENDENCIES(atomspace opencog_atom_types)
 
-SET(ATOMSPACE_LINK_LIBS
+TARGET_LINK_LIBRARIES(atomspace
 	cogutil
 	${GSL_LIBRARIES}
-	${Boost_SIGNALS_LIBRARY}
 	${Boost_THREAD_LIBRARY}
-)
-
-TARGET_LINK_LIBRARIES(atomspace
-	${ATOMSPACE_LINK_LIBS}
 )
 
 IF (CYGWIN)
@@ -82,7 +76,6 @@ INSTALL (FILES
     AttentionBank.h
     BackingStore.h
     ClassServer.h
-    CompositeTruthValue.h
     CountTruthValue.h
     FixedIntegerIndex.h
     FollowLink.h
@@ -111,7 +104,6 @@ INSTALL (FILES
     TLB.h
     TruthValue.h
     TypeIndex.h
-    VersionHandle.h
     types.h
     DESTINATION "include/${PROJECT_NAME}/atomspace"
 )

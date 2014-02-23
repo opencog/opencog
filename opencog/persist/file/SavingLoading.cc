@@ -26,28 +26,28 @@
 /* SavingLoading.cc - Saves/loads the atom network (or a subset of it) to/from
  * disk */
 
-#include "CompositeRenumber.h"
-#include "SavingLoading.h"
-#include "SpaceServerSavable.h"
-#include "TimeServerSavable.h"
-#include "CoreUtils.h"
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-#include <opencog/util/platform.h>
-
-#include <opencog/atomspace/AtomSpaceDefinitions.h>
 #include <opencog/atomspace/ClassServer.h>
-#include <opencog/atomspace/CompositeTruthValue.h>
+#include <opencog/atomspace/CountTruthValue.h>
 #include <opencog/atomspace/HandleMap.h>
+#include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/atomspace/Link.h>
 #include <opencog/atomspace/Node.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 #include <opencog/atomspace/types.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/macros.h>
+#include <opencog/util/functional.h>
+#include <opencog/util/platform.h>
+
+#include "SavingLoading.h"
+#include "SpaceServerSavable.h"
+#include "TimeServerSavable.h"
+#include "CoreUtils.h"
 
 using namespace opencog;
 
@@ -417,18 +417,7 @@ void SavingLoading::loadLinks(FILE* f, HandMapPtr handles,
     CHECK_FREAD;
 }
 
-void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles)
-{
-    logger().fine("SavingLoading::updateHandles: type = %d", atom->getType());
-
-    // if atom uses a CompositeTruthValue, updates the version handles inside it
-    if (atom->getTruthValue()->getType() == COMPOSITE_TRUTH_VALUE) {
-        //logger().fine("SavingLoading::updateHandles: CTV");
-        CompositeTruthValuePtr ctv(CompositeTVCast(atom->getTruthValue()));
-        CompositeRenumber::updateVersionHandles(ctv, handles);
-        atom->setTruthValue(ctv);
-    }
-}
+void SavingLoading::updateHandles(AtomPtr atom, HandMapPtr handles) {}
 
 void SavingLoading::writeAtom(FILE *f, AtomPtr atom)
 {
@@ -582,6 +571,77 @@ AttentionValuePtr SavingLoading::readAttentionValue(FILE *f)
     return createAV(tempSTI, tempLTI, tempVLTI);
 }
 
+static const char* typeToStr(TruthValueType t) throw (InvalidParamException)
+{
+    switch (t) {
+    case SIMPLE_TRUTH_VALUE:
+        return "SIMPLE_TRUTH_VALUE";
+    case COUNT_TRUTH_VALUE:
+        return "COUNT_TRUTH_VALUE";
+    case INDEFINITE_TRUTH_VALUE:
+        return "INDEFINITE_TRUTH_VALUE";
+    default:
+        throw InvalidParamException(TRACE_INFO,
+             "Invalid Truth Value type: '%d'.", t);
+    }
+}
+
+static TruthValueType TVstrToType(const char* str) throw (InvalidParamException)
+{
+    TruthValueType t = SIMPLE_TRUTH_VALUE;
+
+    while (t != NUMBER_OF_TRUTH_VALUE_TYPES) {
+        if (!strcmp(str, typeToStr(t))) {
+            return t;
+        }
+        t = (TruthValueType)((int)t + 1);
+    }
+
+    throw InvalidParamException(TRACE_INFO,
+          "TruthValue - Invalid Truth Value type string: '%s'.", str);
+}
+
+
+static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr);
+
+static TruthValuePtr tv_factory(TruthValueType type, const char* tvStr)
+{
+    switch (type) {
+    case SIMPLE_TRUTH_VALUE: {
+        float mean, conf;
+        sscanf(tvStr, "(stv %f %f)", &mean, &conf);
+        return SimpleTruthValue::createTV(static_cast<strength_t>(mean),
+            static_cast<count_t>(SimpleTruthValue::confidenceToCount(conf)));
+    }
+    case COUNT_TRUTH_VALUE: {
+        float tmean, tcount, tconf;
+        sscanf(tvStr, "(ctv %f %f %f)", &tmean, &tconf, &tcount);
+        return CountTruthValue::createTV(
+            static_cast<strength_t>(tmean),
+            static_cast<confidence_t>(tconf),
+            static_cast<count_t>(tcount));
+    }
+    case INDEFINITE_TRUTH_VALUE: {
+        float m, l, u, c, d;
+        int s;
+        sscanf(tvStr, "[%f,%f,%f,%f,%f,%d]", &m, &l, &u, &c, &d, &s);
+        IndefiniteTruthValuePtr result(
+            IndefiniteTruthValue::createITV(static_cast<strength_t>(l),
+                      static_cast<strength_t>(u),
+                      static_cast<confidence_t>(c)));
+        result->setDiff(static_cast<strength_t>(d));
+        result->setSymmetric(s != 0);
+        result->setMean(static_cast<strength_t>(m));
+        return result;
+
+    }
+    default:
+        throw InvalidParamException(TRACE_INFO,
+            "Invalid Truth Value type in factory(...): '%d'.", type);
+        break;
+    }
+    return NULL;
+}
 
 TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 {
@@ -599,7 +659,7 @@ TruthValuePtr SavingLoading::readTruthValue(FILE *f)
 
     //logger().fine("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
     logger().info("SavingLoading::readTruthValue() tvStr = %s\n", tvStr);
-    TruthValuePtr result = TruthValue::factory(type, tvStr);
+    TruthValuePtr result = tv_factory(type, tvStr);
     delete[] tvStr;
     CHECK_FREAD;
     return result;

@@ -22,6 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <boost/bind.hpp>
 
 #include <opencog/util/Config.h>
 #include "AttentionBank.h"

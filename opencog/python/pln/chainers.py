@@ -10,6 +10,8 @@ from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 import random
 from collections import defaultdict
 
+_VERBOSE=True
+
 '''There are lots of possible heuristics for choosing atoms. It also depends on the kind of rule, and will have a HUGE effect on the system. (i.e. if you choose less useful atoms, you will waste a lot of time / it will take exponentially longer to find something useful / you will find exponentially more rubbish! and since all other parts of opencog have combinatorial explosions, generating rubbish is VERY bad!)
 
 The algorithm doesn't explicitly distinguish between depth-first and breadth-first search, but you could bias it. You can set a parameter for how much STI to give each atom that is used (or produced) by forward chaining (which should be set relative to the other AI processes!). If it's low, then PLN will tend to stay within the current "bubble of attention". If it's high, then PLN will tend to "move the bubble of attention" so it chains together strings (or rather DAGs) of inferences.
@@ -42,6 +44,7 @@ class AbstractChainer(Logic):
     def __init__(self, atomspace):
         Logic.__init__(self, atomspace)
         self.rules = []
+        self.random = random.Random(0)
 
     def add_rule(self, rule):
         assert isinstance(rule, Rule)
@@ -49,45 +52,66 @@ class AbstractChainer(Logic):
 
         self.rules.append(rule)
 
+        for template in rule._inputs+rule._outputs:
+            template.av = {'vlti':1}
+
     def log_failed_inference(self,message):
         print 'Attempted invalid inference:',message
 
     # Finds a list of candidate atoms and then matches all of them against the template.
     # Uses the Attentional Focus where possible but will search the whole AtomSpace if necessary.
-    def _select_one_matching(self, template, s = {}, allow_zero_tv = False):
+    def _select_one_matching(self, template, s = {}, rule=None, other_inputs=None, allow_zero_tv = False):
         # If the template is a specific atom, just return that!
         if len(self.variables(template)) == 0:
             return template
 
-        # TODO backward chaining doesn't work, because this method will pick up Atoms
-        # that have variables in them (including the queries left over from other inferences)!!!
-
-        atom = self._select_from(template, s, allow_zero_tv, useAF=True)
+        atoms = self.atomspace.get_atoms_in_attentional_focus()
+        atom = self._select_atom(template, s, atoms, allow_zero_tv, rule, other_inputs)
         if not atom:
-            # if it can't find anything in the attentional focus, try the whole atomspace.
-            atom = self._select_from(template, s, allow_zero_tv, useAF=False)
+            # if it can't find anything in the attentional focus, try the whole atomspace. (it actually still uses indexes to find a subset of the links, that is more likely to be useful)
+            atoms = self.lookup_atoms(template, s)
+            atom = self._select_atom(template, s, atoms, allow_zero_tv, rule, other_inputs)
 
         return atom
 
-    def _select_from(self, template, substitution, allow_zero_tv, useAF):
+    def disabled__select_fromAF(self, template, substitution):
         # never allow inputs with variables. (not even for backchaining targets)
-        ground_results = True
+        ground_results = False
 
-        atoms = self.find(template, substitution, useAF=useAF, allow_zero_tv=allow_zero_tv, ground=ground_results)
+        atoms = self.find(template, substitution)
 
         if len(atoms) == 0:
             return None
 
         return self._selectOne(atoms)
 
+    def _select_atom(self, template, substitution, atoms, allow_zero_tv, rule=None, other_inputs=None):
+        # This method will sample atoms before doing any filtering, and will only apply the filters on as many atoms as it needs to.
+
+        # The atomspace lookup and the shuffle are both O(N)...
+        # But if you shuffle it you're guaranteed to eventually find a suitable atom if one exists.
+        # The correct option would be to do it inside the atomspace.
+        # Sample without replacement, or shuffle a little bit at a time.
+        # Or even being able to get results N atoms at a time would help a lot!
+        self.random.shuffle(atoms)
+        #atoms = self.random.sample(atoms, len(atoms))
+
+        # O(N*the percentage of atoms that are useful)
+        for atom in atoms:
+            if self.wanted_atom(atom, template, substitution, ground=False, allow_zero_tv = allow_zero_tv):
+                if rule is None:
+                    return atom
+                if rule.valid_inputs(other_inputs+[atom]):
+                    return atom
+                else:
+                    if _VERBOSE: self.log_failed_inference('invalid input, trying another one '+ str(other_inputs+[atom]))
+        return None
+
     def _selectOne(self, atoms):
         # The score should always be an int or stuff will get weird. sti is an int but TV mean and conf are not
         def sti_score(atom):
             sti = atom.av['sti']
-            if sti > 1:
-                return sti
-            else:
-                return 1
+            return max(sti, 1)
 
         def mixed_score(atom):
             s = int(10*sti_score(atom) + 100*(atom.tv.mean+0.01) + 100*(atom.tv.confidence+0.01))
@@ -98,26 +122,25 @@ class AbstractChainer(Logic):
 
         assert type(atoms[0]) == Atom
 
-        max = sum([score(atom) for atom in atoms])
-        pick = random.randrange(0, max)
+        total = sum([score(atom) for atom in atoms])
+        pick = self.random.randrange(0, total)
         current = 0
         for atom in atoms:
             current += score(atom)
             if current >= pick:
-                print 'choosing atom based on score',score(atom), atom
                 return atom
 
         assert False
 
     def _select_rule(self):
         if not self.learnRuleFrequencies:
-            return random.choice(self.rules)
+            return self.random.choice(self.rules)
         else:
             def score(rule):
                 return self.rule_count[rule]
 
             max = sum([score(rule) for rule in self.rules])
-            pick = random.randrange(0, max)
+            pick = self.random.randrange(0, max)
             current = 0
             for rule in self.rules:
                 current += score(rule)
@@ -129,31 +152,18 @@ class AbstractChainer(Logic):
         '''Does a kind of 'type-check' to see if an Atom's structure makes sense.
            The forward chainer is very creative and will come up with anything allowed by the Rules
            otherwise.'''
-#        if atom.type in [types.InheritanceLink, types.SubsetLink, types.SimilarityLink]:
-#            #is_between_nodes = atom.out[0].is_node() and atom.out[1].is_node()
-#            not_self_link    = atom.out[0] != atom.out[1]
-#            return not_self_link
-        if atom.arity == 2:
+        # Reject And(And(...) ...)
+        if atom.type in rules.BOOLEAN_LINKS:
+            nested_boolean = any(outgoing_atom.type == atom.type for outgoing_atom in atom.out)
+            if nested_boolean: return False
+        elif atom.arity == 2:
             # heuristically assume that all selflinks are invalid!
             self_link = atom.out[0] == atom.out[1]
             # don't allow inheritancelinks (or anything else?) with two variables. (These are rapidly created as backchaining targets with DeductionRule)
             both_variables = self.is_variable(atom.out[0]) and self.is_variable(atom.out[1])
-            return not self_link and not both_variables
-        elif atom.type in rules.BOOLEAN_LINKS:
-            # see if it has semantically sensible arguments (e.g you don't want MemberLinks inside AndLinks)
-            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.EvaluationLink) for arg in atom.out)
-            return suitable
-        elif atom.type in rules.FIRST_ORDER_LINKS:
-            suitable = all(self.is_variable(arg) or arg.is_a(types.ConceptNode) or arg.is_a(types.ObjectNode) or arg.type in rules.BOOLEAN_LINKS)
-            return suitable
-        elif atom.type in rules.HIGHER_ORDER_LINKS:
-            suitable = all(self.is_variable(arg) or arg.is_a(types.EvaluationLink) or arg.type in rules.BOOLEAN_LINKS)
-        elif atom.is_a(types.MemberLink):
-            # Assume the domain of all predicates is objects
-            element = atom.out[0]
-            return element.is_a(types.ObjectNode)
-        else:
-            return True
+            if self_link or both_variables: return False
+
+        return True
 
     def count_objects(self):
         all_object_nodes = self.atomspace.get_atoms_by_type(types.ObjectNode)
@@ -162,7 +172,7 @@ class AbstractChainer(Logic):
     def count_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        members = self.find(template, {}, ground=True)
+        members = self.find(template)
         self.atomspace.remove(var)
         return len(members)
 
@@ -220,13 +230,17 @@ class Chainer(AbstractChainer):
 
     ### public interface
 
-    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False):
+    def __init__(self, atomspace, stimulateAtoms=False, agent=None, learnRuleFrequencies=False, preferAttentionalFocus=False, allow_output_with_variables = False, allow_backchaining_with_variables=False, delete_temporary_variables=False):
         AbstractChainer.__init__(self, atomspace)
 
         # It stores a reference to the MindAgent object so it can stimulate atoms.
         self._stimulateAtoms = stimulateAtoms
         self._agent = agent
+        self._preferAttentionalFocus = preferAttentionalFocus
         self.learnRuleFrequencies = learnRuleFrequencies
+        self._allow_output_with_variables = allow_output_with_variables
+        self._allow_backchaining_with_variables = allow_backchaining_with_variables
+        self._delete_temporary_variables = delete_temporary_variables
 
         self.atomspace = atomspace
 
@@ -255,7 +269,6 @@ class Chainer(AbstractChainer):
         if rule is None:
             rule = self._select_rule()
 
-        print rule
         results = self._apply_forward(rule)
 
         return results
@@ -264,7 +277,6 @@ class Chainer(AbstractChainer):
         if rule is None:
             rule = self._select_rule()
 
-        print rule
         results = self._apply_backward(rule, target_outputs=target_atoms)
 
         return results
@@ -283,22 +295,28 @@ class Chainer(AbstractChainer):
             # give it an STI boost
             # record this inference in the InferenceHistoryRepository
 
+        if _VERBOSE: print str(rule)
         try:
             (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
             specific_inputs = []
             empty_substitution = {}
-            subst = self._choose_inputs(specific_inputs, generic_inputs, empty_substitution)
+            subst = self._choose_inputs(rule, specific_inputs, generic_inputs, empty_substitution)
             if subst is None:
                 return None
             # set the outputs after you've found all the inputs
-            # mustn't use '=' because it will discard the original reference and thus have no effect
+            # In Modus Ponens for example: if variable B refers to (Member $T Trains) and $T refers to Thomas
+            # The first line will replace B with (Member $T Trains)
             specific_outputs = self.substitute_list(subst, generic_outputs)
+            # The second line will replace (Member $T Trains) with (Member Thomas Trains), which is what we really need
+            specific_outputs = self.substitute_list(subst, specific_outputs)
         finally:
             # delete the query atoms after you've finished using them.
             # recursive means it will delete the new variable nodes and the links
             # containing them (but not the existing nodes and links)
-            for var in created_vars:
-                self.atomspace.remove(var, recursive=True)
+            if self._delete_temporary_variables:
+                for var in created_vars:
+                    if var in self.atomspace:
+                        self.atomspace.remove(var, recursive=False)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
@@ -309,7 +327,7 @@ class Chainer(AbstractChainer):
 
         assert len(generic_inputs) == 1
         template = generic_inputs[0]
-        input_atoms = self.find(template, ground=True)
+        input_atoms = self.find(template)
 
         for input in input_atoms:
             subst = self.unify(template, input, {})
@@ -320,26 +338,29 @@ class Chainer(AbstractChainer):
         for var in created_vars:
             self.atomspace.remove(var, recursive=True)
 
-    def _choose_inputs(self, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
+        return output_atoms
+
+    def _choose_inputs(self, rule, return_inputs, input_templates, subst_so_far, allow_zero_tv=False):
         '''Find suitable inputs and outputs for a Rule. Chooses them at random based on STI. Store them in return_inputs and return_outputs (lists of Atoms). Return the substitution if inputs were found, None otherwise.'''
         return_inputs += [x for x in input_templates]
 
         for i in xrange(0, len(input_templates)):
+            input_templates = self.substitute_list(subst_so_far, input_templates)
             template = input_templates[i]
 
-            atom = self._select_one_matching(template, subst_so_far)
+            atom = self._select_one_matching(template, subst_so_far, rule, input_templates[0:i])
             
             if atom != None:
                 # Find the substitution that would change 'template' to 'atom'
                 # Alternatively this could be returned by _select_one_matching
                 subst_so_far = self.unify(template, atom, subst_so_far)
-                if subst_so_far == None:
-                    import pdb; pdb.set_trace()
+                #if subst_so_far == None:
+                #    import pdb; pdb.set_trace()
 
                 return_inputs[i] = atom
             else:
                 if not allow_zero_tv:
-                    print 'unable to match:',template
+                    #print 'unable to match:',template
                     return None
                 # This means it won't be able to produce the output, but choosing some inputs is still essential for backward chaining.
                 # Just specialize the rest of the inputs. These "input" will actually just be 0-tv atoms, and it can become a BC target later.
@@ -355,10 +376,10 @@ class Chainer(AbstractChainer):
     def delete_queries(self, created_vars, subst):
         # Delete any variables that have been bound to something (they're no longer required).
         # Variables that haven't been bound become backward chaining queries
-        for var in created_vars:
-            if subst is None or (var in subst and subst[var] != var):
-                print 'removing', var
-                self.atomspace.remove(var, recursive=True)
+        if self._delete_temporary_variables:
+            for var in created_vars:
+                if subst is None or (var in subst and subst[var] != var):
+                    self.atomspace.remove(var, recursive=True)
 
     def _apply_backward(self, rule, target_outputs=None):
         # target outputs is the exact series of outputs to produce. If you don't specify, it will choose outputs for you
@@ -392,7 +413,6 @@ class Chainer(AbstractChainer):
 
         (generic_inputs, generic_outputs, created_vars) = rule.standardize_apart_input_output(self)
         subst = {}
-        print (generic_inputs, generic_outputs)
 
         if target_outputs is None:
             # This variable isn't really used; now we just use the substitution instead
@@ -407,12 +427,12 @@ class Chainer(AbstractChainer):
             return None
 
         specific_inputs = []
-        subst = self._choose_inputs(specific_inputs, generic_inputs, subst, allow_zero_tv = True)
+        subst = self._choose_inputs(rule, specific_inputs, generic_inputs, subst, allow_zero_tv = True)
         found = len(subst) > 0
 
-        print specific_inputs
-
         final_outputs = self.substitute_list(subst, generic_outputs)
+        # See apply_forward
+        final_outputs = self.substitute_list(subst, final_outputs)
 
         self.delete_queries(created_vars, subst)
         if not found:
@@ -424,6 +444,10 @@ class Chainer(AbstractChainer):
         if self._all_nonzero_tvs(specific_inputs):
             return self.apply_rule(rule, specific_inputs, final_outputs)
         else:
+            if (not self._allow_backchaining_with_variables) and any(
+                    self._contains_variables(atom) for atom in specific_inputs+final_outputs):
+                return None
+
             if self._stimulateAtoms:
 #                for atom in specific_outputs:
 #                    self._give_stimulus(atom)
@@ -500,22 +524,28 @@ class Chainer(AbstractChainer):
         revised_tv = revisionFormula([old_tv, new_tv])
         atom.tv = revised_tv
 
-        print 'old_tv, revised_tv, atom.tv =', old_tv, revised_tv, atom.tv
+        # atom.tv= actually uses the "truth value merging" function in the atomspace,
+        # which will always use the tv with the higher confidence (which is always the revised TV, at least with the current revisionFormula)
+        assert atom.tv == revised_tv
 
     def _give_stimulus(self, atom):
-        # Arbitrary
-        STIMULUS_PER_ATOM = 10
-        self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
+        if self._stimulateAtoms:
+            # Arbitrary
+            STIMULUS_PER_ATOM = 10
+            self._agent.stimulate_atom(atom, STIMULUS_PER_ATOM)
 
     ### automatically reject some inferences based on various problems
 
     def _validate(self, rule, inputs, outputs):
         # some of the validations might not make sense for backward chaining
 
-        print rule, map(str,inputs), map(str,outputs)
         # Sanity checks
+        if not self._allow_output_with_variables and self._contains_variables(outputs[0]):
+            self.log_failed_inference('output contains variable(s)')
+            return False
+
         if not self.valid_structure(outputs[0]):
-            self.log_failed_inference('invalid structure')
+            self.log_failed_inference('invalid structure %s %s %s' % (rule, inputs, outputs))
             return False
 
         if self._compute_trail_and_check_cycles(outputs[0], inputs):
@@ -527,6 +557,9 @@ class Chainer(AbstractChainer):
             return False
 
         return True
+
+    def _contains_variables(self, output):
+        return len(self.variables(output)) > 0
 
     def _compute_trail_and_check_cycles(self, output, inputs):
         ''' Recursively find the atoms used to produce output (the inference trail). If there is a cycle, return True.
@@ -554,6 +587,34 @@ class Chainer(AbstractChainer):
             trail |= input_trail
 
         return False
+
+    def find_trail(self, atom, trail=[]):
+        """Compute the inference trail for atom. It's represented as a
+        list of tuples, tuples of the form (atom produced, set(atoms used to produce it))."""
+        inputs = self.trails[atom]
+        trail.append((atom, inputs))
+
+        for input in inputs:
+            self.find_trail(input, trail)
+
+        return trail
+
+    def display_trail(self, trail):
+        for (number, line) in enumerate(reversed(trail)):
+            (output_atom, input_set) = line
+
+            if len(input_set):
+                if output_atom not in self.atomspace:
+                    print 'warning: trail contains nonexistent atom (caused by some bug)'
+                    continue
+
+                print '\nStep',number+1
+                for input in input_set:
+                    print input.h, input
+                print '|='
+                print output_atom.h, output_atom
+            #else:
+            #    print 'Premise', output_atom.h, output_atom
 
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one time. (Any atom can be
@@ -622,15 +683,56 @@ class Chainer(AbstractChainer):
 
     def test_rule(self, rule, sample_count):
         # Do a series of samples; different atoms with the same rules.
-        import random; random.seed(0)
-
+        self.random.seed(0)
         print 'Testing',rule,'in forward chainer'
 
         for i in xrange(0, sample_count):
-            self.forward_step(rule=rule)
+            results= self.forward_step(rule=rule)
+            if results: print results
 
         print 'Testing',rule,'in backward chainer'
 
         for i in xrange(0, sample_count):
-            self.backward_step(rule=rule)
+            results= self.backward_step(rule=rule)
+            if results: print results
+
+    def find_atom(self, atom, time_allowed=300):
+        # Run inference until atom is proved with >0 count, or time runs out (measured in seconds)
+        print 'Trying to produce truth values for atom:'
+        print repr(atom)
+
+        import time
+        start_time = time.time()
+
+        while time.time() - start_time < time_allowed:
+            if self._stimulateAtoms:
+                self._give_stimulus(atom)
+
+#            res = self.backward_step()
+#            if res: print res
+            res = self.forward_step()
+            if _VERBOSE and res: print res
+
+            target_instances = self.get_target_instances(atom)
+            if target_instances:
+                for instance in target_instances:
+                    print 'Target produced!'
+                    print repr(atom)
+
+                    print 'Inference steps'
+                    print self.display_trail(self.find_trail(atom))
+
+                return True
+
+        print 'Failed to find target in', time_allowed, 'seconds'
+        return False
+
+    def get_target_instances(self, target):
+        '''Ask the atomspace whether the target has been found (i.e. a TV with >0 confidence has already been produced by inference). The target is allowed to contain variables, in which case any instance of it is accepted (an instance is the target but with variables bound)'''
+        atoms = self.lookup_atoms(target, {})
+        atoms = [a for a in atoms if a.tv.count > 0]
+        return atoms
+
+    def get_query(self):
+        return self.get_predicate_arguments('query')[0]
 

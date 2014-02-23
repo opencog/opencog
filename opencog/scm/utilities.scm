@@ -19,13 +19,15 @@
 ; -- cog-report-counts -- Return an association list of counts.
 ; -- cog-get-partner -- Return other atom of a link conecting two atoms.
 ; -- cog-pred-get-partner -- Get the partner in an EvaluationLink.
-; -- cog-filter-map -- call proceedure on list of atoms.
 ; -- cog-filter -- return a list of atoms of given type.
-; -- cog-filter-incoming -- filter atoms of given type from incoming set.
-; -- cog-filter-outgoing -- filter atoms of given type from outgoing set.
 ; -- cog-chase-link -- Return other atom of a link conecting two atoms.
+; -- cog-chase-link-chk -- chase a link, with checking
 ; -- cog-map-chase-link -- Invoke proc on atoms connected through type.
+; -- cog-par-chase-link -- call proc on atom connected via type. (parallel)
 ; -- cog-map-chase-links -- Invoke proc on atoms connected through type.
+; -- cog-par-chase-links -- call proc on atoms connected via type. (parallel)
+; -- cog-map-chase-links-chk -- Invoke proc on atom connected through type.
+; -- cog-par-chase-links-chk -- call proc on atoms connected via type. (pllel)
 ; -- cog-map-chase-link-dbg -- Debugging version of above.
 ; -- cog-map-apply-link -- call proc on link between atom and atom type.
 ; -- cog-get-link -- Get list of links connecting atom to atom type.
@@ -34,10 +36,11 @@
 ; -- cartesian-prod -- create Cartesian product from tuple of sets.
 ;
 ;
-; Copyright (c) 2008, 2013 Linas Vepstas <linasvepstas@gmail.com>
+; Copyright (c) 2008, 2013, 2014 Linas Vepstas <linasvepstas@gmail.com>
 ;
 
 (use-modules (srfi srfi-1))
+(use-modules (ice-9 threads))  ; needed for par-map par-for-each
 
 (define (av sti lti vlti) (cog-new-av sti lti vlti))    
 
@@ -52,6 +55,17 @@
   (let ((head (car x)) (tail (cdr x)))
     (if (pair? head) (cog-set-vtv! (mtv tail) (car head) (cdr head))
         (cog-new-mtv head (cadr x)))))
+
+; Fetch the mean, confidence and count of a TV.
+(define (tv-mean tv) (assoc-ref (cog-tv->alist tv) 'mean))
+(define (tv-conf tv) (assoc-ref (cog-tv->alist tv) 'confidence))
+;
+; Simple truth values won't have a count. Its faster to just check
+; for #f than to call (cog-ctv? tv)
+(define (tv-count tv)
+	(define cnt (assoc-ref (cog-tv->alist tv) 'count))
+	(if (eq? cnt #f) 0 cnt)
+)
 
 ; -----------------------------------------------------------------------
 ; analogs of car, cdr, etc. but for atoms.
@@ -94,7 +108,8 @@
 ;
 ; If the current truth value on the atom is not a CountTruthValue,
 ; then the truth value is replaced by a CountTruthValue, with the 
-; count set to "cnt".
+; count set to "cnt".  The mean and confidence values are left
+; untouched.
 ;
 ; XXX this implementation is slow/wasteful, a native C++ would
 ; be considerably faster.
@@ -271,68 +286,18 @@
 ; atom in the listLink.
 ;
 (define (cog-pred-get-partner rel atom)
-	; The 'car' appears here because 'cog-filter-outgoing' is returning
+	; The 'car' appears here because 'cog-filter' is returning
 	; a list, and we want just one atom (the only one in the list)
-	(cog-get-partner (car (cog-filter-outgoing 'ListLink rel)) atom)
+	(cog-get-partner (car (cog-filter 'ListLink (cog-outgoing-set rel))) atom)
 )
 
 ; -----------------------------------------------------------------------
-; cog-filter-map -- call proceedure on list of atoms
-;
-; cog-filter-map atom-type proc atom-list
-;
-; Apply the proceedure 'proc' to every atom of 'atom-list' that is
-; of type 'atom-type'. Application halts if proc returns any value 
-; other than #f. Return the last value returned by proc; that is,
-; return #f if proc always returned #f, otherwise return the value
-; that halted the application.
-;
-; Exmaple usage:
-; (cog-filter-map 'ConceptNode display (list (cog-new-node 'ConceptNode "hello")))
-; 
-; See also: cgw-filter-atom-type, which does the same thing, but for wires.
-;
-; XXX TODO This is not really a map, because of the #f behaviour. This
-; should be fixed someday ...
-;
-(define (cog-filter-map atom-type proc atom-list) 
-	(define rc #f)
-	(cond 
-		((null? atom-list) #f)
-		((eq? (cog-type (car atom-list)) atom-type) 
-			(set! rc (proc (car atom-list))) 
-			(if (eq? #f rc) 
-				(cog-filter-map atom-type proc (cdr atom-list))
-				rc
-			)
-		) 
-		(else (cog-filter-map atom-type proc (cdr atom-list))
-		)
-	)
-)
-
 ; cog-filter -- return a list of atoms of given type.
 ;
 ; Given a list of atoms, return a list of atoms that are of 'atom-type'
 (define (cog-filter atom-type atom-list) 
 	(define (is-type? atom) (eq? atom-type (cog-type atom)))
 	(filter is-type? atom-list)
-)
-
-; cog-filter-incoming -- filter atoms of given type from incoming set.
-;
-; Given an atom, return a list of atoms from its incoming set that 
-; are of type 'atom-type'
-(define (cog-filter-incoming atom-type atom)
-	(cog-filter atom-type (cog-incoming-set atom))
-)
-
-; cog-filter-outgoing -- filter atoms of given type from outgoing set.
-;
-; Given an atom, return a list of atoms from its outgoing set that 
-; are of type 'atom-type'
-(define (cog-filter-outgoing atom-type atom)
-	(cog-filter atom-type (cog-outgoing-set atom))
 )
 
 ; -----------------------------------------------------------------------
@@ -342,7 +307,8 @@
 ;
 ; Starting at the atom 'anchor', chase its incoming links of
 ; 'link-type', and return a list of all of the atoms of type 
-; 'node-type' in those links. For example, given:
+; 'node-type' in those links. For example, if 'anchor' is the
+; node 'GivenNode "a"', and the atomspace contains
 ;
 ;    SomeLink
 ;        GivenNode "a"
@@ -352,8 +318,8 @@
 ;        GivenNode "a"
 ;        WantedNode  "q"
 ;
-; then this method will return the two WantedNodes's given the
-; GivenNode, and the link-type 'SomeLink.
+; then this method will return the two WantedNodes's, given the
+; GivenNode as anchor, and the link-type 'SomeLink.
 ;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
@@ -375,12 +341,32 @@
 )
 
 ; -----------------------------------------------------------------------
+; cog-chase-link-chk -- chase a link with checking
+;
+; cog-chase-link link-type endpoint-type anchor anchor-type
+'
+; Same as above, but throws an error if anchor is not an atom of
+; 'anchor-type'.
+;
+(define (cog-chase-link-chk link-type endpoint-type anchor anchor-type)
+	(let ((lst '()))
+		(define (mklist inst)
+			(set! lst (cons inst lst))
+			#f
+		)
+		(cog-map-chase-links-chk link-type endpoint-type mklist anchor anchor-type)
+		lst
+	)
+)
+
+; -----------------------------------------------------------------------
 ; cog-map-chase-link -- Invoke proc on atom connected through type.
 ;
 ; Similar to cog-chase-link, but invokes 'proc' on the wanted atom.
 ; Starting at the atom 'anchor', chase its incoming links of
 ; 'link-type', and call proceedure 'proc' on all of the atoms of
-; type 'node-type' in those links. For example, given:
+; type 'node-type' in those links. For example, if 'anchor' is the
+; node 'GivenNode "a"', and the atomspace contains
 ;
 ;    SomeLink
 ;        GivenNode "a"
@@ -392,25 +378,39 @@
 ;
 ; then 'proc' will be called twice, with each of the WantedNodes's
 ; as the argument. These wanted nodes were found by following the
-; link type 'SomeLink, starting at GivenNode.
+; link type 'SomeLink, starting at the anchor GivenNode "a".
 ;
 ; It is presumed that 'anchor' points to some atom (typically a node),
 ; and that it has many links in its incoming set. So, loop over all of
 ; the links of 'link-type' in this set. They presumably link to all 
 ; sorts of things. Find all of the things that are of 'endpoint-type'.
-; Return a list of all of these.
+; Apply proc to each of these.
 ;
 (define (cog-map-chase-link link-type endpoint-type proc anchor)
 	(define (get-endpoint w)
-		; cog-filter-map returns the return value from proc, we pass it on
-		; in turn, so make sure this is last statement
-		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
+		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
 	)
-	; cog-filter-map returns the return value from proc, we pass it on
-	; in turn, so make sure this is last statement
+
+	; We assume that anchor is a single atom, or empty list...
 	(if (null? anchor)
 		'()
-		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+		(map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
+	)
+)
+
+; cog-par-chase-link -- call proc on atom connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.
+(define (cog-par-chase-link link-type endpoint-type proc anchor)
+	(define (get-endpoint w)
+		(map proc (cog-filter endpoint-type (cog-outgoing-set w)))
+	)
+
+	; We assume that anchor is a single atom, or empty list...
+	(if (null? anchor)
+		'()
+		(par-map get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
 	)
 )
 
@@ -430,6 +430,24 @@
 	)
 )
 
+; cog-par-chase-links -- call proc on atoms connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.  If anchor is a list, its still walked 
+; serially; the parallelism is in the incoming set of the anchor.
+; (which makes sense, since the incoming set is most likely to be
+; manifold).
+(define (cog-par-chase-links link-type endpoint-type proc anchor)
+	(if (list? anchor)
+		(map 
+			(lambda (one-of)
+				(cog-par-chase-links link-type endpoint-type proc one-of)
+			)
+		anchor)
+		(cog-par-chase-link link-type endpoint-type proc anchor)
+	)
+)
+
 ; -----------------------------------------------------------------------
 ; cog-map-chase-links-chk -- Invoke proc on atom connected through type.
 ;
@@ -440,12 +458,33 @@
 		; If we are here, then anchor is a list. Recurse.
 		(map 
 			(lambda (one-of)
-				(cog-map-chase-links link-type endpoint-type proc one-of)
+				(cog-map-chase-links-chk link-type endpoint-type proc one-of anchor-type)
 			)
 		anchor)
 		; If we are here, then its a singleton. Verify type.
 		(if (eq? (cog-type anchor) anchor-type)
 			(cog-map-chase-link link-type endpoint-type proc anchor)
+			(throw 'wrong-atom-type 'cog-map-chase-links
+				"Error: expecting atom:" anchor)
+		)
+	)
+)
+
+; cog-par-chase-links-chk -- call proc on atoms connected via type. (parallel)
+; 
+; Same as above, but a multi-threaded version: the work is distributed
+; over the available CPU's.
+(define (cog-par-chase-links-chk link-type endpoint-type proc anchor anchor-type)
+	(if (list? anchor)
+		; If we are here, then anchor is a list. Recurse.
+		(map 
+			(lambda (one-of)
+				(cog-par-chase-links-chk link-type endpoint-type proc one-of anchor-type)
+			)
+		anchor)
+		; If we are here, then its a singleton. Verify type.
+		(if (eq? (cog-type anchor) anchor-type)
+			(cog-par-chase-link link-type endpoint-type proc anchor)
 			(throw 'wrong-atom-type 'cog-map-chase-links
 				"Error: expecting atom:" anchor)
 		)
@@ -478,16 +517,12 @@
 (define (cog-map-chase-link-dbg link-type endpoint-type dbg-lmsg dbg-emsg proc anchor)
 	(define (get-endpoint w)
 		(if (not (eq? '() dbg-emsg)) (display dbg-emsg))
-		; cog-filter-map returns the return value from proc, we pass it on
-		; in turn, so make sure this is last statement
-		(cog-filter-map endpoint-type proc (cog-outgoing-set w))
+		(for-each proc (cog-filter endpoint-type (cog-outgoing-set w)))
 	)
 	(if (not (eq? '() dbg-lmsg)) (display dbg-lmsg))
-	; cog-filter-map returns the return value from proc, we pass it on
-	; in turn, so make sure this is last statement
 	(if (null? anchor)
 		'()
-		(cog-filter-map link-type get-endpoint (cog-incoming-set anchor))
+		(for-each get-endpoint (cog-filter link-type (cog-incoming-set anchor)))
 	)
 )
 
@@ -503,9 +538,9 @@
 		(define (apply-link e)
 			(proc l)
 		)
-		(cog-filter-map endpoint-type apply-link (cog-outgoing-set l))
+		(for-each apply-link (cog-filter endpoint-type (cog-outgoing-set l)))
 	)
-	(cog-filter-map link-type get-link (cog-incoming-set anchor))
+	(for-each get-link (cog-filter link-type (cog-incoming-set anchor)))
 )
 
 ;
@@ -554,7 +589,8 @@
 		(append!
 			(map
 				(lambda (lnk) (cog-get-link 'EvaluationLink pred-type lnk))
-				(append! (cog-filter-incoming 'ListLink inst)) ;; append removes null's
+				;; append removes null's
+				(append! (cog-filter 'ListLink (cog-incoming-set inst)))
 			)
 		)
 	)

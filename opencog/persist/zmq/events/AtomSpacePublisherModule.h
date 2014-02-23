@@ -1,7 +1,7 @@
 /*
  * opencog/persist/zmq/events/AtomSpacePublisherModule.h
  *
- * Copyright (C) 2013 OpenCog Foundation
+ * Copyright (C) 2014 OpenCog Foundation
  * All Rights Reserved
  *
  * Written by Cosmo Harrigan
@@ -45,21 +45,19 @@ class CogServer;
  * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using ZeroMQ
  * to allow for external clients to receive updates from the AtomSpace via a publish/subscribe pattern.
  *
- * Full documentation is available here:
- *   http://wiki.opencog.org/w/AtomSpace_Event_Publisher
+ * API documentation is in: README.md
  *
  * Clients can subscribe to the events by subscribing to the ZeroMQ socket defined in the
  * ZMQ_EVENT_PORT parameter set in the OpenCog configuration file.
  *
  * Supported events are:
  *
- *   add
- *   remove
- *   tvchanged
- *   avchanged
- *
- * The message is a JSON-formatted string with the following structure:
- *   http://wiki.opencog.org/w/AtomSpace_Event_Publisher#Message_format
+ *   add        (Atom added)
+ *   remove     (Atom removed)
+ *   tvChanged  (Atom TruthValue changed)
+ *   avChanged  (Atom AttentionValue changed)
+ *   addAF      (Atom AttentionValue changed and entered the AttentionalFocus)
+ *   removeAF   (Atom AttentionValue changed and exited the AttentionalFocus)
  *
  **/
 class AtomSpacePublisherModule;
@@ -69,15 +67,23 @@ class AtomSpacePublisherModule : public Module
 {
     private:
         AtomSpace* as;
-        boost::signals::connection removeAtomConnection;
-        boost::signals::connection addAtomConnection;
-        boost::signals::connection TVChangedConnection;
-        boost::signals::connection AVChangedConnection;
+        boost::signals2::connection removeAtomConnection;
+        boost::signals2::connection addAtomConnection;
+        boost::signals2::connection TVChangedConnection;
+        boost::signals2::connection AVChangedConnection;
 
         zmq::context_t * context;
         zmq::socket_t * publisher;
 
         void InitZeroMQ();
+
+        ptree atomToPtree(Handle h);
+        ptree tvToPtree(TruthValuePtr tv);
+        ptree avToPtree(AttentionValuePtr av);
+        std::string atomMessage(ptree ptAtom);
+        std::string avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew);
+        std::string tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew);
+        std::string ptToJSON(ptree pt);
 
     public:
         AtomSpacePublisherModule(CogServer&);
@@ -91,9 +97,6 @@ class AtomSpacePublisherModule : public Module
         void atomRemoveSignal(AtomPtr atom);
         void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
         void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
-
-        std::string atomToJSON(Handle h);
-        ptree tvToPtree(TruthValuePtr tv);
 };
 
 }

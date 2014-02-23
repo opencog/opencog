@@ -57,7 +57,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
 
     // Collect statistics about the run, in struct optim_stats
     nsteps = 0;
-    deme_count ++;
+    demeID = deme.getID();
     over_budget = false;
     struct timeval start;
     gettimeofday(&start, NULL);
@@ -373,7 +373,7 @@ unsigned hill_climbing::operator()(deme_t& deme,
             ram_usage *= _instance_bytes;
             ram_usage /= 1024 * 1024;
             logger().info() << hc_params.prefix_stat_deme << ": "
-                << deme_count << "\t"
+                << demeID << "\t"
                 << iteration << "\t"
                 << total_steps << "\t"
                 << total_evals << "\t"
@@ -817,7 +817,7 @@ bool hill_climbing::resize_deme(deme_t& deme, score_t best_score)
 
 void hill_climbing::log_stats_legend() {
     logger().info() << hc_params.prefix_stat_deme << ": # "   /* Legend for graph stats */
-        "deme_count\t"
+        "demeID\t"
         "iteration\t"
         "total_steps\t"
         "total_evals\t"
