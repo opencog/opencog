@@ -1,3 +1,4 @@
+
 /*
  * opencog/persist/zmq/events/AtomSpacePublisherModule.h
  *
@@ -78,16 +79,31 @@ class AtomSpacePublisherModule : public Module
 
         zmq::context_t * context;
         zmq::socket_t * publisher;
-
         void InitZeroMQ();
+        void proxy();
 
         ptree atomToPtree(Handle h);
         ptree tvToPtree(TruthValuePtr tv);
         ptree avToPtree(AttentionValuePtr av);
+        void sendMessage(std::string messageType, std::string payload);
         std::string atomMessage(ptree ptAtom);
         std::string avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew);
         std::string tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew);
         std::string ptToJSON(ptree pt);
+        void signalHandlerAdd(Handle h);
+        void signalHandlerRemove(AtomPtr atom);
+        void signalHandlerAVChanged(const Handle& h,
+                                    const AttentionValuePtr& av_old,
+                                    const AttentionValuePtr& av_new);
+        void signalHandlerTVChanged(const Handle& h,
+                                    const TruthValuePtr& tv_old,
+                                    const TruthValuePtr& tv_new);
+        void signalHandlerAddAF(const Handle& h,
+                                const AttentionValuePtr& av_old,
+                                const AttentionValuePtr& av_new);
+        void signalHandlerRemoveAF(const Handle& h,
+                                   const AttentionValuePtr& av_old,
+                                   const AttentionValuePtr& av_new);
 
     public:
         AtomSpacePublisherModule(CogServer&);
@@ -105,6 +121,12 @@ class AtomSpacePublisherModule : public Module
         void TVChangedSignal(const Handle& h,
                              const TruthValuePtr& tv_old,
                              const TruthValuePtr& tv_new);
+        void addAFSignal(const Handle& h,
+                         const AttentionValuePtr& av_old,
+                         const AttentionValuePtr& av_new);
+        void removeAFSignal(const Handle& h,
+                         const AttentionValuePtr& av_old,
+                         const AttentionValuePtr& av_new);
 };
 
 }

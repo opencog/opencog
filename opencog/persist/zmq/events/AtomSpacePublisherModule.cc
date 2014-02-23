@@ -30,6 +30,7 @@
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include "opencog/util/zhelpers.hpp"
 #include <iostream>
+#include <thread>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -58,11 +59,11 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
     AVChangedConnection = as->AVChangedSignal(
                 boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
                             this, _1, _2, _3));
-    AddAFConnection = as->getAttentionBank().AddAFSignal(
-                boost::bind(&AtomSpacePublisherModule::AddAFSignal,
+    AddAFConnection = as->AddAFSignal(
+                boost::bind(&AtomSpacePublisherModule::addAFSignal,
                             this, _1, _2, _3));
-    RemoveAFConnection = as->getAttentionBank().RemoveAFSignal(
-                boost::bind(&AtomSpacePublisherModule::RemoveAFSignal,
+    RemoveAFConnection = as->RemoveAFSignal(
+                boost::bind(&AtomSpacePublisherModule::removeAFSignal,
                             this, _1, _2, _3));
 }
 
@@ -86,85 +87,155 @@ AtomSpacePublisherModule::~AtomSpacePublisherModule()
 
 void AtomSpacePublisherModule::InitZeroMQ()
 {
-    //  Prepare the context and publisher
     context = new zmq::context_t(1);
-    publisher = new zmq::socket_t(*context, ZMQ_PUB);
+
+    std::thread proxyThread(&AtomSpacePublisherModule::proxy, this);
+    proxyThread.detach();
+}
+
+void AtomSpacePublisherModule::proxy()
+{
+    zmq::socket_t * consumer;
+    zmq::socket_t * pub;
+
+    consumer = new zmq::socket_t(*context, ZMQ_PULL);
+    pub = new zmq::socket_t(*context, ZMQ_PUB);
 
     std::string zmq_event_port = config().get("ZMQ_EVENT_PORT");
     bool zmq_use_public_ip = config().get_bool("ZMQ_EVENT_USE_PUBLIC_IP");
-
     std::string zmq_ip;
     if (zmq_use_public_ip)
         zmq_ip = "0.0.0.0";
     else
         zmq_ip = "*";
 
-    const char * zmq_address =
-            ("tcp://" + zmq_ip + ":" + zmq_event_port).c_str();
-
     try {
-        publisher->bind(zmq_address);
+        consumer->bind("inproc://atomspace");
+        pub->bind(("tcp://" + zmq_ip + ":" + zmq_event_port).c_str());
     } catch (zmq::error_t error) {
         std::cout << "ZeroMQ error: " << error.what() << std::endl;
+        return;
     }
+
+    // Forward messages from multiple producers on to the publisher
+    while (1) {
+        std::string address = s_recv(*consumer);
+        std::string payload = s_recv(*consumer);
+        s_sendmore(*pub, address);
+        s_send(*pub, payload);
+    }
+}
+
+void AtomSpacePublisherModule::sendMessage(std::string messageType,
+                                           std::string payload)
+{
+    zmq::socket_t * socket = new zmq::socket_t(*context, ZMQ_PUSH);
+    socket->connect("inproc://atomspace");
+    s_sendmore (*socket, messageType);
+    s_send (*socket, payload);
+    socket->close();
+
+    //cout << "[" << messageType << "] " << payload << endl;
+}
+
+void AtomSpacePublisherModule
+::signalHandlerAdd(Handle h)
+{
+    sendMessage("add",
+                atomMessage(atomToPtree(h)));
+}
+
+void AtomSpacePublisherModule
+::signalHandlerRemove(AtomPtr atom)
+{
+    sendMessage("remove",
+                atomMessage(atomToPtree(atom->getHandle())));
+}
+
+void AtomSpacePublisherModule
+::signalHandlerAVChanged(const Handle& h,
+                         const AttentionValuePtr& av_old,
+                         const AttentionValuePtr& av_new)
+{
+    // Due to outstanding issue #394:
+    //   https://github.com/opencog/opencog/issues/394
+    // we check if the AttentionValue has actually changed
+    if (av_old->getSTI() != av_new->getSTI() &&
+        av_old->getLTI() != av_new->getLTI() &&
+        av_old->getVLTI() != av_new->getVLTI()) {
+        sendMessage("avChanged",
+                    avMessage(atomToPtree(h),
+                              avToPtree(av_old),
+                              avToPtree(av_new)));
+    }
+}
+
+void AtomSpacePublisherModule
+::signalHandlerTVChanged(const Handle& h,
+                         const TruthValuePtr& tv_old,
+                         const TruthValuePtr& tv_new)
+{
+    // Due to outstanding issue #394:
+    //   https://github.com/opencog/opencog/issues/394
+    // we check if the AttentionValue has actually changed
+//    if (tv_old != tv_new) {
+        sendMessage("tvChanged",
+                    tvMessage(atomToPtree(h),
+                              tvToPtree(tv_old),
+                              tvToPtree(tv_new)));
+//    }
+}
+
+void AtomSpacePublisherModule
+::signalHandlerAddAF(const Handle& h,
+                     const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new)
+{
+    sendMessage("addAF",
+                avMessage(atomToPtree(h),
+                          avToPtree(av_old),
+                          avToPtree(av_new)));
+}
+
+void AtomSpacePublisherModule
+::signalHandlerRemoveAF(const Handle& h,
+                        const AttentionValuePtr& av_old,
+                        const AttentionValuePtr& av_new)
+{
+    sendMessage("removeAF",
+                avMessage(atomToPtree(h),
+                          avToPtree(av_old),
+                          avToPtree(av_new)));
 }
 
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
 {
-    std::string payload = atomMessage(atomToPtree(h));
-    s_sendmore (*publisher, "add");
-    s_send (*publisher, payload);
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerAdd,
+                        this, h);
+    handler.detach();
 }
 
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
-    std::string payload = atomMessage(atomToPtree(atom->getHandle()));
-    s_sendmore (*publisher, "remove");
-    s_send (*publisher, payload);
-
     // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you remove
     // an atom:
     //   https://github.com/opencog/opencog/issues/394
     // After that bug is resolved, it may be necessary to check if the atom was
     // in the AttentionalFocus before being deleted, and then publish a
     // 'removeAF' signal
+
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerRemove,
+                        this, atom);
+    handler.detach();
 }
 
 void AtomSpacePublisherModule::AVChangedSignal(const Handle& h,
                                                const AttentionValuePtr& av_old,
                                                const AttentionValuePtr& av_new)
 {
-    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you add
-    // an atom:
-    //   https://github.com/opencog/opencog/issues/394
-    // Until that bug is fixed, this will ignore the simple case where the atom
-    // is created with no AttentionValue defined. However, if the atom is
-    // created with an AttentionValue defined, that dummy signal will still be
-    // published.
-    if (av_old != av_new)
-    {
-        // Publish signal: avchanged
-        std::string payload =
-                avMessage(atomToPtree(h), avToPtree(av_old), avToPtree(av_new));
-        s_sendmore (*publisher, "avChanged");
-        s_send (*publisher, payload);
-
-        // Check whether atom was added or removed from the AttentionalFocus
-        if (av_old->getSTI() < as->getAttentionalFocusBoundary() &&
-                av_new->getSTI() >= as->getAttentionalFocusBoundary())
-        {
-            // Publish signal: addAF
-            s_sendmore (*publisher, "addAF");
-            s_send (*publisher, payload);
-        }
-        else if (av_new->getSTI() < as->getAttentionalFocusBoundary() &&
-                 av_old->getSTI() >= as->getAttentionalFocusBoundary())
-        {
-            // Publish signal: removeAF
-            s_sendmore (*publisher, "removeAF");
-            s_send (*publisher, payload);
-        }
-    }
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerAVChanged,
+                            this, h, av_old, av_new);
+    handler.detach();
 }
 
 void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
@@ -177,13 +248,27 @@ void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
     // Until that bug is fixed, this will ignore the simple case where the link
     // is created with no TruthValue defined. However, if the link is created
     // with a TruthValue defined, that dummy signal will still be published.
-    if (tv_old != tv_new)
-    {
-        std::string payload =
-                tvMessage(atomToPtree(h), tvToPtree(tv_old), tvToPtree(tv_new));
-        s_sendmore (*publisher, "tvChanged");
-        s_send (*publisher, payload);
-    }
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerTVChanged,
+                        this, h, tv_old, tv_new);
+    handler.detach();
+}
+
+void AtomSpacePublisherModule::addAFSignal(const Handle& h,
+                                           const AttentionValuePtr& av_old,
+                                           const AttentionValuePtr& av_new)
+{
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerAddAF,
+                            this, h, av_old, av_new);
+    handler.detach();
+}
+
+void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
+                                              const AttentionValuePtr& av_old,
+                                              const AttentionValuePtr& av_new)
+{
+    std::thread handler(&AtomSpacePublisherModule::signalHandlerRemoveAF,
+                            this, h, av_old, av_new);
+    handler.detach();
 }
 
 ptree AtomSpacePublisherModule::atomToPtree(Handle h)
@@ -255,10 +340,8 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
 {
     ptree ptTV;
 
-    switch (tvp->getType())
-    {
-        case SIMPLE_TRUTH_VALUE:
-        {
+    switch (tvp->getType()) {
+        case SIMPLE_TRUTH_VALUE: {
             ptTV.put("type", "simple");
             ptTV.put("details.strength", tvp->getMean());
             ptTV.put("details.count", tvp->getCount());
@@ -266,8 +349,7 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
             break;
         }
 
-        case COUNT_TRUTH_VALUE:
-        {
+        case COUNT_TRUTH_VALUE: {
             ptTV.put("type", "count");
             ptTV.put("details.strength", tvp->getMean());
             ptTV.put("details.count", tvp->getCount());
@@ -275,8 +357,7 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
             break;
         }
 
-        case INDEFINITE_TRUTH_VALUE:
-        {
+        case INDEFINITE_TRUTH_VALUE: {
             IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
             ptTV.put("type", "indefinite");
             ptTV.put("details.strength", itv->getMean());
@@ -289,8 +370,7 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
         }
 
         case NULL_TRUTH_VALUE:
-        case NUMBER_OF_TRUTH_VALUE_TYPES:
-        {
+        case NUMBER_OF_TRUTH_VALUE_TYPES: {
             break;
         }
     }
