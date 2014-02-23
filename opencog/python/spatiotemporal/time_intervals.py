@@ -17,6 +17,7 @@ def check_is_time_interval(interval):
 class TimeInterval(object):
     _list = None
     _datetime = None
+    _float_list = None
     _iter_step = None
 
     def __init__(self, a=None, b=None, bins=50):
@@ -51,6 +52,12 @@ class TimeInterval(object):
         if self._datetime is None:
             self._datetime = [UnixTime(time).to_datetime() for time in self]
         return self._datetime
+
+    def to_float_list(self):
+        if self._float_list is None:
+            self._float_list = [float(time) for time in self]
+        return self._float_list
+
 
     @property
     def duration(self):

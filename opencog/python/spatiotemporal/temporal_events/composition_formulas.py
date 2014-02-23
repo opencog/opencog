@@ -150,6 +150,6 @@ if __name__ == '__main__':
 
     start = time.time()
     size = 4000000
-    create_sample_file(size)
-    learn(size)
+    # create_sample_file(size)
+    learn(1000000)
     print 'Performance:', time.time() - start, 'seconds'
