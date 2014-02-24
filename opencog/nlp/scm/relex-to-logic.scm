@@ -11,7 +11,7 @@
 
 ; Return #t if there is a node of type node-type with a name "node-name"
 (define (check-name? node-name node-type)
-	(> (length (filter-map (lambda (a-string) (string=? node-name a-string)) (map cog-name (cog-get-atoms node-type)))) 0)
+        (not (null? (cog-node node-type node-name)))
 )
 
 (define (random-node-name node-type name-length)
