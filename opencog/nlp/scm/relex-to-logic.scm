@@ -1,4 +1,7 @@
-; random-string, random-node-name and choose-var-name can be moved to utilities.scm
+; Notes: random-string, random-node-name and choose-var-name can be moved to utilities.scm
+
+; -----------------------------------------------------------------------
+; Returns a random string of length 'str-length'.
 (define (random-string str-length) 
 	(define alphanumeric "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 	(define str "")
@@ -9,11 +12,16 @@
 	str
 )
 
-; Return #t if there is a node of type node-type with a name "node-name"
+; -----------------------------------------------------------------------
+; Return #t if there is a node of type node-type with a name "node-name".
 (define (check-name? node-name node-type)
         (not (null? (cog-node node-type node-name)))
 )
 
+; -----------------------------------------------------------------------
+; Creates a possible name 'node-name' of lenght 'name-length' for a node
+; of type 'node-type'. The 'node-name' is not used with any other node
+; of type 'node-type'. 
 (define (random-node-name node-type name-length)
 	(define node-name (random-string name-length))
 	(if (equal? node-type 'VariableNode)
@@ -28,13 +36,20 @@
 	node-name
 )
 
+; -----------------------------------------------------------------------
+; Creates name for VariableNodes after checking whether the name is being
+; used by other VariableNode.
 (define (choose-var-name) (random-node-name 'VariableNode 36))
 
+; -----------------------------------------------------------------------
+; Check if the lemma of a WordInstanceNode 'word-inst' is 'word'.
 (define (check-lemma? word word-inst)
 	(string=? word (cog-name (word-inst-get-lemma word-inst)))
 )
 
-; 'word-inst' refers to WordInstanceNode
+; -----------------------------------------------------------------------
+; Returns a list of WordInstanceNodes from 'parse-node', which have a LemmaLink with a
+; WordNode named 'word'.
 (define (get-word-inst-nodes word parse-node)
 	(define word-inst-list (parse-get-words parse-node))
 	(append-map (lambda (a-predicate a-word-inst) (if a-predicate (list a-word-inst) '()))
@@ -43,17 +58,18 @@
 	)
 )
 
-; gets the occurence count of the a word node in a parse
+; -----------------------------------------------------------------------
+; Gets the occurence count of the a word node in a parse
 (define (get-word-inst-index word-inst)
 	(define parse-node (car (cog-chase-link 'WordInstanceLink 'ParseNode word-inst)))
 	(define word (word-inst-get-word-str word-inst))
 	(+ 1 (list-index (lambda (a-node) (equal? word-inst a-node)) (get-word-inst-nodes word parse-node)))
 )
 
+; -----------------------------------------------------------------------
 ; Returns the word-instance name when its word-lemma, word-index and parse-node is inputed.
 ; It also checks whether an atom name is a word-instance name for the given parse-node and
 ; word lemma and returns the word-instance name.
-
 (define (get-instance-name word word-index parse-node)
 	(cond	((number? word-index)
 			(cog-name (list-ref (get-word-inst-nodes word parse-node) (- word-index 1)))
@@ -66,6 +82,7 @@
 	)
 )
 
+; -----------------------------------------------------------------------
 (define (amod-rule concept instance adj adj_instance)
 	(define new_concept (ConceptNode instance))
 	(define new_concept_adj (ConceptNode adj_instance))
@@ -147,11 +164,11 @@
 	(define num_ins_node (NumberNode num_instance)) 
 	(InheritanceLink  noun_ins_concept noun_concept) 
 	(InheritanceLink  num_ins_node num_node) 
-	(QuantityLink  noun_ins_concept, num_ins_node) 
+	(QuantityLink  noun_ins_concept num_ins_node) 
 )
 
 (define (on-rule w1 w1_instance w2 w2_instance)
-	(define On (PredicateNode “On”))
+	(define On (PredicateNode "On"))
 	(define new_concept_1 (ConceptNode w1_instance))
 	(define new_concept_2 (ConceptNode w2_instance))
 	(define word_node_1 (ConceptNode w1))
@@ -259,7 +276,7 @@
 	(define n2_ins_concept (ConceptNode n2_instance)) 
 	(InheritanceLink  n1_ins_concept n1_concept) 
 	(InheritanceLink  n2_ins_concept n2_concept) 
-	(InheritanceLink  n1_ins_concept, n2_ins_concept) 
+	(InheritanceLink  n1_ins_concept n2_ins_concept) 
 )
 
 (define (SV-rule subj_concept  subj_instance  verb  verb_instance)
