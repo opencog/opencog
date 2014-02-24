@@ -92,6 +92,7 @@ GROUNDED_SCHEMA_NODE <- SCHEMA_NODE,GROUNDED_PROCEDURE_NODE
 
 PREDICATE_NODE <- SCHEMA_NODE
 GROUNDED_PREDICATE_NODE <- PREDICATE_NODE,GROUNDED_PROCEDURE_NODE
+DEFINED_RELATIONSHIP_NODE <- PREDICATE_NODE // Generic relations
 
 SATISFYING_SET_LINK <- ORDERED_LINK
 
@@ -105,7 +106,11 @@ EXECUTION_OUTPUT_LINK <- ORDERED_LINK
 // Synchronization primitive, used to mark stages of a processing
 // pipeline; used as a fence or guard barrier, make sure that earlier
 // stages have completed processing before later ones start.
-// Basically, hypergraphs may be attached to the anchor, with a 
+// Basically, hypergraphs may be attached to the anchor, with a
 // ListLink, to indicate that they are either done, or awaiting
 // processing.
 ANCHOR_NODE <- NODE
+
+// Link for mathematices. Not in use at the time of recatgorizing, from
+// NLP related atom types.
+QUANTITY_LINK <- ORDERED_LINK
