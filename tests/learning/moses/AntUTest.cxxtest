@@ -1,0 +1,102 @@
+/** AntUTest.cxxtest ---
+ *
+ * Copyright (C) 2011 OpenCog Foundation
+ *
+ * Author: Nil Geisweiller <nilg@desktop>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+
+#include <opencog/learning/moses/moses/moses_main.h>
+#include <opencog/learning/moses/example-ant/ant_scoring.h>
+#include <opencog/learning/moses/metapopulation/metapopulation.h>
+#include <opencog/learning/moses/optimization/hill-climbing.h>
+#include <opencog/comboreduct/reduct/reduct.h>
+#include <opencog/comboreduct/combo/vertex.h>
+#include <opencog/comboreduct/ant_combo_vocabulary/ant_combo_vocabulary.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/oc_omp.h>
+
+using namespace opencog;
+using namespace moses;
+using namespace reduct;
+using namespace boost;
+using namespace ant_combo;
+using namespace std;
+
+/**
+ * MOSES ant problem
+ */
+class AntUTest : public CxxTest::TestSuite
+{
+public:
+    AntUTest() {
+        // Logger setting
+        logger().setPrintToStdoutFlag(true); 
+        logger().setLevel(Logger::DEBUG);        
+    }
+
+    void test_ant() {
+        // Max evals
+        int max_evals = 1000000;
+
+        // Random seed
+        int rand_seed = 1;
+        randGen().seed(rand_seed);
+
+        // Simplificity pressure
+        float simplicity_pressure = 1;
+
+        // Multi-thread
+        static const string localhost = "localhost";
+        unsigned n_jobs = 4;
+        jobs_t jobs{{localhost, n_jobs}};
+        setting_omp(jobs[localhost]);
+
+        type_tree tt(id::lambda_type);
+        tt.append_children(tt.begin(),id::action_result_type,1);
+
+        ant_bscore bscorer(simplicity_pressure);
+        bscore_based_cscore<ant_bscore> cscorer(bscorer);
+
+        combo_tree_ns_set perceptions;
+        combo_tree_ns_set actions;
+
+        actions.insert(combo_tree(get_instance(id::turn_left)));
+        actions.insert(combo_tree(get_instance(id::turn_right)));
+        actions.insert(combo_tree(get_instance(id::move_forward)));
+
+        perceptions.insert(combo_tree(get_instance(id::is_food_ahead)));
+
+        metapop_parameters metaparms;
+        metaparms.perceptions = &perceptions;
+        metaparms.actions = &actions;
+
+        hill_climbing hc;
+        metapopulation metapop(combo_tree(id::sequential_and), tt,
+                               action_reduction(),
+                               cscorer, bscorer, hc, metaparms);
+  
+        boost::program_options::variables_map vm;
+
+        moses_parameters moses_param(vm, jobs, true, max_evals, -1, 0, 100);
+        moses_statistics st;
+        run_moses(metapop, moses_param, st);
+        TS_ASSERT_EQUALS(metapop.best_score(), 0.0);
+    }
+};
