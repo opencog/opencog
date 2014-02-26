@@ -61,7 +61,7 @@ int main(int argc,char** argv)
     }
 
     // Simplificity pressure
-    float simplicity_pressure = 1;
+    float simplicity_pressure = 0.5;
 
     // Multi-thread
     static const string localhost = "localhost";
@@ -93,8 +93,16 @@ int main(int argc,char** argv)
     metapop_parameters metaparms;
     metaparms.perceptions = &perceptions;
     metaparms.actions = &actions;
+    metaparms.complexity_temperature = 100;
 
-    hill_climbing hc;
+    // Define optimization algo
+    optim_parameters opt_params;
+    opt_params.max_dist = 3;
+    hc_parameters hc_params;
+    hc_params.widen_search = true;
+    hc_params.crossover = true;
+    hill_climbing hc(opt_params, hc_params);
+
     metapopulation metapop(combo_tree(id::sequential_and), tt, action_reduction(),
                            cscorer, bscorer, hc, metaparms);
   
