@@ -38,6 +38,10 @@ namespace opencog
  *  @{
  */
 
+typedef boost::signals2::signal<void (const Handle&,
+                                      const AttentionValuePtr&,
+                                      const AttentionValuePtr&)> AFCHSigl;
+
 class AtomTable;
 
 class AttentionBank
@@ -52,6 +56,10 @@ class AttentionBank
      * not charged STI rent 
      */
     AttentionValue::sti_t attentionalFocusBoundary;
+
+    /** Signal emitted when an atom crosses in or out of the AttentionalFocus */
+    AFCHSigl _AddAFSignal;
+    AFCHSigl _RemoveAFSignal;
 
     opencog::recent_val<AttentionValue::sti_t> maxSTI;
     opencog::recent_val<AttentionValue::sti_t> minSTI;
@@ -73,6 +81,13 @@ public:
     /** The table notifies us about AV changes */
     AttentionBank(AtomTable*);
     ~AttentionBank();
+
+    /**
+     * Provide ability for others to find out about atoms that cross in or
+     * out of the AttentionalFocus
+     */
+    AFCHSigl& AddAFSignal() { return _AddAFSignal; }
+    AFCHSigl& RemoveAFSignal() { return _RemoveAFSignal; }
 
     /**
      * Decays STI of all atoms in the AtomSpace (one cycle of importance decay).

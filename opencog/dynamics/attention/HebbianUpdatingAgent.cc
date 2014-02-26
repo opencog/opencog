@@ -68,7 +68,7 @@ HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::WARN, true));
+    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE, true));
 }
 
 HebbianUpdatingAgent::~HebbianUpdatingAgent()

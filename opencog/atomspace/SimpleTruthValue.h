@@ -38,7 +38,7 @@ namespace opencog
 class SimpleTruthValue;
 typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidance)
+//! a TruthValue that stores a mean and the number of observations (strength and confidence)
 class SimpleTruthValue : public TruthValue
 {
 protected:

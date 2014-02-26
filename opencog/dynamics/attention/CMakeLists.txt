@@ -12,6 +12,7 @@ ADD_CUSTOM_TARGET(attention_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
+# AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
 	ForgettingAgent
@@ -26,15 +27,32 @@ ADD_LIBRARY(attention SHARED
 ADD_DEPENDENCIES(attention opencog_atom_types)
 ADD_DEPENDENCIES(attention attention_atom_types)
 
-
 INCLUDE_DIRECTORIES(
-	${PROJECT_SOURCE_DIR}/opencog/util
-	${PROJECT_SOURCE_DIR}/opencog/atomspace
-	${PROJECT_SOURCE_DIR}/opencog/server
-	${PROJECT_SOURCE_DIR}/opencog/query
+        ${PROJECT_SOURCE_DIR}/opencog/util
+        ${PROJECT_SOURCE_DIR}/opencog/atomspace
+        ${PROJECT_SOURCE_DIR}/opencog/server
+        ${PROJECT_SOURCE_DIR}/opencog/query
 )
 
 TARGET_LINK_LIBRARIES(attention server)
+
+# HebbianCreationModule
+ADD_LIBRARY(hebbiancreation SHARED
+        HebbianCreationModule
+)
+
+ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
+ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
+
+INCLUDE_DIRECTORIES(
+        ${PROJECT_SOURCE_DIR}/opencog/util
+        ${PROJECT_SOURCE_DIR}/opencog/atomspace
+        ${PROJECT_SOURCE_DIR}/opencog/server
+        ${PROJECT_SOURCE_DIR}/opencog/query
+)
+
+TARGET_LINK_LIBRARIES(hebbiancreation server)
+
 
 IF (CYGWIN)
 	INSTALL (TARGETS attention
@@ -51,6 +69,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
 	ForgettingAgent.h
+        HebbianCreationModule.h
 	HebbianUpdatingAgent.h
 	ImportanceSpreadingAgent.h
 	ImportanceDiffusionAgent.h
