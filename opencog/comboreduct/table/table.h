@@ -253,13 +253,13 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
     interpreter_visitor(const combo_tree::iterator& it) : _it(it) {}
     vertex operator()(const std::vector<builtin>& inputs) {
         return boolean_interpreter(inputs)(_it);
-    }    
+    }
     vertex operator()(const std::vector<contin_t>& inputs) {
         // Can't use contin, since the output might be non-contin,
         // e.g. a boolean, or an enum.  
         // return contin_interpreter(inputs)(_it);
         return mixed_interpreter(inputs)(_it);
-    }    
+    }
     vertex operator()(const std::vector<vertex>& inputs) {
         return mixed_interpreter(inputs)(_it);
     }
@@ -273,7 +273,7 @@ struct interpreter_visitor : public boost::static_visitor<vertex>
     }
     combo_tree::iterator _it;
 };
-        
+
 /**
  * multi_type_seq is a variant of sequences of primitive combo types,
  * vertex and tree. That way the Table, ITable or CTable can store
