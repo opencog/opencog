@@ -94,3 +94,11 @@ TARGET_LINK_LIBRARIES(scoringUTest
 	cogutil
 )
 
+ADD_CXXTEST(AntUTest)
+TARGET_LINK_LIBRARIES(AntUTest
+    ant_scoring
+	moses_exec
+	moses
+	comboreduct
+	cogutil
+)

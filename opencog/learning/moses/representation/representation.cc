@@ -359,14 +359,6 @@ void representation::get_candidate_rec(const instance& inst,
             get_candidate_rec(inst, src_child, new_parent_dst, candidate);
     };
 
-    // append v to parent_dst's children. If candidate is empty then
-    // set it as head. Return the iterator pointing to the new content.
-    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
-    {
-        return candidate.empty()? candidate.set_head(v)
-            : candidate.append_child(parent_dst, v);
-    };
-
     // Find the knob associated to src (if any)
     disc_map_cit dcit = find_disc_knob(src);
     if (dcit != disc.end()) {
@@ -383,6 +375,14 @@ void representation::get_candidate_rec(const instance& inst,
          ccit->second.append_to(candidate, parent_dst, c);
          return;
     }
+
+    // append v to parent_dst's children. If candidate is empty then
+    // set it as head. Return the iterator pointing to the new content.
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+    {
+        return candidate.empty()? candidate.set_head(v)
+            : candidate.append_child(parent_dst, v);
+    };
 
     // There was no knob.  Just copy.
     recursive_call(append_child(parent_dst, *src), src);

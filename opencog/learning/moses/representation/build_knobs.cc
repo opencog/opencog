@@ -29,6 +29,7 @@
 #include <opencog/util/exceptions.h>
 #include <opencog/util/dorepeat.h>
 #include <opencog/util/oc_omp.h>
+#include <opencog/util/random.h>
 
 #include <opencog/comboreduct/combo/convert_ann_combo.h>
 #include <opencog/comboreduct/reduct/meta_rules.h>
@@ -132,7 +133,7 @@ build_knobs::build_knobs(combo_tree& exemplar,
  * An operator is permitted, if it is not one of those that we were
  * told to ignore, i.e. that should be omitted from the tree.
  */
-bool build_knobs::permitted_op(const vertex& v)
+bool build_knobs::permitted_op(const vertex& v) const
 {
     return _ignore_ops.find(v) == _ignore_ops.end();
 }
@@ -182,7 +183,7 @@ void build_knobs::logical_canonize(pre_it it)
         _exemplar.insert_above(it, id::logical_or);
     }
     else {
-        OC_ASSERT(0, "Error: during logical_cannonize, got unexpected "
+        OC_ASSERT(0, "Error: during logical_canonize, got unexpected "
              " type in logical expression.");
     }
 }
@@ -606,7 +607,7 @@ void build_knobs::add_logical_knobs(pre_it subtree,
 /**
  * build_logical -- add knobs to an exemplar that contains boolean
  * and logic terms, and predicates.  If a predicate is found, it is
- * cannonized, and knobs are added to that.
+ * canonized, and knobs are added to that.
  *
  * @subtree -- pointer to a subtree of the exemplar that consists of
  *             logical elements.
@@ -696,9 +697,9 @@ void build_knobs::build_logical(pre_it subtree, pre_it it)
 }
 
 // ***********************************************************************
-/// contin_cannonize -- add knobs to create canonical contin expr.
+/// contin_canonize -- add knobs to create canonical contin expr.
 ///
-/// Given a pointer @it into the exemplar, the contin_cannonize()
+/// Given a pointer @it into the exemplar, the contin_canonize()
 /// method will insert a "canonical form" above this pointer.
 ///
 /// The canonical form we want for a contin-valued term is a linear-
@@ -839,7 +840,7 @@ void build_knobs::linear_canonize_times(pre_it it)
 ///
 /// The recursive aspect of this is such that, if it encounters terms
 /// that are functions, it will canonize their arguments as well.  Thus,
-/// sin(), exp(), log() will all get their args cannonized.  Note that
+/// sin(), exp(), log() will all get their args canonized.  Note that
 /// the function impulse() returns contin but take a boolean expr: in
 /// this case, we call logical_canonize on it's arg.
 //
@@ -1003,7 +1004,7 @@ pre_it build_knobs::mult_add(pre_it it, const vertex& v)
 // For now, we only handle enumerated types on output, and not on input.
 // TODO: implement support for enumerated types in the input.
 
-/// enum_cannonize: make sure that the exemplar is in cannonical form.
+/// enum_canonize: make sure that the exemplar is in canonical form.
 /// The canonical form will be of the form
 ///       cond(p1 x1  p2 x2 ... pn xn y)
 /// where each possible enum is likely to appear in at least one of the
@@ -1037,7 +1038,7 @@ void build_knobs::enum_canonize(pre_it it)
         _exemplar.insert(last, enum_t::get_random_enum());
     }
 
-    // Cannonize every predicate.
+    // Canonize every predicate.
     // This loop is strangely structured because the logical_canonize()
     // does an insert_above, and thus wrecks the iterator.
     sib_it sib = it.begin();
@@ -1167,29 +1168,19 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
     const int number_of_actions = _actions->size();
     int n = number_of_actions; // controls the number of perms
 
-    for (combo_tree_ns_set_it i = _actions->begin(); i != _actions->end(); ++i)
-        perms.push_back(*i);
-
-    // lazy_random_selector sel(number_of_actions);
-    // dorepeat(n) {  // add n builtin actions
-    //   int i=sel();  // since this argument is varied, it doesn't matter what was the initial value
-    // }
+    for (const combo_tree& tr : *_actions)
+        perms.push_back(tr);
 
     //and n random pairs out of the total  2 * choose(n,2) = n * (n - 1) of these
     //TODO: should bias the selection of these (and possibly choose larger subtrees)
-    lazy_random_selector randpair(number_of_actions*(number_of_actions - 1));
+    lazy_random_selector randpair(n * (n - 1));
 
     dorepeat(n) {
         combo_tree v(id::action_boolean_if);
         pre_it iv = v.begin();
 
-        int rand_int = randGen().randint(_perceptions->size());
-        combo_tree_ns_set_it p_it = _perceptions->begin();
-        for (int ind = 0; ind < rand_int; ++ind)
-            ++p_it;
-
-        combo_tree vp(*p_it);
-        v.append_child(iv, vp.begin());
+        // append a randomly picked perception
+        v.append_child(iv, randset(*_perceptions).begin());
 
         int x = randpair();
         int a = x / (number_of_actions - 1);
@@ -1204,6 +1195,9 @@ void build_knobs::sample_action_perms(pre_it it, vector<combo_tree>& perms)
 
         perms.push_back(v);
     }
+
+    if (logger().isFineEnabled())
+        ostreamContainer(logger().fine() << "Perms:" << std::endl, perms, "\n");
 }
 
 
@@ -1230,7 +1224,7 @@ void build_knobs::action_cleanup()
 {
     combo_tree::post_order_iterator it = _exemplar.begin_post();
     while (it != _exemplar.end_post())
-        if ((*it == id::sequential_and || *it == id::sequential_and || *it == id::sequential_exec) && it.is_childless())
+        if ((*it == id::sequential_and || *it == id::sequential_or || *it == id::sequential_exec) && it.is_childless())
             _exemplar.erase(it++);
         else
             ++it;

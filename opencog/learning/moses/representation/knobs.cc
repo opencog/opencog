@@ -25,6 +25,175 @@
 
 namespace opencog { namespace moses {
 
+/////////////////
+// contin_knob //
+/////////////////
+
+contin_knob::contin_knob(combo_tree& tr, combo_tree::iterator tgt,
+                         contin_t step_size, contin_t expansion,
+                         field_set::width_t depth)
+    : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
+                                step_size, expansion, depth) { }
+
+bool contin_knob::in_exemplar() const
+{
+    return true;
+}
+
+void contin_knob::clear_exemplar() { }
+
+void contin_knob::turn(contin_t x)
+{
+    *_loc = x;
+}
+
+void contin_knob::append_to(combo_tree& candidate, combo_tree::iterator parent_dst,
+                            contin_t c) const
+{
+    if (candidate.empty())
+        candidate.set_head(c);
+    else
+        candidate.append_child(parent_dst, c);
+}
+
+const field_set::contin_spec& contin_knob::spec() const
+{
+    return _spec;
+}
+
+std::string contin_knob::toStr() const
+{
+    std::stringstream ss;
+    ss << "[" << *_loc << "]";
+    return ss.str();
+}
+
+//////////////////////////
+// logical_subtree_knob //
+//////////////////////////
+
+logical_subtree_knob::logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+                                           const logical_subtree_knob& lsk)
+    : discrete_knob<3>(tr)
+{
+    // logger().debug("lsk = %s", lsk.toStr().c_str());
+    // stringstream ss;
+    // ss << "*tgt = " << *tgt;
+    // logger().debug(ss.str());
+
+    if (lsk.in_exemplar())
+        _loc = _tr.child(tgt, lsk._tr.sibling_index(lsk._loc));
+    else
+        _loc = _tr.append_child(tgt, lsk._loc);
+    _disallowed = lsk._disallowed;
+    _default = lsk._default;
+    _current = lsk._current;
+}
+
+logical_subtree_knob::logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+                                           combo_tree::iterator subtree)
+    : discrete_knob<3>(tr)
+{
+    typedef combo_tree::sibling_iterator sib_it;
+    typedef combo_tree::pre_order_iterator pre_it;
+
+    // compute the negation of the subtree
+    combo_tree negated_subtree(subtree);
+    negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
+
+    reduct::logical_reduction r;
+    r(1)(negated_subtree);
+
+    for (sib_it sib = tgt.begin(); sib != tgt.end(); ++sib) {
+        if (_tr.equal_subtree(pre_it(sib), subtree) ||
+            _tr.equal_subtree(pre_it(sib), negated_subtree.begin())) {
+            _loc = sib;
+            _current = present;
+            _default = present;
+            return;
+        }
+    }
+
+    _loc = _tr.append_child(tgt, id::null_vertex);
+    _tr.append_child(_loc, subtree);
+}
+
+complexity_t logical_subtree_knob::complexity_bound() const
+{
+    return (_current == absent ? 0 : tree_complexity(_loc));
+}
+
+void logical_subtree_knob::clear_exemplar()
+{
+    if (in_exemplar())
+        turn(0);
+    else
+        _tr.erase(_loc);
+}
+
+void logical_subtree_knob::turn(int idx)
+{
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
+
+    if (idx == _current) // already set, nothing to do
+        return;
+
+    switch (idx) {
+    case absent:
+        // flag subtree to be ignored with a null_vertex, replace
+        // negation if present
+        if (_current == negated)
+            *_loc = id::null_vertex;
+        else
+            _loc = _tr.insert_above(_loc, id::null_vertex);
+        break;
+    case present:
+        _loc = _tr.erase(_tr.flatten(_loc));
+        break;
+    case negated:
+        if (_current == present)
+            _loc = _tr.insert_above(_loc, id::logical_not);
+        else
+            *_loc = id::logical_not;
+        break;
+    }
+
+    _current = idx;
+}
+
+combo_tree::iterator logical_subtree_knob::append_to(combo_tree& candidate,
+                                                     combo_tree::iterator& parent_dst,
+                                                     int idx) const
+{
+    typedef combo_tree::iterator pre_it;
+
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
+
+    // append v to parent_dst's children. If candidate is empty
+    // then set it as head. Return the iterator pointing to the
+    // new content.
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+    {
+        return candidate.empty()? candidate.set_head(v)
+        : candidate.append_child(parent_dst, v);
+    };
+
+    pre_it new_src = parent_dst.end();
+    if (idx == negated)
+        parent_dst = append_child(parent_dst, id::logical_not);
+    if (idx != absent) {
+        new_src = _default == present ? _loc : (pre_it)_loc.begin();
+        parent_dst = append_child(parent_dst, *new_src);
+    }
+    return new_src;
+}
+
+field_set::disc_spec logical_subtree_knob::spec() const {
+    return field_set::disc_spec(multiplicity());
+}
+
 std::string logical_subtree_knob::toStr() const
 {
     std::stringstream ss;
@@ -77,6 +246,189 @@ std::string logical_subtree_knob::posStr(int pos, bool tag_current) const
     }
     return pos == _current && tag_current?
         std::string("(") + ss.str() + ")" : ss.str();
+}
+
+/////////////////////////
+// action_subtree_knob //
+/////////////////////////
+
+action_subtree_knob::action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
+                                         const vector<combo_tree>& perms)
+    : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
+
+    OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
+
+    for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;++i)
+        disallow(i);
+
+    _default = 0;
+    _current = _default;
+    _loc = _tr.append_child(tgt, id::null_vertex);
+}
+
+complexity_t action_subtree_knob::complexity_bound() const {
+    return tree_complexity(_loc);
+}
+
+void action_subtree_knob::clear_exemplar() {
+    if (in_exemplar())
+        turn(0);
+    else
+        _tr.erase(_loc);
+}
+
+void action_subtree_knob::turn(int idx)
+{
+    idx = map_idx(idx);
+    OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+    
+    if (idx == _current) //already set, nothing to
+        return;
+    
+    if (idx == 0) {
+        if (_current != 0) {
+            combo_tree t(id::null_vertex);
+            _loc = _tr.replace(_loc, t.begin());
+        }
+    } else {
+        pre_it ite = (_perms[idx-1]).begin();
+        _loc = _tr.replace(_loc, ite);
+    }
+    _current = idx;
+}
+
+
+combo_tree::iterator action_subtree_knob::append_to(combo_tree& candidate,
+                                                    combo_tree::iterator& parent_dst,
+                                                    int idx) const
+{
+    idx = map_idx(idx);
+    OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+
+    if (idx != 0) {
+        if (candidate.empty())
+            candidate = _perms[idx-1];
+        else
+            candidate.append_child(parent_dst, _perms[idx-1].begin());
+    }
+
+    return parent_dst.end();    // there is no child knobs
+}
+
+field_set::disc_spec action_subtree_knob::spec() const {
+    return field_set::disc_spec(multiplicity());
+}
+
+std::string action_subtree_knob::toStr() const {
+    std::stringstream ss;
+    ss << "[";
+    for(int i = 0; i < multiplicity(); ++i) {
+        int idx = map_idx(i);
+        OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
+        if (idx == 0)
+            ss << "nil";
+        else {
+            std::stringstream tr_ss;
+            tr_ss << _perms[idx-1];
+            ss << tr_ss.str().substr(0, tr_ss.str().size()-1);
+        }
+        if (i+1 < multiplicity())
+            ss << "|";
+    }
+    ss << "]";
+    return ss.str();
+}
+
+////////////////////////////////
+// simple_action_subtree_knob //
+////////////////////////////////
+
+simple_action_subtree_knob::simple_action_subtree_knob(combo_tree& tr,
+                                                       combo_tree::iterator tgt)
+    : discrete_knob<2>(tr, tgt)
+{
+    _current = present;
+    _default = present;
+}
+
+complexity_t simple_action_subtree_knob::complexity_bound() const {
+    return (_current == absent ? 0 : tree_complexity(_loc));
+}
+
+void simple_action_subtree_knob::clear_exemplar() {
+    //      if (in_exemplar())
+    turn(0);
+    //      else
+    // _tr.erase(_loc);
+}
+
+void simple_action_subtree_knob::turn(int idx)
+{
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 2), "Index greater than 1.");
+
+    if (idx == _current) //already set, nothing to
+        return;
+
+    switch (idx) {
+    case present:
+        _loc = _tr.erase(_tr.flatten(_loc));
+        break;
+    case absent:
+        _loc = _tr.insert_above(_loc, id::null_vertex);
+        break;
+    }
+
+    _current = idx;
+}
+
+combo_tree::iterator simple_action_subtree_knob::append_to(combo_tree& candidate,
+                                                           combo_tree::iterator& parent_dst,
+                                                           int idx) const
+{
+    typedef combo_tree::iterator pre_it;
+
+    idx = map_idx(idx);
+    OC_ASSERT((idx < 2), "Index greater than 1.");
+
+    // append v to parent_dst's children. If candidate is empty
+    // then set it as head. Return the iterator pointing to the
+    // new content.
+    auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
+    {
+        return candidate.empty()? candidate.set_head(v)
+        : candidate.append_child(parent_dst, v);
+    };
+
+    pre_it new_src = parent_dst.end();
+    if (idx == present) {
+        new_src = _default == present ? _loc : (pre_it)_loc.begin();
+        parent_dst = append_child(parent_dst, *new_src);
+    };
+    return new_src;
+}
+
+field_set::disc_spec simple_action_subtree_knob::spec() const {
+    return field_set::disc_spec(multiplicity());
+}
+
+std::string simple_action_subtree_knob::toStr() const {
+    std::stringstream ss;
+    ss << "[nil|" << locStr() << "]";
+    return ss.str();
+}
+
+std::string simple_action_subtree_knob::locStr() const
+{
+    OC_ASSERT(*_loc != id::null_vertex || _loc.has_one_child(),
+              "if _loc is null_vertex then it must have only one child");
+    std::stringstream ss;
+    combo_tree::iterator it;
+    if (*_loc == id::null_vertex)
+        it = _loc.begin();
+    else it = _loc;
+    ss << *it;
+    return ss.str();
 }
 
 } //~namespace moses
