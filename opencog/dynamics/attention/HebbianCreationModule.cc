@@ -77,7 +77,7 @@ void HebbianCreationModule::addAFSignal(const Handle& source,
  * When an atom enters the AttentionalFocus, a search is done to
  * identify to which other atoms in the AttentionalFocus there is not already
  * a pair of AsymmetricHebbianLinks connecting them, and those links are
- * created for later updating by the ImportanceDiffusionAgent.
+ * created for later updating by the HebbianUpdatingAgent.
  */
 void HebbianCreationModule::addAFSignalHandler(const Handle& source,
                                         const AttentionValuePtr& av_old,
@@ -112,13 +112,11 @@ void HebbianCreationModule::addAFSignalHandler(const Handle& source,
     // a new AsymmetricHebbianLink in either direction
     foreach (Handle atom, needToBeSource) {
         as->addLink(ASYMMETRIC_HEBBIAN_LINK, atom, source,
-                    SimpleTruthValue::createTV(
-                        0, SimpleTruthValue::confidenceToCount(1)));
+                    SimpleTruthValue::createTV(0, 1));
     }
 
     foreach (Handle atom, needToBeTarget) {
         as->addLink(ASYMMETRIC_HEBBIAN_LINK, source, atom,
-                    SimpleTruthValue::createTV(
-                        0, SimpleTruthValue::confidenceToCount(1)));
+                    SimpleTruthValue::createTV(0, 1));
     }
 }

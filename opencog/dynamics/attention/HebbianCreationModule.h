@@ -41,7 +41,7 @@ typedef std::shared_ptr<HebbianCreationModule> HebbianCreationModulePtr;
 
 /**
 * The HebbianCreationModule creates AsymmetricHebbianLinks between
-* atoms in the AttentionalFocus for updating by AttentionAllocation.
+* atoms in the AttentionalFocus for updating by the HebbianUpdatingAgent.
 *
 * It is notified of atoms that are added to the AttentionalFocus
 * by registering a slot with the Boost Signals2 events exposed by

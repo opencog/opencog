@@ -29,6 +29,10 @@ allocation among atoms within OpenCog.
     is in the Attentional Focus of the OpenCog instance at the time it's run.
   - STIDecayingAgent - simplified forgetting mechanism (Used by Embodiment).
 
+- Modules
+  - HebbianCreationModule - creates AsymmetricHebbianLinks between
+    atoms in the AttentionalFocus for updating by the HebbianUpdatingAgent.
+
 - AttentionValues - Each atom has an AttentionValue to record it's Short
 Importance (STI) and Long Term Importance (LTI).
 
@@ -47,6 +51,8 @@ This sections presents how the flow of attention allocation works:
    on whether linked atoms are in the Attentional Focus or not.
 4. The ForgettingAgent removes either atoms that are below a threshold LTI,
    or above it.
+5. The HebbianCreationModule creates new AsymmetricHebbianLinks as atoms are
+   added to the Attentional Focus.
 
 == Hebbian Links ==
 
@@ -234,3 +240,12 @@ one parameter is set, then the other has free reign. I.e. a certain percentage
 of the AtomSpace will always be forgotten regardless of their LTI, or, any atom
 that drops below the maximum forgetting LTI will be forgotten.
 
+=== HebbianCreationModule ===
+
+The HebbianCreationModule creates AsymmetricHebbianLinks between atoms in the
+AttentionalFocus for updating by the HebbianUpdatingAgent. Rather than being a
+MindAgent that runs every cognitive cycle, it is implemented as a Module that is
+notified of atoms that are added to the AttentionalFocus by registering a slot
+with the Boost Signals2 events exposed by the AtomSpace. When this slot is
+called, a separate handler thread is created to do the work while allowing
+execution to continue.
