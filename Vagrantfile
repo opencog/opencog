@@ -16,8 +16,13 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", inline: "apt-get update -y"
   config.vm.provision "shell", inline: "apt-get install python-software-properties -y"
   config.vm.provision "shell", inline: "ln -v -s /vagrant /usr/local/src/opencog"
+  config.vm.provision "shell", inline: "ln -v -s /vagrant /home/vagrant/opencog"
   config.vm.provision "shell", path:   "http://raw.github.com/opencog/ocpkg/master/ocpkg"
-  config.vm.provision "shell", inline: "ln -v -s /usr/local/src/opencog ~vagrant"
+
+  # Port forwarding for AtomSpace Visualizer. 
+  # Set IP_ADDRESS = '0.0.0.0' in /opencog/python/web/api/restapi.py and
+  # run the Visualizer on host.
+  config.vm.network "forwarded_port", guest: 5000 , host: 5000
 
   config.vm.provider :virtualbox do |vb|
       vb.name = "cogbox"
