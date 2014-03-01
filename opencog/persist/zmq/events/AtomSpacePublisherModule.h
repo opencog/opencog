@@ -76,6 +76,8 @@ class AtomSpacePublisherModule : public Module
         boost::signals2::connection AVChangedConnection;
         boost::signals2::connection AddAFConnection;
         boost::signals2::connection RemoveAFConnection;
+        void enableSignals();
+        void disableSignals();
 
         zmq::context_t * context;
         zmq::socket_t * publisher;
@@ -104,6 +106,18 @@ class AtomSpacePublisherModule : public Module
         void signalHandlerRemoveAF(const Handle& h,
                                    const AttentionValuePtr& av_old,
                                    const AttentionValuePtr& av_new);
+
+        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
+           do_publisherEnableSignals,
+           "Enable AtomSpace signals for the AtomSpace Publisher",
+           "Usage: publisher-enable-signals",
+           false, false)
+
+        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
+           do_publisherDisableSignals,
+           "Disable AtomSpace signals for the AtomSpace Publisher",
+           "Usage: publisher-disable-signals",
+           false, false)
 
     public:
         AtomSpacePublisherModule(CogServer&);

@@ -28,9 +28,12 @@
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
+#include <opencog/dynamics/attention/atom_types.h> // todo: remove?
 #include "opencog/util/zhelpers.hpp"
 #include <iostream>
 #include <thread>
+#include <iomanip>
+#include <time.h>
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -47,24 +50,11 @@ AtomSpacePublisherModule::AtomSpacePublisherModule(CogServer& cs) : Module(cs)
 {
     logger().info("[AtomSpacePublisherModule] constructor");
     this->as = &cs.getAtomSpace();
-    addAtomConnection = as->addAtomSignal(
-                boost::bind(&AtomSpacePublisherModule::atomAddSignal,
-                            this, _1));
-    removeAtomConnection = as->removeAtomSignal(
-                boost::bind(&AtomSpacePublisherModule::atomRemoveSignal,
-                            this, _1));
-    TVChangedConnection = as->TVChangedSignal(
-                boost::bind(&AtomSpacePublisherModule::TVChangedSignal,
-                            this, _1, _2, _3));
-    AVChangedConnection = as->AVChangedSignal(
-                boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
-                            this, _1, _2, _3));
-    AddAFConnection = as->AddAFSignal(
-                boost::bind(&AtomSpacePublisherModule::addAFSignal,
-                            this, _1, _2, _3));
-    RemoveAFConnection = as->RemoveAFSignal(
-                boost::bind(&AtomSpacePublisherModule::removeAFSignal,
-                            this, _1, _2, _3));
+
+    enableSignals();
+
+    do_publisherEnableSignals_register();
+    do_publisherDisableSignals_register();
 }
 
 void AtomSpacePublisherModule::init(void)
@@ -80,9 +70,59 @@ void AtomSpacePublisherModule::run()
 AtomSpacePublisherModule::~AtomSpacePublisherModule()
 {
     logger().info("Terminating AtomSpacePublisherModule.");
+
+    disableSignals();
+
     publisher->close();
     delete publisher;
     delete context;
+
+    do_publisherEnableSignals_unregister();
+    do_publisherDisableSignals_unregister();
+}
+
+void AtomSpacePublisherModule::enableSignals()
+{
+    if (!addAtomConnection.connected())
+        addAtomConnection = as->addAtomSignal(
+                boost::bind(&AtomSpacePublisherModule::atomAddSignal,
+                            this, _1));
+    if (!removeAtomConnection.connected())
+    removeAtomConnection = as->removeAtomSignal(
+                boost::bind(&AtomSpacePublisherModule::atomRemoveSignal,
+                            this, _1));
+    if (!TVChangedConnection.connected())
+        TVChangedConnection = as->TVChangedSignal(
+                boost::bind(&AtomSpacePublisherModule::TVChangedSignal,
+                            this, _1, _2, _3));
+    if (!AVChangedConnection.connected())
+        AVChangedConnection = as->AVChangedSignal(
+                boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
+                            this, _1, _2, _3));
+    if (!AddAFConnection.connected())
+        AddAFConnection = as->AddAFSignal(
+                boost::bind(&AtomSpacePublisherModule::addAFSignal,
+                            this, _1, _2, _3));
+    if (!RemoveAFConnection.connected())
+        RemoveAFConnection = as->RemoveAFSignal(
+                boost::bind(&AtomSpacePublisherModule::removeAFSignal,
+                            this, _1, _2, _3));
+}
+
+void AtomSpacePublisherModule::disableSignals()
+{
+    if (addAtomConnection.connected())
+        addAtomConnection.disconnect();
+    if (removeAtomConnection.connected())
+        removeAtomConnection.disconnect();
+    if (TVChangedConnection.connected())
+        TVChangedConnection.disconnect();
+    if (AVChangedConnection.connected())
+        AVChangedConnection.disconnect();
+    if (AddAFConnection.connected())
+        AddAFConnection.disconnect();
+    if (RemoveAFConnection.connected())
+        RemoveAFConnection.disconnect();
 }
 
 void AtomSpacePublisherModule::InitZeroMQ()
@@ -419,4 +459,20 @@ std::string AtomSpacePublisherModule::ptToJSON(ptree pt)
     write_json (buf, pt, true); // true = use pretty print formatting
     std::string json = buf.str();
     return json;
+}
+
+std::string AtomSpacePublisherModule
+::do_publisherEnableSignals(Request *dummy, std::list<std::string> args)
+{
+    enableSignals();
+
+    return "AtomSpace Publisher signals have been enabled.\n";
+}
+
+std::string AtomSpacePublisherModule
+::do_publisherDisableSignals(Request *dummy, std::list<std::string> args)
+{
+    disableSignals();
+
+    return "AtomSpace Publisher signals have been disabled.\n";
 }
