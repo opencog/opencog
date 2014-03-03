@@ -68,7 +68,7 @@ ToDo/Bugs:
   appropriate module(s) first).
 
 * Need to create classes to handle the special commands ctrl-D (0x04)
-  and ctrl-C (0xff 0xf4 0xff 0xfd  0x06) which is a sequence of telent
+  and ctrl-C (0xff 0xf4 0xff 0xfd  0x06) which is a sequence of telnet
   commands and also to handle "quit" as a synonym for "exit".
   The ctrl-C and etc can be handled just like any other command... 
 
