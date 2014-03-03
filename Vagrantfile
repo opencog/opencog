@@ -27,6 +27,10 @@ Vagrant.configure("2") do |config|
   # run the Visualizer on host.
   config.vm.network "forwarded_port", guest: 5000, host: 5000
 
+  # Set --host to 192.168.50.2 when running opencog-server.sh in RelEx,
+  # to pass RelEx's OpenCog scheme output to cogbox.
+  config.vm.network "private_network", ip: "192.168.50.2"
+
   config.vm.provider :virtualbox do |vb|
       vb.name = "cogbox"
       vb.customize [
