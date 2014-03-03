@@ -125,9 +125,6 @@ Misc TODO
 * Optimize the scm scripts to not pound the database so hard.
   (How? Lots of word pushes, but really, there's not much repeat
   traffic ...) Not sure this is much of a problem, any more.
-* Investigate crash: while writing truuth value, stv_confidence 
-  was pure virtual (circa line 920 of AtomStorage.cc) There's some
-  kind of smart-pointer race. See "Crash" section below.
 
 DONE
 ----
@@ -151,6 +148,10 @@ DONE
   any-language goes hog-wild and creates huge counts for just
   one sentence ... is this desired?  Anyway, they'll overflow...
   Done. atoms.sql now uses bigint 64-bit uuids.
+* Investigate crash: while writing truuth value, stv_confidence 
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
+  Done. Ran for a month without issues.
 
 
 Misc Notes about batch processing
