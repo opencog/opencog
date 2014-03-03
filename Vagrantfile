@@ -1,3 +1,6 @@
+# -*- mode: ruby -*-
+# # vi: set ft=ruby :
+
 # QuickStart
 # 1. vagrant box add precise64 http://files.vagrantup.com/precise64.box
 # 2. vagrant up
@@ -22,7 +25,7 @@ Vagrant.configure("2") do |config|
   # Port forwarding for AtomSpace Visualizer. 
   # Set IP_ADDRESS = '0.0.0.0' in /opencog/python/web/api/restapi.py and
   # run the Visualizer on host.
-  config.vm.network "forwarded_port", guest: 5000 , host: 5000
+  config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   config.vm.provider :virtualbox do |vb|
       vb.name = "cogbox"
