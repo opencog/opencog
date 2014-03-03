@@ -99,7 +99,7 @@ https://github.com/opencog/opencog/issues/484
 
 After replacing atom_types.script, you will need to run cmake and make again to rebuild the system.
 
-A complete example is available here: **opencog/python/pln/examples/deduction_example.py
+A complete example is available in: **opencog/python/pln/examples/deduction_example.py**
 
 Example:
 Define an initial [atomspace][] object populated with Atoms.
@@ -242,10 +242,6 @@ prominent role in inference control.
 
 This is referenced [here][] and [here][1] in the design guidelines.
 
-However, the **getAttentionalFocusBoundary** method that is defined in
-the [C++ AttentionBank class][] has not yet been integrated with the
-Cython bindings.
-
 The **\_selectOne** method in the [Chainer class][] implements a
 randomized algorithm weighted by [STI][] to choose an atom for chaining.
 More details on a potential future approach to this are available in
@@ -283,7 +279,6 @@ If set, the \_give\_stimulus method is called, to be applied by the
   [Attention Allocation]: http://wiki.opencog.org/w/ECAN
   [here]: http://wiki.opencog.org/w/New_PLN_Implementation_Guide,_2013#STEP_1:_BASIC_FIRST-ORDER_PLN
   [1]: http://wiki.opencog.org/w/New_PLN_Design,_2013#The_Atomspace_AttentionalFocus_as_PLN.27s_Working_Memory
-  [C++ AttentionBank class]: http://buildbot.opencog.org/doxygen/df/d07/classopencog_1_1AttentionBank.html
   [STI]: http://wiki.opencog.org/w/Short-Term_Importance
   [this mailing list thread]: https://groups.google.com/d/msg/opencog/uA5Ig_wJaT4/1eEsslH0WE8J
   [ImportanceUpdatingAgent]: http://wiki.opencog.org/w/ImportanceUpdatingAgent
