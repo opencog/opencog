@@ -11,36 +11,24 @@ The code is located in the [opencog/python/pln directory][]. It is still in-prog
 
 ### Prerequisites:
 
-1) Be sure to pull the latest version of the code from the repository
+1) Ensure that all dependencies have been installed. Checkout and build the latest version of OpenCog from the repository.
 
-2) Then, you need to replace the contents of the opencog/atomspace/atom_types.script file with the following file:
-
-https://gist.github.com/cosmoharrigan/8453760
-
-There is an outstanding issue, after which this will no longer be necessary:
-
-https://github.com/opencog/opencog/issues/484
-
-Run cmake and make
-
-3) Clone the external-tools repository so that you can use the AtomSpace Viewer:
+2) Clone the external-tools repository so that you can use the AtomSpace Viewer:
 
 ```git clone https://github.com/opencog/external-tools.git```
 
 ### Let's get started:
 
-1) Read the PLN module documentation below to understand the structure of the module.
+3) Read the PLN module documentation below to understand the structure of the module.
 
-2) Read **Elements of PLN** and **Forward and backward chaining**:
+4) Read **Elements of PLN** and **Forward and backward chaining**:
 
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
 
-3) Run **deduction_example.py** in a Python interpreter and examine the output
+5) Load **deduction_agent.py** in the CogServer
 
-4) Load **deduction_agent.py** in the CogServer
-
-The opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path:
+Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path:
 
 ```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction```
 
@@ -48,36 +36,36 @@ After starting the CogServer:
 
 ```loadpy deduction_agent```
 
-5) Start the REST API:
+6) Start the REST API:
 
 http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
 
-6) Populate the atomspace with some sample contents
+7) Populate the atomspace with some sample contents
 
 For example:
 
 ```(load-scm-from-file "/home/cosmo/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm")```
 
-7) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
+8) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
 
 https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
 
-8) Start the deduction_agent:
+9) Start the deduction_agent:
 
 ```agents-start deduction_agent.DeductionAgent```
 
-9) Refresh the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Observe how the subgraph has become more complex with the additional knowledge gained via forward inference.
+10) Refresh the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Observe how the subgraph has become more complex with the additional knowledge gained via forward inference.
 
-10) Review the structure of the **ForwardInferenceAgent** and **BackwardInferenceAgent** implementations in **agents.py**
+11) Review the structure of the **ForwardInferenceAgent**, **BackwardInferenceAgent** and **InferenceAgent** implementations in **agents.py**
 
 ## Documentation
 
-### Examples
+### PLN Examples in the CogServer
 
 For example code, see the **opencog/python/pln/examples** folder.
 
 Currently, the following examples are available:
--   **deduction** - illustrates how to create a forward chaining agent in **deduction_example.py** utilizing **deduction_agent.py**
+-   **deduction** - illustrates how to create a forward chaining agent utilizing **deduction_agent.py**
 
 ### Setup
 
@@ -89,23 +77,41 @@ The main intended usage of PLN is within a MindAgent. The high-level steps are:
 -   **Load the agent**
 -   **Start the agent**
 
-### Example usage
+Optionally, you can also load the Attention Allocation system to guide the dynamics of the inference process.
 
-Although the primary intension is to use PLN within a MindAgent, the PLN classes can also be interacted with directly in Python. Here, the basic usage pattern is described.
+The activity of the PLN and Attention Allocation systems can be monitored in real-time by using the AtomSpaceSubscriber tool in the external-tools repository, which demonstrates how to subscribe to JSON-formatted updates.
+
+### PLN Development/testing example in Python without the CogServer
+
+Although the primary use case is to use PLN within a MindAgent loaded into the CogServer, coupled with the Attention Allocation system, for development and testing purposes it can be useful to interact directly with the PLN classes in a standalone Python environment.
+
+In the following section, the basic usage pattern is described to interact with PLN from a Python environment without running the CogServer.
 
 ##### Prerequisites
 
+To access PLN from Python without running the CogServer, you will need to replace the contents of the opencog/atomspace/atom_types.script file with the following file:
+
+https://gist.github.com/cosmoharrigan/8453760
+
+This is due to the following outstanding issue, after which this would no longer be necessary:
+
+https://github.com/opencog/opencog/issues/484
+
+After replacing atom_types.script, you will need to run cmake and make again to rebuild the system.
+
+A complete example is available in: **opencog/python/pln/examples/deduction_example.py**
+
+Example:
 Define an initial [atomspace][] object populated with Atoms.
 
-For example:
 ```
 from opencog.atomspace import *
 atomspace = AtomSpace()
-animal = atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, .9))
-bird = atomspace.add_node(types.ConceptNode, 'bird', TruthValue(.01, .9))
-swan = atomspace.add_node(types.ConceptNode, 'swan', TruthValue(.001, .9))
-swan_bird = atomspace.add_link(types.InheritanceLink, [swan, bird], TruthValue(0.5, 0.5))
-bird_animal = atomspace.add_link(types.InheritanceLink, [bird, animal], TruthValue(0.5, 0.5))
+animal = atomspace.add_node(types.ConceptNode, 'animal', TruthValue(.1, TruthValue().confidence_to_count(.9)))
+bird = atomspace.add_node(types.ConceptNode, 'bird', TruthValue(.01, TruthValue().confidence_to_count(.9)))
+swan = atomspace.add_node(types.ConceptNode, 'swan', TruthValue(.001, TruthValue().confidence_to_count(.9)))
+swan_bird = atomspace.add_link(types.InheritanceLink, [swan, bird], TruthValue(0.5, TruthValue().confidence_to_count(.5)))
+bird_animal = atomspace.add_link(types.InheritanceLink, [bird, animal], TruthValue(0.5, TruthValue().confidence_to_count(.5)))
 ```
 
 Then, proceed to load PLN as follows:
@@ -140,9 +146,9 @@ for item in chainer.trails:
 node[ConceptNode:animal]
 node[ConceptNode:bird]
 node[ConceptNode:swan]
-[InheritanceLink `<swan,bird>` 0.5 0.00062461]
-[InheritanceLink `<bird,animal>` 0.5 0.00062461]
-[InheritanceLink `<swan,animal>` 0.14899 0.000347102]
+[InheritanceLink `<swan,bird>` 0.5 0.50000000]
+[InheritanceLink `<bird,animal>` 0.5 0.50000000]
+[InheritanceLink `<swan,animal>` 0.14899 0.50000000]
 ```
 You can also inspect the detailed history:
     print vars(chainer.history_index)
@@ -236,10 +242,6 @@ prominent role in inference control.
 
 This is referenced [here][] and [here][1] in the design guidelines.
 
-However, the **getAttentionalFocusBoundary** method that is defined in
-the [C++ AttentionBank class][] has not yet been integrated with the
-Cython bindings.
-
 The **\_selectOne** method in the [Chainer class][] implements a
 randomized algorithm weighted by [STI][] to choose an atom for chaining.
 More details on a potential future approach to this are available in
@@ -277,8 +279,6 @@ If set, the \_give\_stimulus method is called, to be applied by the
   [Attention Allocation]: http://wiki.opencog.org/w/ECAN
   [here]: http://wiki.opencog.org/w/New_PLN_Implementation_Guide,_2013#STEP_1:_BASIC_FIRST-ORDER_PLN
   [1]: http://wiki.opencog.org/w/New_PLN_Design,_2013#The_Atomspace_AttentionalFocus_as_PLN.27s_Working_Memory
-  [C++ AttentionBank class]: http://buildbot.opencog.org/doxygen/df/d07/classopencog_1_1AttentionBank.html
   [STI]: http://wiki.opencog.org/w/Short-Term_Importance
   [this mailing list thread]: https://groups.google.com/d/msg/opencog/uA5Ig_wJaT4/1eEsslH0WE8J
   [ImportanceUpdatingAgent]: http://wiki.opencog.org/w/ImportanceUpdatingAgent
-

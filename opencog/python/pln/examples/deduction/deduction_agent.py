@@ -3,6 +3,8 @@ PLN Simple Deduction Agent Example
 
 Demonstrates the simplest possible forward inference agent that implements
 a chainer with one inference rule and one link type
+
+For instructions, refer to the README for PLN.
 """
 
 from opencog.cogserver import MindAgent

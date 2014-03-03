@@ -62,7 +62,7 @@ attentional focus of the instance, then attention is spread (by the
 ImportanceSpreadingAgent) to the other in an attempt to get it into the
 attentional focus as well, or at least to prevent it from being forgotten.
 
-HebbianLinks are discovered by the to-be-implemented HebbianMiningAgent.
+HebbianLinks are discovered by the HebbianCreationModule.
 
 HebbianLinks have their weights updated by the HebbianUpdatingAgent.
 

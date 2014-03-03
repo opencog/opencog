@@ -1,6 +1,11 @@
 """
 PLN Deduction Example
-Demonstrates how to interact with the example in deduction_agent.py
+
+Demonstrates how to run the example in deduction_agent.py when
+when interacting with PLN from a standalone Python environment
+for development or testing purposes. The normal use case is to
+run the example from the CogServer, for which you should use
+deduction_agent.py instead.
 """
 
 from __future__ import print_function

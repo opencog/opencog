@@ -33,3 +33,7 @@ distribution folder.
 * For running Embodiment servers, run the "start_embodiment.sh" script file.
 * For killing Embodiment servers, run the "stop_embodiment.sh" script file.
 
+There is also a tutorial available for running Embodiment along with the game
+world at the following wiki page:
+
+http://wiki.opencog.org/w/Setting_up_the_Unity3D_world

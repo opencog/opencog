@@ -41,7 +41,7 @@ class CogServer;
 
 /** Agent that carries out simple Hebbian learning.
  *
- * @note Only updates existing HebbianLinks. Still need a HebbianMiningAgent...
+ * @note Only updates existing HebbianLinks.
  * @todo Support SymmetricInverseHebbianLinks and AsymmetricHebbianLinks
  * @todo Support Hebbian links with arity > 2
  */
