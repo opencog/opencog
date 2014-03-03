@@ -128,7 +128,7 @@ http://opencog.org/wiki/RelEx
 -- Pattern matching is on graphs, not hypergraphs.
 
 -- RelEx has other assorted other functions too ... 
-   (framenet, pronoun resolution, entity identification, stanford-compatible output...)
+   (pronoun resolution, entity identification, stanford-compatible output...)
 -- Functions can be specified with flags, e.g. -a to resolve anaphoras, etc.
 
 
@@ -348,7 +348,6 @@ Common-sense Reasoning
 Important things this tutorial did not cover:
 =============================================
 -- Many link-grammar details, including post-grocessing, SAT solver
--- Framenet-like markup in RelEx
 -- Pronoun/anaphora resolution in RelEx
 -- Word-sense disambiguation in OpenCog.
 
