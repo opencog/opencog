@@ -787,7 +787,7 @@ key "Yuret1998"
 
 .
  Viz, specifically, that such connectors are in 1-1 correspondance with
- work-pairs.
+ word-pairs.
  (I don't think he's aware of this assumption; I don't think anyone has
  ever before realized that he's making such an assumption; certainly, I
  haven't).
@@ -1272,6 +1272,184 @@ A supporting argument is that we also ignored 3,4,5-point interactions as
  work better than an MST parse? Because Yuret-MST ignores the valence of
  words, whereas the disjuncts don't! The disjuncts provide a better, more
  accurate way of capturing valency!
+\end_layout
+
+\begin_layout Subsection*
+Entity Extraction
+\end_layout
+
+\begin_layout Standard
+See Oren Etzioni, Michael Cafarella, Doug Downey, Ana-Maria Popescu Tal
+ Shaked, Stephen Soderland, Daniel S.
+ Weld, and Alexander Yates (2005) 
+\begin_inset Quotes eld
+\end_inset
+
+Unsupervised Named-Entity Extraction from the Web: An Experimental Study
+\begin_inset Quotes erd
+\end_inset
+
+.
+ So: KNOWITALL utilizes a set of eight domain-independent extraction patterns
+ to generate candidate facts.1 For example, the generic pattern “NP1 such
+ as NPList2” ...
+ 
+\begin_inset Quotes eld
+\end_inset
+
+cities such as Paris,...
+\begin_inset Quotes erd
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ Of course, this is not really unsupervised, since it uses human-generated
+ search patterns (
+\begin_inset Quotes eld
+\end_inset
+
+such as
+\begin_inset Quotes erd
+\end_inset
+
+) and also applies constraints (the targets must be proper nouns, which
+ is not a-priori known).
+\end_layout
+
+\begin_layout Section*
+3 February 2014
+\end_layout
+
+\begin_layout Standard
+Start again, after long distraction.
+\end_layout
+
+\begin_layout Subsection*
+Finding patterns
+\end_layout
+
+\begin_layout Standard
+To problem.
+ Consider an alphabet of 
+\begin_inset Formula $N=5$
+\end_inset
+
+ letters, 
+\begin_inset Formula $\alpha=\{A,B,C,D,E\}$
+\end_inset
+
+ and a corpus built from those letters.
+ The five letters occur with probability 
+\begin_inset Formula $p(w)$
+\end_inset
+
+ with 
+\begin_inset Formula $w\in\alpha$
+\end_inset
+
+.
+ Assume the corpus consists entirely of pairs AB, CB and DE, each occurring
+ equally often: so: 
+\begin_inset Formula $p(A,B)=p(C,B)=p(D,E)=1/3$
+\end_inset
+
+ .
+ From this, we can reconstruct that 
+\begin_inset Formula $p(A)=p(C)=p(D)=p(E)=1/6$
+\end_inset
+
+ and 
+\begin_inset Formula $p(B)=1/3$
+\end_inset
+
+.
+ This follows because the corpus can be reduced to 
+\begin_inset Formula $\{AB,CB,DE\}$
+\end_inset
+
+, so A occurs 1 out of 6 times, B two out of 6 times, etc.
+ We can also deduce that 
+\begin_inset Formula $p(*,B)=2/3$
+\end_inset
+
+, 
+\begin_inset Formula $p(A,*)=1/3$
+\end_inset
+
+ and so 
+\begin_inset Formula 
+\begin{align*}
+MI(A,B) & =\log_{2}p(A,B)-\log_{2}p(A,*)-\log_{2}p(*,B)\\
+ & =\log_{2}3/2=0.585
+\end{align*}
+
+\end_inset
+
+and likewise 
+\begin_inset Formula $MI(C,B)=MI(A,B)$
+\end_inset
+
+ while 
+\begin_inset Formula $MI(D,E)=\log_{2}3=1.585$
+\end_inset
+
+.
+ By contrast, in a random 2-letter corpus, we expect all possible letter
+ pairs to occur equally often, i.e.
+ 
+\begin_inset Formula $p(w_{1},w_{2})=1/25$
+\end_inset
+
+, which would result in an 
+\begin_inset Formula $MI(w_{1},w_{2})=\log_{2}1=0$
+\end_inset
+
+ for all word pairs.
+ 
+\end_layout
+
+\begin_layout Standard
+Given this corpus, we wish to deduce the following answer: there is a cluster
+ 
+\begin_inset Formula $\gamma=\{A,C\}$
+\end_inset
+
+ and two link relations 
+\begin_inset Formula $R(\gamma,B)$
+\end_inset
+
+ and 
+\begin_inset Formula $R(D,E)$
+\end_inset
+
+ occuring with probabilities 
+\begin_inset Formula $p(\gamma,B)=p(A,B)+p(C,B)=2/3$
+\end_inset
+
+ and 
+\begin_inset Formula $p(D,E)=1/3$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula $p(\gamma,*)=p(A,*)+p(C,*)=2/3$
+\end_inset
+
+ so that
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\begin{align*}
+MI(\gamma,B) & =\log_{2}p(\gamma,B)-\log_{2}p(\gamma,*)-\log_{2}p(*,B)\\
+ & =\log_{2}3/2=0.585
+\end{align*}
+
+\end_inset
+
+So how do we deduce this?
 \end_layout
 
 \begin_layout Section*
