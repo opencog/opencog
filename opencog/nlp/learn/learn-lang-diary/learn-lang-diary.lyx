@@ -1370,7 +1370,50 @@ To problem.
 \end_inset
 
 , so A occurs 1 out of 6 times, B two out of 6 times, etc.
- We can also deduce that 
+ The total single-letter entropy is thus
+\begin_inset Formula 
+\begin{align*}
+h_{SING} & =-\sum_{w\in\alpha}p(w)\log_{2}p(w)\\
+ & =-\frac{4}{6}\log_{2}\frac{1}{6}-\frac{1}{3}\log_{2}\frac{1}{3}\\
+ & =\frac{2}{3}-\log_{2}\frac{1}{3}=2.25163
+\end{align*}
+
+\end_inset
+
+By contrast, in a random 2-letter corpus, we expect all possible letter
+ pairs to occur equally often, i.e.
+ 
+\begin_inset Formula $p(w)=1/5$
+\end_inset
+
+, which would result in 
+\begin_inset Formula $h_{RAND}=-\log_{2}1/5=2.321928$
+\end_inset
+
+ and so we see that the total entropy for this corpus is less than the random
+ corpus.
+\end_layout
+
+\begin_layout Standard
+The total double-word entropy is
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR} & =-\sum_{w_{1},w_{2}\in\alpha}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+ & =-\log_{2}\frac{1}{3}=1.5849625
+\end{align*}
+
+\end_inset
+
+Compare this to 
+\begin_inset Formula $h_{PR-RAND}=-\log_{2}1/25=4.643856$
+\end_inset
+
+ for the random 2-letter corpus.
+ The pair-entropy is sharply lower.
+\end_layout
+
+\begin_layout Standard
+What do we know about mutual information? We can also deduce that 
 \begin_inset Formula $p(*,B)=2/3$
 \end_inset
 
@@ -1396,7 +1439,11 @@ and likewise
 \end_inset
 
 .
- By contrast, in a random 2-letter corpus, we expect all possible letter
+ 
+\end_layout
+
+\begin_layout Standard
+By contrast, in a random 2-letter corpus, we expect all possible letter
  pairs to occur equally often, i.e.
  
 \begin_inset Formula $p(w_{1},w_{2})=1/25$
@@ -1450,6 +1497,94 @@ MI(\gamma,B) & =\log_{2}p(\gamma,B)-\log_{2}p(\gamma,*)-\log_{2}p(*,B)\\
 \end_inset
 
 So how do we deduce this?
+\end_layout
+
+\begin_layout Standard
+Well, consider the reduced space, with 
+\begin_inset Formula $N=4$
+\end_inset
+
+ letters: 
+\begin_inset Formula $\beta=\{\gamma,B,D,E\}$
+\end_inset
+
+.
+ In this space, only two pairs are observed in the corpus, 
+\begin_inset Formula $\gamma B$
+\end_inset
+
+ and 
+\begin_inset Formula $DE$
+\end_inset
+
+ with probabilities as above.
+ The single-letter probabilities are 
+\begin_inset Formula $p(D)=p(E)=1/6$
+\end_inset
+
+ and 
+\begin_inset Formula $p(\gamma)=p(B)=1/3$
+\end_inset
+
+.
+ The single-letter entropy is
+\begin_inset Formula 
+\begin{align*}
+h_{SING}^{red} & =-\sum_{w\in\beta}p(w)\log_{2}p(w)\\
+ & =-\frac{2}{6}\log_{2}\frac{1}{6}-\frac{2}{3}\log_{2}\frac{1}{3}\\
+ & =\frac{1}{3}-\log_{2}\frac{1}{3}=1.9182958
+\end{align*}
+
+\end_inset
+
+This can be compared to the entropy of the random 4-word corpus: 
+\begin_inset Formula $h_{RAND}^{red}=-\log_{2}1/4=2$
+\end_inset
+
+.
+ Note that 
+\begin_inset Formula 
+\[
+h_{RAND}^{red}-h_{SING}^{red}=0.081704>0.070298=h_{RAND}-h_{SING}
+\]
+
+\end_inset
+
+In other words, the reduced corpus shows more order than the comparable
+ unreduced corpus! Interesting! 
+\end_layout
+
+\begin_layout Standard
+What about the reduced pair entropy? For this case, we have
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR}^{red} & =-\sum_{w_{1},w_{2}\in\beta}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+ & =-\frac{2}{3}\log_{2}\frac{2}{3}-\frac{1}{3}\log_{2}\frac{1}{3}\\
+ & =-\frac{2}{3}-\log_{2}\frac{1}{3}=0.9182958
+\end{align*}
+
+\end_inset
+
+which can be compaired to the random-pair entropy of 
+\begin_inset Formula $h_{PR-RAND}^{red}=-\log_{2}1/16=4$
+\end_inset
+
+.
+ The comparable reduction is 
+\begin_inset Formula 
+\[
+h_{PR-RAND}^{red}-h_{PAIR}^{red}=3.081704>3.0588935=h_{PR-RAND}-h_{PAIR}
+\]
+
+\end_inset
+
+So again, this wins, but not by a lot.
+\end_layout
+
+\begin_layout Standard
+So we seem to have two ways of winning: reducing the overall entropy, for
+ for single letters, and for pairs, and also finding reductions that are
+ strong, even compared to the reduced vocab.
 \end_layout
 
 \begin_layout Section*
