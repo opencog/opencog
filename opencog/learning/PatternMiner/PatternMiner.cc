@@ -21,12 +21,166 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-
+#include <thread>
+#include <sstream>
+#include <map>
+#include <iterator>
+#include <opencog/atomspace/atom_types.h>
+#include <opencog/util/foreach.h>
 #include "PatternMiner.h"
 
-using namespace opencog::PatternMiner;
+using namespace opencog::PatternMining;
+using namespace opencog;
 
-void PatternMiner::processOneInputStream(HandleSeq inputSteam)
+
+int countSubstring(const std::string& str, const std::string& sub)
 {
+    if (sub.length() == 0) return 0;
+    int count = 0;
+    for (size_t offset = str.find(sub); offset != std::string::npos; offset = str.find(sub, offset + sub.length()))
+    {
+        ++count;
+    }
+    return count;
+}
+
+
+void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
+{
+    HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
+    foreach (Handle h, outgoingLinks)
+    {
+        if (atomSpace->isNode(h))
+        {
+            if (atomSpace->getType(h) == opencog::VARIABLE_NODE)
+            {
+                string var_name = atomSpace->getName(h);
+
+                vector<int> indexesForCurVar;
+                int index = 0;
+
+                foreach (Handle oh,orderedHandles)
+                {
+                    string ohStr = atomSpace->atomAsString(oh);
+                    if (ohStr.find(var_name) != std::string::npos)
+                    {
+                        indexesForCurVar.push_back(index);
+                    }
+
+                    index ++;
+                }
+
+                indexes.push_back(indexesForCurVar);
+            }
+        }
+        else
+            generateIndexesOfSharedVars(h,orderedHandles,indexes);
+    }
+}
+
+void PatternMiner::RebindVariableName(vector<Handle>& orderedPattern)
+{
+
+}
+
+// the input links should be like: only specify the const node, all the variable node name should not be specified:
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
+{
+
+    // Step 1: take away all the variable names, make the pattern into such format string:
+    //    (InheritanceLink
+    //       (VariableNode )
+    //       (ConceptNode "Animal")
+
+    //    (InheritanceLink
+    //       (VariableNode )
+    //       (VariableNode )
+
+    //    (InheritanceLink
+    //       (VariableNode )
+    //       (VariableNode )
+
+    //    (EvaluationLink (stv 1 1)
+    //       (PredicateNode "like_food")
+    //       (ListLink
+    //          (VariableNode )
+    //          (ConceptNode "meat")
+    //       )
+    //    )
+
+    multimap<string, Handle> nonVarStrToHandleMap;
+
+    foreach (Handle inputH, inputPattern)
+    {
+        string str = atomSpace->atomAsString(inputH);
+        string nonVarNameString = "";
+        std::stringstream stream(str);
+        string oneLine;
+
+        while(std::getline(stream, oneLine,'\n'))
+        {
+            if (oneLine.find("VariableNode")==std::string::npos)
+            {
+                // this node is not a VariableNode, just keep this line
+                nonVarNameString += oneLine;
+            }
+            else
+            {
+                // this node is an VariableNode, remove the name, just keep "VariableNode"
+                nonVarNameString += "VariableNode\n";
+            }
+        }
+
+        nonVarStrToHandleMap.insert(std::pair<string, Handle>(nonVarNameString,inputH));
+    }
+
+    // Step 2: sort the order of all the handls do not share the same string key with other handls
+    // becasue the strings are put into a map , so they are already sorted.
+    // now print the Handles that do not share the same key with other Handles into a vector, left the Handles share the same keys
+
+    vector<Handle> orderedHandles;
+    vector<string> duplicateStrs;
+    multimap<string, Handle>::iterator it;
+    for(it = nonVarStrToHandleMap.begin(); it != nonVarStrToHandleMap.end();)
+    {
+        int count = nonVarStrToHandleMap.count(it->first);
+        if (count == 1)
+        {
+            // if this key string has only one record , just put the corresponding handle to the end of orderedHandles
+            orderedHandles.push_back(it->second);
+            it ++;
+        }
+        else
+        {
+            // this key string has multiple handles to it, not put these handles into the orderedHandles,
+            // insteadly put this key string into duplicateStrs
+            duplicateStrs.push_back(it->first);
+            it = nonVarStrToHandleMap.upper_bound(it->first);
+        }
+
+    }
+
+    // Step 3: sort the order of the handls share the same string key with other handles
+    foreach (string keyString, duplicateStrs)
+    {
+        // get all the corresponding handles for this key string
+        multimap<string, Handle>::iterator kit;
+        vector<_non_ordered_pattern> sharedSameKeyPatterns;
+        for (kit = nonVarStrToHandleMap.lower_bound(keyString); kit != nonVarStrToHandleMap.upper_bound(keyString);  ++ kit)
+        {
+            _non_ordered_pattern p;
+            p.link = kit->second;
+            generateIndexesOfSharedVars(p.link, orderedHandles, p.indexesOfSharedVars);
+            sharedSameKeyPatterns.push_back(p);
+        }
+
+        std::sort(sharedSameKeyPatterns.begin(), sharedSameKeyPatterns.end());
+        foreach (_non_ordered_pattern np, sharedSameKeyPatterns)
+        {
+            orderedHandles.push_back(np.link);
+        }
+    }
+
+    return orderedHandles;
 
 }

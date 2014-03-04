@@ -28,27 +28,86 @@
 #include <vector>
 #include "Pattern.h"
 #include "HTree.h"
+#include <cstdio>
 #include <opencog/atomspace/AtomSpace.h>
 
 using namespace std;
 
 namespace opencog
 {
- namespace PatternMiner
+namespace PatternMining
 {
+
+ struct _non_ordered_pattern
+ {
+     Handle link;
+     vector< vector<int> > indexesOfSharedVars;
+
+     bool operator <(const _non_ordered_pattern& other) const
+     {
+
+         for (unsigned int i = 0; i < indexesOfSharedVars.size(); ++ i)
+         {
+             if (indexesOfSharedVars[i].size() < other.indexesOfSharedVars[i].size())
+                 return true;
+             else if (indexesOfSharedVars[i].size() > other.indexesOfSharedVars[i].size())
+                 return false;
+
+             for (unsigned int j = 0; j < indexesOfSharedVars[i].size(); ++ j)
+             {
+                 if (indexesOfSharedVars[i][j]< other.indexesOfSharedVars[i][j])
+                     return true;
+                 else if (indexesOfSharedVars[i][j] > other.indexesOfSharedVars[i][j])
+                     return false;
+             }
+         }
+
+         // if all above criteria cannot figure out the order of these two patterns, just return true and output a warning
+         cout << "\n warning: _non_ordered_pattern: Fail to figure out the order of  two patterns!\n";
+         return true;
+     }
+ };
 
  class PatternMiner
  {
 private:
     HTree* htree;
     AtomSpace* atomSpace;
+
+    // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
+    // the input links should be a Pattern in such format:
+    //    (InheritanceLink
+    //       (VariableNode "$1")
+    //       (ConceptNode "Animal")
+
+    //    (InheritanceLink
+    //       (VariableNode "$2")
+    //       (VariableNode "$1")
+
+    //    (InheritanceLink
+    //       (VariableNode "$3")
+    //       (VariableNode "$2")
+
+    //    (EvaluationLink (stv 1 1)
+    //       (PredicateNode "like_food")
+    //       (ListLink
+    //          (VariableNode "$3")
+    //          (ConceptNode "meat")
+    //       )
+    //    )
+    // Return unified ordered Handle vector
+    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
+
+    void RebindVariableName(vector<Handle>& orderedPattern);
+
+    void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
+
 public:
     PatternMiner(AtomSpace* _atomSpace): atomSpace(_atomSpace)
     {
         htree = new HTree();
     }
 
-    void processOneInputStream(HandleSeq inputSteam);
 
  };
 

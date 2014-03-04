@@ -28,11 +28,12 @@
 #include <vector>
 #include <opencog/atomspace/AtomSpace.h>
 
+
 using namespace std;
 
 namespace opencog 
 {
- namespace PatternMiner 
+ namespace PatternMining
 {
 
  class Skeleton
@@ -41,6 +42,9 @@ public:
 	vector<Handle> skeletonLinks;
 	Skeleton(){}
     Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
+
+    // Make sure the input Links are connected before calling this function
+    static Skeleton* extractSkeleton(vector<Handle> inputLinks);
 
  };
 

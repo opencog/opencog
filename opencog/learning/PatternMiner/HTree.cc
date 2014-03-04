@@ -23,6 +23,21 @@
  */
 
 #include "HTree.h"
+#include <iterator>
+#include <opencog/util/foreach.h>
 
 
-using namespace opencog::PatternMiner;
+using namespace opencog::PatternMining;
+using namespace opencog;
+
+HTreeNode* HTree::findPatternInHTreeForAnInstance(vector<Handle> inputLinks)
+{
+    HTreeNode* cur_node = rootNode;
+    foreach (Handle h, inputLinks)
+    {
+        foreach(HTreeNode* node, cur_node->childLinks)
+        {
+           // todo
+        }
+    }
+}

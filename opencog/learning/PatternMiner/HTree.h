@@ -33,43 +33,50 @@ using namespace std;
 
 namespace opencog
 {
- namespace PatternMiner
-{
-
- // HTree is an efficient data strusture to store all the patterns , for quick index / query
-
- class HTreeNode
- {
- public:
-    Skeleton* skeleton;
-    map<Pattern*, HandleSeqSeq> PatternsToInstances;
-    vector<HTreeNode*> parentLinks;
-    vector<HTreeNode*> childLinks;
-    HTreeNode(Skeleton* _skeleton):skeleton(_skeleton)
+     namespace PatternMining
     {
-        parentLinks.clear();
-        childLinks.clear();
-    }
 
- };
+     // HTree is an efficient data strusture to store all the patterns , for quick index / query
 
- class HTree
- {
-
- public:
-     HTree()
+     class HTreeNode
      {
-         rootNode = new HTreeNode(0); // the rootNode with an empty Skeleton
-     }
+     public:
+        Skeleton* skeleton;
+        map<Pattern*, HandleSeqSeq> PatternsToInstances;
+        vector<HTreeNode*> parentLinks;
+        vector<HTreeNode*> childLinks;
 
- private:
-     HTreeNode* rootNode;
+        HTreeNode(Skeleton* _skeleton):skeleton(_skeleton)
+        {
+            parentLinks.clear();
+            childLinks.clear();
+        }
+
+     };
+
+     class HTree
+     {
+
+     public:
+         unsigned int var_num;
+         HTree()
+         {
+             rootNode = new HTreeNode(0); // the rootNode with an empty Skeleton
+             var_num = 0;
+         }
+
+         // search in the HTree to find the corresponding pattern(HTreeNode) for an input instance
+         HTreeNode* findPatternInHTreeForAnInstance(vector<Handle> inputLinks);
 
 
- };
+     private:
+         HTreeNode* rootNode;
 
 
-}
+     };
+
+
+    }
 }
 
 #endif //_OPENCOG_PATTERNMINER_HTREE_H

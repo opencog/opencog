@@ -23,9 +23,11 @@
  */
 
 #include "Pattern.h"
+#include "HTree.h"
 
 
-using namespace opencog::PatternMiner;
+using namespace opencog::PatternMining;
+using namespace opencog;
 
 bool Pattern::addVariableBinding(Handle variableH, Handle valueH)
 {
