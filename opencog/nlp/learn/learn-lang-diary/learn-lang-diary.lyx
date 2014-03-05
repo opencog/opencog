@@ -1551,7 +1551,15 @@ h_{RAND}^{red}-h_{SING}^{red}=0.081704>0.070298=h_{RAND}-h_{SING}
 \end_inset
 
 In other words, the reduced corpus shows more order than the comparable
- unreduced corpus! Interesting! 
+ unreduced corpus! Interesting! The above can be written as: 
+\begin_inset Formula 
+\[
+h_{SING}-h_{SING}^{red}=0.333334>0.321928=h_{RAND}-h_{RAND}^{red}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1579,12 +1587,102 @@ h_{PR-RAND}^{red}-h_{PAIR}^{red}=3.081704>3.0588935=h_{PR-RAND}-h_{PAIR}
 \end_inset
 
 So again, this wins, but not by a lot.
+ Re-ordering, this can be written as:
+\begin_inset Formula 
+\[
+h_{PAIR}-h_{PAIR}^{red}=0.6666667>0.643856=h_{PR-RAND}-h_{PR-RAND}^{red}
+\]
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
 So we seem to have two ways of winning: reducing the overall entropy, for
  for single letters, and for pairs, and also finding reductions that are
  strong, even compared to the reduced vocab.
+\end_layout
+
+\begin_layout Subsection*
+Finding Patterns, General Formula
+\end_layout
+
+\begin_layout Standard
+OK, recast the above section for the (semi-)general case of word-pairs (not
+ structures in general).
+ So, given a vocabulary of 
+\begin_inset Formula $N$
+\end_inset
+
+ words, we have 
+\begin_inset Formula $h_{RAND}=-\log_{2}\frac{1}{N}=\log_{2}N$
+\end_inset
+
+ and 
+\begin_inset Formula $h_{RAND}^{red}=\log_{2}(N-1)$
+\end_inset
+
+ so that for large 
+\begin_inset Formula $N,$
+\end_inset
+
+ 
+\begin_inset Formula $h_{RAND}-h_{RAND}^{red}=\log_{2}N/(N-1)=\log_{2}(1+1/(N-1))\approx1/N$
+\end_inset
+
+ and so we have a word-combine winner if we can combine words A and C into
+ a cluster 
+\begin_inset Formula $\gamma=\{A,C\}$
+\end_inset
+
+ such that 
+\begin_inset Formula 
+\begin{align*}
+\frac{1}{N} & \lesssim h_{SING}-h_{SING}^{red}\\
+ & =-\sum_{w\in\alpha}p(w)\log_{2}p(w)+\sum_{w\in\beta}p(w)\log_{2}p(w)\\
+ & =-p(A)\log_{2}p(A)-p(C)\log_{2}p(C)+p(\gamma)\log_{2}p(\gamma)\\
+ & =p(A)\log_{2}\left(1+\frac{p(C)}{p(A)}\right)+p(C)\log_{2}\left(1+\frac{p(A)}{p(C)}\right)
+\end{align*}
+
+\end_inset
+
+where 
+\begin_inset Formula $p(\gamma)=p(A)+p(C)$
+\end_inset
+
+.
+ What's not clear: is this inequality 
+\emph on
+ever
+\emph default
+ broken? Or does it always hold?
+\end_layout
+
+\begin_layout Standard
+For pairs, its clear that 
+\begin_inset Formula $h_{PR-RAND}-h_{PR-RAND}^{red}\approx2/N$
+\end_inset
+
+ which follows as above, given that 
+\begin_inset Formula $h_{PR-RAND}=2\log_{2}N$
+\end_inset
+
+, etc.
+ The corresponding inequality is now
+\begin_inset Formula 
+\begin{align*}
+\frac{2}{N}\lesssim h_{PAIR}-h_{PAIR}^{red}\\
+=-\sum_{w_{1},w_{2}\in\alpha} & p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})+\sum_{w_{1},w_{2}\in\beta}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+=-\sum_{w\in\alpha\backslash A,C} & \left[p(A,w)\log_{2}p(A,w)+p(C,w)\log_{2}p(C,w)-p(\gamma,w)\log_{2}p(\gamma,w)\right]\\
+-\sum_{w\in\alpha\backslash A,C} & \left[p(w,A)\log_{2}p(w,A)+p(w,C)\log_{2}p(w,C)-p(w,\gamma)\log_{2}p(w,\gamma)\right]\\
+ & -p(A,A)\log_{2}p(A,A)-p(C,A)\log_{2}p(C,A)+p(\gamma)\log_{2}p(\gamma)\\
+ & -p(A,C)\log_{2}p(A,C)-p(C,C)\log_{2}p(C,C)
+\end{align*}
+
+\end_inset
+
+So...
 \end_layout
 
 \begin_layout Section*
