@@ -2,7 +2,6 @@ __author__ = 'Cosmo Harrigan'
 
 from flask import Flask
 from flask.ext.restful import Api
-from apiatom import *
 from apiatomcollection import *
 from apitypes import *
 
