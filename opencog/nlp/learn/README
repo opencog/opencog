@@ -125,9 +125,6 @@ Misc TODO
 * Optimize the scm scripts to not pound the database so hard.
   (How? Lots of word pushes, but really, there's not much repeat
   traffic ...) Not sure this is much of a problem, any more.
-* Investigate crash: while writing truuth value, stv_confidence 
-  was pure virtual (circa line 920 of AtomStorage.cc) There's some
-  kind of smart-pointer race. See "Crash" section below.
 
 DONE
 ----
@@ -151,6 +148,10 @@ DONE
   any-language goes hog-wild and creates huge counts for just
   one sentence ... is this desired?  Anyway, they'll overflow...
   Done. atoms.sql now uses bigint 64-bit uuids.
+* Investigate crash: while writing truuth value, stv_confidence 
+  was pure virtual (circa line 920 of AtomStorage.cc) There's some
+  kind of smart-pointer race. See "Crash" section below.
+  Done. Ran for a month without issues.
 
 
 Misc Notes about batch processing
@@ -305,6 +306,7 @@ So this is about 1.2KB per atom, all included. Atoms are a bit fat...
 typical atom size: 4820384 / 35444 = 136 Bytes/atom
 this is NOT counting indexes, etc.)
 
+
 Wild-card pair-count was taking about 30 per minute.  After extensive
 bug fixing and tuning in the cogserver, its now running at hundreds
 per minute (maybe 10x faster than before). This is still very slow:
@@ -333,6 +335,18 @@ price of generality.  Avoiding the pattern matcher would go a long way.
 (This script currently uses the patten matcher cause I got lazy. 
 It could be speeded up by avoiding the pattern matcher, since the desired
 patterns are really quite simple).
+
+Update Feb 2014: fr_pairs now contains 10.3M atoms
+SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
+select count(uuid) from atoms where type = 77; gives  226030 (226K words)
+select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
+select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
+
+Load 10.3M atoms, which takes about 10 minutes cpu time to load
+20 minutes wall-clock time (500K atoms per minute, 9K/second on a busy
+server).
+
+Estimate: 226K words @ 250/minute = 1000 minutes = 17 hours. Ouch. 
 
 
 Next step: Minimum Spanning Tree parsing
