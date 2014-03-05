@@ -1,14 +1,19 @@
 Benchmark Module
 ================
 
-libbenchmark.so
-
-Load in the CogServer by adding **opencog/benchmark/module/libbenchmark.so** to
-the **MODULES** parameter in **opencog.conf**.
+***libbenchmark.so***
 
 Runs a performance benchmark on the AtomSpace by creating a fully connected
 graph with bidirectional directed edges (requires n^2 - n edges) with specified
 concurrency arguments.
+
+Having an integrated benchmark that you can load from the CogServer shell is
+useful because it allows you to measure the performance impact of additional
+modules that are added to the system and to measure various configuration
+scenarios.
+
+Load in the CogServer by adding **opencog/benchmark/module/libbenchmark.so** to
+the **MODULES** parameter in **opencog.conf**.
 
 - Invoked from the CogServer shell. Syntax:
 
