@@ -73,6 +73,7 @@ namespace PatternMining
 private:
     HTree* htree;
     AtomSpace* atomSpace;
+    AtomSpace* originalAtomSpace;
 
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
@@ -98,14 +99,18 @@ private:
     // Return unified ordered Handle vector
     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
-    void RebindVariableName(vector<Handle>& orderedPattern);
+    void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
+
+    // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
+    vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern);
 
     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
 public:
-    PatternMiner(AtomSpace* _atomSpace): atomSpace(_atomSpace)
+    PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
     {
         htree = new HTree();
+        atomSpace = new AtomSpace();
     }
 
 

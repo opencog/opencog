@@ -26,24 +26,12 @@
 #include <map>
 #include <iterator>
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/util/StringManipulator.h>
 #include <opencog/util/foreach.h>
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
 using namespace opencog;
-
-
-int countSubstring(const std::string& str, const std::string& sub)
-{
-    if (sub.length() == 0) return 0;
-    int count = 0;
-    for (size_t offset = str.find(sub); offset != std::string::npos; offset = str.find(sub, offset + sub.length()))
-    {
-        ++count;
-    }
-    return count;
-}
-
 
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
@@ -78,9 +66,59 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& ord
     }
 }
 
-void PatternMiner::RebindVariableName(vector<Handle>& orderedPattern)
+
+void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks)
 {
 
+    HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (atomSpace->isNode(h))
+        {
+           if (atomSpace->getType(h) == opencog::VARIABLE_NODE)
+           {
+               if (varNameMap.find(h) != varNameMap.end())
+               {
+
+               }
+               else
+               {
+
+                   string var_name = "$var_"  + toString(varNameMap.size() + 1);
+                   Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name, TruthValue::TRUE_TV());
+
+               }
+
+           }
+        }
+        else
+        {
+             HandleSeq _renameOutgoingLinks;
+             findAndRenameVariablesForOneLink(_renameOutgoingLinks);
+             Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks,TruthValue::TRUE_TV());
+             outgoingLinks.push_back(reLink);
+
+
+
+        }
+
+    }
+
+}
+
+vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern)
+{
+    map<Handle,Handle> varNameMap;
+    vector<Handle> rebindedPattern;
+
+    foreach (Handle link, orderedPattern)
+    {
+        HandleSeq renameOutgoingLinks;
+        findAndRenameVariablesForOneLink(link, varNameMap, renameOutgoingLinks);
+        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(h),renameOutgoingLinks,TruthValue::TRUE_TV());
+        rebindedPattern.push_back(rebindedLink);
+    }
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
