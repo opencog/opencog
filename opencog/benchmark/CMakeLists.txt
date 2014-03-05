@@ -25,3 +25,5 @@ TARGET_LINK_LIBRARIES (atomspace_bm
 	cogutil
 	${PYTHON_LIBRARIES}
 )
+
+ADD_SUBDIRECTORY(module)
