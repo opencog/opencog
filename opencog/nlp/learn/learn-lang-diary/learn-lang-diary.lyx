@@ -1573,7 +1573,7 @@ h_{PAIR}^{red} & =-\sum_{w_{1},w_{2}\in\beta}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2}
 
 \end_inset
 
-which can be compaired to the random-pair entropy of 
+which can be compared to the random-pair entropy of 
 \begin_inset Formula $h_{PR-RAND}^{red}=-\log_{2}1/16=4$
 \end_inset
 
@@ -1602,6 +1602,102 @@ h_{PAIR}-h_{PAIR}^{red}=0.6666667>0.643856=h_{PR-RAND}-h_{PR-RAND}^{red}
 So we seem to have two ways of winning: reducing the overall entropy, for
  for single letters, and for pairs, and also finding reductions that are
  strong, even compared to the reduced vocab.
+\end_layout
+
+\begin_layout Subsection*
+Reductio ad absurdum? No.
+\end_layout
+
+\begin_layout Standard
+What if we continue on this path, and (incorectly) reduce to 
+\begin_inset Formula $N=3$
+\end_inset
+
+ letters, with 
+\begin_inset Formula $\delta=\{\gamma,\eta,D\}$
+\end_inset
+
+ where 
+\begin_inset Formula $\eta=\{B,E\}$
+\end_inset
+
+? Then 
+\begin_inset Formula $p(\eta)=p(B)+p(E)=1/2$
+\end_inset
+
+ 
+\begin_inset Formula 
+\begin{align*}
+h_{SING}^{rr} & =-\sum_{w\in\delta}p(w)\log_{2}p(w)\\
+ & =-\frac{1}{6}\log_{2}\frac{1}{6}-\frac{1}{3}\log_{2}\frac{1}{3}-\frac{1}{2}\log_{2}\frac{1}{2}\\
+ & =\frac{2}{3}-\frac{1}{2}\log_{2}\frac{1}{3}=1.4591479
+\end{align*}
+
+\end_inset
+
+and the reduction inequality is
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+h_{SING}^{red}-h_{SING}^{rr}=0.4591479>0.4150375=h_{RAND}^{red}-h_{RAND}^{rr}
+\]
+
+\end_inset
+
+So this inequality allows an inappropriate reduction to take place.
+ For the pairs, 
+\begin_inset Formula $p(\gamma,\eta)=p(\gamma,B)=2/3$
+\end_inset
+
+ and 
+\begin_inset Formula $p(D,\eta)=p(D,E)=1/3$
+\end_inset
+
+ and everything else being zero.
+ Thus one gets:
+\begin_inset Formula 
+\begin{align*}
+h_{PAIR}^{rr} & =-\sum_{w_{1},w_{2}\in\delta}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
+ & =-\frac{2}{3}\log_{2}\frac{2}{3}-\frac{1}{3}\log_{2}\frac{1}{3}\\
+ & =-\frac{2}{3}-\log_{2}\frac{1}{3}=0.9182958
+\end{align*}
+
+\end_inset
+
+so that 
+\begin_inset Formula 
+\[
+h_{PAIR}^{red}-h_{PAIR}^{rr}=0\ngtr0.830075=h_{PR-RAND}^{red}-h_{PR-RAND}^{rr}
+\]
+
+\end_inset
+
+Here, nothing is gained, so the pair inequality blocks the inappropriate
+ reduction.
+ Consider a differnt inappropraite reduction to 
+\begin_inset Formula $N=3$
+\end_inset
+
+: let 
+\begin_inset Formula $\epsilon=\{\zeta,B,E\}$
+\end_inset
+
+ with 
+\begin_inset Formula $\zeta=\{D,\gamma\}$
+\end_inset
+
+ Then the pair probabilities are 
+\begin_inset Formula $p(\zeta,B)=p(\gamma,B)=2/3$
+\end_inset
+
+ and 
+\begin_inset Formula $p(\zeta,E)=p(D,E)=1/3$
+\end_inset
+
+ and again, there is no entropy reduction.
+ The other groupings look to be equally ineffective.
 \end_layout
 
 \begin_layout Subsection*
