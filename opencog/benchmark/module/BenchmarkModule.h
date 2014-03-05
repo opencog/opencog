@@ -49,8 +49,8 @@ class BenchmarkModule : public Module
 
         /*
          * Runs a performance benchmark on the AtomSpace by creating a fully
-         * connected graph between them a certain number of with bidirectional
-         * directed edges (requires n^2 - n edges).
+         * connected graph with bidirectional directed edges
+         * (requires n^2 - n edges).
          *
          * Invoked from the CogServer shell. Syntax:
          *   benchmark-fully-connected OPTION COUNT THREADS
@@ -59,6 +59,7 @@ class BenchmarkModule : public Module
          * integer number of nodes, and THREADS is an integer number of threads.
          * If no arguments are specified, defaults to:
          *   concurrent 500 2
+         * indicating multithreaded execution with 500 nodes and 2 threads.
          *
          * The 'single' option will run synchronously using std::for_each.
          *

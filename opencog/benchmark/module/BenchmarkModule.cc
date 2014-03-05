@@ -191,8 +191,8 @@ std::string BenchmarkModule
                "where OPTION is 'single', 'concurrent',\n"
                "or 'reset', COUNT is an integer number\n"
                "of nodes, and THREADS is an integer number of\n"
-               "threads.\nIf no arguments are specified, defaults to:\n"
-               "concurrent 500 2\n";
+               "threads. If no arguments are specified, defaults to:\n"
+               "  concurrent 500 2\n";
     }
 
     const clock_t end_time_cpu = clock();
