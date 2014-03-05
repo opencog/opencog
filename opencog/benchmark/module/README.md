@@ -21,8 +21,8 @@ the **MODULES** parameter in **opencog.conf**.
 benchmark-fully-connected OPTION COUNT THREADS
 ```
 
-where OPTION is 'single', 'concurrent', or 'reset', COUNT is an integer number
-of nodes, and THREADS is an integer number of threads.
+where OPTION is concurrent', or 'reset', COUNT is an integer number of nodes,
+and THREADS is an integer number of threads.
 
 The nodes are of type ConceptNode, and the links are of type AsymmetricHebbianLink.
 
@@ -34,8 +34,7 @@ benchmark-fully-connected concurrent 500 2
 
 indicating multithreaded execution with 500 nodes and 2 threads.
 
-- The 'single' option will run synchronously using std::for_each.
-- The 'concurrent' option will use a multithreaded version of for_each from the GNU libstdc++ parallel mode OpenMP library
+- The 'concurrent' option uses a multithreaded version of for_each from the GNU libstdc++ parallel mode OpenMP library
 - The 'reset' option will delete all the ConceptNodes in the AtomSpace along with their incoming sets.
 
 Additional benchmarks can be added to this module later.

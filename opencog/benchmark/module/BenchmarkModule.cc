@@ -97,36 +97,6 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     return atoms.size();
 }
 
-int BenchmarkModule::fullyConnectedTest(int numAtoms)
-{
-    // Add numAtoms ConceptNodes
-    auto ir = boost::irange((size_t)0, (size_t)numAtoms);
-    vector<size_t> indices(ir.begin(), ir.end());
-
-    for_each(indices.begin(), indices.end(), [&as](int index)
-    {
-        as->addPrefixedNode(CONCEPT_NODE, "test_atom_");
-    });
-
-    // Retrieve all the ConceptNodes into an iterator
-    HandleSeq atoms;
-    as->getHandlesByType(back_inserter(atoms), CONCEPT_NODE);
-
-    // Create a fully connected graph between them with bidirectional directed
-    // edges: requires n^2 - n edges
-    for_each(atoms.begin(), atoms.end(),
-        [&atoms, &as](Handle handleSource)
-    {
-        for_each(atoms.begin(), atoms.end(),
-            [&handleSource, &as](Handle handleTarget)
-        {
-            as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget);
-        });
-    });
-
-    return atoms.size();
-}
-
 std::string BenchmarkModule
 ::do_fullyConnectedTest(Request *dummy, std::list<std::string> args)
 {
@@ -162,11 +132,7 @@ std::string BenchmarkModule
 
     int numNodes;
 
-    if (option == "single")
-    {
-        numNodes = fullyConnectedTest(numNewNodes);
-    }
-    else if (option == "reset")
+    if (option == "reset")
     {
         // Delete all ConceptNodes and their incoming sets
         HandleSeq atoms;
@@ -188,10 +154,9 @@ std::string BenchmarkModule
     {
         return "Error, unrecognized argument. Usage:\n"
                "  benchmark-fully-connected OPTION COUNT THREADS\n"
-               "where OPTION is 'single', 'concurrent',\n"
-               "or 'reset', COUNT is an integer number\n"
-               "of nodes, and THREADS is an integer number of\n"
-               "threads. If no arguments are specified, defaults to:\n"
+               "where OPTION is 'concurrent' or 'reset', COUNT is an integer "
+               "number of nodes,\nand THREADS is an integer number of threads. "
+               "If no arguments are specified,\ndefaults to:\n"
                "  concurrent 500 2\n";
     }
 

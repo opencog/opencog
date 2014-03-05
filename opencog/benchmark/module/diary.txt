@@ -16,5 +16,7 @@ threads    time	    aggregate links/sec
 10         29.0	     8603
 12         30.5	     8180
 
-Test: 500 nodes, 249500 directed edges, fully connected
+Test:
+benchmark-fully-connected
+500 nodes, 249500 directed edges
 Test system: i7-4930K 3.4GHz (12 core) w/ 32GB RAM
