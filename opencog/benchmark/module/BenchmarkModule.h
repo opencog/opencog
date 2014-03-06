@@ -55,13 +55,11 @@ class BenchmarkModule : public Module
          * Invoked from the CogServer shell. Syntax:
          *   benchmark-fully-connected OPTION COUNT THREADS
          *
-         * where OPTION is 'single', 'concurrent', or 'reset', COUNT is an
-         * integer number of nodes, and THREADS is an integer number of threads.
+         * where OPTION is 'concurrent', or 'reset', COUNT is an integer
+         * number of nodes, and THREADS is an integer number of threads.
          * If no arguments are specified, defaults to:
          *   concurrent 500 2
          * indicating multithreaded execution with 500 nodes and 2 threads.
-         *
-         * The 'single' option will run synchronously using std::for_each.
          *
          * The 'concurrent' option will use a multithreaded version of for_each
          * from the GNU libstdc++ parallel mode OpenMP library
@@ -72,7 +70,6 @@ class BenchmarkModule : public Module
            "Usage: benchmark-fully-connected",
            false, false)
         int fullyConnectedTestConcurrent(int);
-        int fullyConnectedTest(int);
 
     public:
         BenchmarkModule(CogServer&);
