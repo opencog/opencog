@@ -63,8 +63,7 @@ Exit the scheme shell by typing ```.``` and hitting enter.
 
 10) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
 
-Enter in another shell: ```git clone https://github.com/opencog/external-tools/AtomViewer```
-Open atom_viewer.html in your browser.
+Open ***~/external-tools/AtomViewer/WebContent/atom_viewer.html*** in your browser.
 For more information: https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
 
 11) Start the deduction_agent:
