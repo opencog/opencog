@@ -26,37 +26,54 @@ The code is located in the [opencog/python/pln directory][]. It is still in-prog
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
 
-5) Load **deduction_agent.py** in the CogServer
+5) Setting up restapi and specifying **deduction_agent.py* and restapi in the CogServer configuration
 
-Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path:
+Install the necessary dependencies for REST API
+```cd opencog/python/web/api/```
+```sudo ./install_dependencies.sh```
+For more information: http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
+
+Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path and the ***../opencog/python/web/api*** path and restapi as a preloaded module:
 
 ```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction```
+```PYTHON_PRELOAD = restapi```
 
-After starting the CogServer:
+6) Start the CogServer
+
+Make sure you're in your opencog's build directory. In its lib directory should be the opencog.conf file which is mandatory for the CogServer.
+Run cogserver now with ./opencog/server/cogserver from your build directory.
+Switch to a second terminal and type 'telnet localhost 17001'. The opencog shell should now open.
+For more information: http://wiki.opencog.org/w/Starting_the_Cogserver
+
+7) Load **deduction_agent.py** in the CogServer
 
 ```loadpy deduction_agent```
 
-6) Start the REST API:
+8) Start the REST API:
 
-http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
+When typing ```help``` ```restapi.Start``` should be listed as a preloaded command.
+Enter ```restapi.Start```
 
-7) Populate the atomspace with some sample contents
+9) Populate the atomspace with some sample contents
 
-For example:
+Open the scheme shell by typing ```scm```.
+Load a scheme file by typing ```(load-scm-from-file "filepath")```
+with filepath being, e.g. /home/username/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm
+Exit the scheme shell by typing ```.``` and hitting enter.
 
-```(load-scm-from-file "/home/cosmo/opencog/opencog/python/pln/examples/deduction/atomspace_contents.scm")```
+10) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
 
-8) Load the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Note what knowledge is represented:
+Enter in another shell: ```git clone https://github.com/opencog/external-tools/AtomViewer```
+Open atom_viewer.html in your browser.
+For more information: https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
 
-https://github.com/opencog/external-tools/blob/master/AtomViewer/README.md
-
-9) Start the deduction_agent:
+11) Start the deduction_agent:
 
 ```agents-start deduction_agent.DeductionAgent```
 
-10) Refresh the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Observe how the subgraph has become more complex with the additional knowledge gained via forward inference.
+12) Refresh the atomspace in the AtomSpace viewer and zoom in on the subgraph centered around the ConceptNode named Peter. Observe how the subgraph has become more complex with the additional knowledge gained via forward inference.
 
-11) Review the structure of the **ForwardInferenceAgent**, **BackwardInferenceAgent** and **InferenceAgent** implementations in **agents.py**
+13) Review the structure of the **ForwardInferenceAgent**, **BackwardInferenceAgent** and **InferenceAgent** implementations in **agents.py**
 
 ## Documentation
 
