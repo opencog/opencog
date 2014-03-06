@@ -87,7 +87,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     OMP_ALGO::for_each(atoms.begin(), atoms.end(),
         [&atoms, &as](Handle handleSource)
     {
-        OMP_ALGO::for_each(atoms.begin(), atoms.end(),
+        for_each(atoms.begin(), atoms.end(),
             [&handleSource, &as](Handle handleTarget)
         {
             as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget);
