@@ -17,4 +17,5 @@ LINK_LIBRARIES(
 
 TARGET_LINK_LIBRARIES(atomspacepublishermodule
     zmq
+    json_spirit
 )

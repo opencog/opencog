@@ -35,13 +35,10 @@
 #include <iomanip>
 #include <time.h>
 
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/json_parser.hpp>
-using boost::property_tree::ptree;
-using boost::property_tree::read_json;
-using boost::property_tree::write_json;
+#include <lib/json_spirit/json_spirit.h>
 
 using namespace std;
+using namespace json_spirit;
 using namespace opencog;
 
 DECLARE_MODULE(AtomSpacePublisherModule)
@@ -182,14 +179,14 @@ void AtomSpacePublisherModule
 ::signalHandlerAdd(Handle h)
 {
     sendMessage("add",
-                atomMessage(atomToPtree(h)));
+                atomMessage(atomToJSON(h)));
 }
 
 void AtomSpacePublisherModule
 ::signalHandlerRemove(AtomPtr atom)
 {
     sendMessage("remove",
-                atomMessage(atomToPtree(atom->getHandle())));
+                atomMessage(atomToJSON(atom->getHandle())));
 }
 
 void AtomSpacePublisherModule
@@ -204,9 +201,9 @@ void AtomSpacePublisherModule
         av_old->getLTI() != av_new->getLTI() &&
         av_old->getVLTI() != av_new->getVLTI()) {
         sendMessage("avChanged",
-                    avMessage(atomToPtree(h),
-                              avToPtree(av_old),
-                              avToPtree(av_new)));
+                    avMessage(atomToJSON(h),
+                              avToJSON(av_old),
+                              avToJSON(av_new)));
     }
 }
 
@@ -220,9 +217,9 @@ void AtomSpacePublisherModule
     // we check if the AttentionValue has actually changed
 //    if (tv_old != tv_new) {
         sendMessage("tvChanged",
-                    tvMessage(atomToPtree(h),
-                              tvToPtree(tv_old),
-                              tvToPtree(tv_new)));
+                    tvMessage(atomToJSON(h),
+                              tvToJSON(tv_old),
+                              tvToJSON(tv_new)));
 //    }
 }
 
@@ -232,9 +229,9 @@ void AtomSpacePublisherModule
                      const AttentionValuePtr& av_new)
 {
     sendMessage("addAF",
-                avMessage(atomToPtree(h),
-                          avToPtree(av_old),
-                          avToPtree(av_new)));
+                avMessage(atomToJSON(h),
+                          avToJSON(av_old),
+                          avToJSON(av_new)));
 }
 
 void AtomSpacePublisherModule
@@ -243,9 +240,9 @@ void AtomSpacePublisherModule
                         const AttentionValuePtr& av_new)
 {
     sendMessage("removeAF",
-                avMessage(atomToPtree(h),
-                          avToPtree(av_old),
-                          avToPtree(av_new)));
+                avMessage(atomToJSON(h),
+                          avToJSON(av_old),
+                          avToJSON(av_new)));
 }
 
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
@@ -311,7 +308,7 @@ void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
     handler.detach();
 }
 
-ptree AtomSpacePublisherModule::atomToPtree(Handle h)
+Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
     // Type
     Type type = as->getType(h);
@@ -321,91 +318,89 @@ ptree AtomSpacePublisherModule::atomToPtree(Handle h)
     std::string nameString = as->getName(h);
 
     // Handle
-    std::string handleString = std::to_string(h.value());
+    int handle = h.value();
 
     // AttentionValue
     AttentionValuePtr av = as->getAV(h);
-    ptree ptAV;
-    ptAV = avToPtree(av);
+    Object jsonAV;
+    jsonAV = avToJSON(av);
 
     // TruthValue
     TruthValuePtr tvp = as->getTV(h);
-    ptree ptTV;
-    ptTV = tvToPtree(tvp);
+    Object jsonTV;
+    jsonTV = tvToJSON(tvp);
 
     // Incoming set
-    HandleSeq incoming = as->getIncoming(h);
-    ptree ptIncoming;
-    for (uint i = 0; i < incoming.size(); i++) {
-        ptree ptElement;
-        ptElement.put("", std::to_string(incoming[i].value()));
-        ptIncoming.push_back(std::make_pair("", ptElement));
+    HandleSeq incomingHandles = as->getIncoming(h);
+    Array incoming;
+    for (uint i = 0; i < incomingHandles.size(); i++) {
+        incoming.push_back(incomingHandles[i].value());
     }
 
     // Outgoing set
-    HandleSeq outgoing = as->getOutgoing(h);
-    ptree ptOutgoing;
-    for (uint i = 0; i < outgoing.size(); i++) {
-        ptree ptElement;
-        ptElement.put("", std::to_string(outgoing[i].value()));
-        ptOutgoing.push_back(std::make_pair("", ptElement));
+    HandleSeq outgoingHandles = as->getOutgoing(h);
+    Array outgoing;
+    for (uint i = 0; i < outgoingHandles.size(); i++) {
+        outgoing.push_back(outgoingHandles[i].value());
     }
 
-    // Use Boost property trees for JSON serialization
-    ptree pt;
+    Object jsonAtom;
+    jsonAtom.push_back(Pair("handle", handle));
+    jsonAtom.push_back(Pair("type", typeNameString));
+    jsonAtom.push_back(Pair("name", nameString));
+    jsonAtom.push_back(Pair("attentionvalue", jsonAV));
+    jsonAtom.push_back(Pair("truthvalue", jsonTV));
+    jsonAtom.push_back(Pair("outgoing", outgoing));
+    jsonAtom.push_back(Pair("incoming", incoming));
 
-    pt.put("handle", handleString);
-    pt.put("type", typeNameString);
-    pt.put("name", nameString);
-    pt.add_child("attentionvalue", ptAV);
-    pt.add_child("truthvalue", ptTV);
-    pt.add_child("outgoing", ptOutgoing);
-    pt.add_child("incoming", ptIncoming);
-
-    return pt;
+    return jsonAtom;
 }
 
-ptree AtomSpacePublisherModule::avToPtree(AttentionValuePtr av)
+Object AtomSpacePublisherModule::avToJSON(AttentionValuePtr av)
 {
-    ptree ptAV;
+    Object json;
 
-    ptAV.put("sti", std::to_string(av->getSTI()));
-    ptAV.put("lti", std::to_string(av->getLTI()));
-    ptAV.put("vlti", av->getVLTI() != 0 ? "true" : "false");
+    json.push_back(Pair("sti", av->getSTI()));
+    json.push_back(Pair("lti", av->getLTI()));
+    json.push_back(Pair("vlti", av->getVLTI() != 0 ? true : false));
 
-    return ptAV;
+    return json;
 }
 
-ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
+Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 {
-    ptree ptTV;
+    Object json;
+    Object jsonDetails;
 
     switch (tvp->getType()) {
         case SIMPLE_TRUTH_VALUE: {
-            ptTV.put("type", "simple");
-            ptTV.put("details.strength", tvp->getMean());
-            ptTV.put("details.count", tvp->getCount());
-            ptTV.put("details.confidence", tvp->getConfidence());
+            json.push_back(Pair(Pair("type", "simple")));
+            jsonDetails.push_back(Pair("strength", tvp->getMean()));
+            jsonDetails.push_back(Pair("count", tvp->getCount()));
+            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+            json.push_back(Pair(Pair("details", jsonDetails)));
             break;
         }
 
         case COUNT_TRUTH_VALUE: {
-            ptTV.put("type", "count");
-            ptTV.put("details.strength", tvp->getMean());
-            ptTV.put("details.count", tvp->getCount());
-            ptTV.put("details.confidence", tvp->getConfidence());
+            json.push_back(Pair(Pair("type", "count")));
+            jsonDetails.push_back(Pair("strength", tvp->getMean()));
+            jsonDetails.push_back(Pair("count", tvp->getCount()));
+            jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
+            json.push_back(Pair(Pair("details", jsonDetails)));
             break;
         }
 
         case INDEFINITE_TRUTH_VALUE: {
             IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
-            ptTV.put("type", "indefinite");
-            ptTV.put("details.strength", itv->getMean());
-            ptTV.put("details.L", itv->getL());
-            ptTV.put("details.U", itv->getU());
-            ptTV.put("details.confidence", itv->getConfidenceLevel());
-            ptTV.put("details.diff", itv->getDiff());
-            ptTV.put("details.symmetric", itv->isSymmetric());
+            json.push_back(Pair(Pair("type", "indefinite")));
+            jsonDetails.push_back(Pair("strength", itv->getMean()));
+            jsonDetails.push_back(Pair("L", itv->getL()));
+            jsonDetails.push_back(Pair("U", itv->getU()));
+            jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
+            jsonDetails.push_back(Pair("diff", itv->getDiff()));
+            jsonDetails.push_back(Pair("symmetric", itv->isSymmetric()));
+            json.push_back(Pair(Pair("details", jsonDetails)));
             break;
         }
 
@@ -415,50 +410,44 @@ ptree AtomSpacePublisherModule::tvToPtree(TruthValuePtr tvp)
         }
     }
 
-    return ptTV;
+    return json;
 }
 
-std::string AtomSpacePublisherModule::atomMessage(ptree ptAtom)
-{
-    ptree ptAtomMessage;
-
-    ptAtomMessage.add_child("atom", ptAtom);
-
-    return ptToJSON(ptAtomMessage);
+std::string AtomSpacePublisherModule::atomMessage(Object jsonAtom)
+{  
+    Object json;
+    json.push_back(Pair("atom", jsonAtom));
+    json.push_back(Pair("timestamp", time(0)));
+    return jsonToString(json);
 }
 
 std::string AtomSpacePublisherModule::avMessage(
-        ptree ptAtom, ptree ptAVOld, ptree ptAVNew)
+        Object jsonAtom, Object jsonAVOld, Object jsonAVNew)
 {
-    ptree ptAVMessage;
-
-    ptAVMessage.put("handle", ptAtom.get<std::string>("handle", ""));
-    ptAVMessage.add_child("avOld", ptAVOld);
-    ptAVMessage.add_child("avNew", ptAVNew);
-    ptAVMessage.add_child("atom", ptAtom);
-
-    return ptToJSON(ptAVMessage);
+    Object json;
+    json.push_back(Pair("handle", find_value(jsonAtom, "handle")));
+    json.push_back(Pair("avOld", jsonAVOld));
+    json.push_back(Pair("avNew", jsonAVNew));
+    json.push_back(Pair("atom", jsonAtom));
+    json.push_back(Pair("timestamp", time(0)));
+    return jsonToString(json);
 }
 
 std::string AtomSpacePublisherModule::tvMessage(
-        ptree ptAtom, ptree ptTVOld, ptree ptTVNew)
+        Object jsonAtom, Object jsonTVOld, Object jsonTVNew)
 {
-    ptree ptTVMessage;
-
-    ptTVMessage.put("handle", ptAtom.get<std::string>("handle", ""));
-    ptTVMessage.add_child("tvOld", ptTVOld);
-    ptTVMessage.add_child("tvNew", ptTVNew);
-    ptTVMessage.add_child("atom", ptAtom);
-
-    return ptToJSON(ptTVMessage);
+    Object json;
+    json.push_back(Pair("handle", find_value(jsonAtom, "handle")));
+    json.push_back(Pair("tvOld", jsonTVOld));
+    json.push_back(Pair("tvNew", jsonTVNew));
+    json.push_back(Pair("atom", jsonAtom));
+    json.push_back(Pair("timestamp", time(0)));
+    return jsonToString(json);
 }
 
-std::string AtomSpacePublisherModule::ptToJSON(ptree pt)
+std::string AtomSpacePublisherModule::jsonToString(Object json)
 {
-    std::ostringstream buf;
-    write_json (buf, pt, true); // true = use pretty print formatting
-    std::string json = buf.str();
-    return json;
+    return write_formatted(json);
 }
 
 std::string AtomSpacePublisherModule

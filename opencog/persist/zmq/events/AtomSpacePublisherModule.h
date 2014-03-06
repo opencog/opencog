@@ -32,9 +32,9 @@
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 
-#include <boost/property_tree/ptree.hpp>
-using boost::property_tree::ptree;
+#include <lib/json_spirit/json_spirit.h>
 
+using namespace json_spirit;
 #include "opencog/util/zhelpers.hpp"
 
 namespace opencog
@@ -84,14 +84,14 @@ class AtomSpacePublisherModule : public Module
         void InitZeroMQ();
         void proxy();
 
-        ptree atomToPtree(Handle h);
-        ptree tvToPtree(TruthValuePtr tv);
-        ptree avToPtree(AttentionValuePtr av);
+        Object atomToJSON(Handle h);
+        Object tvToJSON(TruthValuePtr tv);
+        Object avToJSON(AttentionValuePtr av);
         void sendMessage(std::string messageType, std::string payload);
-        std::string atomMessage(ptree ptAtom);
-        std::string avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew);
-        std::string tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew);
-        std::string ptToJSON(ptree pt);
+        std::string atomMessage(Object jsonAtom);
+        std::string avMessage(Object jsonAtom, Object jsonAVOld, Object jsonAVNew);
+        std::string tvMessage(Object jsonAtom, Object jsonTVOld, Object jsonTVNew);
+        std::string jsonToString(Object json);
         void signalHandlerAdd(Handle h);
         void signalHandlerRemove(AtomPtr atom);
         void signalHandlerAVChanged(const Handle& h,
