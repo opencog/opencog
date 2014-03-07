@@ -199,7 +199,7 @@ private:
     void loadAtomSpace(const std::string & petId);
 
     /**
-     * Process messages from the spwaner componente. Usually a SAVE_AND_EXIT
+     * Process messages from the spawner component. Usually a SAVE_AND_EXIT
      * one.
      *
      * @param spawnerMessage The spawner message plain text format to be

@@ -30,7 +30,7 @@
 
 namespace opencog {
 
-// At the moment, this is a cheap hack to provie all-things
+// At the moment, this is a cheap hack to provide all-things
 // embodiment related with access to spacetime.
 
 /** \addtogroup grp_spacetime
