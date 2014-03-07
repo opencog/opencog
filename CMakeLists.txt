@@ -42,6 +42,9 @@ ENDIF (CMAKE_BUILD_TYPE STREQUAL "")
 
 MESSAGE(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
+ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
+                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
+
 # add the 'lib' dir to cmake's module search path
 SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 
@@ -113,9 +116,6 @@ IF (WIN32)
 		ENDIF (CYGWIN)
 	ENDIF (NOT UNIX)
 ENDIF (WIN32)
-
-ADD_DEFINITIONS(-DPROJECT_SOURCE_DIR=\\"${CMAKE_SOURCE_DIR}\\"
-                -DPROJECT_BINARY_DIR=\\"${CMAKE_BINARY_DIR}\\")
 
 # ===================================================================
 # Check for existance of various required, optional packages.
