@@ -678,20 +678,25 @@ SET(CPACK_SOURCE_IGNORE_FILES
 	"^${PROJECT_BINARY_DIR}/examples/hopfield/hopfield$"
 )
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
-IF (WIN32 AND NOT UNIX)
-  # There is a bug in NSI that does not handle full unix paths properly. Make
-  # sure there is at least one set of four (4) backlasshes.
-  SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
-  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\cogserver.exe")
-  SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The Open Cognition Framework")
-  SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
-  SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
-  SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
-  SET(CPACK_NSIS_MODIFY_PATH ON)
-ELSE(WIN32 AND NOT UNIX)
-  SET(CPACK_STRIP_FILES "bin/cogserver")
-  SET(CPACK_SOURCE_STRIP_FILES "")
-ENDIF(WIN32 AND NOT UNIX)
+IF (WIN32)
+	# Its "not unix" is cygwin is being used.
+	IF (NOT UNIX)
+		# There is a bug in NSI that does not handle full unix paths
+		# properly. Make sure there is at least one set of four (4)
+		# backslashes.
+		SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}\\\\lib\\\\opencog.ico")
+		SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\cogserver.exe")
+		SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} The Open Cognition Framework")
+		SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\www.opencog.org")
+		SET(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\www.opencog.org")
+		SET(CPACK_NSIS_CONTACT "opencog@googlegroups.com")
+		SET(CPACK_NSIS_MODIFY_PATH ON)
+	ELSE(NOT UNIX)
+		SET(CPACK_STRIP_FILES "bin/cogserver")
+		SET(CPACK_SOURCE_STRIP_FILES "")
+	ENDIF(NOT UNIX)
+ENDIF(WIN32)
+
 SET(CPACK_PACKAGE_EXECUTABLES "cogserver" "The Open Cognition Framework")
 INCLUDE(CPack)
 
