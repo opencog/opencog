@@ -73,7 +73,7 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     auto ir = boost::irange((size_t)0, (size_t)numAtoms);
     vector<size_t> indices(ir.begin(), ir.end());
 
-    OMP_ALGO::for_each(indices.begin(), indices.end(), [&as](int index)
+    OMP_ALGO::for_each(indices.begin(), indices.end(), [this](int index)
     {
         as->addPrefixedNode(CONCEPT_NODE, "test_atom_");
     });
@@ -85,10 +85,10 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     // Create a fully connected graph between them with bidirectional directed
     // edges: requires n^2 - n edges
     OMP_ALGO::for_each(atoms.begin(), atoms.end(),
-        [&atoms, &as](Handle handleSource)
+    [&atoms, this](Handle handleSource)
     {
         for_each(atoms.begin(), atoms.end(),
-            [&handleSource, &as](Handle handleTarget)
+            [&handleSource, this](Handle handleTarget)
         {
             as->addLink(ASYMMETRIC_HEBBIAN_LINK, handleSource, handleTarget);
         });
@@ -139,7 +139,7 @@ std::string BenchmarkModule
         as->getHandlesByType(back_inserter(atoms), CONCEPT_NODE);
 
         OMP_ALGO::for_each(atoms.begin(), atoms.end(),
-            [&as](Handle handle)
+            [this](Handle handle)
         {
             as->deleteAtom(handle, true);
         });
