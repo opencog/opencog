@@ -62,7 +62,7 @@
 ; Gets the occurence count of the a word node in a parse
 (define (get-word-inst-index word-inst)
 	(define parse-node (car (cog-chase-link 'WordInstanceLink 'ParseNode word-inst)))
-	(define word (word-inst-get-word-str word-inst))
+	(define word (cog-name (word-inst-get-lemma word-inst)))
 	(+ 1 (list-index (lambda (a-node) (equal? word-inst a-node)) (get-word-inst-nodes word parse-node)))
 )
 
