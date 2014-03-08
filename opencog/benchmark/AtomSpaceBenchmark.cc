@@ -58,11 +58,13 @@ AtomSpaceBenchmark::AtomSpaceBenchmark()
     showTypeSizes = false;
     Nreps = 100000;
     Nloops = 1;
-    sizeIncrease=0;
-    saveToFile=false;
-    saveInterval=1;
-    buildTestData=false;
-    chanceUseDefaultTV=0.8f;
+    memoize = false;
+    compile = false;
+    sizeIncrease = 0;
+    saveToFile = false;
+    saveInterval = 1;
+    buildTestData = false;
+    chanceUseDefaultTV = 0.8f;
     doStats = false;
     testKind = BENCH_AS;
 
@@ -226,8 +228,7 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_AS:  cout << "AtomSpace's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
-        case BENCH_SCM_LOOP:  cout << "Scheme's looped "; break;
-        case BENCH_SCM:  cout << "Scheme's memoized "; break;
+        case BENCH_SCM:  cout << "Scheme's "; break;
 #endif /* HAVE_GUILE */
 #if HAVE_CYTHON
         case BENCH_PYTHON: cout << "Python's "; break;
