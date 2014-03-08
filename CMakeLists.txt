@@ -52,56 +52,55 @@ SET(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/")
 # Detect different compilers and OS'es, tweak flags as necessary.
 
 IF (CMAKE_COMPILER_IS_GNUCXX)
-  IF (APPLE)
-    SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
-    SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
-    SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
-    # Vital to do this otherwise unresolved symbols everywhere:
-    SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-    SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
-  ELSE (APPLE)
-    SET(CMAKE_C_FLAGS "-Wall -fPIC")
-    SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
-    SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
-    SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
-  ENDIF (APPLE)
+	IF (APPLE)
+		SET(CMAKE_C_FLAGS "-Wall -Wno-long-long -Wno-conversion")
+		SET(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+		SET(CMAKE_C_FLAGS_PROFILE "-O0 -pg")
+		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g0")
+		# Vital to do this otherwise unresolved symbols everywhere:
+		SET(CMAKE_SHARED_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
+		SET(CMAKE_EXE_LINKER_FLAGS "-Wl,-flat_namespace,-undefined,dynamic_lookup")
+	ELSE (APPLE)
+		SET(CMAKE_C_FLAGS "-Wall -fPIC")
+		SET(CMAKE_C_FLAGS_DEBUG "-ggdb3 -fstack-protector")
+		SET(CMAKE_C_FLAGS_PROFILE "-O2 -g3 -fstack-protector -pg")
+		SET(CMAKE_C_FLAGS_RELEASE "-O2 -g -fstack-protector")
+	ENDIF (APPLE)
 
-  # 1) -Wno-variadic-macros is to avoid warnings regarding using
-  # variadic in macro OC_ASSERT (the warning warns that this is only
-  # available from C99, lol!)
-  #
-  # 2) -fopenmp for multithreading support
-  #
-  # 3) -std=gnu++0x for C++0x and GNU extensions support
-  SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
+	# 1) -Wno-variadic-macros is to avoid warnings regarding using
+	# variadic in macro OC_ASSERT (the warning warns that this is only
+	# available from C99, lol!)
+	#
+	# 2) -fopenmp for multithreading support
+	#
+	# 3) -std=gnu++0x for C++0x and GNU extensions support
+	SET(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wno-variadic-macros -fopenmp -std=gnu++0x")
 
-  SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
-  SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
-  SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
+	SET(CMAKE_CXX_FLAGS_DEBUG ${CMAKE_C_FLAGS_DEBUG})
+	SET(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
+	SET(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_C_FLAGS_RELEASE})
 
-  # Options for generating gcov code coverage output
-  SET(CMAKE_C_FLAGS_COVERAGE "-O0 -g -fprofile-arcs -ftest-coverage -fno-inline")
-  SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_C_FLAGS_COVERAGE} -fno-default-inline")
-  # Might be needed for some combinations of ln and gcc
-  IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-  LINK_LIBRARIES(gcov)
-  ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-
+	# Options for generating gcov code coverage output
+	SET(CMAKE_C_FLAGS_COVERAGE "-O0 -g -fprofile-arcs -ftest-coverage -fno-inline")
+	SET(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_C_FLAGS_COVERAGE} -fno-default-inline")
+	# Might be needed for some combinations of ln and gcc
+	IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
+		LINK_LIBRARIES(gcov)
+	ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 ENDIF (CMAKE_COMPILER_IS_GNUCXX)
 
 # Do the windows build
 IF (WIN32)
-   ADD_DEFINITIONS(-DWIN32)
+	ADD_DEFINITIONS(-DWIN32)
 	IF (CYGWIN)
-   	ADD_DEFINITIONS(-DCYGWIN)
+		ADD_DEFINITIONS(-DCYGWIN)
 	#   SET(WIN32 1)
 	ENDIF (CYGWIN)
 
 	# It is "not unix" when the code is compiled under windows but not
 	# under cygwin
 	IF (NOT UNIX)
-   	ADD_DEFINITIONS(-DWIN32_NOT_UNIX)
+		ADD_DEFINITIONS(-DWIN32_NOT_UNIX)
 		FIND_PACKAGE(PThreads REQUIRED)
 		FIND_PACKAGE(STLPort REQUIRED)
 		INCLUDE_DIRECTORIES("${CMAKE_SOURCE_DIR}/include/win32" ${PTHREADS_INCLUDE_DIR} ${STLPORT_INCLUDE_DIR})
@@ -154,7 +153,7 @@ ENDIF(Boost_FOUND)
 # Opencog won't compile with Boost 1.51, some kind of conflict with
 # hash functions, see github bugs 1 and 36
 IF(105100 EQUAL ${Boost_VERSION})
-    MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
+	MESSAGE(FATAL_ERROR "Boost version 1.51 will not work with OpenCog.  Please use a different version.")
 ENDIF(105100 EQUAL ${Boost_VERSION})
 MESSAGE(STATUS "Boost version ${Boost_VERSION} found.")
 
@@ -168,9 +167,9 @@ IF(Boost_FOUND_SAVE)
 ENDIF(Boost_FOUND_SAVE)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND)
-  MESSAGE(STATUS "Found Boost::program_options")
+	MESSAGE(STATUS "Found Boost::program_options")
 ELSE(Boost_PROGRAM_OPTIONS_FOUND)
-  MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")
+	MESSAGE(STATUS "Boost program_options missing: needed for Spatial tools (MapTools).")
 ENDIF(Boost_PROGRAM_OPTIONS_FOUND)
 
 IF(Boost_MATH_C99_FOUND)
@@ -188,7 +187,7 @@ ENDIF (NOT CURL_FOUND)
 # At this time (November 2013) it looks like no one is using this.
 # The old NMXML code needed this, but its broken.
 # The old C++ PLN needed this, but that's broken too.
-# This check shoud probably be removed someday ... 
+# This check shoud probably be removed someday ...
 FIND_PACKAGE(EXPAT)
 IF (EXPAT_FOUND)
 	MESSAGE(STATUS "Expat XML parser found.")
@@ -247,7 +246,7 @@ IF (HYPERTABLE_FOUND)
 	FIND_PACKAGE(SIGAR)
 	IF (SIGAR_FOUND)
 	ELSE (SIGAR_FOUND)
-        MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
+		MESSAGE(WARNING "SIGAR was not found! It is needed for Hypertable support.")
 	ENDIF (SIGAR_FOUND)
 
 ELSE (HYPERTABLE_FOUND)
@@ -341,21 +340,21 @@ ENDIF(PYTHONLIBS_FOUND)
 # Cython is used to generate bindings
 FIND_PROGRAM(CYTHON_EXECUTABLE cython)
 IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-   # find python destination dir for python bindings
-   ADD_DEFINITIONS(-DHAVE_CYTHON)
-   SET(HAVE_CYTHON 1)
-   EXECUTE_PROCESS(
-       COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
+	# find python destination dir for python bindings
+	ADD_DEFINITIONS(-DHAVE_CYTHON)
+	SET(HAVE_CYTHON 1)
+	EXECUTE_PROCESS(
+		COMMAND ${PYTHON_EXECUTABLE} -c "from distutils.sysconfig import *;print(get_python_lib())"
 		OUTPUT_VARIABLE PYTHON_DEST
-   )
+	)
 
-   # replace new line at end
-   STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
-   IF ("${PYTHON_DEST}" STREQUAL "")
-	   MESSAGE(FATAL_ERROR "Python destination dir not found")
-   ELSE ("${PYTHON_DEST}" STREQUAL "")
-	   MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
-   ENDIF ("${PYTHON_DEST}" STREQUAL "")
+	# replace new line at end
+	STRING(REPLACE "\n" "" PYTHON_DEST "${PYTHON_DEST}")
+	IF ("${PYTHON_DEST}" STREQUAL "")
+		MESSAGE(FATAL_ERROR "Python destination dir not found")
+	ELSE ("${PYTHON_DEST}" STREQUAL "")
+		MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
+	ENDIF ("${PYTHON_DEST}" STREQUAL "")
 ELSE (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 	IF(NOT CYTHON_EXECUTABLE)
 		MESSAGE(STATUS "Cython executable not found.")
@@ -365,7 +364,7 @@ ENDIF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 # Nosetests will find and automatically run python tests.
 FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
 IF (NOSETESTS_EXECUTABLE)
-   SET(HAVE_NOSETESTS 1)
+	SET(HAVE_NOSETESTS 1)
 ENDIF (NOSETESTS_EXECUTABLE)
 
 # SDL needed for the spatial tools
@@ -455,7 +454,7 @@ ENDIF (XERCESC_FOUND)
 # XML-RPC, used by the ubigraph module
 FIND_PACKAGE(XMLRPC COMPONENTS client)
 IF (NOT XMLRPC_FOUND)
-    MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
+	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
 # ZeroMQ library 2.1.2
@@ -473,16 +472,16 @@ MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
 # Decide what to build, based on the packages found.
 
 IF(Boost_FOUND)
-    SET(HAVE_UTIL 1)
-    SET(HAVE_COMBOREDUCT 1)
-    SET(HAVE_MOSES 1)
-    SET(HAVE_FEATURE_SELECTION 1)
+	SET(HAVE_UTIL 1)
+	SET(HAVE_COMBOREDUCT 1)
+	SET(HAVE_MOSES 1)
+	SET(HAVE_FEATURE_SELECTION 1)
 ENDIF(Boost_FOUND)
 
 IF(GSL_FOUND AND HAVE_UTIL)
-    SET(HAVE_ATOMSPACE 1)
-    SET(HAVE_ATTENTION 1)
-    SET(HAVE_DIMEMBED 1)
+	SET(HAVE_ATOMSPACE 1)
+	SET(HAVE_ATTENTION 1)
+	SET(HAVE_DIMEMBED 1)
 ENDIF(GSL_FOUND AND HAVE_UTIL)
 
 IF(Boost_PROGRAM_OPTIONS_FOUND AND OPENGL_FOUND AND SDL_FOUND AND SDLGFX_FOUND)
@@ -506,7 +505,7 @@ ENDIF(HAVE_ATOMSPACE AND ODBC_FOUND)
 # which uses NMXML as the message format.  And NMXML needs expat,
 # so embodiment can't build without expat.
 IF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
-   SET(HAVE_EMBODIMENT 1)
+	SET(HAVE_EMBODIMENT 1)
 ENDIF(XERCESC_VERSION_OK AND HAVE_PROTOBUF AND HAVE_XML)
 
 IF (CURL_FOUND AND XMLRPC_FOUND)
@@ -529,10 +528,10 @@ ENDIF(HAVE_ATOMSPACE AND HAVE_GUILE AND HAVE_LINK_GRAMMAR)
 
 # set confdir and datadir
 IF (NOT DEFINED CONFDIR)
-    SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
+	SET (CONFDIR "${CMAKE_INSTALL_PREFIX}/etc")
 ENDIF (NOT DEFINED CONFDIR)
 IF (NOT DEFINED DATADIR)
-    SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
+	SET (DATADIR "${CMAKE_INSTALL_PREFIX}/share/opencog")
 ENDIF (NOT DEFINED DATADIR)
 ADD_DEFINITIONS(-DCONFDIR=\\"${CONFDIR}\\")
 ADD_DEFINITIONS(-DDATADIR=\\"${DATADIR}\\")
@@ -571,32 +570,32 @@ ADD_SUBDIRECTORY(opencog)
 ADD_CUSTOM_TARGET(tests)
 ADD_SUBDIRECTORY(tests EXCLUDE_FROM_ALL)
 IF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-    # doing coverage stuff while running tests if this is the Coverage build
-    ADD_CUSTOM_TARGET(test
-        # TODO lcov should be found by cmake first
-        # TODO set it up so that we can pick to run coverage per test, or
-        # combined across all tests (the latter is MUCH faster). Use a define?
-        # There is coverage specific stuff in AddCxxTest.cmake now...
-        # -
-        # Depends on cogserver because RESTFulTest needs it
-        # and cmake has no way to add non-test dependencies to tests
-        DEPENDS tests cogserver
-        WORKING_DIRECTORY tests
-        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-        # This script combines the coverage analysis of each test,
-        # then creates html in tests/lcov
-        # Note: this should now be run separately...
-        #COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
-        COMMENT "Running tests with coverage..."
-    )
+	# doing coverage stuff while running tests if this is the Coverage build
+	ADD_CUSTOM_TARGET(test
+		# TODO lcov should be found by cmake first
+		# TODO set it up so that we can pick to run coverage per test, or
+		# combined across all tests (the latter is MUCH faster). Use a define?
+		# There is coverage specific stuff in AddCxxTest.cmake now...
+		# -
+		# Depends on cogserver because RESTFulTest needs it
+		# and cmake has no way to add non-test dependencies to tests
+		DEPENDS tests cogserver
+		WORKING_DIRECTORY tests
+		COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+		# This script combines the coverage analysis of each test,
+		# then creates html in tests/lcov
+		# Note: this should now be run separately...
+		#COMMAND ${PROJECT_SOURCE_DIR}/scripts/combine_lcov.sh
+		COMMENT "Running tests with coverage..."
+	)
 ELSE (CMAKE_BUILD_TYPE STREQUAL "Coverage")
-    # If this is a build with coverage enabled then test normally
-    ADD_CUSTOM_TARGET(test
-        DEPENDS tests
-        WORKING_DIRECTORY tests
-        COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
-        COMMENT "Running tests..."
-    )
+	# If this is a build with coverage enabled then test normally
+	ADD_CUSTOM_TARGET(test
+		DEPENDS tests
+		WORKING_DIRECTORY tests
+		COMMAND ${CMAKE_CTEST_COMMAND} --force-new-ctest-process $(ARGS)
+		COMMENT "Running tests..."
+	)
 ENDIF (CMAKE_BUILD_TYPE STREQUAL "Coverage")
 
 ADD_SUBDIRECTORY(examples EXCLUDE_FROM_ALL)
@@ -608,18 +607,18 @@ IF (NOT WIN32)
 		# This is because make doesn't know how to pass jobserver args to
 		# the submake.  So, instead, just use $(MAKE) (with round parens)
 		# -- that will do the right thing.
-		# COMMAND ${CMAKE_BUILD_TOOL} 
-		COMMAND $(MAKE) 
+		# COMMAND ${CMAKE_BUILD_TOOL}
+		COMMAND $(MAKE)
 		WORKING_DIRECTORY examples
 		COMMENT "Building examples"
 	)
 ENDIF (NOT WIN32)
 
 ADD_CUSTOM_TARGET(cscope
-    COMMAND find opencog examples tests -name '*.cc' -o -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
-    COMMAND cscope -b
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    COMMENT "Generating CScope database"
+	COMMAND find opencog examples tests -name '*.cc' -o -name '*.h' -o -name '*.cxxtest' -o -name '*.scm' > ${CMAKE_SOURCE_DIR}/cscope.files
+	COMMAND cscope -b
+	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+	COMMENT "Generating CScope database"
 )
 
 # packaging

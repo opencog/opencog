@@ -45,7 +45,7 @@ using namespace opencog;
  * XXX TODO:
  * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
  * should have a separate tag for handles, tv's, etc.) This would
- * simplify that code, and probably improive performance just a bit.
+ * simplify that code, and probably improve performance just a bit.
  */
 
 scm_t_bits SchemeSmob::cog_uuid_tag;
@@ -216,9 +216,9 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
 	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
 
-    // AttentionalFocus and AttentionalFocus Boundary
-    scm_c_define_gsubr("cog-af-boundary",   0, 0, 0, C(ss_af_boundary));
-    scm_c_define_gsubr("cog-set-af-boundary!",   1, 0, 0, C(ss_set_af_boundary));
+	// AttentionalFocus Boundary
+	scm_c_define_gsubr("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
+	scm_c_define_gsubr("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
 
 	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));

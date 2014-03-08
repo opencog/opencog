@@ -91,6 +91,7 @@ public:
     enum BenchType { BENCH_AS = 1, BENCH_TABLE,
 #ifdef HAVE_GUILE
         BENCH_SCM,
+        BENCH_SCM_LOOP,
 #endif 
 #ifdef HAVE_CYTHON
         BENCH_PYTHON,

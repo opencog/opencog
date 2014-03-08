@@ -25,6 +25,7 @@
 using namespace opencog;
 
 
+// Bogus singleton instance. Should get rid of this ASAP XXX FIXME.
 SchemeEval* SchemeEval::singletonInstance = 0;
 
 /**

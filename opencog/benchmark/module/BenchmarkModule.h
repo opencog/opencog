@@ -27,7 +27,6 @@
 
 #include <string>
 
-#include <opencog/server/Agent.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 
