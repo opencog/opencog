@@ -77,6 +77,8 @@ class AtomSpaceBenchmark
     long getMemUsage();
     int counter;
 
+    std::string memoize_or_compile(std::string);
+
     std::vector<std::string>  methodNames;
 public:
     unsigned int Nreps;
