@@ -25,6 +25,7 @@
 using namespace opencog;
 
 
+// Bogus singleton instance. Should get rid of this ASAP XXX FIXME.
 SchemeEval* SchemeEval::singletonInstance = 0;
 
 /**
@@ -75,6 +76,20 @@ void * SchemeEval::c_wrap_finish(void *p)
 	self->finish();
 	return self;
 }
+
+#ifdef HAVE_GUILE2
+// Compiler support
+static SCM eval_string_var;
+static SCM k_compile_p;
+
+static SCM
+oc_c_compile_string(const char *expr)
+{
+	return scm_call_3(scm_variable_ref(eval_string_var),
+	                  scm_from_utf8_string(expr),
+	                  k_compile_p, SCM_BOOL_T);
+}
+#endif // HAVE_GUILE2
 
 static pthread_once_t eval_init_once = PTHREAD_ONCE_INIT;
 static pthread_key_t tid_key = 0;
@@ -135,6 +150,15 @@ static void first_time_only(void)
 	scm_with_guile(do_bogus_scm, NULL);
 	guile_user_module = scm_current_module();
 #endif /* WORK_AROUND_GUILE_185_BUG */
+
+#ifdef HAVE_GUILE2
+	// scheme variable that contains the code for eval-string.
+	eval_string_var = scm_c_public_variable ("ice-9 eval-string",
+	                                         "eval-string");
+
+	// keyword #:compile? used with above.
+	k_compile_p = scm_from_utf8_keyword ("compile?");
+#endif // HAVE_GUILE2
 }
 
 #ifdef WORK_AROUND_GUILE_THREADING_BUG
@@ -422,7 +446,11 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
+#ifdef HAVE_GUILE2
+	                      (scm_t_catch_body) oc_c_compile_string,
+#else // HAVE_GUILE2
 	                      (scm_t_catch_body) scm_c_eval_string,
+#endif // HAVE_GUILE2
 	                      (void *) expr_str,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
