@@ -476,8 +476,7 @@ class MemberToEvaluationRule(Rule):
         [member_link] = inputs
         [arg, concept] = member_link.out
 
-        predicate_name = concept.name
-        predicate_node = self.chainer.node(types.PredicateNode, concept_name)
+        predicate_node = self.chainer.node(types.PredicateNode, concept.name)
 
         evaluation_link = self.chainer.link(types.EvaluationLink, [predicate_node, arg])
         tv = member_link.tv
@@ -493,11 +492,19 @@ def create_general_evaluation_to_member_rules(chainer):
 
     return rules
 
+
 class GeneralEvaluationToMemberRule(Rule):
-    '''An EvaluationLink with 2+ arguments has a satisfying set where every member is a ListLink. But there's another option which may be more useful. If you specify all but one of the arguments, you get a new predicate with only one variable left. And its satisfying set would just be normal objects.
-Given (EvaluationLink pred (ListLink $thing ...)), create
-sat_set =(ConceptNode "SatisfyingSet pred _ blah blah)
-(MemberLink $thing sat_set)''' 
+    """
+    An EvaluationLink with 2+ arguments has a satisfying set where
+    every member is a ListLink. But there's another option which may be
+    more useful. If you specify all but one of the arguments, you get a
+    new predicate with only one variable left. And its satisfying set
+    would just be normal objects. Given:
+      (EvaluationLink pred (ListLink $thing ...))
+    create:
+      sat_set = (ConceptNode "SatisfyingSet pred _ blah blah)
+      (MemberLink $thing sat_set)
+    """
     def __init__(self, chainer, index, arg_count):
         self.index = index
         #self.arg_count= arg_count
