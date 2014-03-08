@@ -15,7 +15,8 @@ int main(int argc, char** argv)
      "-A        \tBenchmark all methods\n"
      "-x        \tTest the AtomSpaceImpl instead of the public AtomSpace API\n"
      "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
-     "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
+     "-g        \tTest the Scheme API, memoized, single-shot\n"
+     "-G        \tTest the Scheme API, not memoized, looped\n"
      "-c        \tTest the Python API instead of the public AtomSpace API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgGcm:ln:r:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -74,6 +75,14 @@ int main(int argc, char** argv)
            case 'g':
 #ifdef HAVE_GUILE
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM;
+#else
+             cerr << "Fatal Error: Benchmark not compiled with scheme support!" << endl;
+             exit(1);
+#endif
+             break;
+           case 'G':
+#ifdef HAVE_GUILE
+             benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_SCM_LOOP;
 #else
              cerr << "Fatal Error: Benchmark not compiled with scheme support!" << endl;
              exit(1);
