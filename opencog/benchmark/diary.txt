@@ -588,3 +588,45 @@ Big drop in getNodesHandles, don't know why.
   getIncomingSet    714         555         
   removeAtom        145         130
 
+
+7 March 2014
+------------
+Due to bug #524, scheme was always being interpreted, never compiled.
+The previous commit fixes this, the setting #:compile? #t on
+eval-string.  This should improve scheme performance.  Does it?
+No, it des NOT. Gack. But of course. Compiling every time is just
+going to slow everything down. Really, we should compile just once.
+and measure the compiled code. Gack.  This needs a new benchmark...
+
+
+                      -A -g
+   test              compile
+   name             K-ops/sec
+   ----             ---------
+  noop                 inf
+  addNode              14.3
+  addLink               6.67
+  getType               0.826
+  getTV                 2.04
+  setTV                 1.92
+  getOutgoingSet        1.92
+  getIncomingSet        1.49
+  removeAtom            0.392
+
+                     27 Oct      -g       -G -r100   -G -r100
+   test               2013      memo       interp     compile
+   name            K-ops/sec   K-ops/sec  K-ops/sec  K-ops/sec
+   ----            ---------   ---------  ---------  ---------
+  noop                  inf      inf         inf
+  addNode              8.93      9.61       10.7
+  addLink              7.52      7.82        5.76
+  getType              7.58      7.81       12.2
+  getTV                6.37      8.62       13.4
+  setTV                7.63      7.81        7.34
+  getOutgoingSet      11.90     13.9        13.2
+  getIncomingSet       5.32      8.62       12.6
+  removeAtom            -       10.4        10.6
+
+Comparing today's interpreted measurements to those from Oct 2013, looks
+like everything improves.  The improvements are all due to the faster
+underlying atomspace.

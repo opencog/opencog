@@ -226,8 +226,8 @@ void AtomSpaceBenchmark::doBenchmark(const std::string& methodName,
         case BENCH_AS:  cout << "AtomSpace's "; break;
         case BENCH_TABLE:  cout << "AtomTable's "; break;
 #if HAVE_GUILE
-        case BENCH_SCM_LOOP:  cout << "Scheme's looped"; break;
-        case BENCH_SCM:  cout << "Scheme's memoized"; break;
+        case BENCH_SCM_LOOP:  cout << "Scheme's looped "; break;
+        case BENCH_SCM:  cout << "Scheme's memoized "; break;
 #endif /* HAVE_GUILE */
 #if HAVE_CYTHON
         case BENCH_PYTHON: cout << "Python's "; break;
