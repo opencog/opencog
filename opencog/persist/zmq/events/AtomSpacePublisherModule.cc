@@ -27,6 +27,7 @@
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
+//#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
 #include <opencog/dynamics/attention/atom_types.h> // todo: remove?
 #include "opencog/util/zhelpers.hpp"
@@ -194,17 +195,10 @@ void AtomSpacePublisherModule
                          const AttentionValuePtr& av_old,
                          const AttentionValuePtr& av_new)
 {
-    // Due to outstanding issue #394:
-    //   https://github.com/opencog/opencog/issues/394
-    // we check if the AttentionValue has actually changed
-    if (av_old->getSTI() != av_new->getSTI() &&
-        av_old->getLTI() != av_new->getLTI() &&
-        av_old->getVLTI() != av_new->getVLTI()) {
         sendMessage("avChanged",
                     avMessage(atomToJSON(h),
                               avToJSON(av_old),
                               avToJSON(av_new)));
-    }
 }
 
 void AtomSpacePublisherModule
@@ -245,6 +239,9 @@ void AtomSpacePublisherModule
                           avToJSON(av_new)));
 }
 
+// Todo: Use a threadpool to process tasks off a work queue
+// instead of creating a new thread for each signal handler
+
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
 {
     std::thread handler(&AtomSpacePublisherModule::signalHandlerAdd,
@@ -260,6 +257,8 @@ void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
     // After that bug is resolved, it may be necessary to check if the atom was
     // in the AttentionalFocus before being deleted, and then publish a
     // 'removeAF' signal
+
+    // todo
 
     std::thread handler(&AtomSpacePublisherModule::signalHandlerRemove,
                         this, atom);
@@ -285,6 +284,9 @@ void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
     // Until that bug is fixed, this will ignore the simple case where the link
     // is created with no TruthValue defined. However, if the link is created
     // with a TruthValue defined, that dummy signal will still be published.
+
+    // todo: investigate occasional wrong tv changed signals from the atomspace
+
     std::thread handler(&AtomSpacePublisherModule::signalHandlerTVChanged,
                         this, h, tv_old, tv_new);
     handler.detach();
@@ -318,7 +320,7 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     std::string nameString = as->getName(h);
 
     // Handle
-    int handle = h.value();
+    std::string handle = std::to_string(h.value());
 
     // AttentionValue
     AttentionValuePtr av = as->getAV(h);
@@ -334,14 +336,14 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
     HandleSeq incomingHandles = as->getIncoming(h);
     Array incoming;
     for (uint i = 0; i < incomingHandles.size(); i++) {
-        incoming.push_back(incomingHandles[i].value());
+        incoming.push_back(std::to_string(incomingHandles[i].value()));
     }
 
     // Outgoing set
     HandleSeq outgoingHandles = as->getOutgoing(h);
     Array outgoing;
     for (uint i = 0; i < outgoingHandles.size(); i++) {
-        outgoing.push_back(outgoingHandles[i].value());
+        outgoing.push_back(std::to_string(outgoingHandles[i].value()));
     }
 
     Object jsonAtom;
@@ -374,33 +376,34 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 
     switch (tvp->getType()) {
         case SIMPLE_TRUTH_VALUE: {
-            json.push_back(Pair(Pair("type", "simple")));
+            json.push_back(Pair("type", "simple"));
             jsonDetails.push_back(Pair("strength", tvp->getMean()));
             jsonDetails.push_back(Pair("count", tvp->getCount()));
+            jsonDetails.push_back(Pair("countString", std::to_string(tvp->getCount())));
             jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair(Pair("details", jsonDetails)));
+            json.push_back(Pair("details", jsonDetails));
             break;
         }
 
         case COUNT_TRUTH_VALUE: {
-            json.push_back(Pair(Pair("type", "count")));
+            json.push_back(Pair("type", "count"));
             jsonDetails.push_back(Pair("strength", tvp->getMean()));
             jsonDetails.push_back(Pair("count", tvp->getCount()));
             jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
-            json.push_back(Pair(Pair("details", jsonDetails)));
+            json.push_back(Pair("details", jsonDetails));
             break;
         }
 
         case INDEFINITE_TRUTH_VALUE: {
             IndefiniteTruthValuePtr itv = IndefiniteTVCast(tvp);
-            json.push_back(Pair(Pair("type", "indefinite")));
+            json.push_back(Pair("type", "indefinite"));
             jsonDetails.push_back(Pair("strength", itv->getMean()));
             jsonDetails.push_back(Pair("L", itv->getL()));
             jsonDetails.push_back(Pair("U", itv->getU()));
             jsonDetails.push_back(Pair("confidence", itv->getConfidenceLevel()));
             jsonDetails.push_back(Pair("diff", itv->getDiff()));
             jsonDetails.push_back(Pair("symmetric", itv->isSymmetric()));
-            json.push_back(Pair(Pair("details", jsonDetails)));
+            json.push_back(Pair("details", jsonDetails));
             break;
         }
 
@@ -414,7 +417,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
 }
 
 std::string AtomSpacePublisherModule::atomMessage(Object jsonAtom)
-{  
+{
     Object json;
     json.push_back(Pair("atom", jsonAtom));
     json.push_back(Pair("timestamp", time(0)));
