@@ -68,7 +68,7 @@ class InferenceAgent(MindAgent):
 
         # It's important to have both of these
         self.chainer.add_rule(rules.MemberToInheritanceRule(self.chainer))
-#        self.chainer.add_rule(rules.InheritanceToMemberRule(self.chainer))
+        self.chainer.add_rule(rules.InheritanceToMemberRule(self.chainer))
 
         # AttractionLink could be useful for causality
         self.chainer.add_rule(rules.AttractionRule(self.chainer))

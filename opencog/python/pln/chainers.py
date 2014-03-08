@@ -207,6 +207,7 @@ class InferenceHistoryIndex(object):
             return False
         else:
             input_tuple_set.add(inputs)
+            return True
 
     def lookup_all_applications(self, rule, outputs):
         try:
@@ -636,17 +637,22 @@ class Chainer(AbstractChainer):
         if not new:
             return False
         else:
-            #self._add_to_inference_repository(rule, outputs, inputs)
+            self._add_to_inference_repository(rule, outputs, inputs)
             return True
 
     def _add_to_inference_repository(self, rule, outputs, inputs):
-        TA = self.history_atomspace
+        # Todo: Temporarily enabled storing the inference repository
+        # in the main atomspace. See:
+        #   https://github.com/opencog/opencog/issues/523
+
+        #TA = self.history_atomspace
+        TA = self.atomspace
         L = TA.add_link
         N = TA.add_node
 
         # create new lists of inputs and outputs for the separate history atomspace
-        inputs  = [self.transfer_atom(TA, a) for a in inputs]
-        outputs = [self.transfer_atom(TA, a) for a in outputs]
+        #inputs  = [self.transfer_atom(TA, a) for a in inputs]
+        #outputs = [self.transfer_atom(TA, a) for a in outputs]
 
         L(types.ExecutionLink, [
             N(types.GroundedSchemaNode, rule.name),
