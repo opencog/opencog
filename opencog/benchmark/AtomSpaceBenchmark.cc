@@ -578,7 +578,7 @@ void AtomSpaceBenchmark::buildAtomSpace(long atomspaceSize, float _percentLinks,
        testKind = BENCH_AS;
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
-    if (testKind == BENCH_SCM)
+    if ((testKind == BENCH_SCM) or (testKind == BENCH_SCM_LOOP))
        testKind = BENCH_AS;
 #endif /* HAVE_GUILE */
 
