@@ -378,7 +378,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
         case SIMPLE_TRUTH_VALUE: {
             json.push_back(Pair("type", "simple"));
             jsonDetails.push_back(Pair("strength", tvp->getMean()));
-            jsonDetails.push_back(Pair("count", tvp->getCount()));
+//            jsonDetails.push_back(Pair("count", tvp->getCount()));
             jsonDetails.push_back(Pair("countString", std::to_string(tvp->getCount())));
             jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
             json.push_back(Pair("details", jsonDetails));
