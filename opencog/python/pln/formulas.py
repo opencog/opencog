@@ -199,13 +199,16 @@ def ext2InhFormula(tvs, U):
     nABint = nAB * EXTENSION_TO_INTENSION_DISCOUNT_FACTOR
     return [TruthValue(sABint, nABint)]
 
-def inheritanceFormula(tvs, U):
-    [(sExt, nExt), (sInt, nInt)] = tvs
-
-    s = (sExt + sInt) / 2.0
-    n = (nExt + nInt) / 2.0
-
-    return [TruthValue(s, n)]
+# Todo: This is a duplicate definition. The symbol "inheritanceFormula"
+# already exists in this file. Which one should be used?
+#
+# def inheritanceFormula(tvs, U):
+#     [(sExt, nExt), (sInt, nInt)] = tvs
+#
+#     s = (sExt + sInt) / 2.0
+#     n = (nExt + nInt) / 2.0
+#
+#     return [TruthValue(s, n)]
 
 def twoInheritanceToSimilarityFormula(tvs):
     [(sAB, nAB), (sBA, nBA)] = tv_seq_to_tv_tuple_seq(tvs)
