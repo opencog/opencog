@@ -567,7 +567,7 @@ Remeasure, because locks had to be added to the truth-value getters.
 Upshot: adding locks to the getTV path did not affect performance.
 The setTV path got faster, probably due to cleaner impl.
 
-Significant improvments in getIncoming/OutgoingSet ... not sure why.
+Significant improvements in getIncoming/OutgoingSet ... not sure why.
 
 Big drop in getNodesHandles, don't know why.
 

@@ -22,20 +22,21 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "BenchmarkModule.h"
+#include <future>
+#include <iostream>
+#include <iomanip>
+#include <thread>
+#include <time.h>
 
+#include <boost/range/irange.hpp>
+
+#include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/oc_omp.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
-#include <boost/range/irange.hpp>
-#include <iostream>
-#include <thread>
-#include <iomanip>
-#include <time.h>
-#include <future>
+
+#include "BenchmarkModule.h"
 
 using namespace std;
 using namespace opencog;
@@ -97,8 +98,9 @@ int BenchmarkModule::fullyConnectedTestConcurrent(int numAtoms)
     return atoms.size();
 }
 
-std::string BenchmarkModule
-::do_fullyConnectedTest(Request *dummy, std::list<std::string> args)
+std::string
+BenchmarkModule::do_fullyConnectedTest(Request *dummy,
+                                       std::list<std::string> args)
 {
     std::vector<std::string> argv{ std::begin(args), std::end(args) };
 
