@@ -4,4 +4,5 @@ ADD_LIBRARY(benchmark SHARED
 
 TARGET_LINK_LIBRARIES(benchmark
         server
+        attention
 )
