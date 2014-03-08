@@ -142,6 +142,7 @@ int main(int argc, char** argv)
     if (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
     {
         if (1 != benchmarker.Nloops)
+        {
             cerr << "Error: the python and atomspace tests currently do not support looping\n";
             benchmarker.Nloops = 1;
         }
