@@ -27,14 +27,14 @@ def makeUpCount(tvs):
 def deductionIndependenceBasedFormula(tvs):
     [(sAB, nAB), (sBC, nBC), (sB, nB),  (sC, _)] = tv_seq_to_tv_tuple_seq(tvs)
 
-    sNotB = 1-sB
+    sNotB = 1 - sB
 
     if sNotB == 0:
         return [TruthValue(0, 0)]
 
-    sAC = sAB*sBC  + (1-sAB)*(sC-sC*sBC)/sNotB
+    sAC = sAB * sBC + (1 - sAB) * (sC - sB * sBC) / sNotB
 
-    n = makeUpCount(tvs)*INDEPENDENCE_ASSUMPTION_DISCOUNT
+    n = makeUpCount(tvs) * INDEPENDENCE_ASSUMPTION_DISCOUNT
 
     return [TruthValue(sAC, n)]
 
