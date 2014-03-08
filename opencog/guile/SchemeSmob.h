@@ -127,9 +127,9 @@ class SchemeSmob
 		static SCM take_av(AttentionValue *);
 		static SCM ss_av_get_value(SCM);
 
-        // AttentionalFocus and AttentionalFocus Boundary
-        static SCM ss_af_boundary(void);
-        static SCM ss_set_af_boundary(SCM);
+		// AttentionalFocus and AttentionalFocus Boundary
+		static SCM ss_af_boundary(void);
+		static SCM ss_set_af_boundary(SCM);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
