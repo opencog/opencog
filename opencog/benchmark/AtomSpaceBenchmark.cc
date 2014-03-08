@@ -633,7 +633,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if 1 // ALL_AT_ONCE
+#if ALL_AT_ONCE
         std::ostringstream ss;
         for (int i=0; i<Nloops; i++) {
             ss << "(cog-delete-recursive (cog-atom " << h.value() << "))\n";
@@ -647,7 +647,7 @@ timepair_t AtomSpaceBenchmark::bm_rmAtom()
         std::string gs = ss.str();
 #else
         std::ostringstream dss;
-        dss << "(define (getty) (cog-type (cog-atom " << h.value() << ")))\n";
+        dss << "(define (getty) (cog-delete-recursive (cog-atom " << h.value() << ")))\n";
         scm->eval(dss.str());
         std::string gs = "(getty)";
 #endif
@@ -699,7 +699,7 @@ timepair_t AtomSpaceBenchmark::bm_getType()
 #endif /* HAVE_CYTHON */
 #if HAVE_GUILE
     case BENCH_SCM: {
-#if 1 // ALL_AT_ONCE
+#if ALL_AT_ONCE
         std::ostringstream ss;
         for (int i=0; i<Nloops; i++) {
             ss << "(cog-type (cog-atom " << h.value() << "))\n";
