@@ -122,7 +122,7 @@ void SCMUtilsUTest::test_utils(void)
 	TruthValuePtr tv = counter->getTruthValue();
    
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 3, getarity(result));
+	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
