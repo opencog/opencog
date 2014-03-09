@@ -132,17 +132,17 @@ void SCMUtilsUTest::test_utils(void)
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
 	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
 
-   // Test cog-get-partner ------------------------------
+	// Test cog-get-partner ------------------------------
 	Handle recount = SchemeEval::instance().eval_h("recount");
 	CHKERR;
 	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
 
-   // Test cog-pred-get-partner ------------------------------
+	// Test cog-pred-get-partner ------------------------------
 	Handle rrcnt = SchemeEval::instance().eval_h("rrcnt");
 	CHKERR;
 	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
 
-   // Test cog-get-link ------------------------------
+	// Test cog-get-link ------------------------------
 	Handle ref = SchemeEval::instance().eval_h("ref");
 	CHKERR;
 	Handle wref = SchemeEval::instance().eval_h("wref");
