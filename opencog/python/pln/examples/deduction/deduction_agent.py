@@ -10,11 +10,12 @@ For instructions, refer to the README for PLN.
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 from pln.chainers import Chainer
-from pln.rules import rules
+from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
 __VERBOSE__ = False
+
 
 class DeductionAgent(MindAgent):
     def __init__(self):
@@ -26,11 +27,12 @@ class DeductionAgent(MindAgent):
         link_types = [types.InheritanceLink]
 
         for link_type in link_types:
-            self.chainer.add_rule(rules.DeductionRule(self.chainer, link_type))
+            self.chainer.add_rule(DeductionRule(self.chainer, link_type))
 
     def run(self, atomspace):
         # Run is invoked on every cogserver cognitive cycle
-        # If it is the first time it has been invoked, then the chainer needs to be created
+        # If it is the first time it has been invoked, then the chainer
+        # needs to be created
         if self.chainer is None:
             self.create_chainer(atomspace)
             return
@@ -47,4 +49,3 @@ class DeductionAgent(MindAgent):
 
     def get_history(self):
         return self.chainer.history_index
-

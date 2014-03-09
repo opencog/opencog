@@ -25,32 +25,32 @@ Instructions:
 from opencog.cogserver import MindAgent
 from opencog.atomspace import types
 from pln.chainers import Chainer
-from pln.rules import rules
+from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
 __VERBOSE__ = False
 
 # Rules which take (chainer, link_type) as arguments
-RULES_CHAINER_LINKTYPE = [rules.DeductionRule,
-                          rules.InversionRule,
-                          rules.ModusPonensRule,
-                          rules.PreciseModusPonensRule,
-                          rules.SymmetricModusPonensRule,
-                          rules.TermProbabilityRule,
-                          rules.TransitiveSimilarityRule]
+RULES_CHAINER_LINKTYPE = [DeductionRule,
+                          InversionRule,
+                          ModusPonensRule,
+                          PreciseModusPonensRule,
+                          SymmetricModusPonensRule,
+                          TermProbabilityRule,
+                          TransitiveSimilarityRule]
 
 # Rules which take (chainer) as argument
-RULES_CHAINER = [rules.EvaluationToMemberRule,
-                 rules.InheritanceRule,
-                 rules.InheritanceToMemberRule,
-                 rules.MemberToEvaluationRule,
-                 rules.MemberToInheritanceRule,
-                 rules.NegatedSubsetEvaluationRule,
-                 rules.OrEvaluationRule,
-                 rules.SimilarityRule,
-                 rules.SubsetEvaluationRule,
-                 rules.AndEvaluationRule]
+RULES_CHAINER = [EvaluationToMemberRule,
+                 InheritanceRule,
+                 InheritanceToMemberRule,
+                 MemberToEvaluationRule,
+                 MemberToInheritanceRule,
+                 NegatedSubsetEvaluationRule,
+                 OrEvaluationRule,
+                 SimilarityRule,
+                 SubsetEvaluationRule,
+                 AndEvaluationRule]
 
 LINK_TYPES = [types.InheritanceLink,
               types.EvaluationLink,
