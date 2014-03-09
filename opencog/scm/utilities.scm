@@ -554,8 +554,9 @@
 ; form (ReferenceLink (ConceptNode "asdf") (WordNode "pqrs"))
 ; Then, the call 
 ;    (cog-get-link 'ReferenceLink 'ConceptNode (WordNode "pqrs"))
-; will return that link. Note that "endpoint-type" need not occur
-; in the first position in the link; it can appear anywhere.
+; will return a list containing that link. Note that "endpoint-type"
+; need not occur in the first position in the link; it can appear
+; anywhere.
 ;
 (define (cog-get-link link-type endpoint-type anchor)
 	(let ((lst '()))

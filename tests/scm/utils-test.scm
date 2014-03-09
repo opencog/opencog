@@ -16,4 +16,4 @@
 
 ; test cog-get-link
 (define ref (ReferenceLink (ConceptNode "asdf") (WordNode "pqrs")))
-(define wref (cog-get-link 'ReferenceLink 'ConceptNode (WordNode "pqrs")))
+(define wref (car (cog-get-link 'ReferenceLink 'ConceptNode (WordNode "pqrs"))))
