@@ -142,7 +142,8 @@ void BasicSCMUTest::test_utf8(void)
 
 // ============================================================
 
-void BasicSCMUTest::check_truth_value(const TruthValue& tv) {
+void BasicSCMUTest::check_truth_value(const TruthValue& tv)
+{
 	std::cout << "check_truth_value(" << tv << ")" << std::endl;
 
 	// added check_truth_value_node in the atomspace

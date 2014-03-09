@@ -1,0 +1,147 @@
+/*
+ * tests/scm/SCMUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class SCMUtilsUTest :  public CxxTest::TestSuite
+{
+	private:
+		AtomSpace *as;
+		Handle disorder;
+		Handle disordered;
+		Handle disor_more;
+
+	public:
+
+		SCMUtilsUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~SCMUtilsUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+
+		void tearDown(void) { }
+
+		void test_utils(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->addNode
+#define al as->addLink
+void SCMUtilsUTest::setUp(void)
+{
+	server(CogServer::createInstance);
+	as = &cogserver().getAtomSpace();
+	pm.set_atomspace(as);
+
+	// Load the required data
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so, "
+		"opencog/spacetime/libspacetime.so, "
+		"opencog/dynamics/attention/libattention.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+
+	config().set("SCM_PRELOAD",
+      "opencog/atomspace/core_types.scm, "
+      "opencog/nlp/types/nlp_types.scm, "
+      "opencog/spacetime/spacetime_types.scm, "
+      "opencog/dynamics/attention/attention_types.scm, "
+      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
+		"tests/query/unordered.scm, "
+		"tests/query/unordered-more.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] = 
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver().loadModules(paths);
+	cogserver().loadSCMModules(paths);
+
+
+	// Create an implication link that will be tested.
+	disorder = SchemeEval::instance().apply("blink", Handle::UNDEFINED);
+	disordered = SchemeEval::instance().apply("blinker", Handle::UNDEFINED);
+	disor_more = SchemeEval::instance().apply("blank", Handle::UNDEFINED);
+}
+
+/*
+ * Test of pattern matching on unordered links. This turns out to be
+ * rather stressful on the pattern matcher, as it requires a bit of a
+ * combinatoric explosion of the search space, under certain circumstances.
+ * The trick is, of course, not to search too much, and not to search too
+ * little.
+ */
+#define getlink(hand,pos) as->getOutgoing(hand,pos)
+#define getarity(hand) as->getArity(hand)
+
+void SCMUtilsUTest::test_utils(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Make sure the scheme file actually loaded!
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disorder);
+	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != disordered);
+
+
+	logger().debug("first result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("next result is %s\n", SchemeSmob::to_string(result).c_str());
+	TSM_ASSERT_EQUALS("wrong number of solutions found", 1, getarity(result));
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
