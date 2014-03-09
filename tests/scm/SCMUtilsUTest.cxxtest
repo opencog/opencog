@@ -83,14 +83,14 @@ void SCMUtilsUTest::setUp(void)
 		"opencog/nlp/types/libnlp-types.so");
 
 	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm, "
-      "opencog/scm/utilities.scm, "
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/scm/utilities.scm, "
 		"tests/scm/utils-test.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	const char * paths[] = 
+	const char * paths[] =
 	{
 		"./",
 		"../",
@@ -111,6 +111,7 @@ void SCMUtilsUTest::test_utils(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
+	// Test cog-atom-incr ---------------------------------
 	Handle counter = SchemeEval::instance().eval_h("counter");
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
@@ -120,9 +121,22 @@ void SCMUtilsUTest::test_utils(void)
 	SchemeEval::instance().eval("(test-incr-cnt)");
 	SchemeEval::instance().eval("(test-incr-cnt)");
 	TruthValuePtr tv = counter->getTruthValue();
-   
+
 	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
 	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
+
+   // Test cog-get-partner ------------------------------
+	Handle recount = SchemeEval::instance().eval_h("recount");
+	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
+
+   // Test cog-pred-get-partner ------------------------------
+	Handle rrcnt = SchemeEval::instance().eval_h("rrcnt");
+	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
+
+   // Test cog-get-link ------------------------------
+	Handle ref = SchemeEval::instance().eval_h("ref");
+	Handle wref = SchemeEval::instance().eval_h("wref");
+	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }
