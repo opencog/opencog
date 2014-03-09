@@ -551,11 +551,12 @@
 ; atom 'anchor'.
 ;
 ; Thus, for example, suppose the atom-space contains a link of the
-; form (ReferenceLink (ConcpetNode "asdf") (WordNode "pqrs"))
+; form (ReferenceLink (ConceptNode "asdf") (WordNode "pqrs"))
 ; Then, the call 
-;    (cog-get-link 'ReferenceLink 'ConcpetNode (WordNode "pqrs"))
-; will return that link. Note that "endpoint-type" need not occur
-; in the first position in the link; it can appear anywhere.
+;    (cog-get-link 'ReferenceLink 'ConceptNode (WordNode "pqrs"))
+; will return a list containing that link. Note that "endpoint-type"
+; need not occur in the first position in the link; it can appear
+; anywhere.
 ;
 (define (cog-get-link link-type endpoint-type anchor)
 	(let ((lst '()))
