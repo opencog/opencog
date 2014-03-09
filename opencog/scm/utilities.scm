@@ -771,3 +771,55 @@
 )
 
 ; ---------------------------------------------------------------------
+
+; A list of all the public (exported) utilities in this file
+(define cog-utilities (list
+'av
+'stv
+'itv
+'ctv
+'mtv
+'tv-mean
+'tv-conf
+'tv-count
+'gar
+'gdr
+'gadr
+'gddr
+'gaddr
+'gdddr
+'for-each-except
+'cog-atom-incr
+'delete-hypergraph
+'delete-type
+'clear
+'count-all
+'cog-get-atoms
+'cog-count-atoms
+'cog-report-counts
+'cog-get-partner
+'cog-pred-get-partner
+'cog-filter
+'cog-chase-link
+'cog-chase-link-chk
+'cog-map-chase-link
+'cog-par-chase-link
+'cog-map-chase-links
+'cog-par-chase-links
+'cog-map-chase-links-chk
+'cog-par-chase-links-chk
+'cog-map-chase-link-dbg
+'cog-map-apply-link
+'cog-get-link
+'cog-get-pred
+'cog-get-reference
+'filter-hypergraph
+'cartesian-prod
+))
+
+; Compile 'em all.  This should improve performance a bit.
+(for-each
+	(lambda (symb) (compile symb #:env (current-module)))
+	cog-utilities
+)
+; ---------------------------------------------------------------------
