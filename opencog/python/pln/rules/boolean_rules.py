@@ -290,8 +290,7 @@ class AndBulkEvaluationRule(Rule):
 
     def custom_compute(self, inputs, outputs):
         # It must only be used in backward chaining. The inputs will be
-        # [] and the outputs will be
-        # [And(conceptNode123, conceptNode456)]
+        # [] and the outputs will be [And(conceptNode123, conceptNode456)]
         # or similar. It uses the Python set class and won't work with
         # variables.
         [and_link_target] = outputs
