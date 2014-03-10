@@ -1,6 +1,5 @@
 from opencog.atomspace import types, TruthValue
-
-import pln.rules.formulas as formulas
+import formulas
 from pln.rule import Rule
 
 # Todo:
@@ -80,7 +79,7 @@ class AndToContextRule(Rule):
         C = chainer.new_variable()
 
         link = chainer.link(link_type, [A, B])
-        contextlink = chainer.link(CONTEXT_LINK, [C, link])
+        contextlink = chainer.link(types.ContextLink, [C, link])
 
         andAC = chainer.link(types.AndLink, [A, C])
         andBC = chainer.link(types.AndLink, [B, C])

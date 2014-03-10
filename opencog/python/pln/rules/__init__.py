@@ -5,3 +5,4 @@ from inheritance_rules import *
 from predicate_rules import *
 from quantifier_rules import *
 from temporal_rules import *
+from formulas import *

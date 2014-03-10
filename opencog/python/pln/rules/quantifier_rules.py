@@ -1,6 +1,5 @@
 from opencog.atomspace import types, TruthValue
-
-import pln.rules.formulas as formulas
+import formulas
 from pln.rule import Rule
 
 # Using 3rd-order probabilities, you can evaluate the other quantifiers.
@@ -192,7 +191,9 @@ Exists $cat: Inherits $cat cat
 |-
 Inherits cat_1 cat
 
-You can do something similar for other expressions too. It's really cool and possibly even useful! (For making inference less annoying by removing variables!)
+You can do something similar for other expressions too. It's really
+cool and possibly even useful! (For making inference less annoying
+by removing variables!)
 
 AverageLink $person
     Implication
@@ -255,7 +256,8 @@ EquivalenceLink
     Member mothers mother
 
 
-or, automatically use the LHS (or RHS) of the EquivalenceLink as a concept:
+or, automatically use the LHS (or RHS) of the EquivalenceLink as a
+concept:
 
 ForAll $person (stv 1 1)
     EquivalenceLink
@@ -300,7 +302,8 @@ Inheritance ConceptNode:1234 hopeless <1.0>
 # Subset robot 1234
 
 
-# having concepts with an intension and extension would be MUCH more useful than SUMO-style definitions!
+# having concepts with an intension and extension would be MUCH more
+useful than SUMO-style definitions!
 
 
 #AverageLink $anything <0.5>
@@ -308,9 +311,11 @@ Inheritance ConceptNode:1234 hopeless <1.0>
 
 
 
-converting it into opencog-ish concepts would make inference easier (maybe?)
-(if support for variables is broken somehow)
-it would mean you could do deduction and induction and calculating similarity links more easily.
+converting it into opencog-ish concepts would make inference easier
+(maybe?) (if support for variables is broken somehow)
+it would mean you could do deduction and induction and calculating
+similarity links more easily.
 
-except there's not enough properties info to direct-evaluate interesting similarity links, probably
+except there's not enough properties info to direct-evaluate
+interesting similarity links, probably
 '''

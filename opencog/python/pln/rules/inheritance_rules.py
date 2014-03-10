@@ -1,5 +1,5 @@
 from opencog.atomspace import types, TruthValue
-import pln.rules.formulas as formulas
+import formulas
 from pln.rule import Rule
 
 '''

@@ -99,7 +99,7 @@ class PLNExamples(object):
         # Todo: The variable 'all_rules' is not used
         all_rules = AllRules(self.atomspace, chainer)
         for r in rules_nodes:
-            chainer.add_rule(AllRules.lookup_rule(r))
+            chainer.add_rule(all_rules.lookup_rule(r))
 
         print [r.full_name for r in chainer.rules]
 
@@ -110,13 +110,16 @@ class PLNExamples(object):
             self.failed.append(filename)
             return False
 
+
+# Todo: Could the following be encapsulated?
 class AllRules(object):
     def __init__(self, atomspace, chainer):
-        #from pln.rules import rules, temporal_rules, boolean_rules, quantifier_rules, context_rules, predicate_rules
-        #from pln.rules import *
-
         # contains every rule
-        self.chainer = Chainer(atomspace, stimulateAtoms = False, agent = self, learnRuleFrequencies=False)
+        self.chainer = Chainer(atomspace,
+                               stimulateAtoms=False,
+                               agent=self,
+                               learnRuleFrequencies=False)
+
         # contains only some rules
         self.test_chainer = chainer
 

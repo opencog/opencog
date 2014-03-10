@@ -1,5 +1,5 @@
 from opencog.atomspace import types, TruthValue
-import pln.rules.formulas as formulas
+import formulas
 from pln.rule import Rule
 
 '''
@@ -220,7 +220,9 @@ class ExtensionalLinkEvaluationRule(Rule):
 
 class IntensionalLinkEvaluationRule(Rule):
     """
-    Using (AttractionLink A x) and (AttractionLink B x), evaluate (IntensionalInheritance A B), (IntensionalInheritance B A), and (IntensionalSimilarityLink A B).
+    Using (AttractionLink A x) and (AttractionLink B x), evaluate
+    (IntensionalInheritance A B), (IntensionalInheritance B A), and
+    (IntensionalSimilarityLink A B).
     """
     def __init__(self, chainer):
         x = chainer.new_variable()
