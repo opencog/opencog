@@ -29,7 +29,7 @@
 
 #include <opencog/util/mt19937ar.h>
 #include <opencog/util/random.h>
-#include <opencog/util/lazy_normal_selector.h>
+#include <opencog/util/lazy_random_selector.h>
 #include <opencog/util/dorepeat.h>
 
 #include "../combo/iostream_combo.h"
@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     // // ~debug print    
 
     // sampling without replacement
-    lazy_normal_selector smp_wor(max_var);
+    lazy_random_selector smp_wor(max_var);
 
     // sampling with replacement
     auto smp_wr = [&]() -> unsigned { return randGen().randint(max_var); };
@@ -143,7 +143,8 @@ int main(int argc, char** argv)
             tr.append_child(head, pos_swap(id::logical_and)) : pre_it();
         // add litterals
         dorepeat(cc) {
-            arity_t idx = (biased_randbool(repl_prob) ? smp_wr() : smp_wor()) + 1;
+            arity_t idx =
+                (biased_randbool(repl_prob) ? smp_wr() : smp_wor.select()) + 1;
             if (biased_randbool(0.5)) // whether the litteral is negative
                 idx *= -1;
             tr.append_child(child, argument(idx));
