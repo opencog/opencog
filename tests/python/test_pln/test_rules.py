@@ -4,7 +4,7 @@ raise unittest.SkipTest("Unit test temporarily disabled - see: https://github.co
 from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, types, Atom, TruthValue
-import pln.rules.rules as rules
+from pln.rules import *
 from pln.chainers import Chainer
 
 class RulesTest(TestCase):
@@ -40,12 +40,12 @@ class RulesTest(TestCase):
 #    def _apply_rule(self, rule, 
 
     def test_standardize_apart_input_output(self):
-        rule = rules.InversionRule(self.chainer, types.InheritanceLink)
+        rule = InversionRule(self.chainer, types.InheritanceLink)
 
         (input, output) = rule.standardize_apart_input_output(self.chainer)
 
     def test_InversionRule(self):
-        rule = rules.InversionRule(self.chainer, types.InheritanceLink)
+        rule = InversionRule(self.chainer, types.InheritanceLink)
         
         self._inh_animal_breathe()
 
@@ -53,7 +53,7 @@ class RulesTest(TestCase):
         print result
 
     def test_InversionRule_backward(self):
-        rule = rules.InversionRule(self.chainer, types.InheritanceLink)
+        rule = InversionRule(self.chainer, types.InheritanceLink)
         
         self._inh_animal_breathe()
         self.inh_breathe_animal = self.atomspace.add_link(types.InheritanceLink, [self.breathe, self.animal])
