@@ -1,5 +1,5 @@
-PLN Documentation
-=================
+Probabilistic Logic Networks (PLN) Documentation
+================================================
 
 ## Summary
 
@@ -133,7 +133,7 @@ bird_animal = atomspace.add_link(types.InheritanceLink, [bird, animal], TruthVal
 Then, proceed to load PLN as follows:
 ```
 from pln.chainers import Chainer
-from pln.rules import rules
+from pln.rules import *
 ```
 ##### Create a chainer
     chainer = Chainer(atomspace)
@@ -141,7 +141,7 @@ from pln.rules import rules
 ##### Choose what rules and link types you want to include in the Chainer
 ```
 link_type = types.InheritanceLink
-rule = rules.DeductionRule(chainer, link_type)
+rule = DeductionRule(chainer, link_type)
 chainer.add_rule(rule)
 ```
 
@@ -198,7 +198,7 @@ implemented by classes that derive from the [Rule class][].
 
 The add\_rule method takes a chainer and a link type as parameters.
 
-You can view the list of implemented rules in [rules.py][].
+You can view the list of implemented rules in the **rules** folder.
 
 After performing [inference][], it stores the results in the **trails**
 and **history\_index** members.
@@ -212,7 +212,7 @@ of the [AbstractChainer class][].
 Each rule is associated with a formula, as described [here][rules]. The
 formula determines the truth value of the inference output.
 
-The formulas are defined in [formulas.py][].
+The formulas are defined in **formulas.py** in the **rules** folder.
 
 For example, the deduction formula is defined as:
 ```
@@ -284,10 +284,8 @@ If set, the \_give\_stimulus method is called, to be applied by the
 
   [rules]: http://wiki.opencog.org/w/New_PLN_Design,_2013#Rules_and_formulas
   [Rule class]: http://buildbot.opencog.org/doxygen/d8/d78/classpython_1_1pln_1_1rules_1_1rules_1_1Rule.html
-  [rules.py]: http://buildbot.opencog.org/doxygen/db/d7d/pln_2rules_2rules_8py.html
   [inference]: http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
   [AbstractChainer class]: http://buildbot.opencog.org/doxygen/d4/d21/classpython_1_1pln_1_1chainers_1_1AbstractChainer.html
-  [formulas.py]: http://buildbot.opencog.org/doxygen/d1/de2/pln_2formulas_8py.html
 
   [Chainer class]: http://buildbot.opencog.org/doxygen/db/d69/classpython_1_1pln_1_1chainers_1_1Chainer.html
   [AbstractChainer class]: http://buildbot.opencog.org/doxygen/d4/d21/classpython_1_1pln_1_1chainers_1_1AbstractChainer.html

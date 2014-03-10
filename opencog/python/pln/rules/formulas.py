@@ -1,5 +1,9 @@
 from opencog.atomspace import TruthValue
 
+# Todo: Could this file be broken up so that there would be a
+# one-to-one correspondence between 'formulas' and 'rules' files?
+
+# Todo: How should these values be chosen properly?
 DEDUCTION_TERM_WEIGHT = 1.0
 INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
@@ -533,4 +537,3 @@ def invert(n):
 
 def negate(n):
     return 1.0 - n
-
