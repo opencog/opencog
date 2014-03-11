@@ -300,6 +300,15 @@ bool IndefiniteTruthValue::isSymmetric() const
     return symmetric;
 }
 
+// Merge formula, as specified by PLN.
+TruthValuePtr IndefiniteTruthValue::merge(TruthValuePtr other) const
+{
+    if (other->getConfidence() > getConfidence()) {
+        return other->clone();
+    }
+    return clone();
+}
+
 std::string IndefiniteTruthValue::toString() const
 {
     char buf[1024];

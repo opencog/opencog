@@ -558,7 +558,7 @@
 
 (define (batch-all-pair-wildcard-counts lg_rel)
 	(begin
-		(start-trace "Start wildcard-counting\n")
+		(start-trace "Start batched wildcard-counting\n")
 
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
