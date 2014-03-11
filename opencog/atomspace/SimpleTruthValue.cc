@@ -70,6 +70,15 @@ confidence_t SimpleTruthValue::getConfidence() const
     return countToConfidence(count);
 }
 
+// This is the merge formula appropriate for PLN.
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other) const
+{
+    if (other->getConfidence() > getConfidence()) {
+        return other->clone();
+    }
+    return clone();
+}
+
 std::string SimpleTruthValue::toString() const
 {
     char buf[1024];
