@@ -29,16 +29,16 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
-bool Pattern::addVariableBinding(Handle variableH, Handle valueH)
-{
-	if (bindings.find(variableH) == bindings.end())
-	{
-		bindings.insert(std::pair<Handle, Handle>(variableH,valueH));
-		return true;
-	}
-	else
-		return false;
+//bool Pattern::addVariableBinding(Handle variableH, Handle valueH)
+//{
+//	if (bindings.find(variableH) == bindings.end())
+//	{
+//		bindings.insert(std::pair<Handle, Handle>(variableH,valueH));
+//		return true;
+//	}
+//	else
+//		return false;
 
-}
+//}
 
 

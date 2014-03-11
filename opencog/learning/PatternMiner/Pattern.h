@@ -36,38 +36,38 @@ namespace opencog
  namespace PatternMining
 {
 
- class Skeleton
- {
-public:
-	vector<Handle> skeletonLinks;
-	Skeleton(){}
-    Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
+// class Skeleton
+// {
+//public:
+//	vector<Handle> skeletonLinks;
+//	Skeleton(){}
+//    Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
 
-    // Make sure the input Links are connected before calling this function
-    static Skeleton* extractSkeleton(vector<Handle> inputLinks);
+//    // Make sure the input Links are connected before calling this function
+//    static Skeleton* extractSkeleton(vector<Handle> inputLinks);
 
- };
+// };
 
- class Pattern
- {
-public:
-	Skeleton* skeleton;
-	map<Handle, Handle> bindings; // bindings of the variables map<varaibleName, varaibleValue>
+// class Pattern
+// {
+//public:
+//	Skeleton* skeleton;
+//	map<Handle, Handle> bindings; // bindings of the variables map<varaibleName, varaibleValue>
 
-    Pattern(Skeleton* _skeleton, map<Handle, Handle>& _bindings)
-	{
-		skeleton = _skeleton;
-        bindings = _bindings;
-    }
+//    Pattern(Skeleton* _skeleton, map<Handle, Handle>& _bindings)
+//	{
+//		skeleton = _skeleton;
+//        bindings = _bindings;
+//    }
         
-    Pattern(Skeleton* _skeleton)
-	{
-		skeleton = _skeleton;
-    }
+//    Pattern(Skeleton* _skeleton)
+//	{
+//		skeleton = _skeleton;
+//    }
 
-    bool addVariableBinding(Handle variableH, Handle valueH);
+//    bool addVariableBinding(Handle variableH, Handle valueH);
 
- };
+// };
 
 }
 }

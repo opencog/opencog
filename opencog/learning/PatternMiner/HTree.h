@@ -41,12 +41,12 @@ namespace opencog
      class HTreeNode
      {
      public:
-        Skeleton* skeleton;
-        map<Pattern*, HandleSeqSeq> PatternsToInstances;
+        HandleSeq pattern;
+        vector<HandleSeqSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
         vector<HTreeNode*> parentLinks;
         vector<HTreeNode*> childLinks;
 
-        HTreeNode(Skeleton* _skeleton):skeleton(_skeleton)
+        HTreeNode()
         {
             parentLinks.clear();
             childLinks.clear();
@@ -58,11 +58,10 @@ namespace opencog
      {
 
      public:
-         unsigned int var_num;
+
          HTree()
          {
-             rootNode = new HTreeNode(0); // the rootNode with an empty Skeleton
-             var_num = 0;
+             rootNode = new HTreeNode(); // the rootNode with no parents
          }
 
          // search in the HTree to find the corresponding pattern(HTreeNode) for an input instance
