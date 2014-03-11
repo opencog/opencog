@@ -304,7 +304,7 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
-            rc = scm_acons(scount, count, rc);
+			rc = scm_acons(scount, count, rc);
 			return rc;
 		}
 		case COUNT_TRUTH_VALUE:
