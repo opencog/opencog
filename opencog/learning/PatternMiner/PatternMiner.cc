@@ -33,6 +33,7 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
+
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
@@ -66,7 +67,6 @@ void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& ord
     }
 }
 
-
 void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks)
 {
 
@@ -80,13 +80,14 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
            {
                if (varNameMap.find(h) != varNameMap.end())
                {
-
+                   renameOutgoingLinks.push_back(varNameMap[h]);
                }
                else
                {
-
                    string var_name = "$var_"  + toString(varNameMap.size() + 1);
                    Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name, TruthValue::TRUE_TV());
+                   varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
+                   renameOutgoingLinks.push_back(var_node);
 
                }
 
@@ -95,11 +96,9 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
         else
         {
              HandleSeq _renameOutgoingLinks;
-             findAndRenameVariablesForOneLink(_renameOutgoingLinks);
+             findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
              Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks,TruthValue::TRUE_TV());
-             outgoingLinks.push_back(reLink);
-
-
+             renameOutgoingLinks.push_back(reLink);
 
         }
 
@@ -116,9 +115,11 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern)
     {
         HandleSeq renameOutgoingLinks;
         findAndRenameVariablesForOneLink(link, varNameMap, renameOutgoingLinks);
-        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(h),renameOutgoingLinks,TruthValue::TRUE_TV());
+        Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks,TruthValue::TRUE_TV());
         rebindedPattern.push_back(rebindedLink);
     }
+
+    return rebindedPattern;
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
@@ -220,5 +221,14 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
     }
 
     return orderedHandles;
+
+}
+
+bool PatternMiner::checkPatternExist(const string& patternKeyStr)
+{
+    if (keyStrToHTreeNodeMap.find(patternKeyStr) == keyStrToHTreeNodeMap.end())
+        return false;
+    else
+        return true;
 
 }

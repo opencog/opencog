@@ -68,12 +68,16 @@ namespace PatternMining
      }
  };
 
+
  class PatternMiner
  {
 private:
     HTree* htree;
     AtomSpace* atomSpace;
     AtomSpace* originalAtomSpace;
+
+    // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
+    map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
@@ -99,6 +103,7 @@ private:
     // Return unified ordered Handle vector
     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
+    // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
 
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
@@ -113,6 +118,7 @@ public:
         atomSpace = new AtomSpace();
     }
 
+    bool checkPatternExist(const string& patternKeyStr);
 
  };
 
