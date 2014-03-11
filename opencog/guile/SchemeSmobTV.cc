@@ -296,12 +296,15 @@ SCM SchemeSmob::ss_tv_get_value (SCM s)
 			SimpleTruthValue *stv = static_cast<SimpleTruthValue *>(tv);
 			SCM mean = scm_from_double(stv->getMean());
 			SCM conf = scm_from_double(stv->getConfidence());
+			SCM count = scm_from_double(stv->getCount());
 			SCM smean = scm_from_locale_symbol("mean");
 			SCM sconf = scm_from_locale_symbol("confidence");
+			SCM scount = scm_from_locale_symbol("count");
 	
 			SCM rc = SCM_EOL;
 			rc = scm_acons(sconf, conf, rc);
 			rc = scm_acons(smean, mean, rc);
+			rc = scm_acons(scount, count, rc);
 			return rc;
 		}
 		case COUNT_TRUTH_VALUE:

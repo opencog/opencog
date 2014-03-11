@@ -35,7 +35,7 @@ cdef extern from "<vector>" namespace "std":
     cdef output_iterator back_inserter(vector[cHandle])
 
 ### TruthValue
-ctypedef float count_t
+ctypedef double count_t
 ctypedef float confidence_t
 ctypedef float strength_t
 
