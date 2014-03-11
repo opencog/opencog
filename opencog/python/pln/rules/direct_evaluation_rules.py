@@ -308,7 +308,8 @@ class MemberToEvaluationRule(Rule):
         predicate_node = self.chainer.node(types.PredicateNode, concept.name)
 
         evaluation_link = self.chainer.link(types.EvaluationLink,
-                                            [predicate_node, arg])
+                             [predicate_node,
+                             self.chainer.link(types.ListLink, [arg])])
         tv = member_link.tv
 
         return [evaluation_link], [tv]
