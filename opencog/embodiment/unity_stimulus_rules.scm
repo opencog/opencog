@@ -9,7 +9,7 @@
 ; Currently, stimulus can be an event or an action performed by other agents.
 ; e.g. A punched B, from the perspective of B, a nasty action has been performed 
 ; which may make it angry. But from the perspective of other agent, say C, this 
-; is an event that it percieved. If B is a good friend of C, C may also gets 
+; is an event that it perceived. If B is a good friend of C, C may also gets 
 ; angry.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

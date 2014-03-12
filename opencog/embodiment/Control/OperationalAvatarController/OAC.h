@@ -238,7 +238,10 @@ public:
      *
      * For details about formats of Modulators, DemandGoals and Rules,
      * please refer to file "rules_core.scm", 
-     * and "pet_rules.scm" is a good example of using them.     
+     * and "pet_rules.scm" is a good example of using them.
+     *
+     * XXX What is this int return? It returns 0 no matter what...
+     *
      */ 
     int addRulesToAtomSpace();
 
