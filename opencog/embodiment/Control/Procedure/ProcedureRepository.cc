@@ -26,13 +26,12 @@
 namespace opencog { namespace Procedure {
 
 ProcedureRepository::ProcedureRepository(pai::PAI& pai) :
-        builtInRepository(*(new BuiltInProcedureRepository(pai)))
+    builtInRepository(pai)
 {
 }
 
 ProcedureRepository::~ProcedureRepository()
 {
-    delete &builtInRepository;
 }
 
 bool ProcedureRepository::contains(const std::string& name) const
