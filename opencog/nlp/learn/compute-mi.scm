@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of language word pairs.
 ;
-; Copyright (c) 2013 Linas Vepstas
+; Copyright (c) 2013, 2014 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -329,6 +329,129 @@
 ; Returns the two wild-card EvaluationLinks
 
 (define (compute-pair-wildcard-counts word lg_rel)
+
+	; get-ev-linkset returns a list of zero or one EvaluationLinks
+	; that contain the given ListLink.
+	;
+	; list-lnk is the ListLink we are given.  We want to find the
+	; EvaluationLink that contains it.  That EvaluationLink should have
+	; lg_rel as its predicate type, and the ListLink in the expected
+	; location. That is, given ListLink, we are looking for 
+	;
+	;    EvaluationLink
+	;        lg_rel
+	;        ListLink
+	;
+	; The result of this search is the ev-link-list, which should be
+	; of length zero or one.
+	(define (get-ev-linkset list-lnk)
+		(filter
+			(lambda (evl)
+				(define oset (cog-outgoing-set evl))
+				(and
+					(eq? 'EvaluationLink (cog-type evl))
+					(eq? lg_rel (car oset))
+					(eq? list-lnk (cadr oset))
+				)
+			)
+			(cog-incoming-set list-lnk)
+		)
+	)
+
+	; Same as above, except it returns either #f or the EvaluationLink
+	(define (get-ev-link list-lnk)
+		(define ev-linkset (get-ev-linkset list-lnk))
+		(and
+			(null? ev-linkset)
+			(car ev-linkset)
+		)
+	)
+
+	(let* (
+			; list-links are all the ListLinks in which the word apears
+			(list-links
+				(filter
+					(lambda (lnk) (eq? 'ListLink (cog-type lnk)))
+					(cog-incoming-set word)
+				)
+			)
+			; The left-stars have the word in the right slot and
+			; have some WordNode (item-type) in the left slot.
+			; We must check for WordNode in this spot, as some of
+			; these ListLinks may have AnyNode in that slot.
+			(left-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and 
+							(eq? item-type (cog-type (car oset)))
+							(eq? word (cadr oset))
+						)
+					)
+					list-links
+				)
+			)
+			; The right-stars have the word in the left slot and
+			; have some WordNode (item-type) in the right slot.
+			(right-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and 
+							(eq? word (car oset))
+							(eq? item-type (cog-type (cadr oset)))
+						)
+					)
+					list-links
+				)
+			)
+
+			; left-evs are the EvaluationLinks above the left-stars
+			; That is, they have the wild-card in the left-hand slot.
+			(left-evs (filter-map get-ev-link left-stars))
+			(right-evs (filter-map get-ev-link right-stars))
+
+			; The total occurance counts
+			(left-total (get-total-atom-count left-evs))
+			(right-total (get-total-atom-count right-evs))
+		)
+
+		(begin
+			; Create the two evaluation links to hold the counts.
+			(define left-star #f)
+			(define right-star #f)
+
+			(if (< 0 left-total)
+				(begin
+					(set! left-star
+						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
+							(ListLink (AnyNode "left-word") word)
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom left-star)
+				)
+			)
+			(if (< 0 right-total)
+				(begin
+					(set! right-star
+						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
+							(ListLink word (AnyNode "right-word"))
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom right-star)
+				)
+			)
+
+			; What the hell, return the two star-counts
+			(list left-star right-star)
+		)
+	)
+)
+
+; Same as above, but using the pattern matcher.
+(define (compute-pair-wildcard-counts-pm word lg_rel)
 
 	; Define the bind links that we'll use with the pattern matcher.
 	; left-bind has the wildcard on the left.

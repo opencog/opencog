@@ -347,6 +347,11 @@ Load 10.3M atoms, which takes about 10 minutes cpu time to load
 server).
 
 Estimate: 226K words @ 250/minute = 1000 minutes = 17 hours. Ouch. 
+Actual: about 1300 seconds per 100 words: 13 seconds/word or 4
+words/minute or 39 days to complete. Unacceptable.  Wild gues that
+the use of the pattern matcher is the bottleneck. So retry with a
+manually written matcher.
+
 
 
 Next step: Minimum Spanning Tree parsing
@@ -803,6 +808,7 @@ Takes about 105 millisecs to clear 90 eval-links from the write-back
 queues. This each eval-link is 5 atoms (eval, defind, list, word, word)
 so this works out to 5*90 atoms /0.105 seconds = 4.3KAtoms/sec 
 which is still pretty pathetic... 
+
 
 
 Misc 
