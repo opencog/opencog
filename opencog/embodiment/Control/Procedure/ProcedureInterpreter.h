@@ -80,7 +80,8 @@ public:
     void stopProcedure(RunningProcedureID id);
 
     // return the combo interpreter object
-    ComboInterpreter& getComboInterpreter() const;
+    // XXX this method is not used anywhere
+    const ComboInterpreter& getComboInterpreter() const;
 
 protected:
     typedef std::map<RunningProcedureID, RunningProcedure> Map;
@@ -89,13 +90,13 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
-    ComboInterpreter* comboInterpreter;
+    ComboInterpreter comboInterpreter;
     Map _map;
     Set _failed;
     ResultMap _resultMap;
     UnifierResultMap _unifierResultMap;
 
-    pai::PAI* _pai;
+    pai::PAI& _pai;
 
     RunningProcedureID _next;
 };

@@ -40,7 +40,7 @@ void ProcedureInterpreter::run(NetworkElement *ne)
 
     // If a separate Agent is used for comboInterpreter, just comment the
     // next line :
-    comboInterpreter->run(ne);
+    comboInterpreter.run(ne);
 
     Set toBeRemoved;
     // Runs each pending RunningBuildInProcedure and checks status of any procedure.
@@ -58,12 +58,12 @@ void ProcedureInterpreter::run(NetworkElement *ne)
             }
         } else {
             RunningProcedureId rcpID = get<RunningProcedureId>(it->second);
-            if (comboInterpreter->isFinished(rcpID)) {
+            if (comboInterpreter.isFinished(rcpID)) {
                 toBeRemoved.insert(it->first);
-                if (comboInterpreter->isFailed(rcpID)) {
+                if (comboInterpreter.isFailed(rcpID)) {
                     _failed.insert(it->first);
                 } else {
-                    _resultMap[it->first] = comboInterpreter->getResult(rcpID);
+                    _resultMap[it->first] = comboInterpreter.getResult(rcpID);
                 }
             }
         }
@@ -74,7 +74,8 @@ void ProcedureInterpreter::run(NetworkElement *ne)
     }
 }
 
-ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
+ProcedureInterpreter::ProcedureInterpreter(PAI& p)
+    : _pai(p), comboInterpreter(_pai)
 {
     // Initialize the random generator
     unsigned long rand_seed;
@@ -85,13 +86,11 @@ ProcedureInterpreter::ProcedureInterpreter(PAI& p) : _pai(&p)
     }
     randGen().seed(rand_seed);
     logger().info("Created random number generator for ComboInterpreter with seed %lu", rand_seed);
-    comboInterpreter = new ComboInterpreter(*_pai);
     _next = 0;
 }
 
 ProcedureInterpreter::~ProcedureInterpreter()
 {
-    delete comboInterpreter;
 }
 
 RunningProcedureID ProcedureInterpreter::runProcedure(
@@ -102,7 +101,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(
     if (p.getType() == COMBO) {
         logger().debug("ProcedureInterpreter - Running a combo procedure.");
 
-        RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
+        RunningProcedureId rcpID = comboInterpreter.runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(std::make_pair(++_next, rcpID));
     } else if (p.getType() == BUILT_IN) {
         logger().debug("ProcedureInterpreter - Running a builtin procedure.");
@@ -125,7 +124,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(const GeneralProcedure& p,
     if (p.getType() == COMBO) {
         logger().debug(
                      "ProcedureInterpreter - Running a combo procedure.");
-        RunningProcedureId rcpID = comboInterpreter->runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
+        RunningProcedureId rcpID = comboInterpreter.runProcedure(((const ComboProcedure&) p).getComboTree(), arguments);
         _map.insert(std::make_pair(++_next, rcpID));
 
     } else {
@@ -146,7 +145,7 @@ bool ProcedureInterpreter::isFinished(RunningProcedureID id) const
         if ((rbp = boost::get<RunningBuiltInProcedure>(&rp))) {
             result = rbp->isFinished();
         } else if ((rpId = boost::get<RunningProcedureId>(&rp))) {
-            result = comboInterpreter->isFinished(*rpId);
+            result = comboInterpreter.isFinished(*rpId);
         }
     }
     logger().debug("ProcedureInterpreter - isFinished(%lu)? Result: %d.",
@@ -163,7 +162,7 @@ bool ProcedureInterpreter::isFailed(RunningProcedureID id) const
         const RunningProcedureId* rpId;
 
         if ((rpId = boost::get<RunningProcedureId>(&(it->second)))) {
-            result = comboInterpreter->isFailed(*rpId);
+            result = comboInterpreter.isFailed(*rpId);
 
         } else {
             result = boost::get<RunningBuiltInProcedure>(it->second).isFailed();
@@ -194,7 +193,7 @@ combo::vertex ProcedureInterpreter::getResult(RunningProcedureID id)
             result = rbp->getResult();
 
         } else if ((rpId = boost::get<RunningProcedureId>(&rp))) {
-            result = comboInterpreter->getResult(*rpId);
+            result = comboInterpreter.getResult(*rpId);
         }
 
     } else {
@@ -222,7 +221,7 @@ void ProcedureInterpreter::stopProcedure(RunningProcedureID id)
     Map::iterator it = _map.find(id);
     if (it != _map.end()) {
         RunningProcedureId* rpId = boost::get<RunningProcedureId>(&(it->second));
-        comboInterpreter->stopProcedure(*rpId);
+        comboInterpreter.stopProcedure(*rpId);
         _map.erase(it);
     }
     Set::iterator failed_it = _failed.find(id);
@@ -235,9 +234,9 @@ void ProcedureInterpreter::stopProcedure(RunningProcedureID id)
     }
 }
 
-ComboInterpreter& ProcedureInterpreter::getComboInterpreter() const
+const ComboInterpreter& ProcedureInterpreter::getComboInterpreter() const
 {
-    return *comboInterpreter;
+    return comboInterpreter;
 }
 
 } // ~namespace Procedure
