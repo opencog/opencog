@@ -292,49 +292,60 @@ these scripts:
 load:
    compute-mi.scm  Look at it. Go to the bottom, and run (do-em-all)
 
+If tracing is turned on, a trace file is written to /tmp/progress.
+
 Example stats and performance:
 current fr_pairs db has 16785 words and 177960 pairs.
 
 This takes 17K + 2x 178K = 370K total atoms loaded.
 These load up in 10-20 seconds-ish or so.
 
+New fr_pairs has 225K words, 5M pairs (10.3M atoms):
+Load 10.3M atoms, which takes about 10 minutes cpu time to load
+20-30 minutes wall-clock time (500K atoms per minute, 9K/second
+on an overloaded server).
+
 RSS for cogserver: 436MB, holding approx 370K atoms
 So this is about 1.2KB per atom, all included. Atoms are a bit fat...
 ... loading all pairs is very manageable even for modest-sized machines.
 
-(from direct measurement:
+RSS for cogserver: 10GB, holding 10.3M atoms
+So this is just under 1KB per atom.
+
+(By comparison, direct measurement of atom size i.e. class Atom:
 typical atom size: 4820384 / 35444 = 136 Bytes/atom
 this is NOT counting indexes, etc.)
 
-
 Wild-card pair-count was taking about 30 per minute.  After extensive
 bug fixing and tuning in the cogserver, its now running at hundreds
-per minute (maybe 10x faster than before). This is still very slow:
-if your goal was to only compute word-pair MI, you could do it a lot
-faster by not using opencog, and writing some custom perl scripts.
-The goal here is to not script-hack, but use an integrated environment,
-and so we use opencog, and deal with some slowness.
+per minute (maybe 10x faster than before).  An additional round of
+fixes, avoiding the pattern matcher, has added another 50x per
+improvement.  The rate is strongly dependent on the size of the
+dataset.
 
-So total processing time will be  17K words x (minute/300 words) = 
-60 minutes = 1 hour .. be patient.
+For dataset (fr_pairs) with 225K words, 5M pairs: 
+Current rate is 150 words/sec or 9K words/min.
 
-If tracing is turnied on, a trace file is written to /tmp/progress.
+XXX !??? After wild-card count finshes, there is a 5563 second 
+pause before batch counting starts. cogserver runs at 100%.
+WTF is this? Garbage collection? Flushing of SQL queues?
 
-After the single-word counts complete, and all-pair count is done. This
-is fast, takes a couple of minutes.
+After the single-word counts complete, and all-pair count is done.
+This is fast, takes a couple of minutes.
 
-Finally, an MI compute stage.  Currently, it did 2910 words in 73 mins
-== 40 per minute ... again, pathetic.  Will take 7 hours (420 minutes)
-to complete ...
+Next: batch-logli takes 540 seconds for 225K words
 
-Wooot!  After numerous fixes, to avoid the old atomspace brain-damage
-we are now up to about 250 per minute on wild-card, that's an 8x speedup!
-Although thats still slower than e.g. a perl script ... oh well,
-price of generality.  Avoiding the pattern matcher would go a long way.
+Finally, an MI compute stage.
+We are now up to about 250 per minute on wild-card, that's an 8x speedup!
+That's on the small dataset, on the large dataset, that 8 per minute.
+Ouch.  Rewrite w/o pattern matcher, get: 60 words/sec = 3.6K per minute
+Thats another 500x speedup... 500x wow.  This rate is per-word, not
+per word-pair.
 
-(This script currently uses the patten matcher cause I got lazy. 
-It could be speeded up by avoiding the pattern matcher, since the desired
-patterns are really quite simple).
+... at first. Then there are long pauses, which seem to be related to
+SQL queue flushing.  The rate then drops to about half at 30 words/sec
+or 1.8K/min.
+
 
 Update Feb 2014: fr_pairs now contains 10.3M atoms
 SELECT count(uuid) FROM Atoms;  gives  10324863 (10.3M atoms)
@@ -342,28 +353,6 @@ select count(uuid) from atoms where type = 77; gives  226030 (226K words)
 select count(uuid) from atoms where type = 8;  gives 5050835 (5M pairs ListLink)
 select count(uuid) from atoms where type = 27; gives 5050847 (5M pairs EvaluationLink)
 
-Load 10.3M atoms, which takes about 10 minutes cpu time to load
-20 minutes wall-clock time (500K atoms per minute, 9K/second on a busy
-server).
-
-Estimate: 226K words @ 250/minute = 1000 minutes = 17 hours. Ouch. 
-Actual: about 1300 seconds per 100 words: 13 seconds/word or 4
-words/minute or 39 days to complete. Unacceptable.  Wild gues that
-the use of the pattern matcher is the bottleneck. So retry with a
-manually written matcher.
-
-And ... its a zillion times faster.  This suggests that there's a
-serious bug in the pattern matcher, probably with finding the starting
-conditions.
-
-10K in 67 secs .. Wow! Thats ... fast. about 150 words/sec
-That's a 50x per improvements over the previous code.
-
-Pair MI is being computed at the rate of 1000 per 7000 seconds
-1 per 7 seconds, 8 per minute ... for 10.3M will take 900 days.
-Impossible.  Another Bind-Link bug ...
-
-compute-pair-mi
 
 XXX
 single-word probs seem to be un-computed?
