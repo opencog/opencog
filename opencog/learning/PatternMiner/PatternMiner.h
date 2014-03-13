@@ -30,6 +30,7 @@
 #include "HTree.h"
 #include <cstdio>
 #include <opencog/atomspace/AtomSpace.h>
+#include <thread>
 
 using namespace std;
 
@@ -79,6 +80,10 @@ private:
     // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
     map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
+    std::thread *threads;
+
+    unsigned int THREAD_NUM;
+
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
     //    (InheritanceLink
@@ -111,14 +116,15 @@ private:
 
     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
+    void extenOnePatternTask();
+
 public:
-    PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
-    {
-        htree = new HTree();
-        atomSpace = new AtomSpace();
-    }
+    PatternMiner(AtomSpace* _originalAtomSpace);
 
     bool checkPatternExist(const string& patternKeyStr);
+
+    void runPatternMiner();
+
 
  };
 

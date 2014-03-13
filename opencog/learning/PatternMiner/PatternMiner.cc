@@ -33,6 +33,19 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
+PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
+{
+    htree = new HTree();
+    atomSpace = new AtomSpace();
+
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    if (system_thread_num > 2)
+        THREAD_NUM = system_thread_num - 2;
+    else
+        THREAD_NUM = 1;
+
+    threads = new thread[THREAD_NUM];
+}
 
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
@@ -231,4 +244,18 @@ bool PatternMiner::checkPatternExist(const string& patternKeyStr)
     else
         return true;
 
+}
+
+void PatternMiner::extenOnePatternTask()
+{
+
+}
+
+void PatternMiner::runPatternMiner()
+{
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+        threads[i] = std::thread([this]{this->extenOnePatternTask();}); // using C++11 lambda-expression
+        threads[i].join();
+    }
 }
