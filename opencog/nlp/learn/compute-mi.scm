@@ -450,7 +450,9 @@
 	)
 )
 
-; Same as above, but using the pattern matcher.
+; Same as above, but using the pattern matcher. CAUTION: For large
+; datasets, this runs 50 times slower than the above! We keep the
+; code here for debugging and historical reasons !?
 (define (compute-pair-wildcard-counts-pm word lg_rel)
 
 	; Define the bind links that we'll use with the pattern matcher.
@@ -848,6 +850,67 @@
 ;
 (define (compute-pair-mi right-word lg_rel)
 
+	; Get the word-pair grand-total
+	(define pair-total (get-pair-total lg_rel))
+
+	(let* (
+			; list-links are all the ListLinks in which the word appears
+			(left-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and
+							(equal? 'ListLink (cog-type lnk))
+							(equal? item-type (cog-type (car oset)))
+							(equal? right-word (cadr oset))
+						)
+					)
+					(cog-incoming-set right-word)
+				)
+			)
+			; left-evs are the EvaluationLinks above the left-stars
+			; That is, they have the wild-card in the left-hand slot.
+			(left-evs (filter-map get-ev-link left-stars))
+		)
+		(begin
+			(for-each
+
+				; This lambda sets the mutual information for each word-pair.
+				(lambda (pair)
+					(let* (
+							; the left-word of the word-pair
+							(left-word (gadr pair))
+							(r-logli (get_right_wildcard_logli left-word lg_rel))
+							(l-logli (get_left_wildcard_logli right-word lg_rel))
+
+							; Compute the logli log_2 P(l,r)/P(*,*)
+ 							(atom (compute-atom-logli pair pair-total))
+
+							; the count truth value components
+							(atv (cog-tv->alist (cog-tv atom)))
+							(meen (assoc-ref atv 'mean))
+							(ll (assoc-ref atv 'confidence))
+							(cnt (assoc-ref atv 'count))
+
+							; Subtract the left and right entropies to get the
+							; mutual information (at last!)
+							(mi (- (+ l-logli r-logli) ll))
+							(ntv (cog-new-ctv meen mi cnt))
+						)
+						; Save the hard-won MI to the database.
+						(store-atom (cog-set-tv! atom ntv))
+					)
+				)
+				left-evs
+			)
+		)
+	)
+)
+
+; Same as above, but uses pattern matcher. CAUTION: this is a LOT
+; slower than the above!
+(define (compute-pair-mi-pm right-word lg_rel)
+
 	; Define the bind link that we'll use with the pattern matcher.
 	; left-bind has the wildcard on the left.
 	(define left-bind-link
@@ -941,10 +1004,6 @@
 ; almost surely be faster.  We put up with the performance overhead here
 ; in order to get the flexibility that the atomspace provides.
 ;
-; XXX TODO: much of the performance bottleneck above is probably due to
-; the use of the pattern-matcher above. Writing a custom chase-the-links
-; scriptlet to replace this would probably improve performance a LOT.
-
 (define (batch-all-pair-mi lg_rel)
 	(begin
 		; First, get the left and right wildcard counts.
