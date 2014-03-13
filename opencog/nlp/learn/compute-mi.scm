@@ -262,6 +262,47 @@
 )
 
 ; ---------------------------------------------------------------------
+; get-ev-link returns either #f or the EvaluationLink that contains
+; the given lg_rel and ListLink.
+;
+; list-lnk is the ListLink we are given.  We want to find the
+; EvaluationLink that contains it.  That EvaluationLink should have
+; lg_rel as its predicate type, and the ListLink in the expected
+; location. That is, given ListLink, we are looking for 
+;
+;    EvaluationLink
+;        lg_rel
+;        ListLink
+;
+; The result of this search is either #f or the EvaluationLink
+
+(define (get-ev-link lg_rel list-lnk)
+
+	; As described above, but the linkset is a scheme list which
+	; should be of length zero or one.
+	(define (get-ev-linkset list-lnk)
+		(filter
+			(lambda (evl)
+				(define oset (cog-outgoing-set evl))
+				(and
+					(equal? 'EvaluationLink (cog-type evl))
+					(equal? lg_rel (car oset))
+					(equal? list-lnk (cadr oset))
+				)
+			)
+			(cog-incoming-set list-lnk)
+		)
+	)
+
+	(define ev-linkset (get-ev-linkset list-lnk))
+
+	(and
+		(not (null? ev-linkset))
+		(car ev-linkset)
+	)
+)
+
+; ---------------------------------------------------------------------
 ; Compute the left and right word-pair wildcard counts.
 ; That is, compute the summations N(w,*) and N(*,w) where * denotes
 ; a wildcard, and ranges over all words observed in that slot.
@@ -330,43 +371,6 @@
 
 (define (compute-pair-wildcard-counts word lg_rel)
 
-	; get-ev-linkset returns a list of zero or one EvaluationLinks
-	; that contain the given ListLink.
-	;
-	; list-lnk is the ListLink we are given.  We want to find the
-	; EvaluationLink that contains it.  That EvaluationLink should have
-	; lg_rel as its predicate type, and the ListLink in the expected
-	; location. That is, given ListLink, we are looking for 
-	;
-	;    EvaluationLink
-	;        lg_rel
-	;        ListLink
-	;
-	; The result of this search is the ev-link-list, which should be
-	; of length zero or one.
-	(define (get-ev-linkset list-lnk)
-		(filter
-			(lambda (evl)
-				(define oset (cog-outgoing-set evl))
-				(and
-					(equal? 'EvaluationLink (cog-type evl))
-					(equal? lg_rel (car oset))
-					(equal? list-lnk (cadr oset))
-				)
-			)
-			(cog-incoming-set list-lnk)
-		)
-	)
-
-	; Same as above, except it returns either #f or the EvaluationLink
-	(define (get-ev-link list-lnk)
-		(define ev-linkset (get-ev-linkset list-lnk))
-		(and
-			(not (null? ev-linkset))
-			(car ev-linkset)
-		)
-	)
-
 	(let* (
 			; list-links are all the ListLinks in which the word appears
 			(list-links
@@ -408,8 +412,14 @@
 
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map get-ev-link left-stars))
-			(right-evs (filter-map get-ev-link right-stars))
+			(left-evs (filter-map 
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					left-stars)
+			)
+			(right-evs (filter-map
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					right-stars)
+			)
 
 			; The total occurance counts
 			(left-total (get-total-atom-count left-evs))
@@ -870,7 +880,10 @@
 			)
 			; left-evs are the EvaluationLinks above the left-stars
 			; That is, they have the wild-card in the left-hand slot.
-			(left-evs (filter-map get-ev-link left-stars))
+			(left-evs (filter-map
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					left-stars)
+			)
 		)
 		(begin
 			(for-each
