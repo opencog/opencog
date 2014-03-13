@@ -105,7 +105,7 @@ RunningProcedureID ProcedureInterpreter::runProcedure(
         _map.insert(std::make_pair(++_next, rcpID));
     } else if (p.getType() == BUILT_IN) {
         logger().debug("ProcedureInterpreter - Running a builtin procedure.");
-        RunningBuiltInProcedure rbp = RunningBuiltInProcedure(*_pai, (const BuiltInProcedure&) p, arguments);
+        RunningBuiltInProcedure rbp = RunningBuiltInProcedure(_pai, (const BuiltInProcedure&) p, arguments);
         // For now, runs built-in procedure immediately, since they are atomic
         // and caller may want to check for failure or get its result synchronously.
         rbp.run();
