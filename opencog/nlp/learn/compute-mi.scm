@@ -349,9 +349,9 @@
 			(lambda (evl)
 				(define oset (cog-outgoing-set evl))
 				(and
-					(eq? 'EvaluationLink (cog-type evl))
-					(eq? lg_rel (car oset))
-					(eq? list-lnk (cadr oset))
+					(equal? 'EvaluationLink (cog-type evl))
+					(equal? lg_rel (car oset))
+					(equal? list-lnk (cadr oset))
 				)
 			)
 			(cog-incoming-set list-lnk)
@@ -368,10 +368,10 @@
 	)
 
 	(let* (
-			; list-links are all the ListLinks in which the word apears
+			; list-links are all the ListLinks in which the word appears
 			(list-links
 				(filter
-					(lambda (lnk) (eq? 'ListLink (cog-type lnk)))
+					(lambda (lnk) (equal? 'ListLink (cog-type lnk)))
 					(cog-incoming-set word)
 				)
 			)
@@ -384,8 +384,8 @@
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
 						(and 
-							(eq? item-type (cog-type (car oset)))
-							(eq? word (cadr oset))
+							(equal? item-type (cog-type (car oset)))
+							(equal? word (cadr oset))
 						)
 					)
 					list-links
@@ -398,8 +398,8 @@
 					(lambda (lnk)
 						(define oset (cog-outgoing-set lnk))
 						(and 
-							(eq? word (car oset))
-							(eq? item-type (cog-type (cadr oset)))
+							(equal? word (car oset))
+							(equal? item-type (cog-type (cadr oset)))
 						)
 					)
 					list-links
@@ -595,7 +595,7 @@
 					; Returns true if either the left or right side is
 					; the any-node
 					(define (is-any? evl)
-						(define (zany atom) (eq? (cog-type atom) 'AnyNode))
+						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
 						(if (zany (gadr evl)) #t (zany (gddr evl)))
 					)
 
@@ -667,7 +667,7 @@
 	(display "\n" oport)
 
 	; Provide some crude timing info too ...
-	(if (eq? 0 (modulo dbg-cnt 100))
+	(if (eqv? 0 (modulo dbg-cnt 10000))
 		(begin
 			(display "Elapsed secs " oport)
 			(display (- (current-time) dbg-tim) oport)
@@ -753,7 +753,7 @@
 
 		; The left and right counts should be equal
 		; XXX TODO probably should do something more drastic here?
-		(if (not (eq? l-cnt r-cnt))
+		(if (not (eqv? l-cnt r-cnt))
 			(begin
 				(display "Error: word-pair-counts unequal: ")
 				(display l-cnt)
