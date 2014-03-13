@@ -90,13 +90,12 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
+    pai::PAI& _pai;
     ComboInterpreter comboInterpreter;
     Map _map;
     Set _failed;
     ResultMap _resultMap;
     UnifierResultMap _unifierResultMap;
-
-    pai::PAI& _pai;
 
     RunningProcedureID _next;
 };
