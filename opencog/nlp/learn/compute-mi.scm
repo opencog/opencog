@@ -362,7 +362,7 @@
 	(define (get-ev-link list-lnk)
 		(define ev-linkset (get-ev-linkset list-lnk))
 		(and
-			(null? ev-linkset)
+			(not (null? ev-linkset))
 			(car ev-linkset)
 		)
 	)
