@@ -1045,6 +1045,7 @@
 			(cog-get-atoms item-type)
 		)
 		(trace-msg "Finished with MI batch\n")
+		(trace-elapsed)
 	)
 )
 

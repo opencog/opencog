@@ -344,7 +344,7 @@ per word-pair.
 
 ... at first. Then there are long pauses, which seem to be related to
 SQL queue flushing.  The rate then drops to about half at 30 words/sec
-or 1.8K/min.
+or 1.8K/min. And worse, dropping another 2x or 3x for a while.
 
 
 Update Feb 2014: fr_pairs now contains 10.3M atoms
