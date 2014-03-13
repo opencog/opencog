@@ -323,7 +323,7 @@ If tracing is turnied on, a trace file is written to /tmp/progress.
 After the single-word counts complete, and all-pair count is done. This
 is fast, takes a couple of minutes.
 
-Finally, an MI comppute stage.  Currently, it did 2910 words in 73 mins
+Finally, an MI compute stage.  Currently, it did 2910 words in 73 mins
 == 40 per minute ... again, pathetic.  Will take 7 hours (420 minutes)
 to complete ...
 
@@ -351,6 +351,22 @@ Actual: about 1300 seconds per 100 words: 13 seconds/word or 4
 words/minute or 39 days to complete. Unacceptable.  Wild gues that
 the use of the pattern matcher is the bottleneck. So retry with a
 manually written matcher.
+
+And ... its a zillion times faster.  This suggests that there's a
+serious bug in the pattern matcher, probably with finding the starting
+conditions.
+
+10K in 67 secs .. Wow! Thats ... fast. about 150 words/sec
+That's a 50x per improvements over the previous code.
+
+Pair MI is being computed at the rate of 1000 per 7000 seconds
+1 per 7 seconds, 8 per minute ... for 10.3M will take 900 days.
+Impossible.  Another Bind-Link bug ...
+
+compute-pair-mi
+
+XXX
+single-word probs seem to be un-computed?
 
 
 

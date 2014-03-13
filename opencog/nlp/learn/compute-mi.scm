@@ -622,6 +622,9 @@
 ;
 (define (all-pair-wildcard-counts lg_rel)
 	(begin
+		(init-trace)
+		(trace-msg "Start on-demand wildcounting\n")
+
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
 
@@ -660,6 +663,14 @@
 	(display "\n" oport)
 	(force-output oport)
 )
+(define (trace-elapsed)
+	(begin
+		(display "Elapsed secs " oport)
+		(display (- (current-time) dbg-tim) oport)
+		(display "\n" oport)
+		(set! dbg-tim (current-time))
+	)
+)
 (define (trace-msg-cnt msg)
 	(display msg oport)
 	(set! dbg-cnt (+ dbg-cnt 1))
@@ -668,12 +679,7 @@
 
 	; Provide some crude timing info too ...
 	(if (eqv? 0 (modulo dbg-cnt 10000))
-		(begin
-			(display "Elapsed secs " oport)
-			(display (- (current-time) dbg-tim) oport)
-			(display "\n" oport)
-			(set! dbg-tim (current-time))
-		)
+		(trace-elapsed)
 	)
 	(force-output oport)
 )
@@ -946,12 +952,15 @@
 		(batch-all-pair-wildcard-counts lg_rel)
 
 		; Now, get the grand-total
+		(trace-elapsed)
 		(trace-msg "Going to batch-count all-pairs\n")
 		(batch-all-pair-count lg_rel)
+		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
 		(trace-msg "Going to batch-logli wildcards\n")
 		(batch-all-pair-wildcard-logli lg_rel)
+		(trace-elapsed)
 
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
