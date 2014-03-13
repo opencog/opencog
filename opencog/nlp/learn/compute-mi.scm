@@ -3,7 +3,7 @@
 ;
 ; Compute the mutual information of language word pairs.
 ;
-; Copyright (c) 2013 Linas Vepstas
+; Copyright (c) 2013, 2014 Linas Vepstas
 ;
 ; ---------------------------------------------------------------------
 ; OVERVIEW
@@ -262,6 +262,47 @@
 )
 
 ; ---------------------------------------------------------------------
+; get-ev-link returns either #f or the EvaluationLink that contains
+; the given lg_rel and ListLink.
+;
+; list-lnk is the ListLink we are given.  We want to find the
+; EvaluationLink that contains it.  That EvaluationLink should have
+; lg_rel as its predicate type, and the ListLink in the expected
+; location. That is, given ListLink, we are looking for 
+;
+;    EvaluationLink
+;        lg_rel
+;        ListLink
+;
+; The result of this search is either #f or the EvaluationLink
+
+(define (get-ev-link lg_rel list-lnk)
+
+	; As described above, but the linkset is a scheme list which
+	; should be of length zero or one.
+	(define (get-ev-linkset list-lnk)
+		(filter
+			(lambda (evl)
+				(define oset (cog-outgoing-set evl))
+				(and
+					(equal? 'EvaluationLink (cog-type evl))
+					(equal? lg_rel (car oset))
+					(equal? list-lnk (cadr oset))
+				)
+			)
+			(cog-incoming-set list-lnk)
+		)
+	)
+
+	(define ev-linkset (get-ev-linkset list-lnk))
+
+	(and
+		(not (null? ev-linkset))
+		(car ev-linkset)
+	)
+)
+
+; ---------------------------------------------------------------------
 ; Compute the left and right word-pair wildcard counts.
 ; That is, compute the summations N(w,*) and N(*,w) where * denotes
 ; a wildcard, and ranges over all words observed in that slot.
@@ -329,6 +370,100 @@
 ; Returns the two wild-card EvaluationLinks
 
 (define (compute-pair-wildcard-counts word lg_rel)
+
+	(let* (
+			; list-links are all the ListLinks in which the word appears
+			(list-links
+				(filter
+					(lambda (lnk) (equal? 'ListLink (cog-type lnk)))
+					(cog-incoming-set word)
+				)
+			)
+			; The left-stars have the word in the right slot and
+			; have some WordNode (item-type) in the left slot.
+			; We must check for WordNode in this spot, as some of
+			; these ListLinks may have AnyNode in that slot.
+			(left-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and 
+							(equal? item-type (cog-type (car oset)))
+							(equal? word (cadr oset))
+						)
+					)
+					list-links
+				)
+			)
+			; The right-stars have the word in the left slot and
+			; have some WordNode (item-type) in the right slot.
+			(right-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and 
+							(equal? word (car oset))
+							(equal? item-type (cog-type (cadr oset)))
+						)
+					)
+					list-links
+				)
+			)
+
+			; left-evs are the EvaluationLinks above the left-stars
+			; That is, they have the wild-card in the left-hand slot.
+			(left-evs (filter-map 
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					left-stars)
+			)
+			(right-evs (filter-map
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					right-stars)
+			)
+
+			; The total occurance counts
+			(left-total (get-total-atom-count left-evs))
+			(right-total (get-total-atom-count right-evs))
+		)
+
+		(begin
+			; Create the two evaluation links to hold the counts.
+			(define left-star #f)
+			(define right-star #f)
+
+			(if (< 0 left-total)
+				(begin
+					(set! left-star
+						(EvaluationLink (cog-new-ctv 0 0 left-total) lg_rel
+							(ListLink (AnyNode "left-word") word)
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom left-star)
+				)
+			)
+			(if (< 0 right-total)
+				(begin
+					(set! right-star
+						(EvaluationLink (cog-new-ctv 0 0 right-total) lg_rel
+							(ListLink word (AnyNode "right-word"))
+						)
+					)
+					; Save these hard-won counts to the database.
+					(store-atom right-star)
+				)
+			)
+
+			; What the hell, return the two star-counts
+			(list left-star right-star)
+		)
+	)
+)
+
+; Same as above, but using the pattern matcher. CAUTION: For large
+; datasets, this runs 50 times slower than the above! We keep the
+; code here for debugging and historical reasons !?
+(define (compute-pair-wildcard-counts-pm word lg_rel)
 
 	; Define the bind links that we'll use with the pattern matcher.
 	; left-bind has the wildcard on the left.
@@ -472,7 +607,7 @@
 					; Returns true if either the left or right side is
 					; the any-node
 					(define (is-any? evl)
-						(define (zany atom) (eq? (cog-type atom) 'AnyNode))
+						(define (zany atom) (equal? (cog-type atom) 'AnyNode))
 						(if (zany (gadr evl)) #t (zany (gddr evl)))
 					)
 
@@ -499,6 +634,9 @@
 ;
 (define (all-pair-wildcard-counts lg_rel)
 	(begin
+		(init-trace)
+		(trace-msg "Start on-demand wildcounting\n")
+
 		; Make sure all words are in the atomspace
 		(load-atoms-of-type item-type)
 
@@ -517,10 +655,12 @@
 ; temp debug support
 (define oport 0)
 (define dbg-cnt 0)
+(define dbg-tim 0)
 (define (init-trace)
 	(set! oport (open-file "/tmp/progress" "w"))
 )
 (define (start-trace msg)
+	(set! dbg-tim (current-time))
 	(set! dbg-cnt 0)
 	(display msg oport)
 	(force-output oport)
@@ -535,11 +675,24 @@
 	(display "\n" oport)
 	(force-output oport)
 )
+(define (trace-elapsed)
+	(begin
+		(display "Elapsed secs " oport)
+		(display (- (current-time) dbg-tim) oport)
+		(display "\n" oport)
+		(set! dbg-tim (current-time))
+	)
+)
 (define (trace-msg-cnt msg)
 	(display msg oport)
 	(set! dbg-cnt (+ dbg-cnt 1))
 	(display dbg-cnt oport)
 	(display "\n" oport)
+
+	; Provide some crude timing info too ...
+	(if (eqv? 0 (modulo dbg-cnt 10000))
+		(trace-elapsed)
+	)
 	(force-output oport)
 )
 
@@ -618,7 +771,7 @@
 
 		; The left and right counts should be equal
 		; XXX TODO probably should do something more drastic here?
-		(if (not (eq? l-cnt r-cnt))
+		(if (not (eqv? l-cnt r-cnt))
 			(begin
 				(display "Error: word-pair-counts unequal: ")
 				(display l-cnt)
@@ -706,6 +859,70 @@
 ;
 ;
 (define (compute-pair-mi right-word lg_rel)
+
+	; Get the word-pair grand-total
+	(define pair-total (get-pair-total lg_rel))
+
+	(let* (
+			; list-links are all the ListLinks in which the word appears
+			(left-stars
+				(filter
+					(lambda (lnk)
+						(define oset (cog-outgoing-set lnk))
+						(and
+							(equal? 'ListLink (cog-type lnk))
+							(equal? item-type (cog-type (car oset)))
+							(equal? right-word (cadr oset))
+						)
+					)
+					(cog-incoming-set right-word)
+				)
+			)
+			; left-evs are the EvaluationLinks above the left-stars
+			; That is, they have the wild-card in the left-hand slot.
+			(left-evs (filter-map
+					(lambda (lnk) (get-ev-link lg_rel lnk))
+					left-stars)
+			)
+		)
+		(begin
+			(for-each
+
+				; This lambda sets the mutual information for each word-pair.
+				(lambda (pair)
+					(let* (
+							; the left-word of the word-pair
+							(left-word (gadr pair))
+							(r-logli (get_right_wildcard_logli left-word lg_rel))
+							(l-logli (get_left_wildcard_logli right-word lg_rel))
+
+							; Compute the logli log_2 P(l,r)/P(*,*)
+ 							(atom (compute-atom-logli pair pair-total))
+
+							; the count truth value components
+							(atv (cog-tv->alist (cog-tv atom)))
+							(meen (assoc-ref atv 'mean))
+							(ll (assoc-ref atv 'confidence))
+							(cnt (assoc-ref atv 'count))
+
+							; Subtract the left and right entropies to get the
+							; mutual information (at last!)
+							(mi (- (+ l-logli r-logli) ll))
+							(ntv (cog-new-ctv meen mi cnt))
+						)
+						; Save the hard-won MI to the database.
+						(store-atom (cog-set-tv! atom ntv))
+					)
+				)
+				left-evs
+			)
+		)
+	)
+)
+
+; Same as above, but uses pattern matcher. CAUTION: this is a LOT
+; slower than the above!
+(define (compute-pair-mi-pm right-word lg_rel)
 
 	; Define the bind link that we'll use with the pattern matcher.
 	; left-bind has the wildcard on the left.
@@ -800,10 +1017,6 @@
 ; almost surely be faster.  We put up with the performance overhead here
 ; in order to get the flexibility that the atomspace provides.
 ;
-; XXX TODO: much of the performance bottleneck above is probably due to
-; the use of the pattern-matcher above. Writing a custom chase-the-links
-; scriptlet to replace this would probably improve performance a LOT.
-
 (define (batch-all-pair-mi lg_rel)
 	(begin
 		; First, get the left and right wildcard counts.
@@ -811,12 +1024,15 @@
 		(batch-all-pair-wildcard-counts lg_rel)
 
 		; Now, get the grand-total
+		(trace-elapsed)
 		(trace-msg "Going to batch-count all-pairs\n")
 		(batch-all-pair-count lg_rel)
+		(trace-elapsed)
 
 		; Compute the left and right wildcard logli's
 		(trace-msg "Going to batch-logli wildcards\n")
 		(batch-all-pair-wildcard-logli lg_rel)
+		(trace-elapsed)
 
 		; Enfin, the word-pair mi's
 		(start-trace "Going to do individual word-pair mi\n")
@@ -829,6 +1045,7 @@
 			(cog-get-atoms item-type)
 		)
 		(trace-msg "Finished with MI batch\n")
+		(trace-elapsed)
 	)
 )
 

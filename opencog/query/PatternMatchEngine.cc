@@ -797,7 +797,7 @@ void PatternMatchEngine::match(PatternMatchCallback *cb,
 #endif
 
 	// Perform the actual search!
-	cb->perform_search(this, vars, clauses,negations);
+	cb->perform_search(this, vars, clauses, negations);
 
 	dbgprt ("==================== Done Matching ==================\n");
 #ifdef DEBUG
