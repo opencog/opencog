@@ -93,7 +93,7 @@ struct RunningComboProcedure {
         return (_tr.is_valid(_it) && (!_hasBegun || _ww.isPlanFinished()));
     }
     //is the rp done running?
-    bool isFinished() {
+    bool isFinished() const {
         if (!finished) {
             finished = (!_tr.is_valid(_it) && (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
         }
@@ -191,7 +191,7 @@ private:
      */
     bool _doesSendDefinitePlan;
 
-    bool finished;
+    mutable bool finished;
 };
 
 }} // ~namespace opencog::Procedure

@@ -77,11 +77,11 @@ public:
     //add a procedure to be run by the interpreter
     RunningProcedureId runProcedure(const combo::combo_tree& tr, const std::vector<combo::vertex>& arguments);
 
-    bool isFinished(RunningProcedureId id);
+    bool isFinished(RunningProcedureId id) const;
 
     // Note: this will return false if the stopProcedure() method was previously called for this same procedure id,
     // even if the procedure execution has failed before
-    bool isFailed(RunningProcedureId id);
+    bool isFailed(RunningProcedureId id) const;
 
     // Get the result of the procedure with the given id
     // Can be called only if the following conditions are true:
