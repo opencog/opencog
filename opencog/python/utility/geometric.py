@@ -16,8 +16,8 @@ def integral(function, start, end):
     return area
 
 
-def almost_equals(a, b):
-    if fabs(a - b) < EPSILON:
+def almost_equals(a, b, epsilon=EPSILON):
+    if fabs(a - b) < epsilon:
         return True
     return False
 

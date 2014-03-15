@@ -1,155 +1,230 @@
-from math import fabs
-from mpl_toolkits.mplot3d import Axes3D
-from spatiotemporal.temporal_events import TemporalEvent
-from spatiotemporal.temporal_events.relation_formulas import TemporalRelation
-from spatiotemporal.temporal_events.trapezium import generate_random_events
-import os
-import csv
-import numpy as np
+from math import sqrt
+from scipy.stats import uniform
+from spatiotemporal.temporal_events import RelationFormulaGeometricMean
+from utility.geometric import almost_equals
 
 __author__ = 'keyvan'
 
-
-class Bin(object):
-    is_empty = True
-
-    def __init__(self, bin_collection):
-        self.count = 0
-        self.bin_collection = bin_collection
-
-    def update(self, value):
-        if self.is_empty:
-            self.bin_collection.number_of_empty_bins -= 1
-            self.is_empty = False
-        if self.count == 0:
-            self.value = float(value)
-
-        self.value = (self.value * self.count + value) / (self.count + 1)
-        self.count += 1
+epsilon = 0.05
+uniform_reference = uniform(0, 1)
 
 
-class BinCollection(dict):
-    def __init__(self, divide_factor):
-        self.divide_factor = divide_factor
-        for i in xrange(divide_factor + 1):
-            for j in xrange(divide_factor + 1):
-                self[i * 1.0 / divide_factor, j * 1.0 / divide_factor] = Bin(self)
-        self.number_of_empty_bins = len(self)
-
-    def observe(self, a_b, b_c, a_c):
-        key_a_b, key_b_c = 0, 0
-        least_distance_a_b, least_distance_b_c = 10, 10
-        for i in xrange(self.divide_factor + 1):
-            key = i * 1.0 / self.divide_factor
-            distance = fabs(a_b - key)
-            if distance < least_distance_a_b:
-                key_a_b = key
-                least_distance_a_b = distance
-            distance = fabs(b_c - key)
-            if distance < least_distance_b_c:
-                key_b_c = key
-                least_distance_b_c = distance
-
-        self[key_a_b, key_b_c].update(a_c)
+class BaseCombinationFormula(object):
+    def combine(self, relation_a_b, relation_a_d, relation_b_c, relation_d_c):
+        pass
 
 
-def read_data(size=100):
-    train_x, train_y = [], []
-    csv_reader = csv.reader(open(os.path.dirname(os.path.abspath(__file__)) + '/data.csv~'))
+class CombinationFormulaGeometricMeanTrapezium(BaseCombinationFormula):
+    relation_formula = RelationFormulaGeometricMean()
 
-    row_number = -1
-    for row in csv_reader:
-        row_number += 1
-        if row_number == size:
-            break
-        for i, element in enumerate(row):
-            row[i] = np.float64(element)
+    def __init__(self):
+        pass
 
-        train_x.append(row[:26])
-        train_y.append(row[26:39])
+    def combine(self, relation_a_b_beginning, relation_a_b_ending, relation_b_beginning_c, relation_b_ending_c):
+        before_a_b, same_a_b, after_a_b = relation_a_b_beginning
+        before_b_c, same_b_c, after_b_c = relation_b_beginning_c
+        unknown = 1.0 / 3
 
-    return np.array(train_x), np.array(train_y)
+        if almost_equals(before_a_b + before_b_c, 2.0, epsilon)\
+                or almost_equals(before_a_b + same_b_c, 2.0, epsilon)\
+                or almost_equals(same_a_b + before_b_c, 2.0, epsilon):
+            return [(1.0, 0.0, 0.0)]
 
+        if almost_equals(after_a_b + after_b_c, 2.0, epsilon)\
+                or almost_equals(after_a_b + same_b_c, 2.0, epsilon)\
+                or almost_equals(same_a_b + after_b_c, 2.0, epsilon):
+            return [(1.0, 0.0, 0.0)]
 
-def create_sample_file(size=100000):
-    csv_writer = csv.writer(open(os.path.dirname(os.path.abspath(__file__)) + '/data.csv~', 'w+'))
+        if almost_equals(same_a_b + same_b_c, 2.0, epsilon):
+            return [(0.0, 1.0, 0.0)]
 
-    for i in xrange(size):
-        if i % (size / 200.0) == 0:
-            print '%{0} complete'.format(float(i) / size * 100)
-        A, B, C = generate_random_events(3)
-        row = (A * B).to_list() + (B * C).to_list() + (A * C).to_list()
-        csv_writer.writerow(row)
-        del A
-        del B
-        del C
-        del row
+        if almost_equals(before_a_b + after_b_c, 2.0, epsilon) or almost_equals(after_a_b + before_b_c, 2.0, epsilon):
+            return [(unknown, unknown, unknown)]
 
+        relation_a_c_possibilities = []
 
-def learn(size=10000):
-    train_x, train_y = read_data(size)
+        a_possibilities, b_ending_1 = self.unpack(relation_a_b_beginning, relation_a_b_ending)
+        c_possibilities, b_ending_2 = self.unpack(tuple(reversed(relation_b_beginning_c)), tuple(reversed(relation_b_ending_c)))
 
-    from sklearn.linear_model import Lasso, Ridge, ElasticNet, LinearRegression, LassoLars, BayesianRidge, ElasticNetCV, SGDRegressor
-    from sklearn.svm import SVR
-    from sklearn.neighbors import KNeighborsRegressor
-    from random import randrange
+        if len(a_possibilities) == 0:
+            if before_a_b == 0:
+                if len(c_possibilities) == 1:
+                    if before_b_c == 0:
+                        relation_a_c_possibilities.append((0.0, 0.0, 1.0))
+                    else:
+                        relation_a_c_possibilities.append((unknown, unknown, unknown))
+                else:
+                    relation_a_c_possibilities.append((unknown, unknown, unknown))
+                    relation_a_c_possibilities.append((0.0, 0.0, 1.0))
+            else:
+                if len(c_possibilities) == 1:
+                    if after_b_c == 0:
+                        relation_a_c_possibilities.append((1.0, 0.0, 0.0))
+                    else:
+                        relation_a_c_possibilities.append((unknown, unknown, unknown))
+                else:
+                    relation_a_c_possibilities.append((unknown, unknown, unknown))
+                    relation_a_c_possibilities.append((1.0, 0.0, 0.0))
 
-    predicate_index = TemporalRelation.all_relations.index('p')
+        if len(c_possibilities) == 0:
+            if before_b_c == 0:
+                if len(a_possibilities) == 1:
+                    if before_a_b == 0:
+                        relation_a_c_possibilities.append((0.0, 0.0, 1.0))
+                    else:
+                        relation_a_c_possibilities.append((unknown, unknown, unknown))
+                else:
+                    relation_a_c_possibilities.append((unknown, unknown, unknown))
+                    relation_a_c_possibilities.append((0.0, 0.0, 1.0))
+            else:
+                if len(a_possibilities) == 1:
+                    if after_a_b == 0:
+                        relation_a_c_possibilities.append((1.0, 0.0, 0.0))
+                    else:
+                        relation_a_c_possibilities.append((unknown, unknown, unknown))
+                else:
+                    relation_a_c_possibilities.append((unknown, unknown, unknown))
+                    relation_a_c_possibilities.append((1.0, 0.0, 0.0))
 
-    clf = KNeighborsRegressor()
-    clf.fit(train_x, train_y[:, predicate_index])
-    for i in xrange(10):
-        A, B, C = generate_random_events(3)
-        print 'learning', clf.predict((A * B).to_list() + (B * C).to_list())
-        print 'actual', (A * C).to_list()[predicate_index], '\n-------------\n'
+        for possible_a in a_possibilities:
+            for possible_c in c_possibilities:
+                relation_a_c_possibilities.append(self.relation_formula.compare(possible_a, possible_c))
 
-    # from scipy.interpolate import Rbf as interpolate
-    # # f = interpolate(np.array([train_a_b, train_b_c]).T, np.array(train_a_c).T)
-    # f = interpolate(train_a_b, train_b_c, train_a_c, function='multiquadric')
-    #
-    # row_number = -1
-    # for row in csv_reader:
-    #     row_number += 1
-    #     if row_number == 10:
-    #         break
-    #     for i, element in enumerate(row):
-    #         row[i] = np.float64(element)
-    #
-    #     a_b_value = row[predicate_index]
-    #     b_c_value = row[13 + predicate_index]
-    #     a_c_value = row[26 + predicate_index]
-    #
-    #     print 'A-B =', a_b_value, 'B-C =', b_c_value, 'learning:', f(a_b_value, b_c_value), 'actual:', a_c_value
-    #     # print 'A-B =', a_b_value, 'B-C =', b_c_value, 'learning:', clf.predict([a_b_value, b_c_value]), 'actual:', a_c_value
-    #
-    # x = y = np.arange(0, 1, 0.006)
-    # X, Y = np.meshgrid(x, y)
-    # zs = np.array([f(x, y) for x, y in zip(np.ravel(X), np.ravel(Y))])
-    # Z = zs.reshape(X.shape)
-    # from matplotlib import pyplot as plt
-    # from matplotlib import cm
-    #
-    # fig = plt.figure()
-    # ax = Axes3D(fig)
-    # ax.set_xlabel('A{p}B')
-    # ax.set_ylabel('B{p}C')
-    # ax.set_zlabel('A{p}C')
-    # # http://matplotlib.org/examples/color/colormaps_reference.html
-    # # rstride=1, cstride=1,
-    # ax.plot_surface(X, Y, Z, rstride=1, cstride=1, cmap=cm.gist_stern_r, linewidth=0, antialiased=True)
-    #
-    # # http://stackoverflow.com/questions/11777381/invert-an-axis-in-a-matplotlib-grafic
-    # ax = plt.gca()
-    # ax.invert_yaxis()
-    # ax.invert_zaxis()
-    # plt.show()
+        return relation_a_c_possibilities
+
+    def _find_c_in_the_middle(self, relation_b_beginning_c, relation_b_ending_c, b_ending):
+        before_b_beginning_c, same_b_beginning_c, after_b_beginning_c = relation_b_beginning_c
+        before_b_ending_c, same_b_ending_c, after_b_ending_c = relation_b_ending_c
+        b_ending_start_point, b_ending_end_point = b_ending.args[0], b_ending.args[0] + b_ending.args[1]
+
+        c_start_point = -(same_b_beginning_c *
+                          (before_b_ending_c * (b_ending_start_point + b_ending_end_point)
+                           + b_ending_start_point + before_b_ending_c)) / (before_b_ending_c *
+                                                                           after_b_beginning_c + same_b_beginning_c
+                                                                           * (1 + before_b_ending_c))
+
+        c_end_poin = 1 + after_b_beginning_c * c_start_point / same_b_beginning_c
+
+        return uniform(c_start_point, c_end_poin - c_start_point)
+
+    def unpack_partial(self, relation, length_b=1.0):
+        before, same, after = relation
+        if same == 0:
+            return []
+
+        length_a = 1.0 / same ** 2
+
+        if before > 0 and after > 0:
+            possibilities = []
+            before_portion = before / (before + after)
+            possibilities.append(uniform((1 - length_a) * before_portion, length_a))
+            length_a = same ** 2
+            possibilities.append(uniform((1 - length_a) * (1 - before_portion), length_a))
+            return possibilities
+
+        length_a = (same ** 4 + 1) / (2 * same ** 2)    # average case
+
+        if before > 0:
+            return [uniform(same * sqrt(length_a) - length_a, length_a)]
+
+        if after > 0:
+            return [uniform(1 - same * sqrt(length_a), length_a)]
+
+        return [uniform(0, 1)]
+
+    def unpack(self, relation_a_b_beginning, relation_a_b_ending):
+        before_a_b_beginning, same_a_b_beginning, after_a_b_beginning = relation_a_b_beginning
+        before_a_b_ending, same_a_b_ending, after_a_b_ending = relation_a_b_ending
+
+        if almost_equals(before_a_b_beginning + same_a_b_beginning + same_a_b_ending + after_a_b_ending, 2.0, epsilon):
+            return [], uniform_reference   # Inconsistent
+
+        if almost_equals(before_a_b_beginning + before_a_b_ending, 2.0, epsilon):
+            return [], uniform_reference
+
+        if almost_equals(after_a_b_beginning + after_a_b_ending, 2.0, epsilon):
+            return [], uniform_reference
+
+        if almost_equals(before_a_b_ending, 1.0, epsilon):
+            return self.unpack_partial(relation_a_b_beginning), uniform_reference
+
+        if almost_equals(after_a_b_beginning, 1.0, epsilon):
+            return self.unpack_partial(relation_a_b_ending), uniform_reference
+
+        a_possibilities = self.unpack_partial(relation_a_b_beginning)
+        if len(a_possibilities) == 1:
+            a_possibility = a_possibilities[0]
+
+            return
+        else:
+            a_possibility_1, a_possibility_2 = a_possibilities
+            a_possibility = a_possibility_1
+            if a_possibility.args[1] < a_possibility_2.args[1]:
+                a_possibility = a_possibility_2
+
+        a_start_point, length_a = a_possibility.args
+
+        if before_a_b_ending * same_a_b_ending * after_a_b_ending > 0:
+            if almost_equals(before_a_b_beginning, 0, epsilon):
+                length_b_ending = length_a * same_a_b_ending ** 2
+            else:
+                length_b_ending = same_a_b_ending ** 2 / same_a_b_beginning ** 2
+            b_ending = uniform(a_start_point + before_a_b_ending * (length_a - length_b_ending) /
+                               (before_a_b_ending + after_a_b_ending), length_b_ending)
+            return [a_possibility], b_ending
+        else:
+            denominator = length_a * same_a_b_ending ** 2
+            length_b_ending_lower_bound = (length_a * same_a_b_ending ** 2) ** 2 / denominator
+            length_b_ending_upper_bound = (a_start_point + length_a - 1) ** 2 / denominator
+            length_b_ending = (length_b_ending_lower_bound + length_b_ending_upper_bound) / 2.0
+            b_start_point = a_start_point + length_a - same_a_b_ending * sqrt(length_b_ending * length_a)
+            b_ending = uniform(b_start_point, length_b_ending)
+            return [a_possibility], b_ending
+
 
 
 if __name__ == '__main__':
-    import time
+    b_ending = uniform(3, 4)
+    c = uniform(0.5, 3)
+    rf = RelationFormulaGeometricMean()
+    f = CombinationFormulaGeometricMeanTrapezium()
+    r_1, r_2 = rf.compare(c, uniform_reference), rf.compare(c, b_ending)
+    c = f._find_c_in_the_middle(r_1, r_2, b_ending)
+    print c.args
+    quit()
 
-    start = time.time()
-    size = 4000000
-    # create_sample_file(size)
-    learn(1000000)
-    print 'Performance:', time.time() - start, 'seconds'
+
+
+
+    from spatiotemporal.temporal_events.trapezium import TemporalEventTrapezium
+    # f = CombinationFormulaGeometricMeanTrapezium()
+    # rf = RelationFormulaGeometricMean()
+    # a, b_beg, b_end = uniform(5, 2), uniform(1, 3), uniform(8, 4)
+    # [a_h], b_end_h = f.unpack(rf.compare(a, b_beg), rf.compare(a, b_end))
+    #
+    # print a_h.args, b_end_h.args
+    # print rf.compare(a, b_beg), rf.compare(a, b_end)
+    # print rf.compare(a_h, uniform_reference), rf.compare(a_h, b_end_h)
+    #
+    # quit()
+
+    A = TemporalEventTrapezium(2, 7, 5, 6)
+    B = TemporalEventTrapezium(1, 6, 3, 4)
+    C = TemporalEventTrapezium(0, 9, 7, 8)
+
+    f = CombinationFormulaGeometricMeanTrapezium()
+    rf = RelationFormulaGeometricMean()
+    # print rf.compare(f.unpack((1, 0, 0))[0], uniform(0, 1))
+
+    A_, B_beg, B_end, C_ = A.distribution_beginning, B.distribution_beginning, B.distribution_ending, C.distribution_beginning
+    # A, B, C = C.distribution_beginning, B.distribution_beginning, A.distribution_beginning
+    print f.combine(rf.compare(A_, B_beg),
+                    rf.compare(A_, B_end),
+                    rf.compare(B_beg, C_),
+                    rf.compare(B_end, C_))
+    print rf.compare(A_, C_)
+
+    plt = A.plot()
+    B.plot(plt)
+    C.plot(plt)
+    plt.show()
