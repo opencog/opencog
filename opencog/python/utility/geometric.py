@@ -16,8 +16,8 @@ def integral(function, start, end):
     return area
 
 
-def equals(a, b):
-    if fabs(a - b) < EPSILON:
+def almost_equals(a, b, epsilon=EPSILON):
+    if fabs(a - b) < epsilon:
         return True
     return False
 
@@ -141,7 +141,7 @@ class FunctionHorizontalLinear(Function):
     def integral(self, start, end):
         if start >= end:
             return 0
-        if equals(self.y_intercept, 0):
+        if almost_equals(self.y_intercept, 0):
             return 0
         return float(self.y_intercept) * (end - start)
 
@@ -183,7 +183,7 @@ class FunctionLinear(Function):
 
         x_intercept = self.x_intercept
 
-        if start > x_intercept or end < x_intercept or equals(end, x_intercept) or equals(start, x_intercept):
+        if start > x_intercept or end < x_intercept or almost_equals(end, x_intercept) or almost_equals(start, x_intercept):
             return (self(start) + self(end)) * (end - start) / 2.0
 
         minus_triangle = (x_intercept - start) * self(start)
@@ -227,8 +227,8 @@ class FunctionComposite(Function):
 
     def integral(self, start, end):
         if self.is_normalised and self.domain is not None:
-            if (start < self.domain[0] or equals(start, self.domain[0])) and (
-                    end > self.domain[-1] or equals(end, self.domain[-1])):
+            if (start < self.domain[0] or almost_equals(start, self.domain[0])) and (
+                    end > self.domain[-1] or almost_equals(end, self.domain[-1])):
                 return 1.0
 
         if start >= end:
@@ -289,7 +289,7 @@ class FunctionPiecewiseLinear(FunctionComposite):
 
     def normalised(self):
         area = self.integral(NEGATIVE_INFINITY, POSITIVE_INFINITY)
-        if equals(area, 0):
+        if almost_equals(area, 0):
             area = self.integral(NEGATIVE_INFINITY, POSITIVE_INFINITY)
         dictionary_input_output = {}
         output_list = [y / area for y in self.output_list]

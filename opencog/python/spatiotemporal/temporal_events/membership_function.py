@@ -119,12 +119,23 @@ class ProbabilityDistributionPiecewiseLinear(list, TimeInterval, rv_frozen):
             return result[0]
         return result
 
+    # def plot(self):
+    #     import matplotlib.pyplot as plt
+    #     x_axis, y_axis = [], []
+    #     for time_step in self:
+    #         x_axis.append(UnixTime(time_step - EPSILON).to_datetime())
+    #         x_axis.append(UnixTime(time_step + EPSILON).to_datetime())
+    #         y_axis.append(self.pdf(time_step - EPSILON))
+    #         y_axis.append(self.pdf(time_step + EPSILON))
+    #     plt.plot(x_axis, y_axis)
+    #     return plt
+
     def plot(self):
         import matplotlib.pyplot as plt
         x_axis, y_axis = [], []
         for time_step in self:
-            x_axis.append(UnixTime(time_step - EPSILON).to_datetime())
-            x_axis.append(UnixTime(time_step + EPSILON).to_datetime())
+            x_axis.append(time_step - EPSILON)
+            x_axis.append(time_step + EPSILON)
             y_axis.append(self.pdf(time_step - EPSILON))
             y_axis.append(self.pdf(time_step + EPSILON))
         plt.plot(x_axis, y_axis)
