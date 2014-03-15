@@ -1,4 +1,5 @@
 from opencog.atomspace import types, TruthValue
+from math import isinf, isnan
 
 __VERBOSE__ = False
 
@@ -62,7 +63,8 @@ class Rule(object):
         tvs = [atom.tv for atom in input_atoms]
         try:
             result_tvs = self.formula(tvs)
-            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0)
+            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0
+               or isinf(tv.mean) or isnan(tv.mean) or isinf(tv.count) or isnan(tv.count))
                    for tv in result_tvs) or len(result_tvs) == 0:
                 return None
             else:
