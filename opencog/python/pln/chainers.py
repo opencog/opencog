@@ -18,7 +18,7 @@ without having to be aware of the different sets of rules that require
 different argument sets.
 """
 
-_VERBOSE = True
+_VERBOSE = False
 
 '''
 There are lots of possible heuristics for choosing atoms. It also
