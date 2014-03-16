@@ -79,7 +79,7 @@ def inductionFormula(tvs):
 
 
 def abductionFormula(tvs):
-    # InversionRUle on the final argument and then Deduction
+    # InversionRule on the final argument and then Deduction
     SM, LM, S, M, L = tvs
 
     [ML] = inversionFormula([LM, L, M])
@@ -90,7 +90,9 @@ def abductionFormula(tvs):
 def modusPonensFormula(tvs):
     [AB, A] = tvs
 
-    NotAB = TruthValue(0.2, 1)
+    # Todo: what should these strength and count values actually be?
+    # see bug: https://github.com/opencog/opencog/issues/598
+    NotAB = TruthValue(0.2, TruthValue().confidence_to_count(1))
 
     return preciseModusPonensFormula([AB, NotAB, A])
 
