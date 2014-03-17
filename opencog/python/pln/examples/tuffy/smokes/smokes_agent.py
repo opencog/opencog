@@ -29,8 +29,6 @@ from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
-__VERBOSE__ = False
-
 
 class InferenceAgent(MindAgent):
     def __init__(self):
@@ -63,8 +61,4 @@ class InferenceAgent(MindAgent):
             return
 
         result = self.chainer.forward_step()
-
-        if __VERBOSE__:
-            print result
-
         return result
