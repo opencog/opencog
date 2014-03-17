@@ -29,8 +29,6 @@ from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
-__VERBOSE__ = False
-
 
 class InferenceAgent(MindAgent):
     def __init__(self):
@@ -45,6 +43,11 @@ class InferenceAgent(MindAgent):
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
 
+        # For predicates with 2 arguments,
+        # with the 0th argument made into a variable
+        self.chainer.add_rule(
+            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
+
         # ModusPonens:
         # Implication smokes(x) cancer(X)
         # smokes(Anna)
@@ -58,8 +61,4 @@ class InferenceAgent(MindAgent):
             return
 
         result = self.chainer.forward_step()
-
-        if __VERBOSE__:
-            print result
-
         return result
