@@ -10,8 +10,6 @@ from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
-__VERBOSE__ = False
-
 
 class EvaluationToMemberAgent(MindAgent):
     def __init__(self):
@@ -21,15 +19,11 @@ class EvaluationToMemberAgent(MindAgent):
         self.chainer = Chainer(atomspace, stimulateAtoms=False)
 
         # EvaluationToMemberRule only accepts predicates with 1 argument
-        # For predicates with more arguments, use GeneralEvaluationToMembeRule
-        # self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
-        # self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
+        # For predicates with more arguments, GeneralEvaluationToMemberRule
+        # is used.
         self.chainer.add_rule(
             GeneralEvaluationToMemberRule(self.chainer, 0, 2))
-
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
-        # self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
-
         self.chainer.add_rule(
             DeductionRule(self.chainer, types.InheritanceLink))
 
@@ -39,8 +33,4 @@ class EvaluationToMemberAgent(MindAgent):
             return
 
         result = self.chainer.forward_step()
-
-        if __VERBOSE__:
-            print result
-
         return result

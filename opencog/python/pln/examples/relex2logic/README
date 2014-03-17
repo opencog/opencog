@@ -1,91 +1,54 @@
-Goal is to demonstrate the simple use of Relex2Logic with PLN to accept
+relex2logic / PLN demo
+======================
+
+**Incomplete, still in-progress**
+
+Author: Cosmo Harrigan
+March 2014
+
+The goal is to demonstrate the simple use of Relex2Logic with PLN to accept
 the following sentences as input:
 
+```
 Socrates is a man.
 Men breathe air.
+```
 
 And then use PLN on the logical representation output of Relex2Logic in
 order to produce the following output:
 
+```
 Socrates breathes air.
+```
 
 represented in AtomSpace notation (rather than natural language).
 
 Important notes:
 
-1. We need to handle satisfying sets differently.
+1. We need to modify PLN to handle satisfying sets properly.
 
 2. The Relex2Logic rules require modification for "is"/"be" predicates, see:
 https://github.com/opencog/opencog/issues/530
 
-From:
+PLN rules needed:
 
-; be(Socrates, man)
+- GeneralEvaluationToMemberRule
+- MemberToInheritanceRule
+- DeductionRule
 
-(EvaluationLink
-  (PredicateNode "be")
-  (ListLink
-    (ConceptNode "Socrates")
-    (ConceptNode "man")))
+## Logical output from Relex2Logic:
 
-(because the rule EvaluationToMemberRule requires that the argument be a length of arity 1 only)
-GeneralEvaluationToMemberRule: (????)
+### Predicates
 
-(MemberLink
-  (ConceptNode "Socrates")
-  (ConceptNode "SatisfyingSet be/man"))
+```
+(PredicateNode "breathe")
 
-MemberToInheritanceRule:
+(PredicateNode "be")
+```
 
-(InheritanceLink
-  (ConceptNode "Socrates...")
+#### be(Socrates, man)
 
-  (ConceptNode "SatisfyingSet be/man"))
-
---------
-(Question: Will the inference happen on the specific instance nodes or the generalized nodes?)
-
-From:
-
-; breathe(men, air)
-
-(EvaluationLink
-  (PredicateNode "breathe")
-  (ListLink
-    (ConceptNode "man")
-    (ConceptNode "air")))
-
-GeneralEvaluationToMemberRule: (???)
-
-(MemberLink
-  (ConceptNode "man")
-  (ConceptNode "SatisfyingSet breathe/air"))
-
-MemberToInheritanceRule:
-
-(InheritanceLink
-  (ConceptNode "man")
-  (ConceptNode "SatisfyingSet breathe/air"))
-
-----------
-
-DeductionRule:
-
-input:
-
-(InheritanceLink
-  (ConceptNode "Socrates")
-  (ConceptNode "SatisfyingSet(be _ man:ConceptNode)"))
-
-(InheritanceLink
-  (ConceptNode "man")
-  (ConceptNode "SatisfyingSet(breathe _ air:ConceptNode)"))
-
-
-; Logical output
-
-;; be(Socrates, man)
-
+```
 (EvaluationLink (stv 1.000000 0.000000)
   (PredicateNode "is@a64c0b7f-117e-447c-8879-7601423601b4")
   (ListLink (stv 1.000000 0.000000)
@@ -93,9 +56,11 @@ input:
     (ConceptNode "man@35b6f89b-5753-4da1-8dc4-55224cf56789")
   )
 )
+```
 
-;; breathe(men, air)
+#### breathe(men, air)
 
+```
 (EvaluationLink (stv 1.000000 0.000000)
   (PredicateNode "breathe@cd1c5b26-0a62-493f-81eb-e7606d3439fa")
   (ListLink (stv 1.000000 0.000000)
@@ -103,9 +68,11 @@ input:
     (ConceptNode "air@4f8ea182-b6a7-4c04-8e1e-c195f5000c8b")
   )
 )
+```
 
-; Concepts
+### Concepts
 
+```
 (ConceptNode "man")
 
 (ConceptNode "men@cc05125c-5468-4b86-b2f3-b4cedd2eb29e")
@@ -117,15 +84,12 @@ input:
 (ConceptNode "Socrates@7b03b9d8-cdee-4b35-bf29-c6fd35cb4229")
 
 (ConceptNode "Socrates")
+```
 
-; Predicates
 
-(PredicateNode "breathe")
+### Sentences
 
-(PredicateNode "be")
-
-; Sentences
-
+```
 (ReferenceLink (stv 1.000000 1.000000)
   (ParseNode "sentence@6c596aad-8396-43a7-8380-0ab51eb91613_parse_0")
   (ListLink (stv 1.000000 0.000000)
@@ -146,9 +110,11 @@ input:
     (WordInstanceNode ".@29183d71-9982-40c4-b474-7e0c2444bfd4")
   )
 )
+```
 
-; Generalizing from specific instances
+### Generalizing from specific instances
 
+```
 (InheritanceLink (stv 1.000000 0.000000)
   (PredicateNode "breathe@cd1c5b26-0a62-493f-81eb-e7606d3439fa")
   (PredicateNode "breathe")
@@ -178,57 +144,4 @@ input:
   (PredicateNode "is@a64c0b7f-117e-447c-8879-7601423601b4")
   (PredicateNode "be")
 )
-
-(MemberLink
-  (ConceptNode "man")
-  (SatisfyingSetLink
-    (VariableNode ("$X")
-    (EvaluationLink
-      (PredicateNode "breathe")
-      (ListLink
-        (VariableNode "$X")
-        (ConceptNode "air"))))))
-
----
-Input:
-
-(ImplicationLink
-  (EvaluationLink
-    (PredicateNode "smokes")
-    (ListLink
-      (VariableNode "$X")))
-  (EvaluationLink
-    (PredicateNode "cancer")
-    (ListLink
-      (VariableNode "$X"))))
-
-(EvaluationLink
-  (PredicateNode "smokes")
-  (ListLink
-    (ConceptNode Anna)))
-
-Output:
-
-(EvaluationLink
-  (PredicateNode "cancer")
-  (ListLink
-    (ConceptNode Anna)))
-
----
-
-Input is equivalent to:
-
-(ImplicationLink
-
-  (MemberLink
-    (ConceptNode "Anna")
-    (ConceptNode "smokes"))
-
-  (EvaluationLink
-    (PredicateNode "smokes")
-    (ListLink
-      (VariableNode "$X")))
-  (EvaluationLink
-    (PredicateNode "cancer")
-    (ListLink
-      (VariableNode "$X"))))
+```
