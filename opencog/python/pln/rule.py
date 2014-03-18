@@ -61,6 +61,9 @@ class Rule(object):
     def _get_type_names(templates):
         return ' '.join(template.type_name for template in templates)
 
+    def __str__(self):
+        return self.full_name
+
     def calculate(self, input_atoms):
         """
         Compute the output TV(s) based on the input atoms

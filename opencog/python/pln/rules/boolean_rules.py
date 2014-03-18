@@ -131,12 +131,14 @@ def create_boolean_transformation_rules(chainer):
     def make_symmetric_rule(lhs, rhs, i):
         rule = Rule(inputs=lhs, outputs=rhs, formula=formulas.identityFormula)
         rule.name = 'BooleanTransformationRule'+str(i)
+        rule._compute_full_name()
         rules.append(rule)
 
         i+=1
 
         rule = Rule(inputs=rhs, outputs=lhs, formula=formulas.identityFormula)
         rule.name = 'BooleanTransformationRule'+str(i)
+        rule._compute_full_name()
         rules.append(rule)
 
     P, Q = chainer.make_n_variables(2)
