@@ -20,7 +20,7 @@ namespace json_spirit
                                                 // to pass through unaltered.
 
                          remove_trailing_zeros = 0x04,
-                                                // outputs e.g. "1.200000000000000" as "1.2"
+                                                // NOTE: this is no longer meaningful, but used to output e.g. "1.200000000000000" as "1.2"
                          single_line_arrays = 0x08,
                                                 // pretty printing except that arrays printed on single lines unless they contain
                                                 // composite elements, i.e. objects or arrays
