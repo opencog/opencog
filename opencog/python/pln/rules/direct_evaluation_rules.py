@@ -367,17 +367,25 @@ class GeneralEvaluationToMemberRule(Rule):
         [predicate, list_link] = eval_link.out
 
         args = list_link.out
-        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
-        parameter_names[self.index] = '_'
-        parameter_names = ' '.join(parameter_names)
-        concept_name = 'SatisfyingSet(%s %s)' % (predicate.name,
-                                                 parameter_names)
+#        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
+#        parameter_names[self.index] = '_'
+#        parameter_names = ' '.join(parameter_names)
+#        concept_name = 'SatisfyingSet(%s %s)' % (predicate.name,
+#                                                 parameter_names)
 
-        set_node = self.chainer.node(types.ConceptNode, concept_name)
+#        set_node = self.chainer.node(types.ConceptNode, concept_name)
 
-        arg = args[self.index]
-        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+#        arg = args[self.index]
+#        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
+
+        concept_1 = args[0]
+        concept_2 = args[1]
+        x = self.chainer.node(types.ConceptNode, "$X")
+        eval_list_link = self.chainer.link(types.ListLink, [x, concept_2])
+        evaluation_link = self.chainer.link(types.EvaluationLink, [predicate , eval_list_link])
+        satisying_set_link = self.chainer.link(types.SatisfyingSetLink, [x, evaluation_link])
+        member_link = self.chainer.link(types.MemberLink, [concept_1, satisying_set_link])
 
         return [member_link], [tv]
 
