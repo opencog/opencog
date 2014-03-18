@@ -381,7 +381,7 @@ class GeneralEvaluationToMemberRule(Rule):
 
         concept_1 = args[0]
         concept_2 = args[1]
-        x = self.chainer.new_variable()
+        x = self.chainer.node(types.ConceptNode, "$X")
         eval_list_link = self.chainer.link(types.ListLink, [x, concept_2])
         evaluation_link = self.chainer.link(types.EvaluationLink, [predicate , eval_list_link])
         satisying_set_link = self.chainer.link(types.SatisfyingSetLink, [x, evaluation_link])
