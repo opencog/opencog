@@ -255,9 +255,18 @@ void PatternMiner::extenOnePatternTask()
     static HandleSeq allLinks;
     originalAtomSpace.getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
-    // randomly choose one link as start
-    int firstLinkIndex = rand() / allLinks.size() ;
-    Handle firstLink = allLinks[firstLinkIndex];
+    // randomly choose one link for start
+    Handle startLink;
+
+    while(true)
+    {
+        int startLinkIndex = rand() / allLinks.size() ;
+        startLink = allLinks[startLinkIndex];
+
+        // if this link is listlink, try another time until get a link that is not listlink
+        if (originalAtomSpace->getType(startLink) != opencog::LIST_LINK)
+            break;
+    }
 
 }
 
