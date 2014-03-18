@@ -1,15 +1,16 @@
-PLN example of Tuffy MLN "smokes" sample
+PLN version of Tuffy MLN "smokes" sample
 ========================================
 
 More details on this example are available here:
-https://github.com/cosmoharrigan/tuffy/tree/master/samples/smoke
-http://hazy.cs.wisc.edu/hazy/tuffy/doc/tuffy-manual.pdf
+
+- https://github.com/cosmoharrigan/tuffy/tree/master/samples/smoke
+- http://hazy.cs.wisc.edu/hazy/tuffy/doc/tuffy-manual.pdf
 
 Author: Cosmo Harrigan, March 2014
 
-**In-progress, incomplete results**
+**In-progress: incomplete results.**
 
-The input data used in this file is currently only a subset of the full input data.
+**The input data used in this file is currently only a subset of the full input data.**
 
 ##### Input data used
 https://github.com/opencog/opencog/blob/master/opencog/python/pln/examples/tuffy/smokes/data.py
@@ -225,7 +226,7 @@ ModusPonensRule
 (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
 ```
 
-## Output
+## Inference steps
 
 ```
 ----- [Output # 1] -----
