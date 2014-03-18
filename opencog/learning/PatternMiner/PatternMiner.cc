@@ -28,6 +28,8 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/foreach.h>
+#include <stdlib.h>
+#include <time.h>
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
@@ -248,14 +250,26 @@ bool PatternMiner::checkPatternExist(const string& patternKeyStr)
 
 void PatternMiner::extenOnePatternTask()
 {
+    static unsigned cur_gram = 1;
+
+    static HandleSeq allLinks;
+    originalAtomSpace.getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+
+    // randomly choose one link as start
+    int firstLinkIndex = rand() / allLinks.size() ;
+    Handle firstLink = allLinks[firstLinkIndex];
 
 }
 
-void PatternMiner::runPatternMiner()
+void PatternMiner::runPatternMiner(unsigned int max_gram)
 {
+    MAX_GRAM = max_gram;
+
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->extenOnePatternTask();}); // using C++11 lambda-expression
         threads[i].join();
     }
+
+    srand(time(NULL));
 }

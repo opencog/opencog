@@ -84,6 +84,8 @@ private:
 
     unsigned int THREAD_NUM;
 
+    unsigned int MAX_GRAM;
+
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
     //    (InheritanceLink
