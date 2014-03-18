@@ -91,7 +91,6 @@ class AbstractChainer(Logic):
 
     def add_rule(self, rule):
         assert isinstance(rule, Rule)
-        assert type(rule) != Rule
 
         self.rules.append(rule)
 

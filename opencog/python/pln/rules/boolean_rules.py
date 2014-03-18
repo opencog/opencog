@@ -128,13 +128,15 @@ def create_boolean_transformation_rules(chainer):
 
     rules = []
 
-    def make_symmetric_rule(lhs, rhs):
+    def make_symmetric_rule(lhs, rhs, i):
         rule = Rule(inputs=lhs, outputs=rhs, formula=formulas.identityFormula)
-        rule.name = 'BooleanTransformationRule'
+        rule.name = 'BooleanTransformationRule'+str(i)
         rules.append(rule)
 
+        i+=1
+
         rule = Rule(inputs=rhs, outputs=lhs, formula=formulas.identityFormula)
-        rule.name = 'BooleanTransformationRule'
+        rule.name = 'BooleanTransformationRule'+str(i)
         rules.append(rule)
 
     P, Q = chainer.make_n_variables(2)
@@ -142,21 +144,21 @@ def create_boolean_transformation_rules(chainer):
     RHS = [chainer.link(types.SubsetLink,
                         [chainer.link(types.NotLink, [P]), Q])]
 
-    make_symmetric_rule(LHS, RHS)
+    make_symmetric_rule(LHS, RHS, 1)
 
     LHS = [chainer.link(types.AndLink, [P, Q])]
     RHS = [chainer.link(types.NotLink,
                         [chainer.link(types.SubsetLink,
                                       [P, chainer.link(types.NotLink, [Q])])])]
 
-    make_symmetric_rule(LHS, RHS)
+    make_symmetric_rule(LHS, RHS, 3)
 
     LHS = [chainer.link(types.ExtensionalSimilarityLink, [P, Q])]
     RHS = [chainer.link(types.AndLink,
-                        chainer.link(types.SubsetLink, [P, Q]),
-                        chainer.link(types.SubsetLink, [Q, P]))]
+                        [chainer.link(types.SubsetLink, [P, Q]),
+                        chainer.link(types.SubsetLink, [Q, P])])]
 
-    make_symmetric_rule(LHS, RHS)
+    make_symmetric_rule(LHS, RHS, 5)
 
     return rules
 

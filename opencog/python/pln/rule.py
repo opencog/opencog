@@ -43,14 +43,19 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-        self.full_name = \
-            self.name + ' (' + self._get_type_names(inputs) + ' -> '
-        self.full_name += self._get_type_names(outputs) + ')'
+
+        self._compute_full_name()
 
         if __VERBOSE__:
             print self.full_name
 
         self.probabilistic_inputs = True
+
+    def _compute_full_name(self):
+        '''Compute the full name based on the name and the input/output types for the rule'''
+        self.full_name = \
+            self.name + ' (' + self._get_type_names(self._inputs) + ' -> '
+        self.full_name += self._get_type_names(self._outputs) + ')'        
 
     @staticmethod
     def _get_type_names(templates):

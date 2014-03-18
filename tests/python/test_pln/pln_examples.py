@@ -192,6 +192,10 @@ class AllRules(object):
         for rule in create_temporal_rules(self.chainer):
             self.chainer.add_rule(rule)
 
+        boolean_transformation_rules = create_boolean_transformation_rules(self.chainer)
+        for rule in boolean_transformation_rules:
+            self.chainer.add_rule(rule)
+
     def lookup_rule(self, rule_schema_node):
         rule = self.chainer.lookup_rule(rule_schema_node.name)
         rule._chainer = self.test_chainer
