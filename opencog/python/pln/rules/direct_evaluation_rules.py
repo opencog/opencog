@@ -273,11 +273,19 @@ class EvaluationToMemberRule(Rule):
             else:
                 return [], []
 
-        concept_name = predicate.name
-        set_node = self.chainer.node(types.ConceptNode, concept_name)
+#        concept_name = predicate.name
+#        set_node = self.chainer.node(types.ConceptNode, concept_name)
 
-        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+#        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
         tv = eval_link.tv
+
+#        concept_1 = args[0]
+#        concept_2 = args[1]
+        x = self.chainer.node(types.VariableNode, "$X")
+        list_link = self.chainer.link(types.ListLink, [x])
+        evaluation_link = self.chainer.link(types.EvaluationLink, [predicate , list_link])
+        satisying_set_link = self.chainer.link(types.SatisfyingSetLink, [x, evaluation_link])
+        member_link = self.chainer.link(types.MemberLink, [arg, satisying_set_link])
 
         return [member_link], [tv]
 
