@@ -15,11 +15,11 @@ from opencog.atomspace import AtomSpace, TruthValue, types
 atomspace = AtomSpace()
 
 # Basic variable definitions
-X = atomspace.add_link(types.ListLink,
-                       [atomspace.add_node(types.VariableNode, "$X")])
+X = atomspace.add_node(types.VariableNode, "$X")
+lX = atomspace.add_link(types.ListLink, [X])
 
-Y = atomspace.add_link(types.ListLink,
-                       [atomspace.add_node(types.VariableNode, "$X")])
+Y = atomspace.add_node(types.VariableNode, "$Y")
+lY = atomspace.add_link(types.ListLink, [Y])
 
 X_Y = atomspace.add_link(types.ListLink, [X, Y])
 
@@ -42,8 +42,8 @@ atomspace.add_link(types.EvaluationLink,
 
 # If X smokes, then X has cancer.
 cancer = atomspace.add_node(types.PredicateNode, "cancer")
-smokes_X = atomspace.add_link(types.EvaluationLink, [smokes, X])
-cancer_X = atomspace.add_link(types.EvaluationLink, [cancer, X])
+smokes_X = atomspace.add_link(types.EvaluationLink, [smokes, lX])
+cancer_X = atomspace.add_link(types.EvaluationLink, [cancer, lX])
 
 atomspace.add_link(types.ImplicationLink,
                    [smokes_X, cancer_X],
@@ -70,16 +70,23 @@ atomspace.add_link(types.ImplicationLink,
 friends = atomspace.add_node(types.PredicateNode, "friends")
 friends_X_Y = atomspace.add_link(types.EvaluationLink, [friends, X_Y])
 
-smokes_Y = atomspace.add_link(types.EvaluationLink, [smokes, Y])
+smokes_Y = atomspace.add_link(types.EvaluationLink, [smokes, lY])
 
 implication_smokes_X_smokes_Y = atomspace.add_link(
     types.ImplicationLink, [smokes_X, smokes_Y])
 
 atomspace.add_link(types.ImplicationLink,
-                   [friends_X_Y, implication_smokes_X_smokes_Y])
+                   [friends_X_Y, implication_smokes_X_smokes_Y],
+                   TruthValue(0.4, full_confidence))
 
 # Anna is friends with Bob.
 Bob = atomspace.add_node(types.ConceptNode, "Bob")
 atomspace.add_link(
     types.EvaluationLink,
     [friends, atomspace.add_link(types.ListLink, [Anna, Bob])], crisp_true)
+
+# Edward is friends with Frank.
+Frank = atomspace.add_node(types.ConceptNode, "Frank")
+atomspace.add_link(
+    types.EvaluationLink,
+    [friends, atomspace.add_link(types.ListLink, [Edward, Frank])], crisp_true)
