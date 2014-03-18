@@ -386,7 +386,6 @@ class GeneralEvaluationToMemberRule(Rule):
         evaluation_link = self.chainer.link(types.EvaluationLink, [predicate , eval_list_link])
         satisying_set_link = self.chainer.link(types.SatisfyingSetLink, [x, evaluation_link])
         member_link = self.chainer.link(types.MemberLink, [concept_1, satisying_set_link])
-        print member_link
 
         return [member_link], [tv]
 
