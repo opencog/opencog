@@ -35,6 +35,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 	private:
 		PatternMatch pm;
 		AtomSpace *as;
+		SchemeEval *eval;
 		Handle varscope, restrict, restrict2;
 		Handle implication, implication2;
 
@@ -99,7 +100,7 @@ void ImplicationUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
-	SchemeEval::instance(as);
+	eval = &SchemeEval::instance(as);
 
 	// Load the atom types
 	config().set("MODULES",
@@ -148,7 +149,7 @@ void ImplicationUTest::setUp(void)
 	"   (apply cog-new-link (append (list 'TypedVariableLink) x)))\n"
 	"(define (BindLink . x)\n"
 	"   (apply cog-new-link (append (list 'BindLink) x)))\n";
-	SchemeEval::instance().eval(setup);
+	eval->eval(setup);
 
 	// Create an implication link that will be tested.
 	const char * imp = 
@@ -167,8 +168,8 @@ void ImplicationUTest::setUp(void)
 	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(imp);
-	implication = SchemeEval::instance( ).apply("imp", Handle::UNDEFINED);
+	eval->eval(imp);
+	implication = eval->apply("imp", Handle::UNDEFINED);
 
 	// Create an implication link without the conjunction (AndLink)
 	const char * imp2 =
@@ -181,8 +182,8 @@ void ImplicationUTest::setUp(void)
 	"   (VariableNode \"$predNode\")\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(imp2);
-	implication2 = SchemeEval::instance( ).apply("imp2", Handle::UNDEFINED);
+	eval->eval(imp2);
+	implication2 = eval->apply("imp2", Handle::UNDEFINED);
 
 	// Create a varscope link with just one variable
 	const char * scope =
@@ -198,8 +199,8 @@ void ImplicationUTest::setUp(void)
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(scope);
-	varscope = SchemeEval::instance( ).apply("varscope", Handle::UNDEFINED);
+	eval->eval(scope);
+	varscope = eval->apply("varscope", Handle::UNDEFINED);
 
 	// Create a varscope link with a type restriction
 	const char * strict =
@@ -218,8 +219,8 @@ void ImplicationUTest::setUp(void)
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(strict);
-	restrict = SchemeEval::instance( ).apply("restricto", Handle::UNDEFINED);
+	eval->eval(strict);
+	restrict = eval->apply("restricto", Handle::UNDEFINED);
 
 	// Create a varscope link with a type restriction
 	const char * strict2 =
@@ -253,8 +254,8 @@ void ImplicationUTest::setUp(void)
 	"   )\n"
 	")\n"
 	")\n";
-	SchemeEval::instance( ).eval(strict2);
-	restrict2 = SchemeEval::instance( ).apply("restrict2", Handle::UNDEFINED);
+	eval->eval(strict2);
+	restrict2 = eval->apply("restrict2", Handle::UNDEFINED);
 
 	// Create data on which the above pattern should match
 	const char * str = 
@@ -266,7 +267,7 @@ void ImplicationUTest::setUp(void)
 	"   (PredicateNode \"grab@a6460c2d-b5f8-4287-8882-028d12de42d2_Manipulation\")\n"
 	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n";
-	SchemeEval::instance( ).eval(str);
+	eval->eval(str);
 }
 
 /*
