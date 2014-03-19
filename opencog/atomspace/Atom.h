@@ -167,6 +167,9 @@ private:
     //! Unsets removal flag.
     void unsetRemovalFlag();
 
+    /** Change the Very-Long-Term Importance */
+    void chgVLTI(int unit);
+
 public:
 
     virtual ~Atom();
@@ -194,6 +197,35 @@ public:
 
     //! Sets the AttentionValue object of the atom.
     void setAttentionValue(AttentionValuePtr) throw (RuntimeException);
+
+    /** Change the Short-Term Importance */
+    void setSTI(AttentionValue::sti_t stiValue)
+    {
+        /* Make a copy */
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            stiValue,
+            old_av->getLTI(),
+            old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Change the Long-term Importance */
+    void setLTI(AttentionValue::lti_t ltiValue)
+    {
+        AttentionValuePtr old_av = getAttentionValue();
+        AttentionValuePtr new_av = createAV(
+            old_av->getSTI(),
+            ltiValue,
+            old_av->getVLTI());
+        setAttentionValue(new_av);
+    }
+
+    /** Increase the Very-Long-Term Importance by 1 */
+    void incVLTI() { chgVLTI(+1); }
+
+    /** Decrease the Very-Long-Term Importance by 1 */
+    void decVLTI() { chgVLTI(-1); }
 
     /** Returns the TruthValue object of the atom.
      *

@@ -116,13 +116,17 @@ public:
         getAtomTable().print(output, type, subclass);
     }
 
-    /** Add a new node to the Atom Table,
-     * if the atom already exists then the old and the new truth value is merged
+    /**
+     * Add a new node to the Atom Table.  If the atom already exists
+     * then the old and the new truth value is merged.
+     *
      * \param t     Type of the node
      * \param name  Name of the node
-     * \param tvn   Optional TruthValue of the node. If not provided, uses the DEFAULT_TV (see TruthValue.h)
+     * \param tvn   Optional TruthValue of the node. If not provided,
+     *              uses the DEFAULT_TV (see TruthValue.h)
      */
-    inline Handle addNode(Type t, const std::string& name = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV())
+    inline Handle addNode(Type t, const std::string& name = "",
+                          TruthValuePtr tvn = TruthValue::DEFAULT_TV())
     {
         return getImpl().addNode(t, name, tvn);
     }
@@ -130,15 +134,18 @@ public:
     /**
      * Add a new node to the AtomTable. A random 16-character string
      * will be appended to the provided name.
+     *
      * @todo: Later on, the names can include server/time info to decrease
      * the probability of collisions and be more informative.
      **/
-    Handle addPrefixedNode(Type t, const std::string& prefix = "", TruthValuePtr tvn = TruthValue::DEFAULT_TV());
+    Handle addPrefixedNode(Type t, const std::string& prefix = "",
+                       TruthValuePtr tvn = TruthValue::DEFAULT_TV());
 
     /**
-     * Add a new link to the Atom Table
-     * If the atom already exists then the old and the new truth value
-     * is merged
+     * Add a new link to the Atom Table.
+     * If the atom already exists, then the old and the new truth value
+     * is merged.
+     *
      * @param t         Type of the link
      * @param outgoing  a const reference to a HandleSeq containing
      *                  the outgoing set of the link
@@ -341,47 +348,26 @@ public:
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const {
         static std::string noname;
-        NodePtr nnn = NodeCast(h);
+        NodePtr nnn(NodeCast(h));
         if (nnn) return nnn->getName();
         return noname;
     }
 
     /** Change the Short-Term Importance of a given Handle */
     void setSTI(Handle h, AttentionValue::sti_t stiValue) const {
-        /* Make a copy */
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            stiValue,
-            old_av->getLTI(),
-            old_av->getVLTI());
-        h->setAttentionValue(new_av);
+        h->setSTI(stiValue);
     }
 
     /** Change the Long-term Importance of a given Handle */
     void setLTI(Handle h, AttentionValue::lti_t ltiValue) const {
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            ltiValue,
-            old_av->getVLTI());
-        h->setAttentionValue(new_av);
-    }
-
-    /** Change the Very-Long-Term Importance of a given Handle */
-    void chgVLTI(Handle h, int unit) const {
-        AttentionValuePtr old_av = h->getAttentionValue();
-        AttentionValuePtr new_av = createAV(
-            old_av->getSTI(),
-            old_av->getLTI(),
-            old_av->getVLTI() + unit);
-        h->setAttentionValue(new_av);
+        h->setLTI(ltiValue);
     }
 
     /** Increase the Very-Long-Term Importance of a given Handle by 1 */
-    void incVLTI(Handle h) { chgVLTI(h, +1); }
+    void incVLTI(Handle h) const { h->incVLTI(); }
 
     /** Decrease the Very-Long-Term Importance of a given Handle by 1 */
-    void decVLTI(Handle h) {chgVLTI(h, -1); }
+    void decVLTI(Handle h) const { h->decVLTI(); }
 
     /** Retrieve the Short-Term Importance of a given Handle */
     AttentionValue::sti_t getSTI(Handle h) const {
@@ -401,7 +387,7 @@ public:
     /** Retrieve the outgoing set of a given link */
     const HandleSeq& getOutgoing(Handle h) const {
         static HandleSeq empty;
-        LinkPtr lll = LinkCast(h);
+        LinkPtr lll(LinkCast(h));
         if (lll) return lll->getOutgoingSet();
         return empty;
     }
@@ -415,7 +401,7 @@ public:
 
     /** Retrieve the arity of a given link */
     Arity getArity(Handle h) const {
-        LinkPtr lll = LinkCast(h);
+        LinkPtr lll(LinkCast(h));
         if (lll) return lll->getArity();
         return 0;
     }

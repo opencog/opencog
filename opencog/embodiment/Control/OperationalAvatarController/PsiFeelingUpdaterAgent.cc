@@ -222,6 +222,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     logger().debug( "PsiFeelingUpdaterAgent::%s - Running feeling updaters (scheme scripts) [ cycle = %d ]",
                     __FUNCTION__ , this->cycleCount);
 
+#if HAVE_GUILE
     // Get OAC
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
@@ -229,8 +230,6 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     // Get AtomSpace
     AtomSpace& atomSpace = oac->getAtomSpace();
 
-
-#if HAVE_GUILE
 
     // Initialize scheme evaluator
     SchemeEval & evaluator = SchemeEval::instance(&atomSpace);

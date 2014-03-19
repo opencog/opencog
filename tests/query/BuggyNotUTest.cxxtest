@@ -131,8 +131,9 @@ void BuggyNot::test_bugnot(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
+	SchemeEval* eval = &SchemeEval::instance();
+	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
