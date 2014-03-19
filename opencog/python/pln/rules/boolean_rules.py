@@ -26,6 +26,8 @@ def create_and_or_rules(chainer, min_n, max_n):
 
 
 class BooleanLinkCreationRule(Rule):
+    # TODO has bugs so i disabled it
+    # e.g. it will convert And(And(A B) And(B C)) into And(A B B C) which is redundant
     def disabled_custom_compute(self, inputs, outputs):
         # the output may have a hierarchy of links, but we should
         # flatten it (this means PLN can incrementally create bigger
