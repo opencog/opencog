@@ -420,26 +420,6 @@ cdef class AtomSpace:
     def print_list(self):
         self.atomspace.print_list()
 
-    def next_new_atom(self):
-        """
-        Function to get atoms that have been added to the AtomSpace.
-        There's a list of newly added ones, and this method will pop the
-        first atom from the list. You should use it to update a separate
-        list for each Python MindAgent that wants to use it. It returns
-        either a Cython Atom or None (if there are none left).
-        """
-        cdef cHandle ch
-        cdef Handle h
-        cdef Atom atom
-        if deref(self.atomspace).addAtomSignalQueue.size() > 0:
-            ch = deref(self.atomspace).addAtomSignalQueue.front()
-            deref(self.atomspace).addAtomSignalQueue.pop_front()
-            h = Handle(ch.value())
-            atom = Atom(h,self)
-            return atom
-        else:
-            return None
-
 cdef class SpaceServer:
     cdef cSpaceServer *spaceserver
 
