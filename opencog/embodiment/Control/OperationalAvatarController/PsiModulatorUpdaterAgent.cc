@@ -127,6 +127,10 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 
     return true; 
 
+#else // HAVE_GUILE    
+    logger().error( "PsiModulatorUpdaterAgent::Modulator::%s - Guile is required", 
+                    __FUNCTION__);
+    return false; 
 #endif // HAVE_GUILE    
 }    
 
