@@ -1,4 +1,3 @@
-
 /*
  * opencog/persist/zmq/events/AtomSpacePublisherModule.h
  *
@@ -27,15 +26,16 @@
 #define _OPENCOG_ATOMSPACE_PUBLISHER_MODULE_H
 
 #include <string>
-
 #include <opencog/server/Agent.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
-
 #include <lib/json_spirit/json_spirit.h>
+#include <tbb/task.h>
+#include <tbb/concurrent_queue.h>
+#include <opencog/util/tbb.h>
+#include <lib/zmq/zhelpers.hpp>
 
 using namespace json_spirit;
-#include "opencog/util/zhelpers.hpp"
 
 namespace opencog
 {
@@ -62,9 +62,26 @@ class CogServer;
  *   addAF      (Atom AttentionValue changed and entered the AttentionalFocus)
  *   removeAF   (Atom AttentionValue changed and exited the AttentionalFocus)
  *
+ * Architecture:
+ *   - Uses Intel TBB (Threaded Building Blocks), Boost Signals2 and ZeroMQ
+ *   - The Boost Signals2 slots receive atomspace events and can be multithreaded
+ *   - Events are enqueued as a pending TBB task
+ *   - TBB scheduler schedules the tasks across available processor cores
+ *   - Tasks serialize the atomspace event into a standard JSON message format
+ *   - Serialized output is forwarded to a TBB concurrent queue
+ *   - Proxy accesses the concurrent queue using a blocking pop operation to 
+ *     demultiplex messages and forward them to the ZeroMQ publisher socket
  **/
 class AtomSpacePublisherModule;
 typedef std::shared_ptr<AtomSpacePublisherModule> AtomSpacePublisherModulePtr;
+
+struct message_t {
+    std::string type;
+    std::string payload;
+};
+
+// High water mark for publisher socket
+const int HWM = 10000000;
 
 class AtomSpacePublisherModule : public Module
 {
@@ -79,43 +96,31 @@ class AtomSpacePublisherModule : public Module
         void enableSignals();
         void disableSignals();
 
+        // TBB
+        tbb::concurrent_bounded_queue<message_t> queue;
+        
+        // ZeroMQ
         zmq::context_t * context;
-        zmq::socket_t * publisher;
         void InitZeroMQ();
         void proxy();
 
-        Object atomToJSON(Handle h);
-        Object tvToJSON(TruthValuePtr tv);
-        Object avToJSON(AttentionValuePtr av);
         void sendMessage(std::string messageType, std::string payload);
         std::string atomMessage(Object jsonAtom);
         std::string avMessage(Object jsonAtom, Object jsonAVOld, Object jsonAVNew);
         std::string tvMessage(Object jsonAtom, Object jsonTVOld, Object jsonTVNew);
-        std::string jsonToString(Object json);
-        void signalHandlerAdd(Handle h);
-        void signalHandlerRemove(AtomPtr atom);
-        void signalHandlerAVChanged(const Handle& h,
-                                    const AttentionValuePtr& av_old,
-                                    const AttentionValuePtr& av_new);
-        void signalHandlerTVChanged(const Handle& h,
-                                    const TruthValuePtr& tv_old,
-                                    const TruthValuePtr& tv_new);
-        void signalHandlerAddAF(const Handle& h,
-                                const AttentionValuePtr& av_old,
-                                const AttentionValuePtr& av_new);
-        void signalHandlerRemoveAF(const Handle& h,
-                                   const AttentionValuePtr& av_old,
-                                   const AttentionValuePtr& av_new);
+        Object atomToJSON(Handle h);
+        Object tvToJSON(TruthValuePtr tv);
+        Object avToJSON(AttentionValuePtr av);
 
         DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
            do_publisherEnableSignals,
-           "Enable AtomSpace signals for the AtomSpace Publisher",
+           "Enable AtomSpace event publishing",
            "Usage: publisher-enable-signals",
            false, false)
 
         DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
            do_publisherDisableSignals,
-           "Disable AtomSpace signals for the AtomSpace Publisher",
+           "Disable AtomSpace event publishing",
            "Usage: publisher-disable-signals",
            false, false)
 

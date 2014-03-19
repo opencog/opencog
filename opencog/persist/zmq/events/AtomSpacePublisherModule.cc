@@ -23,20 +23,19 @@
  */
 
 #include "AtomSpacePublisherModule.h"
-
 #include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/Config.h>
-//#include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/IndefiniteTruthValue.h>
-#include <opencog/dynamics/attention/atom_types.h> // todo: remove?
-#include "opencog/util/zhelpers.hpp"
+#include <lib/zmq/zhelpers.hpp>
+#include <lib/json_spirit/json_spirit.h>
+#include <tbb/task.h>
+#include <tbb/concurrent_queue.h>
+#include <opencog/util/tbb.h>
 #include <iostream>
 #include <thread>
 #include <iomanip>
 #include <time.h>
-
-#include <lib/json_spirit/json_spirit.h>
 
 using namespace std;
 using namespace json_spirit;
@@ -68,13 +67,16 @@ void AtomSpacePublisherModule::run()
 AtomSpacePublisherModule::~AtomSpacePublisherModule()
 {
     logger().info("Terminating AtomSpacePublisherModule.");
-
+    
     disableSignals();
-
-    publisher->close();
-    delete publisher;
-    delete context;
-
+    
+    // Shut down the ZeroMQ proxy loop
+    message_t message;
+    message.type = "CONTROL";
+    message.payload = "TERMINATE";
+    queue.push(message); 
+    context->close();
+    
     do_publisherEnableSignals_unregister();
     do_publisherDisableSignals_unregister();
 }
@@ -82,233 +84,190 @@ AtomSpacePublisherModule::~AtomSpacePublisherModule()
 void AtomSpacePublisherModule::enableSignals()
 {
     if (!addAtomConnection.connected())
-        addAtomConnection = as->addAtomSignal(
-                boost::bind(&AtomSpacePublisherModule::atomAddSignal,
-                            this, _1));
+    {
+        addAtomConnection = as->addAtomSignal(boost::bind(
+            &AtomSpacePublisherModule::atomAddSignal, this, _1));
+    }
     if (!removeAtomConnection.connected())
-    removeAtomConnection = as->removeAtomSignal(
-                boost::bind(&AtomSpacePublisherModule::atomRemoveSignal,
-                            this, _1));
+    {
+        removeAtomConnection = as->removeAtomSignal(boost::bind(
+            &AtomSpacePublisherModule::atomRemoveSignal, this, _1));
+    }
     if (!TVChangedConnection.connected())
-        TVChangedConnection = as->TVChangedSignal(
-                boost::bind(&AtomSpacePublisherModule::TVChangedSignal,
-                            this, _1, _2, _3));
+    {
+        TVChangedConnection = as->TVChangedSignal(boost::bind(
+            &AtomSpacePublisherModule::TVChangedSignal, this, _1, _2, _3));
+    }
     if (!AVChangedConnection.connected())
-        AVChangedConnection = as->AVChangedSignal(
-                boost::bind(&AtomSpacePublisherModule::AVChangedSignal,
-                            this, _1, _2, _3));
+    {
+        AVChangedConnection = as->AVChangedSignal(boost::bind(
+            &AtomSpacePublisherModule::AVChangedSignal, this, _1, _2, _3));
+    }
     if (!AddAFConnection.connected())
-        AddAFConnection = as->AddAFSignal(
-                boost::bind(&AtomSpacePublisherModule::addAFSignal,
-                            this, _1, _2, _3));
+    {
+        AddAFConnection = as->AddAFSignal(boost::bind(
+            &AtomSpacePublisherModule::addAFSignal, this, _1, _2, _3));
+    }
     if (!RemoveAFConnection.connected())
-        RemoveAFConnection = as->RemoveAFSignal(
-                boost::bind(&AtomSpacePublisherModule::removeAFSignal,
-                            this, _1, _2, _3));
+    {
+        RemoveAFConnection = as->RemoveAFSignal(boost::bind(
+            &AtomSpacePublisherModule::removeAFSignal, this, _1, _2, _3));
+    }
 }
 
 void AtomSpacePublisherModule::disableSignals()
 {
     if (addAtomConnection.connected())
+    {
         addAtomConnection.disconnect();
+    }
     if (removeAtomConnection.connected())
+    {
         removeAtomConnection.disconnect();
+    }
     if (TVChangedConnection.connected())
+    {
         TVChangedConnection.disconnect();
+    }
     if (AVChangedConnection.connected())
+    {
         AVChangedConnection.disconnect();
+    }
     if (AddAFConnection.connected())
+    {
         AddAFConnection.disconnect();
+    }
     if (RemoveAFConnection.connected())
+    {
         RemoveAFConnection.disconnect();
+    }
 }
 
 void AtomSpacePublisherModule::InitZeroMQ()
 {
     context = new zmq::context_t(1);
-
     std::thread proxyThread(&AtomSpacePublisherModule::proxy, this);
     proxyThread.detach();
 }
 
 void AtomSpacePublisherModule::proxy()
 {
-    zmq::socket_t * consumer;
-    zmq::socket_t * pub;
-
-    consumer = new zmq::socket_t(*context, ZMQ_PULL);
-    pub = new zmq::socket_t(*context, ZMQ_PUB);
-
+    zmq::socket_t pub(*context, ZMQ_PUB);
+    pub.setsockopt(ZMQ_SNDHWM, &HWM, sizeof(HWM));
+    
     std::string zmq_event_port = config().get("ZMQ_EVENT_PORT");
     bool zmq_use_public_ip = config().get_bool("ZMQ_EVENT_USE_PUBLIC_IP");
     std::string zmq_ip;
     if (zmq_use_public_ip)
+    {
         zmq_ip = "0.0.0.0";
+    }
     else
+    {
         zmq_ip = "*";
+    }
 
-    try {
-        consumer->bind("inproc://atomspace");
-        pub->bind(("tcp://" + zmq_ip + ":" + zmq_event_port).c_str());
-    } catch (zmq::error_t error) {
+    try 
+    {
+        pub.bind(("tcp://" + zmq_ip + ":" + zmq_event_port).c_str());
+    } 
+    catch (zmq::error_t error) 
+    {
         std::cout << "ZeroMQ error: " << error.what() << std::endl;
         return;
     }
 
-    // Forward messages from multiple producers on to the publisher
-    while (1) {
-        std::string address = s_recv(*consumer);
-        std::string payload = s_recv(*consumer);
-        s_sendmore(*pub, address);
-        s_send(*pub, payload);
+    // Concurrent queue uses blocking pop operation to demultiplex messages
+    // received from multithreaded TBB worker tasks and forward them to the
+    // ZeroMQ publisher socket
+    bool active = true;
+    while (active)
+    {
+        message_t message;
+        queue.pop(message);
+        
+        if (message.type == "CONTROL")
+        {
+            if (message.payload == "TERMINATE")
+            {
+                active = false; 
+            }
+        }
+        else
+        {
+            s_sendmore(pub, message.type);
+            s_send(pub, message.payload);
+        }
     }
 }
 
-void AtomSpacePublisherModule::sendMessage(std::string messageType,
+void AtomSpacePublisherModule::sendMessage(std::string messageType, 
                                            std::string payload)
-{
-    zmq::socket_t * socket = new zmq::socket_t(*context, ZMQ_PUSH);
-    socket->connect("inproc://atomspace");
-    s_sendmore (*socket, messageType);
-    s_send (*socket, payload);
-    socket->close();
-
-    //cout << "[" << messageType << "] " << payload << endl;
+{   
+    message_t message;
+    message.type = messageType;
+    message.payload = payload;
+    queue.push(message); 
 }
-
-void AtomSpacePublisherModule
-::signalHandlerAdd(Handle h)
-{
-    sendMessage("add",
-                atomMessage(atomToJSON(h)));
-}
-
-void AtomSpacePublisherModule
-::signalHandlerRemove(AtomPtr atom)
-{
-    sendMessage("remove",
-                atomMessage(atomToJSON(atom->getHandle())));
-}
-
-void AtomSpacePublisherModule
-::signalHandlerAVChanged(const Handle& h,
-                         const AttentionValuePtr& av_old,
-                         const AttentionValuePtr& av_new)
-{
-        sendMessage("avChanged",
-                    avMessage(atomToJSON(h),
-                              avToJSON(av_old),
-                              avToJSON(av_new)));
-}
-
-void AtomSpacePublisherModule
-::signalHandlerTVChanged(const Handle& h,
-                         const TruthValuePtr& tv_old,
-                         const TruthValuePtr& tv_new)
-{
-    // Due to outstanding issue #394:
-    //   https://github.com/opencog/opencog/issues/394
-    // we check if the AttentionValue has actually changed
-//    if (tv_old != tv_new) {
-        sendMessage("tvChanged",
-                    tvMessage(atomToJSON(h),
-                              tvToJSON(tv_old),
-                              tvToJSON(tv_new)));
-//    }
-}
-
-void AtomSpacePublisherModule
-::signalHandlerAddAF(const Handle& h,
-                     const AttentionValuePtr& av_old,
-                     const AttentionValuePtr& av_new)
-{
-    sendMessage("addAF",
-                avMessage(atomToJSON(h),
-                          avToJSON(av_old),
-                          avToJSON(av_new)));
-}
-
-void AtomSpacePublisherModule
-::signalHandlerRemoveAF(const Handle& h,
-                        const AttentionValuePtr& av_old,
-                        const AttentionValuePtr& av_new)
-{
-    sendMessage("removeAF",
-                avMessage(atomToJSON(h),
-                          avToJSON(av_old),
-                          avToJSON(av_new)));
-}
-
-// Todo: Use a threadpool to process tasks off a work queue
-// instead of creating a new thread for each signal handler
-
+    
 void AtomSpacePublisherModule::atomAddSignal(Handle h)
-{
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerAdd,
-                        this, h);
-    handler.detach();
+{   
+    tbb_enqueue_lambda([=] {
+       sendMessage("add", atomMessage(atomToJSON(h)));
+    });
 }
 
 void AtomSpacePublisherModule::atomRemoveSignal(AtomPtr atom)
 {
-    // The AtomSpace API fires a dummy 'AVChangedSignal' signal when you remove
-    // an atom:
-    //   https://github.com/opencog/opencog/issues/394
-    // After that bug is resolved, it may be necessary to check if the atom was
-    // in the AttentionalFocus before being deleted, and then publish a
-    // 'removeAF' signal
-
-    // todo
-
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerRemove,
-                        this, atom);
-    handler.detach();
+    tbb_enqueue_lambda([=] {
+        sendMessage("remove", atomMessage(atomToJSON(atom->getHandle())));
+    });
 }
 
 void AtomSpacePublisherModule::AVChangedSignal(const Handle& h,
                                                const AttentionValuePtr& av_old,
                                                const AttentionValuePtr& av_new)
 {
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerAVChanged,
-                            this, h, av_old, av_new);
-    handler.detach();
+    tbb_enqueue_lambda([=] {
+        sendMessage("avChanged", avMessage(atomToJSON(h), 
+                                           avToJSON(av_old), 
+                                           avToJSON(av_new)));
+    });
 }
 
 void AtomSpacePublisherModule::TVChangedSignal(const Handle& h,
                                                const TruthValuePtr& tv_old,
                                                const TruthValuePtr& tv_new)
 {
-    // The AtomSpace API fires a dummy 'TVChangedSignal' signal when you add
-    // a link:
-    //   https://github.com/opencog/opencog/issues/394
-    // Until that bug is fixed, this will ignore the simple case where the link
-    // is created with no TruthValue defined. However, if the link is created
-    // with a TruthValue defined, that dummy signal will still be published.
-
-    // todo: investigate occasional wrong tv changed signals from the atomspace
-
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerTVChanged,
-                        this, h, tv_old, tv_new);
-    handler.detach();
+    tbb_enqueue_lambda([=] {
+        sendMessage("tvChanged", tvMessage(atomToJSON(h), 
+                                           tvToJSON(tv_old),
+                                           tvToJSON(tv_new)));
+    });
 }
 
 void AtomSpacePublisherModule::addAFSignal(const Handle& h,
                                            const AttentionValuePtr& av_old,
                                            const AttentionValuePtr& av_new)
 {
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerAddAF,
-                            this, h, av_old, av_new);
-    handler.detach();
+    tbb_enqueue_lambda([=] {
+        sendMessage("addAF", avMessage(atomToJSON(h), 
+                                       avToJSON(av_old),
+                                       avToJSON(av_new)));
+    });
 }
 
 void AtomSpacePublisherModule::removeAFSignal(const Handle& h,
                                               const AttentionValuePtr& av_old,
                                               const AttentionValuePtr& av_new)
-{
-    std::thread handler(&AtomSpacePublisherModule::signalHandlerRemoveAF,
-                            this, h, av_old, av_new);
-    handler.detach();
+{  
+    tbb_enqueue_lambda([=] {
+        sendMessage("removeAF", avMessage(atomToJSON(h), 
+                                          avToJSON(av_old),
+                                          avToJSON(av_new)));
+    });
 }
+
 
 Object AtomSpacePublisherModule::atomToJSON(Handle h)
 {
@@ -346,16 +305,16 @@ Object AtomSpacePublisherModule::atomToJSON(Handle h)
         outgoing.push_back(std::to_string(outgoingHandles[i].value()));
     }
 
-    Object jsonAtom;
-    jsonAtom.push_back(Pair("handle", handle));
-    jsonAtom.push_back(Pair("type", typeNameString));
-    jsonAtom.push_back(Pair("name", nameString));
-    jsonAtom.push_back(Pair("attentionvalue", jsonAV));
-    jsonAtom.push_back(Pair("truthvalue", jsonTV));
-    jsonAtom.push_back(Pair("outgoing", outgoing));
-    jsonAtom.push_back(Pair("incoming", incoming));
-
-    return jsonAtom;
+    Object json;
+    json.push_back(Pair("handle", handle));
+    json.push_back(Pair("type", typeNameString));
+    json.push_back(Pair("name", nameString));
+    json.push_back(Pair("attentionvalue", jsonAV));
+    json.push_back(Pair("truthvalue", jsonTV));
+    json.push_back(Pair("outgoing", outgoing));
+    json.push_back(Pair("incoming", incoming));
+    
+    return json;
 }
 
 Object AtomSpacePublisherModule::avToJSON(AttentionValuePtr av)
@@ -378,8 +337,7 @@ Object AtomSpacePublisherModule::tvToJSON(TruthValuePtr tvp)
         case SIMPLE_TRUTH_VALUE: {
             json.push_back(Pair("type", "simple"));
             jsonDetails.push_back(Pair("strength", tvp->getMean()));
-//            jsonDetails.push_back(Pair("count", tvp->getCount()));
-            jsonDetails.push_back(Pair("countString", std::to_string(tvp->getCount())));
+            jsonDetails.push_back(Pair("count", tvp->getCount()));
             jsonDetails.push_back(Pair("confidence", tvp->getConfidence()));
             json.push_back(Pair("details", jsonDetails));
             break;
@@ -421,7 +379,7 @@ std::string AtomSpacePublisherModule::atomMessage(Object jsonAtom)
     Object json;
     json.push_back(Pair("atom", jsonAtom));
     json.push_back(Pair("timestamp", time(0)));
-    return jsonToString(json);
+    return write_formatted(json);
 }
 
 std::string AtomSpacePublisherModule::avMessage(
@@ -433,7 +391,7 @@ std::string AtomSpacePublisherModule::avMessage(
     json.push_back(Pair("avNew", jsonAVNew));
     json.push_back(Pair("atom", jsonAtom));
     json.push_back(Pair("timestamp", time(0)));
-    return jsonToString(json);
+    return write_formatted(json);
 }
 
 std::string AtomSpacePublisherModule::tvMessage(
@@ -445,11 +403,6 @@ std::string AtomSpacePublisherModule::tvMessage(
     json.push_back(Pair("tvNew", jsonTVNew));
     json.push_back(Pair("atom", jsonAtom));
     json.push_back(Pair("timestamp", time(0)));
-    return jsonToString(json);
-}
-
-std::string AtomSpacePublisherModule::jsonToString(Object json)
-{
     return write_formatted(json);
 }
 
@@ -457,7 +410,6 @@ std::string AtomSpacePublisherModule
 ::do_publisherEnableSignals(Request *dummy, std::list<std::string> args)
 {
     enableSignals();
-
     return "AtomSpace Publisher signals have been enabled.\n";
 }
 
@@ -465,6 +417,5 @@ std::string AtomSpacePublisherModule
 ::do_publisherDisableSignals(Request *dummy, std::list<std::string> args)
 {
     disableSignals();
-
     return "AtomSpace Publisher signals have been disabled.\n";
 }
