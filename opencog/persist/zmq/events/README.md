@@ -32,10 +32,12 @@ Prerequisites
 -------------
 
 #### ZeroMQ
+
+http://zeromq.org/intro:get-the-software
+
 Requires ZeroMQ version 3.2.4 (libzmq3-dev) or higher.
 
-This will be installed automatically if you are using [ocpkg](https://github.com/opencog/ocpkg), or can be
-installed manually here: <http://zeromq.org/intro:get-the-software>
+This will be installed automatically if you are using [ocpkg](https://github.com/opencog/ocpkg).
 
 #### Threaded Building Blocks (Intel TBB)
 https://www.threadingbuildingblocks.org/download
@@ -43,7 +45,7 @@ https://www.threadingbuildingblocks.org/download
 Module
 ------
 
-This is implemented as a Module named *libatomspacepublisher.so* which must be enabled in the *opencog.conf* file.
+This is implemented as a module named *libatomspacepublisher.so* which must be enabled in the *opencog.conf* file.
 
 When loaded, it will be enabled by default. The module supports the following CogServer commands:
 
@@ -356,21 +358,23 @@ You can perform benchmarking on this module by loading the libbenchmark.so modul
 That will allow you to compare throughput with the publisher enabled vs. disabled.
 
 March 18, 2014:
+
 Test system: i7-4930K 3.4GHz (12 core) w/ 32GB RAM
+
 Number of threads allocated to AtomSpace add operations: 2
 
 ###### Wall-clock time
 Time taken to build a graph of 2000 nodes fully connected by 3,998,000 bidirectional directed edges
 - Publisher disabled:  61 seconds (aggregate links/sec: 65541)
 - Publisher enabled:   47 seconds (aggregate links/sec: 85064)
-- Deprecated version: 175 seconds (aggregate links/sec: 22846)
+- Previous deprecated version: 175 seconds (aggregate links/sec: 22846)
 
 Time taken to load this Scheme file: https://github.com/opencog/test-datasets/blob/master/conceptnet/conceptnet4.scm
 - Publisher disabled:  23 seconds
 - Publisher enabled:   35 seconds
-- Deprecated version: 286 seconds
+- Previous deprecated version: 286 seconds
 
-For historical purposes, the performance of the previous version was also tested, and is labeled 'Deprecated version' in the results.
+For historical purposes, the performance of the previous version was also tested, and is labeled 'Previous deprecated version' in the results.
 
 Benchmark procedure:
 ```
