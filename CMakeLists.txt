@@ -457,16 +457,25 @@ IF (NOT XMLRPC_FOUND)
 	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
-# ZeroMQ library 2.1.2
+# ZeroMQ
 FIND_PACKAGE(ZMQ)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+IF (ZMQ_FOUND AND ZMQ_LIBRARY)
 	ADD_DEFINITIONS(-DHAVE_ZMQ)
 	SET(HAVE_ZMQ 1)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure ZMQ_LIBRARIES and ZMQ_INCLUDE_DIRS are set.")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
+# Threaded Building Blocks (Intel TBB) library
+FIND_PACKAGE(TBB)
+IF (TBB_FOUND)
+        SET(HAVE_TBB 1)
+ELSE (TBB_FOUND)
+        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+ENDIF (TBB_FOUND)
+MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -724,7 +733,6 @@ SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports" HAVE_ZMQ)
+SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
+SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_SHOW()
-
-
