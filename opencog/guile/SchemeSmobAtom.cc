@@ -117,7 +117,7 @@ SCM SchemeSmob::ss_inc_vlti (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-inc-vlti!");
 
-	atomspace->incVLTI(h);
+	h->incVLTI();
 	return satom;
 }
 
@@ -125,7 +125,7 @@ SCM SchemeSmob::ss_dec_vlti (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-dec-vlti!");
 
-	atomspace->decVLTI(h);
+	h->decVLTI();
 	return satom;
 }
 
