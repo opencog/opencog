@@ -341,7 +341,7 @@ public:
     /** Retrieve the name of a given Handle */
     const std::string& getName(Handle h) const {
         static std::string noname;
-        NodePtr nnn = NodeCast(h);
+        NodePtr nnn(NodeCast(h));
         if (nnn) return nnn->getName();
         return noname;
     }
@@ -401,7 +401,7 @@ public:
     /** Retrieve the outgoing set of a given link */
     const HandleSeq& getOutgoing(Handle h) const {
         static HandleSeq empty;
-        LinkPtr lll = LinkCast(h);
+        LinkPtr lll(LinkCast(h));
         if (lll) return lll->getOutgoingSet();
         return empty;
     }
@@ -415,7 +415,7 @@ public:
 
     /** Retrieve the arity of a given link */
     Arity getArity(Handle h) const {
-        LinkPtr lll = LinkCast(h);
+        LinkPtr lll(LinkCast(h));
         if (lll) return lll->getArity();
         return 0;
     }
