@@ -60,10 +60,12 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
     std::string ret = "";
     for (int i=0; i< indent; i++) ret += "   ";
     ret += "(";
-    ret += classserver().getTypeName(atomspace->getType(h));
-    if (atomspace->isNode(h)) {
+    ret += classserver().getTypeName(h->getType());
+    NodePtr nnn(NodeCast(h));
+    LinkPtr lll(LinkCast(h));
+    if (nnn) {
         ret += " \"";
-        ret += atomspace->getName(h);
+        ret += nnn->getName();
         ret += "\"";
 
         // Print the truth value only after the node name
@@ -82,7 +84,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
         ret += ")";
         return ret;
     }
-    else if (atomspace->isLink(h)) {
+    else if (lll) {
         // If there's a truth value, print it before the other atoms
         TruthValuePtr tv(h->getTruthValue());
         if (!tv->isDefaultTV()) {
@@ -99,7 +101,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
 
         // print the outgoing link set.
         ret += "\n";
-        std::vector<Handle> oset = atomspace->getOutgoing(h);
+        std::vector<Handle> oset = lll->getOutgoingSet();
         unsigned int arity = oset.size();
         for (unsigned int i=0; i<arity; i++) {
             //ret += " ";
@@ -107,7 +109,7 @@ std::string SchemeSmob::handle_to_string(Handle h, int indent)
             ret += "\n";
             //if (i != arity-1) ret += "\n";
         }
-        for (int i=0; i< indent; i++) ret += "   ";
+        for (int i=0; i < indent; i++) ret += "   ";
         ret += ")";
         return ret;
     }
@@ -246,7 +248,7 @@ SCM SchemeSmob::ss_node_p (SCM s)
     if (Handle::UNDEFINED == h)
         return SCM_BOOL_F;
 
-    if (atomspace->isNode(h)) return SCM_BOOL_T;
+    if (NodeCast(h)) return SCM_BOOL_T;
 
     return SCM_BOOL_F;
 }
@@ -260,7 +262,7 @@ SCM SchemeSmob::ss_link_p (SCM s)
     if (Handle::UNDEFINED == h)
         return SCM_BOOL_F;
 
-    if (atomspace->isLink(h)) return SCM_BOOL_T;
+    if (LinkCast(h)) return SCM_BOOL_T;
     return SCM_BOOL_F;
 }
 

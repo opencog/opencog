@@ -101,21 +101,16 @@ class SchemeEval : public GenericEval
 			if (!singletonInstance)
 			{
 				if (!atomspace)
-				{
-					// We create our own local AtomSpace to send calls to the
-					// event loop (otherwise the getType cache breaks)
-					atomspace = new AtomSpace(cogserver().getAtomSpace());
-				}
+					atomspace = &cogserver().getAtomSpace();
 				singletonInstance = new SchemeEval(atomspace);
 			}
-			else if (atomspace &&
-				&singletonInstance->atomspace->getImpl() != &atomspace->getImpl())
+			else if (atomspace && singletonInstance->atomspace != atomspace)
 			{
 				// Someone is trying to initialise the Scheme interpretator
 				// on a different AtomSpace. because of the singleton design
 				// there is no easy way to support this...
 				throw (RuntimeException(TRACE_INFO, "Trying to re-initialise"
-				          " scm interpretor with different AtomSpaceImpl ptr!"));
+				          " scm interpretor with different AtomSpace ptr!"));
 			}
 			return *singletonInstance;
 		}

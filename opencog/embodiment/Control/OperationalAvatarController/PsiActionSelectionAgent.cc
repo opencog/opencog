@@ -233,6 +233,7 @@ void PsiActionSelectionAgent::executeAction(AtomSpace & atomSpace,
 {
 std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_action)<<std::endl<<std::endl;
 
+#if HAVE_GUILE
     // Variables used by combo interpreter
     std::vector <combo::vertex> schemaArguments;
 
@@ -246,7 +247,6 @@ std::cout<<"Currently executing Action: "<<atomSpace.atomAsString(this->current_
                                  atomSpace.getOutgoing(hActionExecutionLink, 0)
                                               );
 
-#if HAVE_GUILE
     // Get scheme function name if any
     bool bSchemeFunction = false;
     size_t scm_prefix_index = actionName.find("scm:");

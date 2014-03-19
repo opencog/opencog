@@ -29,49 +29,6 @@ from pln.rules import *
 
 __author__ = 'Cosmo Harrigan'
 
-__VERBOSE__ = False
-
-# Rules which take (chainer, link_type) as arguments
-RULES_CHAINER_LINKTYPE = [DeductionRule,
-                          InversionRule,
-                          ModusPonensRule,
-                          PreciseModusPonensRule,
-                          SymmetricModusPonensRule,
-                          TermProbabilityRule,
-                          TransitiveSimilarityRule]
-
-# Rules which take (chainer) as argument
-RULES_CHAINER = [EvaluationToMemberRule,
-                 InheritanceRule,
-                 InheritanceToMemberRule,
-                 MemberToEvaluationRule,
-                 MemberToInheritanceRule,
-                 NegatedSubsetEvaluationRule,
-                 OrEvaluationRule,
-                 SimilarityRule,
-                 SubsetEvaluationRule,
-                 AndEvaluationRule]
-
-LINK_TYPES = [types.InheritanceLink,
-              types.EvaluationLink,
-              types.ImplicationLink,
-              types.PredictiveImplicationLink,
-              types.SimilarityLink,
-              types.EquivalenceLink,
-              types.OrLink,
-              types.AndLink,
-              types.SimultaneousAndLink,
-              types.ExtensionalSimilarityLink,
-              types.IntensionalSimilarityLink,
-              types.IntensionalInheritanceLink,
-              types.ListLink,
-              types.SubsetLink,
-              types.SetLink,
-              types.MemberLink,
-              types.NotLink,
-              types.FalseLink,
-              types.TrueLink]
-
 
 class InferenceAgent(MindAgent):
     def __init__(self):
@@ -80,21 +37,23 @@ class InferenceAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace, stimulateAtoms=False)
 
-        # Note:
-        # The API for adding Rules and Links to a PLN Chainer is
-        # hard to use. It could be redesigned so that you would
-        # just pass a list of rule types and link types when you
-        # instantiate the Chainer, without having to be aware of
-        # the different sets of rules that require different
-        # argument sets.
+        # EvaluationToMember, MemberToInheritance
+        self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
+        self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
+        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
+        self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
 
-        for rule in RULES_CHAINER_LINKTYPE:
-            for link_type in LINK_TYPES:
-                print rule, link_type
-                self.chainer.add_rule(rule(self.chainer, link_type))
+        # For predicates with 2 arguments,
+        # with the 0th argument made into a variable
+        self.chainer.add_rule(
+            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
 
-        for rule in RULES_CHAINER:
-            self.chainer.add_rule(rule(self.chainer))
+        # ModusPonens:
+        # Implication smokes(x) cancer(X)
+        # smokes(Anna)
+        # |= cancer(Anna)
+        self.chainer.add_rule(
+            ModusPonensRule(self.chainer, types.ImplicationLink))
 
     def run(self, atomspace):
         if self.chainer is None:
@@ -102,8 +61,4 @@ class InferenceAgent(MindAgent):
             return
 
         result = self.chainer.forward_step()
-
-        if __VERBOSE__:
-            print result
-
         return result

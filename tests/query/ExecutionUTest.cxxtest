@@ -84,8 +84,6 @@ void ExecutionUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
-	// Initialise scheme
-	SchemeEval::instance(as);
 
 	// Create an implication link that will be tested.
 	implication = 

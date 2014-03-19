@@ -222,9 +222,8 @@ ELSE (GTK3_FOUND)
 ENDIF (GTK3_FOUND)
 
 # Gnu Guile scheme interpreter
-# Versions prior to 1.8.6 have assorted serious problems with
-# multi-threading.  If you need guile, you need this version.
-FIND_PACKAGE(Guile 1.8.6)
+# Version 2.0.0 is needed for mrs io ports, compilation, etc.
+FIND_PACKAGE(Guile 2.0.0)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)

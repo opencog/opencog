@@ -111,8 +111,9 @@ void VarTypeNot::setUp(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	vscope_good = SchemeEval::instance().apply("rule-good", Handle::UNDEFINED);
-	vscope_bad = SchemeEval::instance().apply("rule-bad", Handle::UNDEFINED);
+	SchemeEval* evaluator = &SchemeEval::instance();
+	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
+	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
 }
 
 /*

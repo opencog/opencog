@@ -1,5 +1,5 @@
 /*
- * tests/query/EinstainUTest.cxxtest
+ * tests/query/EinsteinUTest.cxxtest
  *
  * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -34,7 +34,8 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
-		AtomSpace *as;
+		AtomSpace* as;
+		SchemeEval* eval;
 		static const char* paths[];
 
 	public:
@@ -59,6 +60,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 			pm.set_atomspace(as);
+			eval = &SchemeEval::instance(as);
 
 			// Load the required data
 			config().set("MODULES",
@@ -135,7 +137,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	Handle puzzle_rules = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
+	Handle puzzle_rules = eval->apply("is-same-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
@@ -166,9 +168,9 @@ void EinsteinPuzzle::test_trivial_keep(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
-	Handle print_rule = SchemeEval::instance().apply("print-ownership", Handle::UNDEFINED);
+	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
+	Handle print_rule = eval->apply("print-ownership", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
@@ -213,12 +215,12 @@ void EinsteinPuzzle::test_full(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
-	Handle faddr_rule = SchemeEval::instance().apply("first-addr-rule", Handle::UNDEFINED);
-	Handle neigh_rule = SchemeEval::instance().apply("neighbor-rule", Handle::UNDEFINED);
-	Handle nesym_rule = SchemeEval::instance().apply("neighbor-symmetry-rule", Handle::UNDEFINED);
-	Handle solun_rule = SchemeEval::instance().apply("found-solution-rule", Handle::UNDEFINED);
+	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
+	Handle faddr_rule = eval->apply("first-addr-rule", Handle::UNDEFINED);
+	Handle neigh_rule = eval->apply("neighbor-rule", Handle::UNDEFINED);
+	Handle nesym_rule = eval->apply("neighbor-symmetry-rule", Handle::UNDEFINED);
+	Handle solun_rule = eval->apply("found-solution-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);

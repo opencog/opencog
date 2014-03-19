@@ -161,7 +161,7 @@ class SchemeSmob
 		SchemeSmob(AtomSpace *as);
 	public:
 		// Helper functions XXX why are these public ??
-		// XXX Becuase the embodiment code uses them :-(
+		// XXX Because the embodiment code uses them :-(
 		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
 		static SCM uuid_to_scm(UUID);

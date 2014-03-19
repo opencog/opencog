@@ -18,7 +18,7 @@ without having to be aware of the different sets of rules that require
 different argument sets.
 """
 
-_VERBOSE = True
+_VERBOSE = False
 
 '''
 There are lots of possible heuristics for choosing atoms. It also
@@ -99,7 +99,8 @@ class AbstractChainer(Logic):
 
     # Todo: Should this be a static method?
     def log_failed_inference(self, message):
-        print 'Attempted invalid inference:', message
+        if _VERBOSE:
+            print 'Attempted invalid inference:', message
 
     # Finds a list of candidate atoms and then matches all of them
     # against the template. Uses the Attentional Focus where possible
@@ -180,10 +181,9 @@ class AbstractChainer(Logic):
                 if rule.valid_inputs(other_inputs+[atom]):
                     return atom
                 else:
-                    if _VERBOSE:
-                        self.log_failed_inference(
-                            'invalid input, trying another one ' +
-                            str(other_inputs+[atom]))
+                    self.log_failed_inference(
+                        'invalid input, trying another one ' +
+                        str(other_inputs + [atom]))
         return None
 
     def _selectOne(self, atoms):
@@ -855,10 +855,10 @@ class Chainer(AbstractChainer):
                                                         inputs=inputs,
                                                         outputs=outputs)
         if not new:
-            return False
+            return True
         else:
             self._add_to_inference_repository(rule, outputs, inputs)
-            return True
+            return False
 
     def _add_to_inference_repository(self, rule, outputs, inputs):
         # Todo: Temporarily enabled storing the inference repository

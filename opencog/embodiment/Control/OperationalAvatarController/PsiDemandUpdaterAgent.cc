@@ -195,6 +195,10 @@ bool PsiDemandUpdaterAgent::Demand::updateDemandGoal (AtomSpace & atomSpace, con
 
     return true;
 
+#else // HAVE_GUILE
+    logger().error("PsiDemandUpdaterAgent::Demand::%s - guile is required",
+                   __FUNCTION__);
+    return false;
 #endif // HAVE_GUILE
 
 }
