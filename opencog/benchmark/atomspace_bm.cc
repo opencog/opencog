@@ -139,7 +139,9 @@ int main(int argc, char** argv)
        }
     }
 
+#ifdef HAVE_GUILE
     if (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
+#endif // HAVE_GUILE
     {
         if (1 != benchmarker.Nloops)
         {
@@ -153,6 +155,7 @@ int main(int argc, char** argv)
         }
     }
 
+#ifdef HAVE_GUILE
     if (opencog::AtomSpaceBenchmark::BENCH_SCM == benchmarker.testKind)
     {
         if (true == benchmarker.memoize and true == benchmarker.compile)
@@ -161,6 +164,7 @@ int main(int argc, char** argv)
             exit(-1);
         }
     }
+#endif // HAVE_GUILE
 
     benchmarker.startBenchmark();
     return 0;
