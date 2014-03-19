@@ -187,6 +187,16 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     avch(getHandle(), local, av);
 }
 
+void Atom::chgVLTI(int unit)
+{
+    AttentionValuePtr old_av = getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        old_av->getLTI(),
+        old_av->getVLTI() + unit);
+    setAttentionValue(new_av);
+}
+
 // ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
