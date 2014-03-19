@@ -481,13 +481,15 @@ def ontoInhFormula(tvs):
 
 
 def revisionFormula(tvs):
-    '''From the PLN Book: We may also heuristically form a count rule
+    """
+    From the PLN Book: We may also heuristically form a count rule
     such as n = n1 + n2 - c min(n1, n2), where the parameter c indicates an 
     assumption about the level of interdependency between the bases of 
     information corresponding to the two premises. The value c=1 denotes 
     the assumption that the two sets of evidence are completely redundant; 
     the value c=0 denotes the assumption that the two sets of evidence are 
-    totally distinct. Intermediate values denote intermediate assumptions.'''
+    totally distinct. Intermediate values denote intermediate assumptions.
+    """
     x, y = tvs
     # revise two truth values
 
