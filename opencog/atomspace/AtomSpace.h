@@ -1146,14 +1146,6 @@ public:
     {
         return getAttentionBank().RemoveAFSignal().connect(function);
     }
-
-    // Provide access to the atom-added signal in Python, but using a queue instead
-    // of callbacks. It's accessible via the Cython wrapper.
-    std::list<Handle> addAtomSignalQueue;
-
-private:
-    boost::signals2::connection c_add; //! Connection to add atom signals
-    void handleAddSignal(Handle);
 };
 
 /** @}*/

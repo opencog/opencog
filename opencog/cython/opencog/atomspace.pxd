@@ -155,8 +155,6 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         void print_list "print" ()
 
-        cpplist[cHandle] addAtomSignalQueue
-
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
 
 # SpaceServer
