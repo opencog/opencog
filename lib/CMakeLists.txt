@@ -7,3 +7,4 @@ CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/lib/opencog-test.conf
     ${PROJECT_BINARY_DIR}/lib/opencog-test.conf)
 
 ADD_SUBDIRECTORY (json_spirit)
+ADD_SUBDIRECTORY (zmq)

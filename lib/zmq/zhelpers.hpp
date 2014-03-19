@@ -27,6 +27,8 @@
 //  Include a bunch of headers that we will need in the examples
 
 #include <zmq.hpp>
+//#include <lib/zmq/zmq.hpp>
+// todo: package updated zmq.hpp
 
 #include <iostream>
 #include <iomanip>
@@ -75,7 +77,7 @@ s_send (zmq::socket_t & socket, const std::string & string) {
 
     zmq::message_t message(string.size());
     memcpy (message.data(), string.data(), string.size());
-
+    
     bool rc = socket.send (message);
     return (rc);
 }
