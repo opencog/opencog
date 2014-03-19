@@ -108,6 +108,10 @@ class InferenceAgent(MindAgent):
 
         self.chainer.add_rule(ScholemRule(self.chainer))
 
+        boolean_transformation_rules = create_boolean_transformation_rules(self.chainer)
+        for rule in boolean_transformation_rules:
+            self.chainer.add_rule(rule)
+
         #self.chainer.add_rule(OntologicalInheritanceRule(self.chainer))
 
         #for rule in temporal_create_temporal_rules(self.chainer):

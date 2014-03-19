@@ -1,4 +1,5 @@
 from opencog.atomspace import types, TruthValue
+from math import isinf, isnan
 
 __VERBOSE__ = False
 
@@ -42,18 +43,28 @@ class Rule(object):
 
         self.formula = formula
         self.name = self.__class__.__name__
-        self.full_name = \
-            self.name + ' (' + self._get_type_names(inputs) + ' -> '
-        self.full_name += self._get_type_names(outputs) + ')'
+
+        self._compute_full_name()
 
         if __VERBOSE__:
             print self.full_name
 
         self.probabilistic_inputs = True
 
+    def _compute_full_name(self):
+        """
+        Compute the full name based on the name and the input/output types for the rule
+        """
+        self.full_name = \
+            self.name + ' (' + self._get_type_names(self._inputs) + ' -> '
+        self.full_name += self._get_type_names(self._outputs) + ')'        
+
     @staticmethod
     def _get_type_names(templates):
         return ' '.join(template.type_name for template in templates)
+
+    def __str__(self):
+        return self.full_name
 
     def calculate(self, input_atoms):
         """
@@ -62,7 +73,8 @@ class Rule(object):
         tvs = [atom.tv for atom in input_atoms]
         try:
             result_tvs = self.formula(tvs)
-            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0)
+            if any((tv.mean < 0 or tv.mean > 1 or tv.count == 0
+               or isinf(tv.mean) or isnan(tv.mean) or isinf(tv.count) or isnan(tv.count))
                    for tv in result_tvs) or len(result_tvs) == 0:
                 return None
             else:
