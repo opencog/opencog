@@ -90,7 +90,7 @@ def simplify_boolean(chainer, link):
         arg = link.out[0]
         if arg.type == types.NotLink:
             deeply_nested_arg = arg.out[0]
-            return chainer.link(types.NotLink, [deeply_nested_arg])
+            return deeply_nested_arg
         return link
 
     # And(A And(B, C) D) => And(A, B, C, D)
