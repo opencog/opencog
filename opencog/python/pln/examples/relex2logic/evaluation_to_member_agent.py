@@ -16,7 +16,7 @@ class EvaluationToMemberAgent(MindAgent):
         self.chainer = None
 
     def create_chainer(self, atomspace):
-        self.chainer = Chainer(atomspace, stimulateAtoms=False)
+        self.chainer = Chainer(atomspace, stimulateAtoms=False, allow_output_with_variables=True)
 
         # EvaluationToMemberRule only accepts predicates with 1 argument
         # For predicates with more arguments, GeneralEvaluationToMemberRule
