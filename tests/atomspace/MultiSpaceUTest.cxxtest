@@ -21,11 +21,13 @@
  */
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/atomspace/SimpleTruthValue.h>
 
 using namespace opencog;
 
 // Test real basic support for naive multiple atomspaces.
-//
+// This is pursuant to github bug #523 -- several users want this
+// ability.
 class MultiSpaceUTest :  public CxxTest::TestSuite
 {
 private:
@@ -43,12 +45,17 @@ public:
 
 	void testSimple()
 	{
-		// Create three atoms in three different atomspaces
-		Handle h1 = as1.addNode(CONCEPT_NODE, "1");
-		Handle h2 = as2.addNode(NUMBER_NODE, "2");
-		Handle h3 = as3.addNode(VARIABLE_NODE, "3");
+		// Create three TV's
+		TruthValuePtr tv1(SimpleTruthValue::createTV(0.5, 1.0));
+		TruthValuePtr tv2(SimpleTruthValue::createTV(0.5, 2.0));
+		TruthValuePtr tv3(SimpleTruthValue::createTV(0.5, 3.0));
 
-      // Forget about the atoms, remember thier UUID's only
+		// Create three atoms in three different atomspaces
+		Handle h1 = as1.addNode(CONCEPT_NODE, "1", tv1);
+		Handle h2 = as2.addNode(NUMBER_NODE, "2", tv2);
+		Handle h3 = as3.addNode(VARIABLE_NODE, "3", tv3);
+
+		// Forget about the atoms, remember thier UUID's only
 		// UUID's are just long ints ...
 		UUID u1 = h1.value();
 		UUID u2 = h2.value();
@@ -60,29 +67,41 @@ public:
 		Handle hu3(u3);
 
 		// They should match the old handles
-      TS_ASSERT(h1 == hu1);
-      TS_ASSERT(h2 == hu2);
-      TS_ASSERT(h3 == hu3);
+		TS_ASSERT(h1 == hu1);
+		TS_ASSERT(h2 == hu2);
+		TS_ASSERT(h3 == hu3);
 
 		// ... and they should refer to the same atoms.
 		TS_ASSERT(hu1->getType() == h1->getType());
 		TS_ASSERT(hu2->getType() == h2->getType());
 		TS_ASSERT(hu3->getType() == h3->getType());
-		
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hu1->getTruthValue() == h1->getTruthValue());
+		TS_ASSERT(hu2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hu3->getTruthValue() == h3->getTruthValue());
+
 		// Fetch three atoms in three different atomspaces
 		Handle hn1 = as1.addNode(CONCEPT_NODE, "1");
 		Handle hn2 = as2.addNode(NUMBER_NODE, "2");
 		Handle hn3 = as3.addNode(VARIABLE_NODE, "3");
 
 		// They should match the old handles
-      TS_ASSERT(h1 == hn1);
-      TS_ASSERT(h2 == hn2);
-      TS_ASSERT(h3 == hn3);
+		TS_ASSERT(h1 == hn1);
+		TS_ASSERT(h2 == hn2);
+		TS_ASSERT(h3 == hn3);
 
 		// ... and they should refer to the same atoms.
 		TS_ASSERT(hn1->getType() == h1->getType());
 		TS_ASSERT(hn2->getType() == h2->getType());
 		TS_ASSERT(hn3->getType() == h3->getType());
+
+		// The truth value *pointers* should be identical, as they
+		// should point to the same exact truth value instance.
+		TS_ASSERT(hn1->getTruthValue() == h1->getTruthValue());
+		TS_ASSERT(hn2->getTruthValue() == h2->getTruthValue());
+		TS_ASSERT(hn3->getTruthValue() == h3->getTruthValue());
 	}
 
 };
