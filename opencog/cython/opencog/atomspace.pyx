@@ -7,4 +7,5 @@
 include "classserver.pyx"
 include "atomspace_details.pyx"
 include "atom.pyx"
+include "spacetime.pyx"
 

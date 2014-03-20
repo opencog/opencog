@@ -409,26 +409,3 @@ cdef class AtomSpace:
     def print_list(self):
         self.atomspace.print_list()
 
-cdef class SpaceServer:
-    cdef cSpaceServer *spaceserver
-
-    def __init__(self):
-        #self.spaceserver = &spaceserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the CogServer takes care of cleaning up
-        pass
-
-
-cdef class TimeServer:
-    cdef cTimeServer *timeserver
-
-    def __cinit__(self):
-        #self.timeserver = &timeserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
-        pass
-
