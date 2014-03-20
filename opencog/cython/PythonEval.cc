@@ -35,9 +35,7 @@
 #include <opencog/server/CogServer.h>
 
 #include "PythonEval.h"
-#include "agent_finder_types.h"
-#include "agent_finder_api.h"
-
+#include "opencog/atomspace_api.h"
 
 using std::string;
 using std::vector;
@@ -116,14 +114,6 @@ void PythonEval::init(void)
         "        return\n"
         "    assert(type(atom) == Atom)\n"
         "    return atom.h.value()\n\n");
-
-    // No idea what this one does but it's needed
-    // XXX FIXME shouldn't this be done from opencog.conf ??
-    if (import_agent_finder() == -1) {
-        PyErr_Print();
-        throw RuntimeException(TRACE_INFO,
-           "[PythonModule] Failed to load helper python module");
-    }
 
     // Add ATOMSPACE to __main__ module
     PyDict_SetItem(PyModule_GetDict(this->pyRootModule),

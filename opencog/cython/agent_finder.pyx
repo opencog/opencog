@@ -42,10 +42,6 @@ cdef extern from "agent_finder_types.h" namespace "opencog":
         vector[bool] req_is_shell
         string err_string 
 
-cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
-    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
-    return atomspace
-
 cdef api string get_path_as_string() with gil:
     import sys
     cdef bytes c_str = str(sys.path)

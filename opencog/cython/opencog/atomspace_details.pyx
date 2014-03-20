@@ -409,3 +409,7 @@ cdef class AtomSpace:
     def print_list(self):
         self.atomspace.print_list()
 
+cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+    return atomspace
+
