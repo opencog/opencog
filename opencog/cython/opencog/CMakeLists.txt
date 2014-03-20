@@ -15,27 +15,26 @@ INCLUDE_DIRECTORIES(
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 IF (HAVE_ATOMSPACE)
-	###################### util ##########################################
-	add_custom_command(OUTPUT util.cpp
+	###################### logger ##########################################
+	add_custom_command(OUTPUT logger.cpp
 		COMMAND
-		${CYTHON_EXECUTABLE} -o util.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/util.pyx"
-		DEPENDS "util.pyx" "atomspace.pxd" opencog_atom_types)
+		${CYTHON_EXECUTABLE} -o logger.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logger.pyx"
+		DEPENDS "logger.pyx")
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "util.cpp")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp")
 
-	## util
-	ADD_LIBRARY(util_cython SHARED
-		util.cpp
+	ADD_LIBRARY(logger_cython SHARED
+		logger.cpp
 	)
 
-	TARGET_LINK_LIBRARIES(util_cython
+	TARGET_LINK_LIBRARIES(logger_cython
 		cogutil
 		${PYTHON_LIBRARIES}
 	)
 
-	SET_TARGET_PROPERTIES(util_cython PROPERTIES
+	SET_TARGET_PROPERTIES(logger_cython PROPERTIES
 		PREFIX ""
-		OUTPUT_NAME util)
+		OUTPUT_NAME logger)
 
 	###################### atomspace ####################################
 	# How to Cython the .pyx file

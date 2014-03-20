@@ -1,7 +1,14 @@
 from libcpp cimport bool
 from cython.operator cimport dereference as deref, preincrement as inc
 
-from atomspace cimport string
+# basic wrapping for std::string conversion
+cdef extern from "<string>" namespace "std":
+    cdef cppclass string:
+        string()
+        string(char *)
+        char * c_str()
+        int size()
+
 
 cdef extern from "opencog/util/Logger.h" namespace "opencog":
     # Need to get around cython's lack of support for nested types
