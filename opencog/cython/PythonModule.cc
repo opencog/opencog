@@ -163,6 +163,7 @@ void PythonModule::init()
         }
     }
 
+    // XXX FIXME this should get loaded from opencog.conf, right!?
     if (import_agent_finder() == -1) {
         PyErr_Print();
         logger().error() << "[PythonModule] Failed to load helper python module";

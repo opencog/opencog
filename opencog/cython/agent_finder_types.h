@@ -1,5 +1,6 @@
 
-#include <opencog/atomspace/AtomSpace.h>
+#include <string>
+#include <vector>
 
 namespace opencog
 {

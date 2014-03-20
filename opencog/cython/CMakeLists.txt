@@ -162,7 +162,7 @@ SET_TARGET_PROPERTIES(agent_finder PROPERTIES
 ADD_LIBRARY(PythonEval SHARED
 	PythonEval.cc
 )
-# ADD_DEPENDENCIES(PythonEval agent_finder)
+ADD_DEPENDENCIES(PythonEval atomspace_cython)
 
 TARGET_LINK_LIBRARIES(PythonEval
 	${PYTHON_LIBRARIES}
