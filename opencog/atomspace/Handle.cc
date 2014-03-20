@@ -43,35 +43,58 @@ Handle& Handle::operator=(const AtomPtr& a)
 }
 
 // ===================================================
-// Handle resolutino stuff.
+// Handle resolution stuff.
+
+// Its a vector, not a set, because its priority ranked.
+std::vector<const AtomTable*> Handle::_resolver;
 
 void Handle::set_resolver(const AtomTable* tab)
 {
-    _resolver = tab;
+    _resolver.push_back(tab);
 }
 
 void Handle::clear_resolver(const AtomTable* tab)
 {
-    _resolver = NULL;
+    auto end = _resolver.end();
+    for (auto it = _resolver.begin(); it != end; it++)
+    {
+        if (*it == tab)
+        {
+            _resolver.erase(it);
+            break;
+        }
+    }
 }
 
-const AtomTable* Handle::_resolver = NULL;
+// Search several atomspaces, in order.  First one to come up with
+// the atom wins.  Seems to work, for now.
+inline AtomPtr Handle::do_res(const Handle* hp)
+{
+    auto end = _resolver.end();
+    for (auto it = _resolver.begin(); it != end; it++)
+    {
+        const AtomTable* at = *it;
+        AtomPtr a(at->getHandle((Handle&)(*hp))._ptr);
+        if (a.get()) return a;
+    }
+    return NULL;
+}
 
 Atom* Handle::resolve()
 {
-    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    AtomPtr a(do_res(this));
     _ptr.swap(a);
     return _ptr.get();
 }
 
 Atom* Handle::cresolve() const
 {
-    return _resolver->getHandle(*this)._ptr.get();
+    return do_res(this).get();
 }
 
 AtomPtr Handle::resolve_ptr()
 {
-    AtomPtr a(_resolver->getHandle(*this)._ptr);
+    AtomPtr a(do_res(this));
     _ptr.swap(a);
     return _ptr;
 }

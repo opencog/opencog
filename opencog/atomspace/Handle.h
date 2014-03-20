@@ -65,7 +65,8 @@ private:
 
     Atom* resolve();
     Atom* cresolve() const;
-    static const AtomTable* _resolver;
+    static AtomPtr do_res(const Handle*);
+    static std::vector<const AtomTable*> _resolver;
 public:
 
     static const Handle UNDEFINED;
