@@ -103,7 +103,7 @@ class SchemeEval : public GenericEval
 					throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
 				singletonInstance = new SchemeEval(atomspace);
 			}
-			else if (singletonInstance->atomspace != atomspace)
+			else if (atomspace and singletonInstance->atomspace != atomspace)
 			{
 				// Someone is trying to initialise the Scheme interpretator
 				// on a different AtomSpace. because of the singleton design

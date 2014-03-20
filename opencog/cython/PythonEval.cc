@@ -197,7 +197,7 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
             throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
         singletonInstance = new PythonEval(atomspace);
     }
-    else if (singletonInstance->_atomspace != atomspace)
+    else if (atomspace and singletonInstance->_atomspace != atomspace)
     {
         // Someone is trying to initialize the Python interpreter on a
         // different AtomSpace.  Because of the singleton design of the
