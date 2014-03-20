@@ -12,7 +12,7 @@ class LoggerTest(TestCase):
         # close the temp file as Logger will want to manually
         # open it
         os.close(tempfd) 
-        self.log = opencog.util.create_logger(self.tempfn)
+        self.log = opencog.logger.create_logger(self.tempfn)
 
     def tearDown(self):
         del self.log
