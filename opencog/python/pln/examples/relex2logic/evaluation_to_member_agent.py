@@ -22,6 +22,8 @@ class EvaluationToMemberAgent(MindAgent):
         # For predicates with more arguments, GeneralEvaluationToMemberRule
         # is used.
         self.chainer.add_rule(
+            GeneralEvaluationToMemberRule(self.chainer, 0, 1))
+        self.chainer.add_rule(
             GeneralEvaluationToMemberRule(self.chainer, 0, 2))
         self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
         self.chainer.add_rule(
