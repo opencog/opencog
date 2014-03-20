@@ -2,7 +2,9 @@
 # Need to use -fno-strict-aliasing when compiling cython code, in order
 # to avoid nasty compiler warnings about aliasing.  Cython explicitly
 # performs aliasing, in order to emulate python object  inheritance.
-# See, for example, https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
+# See, for example, 
+# https://groups.google.com/forum/#!topic/cython-users/JV1-KvIUeIg
+#
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-strict-aliasing")
 
 INCLUDE_DIRECTORIES(
@@ -11,16 +13,32 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
+SET(CYTHON_FLAGS "-f --cplus")
+
+# Cythonizes one .pyx file into a .cpp file
+# Additional arguments are dependencies
+MACRO(CYTHON_ADD_MODULE_PYX name)
+	IF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
+		SET(DEPENDS ${name}.pyx ${name}.pxd)
+	ELSE(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
+		SET(DEPENDS ${name}.pyx)
+	ENDIF(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pxd)
+	# Allow the user to specify dependencies as optional arguments
+	SET(DEPENDS ${DEPENDS} ${ARGN})
+	ADD_CUSTOM_COMMAND(
+		OUTPUT ${name}.cpp
+		COMMAND ${CYTHON_EXECUTABLE}
+		ARGS ${CYTHON_FLAGS} -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+		DEPENDS ${DEPENDS}
+		COMMENT "Cythonizing ${name}.pyx")
+ENDMACRO(CYTHON_ADD_MODULE_PYX)
+
 # Use this as a guide:
 # https://github.com/OpenKinect/libfreenect/blob/master/wrappers/python/CMakeLists.txt
 
 IF (HAVE_ATOMSPACE)
 	###################### logger ##########################################
-	add_custom_command(OUTPUT logger.cpp
-		COMMAND
-		${CYTHON_EXECUTABLE} -o logger.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/logger.pyx"
-		DEPENDS "logger.pyx")
-
+	CYTHON_ADD_MODULE_PYX(logger.pyx)
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp")
 
 	ADD_LIBRARY(logger_cython SHARED
@@ -37,12 +55,9 @@ IF (HAVE_ATOMSPACE)
 		OUTPUT_NAME logger)
 
 	###################### atomspace ####################################
-	# How to Cython the .pyx file
-	add_custom_command(OUTPUT atomspace.cpp
-		COMMAND
-		${CYTHON_EXECUTABLE} -o atomspace.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/atomspace.pyx"
-		DEPENDS "atom.pyx" "classserver.pyx" "atomspace.pyx" "atomspace.pxd"
-		        "atomspace_details.pyx" "spacetime.pyx" opencog_atom_types)
+	CYTHON_ADD_MODULE_PYX(atomspace.pyx
+		"atom.pyx" "classserver.pyx" "atomspace_details.pyx"
+		"spacetime.pyx" opencog_atom_types)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
@@ -70,10 +85,8 @@ ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	############################## scheme wrapper #####################
-	add_custom_command(OUTPUT scheme_wrapper.cpp
-		COMMAND
-		${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
-		DEPENDS "PyScheme.cc" "atomspace.pxd" opencog_atom_types)
+	CYTHON_ADD_MODULE_PYX(scheme_wrapper.pyx
+		"PyScheme.cc" "atomspace.pxd" opencog_atom_types)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 
@@ -97,11 +110,8 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_SERVER)
 	############################ cogserver #########################
-	add_custom_command(OUTPUT cogserver.cpp
-		COMMAND
-		${CYTHON_EXECUTABLE} -o cogserver.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/cogserver.pyx"
-		DEPENDS "cogserver.pyx" "request.pyx" "agent.pyx" "atomspace.pxd"
-		        "cogserver.pxd" opencog_atom_types)
+	CYTHON_ADD_MODULE_PYX(cogserver.pyx
+		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver.cpp")
 
@@ -120,12 +130,11 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME cogserver)
 
 	####################### agent finder ########################
-	add_custom_command(OUTPUT agent_finder.cpp agent_finder_api.h
-		COMMAND
-		${CYTHON_EXECUTABLE} -f -o agent_finder.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/agent_finder.pyx"
-		DEPENDS "agent_finder.pyx" "atomspace.pxd" "cogserver.pxd")
+	CYTHON_ADD_MODULE_PYX(agent_finder.pyx
+		"atomspace.pxd" "cogserver.pxd")
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "agent_finder.cpp" "agent_finder_api.h")
+	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES
+		"agent_finder.cpp" "agent_finder_api.h")
 
 	# utility library for PythonModule
 	ADD_LIBRARY(agent_finder SHARED
@@ -147,10 +156,7 @@ IF (HAVE_SERVER)
 ENDIF(HAVE_SERVER)
 
 IF (HAVE_MOSES)
-	add_custom_command(OUTPUT pymoses.cpp
-		COMMAND
-		${CYTHON_EXECUTABLE} -o pymoses.cpp -f -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/pymoses.pyx"
-		DEPENDS "pymoses.pyx" "pymoses.pxd")
+	CYTHON_ADD_MODULE_PYX(pymoses)
 
 	# opencog.pymoses Python bindings
 	ADD_LIBRARY(moses_cython SHARED
