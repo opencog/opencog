@@ -44,7 +44,7 @@ IF(LINK_GRAMMAR_INCLUDE_DIR AND NOT CMAKE_MAJOR_VERSION LESS 2 AND NOT CMAKE_MIN
 	SET(LG_VERSION_MINOR 0)
 	SET(LG_VERSION_PATCH 0)
 
-	# Extract the libguile version from the 'version.h' file
+	# Extract the version from the 'version.h' file
 	FILE(READ "${LINK_GRAMMAR_INCLUDE_DIR}/link-grammar/link-features.h" _LG_FEAT_H_CONTENTS)
 
 	STRING(REGEX MATCH "#define LINK_MAJOR_VERSION[	 ]+([0-9]+)" _MATCH "${_LG_FEAT_H_CONTENTS}")
