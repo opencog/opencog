@@ -78,7 +78,8 @@ void PythonEval::init(void)
 
     global_python_init();
 
-    logger().info("PythonEval::%s Initialising python evaluator.", __FUNCTION__);
+    logger().info("PythonEval::%s Initialising python evaluator.",
+        __FUNCTION__);
 
     // Save a pointer to the main PyThreadState object
     this->mainThreadState = PyThreadState_Get();
@@ -96,43 +97,49 @@ void PythonEval::init(void)
                 );
 
     // Define the user function executer
-    PyRun_SimpleString("from opencog.atomspace import Handle, Atom\n"
-                       "import inspect\n"
-                       "def execute_user_defined_function(func, handle_uuid):\n"
-                       "    handle = Handle(handle_uuid)\n"
-                       "    args_list_link = ATOMSPACE[handle]\n"
-                       "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
-                       "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
-                       "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
-                       "        raise Exception('Number of arguments in the function (' + "
-                       "str(no_of_arguments_in_user_fn) + ') does not match that of the "
-                       "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
-                       "    atom = func(*args_list_link.out)\n"
-                       "    if atom is None:\n"
-                       "        return\n"
-                       "    assert(type(atom) == Atom)\n"
-                       "    return atom.h.value()\n\n");
+    // XXX FIXME ... this should probably be defined in some py file
+    // that is loaded up by opencog.conf
+    PyRun_SimpleString(
+        "from opencog.atomspace import Handle, Atom\n"
+        "import inspect\n"
+        "def execute_user_defined_function(func, handle_uuid):\n"
+        "    handle = Handle(handle_uuid)\n"
+        "    args_list_link = ATOMSPACE[handle]\n"
+        "    no_of_arguments_in_pattern = len(args_list_link.out)\n"
+        "    no_of_arguments_in_user_fn = len(inspect.getargspec(func).args)\n"
+        "    if no_of_arguments_in_pattern != no_of_arguments_in_user_fn:\n"
+        "        raise Exception('Number of arguments in the function (' + "
+        "str(no_of_arguments_in_user_fn) + ') does not match that of the "
+        "corresponding pattern (' + str(no_of_arguments_in_pattern) + ').')\n"
+        "    atom = func(*args_list_link.out)\n"
+        "    if atom is None:\n"
+        "        return\n"
+        "    assert(type(atom) == Atom)\n"
+        "    return atom.h.value()\n\n");
 
     // No idea what this one does but it's needed
+    // XXX FIXME shouldn't this be done from opencog.conf ??
     if (import_agent_finder() == -1) {
         PyErr_Print();
-        throw RuntimeException(TRACE_INFO,"[PythonModule] Failed to load helper python module");
+        throw RuntimeException(TRACE_INFO,
+           "[PythonModule] Failed to load helper python module");
     }
 
     // Add ATOMSPACE to __main__ module
-    PyDict_SetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("ATOMSPACE"), this->getPyAtomspace());
+    PyDict_SetItem(PyModule_GetDict(this->pyRootModule),
+                   PyBytes_FromString("ATOMSPACE"),
+                   this->getPyAtomspace());
 
-    // These are needed for calling Python/C API functions, definnes them once and for all
+    // These are needed for calling Python/C API functions, define 
+    // them once and for all
     pyGlobal = PyDict_New();
     pyLocal = PyDict_New();
 
     // Getting sys.path and keeping the refrence, used in this->addSysPath()
     sys_path = PySys_GetObject((char*)"path");
 
-    // Import pattern_match_functions which contains user defined functions
-    this->addModuleFromPath(PROJECT_SOURCE_DIR"/opencog/python/pattern_match_functions");
-
-    logger().info("PythonEval::%s Finished initialising python evaluator.", __FUNCTION__);
+    logger().info("PythonEval::%s Finished initialising python evaluator.",
+        __FUNCTION__);
 }
 
 PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
@@ -152,8 +159,8 @@ PyObject* PythonEval::getPyAtomspace(AtomSpace* atomspace)
         if (PyErr_Occurred())
             PyErr_Print();
 
-        logger().error("PythonEval::%s Failed to get atomspace wrapped with python object",
-                       __FUNCTION__);
+        logger().error("PythonEval::%s Failed to get atomspace "
+                       "wrapped with python object", __FUNCTION__);
     }
 
     return pAtomSpace;
@@ -203,14 +210,15 @@ PythonEval& PythonEval::instance(AtomSpace* atomspace)
         // different AtomSpace.  Because of the singleton design of the
         // the CosgServer+AtomSpace, there is no easy way to support this...
         throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
-                               " python interpreter with different AtomSpaceImpl ptr!");
+                " python interpreter with different AtomSpace ptr!");
     }
     return *singletonInstance;
 }
 
 Handle PythonEval::apply(const std::string& func, Handle varargs)
 {
-    PyObject *pError, *pyModule, *pFunc, *pExecFunc, *pArgs, *pUUID, *pValue = NULL;
+    PyObject *pError, *pyModule, *pFunc, *pExecFunc;
+    PyObject *pArgs, *pUUID, *pValue = NULL;
     string moduleName;
     string funcName;
 
@@ -232,7 +240,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
 
     //    PyGILState_STATE _state = PyGILState_Ensure();
     // Get a refrence to the function
-    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule), PyBytes_FromString(funcName.c_str()));
+    pFunc = PyDict_GetItem(PyModule_GetDict(pyModule),
+                           PyBytes_FromString(funcName.c_str()));
 
     OC_ASSERT(pFunc != NULL);
     if(!PyCallable_Check(pFunc))
@@ -242,7 +251,8 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     }
 
     // Get a refrence to our executer function
-    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule), PyBytes_FromString("execute_user_defined_function"));
+    pExecFunc = PyDict_GetItem(PyModule_GetDict(this->pyRootModule),
+                    PyBytes_FromString("execute_user_defined_function"));
     OC_ASSERT(pExecFunc != NULL);
 
     // Create the argument list
@@ -257,9 +267,9 @@ Handle PythonEval::apply(const std::string& func, Handle varargs)
     pValue = PyObject_CallObject(pExecFunc, pArgs);
     pError = PyErr_Occurred();
 
-    if(pError){
+    if (pError) {
         PyErr_Print();
-        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message")) << std::endl;
+        logger().error() << PyBytes_AsString(PyObject_GetAttrString(pError, "message"));
         return Handle::UNDEFINED;
     }
 
