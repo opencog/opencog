@@ -177,8 +177,15 @@ PythonEval::~PythonEval()
 * Use a singleton instance to avoid initializing python interpreter
 * twice.
 */
-PythonEval& PythonEval::instance(AtomSpace * atomspace)
+PythonEval& PythonEval::instance(AtomSpace* atomspace)
 {
+    if (!singletonInstance)
+    {
+        if (!atomspace)
+            throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
+        singletonInstance = new PythonEval(atomspace);
+    }
+
     if (not Py_IsInitialized()){
         logger().error() << "Python Interpreter isn't initialized";
         throw RuntimeException(TRACE_INFO, "Python Interpreter isn't initialized");
@@ -188,20 +195,11 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
         throw RuntimeException(TRACE_INFO, "Python Threads isn't initialized");
     }
 
-    if (!singletonInstance)
+    if (singletonInstance->_atomspace != atomspace)
     {
-        if (!atomspace)
-            throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
-        singletonInstance = new PythonEval(atomspace);
-    }
-    else if (atomspace and &singletonInstance->_atomspace->getImpl() !=
-             &atomspace->getImpl())
-    {
-        // Someone is trying to initialize the Python
-        // interpreter
-        // on a different AtomSpace. because of the singleton
-        // design
-        // there is no easy way to support this...
+        // Someone is trying to initialize the Python interpreter on a
+        // different AtomSpace.  Because of the singleton design of the
+        // the CosgServer+AtomSpace, there is no easy way to support this...
         throw RuntimeException(TRACE_INFO, "Trying to re-initialize"
                                " python interpreter with different AtomSpaceImpl ptr!");
     }
