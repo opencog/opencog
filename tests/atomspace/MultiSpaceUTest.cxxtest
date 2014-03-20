@@ -1,0 +1,89 @@
+/*
+ * tests/atomspace/MultiSpaceUTest.cxxtest
+ *
+ * Copyright (C) 2014 Linas Vepstas
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/atomspace/AtomSpace.h>
+
+using namespace opencog;
+
+// Test real basic support for naive multiple atomspaces.
+//
+class MultiSpaceUTest :  public CxxTest::TestSuite
+{
+private:
+
+	AtomSpace as1;
+	AtomSpace as2;
+	AtomSpace as3;
+
+public:
+	MultiSpaceUTest() {}
+
+	void setUp() {}
+
+	void tearDown() {}
+
+	void testSimple()
+	{
+		// Create three atoms in three different atomspaces
+		Handle h1 = as1.addNode(CONCEPT_NODE, "1");
+		Handle h2 = as2.addNode(NUMBER_NODE, "2");
+		Handle h3 = as3.addNode(VARIABLE_NODE, "3");
+
+      // Forget about the atoms, remember thier UUID's only
+		// UUID's are just long ints ...
+		UUID u1 = h1.value();
+		UUID u2 = h2.value();
+		UUID u3 = h3.value();
+
+		// Create new Handles from the UUID's
+		Handle hu1(u1);
+		Handle hu2(u2);
+		Handle hu3(u3);
+
+		// They should match the old handles
+      TS_ASSERT(h1 == hu1);
+      TS_ASSERT(h2 == hu2);
+      TS_ASSERT(h3 == hu3);
+
+		// ... and they should refer to the same atoms.
+		TS_ASSERT(hu1->getType() == h1->getType());
+		TS_ASSERT(hu2->getType() == h2->getType());
+		TS_ASSERT(hu3->getType() == h3->getType());
+		
+		// Fetch three atoms in three different atomspaces
+		Handle hn1 = as1.addNode(CONCEPT_NODE, "1");
+		Handle hn2 = as2.addNode(NUMBER_NODE, "2");
+		Handle hn3 = as3.addNode(VARIABLE_NODE, "3");
+
+		// They should match the old handles
+      TS_ASSERT(h1 == hn1);
+      TS_ASSERT(h2 == hn2);
+      TS_ASSERT(h3 == hn3);
+
+		// ... and they should refer to the same atoms.
+		TS_ASSERT(hn1->getType() == h1->getType());
+		TS_ASSERT(hn2->getType() == h2->getType());
+		TS_ASSERT(hn3->getType() == h3->getType());
+	}
+
+};
+

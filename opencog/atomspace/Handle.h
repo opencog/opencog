@@ -65,7 +65,8 @@ private:
 
     Atom* resolve();
     Atom* cresolve() const;
-    static const AtomTable* _resolver;
+    static AtomPtr do_res(const Handle*);
+    static std::vector<const AtomTable*> _resolver;
 public:
 
     static const Handle UNDEFINED;
@@ -161,8 +162,8 @@ public:
     }
 
     AtomPtr resolve_ptr();
-    static void set_resolver(const AtomTable* tab) { _resolver = tab; }
-    static void clear_resolver(const AtomTable* tab) { _resolver = NULL; }
+    static void set_resolver(const AtomTable*);
+    static void clear_resolver(const AtomTable*);
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;
