@@ -161,8 +161,8 @@ public:
     }
 
     AtomPtr resolve_ptr();
-    static void set_resolver(const AtomTable* tab) { _resolver = tab; }
-    static void clear_resolver(const AtomTable* tab) { _resolver = NULL; }
+    static void set_resolver(const AtomTable*);
+    static void clear_resolver(const AtomTable*);
 
     operator AtomPtr() const {
         if (_ptr.get()) return _ptr;

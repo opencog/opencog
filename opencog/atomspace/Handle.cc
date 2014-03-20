@@ -42,6 +42,19 @@ Handle& Handle::operator=(const AtomPtr& a)
     return *this;
 }
 
+// ===================================================
+// Handle resolutino stuff.
+
+void Handle::set_resolver(const AtomTable* tab)
+{
+    _resolver = tab;
+}
+
+void Handle::clear_resolver(const AtomTable* tab)
+{
+    _resolver = NULL;
+}
+
 const AtomTable* Handle::_resolver = NULL;
 
 Atom* Handle::resolve()
