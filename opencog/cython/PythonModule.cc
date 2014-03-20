@@ -1,5 +1,5 @@
 /*
- * opencog/cython/PythonModule.h
+ * opencog/cython/PythonModule.cc
  *
  * Copyright (C) 2013 by OpenCog Foundation
  * All Rights Reserved
@@ -27,6 +27,7 @@
 #include <opencog/util/misc.h>
 #include <opencog/util/foreach.h>
 #include <opencog/atomspace/AtomSpace.h>
+
 
 #include "PyMindAgent.h"
 #include "PyRequest.h"

@@ -110,5 +110,5 @@ public:
 } // namespace opencog
 
 #endif // HAVE_CYTHON
-#endif // _OPENCOG_SINGLE_AGENT_MODULE_H
+#endif // _OPENCOG_PYTHON_MODULE_H
 

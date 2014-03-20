@@ -47,7 +47,7 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	add_custom_command(OUTPUT scheme_wrapper.cpp
 		COMMAND
 		${CYTHON_EXECUTABLE} -f -o scheme_wrapper.cpp -I ${CMAKE_CURRENT_SOURCE_DIR} --cplus "${CMAKE_CURRENT_SOURCE_DIR}/scheme_wrapper.pyx"
-		DEPENDS "${PROJECT_SOURCE_DIR}/opencog/guile/SchemeEval.cc" "opencog/atomspace.pxd" opencog_atom_types)
+		DEPENDS "${PROJECT_SOURCE_DIR}/opencog/cython/PyScheme.cc" "opencog/atomspace.pxd" opencog_atom_types)
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
 ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
@@ -162,15 +162,15 @@ SET_TARGET_PROPERTIES(agent_finder PROPERTIES
 ADD_LIBRARY(PythonEval SHARED
 	PythonEval.cc
 )
-ADD_DEPENDENCIES(PythonEval agent_finder)
+# ADD_DEPENDENCIES(PythonEval agent_finder)
 
 TARGET_LINK_LIBRARIES(PythonEval
-	server
 	${PYTHON_LIBRARIES}
 )
 
 IF(HAVE_GUILE)
 	ADD_LIBRARY(scheme_wrapper SHARED
+		PyScheme
 		scheme_wrapper.cpp
 	)
 
