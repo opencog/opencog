@@ -34,8 +34,8 @@
 #include "PythonEval.h"
 #include "PythonModule.h"
 
-#include "agent_finder_types.h"
-#include "agent_finder_api.h"
+#include "opencog/agent_finder_types.h"
+#include "opencog/agent_finder_api.h"
 
 using std::vector;
 using std::string;
@@ -164,7 +164,7 @@ void PythonModule::init()
     }
 
     // XXX FIXME this should get loaded from opencog.conf, right!?
-    if (import_agent_finder() == -1) {
+    if (import_opencog__agent_finder() == -1) {
         PyErr_Print();
         logger().error() << "[PythonModule] Failed to load helper python module";
         return;
