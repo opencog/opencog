@@ -180,8 +180,6 @@ IF(HAVE_GUILE)
 		${PYTHON_LIBRARIES}
 	)
 	
-	ADD_DEPENDENCIES(scheme_wrapper scheme-shell)
-
 	SET_TARGET_PROPERTIES(scheme_wrapper PROPERTIES
 		PREFIX ""
 		OUTPUT_NAME scheme_wrapper)

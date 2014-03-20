@@ -30,7 +30,7 @@ using std::string;
 using namespace opencog;
 
 // Convenience wrapper, for stand-alone usage.
-std::string eval_scheme(AtomSpace& as, const std::string &s)
+std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
    SchemeEval& evaluator = SchemeEval::instance(&as);
