@@ -31,6 +31,7 @@
 #include <cstdio>
 #include <opencog/atomspace/AtomSpace.h>
 #include <thread>
+#include <mutex>
 
 using namespace std;
 
@@ -86,6 +87,8 @@ private:
 
     unsigned int MAX_GRAM;
 
+    std::mutex allAtomListLock, uniqueKeyLock;
+
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
     //    (InheritanceLink
@@ -118,14 +121,20 @@ private:
 
     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
-    void extenOnePatternTask();
+    void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
+
+    HandleSeqSeq extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
+
+    void growTheFirstGramPatternsTask();
+
+    void growAPatternTask();
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace);
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    void runPatternMiner();
+    void runPatternMiner(unsigned int max_gram);
 
 
  };

@@ -248,19 +248,97 @@ bool PatternMiner::checkPatternExist(const string& patternKeyStr)
 
 }
 
-void PatternMiner::extenOnePatternTask()
+void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap)
+{
+    HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (originalAtomSpace->isNode(h))
+        {
+            if (valueToVarMap.find(h) == valueToVarMap.end())
+            {
+                // add a variable node in Pattern miner Atomspace
+                Handle varHandle = atomSpace->addNode(opencog::VARIABLE_NODE,"$var~" + toString(valueToVarMap.size()) );
+                valueToVarMap.insert(std::pair<Handle,Handle>(h,varHandle));
+            }
+            else
+            {
+                extractAllNodesInLink(h,valueToVarMap);
+            }
+
+        }
+    }
+}
+
+// Extract all possible patterns from the original Atomspace input links, and add to the patternmining Atomspace
+// Patterns are in the following format:
+//    (InheritanceLink
+//       (VariableNode )
+//       (ConceptNode "Animal")
+
+//    (InheritanceLink
+//       (VariableNode )
+//       (VariableNode )
+
+//    (InheritanceLink
+//       (VariableNode )
+//       (VariableNode )
+
+//    (EvaluationLink (stv 1 1)
+//       (PredicateNode "like_food")
+//       (ListLink
+//          (VariableNode )
+//          (ConceptNode "meat")
+//       )
+//    )
+HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
+{
+    map<Handle,Handle> valueToVarMap;
+    // First, extract all the nodes in the input links
+    foreach (Handle link, inputLinks)
+    {
+        extractAllNodesInLink(link, valueToVarMap);
+    }
+
+
+}
+
+void PatternMiner::growTheFirstGramPatternsTask()
+{
+    static HandleSeq allLinks;
+    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+
+    while (allLinks.size() > 0)
+    {
+        allAtomListLock.lock();
+        Handle cur_link = allLinks[allLinks.size() - 1];
+        // if this link is listlink, ignore it
+        if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
+            continue;
+
+        allLinks.pop_back();
+        allAtomListLock.unlock();
+
+
+
+    }
+
+}
+
+void PatternMiner::growAPatternTask()
 {
     static unsigned cur_gram = 1;
 
     static HandleSeq allLinks;
-    originalAtomSpace.getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
     // randomly choose one link for start
     Handle startLink;
 
     while(true)
     {
-        int startLinkIndex = rand() / allLinks.size() ;
+        int startLinkIndex = rand() / allLinks.size();
         startLink = allLinks[startLinkIndex];
 
         // if this link is listlink, try another time until get a link that is not listlink
@@ -274,9 +352,10 @@ void PatternMiner::runPatternMiner(unsigned int max_gram)
 {
     MAX_GRAM = max_gram;
 
+    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
-        threads[i] = std::thread([this]{this->extenOnePatternTask();}); // using C++11 lambda-expression
+        threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
         threads[i].join();
     }
 
