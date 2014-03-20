@@ -9,7 +9,7 @@ cdef extern from "<string>" namespace "std":
         char * c_str()
         int size()
 
-cdef extern from "opencog/cython/PyScheme.h" namespace "opencog":
+cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     string eval_scheme(cAtomSpace& as, const string& s)
 
 cdef extern from "opencog/guile/load-file.h" namespace "opencog":
