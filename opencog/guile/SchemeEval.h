@@ -14,7 +14,6 @@
 #include <pthread.h>
 #include <libguile.h>
 #include <opencog/atomspace/Handle.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/shell/GenericEval.h>
 #include <opencog/util/exceptions.h>
 
@@ -101,10 +100,10 @@ class SchemeEval : public GenericEval
 			if (!singletonInstance)
 			{
 				if (!atomspace)
-					atomspace = &cogserver().getAtomSpace();
+					throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
 				singletonInstance = new SchemeEval(atomspace);
 			}
-			else if (atomspace && singletonInstance->atomspace != atomspace)
+			else if (singletonInstance->atomspace != atomspace)
 			{
 				// Someone is trying to initialise the Scheme interpretator
 				// on a different AtomSpace. because of the singleton design
@@ -115,9 +114,6 @@ class SchemeEval : public GenericEval
 			return *singletonInstance;
 		}
 };
-
-/** For easier wrapping by Cython */
-std::string eval_scheme(std::string &s);
 
 /** @}*/
 }
