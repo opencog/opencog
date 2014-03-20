@@ -100,17 +100,6 @@ cdef class TruthValue:
         return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
 
 
-cdef class TimeServer:
-    cdef cTimeServer *timeserver
-
-    def __cinit__(self):
-        #self.timeserver = &timeserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
-        pass
-
 # @todo this should be a generator using the yield statement
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator iter
@@ -431,4 +420,15 @@ cdef class SpaceServer:
         # Don't do anything because the CogServer takes care of cleaning up
         pass
 
+
+cdef class TimeServer:
+    cdef cTimeServer *timeserver
+
+    def __cinit__(self):
+        #self.timeserver = &timeserver
+        pass
+
+    def __dealloc__(self):
+        # Don't do anything because the AtomSpace takes care of cleaning up
+        pass
 
