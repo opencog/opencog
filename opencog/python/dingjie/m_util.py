@@ -10,7 +10,7 @@ import re
 import inspect
 from pprint import pprint
 
-# --------------------------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------
 def format_log(offset, dsp_caller = True, *args):
     '''  '''
     caller = ""
@@ -21,6 +21,14 @@ def format_log(offset, dsp_caller = True, *args):
     out =  ' ' * offset +  ' '.join(map(str, args)) + caller
     return out
 
+# Note that this has the same name, but works differently, than the
+# logger class in opencog/cython/opencog/logger.pyx
+#
+# Note that there is yet a third logger in
+# opencog/python/util/util.py that is like this, but not colorized.
+# XXX FIXME All these different versions should be merged to one
+# version.
+#
 class Logger(object):
     DEBUG = 0
     INFO = 1
