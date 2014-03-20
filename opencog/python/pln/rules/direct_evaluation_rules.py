@@ -243,45 +243,6 @@ class IntensionalLinkEvaluationRule(Rule):
             outputs=outputs)
 
 
-class EvaluationToMemberRule(Rule):
-    """
-    Turns EvaluationLink(PredicateNode Predicate:Z, argument) into
-    MemberLink(argument, ConceptNode:Z).
-    The argument must be a single Node.
-    """
-    def __init__(self, chainer):
-        Z = chainer.new_variable()
-        ARG = chainer.new_variable()
-
-        self.chainer = chainer
-        Rule.__init__(self,
-                      formula=None,
-                      inputs=[chainer.link(types.EvaluationLink, [Z, ARG])],
-                      outputs=[])
-
-        self.probabilistic_inputs = False
-
-    # Todo: The 'outputs' parameter is not used
-    def custom_compute(self, inputs, outputs):
-        [eval_link] = inputs
-        [predicate, arg] = eval_link.out
-
-        # Only support the case with 1 argument
-        if arg.type == types.ListLink:
-            if len(arg.out) == 1:
-                arg = arg.out[0]
-            else:
-                return [], []
-
-        concept_name = predicate.name
-        set_node = self.chainer.node(types.ConceptNode, concept_name)
-
-        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
-        tv = eval_link.tv
-
-        return [member_link], [tv]
-
-
 class MemberToEvaluationRule(Rule):
     """
     Turns MemberLink(argument, ConceptNode:Z) into
@@ -345,7 +306,7 @@ class GeneralEvaluationToMemberRule(Rule):
     """
     def __init__(self, chainer, index, arg_count):
         self.index = index
-        #self.arg_count= arg_count
+        self.arg_count= arg_count
         self.chainer = chainer
 
         pred = chainer.new_variable()
@@ -364,28 +325,35 @@ class GeneralEvaluationToMemberRule(Rule):
     # Todo: The 'outputs' parameter is not used
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
-        [predicate, list_link] = eval_link.out
+        [predicate, arg] = eval_link.out
 
-        args = list_link.out
-#        parameter_names = ['%s:%s' % (arg.name, arg.type_name) for arg in args]
-#        parameter_names[self.index] = '_'
-#        parameter_names = ' '.join(parameter_names)
-#        concept_name = 'SatisfyingSet(%s %s)' % (predicate.name,
-#                                                 parameter_names)
+        # Only support the case with 1 argument
+        if arg.type == types.ListLink:
+            if self.arg_count == 1:
+                arg = arg.out[0]
+                concept_name = predicate.name
+                set_node = self.chainer.node(types.ConceptNode, concept_name)
 
-#        set_node = self.chainer.node(types.ConceptNode, concept_name)
+                member_link = self.chainer.link(types.MemberLink, [arg, set_node])
+                tv = eval_link.tv
+            elif self.arg_count == 2:
+                args = arg.out
+                tv = eval_link.tv
 
-#        arg = args[self.index]
-#        member_link = self.chainer.link(types.MemberLink, [arg, set_node])
-        tv = eval_link.tv
-
-        concept_1 = args[0]
-        concept_2 = args[1]
-        x = self.chainer.node(types.VariableNode, "$X")
-        eval_list_link = self.chainer.link(types.ListLink, [x, concept_2])
-        evaluation_link = self.chainer.link(types.EvaluationLink, [predicate , eval_list_link])
-        satisying_set_link = self.chainer.link(types.SatisfyingSetLink, [x, evaluation_link])
-        member_link = self.chainer.link(types.MemberLink, [concept_1, satisying_set_link])
+                concept_1 = args[0]
+                concept_2 = args[1]
+                x = self.chainer.node(types.VariableNode, "$X")
+                eval_list_link = self.chainer.link(
+                                    types.ListLink, [x, concept_2])
+                evaluation_link = self.chainer.link(
+                                    types.EvaluationLink,
+                                    [predicate , eval_list_link])
+                satisying_set_link = self.chainer.link(
+                                    types.SatisfyingSetLink,
+                                    [x, evaluation_link])
+                member_link = self.chainer.link(
+                                    types.MemberLink,
+                                    [concept_1, satisying_set_link])
 
         return [member_link], [tv]
 
