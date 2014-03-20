@@ -9,17 +9,17 @@ cdef extern from "<string>" namespace "std":
         char * c_str()
         int size()
 
-cdef extern from "opencog/guile/SchemeEval.h" namespace "opencog":
-    string eval_scheme(string& s)
+cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
+    string eval_scheme(cAtomSpace& as, const string& s)
 
 cdef extern from "opencog/guile/load-file.h" namespace "opencog":
     int load_scm_file (cAtomSpace& as, char* filename)
 
-def scheme_eval(char* s):
+def scheme_eval(AtomSpace a, char* s):
     cdef string ret
     cdef string expr
     expr = string(s)
-    ret = eval_scheme(expr)
+    ret = eval_scheme(deref(a.atomspace), expr)
     return ret.c_str()
 
 def load_scm(AtomSpace a, char* fname):

@@ -96,7 +96,6 @@ class PythonEval : public GenericEval
         // singleton instance
         PythonEval(AtomSpace * atomspace) {
             this->_atomspace = atomspace;
-            this->init();
         }
 
         ~PythonEval();

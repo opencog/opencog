@@ -207,6 +207,13 @@ def format_log(*args):
     out =  ' '.join(map(str, args))
     return out
 
+# Note that this has the same name, but works differently, than the
+# logger class in opencog/cython/opencog/logger.pyx
+#
+# Note that there is yet a third logger in
+# opencog/python/dingjie/m_util.py that is like this, but colorized.
+# XXX FIXME All these different versions should be merged to one
+# version.
 class Logger(object):
     def __init__(self, f = 'opencog-python.log'):
         self._file = open(f,'w')

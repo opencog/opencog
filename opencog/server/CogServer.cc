@@ -36,12 +36,14 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/PythonEval.h>
+#include <opencog/guile/load-file.h>
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/server/Agent.h>
 #include <opencog/server/ConsoleSocket.h>
 #include <opencog/server/NetworkServer.h>
 #include <opencog/server/SystemActivityTable.h>
 #include <opencog/server/Request.h>
-#include <opencog/guile/load-file.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 #include <opencog/util/exceptions.h>
@@ -110,6 +112,15 @@ CogServer::CogServer() : cycleCount(1)
 {
     if (atomSpace) delete atomSpace;  // global static, declared in BaseServer.
     atomSpace = new AtomSpace();
+#ifdef HAVE_GUILE
+    // Tell scheme which atomspace to use.
+    SchemeEval::instance(atomSpace);
+#endif // HAVE_GUILE
+#ifdef HAVE_CYTHON
+    // Tell python which atomspace to use.
+    PythonEval::instance(atomSpace);
+#endif // HAVE_CYTHON
+
     _systemActivityTable.init(this);
 
     agentsRunning = true;

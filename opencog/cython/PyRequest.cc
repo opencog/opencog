@@ -2,13 +2,14 @@
 
 #include <opencog/server/CogServer.h>
 
-#include "agent_finder_types.h"
-#include "agent_finder_api.h"
+#include "opencog/agent_finder_types.h"
+#include "opencog/agent_finder_api.h"
 
 using namespace opencog;
 
 PyRequest::PyRequest(CogServer& cs,
-                     const std::string& moduleName, const std::string& className,
+                     const std::string& moduleName,
+                     const std::string& className,
                      RequestClassInfo* cci) :
     Request(cs)
 {
@@ -16,7 +17,7 @@ PyRequest::PyRequest(CogServer& cs,
 
     PyGILState_STATE gstate = PyGILState_Ensure(); 
 
-    import_agent_finder();
+    import_opencog__agent_finder();
     _moduleName = moduleName;
     _className = className;
     // call out to our helper module written in cython
@@ -43,8 +44,10 @@ PyRequest::~PyRequest()
 
 bool PyRequest::execute()
 {
-    std::string result = run_request(_pyrequest, _parameters, &_cogserver.getAtomSpace());
-    // errors only with result is not empty... && duplicate errors are not reported.
+    std::string result = run_request(_pyrequest, _parameters,
+                                    &_cogserver.getAtomSpace());
+    // errors only with result is not empty... && duplicate
+    // errors are not reported.
     if (result.size() > 0 && result != _last_result) {
         // Any string returned is a traceback
         logger().error("[%s::execute] Python Exception:\n%s",

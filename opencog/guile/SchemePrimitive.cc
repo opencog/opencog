@@ -39,9 +39,6 @@ PrimitiveEnviron::~PrimitiveEnviron() {}
 
 void PrimitiveEnviron::do_register(const char *name, int nargs)
 {
-	// Force initialization of the guile subsystem.
-	SchemeEval::instance();
-
 	// Now enter guile mode, and do the actual work there.
 	tmp_name = name;
 	tmp_nargs = nargs;
