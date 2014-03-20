@@ -3,7 +3,7 @@ import os
 import tempfile
 import time
 
-import opencog.util
+import opencog.logger
 
 class LoggerTest(TestCase):
 
