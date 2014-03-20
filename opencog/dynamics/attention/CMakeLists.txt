@@ -1,6 +1,13 @@
 # To make Boost ublas much more efficient.
 ADD_DEFINITIONS(-DNDEBUG)
 
+INCLUDE_DIRECTORIES(
+	${PROJECT_SOURCE_DIR}/opencog/atomspace
+	${PROJECT_SOURCE_DIR}/opencog/query
+	${PROJECT_SOURCE_DIR}/opencog/server
+	${PROJECT_SOURCE_DIR}/opencog/util
+)
+
 #SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h
@@ -27,29 +34,15 @@ ADD_LIBRARY(attention SHARED
 ADD_DEPENDENCIES(attention opencog_atom_types)
 ADD_DEPENDENCIES(attention attention_atom_types)
 
-INCLUDE_DIRECTORIES(
-        ${PROJECT_SOURCE_DIR}/opencog/util
-        ${PROJECT_SOURCE_DIR}/opencog/atomspace
-        ${PROJECT_SOURCE_DIR}/opencog/server
-        ${PROJECT_SOURCE_DIR}/opencog/query
-)
-
 TARGET_LINK_LIBRARIES(attention server)
 
 # HebbianCreationModule
 ADD_LIBRARY(hebbiancreation SHARED
-        HebbianCreationModule
+	HebbianCreationModule
 )
 
 ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
 ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
-
-INCLUDE_DIRECTORIES(
-        ${PROJECT_SOURCE_DIR}/opencog/util
-        ${PROJECT_SOURCE_DIR}/opencog/atomspace
-        ${PROJECT_SOURCE_DIR}/opencog/server
-        ${PROJECT_SOURCE_DIR}/opencog/query
-)
 
 TARGET_LINK_LIBRARIES(hebbiancreation server)
 
@@ -69,7 +62,7 @@ INSTALL (FILES
 	${CMAKE_CURRENT_BINARY_DIR}/atom_types.h
 	AttentionModule.h
 	ForgettingAgent.h
-        HebbianCreationModule.h
+	HebbianCreationModule.h
 	HebbianUpdatingAgent.h
 	ImportanceSpreadingAgent.h
 	ImportanceDiffusionAgent.h

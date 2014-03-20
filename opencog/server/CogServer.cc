@@ -36,6 +36,7 @@
 #include <boost/filesystem/operations.hpp>
 
 #include <opencog/atomspace/AtomSpace.h>
+#include <opencog/cython/PythonEval.h>
 #include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/server/Agent.h>
@@ -115,6 +116,10 @@ CogServer::CogServer() : cycleCount(1)
     // Tell scheme which atomspace to use.
     SchemeEval::instance(atomSpace);
 #endif // HAVE_GUILE
+#ifdef HAVE_CYTHON
+    // Tell python which atomspace to use.
+    PythonEval::instance(atomSpace);
+#endif // HAVE_CYTHON
 
     _systemActivityTable.init(this);
 

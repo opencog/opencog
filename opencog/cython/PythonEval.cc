@@ -190,12 +190,8 @@ PythonEval& PythonEval::instance(AtomSpace * atomspace)
 
     if (!singletonInstance)
     {
-        if (!atomspace) {
-            // Create our own local AtomSpace to send calls to
-            // the
-            // event loop (otherwise the getType cache breaks)
-            atomspace = new AtomSpace(cogserver().getAtomSpace());
-        }
+        if (!atomspace)
+            throw (RuntimeException(TRACE_INFO, "Null Atomspace!"));
         singletonInstance = new PythonEval(atomspace);
     }
     else if (atomspace and &singletonInstance->_atomspace->getImpl() !=
