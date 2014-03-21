@@ -91,7 +91,7 @@
 
 (define (advmod-rule verb instance adv adv_instance)
 	(InheritanceLink  (ConceptNode adv_instance) (ConceptNode adv))
-	(InheritanceLink  new_predicate (ConceptNode adv_instance))
+	(InheritanceLink  (PredicateNode instance) (ConceptNode adv_instance))
 	(InheritanceLink  (PredicateNode instance) (PredicateNode verb))
 )
 
@@ -262,4 +262,3 @@
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode predicative_instance))
 )
-
