@@ -12,6 +12,6 @@ __author__ = 'Cosmo Harrigan'
 
 agent = InteractiveAgent(atomspace=atomspace,
                          agent=evaluation_to_member_agent.EvaluationToMemberAgent(),
-                         num_steps=500,
+                         num_steps=10,
                          print_starting_contents=True)
 agent.run()
