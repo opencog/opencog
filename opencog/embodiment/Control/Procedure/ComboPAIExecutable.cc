@@ -30,6 +30,14 @@ using namespace opencog::messaging;
 
 int main(int argc, char** argv)
 {
+    string OAC_ID("OAC_npc");              // Network element ID of the OAC
+    if (argc != 2) {
+        cout << "OAC ID omitted, 'OAC_npc' will be used" << endl
+             << "Usage recall:" << endl
+             << argv[0] << " [OAC_ID]" << endl;
+    } else {
+        OAC_ID = argv[1];
+    }
 
     // set up the system for talking to the router
     config(opencog::control::EmbodimentConfig::embodimentCreateInstance, true);
@@ -44,7 +52,7 @@ int main(int argc, char** argv)
 
     server(ComboShellServer::createInstance);
     ComboShellServer& css = static_cast<ComboShellServer&>(server());
-    css.init();
+    css.init(OAC_ID);
     css.serverLoop();
     return 0;
 }
