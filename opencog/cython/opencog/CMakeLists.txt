@@ -13,7 +13,7 @@ INCLUDE_DIRECTORIES(
 	${CMAKE_CURRENT_BINARY_DIR}
 )
 
-SET(CYTHON_FLAGS "-f --cplus")
+SET(CYTHON_FLAGS "-f")
 
 # Cythonizes one .pyx file into a .cpp file
 # Additional arguments are dependencies
@@ -28,7 +28,7 @@ MACRO(CYTHON_ADD_MODULE_PYX name)
 	ADD_CUSTOM_COMMAND(
 		OUTPUT ${name}.cpp
 		COMMAND ${CYTHON_EXECUTABLE}
-		ARGS ${CYTHON_FLAGS} -I ${CYTHON_INCLUDE_DIRECTORIES} -o ${name}.cpp ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
+		ARGS ${CYTHON_FLAGS} -o ${name}.cpp --cplus ${CMAKE_CURRENT_SOURCE_DIR}/${name}.pyx
 		DEPENDS ${DEPENDS}
 		COMMENT "Cythonizing ${name}.pyx")
 ENDMACRO(CYTHON_ADD_MODULE_PYX)
@@ -38,7 +38,7 @@ ENDMACRO(CYTHON_ADD_MODULE_PYX)
 
 IF (HAVE_ATOMSPACE)
 	###################### logger ##########################################
-	CYTHON_ADD_MODULE_PYX(logger.pyx)
+	CYTHON_ADD_MODULE_PYX(logger)
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "logger.cpp")
 
 	ADD_LIBRARY(logger_cython SHARED
@@ -55,11 +55,11 @@ IF (HAVE_ATOMSPACE)
 		OUTPUT_NAME logger)
 
 	###################### atomspace ####################################
-	CYTHON_ADD_MODULE_PYX(atomspace.pyx
+	CYTHON_ADD_MODULE_PYX(atomspace
 		"atom.pyx" "classserver.pyx" "atomspace_details.pyx"
 		"spacetime.pyx" opencog_atom_types)
 
-	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
+	# list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace.cpp")
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "atomspace_api.h")
 
 	# opencog.atomspace Python bindings
@@ -85,7 +85,7 @@ ENDIF (HAVE_ATOMSPACE)
 
 IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	############################## scheme wrapper #####################
-	CYTHON_ADD_MODULE_PYX(scheme_wrapper.pyx
+	CYTHON_ADD_MODULE_PYX(scheme_wrapper
 		"PyScheme.cc" "atomspace.pxd" opencog_atom_types)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "scheme_wrapper.cpp")
@@ -110,7 +110,7 @@ ENDIF (HAVE_ATOMSPACE AND HAVE_GUILE)
 
 IF (HAVE_SERVER)
 	############################ cogserver #########################
-	CYTHON_ADD_MODULE_PYX(cogserver.pyx
+	CYTHON_ADD_MODULE_PYX(cogserver
 		"request.pyx" "agent.pyx" "atomspace.pxd" opencog_atom_types)
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES "cogserver.cpp")
@@ -130,7 +130,7 @@ IF (HAVE_SERVER)
 		OUTPUT_NAME cogserver)
 
 	####################### agent finder ########################
-	CYTHON_ADD_MODULE_PYX(agent_finder.pyx
+	CYTHON_ADD_MODULE_PYX(agent_finder
 		"atomspace.pxd" "cogserver.pxd")
 
 	list(APPEND ADDITIONAL_MAKE_CLEAN_FILES
