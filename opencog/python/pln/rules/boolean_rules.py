@@ -176,6 +176,7 @@ class AbstractEliminationRule(Rule):
                       outputs=atoms,
                       inputs=[chainer.link(link_type, atoms)])
 
+# Todo: explain the following comment:
 # (these rules are generally bad approximations)
 
 
@@ -206,7 +207,7 @@ class OrBreakdownRule(AbstractEliminationRule):
                       outputs=[B],
                       inputs=[A, chainer.link(types.OrLink, [A, B])])
 
-# Todo:
+# Todo: explain the following comment:
 # Very hacky Elimination Rules
 
 class AndEliminationRule(AbstractEliminationRule):
