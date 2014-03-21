@@ -272,5 +272,20 @@
 			(PredicateNode verb_instance)
 		)
 	)
-	
 )
+
+(define (SVIO-rule subj_concept  subj_instance  verb  verb_instance  obj_concept  obj_instance iobj_concept iobj_instance)
+	(InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
+	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj_concept))
+	(InheritanceLink (ConceptNode obj_instance) (ConceptNode obj_concept))
+	(InheritanceLink (ConceptNode iobj_instance) (ConceptNode iobj_concept))
+	(EvaluationLink
+        	(PredicateNode verb_instance)
+        	(ListLink
+			(ConceptNode subj_instance)
+			(ConceptNode obj_instance)
+			(ConceptNode iobj_instance)
+        	)
+    	)
+)
+
