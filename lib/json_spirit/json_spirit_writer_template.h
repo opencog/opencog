@@ -104,9 +104,11 @@ namespace json_spirit
     }
 
     template< class Ostream >
-    void append_double( Ostream& os, const double d, const int precision )
+    void append_double( Ostream& os, const double d)
     {
-        os << std::showpoint << std::setprecision( precision ) << d;
+        // This is the minimum precision which should guarantee doubles can be
+        // encoded and decoded without losing any info
+        os << std::setprecision(17) << d;
     }
 
     template< class String_type >
@@ -119,40 +121,6 @@ namespace json_spirit
             exp = str.substr( exp_start );
             str.erase( exp_start );
         }
-    }
-
-    template< class String_type >
-    typename String_type::size_type find_first_non_zero( const String_type& str )
-    {
-        typename String_type::size_type result = str.size() - 1;
-
-        for( ; result != 0; --result )
-        {
-            if( str[ result ] != '0' )
-            {
-                break;
-            }
-        }
-
-        return result;
-    }
-
-    template< class String_type >
-    void remove_trailing( String_type& str )
-    {
-        String_type exp;
-
-        erase_and_extract_exponent( str, exp );
-
-        const typename String_type::size_type first_non_zero = find_first_non_zero( str );
-
-        if( first_non_zero != 0 )
-        {
-            const int offset = str[first_non_zero] == '.' ? 2 : 1;  // note zero digits following a decimal point is non standard
-            str.erase( first_non_zero + offset );
-        }
-
-        str += exp;
     }
 
     // this class generates the JSON text,
@@ -176,7 +144,6 @@ namespace json_spirit
         ,   pretty_( ( options & pretty_print ) != 0 || ( options & single_line_arrays ) != 0 )
         ,   raw_utf8_( ( options & raw_utf8 ) != 0 )
         ,   esc_nonascii_( ( options & always_escape_nonascii ) != 0 )
-        ,   remove_trailing_zeros_( ( options & remove_trailing_zeros ) != 0 )
         ,   single_line_arrays_( ( options & single_line_arrays ) != 0 )
         ,   ios_saver_( os )
         {
@@ -236,23 +203,7 @@ namespace json_spirit
 
         void output( double d )
         {
-            if( remove_trailing_zeros_ )
-            {
-                std::basic_ostringstream< Char_type > os;
-
-                append_double( os, d, 16 );  // note precision is 16 so that we get some trailing space that we can remove,
-                                             // otherwise, 0.1234 gets converted to "0.12399999..."
-
-                String_type str = os.str();
-
-                remove_trailing( str );
-
-                os_ << str;
-            }
-            else
-            {
-                append_double( os_, d, 17 );
-            }
+            append_double( os_, d );
         }
 
         static bool contains_composite_elements( const Array_type& arr )
@@ -351,7 +302,6 @@ namespace json_spirit
         bool pretty_;
         bool raw_utf8_;
         bool esc_nonascii_;
-        bool remove_trailing_zeros_;
         bool single_line_arrays_;
         boost::io::basic_ios_all_saver< Char_type > ios_saver_;  // so that ostream state is reset after control is returned to the caller
     };

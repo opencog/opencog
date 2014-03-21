@@ -26,7 +26,7 @@
 
 #ifdef HAVE_ZMQ
 
-#include <zmq.hpp>
+#include <lib/zmq/zmq.hpp>
 #include <string>
 
 namespace opencog { namespace learningserver {

@@ -106,7 +106,7 @@ TruthValuePtr Atom::getTruthValue()
     // dereference can return a raw pointer to an object that has been
     // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
     // the multi-threaded async atom store in the SQL peristance backend.
-    // Furthermore, we must ake a copy while holding the lock! Got that?
+    // Furthermore, we must make a copy while holding the lock! Got that?
 
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
