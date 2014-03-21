@@ -261,3 +261,16 @@
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode predicative_instance))
 )
+
+(define (which-rule antecedent  antecedent_instance  verb  verb_instance)
+	(InheritanceLink (ConceptNode antecedent_instance) (ConceptNode antecedent))
+	(InheritanceLink (PredicateNode verb_instance) (PredicateNode verb))
+        (EvaluationLink
+		(PredicateNode "whichmarker")
+		(ListLink
+			(ConceptNode antecedent_instance)
+			(PredicateNode verb_instance)
+		)
+	)
+	
+)
