@@ -257,7 +257,6 @@
 )
 
 (define (SVP-rule subj  subj_instance  predicative  predicative_instance)
-	(define subjNode (ConceptNode subj))
 	(InheritanceLink (ConceptNode predicative_instance) (ConceptNode predicative))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode subj))
 	(InheritanceLink (ConceptNode subj_instance) (ConceptNode predicative_instance))
