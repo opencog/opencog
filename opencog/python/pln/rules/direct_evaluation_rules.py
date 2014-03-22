@@ -313,7 +313,6 @@ class GeneralEvaluationToMemberRule(Rule):
         all_args = chainer.make_n_variables(arg_count)
         list_link = chainer.link(types.ListLink, all_args)
 
-        self.chainer = chainer
         Rule.__init__(self,
                       formula=None,
                       inputs=[chainer.link(types.EvaluationLink,
@@ -326,44 +325,49 @@ class GeneralEvaluationToMemberRule(Rule):
     def custom_compute(self, inputs, outputs):
         [eval_link] = inputs
         [predicate, arg] = eval_link.out
+        variables = [self.chainer.node(types.VariableNode, "$X{}".format(i))
+                                        for i in xrange(0, self.arg_count)]
+        returned_outputs = []
+        tv = []
 
-        # Only support the case with 1 argument
-        if arg.type == types.ListLink:
-            if self.arg_count == 1:
-                arg = arg.out[0]
-                tv = eval_link.tv
-                x = self.chainer.node(types.VariableNode, "$X")
-                list_link = self.chainer.link(types.ListLink, [x])
-                evaluation_link = self.chainer.link(
-                                    types.EvaluationLink,
-                                    [predicate , list_link])
-                satisying_set_link = self.chainer.link(
-                                    types.SatisfyingSetLink,
-                                    [x, evaluation_link])
-                member_link = self.chainer.link(
-                                    types.MemberLink,
-                                    [arg, satisying_set_link])
+        # arg_indexes hold the occurence count of a paricular atom in a ListLink
+        # Key = the atom under consideration
+        # Values = the index of the atom in the ListLink
+        arg_indexs = dict(([j, [p for p,q in enumerate(arg.out)  if q == j]]
+                                            for i, j in enumerate(arg.out)))
 
-            elif self.arg_count == 2:
-                args = arg.out
-                tv = eval_link.tv
+        if arg.type == types.ListLink :
+            for i in arg.out:
+                # The arg.out is a list that must not be changed. If arg.out is
+                # used instead of the returned value of atomspace's get_outgoing
+                # method then the changes made to arg.out are permanent.
+                list_arg = self.chainer._atomspace.get_outgoing(arg.h)
+                first_iter = True
 
-                concept_1 = args[0]
-                concept_2 = args[1]
-                x = self.chainer.node(types.VariableNode, "$X")
-                eval_list_link = self.chainer.link(
-                                    types.ListLink, [x, concept_2])
-                evaluation_link = self.chainer.link(
-                                    types.EvaluationLink,
-                                    [predicate , eval_list_link])
-                satisying_set_link = self.chainer.link(
-                                    types.SatisfyingSetLink,
-                                    [x, evaluation_link])
-                member_link = self.chainer.link(
-                                    types.MemberLink,
-                                    [concept_1, satisying_set_link])
+                for j in variables:
+                    if first_iter:
+                        list_arg[arg_indexs[i].pop(0)] = j
+                        first_iter = False
+                    else:
+                        next_index = next(k for k, l in enumerate(list_arg)
+                                                         if l not in variables)
+                        list_arg[next_index] = j
+                    list_link = self.chainer.link(
+                                    types.ListLink, list_arg)
+                    evaluation_link = self.chainer.link(
+                                        types.EvaluationLink,
+                                        [predicate , list_link])
+                    satisying_set_link = self.chainer.link(
+                                        types.SatisfyingSetLink,
+                                        [variables[0], evaluation_link])
+                    member_link2 = self.chainer.link(
+                                        types.MemberLink,
+                                        [i, satisying_set_link])
 
-        return [member_link], [tv]
+                    returned_outputs.append(member_link2)
+                    tv.append(eval_link.tv)
+
+        return returned_outputs, tv
 
 
 class GeneralAtTimeEvaluationToMemberRule(Rule):
