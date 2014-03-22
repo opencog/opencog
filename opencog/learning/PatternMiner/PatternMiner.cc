@@ -248,6 +248,43 @@ bool PatternMiner::checkPatternExist(const string& patternKeyStr)
 
 }
 
+void generateNextCombinationGroup(bool* &indexes, int n_max)
+{
+    int trueCount = -1;
+    int i = 0;
+    for (; i < n_max - 1; ++ i)
+    {
+        if (indexes[i])
+        {
+            ++ trueCount;
+
+            if (! indexes[i+1])
+                break;
+        }
+    }
+
+    indexes[i] = false;
+    indexes[i+1] = true;
+
+    for (int j = 0; j < trueCount; ++ j)
+        indexes[j] = true;
+
+    for (int j = trueCount; j < i; ++ j)
+        indexes[j] = false;
+
+}
+
+bool isLastNElementsAllTrue(bool* array, int size, int n)
+{
+    for (int i = size - 1; i >= size - n; i --)
+    {
+        if (! array[i])
+            return false;
+    }
+
+    return true;
+}
+
 void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap)
 {
     HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(link);
@@ -271,7 +308,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
     }
 }
 
-// Extract all possible patterns from the original Atomspace input links, and add to the patternmining Atomspace
+// Extract all possible patterns from the original Atomspace input links (full Combination), and add to the patternmining Atomspace
 // Patterns are in the following format:
 //    (InheritanceLink
 //       (VariableNode )
@@ -297,10 +334,39 @@ HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handl
     map<Handle,Handle> valueToVarMap;
     // First, extract all the nodes in the input links
     foreach (Handle link, inputLinks)
-    {
         extractAllNodesInLink(link, valueToVarMap);
-    }
 
+    int n_max = valueToVarMap.size();
+    bool* indexes = new bool[n_max];
+
+    OC_ASSERT( (n_max > 1),
+              "PatternMiner::extractAllPossiblePatternsFromInputLinks: this group of links only has one node: %s!\n",
+               atomSpace->atomAsString(inputLinks[0]).c_str() );
+
+    // Generate all the possible combinations of all the nodes: all patterns including 1 ~ (valueToVarMap.size() - 1) variables
+    for (int var_num = 1; var_num < n_max; ++ var_num)
+    {
+        // Use the binary method to generate all combinations:
+
+        // generate the first combination
+        for (int i = 0; i < var_num; ++ i)
+            indexes[i] = true;
+
+        for (int i = var_num; i <n_max; ++ i)
+            indexes[i] = false;
+
+        while (true)
+        {
+            // construct the pattern for this combination in the PatternMining Atomspace
+
+
+            if (isLastNElementsAllTrue(indexes, n_max, var_num))
+                break;
+
+            // generate the next combination
+            generateNextCombinationGroup(indexes, n_max);
+        }
+    }
 
 }
 
