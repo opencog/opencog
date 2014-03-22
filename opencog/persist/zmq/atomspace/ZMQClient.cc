@@ -23,7 +23,7 @@
  */
 
 #include "ZMQClient.h"
-#include <zmq.hpp>
+#include <lib/zmq/zmq.hpp>
 #include <opencog/atomspace/ZMQMessages.pb.h>
 
 using namespace opencog;

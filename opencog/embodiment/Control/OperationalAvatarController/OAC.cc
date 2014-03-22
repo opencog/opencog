@@ -831,7 +831,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         return false;
     }
 
-    // message from spawner - probabily a SAVE_AND_EXIT
+    // message from spawner - probably a SAVE_AND_EXIT
     if (msg->getFrom() == config().get("SPAWNER_ID")) {
         result = processSpawnerMessage((std::string)msg->getPlainTextRepresentation());
 

@@ -30,7 +30,7 @@
 #include <limits.h>
 
 #ifdef HAVE_ZMQ
-#include <zmq.hpp>
+#include <lib/zmq/zmq.hpp>
 #endif
 
 #include <opencog/atomspace/Handle.h>
