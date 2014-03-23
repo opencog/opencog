@@ -50,8 +50,8 @@ alink1=atomspace.add_link(
     [give,
     atomspace.add_link(
             types.ListLink,
-            [Ben, Amen, headache]
-    )]
+            [Ben, Amen, headache])],
+    TruthValue(1, TruthValue().confidence_to_count(1))
 )
 
 alink2=atomspace.add_link(
@@ -59,8 +59,8 @@ alink2=atomspace.add_link(
     [give,
     atomspace.add_link(
             types.ListLink,
-            [Ben, Amen, Ben]
-    )]
+            [Ben, Amen, Ben])],
+    TruthValue(1, TruthValue().confidence_to_count(1))
 )
 
 # Single argument ListLink , for testing
