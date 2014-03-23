@@ -245,9 +245,14 @@ class IntensionalLinkEvaluationRule(Rule):
 
 class MemberToEvaluationRule(Rule):
     """
-    Turns MemberLink(argument, ConceptNode:Z) into
-    EvaluationLink(PredicateNode Predicate:Z, argument).
-    The argument must be a single Node.
+    Turns inputs formated as
+     MemberLink
+         $Y
+         SatisfyingSet
+              $X
+              EvaluationLink($X)
+    to EvaluationLink ($Y).
+    Can handle multiple argument EvaluationLinks.
     """
     def __init__(self, chainer):
         Z = chainer.new_variable()
@@ -264,14 +269,18 @@ class MemberToEvaluationRule(Rule):
     # Todo: The 'outputs' parameter is not used
     def custom_compute(self, inputs, outputs):
         [member_link] = inputs
-        [arg, concept] = member_link.out
-
-        predicate_node = self.chainer.node(types.PredicateNode, concept.name)
-
-        evaluation_link = self.chainer.link(types.EvaluationLink,
-                             [predicate_node,
-                             self.chainer.link(types.ListLink, [arg])])
         tv = member_link.tv
+
+        if member_link.out[1].type == types.SatisfyingSetLink:
+            concept = member_link.out[0]
+            variable = member_link.out[1].out[0]
+            predicate = member_link.out[1].out[1].out[0]
+            input_args = member_link.out[1].out[1].out[1].out
+            output_args =  [concept if i == variable else i for i in input_args]
+
+            list_link = self.chainer.link(types.ListLink, output_args)
+            evaluation_link = self.chainer.link(types.EvaluationLink,
+                                 [predicate, list_link])
 
         return [evaluation_link], [tv]
 
@@ -349,8 +358,11 @@ class GeneralEvaluationToMemberRule(Rule):
                         list_arg[arg_indexs[i].pop(0)] = j
                         first_iter = False
                     else:
-                        next_index = next(k for k, l in enumerate(list_arg)
+                        try:
+                            next_index = next(k for k, l in enumerate(list_arg)
                                                          if l not in variables)
+                        except:
+                            break
                         list_arg[next_index] = j
                     list_link = self.chainer.link(
                                     types.ListLink, list_arg)
