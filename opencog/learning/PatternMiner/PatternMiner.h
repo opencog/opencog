@@ -113,6 +113,8 @@ private:
     // Return unified ordered Handle vector
     vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
+    string unifiedPatternToKeyString(vector<Handle>& inputPattern);
+
     // this function is called by RebindVariableNames
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
 
@@ -120,6 +122,9 @@ private:
     vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern);
 
     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
+
+    // generate the outgoings for a link in a pattern in the Pattern mining Atomspace, according to the given group of variables
+    void generateALinkByChosenVariables(Handle &originalLink, map<Handle,Handle>& valueToVarMap, HandleSeq &outputOutgoings);
 
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
 

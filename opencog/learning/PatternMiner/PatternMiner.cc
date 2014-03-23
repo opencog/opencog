@@ -239,6 +239,16 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
 
 }
 
+string PatternMiner::unifiedPatternToKeyString(vector<Handle>& inputPattern)
+{
+    string keyStr = "";
+    foreach(Handle h, inputPattern)
+    {
+        keyStr += atomSpace->atomAsString(inputPattern);
+        keyStr += "\n";
+    }
+}
+
 bool PatternMiner::checkPatternExist(const string& patternKeyStr)
 {
     if (keyStrToHTreeNodeMap.find(patternKeyStr) == keyStrToHTreeNodeMap.end())
@@ -283,6 +293,36 @@ bool isLastNElementsAllTrue(bool* array, int size, int n)
     }
 
     return true;
+}
+
+void PatternMiner::generateALinkByChosenVariables(Handle& originalLink, map<Handle,Handle>& valueToVarMap,  HandleSeq& outputOutgoings)
+{
+    HandleSeq outgoingLinks = originalAtomSpace->getOutgoing(originalLink);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (originalAtomSpace->isNode(h))
+        {
+           if (valueToVarMap.find(h) != valueToVarMap.end())
+           {
+               // this node is considered as a variable
+               outputOutgoings.push_back(valueToVarMap[h]);
+           }
+           else
+           {
+               // this node is considered not a variable, so add its bound value node into the Pattern mining Atomspace
+               Handle value_node = atomSpace->addNode(originalAtomSpace->getType(h), originalAtomSpace->getName(h), TruthValue::TRUE_TV());
+               outputOutgoings.push_back(value_node);
+           }
+        }
+        else
+        {
+             HandleSeq _outputOutgoings;
+             generateALinkByChosenVariables(h, valueToVarMap, _outputOutgoings);
+             Handle reLink = atomSpace->addLink(originalAtomSpace->getType(h),_outputOutgoings,TruthValue::TRUE_TV());
+             outputOutgoings.push_back(reLink);
+        }
+    }
 }
 
 void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap)
@@ -358,7 +398,33 @@ HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handl
         while (true)
         {
             // construct the pattern for this combination in the PatternMining Atomspace
+            // generate the valueToVarMap for this pattern of this combination
+            map<Handle,Handle>::iterator iter;
+            map<Handle,Handle> patternVarMap;
+            unsigned int index = 0;
+            for (iter = valueToVarMap.begin(); iter != valueToVarMap.end(); ++ iter)
+            {
+                if (indexes[index])
+                    patternVarMap.insert(std::pair<Handle,Handle>(iter->first, iter->second));
 
+                index ++;
+            }
+
+            HandleSeq pattern, unifiedPattern;
+
+            foreach (Handle link, inputLinks)
+            {
+                HandleSeq outgoingLinks;
+                generateALinkByChosenVariables(link, patternVarMap, outgoingLinks);
+                Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),outgoingLinks,TruthValue::TRUE_TV());
+                pattern.push_back(rebindedLink);
+            }
+
+            // unify the pattern
+            unifiedPattern = UnifyPatternOrder(pattern);
+            string keyString = unifiedPatternToKeyString(unifiedPattern);
+
+            // next, check if this pattern already exist, need lock
 
             if (isLastNElementsAllTrue(indexes, n_max, var_num))
                 break;
@@ -385,8 +451,6 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
         allLinks.pop_back();
         allAtomListLock.unlock();
-
-
 
     }
 
