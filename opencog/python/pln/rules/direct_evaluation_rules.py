@@ -336,7 +336,7 @@ class GeneralEvaluationToMemberRule(Rule):
         arg_indexs = dict(([j, [p for p,q in enumerate(arg.out)  if q == j]]
                                             for i, j in enumerate(arg.out)))
 
-        if arg.type == types.ListLink :
+        if arg.type == types.ListLink:
             for i in arg.out:
                 # The arg.out is a list that must not be changed. If arg.out is
                 # used instead of the returned value of atomspace's get_outgoing
@@ -360,11 +360,11 @@ class GeneralEvaluationToMemberRule(Rule):
                     satisying_set_link = self.chainer.link(
                                         types.SatisfyingSetLink,
                                         [variables[0], evaluation_link])
-                    member_link2 = self.chainer.link(
+                    member_link = self.chainer.link(
                                         types.MemberLink,
                                         [i, satisying_set_link])
 
-                    returned_outputs.append(member_link2)
+                    returned_outputs.append(member_link)
                     tv.append(eval_link.tv)
 
         return returned_outputs, tv
