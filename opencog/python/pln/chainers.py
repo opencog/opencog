@@ -759,9 +759,9 @@ class Chainer(AbstractChainer):
                 self.log_failed_inference('cycle detected')
                 return False
 
-            if self._is_repeated(rule, outputs, inputs):
-                self.log_failed_inference('repeated inference')
-                return False
+        if self._is_repeated(rule, outputs, inputs):
+            self.log_failed_inference('repeated inference')
+            return False
 
         return True
 
