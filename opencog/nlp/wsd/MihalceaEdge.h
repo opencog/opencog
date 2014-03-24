@@ -43,7 +43,6 @@ class MihalceaEdge : private EdgeUtils
 	public:
 		MihalceaEdge();
 		~MihalceaEdge();
-        void init_sense_similarity();
 		void set_atom_space(AtomSpace *);
 		void annotate_sentence(Handle);
 		void annotate_parse(Handle);
