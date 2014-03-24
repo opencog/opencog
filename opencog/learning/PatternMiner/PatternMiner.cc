@@ -244,9 +244,11 @@ string PatternMiner::unifiedPatternToKeyString(vector<Handle>& inputPattern)
     string keyStr = "";
     foreach(Handle h, inputPattern)
     {
-        keyStr += atomSpace->atomAsString(inputPattern);
+        keyStr += atomSpace->atomAsString(h);
         keyStr += "\n";
     }
+
+    return keyStr;
 }
 
 bool PatternMiner::checkPatternExist(const string& patternKeyStr)
@@ -369,9 +371,11 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 //          (ConceptNode "meat")
 //       )
 //    )
-HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
+vector<string> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
 {
     map<Handle,Handle> valueToVarMap;
+    vector<string> allNewPatternKeys;
+
     // First, extract all the nodes in the input links
     foreach (Handle link, inputLinks)
         extractAllNodesInLink(link, valueToVarMap);
@@ -424,7 +428,23 @@ HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handl
             unifiedPattern = UnifyPatternOrder(pattern);
             string keyString = unifiedPatternToKeyString(unifiedPattern);
 
-            // next, check if this pattern already exist, need lock
+            // next, check if this pattern already exist (need lock)
+            HTreeNode* newHTreeNode = 0;
+            uniqueKeyLock.lock();
+
+            if (keyStrToHTreeNodeMap.find(keyString) == keyStrToHTreeNodeMap.end())
+            {
+                newHTreeNode = new HTreeNode();
+                keyStrToHTreeNodeMap.insert(std::pair<string, HTreeNode*>(keyString, newHTreeNode));
+            }
+
+            uniqueKeyLock.unlock();
+
+            if (newHTreeNode)
+            {
+                newHTreeNode->pattern = unifiedPattern;
+                allNewPatternKeys.push_back(keyString);
+            }
 
             if (isLastNElementsAllTrue(indexes, n_max, var_num))
                 break;
@@ -433,6 +453,8 @@ HandleSeqSeq PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handl
             generateNextCombinationGroup(indexes, n_max);
         }
     }
+
+    return allNewPatternKeys;
 
 }
 
@@ -451,6 +473,10 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
         allLinks.pop_back();
         allAtomListLock.unlock();
+
+        HandleSeq originalLinks;
+        originalLinks.push_back(cur_link);
+        extractAllPossiblePatternsFromInputLinks(originalLinks);
 
     }
 

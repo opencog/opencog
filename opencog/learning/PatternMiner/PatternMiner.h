@@ -128,7 +128,7 @@ private:
 
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
 
-    HandleSeqSeq extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
+    vector<string> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
 
     void growTheFirstGramPatternsTask();
 
