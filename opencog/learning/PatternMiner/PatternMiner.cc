@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -103,9 +103,7 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
                    Handle var_node = atomSpace->addNode(opencog::VARIABLE_NODE, var_name, TruthValue::TRUE_TV());
                    varNameMap.insert(std::pair<Handle,Handle>(h,var_node));
                    renameOutgoingLinks.push_back(var_node);
-
                }
-
            }
         }
         else
@@ -114,22 +112,21 @@ void PatternMiner::findAndRenameVariablesForOneLink(Handle link, map<Handle,Hand
              findAndRenameVariablesForOneLink(h, varNameMap, _renameOutgoingLinks);
              Handle reLink = atomSpace->addLink(atomSpace->getType(h),_renameOutgoingLinks,TruthValue::TRUE_TV());
              renameOutgoingLinks.push_back(reLink);
-
         }
 
     }
 
 }
 
-vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern)
+vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern, map<Handle,Handle>& orderedVarNameMap)
 {
-    map<Handle,Handle> varNameMap;
+
     vector<Handle> rebindedPattern;
 
     foreach (Handle link, orderedPattern)
     {
         HandleSeq renameOutgoingLinks;
-        findAndRenameVariablesForOneLink(link, varNameMap, renameOutgoingLinks);
+        findAndRenameVariablesForOneLink(link, orderedVarNameMap, renameOutgoingLinks);
         Handle rebindedLink = atomSpace->addLink(atomSpace->getType(link),renameOutgoingLinks,TruthValue::TRUE_TV());
         rebindedPattern.push_back(rebindedLink);
     }
@@ -138,7 +135,7 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern)
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, HandleSeq& outputVarlist)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -235,7 +232,13 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
         }
     }
 
-    return orderedHandles;
+    map<Handle,Handle> orderedVarNameMap;
+    vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
+    map<Handle,Handle>::iterator varIter;
+    for (varIter = orderedVarNameMap.begin(); varIter != orderedVarNameMap.end(); ++ varIter)
+        outputVarlist.push_back(varIter->second);
+
+    return rebindPattern;
 
 }
 
@@ -371,10 +374,10 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 //          (ConceptNode "meat")
 //       )
 //    )
-vector<string> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
+vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
 {
     map<Handle,Handle> valueToVarMap;
-    vector<string> allNewPatternKeys;
+    vector<HTreeNode*> allNewPatternKeys;
 
     // First, extract all the nodes in the input links
     foreach (Handle link, inputLinks)
@@ -425,7 +428,9 @@ vector<string> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Han
             }
 
             // unify the pattern
-            unifiedPattern = UnifyPatternOrder(pattern);
+            HandleSeq orderedVarNodeList;
+            unifiedPattern = UnifyPatternOrder(pattern, orderedVarNodeList);
+
             string keyString = unifiedPatternToKeyString(unifiedPattern);
 
             // next, check if this pattern already exist (need lock)
@@ -443,7 +448,8 @@ vector<string> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Han
             if (newHTreeNode)
             {
                 newHTreeNode->pattern = unifiedPattern;
-                allNewPatternKeys.push_back(keyString);
+                newHTreeNode->varNodeList = orderedVarNodeList;
+                allNewPatternKeys.push_back(newHTreeNode);
             }
 
             if (isLastNElementsAllTrue(indexes, n_max, var_num))
@@ -455,6 +461,118 @@ vector<string> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Han
     }
 
     return allNewPatternKeys;
+
+}
+
+ // using PatternMatcher
+void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
+{
+    // First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
+    //(BindLink
+    //    ;; The variables to be bound
+    //    (Listlink)
+    //      (VariableNode "$var_1")
+    //      (VariableNode "$var_2")
+    //      ...
+    //    (ImplicationLink
+    //      ;; The pattern to be searched for
+    //      (pattern)
+    //      ;; The instance to be returned.
+    //      (result)
+    //
+    //    )
+    // )
+//    HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
+//    vector<string> allVariables;
+
+//    if (stateIndexes.size() == 1) // only contains one condition
+//    {
+//        int index = stateIndexes[0];
+//        list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+//        for(int x = 0; x < index; ++x)
+//             ++ it;
+
+//        UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+//        std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
+
+//        implicationLinkOutgoings.push_back(record.PMLink);
+//    }
+//    else
+//    {
+//        for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
+//        {
+//            int index = stateIndexes[i];
+//            list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
+//            for(int x = 0; x < index; ++x)
+//                 ++ it;
+
+//            UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
+//            std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
+//            andLinkOutgoings.push_back(record.PMLink);
+
+//        }
+
+//        // remove the repeated elements
+//        std::sort(allVariables.begin(), allVariables.end());
+//        allVariables.erase(std::unique(allVariables.begin(), allVariables.end()),allVariables.end());
+//        Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
+
+//        implicationLinkOutgoings.push_back(hAndLink);
+
+//    }
+
+//    // add variable atoms
+//    vector<string>::iterator itor = allVariables.begin();
+//    for(;itor != allVariables.end(); ++ itor)
+//    {
+//        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
+//        varNames.push_back((*itor).c_str());
+//    }
+
+//    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
+
+//    implicationLinkOutgoings.push_back(hVariablesListLink);
+
+//    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+
+//    bindLinkOutgoings.push_back(hVariablesListLink);
+//    bindLinkOutgoings.push_back(hImplicationLink);
+//    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
+
+////    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+////            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+
+//    // Run pattern matcher
+//    PatternMatch pm;
+//    pm.set_atomspace(atomSpace);
+
+//    Handle hResultListLink = pm.bindlink(hBindLink);
+
+////    std::cout<<"Debug: pattern matching results: " << std::endl
+////            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+
+//    // Get result
+//    // Note: Don't forget remove the hResultListLink
+//    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
+//    atomSpace->removeAtom(hResultListLink);
+
+//    // loop through all the result groups, remove the groups that bind the same variables to different variables
+//    if (allVariables.size() > 1)
+//    {
+//        HandleSeq nonDuplicatedResultSet;
+//        foreach (Handle listH , resultSet)
+//        {
+//            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+//            sort(oneGroup.begin(),oneGroup.end());
+
+//            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
+//                nonDuplicatedResultSet.push_back(listH);
+
+//        }
+//        return nonDuplicatedResultSet;
+//    }
+//    else
+//       return resultSet;
 
 }
 
@@ -476,7 +594,17 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
         HandleSeq originalLinks;
         originalLinks.push_back(cur_link);
-        extractAllPossiblePatternsFromInputLinks(originalLinks);
+
+        // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+        vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks);
+
+        foreach (HTreeNode* HNode, newPatternNodes)
+        {
+            HNode->parentLinks.push_back(htree->rootNode);
+
+            // Find All Instances in the original AtomSpace For this Pattern
+            findAllInstancesForGivenPattern(HNode);
+        }
 
     }
 

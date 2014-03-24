@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -42,6 +42,7 @@ namespace opencog
      {
      public:
         HandleSeq pattern;
+        HandleSeq varNodeList;
         vector<HandleSeqSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
         vector<HTreeNode*> parentLinks;
         vector<HTreeNode*> childLinks;
@@ -59,6 +60,8 @@ namespace opencog
 
      public:
 
+         HTreeNode* rootNode;
+
          HTree()
          {
              rootNode = new HTreeNode(); // the rootNode with no parents
@@ -66,11 +69,6 @@ namespace opencog
 
          // search in the HTree to find the corresponding pattern(HTreeNode) for an input instance
          HTreeNode* findPatternInHTreeForAnInstance(vector<Handle> inputLinks);
-
-
-     private:
-         HTreeNode* rootNode;
-
 
      };
 

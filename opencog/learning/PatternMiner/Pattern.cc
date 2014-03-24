@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as

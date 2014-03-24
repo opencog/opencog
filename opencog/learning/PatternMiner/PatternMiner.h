@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -111,7 +111,7 @@ private:
     //       )
     //    )
     // Return unified ordered Handle vector
-    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
+    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern, HandleSeq &outputVarlist);
 
     string unifiedPatternToKeyString(vector<Handle>& inputPattern);
 
@@ -119,7 +119,7 @@ private:
     void findAndRenameVariablesForOneLink(Handle link, map<Handle,Handle>& varNameMap, HandleSeq& renameOutgoingLinks);
 
     // rename the variable names in a ordered pattern according to the orders of the variables appear in the orderedPattern
-    vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern);
+    vector<Handle> RebindVariableNames(vector<Handle>& orderedPattern, map<Handle, Handle> &orderedVarNameMap);
 
     void generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector< vector<int> > &indexes);
 
@@ -128,7 +128,9 @@ private:
 
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
 
-    vector<string> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
+    vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
+
+    void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
     void growTheFirstGramPatternsTask();
 
