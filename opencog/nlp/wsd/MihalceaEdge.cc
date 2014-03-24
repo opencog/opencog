@@ -38,21 +38,8 @@ using namespace opencog;
 
 MihalceaEdge::MihalceaEdge()
 {
-    sen_sim = NULL;
+	sen_sim = NULL;
 	atom_space = NULL;
-}
-
-void MihalceaEdge::init_sense_similarity()
-{
-#ifdef HAVE_SQL_STORAGE
-	sen_sim = new SenseSimilaritySQL(atom_space);
-#else
-	fprintf (stderr, 
-		"Warning/Error: MihalceaEdge: proper operation of word-sense \n"
-		"disambiguation requires precomputed sense similarities to be\n"
-		"pulled from SQL stoarage.\n");
-	sen_sim = new SenseSimilarityLCH(atom_space);
-#endif /* HAVE_SQL_STORAGE */
 }
 
 MihalceaEdge::~MihalceaEdge()
@@ -65,7 +52,17 @@ void MihalceaEdge::set_atom_space(AtomSpace *as)
 {
 	atom_space = as;
 	if (sen_sim) delete sen_sim;
-    init_sense_similarity();
+
+#ifdef HAVE_SQL_STORAGE
+	sen_sim = new SenseSimilaritySQL(atom_space);
+#else
+	fprintf (stderr, 
+		"Warning/Error: MihalceaEdge: proper operation of word-sense \n"
+		"disambiguation requires precomputed sense similarities to be\n"
+		"pulled from SQL stoarage.\n");
+	sen_sim = new SenseSimilarityLCH();
+#endif /* HAVE_SQL_STORAGE */
+
 	sense_cache.set_atom_space(as);
 }
 
