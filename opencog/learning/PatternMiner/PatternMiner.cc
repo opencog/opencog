@@ -28,6 +28,7 @@
 #include <opencog/atomspace/atom_types.h>
 #include <opencog/util/StringManipulator.h>
 #include <opencog/util/foreach.h>
+#include <opencog/query/PatternMatch.h>
 #include <stdlib.h>
 #include <time.h>
 #include "PatternMiner.h"
@@ -135,7 +136,7 @@ vector<Handle> PatternMiner::RebindVariableNames(vector<Handle>& orderedPattern,
 }
 
 // the input links should be like: only specify the const node, all the variable node name should not be specified:
-vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, HandleSeq& outputVarlist)
+vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern)
 {
 
     // Step 1: take away all the variable names, make the pattern into such format string:
@@ -232,11 +233,10 @@ vector<Handle> PatternMiner::UnifyPatternOrder(vector<Handle>& inputPattern, Han
         }
     }
 
+    // in this map, the first Handle is the variable node is the original Atomspace,
+    // the second Handle is the renamed ordered variable node in the Pattern Mining Atomspace.
     map<Handle,Handle> orderedVarNameMap;
     vector<Handle> rebindPattern = RebindVariableNames(orderedHandles, orderedVarNameMap);
-    map<Handle,Handle>::iterator varIter;
-    for (varIter = orderedVarNameMap.begin(); varIter != orderedVarNameMap.end(); ++ varIter)
-        outputVarlist.push_back(varIter->second);
 
     return rebindPattern;
 
@@ -428,8 +428,7 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             }
 
             // unify the pattern
-            HandleSeq orderedVarNodeList;
-            unifiedPattern = UnifyPatternOrder(pattern, orderedVarNodeList);
+            unifiedPattern = UnifyPatternOrder(pattern);
 
             string keyString = unifiedPatternToKeyString(unifiedPattern);
 
@@ -448,7 +447,6 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             if (newHTreeNode)
             {
                 newHTreeNode->pattern = unifiedPattern;
-                newHTreeNode->varNodeList = orderedVarNodeList;
                 allNewPatternKeys.push_back(newHTreeNode);
             }
 
@@ -464,7 +462,7 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
 }
 
-void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings)
+void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes)
 {
     HandleSeq outgoingLinks = fromAtomSpace->getOutgoing(fromLink);
 
@@ -474,28 +472,32 @@ void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, Atom
         {
            Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
            outgoings.push_back(new_node);
+           if (fromAtomSpace->getType(h) == VARIABLE_NODE)
+               outVariableNodes.push_back(new_node);
         }
         else
         {
              HandleSeq _OutgoingLinks;
-             swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks);
+             swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks, outVariableNodes);
              Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h),_OutgoingLinks,fromAtomSpace->getTV(h));
              outgoings.push_back(_link);
         }
     }
 }
 
-HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks)
+HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq& outVariableNodes)
 {
     HandleSeq outPutLinks;
 
     foreach (Handle link, fromLinks)
     {
         HandleSeq outgoingLinks;
-        swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks);
+        swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks, outVariableNodes);
         Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link),outgoingLinks,fromAtomSpace->getTV(link));
         outPutLinks.push_back(toLink);
     }
+
+    return outPutLinks;
 }
 
  // using PatternMatcher
@@ -515,72 +517,51 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 //          (result)
 //        )
 //     )
+
     HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings;
+
+    HandleSeq patternToMatch = swapLinksBetweenTwoAtomSpace(atomSpace, originalAtomSpace, HNode->pattern, variableNodes);
 
     if (HNode->pattern.size() == 1) // this pattern only contains one link
     {
-        implicationLinkOutgoings.push_back(HNode->pattern[0]);
+        implicationLinkOutgoings.push_back(patternToMatch[0]); // the pattern to match
+        implicationLinkOutgoings.push_back(patternToMatch[0]); // the results to return
     }
     else
     {
-        Handle hAndLink = atomSpace->addLink(AND_LINK,HNode->pattern,TruthValue::TRUE_TV());
-
-        implicationLinkOutgoings.push_back(hAndLink);
-
+        Handle hAndLink = originalAtomSpace->addLink(AND_LINK, patternToMatch, TruthValue::TRUE_TV());
+        implicationLinkOutgoings.push_back(hAndLink); // the pattern to match
+        implicationLinkOutgoings.push_back(hAndLink); // the results to return
     }
+
+    Handle hImplicationLink = originalAtomSpace->addLink(IMPLICATION_LINK, implicationLinkOutgoings, TruthValue::TRUE_TV());
 
     // add variable atoms
-    vector<string>::iterator itor = allVariables.begin();
-    for(;itor != allVariables.end(); ++ itor)
-    {
-        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
-        varNames.push_back((*itor).c_str());
-    }
-
-    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
-
-    implicationLinkOutgoings.push_back(hVariablesListLink);
-
-    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+    Handle hVariablesListLink = originalAtomSpace->addLink(LIST_LINK, variableNodes, TruthValue::TRUE_TV());
 
     bindLinkOutgoings.push_back(hVariablesListLink);
     bindLinkOutgoings.push_back(hImplicationLink);
-    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
-
-//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+    Handle hBindLink = originalAtomSpace->addLink(BIND_LINK, bindLinkOutgoings, TruthValue::TRUE_TV());
 
     // Run pattern matcher
     PatternMatch pm;
-    pm.set_atomspace(atomSpace);
+    pm.set_atomspace(originalAtomSpace);
 
     Handle hResultListLink = pm.bindlink(hBindLink);
 
-//    std::cout<<"Debug: pattern matching results: " << std::endl
-//            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
+    std::cout<<"Debug: PatternMiner::findAllInstancesForGivenPattern: pattern matching results: " << std::endl
+            << originalAtomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
 
     // Get result
-    // Note: Don't forget remove the hResultListLink
-    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
-    atomSpace->removeAtom(hResultListLink);
+    // Note: Don't forget remove the hResultListLink and BindLink
+    HandleSeq resultSet = originalAtomSpace->getOutgoing(hResultListLink);
+    originalAtomSpace->removeAtom(hResultListLink);
+    originalAtomSpace->removeAtom(hBindLink);
 
-    // loop through all the result groups, remove the groups that bind the same variables to different variables
-    if (allVariables.size() > 1)
+    foreach (Handle listH , resultSet)
     {
-        HandleSeq nonDuplicatedResultSet;
-        foreach (Handle listH , resultSet)
-        {
-            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
-            sort(oneGroup.begin(),oneGroup.end());
-
-            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
-                nonDuplicatedResultSet.push_back(listH);
-
-        }
-        return nonDuplicatedResultSet;
+        HNode->instances.push_back(originalAtomSpace->getOutgoing(listH));
     }
-    else
-       return resultSet;
 
 }
 
@@ -620,7 +601,7 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
 void PatternMiner::growAPatternTask()
 {
-    static unsigned cur_gram = 1;
+//    static unsigned cur_gram = 1;
 
     static HandleSeq allLinks;
     originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );

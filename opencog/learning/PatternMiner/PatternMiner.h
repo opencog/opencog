@@ -111,7 +111,7 @@ private:
     //       )
     //    )
     // Return unified ordered Handle vector
-    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern, HandleSeq &outputVarlist);
+    vector<Handle> UnifyPatternOrder(vector<Handle>& inputPattern);
 
     string unifiedPatternToKeyString(vector<Handle>& inputPattern);
 
@@ -130,10 +130,11 @@ private:
 
     vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
 
-    void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings);
+    void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
     // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
-    HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks);
+    // Output all the variable nodes in the toAtomSpace BTW
+    HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
     void findAllInstancesForGivenPattern(HTreeNode* HNode);
 

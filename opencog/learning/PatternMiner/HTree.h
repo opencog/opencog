@@ -42,8 +42,7 @@ namespace opencog
      {
      public:
         HandleSeq pattern;
-        HandleSeq varNodeList;
-        vector<HandleSeqSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
+        vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
         vector<HTreeNode*> parentLinks;
         vector<HTreeNode*> childLinks;
 
