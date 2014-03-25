@@ -1768,7 +1768,7 @@ For pairs, its clear that
  The corresponding inequality is now
 \begin_inset Formula 
 \begin{align*}
-\frac{2}{N}\lesssim h_{PAIR}-h_{PAIR}^{red}\\
+\frac{2}{N}\lesssim & h_{PAIR}-h_{PAIR}^{red}\\
 =-\sum_{w_{1},w_{2}\in\alpha} & p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})+\sum_{w_{1},w_{2}\in\beta}p(w_{1},w_{2})\log_{2}p(w_{1},w_{2})\\
 =-\sum_{w\in\alpha\backslash A,C} & \left[p(A,w)\log_{2}p(A,w)+p(C,w)\log_{2}p(C,w)-p(\gamma,w)\log_{2}p(\gamma,w)\right]\\
 -\sum_{w\in\alpha\backslash A,C} & \left[p(w,A)\log_{2}p(w,A)+p(w,C)\log_{2}p(w,C)-p(w,\gamma)\log_{2}p(w,\gamma)\right]\\
@@ -1779,6 +1779,45 @@ For pairs, its clear that
 \end_inset
 
 So...
+\end_layout
+
+\begin_layout Section*
+8 March 2014
+\end_layout
+
+\begin_layout Subsection*
+Morphology
+\end_layout
+
+\begin_layout Standard
+Notes: https://en.wikipedia.org/wiki/Nonconcatenative morphology
+\end_layout
+
+\begin_layout Section*
+25 March 2014
+\end_layout
+
+\begin_layout Subsection*
+Information-Theoretic Clustering
+\end_layout
+
+\begin_layout Standard
+New references:
+\end_layout
+
+\begin_layout Itemize
+http://www.cs.utexas.edu/users/inderjit/public_papers/kdd_cocluster.pdf Information-
+Theoretic Co-clustering Inderjit S.
+ Dhillon, Subramanyam Mallela, Dharmendra S.
+ Modha 
+\end_layout
+
+\begin_layout Itemize
+http://pdf.aminer.org/000/472/364/a_generalized_maximum_entropy_approach_to_bregma
+n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
+ Co-clustering and Matrix Approximation Arindam Banerjee, Inderjit Dhillon,
+ Joydeep Ghosh, Srujana Merugu, Dharmendra S.
+ Modha Journal of Machine Learning Research 8 (2007) 1919-1986 
 \end_layout
 
 \begin_layout Section*
