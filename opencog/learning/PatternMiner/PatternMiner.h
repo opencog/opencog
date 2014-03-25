@@ -130,6 +130,11 @@ private:
 
     vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
 
+    void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings);
+
+    // Generate the links in toAtomSpace the same as the fromLinks in the fromAtomSpace. Return the swapped links in the toAtomSpace.
+    HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks);
+
     void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
     void growTheFirstGramPatternsTask();

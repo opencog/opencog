@@ -464,115 +464,123 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
 
 }
 
+void PatternMiner::swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings)
+{
+    HandleSeq outgoingLinks = fromAtomSpace->getOutgoing(fromLink);
+
+    foreach (Handle h, outgoingLinks)
+    {
+        if (fromAtomSpace->isNode(h))
+        {
+           Handle new_node = toAtomSpace->addNode(fromAtomSpace->getType(h), fromAtomSpace->getName(h), fromAtomSpace->getTV(h));
+           outgoings.push_back(new_node);
+        }
+        else
+        {
+             HandleSeq _OutgoingLinks;
+             swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, h, _OutgoingLinks);
+             Handle _link = toAtomSpace->addLink(fromAtomSpace->getType(h),_OutgoingLinks,fromAtomSpace->getTV(h));
+             outgoings.push_back(_link);
+        }
+    }
+}
+
+HandleSeq PatternMiner::swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks)
+{
+    HandleSeq outPutLinks;
+
+    foreach (Handle link, fromLinks)
+    {
+        HandleSeq outgoingLinks;
+        swapOneLinkBetweenTwoAtomSpace(fromAtomSpace, toAtomSpace, link, outgoingLinks);
+        Handle toLink = toAtomSpace->addLink(fromAtomSpace->getType(link),outgoingLinks,fromAtomSpace->getTV(link));
+        outPutLinks.push_back(toLink);
+    }
+}
+
  // using PatternMatcher
 void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 {
-    // First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
-    //(BindLink
-    //    ;; The variables to be bound
-    //    (Listlink)
-    //      (VariableNode "$var_1")
-    //      (VariableNode "$var_2")
-    //      ...
-    //    (ImplicationLink
-    //      ;; The pattern to be searched for
-    //      (pattern)
-    //      ;; The instance to be returned.
-    //      (result)
-    //
-    //    )
-    // )
-//    HandleSeq variableNodes,andLinkOutgoings, implicationLinkOutgoings, bindLinkOutgoings;
-//    vector<string> allVariables;
+//     First, generate the Bindlink for using PatternMatcher to find all the instances for this pattern in the original Atomspace
+//    (BindLink
+//        ;; The variables to be bound
+//        (Listlink)
+//          (VariableNode "$var_1")
+//          (VariableNode "$var_2")
+//          ...
+//        (ImplicationLink
+//          ;; The pattern to be searched for
+//          (pattern)
+//          ;; The instance to be returned.
+//          (result)
+//        )
+//     )
+    HandleSeq variableNodes, implicationLinkOutgoings, bindLinkOutgoings;
 
-//    if (stateIndexes.size() == 1) // only contains one condition
-//    {
-//        int index = stateIndexes[0];
-//        list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
-//        for(int x = 0; x < index; ++x)
-//             ++ it;
+    if (HNode->pattern.size() == 1) // this pattern only contains one link
+    {
+        implicationLinkOutgoings.push_back(HNode->pattern[0]);
+    }
+    else
+    {
+        Handle hAndLink = atomSpace->addLink(AND_LINK,HNode->pattern,TruthValue::TRUE_TV());
 
-//        UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
-//        std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
+        implicationLinkOutgoings.push_back(hAndLink);
 
-//        implicationLinkOutgoings.push_back(record.PMLink);
-//    }
-//    else
-//    {
-//        for(int i = 0; (std::size_t)i < stateIndexes.size() ; ++ i)
-//        {
-//            int index = stateIndexes[i];
-//            list<UngroundedVariablesInAState>::iterator it = ruleNode->curUngroundedVariables.begin();
-//            for(int x = 0; x < index; ++x)
-//                 ++ it;
+    }
 
-//            UngroundedVariablesInAState& record = (UngroundedVariablesInAState&)(*it);
-//            std::copy(record.vars.begin(),record.vars.end(),std::back_inserter(allVariables));
-//            andLinkOutgoings.push_back(record.PMLink);
+    // add variable atoms
+    vector<string>::iterator itor = allVariables.begin();
+    for(;itor != allVariables.end(); ++ itor)
+    {
+        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
+        varNames.push_back((*itor).c_str());
+    }
 
-//        }
+    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
 
-//        // remove the repeated elements
-//        std::sort(allVariables.begin(), allVariables.end());
-//        allVariables.erase(std::unique(allVariables.begin(), allVariables.end()),allVariables.end());
-//        Handle hAndLink = AtomSpaceUtil::addLink(*atomSpace,AND_LINK,andLinkOutgoings);
+    implicationLinkOutgoings.push_back(hVariablesListLink);
 
-//        implicationLinkOutgoings.push_back(hAndLink);
+    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
 
-//    }
+    bindLinkOutgoings.push_back(hVariablesListLink);
+    bindLinkOutgoings.push_back(hImplicationLink);
+    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
 
-//    // add variable atoms
-//    vector<string>::iterator itor = allVariables.begin();
-//    for(;itor != allVariables.end(); ++ itor)
-//    {
-//        variableNodes.push_back(AtomSpaceUtil::addNode(*atomSpace,VARIABLE_NODE,(*itor).c_str()));
-//        varNames.push_back((*itor).c_str());
-//    }
+//    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
+//            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
 
-//    Handle hVariablesListLink = AtomSpaceUtil::addLink(*atomSpace,LIST_LINK,variableNodes);
+    // Run pattern matcher
+    PatternMatch pm;
+    pm.set_atomspace(atomSpace);
 
-//    implicationLinkOutgoings.push_back(hVariablesListLink);
+    Handle hResultListLink = pm.bindlink(hBindLink);
 
-//    Handle hImplicationLink = AtomSpaceUtil::addLink(*atomSpace,IMPLICATION_LINK, implicationLinkOutgoings);
+//    std::cout<<"Debug: pattern matching results: " << std::endl
+//            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
 
-//    bindLinkOutgoings.push_back(hVariablesListLink);
-//    bindLinkOutgoings.push_back(hImplicationLink);
-//    Handle hBindLink = AtomSpaceUtil::addLink(*atomSpace,BIND_LINK, bindLinkOutgoings);
+    // Get result
+    // Note: Don't forget remove the hResultListLink
+    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
+    atomSpace->removeAtom(hResultListLink);
 
-////    std::cout<<"Debug: Inquery variables from the Atomspace: " << std::endl
-////            << atomSpace->atomAsString(hBindLink).c_str() <<std::endl;
+    // loop through all the result groups, remove the groups that bind the same variables to different variables
+    if (allVariables.size() > 1)
+    {
+        HandleSeq nonDuplicatedResultSet;
+        foreach (Handle listH , resultSet)
+        {
+            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
+            sort(oneGroup.begin(),oneGroup.end());
 
-//    // Run pattern matcher
-//    PatternMatch pm;
-//    pm.set_atomspace(atomSpace);
+            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
+                nonDuplicatedResultSet.push_back(listH);
 
-//    Handle hResultListLink = pm.bindlink(hBindLink);
-
-////    std::cout<<"Debug: pattern matching results: " << std::endl
-////            << atomSpace->atomAsString(hResultListLink).c_str() <<std::endl;
-
-//    // Get result
-//    // Note: Don't forget remove the hResultListLink
-//    HandleSeq resultSet = atomSpace->getOutgoing(hResultListLink);
-//    atomSpace->removeAtom(hResultListLink);
-
-//    // loop through all the result groups, remove the groups that bind the same variables to different variables
-//    if (allVariables.size() > 1)
-//    {
-//        HandleSeq nonDuplicatedResultSet;
-//        foreach (Handle listH , resultSet)
-//        {
-//            HandleSeq oneGroup = atomSpace->getOutgoing(listH);
-//            sort(oneGroup.begin(),oneGroup.end());
-
-//            if (unique(oneGroup.begin(),oneGroup.end()) == oneGroup.end())
-//                nonDuplicatedResultSet.push_back(listH);
-
-//        }
-//        return nonDuplicatedResultSet;
-//    }
-//    else
-//       return resultSet;
+        }
+        return nonDuplicatedResultSet;
+    }
+    else
+       return resultSet;
 
 }
 
