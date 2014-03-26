@@ -75,7 +75,7 @@ void ProcedureInterpreter::run(NetworkElement *ne)
 }
 
 ProcedureInterpreter::ProcedureInterpreter(PAI& p)
-    : _pai(p), comboInterpreter(_pai)
+    : _pai(p), comboInterpreter(_pai), _next(0)
 {
     // Initialize the random generator
     unsigned long rand_seed;
@@ -86,7 +86,6 @@ ProcedureInterpreter::ProcedureInterpreter(PAI& p)
     }
     randGen().seed(rand_seed);
     logger().info("Created random number generator for ComboInterpreter with seed %lu", rand_seed);
-    _next = 0;
 }
 
 ProcedureInterpreter::~ProcedureInterpreter()
