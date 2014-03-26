@@ -16,8 +16,16 @@ Output format is:
           ...
         (ConceptNode "argumentN")))
 
-where the name of the PredicateNode will begin with '!' if it 
-is negated.
+or
+
+(NotLink (stv 1 1)
+    (EvaluationLink
+        (PredicateNode "predicate")
+        (ListLink
+            (ConceptNode "argument1")
+            (ConceptNode "argument2")
+              ...
+            (ConceptNode "argumentN"))))
 
 Todo:
   - Should it set node probabilities?
@@ -62,13 +70,8 @@ try:
 
                     # Construct OpenCog atoms
 
-                    # PredicateNode
-                    if negated:
-                        predicate_node = atomspace.add_node(
-                            types.PredicateNode, '!' + predicate)
-                    else:
-                        predicate_node = atomspace.add_node(
-                            types.PredicateNode, predicate)
+                    predicate_node = atomspace.add_node(
+                        types.PredicateNode, predicate)
 
                     # ConceptNodes
                     concept_nodes = []
@@ -83,10 +86,23 @@ try:
                     # EvaluationLink
                     eval_link = atomspace.add_link(
                         types.EvaluationLink, [predicate_node, list_link])
+                    new_link = eval_link
 
-                    # TruthValue
-                    atomspace.set_tv(eval_link.h, crisp_true)
+                    # Determine whether the predicate is negated, and create
+                    # a NotLink if necessary.
+                    if negated:
+                        # NotLink
+                        not_link = atomspace.add_link(types.NotLink, [eval_link])
 
-                    output.write(eval_link.__str__())
+                        # TruthValue
+                        atomspace.set_tv(not_link.h, crisp_true)
+
+                        new_link = not_link
+                    else:
+                        # TruthValue
+                        atomspace.set_tv(eval_link.h, crisp_true)
+
+                    output.write(new_link.__str__())
+
 except (OSError, IOError), e:
     print('Exception: {0}'.format(e))
