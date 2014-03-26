@@ -116,8 +116,8 @@ vertex RunningComboProcedure::eval_anything(sib_it it)
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
-        AssertionException,
-        std::bad_exception)
+                                          AssertionException,
+                                          std::bad_exception)
 {
     vertex_seq empty;
 
@@ -370,12 +370,14 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
 
 bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
 {
-    //debug print
-    //std::cout << "EXECSEQ FROM : "
-    //  << (_tr.is_valid(from)? *from : "invalid")
-    //          << " TO : " << (_tr.is_valid(to)? *to : "invalid")
-    //   << std::endl;
-    //~debug print
+    if (logger().isDebugEnabled()) {
+        stringstream ss;
+        ss << "RunningComboProcedure::execSeq from : "
+           << (_tr.is_valid(from)? *from : "invalid")
+           << " to : " << (_tr.is_valid(to)? *to : "invalid");
+        logger().debug(ss.str());
+    }
+
     if (from == to) {
         _it = from; //FIXME : not sure it is necessary
         return false;
