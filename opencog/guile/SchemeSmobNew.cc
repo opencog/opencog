@@ -475,20 +475,19 @@ SchemeSmob::verify_handle_list (SCM satom_list, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
+    Handle h;
     Type t = verify_link (stype, "cog-new-link");
 
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
 
-    // Now, create the actual link... in the actual atom space.
-    Handle h = atomspace->addLink(t, outgoing_set);
-
     // Fish out a truth value, if its there.
-    // NB: we do this in two steps, because the atomspace::addLink()
-    // method is too stupid to set the truth value correctly.
     const TruthValue *tv = get_tv_from_list(satom_list);
     if (tv) {
-        h->setTruthValue(tv->clone());
+        h = atomspace->addLink(t, outgoing_set, tv->clone());
+    } else {
+        // Now, create the actual link... in the actual atom space.
+        h = atomspace->addLink(t, outgoing_set);
     }
 
     // Was an attention value explicitly specified?

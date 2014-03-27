@@ -846,7 +846,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
     // message from the combo shell to execute a schema
     if (msg->getFrom() == config().get("COMBO_SHELL_ID")) {
         std::string str(msg->getPlainTextRepresentation());
-        logger().error("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
+        logger().info("OAC::%s - Got combo shell msg: '%s'", __FUNCTION__, str.c_str());
 
         if (str.empty())
             return false; //a timing error, maybe?
@@ -857,7 +857,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
         ComboProcedure cp("", 0, tr);
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
-        logger().error("OAC - Called runProcedure(" + ss.str() + ")");
+        logger().info("OAC - Called runProcedure(" + ss.str() + ")");
     }
 
     // message from learning server

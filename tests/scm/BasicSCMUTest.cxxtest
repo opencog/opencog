@@ -394,8 +394,8 @@ void BasicSCMUTest::test_link_tv_setting(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Create initially with one set of trtuh values
-	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.5) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	// Create initially with one set of truth values
+	Handle inh = eval->eval_h("(ListLink (stv 0.75 0.25) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
 	bool eval_err = eval->eval_error();
 	eval->clear_pending();
 	TSM_ASSERT("Failed to create a link", !eval_err);
@@ -404,14 +404,29 @@ void BasicSCMUTest::test_link_tv_setting(void)
 	float m = tv->getMean();
 	float c = tv->getConfidence();
 	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.75), 1.0e-6);
-	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.5), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.25), 1.0e-6);
 
-	// Create it again, but with differeent truth values
-	// Make sure the new values grab hold.
+	// Add it again, but with stronger confidence.
+	// Make sure the new values grab hold (because tv merge should use
+	// the stronger confidence value).
 	inh = eval->eval_h("(ListLink (stv 0.6 0.42) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
 	eval_err = eval->eval_error();
 	eval->clear_pending();
-	TSM_ASSERT("Failed to create a link", !eval_err);
+	TSM_ASSERT("Failed to update a link", !eval_err);
+
+	tv = as->getTV(inh);
+	m = tv->getMean();
+	c = tv->getConfidence();
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(m - 0.6), 1.0e-6);
+	TS_ASSERT_LESS_THAN_EQUALS(fabs(c - 0.42), 1.0e-6);
+
+	// Add it again, but with weaker confidence.
+	// Make sure the new values DO NOT grab hold (because tv merge
+	// should use the stronger confidence value).
+	inh = eval->eval_h("(ListLink (stv 0.9 0.16) (ConceptNode \"Linas\") (ConceptNode \"human\"))");
+	eval_err = eval->eval_error();
+	eval->clear_pending();
+	TSM_ASSERT("Failed to update a link", !eval_err);
 
 	tv = as->getTV(inh);
 	m = tv->getMean();
