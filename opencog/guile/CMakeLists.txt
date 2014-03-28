@@ -17,6 +17,7 @@ ADD_LIBRARY (smob SHARED
 )
 
 TARGET_LINK_LIBRARIES(smob
+	atomspace
 	${GUILE_LIBRARIES}
 )
 
