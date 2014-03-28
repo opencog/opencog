@@ -106,6 +106,7 @@ void SchemeSmob::ss_set_env_as(AtomSpace *as)
 	// Not sure...
 	scm_c_define("*-atomspace-*", make_as(as));
 	atomspace_symbol = scm_c_lookup("*-atomspace-*");
+	atomspace_symbol = scm_permanent_object(atomspace_symbol);
 }
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
