@@ -67,8 +67,7 @@ class ImplicationUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_exec(void);
 };
@@ -100,7 +99,7 @@ void ImplicationUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
-	eval = &SchemeEval::instance(as);
+	eval = new SchemeEval();
 
 	// Load the atom types
 	config().set("MODULES",
@@ -268,6 +267,12 @@ void ImplicationUTest::setUp(void)
 	"   (WordSenseNode \"#Manipulation\")\n"
 	")\n";
 	eval->eval(str);
+}
+
+void ImplicationUTest::tearDown(void)
+{
+	delete eval;
+	eval = NULL;
 }
 
 /*

@@ -116,10 +116,11 @@ void UnorderedUTest::setUp(void)
 
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = &SchemeEval::instance();
+	SchemeEval* eval = new SchemeEval();
 	disorder = eval->apply("blink", Handle::UNDEFINED);
 	disordered = eval->apply("blinker", Handle::UNDEFINED);
 	disor_more = eval->apply("blank", Handle::UNDEFINED);
+	delete eval;
 }
 
 /*

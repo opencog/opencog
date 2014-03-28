@@ -64,8 +64,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_utils(void);
 };
@@ -78,7 +77,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 void SCMUtilsUTest::setUp(void)
 {
 	server(CogServer::createInstance);
-	evaluator = &SchemeEval::instance();
+	evaluator = new SchemeEval();
 
 	// Load the required data
 	config().set("MODULES",
@@ -103,6 +102,12 @@ void SCMUtilsUTest::setUp(void)
 	cogserver().loadModules(paths);
 	cogserver().loadSCMModules(paths);
 
+}
+
+void SCMUtilsUTest::tearDown(void)
+{
+	delete evaluator;
+	evaluator = NULL;
 }
 
 #define CHKERR \

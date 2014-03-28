@@ -24,10 +24,6 @@
 
 using namespace opencog;
 
-
-// Bogus singleton instance. Should get rid of this ASAP XXX FIXME.
-SchemeEval* SchemeEval::singletonInstance = 0;
-
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -203,7 +199,6 @@ void SchemeEval::per_thread_init(void)
 SchemeEval::~SchemeEval()
 {
 	scm_with_guile(c_wrap_finish, this);
-	delete singletonInstance;
 }
 
 /* ============================================================== */

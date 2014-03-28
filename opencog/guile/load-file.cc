@@ -31,7 +31,7 @@
 namespace opencog {
 
 /**
- * Load scheme code from a file. 
+ * Load scheme code from a file.
  * The code will be loaded into a running instance of the evaluator.
  * Parsing errors will be printed to stderr.
  *
@@ -39,47 +39,51 @@ namespace opencog {
  */
 int load_scm_file (AtomSpace& as, const char * filename)
 {
-#define BUFSZ 400
+#define BUFSZ 4120
 	char buff[BUFSZ];
 
 	FILE * fh = fopen (filename, "r");
 	if (NULL == fh)
 	{
 		int norr = errno;
-		fprintf(stderr, "Error: %d %s: %s\n", 
+		fprintf(stderr, "Error: %d %s: %s\n",
 			norr, strerror(norr), filename);
 		return norr;
 	}
 
-	SchemeEval &evaluator = SchemeEval::instance(&as);
+	SchemeEval* evaluator = new SchemeEval(&as);
 	int lineno = 0;
-    int pending_lineno = 0;
+	int pending_lineno = 0;
 
-	while(1)
+	while (1)
 	{
 		char * rc = fgets(buff, BUFSZ, fh);
 		if (NULL == rc) break;
-		std::string rv = evaluator.eval(buff);
+		std::string rv = evaluator->eval(buff);
 
-		if (evaluator.eval_error())
+		if (evaluator->eval_error())
 		{
 			fprintf(stderr, "File: %s line: %d\n", filename, lineno);
 			fprintf(stderr, "%s\n", rv.c_str());
-            return 1;
+			delete evaluator;
+			return 1;
 		}
 		lineno ++;
-        // keep a record of where pending input starts
-        if (!evaluator.input_pending()) pending_lineno = lineno;
+		// Keep a record of where pending input starts
+		if (!evaluator->input_pending()) pending_lineno = lineno;
 	}
-    if (evaluator.input_pending()) {
-        // pending input... print error
-        fprintf(stderr, "Warning file %s ended with unterminated "
-                "input begun at line %d\n", filename, pending_lineno);
-        evaluator.clear_pending();
-        return 1;
-    }
-	
-	fclose (fh);
+
+	if (evaluator->input_pending())
+	{
+		// Pending input... print error
+		fprintf(stderr, "Warning file %s ended with unterminated "
+		        "input begun at line %d\n", filename, pending_lineno);
+		delete evaluator;
+		return 1;
+	}
+
+	fclose(fh);
+	delete evaluator;
 	return 0;
 }
 
