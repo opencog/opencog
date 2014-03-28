@@ -116,12 +116,8 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	switch (misctype)
 	{
 		case COG_AS:
-		{
-			char buf[51];
-			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(node);
-			snprintf(buf, 50, "#<atomspace %p>\n", as);
-			return buf;
-		}
+			return as_to_string((AtomSpace *) SCM_SMOB_DATA(node));
+
 		case COG_AV:
 			return av_to_string((AttentionValue *) SCM_SMOB_DATA(node));
 

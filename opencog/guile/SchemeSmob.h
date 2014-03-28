@@ -84,7 +84,6 @@ class SchemeSmob
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
 
-
 		// return the int of Handle::UNDEFINED
 		static SCM ss_undefined_handle(void);
 
@@ -121,6 +120,11 @@ class SchemeSmob
 		static SCM ss_itv_p(SCM);
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
+
+		// Atom Spaces
+		static SCM ss_new_as(void);
+		static SCM ss_as_p(SCM);
+		static SCM take_as(AtomSpace *);
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
@@ -171,6 +175,7 @@ class SchemeSmob
 
 		// Utility printing functions
 		static std::string to_string(Handle);
+		static std::string as_to_string(const AtomSpace *);
 		static std::string av_to_string(const AttentionValue *);
 		static std::string tv_to_string(const TruthValue *);
 };

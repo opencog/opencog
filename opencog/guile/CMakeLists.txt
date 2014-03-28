@@ -8,6 +8,7 @@ ADD_LIBRARY (smob SHARED
 	SchemePrimitive.cc
 	SchemeSmob.cc
 	SchemeSmobAtom.cc
+	SchemeSmobAS.cc
 	SchemeSmobAV.cc
 	SchemeSmobGC.cc
 	SchemeSmobNew.cc
