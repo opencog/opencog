@@ -110,7 +110,8 @@ void SchemeSmob::ss_set_env_as(AtomSpace *as)
 
 AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
 {
-	AtomSpace* as = ss_to_atomspace(atomspace_symbol);
+	SCM ref = scm_variable_ref(atomspace_symbol);
+	AtomSpace* as = ss_to_atomspace(ref);
 	if (NULL == as)
 		scm_out_of_range(subr, atomspace_symbol);
 	return as;
