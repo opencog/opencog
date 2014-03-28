@@ -104,7 +104,7 @@ std::string Link::toString(std::string indent)
         AtomPtr a(_outgoing[i]);
         answer += a->toString(more_indent);
     }
-    answer += answer + indent + ") ; [" + 
+    answer += indent + ") ; [" + 
             std::to_string(getHandle().value()).c_str() + "]\n";
     return answer;
 }
