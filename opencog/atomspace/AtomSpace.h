@@ -41,8 +41,7 @@ namespace opencog
  *  @{
  */
 /**
- * The AtomSpace class is a legacy interface to OpenCog's AtomSpace and
- * provide standard functions that return results immediately.
+ * The AtomSpace class exposes the public API of the OpenCog AtomSpace
  *
  * @code
  *  // Create an atomspace

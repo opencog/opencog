@@ -55,8 +55,9 @@ std::string Node::toShortString(std::string indent)
 
     std::string nam = indent +
         "(" + classserver().getTypeName(_type) + 
-        " \"" + tmpname + "\")\n";
         // + getTruthValue()->toString() + ")\n";
+        " \"" + tmpname + "\") ; [" + 
+        std::to_string(getHandle().value()) + "]\n";
     return nam;
 }
 
@@ -67,13 +68,14 @@ std::string Node::toString(std::string indent)
     std::string tmpname = name;
     if (name == "")
         tmpname = "#" + _uuid;
-    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s)\n",
+    snprintf(buf, BUFSZ, "(%s \"%s\" (av %d %d %d) %s) ; [%lu]\n",
              classserver().getTypeName(_type).c_str(),
              tmpname.c_str(),
              (int)getAttentionValue()->getSTI(),
              (int)getAttentionValue()->getLTI(),
              (int)getAttentionValue()->getVLTI(),
-             getTruthValue()->toString().c_str());
+             getTruthValue()->toString().c_str(),
+             getHandle().value());
     return indent + buf;
 }
 

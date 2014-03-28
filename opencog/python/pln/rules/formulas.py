@@ -499,7 +499,12 @@ def revisionFormula(tvs):
     weight_1 = x.count * 1.0 / n
     weight_2 = y.count * 1.0 / n
     # TODO maybe check for overlap
-    s = (weight_1 * x.mean + weight_2 * y.mean)
+    #s = (weight_1 * x.mean + weight_2 * y.mean)
+
+    #TODO: formula temporarily changed, due to this issue:
+    #   https://github.com/opencog/opencog/issues/646
+    s = (x.count * x.mean + y.count * y.mean) / (x.count + y.count)
+
     return TruthValue(s, n)
 
 
