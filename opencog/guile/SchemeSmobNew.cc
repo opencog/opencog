@@ -309,7 +309,8 @@ Type SchemeSmob::verify_node_type (SCM stype, const char *subrname, int pos)
  * Check that the argument is a string, else throw errors.
  * Return the string, in C.
  */
-std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos, const char * msg)
+std::string SchemeSmob::verify_string (SCM sname, const char *subrname,
+                                       int pos, const char * msg)
 {
     if (scm_is_false(scm_string_p(sname)))
         scm_wrong_type_arg_msg(subrname, pos, sname, msg);
@@ -324,7 +325,8 @@ std::string SchemeSmob::verify_string (SCM sname, const char *subrname, int pos,
  * Check that the argument is an int, else throw errors.
  * Return the int.
  */
-int SchemeSmob::verify_int (SCM sint, const char *subrname, int pos, const char * msg)
+int SchemeSmob::verify_int (SCM sint, const char *subrname,
+                            int pos, const char * msg)
 {
     if (scm_is_false(scm_integer_p(sint)))
         scm_wrong_type_arg_msg(subrname, pos, sint, msg);
@@ -338,9 +340,9 @@ int SchemeSmob::verify_int (SCM sint, const char *subrname, int pos, const char 
 SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-new-node", 1);
-    std::string name = verify_string (sname, "cog-new-node", 2, "string name for the node");
+    std::string name = verify_string (sname, "cog-new-node", 2,
+        "string name for the node");
     AtomSpace* atomspace = ss_get_env_as("cog-new-node");
-
 
     Handle h;
     // Now, create the actual node... in the actual atom space.
@@ -373,7 +375,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-node", 1);
-    std::string name = verify_string (sname, "cog-node", 2, "string name for the node");
+    std::string name = verify_string (sname, "cog-node", 2,
+                                    "string name for the node");
     AtomSpace* atomspace = ss_get_env_as("cog-node");
 
     // Now, look for the actual node... in the actual atom space.

@@ -1,0 +1,146 @@
+/*
+ * tests/scm/MultiAtomSpace.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class MultiAtomSpace :  public CxxTest::TestSuite
+{
+	private:
+		SchemeEval* evaluator;
+		Handle disorder;
+		Handle disordered;
+		Handle disor_more;
+
+	public:
+
+		MultiAtomSpace(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~MultiAtomSpace()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_two(void);
+};
+
+/*
+ * This function sets up .. whatever.
+ */
+#define an as->addNode
+#define al as->addLink
+void MultiAtomSpace::setUp(void)
+{
+	server(CogServer::createInstance);
+	evaluator = new SchemeEval();
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"tests/scm/multispace.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] =
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver().loadModules(paths);
+	cogserver().loadSCMModules(paths);
+
+}
+
+void MultiAtomSpace::tearDown(void)
+{
+	delete evaluator;
+	evaluator = NULL;
+}
+
+#define CHKERR \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == evaluator->eval_error()));
+/*
+ * Test assorted functions from opencog/scm/utilities.scm
+ */
+
+void MultiAtomSpace::test_two(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Populate atomspace with some misc junk
+	evaluator->eval("(NumberNode \"42\")");
+	evaluator->eval("(VariableNode \"$var\")");
+
+	Handle h1 = evaluator->eval_h("(ConceptNode \"stuff\")");
+	CHKERR;
+
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->getType());
+
+	std::string msg = evaluator->eval("(dbg)");
+	printf("Evaluation returned: %s\n", msg.c_str());
+
+	Handle h2 = evaluator->eval_h("(func-env)");
+	CHKERR;
+
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->getType());
+
+	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
+	printf ("h2 = %lu %p\n", h2.value(), h2.operator->());
+
+	// h1 and h2 had better be different.
+	TSM_ASSERT("Wrong handles", h1 != h2);
+
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+
