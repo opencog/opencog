@@ -73,15 +73,12 @@ class SchemeEval : public GenericEval
 		SCM saved_outport;
 		bool in_shell;
 
-		// Make constructor, destructor private; force
-		// everyone to use the singleton instance, for now.
-		// This really needs to go away XXX FIXME
-		SchemeEval(AtomSpace* a);
-		~SchemeEval();
 		static SchemeEval* singletonInstance;
 		AtomSpace *atomspace;
 
 	public:
+		SchemeEval(AtomSpace* a);
+		~SchemeEval();
 
 		std::string eval(const std::string&);
 		std::string eval(const std::stringstream& ss) { return eval(ss.str()); }
