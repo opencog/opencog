@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2104 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -131,10 +131,19 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		default: // Should never happen.
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
+      case COG_AS:
+		{
+			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
+			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
+			/* Just a simple pointer comparison */
+			if (as == bs) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
       case COG_AV:
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
 			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
+			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
@@ -157,6 +166,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		{
 			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
 			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
+			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}

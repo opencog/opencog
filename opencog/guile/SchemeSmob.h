@@ -41,9 +41,10 @@ class SchemeSmob
 
 		enum {
 			COG_UUID = 1, // unsigned long int
-			COG_HANDLE,   // msart pointer
+			COG_HANDLE,   // smart pointer
 			COG_TV,       // truth values
 			COG_AV,       // attention values
+			COG_AS,       // atom spaces
 			COG_EXTEND    // callbacks into C++ code.
 		};
 
