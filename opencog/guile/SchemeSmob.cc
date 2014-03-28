@@ -51,7 +51,6 @@ using namespace opencog;
 scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
-AtomSpace* SchemeSmob::atomspace = NULL;
 
 void SchemeSmob::init(AtomSpace *as)
 {
@@ -62,7 +61,7 @@ void SchemeSmob::init(AtomSpace *as)
 		is_inited = true;
 		init_smob_type();
 		register_procs();
-		atomspace = as;
+		ss_set_env_as(as);
 	}
 }
 
@@ -131,7 +130,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		default: // Should never happen.
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
-      case COG_AS:
+		case COG_AS:
 		{
 			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
 			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
@@ -139,7 +138,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (as == bs) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_AV:
+		case COG_AV:
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
 			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
@@ -147,7 +146,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_EXTEND:
+		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
 			PrimitiveEnviron* av = (PrimitiveEnviron *) SCM_SMOB_DATA(a);
@@ -162,7 +161,7 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (ha == hb) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_TV:
+		case COG_TV:
 		{
 			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
 			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);

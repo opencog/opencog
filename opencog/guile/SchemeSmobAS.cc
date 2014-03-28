@@ -28,17 +28,26 @@ std::string SchemeSmob::as_to_string(const AtomSpace *as)
 
 /* ============================================================== */
 /**
+ * Create SCM object wrapping the atomspace.
+ * Do NOT take over memory management of it!
+ */
+SCM SchemeSmob::make_as (AtomSpace *as)
+{
+	SCM smob;
+	SCM_NEWSMOB (smob, cog_misc_tag, as);
+	SCM_SET_SMOB_FLAGS(smob, COG_AS);
+	return smob;
+}
+
+/* ============================================================== */
+/**
  * Take over memory management of an atom space
  */
 SCM SchemeSmob::take_as (AtomSpace *as)
 {
 	scm_gc_register_collectable_memory (as,
 	                 sizeof(*as), "opencog atomspace");
-
-	SCM smob;
-	SCM_NEWSMOB (smob, cog_misc_tag, as);
-	SCM_SET_SMOB_FLAGS(smob, COG_AS);
-	return smob;
+	return make_as(as);
 }
 
 /* ============================================================== */
@@ -71,6 +80,42 @@ SCM SchemeSmob::ss_as_p (SCM s)
 	}
 	return SCM_BOOL_F;
 }
+
+/* ============================================================== */
+/* Cast SCM to atomspace */
+
+AtomSpace* SchemeSmob::ss_to_atomspace(SCM sas)
+{
+   scm_t_bits misctype = SCM_SMOB_FLAGS(sas);
+	if (COG_AS != misctype)
+		return NULL;
+   return (AtomSpace *) SCM_SMOB_DATA(sas);
+}
+
+/* ============================================================== */
+/**
+ * Set the atomspace into the top-level interaction environment
+ */
+
+SCM SchemeSmob::atomspace_symbol;
+
+void SchemeSmob::ss_set_env_as(AtomSpace *as)
+{
+	// Place the atomspace in the ... well, the top-level environment
+	// I think this is the interaction-environment, at this point.
+	// Not sure...
+	scm_c_define("*-atomspace-*", make_as(as));
+	atomspace_symbol = scm_c_lookup("*-atomspace-*");
+}
+
+AtomSpace* SchemeSmob::ss_get_env_as(const char* subr)
+{
+	AtomSpace* as = ss_to_atomspace(atomspace_symbol);
+	if (NULL == as)
+		scm_out_of_range(subr, atomspace_symbol);
+	return as;
+}
+
 
 #endif /* HAVE_GUILE */
 /* ===================== END OF FILE ============================ */

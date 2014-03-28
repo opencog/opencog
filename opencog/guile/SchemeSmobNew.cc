@@ -52,8 +52,7 @@ std::string SchemeSmob::to_string(Handle h)
 std::string SchemeSmob::handle_to_string(Handle h, int indent)
 {
     if (Handle::UNDEFINED == h) return "#<Undefined atom handle>";
-
-    if (!atomspace->isValidHandle(h)) return "#<Invalid handle>";
+    if (NULL == h) return "#<Invalid handle>";
 
     // Print a scheme expression, so that the output can be saved
     // to file, and then restored, as needed.
@@ -340,6 +339,8 @@ SCM SchemeSmob::ss_new_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-new-node", 1);
     std::string name = verify_string (sname, "cog-new-node", 2, "string name for the node");
+    AtomSpace* atomspace = ss_get_env_as("cog-new-node");
+
 
     Handle h;
     // Now, create the actual node... in the actual atom space.
@@ -373,10 +374,12 @@ SCM SchemeSmob::ss_node (SCM stype, SCM sname, SCM kv_pairs)
 {
     Type t = verify_node_type(stype, "cog-node", 1);
     std::string name = verify_string (sname, "cog-node", 2, "string name for the node");
+    AtomSpace* atomspace = ss_get_env_as("cog-node");
 
     // Now, look for the actual node... in the actual atom space.
-    Handle h = atomspace->getHandle(t, name);
-    if (!atomspace->isValidHandle(h)) return SCM_EOL; // NIL
+    Handle h(atomspace->getHandle(t, name));
+    if (Handle::UNDEFINED == h) return SCM_EOL;
+    if (NULL == h) return SCM_EOL;
 
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(kv_pairs);
@@ -477,6 +480,7 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 {
     Handle h;
     Type t = verify_link (stype, "cog-new-link");
+    AtomSpace* atomspace = ss_get_env_as("cog-new-link");
 
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-new-link", 2);
@@ -507,13 +511,15 @@ SCM SchemeSmob::ss_new_link (SCM stype, SCM satom_list)
 SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 {
     Type t = verify_link (stype, "cog-link");
+    AtomSpace* atomspace = ss_get_env_as("cog-link");
 
     std::vector<Handle> outgoing_set;
     outgoing_set = verify_handle_list (satom_list, "cog-link", 2);
 
     // Now, look to find the actual link... in the actual atom space.
     Handle h(atomspace->getHandle(t, outgoing_set));
-    if (!atomspace->isValidHandle(h)) return SCM_EOL; // NIL
+    if (Handle::UNDEFINED == h) return SCM_EOL;
+    if (NULL == h) return SCM_EOL;
 
     // If there was a truth value, change it.
     const TruthValue *tv = get_tv_from_list(satom_list);
@@ -534,6 +540,7 @@ SCM SchemeSmob::ss_link (SCM stype, SCM satom_list)
 SCM SchemeSmob::ss_delete (SCM satom)
 {
     Handle h = verify_handle(satom, "cog-delete");
+    AtomSpace* atomspace = ss_get_env_as("cog-delete");
 
     // It can happen that the atom has already been deleted, but we're
     // still holding on to its UUID.  This is rare... but possible. So
@@ -559,6 +566,7 @@ SCM SchemeSmob::ss_delete (SCM satom)
 SCM SchemeSmob::ss_delete_recursive (SCM satom)
 {
     Handle h = verify_handle(satom, "cog-delete-recursive");
+    AtomSpace* atomspace = ss_get_env_as("cog-delete-recursive");
 
     bool rc = atomspace->removeAtom(h, true);
 

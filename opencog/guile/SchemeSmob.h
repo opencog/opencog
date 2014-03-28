@@ -125,6 +125,8 @@ class SchemeSmob
 		static SCM ss_new_as(void);
 		static SCM ss_as_p(SCM);
 		static SCM take_as(AtomSpace *);
+		static SCM make_as(AtomSpace *);
+		static AtomSpace* ss_to_atomspace(SCM);
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
@@ -161,7 +163,9 @@ class SchemeSmob
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
 
-		static AtomSpace* atomspace;
+		static SCM atomspace_symbol;
+		static void ss_set_env_as(AtomSpace *);
+		static AtomSpace* ss_get_env_as(const char *);
 		static void init(AtomSpace *as);
 		SchemeSmob(AtomSpace *as);
 	public:
