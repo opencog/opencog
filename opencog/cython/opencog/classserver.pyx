@@ -5,7 +5,7 @@ cdef extern :
     cdef void nlp_types_init()
 
 cdef extern :
-    cdef void pln_types_init()
+    cdef void pln_types_init() 
 
 
 # Dynamically construct a "types" module.

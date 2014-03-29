@@ -52,3 +52,27 @@ std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
    return "Error: Compiled without Guile support";
 #endif // HAVE_GUILE
 }
+
+// Convenience wrapper, for stand-alone usage.
+Handle opencog::eval_scheme_h(AtomSpace& as, const std::string &s)
+{
+#ifdef HAVE_GUILE
+   SchemeEval* evaluator = new SchemeEval(&as);
+   Handle scheme_return_value = evaluator->eval_h(s);
+
+   if (evaluator->eval_error()) {
+      logger().error( "%s - Failed to execute '%s'",
+                     __FUNCTION__, s.c_str());
+   }
+
+   if (evaluator->input_pending()) {
+      logger().error( "%s - Scheme syntax error in input: '%s'",
+                     __FUNCTION__, s.c_str());
+   }
+   delete evaluator;
+
+   return scheme_return_value;
+#else // HAVE_GUILE
+   return "Error: Compiled without Guile support";
+#endif // HAVE_GUILE
+}
