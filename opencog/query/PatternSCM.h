@@ -17,7 +17,7 @@ class PatternSCM
 	private:
 		Handle do_bindlink(Handle);
 		Handle do_crisp_bindlink(Handle);
-		static bool _inited;
+		static PatternSCM* _inst;
 		void init(void);
 	public:
 		PatternSCM();

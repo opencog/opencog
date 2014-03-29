@@ -2,10 +2,13 @@ from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
+from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h, __init__
 
+
+# We are poking atoms into this from the scm files, so we want
+# them to still be there, later.
 shared_space = AtomSpace()
-# opencog.scheme_wrapper.init() 
+__init__(shared_space)
 
 class SchemeTest(TestCase):
 
@@ -61,21 +64,27 @@ class SchemeTest(TestCase):
         # print "eq", Atom(basic, self.space) == a1
         self.assertEquals(a1, Atom(basic, self.space))
 
+        # Do it again, from a define in the scm file.
         again = scheme_eval_h(self.space, "wobbly")
-        print again
-
         a2 = self.space.add_node(types.ConceptNode, "wobbly")
-        print a2
         self.assertTrue(a2)
-        print Atom(again, self.space)
         self.assertEquals(a2, Atom(again, self.space))
 
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
         h = scheme_eval_h(self.space, "cap-deduce")
+        self.assertTrue(h)
+        print "\nThe question is:"
         print h
+        question = Atom(h, self.space)
+        print question
 
         h = scheme_eval_h(self.space, "(cog-bind cap-deduce)")
-
+        self.assertTrue(h)
         print h
+        answer = Atom(h, self.space)
+        print "\nThe answer is:"
+        print answer
+        self.assertEqual(answer.type, types.ListLink)
+        self.assertEqual(answer.arity, 2)

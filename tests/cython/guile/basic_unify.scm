@@ -15,14 +15,14 @@
 (EvaluationLink
 	(PredicateNode "of")
 	(ListLink
-		(WordNode "capital")
+		(WordNode "capital@ggg")
 		(WordNode "Germany")
 	)
 )
 (EvaluationLink
 	(PredicateNode "of")
 	(ListLink
-		(WordNode "capital")
+		(WordNode "capital@fff")
 		(WordNode "France")
 	)
 )
@@ -30,7 +30,7 @@
 	(PredicateNode "_subj")
 	(ListLink
 		(WordNode "be@fff")
-		(WordNode "capital")
+		(WordNode "capital@fff")
 	)
 )
 (EvaluationLink
@@ -44,7 +44,7 @@
 	(PredicateNode "_subj")
 	(ListLink
 		(WordNode "be@ggg")
-		(WordNode "capital")
+		(WordNode "capital@ggg")
 	)
 )
 (EvaluationLink

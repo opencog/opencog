@@ -14,13 +14,11 @@ cdef extern from "opencog/query/PatternSCM.h" namespace "opencog":
     cdef cppclass PatternSCM:
         PatternSCM()
 
-cdef PatternSCM pattern_object
-def __init__():
-    global pattern_object
-    pattern_object = PatternSCM()
+def __init__(AtomSpace a):
+    # Do something, anything, to force initialization
+    eval_scheme(deref(a.atomspace), "(+ 2 2)")
+    PatternSCM()
 
-# Now actually run it ... 
-__init__()
 
 cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
     string eval_scheme(cAtomSpace& as, const string& s)

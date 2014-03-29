@@ -14,13 +14,13 @@
 
 using namespace opencog;
 
-bool PatternSCM::_inited = false;
+PatternSCM* PatternSCM::_inst = NULL;
 
 PatternSCM::PatternSCM()
 {
-	if (not _inited) {
+	if (NULL == _inst) {
+		_inst = this;
 		init();
-		_inited = true;
 	}
 }
 
@@ -30,9 +30,10 @@ PatternSCM::~PatternSCM()
 
 void PatternSCM::init(void)
 {
+	_inst = new PatternSCM();
 #ifdef HAVE_GUILE
-	define_scheme_primitive("cog-bind", &PatternSCM::do_bindlink, this);
-	define_scheme_primitive("cog-bind-crisp", &PatternSCM::do_crisp_bindlink, this);
+	define_scheme_primitive("cog-bind", &PatternSCM::do_bindlink, _inst);
+	define_scheme_primitive("cog-bind-crisp", &PatternSCM::do_crisp_bindlink, _inst);
 #endif
 }
 
