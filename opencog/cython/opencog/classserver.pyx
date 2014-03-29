@@ -1,6 +1,13 @@
 from atomspace cimport cClassServer, classserver, NOTYPE, string, Type
 from classserver cimport strcmp
 
+cdef extern :
+    cdef void nlp_types_init()
+
+cdef extern :
+    cdef void pln_types_init()
+
+
 # Dynamically construct a "types" module.
 # XXX FIXME This should also listen to "addtype" signals in case
 # new types are added dynamically (which they are, when new cogserver
@@ -44,6 +51,8 @@ def is_a(Type t1, Type t2):
 #    setattr(mod, name, class_)
 
 cdef generate_type_module():
+    nlp_types_init()
+    pln_types_init()
     types = {}
     cdef string s
     for i in range(0, classserver().getNumberOfClasses()):

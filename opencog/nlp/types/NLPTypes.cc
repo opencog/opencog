@@ -47,5 +47,17 @@ static __attribute__ ((destructor)) void nlp_fini(void)
 
 #endif
 
+// namespace opencog {
+extern "C" {
+// Calling this forces this shared-lib to load, thus calling the 
+// constructor above, thus causing the atom types to be loaded into
+// the atomspace.
+void nlp_types_init(void)
+{
+	/* No-op */
+}
+};
+// }
+
 TRIVIAL_MODULE(NLPTypesModule)
 DECLARE_MODULE(NLPTypesModule)

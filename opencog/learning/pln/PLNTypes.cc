@@ -38,6 +38,16 @@ static void init(void)
     #include "opencog/learning/pln/atom_types.inheritance"
 }
 
+extern "C" {
+// Calling this forces this shared-lib to load, thus calling the 
+// constructor above, thus causing the atom types to be loaded into
+// the atomspace.
+void pln_types_init()
+{
+	/* No-op */
+} 
+};
+
 // __attribute__((constructor))
 // void fini(void)
 // {
