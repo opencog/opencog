@@ -65,8 +65,7 @@ class VarTypeNot :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_exec(void);
 };
@@ -90,16 +89,16 @@ void VarTypeNot::setUp(void)
 		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
 
 	config().set("SCM_PRELOAD",
-      "opencog/atomspace/core_types.scm, "
-      "opencog/nlp/types/nlp_types.scm, "
-      "opencog/spacetime/spacetime_types.scm, "
-      "opencog/dynamics/attention/attention_types.scm, "
-      "opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/spacetime/spacetime_types.scm, "
+		"opencog/dynamics/attention/attention_types.scm, "
+		"opencog/embodiment/AtomSpaceExtensions/embodiment_types.scm, "
 		"tests/query/var-type-not.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	const char * paths[] = 
+	const char * paths[] =
 	{
 		"./",
 		"../",
@@ -111,9 +110,14 @@ void VarTypeNot::setUp(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* evaluator = &SchemeEval::instance();
+	SchemeEval* evaluator = new SchemeEval();
 	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
 	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
+	delete evaluator;
+}
+
+void VarTypeNot::tearDown(void)
+{
 }
 
 /*

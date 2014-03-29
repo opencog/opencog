@@ -60,7 +60,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 			pm.set_atomspace(as);
-			eval = &SchemeEval::instance(as);
+			eval = new SchemeEval();
 
 			// Load the required data
 			config().set("MODULES",
@@ -76,6 +76,8 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 		~EinsteinPuzzle()
 		{
+			delete eval;
+
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());

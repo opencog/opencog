@@ -27,6 +27,7 @@
 
 #include <string>
 
+#include <opencog/guile/SchemeEval.h>
 #include <opencog/shell/SchemeShell.h>
 #include <opencog/server/Request.h>
 #include <opencog/server/CogServer.h>
@@ -56,6 +57,8 @@ class SchemeShellModule : public Module
 			"Usage: scm-eval <scheme code>\n\n"
 			"Evaluate the specified Scheme code. It does not need to be quoted.",
 			false, false)
+
+		SchemeEval* evaluator;
 
 	public:
 		SchemeShellModule(CogServer&);

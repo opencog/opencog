@@ -1,8 +1,10 @@
-/*
+/**
  * SchemeEval.cc
  *
- * Simple scheme evaluator
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Scheme evaluator.  Given strings in scheme, evaluates them with
+ * the appropriate Atomspace, etc.
+ *
+ * Copyright (c) 2008, 2014 Linas Vepstas
  */
 
 #ifdef HAVE_GUILE
@@ -24,10 +26,6 @@
 
 using namespace opencog;
 
-
-// Bogus singleton instance. Should get rid of this ASAP XXX FIXME.
-SchemeEval* SchemeEval::singletonInstance = 0;
-
 /**
  * This init is called once for every time that this class
  * is instantiated -- i.e. it is a per-instance initializer.
@@ -38,15 +36,21 @@ void SchemeEval::init(void)
 	PrimitiveEnviron::init();
 
 	saved_outport = scm_current_output_port();
-	// scm_gc_protect_object(saved_outport);
+	saved_outport = scm_gc_protect_object(saved_outport);
 
 	outport = scm_open_output_string();
-	// outport = scm_gc_protect_object(outport);
+	outport = scm_gc_protect_object(outport);
+
 	scm_set_current_output_port(outport);
+
 	in_shell = false;
 
 	error_string = SCM_EOL;
+	error_string = scm_gc_protect_object(error_string);
+
 	captured_stack = SCM_BOOL_F;
+	captured_stack = scm_gc_protect_object(captured_stack);
+
 	pexpr = NULL;
 }
 
@@ -60,14 +64,14 @@ void * SchemeEval::c_wrap_init(void *p)
 void SchemeEval::finish(void)
 {
 	// Restore the previous outport.
-	// XXX This works only if the evaluator was run nested;
-	// it bombs, if run in parallel, because the saved port
-	// might have been closed.
 	scm_set_current_output_port(saved_outport);
-	// scm_gc_unprotect_object(saved_outport);
+	scm_gc_unprotect_object(saved_outport);
 
 	scm_close_port(outport);
-	// scm_gc_unprotect_object(outport);
+	scm_gc_unprotect_object(outport);
+
+	scm_gc_unprotect_object(error_string);
+	scm_gc_unprotect_object(captured_stack);
 }
 
 void * SchemeEval::c_wrap_finish(void *p)
@@ -203,7 +207,6 @@ void SchemeEval::per_thread_init(void)
 SchemeEval::~SchemeEval()
 {
 	scm_with_guile(c_wrap_finish, this);
-	delete singletonInstance;
 }
 
 /* ============================================================== */

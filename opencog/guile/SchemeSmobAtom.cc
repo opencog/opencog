@@ -160,6 +160,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
+	AtomSpace* atomspace = ss_get_env_as("cog-incoming-set");
 
 	std::vector<Handle> iset = atomspace->getIncoming(h);
 	size_t isz = iset.size();
@@ -186,6 +187,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 {
 	Type t = verify_atom_type (stype, "cog-map-type");
+	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;

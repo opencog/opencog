@@ -232,7 +232,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
 
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one
@@ -250,9 +250,9 @@ void PsiFeelingUpdaterAgent::runUpdaters()
         scheme_expression = "( " + feelingUpdater + " )";
 
         // Run the Procedure that update feeling and get the updated value
-        scheme_return_value = evaluator.eval(scheme_expression);
+        scheme_return_value = evaluator->eval(scheme_expression);
 
-        if ( evaluator.eval_error() ) {
+        if ( evaluator->eval_error() ) {
             logger().error( "PsiFeelingUpdaterAgent::%s - Failed to execute '%s'",
                              __FUNCTION__, scheme_expression.c_str());
 
@@ -279,6 +279,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
                          __FUNCTION__, feeling.c_str(), iFeeling->second.updatedValue);
     }// for
 
+    delete evaluator;
 #endif // HAVE_GUILE
 
 }

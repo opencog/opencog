@@ -1822,15 +1822,15 @@ void PAI::processInstruction(DOMElement * element)
     } // if
 
 #ifdef HAVE_GUILE
-    if(parsedSentenceText != NULL){
-        SchemeEval & evaluator = SchemeEval::instance(); 
+    if (parsedSentenceText != NULL){
+        SchemeEval* evaluator = new SchemeEval(); 
         std::string scheme_expression, scheme_return_value; 
 
         // Clean up all the information of previous sentence, such as detach 
         // the AnchorNode of previous sentence if it has not been processed. 
         scheme_expression = "( reset_dialog_system )";
-        scheme_return_value = evaluator.eval(scheme_expression); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(scheme_expression); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to execute '%s'", 
                             __FUNCTION__, 
                            scheme_expression.c_str()
@@ -1839,13 +1839,14 @@ void PAI::processInstruction(DOMElement * element)
 
         // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
         // and dialog_system.scm will continue processing it. 
-        scheme_return_value = evaluator.eval(parsedSentenceText); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
                            __FUNCTION__
                           ); 
         }
-    }    
+        delete evaluator;
+    }
 #endif
 
     // Add the perceptions into AtomSpace

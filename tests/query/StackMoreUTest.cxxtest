@@ -117,11 +117,12 @@ void StackMoreUTest::setUp(void)
 	cogserver().loadSCMModules(paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = &SchemeEval::instance();
+	SchemeEval* eval = new SchemeEval();
 	bind_oo = eval->apply("bind_oo", Handle::UNDEFINED);
 	bind_ou = eval->apply("bind_ou", Handle::UNDEFINED);
 	bind_uo = eval->apply("bind_uo", Handle::UNDEFINED);
 	bind_uu = eval->apply("bind_uu", Handle::UNDEFINED);
+	delete eval;
 }
 
 /*

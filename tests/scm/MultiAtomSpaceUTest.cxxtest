@@ -1,5 +1,5 @@
 /*
- * tests/scm/SCMUtilsUTest.cxxtest
+ * tests/scm/MultiAtomSpace.cxxtest
  *
  * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -28,7 +28,7 @@
 
 using namespace opencog;
 
-class SCMUtilsUTest :  public CxxTest::TestSuite
+class MultiAtomSpace :  public CxxTest::TestSuite
 {
 	private:
 		SchemeEval* evaluator;
@@ -38,7 +38,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 
 	public:
 
-		SCMUtilsUTest(void)
+		MultiAtomSpace(void)
 		{
 			try
 			{
@@ -56,7 +56,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 			// logger().setPrintToStdoutFlag(true);
 		}
 
-		~SCMUtilsUTest()
+		~MultiAtomSpace()
 		{
 			// erase the log file if no assertions failed
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
@@ -66,28 +66,22 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 		void setUp(void);
 		void tearDown(void);
 
-		void test_utils(void);
+		void test_two(void);
 };
 
 /*
- * This function sets up an implication link, and some data.
+ * This function sets up .. whatever.
  */
 #define an as->addNode
 #define al as->addLink
-void SCMUtilsUTest::setUp(void)
+void MultiAtomSpace::setUp(void)
 {
 	server(CogServer::createInstance);
 	evaluator = new SchemeEval();
 
-	// Load the required data
-	config().set("MODULES",
-		"opencog/nlp/types/libnlp-types.so");
-
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "
-		"opencog/nlp/types/nlp_types.scm, "
-		"opencog/scm/utilities.scm, "
-		"tests/scm/utils-test.scm");
+		"tests/scm/multispace.scm");
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
@@ -104,7 +98,7 @@ void SCMUtilsUTest::setUp(void)
 
 }
 
-void SCMUtilsUTest::tearDown(void)
+void MultiAtomSpace::tearDown(void)
 {
 	delete evaluator;
 	evaluator = NULL;
@@ -117,45 +111,35 @@ void SCMUtilsUTest::tearDown(void)
  * Test assorted functions from opencog/scm/utilities.scm
  */
 
-void SCMUtilsUTest::test_utils(void)
+void MultiAtomSpace::test_two(void)
 {
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
-	// Test cog-atom-incr ---------------------------------
-	Handle counter = evaluator->eval_h("counter");
+	// Populate atomspace with some misc junk
+	evaluator->eval("(NumberNode \"42\")");
+	evaluator->eval("(VariableNode \"$var\")");
+
+	Handle h1 = evaluator->eval_h("(ConceptNode \"stuff\")");
 	CHKERR;
 
-	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
-	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->getType());
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h1);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h1->getType());
 
-	evaluator->eval("(test-incr-cnt)");
-	CHKERR;
-	evaluator->eval("(test-incr-cnt)");
-	CHKERR;
-	evaluator->eval("(test-incr-cnt)");
-	CHKERR;
-	TruthValuePtr tv = counter->getTruthValue();
+	std::string msg = evaluator->eval("(dbg)");
+	printf("Evaluation returned: %s\n", msg.c_str());
 
-	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
-	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
+	Handle h2 = evaluator->eval_h("(func-env)");
+	CHKERR;
 
-	// Test cog-get-partner ------------------------------
-	Handle recount = evaluator->eval_h("recount");
-	CHKERR;
-	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
+	TSM_ASSERT("Failed to create atom", Handle::UNDEFINED != h2);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, h2->getType());
 
-	// Test cog-pred-get-partner ------------------------------
-	Handle rrcnt = evaluator->eval_h("rrcnt");
-	CHKERR;
-	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
+	printf ("h1 = %lu %p\n", h1.value(), h1.operator->());
+	printf ("h2 = %lu %p\n", h2.value(), h2.operator->());
 
-	// Test cog-get-link ------------------------------
-	Handle ref = evaluator->eval_h("ref");
-	CHKERR;
-	Handle wref = evaluator->eval_h("wref");
-	CHKERR;
-	TSM_ASSERT("Error setting up for cog-get-link", Handle::UNDEFINED != ref);
-	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);
+	// h1 and h2 had better be different.
+	TSM_ASSERT("Wrong handles", h1 != h2);
+
 
 	logger().debug("END TEST: %s", __FUNCTION__);
 }

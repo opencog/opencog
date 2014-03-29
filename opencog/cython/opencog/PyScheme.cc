@@ -33,22 +33,22 @@ using namespace opencog;
 std::string opencog::eval_scheme(AtomSpace& as, const std::string &s)
 {
 #ifdef HAVE_GUILE
-   SchemeEval& evaluator = SchemeEval::instance(&as);
-   std::string scheme_return_value = evaluator.eval(s);
+   SchemeEval* evaluator = new SchemeEval(&as);
+   std::string scheme_return_value = evaluator->eval(s);
 
-   if (evaluator.eval_error()) {
+   if (evaluator->eval_error()) {
       logger().error( "%s - Failed to execute '%s'",
                      __FUNCTION__, s.c_str());
    }
 
-   if (evaluator.input_pending()) {
+   if (evaluator->input_pending()) {
       logger().error( "%s - Scheme syntax error in input: '%s'",
                      __FUNCTION__, s.c_str());
    }
-   evaluator.clear_pending();
+   delete evaluator;
 
    return scheme_return_value;
 #else // HAVE_GUILE
-   return "";
+   return "Error: Compiled without Guile support";
 #endif // HAVE_GUILE
 }

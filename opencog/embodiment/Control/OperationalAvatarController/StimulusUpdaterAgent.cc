@@ -41,18 +41,19 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
 #if HAVE_GUILE
 
     // Initialize scheme evaluator
-    SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + stimulusUpdater + " )";
 
     // Run the Procedure that update Stimuluss and get the updated value
-    scheme_return_value = evaluator.eval(scheme_expression);
+    scheme_return_value = evaluator->eval(scheme_expression);
 
-    if ( evaluator.eval_error() ) {
+    if ( evaluator->eval_error() ) {
         logger().error( "StimulusUpdaterAgent::Stimulus::%s - Failed to execute '%s'",
                          __FUNCTION__, scheme_expression.c_str());
 
+        delete evaluator;
         return false;
     }
 
@@ -62,6 +63,7 @@ bool StimulusUpdaterAgent::Stimulus::runUpdater (AtomSpace & atomSpace)
     logger().debug("StimulusUpdaterAgent::Stimulus::%s - The level of stimulus '%s' will be set to '%f'",
                    __FUNCTION__, this->stimulusName.c_str(), this->currentStimulusValue);
 
+    delete evaluator;
 #endif // HAVE_GUILE
 
     return true;
@@ -111,7 +113,7 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
 
     // TODO: implement Stimulus updaters like ModulatorUpdater
     // Initialize scheme evaluator
-    //SchemeEval & evaluator = SchemeEval::instance(&atomSpace);
+    //SchemeEval* evaluator = new SchemeEval();
     //std::string scheme_expression, scheme_return_value;
 
     //// Store the updated Stimulus levels to AtomSpace
@@ -126,9 +128,9 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
     //                     ")";
 
     //// Run the scheme procedure
-    //scheme_return_value = evaluator.eval(scheme_expression);
+    //scheme_return_value = evaluator->eval(scheme_expression);
 
-    //if ( evaluator.eval_error() ) {
+    //if ( evaluator->eval_error() ) {
     //    logger().error( "StimulusUpdaterAgent::Stimulus::%s - Failed to execute '%s'",
     //                     __FUNCTION__,
     //                     scheme_expression.c_str()
@@ -142,6 +144,7 @@ bool StimulusUpdaterAgent::Stimulus::updateStimulus (AtomSpace & atomSpace, cons
     //               this->stimulusName.c_str(),
     //               this->currentStimulusValue
     //              );
+    // delete evaluator;
 #endif // HAVE_GUILE
 
     return true;
