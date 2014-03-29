@@ -23,7 +23,7 @@ cdef extern from "opencog/cython/opencog/PyScheme.h" namespace "opencog":
 cdef extern from "opencog/guile/load-file.h" namespace "opencog":
     int load_scm_file (cAtomSpace& as, char* filename)
 
-def init():
+def __init__():
     PatternSCM()
 
 # Returns a string value
@@ -40,7 +40,6 @@ def scheme_eval_h(AtomSpace a, char* s):
     cdef string expr
     expr = string(s)
     ret = eval_scheme_h(deref(a.atomspace), expr)
-    print "duuuuude wtf", ret.value()
     return Handle(ret.value())
 
 def load_scm(AtomSpace a, char* fname):

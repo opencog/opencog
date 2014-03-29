@@ -2,17 +2,19 @@ from unittest import TestCase
 
 from opencog.atomspace import AtomSpace, TruthValue, Atom, Handle
 from opencog.atomspace import types, is_a, get_type, get_type_name
-from opencog.scheme_wrapper import load_scm, scheme_eval, init
+from opencog.scheme_wrapper import load_scm, scheme_eval, scheme_eval_h
 
+shared_space = AtomSpace()
+# opencog.scheme_wrapper.init() 
 
 class SchemeTest(TestCase):
 
     def setUp(self):
-        self.space = AtomSpace()
-        init()
+        global shared_space
+        self.space = shared_space
 
     def tearDown(self):
-        del self.space
+        pass
 
     # Load several different scheme files, containin atom type
     # declarations, and utuilites. They should load just fine.
@@ -47,20 +49,33 @@ class SchemeTest(TestCase):
     def test_c_eval(self):
         basic = scheme_eval_h(self.space,
             "(ConceptNode \"whatever\" (stv 0.5 0.5))")
-        print "duude", basic
 
         a1 = self.space.add_node(types.ConceptNode, "whatever")
         self.assertTrue(a1)
-
-        print "duude", basic == a1
 
         # Make sure the truth value is what's in the SCM file.
         expected = TruthValue(0.5, 800)
         self.assertEquals(a1.tv, expected)
 
+        # Actually, the atoms overall should compare.
+        # print "eq", Atom(basic, self.space) == a1
+        self.assertEquals(a1, Atom(basic, self.space))
+
+        again = scheme_eval_h(self.space, "wobbly")
+        print again
+
+        a2 = self.space.add_node(types.ConceptNode, "wobbly")
+        print a2
+        self.assertTrue(a2)
+        print Atom(again, self.space)
+        self.assertEquals(a2, Atom(again, self.space))
+
 
     # Run the pattern-matcher/unifier/query-engine.
     def test_unifier(self):
-        h = scheme_eval(self.space, "(cog-bind cap-deduce)")
+        h = scheme_eval_h(self.space, "cap-deduce")
+        print h
+
+        h = scheme_eval_h(self.space, "(cog-bind cap-deduce)")
 
         print h
