@@ -22,7 +22,7 @@ from opencog.atomspace import AtomSpace, Atom, types
 try:
     from pln.chainers import Chainer
     from pln.rules import *
-    import scheme_wrapper
+    import opencog.scheme_wrapper
 except AttributeError:
     import unittest
     raise unittest.SkipTest("PLN automated unit test temporarily disabled - "
@@ -77,7 +77,7 @@ class PLNExamples(object):
             
         # Todo: The variable 'tmp' is not used
         tmp = open(filename, 'r')
-        if not scheme_wrapper.load_scm(self.atomspace, filename):
+        if not opencog.scheme_wrapper.load_scm(self.atomspace, filename):
             print 'unable to load file', filename
             return
         print filename
