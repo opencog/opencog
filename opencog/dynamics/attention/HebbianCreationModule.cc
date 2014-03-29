@@ -31,6 +31,8 @@
 #include <opencog/util/Config.h>
 #include <opencog/dynamics/attention/atom_types.h>
 #include <opencog/atomspace/SimpleTruthValue.h>
+#include <tbb/task.h>
+#include <opencog/util/tbb.h>
 
 using namespace std;
 using namespace opencog;
@@ -62,15 +64,15 @@ HebbianCreationModule::~HebbianCreationModule()
 }
 
 /*
- * Create a separate thread to handle the AddAFSignal event to avoid blocking
+ * Create a task to handle the AddAFSignal event to avoid blocking
  */
 void HebbianCreationModule::addAFSignal(const Handle& source,
                                         const AttentionValuePtr& av_old,
                                         const AttentionValuePtr& av_new)
 {
-    std::thread handler(&HebbianCreationModule::addAFSignalHandler,
-                        this, source, av_old, av_new);
-    handler.detach();
+    tbb_enqueue_lambda([=] {
+        addAFSignalHandler(source, av_old, av_new); 
+    });
 }
 
 /*
