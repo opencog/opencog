@@ -24,6 +24,7 @@ class InferenceAgent(MindAgent):
 
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace,
+                               agent=self,
                                stimulateAtoms=True,
                                preferAttentionalFocus=True,
                                delete_temporary_variables=True,
