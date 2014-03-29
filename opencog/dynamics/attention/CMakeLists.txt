@@ -37,15 +37,16 @@ ADD_DEPENDENCIES(attention attention_atom_types)
 TARGET_LINK_LIBRARIES(attention server)
 
 # HebbianCreationModule
-ADD_LIBRARY(hebbiancreation SHARED
-	HebbianCreationModule
-)
-
-ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
-ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
-
-TARGET_LINK_LIBRARIES(hebbiancreation server)
-
+IF (TBB_FOUND)
+    ADD_LIBRARY(hebbiancreation SHARED
+            HebbianCreationModule
+    )
+    
+    ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
+    ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
+    
+    TARGET_LINK_LIBRARIES(hebbiancreation server)
+ENDIF (TBB_FOUND)
 
 IF (CYGWIN)
 	INSTALL (TARGETS attention

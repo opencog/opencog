@@ -128,13 +128,15 @@ cdef api object instantiate_agent(string module_name, string agent_name, cAgent 
         if filep: filep.close()
     return agent
 
-cdef api string run_agent(object o,cAtomSpace *c_atomspace) with gil:
+cdef api string run_agent(object o, cAtomSpace *c_atomspace) with gil:
     cdef string result
     a = AtomSpace_factory(c_atomspace)
+
+    # Propagates exceptions to PyMindAgent to throw
     try:
         o.run(a)
     except Exception, e:
-        s = traceback.format_exc(10)
+        s = traceback.format_exc(20)
         result = string(s)
     return result
 

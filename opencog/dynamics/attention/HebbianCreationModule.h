@@ -30,6 +30,8 @@
 #include <opencog/server/Agent.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
+#include <tbb/task.h>
+#include <opencog/util/tbb.h>
 
 namespace opencog
 {
@@ -45,8 +47,8 @@ typedef std::shared_ptr<HebbianCreationModule> HebbianCreationModulePtr;
 *
 * It is notified of atoms that are added to the AttentionalFocus
 * by registering a slot with the Boost Signals2 events exposed by
-* the AtomSpace. When this slot is called, a separate handler thread
-* is created to do the work while allowing execution to continue.
+* the AtomSpace. When this slot is called, a handler task is enqueued
+* to do the work while allowing execution to continue.
 **/
 class HebbianCreationModule : public Module
 {

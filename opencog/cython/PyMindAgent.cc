@@ -59,13 +59,11 @@ PyMindAgent::~PyMindAgent()
 void PyMindAgent::run()
 {
     std::string result = run_agent(pyagent, &_cogserver.getAtomSpace());
-    // errors only with result is not empty... && duplicate errors
-    // are not reported.
-    if (result.size() > 0 && result != last_result) {
-        // Any string returned is a traceback
-        logger().error("[%s::run] Python Exception:\n%s",
-                this->classinfo().id.c_str(),result.c_str());
+    
+    // run_agent only returns a string if it is propagating an exception
+    if (result.size() > 0) {
+        throw RuntimeException(result.c_str(),
+                               "PyMindAgent triggered runtime exception.");
     }
-    last_result = result;
 }
 
