@@ -123,31 +123,28 @@ public:
         cogserver.runLoopStep();
         // ensure that the exception is reported
         TS_ASSERT_DIFFERS(srr->result.find("TypeError"), std::string::npos);
-
     }
 
     void testAgentWithRunException() {
         TestCogServer& cogserver = static_cast<TestCogServer&>(server(TestCogServer::createInstance)); 
+        
         // test loading a module
         Request* loadpyRequest = cogserver.createRequest("loadpy");
         TS_ASSERT(loadpyRequest != NULL);
         loadpyRequest->addParameter("test_agent_w_run_exception");
+        
         // add request to queue
         cogserver.pushRequest(loadpyRequest);
+        
         // process request
         cogserver.runLoopStep();
 
         // create agent
-        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent_w_run_exception.TestRunExceptionAgent",true);
+        AgentPtr pythonTestAgent = cogserver.createAgent("test_agent_w_run_exception.TestRunExceptionAgent", false);
         TS_ASSERT(pythonTestAgent != NULL);
 
-        cogserver.runLoopStep();
-
-        // check that the exception was reported
-        PyMindAgentPtr pta = std::dynamic_pointer_cast<PyMindAgent>(pythonTestAgent);
-        TS_ASSERT_DIFFERS( pta->last_result.find("IndexError"),
-                std::string::npos );
-
+        // run agent with test exception
+        TS_ASSERT_THROWS_ANYTHING(cogserver.runAgent(pythonTestAgent));
     }
 
     void testPreloadAgent () {
