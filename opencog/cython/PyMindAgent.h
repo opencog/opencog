@@ -51,8 +51,6 @@ class PyMindAgent : public Agent
     PyObject* pyagent;
     std::string moduleName;
     std::string className;
-protected:
-    std::string last_result;
 
 public:
 
