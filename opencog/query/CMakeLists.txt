@@ -1,10 +1,10 @@
-# Build the query module
 
+# Build the query shlib
 ADD_LIBRARY(query SHARED
 	DefaultPatternMatchCB.cc
 	PatternMatch.cc
 	PatternMatchEngine.cc
-	QueryModule.cc
+	PatternSCM.cc
 )
 
 ADD_DEPENDENCIES(query
@@ -12,6 +12,12 @@ ADD_DEPENDENCIES(query
 )
 
 TARGET_LINK_LIBRARIES(query atomspace execution)
+
+# Build the query cogserver module
+ADD_LIBRARY(QueryModule SHARED
+	QueryModule.cc
+)
+TARGET_LINK_LIBRARIES(QueryModule query server)
 
 IF (WIN32)
    INSTALL (TARGETS query DESTINATION "lib${LIB_DIR_SUFFIX}/opencog")
@@ -24,7 +30,6 @@ ENDIF (WIN32)
 INSTALL (FILES
 	CrispLogicPMCB.h
 	DefaultPatternMatchCB.h
-	OutgoingTree.h
 	PatternMatch.h
 	PatternMatchCallback.h
 	PatternMatchEngine.h
