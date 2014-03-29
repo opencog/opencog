@@ -165,17 +165,22 @@ class SchemeSmob
 
 		static SCM atomspace_symbol;
 		static void ss_set_env_as(AtomSpace *);
-		static AtomSpace* ss_get_env_as(const char *);
 		static void init(AtomSpace *as);
 		SchemeSmob(AtomSpace *as);
 	public:
+		// This alows other users to get the atomspace that scheme is
+		// using.
+		static AtomSpace* ss_get_env_as(const char *);
+
 		// Helper functions XXX why are these public ??
 		// XXX Because the embodiment code uses them :-(
 		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
+		static Handle scm_to_handle(SCM);
+	private:
 		static SCM uuid_to_scm(UUID);
 		static Handle scm_uuid_to_handle(SCM);
-		static Handle scm_to_handle(SCM);
+	public:
 
 		// Utility printing functions
 		static std::string to_string(Handle);
