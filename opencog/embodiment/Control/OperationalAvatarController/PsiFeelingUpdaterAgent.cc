@@ -227,10 +227,6 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     OAC* oac = dynamic_cast<OAC*>(&_cogserver);
     OC_ASSERT(oac, "Did not get an OAC server");
 
-    // Get AtomSpace
-    AtomSpace& atomSpace = oac->getAtomSpace();
-
-
     // Initialize scheme evaluator
     SchemeEval* evaluator = new SchemeEval();
     std::string scheme_expression, scheme_return_value;
