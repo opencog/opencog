@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Logger.h>
 
 using namespace opencog;
@@ -52,8 +52,7 @@ class LoopPatternUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_prep(void);
 		void verify(Handle);
@@ -65,10 +64,13 @@ class LoopPatternUTest :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
+void LoopPatternUTest::tearDown(void)
+{
+	delete as;
+}
 void LoopPatternUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.
@@ -148,7 +150,6 @@ void LoopPatternUTest::cycle(Handle va, Handle vb, Handle vc)
 
 void LoopPatternUTest::verify(Handle soln)
 {
-	AtomSpace *as = &cogserver().getAtomSpace();
 	Handle va = getlink(soln, 0);
 	Handle vb = getlink(soln, 1);
 	Handle vc = getlink(soln, 2);
