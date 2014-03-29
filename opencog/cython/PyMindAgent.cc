@@ -60,6 +60,7 @@ void PyMindAgent::run()
 {
     std::string result = run_agent(pyagent, &_cogserver.getAtomSpace());
     
+    // run_agent only returns a string if it is propagating an exception
     if (result.size() > 0) {
         throw RuntimeException(result.c_str(),
                                "PyMindAgent triggered runtime exception.");
