@@ -38,6 +38,15 @@ TARGET_LINK_LIBRARIES(attention server)
 
 # HebbianCreationModule
 IF (TBB_FOUND)
+    INCLUDE_DIRECTORIES (
+            ${TBB_INCLUDE_DIR}
+    )
+
+    LINK_DIRECTORIES(
+            ${TBB_INCLUDE_DIR}
+            ${TBB_LIBRARY_DIRS}
+    )
+
     ADD_LIBRARY(hebbiancreation SHARED
             HebbianCreationModule
     )
@@ -45,7 +54,10 @@ IF (TBB_FOUND)
     ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
     ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
     
-    TARGET_LINK_LIBRARIES(hebbiancreation server)
+    TARGET_LINK_LIBRARIES(hebbiancreation 
+            server
+            tbb
+    )
 ENDIF (TBB_FOUND)
 
 IF (CYGWIN)
