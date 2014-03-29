@@ -10,6 +10,7 @@ namespace opencog
 
 /** For easier wrapping by Cython */
 std::string eval_scheme(AtomSpace& as, const std::string &s);
+Handle eval_scheme_h(AtomSpace& as, const std::string &s);
 
 } // namespace opencog
 

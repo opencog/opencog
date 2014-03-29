@@ -101,7 +101,7 @@ IF (HAVE_ATOMSPACE AND HAVE_GUILE)
 	)
 
 	TARGET_LINK_LIBRARIES(scheme_wrapper
-		scheme-shell
+		query
 		smob
 		${PYTHON_LIBRARIES}
 	)
