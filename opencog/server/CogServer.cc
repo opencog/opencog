@@ -673,36 +673,8 @@ void CogServer::loadModules(const char* module_paths[])
 
 void CogServer::loadSCMModules(const char* config_paths[])
 {
-    // Load scheme modules specified in the config file
-    std::vector<std::string> scm_modules;
-    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
 #ifdef HAVE_GUILE
-    std::vector<std::string>::const_iterator it;
-    for (it = scm_modules.begin(); it != scm_modules.end(); ++it)
-    {
-        int rc = 2;
-        const char * mod = (*it).c_str();
-        if ( config_paths != NULL ) {
-            for (int i = 0; config_paths[i] != NULL; ++i) {
-                boost::filesystem::path modulePath(config_paths[i]);
-                modulePath /= *it;
-                if (boost::filesystem::exists(modulePath)) {
-                    mod = modulePath.string().c_str();
-                    rc = load_scm_file(*atomSpace,mod);
-                    if (0 == rc) break;
-                }
-            }
-        } // if
-        if (rc)
-        {
-           logger().warn("Failed to load %s: %d %s",
-                 mod, rc, strerror(rc));
-        }
-        else
-        {
-            logger().info("Loaded %s", mod);
-        }
-    }
+    load_scm_files_from_config(*atomSpace, config_paths);
 #else /* HAVE_GUILE */
     logger().warn(
         "Server compiled without SCM support");
