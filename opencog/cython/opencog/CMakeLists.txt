@@ -68,9 +68,14 @@ IF (HAVE_ATOMSPACE)
 	)
 
 	ADD_DEPENDENCIES(atomspace_cython opencog_atom_types)
+	ADD_DEPENDENCIES(atomspace_cython nlp_atom_types)
+	ADD_DEPENDENCIES(atomspace_cython attention_atom_types)
+	ADD_DEPENDENCIES(atomspace_cython pln_atom_types)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
 		atomspace
+		nlp-types
+		PLNTypes
 		cogutil
 		${PYTHON_LIBRARIES}
 		${Boost_THREAD_LIBRARY}
