@@ -1824,6 +1824,11 @@ n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
 30 March 2014
 \end_layout
 
+\begin_layout Standard
+The below was going to be a breif note, but I'm turning it into a rough
+ draft blog post.
+\end_layout
+
 \begin_layout Subsection*
 Freedom and Constraint
 \end_layout
@@ -1934,7 +1939,196 @@ I used the theory of Link Grammar for performing structural linguistic analysis.
  research into more complex morphologies).
  From the point of view of a linguist, Link Grammar appears to be 'just
  another theory of syntax', being a kind of dependency grammar.
- From the point of view of a mathematician, it is entirely more remarkable...
+ From the point of view of a mathematician, the situation is entirely more
+ remarkable.
+ It appears that the mathematical defintion of what constitutes a 'link
+ grammar' is isomorphic to that of a 'categorical grammar', and that the
+ correspondance is immediate and direct.
+ Categorical grammars are interesting because they have a direct, formal
+ mathematical definition that is studied and classified by mathematicians:
+ roughly speaking, categorical grammars are 'non-symmetric compact closed
+ monoidal categories'.
+ The precise definition here has been championed by Bob Coecke ref [xxx]
+ 
+\end_layout
+
+\begin_layout Standard
+It takes some study of category theory to understand what this means, but,
+ roughly speaking, it means that sequences of sounds, morphemes, words are
+ analyzed in sequential order: by means of short-distance groupings of left-righ
+t arrangements.
+ This may sound silly, as, of course, sequential things occur in a sequence,
+ but it helps highlight the difference between dependency grammars and phrase-st
+ructure grammars, or computer-science grammars in general.
+ An example of a 'computer-science grammar' is the so-called 'context-free
+ grammar'.
+ A hallmark of such grammars is that they allow recursion to arbitrary depths.
+ An English-language example would be the sequence of sentences: 
+\begin_inset Quotes eld
+\end_inset
+
+This is a house
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+This thing is a house.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+This thing is a thing that is a house.
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+This thing is a thing that is a thing that is ...
+ a house.
+\begin_inset Quotes erd
+\end_inset
+
+ The example is silly because no one ever talks that way.
+ The phrase-structure analysis of this would be 
+\begin_inset Quotes eld
+\end_inset
+
+(S (VP (NP (VP (NP ...
+ )))))
+\begin_inset Quotes erd
+\end_inset
+
+, with the heirarchical arrangement emphsized.
+ Dependency grammars can also parse such sentences, but here, the arrangment
+ of dependencies are in the form of arrows that point from head word to
+ dependent word; the arrows are only rarely long-range, and usually point
+ to the immediately-surrounding words.
+ There is strong psycho-linguistic evidence for such local structure in
+ language, see for example [xxxx].
+ That is, the workings of the human mind is not recursive in nature, pushing
+ and popping an arbitrarily deep stack as each new noun-phrase or verb-phrase
+ is enountered.
+ Indeed, psychological studies with constructed sentences similar to the
+ above, but varying the 'thing' and 'house' at each depth, show that humans
+ quickly loose track after just two or three nestings [need ref].
+ In essence, the human mind is adapted for linear sequential analysis, and
+ long-range order between words is challenging: this is the psycho-linguistic
+ argument for dependency grammars.
+ From the mathematical point of view, the statement is that human languages
+ are not so much context-free, as they are non-symmetric compact closed
+ monoidal categories.
+ That Link Grammar is an example of the latter is why it seems so appropriate
+ to use for syntactic and morpho-tactic structural analysis.
+\end_layout
+
+\begin_layout Standard
+Which theories of langauge are mathematically isomorphic? That is, Link
+ Grammar and categorical grammars seem to be isomorphic because there is
+ a simple way of translating the one into the other, and vice-versa (although
+ no formal mathematical proof of this has been written down).
+ A mathematical proof of equivalence is a mechanical device: given one represent
+ation, one turns a crank to obtain the other.
+ More generally, its been argued that phrase-structure grammars and dependency
+ grammars are equivalent in the same sense: there is an algorithm that converts
+ the one into the other, and v.v.[where's the ref for this?].
+ Does this mean that non-symmetric compact closed monoidal categories have
+ context-free grammars as their internal language, and that every context-free
+ language has a corresponding monoidal category? I think not, but the answer
+ to that, the 'why not', and the 'what, then, is the difference?' is entirely
+ unclear.
+ Clarifying these relationships seems important for putting language study
+ on a firmer basis.
+\end_layout
+
+\begin_layout Standard
+Anyway, the point here was to clarify the boundaries between freedom and
+ constraint.
+ Traditional phrase-structure grammars were inspired by notions from 1960's-era
+ computer science, but now seem slavishly wedded to the same ideas, to the
+ detriment of closer linguistic understanding.
+ Dependency grammars seem to be more psycho-linguistically valid, but have
+ suffered from a lack of mathematical formalism that ellucidates freedom
+ and constraint.
+ This lack of formalism makes it hard to explain why some constructions
+ are grammatically correct, and others are not.
+ It also seems to draw an artificial and confusing line between syntactic
+ and morphotactic structure, when, in fact, these really should be taken
+ as a part of a continuum of structure.
+ I see no reason why a single grammar could not also describe the allomorphic
+ variations in pronunciation.
+ After all, these are just a set of rules that govern how a morpheme is
+ pronounced, and this is essentially a linear, sequential phenomenon, with
+ only (mostly?) nearest-neighbor morphemes affecting one-another.
+ The nearest-neighbor aspect of this fairly well screams out 'dependency'.
+\end_layout
+
+\begin_layout Standard
+Another curious and interesting language-constraint structure emerges with
+ the study of idioms and institutionalized, set phrases.
+ Because these are 'phrases', built of 'words', it would naively seem that
+ tese lie in the domain of syntax.
+ But this is misleading.
+ Institutionalized utterances are those where neither the word-choice nor
+ the word-order are directly governed by syntax alone, but instead seem
+ to be frozen into a fixed form.
+ So, one talks of the 'time of day', but never of 'pressure of air' or 'height
+ of mountain' -- 
+\begin_inset Quotes eld
+\end_inset
+
+What pressure of air should I put in this tire?
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+What height of mountain do you plan to climb?
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\begin_inset Quotes eld
+\end_inset
+
+What time of day do you expect to come over?
+\begin_inset Quotes erd
+\end_inset
+
+.
+ There is nothing syntactic that prevents such a choice of wording, and
+ the semantic meaning is more or less clear: its just that such word arrangement
+s simply don't happen.
+ Its as if the lexis for English has a phrase in it: 
+\begin_inset Quotes eld
+\end_inset
+
+time-of-day
+\begin_inset Quotes erd
+\end_inset
+
+, which should be treated as a single word, rather than the three words
+ it is written as.
+ This provides the first hint of the role of probability in this discussion:
+ the probability of seeing the phrase 'height of mountain' in English approaches
+ zero: in fact, this text that you are reading right now just might be the
+ only place ever in the history of the world in which this phrase has appeared
+ ...
+ despite it being 'grammatically valid'.
+ Freedom and constraint aren't just governed by true-false distinctions,
+ but by probabilities.
+ The question then is, 'what is the most natural way in which to express
+ such probabilities?' This too, then, is one of the things that occupy my
+ attention.
 \end_layout
 
 \begin_layout Section*
