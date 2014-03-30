@@ -1835,27 +1835,40 @@ The concepts of freedom and constraint are central to the definition of
  of the group may be arranged freely, in any order desired.
  A given group is then defined as a 'presentation', a set of equivalences
  between different orderings.
- A more complex example is the term algebra, where the terms may be arranged
- in free order; but the combination of the written symbols on the page are
- constrained to those of the 'signature' of the algebra.
+ Thus, there is the notion of a 'free group', which is merely a set of symbols
+ that can be written in arbitrary order, and no further constraints other
+ than those of it being a group.
+ Groups that aren't free are presented by a collection of equations, which
+ state that one certain order of symbols is equivalent to another.
+ One says that groups are 'equationally presented'.
  
 \end_layout
 
 \begin_layout Standard
-Several remarks.
- Continuing with the mathematical observations, the signature of a term
- algebra can be viewed as defining the 'syntax' of the symbolic notation:
- a Turing machine, tasked with the need to recognize the 'language' of the
- term algebra, would process input symbols one by one.
+A more complex example is the term algebra, where the terms may be arranged
+ in free order; but the combination of the written symbols on the page are
+ constrained to those of the 'signature' of the algebra.
+ One then has the notion of an 'equational theory', which is a term algebra
+ with additional equations between expressions, indicating which expressions
+ should be taken as equivalent.
+\end_layout
+
+\begin_layout Standard
+These have strong, and even precise analogues in linguistics.
+ But first, continuing with the mathematical observations: the signature
+ of a term algebra can be viewed as defining the 'syntax' of the symbolic
+ notation: a Turing machine, tasked with the need to recognize the 'language'
+ of the term algebra, would process input symbols one by one.
  It would appear that term algebras have a context-free syntax, and are
  thus recognizable by a push-down automata.
  That is, one must recognize the function symbol, the open and close parens,
  the commas separating arguments, and the constant symbols.
  The arbitrary-depth recursiveness is the only reason why the push-down
  is needed; otherwise the language seems 'almost regular'.
- (Hmm ..
- is there any formal definition/distinction of this case? Not that I know
- of ...)
+ (Hmm ...
+ is there any formal definition/distinction of this case? i.e.
+ for very simple constext-free languages, vs.
+ 'more complex' ones? Not that I know of ...)
 \end_layout
 
 \begin_layout Standard
@@ -1870,7 +1883,58 @@ key "Anderson2012"
 
 , Anderson describes the syntax and morphotactics of Kwakw’ala, a Wakashan
  language of coastal British Columbia.
+ The syntax of the language (that is, the order in which the words can appear
+ in a sentence) is very strict: the verb must be followed by a subject,
+ optionally followed by the object, and then a prepositional phrase.
+ Similarly adjectives must always preceed the noun.
+ The language also has a rich morphology: words are assembled from stems
+ and suffixes.
+ The rules for assembling a word out of stems and affixes is refered to
+ as the 'morphotactics'.
+ In Kwakw’ala, it would appear that the morphotactics is utterly distinct
+ from the syntax: here, object-denoting prefixes can preceed verbs, adjective-de
+noting suffixes follow a noun.
+ Anderson finds this quite remarkable: the language has two distinct kinds
+ of structure-imposing systems: the syntax and the morphtactics, and they
+ are quite different.
+ He notes that this dual structure in turn allows the same thing to be said
+ in multiple ways.
+ One may take meaning-parts, as morphemes, and glue them together morphtacticall
+y into words, and aranging these in a sentence.
+ Allternately, one may take the meaning-parts separately, as individual
+ words, and glue them together into a sentence, having a different sequence
+ of the meaning-parts.
+\end_layout
+
+\begin_layout Standard
+The part that struck me with Anderson's analysis is the similarity of the
+ phenomena to the analogous behaviour formalized in mathematics.
+ Lets first look at a second example: Lithuanian has a rich morphotactical
+ structure: verbs and adverbs are conjugated, nouns and adjectives are declined;
+ the rules for doing so are rather fixed and uniform, making adjustments
+ mostly for phonological reasons (i.e.
+ with exceptions based on constraints that come from the natural flow of
+ the sound sequences constrained by the use of vocal cords, mouth, tongue
+ and lips).
+ Curiously, Lithuanian is almost devoid of syntactic constraint: word-order
+ can be chosen freely (in the mathemaitcal sense!), and the meaning of the
+ resulting sentences are esentially the same (if I am allowed to gloss over
+ the notion that different word orders can serve to highlight or emphasize
+ different themes and rhemes).
+ So again: a language with very distinct syntax and morphtactics; in this
+ case, the syntax being almost absent.
  
+\end_layout
+
+\begin_layout Standard
+I used the theory of Link Grammar for performing structural linguistic analysis.
+ The theory was originally developed to model syntactic structure, but it
+ also appears to be entirely adequate for morphotactic analysis as well
+ (certainly, for 'agglutinative' or 'concatenative' languages, with ongoing
+ research into more complex morphologies).
+ From the point of view of a linguist, Link Grammar appears to be 'just
+ another theory of syntax', being a kind of dependency grammar.
+ From the point of view of a mathematician, it is entirely more remarkable...
 \end_layout
 
 \begin_layout Section*
