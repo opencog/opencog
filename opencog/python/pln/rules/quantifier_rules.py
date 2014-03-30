@@ -118,27 +118,6 @@ class HigherOrderRule(Rule):
 
         return variable, expression
 
-
-# Todo: Why is there a 'DeductionRule' both here and in
-# 'inheritance_rules.py' (formerly 'rules.py')?
-# change InheritanceLink to ImplicationLink
-class DeductionRule(Rule):
-    """
-    A->B, B->C entails A->C
-    """
-    def __init__(self, chainer, link_type):
-        A = chainer.new_variable()
-        B = chainer.new_variable()
-        C = chainer.new_variable()
-
-        Rule.__init__(self,
-                      formula=formulas.deductionIndependenceBasedFormula,
-                      outputs=[chainer.link(link_type, [A, C])],
-                      inputs=[chainer.link(link_type, [A, B]),
-                              chainer.link(link_type, [B, C]),
-                              B, C])
-
-
 # Todo: Has not been implemented
 class VariableInstantiationRule(Rule):
     """
