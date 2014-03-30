@@ -288,15 +288,15 @@ class AndBulkEvaluationRule(Rule):
     AndEvaluationRule this will find every MemberLink at the same time
     (much more efficient than doing it online at random)
     """
-    def __init__(self, chainer):
+    def __init__(self, chainer, N):
         self._chainer = chainer
 
-        A = chainer.new_variable()
-        B = chainer.new_variable()
+        vars = chainer.make_n_variables(N)
 
         Rule.__init__(self,
+                      name="AndBulkEvaluationRule<%s>"%(N,),
                       formula=None,
-                      outputs=[chainer.link(types.AndLink, [A, B])],
+                      outputs=[chainer.link(types.AndLink, vars)],
                       inputs=[])
 
     def custom_compute(self, inputs, outputs):
@@ -305,26 +305,30 @@ class AndBulkEvaluationRule(Rule):
         # or similar. It uses the Python set class and won't work with
         # variables.
         [and_link_target] = outputs
-        [conceptNodeA, conceptNodeB] = and_link_target.out
-        if (conceptNodeA.is_a(types.VariableNode) or
-           conceptNodeB.is_a(types.VariableNode)):
+        conceptnodes = and_link_target.out
+        if any(node.is_a(types.VariableNode) for node in conceptnodes):
             return [], []
 
-        import pdb; pdb.set_trace()
-
-        setA = set(self._chainer.find_members(conceptNodeA))
-        setB = set(self._chainer.find_members(conceptNodeB))
+        sets = [set(self._chainer.find_members(node)) for node in conceptnodes]
 
         # filter links with fuzzy strength > 0.5 and select just the nodes
-        setA = set(link.out[0] for link in setA if link.tv.mean > 0.5)
-        setB = set(link.out[0] for link in setB if link.tv.mean > 0.5)
+        for i in xrange(0, len(sets)):
+            filteredSet = set(link.out[0] for link in sets[i] if link.tv.mean > 0.5)
+            sets[i] = filteredSet
 
-        nIntersection = float(len(setA & setB))
-        nUnion = float(len(setA | setB))
+        intersection = sets[0]
+        for i in xrange(1, len(sets)):
+            intersection = intersection & sets[i]
+
+        union = sets[0]
+        for i in xrange(1, len(sets)):
+            union = union | sets[i]
+
+        nIntersection = float(len(intersection))
+        nUnion = float(len(union))
 
         sAnd = nIntersection / nUnion
-        and_link = self._chainer.link(types.AndLink,
-                                     [conceptNodeA, conceptNodeB])
+        and_link = self._chainer.link(types.AndLink, conceptnodes)
 
         nAnd = nUnion
 
