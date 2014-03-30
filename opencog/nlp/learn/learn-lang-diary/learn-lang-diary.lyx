@@ -2127,8 +2127,63 @@ time-of-day
  Freedom and constraint aren't just governed by true-false distinctions,
  but by probabilities.
  The question then is, 'what is the most natural way in which to express
- such probabilities?' This too, then, is one of the things that occupy my
- attention.
+ such probabilities?' 
+\end_layout
+
+\begin_layout Standard
+The last is not just some idle intellectual question, but in fact, an engineerin
+g question: the proper structure should have an immediate and direct effect
+ on how well, and how quickly a language could be learned, via unsupervised
+ machine-learning algorithms.
+ A universal but naive attitude in the artificial-intelligence community
+ is that 'oh.
+ everything is a neural net, and we should use neural nets to build AI.'
+ Less frequently, one may seem a similar attitude regarding Hidden Markov
+ Models (HMMs).
+ The fact that such naive approaches lead to algorithms that fail to converge
+ quickly leads to ideas such as 'deep learning': a modification that explicitly
+ splits a problem into layers, with explicit feedback between layers.
+ Another variation used to escape the trap is to explicitly model what is
+ un-known: this is the notion of maximum entropy (MaxEnt).
+ Traditional AI was also founded on logic and reasoning, and, for many decades,
+ AI was dominated by the exploration of boolean-valued logic.
+ By this I mean anything with crisp, sharp truth values: whether first-order
+ logic, boolean satisfiability, satisfiability-modulo-theories, stable-model
+ semantics, and so on.
+ Another corner was fuzzy logic, but that didn't seem to have legs.
+ Notions of maximum entropy and probability can be unified: thus, one has
+ Markov Logic Networks (MLN).
+ What I'm wodering about here is that maybe none of these approaches are
+ correct, because they are ignoring the actual structure that is in front
+ of us.
+\end_layout
+
+\begin_layout Standard
+So, perhaps, the correct approach is not to marry maximum entropy with first-ord
+er logic, but to marry maximum entropy to dependency grammars (or, equivalently,
+ to appropriate monoidal categories).
+ The question then becomes: what is the appropriate monoidal category? Picking
+ the wrong one will lead to disasterous machine learning performance (this,
+ I think, is the lesson from neural networks).
+ Picking something too easy doesn't get you far enough (the lesson of HMM's
+ -- excellent for certain classes of problems, but lacking in scale).
+ There are more choices than that: but the chices, and their inter-connectedness
+, and trade-offs, seem to be unarticulated.
+ For any given monoidal category, there would seem to be some probabilistic
+ model corresponding to that category's internal langauge.
+ That is, there is a way of describing the transition probabilities from
+ state to state.
+ Indeeded, (finite) monoidal categories, in the form of acts, can be partly
+ understood to be finite state machines acting on a set.
+ The probabilistic generalization of this leads both to probabilistic and
+ quantum finite automata, with the former having a strong resemblance, if
+ not identity, to Markov chains, with the corresponding acts being HMM's.
+ My hypothesis is that probabilistic dependency grammars will lead to machine
+ learning algos that converge more rapidly than the similar-but-different
+ HMM that can also be mapped onto the same problem.
+ Unfortunately, my hypothesis is impedded by my lack of understanding of
+ precisely, exactly how the different approaches named above may be equivalent,
+ isomorphic, or merely similar.
 \end_layout
 
 \begin_layout Section*
