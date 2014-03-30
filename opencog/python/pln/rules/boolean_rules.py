@@ -309,11 +309,11 @@ class AndBulkEvaluationRule(Rule):
         if any(node.is_a(types.VariableNode) for node in conceptnodes):
             return [], []
 
-        sets = [set(self._chainer.find_members(node)) for node in conceptnodes]
+        sets = [self.get_member_links(node) for node in conceptnodes]
 
         # filter links with fuzzy strength > 0.5 and select just the nodes
         for i in xrange(0, len(sets)):
-            filteredSet = set(link.out[0] for link in sets[i] if link.tv.mean > 0.5)
+            filteredSet = set(self.get_member(link) for link in sets[i] if link.tv.mean > 0.5)
             sets[i] = filteredSet
 
         intersection = sets[0]
@@ -333,4 +333,10 @@ class AndBulkEvaluationRule(Rule):
         nAnd = nUnion
 
         return [and_link], [TruthValue(sAnd, nAnd)]
+
+    def get_member_links(self, conceptnode):
+        return set(self._chainer.find_members(conceptnode))
+
+    def get_member(self, member_link):
+        return member_link.out[0]
 
