@@ -27,7 +27,6 @@
 
 #include <algorithm>
 
-#include <opencog/server/Agent.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
 #include <tbb/task.h>
@@ -35,8 +34,6 @@
 
 namespace opencog
 {
-
-class CogServer;
 
 class HebbianCreationModule;
 typedef std::shared_ptr<HebbianCreationModule> HebbianCreationModulePtr;

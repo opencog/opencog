@@ -22,17 +22,18 @@
 * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
 */
 
-#include "HebbianCreationModule.h"
 
-#include <opencog/util/algorithm.h>
-
-#include <opencog/server/CogServer.h>
-#include <opencog/util/Logger.h>
-#include <opencog/util/Config.h>
-#include <opencog/dynamics/attention/atom_types.h>
-#include <opencog/atomspace/SimpleTruthValue.h>
 #include <tbb/task.h>
+
+#include <opencog/atomspace/SimpleTruthValue.h>
+#include <opencog/dynamics/attention/atom_types.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/algorithm.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
 #include <opencog/util/tbb.h>
+
+#include "HebbianCreationModule.h"
 
 using namespace std;
 using namespace opencog;

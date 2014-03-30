@@ -66,6 +66,17 @@ void fini(void)
 
 #endif
 
+extern "C" {
+// Calling this forces this shared-lib to load, thus calling the 
+// constructor above, thus causing the atom types to be loaded into
+// the atomspace.
+void embodiment_types_init(void)
+{
+   /* No-op */
+}
+};
+
+
 using namespace opencog;
 TRIVIAL_MODULE(EmbodimentTypesModule)
 DECLARE_MODULE(EmbodimentTypesModule)

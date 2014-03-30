@@ -35,6 +35,7 @@ TARGET_LINK_LIBRARIES(PAI
 	Language
 	Control
 	AtomSpaceExtensions
+	embodiment-types
 	nlp-types
 	query
 	${XERCESC_LIBRARIES}
