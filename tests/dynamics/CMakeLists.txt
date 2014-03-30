@@ -1,6 +1,7 @@
 LINK_LIBRARIES (
 	server
-        attention
+	attention-types
+	attention
 	${GSL_LIBRARIES}
 )
 

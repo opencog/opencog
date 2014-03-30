@@ -76,6 +76,7 @@ IF (HAVE_ATOMSPACE)
 
 	TARGET_LINK_LIBRARIES(atomspace_cython
 		atomspace
+		attention-types
 		embodiment-types
 		nlp-types
 		PLNTypes
