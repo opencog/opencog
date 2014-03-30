@@ -54,4 +54,24 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
 	return scm_from_short(atomspace->setAttentionalFocusBoundary(bdy));
 }
 
+/**
+ * Return the list of atoms in the AttentionalFocus
+ */
+SCM SchemeSmob::ss_af (void)
+{
+    HandleSeq attentionalFocus;
+    atomspace->getHandleSetInAttentionalFocus(back_inserter(attentionalFocus));
+    size_t isz = attentionalFocus.size();
+	if (0 == isz) return SCM_EOL;
+    
+    SCM head = SCM_EOL;
+    for (size_t i = 0; i < isz; i++) {
+        Handle hi = attentionalFocus[i];
+        SCM smob = handle_to_scm(hi);
+        head = scm_cons(smob, head);
+    }
+
+	return head;
+}
+
 #endif /* HAVE_GUILE */
