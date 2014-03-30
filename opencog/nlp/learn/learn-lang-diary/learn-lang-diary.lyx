@@ -1821,6 +1821,59 @@ n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
 \end_layout
 
 \begin_layout Section*
+30 March 2014
+\end_layout
+
+\begin_layout Subsection*
+Freedom and Constraint
+\end_layout
+
+\begin_layout Standard
+The concepts of freedom and constraint are central to the definition of
+ algebra in mathematics.
+ So for example, in group theory, the algebraic symbols denoting the elements
+ of the group may be arranged freely, in any order desired.
+ A given group is then defined as a 'presentation', a set of equivalences
+ between different orderings.
+ A more complex example is the term algebra, where the terms may be arranged
+ in free order; but the combination of the written symbols on the page are
+ constrained to those of the 'signature' of the algebra.
+ 
+\end_layout
+
+\begin_layout Standard
+Several remarks.
+ Continuing with the mathematical observations, the signature of a term
+ algebra can be viewed as defining the 'syntax' of the symbolic notation:
+ a Turing machine, tasked with the need to recognize the 'language' of the
+ term algebra, would process input symbols one by one.
+ It would appear that term algebras have a context-free syntax, and are
+ thus recognizable by a push-down automata.
+ That is, one must recognize the function symbol, the open and close parens,
+ the commas separating arguments, and the constant symbols.
+ The arbitrary-depth recursiveness is the only reason why the push-down
+ is needed; otherwise the language seems 'almost regular'.
+ (Hmm ..
+ is there any formal definition/distinction of this case? Not that I know
+ of ...)
+\end_layout
+
+\begin_layout Standard
+In linguistics, similar notions of freedom and constraint arise, but seem
+ to be more of a surprise and mystery to linguists.
+ Thus, for example, in 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "Anderson2012"
+
+\end_inset
+
+, Anderson describes the syntax and morphotactics of Kwakw’ala, a Wakashan
+ language of coastal British Columbia.
+ 
+\end_layout
+
+\begin_layout Section*
 The End 
 \end_layout
 
