@@ -271,6 +271,14 @@ class AbstractChainer(Logic):
         self.atomspace.remove(var)
         return members
 
+    def find_eval_links(self, predicatenode):
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [predicatenode, var])
+        evals = self.lookup_atoms(template, {})
+        evals = [e for e in evals if self.wanted_atom(e, template, ground=True)]
+        self.atomspace.remove(var)
+        return evals
+
     def node_tv(self, conceptnode):
         """
         Calculate the probability of any object being a member of this
