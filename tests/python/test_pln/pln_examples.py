@@ -99,9 +99,10 @@ class PLNExamples(object):
         # Todo: The variable 'all_rules' is not used
         all_rules = AllRules(self.atomspace, chainer)
         for r in rules_nodes:
+            # Yes it is, right here!
             chainer.add_rule(all_rules.lookup_rule(r))
 
-        print [r.full_name for r in chainer.rules]
+        print [r.name for r in chainer.rules]
 
         if chainer.find_atom(query, time_allowed=10):
             self.passed.append(filename)

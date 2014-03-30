@@ -15,6 +15,6 @@
 )
 
 (EvaluationLink (PredicateNode "rules") (ListLink
-    (ConceptNode "BooleanTransformationRule1")
+    (ConceptNode "BooleanTransformationRule<OrLink,ImplicationLink>")
 ))
 

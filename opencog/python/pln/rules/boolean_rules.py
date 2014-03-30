@@ -67,7 +67,9 @@ class AndCreationRule(BooleanLinkCreationRule):
         Rule.__init__(self,
                       formula=formulas.andFormula,
                       outputs=[chainer.link(types.AndLink, atoms)],
-                      inputs=atoms)
+                      inputs=atoms,
+                      name = "AndCreationRule<"+str(N)+">")
+
 
 
 class OrCreationRule(BooleanLinkCreationRule):
@@ -79,7 +81,8 @@ class OrCreationRule(BooleanLinkCreationRule):
         Rule.__init__(self,
                       formula=formulas.orFormula,
                       outputs=[chainer.link(types.OrLink, atoms)],
-                      inputs=atoms)
+                      inputs=atoms,
+                      name = "OrCreationRule<"+str(N)+">")
 
 
 def simplify_boolean(chainer, link):
@@ -130,16 +133,17 @@ def create_boolean_transformation_rules(chainer):
 
     rules = []
 
-    def make_symmetric_rule(lhs, rhs, i):
+    def make_symmetric_rule(lhs, rhs):
+        assert len(lhs) == 1
+        assert len(rhs) == 1
+
         rule = Rule(inputs=lhs, outputs=rhs, formula=formulas.identityFormula)
-        rule.name = 'BooleanTransformationRule'+str(i)
+        rule.name = 'BooleanTransformationRule<%s,%s>' % (lhs[0].type_name, rhs[0].type_name)
         rule._compute_full_name()
         rules.append(rule)
 
-        i+=1
-
         rule = Rule(inputs=rhs, outputs=lhs, formula=formulas.identityFormula)
-        rule.name = 'BooleanTransformationRule'+str(i)
+        rule.name = 'BooleanTransformationRule<%s,%s>' % (lhs[0].type_name, rhs[0].type_name)
         rule._compute_full_name()
         rules.append(rule)
 
@@ -148,21 +152,21 @@ def create_boolean_transformation_rules(chainer):
     RHS = [chainer.link(types.SubsetLink,
                         [chainer.link(types.NotLink, [P]), Q])]
 
-    make_symmetric_rule(LHS, RHS, 1)
+    make_symmetric_rule(LHS, RHS)
 
     LHS = [chainer.link(types.AndLink, [P, Q])]
     RHS = [chainer.link(types.NotLink,
                         [chainer.link(types.SubsetLink,
                                       [P, chainer.link(types.NotLink, [Q])])])]
 
-    make_symmetric_rule(LHS, RHS, 3)
+    make_symmetric_rule(LHS, RHS)
 
     LHS = [chainer.link(types.ExtensionalSimilarityLink, [P, Q])]
     RHS = [chainer.link(types.AndLink,
                         [chainer.link(types.SubsetLink, [P, Q]),
                         chainer.link(types.SubsetLink, [Q, P])])]
 
-    make_symmetric_rule(LHS, RHS, 5)
+    make_symmetric_rule(LHS, RHS)
 
     return rules
 

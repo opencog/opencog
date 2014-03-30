@@ -8,5 +8,5 @@
 (define imp_ac (InheritanceLink a c))
 
 (EvaluationLink (PredicateNode "query") (ListLink imp_ac))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "DeductionRule")))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "DeductionRule<InheritanceLink>")))
 

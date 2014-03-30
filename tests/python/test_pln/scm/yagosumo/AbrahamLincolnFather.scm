@@ -141,6 +141,6 @@
 (EvaluationLink
     (PredicateNode "rules")
     (ListLink
-        (ConceptNode "SymmetricModusPonensRule (EquivalenceLink VariableNode -> VariableNode)")
+        (ConceptNode "SymmetricModusPonensRule<EquivalenceLink>")
     )
 )
