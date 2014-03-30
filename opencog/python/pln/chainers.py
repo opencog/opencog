@@ -271,6 +271,14 @@ class AbstractChainer(Logic):
         self.atomspace.remove(var)
         return members
 
+    def find_eval_links(self, predicatenode):
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [predicatenode, var])
+        evals = self.lookup_atoms(template, {})
+        evals = [e for e in evals if self.wanted_atom(e, template, ground=True)]
+        self.atomspace.remove(var)
+        return evals
+
     def node_tv(self, conceptnode):
         """
         Calculate the probability of any object being a member of this
@@ -941,8 +949,8 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-#            res = self.backward_step()
-#            if res: print res
+            res = self.backward_step()
+            if res: print res
             res = self.forward_step()
             if _VERBOSE and res:
                 print res
@@ -952,10 +960,10 @@ class Chainer(AbstractChainer):
                 # Todo: The variable 'instance' is never used
                 for instance in target_instances:
                     print 'Target produced!'
-                    print repr(atom)
+                    print repr(instance)
 
                     print 'Inference steps'
-                    print self.display_trail(self.find_trail(atom))
+                    print self.display_trail(self.find_trail(instance))
 
                 return True
 
@@ -971,7 +979,7 @@ class Chainer(AbstractChainer):
         variables bound)
         """
         atoms = self.lookup_atoms(target, {})
-        atoms = [a for a in atoms if a.tv.count > 0]
+        atoms = [atom for atom in atoms if self.wanted_atom(atom, target, {}, allow_zero_tv=False, ground=False)]
         return atoms
 
     def get_query(self):

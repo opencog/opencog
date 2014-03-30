@@ -85,7 +85,9 @@ class PLNExamples(object):
         chainer = Chainer(self.atomspace,
                           stimulateAtoms=False,
                           agent=self,
-                          learnRuleFrequencies=False)
+                          learnRuleFrequencies=False,
+                          allow_output_with_variables=True,
+                          allow_backchaining_with_variables=True)
 
         try:
             query = chainer.get_predicate_arguments('query')[0]
@@ -104,7 +106,7 @@ class PLNExamples(object):
 
         print [r.name for r in chainer.rules]
 
-        if chainer.find_atom(query, time_allowed=10):
+        if chainer.find_atom(query, time_allowed=30):
             self.passed.append(filename)
             return True
         else:
@@ -155,8 +157,9 @@ class AllRules(object):
         # boolean links
         for rule in create_and_or_rules(self.chainer, 2, 8):
             self.chainer.add_rule(rule)
-        self.chainer.add_rule(
-            boolean_rules.AndBulkEvaluationRule(self.chainer))
+        for N in xrange(2, 8):
+            self.chainer.add_rule(
+                boolean_rules.AndBulkEvaluationRule(self.chainer, N))
 
         # create probabilistic logical links out of MemberLinks
 

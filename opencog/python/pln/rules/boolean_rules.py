@@ -286,17 +286,21 @@ class AndBulkEvaluationRule(Rule):
     """
     Bulk evaluate And(A B) based on MemberLinks. Unlike
     AndEvaluationRule this will find every MemberLink at the same time
-    (much more efficient than doing it online at random)
+    (much more efficient than doing it online at random).
+    It autodetects whether the AndLink has ConceptNodes or EvaluationLinks.
+    If ConceptNodes, it will search for Concepts that are members of the given concepts.
+    If PredicateNodes, it will search for tuples (i.e. ListLinks) that have an EvaluationLink with the given predicate.
+    If EvaluationLinks, they should all have the same number of arguments which should all just be variablenodes. (Less general but a lot simpler)
     """
-    def __init__(self, chainer):
+    def __init__(self, chainer, N):
         self._chainer = chainer
 
-        A = chainer.new_variable()
-        B = chainer.new_variable()
+        vars = chainer.make_n_variables(N)
 
         Rule.__init__(self,
+                      name="AndBulkEvaluationRule<%s>"%(N,),
                       formula=None,
-                      outputs=[chainer.link(types.AndLink, [A, B])],
+                      outputs=[chainer.link(types.AndLink, vars)],
                       inputs=[])
 
     def custom_compute(self, inputs, outputs):
@@ -305,19 +309,57 @@ class AndBulkEvaluationRule(Rule):
         # or similar. It uses the Python set class and won't work with
         # variables.
         [and_link_target] = outputs
-        [conceptNodeA, conceptNodeB] = and_link_target.out
+        and_args = and_link_target.out
+        if any(atom.is_a(types.VariableNode) for atom in and_args):
+            return [], []
 
-        setA = set(self._chainer.find_members(conceptNodeA))
-        setB = set(self._chainer.find_members(conceptNodeB))
+        # An AndLink can either contain ConceptNodes, in which case we would use MemberLinks, or it can contain EvaluationLinks (in which case we would use instances of that EvaluationLink)
+        if and_args[0].is_a(types.ConceptNode):
+            conceptnodes = and_args
+            sets = [self.get_member_links(node) for node in conceptnodes]
+        elif and_args[0].is_a(types.PredicateNode):
+            predicatenodes = and_args
+            sets = [self.get_eval_links(node) for node in predicatenodes]
+        elif and_args[0].is_a(types.EvaluationLink):
+            eval_links = and_args
+            predicatenodes = [link.out[0] for link in eval_links]
+            sets = [self.get_eval_links(node) for node in predicatenodes]
+        else:
+            assert "not implemented yet"
 
-        nIntersection = float(len(setA ^ setB))
-        nUnion = float(len(setA | setB))
+        # filter links with fuzzy strength > 0.5 and select just the nodes
+        for i in xrange(0, len(sets)):
+            filteredSet = set(self.get_member(link) for link in sets[i] if link.tv.mean > 0.5)
+            sets[i] = filteredSet
+
+        intersection = sets[0]
+        for i in xrange(1, len(sets)):
+            intersection = intersection & sets[i]
+
+        union = sets[0]
+        for i in xrange(1, len(sets)):
+            union = union | sets[i]
+
+        nIntersection = float(len(intersection))
+        nUnion = float(len(union))
 
         sAnd = nIntersection / nUnion
-        and_link = self._chainer.link(types.AndLink,
-                                     [conceptNodeA, conceptNodeB])
+        #and_link = self._chainer.link(types.AndLink, and_args)
+        and_link = outputs[0]
 
         nAnd = nUnion
 
         return [and_link], [TruthValue(sAnd, nAnd)]
+
+    def get_member_links(self, conceptnode):
+        return set(self._chainer.find_members(conceptnode))
+
+    def get_member(self, link):
+        if link.is_a(types.MemberLink):
+            return link.out[0]
+        else:
+            return link.out[1]
+
+    def get_eval_links(self, predicatenode):
+        return set(self._chainer.find_eval_links(predicatenode))
 

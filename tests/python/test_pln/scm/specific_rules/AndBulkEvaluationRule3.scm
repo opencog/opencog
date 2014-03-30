@@ -3,6 +3,7 @@
 
 (define A (ConceptNode "A"))
 (define B (ConceptNode "B"))
+(define C (ConceptNode "C"))
 
 (MemberLink (ConceptNode "1") A true)
 (MemberLink (ConceptNode "2") A true)
@@ -15,11 +16,17 @@
 (MemberLink (ConceptNode "4") B false)
 (MemberLink (ConceptNode "42") B true)
 
+(MemberLink (ConceptNode "1") C true)
+(MemberLink (ConceptNode "2") C true)
+(MemberLink (ConceptNode "3") C true)
+(MemberLink (ConceptNode "4") C true)
+(MemberLink (ConceptNode "tigerzrkewl") C true)
+
 (EvaluationLink (PredicateNode "query") (ListLink
-    (AndLink A B)
+    (AndLink A B C)
 ))
 
 (EvaluationLink (PredicateNode "rules") (ListLink
-    (ConceptNode "AndBulkEvaluationRule<2>")
+    (ConceptNode "AndBulkEvaluationRule<3>")
 ))
 
