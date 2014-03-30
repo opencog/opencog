@@ -290,6 +290,7 @@ class AndBulkEvaluationRule(Rule):
     It autodetects whether the AndLink has ConceptNodes or EvaluationLinks.
     If ConceptNodes, it will search for Concepts that are members of the given concepts.
     If PredicateNodes, it will search for tuples (i.e. ListLinks) that have an EvaluationLink with the given predicate.
+    If EvaluationLinks, they should all have the same number of arguments which should all just be variablenodes. (Less general but a lot simpler)
     """
     def __init__(self, chainer, N):
         self._chainer = chainer
@@ -319,6 +320,10 @@ class AndBulkEvaluationRule(Rule):
         elif and_args[0].is_a(types.PredicateNode):
             predicatenodes = and_args
             sets = [self.get_eval_links(node) for node in predicatenodes]
+        elif and_args[0].is_a(types.EvaluationLink):
+            eval_links = and_args
+            predicatenodes = [link.out[0] for link in eval_links]
+            sets = [self.get_eval_links(node) for node in predicatenodes]
         else:
             assert "not implemented yet"
 
@@ -339,7 +344,8 @@ class AndBulkEvaluationRule(Rule):
         nUnion = float(len(union))
 
         sAnd = nIntersection / nUnion
-        and_link = self._chainer.link(types.AndLink, and_args)
+        #and_link = self._chainer.link(types.AndLink, and_args)
+        and_link = outputs[0]
 
         nAnd = nUnion
 

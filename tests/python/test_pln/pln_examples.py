@@ -85,7 +85,9 @@ class PLNExamples(object):
         chainer = Chainer(self.atomspace,
                           stimulateAtoms=False,
                           agent=self,
-                          learnRuleFrequencies=False)
+                          learnRuleFrequencies=False,
+                          allow_output_with_variables=True,
+                          allow_backchaining_with_variables=True)
 
         try:
             query = chainer.get_predicate_arguments('query')[0]
