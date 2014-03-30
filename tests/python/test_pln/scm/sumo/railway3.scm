@@ -44,6 +44,6 @@
 (EvaluationLink (av 0 0 0) (stv 0.900000 0.111111)
   (PredicateNode "rules" (av 0 0 0) (stv 0.100000 0.111111))
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)" (av 0 0 0) (stv 0.010000 0.555556))
+    (ConceptNode "ModusPonensRule<ImplicationLink>" (av 0 0 0) (stv 0.010000 0.555556))
   )
 )

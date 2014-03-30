@@ -32,7 +32,7 @@
 
 (EvaluationLink
   (PredicateNode "rules")
-  (ListLink (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)")
+  (ListLink (ConceptNode "ModusPonensRule<ImplicationLink>")
   )
 )
 

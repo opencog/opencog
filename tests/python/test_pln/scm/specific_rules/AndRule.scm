@@ -3,5 +3,5 @@
 (define and_ab (AndLink a b))
 
 (EvaluationLink (PredicateNode "query") (ListLink and_ab))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "AndCreationRule")))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "AndCreationRule<2>")))
 
