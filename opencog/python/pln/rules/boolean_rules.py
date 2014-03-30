@@ -310,9 +310,10 @@ class AndBulkEvaluationRule(Rule):
         nUnion = float(len(setA | setB))
 
         sAnd = nIntersection / nUnion
-        and_link = self.chainer.link(types.AndLink,
+        and_link = self._chainer.link(types.AndLink,
                                      [conceptNodeA, conceptNodeB])
 
         nAnd = nUnion
 
         return [and_link], [TruthValue(sAnd, nAnd)]
+

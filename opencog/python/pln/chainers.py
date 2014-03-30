@@ -266,7 +266,8 @@ class AbstractChainer(Logic):
     def find_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        members = self.find(template)
+        members = self.lookup_atoms(template, {})
+        members = [m for m in members if self.wanted_atom(m, template, ground=True)]
         self.atomspace.remove(var)
         return members
 
