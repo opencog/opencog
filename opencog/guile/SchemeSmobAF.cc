@@ -59,6 +59,8 @@ SCM SchemeSmob::ss_set_af_boundary (SCM sboundary)
  */
 SCM SchemeSmob::ss_af (void)
 {
+    AtomSpace* atomspace = ss_get_env_as("cog-af");
+    
     HandleSeq attentionalFocus;
     atomspace->getHandleSetInAttentionalFocus(back_inserter(attentionalFocus));
     size_t isz = attentionalFocus.size();
