@@ -305,11 +305,17 @@ class AndBulkEvaluationRule(Rule):
         # or similar. It uses the Python set class and won't work with
         # variables.
         [and_link_target] = outputs
-        conceptnodes = and_link_target.out
-        if any(node.is_a(types.VariableNode) for node in conceptnodes):
+        and_args = and_link_target.out
+        if any(atom.is_a(types.VariableNode) for atom in and_args):
             return [], []
 
-        sets = [self.get_member_links(node) for node in conceptnodes]
+        # An AndLink can either contain ConceptNodes, in which case we would use MemberLinks, or it can contain EvaluationLinks (in which case we would use instances of that EvaluationLink)
+        if and_args[0].is_a(types.Node):
+            conceptnodes = and_args
+            sets = [self.get_member_links(node) for node in conceptnodes]
+        else:
+            eval_links = and_args
+            assert "not implemented yet"
 
         # filter links with fuzzy strength > 0.5 and select just the nodes
         for i in xrange(0, len(sets)):
