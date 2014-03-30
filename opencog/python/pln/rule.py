@@ -19,7 +19,7 @@ HIGHER_ORDER_LINKS = [types.ImplicationLink,
 
 
 class Rule(object):
-    def __init__(self, outputs, inputs, formula):
+    def __init__(self, outputs, inputs, formula, name=None):
         """
         @outputs is one or more Trees representing the structure of
         Atom (usually a Link) to be produced by this Rule. If it's a
@@ -42,12 +42,16 @@ class Rule(object):
         self._inputs = inputs
 
         self.formula = formula
-        self.name = self.__class__.__name__
+        if name:
+            self.name = name
+        else:
+            self.name = self.__class__.__name__
 
+        # It's easier to just generate descriptive names (see inheritance_rules.py for example)
         self._compute_full_name()
 
         if __VERBOSE__:
-            print self.full_name
+            print self.name
 
         self.probabilistic_inputs = True
 
@@ -64,7 +68,7 @@ class Rule(object):
         return ' '.join(template.type_name for template in templates)
 
     def __str__(self):
-        return self.full_name
+        return self.name
 
     def calculate(self, input_atoms):
         """
