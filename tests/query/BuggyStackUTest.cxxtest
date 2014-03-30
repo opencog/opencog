@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -108,7 +109,7 @@ void BuggyStackUTest::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 
 #ifdef HAVE_GUILE

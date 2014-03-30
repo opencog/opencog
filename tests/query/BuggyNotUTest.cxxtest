@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -114,7 +115,7 @@ void BuggyNot::setUp(void)
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 }
 
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
@@ -128,7 +129,7 @@ void BuggyNot::test_bugnot(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	config().set("SCM_PRELOAD", "tests/query/buggy-not.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	SchemeEval* eval = new SchemeEval();

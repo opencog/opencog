@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -109,7 +110,7 @@ void MatchLink::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	SchemeEval* eval = new SchemeEval();
