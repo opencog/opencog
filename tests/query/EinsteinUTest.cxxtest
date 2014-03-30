@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -120,7 +121,7 @@ void EinsteinPuzzle::setUp(void)
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 }
 
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
@@ -136,7 +137,7 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	Handle puzzle_rules = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -167,7 +168,7 @@ void EinsteinPuzzle::test_trivial_keep(void)
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm, "
 		"tests/query/deduct-keep.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
@@ -214,7 +215,7 @@ void EinsteinPuzzle::test_full(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-einstein.scm, "
 		"tests/query/deduct-rules.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
