@@ -87,9 +87,8 @@ void MatchLink::setUp(void)
 	// Load the required data
 	config().set("MODULES",
 		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/spacetime/libspacetime.so, "
-		"opencog/dynamics/attention/libattention.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+		"opencog/dynamics/attention/libattention-types.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
 	config().set("SCM_PRELOAD",
       "opencog/atomspace/core_types.scm, "

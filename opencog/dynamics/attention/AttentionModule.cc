@@ -63,35 +63,3 @@ void AttentionModule::init()
 {
 }
 
-// dynamic library initialization
-#if defined(WIN32) && defined(_DLL)
-namespace win {
-#include <windows.h>
-}
-win::BOOL APIENTRY DllMain(win::HINSTANCE hinstDLL,  // handle to DLL module
-                           win::DWORD fdwReason,     // reason for calling function
-                           win::LPVOID lpvReserved)  // reserved
-{
-    System::setModuleHandle(hinstDLL);
-    switch(fdwReason) {
-        case DLL_PROCESS_ATTACH:
-            #include "opencog/dynamics/attention/atom_types.inheritance"
-            break;
-        case DLL_THREAD_ATTACH:
-            break;
-        case DLL_THREAD_DETACH:
-            break;
-        case DLL_PROCESS_DETACH:
-            break;
-    }
-    return TRUE;
-}
-#elif __GNUC__
-static __attribute__ ((constructor)) void attention_init(void)
-{
-    #include "opencog/dynamics/attention/atom_types.inheritance"
-}
-static __attribute__ ((destructor)) void attention_fini(void)
-{
-}
-#endif
