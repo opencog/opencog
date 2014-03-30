@@ -104,7 +104,7 @@ class PLNExamples(object):
 
         print [r.name for r in chainer.rules]
 
-        if chainer.find_atom(query, time_allowed=10):
+        if chainer.find_atom(query, time_allowed=30):
             self.passed.append(filename)
             return True
         else:
