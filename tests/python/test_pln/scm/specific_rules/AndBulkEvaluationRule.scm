@@ -13,6 +13,7 @@
 (MemberLink (ConceptNode "2") B false)
 (MemberLink (ConceptNode "3") B true)
 (MemberLink (ConceptNode "4") B false)
+(MemberLink (ConceptNode "42") B true)
 
 (EvaluationLink (PredicateNode "query") (ListLink
     (AndLink A B)

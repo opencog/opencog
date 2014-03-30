@@ -306,11 +306,20 @@ class AndBulkEvaluationRule(Rule):
         # variables.
         [and_link_target] = outputs
         [conceptNodeA, conceptNodeB] = and_link_target.out
+        if (conceptNodeA.is_a(types.VariableNode) or
+           conceptNodeB.is_a(types.VariableNode)):
+            return [], []
+
+        import pdb; pdb.set_trace()
 
         setA = set(self._chainer.find_members(conceptNodeA))
         setB = set(self._chainer.find_members(conceptNodeB))
 
-        nIntersection = float(len(setA ^ setB))
+        # filter links with fuzzy strength > 0.5 and select just the nodes
+        setA = set(link.out[0] for link in setA if link.tv.mean > 0.5)
+        setB = set(link.out[0] for link in setB if link.tv.mean > 0.5)
+
+        nIntersection = float(len(setA & setB))
         nUnion = float(len(setA | setB))
 
         sAnd = nIntersection / nUnion

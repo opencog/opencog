@@ -941,8 +941,8 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-#            res = self.backward_step()
-#            if res: print res
+            res = self.backward_step()
+            if res: print res
             res = self.forward_step()
             if _VERBOSE and res:
                 print res
