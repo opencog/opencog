@@ -410,6 +410,3 @@ class TypeTest(TestCase):
         self.assertEqual(get_type_name(types.Node), "Node")
         self.assertEqual(get_type_name(2231), "")
         self.assertEqual(get_type_name(types.NO_TYPE), "")
-
-
-
