@@ -363,3 +363,74 @@ class AndBulkEvaluationRule(Rule):
     def get_eval_links(self, predicatenode):
         return set(self._chainer.find_eval_links(predicatenode))
 
+class NegatedAndBulkEvaluationRule(AndBulkEvaluationRule):
+    """
+    Bulk evaluate And(Not(And(A B C)) D). It only handles EvaluationLinks.
+    It is evaluating the probability of D in things that don't satisfy And(A B C). (It can be used with AndToSubsetRule1 to create Implication(Not(And A B C) D).
+    So once you also have Implication(Not(And A B C) D) you can use PreciseModusPonensRule to find P(D|A,B,C)!
+    """
+    def __init__(self, chainer, N):
+        self._chainer = chainer
+
+        vars = chainer.make_n_variables(N)
+        notlink = chainer.link(types.NotLink,
+                    chainer.link(types.AndLink, vars[0:-2]))
+        andlink = chainer.link(types.AndLink, [notlink, vars[-1]])
+
+        Rule.__init__(self,
+                      name="NegatedAndBulkEvaluationRule<%s>"%(N,),
+                      formula=None,
+                      outputs=[andlink],
+                      inputs=[])
+
+    def custom_compute(self, inputs, outputs):
+        # It must only be used in backward chaining. The inputs will be
+        # [] and the outputs will be [And(conceptNode123, conceptNode456)]
+        # or similar. It uses the Python set class and won't work with
+        # variables.
+        [and_link_target] = outputs
+        top_and_args = and_link_target.out
+
+        not_link = and_args.out[0]
+        negated_args = not_link.out[0].out        
+
+        other_eval_link = and_args.out[1]
+
+        if any(atom.is_a(types.VariableNode) for atom in negated_args+[other_eval_link]):
+            return [], []
+
+        if not and_args[0].is_a(types.EvaluationLink):
+            assert "not implemented yet"
+
+        eval_links = and_args+[other_eval_link]
+        predicatenodes = [link.out[0] for link in eval_links]
+        sets = [self.get_eval_links(node) for node in predicatenodes]
+
+        # filter links with fuzzy strength > 0.5 and select just the nodes
+        for i in xrange(0, len(sets)):
+            filteredSet = set(self.get_member(link) for link in sets[i] if link.tv.mean > 0.5)
+            sets[i] = filteredSet
+
+        # Find the intersection of the things in the NotLink (A&B&C)
+        # Then find things that are in D but not (A&B&C) = D-(A&B&C)
+        intersection = sets[0]
+        for i in xrange(1, len(sets)-1):
+            intersection = intersection & sets[i]
+
+        intersection= sets[-1] - intersection
+
+        union = sets[0]
+        for i in xrange(1, len(sets)):
+            union = union | sets[i]
+
+        nIntersection = float(len(intersection))
+        nUnion = float(len(union))
+
+        sAnd = nIntersection / nUnion
+        #and_link = self._chainer.link(types.AndLink, and_args)
+        and_link = outputs[0]
+
+        nAnd = nUnion
+
+        return [and_link], [TruthValue(sAnd, nAnd)]
+

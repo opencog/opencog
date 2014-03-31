@@ -166,6 +166,8 @@ class AllRules(object):
         for N in xrange(2, 8):
             self.chainer.add_rule(
                 boolean_rules.AndBulkEvaluationRule(self.chainer, N))
+            self.chainer.add_rule(
+                boolean_rules.NegatedAndBulkEvaluationRule(self.chainer, N))
 
         # create probabilistic logical links out of MemberLinks
 
