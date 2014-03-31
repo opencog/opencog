@@ -108,7 +108,12 @@ stim_t Agent::stimulateAtom(Handle h, stim_t amount)
 
     // update record of total stimulus given out
     totalStimulus += amount;
-    //logger().fine("%d added to totalStimulus, now %d", amount, totalStimulus);
+    
+    logger().fine("Atom %d received stimulus of %d, total now %d", 
+                  h.value(), 
+                  amount, 
+                  totalStimulus);
+    
     return totalStimulus;
 }
 

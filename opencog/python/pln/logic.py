@@ -1,6 +1,7 @@
 from opencog.atomspace import types, Atom
-
 from itertools import permutations
+
+_DEBUG = False
 
 
 class Logic(object):
@@ -59,23 +60,11 @@ class Logic(object):
         # Todo: The variable 'i' is never used. Use itertools.repeat()?
         return [self.new_variable() for i in xrange(0, N)]
 
-    # Todo: Change this to use the get_atoms_in_attentional_focus
-    # method that was recently added to the Cython bindings instead.
-
-    # @todo The AtomSpace has an ImportanceIndex which is much more
-    # efficient. This algorithm checks every Atom's STI (in the whole
-    # AtomSpace)
-    def filter_attentional_focus(self, atoms, attentional_focus_boundary=0):
-        attentional_focus = []
-        for atom in atoms:
-            if atom.av['sti'] > attentional_focus_boundary:
-                attentional_focus.append(atom)
-        return attentional_focus
-
+    # Todo: this method is never used, should it be removed?
     def find(self, template):
         atoms = self.lookup_atoms(template, {})
 
-        atoms = self.filter_attentional_focus(atoms)
+        atoms = self._atomspace.get_atoms_in_attentional_focus()
         atoms = [atom for atom in atoms if self.wanted_atom(atom,
                                                             template,
                                                             ground=True)]
@@ -118,6 +107,10 @@ class Logic(object):
         unifies_ok = self.unify_together(atom, template, s)
         grounded_ok = not ground or len(self.variables(atom)) == 0
 
+        if _DEBUG:
+            print("tv_ok: {0}, unifies_ok: {1}, grounded_ok: {2}".
+                  format(tv_ok, unifies_ok, grounded_ok))
+
         return tv_ok and unifies_ok and grounded_ok
 
     def unify_together(self, x, y, s):
@@ -125,7 +118,8 @@ class Logic(object):
 
     def standardize_apart(self, atom, dic=None):
         """
-        Create a new link where all the variables in the link are replaced with new variables. dic creates a mapping of old variables to new ones
+        Create a new link where all the variables in the link are replaced
+        with new variables. dic creates a mapping of old variables to new ones
         """
         assert isinstance(atom, Atom)
 
@@ -183,6 +177,8 @@ class Logic(object):
         that would make x,y equal, or None if x,y can not unify.
         """
 
+        if _DEBUG:
+            print("Trying to unify: {0} and {1}".format(x, y))
         if substitution is None:
             return None
         elif x == y:

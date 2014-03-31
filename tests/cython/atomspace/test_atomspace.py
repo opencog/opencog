@@ -230,8 +230,6 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(h3 in self.space)
 
         l = self.space.add_link(types.SimilarityLink, [h2, h3])
-        self.space.remove(h2, False) # won't remove it unless recursive is True
-        self.assertTrue(h2 in self.space)
         self.space.remove(h2, True) # won't remove it unless recursive is True
         self.assertTrue(h2 not in self.space)
         self.assertTrue(l not in self.space)
@@ -410,6 +408,3 @@ class TypeTest(TestCase):
         self.assertEqual(get_type_name(types.Node), "Node")
         self.assertEqual(get_type_name(2231), "")
         self.assertEqual(get_type_name(types.NO_TYPE), "")
-
-
-
