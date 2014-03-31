@@ -491,7 +491,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
