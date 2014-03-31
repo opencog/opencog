@@ -154,6 +154,12 @@ class AllRules(object):
         self.chainer.add_rule(InheritanceRule(self.chainer))
         self.chainer.add_rule(SimilarityRule(self.chainer))
 
+        for link_type in conditional_probability_types:
+            self.chainer.add_rule(AndToSubsetRule1(self.chainer, link_type))
+
+            for N in xrange(2, 8):
+                self.chainer.add_rule(AndToSubsetRuleN(self.chainer, link_type, N))
+
         # boolean links
         for rule in create_and_or_rules(self.chainer, 2, 8):
             self.chainer.add_rule(rule)

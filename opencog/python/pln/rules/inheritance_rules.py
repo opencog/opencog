@@ -276,7 +276,7 @@ class AndToSubsetRule1(Rule):
         B = chainer.new_variable()
 
         Rule.__init__(self,
-                      name="SubsetRule1<%s>"%(get_type_name(link_type),),
+                      name="AndToSubsetRule1<%s>"%(get_type_name(link_type),),
                       outputs=[chainer.link(link_type, [A, B])],
                       inputs=[chainer.link(types.AndLink, [A, B]),
                               A],
@@ -295,8 +295,8 @@ class AndToSubsetRuleN(Rule):
         rhs = vars[-1]
 
         Rule.__init__(self,
-                      name="SubsetRuleN<%s,%s>"%(get_type_name(link_type),N),
-                      outputs=[chainer.link(link_type, lhs, rhs)],
+                      name="AndToSubsetRuleN<%s,%s>"%(get_type_name(link_type),N),
+                      outputs=[chainer.link(link_type, [lhs, rhs])],
                       inputs=[chainer.link(types.AndLink, vars),
                               lhs],
                       formula=formulas.subsetFormula)
