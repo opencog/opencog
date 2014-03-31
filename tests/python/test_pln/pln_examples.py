@@ -139,6 +139,7 @@ class AllRules(object):
             # Seems better than Modus Ponens - it doesn't make anything up
             self.chainer.add_rule(TermProbabilityRule(self.chainer, link_type))
             self.chainer.add_rule(ModusPonensRule(self.chainer, link_type))
+            self.chainer.add_rule(PreciseModusPonensRule(self.chainer, link_type))
 
         for link_type in similarity_types:
             # SimilarityLinks don't require an InversionRule obviously
