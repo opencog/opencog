@@ -612,7 +612,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     atom->markForRemoval();
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
-    // recurisve. We need to lock here to avoid confusion if multiple
+    // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
@@ -641,38 +641,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         }
     }
 
+    // Check for an invalid condition that should not occur. See:
+    // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
     if (0 < handle->getIncomingSetSize())
     {
-        // It is very tempting to just throw, here, but apparently,
-        // someone somewhere thinks that it is more appropriate to
-        // log a warning, instead.  Not clear to my why this is a
-        // wise decision .. perhaps there is some race condition
-        // removal due to attention value miscalculation? ???
-        // XXX TODO Review the policy here and rationalize it.
-        // throw RuntimeException(TRACE_INFO,
-        //   "Cannot extract an atom with a non-trivial incoming set!");
-
-        // XXX well, I guess we could/should check to see if any atoms
-        // in the incoming set belong to this atomspace. Because if
-        // none of them do, then it would be ok to extract...
-        Logger::Level save = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::NONE);
-        logger().warn("AtomTable.extract(): "
-           "attempting to extract atom with non-empty incoming set: %s\n",
-           atom->toShortString().c_str());
-
-        HandleSeq is = getIncomingSet(handle);
-        HandleSeq::iterator it = is.begin();
-        HandleSeq::iterator is_end = is.end();
-        for (; it != is_end; it++)
-        {
-            logger().warn("\tincoming: %s\n", (*it)->toShortString().c_str());
-        }
-        logger().setBackTraceLevel(save);
-        logger().warn("AtomTable.extract(): stack trace for previous error follows");
-
-        atom->unsetRemovalFlag();
-        return AtomPtrSet();
+        throw RuntimeException(TRACE_INFO,
+           "Cannot extract an atom with a non-empty incoming set!");
     }
 
     // Issue the atom removal signal *BEFORE* the atom is actually
