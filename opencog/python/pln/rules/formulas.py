@@ -1,4 +1,5 @@
 from opencog.atomspace import TruthValue
+from numpy import isinf, isnan
 
 # Todo: Could this file be broken up so that there would be a
 # one-to-one correspondence between 'formulas' and 'rules' files?
