@@ -69,6 +69,7 @@
 ; -----------------------------------------------------------------------
 ; cog-stv-confidence
 ; Return the truth value confidence of an atom
+; (Compatible with atoms that have a SimpleTruthValue)
 (define (cog-stv-confidence x) (cdr (assoc 'confidence (cog-tv->alist (cog-tv x)))))
 
 ; -----------------------------------------------------------------------
@@ -88,6 +89,7 @@
 ; -----------------------------------------------------------------------
 ; cog-stv-count
 ; Return the truth value count of an atom
+; (Compatible with atoms that have a SimpleTruthValue)
 (define (cog-stv-count x) (cdr (assoc 'count (cog-tv->alist (cog-tv x)))))
 
 ; -----------------------------------------------------------------------
@@ -108,4 +110,5 @@
 ; cog-stv-positive-filter
 ; Given a list of atoms, returns a list containing the subset that has
 ; truth value count > 0 and truth value strength > 0
+; (Compatible with atoms that have a SimpleTruthValue)
 (define (cog-stv-positive-filter x) (cog-stv-strength-above 0 (cog-stv-count-above 0 x)))
