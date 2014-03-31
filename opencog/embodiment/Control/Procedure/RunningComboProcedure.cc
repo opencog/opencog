@@ -320,10 +320,20 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     }
                 }
             }
-            bool execed =
-                ( (_tr.is_valid(parent) && *parent == id::sequential_and) ?
-                  execSeq(_it, std::find_if(_it, parent.end(), !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)) )
-                  : exec(_it) );
+            bool execed;
+            // Parent is a sequential_and, so we send a plan instead
+            // of individual action
+            if (_tr.is_valid(parent) && *parent == id::sequential_and) {
+                // Find the next non atomic action in the sequence
+                auto to =
+                    std::find_if(_it, parent.end(), [](const combo::vertex& v)
+                    {
+                        return !WorldWrapperUtil::is_builtin_atomic_action(v);
+                    });
+                execed = execSeq(_it, to);
+            } else // Parent is not a sequential_and so we send an action
+                execed = exec(_it);
+
             if (execed) {
                 moveOn();
                 return;
