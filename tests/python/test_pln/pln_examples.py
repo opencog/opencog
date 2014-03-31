@@ -166,6 +166,7 @@ class AllRules(object):
         for N in xrange(2, 8):
             self.chainer.add_rule(
                 boolean_rules.AndBulkEvaluationRule(self.chainer, N))
+        for N in xrange(3, 8):
             self.chainer.add_rule(
                 boolean_rules.NegatedAndBulkEvaluationRule(self.chainer, N))
 

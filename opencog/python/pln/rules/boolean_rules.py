@@ -374,7 +374,7 @@ class NegatedAndBulkEvaluationRule(AndBulkEvaluationRule):
 
         vars = chainer.make_n_variables(N)
         notlink = chainer.link(types.NotLink,
-                    chainer.link(types.AndLink, vars[0:-2]))
+                    [chainer.link(types.AndLink, vars[0:-1])])
         andlink = chainer.link(types.AndLink, [notlink, vars[-1]])
 
         Rule.__init__(self,
@@ -391,18 +391,24 @@ class NegatedAndBulkEvaluationRule(AndBulkEvaluationRule):
         [and_link_target] = outputs
         top_and_args = and_link_target.out
 
-        not_link = and_args.out[0]
+        #import pdb; pdb.set_trace()
+
+        # You can't assume that the first link is the NotLink because AndLink is an UnorderedLink and the AtomSpace will choose a canonical order
+        if not top_and_args[0].is_a(types.NotLink):
+            top_and_args.reverse()
+
+        not_link = top_and_args[0]
         negated_args = not_link.out[0].out        
 
-        other_eval_link = and_args.out[1]
+        other_eval_link = top_and_args[1]
 
         if any(atom.is_a(types.VariableNode) for atom in negated_args+[other_eval_link]):
             return [], []
 
-        if not and_args[0].is_a(types.EvaluationLink):
+        if not negated_args[0].is_a(types.EvaluationLink):
             assert "not implemented yet"
 
-        eval_links = and_args+[other_eval_link]
+        eval_links = negated_args+[other_eval_link]
         predicatenodes = [link.out[0] for link in eval_links]
         sets = [self.get_eval_links(node) for node in predicatenodes]
 
@@ -431,6 +437,8 @@ class NegatedAndBulkEvaluationRule(AndBulkEvaluationRule):
         and_link = outputs[0]
 
         nAnd = nUnion
+
+        #print and_link, TruthValue(sAnd, nAnd)
 
         return [and_link], [TruthValue(sAnd, nAnd)]
 
