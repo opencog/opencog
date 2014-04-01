@@ -214,8 +214,8 @@ AvatarAction *AvatarAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOME
 
     std::string actionName = getAttribute(actionDOMElement, NAME_ATTRIBUTE);
     ActionType actionType = ActionType::getFromName(actionName);
-    AvatarAction *petAction = new AvatarAction(actionType);
-    petAction->setSequence((unsigned int) atoi(getAttribute(actionDOMElement, SEQUENCE_ATTRIBUTE)));
+    AvatarAction *avatarAction = new AvatarAction(actionType);
+    avatarAction->setSequence((unsigned int) atoi(getAttribute(actionDOMElement, SEQUENCE_ATTRIBUTE)));
 
     XERCES_CPP_NAMESPACE::DOMNodeList *list = getChildren(actionDOMElement, PARAMETER_ELEMENT);
 
@@ -269,10 +269,10 @@ AvatarAction *AvatarAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOME
         }
         }
         ActionParameter actionParameter(parameterName, parameterType, parameterValue);
-        petAction->addParameter(actionParameter);
+        avatarAction->addParameter(actionParameter);
     }
 
-    return petAction;
+    return avatarAction;
 }
 
 std::string AvatarAction::stringRepresentation() const
