@@ -57,7 +57,7 @@
 
 namespace opencog { namespace world {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog::pai;
 
 /**

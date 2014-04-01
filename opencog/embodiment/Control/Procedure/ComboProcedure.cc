@@ -31,7 +31,7 @@
 
 namespace opencog { namespace Procedure {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 static combo_tree empty_procedure;
 
@@ -135,7 +135,7 @@ std::istream& operator>>(std::istream& in, Procedure::ComboProcedure& proc)
     combo_tree tr;
     stringstream ss(body);
     // ss >> tr;
-    PetCombo::operator>>(ss, tr);
+    AvatarCombo::operator>>(ss, tr);
 
     for (combo_tree::iterator it = tr.begin();it != tr.end();++it) {
         if (is_argument(*it)) {

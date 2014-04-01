@@ -42,7 +42,7 @@
 
 #include "EntityRelevanceFilter.h"
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog::world;
 using namespace opencog; /// @todo make it under the namespace opencog
 

@@ -53,7 +53,7 @@ namespace opencog {
 namespace oac {
 
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace pai;
 using learningserver::messages::SchemaMessage;
 

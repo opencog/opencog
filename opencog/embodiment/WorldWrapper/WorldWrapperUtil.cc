@@ -45,7 +45,7 @@
 
 #include "WorldWrapperUtil.h"
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog;
 using namespace opencog::pai;
 // This is already available in opencog::world, but this is placed here to
