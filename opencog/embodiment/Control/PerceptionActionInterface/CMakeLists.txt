@@ -20,7 +20,7 @@ ADD_LIBRARY (PAI SHARED
 	ActionParamType
 	ActionParameter
 	ActionType
-	PetAction
+	AvatarAction
 	ActionPlan
 	PAI
 	ActionPlanDispatcher

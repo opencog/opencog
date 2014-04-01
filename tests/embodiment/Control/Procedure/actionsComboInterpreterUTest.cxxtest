@@ -27,7 +27,7 @@
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace opencog::pai;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 
 

@@ -24,7 +24,7 @@
 #include <opencog/embodiment/Control/Procedure/RunningBuiltInProcedure.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
-#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
+#include <opencog/embodiment/Control/Procedure/BuiltIn/AvatarActionSchema.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 
 using namespace Procedure;
@@ -75,7 +75,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        PetActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::BARK());
         RunningBuiltInProcedure rbp(pai, p, arguments);
         TS_ASSERT(!rbp.isFinished());
         TS_ASSERT(!rbp.isFailed());
@@ -97,7 +97,7 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        PetActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::BARK());
         std::vector<combo::vertex> arguments;
         RunningBuiltInProcedure rbp(pai, p, arguments);
         TS_ASSERT(!rbp.isFinished());

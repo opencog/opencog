@@ -34,7 +34,7 @@
 int main(int argc, char** argv)
 {
     using namespace std;
-    using namespace PetCombo;
+    using namespace AvatarCombo;
     using namespace Procedure;
 
     //instantiate a Logger that does not print messages to not interfere with
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
         // Pick the correct operator>> explicitly, as otherwise, the
         // compiler may not pick the one we want.
         // cin >> tr;
-        PetCombo::operator>>(cin, tr);
+        AvatarCombo::operator>>(cin, tr);
         if (!cin.good())
             break;
         cout << "running " << tr << endl;

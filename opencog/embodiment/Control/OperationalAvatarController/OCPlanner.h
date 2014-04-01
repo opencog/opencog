@@ -33,7 +33,7 @@
 #include <opencog/atomspace/AtomSpace.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
-#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.h>
 #include <opencog/util/StringManipulator.h>
 #include "PlanningHeaderFiles.h"
 #include "Strips.h"
@@ -328,7 +328,7 @@ public:
      // add a new rule
      void addNewRule(Rule& newRule);
 
-     // the output plan:vector<PetAction>& plan, is a series of actions.
+     // the output plan:vector<AvatarAction>& plan, is a series of actions.
      // if failed in generating a plan to achieve the goal, return false.
      ActionPlanID doPlanning(const vector<State*> &goal, const vector<State *> &knownStates, CogServer *server);
 
@@ -438,7 +438,7 @@ protected:
      // add hyptothetical link into the AtomSpace for a new StateNode , only for state that is permanent
      void addHypotheticalLinkForStateNode(StateNode *stateNode);
 
-     bool isActionChangeSPaceMap(PetAction* action);
+     bool isActionChangeSPaceMap(AvatarAction* action);
 
      bool groundARuleNodeParametersFromItsForwardState(RuleNode* ruleNode, StateNode* forwardStateNode);
 

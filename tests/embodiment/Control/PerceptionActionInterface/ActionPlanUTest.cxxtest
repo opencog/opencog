@@ -64,18 +64,18 @@ public:
     void testAddAndGetAction() {
         ActionPlan plan("10", "Affiliation");
         TS_ASSERT(plan.size() == 0);
-        PetAction p1;
+        AvatarAction p1;
         TS_ASSERT(plan.addAction(p1) == 1);
         TS_ASSERT(plan.size() == 1);
-        PetAction p2;
+        AvatarAction p2;
         TS_ASSERT(plan.addAction(p2) == 2);
         TS_ASSERT(plan.size() == 2);
-        PetAction p3;
+        AvatarAction p3;
         TS_ASSERT(plan.addAction(p3) == 3);
         TS_ASSERT(plan.size() == 3);
 
         for (unsigned int i = 1; i <= plan.size(); i++) {
-            const PetAction& p = plan.getAction(i);
+            const AvatarAction& p = plan.getAction(i);
             TS_ASSERT(p.getSequence() == i);
         }
     }
@@ -196,12 +196,12 @@ public:
 
         //printf("%s\n", expectedPVPMessages[2]);
 
-        PetAction actions[NUM_ACTIONS] =  {
-            PetAction(ActionType::TRICK_FOR_FOOD()),
-            PetAction(ActionType::WALK()),
-            PetAction(ActionType::BARK()),
-            PetAction(ActionType::EAT()),
-            PetAction(ActionType::FLY())
+        AvatarAction actions[NUM_ACTIONS] =  {
+            AvatarAction(ActionType::TRICK_FOR_FOOD()),
+            AvatarAction(ActionType::WALK()),
+            AvatarAction(ActionType::BARK()),
+            AvatarAction(ActionType::EAT()),
+            AvatarAction(ActionType::FLY())
         };
 
         // Add valid parameters to the actions
@@ -226,23 +226,23 @@ public:
             if (i < NUM_ACTIONS) plan.addAction(actions[i]);
         }
 
-        TS_ASSERT_THROWS(plan.addAction(PetAction(ActionType::JUMP_TOWARD())), opencog::InvalidParamException&); // jump requires 1 parameter
+        TS_ASSERT_THROWS(plan.addAction(AvatarAction(ActionType::JUMP_TOWARD())), opencog::InvalidParamException&); // jump requires 1 parameter
     }
 
     void testSize() {
         ActionPlan plan;
         TS_ASSERT(plan.size() == 0);
-        plan.addAction(PetAction(ActionType::BARK()));
+        plan.addAction(AvatarAction(ActionType::BARK()));
         TS_ASSERT(plan.size() == 1);
-        plan.addAction(PetAction(ActionType::SIT()));
+        plan.addAction(AvatarAction(ActionType::SIT()));
         TS_ASSERT(plan.size() == 2);
     }
 
     void testMarkAndCheckMarkMethods() {
         ActionPlan plan;
-        plan.addAction(PetAction(ActionType::BARK()));
-        plan.addAction(PetAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan.addAction(PetAction(ActionType::SLEEP()));
+        plan.addAction(AvatarAction(ActionType::BARK()));
+        plan.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
+        plan.addAction(AvatarAction(ActionType::SLEEP()));
 
         TS_ASSERT(!plan.isTried(1));
         TS_ASSERT(!plan.isTried(2));
@@ -323,9 +323,9 @@ public:
         TS_ASSERT(plan.hasFailed());
 
         ActionPlan plan2;
-        plan2.addAction(PetAction(ActionType::BARK()));
-        plan2.addAction(PetAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan2.addAction(PetAction(ActionType::SLEEP()));
+        plan2.addAction(AvatarAction(ActionType::BARK()));
+        plan2.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
+        plan2.addAction(AvatarAction(ActionType::SLEEP()));
         plan2.markAsDone(1);
         plan2.markAsDone(2);
         plan2.markAsDone(3);

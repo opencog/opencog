@@ -154,8 +154,8 @@ private:
                          Handle goBehind = Handle::UNDEFINED,
                          float walkSpeed = 0);
 
-    //! synthesize a PetAction obj from a subtree
-    opencog::pai::PetAction buildPetAction(sib_it from);
+    //! synthesize a AvatarAction obj from a subtree
+    opencog::pai::AvatarAction buildAvatarAction(sib_it from);
 
     //! convert string to camelCase
     std::string toCamelCase(const std::string& str);

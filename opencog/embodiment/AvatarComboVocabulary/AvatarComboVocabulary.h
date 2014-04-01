@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef _PETCOMBOVOCABULARY_H
-#define _PETCOMBOVOCABULARY_H
+#ifndef _AVATARCOMBOVOCABULARY_H
+#define _AVATARCOMBOVOCABULARY_H
 
 #include "avatar_builtin_action.h"
 #include "avatar_perception.h"
@@ -55,7 +55,7 @@ static const definite_object all_agents = "all_agents";
 
 // this namespace is defined in order to break ambiguities
 // and allow several vocabularies to coexist 
-namespace PetCombo {
+namespace AvatarCombo {
 
 using namespace opencog::combo;
 
@@ -88,7 +88,7 @@ std::ostream& operator<<(std::ostream&, avatar_indefinite_object_enum);
 // XXX This design is real dicy, as its easy for the compiler to use
 // the wrong opator>>(), and to get confused about which of serval to
 // use... the problem is that the below, which are really 
-// PetCombo::operator>>() collide with opencog::combo::operator>>()
+// AvatarCombo::operator>>() collide with opencog::combo::operator>>()
 std::istream& operator>>(std::istream&, vertex&);
 std::istream& operator>>(std::istream&, combo_tree&);
 
@@ -96,7 +96,7 @@ std::istream& operator>>(std::istream&, combo_tree&);
 // combo operator type and enum is used
 // That means that different vocabularies will be able to coexist
 // with the same code file and within the same library -- just say
-// using namespace PetCombo.
+// using namespace AvatarCombo.
 bool operator==(builtin_action, avatar_builtin_action_enum);
 bool operator==(avatar_builtin_action_enum, builtin_action);
 bool operator!=(builtin_action, avatar_builtin_action_enum);
@@ -114,7 +114,7 @@ bool operator==(avatar_indefinite_object_enum, indefinite_object);
 bool operator!=(indefinite_object, avatar_indefinite_object_enum);
 bool operator!=(avatar_indefinite_object_enum, indefinite_object);
 
-}//~namespace PetCombo
+} // ~namespace AvatarCombo
 
 #endif
 

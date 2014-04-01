@@ -30,7 +30,7 @@
 
 namespace opencog { namespace world {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 /**
  * ctor, dtor

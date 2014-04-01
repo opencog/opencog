@@ -29,7 +29,7 @@
 #include <xercesc/dom/DOMDocument.hpp>
 #include <xercesc/util/PlatformUtils.hpp>
 
-#include "PetAction.h"
+#include "AvatarAction.h"
 
 #include <list>
 #include <vector>
@@ -45,7 +45,7 @@ class ActionPlan
 private:
     ActionPlanID id;
     std::string demandName; 
-    std::vector<PetAction> actions;
+    std::vector<AvatarAction> actions;
     std::vector<bool> actionTried;
     std::vector<bool> actionDone;
     std::vector<bool> actionFailed;
@@ -81,12 +81,12 @@ public:
     /**
      * Add an action to this plan
      *
-     * @param action A reference to the action to be added. A new PetAction object is created from this argument and
+     * @param action A reference to the action to be added. A new AvatarAction object is created from this argument and
      *         its sequence number is set, according with its position in this action plan.
      * @return The position of the added action in this plan.
      * @throws InvalidParamException if the action contains invalid parameters for its type.
      */
-    unsigned int addAction(const PetAction& action) throw (opencog::InvalidParamException, std::bad_exception);
+    unsigned int addAction(const AvatarAction& action) throw (opencog::InvalidParamException, std::bad_exception);
 
     /**
      * Return true iff there is no actions in the ActionPlan
@@ -101,7 +101,7 @@ public:
     /**
      * Get the action of this action plan, given its sequence number
      */
-    const PetAction& getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception);
+    const AvatarAction& getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception);
 
     /**
      * Generate the corresponding PVP's message in XML format for this action plan

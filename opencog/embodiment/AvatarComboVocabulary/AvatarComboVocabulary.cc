@@ -23,7 +23,7 @@
 
 #include "AvatarComboVocabulary.h"
 
-namespace PetCombo
+namespace AvatarCombo
 {
 
 builtin_action get_instance(avatar_builtin_action_enum e)
@@ -163,4 +163,4 @@ bool operator!=(avatar_indefinite_object_enum e, indefinite_object i)
     return get_instance(e) == i;
 }
 
-}//~namespace PetCombo
+} // ~namespace AvatarCombo

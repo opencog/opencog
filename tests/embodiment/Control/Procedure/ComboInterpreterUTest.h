@@ -126,7 +126,7 @@ public:
 
         std::stringstream ss(cmd);
         // ss >> tree;
-        PetCombo::operator>>(ss, tree);
+        AvatarCombo::operator>>(ss, tree);
 
         cpr.instantiateProcedureCalls(tree, true);
 

@@ -58,7 +58,7 @@ typedef int64_t mytime_t;
 namespace behavior
 {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog;
 
 const unsigned long BehaviorEncoder::MinActionTime = MIN_ACTION_DURATION;

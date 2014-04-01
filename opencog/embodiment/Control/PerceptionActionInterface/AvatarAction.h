@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetAction.h
+ * opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,8 +21,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PETACTION_H
-#define PETACTION_H
+#ifndef AVATARACTION_H
+#define AVATARACTION_H
 
 #include "ActionType.h"
 #include "ActionParameter.h"
@@ -36,10 +36,10 @@ namespace opencog { namespace pai {
 using namespace std;
 
 /**
- * PetAction class represents an action element that is part of an pet action-plan.
+ * AvatarAction class represents an action element that is part of an pet action-plan.
  * This is a generic container, that is, it can be any type of action defined by ESC XML Scheme.
  */
-class PetAction
+class AvatarAction
 {
 private:
 
@@ -74,17 +74,17 @@ public:
     /**
      * Empty constructor
      */
-    PetAction();
+    AvatarAction();
 
     /**
      * Constructor
      */
-    PetAction(const ActionType& type);
+    AvatarAction(const ActionType& type);
 
     /**
      * Destructor
      */
-    ~PetAction();
+    ~AvatarAction();
 
     /**
      * Adds a parameter to this action. The order of the parameters in this action depends on
@@ -103,7 +103,7 @@ public:
     const list<ActionParameter>& getParameters() const;
 
     /**
-     * Check if the parameters of this PetAction are OK with its ActionType (i.e., if they have the right number of parameters
+     * Check if the parameters of this AvatarAction are OK with its ActionType (i.e., if they have the right number of parameters
      * and if each parameter has the right type, according with its position).
      *
      * @return true, if the added parameters are valid. False, owhterwise
@@ -133,13 +133,13 @@ public:
     XERCES_CPP_NAMESPACE::DOMElement* createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
             XERCES_CPP_NAMESPACE::DOMElement* parent) const;
 
-    // TODO: implement an assignment operator (=) and change the return type of the method below to PetAction
+    // TODO: implement an assignment operator (=) and change the return type of the method below to AvatarAction
     /**
-     * Builds a PetAction using a DOMElement (usually created by a XML parser).
+     * Builds a AvatarAction using a DOMElement (usually created by a XML parser).
      *
      * The DOMElement follows the same convention described in method createPVPXmlElement().
      */
-    static PetAction *factory(XERCES_CPP_NAMESPACE::DOMElement *domElement) throw (opencog::InvalidParamException, std::bad_exception);
+    static AvatarAction *factory(XERCES_CPP_NAMESPACE::DOMElement *domElement) throw (opencog::InvalidParamException, std::bad_exception);
 
     /**
      * Sets the type of this action.

@@ -9,7 +9,7 @@ ADD_LIBRARY (Procedure SHARED
 	ComboShellServer
 	ProcedureInterpreter
 	RunningBuiltInProcedure
-	BuiltIn/PetActionSchema
+	BuiltIn/AvatarActionSchema
 )
 
 TARGET_LINK_LIBRARIES (Procedure

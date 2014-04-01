@@ -34,7 +34,7 @@
 
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog;
 
 #include <string>

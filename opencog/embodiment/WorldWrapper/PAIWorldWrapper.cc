@@ -57,7 +57,7 @@
 
 namespace opencog { namespace world {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog::pai;
 
 /**
@@ -338,7 +338,7 @@ throw (ComboException, AssertionException, std::bad_exception)
                 if (!build_goto_plan(obj,  Handle::UNDEFINED, walkSpeed ) )
                     planID = pai.createActionPlan();
                 //then add a follow action at the end
-                PetAction action(ActionType::FOLLOW());
+                AvatarAction action(ActionType::FOLLOW());
                 action.addParameter(ActionParameter("id",
                                                     ActionParamType::ENTITY(),
                                                     Entity(get_definite_object(*it.begin()),
@@ -374,20 +374,20 @@ throw (ComboException, AssertionException, std::bad_exception)
     } else { //non-compound action sequence
         while (from != to) {
             try {
-                PetAction action = buildPetAction(from);
+                AvatarAction action = buildAvatarAction(from);
                 pai.addAction(planID, action);
                 ++from;
             } catch( const StandardException& ex ) {
                 std::stringstream ss (stringstream::out);
                 ss << combo_tree(from);
                 ss << " " << const_cast<StandardException*>( &ex )->getMessage( );
-                logger().error( "PAIWorldWrapper::%s - Failed to build PetAction '%s'",
+                logger().error( "PAIWorldWrapper::%s - Failed to build AvatarAction '%s'",
                                 __FUNCTION__, ss.str().c_str( )  );
                 from = to;
             } catch (...) {
                 std::stringstream ss (stringstream::out);
                 ss << combo_tree(from);
-                logger().error("PAIWorldWrapper - Failed to build PetAction '%s'.",
+                logger().error("PAIWorldWrapper - Failed to build AvatarAction '%s'.",
                              ss.str().c_str());
 
                 // so no more actions are built for that action plan, as
@@ -636,10 +636,10 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
     } // if
 
     foreach(const spatial::Point& it_action, actions ) {
-        PetAction action;
+        AvatarAction action;
 
         if (toNudge != Handle::UNDEFINED) {
-            action = PetAction(ActionType::NUDGE_TO());
+            action = AvatarAction(ActionType::NUDGE_TO());
             action.addParameter(ActionParameter("moveableObj",
                                                 ActionParamType::ENTITY(),
                                                 Entity(pai.getAtomSpace().getName(toNudge),
@@ -650,7 +650,7 @@ bool PAIWorldWrapper::createWalkPlanAction( std::vector<spatial::Point>& actions
                                                        it_action.second,
                                                        0.0)));
         } else {
-            action = PetAction(ActionType::WALK());
+            action = AvatarAction(ActionType::WALK());
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
                                                 Vector(it_action.first,
@@ -711,14 +711,14 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
     endPointIter --;
 
     while (it_point != actions.end()) {
-        PetAction action;
+        AvatarAction action;
 
         // Now in Unity, we consider jump/climb up one block as normal walking action:
 
         // The agent need to jump when this pos is higher than last pos
         if (((SpaceServer::SpaceMapPoint)(*(it_point))).z > ((SpaceServer::SpaceMapPoint)(*(it_point-1))).z )
         {
-            action = PetAction(ActionType::JUMP_TOWARD());
+            action = AvatarAction(ActionType::JUMP_TOWARD());
             action.addParameter(ActionParameter("direction",
                                                 ActionParamType::VECTOR(),
                                                 Vector(((SpaceServer::SpaceMapPoint)(*it_point)).x,
@@ -727,7 +727,7 @@ bool PAIWorldWrapper::createNavigationPlanAction( opencog::pai::PAI& pai,SpaceSe
         }
         else
         {
-            action = PetAction(ActionType::WALK());
+            action = AvatarAction(ActionType::WALK());
             action.addParameter(ActionParameter("target",
                                                 ActionParamType::VECTOR(),
                                                 Vector(((SpaceServer::SpaceMapPoint)(*it_point)).x,
@@ -826,7 +826,7 @@ bool PAIWorldWrapper::build_goto_plan(Handle goalHandle,
     return false;
 }
 
-PetAction PAIWorldWrapper::buildPetAction(sib_it from)
+AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
 {
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
@@ -924,7 +924,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
          bite(obj)
          whine_at(obj)
     ****/
-    PetAction action;
+    AvatarAction action;
     if (actions2types.find(bae) != actions2types.end()) {
         action = actions2types.find(bae)->second;
     } else {
@@ -1279,7 +1279,7 @@ PetAction PAIWorldWrapper::buildPetAction(sib_it from)
         logger().debug("PAIWorldWrapper::%s - Cannot find type for action '%s'",
                        __FUNCTION__, ss.str().c_str( ));
 
-        action = PetAction(ActionType::getFromName(toCamelCase(ss.str())));
+        action = AvatarAction(ActionType::getFromName(toCamelCase(ss.str())));
     }
     return action;
 }
