@@ -855,7 +855,7 @@ bool OAC::processNextMessage(messaging::Message *msg)
 
         std::stringstream ss(str);
         combo_tree tr;
-        ss >> tr;
+        AvatarCombo::operator>>(ss, tr);
         ComboProcedure cp("", 0, tr);
         std::vector<vertex> args; //an expression, not a function - no args
         procedureInterpreter->runProcedure(cp, args);
