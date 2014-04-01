@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/PerceptionActionInterface/PetAction.cc
+ * opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -21,7 +21,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "PetAction.h"
+#include "AvatarAction.h"
 
 #include <opencog/util/exceptions.h>
 #include <opencog/util/Logger.h>
@@ -33,93 +33,93 @@
 using namespace opencog::pai;
 using namespace opencog;
 
-PetAction::PetAction()
+AvatarAction::AvatarAction()
 {
     PAIUtils::initializeXMLPlatform();
     type = ActionType::BARK().getCode(); // default action. Just to be valid.
     sequence = 0;
 }
 
-PetAction::PetAction(const ActionType& type)
+AvatarAction::AvatarAction(const ActionType& type)
 {
     PAIUtils::initializeXMLPlatform();
     this->type = type.getCode();
     this->sequence = 0;
 }
 
-PetAction::~PetAction()
+AvatarAction::~AvatarAction()
 {
 }
 
-void PetAction::setType(const ActionType& actionType) throw (opencog::InvalidParamException, std::bad_exception)
+void AvatarAction::setType(const ActionType& actionType) throw (opencog::InvalidParamException, std::bad_exception)
 {
     std::string errorMessage = validateParameters(actionType, parameters);
     if (!errorMessage.empty()) {
-        throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Invalid parameter: '%s'. %s.",
+        throw opencog::InvalidParamException(TRACE_INFO, "AvatarAction - Invalid parameter: '%s'. %s.",
                                              actionType.getName().c_str(), errorMessage.c_str());
     }
     this->type = actionType.getCode();
 }
 
-const ActionType& PetAction::getType() const
+const ActionType& AvatarAction::getType() const
 {
     return ActionType::getFromCode(type);
 }
 
-const string& PetAction::getName() const
+const string& AvatarAction::getName() const
 {
     return ActionType::getFromCode(type).getName();
 }
 
-void PetAction::setSequence(unsigned int sequence)
+void AvatarAction::setSequence(unsigned int sequence)
 {
     this->sequence = sequence;
 }
 
-unsigned int PetAction::getSequence() const
+unsigned int AvatarAction::getSequence() const
 {
     return this->sequence;
 }
 
-void PetAction::addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception)
+void AvatarAction::addParameter(ActionParameter param) throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     const ActionType::ParamTypes& mandatoryParamTypes = ActionType::getFromCode(type).getMandatoryParamTypes();
     if (parameters.size() < mandatoryParamTypes.size()) {
         if (param.getType() != mandatoryParamTypes[parameters.size()]) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                                                 "PetAction - Param '%s', type '%s' with wrong type for parameter '%u' (mandatory: '%s').", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, mandatoryParamTypes[parameters.size()].getName().c_str());
+                                                 "AvatarAction - Param '%s', type '%s' with wrong type for parameter '%u' (mandatory: '%s').", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, mandatoryParamTypes[parameters.size()].getName().c_str());
         }
     } else {
         const ActionType::ParamTypes& optionalParamTypes =  ActionType::getFromCode(type).getOptionalParamTypes();
         unsigned int numberOfOptionalParams = parameters.size() - mandatoryParamTypes.size();
         if (numberOfOptionalParams >= optionalParamTypes.size()) {
-            throw opencog::InvalidParamException(TRACE_INFO, "PetAction - Param '%s', type '%s': maximum number of parameters already reached", param.getName().c_str(), param.getType().getName().c_str());
+            throw opencog::InvalidParamException(TRACE_INFO, "AvatarAction - Param '%s', type '%s': maximum number of parameters already reached", param.getName().c_str(), param.getType().getName().c_str());
         }
         if (param.getType() != optionalParamTypes[numberOfOptionalParams]) {
             throw opencog::InvalidParamException(TRACE_INFO,
-                                                 "PetAction - Param '%s', type '%s': wrong type for parameter %u (optional: %s)", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, optionalParamTypes[numberOfOptionalParams].getName().c_str());
+                                                 "AvatarAction - Param '%s', type '%s': wrong type for parameter %u (optional: %s)", param.getName().c_str(), param.getType().getName().c_str(), parameters.size() + 1, optionalParamTypes[numberOfOptionalParams].getName().c_str());
         }
     }
     parameters.push_back(param);
 }
 
-const list<ActionParameter>& PetAction::getParameters() const
+const list<ActionParameter>& AvatarAction::getParameters() const
 {
     return parameters;
 }
 
-bool PetAction::containsValidParameters() const
+bool AvatarAction::containsValidParameters() const
 {
     std::string errorMessage = validateParameters(ActionType::getFromCode(type), parameters);
     if (errorMessage.size() > 0) {
-        logger().warn("PetAction::" + errorMessage);
+        logger().warn("AvatarAction::" + errorMessage);
         return false;
     }
     return true;
 }
 
-std::string PetAction::validateParameters(const ActionType& actionType, const list<ActionParameter>& params)
+std::string AvatarAction::validateParameters(const ActionType& actionType, const list<ActionParameter>& params)
 {
     char buffer[1<<16];
 
@@ -155,7 +155,7 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     paramTypeItr = optionalParamTypes.begin();
     while (paramItr != params.end()) {
         if (paramItr->getType() != *paramTypeItr) {
-            sprintf(buffer, "PetAction::containsValidParameters(): Optional parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
+            sprintf(buffer, "AvatarAction::containsValidParameters(): Optional parameter type mismatch (param type = '%s', expected type = '%s')", paramItr->getType().getName().c_str(), paramTypeItr->getName().c_str());
             return buffer;
         }
         paramTypeItr++;
@@ -165,7 +165,7 @@ std::string PetAction::validateParameters(const ActionType& actionType, const li
     return "";
 }
 
-XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
+XERCES_CPP_NAMESPACE::DOMElement* AvatarAction::createPVPXmlElement(XERCES_CPP_NAMESPACE::DOMDocument* doc,
         XERCES_CPP_NAMESPACE::DOMElement* parent) const
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH+1];
@@ -191,7 +191,7 @@ XERCES_CPP_NAMESPACE::DOMElement* PetAction::createPVPXmlElement(XERCES_CPP_NAME
     return actionElement;
 }
 
-char *PetAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const char *attributeName)
+char *AvatarAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const char *attributeName)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH + 1];
     XERCES_CPP_NAMESPACE::XMLString::transcode(attributeName, tag, PAIUtils::MAX_TAG_LENGTH);
@@ -202,19 +202,19 @@ char *PetAction::getAttribute(XERCES_CPP_NAMESPACE::DOMElement *element, const c
     return XERCES_CPP_NAMESPACE::XMLString::transcode(element->getAttribute(tag));
 }
 
-XERCES_CPP_NAMESPACE::DOMNodeList *PetAction::getChildren(XERCES_CPP_NAMESPACE::DOMElement *element, const char *tagName)
+XERCES_CPP_NAMESPACE::DOMNodeList *AvatarAction::getChildren(XERCES_CPP_NAMESPACE::DOMElement *element, const char *tagName)
 {
     XMLCh tag[PAIUtils::MAX_TAG_LENGTH + 1];
     XERCES_CPP_NAMESPACE::XMLString::transcode(tagName, tag, PAIUtils::MAX_TAG_LENGTH);
     return element->getElementsByTagName(tag);
 }
 
-PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (opencog::InvalidParamException, std::bad_exception)
+AvatarAction *AvatarAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement) throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     std::string actionName = getAttribute(actionDOMElement, NAME_ATTRIBUTE);
     ActionType actionType = ActionType::getFromName(actionName);
-    PetAction *petAction = new PetAction(actionType);
+    AvatarAction *petAction = new AvatarAction(actionType);
     petAction->setSequence((unsigned int) atoi(getAttribute(actionDOMElement, SEQUENCE_ATTRIBUTE)));
 
     XERCES_CPP_NAMESPACE::DOMNodeList *list = getChildren(actionDOMElement, PARAMETER_ELEMENT);
@@ -264,7 +264,7 @@ PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement
         }
         default: {
             throw opencog::InvalidParamException(TRACE_INFO,
-                                                 "PetAction - Invalid param type code: %d", typeCode);
+                                                 "AvatarAction - Invalid param type code: %d", typeCode);
             break;
         }
         }
@@ -275,7 +275,7 @@ PetAction *PetAction::factory(XERCES_CPP_NAMESPACE::DOMElement *actionDOMElement
     return petAction;
 }
 
-std::string PetAction::stringRepresentation() const
+std::string AvatarAction::stringRepresentation() const
 {
 
     char s[16];

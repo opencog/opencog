@@ -1,5 +1,5 @@
 /*
- * tests/embodiment/Control/Procedure/BuiltIn/PetActionSchemaUTest.cxxtest
+ * tests/embodiment/Control/Procedure/BuiltIn/AvatarActionSchemaUTest.cxxtest
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -22,7 +22,7 @@
  */
 
 #include <opencog/util/misc.h>
-#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
+#include <opencog/embodiment/Control/Procedure/BuiltIn/AvatarActionSchema.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
@@ -33,17 +33,17 @@ using namespace opencog::control;
 using namespace opencog;
 using namespace std;
 
-class PetActionSchemaUTest :  public CxxTest::TestSuite
+class AvatarActionSchemaUTest :  public CxxTest::TestSuite
 {
 private:
     AtomSpace atomSpace; 
 
 public:
-    PetActionSchemaUTest() {
+    AvatarActionSchemaUTest() {
         config(EmbodimentConfig::embodimentCreateInstance, true);
     }
 
-    ~PetActionSchemaUTest() {
+    ~AvatarActionSchemaUTest() {
     }
 
     void setUp() {
@@ -73,7 +73,7 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        PetActionSchema bark(pai, ActionType::BARK());
+        AvatarActionSchema bark(pai, ActionType::BARK());
         TS_ASSERT(!strcmp(bark.getName().c_str(), "BARK"));
     }
 
@@ -84,7 +84,7 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        PetActionSchema bark(pai, ActionType::BARK());
+        AvatarActionSchema bark(pai, ActionType::BARK());
         std::vector<combo::vertex> args(1, "Wynx");
         combo::vertex result = bark.execute(args);
         ActionPlanID* planId = boost::get<ActionPlanID>(&result);
@@ -100,8 +100,8 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        PetActionSchema bark(pai, ActionType::BARK());
-        PetActionSchema eat(pai, ActionType::EAT());
+        AvatarActionSchema bark(pai, ActionType::BARK());
+        AvatarActionSchema eat(pai, ActionType::EAT());
 
         // param exception
         std::vector<combo::vertex> args(1, "food");

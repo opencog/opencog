@@ -492,7 +492,7 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
     doc->release();
 }
 
-ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+ActionID PAI::addAction(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     ActionID result = Handle::UNDEFINED;
     ActionPlanMap::iterator it = inProgressActionPlans.find(planId);
@@ -2709,7 +2709,7 @@ Vector PAI::getVelocityData(DOMElement* velocityElement)
     return result;
 }
 
-Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
 
     Handle schemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, action.getName().c_str());
@@ -2785,7 +2785,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) t
     return execLink;
 }
 
-Handle PAI::addActionPredicate(const char* predicateName, const PetAction& action, unsigned long timestamp, ActionID actionId)
+Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
     logger().debug("PAI - execLink = %s \n", atomSpace.atomAsString(execLink).c_str());
@@ -2802,7 +2802,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp, TruthValue::TRUE_TV());
-    AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
+    AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
 }
@@ -3374,7 +3374,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             switch (statusCode) {
             case opencog::pai::DONE:
                 {
-                    const PetAction& action = plan.getAction(seqNumber);
+                    const AvatarAction& action = plan.getAction(seqNumber);
 
                     // if a GRAB action, set grabbed object
                     if (action.getType() == ActionType::GRAB()) {

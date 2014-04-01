@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.cc
+ * opencog/embodiment/Control/Procedure/BuiltIn/AvatarActionSchema.cc
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -27,13 +27,13 @@
 #include <opencog/spacetime/atom_types.h>
 
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
-#include "PetActionSchema.h"
+#include "AvatarActionSchema.h"
 
 namespace opencog { namespace Procedure {
 
 using namespace pai;
 
-PetActionSchema::PetActionSchema(PAI& _pai, const ActionType& _actionType) : pai(_pai), actionType(_actionType)
+AvatarActionSchema::AvatarActionSchema(PAI& _pai, const ActionType& _actionType) : pai(_pai), actionType(_actionType)
 {
     name =  StringManipulator::toUpper(actionType.getName());
 
@@ -41,14 +41,14 @@ PetActionSchema::PetActionSchema(PAI& _pai, const ActionType& _actionType) : pai
     optionalArity = actionType.getOptionalParamSize();
 }
 
-PetActionSchema::~PetActionSchema() {}
+AvatarActionSchema::~AvatarActionSchema() {}
 
-const std::string& PetActionSchema::getName() const
+const std::string& AvatarActionSchema::getName() const
 {
     return name;
 }
 
-bool PetActionSchema::isPetAction() const
+bool AvatarActionSchema::isAvatarAction() const
 {
     return true;
 }
@@ -82,14 +82,14 @@ bool PetActionSchema::isPetAction() const
  *  heel                => void heel()
  *  random_step
  */
-combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception)
+combo::vertex AvatarActionSchema::execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception)
 {
-    PetAction action(actionType);
+    AvatarAction action(actionType);
 
     const ActionType::ParamTypes& mandatoryParamTypes = actionType.getMandatoryParamTypes();
     if (arguments.size() < minArity) {
         throw InvalidParamException(TRACE_INFO,
-             "PetActionSchema - Schema %s got insuficient no. "
+             "AvatarActionSchema - Schema %s got insuficient no. "
              "of parameters: %u (expected at least %u).",
              actionType.getName().c_str(), arguments.size(), minArity);
     }
@@ -101,7 +101,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
     unsigned int maximalArity = minArity + optionalArity;
     if (arguments.size() > maximalArity) {
         throw InvalidParamException(TRACE_INFO,
-             "PetActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
+             "AvatarActionSchema - Schema %s exceeded no. of parameters: %u (expected at most %u).",
              actionType.getName().c_str(), arguments.size(), maximalArity);
     }
 
@@ -203,7 +203,7 @@ combo::vertex PetActionSchema::execute(const std::vector<combo::vertex>& argumen
 
         if (!validArg) {
             throw InvalidParamException(TRACE_INFO,
-                "PetActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).",
+                "AvatarActionSchema - Schema %s got invalid argument at %u: %s (expected an %s).",
                 actionType.getName().c_str(), argIndex,
                 toString(arguments[0]).c_str(), paramType.getName().c_str());
         }

@@ -24,7 +24,7 @@
 #include <opencog/embodiment/Control/Procedure/ProcedureInterpreter.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/ActionPlanSenderMock.h>
 #include <tests/embodiment/Control/PerceptionActionInterface/AvatarInterfaceMock.h>
-#include <opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h>
+#include <opencog/embodiment/Control/Procedure/BuiltIn/AvatarActionSchema.h>
 #include <opencog/embodiment/Control/EmbodimentConfig.h>
 #include <opencog/atomspace/AtomSpace.h>
 
@@ -77,7 +77,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        PetActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::BARK());
         ProcedureInterpreter interpreter(pai);
         RunningProcedureID id = interpreter.runProcedure(p, arguments);
         //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
@@ -104,7 +104,7 @@ public:
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
         std::vector<combo::vertex> arguments;
-        PetActionSchema p(pai, ActionType::BARK());
+        AvatarActionSchema p(pai, ActionType::BARK());
         ProcedureInterpreter interpreter(pai);
         RunningProcedureID id = interpreter.runProcedure(p, arguments);
         //TS_ASSERT(interpreter.isFinished(id)); // it's finished because interpreter runs builtin procedures imediatelly
