@@ -104,6 +104,12 @@ void SchemeSmob::ss_set_env_as(AtomSpace *as)
 	// Place the atomspace in the ... well, the top-level environment
 	// I think this is the interaction-environment, at this point.
 	// Not sure...
+
+	// XXX TODO FIXME: if someone deletes the atomspace, without
+	// telling us, then we are left holding a pointer to freed memory.
+	// Although this is a "user error", we could minimize this by
+	// creating a signal in the atomspace destructor, and listening
+	// for that signal.
 	scm_c_define("*-atomspace-*", make_as(as));
 	atomspace_symbol = scm_c_lookup("*-atomspace-*");
 	atomspace_symbol = scm_permanent_object(atomspace_symbol);
