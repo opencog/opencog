@@ -1045,7 +1045,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        atab->getIncomingSet(h);
+        h->getIncomingSet();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }

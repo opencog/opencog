@@ -237,7 +237,8 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     for (Arity i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             Handle h(handles[i]);
-            HandleSeq hs = getIncomingSet(h);
+            HandleSeq hs;
+            h->getIncomingSet(back_inserter(hs));
 
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 // sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
@@ -285,7 +286,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             // sets[i] = HandleEntry::filterSet(sets[i], type, subclass);
             UnorderedHandleSet hs;
             std::copy_if(sets[i].begin(), sets[i].end(), inserter(hs),
-                [&](Handle h)->bool { return isType(h, type, subclass); });
+                [&](Handle h)->bool { return h->isType(type, subclass); });
         }
     }
 
@@ -308,7 +309,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                         if (NULL == l) return true;
                         if (l->getArity() != arity) return false;
                         Handle hosi(l->getOutgoingSet()[i]);
-                        return isType(hosi, types[i], sub);
+                        return hosi->isType(types[i], sub);
                     });
                 set = filt;
             }
@@ -337,7 +338,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
-                getIncomingSetByName(inserter(sets[i]), names[i], types[i], type, subclass);
+                Handle targh(getHandle(types[i], names[i]));
+                targh->getIncomingSetByType(inserter(sets[i]), type, subclass);
                 if (sub) {
                     // If subclasses are accepted, the subclasses are
                     // returned in the array types.
@@ -350,8 +352,9 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
                         UnorderedHandleSet subSet;
-                        getIncomingSetByName(inserter(subSet), names[i],
-                                          subTypes[j], type, subclass);
+                        Handle targh(getHandle(subTypes[j], names[i]));
+                        targh->getIncomingSetByType(inserter(subSet), type, subclass);
+                        // XXX wait .. why are we copying, again?
                         sets[i].insert(subSet.begin(), subSet.end());
                     }
                 }
@@ -362,7 +365,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                         LinkPtr l(LinkCast(h));
                         if (l->getArity() != arity) return false;
                         Handle oh(l->getOutgoingSet()[i]);
-                        if (not isType(oh, types[i], sub)) return false;
+                        if (not oh->isType(types[i], sub)) return false;
                         AtomPtr oa = l->getOutgoingAtom(i);
                         if (LinkCast(oa))
                             return (NULL == names[i]) or (0 == names[i][0]);
@@ -384,7 +387,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     LinkPtr l(LinkCast(h));
                     if (l->getArity() != arity) return false;
                     Handle oh(l->getOutgoingSet()[i]);
-                    return isType(oh, types[i], sub);
+                    return oh->isType(types[i], sub);
                 });
         } else {
             countdown++;
@@ -495,9 +498,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
             }
-#if not TABLE_INCOMING_INDEX
             h->insert_atom(lll);
-#endif
         }
     }
 
@@ -519,11 +520,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.insertAtom(atom);
-#else
     atom->keep_incoming_set();
-#endif
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
@@ -622,7 +619,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        HandleSeq is = getIncomingSet(handle);
+        HandleSeq is;
+        handle->getIncomingSet(back_inserter(is));
 
         HandleSeq::iterator is_it = is.begin();
         HandleSeq::iterator is_end = is.end();
@@ -666,16 +664,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.removeAtom(atom);
-#else
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         foreach(AtomPtr a, lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-#endif
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);

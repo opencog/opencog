@@ -103,9 +103,6 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
-#if TABLE_INCOMING_INDEX
-    IncomingIndex incomingIndex;
-#endif
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
@@ -255,12 +252,6 @@ public:
 protected:
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool isType(Handle& h, Type t, bool subclass) const
-    {
-        Type at = h->getType();
-        if (not subclass) return t == at;
-        return classserver().isA(at, t);
-    }
     bool hasNullName(Handle& h) const
     {
         if (LinkCast(h)) return true;
@@ -351,104 +342,8 @@ public:
                             targetTypeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                 return isDefined(h) and isType(h, type, subclass);
+                 return isDefined(h) and h->isType(type, subclass);
              });
-    }
-
-    /**
-     * Return the incoming set associated with handle h.
-     * Note that this returns a copy of the incoming set,
-     * thus making it thread-safe against concurrent additions
-     * or deletions by other threads.
-     *
-     * Return an std::vector, simply because its faster to put the
-     * elements into an std::vector than anything else. We don't need
-     * good delete or random-access performance for this.
-     */
-    HandleSeq getIncomingSet(Handle& h) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return incomingIndex.getIncomingSet(h);
-#else
-        HandleSeq hs;
-        h->getIncomingSet(back_inserter(hs));
-        return hs;
-#endif
-    }
-
-    template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result,
-                   Handle& h) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy(incomingIndex.begin(h),
-                         incomingIndex.end(),
-                         result);
-#else
-        return h->getIncomingSet(result);
-#endif
-    }
-
-    /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * That is, returns the incoming set of Handle h, with some optional
-     * filtering.
-     *
-     * @param The handle that must be in the outgoing set of the atom.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle in
-     * their outgoing set.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                         Handle& h,
-                         Type type,
-                         bool subclass = false) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
-#else
-        // XXX TODO it would be more efficient to move this to Atom.h
-        HandleSeq hs(getIncomingSet(h));
-        return std::copy_if(hs.begin(), hs.end(), result,
-#endif
-             [&](Handle h)->bool {
-                     return isDefined(h)
-                        and isType(h, type, subclass); });
-    }
-
-
-    /**
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param The name of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The type of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     *         set contains at least one atom of the given type and name.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByName(OutputIterator result,
-                         const std::string& targetName,
-                         Type targetType,
-                         Type type = ATOM,
-                         bool subclass = true) const
-    {
-        // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh(getHandle(targetType, targetName));
-        return getIncomingSetByType(result, targh, type, subclass);
     }
 
     /**
