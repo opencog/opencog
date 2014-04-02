@@ -645,6 +645,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
     if (0 < handle->getIncomingSetSize())
     {
+        atom->unsetRemovalFlag();
+
         throw RuntimeException(TRACE_INFO,
            "Cannot extract an atom with a non-empty incoming set!");
     }
