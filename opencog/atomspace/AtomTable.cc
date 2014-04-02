@@ -498,9 +498,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
             }
-#if not TABLE_INCOMING_INDEX
             h->insert_atom(lll);
-#endif
         }
     }
 
@@ -522,11 +520,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.insertAtom(atom);
-#else
     atom->keep_incoming_set();
-#endif
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
@@ -668,16 +662,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.removeAtom(atom);
-#else
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         foreach(AtomPtr a, lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-#endif
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);

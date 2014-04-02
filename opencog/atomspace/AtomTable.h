@@ -103,9 +103,6 @@ private:
     TypeIndex typeIndex;
     NodeIndex nodeIndex;
     LinkIndex linkIndex;
-#if TABLE_INCOMING_INDEX
-    IncomingIndex incomingIndex;
-#endif
     ImportanceIndex importanceIndex;
     TargetTypeIndex targetTypeIndex;
     PredicateIndex predicateIndex;
