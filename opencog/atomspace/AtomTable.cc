@@ -338,7 +338,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
-                getIncomingSetByName(inserter(sets[i]), names[i], types[i], type, subclass);
+                Handle targh(getHandle(types[i], names[i]));
+                targh->getIncomingSetByType(inserter(sets[i]), type, subclass);
                 if (sub) {
                     // If subclasses are accepted, the subclasses are
                     // returned in the array types.
@@ -351,8 +352,9 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
                         UnorderedHandleSet subSet;
-                        getIncomingSetByName(inserter(subSet), names[i],
-                                          subTypes[j], type, subclass);
+                        Handle targh(getHandle(subTypes[j], names[i]));
+                        targh->getIncomingSetByType(inserter(subSet), type, subclass);
+                        // XXX wait .. why are we copying, again?
                         sets[i].insert(subSet.begin(), subSet.end());
                     }
                 }

@@ -722,8 +722,8 @@ public:
                  Type type,
                  bool subclass) const
     {
-        return getAtomTable().getIncomingSetByName(result,
-               targetName, targetType, type, subclass);
+        Handle targh(getAtomTable().getHandle(targetType, targetName));
+        return targh->getIncomingSetByType(result, type, subclass);
     }
 
     /**

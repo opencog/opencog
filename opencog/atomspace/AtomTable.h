@@ -350,32 +350,6 @@ public:
     }
 
     /**
-     * Returns the set of atoms whose outgoing set contains at least one
-     * atom with the given name and type (atom type and subclasses
-     * optionally).
-     *
-     * @param The name of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The type of the atom in the outgoing set of the searched
-     *        atoms.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type and name whose outgoing
-     *         set contains at least one atom of the given type and name.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByName(OutputIterator result,
-                         const std::string& targetName,
-                         Type targetType,
-                         Type type = ATOM,
-                         bool subclass = true) const
-    {
-        // Gets the exact atom with the given name and type, in any AtomTable.
-        Handle targh(getHandle(targetType, targetName));
-        return targh->getIncomingSetByType(result, type, subclass);
-    }
-
-    /**
      * Returns the set of atoms with the given target handles and types
      * (order is considered) in their outgoing sets, where the type and
      * subclasses of the atoms are optional.
