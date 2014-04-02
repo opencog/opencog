@@ -285,7 +285,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             // sets[i] = HandleEntry::filterSet(sets[i], type, subclass);
             UnorderedHandleSet hs;
             std::copy_if(sets[i].begin(), sets[i].end(), inserter(hs),
-                [&](Handle h)->bool { return isType(h, type, subclass); });
+                [&](Handle h)->bool { return h->isType(type, subclass); });
         }
     }
 
@@ -308,7 +308,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                         if (NULL == l) return true;
                         if (l->getArity() != arity) return false;
                         Handle hosi(l->getOutgoingSet()[i]);
-                        return isType(hosi, types[i], sub);
+                        return hosi->isType(types[i], sub);
                     });
                 set = filt;
             }
@@ -362,7 +362,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                         LinkPtr l(LinkCast(h));
                         if (l->getArity() != arity) return false;
                         Handle oh(l->getOutgoingSet()[i]);
-                        if (not isType(oh, types[i], sub)) return false;
+                        if (not oh->isType(types[i], sub)) return false;
                         AtomPtr oa = l->getOutgoingAtom(i);
                         if (LinkCast(oa))
                             return (NULL == names[i]) or (0 == names[i][0]);
@@ -384,7 +384,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     LinkPtr l(LinkCast(h));
                     if (l->getArity() != arity) return false;
                     Handle oh(l->getOutgoingSet()[i]);
-                    return isType(oh, types[i], sub);
+                    return oh->isType(types[i], sub);
                 });
         } else {
             countdown++;

@@ -255,12 +255,6 @@ public:
 protected:
     /* Some basic predicates */
     static bool isDefined(Handle h) { return h != Handle::UNDEFINED; }
-    bool isType(Handle& h, Type t, bool subclass) const
-    {
-        Type at = h->getType();
-        if (not subclass) return t == at;
-        return classserver().isA(at, t);
-    }
     bool hasNullName(Handle& h) const
     {
         if (LinkCast(h)) return true;
@@ -351,7 +345,7 @@ public:
                             targetTypeIndex.end(),
                             result,
              [&](Handle h)->bool{
-                 return isDefined(h) and isType(h, type, subclass);
+                 return isDefined(h) and h->isType(type, subclass);
              });
     }
 
@@ -391,39 +385,6 @@ public:
 #endif
     }
 
-    /**
-     * Returns the set of atoms with a given target handle in their
-     * outgoing set (atom type and its subclasses optionally).
-     * That is, returns the incoming set of Handle h, with some optional
-     * filtering.
-     *
-     * @param The handle that must be in the outgoing set of the atom.
-     * @param The optional type of the atom.
-     * @param Whether atom type subclasses should be considered.
-     * @return The set of atoms of the given type with the given handle in
-     * their outgoing set.
-     */
-    template <typename OutputIterator> OutputIterator
-    getIncomingSetByType(OutputIterator result,
-                         Handle& h,
-                         Type type,
-                         bool subclass = false) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy_if(incomingIndex.begin(h),
-                            incomingIndex.end(),
-                            result,
-#else
-        // XXX TODO it would be more efficient to move this to Atom.h
-        HandleSeq hs(getIncomingSet(h));
-        return std::copy_if(hs.begin(), hs.end(), result,
-#endif
-             [&](Handle h)->bool {
-                     return isDefined(h)
-                        and isType(h, type, subclass); });
-    }
-
 
     /**
      * Returns the set of atoms whose outgoing set contains at least one
@@ -448,7 +409,7 @@ public:
     {
         // Gets the exact atom with the given name and type, in any AtomTable.
         Handle targh(getHandle(targetType, targetName));
-        return getIncomingSetByType(result, targh, type, subclass);
+        return targh->getIncomingSetByType(result, type, subclass);
     }
 
     /**
