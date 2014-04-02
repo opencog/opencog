@@ -350,43 +350,6 @@ public:
     }
 
     /**
-     * Return the incoming set associated with handle h.
-     * Note that this returns a copy of the incoming set,
-     * thus making it thread-safe against concurrent additions
-     * or deletions by other threads.
-     *
-     * Return an std::vector, simply because its faster to put the
-     * elements into an std::vector than anything else. We don't need
-     * good delete or random-access performance for this.
-     */
-    HandleSeq getIncomingSet(Handle& h) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return incomingIndex.getIncomingSet(h);
-#else
-        HandleSeq hs;
-        h->getIncomingSet(back_inserter(hs));
-        return hs;
-#endif
-    }
-
-    template <typename OutputIterator> OutputIterator
-    getIncomingSet(OutputIterator result,
-                   Handle& h) const
-    {
-#if TABLE_INCOMING_INDEX
-        std::lock_guard<std::recursive_mutex> lck(_mtx);
-        return std::copy(incomingIndex.begin(h),
-                         incomingIndex.end(),
-                         result);
-#else
-        return h->getIncomingSet(result);
-#endif
-    }
-
-
-    /**
      * Returns the set of atoms whose outgoing set contains at least one
      * atom with the given name and type (atom type and subclasses
      * optionally).

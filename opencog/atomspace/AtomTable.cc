@@ -237,7 +237,8 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     for (Arity i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             Handle h(handles[i]);
-            HandleSeq hs = getIncomingSet(h);
+            HandleSeq hs;
+            h->getIncomingSet(back_inserter(hs));
 
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 // sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
@@ -622,7 +623,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        HandleSeq is = getIncomingSet(handle);
+        HandleSeq is;
+        handle->getIncomingSet(back_inserter(is));
 
         HandleSeq::iterator is_it = is.begin();
         HandleSeq::iterator is_end = is.end();
