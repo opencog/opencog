@@ -1827,6 +1827,8 @@ n_co_clustering_and.pdf A Generalized Maximum Entropy Approach to Bregman
 \begin_layout Standard
 The below was going to be a breif note, but I'm turning it into a rough
  draft blog post.
+ But after sleeping on it, it seems silly.
+ 
 \end_layout
 
 \begin_layout Subsection*
@@ -2184,6 +2186,246 @@ er logic, but to marry maximum entropy to dependency grammars (or, equivalently,
  Unfortunately, my hypothesis is impedded by my lack of understanding of
  precisely, exactly how the different approaches named above may be equivalent,
  isomorphic, or merely similar.
+\end_layout
+
+\begin_layout Section*
+2 April 2014
+\end_layout
+
+\begin_layout Subsection*
+Link Grammar and Finite State Transducers
+\end_layout
+
+\begin_layout Standard
+Claim: Finite state transducers, such as those used for morphological analysis,
+ can be mapped to a Link Grammar.
+ This implies that Link Grammar parsing can be used for morphological analysis,
+ thus unifying syntactic parsing and morphological analysis into a unified
+ framework.A finite state transducer (FST) is defined as:
+\end_layout
+
+\begin_layout Itemize
+A set of states 
+\begin_inset Formula $Q$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+A set 
+\begin_inset Formula $\Sigma$
+\end_inset
+
+ of input symbols (surface form)
+\end_layout
+
+\begin_layout Itemize
+A set 
+\begin_inset Formula $\Gamma$
+\end_inset
+
+ of output symbols (lexicalized form)
+\end_layout
+
+\begin_layout Itemize
+A transition function 
+\begin_inset Formula $\delta\subset Q\times\{\Sigma\cup\epsilon\}\times\{\Gamma\cup\epsilon\}\times Q$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A member 
+\begin_inset Formula $(r,a,b,s)\in\delta$
+\end_inset
+
+ should be thought of as the arrow from state 
+\begin_inset Formula $r$
+\end_inset
+
+ to state 
+\begin_inset Formula $s$
+\end_inset
+
+, the arrow being taken when the input symbol is 
+\begin_inset Formula $a$
+\end_inset
+
+ and as a result producing the output symbol 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ The corresponding link-grammar dictionary entry for this would be 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     a.b: r- & s+;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This states that no linkage is possible, unless the previous link resulted
+ in the emission of the r+ connector.
+ No transition to the next state is possible, unless that state has an s-
+ connector on it.
+\end_layout
+
+\begin_layout Standard
+The current link-grammar notation a.b is awkward for printing, and perhaps
+ some new style is needed to distinguish the output to be printed from the
+ input that is recognized.
+ Thus, perhaps, it would be better to invent a new notation, perhaps a$b
+ to denote that a is recognized, and that b is printed.
+ 
+\end_layout
+
+\begin_layout Standard
+Note that the above definition of link-grammar rules results in a very simple,
+ linear linkage: state transitions follow one-another in linear order.
+ Link grammar allows richer, more complex linkage diagrams, and so the question
+ arises: can a given FST be compactified into a smaller system by making
+ use of the richer possibilities that link-grammar offers? How can this
+ compactification be acheived?
+\end_layout
+
+\begin_layout Standard
+Suppose that the FST 
+\begin_inset Formula $\delta$
+\end_inset
+
+ includes as a subset the state transitions 
+\begin_inset Formula $\{(r,a,?,s),(s,\epsilon,\epsilon,t),(s,b,?,t),(t,c,?,u)\}$
+\end_inset
+
+.
+ The symbol ? is used here as a don't-care state, as it is irrelevant to
+ the discussion that follows.
+ The above state transitions indicates that when the system is in state
+ 
+\begin_inset Formula $s$
+\end_inset
+
+, it may spontaneously transition to state 
+\begin_inset Formula $t$
+\end_inset
+
+, or may do so upon reading 
+\begin_inset Formula $b$
+\end_inset
+
+.
+ That is, the presence of 
+\begin_inset Formula $b$
+\end_inset
+
+ is optional in the state transition.
+ The 
+\begin_inset Quotes eld
+\end_inset
+
+natural
+\begin_inset Quotes erd
+\end_inset
+
+ way of indicating this with link-grammar notation is using the link-grammar
+ dictionary entries: 
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+   a: r- & s+;
+\end_layout
+
+\begin_layout Plain Layout
+
+   b: t+;
+\end_layout
+
+\begin_layout Plain Layout
+
+   c: {t-} & s- & u+;
+\end_layout
+
+\end_inset
+
+Because the transition 
+\begin_inset Formula $(s,\epsilon,\epsilon,t)$
+\end_inset
+
+ reads no input, and produces no output, the state transitions would more
+ likely be written as 
+\begin_inset Formula $\{(r,a,?,t),(r,a,?,s),(s,b,?,t),(t,c,?,u)\}$
+\end_inset
+
+, that is, by collapsing the transition 
+\begin_inset Formula $(s,\epsilon,\epsilon,t)$
+\end_inset
+
+ into the prior state.
+ This would have the entries
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+   a: r- & (s+ or t+);
+\end_layout
+
+\begin_layout Plain Layout
+
+   b: s- & t+;
+\end_layout
+
+\begin_layout Plain Layout
+
+   c: t- & u+;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note this is effective linkage equivalence holds in general for any link-grammar
+ dict, and not just for FST.
+ How should it be understood?
+\end_layout
+
+\begin_layout Standard
+An example of the former is c a noun, and b an adjective: the presence of
+ te adjective is optional, and when it is present, it is linked with a special
+ 'adjective' link (here, t+).
+\end_layout
+
+\begin_layout Standard
+The later construction does not seem to have any easy example equivalent
+ for the English language ...
+ it seems to be awkward.
+ 
+\end_layout
+
+\begin_layout Standard
+This suggests that there should be a pattern recognizer that converts the
+ latter into the former.
+ When would this be inappropriate? When would weighting schemes interfere?
+ when would output interfere?
 \end_layout
 
 \begin_layout Section*
