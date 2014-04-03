@@ -37,3 +37,38 @@ atomspace.add_link(
      atomspace.add_link(
          types.ListLink, [Man, Air])],
     TruthValue(1, TruthValue().confidence_to_count(1)))
+
+# Ben gives Amen headache.(3 argument ListLink)
+
+Ben = atomspace.add_node(types.ConceptNode, "Ben")
+Amen = atomspace.add_node(types.ConceptNode, "Amen")
+give = atomspace.add_node(types.PredicateNode, "gives")
+headache = atomspace.add_node(types.ConceptNode, "headache")
+
+alink1=atomspace.add_link(
+    types.EvaluationLink,
+    [give,
+    atomspace.add_link(
+            types.ListLink,
+            [Ben, Amen, headache])],
+    TruthValue(1, TruthValue().confidence_to_count(1))
+)
+
+alink2=atomspace.add_link(
+    types.EvaluationLink,
+    [give,
+    atomspace.add_link(
+            types.ListLink,
+            [Ben, Amen, Ben])],
+    TruthValue(1, TruthValue().confidence_to_count(1))
+)
+
+# Single argument ListLink , for testing
+
+full_confidence = TruthValue().confidence_to_count(1)
+crisp_true = TruthValue(1, full_confidence)
+Anna = atomspace.add_node(types.ConceptNode, "Anna")
+smokes = atomspace.add_node(types.PredicateNode, "smokes")
+atomspace.add_link(types.EvaluationLink,
+                   [smokes, atomspace.add_link(types.ListLink, [Anna])],
+                   crisp_true)
