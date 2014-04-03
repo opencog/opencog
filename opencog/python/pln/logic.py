@@ -174,25 +174,32 @@ class Logic(object):
         Unify atoms x,y with substitution s; return a substitution
         that would make x,y equal, or None if x,y can not unify.
         """
-
         self.log.debug("Trying to unify:\n{0}\n{1}".format(x, y))
+
         if substitution is None:
-            return None
+            result = None
         elif x == y:
-            return substitution
+            result = substitution
         elif self.is_variable(x):
-            return self._unify_variable(x, y, substitution)
+            result = self._unify_variable(x, y, substitution)
         elif self.is_variable(y):
-            return self._unify_variable(y, x, substitution)
+            result = self._unify_variable(y, x, substitution)
         elif (not x.is_node()) and (not y.is_node()):
             if x.type != y.type:
-                return None
+                result = None
             elif len(x.out) != len(y.out):    
-                return None
+                result = None
             else:
-                return self._unify_outgoing(x, y, substitution)
+                result = self._unify_outgoing(x, y, substitution)
         else:
-            return None
+            result = None
+
+        if result is not None:
+            self.log.debug("Unify result:\n{0}".format(result))
+        else:
+            self.log.debug("Unable to unify")
+
+        return result
 
     def _unify_outgoing(self, x, y, substitution):
         assert isinstance(x, Atom)

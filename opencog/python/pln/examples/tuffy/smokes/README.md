@@ -8,40 +8,38 @@ More details on this example are available here:
 
 Author: Cosmo Harrigan, March 2014
 
-**In-progress: incomplete results.**
-
-**The input data used in this file is currently only a subset of the full input data.**
-
 ##### Input data used
+
+###### Python format
 https://github.com/opencog/opencog/blob/master/opencog/python/pln/examples/tuffy/smokes/data.py
 
-##### Full input data to be used when completed
+###### Scheme format
 https://github.com/opencog/test-datasets/blob/master/pln/tuffy/smokes/smokes.scm
 
 ## Results
 ```
-(EvaluationLink (stv 0.500000 1.000000)
+(EvaluationLink (stv 0.622500 1.000000)
   (PredicateNode "cancer")
   (ListLink (stv 1.000000 0.000000)
     (ConceptNode "Edward")
   )
 )
 
-(EvaluationLink (stv 0.500000 1.000000)
+(EvaluationLink (stv 0.503926 1.000000)
   (PredicateNode "cancer")
   (ListLink (stv 1.000000 0.000000)
     (ConceptNode "Anna")
   )
 )
 
-(EvaluationLink (stv 0.320000 1.000000)
+(EvaluationLink (stv 0.452951 1.000000)
   (PredicateNode "cancer")
   (ListLink (stv 1.000000 0.000000)
     (ConceptNode "Bob")
   )
 )
 
-(EvaluationLink (stv 0.320000 1.000000)
+(EvaluationLink (stv 0.452951 1.000000)
   (PredicateNode "cancer")
   (ListLink (stv 1.000000 0.000000)
     (ConceptNode "Frank")
@@ -52,178 +50,187 @@ https://github.com/opencog/test-datasets/blob/master/pln/tuffy/smokes/smokes.scm
 ## Active rules
 
 ```
-EvaluationToMemberRule
-MemberToEvaluationRule
-MemberToInheritanceRule
-InheritanceToMemberRule
-GeneralEvaluationToMemberRule
 ModusPonensRule
 ```
 
 ## AtomSpace starting contents
 
 ```
-(ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
+(ConceptNode "Bob") ; [22]
 
-(ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
+(ConceptNode "Frank") ; [27]
 
-(ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
+(ConceptNode "Anna") ; [6]
 
-(ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
+(ConceptNode "Edward") ; [10]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "Edward") ; [10]
+) ; [11]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "Anna") ; [6]
+  (ConceptNode "Bob") ; [22]
+) ; [23]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "Bob") ; [22]
+  (ConceptNode "Anna") ; [6]
+) ; [25]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "Edward") ; [10]
+  (ConceptNode "Frank") ; [27]
+) ; [28]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(ListLink (stv 1.000000 0.000000)
+  (ConceptNode "Anna") ; [6]
+) ; [8]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-  (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(PredicateNode "cancer") ; [13]
 
-(ListLink (av 0 0 0) (stv 1.000000 0.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-)
+(PredicateNode "friends") ; [17]
 
-(VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
+(PredicateNode "smokes") ; [7]
 
-(VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Edward") ; [10]
+  ) ; [11]
+) ; [12]
 
-(ImplicationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "friends") ; [17]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Anna") ; [6]
+    (ConceptNode "Bob") ; [22]
+  ) ; [23]
+) ; [24]
 
-(ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
+(EvaluationLink (stv 1.000000 0.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (VariableNode "$X") ; [1]
+  ) ; [2]
+) ; [14]
 
-(ImplicationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
-    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
-  )
-)
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "friends") ; [17]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Bob") ; [22]
+    (ConceptNode "Anna") ; [6]
+  ) ; [25]
+) ; [26]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "friends") ; [17]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Edward") ; [10]
+    (ConceptNode "Frank") ; [27]
+  ) ; [28]
+) ; [29]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(EvaluationLink (stv 1.000000 1.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Anna") ; [6]
+  ) ; [8]
+) ; [9]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(EvaluationLink (stv 1.000000 0.000000)
+  (PredicateNode "friends") ; [17]
+  (ListLink (stv 1.000000 0.000000)
+    (VariableNode "$X") ; [1]
+    (VariableNode "$Y") ; [3]
+  ) ; [5]
+) ; [18]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-  (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(EvaluationLink (stv 1.000000 0.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (VariableNode "$Y") ; [3]
+  ) ; [4]
+) ; [19]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(EvaluationLink (stv 1.000000 0.000000)
+  (PredicateNode "cancer") ; [13]
+  (ListLink (stv 1.000000 0.000000)
+    (VariableNode "$X") ; [1]
+  ) ; [2]
+) ; [15]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(VariableNode "$X") ; [1]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(VariableNode "$Y") ; [3]
 
-(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+(ListLink (stv 1.000000 0.000000)
+  (VariableNode "$X") ; [1]
+) ; [2]
 
-(PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
+(ListLink (stv 1.000000 0.000000)
+  (VariableNode "$Y") ; [3]
+) ; [4]
 
-(PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+(ListLink (stv 1.000000 0.000000)
+  (VariableNode "$X") ; [1]
+  (VariableNode "$Y") ; [3]
+) ; [5]
 
-(PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+
+(ImplicationLink (stv 0.622500 1.000000)
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (VariableNode "$X") ; [1]
+    ) ; [2]
+  ) ; [14]
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "cancer") ; [13]
+    (ListLink (stv 1.000000 0.000000)
+      (VariableNode "$X") ; [1]
+    ) ; [2]
+  ) ; [15]
+) ; [16]
+
+(ImplicationLink (stv 1.000000 0.000000)
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (VariableNode "$X") ; [1]
+    ) ; [2]
+  ) ; [14]
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (VariableNode "$Y") ; [3]
+    ) ; [4]
+  ) ; [19]
+) ; [20]
+
+(ImplicationLink (stv 0.598700 1.000000)
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "friends") ; [17]
+    (ListLink (stv 1.000000 0.000000)
+      (VariableNode "$X") ; [1]
+      (VariableNode "$Y") ; [3]
+    ) ; [5]
+  ) ; [18]
+  (ImplicationLink (stv 1.000000 0.000000)
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "smokes") ; [7]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$X") ; [1]
+      ) ; [2]
+    ) ; [14]
+    (EvaluationLink (stv 1.000000 0.000000)
+      (PredicateNode "smokes") ; [7]
+      (ListLink (stv 1.000000 0.000000)
+        (VariableNode "$Y") ; [3]
+      ) ; [4]
+    ) ; [19]
+  ) ; [20]
+) ; [21]
 ```
 
 ## Inference steps
@@ -231,1027 +238,397 @@ ModusPonensRule
 ```
 ----- [Output # 1] -----
 -- Output:
-(ImplicationLink (stv 0.400000 1.000000)
+(ImplicationLink (stv 0.598700 1.000000)
   (EvaluationLink (stv 1.000000 1.000000)
-    (PredicateNode "smokes")
+    (PredicateNode "smokes") ; [7]
     (ListLink (stv 1.000000 0.000000)
-      (ConceptNode "Edward")
-    )
-  )
+      (ConceptNode "Anna") ; [6]
+    ) ; [8]
+  ) ; [9]
   (EvaluationLink (stv 1.000000 0.000000)
-    (PredicateNode "smokes")
+    (PredicateNode "smokes") ; [7]
     (ListLink (stv 1.000000 0.000000)
-      (ConceptNode "Frank")
-    )
-  )
-)
+      (ConceptNode "Bob") ; [22]
+    ) ; [36]
+  ) ; [37]
+) ; [38]
 
--- using production rule: ModusPonensRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.400000 1.000000)
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
   (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+    ) ; [5]
+  ) ; [18]
   (ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
     (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
       (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
+        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      ) ; [2]
+    ) ; [14]
     (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
       (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
-  )
-)
+        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+      ) ; [4]
+    ) ; [19]
+  ) ; [20]
+) ; [21]
 , (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+  ) ; [23]
+) ; [24]
 ]
 
 ----- [Output # 2] -----
 -- Output:
-(EvaluationLink (stv 0.400000 1.000000)
-  (PredicateNode "smokes")
+(EvaluationLink (stv 0.598700 1.000000)
+  (PredicateNode "smokes") ; [7]
   (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Frank")
-  )
-)
+    (ConceptNode "Bob") ; [22]
+  ) ; [36]
+) ; [37]
 
--- using production rule: ModusPonensRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.400000 1.000000)
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
   (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+      (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+    ) ; [8]
+  ) ; [9]
+  (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
+      (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+    ) ; [36]
+  ) ; [37]
+) ; [38]
 , (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+  ) ; [8]
+) ; [9]
 ]
 
 ----- [Output # 3] -----
 -- Output:
-(ImplicationLink (stv 0.400000 1.000000)
-  (EvaluationLink (stv 1.000000 1.000000)
-    (PredicateNode "smokes")
-    (ListLink (stv 1.000000 0.000000)
-      (ConceptNode "Anna")
-    )
-  )
-  (EvaluationLink (stv 1.000000 0.000000)
-    (PredicateNode "smokes")
-    (ListLink (stv 1.000000 0.000000)
-      (ConceptNode "Bob")
-    )
-  )
-)
+(EvaluationLink (stv 0.622500 1.000000)
+  (PredicateNode "cancer") ; [13]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Edward") ; [10]
+  ) ; [11]
+) ; [54]
 
--- using production rule: ModusPonensRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.400000 1.000000)
+[(ImplicationLink (av 0 0 0) (stv 0.622500 1.000000)
   (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
-    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000))
-      )
-    )
-  )
-)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [14]
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000)) ; [13]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [15]
+) ; [16]
 , (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000)) ; [10]
+  ) ; [11]
+) ; [12]
 ]
 
 ----- [Output # 4] -----
 -- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "smokes")
-)
+(ImplicationLink (stv 0.598700 1.000000)
+  (EvaluationLink (stv 1.000000 1.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (ConceptNode "Edward") ; [10]
+    ) ; [11]
+  ) ; [12]
+  (EvaluationLink (stv 1.000000 0.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (ConceptNode "Frank") ; [27]
+    ) ; [62]
+  ) ; [63]
+) ; [64]
 
--- using production rule: EvaluationToMemberRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+    ) ; [5]
+  ) ; [18]
+  (ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      ) ; [2]
+    ) ; [14]
+    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+      ) ; [4]
+    ) ; [19]
+  ) ; [20]
+) ; [21]
+, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000)) ; [10]
+    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000)) ; [27]
+  ) ; [28]
+) ; [29]
 ]
 
 ----- [Output # 5] -----
 -- Output:
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "smokes")
-)
+(EvaluationLink (stv 0.598700 1.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Frank") ; [27]
+  ) ; [62]
+) ; [63]
 
--- using production rule: MemberToInheritanceRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000)) ; [10]
+    ) ; [11]
+  ) ; [12]
+  (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000)) ; [27]
+    ) ; [62]
+  ) ; [63]
+) ; [64]
+, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000)) ; [10]
+  ) ; [11]
+) ; [12]
 ]
 
 ----- [Output # 6] -----
 -- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "smokes")
-)
+(EvaluationLink (stv 0.452951 1.000000)
+  (PredicateNode "cancer") ; [13]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Bob") ; [22]
+  ) ; [36]
+) ; [79]
 
--- using production rule: InheritanceToMemberRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
+[(ImplicationLink (av 0 0 0) (stv 0.622500 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [14]
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000)) ; [13]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [15]
+) ; [16]
+, (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+  ) ; [36]
+) ; [37]
 ]
 
 ----- [Output # 7] -----
 -- Output:
-(EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "smokes")
+(EvaluationLink (stv 0.452951 1.000000)
+  (PredicateNode "cancer") ; [13]
   (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Anna")
-  )
-)
+    (ConceptNode "Frank") ; [27]
+  ) ; [62]
+) ; [90]
 
--- using production rule: MemberToEvaluationRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
+[(ImplicationLink (av 0 0 0) (stv 0.622500 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [14]
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000)) ; [13]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [15]
+) ; [16]
+, (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000)) ; [27]
+  ) ; [62]
+) ; [63]
 ]
 
 ----- [Output # 8] -----
 -- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)")
-)
+(ImplicationLink (stv 0.598700 1.000000)
+  (EvaluationLink (stv 0.598700 1.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (ConceptNode "Bob") ; [22]
+    ) ; [36]
+  ) ; [37]
+  (EvaluationLink (stv 1.000000 1.000000)
+    (PredicateNode "smokes") ; [7]
+    (ListLink (stv 1.000000 0.000000)
+      (ConceptNode "Anna") ; [6]
+    ) ; [8]
+  ) ; [9]
+) ; [134]
 
--- using production rule: GeneralEvaluationToMemberRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+    ) ; [5]
+  ) ; [18]
+  (ImplicationLink (av 0 0 0) (stv 1.000000 0.000000)
+    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+        (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+      ) ; [2]
+    ) ; [14]
+    (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
+      (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+      (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+        (VariableNode "$Y" (av 0 0 0) (stv 1.000000 0.000000)) ; [3]
+      ) ; [4]
+    ) ; [19]
+  ) ; [20]
+) ; [21]
+, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
+  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000)) ; [17]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+  ) ; [25]
+) ; [26]
 ]
 
 ----- [Output # 9] -----
 -- Output:
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)")
-)
+(EvaluationLink (stv 0.719351 1.000000)
+  (PredicateNode "smokes") ; [7]
+  (ListLink (stv 1.000000 0.000000)
+    (ConceptNode "Anna") ; [6]
+  ) ; [8]
+) ; [9]
 
--- using production rule: MemberToInheritanceRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
+[(ImplicationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+    ) ; [36]
+  ) ; [37]
+  (EvaluationLink (av 0 0 0) (stv 0.719351 1.000000)
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+      (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+    ) ; [8]
+  ) ; [9]
+) ; [134]
+, (EvaluationLink (av 0 0 0) (stv 0.598700 1.000000)
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
+  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
+    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000)) ; [22]
+  ) ; [36]
+) ; [37]
 ]
 
 ----- [Output # 10] -----
 -- Output:
-(EvaluationLink (stv 0.320000 1.000000)
-  (PredicateNode "cancer")
+(EvaluationLink (stv 0.503926 1.000000)
+  (PredicateNode "cancer") ; [13]
   (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Frank")
-  )
-)
+    (ConceptNode "Anna") ; [6]
+  ) ; [8]
+) ; [164]
 
--- using production rule: ModusPonensRule
+-- using production rule: ModusPonensRule<ImplicationLink>
 
 -- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.500000 1.000000)
+[(ImplicationLink (av 0 0 0) (stv 0.622500 1.000000)
   (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [14]
   (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
+    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000)) ; [13]
     (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
-, (EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
+      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000)) ; [1]
+    ) ; [2]
+  ) ; [15]
+) ; [16]
+, (EvaluationLink (av 0 0 0) (stv 0.719351 1.000000)
+  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000)) ; [7]
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
+    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000)) ; [6]
+  ) ; [8]
+) ; [9]
 ]
 
------ [Output # 11] -----
--- Output:
-(MemberLink (stv 0.400000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "smokes")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 12] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)")
-)
-
--- using production rule: GeneralEvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "friends" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 13] -----
--- Output:
-(MemberLink (stv 0.320000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "cancer")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.320000 1.000000)
-  (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 14] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 15] -----
--- Output:
-(InheritanceLink (stv 0.400000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "smokes")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 16] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "smokes")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 17] -----
--- Output:
-(EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "SatisfyingSet(friends _ Frank:ConceptNode)")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Edward")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 18] -----
--- Output:
-(MemberLink (stv 0.400000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "smokes")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 19] -----
--- Output:
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "smokes")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 20] -----
--- Output:
-(EvaluationLink (stv 0.400000 1.000000)
-  (PredicateNode "smokes")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Frank")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 21] -----
--- Output:
-(EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "SatisfyingSet(friends _ Bob:ConceptNode)")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Anna")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 22] -----
--- Output:
-(InheritanceLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 23] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "SatisfyingSet(friends _ Bob:ConceptNode)")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "SatisfyingSet(friends _ Bob:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 24] -----
--- Output:
-(EvaluationLink (stv 0.320000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Frank")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 25] -----
--- Output:
-(EvaluationLink (stv 0.500000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Edward")
-  )
-)
-
--- using production rule: ModusPonensRule
-
--- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
-, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 26] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 27] -----
--- Output:
-(EvaluationLink (stv 1.000000 1.000000)
-  (PredicateNode "smokes")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Edward")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 28] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "SatisfyingSet(friends _ Frank:ConceptNode)")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "SatisfyingSet(friends _ Frank:ConceptNode)" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 29] -----
--- Output:
-(EvaluationLink (stv 0.400000 1.000000)
-  (PredicateNode "smokes")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Bob")
-  )
-)
-
--- using production rule: ModusPonensRule
-
--- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
-, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 30] -----
--- Output:
-(MemberLink (stv 1.000000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "smokes")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 1.000000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 31] -----
--- Output:
-(MemberLink (stv 0.400000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "smokes")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 32] -----
--- Output:
-(EvaluationLink (stv 0.500000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Anna")
-  )
-)
-
--- using production rule: ModusPonensRule
-
--- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
-, (EvaluationLink (av 0 0 0) (stv 1.000000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 33] -----
--- Output:
-(EvaluationLink (stv 0.320000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Bob")
-  )
-)
-
--- using production rule: ModusPonensRule
-
--- based on this input:
-[(ImplicationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-  (EvaluationLink (av 0 0 0) (stv 1.000000 0.000000)
-    (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-    (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-      (VariableNode "$X" (av 0 0 0) (stv 1.000000 0.000000))
-    )
-  )
-)
-, (EvaluationLink (av 0 0 0) (stv 0.400000 1.000000)
-  (PredicateNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 34] -----
--- Output:
-(MemberLink (stv 0.320000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "cancer")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.320000 1.000000)
-  (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 35] -----
--- Output:
-(InheritanceLink (stv 0.320000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "cancer")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 36] -----
--- Output:
-(EvaluationLink (stv 0.320000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Bob")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 37] -----
--- Output:
-(MemberLink (stv 0.500000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "cancer")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 38] -----
--- Output:
-(InheritanceLink (stv 0.500000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "cancer")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 39] -----
--- Output:
-(InheritanceLink (stv 0.400000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "smokes")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 40] -----
--- Output:
-(MemberLink (stv 0.320000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "cancer")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 41] -----
--- Output:
-(MemberLink (stv 0.500000 1.000000)
-  (ConceptNode "Edward")
-  (ConceptNode "cancer")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 42] -----
--- Output:
-(EvaluationLink (stv 0.500000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Edward")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Edward" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 43] -----
--- Output:
-(MemberLink (stv 0.400000 1.000000)
-  (ConceptNode "Bob")
-  (ConceptNode "smokes")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 44] -----
--- Output:
-(MemberLink (stv 0.500000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "cancer")
-)
-
--- using production rule: EvaluationToMemberRule
-
--- based on this input:
-[(EvaluationLink (av 0 0 0) (stv 0.500000 1.000000)
-  (PredicateNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-  (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  )
-)
-]
-
------ [Output # 45] -----
--- Output:
-(EvaluationLink (stv 0.500000 1.000000)
-  (PredicateNode "cancer")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Anna")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 46] -----
--- Output:
-(InheritanceLink (stv 0.500000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "cancer")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 47] -----
--- Output:
-(EvaluationLink (stv 0.400000 1.000000)
-  (PredicateNode "smokes")
-  (ListLink (stv 1.000000 0.000000)
-    (ConceptNode "Bob")
-  )
-)
-
--- using production rule: MemberToEvaluationRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.400000 1.000000)
-  (ConceptNode "Bob" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "smokes" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 48] -----
--- Output:
-(InheritanceLink (stv 0.320000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "cancer")
-)
-
--- using production rule: MemberToInheritanceRule
-
--- based on this input:
-[(MemberLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 49] -----
--- Output:
-(MemberLink (stv 0.500000 1.000000)
-  (ConceptNode "Anna")
-  (ConceptNode "cancer")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.500000 1.000000)
-  (ConceptNode "Anna" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
-
------ [Output # 50] -----
--- Output:
-(MemberLink (stv 0.320000 1.000000)
-  (ConceptNode "Frank")
-  (ConceptNode "cancer")
-)
-
--- using production rule: InheritanceToMemberRule
-
--- based on this input:
-[(InheritanceLink (av 0 0 0) (stv 0.320000 1.000000)
-  (ConceptNode "Frank" (av 0 0 0) (stv 1.000000 0.000000))
-  (ConceptNode "cancer" (av 0 0 0) (stv 1.000000 0.000000))
-)
-]
+---- Answer found after 10 inference steps that produced a new output, out of 28 total inference steps attempted.
 ```

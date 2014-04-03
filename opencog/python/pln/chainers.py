@@ -4,7 +4,6 @@ import random
 from collections import defaultdict
 
 from pln.logic import Logic
-from pln.rules.formulas import revisionFormula
 from pln.rules import *
 from opencog.atomspace import types, Atom, AtomSpace, TruthValue
 from opencog import logger
@@ -175,24 +174,35 @@ class AbstractChainer(Logic):
         self.random.shuffle(atoms)
         #atoms = self.random.sample(atoms, len(atoms))
 
+        if len(atoms) is 0:
+            self.log.debug("Warning: _select_atom called with empty list")
+            return None
+
         # O(N*the percentage of atoms that are useful)
+        num_attempts = 0
         for atom in atoms:
+            num_attempts += 1
             if self.wanted_atom(atom,
                                 template,
                                 substitution,
                                 ground=False,
                                 allow_zero_tv=allow_zero_tv):
-                self.log.debug("wanted_atom = True")
                 if rule is None:
+                    self.log.debug("Found atom after {0} attempts".
+                                   format(num_attempts))
                     return atom
                 if rule.valid_inputs(other_inputs+[atom]):
+                    self.log.debug("Found atom after {0} attempts".
+                                   format(num_attempts))
                     return atom
                 else:
                     self.log_failed_inference(
-                        'invalid input, trying another one ' +
+                        "Attempt #" + str(num_attempts) + "{0} produced " +
+                        "invalid input, trying another one " +
                         str(other_inputs + [atom]))
-            else:
-                self.log.debug("wanted_atom = False")
+
+        self.log.debug("Unable to find wanted atom after {0} attempts".
+                       format(num_attempts))
         return None
 
     def _selectOne(self, atoms):
@@ -414,16 +424,30 @@ class Chainer(AbstractChainer):
             self.rule_count = defaultdict(constant_factory)
 
     def forward_step(self, rule=None):
+        self.log.debug("=============================== Running forward step")
         if rule is None:
             rule = self._select_rule()
         results = self._apply_forward(rule)
+
+        if results is not None:
+            self.log.debug("Forward step results:\n{0}".format(results))
+        else:
+            self.log.debug("Forward step returned no results")
+
         return results
 
     def backward_step(self, rule=None, target_atoms=None):
+        self.log.debug("=============================== Running backward step")
+
         if rule is None:
             rule = self._select_rule()
 
         results = self._apply_backward(rule, target_outputs=target_atoms)
+
+        if results is not None:
+            self.log.debug("Backward step results:\n{0}".format(results))
+        else:
+            self.log.debug("Backward step returned no results")
 
         return results
 
@@ -965,8 +989,8 @@ class Chainer(AbstractChainer):
         Run inference until atom is proved with >0 count, or time
         runs out (measured in seconds)
         """
-        self.log.debug("Trying to produce truth values for atom:")
-        self.log.debug(repr(atom))
+        self.log.debug("Trying to produce truth values for atom:\n{0}".
+                       format(repr(atom)))
 
         import time
         start_time = time.time()
@@ -975,23 +999,11 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-            self.log.debug("Running backward step")
-            res = self.backward_step()
-            if res:
-                self.log.debug(res)
-            else:
-                self.log.debug("Backward step returned no results")
-
-            self.log.debug("Running forward step")
-            res = self.forward_step()
-            if res:
-                self.log.debug(res)
-            else:
-                self.log.debug("Forward step returned no results")
+            self.backward_step()
+            self.forward_step()
 
             target_instances = self.get_target_instances(atom)
             if target_instances:
-                # Todo: The variable 'instance' is never used
                 for instance in target_instances:
                     self.log.debug("Target produced!")
                     self.log.debug(repr(instance))
