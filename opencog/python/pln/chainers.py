@@ -474,7 +474,6 @@ class Chainer(AbstractChainer):
             if self._delete_temporary_variables:
                 for var in created_vars:
                     if var in self.atomspace:
-                        #self.atomspace.remove(var, recursive=False)
                         self.atomspace.remove(var, recursive=True)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
