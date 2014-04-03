@@ -52,7 +52,7 @@ class InteractiveAgent:
 
         outputs_produced = 0
 
-        for i in range(1, 500):
+        for i in range(0, self.num_steps):
             result = self.agent.run(self.atomspace)
 
             output = None
