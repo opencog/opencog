@@ -7,7 +7,7 @@ from pln.logic import Logic
 from pln.rules.formulas import revisionFormula
 from pln.rules import *
 from opencog.atomspace import types, Atom, AtomSpace, TruthValue
-
+from opencog import logger
 
 """
 Todo:
@@ -18,7 +18,8 @@ without having to be aware of the different sets of rules that require
 different argument sets.
 """
 
-_VERBOSE = False
+LOG_LEVEL = "FINE"
+LOG_DEFAULT_FILENAME = "/tmp/pln.log"
 
 '''
 There are lots of possible heuristics for choosing atoms. It also
@@ -84,8 +85,9 @@ class AbstractChainer(Logic):
     """
     Has important utility methods for chainers.
     """
-    def __init__(self, atomspace):
-        Logic.__init__(self, atomspace)
+    def __init__(self, atomspace, log):
+        self.log = log
+        Logic.__init__(self, atomspace, self.log)
         self.rules = []
         self.random = random.Random(0)
 
@@ -99,8 +101,7 @@ class AbstractChainer(Logic):
 
     # Todo: Should this be a static method?
     def log_failed_inference(self, message):
-        if _VERBOSE:
-            print 'Attempted invalid inference:', message
+        self.log.debug("Attempted invalid inference: {0}".format(message))
 
     # Finds a list of candidate atoms and then matches all of them
     # against the template. Uses the Attentional Focus where possible
@@ -116,6 +117,7 @@ class AbstractChainer(Logic):
             return template
 
         atoms = self.atomspace.get_atoms_in_attentional_focus()
+        self.log.debug("Found in attentional focus: {0}.".format(len(atoms)))
         atom = self._select_atom(template,
                                  s,
                                  atoms,
@@ -123,17 +125,21 @@ class AbstractChainer(Logic):
                                  rule,
                                  other_inputs)
         if not atom:
+            self.log.debug("No atoms found in attentional focus")
             # if it can't find anything in the attentional focus, try
             # the whole atomspace. (it actually still uses indexes to
             # find a subset of the links, that is more likely to be
             # useful)
             atoms = self.lookup_atoms(template, s)
+            self.log.debug("Lookup atoms returned {0} results"
+                           .format(len(atoms)))
             atom = self._select_atom(template,
                                      s,
                                      atoms,
                                      allow_zero_tv,
                                      rule,
                                      other_inputs)
+            self.log.debug("Select atom returned:\n{0}".format(atom))
 
         return atom
 
@@ -176,6 +182,7 @@ class AbstractChainer(Logic):
                                 substitution,
                                 ground=False,
                                 allow_zero_tv=allow_zero_tv):
+                self.log.debug("wanted_atom = True")
                 if rule is None:
                     return atom
                 if rule.valid_inputs(other_inputs+[atom]):
@@ -184,6 +191,8 @@ class AbstractChainer(Logic):
                     self.log_failed_inference(
                         'invalid input, trying another one ' +
                         str(other_inputs + [atom]))
+            else:
+                self.log.debug("wanted_atom = False")
         return None
 
     def _selectOne(self, atoms):
@@ -354,8 +363,17 @@ class Chainer(AbstractChainer):
                  preferAttentionalFocus=False,
                  allow_output_with_variables=False,
                  allow_backchaining_with_variables=False,
-                 delete_temporary_variables=False):
-        AbstractChainer.__init__(self, atomspace)
+                 delete_temporary_variables=False,
+                 log=None):
+
+        if log is None:
+            self.log = logger.create_logger(LOG_DEFAULT_FILENAME)
+        else:
+            self.log = logger
+        self.log.set_level(LOG_LEVEL)
+        self.log.fine("Initializing PLN MindAgent")
+
+        AbstractChainer.__init__(self, atomspace, self.log)
 
         # It stores a reference to the MindAgent object so it can
         # stimulate atoms.
@@ -398,9 +416,7 @@ class Chainer(AbstractChainer):
     def forward_step(self, rule=None):
         if rule is None:
             rule = self._select_rule()
-
         results = self._apply_forward(rule)
-
         return results
 
     def backward_step(self, rule=None, target_atoms=None):
@@ -428,8 +444,8 @@ class Chainer(AbstractChainer):
             * give it an STI boost
             * record this inference in the InferenceHistoryRepository
         """
-        if _VERBOSE:
-            print str(rule)
+        self.log.debug(str(rule))
+
         try:
             (generic_inputs, generic_outputs, created_vars) = \
                 rule.standardize_apart_input_output(self)
@@ -458,7 +474,7 @@ class Chainer(AbstractChainer):
             if self._delete_temporary_variables:
                 for var in created_vars:
                     if var in self.atomspace:
-                        self.atomspace.remove(var, recursive=False)
+                        self.atomspace.remove(var, recursive=True)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
@@ -524,7 +540,7 @@ class Chainer(AbstractChainer):
                 return_inputs[i] = atom
             else:
                 if not allow_zero_tv:
-                    #print 'unable to match:',template
+                    #self.log.debug("Unable to match: {0}".format(template))
                     return None
                 # This means it won't be able to produce the output,
                 # but choosing some inputs is still essential for
@@ -624,6 +640,9 @@ class Chainer(AbstractChainer):
         # the atoms, but not assign a TruthValue. Stimulating the inputs
         # makes it more likely to find them in future.
 
+        if len(specific_inputs) == 0:
+            self.log.debug("Error: specific_inputs == 0")
+            return None
         if self._all_nonzero_tvs(specific_inputs):
             return self.apply_rule(rule, specific_inputs, final_outputs)
         else:
@@ -828,17 +847,24 @@ class Chainer(AbstractChainer):
 
             if len(input_set):
                 if output_atom not in self.atomspace:
-                    print 'warning: trail contains nonexistent atom ' \
-                          '(caused by some bug)'
+                    # Todo: @jadeoneill did you find the root cause of this?
+                    #       Is this check still necessary?
+                    #       https://github.com/opencog/opencog/issues/522
+                    self.log.error("warning: trail contains nonexistent atom" +
+                                   "(caused by some bug)")
                     continue
 
-                print '\nStep', number + 1
+                self.log.debug("Inference trail:")
+                self.log.debug("Step #{0}".format(number + 1))
                 for input in input_set:
-                    print input.h, input
-                print '|='
-                print output_atom.h, output_atom
+                    self.log.debug("[{0}] {1}".format(input.h, input))
+                self.log.debug("|=")
+                self.log.debug("[{0}] {1}".format(output_atom.h, output_atom))
+
+            # Todo: Can the following be uncommented or removed?
             #else:
-            #    print 'Premise', output_atom.h, output_atom
+            #    self.log.debug("Premise")
+            #    self.log.debug("[{0}] {1}".format(output_atom.h, output_atom))
 
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one
@@ -920,27 +946,27 @@ class Chainer(AbstractChainer):
     def test_rule(self, rule, sample_count):
         # Do a series of samples; different atoms with the same rules.
         self.random.seed(0)
-        print 'Testing', rule, 'in forward chainer'
+        self.log.debug("Testing {0} in forward chainer".format(rule))
 
         for i in xrange(0, sample_count):
             results = self.forward_step(rule=rule)
             if results:
-                print results
+                self.log.debug(results)
 
-        print 'Testing', rule, 'in backward chainer'
+        self.log.debug("Testing {0} in backward chainer".format(rule))
 
         for i in xrange(0, sample_count):
             results = self.backward_step(rule=rule)
             if results:
-                print results
+                self.log.debug(results)
 
     def find_atom(self, atom, time_allowed=300):
         """
         Run inference until atom is proved with >0 count, or time
         runs out (measured in seconds)
         """
-        print 'Trying to produce truth values for atom:'
-        print repr(atom)
+        self.log.debug("Trying to produce truth values for atom:")
+        self.log.debug(repr(atom))
 
         import time
         start_time = time.time()
@@ -949,25 +975,35 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
+            self.log.debug("Running backward step")
             res = self.backward_step()
-            if res: print res
+            if res:
+                self.log.debug(res)
+            else:
+                self.log.debug("Backward step returned no results")
+
+            self.log.debug("Running forward step")
             res = self.forward_step()
-            if _VERBOSE and res:
-                print res
+            if res:
+                self.log.debug(res)
+            else:
+                self.log.debug("Forward step returned no results")
 
             target_instances = self.get_target_instances(atom)
             if target_instances:
                 # Todo: The variable 'instance' is never used
                 for instance in target_instances:
-                    print 'Target produced!'
-                    print repr(instance)
+                    self.log.debug("Target produced!")
+                    self.log.debug(repr(instance))
 
-                    print 'Inference steps'
-                    print self.display_trail(self.find_trail(instance))
+                    self.log.debug("Inference steps")
+                    self.log.debug(
+                        self.display_trail(self.find_trail(instance)))
 
                 return True
 
-        print 'Failed to find target in', time_allowed, 'seconds'
+        self.log.debug(
+            "Failed to find target in {0} seconds".format(time_allowed))
         return False
 
     def get_target_instances(self, target):
@@ -979,7 +1015,8 @@ class Chainer(AbstractChainer):
         variables bound)
         """
         atoms = self.lookup_atoms(target, {})
-        atoms = [atom for atom in atoms if self.wanted_atom(atom, target, {}, allow_zero_tv=False, ground=False)]
+        atoms = [atom for atom in atoms if
+                 self.wanted_atom(atom, target, {}, allow_zero_tv=False, ground=False)]
         return atoms
 
     def get_query(self):

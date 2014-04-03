@@ -1,8 +1,6 @@
 from opencog.atomspace import types, Atom
 from itertools import permutations
 
-_DEBUG = False
-
 
 class Logic(object):
     """
@@ -10,7 +8,8 @@ class Logic(object):
     logical functions inspired by the AIMA chapter on first-order
     logic. They all operate directly on Atoms.
     """
-    def __init__(self, atomspace):
+    def __init__(self, atomspace, log):
+        self.log = log
         self._atomspace = atomspace
 
     def variables(self, atom):
@@ -107,14 +106,13 @@ class Logic(object):
         unifies_ok = self.unify_together(atom, template, s)
         grounded_ok = not ground or len(self.variables(atom)) == 0
 
-        if _DEBUG:
-            print("tv_ok: {0}, unifies_ok: {1}, grounded_ok: {2}".
-                  format(tv_ok, unifies_ok, grounded_ok))
+        self.log.debug("tv_ok: {0}, unifies_ok: {1}, grounded_ok: {2}".
+                       format(tv_ok, unifies_ok, grounded_ok))
 
         return tv_ok and unifies_ok and grounded_ok
 
     def unify_together(self, x, y, s):
-        return self.unify(x, y, s) != None
+        return self.unify(x, y, s) is not None
 
     def standardize_apart(self, atom, dic=None):
         """
@@ -177,8 +175,7 @@ class Logic(object):
         that would make x,y equal, or None if x,y can not unify.
         """
 
-        if _DEBUG:
-            print("Trying to unify: {0} and {1}".format(x, y))
+        self.log.debug("Trying to unify:\n{0}\n{1}".format(x, y))
         if substitution is None:
             return None
         elif x == y:
