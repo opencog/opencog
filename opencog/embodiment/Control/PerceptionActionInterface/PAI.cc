@@ -180,17 +180,20 @@ ActionPlanID PAI::createActionPlan()
     // Get the planning result
     std::string demandName; 
 
-    Handle hDemandEvaluationLink =
-        AtomSpaceUtil::getReference(atomSpace, 
-                                    atomSpace.getHandle(CONCEPT_NODE,
-                                                        "plan_selected_demand_goal"
-                                                       )
-                                   );
+    // @todo: this pertains to OpenPsi, that logging should probably
+    // occur by the OpenPsi caller rather than here
+    Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
+                                                 "plan_selected_demand_goal");
+    if (hPlanSelDemGoal != Handle::UNDEFINED) {
+        Handle hDemandEvaluationLink =
+            AtomSpaceUtil::getReference(atomSpace, hPlanSelDemGoal);
 
-    if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
-        Handle hDemandPredicateNode = atomSpace.getOutgoing(hDemandEvaluationLink, 0);
-        demandName = atomSpace.getName(hDemandPredicateNode); 
-        demandName = demandName.substr(0, demandName.rfind("DemandGoal")); 
+        if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
+            Handle hDemandPredicateNode =
+                atomSpace.getOutgoing(hDemandEvaluationLink, 0);
+            demandName = atomSpace.getName(hDemandPredicateNode);
+            demandName = demandName.substr(0, demandName.rfind("DemandGoal"));
+        }
     }
 
     ActionPlan plan(planId, demandName);
