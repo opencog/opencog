@@ -352,8 +352,8 @@ class Chainer(AbstractChainer):
                  agent=None,
                  learnRuleFrequencies=False,
                  preferAttentionalFocus=False,
-                 allow_output_with_variables=False,
-                 allow_backchaining_with_variables=False,
+                 allow_output_with_variables=True,
+                 allow_backchaining_with_variables=True,
                  delete_temporary_variables=False):
         AbstractChainer.__init__(self, atomspace)
 
@@ -934,10 +934,14 @@ class Chainer(AbstractChainer):
             if results:
                 print results
 
-    def find_atom(self, atom, time_allowed=300):
+    def find_atom(self, atom, time_allowed=300, required_confidence=0):
         """
-        Run inference until atom is proved with >0 count, or time
-        runs out (measured in seconds)
+        Run inference until atom is proved with >required_confidence confidence,
+        or time runs out (measured in seconds). With required_confidence=0, it
+        will stop after any inference produces the target atom. With
+        required_confidence=1 it will keep trying other inference paths until it
+        runs out of time. (With any other value it will stop if it reaches that
+        level of confidence)
         """
         print 'Trying to produce truth values for atom:'
         print repr(atom)
@@ -951,9 +955,9 @@ class Chainer(AbstractChainer):
 
             res = self.backward_step()
             #if res: print res
-            res = self.forward_step()
-            if _VERBOSE and res:
-                print res
+            #res = self.forward_step()
+            #if _VERBOSE and res:
+            #    print res
 
             target_instances = self.get_target_instances(atom)
             if target_instances:
@@ -965,9 +969,10 @@ class Chainer(AbstractChainer):
                     print 'Inference steps'
                     print self.display_trail(self.find_trail(instance))
 
-                return True
+                    if instance.tv.confidence > required_confidence:
+                        return True
 
-        print 'Failed to find target in', time_allowed, 'seconds'
+        print 'Failed to find target (with enough confidence) in', time_allowed, 'seconds'
         return False
 
     def get_target_instances(self, target):

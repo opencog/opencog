@@ -313,6 +313,10 @@ class AndBulkEvaluationRule(Rule):
         if any(atom.is_a(types.VariableNode) for atom in and_args):
             return [], []
 
+        # The backward chainer will find weird subgoals that don't make sense
+        if any(not(arg.is_a(types.ConceptNode) or arg.is_a(types.PredicateNode) or arg.is_a(types.EvaluationLink)) for arg in and_args):
+            return [], []
+
         # An AndLink can either contain ConceptNodes, in which case we would use MemberLinks, or it can contain EvaluationLinks (in which case we would use instances of that EvaluationLink)
         if and_args[0].is_a(types.ConceptNode):
             conceptnodes = and_args
@@ -325,7 +329,7 @@ class AndBulkEvaluationRule(Rule):
             predicatenodes = [link.out[0] for link in eval_links]
             sets = [self.get_eval_links(node) for node in predicatenodes]
         else:
-            assert "not implemented yet"
+            raise "not implemented yet"
 
         # filter links with fuzzy strength > 0.5 and select just the nodes
         for i in xrange(0, len(sets)):

@@ -90,12 +90,20 @@ class PLNExamples(object):
                           allow_backchaining_with_variables=True)
 
         try:
-            query = chainer.get_predicate_arguments('query')[0]
+            queries = chainer.get_predicate_arguments('query')
+        except ValueError, e:
+            try:
+                queries = chainer.get_predicate_arguments('queries')
+            except ValueError, e:
+                print e
+                return
+        try:
             rules_nodes = chainer.get_predicate_arguments('rules')
         except ValueError, e:
             print e
             return
-        print query
+            
+        print queries
         print rules_nodes
 
         # Todo: The variable 'all_rules' is not used
@@ -106,13 +114,21 @@ class PLNExamples(object):
 
         print [r.name for r in chainer.rules]
 
-        if chainer.find_atom(query, time_allowed=30):
-            self.passed.append(filename)
-            return True
+        if len(queries) == 1:
+            query = queries[0]
+            if chainer.find_atom(query, time_allowed=360):
+                self.passed.append(filename)
+                return True
+            else:
+                self.failed.append(filename)
+                return False
         else:
-            self.failed.append(filename)
-            return False
-
+            for query in queries:
+                if chainer.find_atom(query, time_allowed=600):
+                    self.passed.append(filename)
+                else:
+                    self.failed.append(filename)
+            return True
 
 # Todo: Could the following be encapsulated?
 class AllRules(object):
