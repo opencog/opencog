@@ -31,12 +31,13 @@
 #include <opencog/query/PatternMatch.h>
 #include <stdlib.h>
 #include <time.h>
+#include <opencog/atomspace/Handle.h>
 #include "PatternMiner.h"
 
 using namespace opencog::PatternMining;
 using namespace opencog;
 
-PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_originalAtomSpace)
+PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
 {
     htree = new HTree();
     atomSpace = new AtomSpace();
@@ -48,6 +49,17 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace): originalAtomSpace(_or
         THREAD_NUM = 1;
 
     threads = new thread[THREAD_NUM];
+
+    MAX_GRAM = max_gram;
+
+    ignoredTypes[0] = LIST_LINK;
+
+    // vector < vector<HTreeNode*> > patternsForGram
+    for (unsigned int i = 0; i < max_gram; ++i)
+    {
+        vector<HTreeNode*> patternVector;
+        patternsForGram.push_back(patternVector);
+    }
 }
 
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
@@ -374,7 +386,7 @@ void PatternMiner::extractAllNodesInLink(Handle link, map<Handle,Handle>& valueT
 //          (ConceptNode "meat")
 //       )
 //    )
-vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks)
+vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, unsigned int gram)
 {
     map<Handle,Handle> valueToVarMap;
     vector<HTreeNode*> allNewPatternKeys;
@@ -448,6 +460,8 @@ vector<HTreeNode*> PatternMiner::extractAllPossiblePatternsFromInputLinks(vector
             {
                 newHTreeNode->pattern = unifiedPattern;
                 allNewPatternKeys.push_back(newHTreeNode);
+                newHTreeNode->patternVarMap = patternVarMap;
+                (patternsForGram[gram-1]).push_back(newHTreeNode);
             }
 
             if (isLastNElementsAllTrue(indexes, n_max, var_num))
@@ -599,38 +613,146 @@ void PatternMiner::growTheFirstGramPatternsTask()
 
 }
 
-void PatternMiner::growAPatternTask()
+bool PatternMiner::isInHandleSeq(Handle handle, HandleSeq &handles)
 {
-//    static unsigned cur_gram = 1;
+    foreach(Handle h, handles)
+    {
+        if (handle == h)
+            return true;
+    }
 
-    static HandleSeq allLinks;
-    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
+    return false;
+}
 
-    // randomly choose one link for start
-    Handle startLink;
+bool PatternMiner::isIgnoredType(Type type)
+{
+    foreach (Type t, ignoredTypes)
+    {
+        if (t == type)
+            return true;
+    }
 
+    return false;
+}
+
+Handle PatternMiner::getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle& handle)
+{
+    Handle cur_h = handle;
     while(true)
     {
-        int startLinkIndex = rand() / allLinks.size();
-        startLink = allLinks[startLinkIndex];
+        HandleSeq incomings = atomspace->getIncoming(cur_h);
+        if (incomings.size() == 0)
+            return Handle::UNDEFINED;
 
-        // if this link is listlink, try another time until get a link that is not listlink
-        if (originalAtomSpace->getType(startLink) != opencog::LIST_LINK)
-            break;
+        if (isIgnoredType (atomspace->getType(incomings[0])))
+        {
+            cur_h = incomings[0];
+            continue;
+        }
+        else
+            return incomings[0];
+
     }
 
 }
 
-void PatternMiner::runPatternMiner(unsigned int max_gram)
+void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram)
 {
-    MAX_GRAM = max_gram;
+    map<Handle, Handle>::iterator varIt = curHTreeNode->patternVarMap.begin();
 
-    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
+    for(;varIt != curHTreeNode->patternVarMap.end(); ++ varIt)
+    {
+        // find what are the other links in the original Atomspace contain this variable
+        HandleSeq incomings = originalAtomSpace->getIncoming( ((Handle)(varIt->second)));
+        foreach(Handle incomingHandle, incomings)
+        {
+            if (isInHandleSeq(incomingHandle, instance))
+                continue;
+
+            Handle extendedHandle;
+            // if this atom is a igonred type, get its first parent that is not in the igonred types
+            if (isIgnoredType (originalAtomSpace->getType(incomingHandle)) )
+            {
+                extendedHandle = getFirstNonIgnoredIncomingLink(originalAtomSpace, incomingHandle);
+                if (extendedHandle == Handle::UNDEFINED)
+                    continue;
+            }
+            else
+                extendedHandle = incomingHandle;
+
+            // Add this extendedHandle to the old pattern so as to make a new pattern
+            HandleSeq originalLinks = instance;
+            originalLinks.push_back(extendedHandle);
+
+            // Extract all the possible patterns from this originalLinks, not duplicating the already existing patterns
+            vector<HTreeNode*> newPatternNodes = extractAllPossiblePatternsFromInputLinks(originalLinks, gram);
+
+            foreach (HTreeNode* HNode, newPatternNodes)
+            {
+                HNode->parentLinks.push_back(curHTreeNode);
+
+                // Find All Instances in the original AtomSpace For this Pattern
+                findAllInstancesForGivenPattern(HNode);
+            }
+
+        }
+    }
+}
+
+void PatternMiner::growPatternTask()
+{
+    static unsigned cur_gram = 1;
+
+    static unsigned int cur_index = -1;
+
+    vector<HTreeNode*>& last_gram_patterns = patternsForGram[cur_gram-1];
+
+    unsigned int total = last_gram_patterns.size();
+
+    while(true)
+    {
+        patternForLastGramLock.lock();
+        cur_index ++;
+        if (cur_index >= total)
+            break;
+        patternForLastGramLock.unlock();
+
+        HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
+        foreach (HandleSeq instance , cur_growing_pattern->instances)
+        {
+            extendAllPossiblePatternsForOneMoreGram(instance, cur_growing_pattern, cur_gram);
+        }
+
+    }
+
+}
+
+void PatternMiner::ConstructTheFirstGramPatterns()
+{
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
         threads[i].join();
     }
+}
 
+void PatternMiner::GrowAllPatterns()
+{
     srand(time(NULL));
+
+    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    {
+        threads[i] = std::thread([this]{this->growPatternTask();}); // using C++11 lambda-expression
+        threads[i].join();
+    }
+}
+
+void PatternMiner::runPatternMiner()
+{
+
+
+    // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
+    ConstructTheFirstGramPatterns();
+
+
 }

@@ -74,6 +74,7 @@ namespace PatternMining
  class PatternMiner
  {
 private:
+
     HTree* htree;
     AtomSpace* atomSpace;
     AtomSpace* originalAtomSpace;
@@ -81,13 +82,17 @@ private:
     // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
     map<string, HTreeNode*> keyStrToHTreeNodeMap;
 
+    vector < vector<HTreeNode*> > patternsForGram;
+
     std::thread *threads;
 
     unsigned int THREAD_NUM;
 
     unsigned int MAX_GRAM;
 
-    std::mutex allAtomListLock, uniqueKeyLock;
+    std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock;
+
+    Type ignoredTypes[1];
 
     // this is to against graph isomorphism problem, make sure the patterns we found are not dupicacted
     // the input links should be a Pattern in such format:
@@ -128,7 +133,7 @@ private:
 
     void extractAllNodesInLink(Handle link, map<Handle,Handle>& valueToVarMap);
 
-    vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks);
+    vector<HTreeNode *> extractAllPossiblePatternsFromInputLinks(vector<Handle>& inputLinks, unsigned int gram = 1);
 
     void swapOneLinkBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, Handle& fromLink, HandleSeq& outgoings, HandleSeq &outVariableNodes);
 
@@ -136,18 +141,30 @@ private:
     // Output all the variable nodes in the toAtomSpace BTW
     HandleSeq swapLinksBetweenTwoAtomSpace(AtomSpace* fromAtomSpace, AtomSpace* toAtomSpace, HandleSeq& fromLinks, HandleSeq &outVariableNodes);
 
+    void extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, HTreeNode* curHTreeNode, unsigned int gram);
+
     void findAllInstancesForGivenPattern(HTreeNode* HNode);
 
     void growTheFirstGramPatternsTask();
 
-    void growAPatternTask();
+    void ConstructTheFirstGramPatterns();
+
+    void growPatternTask();
+
+    void GrowAllPatterns();
+
+    bool isInHandleSeq(Handle handle, HandleSeq &handles);
+
+    Handle getFirstNonIgnoredIncomingLink(AtomSpace *atomspace, Handle &handle);
+
+    bool isIgnoredType(Type type);
 
 public:
-    PatternMiner(AtomSpace* _originalAtomSpace);
+    PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
 
     bool checkPatternExist(const string& patternKeyStr);
 
-    void runPatternMiner(unsigned int max_gram);
+    void runPatternMiner();
 
 
  };
