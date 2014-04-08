@@ -90,12 +90,20 @@ class PLNExamples(object):
                           allow_backchaining_with_variables=True)
 
         try:
-            query = chainer.get_predicate_arguments('query')[0]
+            queries = chainer.get_predicate_arguments('query')
+        except ValueError, e:
+            try:
+                queries = chainer.get_predicate_arguments('queries')
+            except ValueError, e:
+                print e
+                return
+        try:
             rules_nodes = chainer.get_predicate_arguments('rules')
         except ValueError, e:
             print e
             return
-        print query
+            
+        print queries
         print rules_nodes
 
         # Todo: The variable 'all_rules' is not used
@@ -106,13 +114,21 @@ class PLNExamples(object):
 
         print [r.name for r in chainer.rules]
 
-        if chainer.find_atom(query, time_allowed=30):
-            self.passed.append(filename)
-            return True
+        if len(queries) == 1:
+            query = queries[0]
+            if chainer.find_atom(query, time_allowed=360):
+                self.passed.append(filename)
+                return True
+            else:
+                self.failed.append(filename)
+                return False
         else:
-            self.failed.append(filename)
-            return False
-
+            for query in queries:
+                if chainer.find_atom(query, time_allowed=600):
+                    self.passed.append(filename)
+                else:
+                    self.failed.append(filename)
+            return True
 
 # Todo: Could the following be encapsulated?
 class AllRules(object):
@@ -139,6 +155,7 @@ class AllRules(object):
             # Seems better than Modus Ponens - it doesn't make anything up
             self.chainer.add_rule(TermProbabilityRule(self.chainer, link_type))
             self.chainer.add_rule(ModusPonensRule(self.chainer, link_type))
+            self.chainer.add_rule(PreciseModusPonensRule(self.chainer, link_type))
 
         for link_type in similarity_types:
             # SimilarityLinks don't require an InversionRule obviously
@@ -154,12 +171,21 @@ class AllRules(object):
         self.chainer.add_rule(InheritanceRule(self.chainer))
         self.chainer.add_rule(SimilarityRule(self.chainer))
 
+        for link_type in conditional_probability_types:
+            self.chainer.add_rule(AndToSubsetRule1(self.chainer, link_type))
+
+            for N in xrange(2, 8):
+                self.chainer.add_rule(AndToSubsetRuleN(self.chainer, link_type, N))
+
         # boolean links
         for rule in create_and_or_rules(self.chainer, 2, 8):
             self.chainer.add_rule(rule)
         for N in xrange(2, 8):
             self.chainer.add_rule(
                 boolean_rules.AndBulkEvaluationRule(self.chainer, N))
+        for N in xrange(3, 8):
+            self.chainer.add_rule(
+                boolean_rules.NegatedAndBulkEvaluationRule(self.chainer, N))
 
         # create probabilistic logical links out of MemberLinks
 

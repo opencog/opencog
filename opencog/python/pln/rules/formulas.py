@@ -460,6 +460,13 @@ def extensionalSimilarityFormula(tvs):
 
     return [TruthValue(P, N)]
 
+def subsetFormula(tvs):
+    [and_tv, a_tv] = tvs
+
+    sAB = and_tv.mean / a_tv.mean
+    nAB = makeUpCount(tvs)
+
+    return [TruthValue(sAB, nAB)]
 
 def attractionFormula(tvs):
     [ab, b] = tvs

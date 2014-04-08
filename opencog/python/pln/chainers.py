@@ -984,10 +984,14 @@ class Chainer(AbstractChainer):
             if results:
                 self.log.debug(results)
 
-    def find_atom(self, atom, time_allowed=300):
+    def find_atom(self, atom, time_allowed=300, required_confidence=0):
         """
-        Run inference until atom is proved with >0 count, or time
-        runs out (measured in seconds)
+        Run inference until atom is proved with >required_confidence confidence,
+        or time runs out (measured in seconds). With required_confidence=0, it
+        will stop after any inference produces the target atom. With
+        required_confidence=1 it will keep trying other inference paths until it
+        runs out of time. (With any other value it will stop if it reaches that
+        level of confidence)
         """
         self.log.debug("Trying to produce truth values for atom:\n{0}".
                        format(repr(atom)))
@@ -1000,7 +1004,6 @@ class Chainer(AbstractChainer):
                 self._give_stimulus(atom)
 
             self.backward_step()
-            self.forward_step()
 
             target_instances = self.get_target_instances(atom)
             if target_instances:
@@ -1012,7 +1015,8 @@ class Chainer(AbstractChainer):
                     self.log.debug(
                         self.display_trail(self.find_trail(instance)))
 
-                return True
+                    if instance.tv.confidence > required_confidence:
+                        return True
 
         self.log.debug(
             "Failed to find target in {0} seconds".format(time_allowed))

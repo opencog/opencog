@@ -103,8 +103,7 @@ class Rule(object):
 
         return new_inputs, new_outputs, created_vars
 
-    # Todo: should this be a static method, or should it refer to the
-    # class variable 'self._inputs'?
+    # This uses the actual inputs chosen by the chainer
     def valid_inputs(self, inputs):
         """
         Takes all of the inputs found so far, and tells you if they are
