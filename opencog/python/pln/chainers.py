@@ -312,45 +312,6 @@ class AbstractChainer(Logic):
         for node in self.atomspace.get_atoms_by_type(types.ConceptNode):
             node.tv = self.node_tv(node)
 
-
-class InferenceHistoryIndex(object):
-    """
-    A custom datastructure that uses Python datastructures (not the atomspace)
-    to record for each rule, the set of outputs it has ever produced, and for
-    each output tuple, the set of input tuples used (often only one).
-    It is also recorded in the AtomSpace, so it might be better to lookup that
-    information in the AtomSpace. This is also separate from the trails, which
-    only record the set of atoms used to produce each atom.
-    """
-    def __init__(self):
-        self.rule_to_io = {}
-
-    def record_new_application(self, rule, inputs, outputs):
-        outputs = tuple(outputs)
-        inputs = tuple(inputs)
-
-        try:
-            output_to_inputs = self.rule_to_io[rule]
-        except KeyError:
-            output_to_inputs = self.rule_to_io[rule] = defaultdict(set)
-            assert output_to_inputs is not None
-
-        input_tuple_set = output_to_inputs[outputs]
-
-        if inputs in input_tuple_set:
-            return False
-        else:
-            input_tuple_set.add(inputs)
-            return True
-
-    def lookup_all_applications(self, rule, outputs):
-        try:
-            output_to_inputs = self.rule_to_io[rule]
-        except KeyError:
-            return []
-        input_tuple_set = output_to_inputs[outputs]
-        return input_tuple_set
-
 class AtomSpaceBasedInferenceHistory:
     """
     Use the AtomSpace to record inference history. It has two main uses. The
@@ -358,11 +319,13 @@ class AtomSpaceBasedInferenceHistory:
     And after a successful inference, it can look up the produced Atom to reconstruct
     the tree of rules that were applied to find it.
     """
-    def __init__(self, main_atomspace, history_atomspace):
+    def __init__(self, chainer, main_atomspace, history_atomspace):
         """
         Currently the history_atomspace is the same as the main atomspace (but
         it could/should be a separate one).
         """
+        self._chainer = chainer
+        self.log = chainer.log
         self._main_atomspace = main_atomspace
         self._history_atomspace = history_atomspace
         self._all_applications = set()
@@ -390,11 +353,122 @@ class AtomSpaceBasedInferenceHistory:
             ])
         ])
 
-        if L not in self._all_applications:
-            self._all_applications.add(L)
+        if app not in self._all_applications:
+            self._all_applications.add(app)
             return True
         else:
             return False
+
+    def lookup_applications_by_output_tuple_and_rule():
+        """
+        Lookup every input tuple that the given Rule has used to create this output.
+        Used by temporal rules
+        """
+
+    # TODO only works for rules with one output. This is hard to fix
+    def _lookup_applications_by_output_atom(self, output):
+        # ExecutionLink
+        #   rule
+        #   ListLink
+        #       ListLink inputs
+        #       ListLink outputs
+        TA = self._history_atomspace
+        L = TA.add_link
+        N = TA.add_node
+
+        rule = self._chainer.new_variable()
+        inputs = self._chainer.new_variable()
+        outputs = L(types.ListLink, [output])
+
+        template = L(types.ExecutionLink, [
+            rule
+            L(types.ListLink, [
+                inputs,
+                outputs
+            ])
+        ])
+        
+        apps = self._chainer.lookup_atoms(template, {})
+        apps = [a for a in apps if self._chainer.wanted_atom(a, template, ground=False, allow_zero_tv=True)]
+        # It will find the template as one of the matches
+        apps.remove(template)
+        self.atomspace.remove(template)
+
+        return apps
+
+    def _get_inputs(self, application):
+        """
+        Returns the inputs for a Rule application. application is the atom
+        representing the rule application.
+        """
+        inputs = application.out[1].out[0].out
+
+        return inputs
+
+    def _get_outputs(self, application):
+        outputs = application.out[1].out[1].out
+
+        return outputs
+
+    def _get_rule(self, application):
+        rule = application.out[0]
+
+        return rule
+
+    def check_cycles(self, inputs, outputs):
+        """
+        Recursively find the atoms used to produce output (the
+        inference trail). If there is a cycle, return True. Otherwise
+        return False. It has to be used before rule_application_is_new
+        because we don't want to add the application to perform the application
+        at all if there is a cycle (and hence don't want to add it to the
+        history.
+        """
+        for output_atom in outputs:        
+            if atom in inputs:
+                return True
+            for input_atom in inputs:
+                history = self.lookup_history_for_atom(input_atom)
+                for application in history:
+                    if output_atom in self._get_inputs(application):
+                        return True
+
+        return False
+
+    def lookup_history_for_atom(self, atom, history=[]):
+        """
+        Lookup the entire inference history for an Atom. It is returned as a list
+        of Atoms representing the rule applications
+        """
+        apps = self._lookup_applications_by_output_atom(atom)
+        history.append(apps)
+
+        for app in apps:
+            inputs = self._get_inputs(app)
+            for input_atom in inputs:
+                self.lookup_history_for_atom(input_atom, trail)
+
+        # It goes through the tree of applications in top-down fashion (i.e.
+        # from the last conclusion to the first. Reversing the list means it
+        # goes from the premises to the conclusion.
+        return reversed(trail)
+        
+    def print_application(self, application):
+        self.log.debug("Using {0}\n".format(self._get_rule(application).name))
+        for input_atom in self._get_inputs(application):
+            self.log.debug("{0}\n".format(input_atom))
+        self.log.debug("|=")
+        for output_atom in self._get_outputs(application):
+            self.log.debug("{0}\n".format(output_atom))
+        
+        return ret
+
+    def print_history(self, atom):
+        history = self.lookup_history_for_atom(atom)
+
+        self.log.debug("Inference trail:")
+        for application in trail:
+            self.print_application(application)
 
 class Chainer(AbstractChainer):
     """
@@ -448,20 +522,7 @@ class Chainer(AbstractChainer):
 
         self.atomspace = atomspace
 
-        # For every atom, store the atoms used to produce it (including
-        # the atoms used to produce them). This prevents cycles (very
-        # important) as well as repeating the same inference.
-        # Map from Atom -> set(Atom)
-        # Default value is the empty set
-        self.trails = defaultdict(set)
-        # Todo: What is the following line for?
-        #self.produced_from = defaultdict(set)
-        self.history_index = InferenceHistoryIndex()
-
-        # Todo:
-        #self.history_atomspace = AtomSpace()
-        # TODO actually load and save these. When loading it, rebuild
-        # the indexes above.
+        self.history = AtomSpaceBasedInferenceHistory()
 
         # Record how often each Rule is used. To bias the Rule
         # frequencies. It will take longer to adapt if you set this
@@ -780,7 +841,7 @@ class Chainer(AbstractChainer):
             # Lookup all inputs ever found by the chainer, and then use
             # the special temporal computation instead of revision.
             past_input_tuples = \
-                self.history_index.lookup_all_applications(rule, outputs)
+                self.history.lookup_all_applications(rule, outputs)
             all_input_tuples = [inputs] + past_input_tuples
 
             (outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
@@ -857,7 +918,7 @@ class Chainer(AbstractChainer):
                                       (rule, inputs, outputs))
             return False
 
-        if self._compute_trail_and_check_cycles(outputs[0], inputs):
+        if self.history.check_cycles(inputs, outputs):
             self.log_failed_inference('cycle detected')
             return False
 
@@ -870,86 +931,11 @@ class Chainer(AbstractChainer):
     def _contains_variables(self, output):
         return len(self.variables(output)) > 0
 
-    def _compute_trail_and_check_cycles(self, output, inputs):
-        """
-        Recursively find the atoms used to produce output (the
-        inference trail). If there is a cycle, return True. Otherwise
-        return False
-        """
-        trail = self.trails[output]
-
-        # Check for cycles before adding anything into the trails
-        if output in inputs:
-            return True
-        for atom in inputs:
-            input_trail = self.trails[atom]
-
-            if output in input_trail:
-                return None
-
-        for atom in inputs:
-            # Reusing the same Atom more than once is bad
-            # (maybe? What if you're combining it with a different atom
-            # to produce a new TV for the same result?)
-            #if atom in trail:
-            #    return None
-            trail.add(atom)
-
-        for atom in inputs:
-            input_trail = self.trails[atom]
-            trail |= input_trail
-
-        return False
-
-    def find_trail(self, atom, trail=[]):
-        """
-        Compute the inference trail for atom. It's represented as a
-        list of tuples, tuples of the form (atom produced, set(atoms
-        used to produce it)).
-        """
-        inputs = self.trails[atom]
-        trail.append((atom, inputs))
-
-        for input in inputs:
-            self.find_trail(input, trail)
-
-        return trail
-
-    # Todo: Fix the root cause of the bug
-    def display_trail(self, trail):
-        for (number, line) in enumerate(reversed(trail)):
-            (output_atom, input_set) = line
-
-            if len(input_set):
-                if output_atom not in self.atomspace:
-                    # Todo: @jadeoneill did you find the root cause of this?
-                    #       Is this check still necessary?
-                    #       https://github.com/opencog/opencog/issues/522
-                    self.log.error("warning: trail contains nonexistent atom" +
-                                   "(caused by some bug)")
-                    continue
-
-                self.log.debug("Inference trail:")
-                self.log.debug("Step #{0}".format(number + 1))
-                for input in input_set:
-                    self.log.debug("[{0}] {1}".format(input.h, input))
-                self.log.debug("|=")
-                self.log.debug("[{0}] {1}".format(output_atom.h, output_atom))
-
-            # Todo: Can the following be uncommented or removed?
-            #else:
-            #    self.log.debug("Premise")
-            #    self.log.debug("[{0}] {1}".format(output_atom.h, output_atom))
-
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one
         # time. (Any atom can be produced multiple ways using different
         # Rules and inputs.)
         # Return True if this exact inference has been applied before
-
-        # In future this should record to the Inference History
-        # Repository atomspace
-        # convert the inputs to a tuple so they can be stored in a set.
 
         # About unordered links
         # Such as And(A B) or And(B A)
@@ -957,17 +943,12 @@ class Chainer(AbstractChainer):
         # unordered link. So this algorithm should still work okay for
         # unordered links.
 
-        # TODO it should work for Rules where the input order doesn't
-        # matter (e.g. AndRule) currently it won't notice repetition
-        # for different input orders
-
-        new = self.history_index.record_new_application(rule,
+        new = self.history.rule_application_is_new(rule,
                                                         inputs=inputs,
                                                         outputs=outputs)
         if not new:
             return True
         else:
-            self._add_to_inference_repository(rule, outputs, inputs)
             return False
 
     def lookup_rule(self, rule_name):
@@ -1027,7 +1008,7 @@ class Chainer(AbstractChainer):
 
                     self.log.debug("Inference steps")
                     self.log.debug(
-                        self.display_trail(self.find_trail(instance)))
+                        self.inference_history.print_trail(instance))
 
                     if instance.tv.confidence > required_confidence:
                         return True
