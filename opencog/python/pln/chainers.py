@@ -313,8 +313,15 @@ class AbstractChainer(Logic):
             node.tv = self.node_tv(node)
 
 
-# Todo: Add a docstring to explain this complex class
 class InferenceHistoryIndex(object):
+    """
+    A custom datastructure that uses Python datastructures (not the atomspace)
+    to record for each rule, the set of outputs it has ever produced, and for
+    each output tuple, the set of input tuples used (often only one).
+    It is also recorded in the AtomSpace, so it might be better to lookup that
+    information in the AtomSpace. This is also separate from the trails, which
+    only record the set of atoms used to produce each atom.
+    """
     def __init__(self):
         self.rule_to_io = {}
 
@@ -344,6 +351,50 @@ class InferenceHistoryIndex(object):
         input_tuple_set = output_to_inputs[outputs]
         return input_tuple_set
 
+class AtomSpaceBasedInferenceHistory:
+    """
+    Use the AtomSpace to record inference history. It has two main uses. The
+    chainer can lookup an inference to see whether it has already been performed.
+    And after a successful inference, it can look up the produced Atom to reconstruct
+    the tree of rules that were applied to find it.
+    """
+    def __init__(self, main_atomspace, history_atomspace):
+        """
+        Currently the history_atomspace is the same as the main atomspace (but
+        it could/should be a separate one).
+        """
+        self._main_atomspace = main_atomspace
+        self._history_atomspace = history_atomspace
+        self._all_applications = set()
+
+    def rule_application_is_new(self, rule, inputs, outputs):
+        """
+        Record a rule application in the history/main atomspace and check if it is new.
+        Return true if it is a new rule application or false if it has been performed
+        before.
+        """
+
+        TA = self._history_atomspace
+        L = TA.add_link
+        N = TA.add_node
+
+        # create new lists of inputs and outputs for the separate history atomspace
+        #inputs  = [self.transfer_atom(TA, a) for a in inputs]
+        #outputs = [self.transfer_atom(TA, a) for a in outputs]
+
+        app = L(types.ExecutionLink, [
+            N(types.GroundedSchemaNode, rule.name),
+            L(types.ListLink, [
+                L(types.ListLink, inputs),
+                L(types.ListLink, outputs)
+            ])
+        ])
+
+        if L not in self._all_applications:
+            self._all_applications.add(L)
+            return True
+        else:
+            return False
 
 class Chainer(AbstractChainer):
     """
@@ -918,43 +969,6 @@ class Chainer(AbstractChainer):
         else:
             self._add_to_inference_repository(rule, outputs, inputs)
             return False
-
-    def _add_to_inference_repository(self, rule, outputs, inputs):
-        # Todo: Temporarily enabled storing the inference repository
-        # in the main atomspace. See:
-        #   https://github.com/opencog/opencog/issues/523
-
-        #TA = self.history_atomspace
-        TA = self.atomspace
-        L = TA.add_link
-        N = TA.add_node
-
-        # create new lists of inputs and outputs for the separate history atomspace
-        #inputs  = [self.transfer_atom(TA, a) for a in inputs]
-        #outputs = [self.transfer_atom(TA, a) for a in outputs]
-
-        L(types.ExecutionLink, [
-            N(types.GroundedSchemaNode, rule.name),
-            L(types.ListLink, [
-                L(types.ListLink, inputs),
-                L(types.ListLink, outputs)
-            ])
-        ])
-
-    def load_inference_repository(self):
-        # TODO fill the history atomspace
-        TA = self.history_atomspace
-
-        for link in TA.get_atoms_by_type(types.ExecutionLink):
-            rule_name = link.out[0]
-            list_link = link.out[1]
-            inputs= list_link.out[0]
-            outputs= list_link.out[1]
-
-            # Todo: The variables 'rule', 'inputs', outputs' are never used
-            rule = self.lookup_rule(rule_name)
-            inputs = [self.transfer_atom(self.atomspace, a) for a in inputs]
-            outputs = [self.transfer_atom(self.atomspace, a) for a in outputs]
 
     def lookup_rule(self, rule_name):
         for rule in self.rules:
