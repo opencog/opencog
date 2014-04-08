@@ -8,7 +8,7 @@ INCLUDE_DIRECTORIES(
 	${PROJECT_SOURCE_DIR}/opencog/util
 )
 
-#SET_DIRECTORY_PROPERTIES(PROPERTIES CLEAN_NO_CUSTOM true)
+# --------------------------------------------------
 OPENCOG_ADD_ATOM_TYPES(atom_types.script
 	atom_types.h
 	atom_types.definitions
@@ -19,6 +19,17 @@ ADD_CUSTOM_TARGET(attention_atom_types DEPENDS atom_types.h)
 # The atom_types.h file is written to the build directory
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 
+ADD_LIBRARY(attention-types SHARED
+	atom_types_init.cc
+)
+
+# Without this, parallel make will race and crap up the generated files.
+ADD_DEPENDENCIES(attention-types opencog_atom_types)
+ADD_DEPENDENCIES(attention-types attention_atom_types)
+
+TARGET_LINK_LIBRARIES(attention-types atomspace)
+
+# --------------------------------------------------
 # AttentionModule
 ADD_LIBRARY(attention SHARED
 	AttentionModule
@@ -30,33 +41,26 @@ ADD_LIBRARY(attention SHARED
 	STIDecayingAgent
 )
 
-# Without this, parallel make will race and crap up the generated files.
-ADD_DEPENDENCIES(attention opencog_atom_types)
-ADD_DEPENDENCIES(attention attention_atom_types)
-
 TARGET_LINK_LIBRARIES(attention server)
 
 # HebbianCreationModule
 IF (TBB_FOUND)
     INCLUDE_DIRECTORIES (
-            ${TBB_INCLUDE_DIR}
+	    ${TBB_INCLUDE_DIR}
     )
 
     LINK_DIRECTORIES(
-            ${TBB_INCLUDE_DIR}
-            ${TBB_LIBRARY_DIRS}
+	    ${TBB_INCLUDE_DIR}
+	    ${TBB_LIBRARY_DIRS}
     )
 
     ADD_LIBRARY(hebbiancreation SHARED
-            HebbianCreationModule
+	    HebbianCreationModule
     )
-    
-    ADD_DEPENDENCIES(hebbiancreation opencog_atom_types)
-    ADD_DEPENDENCIES(hebbiancreation attention_atom_types)
-    
-    TARGET_LINK_LIBRARIES(hebbiancreation 
-            server
-            tbb
+
+    TARGET_LINK_LIBRARIES(hebbiancreation
+	    server
+	    tbb
     )
 ENDIF (TBB_FOUND)
 

@@ -38,7 +38,7 @@
 #define TIME_INTERVAL 100
 #define BEHAVED_STR "behaved"
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 using namespace behavior;
 

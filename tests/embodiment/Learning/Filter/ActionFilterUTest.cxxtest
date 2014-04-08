@@ -30,7 +30,7 @@
 #include <opencog/embodiment/Learning/LearningServer/AtomSpaceWorldProvider.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 using namespace behavior;
 
@@ -241,7 +241,7 @@ public:
             string assStr = string("goto_obj($1 " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             
             action_subs_res.insert(ass);
         }
@@ -250,7 +250,7 @@ public:
             string assStr = string("goto_obj($2 " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 3
@@ -259,7 +259,7 @@ public:
                             + string(" " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 4
@@ -267,7 +267,7 @@ public:
             string assStr = string("drop");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 5
@@ -276,7 +276,7 @@ public:
                             + string(" " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 6
@@ -284,7 +284,7 @@ public:
             string assStr = string("goto_obj(random_object " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 7
@@ -292,7 +292,7 @@ public:
             string assStr = string("goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ")");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         //subsequence of actions
@@ -301,7 +301,7 @@ public:
             string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") drop)");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 9
@@ -310,7 +310,7 @@ public:
                             + string(" " GOTO_OBJ_SPEED_STR ") drop)");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 10
@@ -319,7 +319,7 @@ public:
                             + string(" " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 11
@@ -327,7 +327,7 @@ public:
             string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 12
@@ -335,7 +335,7 @@ public:
             string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 13
@@ -343,7 +343,7 @@ public:
             string assStr = string("and_seq(goto_obj(") + obj_str + string(" " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 14
@@ -351,7 +351,7 @@ public:
             string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") drop)");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 15
@@ -359,7 +359,7 @@ public:
             string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 16
@@ -367,7 +367,7 @@ public:
             string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 17
@@ -375,7 +375,7 @@ public:
             string assStr = string("and_seq(goto_obj(") + obj_str + string(" " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 18
@@ -383,7 +383,7 @@ public:
             string assStr = string("and_seq(goto_obj(random_object " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 19
@@ -391,7 +391,7 @@ public:
             string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") drop)");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 20
@@ -399,7 +399,7 @@ public:
             string assStr = string("and_seq(goto_obj($1 " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 21
@@ -407,7 +407,7 @@ public:
             string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") goto_obj($2 " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 22
@@ -415,7 +415,7 @@ public:
             string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") goto_obj(random_object " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         { //action seq 23
@@ -423,7 +423,7 @@ public:
             string assStr = string("and_seq(goto_obj(nearest_object " GOTO_OBJ_SPEED_STR ") goto_obj(") + string(id::owner) + string(" " GOTO_OBJ_SPEED_STR "))");
             stringstream assSS(assStr);
             // assSS >> ass;
-            PetCombo::operator>>(assSS, ass);
+            AvatarCombo::operator>>(assSS, ass);
             action_subs_res.insert(ass);
         }
         //print for debug

@@ -62,7 +62,7 @@ namespace Filter
 
 using namespace opencog::pai;
 using namespace opencog::world;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog; /// @todo make it under the namespace opencog
 
 //constructor, destructor

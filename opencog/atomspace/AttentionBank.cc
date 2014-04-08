@@ -53,8 +53,11 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
 {
     // Add the old attention values to the AtomSpace funds and
     // subtract the new attention values from the AtomSpace funds
-    fundsSTI += (old_av->getSTI() - new_av->getSTI());
-    fundsLTI += (old_av->getLTI() - new_av->getLTI());
+    updateSTIFunds(old_av->getSTI() - new_av->getSTI());
+    updateLTIFunds(old_av->getLTI() - new_av->getLTI());
+    
+    logger().fine("AVChanged: fundsSTI = %d, old_av: %d, new_av: %d",
+                   fundsSTI, old_av->getSTI(), new_av->getSTI());
 
     // Check if the atom crossed into or out of the AttentionalFocus
     // and notify any interested parties
@@ -74,11 +77,13 @@ void AttentionBank::AVChanged(Handle h, AttentionValuePtr old_av,
 
 long AttentionBank::getTotalSTI() const
 {
+    std::lock_guard<std::mutex> lock(lock_funds);
     return startingFundsSTI - fundsSTI;
 }
 
 long AttentionBank::getTotalLTI() const
 {
+    std::lock_guard<std::mutex> lock(lock_funds);
     return startingFundsLTI - fundsLTI;
 }
 

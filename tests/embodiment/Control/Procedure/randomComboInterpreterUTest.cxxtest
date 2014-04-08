@@ -32,7 +32,7 @@
 
 
 using namespace opencog::pai;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 using namespace Procedure;
 

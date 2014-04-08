@@ -34,7 +34,7 @@
 
 
 using namespace opencog::pai;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 
 class isComboInterpreterUTest :  public CxxTest::TestSuite , ComboInterpreterUTest

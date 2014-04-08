@@ -1,5 +1,4 @@
 from opencog.atomspace import types, Atom
-
 from itertools import permutations
 
 
@@ -9,7 +8,8 @@ class Logic(object):
     logical functions inspired by the AIMA chapter on first-order
     logic. They all operate directly on Atoms.
     """
-    def __init__(self, atomspace):
+    def __init__(self, atomspace, log):
+        self.log = log
         self._atomspace = atomspace
 
     def variables(self, atom):
@@ -59,23 +59,11 @@ class Logic(object):
         # Todo: The variable 'i' is never used. Use itertools.repeat()?
         return [self.new_variable() for i in xrange(0, N)]
 
-    # Todo: Change this to use the get_atoms_in_attentional_focus
-    # method that was recently added to the Cython bindings instead.
-
-    # @todo The AtomSpace has an ImportanceIndex which is much more
-    # efficient. This algorithm checks every Atom's STI (in the whole
-    # AtomSpace)
-    def filter_attentional_focus(self, atoms, attentional_focus_boundary=0):
-        attentional_focus = []
-        for atom in atoms:
-            if atom.av['sti'] > attentional_focus_boundary:
-                attentional_focus.append(atom)
-        return attentional_focus
-
+    # Todo: this method is never used, should it be removed?
     def find(self, template):
         atoms = self.lookup_atoms(template, {})
 
-        atoms = self.filter_attentional_focus(atoms)
+        atoms = self._atomspace.get_atoms_in_attentional_focus()
         atoms = [atom for atom in atoms if self.wanted_atom(atom,
                                                             template,
                                                             ground=True)]
@@ -118,14 +106,18 @@ class Logic(object):
         unifies_ok = self.unify_together(atom, template, s)
         grounded_ok = not ground or len(self.variables(atom)) == 0
 
+        self.log.debug("tv_ok: {0}, unifies_ok: {1}, grounded_ok: {2}".
+                       format(tv_ok, unifies_ok, grounded_ok))
+
         return tv_ok and unifies_ok and grounded_ok
 
     def unify_together(self, x, y, s):
-        return self.unify(x, y, s) != None
+        return self.unify(x, y, s) is not None
 
     def standardize_apart(self, atom, dic=None):
         """
-        Create a new link where all the variables in the link are replaced with new variables. dic creates a mapping of old variables to new ones
+        Create a new link where all the variables in the link are replaced
+        with new variables. dic creates a mapping of old variables to new ones
         """
         assert isinstance(atom, Atom)
 
@@ -182,24 +174,32 @@ class Logic(object):
         Unify atoms x,y with substitution s; return a substitution
         that would make x,y equal, or None if x,y can not unify.
         """
+        self.log.debug("Trying to unify:\n{0}\n{1}".format(x, y))
 
         if substitution is None:
-            return None
+            result = None
         elif x == y:
-            return substitution
+            result = substitution
         elif self.is_variable(x):
-            return self._unify_variable(x, y, substitution)
+            result = self._unify_variable(x, y, substitution)
         elif self.is_variable(y):
-            return self._unify_variable(y, x, substitution)
+            result = self._unify_variable(y, x, substitution)
         elif (not x.is_node()) and (not y.is_node()):
             if x.type != y.type:
-                return None
+                result = None
             elif len(x.out) != len(y.out):    
-                return None
+                result = None
             else:
-                return self._unify_outgoing(x, y, substitution)
+                result = self._unify_outgoing(x, y, substitution)
         else:
-            return None
+            result = None
+
+        if result is not None:
+            self.log.debug("Unify result:\n{0}".format(result))
+        else:
+            self.log.debug("Unable to unify")
+
+        return result
 
     def _unify_outgoing(self, x, y, substitution):
         assert isinstance(x, Atom)

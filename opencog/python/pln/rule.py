@@ -1,8 +1,6 @@
 from opencog.atomspace import types, TruthValue
 from math import isinf, isnan
 
-__VERBOSE__ = False
-
 BOOLEAN_LINKS = [types.AndLink,
                  types.OrLink,
                  types.NotLink]
@@ -50,9 +48,6 @@ class Rule(object):
         # It's easier to just generate descriptive names (see inheritance_rules.py for example)
         self._compute_full_name()
 
-        if __VERBOSE__:
-            print self.name
-
         self.probabilistic_inputs = True
 
     def _compute_full_name(self):
@@ -87,6 +82,8 @@ class Rule(object):
             return None
 
     def standardize_apart_input_output(self, chainer):
+        chainer.log.debug("Standardizing apart for {0}".format(self.name))
+
         new_inputs = []
         new_outputs = []
         dic = {}
@@ -100,6 +97,9 @@ class Rule(object):
             new_outputs.append(new_template)
 
         created_vars = dic.values()
+
+        chainer.log.debug("New inputs:\n{0}".format(new_inputs))
+        chainer.log.debug("New outputs:\n{0}".format(new_outputs))
 
         return new_inputs, new_outputs, created_vars
 

@@ -491,7 +491,7 @@ public:
      * @return normalised STI between 0..1
      */
     float getNormalisedZeroToOneSTI(Handle h, bool average=true, bool clip=false) const {
-        return getAttentionBankconst().getNormalisedSTI(h->getAttentionValue(), average, clip);
+        return getAttentionBankconst().getNormalisedZeroToOneSTI(h->getAttentionValue(), average, clip);
     }
 
     /**
@@ -615,9 +615,6 @@ public:
     }
 
     /**
-     * DEPRECATED!!!
-     * Do not use this in new code: filter stuff yourself.
-     *
      * Returns the set of atoms with a given target handle in their
      * outgoing set (atom type and its subclasses optionally).
      * i.e. returns the incoming set for that handle, but filtered
@@ -630,8 +627,10 @@ public:
      * @return The set of atoms of the given type with the given handle in
      * their outgoing set.
      *
-     * @note The matched entries are appended to a container whose OutputIterator is passed as the first argument.
-     *          Example of call to this method, which would return all entries in AtomSpace:
+     * @note The matched entries are appended to a container whose 
+     *       OutputIterator is passed as the first argument.
+     *       Example of call to this method, which would return all
+     *       entries in AtomSpace:
      * @code
      *         // Handle h == the Handle for your choice of Atom
      *         std::list<Handle> ret;
@@ -644,8 +643,7 @@ public:
                  Type type,
                  bool subclass) const
     {
-        return getAtomTable().getIncomingSetByType(result,
-               handle, type, subclass);
+        return handle->getIncomingSetByType(result, type, subclass);
     }
 
     /**
@@ -724,8 +722,8 @@ public:
                  Type type,
                  bool subclass) const
     {
-        return getAtomTable().getIncomingSetByName(result,
-               targetName, targetType, type, subclass);
+        Handle targh(getAtomTable().getHandle(targetType, targetName));
+        return targh->getIncomingSetByType(result, type, subclass);
     }
 
     /**

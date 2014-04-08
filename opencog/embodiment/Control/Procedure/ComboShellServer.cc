@@ -33,7 +33,7 @@
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace boost;
 using namespace std;
 using namespace opencog::messaging;

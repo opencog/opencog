@@ -1,7 +1,8 @@
 /*
- * opencog/embodiment/AtomSpaceExtensions/atom_types_init.cc
+ * src/dynamics/attention/atnom_types_init.cc
  *
  * Copyright (C) 2014 Linas Vepstas
+ * All Rights Reserved
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -21,16 +22,14 @@
 
 #include <opencog/server/Module.h>
 
-#include "opencog/spacetime/atom_types.definitions"
-#include "opencog/embodiment/AtomSpaceExtensions/atom_types.definitions"
+#include "opencog/dynamics/attention/atom_types.definitions"
 
-#define INHERITANCE_FILE "opencog/spacetime/atom_types.inheritance"
-#define INHERITANCE_FILE2 "opencog/embodiment/AtomSpaceExtensions/atom_types.inheritance"
-#define INITNAME embodiment_types_init
+#define INHERITANCE_FILE "opencog/dynamics/attention/atom_types.inheritance"
+#define INITNAME attention_types_init
 
 #include <opencog/atomspace/atom_types.cc>
 
 using namespace opencog;
-TRIVIAL_MODULE(EmbodimentTypesModule)
-DECLARE_MODULE(EmbodimentTypesModule)
+TRIVIAL_MODULE(AttentionTypesModule)
+DECLARE_MODULE(AttentionTypesModule)
 

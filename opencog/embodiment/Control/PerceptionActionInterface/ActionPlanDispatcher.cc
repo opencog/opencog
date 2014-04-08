@@ -25,7 +25,7 @@
 
 using namespace opencog::pai;
 
-ActionPlanDispatcher::ActionPlanDispatcher(PAI& _pai, const std::list<PetAction>&  _actionPlan) :
+ActionPlanDispatcher::ActionPlanDispatcher(PAI& _pai, const std::list<AvatarAction>&  _actionPlan) :
         pai(_pai),  actionPlan(_actionPlan)
 {
     badlyFailed = false;
@@ -35,7 +35,7 @@ void ActionPlanDispatcher::dispatch()
 {
     try {
         planId = pai.createActionPlan();
-        for (std::list<PetAction>::const_iterator itr = actionPlan.begin(); itr != actionPlan.end(); itr++) {
+        for (std::list<AvatarAction>::const_iterator itr = actionPlan.begin(); itr != actionPlan.end(); itr++) {
             pai.addAction(planId, *itr);
         }
 

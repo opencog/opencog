@@ -26,7 +26,7 @@
 
 namespace opencog { namespace hillclimbing {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 HCPetaverseVocabularyProvider::HCPetaverseVocabularyProvider()
 {

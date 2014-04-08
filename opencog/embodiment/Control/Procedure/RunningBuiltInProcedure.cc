@@ -49,7 +49,7 @@ void RunningBuiltInProcedure::run()
 bool RunningBuiltInProcedure::isFinished() const
 {
     if (!finished) return false;
-    if (!p.isPetAction()) return true;
+    if (!p.isAvatarAction()) return true;
     const ActionPlanID* planId = boost::get<ActionPlanID>(&result);
     if (!planId) return true;
     return pai.isPlanFinished(*planId);
@@ -58,7 +58,7 @@ bool RunningBuiltInProcedure::isFinished() const
 bool RunningBuiltInProcedure::isFailed() const
 {
     if (failed) return true;
-    if (p.isPetAction() && finished) {
+    if (p.isAvatarAction() && finished) {
         const ActionPlanID* planId = boost::get<ActionPlanID>(&result);
         if (!planId) return true;
         return pai.hasPlanFailed(*planId);

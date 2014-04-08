@@ -30,7 +30,7 @@
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParameter.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionParamType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
-#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.h>
 #include "PlanningHeaderFiles.h"
 #include "Inquery.h"
 
@@ -347,7 +347,7 @@ namespace opencog { namespace oac {
     class Rule
     {
     public:
-        PetAction* action;
+        AvatarAction* action;
 
         // the actor who carry out this action, usually an Entity
         ParamValue actor;
@@ -389,12 +389,12 @@ namespace opencog { namespace oac {
         bool isReversibleRule;
 
         // constructors
-        Rule(PetAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
+        Rule(AvatarAction* _action, ParamValue _actor, vector<State*> _preconditionList, vector<EffectPair> _effectList, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(_preconditionList), effectList(_effectList), basic_cost(_basic_cost),
             CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent), isReversibleRule(_isReversibleRule)
         {noCoexisenceOtherRules.clear();}
 
-        Rule(PetAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
+        Rule(AvatarAction* _action, ParamValue _actor, float _basic_cost, bool _precondOrderDependent = false, bool _isReversibleRule = false):
             action(_action) , actor(_actor), preconditionList(), effectList(), basic_cost(_basic_cost),
             CostHeuristics(), IsRecursiveRule(false), bestNumericVariableinqueryStateFuns(), paraIndexMap(),ruleName(""),precondOrderDependent(_precondOrderDependent),isReversibleRule(_isReversibleRule)
         {noCoexisenceOtherRules.clear();}

@@ -32,7 +32,7 @@
 
 using namespace ImaginaryLife;
 using namespace behavior;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace std;
 
 #define T1 0
@@ -61,8 +61,8 @@ public:
         stringstream tr_str_rand(string("and_seq(beg stretch goto_obj(random_object))"));
         // tr_str >> tr;
         // tr_str_rand >> tr_rand;
-        PetCombo::operator>>(tr_str, tr);
-        PetCombo::operator>>(tr_str_rand, tr_rand);
+        AvatarCombo::operator>>(tr_str, tr);
+        AvatarCombo::operator>>(tr_str_rand, tr_rand);
 
         //fill atomSpace with definite objects
         AtomSpace atomSpace;

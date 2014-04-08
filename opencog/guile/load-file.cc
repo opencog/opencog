@@ -26,7 +26,12 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <boost/filesystem/operations.hpp>
+
 #include <opencog/guile/SchemeEval.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+#include <opencog/util/misc.h>
 
 namespace opencog {
 
@@ -85,6 +90,44 @@ int load_scm_file (AtomSpace& as, const char * filename)
 	fclose(fh);
 	delete evaluator;
 	return 0;
+}
+
+/**
+ * Pull the names of scm files out of the config file, the SCM_PRELOAD
+ * key, and try to load those, relative to the search paths
+ */
+void load_scm_files_from_config(AtomSpace& atomSpace, const char* search_paths[])
+{
+    // Load scheme modules specified in the config file
+    std::vector<std::string> scm_modules;
+    tokenize(config()["SCM_PRELOAD"], std::back_inserter(scm_modules), ", ");
+
+    std::vector<std::string>::const_iterator it;
+    for (it = scm_modules.begin(); it != scm_modules.end(); ++it)
+    {
+        int rc = 2;
+        const char * mod = (*it).c_str();
+        if ( search_paths != NULL ) {
+            for (int i = 0; search_paths[i] != NULL; ++i) {
+                boost::filesystem::path modulePath(search_paths[i]);
+                modulePath /= *it;
+                if (boost::filesystem::exists(modulePath)) {
+                    mod = modulePath.string().c_str();
+                    rc = load_scm_file(atomSpace, mod);
+                    if (0 == rc) break;
+                }
+            }
+        } // if
+        if (rc)
+        {
+           logger().warn("Failed to load %s: %d %s",
+                 mod, rc, strerror(rc));
+        }
+        else
+        {
+            logger().info("Loaded %s", mod);
+        }
+    }
 }
 
 }

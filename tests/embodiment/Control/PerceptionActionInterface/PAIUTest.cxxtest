@@ -194,25 +194,25 @@ public:
         avatarInterface.setPAI(&pai);
         ActionPlanID plan1 = pai.createActionPlan();
         ActionPlanID plan2 = pai.createActionPlan();
-        pai.addAction(plan1, PetAction(ActionType::TRICK_FOR_FOOD()));
-        TS_ASSERT_THROWS(pai.addAction(plan1, PetAction(ActionType::WALK())), InvalidParamException&); // invalid parameters
+        pai.addAction(plan1, AvatarAction(ActionType::TRICK_FOR_FOOD()));
+        TS_ASSERT_THROWS(pai.addAction(plan1, AvatarAction(ActionType::WALK())), InvalidParamException&); // invalid parameters
         pai.sendActionPlan(plan1);
         TS_ASSERT(sentActionPlans.size() == 1);
         TS_ASSERT(sentActionPlans.front().getAction(1).getType() == ActionType::TRICK_FOR_FOOD());
-        PetAction walkAction(ActionType::WALK());
+        AvatarAction walkAction(ActionType::WALK());
         walkAction.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
         walkAction.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
         walkAction.addParameter(ActionParameter("rotate", ActionParamType::ROTATION(), Rotation(1.2, 1.3, 1.4)));
         pai.addAction(plan2, walkAction);
-        pai.addAction(plan2, PetAction(ActionType::BARK()));
-        PetAction eatAction(ActionType::EAT());
+        pai.addAction(plan2, AvatarAction(ActionType::BARK()));
+        AvatarAction eatAction(ActionType::EAT());
         eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("10"), "pet")));
         pai.addAction(plan2, eatAction);
-        PetAction flyAction(ActionType::FLY());
+        AvatarAction flyAction(ActionType::FLY());
         flyAction.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
         flyAction.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
         pai.addAction(plan2, flyAction);
-        TS_ASSERT_THROWS(pai.addAction(plan2, PetAction(ActionType::JUMP_TOWARD())), InvalidParamException&); // invalid parameters
+        TS_ASSERT_THROWS(pai.addAction(plan2, AvatarAction(ActionType::JUMP_TOWARD())), InvalidParamException&); // invalid parameters
         pai.sendActionPlan(plan2);
         TS_ASSERT(sentActionPlans.size() == 2);
         TS_ASSERT(sentActionPlans.back().getAction(1).getType() == ActionType::WALK());
@@ -249,12 +249,12 @@ public:
         ActionPlanID planId = pai.createActionPlan();
         TS_ASSERT(planId == "10");
 
-        PetAction action1(ActionType::BARK());
+        AvatarAction action1(ActionType::BARK());
         action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
         ActionID actionId1 = pai.addAction(planId, action1);
 
-        PetAction action2(ActionType::WALK());
+        AvatarAction action2(ActionType::WALK());
         action2.addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(10.0, 15.0, 20.0)));
         action2.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), toString(1.0)));
         action2.addParameter(ActionParameter("frameOfReference", ActionParamType::ROTATION(), Rotation(0.5, 0.0, -3.0)));
@@ -265,7 +265,7 @@ public:
         planId = pai.createActionPlan();
         TS_ASSERT(planId == "11");
 
-        PetAction action3(ActionType::BARK());
+        AvatarAction action3(ActionType::BARK());
         ActionID actionId3 = pai.addAction(planId, action3);
 
         pai.sendActionPlan(planId);
@@ -273,7 +273,7 @@ public:
         planId = pai.createActionPlan();
         TS_ASSERT(planId == "12");
 
-        PetAction action4(ActionType::GRAB());
+        AvatarAction action4(ActionType::GRAB());
         action4.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         ActionID actionId4 = pai.addAction(planId, action4);
 
@@ -282,7 +282,7 @@ public:
         planId = pai.createActionPlan();
         TS_ASSERT(planId == "13");
 
-        PetAction action5(ActionType::DROP());
+        AvatarAction action5(ActionType::DROP());
         ActionID actionId5 = pai.addAction(planId, action5);
 
         pai.sendActionPlan(planId);

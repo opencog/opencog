@@ -37,6 +37,7 @@
 #include <opencog/util/exceptions.h>
 
 #include <opencog/atomspace/AttentionValue.h>
+#include <opencog/atomspace/ClassServer.h>
 #include <opencog/atomspace/TruthValue.h>
 #include <opencog/atomspace/types.h>
 
@@ -180,6 +181,14 @@ public:
      */
     inline Type getType() const { return _type; }
 
+    /** Basic predicate */
+    bool isType(Type t, bool subclass) const
+    {
+        Type at(getType());
+        if (not subclass) return t == at;
+        return classserver().isA(at, t);
+    }
+
     /** Returns the handle of the atom.
      *
      * @return The handle of the atom.
@@ -261,6 +270,38 @@ public:
         return result;
     }
 
+    /**
+     * Returns the set of atoms with a given target handle in their
+     * outgoing set (atom type and its subclasses optionally).
+     * That is, returns the incoming set of Handle h, with some optional
+     * filtering.
+     *
+     * @param The handle that must be in the outgoing set of the atom.
+     * @param The optional type of the atom.
+     * @param Whether atom type subclasses should be considered.
+     * @return The set of atoms of the given type with the given handle
+     *         in their outgoing set.
+     */
+    template <typename OutputIterator> OutputIterator
+    getIncomingSetByType(OutputIterator result,
+                         Type type, bool subclass = false)
+    {
+        if (NULL == _incoming_set) return result;
+        std::lock_guard<std::mutex> lck(_mtx);
+        // Sigh. I need to compose copy_if with transform. I could
+        // do this wih boost range adaptors, but I don't feel like it.
+        auto end = _incoming_set->_iset.end();
+        for (auto w = _incoming_set->_iset.begin(); w != end; w++)
+        {
+            Handle h(w->lock());
+            if (h and h->isType(type, subclass)) {
+                *result = h;
+                result ++;
+            }
+        }
+        return result;
+    }
+
 
     /** Returns a string representation of the node.
      *
@@ -281,6 +322,8 @@ public:
      * @return true if the atoms are different, false otherwise.
      */
     virtual bool operator!=(const Atom&) const = 0;
+
+
 };
 
 /** @}*/

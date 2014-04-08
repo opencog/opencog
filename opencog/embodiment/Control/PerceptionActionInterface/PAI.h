@@ -37,7 +37,7 @@
 
 #include <opencog/atomspace/AtomSpace.h>
 
-#include "PetAction.h"
+#include "AvatarAction.h"
 #include "ActionPlan.h"
 #include "ActionPlanSender.h"
 #include <opencog/embodiment/Control/AvatarInterface.h>
@@ -309,7 +309,7 @@ public:
      *
      * @param planId The identification of the action plan where the action must
      * be inserted.
-     * @param action A reference to the PetAction object containg
+     * @param action A reference to the AvatarAction object containg
      * the action to be inserted into de actio plan.
      *
      * @return An action identifier used to track the execution of the action in
@@ -317,7 +317,7 @@ public:
      * @throw RuntimeException if the action contains invalid parameters for its
      * type.
      */
-    ActionID addAction(ActionPlanID planId, const PetAction& action) throw
+    ActionID addAction(ActionPlanID planId, const AvatarAction& action) throw
         (opencog::RuntimeException, opencog::InvalidParamException,
          std::bad_exception);
 
@@ -578,7 +578,7 @@ private:
      * @param action action to be represented
      * @return the Handle of the action representation.
      */
-    Handle addActionToAtomSpace(ActionPlanID planId, const PetAction& action)
+    Handle addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action)
         throw (opencog::RuntimeException, opencog::InvalidParamException,
                 std::bad_exception);
 
@@ -587,13 +587,13 @@ private:
      *
      * @param predicateName the name of the predicate (actionTried, actionDone
      * or actionFailed)
-     * @param action a referent to the PetAction object
+     * @param action a referent to the AvatarAction object
      * @param timestamp an unsigned long value that represents the timestamp of
      * this predicate.
      * @param actionId the id that identifies the action (with the exact
      * arguments)
      */
-    Handle addActionPredicate(const char* predicateName, const PetAction&
+    Handle addActionPredicate(const char* predicateName, const AvatarAction&
             action, unsigned long timestamp, ActionID actionId);
 
 //    /**

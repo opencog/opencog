@@ -1,4 +1,5 @@
 from opencog.atomspace import TruthValue
+from math import isinf, isnan
 
 # Todo: Could this file be broken up so that there would be a
 # one-to-one correspondence between 'formulas' and 'rules' files?
@@ -185,7 +186,7 @@ def andFormula(tvs):
     
     for tv in tvs:
         total_strength *= tv.mean
-    
+
     return [TruthValue(total_strength, makeUpCount(tvs))]
 
 

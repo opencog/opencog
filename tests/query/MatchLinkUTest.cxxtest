@@ -22,6 +22,7 @@
 
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
+#include <opencog/guile/load-file.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
 #include <opencog/server/CogServer.h>
@@ -86,9 +87,8 @@ void MatchLink::setUp(void)
 	// Load the required data
 	config().set("MODULES",
 		"opencog/nlp/types/libnlp-types.so, "
-		"opencog/spacetime/libspacetime.so, "
-		"opencog/dynamics/attention/libattention.so, "
-		"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+		"opencog/dynamics/attention/libattention-types.so, "
+		"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
 	config().set("SCM_PRELOAD",
       "opencog/atomspace/core_types.scm, "
@@ -109,7 +109,7 @@ void MatchLink::setUp(void)
 		NULL
 	};
 	cogserver().loadModules(paths);
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
 	SchemeEval* eval = new SchemeEval();

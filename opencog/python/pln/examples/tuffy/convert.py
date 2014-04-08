@@ -10,7 +10,7 @@ Output format is:
 
 (EvaluationLink (stv 1 1)
     (PredicateNode "predicate")
-    (ListLink
+    (ListLink (stv 1 1)
         (ConceptNode "argument1")
         (ConceptNode "argument2")
           ...
@@ -21,7 +21,7 @@ or
 (NotLink (stv 1 1)
     (EvaluationLink
         (PredicateNode "predicate")
-        (ListLink
+        (ListLink (stv 1 1)
             (ConceptNode "argument1")
             (ConceptNode "argument2")
               ...
@@ -81,7 +81,7 @@ try:
 
                     # ListLink
                     list_link = atomspace.add_link(
-                        types.ListLink, concept_nodes)
+                        types.ListLink, concept_nodes, crisp_true)
 
                     # EvaluationLink
                     eval_link = atomspace.add_link(

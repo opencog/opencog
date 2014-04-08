@@ -1,5 +1,5 @@
 /*
- * opencog/embodiment/Control/Procedure/BuiltIn/PetActionSchema.h
+ * opencog/embodiment/Control/Procedure/BuiltIn/AvatarActionSchema.h
  *
  * Copyright (C) 2002-2009 Novamente LLC
  * All Rights Reserved
@@ -24,7 +24,7 @@
 #ifndef PET_ATION_SCHEMA_H_
 #define PET_ATION_SCHEMA_H_
 /**
- * PetActionSchema.h:
+ * AvatarActionSchema.h:
  *
  * This is a class for all builtin schema that executes a single Pet action
  * The execute() method always returns the ID of the ActionPlan sent to SL/Proxy so
@@ -40,7 +40,7 @@
 
 namespace opencog { namespace Procedure {
 
-class PetActionSchema : public BuiltInProcedure
+class AvatarActionSchema : public BuiltInProcedure
 {
 
     std::string name;
@@ -52,11 +52,11 @@ protected:
 
 public:
 
-    PetActionSchema(pai::PAI& pai, const pai::ActionType& actionType);
-    virtual ~PetActionSchema();
+    AvatarActionSchema(pai::PAI& pai, const pai::ActionType& actionType);
+    virtual ~AvatarActionSchema();
 
     const std::string& getName() const;
-    bool isPetAction() const;
+    bool isAvatarAction() const;
     combo::vertex execute(const std::vector<combo::vertex>& arguments) const throw (RuntimeException, InvalidParamException, std::bad_exception);
 };
 
