@@ -166,6 +166,8 @@ public:
 
     bool checkPatternExist(const string& patternKeyStr);
 
+    void OutPutPatternsToFile(unsigned int n_gram);
+
     void runPatternMiner();
 
 

@@ -23,6 +23,8 @@
  */
 #include <thread>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 #include <map>
 #include <iterator>
 #include <opencog/atomspace/atom_types.h>
@@ -731,11 +733,25 @@ bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
     return (node1->instances.size() >= node2->instances.size());
 }
 
-//void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
-//{
-//    // out put the n_gram patterns to a file
+void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
+{
+    // out put the n_gram patterns to a file
+    ofstream resultFile;
+    string fileName = "FrequentPatterns_" + toString(n_gram) + "gram.scm";
+    resultFile.open(fileName.c_str());
+    vector<HTreeNode*> &patternsForThisGram = patternsForGram[n_gram-1];
+    resultFile << "Frequenc Pattern Mining results for " + toString(n_gram) + " gram patterns. Total pattern number: " + toString(patternsForThisGram.size()) << endl;
 
-//}
+    foreach(HTreeNode* htreeNode, patternsForThisGram)
+    {
+        resultFile << endl << "Pattern: Frequency = " << toString(htreeNode->instances.size()) << endl;
+        foreach (Handle link, htreeNode->pattern)
+        {
+            resultFile << atomSpace->atomAsString(link);
+        }
+    }
+
+}
 
 void PatternMiner::ConstructTheFirstGramPatterns()
 {
@@ -749,6 +765,7 @@ void PatternMiner::ConstructTheFirstGramPatterns()
 
     // sort the patterns by frequency
     std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
+    OutPutPatternsToFile(1);
 
 }
 
@@ -765,7 +782,7 @@ void PatternMiner::GrowAllPatterns()
         std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
 
         // Finished mining cur_gram patterns; output to file
-
+        OutPutPatternsToFile(cur_gram);
     }
 }
 
