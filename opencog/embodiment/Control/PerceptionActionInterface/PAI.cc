@@ -180,8 +180,6 @@ ActionPlanID PAI::createActionPlan()
     // Get the planning result
     std::string demandName; 
 
-    // @todo: this pertains to OpenPsi, that logging should probably
-    // occur by the OpenPsi caller rather than here
     Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
                                                  "plan_selected_demand_goal");
     if (hPlanSelDemGoal != Handle::UNDEFINED) {
