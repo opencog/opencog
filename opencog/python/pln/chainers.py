@@ -359,11 +359,19 @@ class AtomSpaceBasedInferenceHistory:
         else:
             return False
 
-    def lookup_applications_by_output_tuple_and_rule():
+    def lookup_input_tuples_by_output_tuple_and_rule(self, rule, output):
         """
         Lookup every input tuple that the given Rule has used to create this output.
         Used by temporal rules
         """
+        # rule in the arguments is a Rule object, but _get_rule returns a Node
+
+        # Find all the apps for that output, and then select only the
+        # ones for this rule
+        apps = self._lookup_applications_by_output_atom(self, output)
+        relevant_apps = [app for app in apps if self._get_rule(app).name == rule.name]
+        input_tuples = [tuple(self._get_inputs(app)) for app in relevant_apps]
+        return input_tuples
 
     # TODO only works for rules with one output. This is hard to fix
     def _lookup_applications_by_output_atom(self, output):
@@ -841,7 +849,7 @@ class Chainer(AbstractChainer):
             # Lookup all inputs ever found by the chainer, and then use
             # the special temporal computation instead of revision.
             past_input_tuples = \
-                self.history.lookup_all_applications(rule, outputs)
+                self.history.lookup_input_tuples_by_output_tuple_and_rule(rule, outputs)
             all_input_tuples = [inputs] + past_input_tuples
 
             (outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
