@@ -21,13 +21,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef PET_INTERFACE_H_
-#define PET_INTERFACE_H_
+#ifndef AVATAR_INTERFACE_H_
+#define AVATAR_INTERFACE_H_
 
 /**
  * AvatarInterface.h
  *
- * This is an abstract class to define the interface that the Pet class must
+ * This is an abstract class to define the interface that the Avatar class must
  * provide for usage by other classes (like PAI, Predavese parser and handlers, etc).
  */
 #include <fstream>
@@ -188,4 +188,4 @@ public:
 
 }} // opencog::control
 
-#endif /*PET_INTERFACE_H_*/
+#endif /*AVATAR_INTERFACE_H_*/
