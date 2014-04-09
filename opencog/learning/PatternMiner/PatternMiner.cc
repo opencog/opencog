@@ -30,7 +30,6 @@
 #include <opencog/util/foreach.h>
 #include <opencog/query/PatternMatch.h>
 #include <stdlib.h>
-#include <time.h>
 #include <opencog/atomspace/Handle.h>
 #include "PatternMiner.h"
 
@@ -51,6 +50,7 @@ PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram)
     threads = new thread[THREAD_NUM];
 
     MAX_GRAM = max_gram;
+    cur_gram = 0;
 
     ignoredTypes[0] = LIST_LINK;
 
@@ -699,10 +699,8 @@ void PatternMiner::extendAllPossiblePatternsForOneMoreGram(HandleSeq &instance, 
     }
 }
 
-void PatternMiner::growPatternTask()
+void PatternMiner::growPatternsTask()
 {
-    static unsigned cur_gram = 1;
-
     static unsigned int cur_index = -1;
 
     vector<HTreeNode*>& last_gram_patterns = patternsForGram[cur_gram-1];
@@ -715,6 +713,7 @@ void PatternMiner::growPatternTask()
         cur_index ++;
         if (cur_index >= total)
             break;
+
         patternForLastGramLock.unlock();
 
         HTreeNode* cur_growing_pattern = last_gram_patterns[cur_index];
@@ -727,32 +726,55 @@ void PatternMiner::growPatternTask()
 
 }
 
+bool compareHTreeNodeByFrequency(HTreeNode* node1, HTreeNode* node2)
+{
+    return (node1->instances.size() >= node2->instances.size());
+}
+
+//void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
+//{
+//    // out put the n_gram patterns to a file
+
+//}
+
 void PatternMiner::ConstructTheFirstGramPatterns()
 {
+    cur_gram = 1;
+
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
         threads[i] = std::thread([this]{this->growTheFirstGramPatternsTask();}); // using C++11 lambda-expression
         threads[i].join();
     }
+
+    // sort the patterns by frequency
+    std::sort((patternsForGram[0]).begin(), (patternsForGram[0]).end(),compareHTreeNodeByFrequency );
+
 }
 
 void PatternMiner::GrowAllPatterns()
 {
-    srand(time(NULL));
-
-    for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+    for ( cur_gram = 2; cur_gram <= MAX_GRAM; ++ cur_gram)
     {
-        threads[i] = std::thread([this]{this->growPatternTask();}); // using C++11 lambda-expression
-        threads[i].join();
+        for (unsigned int i = 0; i < THREAD_NUM; ++ i)
+        {
+            threads[i] = std::thread([this]{this->growPatternsTask();}); // using C++11 lambda-expression
+            threads[i].join();
+        }
+
+        std::sort((patternsForGram[cur_gram-1]).begin(), (patternsForGram[cur_gram-1]).end(),compareHTreeNodeByFrequency );
+
+        // Finished mining cur_gram patterns; output to file
+
     }
 }
 
 void PatternMiner::runPatternMiner()
 {
 
-
     // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
     ConstructTheFirstGramPatterns();
+    GrowAllPatterns();
 
 
 }

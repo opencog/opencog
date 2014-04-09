@@ -90,6 +90,8 @@ private:
 
     unsigned int MAX_GRAM;
 
+    unsigned int cur_gram;
+
     std::mutex allAtomListLock, uniqueKeyLock, patternForLastGramLock;
 
     Type ignoredTypes[1];
@@ -149,7 +151,7 @@ private:
 
     void ConstructTheFirstGramPatterns();
 
-    void growPatternTask();
+    void growPatternsTask();
 
     void GrowAllPatterns();
 
