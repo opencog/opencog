@@ -1,7 +1,7 @@
 /*
  * PatternSCM.h
  *
- * Guile scheme bindigs for the pattern matcher
+ * Guile scheme bindings for the pattern matcher
  * Copyright (c) 2008, 2014 Linas Vepstas <linas@linas.org>
  */
 

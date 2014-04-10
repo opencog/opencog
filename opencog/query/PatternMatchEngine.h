@@ -119,9 +119,9 @@ class PatternMatchEngine
 		              Handle& clause);
 
 		void match(PatternMatchCallback *,
-		           const std::vector<Handle> &vars,
-		           const std::vector<Handle> &clauses,
-		           const std::vector<Handle> &negations);
+		           std::vector<Handle> &vars,
+		           std::vector<Handle> &clauses,
+		           std::vector<Handle> &negations);
 
 		void print_solution(const std::map<Handle, Handle> &vars,
 		                           const std::map<Handle, Handle> &clauses);
