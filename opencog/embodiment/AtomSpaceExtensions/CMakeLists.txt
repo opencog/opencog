@@ -11,9 +11,9 @@ INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR})
 ADD_LIBRARY (embodiment-types SHARED
     atom_types_init
 )
-ADD_DEPENDENCIES(embodiment_atom_types opencog_atom_types)
-ADD_DEPENDENCIES(embodiment_atom_types spacetime_atom_types)
-ADD_DEPENDENCIES(embodiment_atom_types embodiment_atom_types)
+ADD_DEPENDENCIES(embodiment-types opencog_atom_types)
+ADD_DEPENDENCIES(embodiment-types spacetime_atom_types)
+ADD_DEPENDENCIES(embodiment-types embodiment_atom_types)
 
 TARGET_LINK_LIBRARIES (embodiment-types
 	atomspace
