@@ -184,8 +184,8 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// In principle, we could start our search at some node, any node,
 	// that is not a variable. In practice, the search begins by
 	// iterating over the incoming set of the node, and so, if it is
-	// large, an huge amounf of effort might be wasted exploring
-	// dead-ends.  Thus, it pays off to start the seearch on the
+	// large, a huge amount of effort might be wasted exploring
+	// dead-ends.  Thus, it pays off to start the search on the
 	// node with the smallest ("narrowest" or "thinnest") incoming set
 	// possible.  Thus, we look at all the clauses, to find the
 	// "thinnest" one.

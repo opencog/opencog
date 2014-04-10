@@ -532,7 +532,7 @@ void PatternMatchEngine::get_next_untried_clause(void)
 		}
 
 		// XXX TODO ... Rather than settling for the first one that we find,
-		// we should instead look for the "thinnest" one, the one with the 
+		// we should instead look for the "thinnest" one, the one with the
 		// smallest incoming set.  That is because the very next thing that
 		// we do will be to iterate over the incoming set of "pursue" ... so
 		// it could be a huge pay-off to minimize this.
@@ -723,11 +723,11 @@ void PatternMatchEngine::clear(void)
  * inverted.  That is, while the clauses define a subgraph that
  * *must* be found, the negations define a subgraph that should
  * not be found, or, if found, should have a truth value of 'false'.
- * The precise meaning of 'false' in the sentence above is determined 
- * by the callback, which can use arbitrary criteria for this.  
- * In particularm the search engine itself will happily proclaim
- * a match whether or not it finds any of the negated clauses. So, 
- * in this sense, the negated clauses can be understood to be 
+ * The precise meaning of 'false' in the sentence above is determined
+ * by the callback, which can use arbitrary criteria for this.
+ * In particular, the search engine itself will happily proclaim
+ * a match whether or not it finds any of the negated clauses. So,
+ * in this sense, the negated clauses can be understood to be
  * "optional" matches: they will be matched, if possible, but are not
  * required to be matched. It is up to the callback to explictly
  * reject these clauses, if it so wishes to, thus implementing the
