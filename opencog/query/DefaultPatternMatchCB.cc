@@ -42,7 +42,7 @@ using namespace opencog;
 // The handle h points to a clause.  In principle, it is enough to
 // simply find a constant in the clause, and just start there. In
 // practice, this can be an awful way to do things. So, for example,
-// most "typical" clauses will be of the form 
+// most "typical" clauses will be of the form
 //
 //    EvaluationLink
 //        PredicteNode "blah"
@@ -66,15 +66,15 @@ using namespace opencog;
 // set, but "blah" does not, then "blah" is a much better place to
 // start.
 //
-// size_t& depth will be set to the depth of the deepest constant found.
+// size_t& depth will be set to the depth of the thinnest constant found.
 // Handle& start will be set to the link containing that constant.
 // size_t& width will be set to the incoming-set size of the thinnest
 //               constant found.
 // The returned value will be the constant at which to start the search.
 // If no constant is found, then the returned value is the undefnied
 // handle.
-// 
-Handle 
+//
+Handle
 DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
                                     Handle& start, size_t& width)
 {
@@ -90,42 +90,38 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 		return Handle::UNDEFINED;
 	}
 
+	size_t deepest = depth;
+	start = Handle::UNDEFINED;
+	Handle hdeepest(Handle::UNDEFINED);
+	size_t thinnest = SIZE_MAX;
+
+	// Iterate over all the handles in the outgoing set.
+	// Find the deepest one that contains a constant, and start
+	// the search there.  If there are two at the same depth,
+	// then start with the skinnier one.
 	LinkPtr ll(LinkCast(h));
-	if (ll) {
-		size_t deepest = depth;
-		start = Handle::UNDEFINED;
-		Handle hdeepest(Handle::UNDEFINED);
-		size_t thinnest = SIZE_MAX;
+	const std::vector<Handle> &vh = ll->getOutgoingSet();
+	for (size_t i = 0; i < vh.size(); i++) {
 
-		// Iterate over all the handles in the outgoing set.
-		// Find the deepest one that contains a constant, and start
-		// the search there.  If there are two at the same depth,
-		// then start with the skinnier one.
-		const std::vector<Handle> &vh = ll->getOutgoingSet();
-		for (size_t i = 0; i < vh.size(); i++) {
+		size_t brdepth = depth + 1;
+		size_t brwid = SIZE_MAX;
+		Handle sbr(h);
+		Handle s(find_starter(vh[i], brdepth, sbr, brwid));
 
-			size_t brdepth = depth + 1;
-			size_t brwid = SIZE_MAX;
-			Handle sbr(h);
-			Handle s(find_starter(vh[i], brdepth, sbr, brwid));
-
-			if (s != Handle::UNDEFINED
-			    and (brwid < thinnest
-			         or (brwid == thinnest and deepest < brdepth)))
-			{
-				deepest = brdepth;
-				hdeepest = s;
-				start = sbr;
-				thinnest = brwid;
-			}
-
+		if (s != Handle::UNDEFINED
+		    and (brwid < thinnest
+		         or (brwid == thinnest and deepest < brdepth)))
+		{
+			deepest = brdepth;
+			hdeepest = s;
+			start = sbr;
+			thinnest = brwid;
 		}
-		depth = deepest;
-		width = thinnest;
-		return hdeepest;
-	}
 
-	return Handle::UNDEFINED;
+	}
+	depth = deepest;
+	width = thinnest;
+	return hdeepest;
 }
 
 bool DefaultPatternMatchCB::loop_candidate(Handle h)
@@ -138,7 +134,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
 /**
  * Search for solutions/groundings over all of the AtomSpace, using
  * some "reasonable" assumptions for what might be searched for. Or,
- * to put it bluntly, this search method *might* miss some possible 
+ * to put it bluntly, this search method *might* miss some possible
  * solutions, for certain "unusual" search types. The trade-off is
  * that this search algo should really be quite fast for "normal"
  * search types.
@@ -146,7 +142,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  * This search algo makes the following (important) assumptions:
  *
  * 1) If there are no variables in the clauses, then this will search
- *    over all links which have the same type as the first clause. 
+ *    over all links which have the same type as the first clause.
  *    Clearly, this kind of search can fail if link_match() callback
  *    was prepared to accept other link types as well.
  *
@@ -162,12 +158,12 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  *
  * The above describes the limits to the "typical" search that this
  * algo can do well. In particular, if the constraint of 2) can be met,
- * then the search can be quite rapid, since incoming sets are often 
- * quite small; and assumption 2) limits the search to "nearby", 
+ * then the search can be quite rapid, since incoming sets are often
+ * quite small; and assumption 2) limits the search to "nearby",
  * connected atoms.
  *
  * Note that the default implementation of node_match() and link_match()
- * in this class does satisfy both 1) and 2), so this algo will work 
+ * in this class does satisfy both 1) and 2), so this algo will work
  * correctly if these two methods are not overloaded.
  *
  * If you overload node_match(), and do so in a way that breaks
@@ -175,7 +171,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  * "why did my search fail to find this obvious solution?" The answer
  * will be for you to create a new search algo, in a new class, that
  * overloads this one, and does what you want it to.  This class should
- * probably *not* be modified, since it is quite efficient for the 
+ * probably *not* be modified, since it is quite efficient for the
  * "normal" case.
  */
 void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
