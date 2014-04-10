@@ -156,7 +156,7 @@ class DefaultPatternMatchCB :
 	private:
 		Handle _root;
 		Handle _starter_pred;
-		Handle find_starter(Handle, int&, Handle&);
+		Handle find_starter(Handle, size_t&, Handle&, size_t&);
 		bool loop_candidate(Handle);
 		VariableTypeMap *_type_restrictions;
 	protected:

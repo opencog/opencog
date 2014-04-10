@@ -56,43 +56,69 @@ using namespace opencog;
 // below tries to pass over "blah" and pick "item" instead.  Note that
 // it has to drill deep to find that.
 //
-// int& depth will be set to the depth of the deepest constant found.
+// A secondary optimization is to find the "thinnest" starting point.
+// This is a variant of the above reasoning: if there are two atoms
+// at the same level, then start the search at the one with the smallest
+// incoming set. This again is a form of "greedy" search: minimize the
+// total number of possibilities to explore.
+//
+// size_t& depth will be set to the depth of the deepest constant found.
 // Handle& start will be set to the link containing that constant.
+// size_t& width will be set to the incoming-set size of the thinnest
+//               constant found.
 // The returned value will be the constant at which to start the search.
 // If no constant is found, then the returned value is the undefnied
 // handle.
 // 
 Handle 
-DefaultPatternMatchCB::find_starter(Handle h, int& depth, Handle& start)
+DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
+                                    Handle& start, size_t& width)
 {
 
 	// If its a node, then we are done. Don't modiy either depth or
 	// start.
 	Type t = h->getType();
 	if (classserver().isNode(t)) {
-		if (t != VARIABLE_NODE) return h;
+		if (t != VARIABLE_NODE) {
+			width = h->getIncomingSetSize();
+			return h;
+		}
 		return Handle::UNDEFINED;
 	}
 
 	LinkPtr ll(LinkCast(h));
 	if (ll) {
-		int deepest = depth;
+		size_t deepest = depth;
 		start = Handle::UNDEFINED;
 		Handle hdeepest(Handle::UNDEFINED);
+		size_t thinnest = SIZE_MAX;
 
+		// Iterate over all the handles in the outgoing set.
+		// Find the deepest one that contains a constant, and start
+		// the search there.  If there are two at the same depth,
+		// then start with the skinnier one.
 		const std::vector<Handle> &vh = ll->getOutgoingSet();
 		for (size_t i = 0; i < vh.size(); i++) {
 
-			int brdepth = depth + 1;
+			size_t brdepth = depth + 1;
+			size_t brwid = SIZE_MAX;
 			Handle sbr(h);
-			Handle s(find_starter(vh[i], brdepth, sbr));
-			if (deepest < brdepth and s != Handle::UNDEFINED) {
-				deepest = brdepth;
-				hdeepest = s;
-				start = sbr;
+			Handle s(find_starter(vh[i], brdepth, sbr, brwid));
+
+			if (s != Handle::UNDEFINED) {
+				if (deepest < brdepth or
+				   (deepest == brdepth and brwid < thinnest))
+				{
+					deepest = brdepth;
+					hdeepest = s;
+					start = sbr;
+					thinnest = brwid;
+				}
 			}
+
 		}
 		depth = deepest;
+		width = thinnest;
 		return hdeepest;
 	}
 
@@ -164,8 +190,9 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	// variables at all, then we must assume a very general match.
 	Handle h(clauses[0]);
 	_root = h;
-	int depth = 0;
-	Handle start = find_starter(h, depth, _starter_pred);
+	size_t depth = 0;
+	size_t width = SIZE_MAX;
+	Handle start = find_starter(h, depth, _starter_pred, width);
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
 		dbgprt("Search start node: %s\n", start->toShortString().c_str());
