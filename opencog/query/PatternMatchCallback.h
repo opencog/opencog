@@ -3,7 +3,7 @@
  *
  * Author: Linas Vepstas February 2008
  *
- * Copyright (C) 2008,2009 Linas Vepstas <linasvepstas@gmail.com>
+ * Copyright (C) 2008,2009,2014 Linas Vepstas <linasvepstas@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -144,16 +144,17 @@ class PatternMatchCallback
 		virtual void set_type_restrictions(VariableTypeMap &tm) {}
 
 		/**
-		 * Called to start search. Must iterate over the portion of the
-		 * atomspace in which the solution will be looked for.  This
-		 * callback can be used to limit how much of the atomspace is
-		 * searched, as well as controlling the initial starting points
-		 * for the search.
+		 * Called to initiaite the search. This callback is responsbile
+		 * for performing the top-most, outer loop of the search. That is,
+		 * it gets to pick the starting points for the search, thereby
+		 * possibly limiting the breadth of the search.  It may also cull
+		 * the variables, clauses, or negated clauses to remove those that
+		 * will not alter the final semantics of the search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            const std::vector<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations) = 0;
+		                            std::vector<Handle> &vars,
+		                            std::vector<Handle> &clauses,
+		                            std::vector<Handle> &negations) = 0;
 };
 
 } // namespace opencog

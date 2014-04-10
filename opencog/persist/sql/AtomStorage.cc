@@ -1704,6 +1704,9 @@ void AtomStorage::create_tables(void)
 	rp.rs = db_conn->exec("CREATE TABLE Global ("
 	                      "max_height INT);");
 	rp.rs->release();
+	rp.rs = db_conn->exec("INSERT INTO Global (max_height) VALUES (0);");
+	rp.rs->release();
+
 	put_conn(db_conn);
 }
 

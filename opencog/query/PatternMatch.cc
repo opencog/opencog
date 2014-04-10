@@ -103,7 +103,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 		return;
 	}
 
-	const std::vector<Handle> &vars = lvarbles->getOutgoingSet();
+	std::vector<Handle> vars(lvarbles->getOutgoingSet());
 
 	// negation clauses are optionally present
 	std::vector<Handle> negs;
@@ -126,8 +126,7 @@ void PatternMatch::match(PatternMatchCallback *cb,
 	}
 
 	// Make sure that the user did not pass in bogus clauses
-	std::vector<Handle> clauses;
-	clauses = lclauses->getOutgoingSet();
+	std::vector<Handle> clauses(lclauses->getOutgoingSet());
 
 	bool bogus = pme.validate(vars, clauses);
 	if (bogus)
