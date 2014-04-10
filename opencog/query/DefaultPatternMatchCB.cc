@@ -1,7 +1,7 @@
 /*
  * DefaultPatternMatchCB.cc
  *
- * Copyright (C) 2008,2009 Linas Vepstas
+ * Copyright (C) 2008,2009,2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -37,21 +37,63 @@ using namespace opencog;
 
 /* ======================================================== */
 
-Handle DefaultPatternMatchCB::find_starter(Handle& h)
+// Find a good place to start the search.
+//
+// The handle h points to a clause.  In principle, it is enough to
+// simply find a constant in the clause, and just start there. In
+// practice, this can be an awful way to do things. So, for example,
+// most "typical" clauses will be of the form 
+//
+//    EvaluationLink
+//        PredicteNode "blah"
+//        ListLink
+//            VariableNode $var
+//            ConceptNode  "item"
+//
+// Typically, the incoming set to "blah" will be huge, so starting the
+// search there would be a poor choice. Typically, the incoming set to
+// "item" will be much smaller, and so makes a better choice.  The code
+// below tries to pass over "blah" and pick "item" instead.  Note that
+// it has to drill deep to find that.
+//
+// int& depth will be set to the depth of the deepest constant found.
+// Handle& start will be set to the link containing that constant.
+// The returned value will be the constant at which to start the search.
+// If no constant is found, then the returned value is the undefnied
+// handle.
+// 
+Handle 
+DefaultPatternMatchCB::find_starter(Handle h, int& depth, Handle& start)
 {
+
+	// If its a node, then we are done. Don't modiy either depth or
+	// start.
 	Type t = h->getType();
 	if (classserver().isNode(t)) {
 		if (t != VARIABLE_NODE) return h;
 		return Handle::UNDEFINED;
 	}
 
-	starter_pred = h;
 	LinkPtr ll(LinkCast(h));
-	const std::vector<Handle> &vh = ll->getOutgoingSet();
-	for (size_t i = 0; i < vh.size(); i++) {
-		Handle ho(vh[i]);
-		Handle s(find_starter(ho));
-		if (s != Handle::UNDEFINED) return s;
+	if (ll) {
+		int deepest = depth;
+		start = Handle::UNDEFINED;
+		Handle hdeepest(Handle::UNDEFINED);
+
+		const std::vector<Handle> &vh = ll->getOutgoingSet();
+		for (size_t i = 0; i < vh.size(); i++) {
+
+			int brdepth = depth + 1;
+			Handle sbr(h);
+			Handle s(find_starter(vh[i], brdepth, sbr));
+			if (deepest < brdepth and s != Handle::UNDEFINED) {
+				deepest = brdepth;
+				hdeepest = s;
+				start = sbr;
+			}
+		}
+		depth = deepest;
+		return hdeepest;
 	}
 
 	return Handle::UNDEFINED;
@@ -61,7 +103,7 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
 {
 	dbgprt("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n");
 	dbgprt("Loop candidate: %s\n", h->toShortString().c_str());
-	return pme->do_candidate(root, starter_pred, h);
+	return _pme->do_candidate(_root, _starter_pred, h);
 }
 
 /**
@@ -107,12 +149,12 @@ bool DefaultPatternMatchCB::loop_candidate(Handle h)
  * probably *not* be modified, since it is quite efficient for the 
  * "normal" case.
  */
-void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
+void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
                          const std::vector<Handle> &vars,
                          const std::vector<Handle> &clauses,
                          const std::vector<Handle> &negations)
 {
-	pme = _pme;
+	_pme = pme;
 
 	// Ideally, we start our search at some node, any node, that is
 	// not a variable, that is in the first clause. If the first
@@ -121,26 +163,27 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *_pme,
 	// type as the first clause.  Alternately, if there are *no*
 	// variables at all, then we must assume a very general match.
 	Handle h(clauses[0]);
-	root = h;
-	Handle start = find_starter(h);
+	_root = h;
+	int depth = 0;
+	Handle start = find_starter(h, depth, _starter_pred);
 	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
 	{
 		dbgprt("Search start node: %s\n", start->toShortString().c_str());
-		dbgprt("Start pred is: %s\n", starter_pred->toShortString().c_str());
+		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 		foreach_incoming_handle(start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
 	else
 	{
-		starter_pred = root;
+		_starter_pred = _root;
 
-		dbgprt("Start pred is: %s\n", starter_pred->toShortString().c_str());
+		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 		// Get type of the first item in the predicate list.
 		Type ptype = h->getType();
 
 		// Plunge into the deep end - start looking at all viable
 		// candidates in the AtomSpace.
-		AtomSpace *as = pme->get_atomspace();
+		AtomSpace *as = _pme->get_atomspace();
 		as->foreach_handle_of_type(ptype,
 		      &DefaultPatternMatchCB::loop_candidate, this);
 	}

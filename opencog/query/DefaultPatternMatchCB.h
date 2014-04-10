@@ -46,7 +46,7 @@ class DefaultPatternMatchCB :
 	public:
 		DefaultPatternMatchCB(void)
 		{
-			type_restrictions = NULL;
+			_type_restrictions = NULL;
 		}
 
 		/**
@@ -95,12 +95,12 @@ class DefaultPatternMatchCB :
 			// If the ungrounded term is a variable, then see if there
 			// are any restrictions on the variable type.
 			// If no restrictions, we are good to go.
-			if (NULL == type_restrictions) return false;
+			if (NULL == _type_restrictions) return false;
 
 			// If we are here, there's a restriction on the grounding type.
 			// Validate the node type, if needed.
-			VariableTypeMap::const_iterator it = type_restrictions->find(npat_h);
-			if (it == type_restrictions->end()) return false;
+			VariableTypeMap::const_iterator it = _type_restrictions->find(npat_h);
+			if (it == _type_restrictions->end()) return false;
 
 			// Is the ground-atom type in our list of allowed types?
 			const std::set<Type> &tset = it->second;
@@ -151,16 +151,16 @@ class DefaultPatternMatchCB :
 		 */
 		virtual void set_type_restrictions(VariableTypeMap &tm)
 		{
-			type_restrictions = &tm;
+			_type_restrictions = &tm;
 		}
 	private:
-		Handle root;
-		Handle starter_pred;
-		Handle find_starter(Handle&);
+		Handle _root;
+		Handle _starter_pred;
+		Handle find_starter(Handle, int&, Handle&);
 		bool loop_candidate(Handle);
-		VariableTypeMap *type_restrictions;
+		VariableTypeMap *_type_restrictions;
 	protected:
-		PatternMatchEngine *pme;
+		PatternMatchEngine *_pme;
 };
 
 } // namespace opencog
