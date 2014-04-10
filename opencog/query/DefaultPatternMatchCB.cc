@@ -53,14 +53,18 @@ using namespace opencog;
 // Typically, the incoming set to "blah" will be huge, so starting the
 // search there would be a poor choice. Typically, the incoming set to
 // "item" will be much smaller, and so makes a better choice.  The code
-// below tries to pass over "blah" and pick "item" instead.  Note that
-// it has to drill deep to find that.
+// below tries to pass over "blah" and pick "item" instead.  It does so
+// by comparing the size of the incoming sets of the two constants, and
+// picking the one with the smaller ("thinner") incoming set. Note that
+// this is a form of "greedy" search.
 //
-// A secondary optimization is to find the "thinnest" starting point.
-// This is a variant of the above reasoning: if there are two atoms
-// at the same level, then start the search at the one with the smallest
-// incoming set. This again is a form of "greedy" search: minimize the
-// total number of possibilities to explore.
+// Note that the algo performs a full-depth search to find this. That's
+// OK, because typeical clauses are never deep.
+//
+// Note that the size of the incoming set really is a better measure,
+// and not the depth.  So, for example, if "item" has a huge incoming
+// set, but "blah" does not, then "blah" is a much better place to
+// start.
 //
 // size_t& depth will be set to the depth of the deepest constant found.
 // Handle& start will be set to the link containing that constant.
@@ -105,15 +109,14 @@ DefaultPatternMatchCB::find_starter(Handle h, size_t& depth,
 			Handle sbr(h);
 			Handle s(find_starter(vh[i], brdepth, sbr, brwid));
 
-			if (s != Handle::UNDEFINED) {
-				if (deepest < brdepth or
-				   (deepest == brdepth and brwid < thinnest))
-				{
-					deepest = brdepth;
-					hdeepest = s;
-					start = sbr;
-					thinnest = brwid;
-				}
+			if (s != Handle::UNDEFINED
+			    and (brwid < thinnest
+			         or (brwid == thinnest and deepest < brdepth)))
+			{
+				deepest = brdepth;
+				hdeepest = s;
+				start = sbr;
+				thinnest = brwid;
 			}
 
 		}
