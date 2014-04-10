@@ -530,6 +530,12 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved = true;
 			}
 		}
+
+		// XXX TODO ... Rather than settling for the first one that we find,
+		// we should instead look for the "thinnest" one, the one with the 
+		// smallest incoming set.  That is because the very next thing that
+		// we do will be to iterate over the incoming set of "pursue" ... so
+		// it could be a huge pay-off to minimize this.
 		if (solved && unsolved) break;
 	}
 
