@@ -185,22 +185,53 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 {
 	_pme = pme;
 
-	// Ideally, we start our search at some node, any node, that is
-	// not a variable, that is in the first clause. If the first
-	// clause consists entirely of variable nodes, then we are 
-	// screwed, and must search over all links that have the same 
-	// type as the first clause.  Alternately, if there are *no*
-	// variables at all, then we must assume a very general match.
-	Handle h(clauses[0]);
-	_root = h;
-	size_t depth = 0;
-	size_t width = SIZE_MAX;
-	Handle start = find_starter(h, depth, _starter_pred, width);
-	if ((Handle::UNDEFINED != start) && (0 != vars.size()))
+	// In principle, we could start our search at some node, any node,
+	// that is not a variable. In practice, the search begins by
+	// iterating over the incoming set of the node, and so, if it is
+	// large, an huge amounf of effort might be wasted exploring
+	// dead-ends.  Thus, it pays off to start the seearch on the
+	// node with the smallest ("narrowest" or "thinnest") incoming set
+	// possible.  Thus, we look at all the clauses, to find the
+	// "thinnest" one.
+	//
+	// Note also: the user is allowed to specify patterns that have
+	// no constants in them at all.  In this case, the search is
+	// performed by looping over all links of the given types.
+
+	size_t thinnest = SIZE_MAX;
+	size_t deepest = 0;
+	size_t bestclause = 0;
+	Handle best_start(Handle::UNDEFINED);
+	_starter_pred = Handle::UNDEFINED;
+
+	size_t nc = clauses.size();
+	for (size_t i=0; i < nc; i++) {
+		Handle h(clauses[i]);
+		size_t depth = 0;
+		size_t width = SIZE_MAX;
+		Handle pred(Handle::UNDEFINED);
+		Handle start(find_starter(h, depth, pred, width));
+		if (start != Handle::UNDEFINED
+		    and (width < thinnest
+		         or (width == thinnest and depth > deepest)))
+		{
+			thinnest = width;
+			deepest = depth;
+			bestclause = i;
+			best_start = start;
+			_starter_pred = pred;
+		}
+	}
+	Handle tmp(clauses[0]);
+	clauses[0] = clauses[bestclause];
+	clauses[bestclause] = tmp;
+
+	_root = clauses[0];
+	if ((Handle::UNDEFINED != best_start) && (0 != vars.size()))
 	{
-		dbgprt("Search start node: %s\n", start->toShortString().c_str());
+		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
-		foreach_incoming_handle(start,
+		foreach_incoming_handle(best_start,
 		                  &DefaultPatternMatchCB::loop_candidate, this);
 	}
 	else
@@ -209,10 +240,15 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 		// Get type of the first item in the predicate list.
-		Type ptype = h->getType();
+		Type ptype = _root->getType();
 
 		// Plunge into the deep end - start looking at all viable
 		// candidates in the AtomSpace.
+
+		// XXX TODO -- as a performance optimization, we should try all
+		// the ifferent clauses, and find the one with the smallest number
+		// of atoms of tht type, or otheise try to find a small ("thin")
+		// incoming set to search over.
 		AtomSpace *as = _pme->get_atomspace();
 		as->foreach_handle_of_type(ptype,
 		      &DefaultPatternMatchCB::loop_candidate, this);
