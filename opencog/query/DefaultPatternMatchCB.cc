@@ -222,13 +222,10 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 			_starter_pred = pred;
 		}
 	}
-	Handle tmp(clauses[0]);
-	clauses[0] = clauses[bestclause];
-	clauses[bestclause] = tmp;
 
-	_root = clauses[0];
 	if ((Handle::UNDEFINED != best_start) && (0 != vars.size()))
 	{
+		_root = clauses[bestclause];
 		dbgprt("Search start node: %s\n", best_start->toShortString().c_str());
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
 		foreach_incoming_handle(best_start,
@@ -236,6 +233,7 @@ void DefaultPatternMatchCB::perform_search(PatternMatchEngine *pme,
 	}
 	else
 	{
+		_root = clauses[0];
 		_starter_pred = _root;
 
 		dbgprt("Start pred is: %s\n", _starter_pred->toShortString().c_str());
