@@ -140,9 +140,9 @@ class DefaultPatternMatchCB :
 		 * in order to drive a reasonably-fast search.
 		 */
 		virtual void perform_search(PatternMatchEngine *,
-		                            const std::vector<Handle> &vars,
-		                            const std::vector<Handle> &clauses,
-		                            const std::vector<Handle> &negations);
+		                            std::vector<Handle> &vars,
+		                            std::vector<Handle> &clauses,
+		                            std::vector<Handle> &negations);
 
 		/**
 		 * Indicate a set of restrictions on the types of the ground atoms.
