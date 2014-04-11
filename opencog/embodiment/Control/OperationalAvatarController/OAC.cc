@@ -373,7 +373,13 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
     }
     else
         this->monitorChangesAgent = NULL; 
-#endif        
+#endif
+
+    if ( config().get_bool("ENABLE_PATTERN_MINER"))
+    {
+        this->patternMiningAgent = PatternMiningAgentPtr(new PatternMiningAgent(*this));
+        this->startAgent(this->patternMiningAgent);
+    }
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
@@ -403,6 +409,7 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
             boost::lexical_cast<std::string>( visualDebuggerPort ) );
 
     } // if
+
 
     Inquery::init(atomSpace);
 

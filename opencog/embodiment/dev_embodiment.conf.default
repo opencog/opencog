@@ -498,5 +498,6 @@ UPDATE_SPATIAL_PREDICATES_FOR = only_non_block_entity
 # in 3D SpaceMap, if turn on BlockEntities segmentation, when percepting the block world. This is very consuming.
 ENABLE_BLOCKENTITY_SEGMENTATION = false
 
-
+ENABLE_PATTERN_MINER = fasle
+PATTERN_MAX_GRAM = 5;
 
