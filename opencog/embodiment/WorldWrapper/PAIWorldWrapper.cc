@@ -849,8 +849,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::move_head, ActionType::MOVE_HEAD()},
           {id::random_step, ActionType::WALK()},
           {id::rotate, ActionType::ROTATE()},
-          {id::rotate_left, ActionType::TURN()},
-          {id::rotate_right, ActionType::TURN()},
         // {id::scratch_self, ActionType::SCRATCH_SELF_*()} // each body part has itw own  scratch command
           {id::scratch_other, ActionType::SCRATCH_OTHER()},
           {id::scratch_ground_back_legs, ActionType::SCRATCH_GROUND_BACK_LEGS()},
@@ -858,7 +856,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::sniff_avatar_part, ActionType::SNIFF_AVATAR_PART()},
           {id::sniff_pet_part, ActionType::SNIFF_PET_PART()},
           {id::step_backward, ActionType::WALK()},
-          {id::step_forward, ActionType::WALK()},
           {id::step_towards, ActionType::WALK()},
           {id::tail_flex, ActionType::TAIL_FLEX()},
           {id::turn_to_face, ActionType::TURN()},
@@ -871,6 +868,12 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::say, ActionType::SAY()},
           {id::build_block, ActionType::BUILD_BLOCK()},
           {id::destroy_block, ActionType::DESTROY_BLOCK()},
+
+          // For Santa Fe Trail problem
+          {id::step_forward, ActionType::STEP_FORWARD()},
+          {id::rotate_right, ActionType::ROTATE_RIGHT()},
+          {id::rotate_left, ActionType::ROTATE_LEFT()},
+
           {id::whine_at, ActionType::WHINE()}
         };
 
@@ -906,8 +909,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
          move_head(angle, angle)
          random_step
          move_right_ear(TWITCH|PERK|BACK)
-         rotate_left
-         rotate_right
          rotate(angle)
          scratch_other(obj)
          scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
@@ -1025,18 +1026,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     break;
 
         //now rotations
-    case id::rotate_left:      // rotate_left
-        action.addParameter(ActionParameter("rotation",
-                                            ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, pai.getAvatarInterface().computeRotationAngle())));
-        break;
-
-    case id::rotate_right:     // rotate_right
-        action.addParameter(ActionParameter("rotation",
-                                            ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, -pai.getAvatarInterface().computeRotationAngle())));
-        break;
-
     case id::rotate:
     {
         std::stringstream ss;
@@ -1057,9 +1046,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
         if (theta > 2*PI)
             theta -= 2 * PI;
         goto build_step;
-    case id::step_forward:      // step_forward
-        theta = getAngleFacing(WorldWrapperUtil::selfHandle(as,
-                               selfName()));
 
     build_step:
         //now compute a step in which direction the pet is going
