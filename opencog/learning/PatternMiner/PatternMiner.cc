@@ -751,6 +751,8 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
         }
     }
 
+    resultFile.close();
+
 }
 
 void PatternMiner::ConstructTheFirstGramPatterns()
