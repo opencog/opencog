@@ -237,7 +237,7 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
             
             // must be added first. Otherwise the reference to the plan becomes invalid
             pendingActionPlans[planId] = plan;
-            inProgressActionPlans.erase(it->first);
+            inProgressActionPlans.erase(it);
 
         } else {
             throw opencog::RuntimeException(TRACE_INFO,
