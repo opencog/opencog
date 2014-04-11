@@ -163,6 +163,7 @@ private:
 
 public:
     PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram);
+    ~PatternMiner();
 
     bool checkPatternExist(const string& patternKeyStr);
 

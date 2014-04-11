@@ -38,32 +38,6 @@
 using namespace opencog::PatternMining;
 using namespace opencog;
 
-PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
-{
-    htree = new HTree();
-    atomSpace = new AtomSpace();
-
-    unsigned int system_thread_num  = std::thread::hardware_concurrency();
-    if (system_thread_num > 2)
-        THREAD_NUM = system_thread_num - 2;
-    else
-        THREAD_NUM = 1;
-
-    threads = new thread[THREAD_NUM];
-
-    MAX_GRAM = max_gram;
-    cur_gram = 0;
-
-    ignoredTypes[0] = LIST_LINK;
-
-    // vector < vector<HTreeNode*> > patternsForGram
-    for (unsigned int i = 0; i < max_gram; ++i)
-    {
-        vector<HTreeNode*> patternVector;
-        patternsForGram.push_back(patternVector);
-    }
-}
-
 void PatternMiner::generateIndexesOfSharedVars(Handle& link, vector<Handle>& orderedHandles, vector < vector<int> >& indexes)
 {
     HandleSeq outgoingLinks = atomSpace->getOutgoing(link);
@@ -788,12 +762,45 @@ void PatternMiner::GrowAllPatterns()
     }
 }
 
+PatternMiner::PatternMiner(AtomSpace* _originalAtomSpace, unsigned int max_gram): originalAtomSpace(_originalAtomSpace)
+{
+    htree = new HTree();
+    atomSpace = new AtomSpace();
+
+    unsigned int system_thread_num  = std::thread::hardware_concurrency();
+    if (system_thread_num > 2)
+        THREAD_NUM = system_thread_num - 2;
+    else
+        THREAD_NUM = 1;
+
+    threads = new thread[THREAD_NUM];
+
+    MAX_GRAM = max_gram;
+    cur_gram = 0;
+
+    ignoredTypes[0] = LIST_LINK;
+
+    // vector < vector<HTreeNode*> > patternsForGram
+    for (unsigned int i = 0; i < max_gram; ++i)
+    {
+        vector<HTreeNode*> patternVector;
+        patternsForGram.push_back(patternVector);
+    }
+}
+
+PatternMiner::~PatternMiner()
+{
+    delete htree;
+    delete atomSpace;
+}
+
 void PatternMiner::runPatternMiner()
 {
 
     // first, generate the first layer patterns: patterns of 1 gram (contains only one link)
     ConstructTheFirstGramPatterns();
-    GrowAllPatterns();
 
+    // and then generate all patterns
+    GrowAllPatterns();
 
 }
