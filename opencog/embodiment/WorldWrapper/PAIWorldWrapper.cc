@@ -885,11 +885,9 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
                    __FUNCTION__, ss.str().c_str( ), bae);
 
     /****
-         this switch statement deals with
-         special cases - e.g. step_forward needs to get translated into a walk
-         command based on the pet's current position
-
-         also, commands like scratch needs to have the body-part codes translated
+         this switch statement deals with special cases. Also,
+         commands like scratch needs to have the body-part codes
+         translated
 
          the full list of such schema is:
 
@@ -917,20 +915,21 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
          sniff_avatar_part(avatar,RIGHT_FOOT|LEFT_FOOT|RIGHT_HAND|LEFT_HAND|CROTCH|BUTT)
          sniff_pet_part(pet,NOSE|NECK|BUTT)
          step_backward
-         step_forward
          step_towards(obj,TOWARDS|AWAY)
          tail_flex(position)
          turn_to_face(obj)
          bite(obj)
          whine_at(obj)
     ****/
-    AvatarAction action;
-    if (actions2types.find(bae) != actions2types.end()) {
-        action = actions2types.find(bae)->second;
-    } else {
-        logger().fine(
-                     "PAIWorldWrapper - No action type was found to build pet action at actions2types" );
-    } // else
+    auto at_it = actions2types.find(bae);
+    {
+        stringstream ss;
+        ss << bae;
+        OC_ASSERT(at_it != actions2types.end(),
+                  "PAIWorldWrapper - No action type corresponding to %s was found "
+                  "in actions2types", ss.str().c_str());
+    }
+    AvatarAction action = at_it->second;
 
     double theta = 0;
     switch (bae) {
@@ -1272,14 +1271,11 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
            vomit
            whine
            widen_eyes
+           step_forward
+           rotate_left
+           rotate_right
         **/
-
-        stringstream ss;
-        ss << *from;
-        logger().debug("PAIWorldWrapper::%s - Cannot find type for action '%s'",
-                       __FUNCTION__, ss.str().c_str( ));
-
-        action = AvatarAction(ActionType::getFromName(toCamelCase(ss.str())));
+        break;
     }
     return action;
 }
