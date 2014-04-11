@@ -138,6 +138,11 @@ enum ActionTypeCode {
     DESTROY_BLOCK_CODE,
     DO_NOTHING_CODE,
 
+    // For Santa Fe Trail problem
+    STEP_FORWARD_CODE,
+    ROTATE_LEFT_CODE,
+    ROTATE_RIGHT_CODE,
+
     // This is not really a type and must be at the end of that enumeration in order to count the number of action types.
     NUMBER_OF_ACTION_TYPES
 };
@@ -536,6 +541,21 @@ public:
      * void destroy_block( Vector position )
      */
     static const ActionType& DESTROY_BLOCK();
+
+    /**
+     * void step_forward()
+     */
+    static const ActionType& STEP_FORWARD();
+
+    /**
+     * void rotate_right()
+     */
+    static const ActionType& ROTATE_RIGHT();
+
+    /**
+     * void rotate_left()
+     */
+    static const ActionType& ROTATE_LEFT();
 
     /**
      * void do_nothing( )  // this is using in planning
