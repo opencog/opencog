@@ -849,8 +849,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::move_head, ActionType::MOVE_HEAD()},
           {id::random_step, ActionType::WALK()},
           {id::rotate, ActionType::ROTATE()},
-          {id::rotate_left, ActionType::TURN()},
-          {id::rotate_right, ActionType::TURN()},
         // {id::scratch_self, ActionType::SCRATCH_SELF_*()} // each body part has itw own  scratch command
           {id::scratch_other, ActionType::SCRATCH_OTHER()},
           {id::scratch_ground_back_legs, ActionType::SCRATCH_GROUND_BACK_LEGS()},
@@ -858,7 +856,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::sniff_avatar_part, ActionType::SNIFF_AVATAR_PART()},
           {id::sniff_pet_part, ActionType::SNIFF_PET_PART()},
           {id::step_backward, ActionType::WALK()},
-          {id::step_forward, ActionType::WALK()},
           {id::step_towards, ActionType::WALK()},
           {id::tail_flex, ActionType::TAIL_FLEX()},
           {id::turn_to_face, ActionType::TURN()},
@@ -871,6 +868,12 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::say, ActionType::SAY()},
           {id::build_block, ActionType::BUILD_BLOCK()},
           {id::destroy_block, ActionType::DESTROY_BLOCK()},
+
+          // For Santa Fe Trail problem
+          {id::step_forward, ActionType::STEP_FORWARD()},
+          {id::rotate_right, ActionType::ROTATE_RIGHT()},
+          {id::rotate_left, ActionType::ROTATE_LEFT()},
+
           {id::whine_at, ActionType::WHINE()}
         };
 
@@ -885,11 +888,9 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
                    __FUNCTION__, ss.str().c_str( ), bae);
 
     /****
-         this switch statement deals with
-         special cases - e.g. step_forward needs to get translated into a walk
-         command based on the pet's current position
-
-         also, commands like scratch needs to have the body-part codes translated
+         this switch statement deals with special cases. Also,
+         commands like scratch needs to have the body-part codes
+         translated
 
          the full list of such schema is:
 
@@ -908,8 +909,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
          move_head(angle, angle)
          random_step
          move_right_ear(TWITCH|PERK|BACK)
-         rotate_left
-         rotate_right
          rotate(angle)
          scratch_other(obj)
          scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
@@ -917,20 +916,21 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
          sniff_avatar_part(avatar,RIGHT_FOOT|LEFT_FOOT|RIGHT_HAND|LEFT_HAND|CROTCH|BUTT)
          sniff_pet_part(pet,NOSE|NECK|BUTT)
          step_backward
-         step_forward
          step_towards(obj,TOWARDS|AWAY)
          tail_flex(position)
          turn_to_face(obj)
          bite(obj)
          whine_at(obj)
     ****/
-    AvatarAction action;
-    if (actions2types.find(bae) != actions2types.end()) {
-        action = actions2types.find(bae)->second;
-    } else {
-        logger().fine(
-                     "PAIWorldWrapper - No action type was found to build pet action at actions2types" );
-    } // else
+    auto at_it = actions2types.find(bae);
+    {
+        stringstream ss;
+        ss << bae;
+        OC_ASSERT(at_it != actions2types.end(),
+                  "PAIWorldWrapper - No action type corresponding to %s was found "
+                  "in actions2types", ss.str().c_str());
+    }
+    AvatarAction action = at_it->second;
 
     double theta = 0;
     switch (bae) {
@@ -1026,18 +1026,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     break;
 
         //now rotations
-    case id::rotate_left:      // rotate_left
-        action.addParameter(ActionParameter("rotation",
-                                            ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, pai.getAvatarInterface().computeRotationAngle())));
-        break;
-
-    case id::rotate_right:     // rotate_right
-        action.addParameter(ActionParameter("rotation",
-                                            ActionParamType::ROTATION(),
-                                            Rotation(0.0, 0.0, -pai.getAvatarInterface().computeRotationAngle())));
-        break;
-
     case id::rotate:
     {
         std::stringstream ss;
@@ -1058,9 +1046,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
         if (theta > 2*PI)
             theta -= 2 * PI;
         goto build_step;
-    case id::step_forward:      // step_forward
-        theta = getAngleFacing(WorldWrapperUtil::selfHandle(as,
-                               selfName()));
 
     build_step:
         //now compute a step in which direction the pet is going
@@ -1272,14 +1257,11 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
            vomit
            whine
            widen_eyes
+           step_forward
+           rotate_left
+           rotate_right
         **/
-
-        stringstream ss;
-        ss << *from;
-        logger().debug("PAIWorldWrapper::%s - Cannot find type for action '%s'",
-                       __FUNCTION__, ss.str().c_str( ));
-
-        action = AvatarAction(ActionType::getFromName(toCamelCase(ss.str())));
+        break;
     }
     return action;
 }
