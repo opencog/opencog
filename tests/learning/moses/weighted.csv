@@ -6,17 +6,20 @@
 ; is used instead.
 ;
 ; The input columns are a,b,c,d,e.   The result column is r.  In this
-; case, r=1 if the majority of the inputs are 1, else r=0.  The weight
-; wgt is the importance of getting the score correct.
+; case, r=1 if the number of input columns equal to 1 is odd, else r=0.
+; The weight wgt is the importance of getting the score correct.
+;
+; Turns out that learning the correct function via straight boolean 
+; learning is fairly hard. 
 ;
 ; Columns:
 wgt	a	b	c	d	e	r
 3.0	1	1	1	1	1	1
-2.0	0	1	1	1	1	1
-2.0	1	0	1	1	1	1
-2.0	1	1	0	1	1	1
-2.0	1	1	1	0	1	1
-2.0	1	1	1	1	0	1
+2.0	0	1	1	1	1	0
+2.0	1	0	1	1	1	0
+2.0	1	1	0	1	1	0
+2.0	1	1	1	0	1	0
+2.0	1	1	1	1	0	0
 1.0	1	1	1	0	0	1
 1.0	1	1	0	1	0	1
 1.0	1	1	0	0	1	1
@@ -37,9 +40,9 @@ wgt	a	b	c	d	e	r
 1.0	0	0	1	1	0	0
 1.0	0	0	1	0	1	0
 1.0	0	0	0	1	1	0
-2.0	0	0	0	0	1	0
-2.0	0	0	0	1	0	0
-2.0	0	0	1	0	0	0
-2.0	0	1	0	0	0	0
-2.0	1	0	0	0	0	0
+2.0	0	0	0	0	1	1
+2.0	0	0	0	1	0	1
+2.0	0	0	1	0	0	1
+2.0	0	1	0	0	0	1
+2.0	1	0	0	0	0	1
 3.0	0	0	0	0	0	0
