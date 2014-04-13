@@ -103,7 +103,7 @@ pair<score_t, string> cheap_parse_result(const string& tempfile)
     return {hiscore, hitr_str};
 }
 
-// Test passes only if the score is exatly equal to expected_sc
+// Test passes only if the score is exactly equal to expected_sc
 void moses_test_score(vector<string> arguments, score_t expected_sc = 0)
 {
     auto t1 = microsec_clock::local_time();

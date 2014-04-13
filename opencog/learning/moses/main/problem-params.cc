@@ -243,7 +243,8 @@ void problem_params::options_init()
 
         (opt_desc_str(target_feature_opt).c_str(),
          value<string>(&target_feature),
-         "Label of the target feature to fit. If none is given the first one is used.\n")
+         "Label of the target feature to fit. If none is given the "
+         "first one is used.\n")
 
         (opt_desc_str(ignore_feature_str_opt).c_str(),
          value<vector<string>>(&ignore_features_str),
@@ -261,54 +262,12 @@ void problem_params::options_init()
 
         // Algorithm control options
 
-        (opt_desc_str(hc_crossover_opt).c_str(),
-         value<bool>(&hc_crossover)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If false, then only "
-                    "the local neighborhood of the current center "
-                    "instance is explored. That is, the highest-scoring "
-                    "instance is chosen as the new center "
-                    "instance, and the process is repeated.  For "
-                    "many datasets, however, the highest-scoring "
-                    "instances tend to cluster together, and so an "
-                    "exhaustive search may not be required. When "
-                    "this option is specified, a handful of the "
-                    "highest-scoring instances are crossed-over (in "
-                    "the genetic sense of cross-over) to create new "
-                    "instances.  Only these are evaluated for "
-                    "fitness; the exhaustive search step is skipped. "
-                    "For many problem types, especialy those with "
-                    "large neighborhoods (i.e. those with high "
-                    "prorgram complexity), this can lead to an "
-                    "order-of-magnitude speedup, or more.  For other "
-                    "problem types, especially those with deceptive "
-                    "scoring functions, this can hurt performance.\n"
-                    ) % hc).c_str())
-
-        ("hc-crossover-pop-size",
-         value<unsigned>(&hc_crossover_pop_size)->default_value(120),
-         "Number of new candidates created by crossover during each iteration "
-         "of hillclimbing.\n")
-
-        ("hc-crossover-min-neighbors",
-         value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
-         "It also allows to control when crossover occurs instead of "         
-         " exhaustive search. If the neighborhood to explore has more than "
-         "the given number (and at least 2 iterations has passed) then "
-         "crossover kicks in.\n")
-
-        ("hc-allow-resize-deme",
-         value<bool>(&hc_allow_resize_deme)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If true then the deme "
-                    "is allowed to resized to fit in memory. Not that as it "
-                    "uses the RAM of the machine therefore it possibly introduces "
-                    "an indeterminism between instances run on machines with "
-                    "different RAM.\n") % hc).c_str())
-
         (opt_desc_str(opt_algo_opt).c_str(),
          value<string>(&opt_algo)->default_value(hc),
-         str(format("Optimization algorithm, supported algorithms are"
-                    " univariate (%s), simulation annealing (%s),"
-                    " hillclimbing (%s).\n")
+         str(format("Optimization algorithm, supported algorithms are "
+                    "univariate (%s), simulation annealing (%s), "
+                    "hillclimbing (%s). Of these, only hillclimbing "
+                    "works well; the other algos have bit-rotted.\n")
              % un % sa % hc).c_str())
 
         (opt_desc_str(max_score_opt).c_str(),
@@ -319,6 +278,14 @@ void problem_params::options_init()
          "it will overwrite it. "
          "Otherwise, for any other value, the user's defined max-score will "
          "be used.\n")
+
+        ("score-weight",
+         value<string>(&weighting_feature),
+         "Feature (table column) to use as a weight during scoring. "
+         "The score of the combo model on each row of the table is "
+         "weighted by this value, to determine the final score. This "
+         "option is useful when not all of the rows in a table are "
+         "equally important to model correctly.\n")
 
         (opt_desc_str(max_evals_opt).c_str(),
          value<unsigned long>(&max_evals)->default_value(10000),
@@ -434,6 +401,49 @@ void problem_params::options_init()
          "scoring function, and so an exhaustive search can be prohibitive.  "
          "A partial search can often work quite well, especially when "
          "cross-over is enabled.\n") % hc).c_str())
+
+        (opt_desc_str(hc_crossover_opt).c_str(),
+         value<bool>(&hc_crossover)->default_value(true),
+         str(format("Hillclimbing crossover (%s). If false, then only "
+                    "the local neighborhood of the current center "
+                    "instance is explored. That is, the highest-scoring "
+                    "instance is chosen as the new center "
+                    "instance, and the process is repeated.  For "
+                    "many datasets, however, the highest-scoring "
+                    "instances tend to cluster together, and so an "
+                    "exhaustive search may not be required. When "
+                    "this option is specified, a handful of the "
+                    "highest-scoring instances are crossed-over (in "
+                    "the genetic sense of cross-over) to create new "
+                    "instances.  Only these are evaluated for "
+                    "fitness; the exhaustive search step is skipped. "
+                    "For many problem types, especialy those with "
+                    "large neighborhoods (i.e. those with high "
+                    "prorgram complexity), this can lead to an "
+                    "order-of-magnitude speedup, or more.  For other "
+                    "problem types, especially those with deceptive "
+                    "scoring functions, this can hurt performance.\n"
+                    ) % hc).c_str())
+
+        ("hc-crossover-pop-size",
+         value<unsigned>(&hc_crossover_pop_size)->default_value(120),
+         "Number of new candidates created by crossover during each iteration "
+         "of hillclimbing.\n")
+
+        ("hc-crossover-min-neighbors",
+         value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
+         "It also allows to control when crossover occurs instead of "         
+         " exhaustive search. If the neighborhood to explore has more than "
+         "the given number (and at least 2 iterations has passed) then "
+         "crossover kicks in.\n")
+
+        ("hc-allow-resize-deme",
+         value<bool>(&hc_allow_resize_deme)->default_value(true),
+         str(format("Hillclimbing parameter (%s). If true then the deme "
+                    "is allowed to resized to fit in memory. Not that as it "
+                    "uses the RAM of the machine therefore it possibly introduces "
+                    "an indeterminism between instances run on machines with "
+                    "different RAM.\n") % hc).c_str())
 
         // Algorithm tuning options
         

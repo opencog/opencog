@@ -156,6 +156,7 @@ struct problem_params
     // XXX just like above, the table_base argv parser should grab these...
     std::vector<std::string> input_data_files;
     std::string target_feature;
+    std::string weighting_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
