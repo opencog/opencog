@@ -1,0 +1,55 @@
+/**
+ * weightedUTest.cxxtest ---
+ *
+ * Copyright (C) 2012,2014 OpenCog Foundation
+ *
+ * Author: Linas Vepstas <linasveptas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string weightedUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test learning of problems that require a weieghted score
+ */
+class weightedUTest : public CxxTest::TestSuite
+{
+public:
+    weightedUTest()
+    {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
+    // A simple predicate learning test case, should learn this:
+    // We expect a score of zero, no matter what.
+    void test_predicate_score()
+    {
+        string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
+        moses_test_score({"-Hit", 
+                          "-ur",
+                          "-Ywgt",
+                          data_file_path,
+                          });
+    }
+
+};

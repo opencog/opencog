@@ -7,10 +7,10 @@
 ;
 ; The input columns are a,b,c,d,e.   The result column is r.  In this
 ; case, r=1 if the majority of the inputs are 1, else r=0.  The weight
-; w is the importance of getting the score correct.
+; wgt is the importance of getting the score correct.
 ;
 ; Columns:
-; w	a	b	c	d	e	r
+wgt	a	b	c	d	e	r
 3.0	1	1	1	1	1	1
 2.0	0	1	1	1	1	1
 2.0	1	0	1	1	1	1
