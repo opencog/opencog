@@ -124,7 +124,8 @@ class AtomCollectionAPI(Resource):
                 atom = self.atomspace[Handle(id)]
                 atoms = [atom]
             except IndexError:
-                abort(404, 'Handle not found')
+                # abort(404, 'Handle not found')
+                atoms = []
         else:
             # First, check if there is a valid filter type, and give it precedence if it exists
             valid_filter = False
