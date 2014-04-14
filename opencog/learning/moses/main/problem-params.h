@@ -26,6 +26,9 @@
 
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/table/table.h>
@@ -156,6 +159,7 @@ struct problem_params
     // XXX just like above, the table_base argv parser should grab these...
     std::vector<std::string> input_data_files;
     std::string target_feature;
+    std::string weighting_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
@@ -178,7 +182,7 @@ protected:
     const unsigned int max_filename_size;
 
     reduct::logical_reduction lr;
-    options_description desc;
+    boost::program_options::options_description desc;
     void options_init();
 
 private:

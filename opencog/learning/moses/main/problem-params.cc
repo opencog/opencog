@@ -27,7 +27,6 @@
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/program_options.hpp>
 
 #include <opencog/util/oc_omp.h>
 
@@ -39,12 +38,7 @@
 
 namespace opencog { namespace moses {
 
-using boost::format;
-using boost::trim;
-using boost::str;
-using namespace boost::program_options;
 using namespace std;
-using namespace reduct;
 
 // diversity distance types
 static const string p_norm = "p_norm";
@@ -164,7 +158,8 @@ problem_params::problem_params() :
 
 void problem_params::options_init()
 {
-
+    namespace po = boost::program_options;
+    using boost::format;
 
     // Declare the supported options.
     // XXX TODO: make this print correctly, instead of using brackets.
@@ -177,7 +172,7 @@ void problem_params::options_init()
         ("version", "Display the version of moses.\n")
 
         (opt_desc_str(jobs_opt).c_str(),
-         value<vector<string>>(&jobs_str),
+         po::value<vector<string>>(&jobs_str),
          str(format("Number of jobs allocated for deme optimization."
                     " Jobs can be executed on a remote machine as well,"
                     " in such case the notation -%1% N:REMOTE_HOST is used,"
@@ -195,17 +190,17 @@ void problem_params::options_init()
                     " the remote machines.\n")
              % jobs_opt.second % job_seperator).c_str())
 
-        ("min-pool", value<unsigned>(&min_pool)->default_value(50),
+        ("min-pool", po::value<unsigned>(&min_pool)->default_value(50),
          "Minimum number of elements to process in the pool to enable "
          " multi-threading.\n")
 
         (opt_desc_str(exemplars_str_opt).c_str(),
-         value<vector<string>>(&exemplars_str),
+         po::value<vector<string>>(&exemplars_str),
          "Start the search with a given exemplar, can be used several times.\n")
 
         // Problem-type options
         (opt_desc_str(problem_opt).c_str(),
-         value<string>(&problem)->default_value("it"),
+         po::value<string>(&problem)->default_value("it"),
          "Problem to solve, supported problems are:\n\n"
          "it, regression based on input table\n\n"
          "pre, regression based on input table, maximizing precision, while holding activation fixed\n\n"
@@ -232,7 +227,7 @@ void problem_params::options_init()
         // Input specification options
 
         (opt_desc_str(input_data_file_opt).c_str(),
-         value<vector<string>>(&input_data_files),
+         po::value<vector<string>>(&input_data_files),
          "Input table file in DSV format (with comma, whitespace "
          "and tabulation as seperator). Colums correspond to features "
          "and rows to observations. Can be used several times, in such "
@@ -242,16 +237,17 @@ void problem_params::options_init()
          "of features in the same order.\n")
 
         (opt_desc_str(target_feature_opt).c_str(),
-         value<string>(&target_feature),
-         "Label of the target feature to fit. If none is given the first one is used.\n")
+         po::value<string>(&target_feature),
+         "Label of the target feature to fit. If none is given the "
+         "first one is used.\n")
 
         (opt_desc_str(ignore_feature_str_opt).c_str(),
-         value<vector<string>>(&ignore_features_str),
+         po::value<vector<string>>(&ignore_features_str),
          "Ignore feature from the datasets. Can be used several times "
          "to ignore several features.\n")
 
         (opt_desc_str(nsamples_opt).c_str(),
-         value<int>(&nsamples)->default_value(-1),
+         po::value<int>(&nsamples)->default_value(-1),
          "Number of samples to describe the problem. "
          "If nsample is negative, null or larger than the maximum "
          "number of samples allowed it is ignored. If the default "
@@ -261,9 +257,149 @@ void problem_params::options_init()
 
         // Algorithm control options
 
+        (opt_desc_str(opt_algo_opt).c_str(),
+         po::value<string>(&opt_algo)->default_value(hc),
+         str(format("Optimization algorithm, supported algorithms are "
+                    "univariate (%s), simulation annealing (%s), "
+                    "hillclimbing (%s). Of these, only hillclimbing "
+                    "works well; the other algos have bit-rotted.\n")
+             % un % sa % hc).c_str())
+
+        (opt_desc_str(max_score_opt).c_str(),
+         po::value<score_t>(&max_score)->default_value(very_best_score),
+         "The max score to reach, once reached MOSES halts. If the largest "
+         "floating point number is used and MOSES is able to calculate the "
+         "max score that can be reached for that particular problem, "
+         "it will overwrite it. "
+         "Otherwise, for any other value, the user's defined max-score will "
+         "be used.\n")
+
+        ("score-weight",
+         po::value<string>(&weighting_feature),
+         "Feature (table column) to use as a weight during scoring. "
+         "The score of the combo model on each row of the table is "
+         "weighted by this value, to determine the final score. This "
+         "option is useful when not all of the rows in a table are "
+         "equally important to model correctly.\n")
+
+        (opt_desc_str(max_evals_opt).c_str(),
+         po::value<unsigned long>(&max_evals)->default_value(10000),
+         "Maximum number of fitness function evaluations.\n")
+
+        ("max-time",
+         po::value<time_t>(&max_time)->default_value(INT_MAX),
+         "Longest allowed runtime, in seconds.\n")
+
+        (opt_desc_str(cache_size_opt).c_str(),
+         po::value<unsigned>(&cache_size)->default_value(100000),
+         "Cache size. Memoize, that is, cache evaluation results, "
+         "so that identical candidates are not re-evaluated.\n")
+         // adaptive_cache has been temporarly disabled because it is
+         // not thread safe, so the following comment doesn't apply
+         // " The cache size is determined by this option "
+         // "adjusted to fit in the RAM.\n")
+
+        (opt_desc_str(ignore_ops_str_opt).c_str(),
+         po::value<vector<string>>(&ignore_ops_str),
+         str(format("Ignore the following operator in the program solution.  "
+                    "This option may be used several times.  Currently, only div, "
+                    "sin, exp, log can be ignored. "
+                    "This option has the priority over --%s. "
+                    "That is, if an operator is both be included and ignored, "
+                    "then it is ignored.  This option does not work with ANN.\n")
+             % include_only_ops_str_opt.first).c_str())
+
+        ("linear-regression",
+         po::value<bool>(&linear_regression)->default_value(false),
+         "When attempting to fit continous-valued features, restrict "
+         "searches to linear expressions only; that is, do not use "
+         "polynomials in the fit.  Specifying this option also "
+         "automatically disables the use of div, sin, exp and log.\n")
+
+        ("logical-perm-ratio",
+         po::value<float>(&perm_ratio)->default_value(0.0),
+         "When decorating boolean exemplars with knobs, this option "
+         "controls how many pairs of literals of the form op(L1 L2) are "
+         "created.  That is, such pairs are used to decorate the exemplar "
+         "tree. By default, N such pairs are created, where N is the "
+         "arity of the problem. Valid values for this option are in the "
+         "range of -1.0 to +1.0.  For negative values, the number of pairs "
+         "created are (1.0+r)*N where r is the value given in this option.  "
+         "For positive values, the number of pairs created is "
+         "(N + r*N*(N-2)). A larger number of pairs can lead to faster "
+         "solutions but can also result in over-training.\n")
+
+        (opt_desc_str(rand_seed_opt).c_str(),
+         po::value<unsigned long>(&rand_seed)->default_value(1),
+         "Random seed.\n")
+
+        (opt_desc_str(complexity_temperature_opt).c_str(),
+         po::value<score_t>(&complexity_temperature)->default_value(6.0),
+         "Set the \"temperature\" (scritly positive floating number) "
+         "of the Boltzmann-like distribution "
+         "used to select the next exemplar out of the metapopulaton. "
+         "A temperature that is too high or too low will make it likely "
+         "that poor exemplars will be chosen for exploration, thus "
+         "resulting in excessively long search times.\n")
+
+        (opt_desc_str(complexity_ratio_opt).c_str(),
+         po::value<score_t>(&complexity_ratio)->default_value(3.5),
+         "Fix the ratio of the score to complexity, to be used as a "
+         "penalty, when ranking the metapopulation for fitness.  "
+         "The complexity penalty is "
+         "the inverse of the complexity ratio.  Setting this ratio "
+         "too low (complexity penalty too high) causes the complexity "
+         "to dominate ranking, probably trapping the algorithm in a "
+         "local maximum.  Setting this ratio too high (complexity "
+         "penalty too low) will waste time exploring unproductive "
+         "solutions, adversely lengthening solution times.  "
+         "Suggest setting this to a value that is 1x to 2x larger than "
+         "the ratio of change in complexity to score improvement (as "
+         "determined by earlier runs).\n")
+
+        ("cap-coef", po::value<double>(&cap_coef)->default_value(50.0),
+         "Set the leading coefficient of the formula defining the "
+         "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
+         "where x is the number of generations so far. The default usually works "
+         "well but if you run out of memory you may decrease that value.\n")
+        
+        // Large problem parameters
+
+        ("hc-max-nn-evals",
+         po::value<unsigned>(&hc_max_nn)->default_value(20000),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the maximum number of nearest neighbors to explore.  An "
+         "exhaustive search of the nearest neighborhood is performed "
+         "when the number of nearest neighbors is less than this value.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
+        ("hc-fraction-of-nn",
+         po::value<double>(&hc_frac_of_nn)->default_value(2.0),
+         str(format("Hillclimbing parameter (%s).  When exploring the "
+         "nearest neighborhood of an instance, this number specifies "
+         "the fraction of nearest neighborhood to explore.  As currently "
+         "implemented, only an estimate of the nearest-neighborhood size "
+         "is used, not the true size.  However, this estimate is accurate "
+         "to within a factor of 2.  Thus, to obtain an exhaustive search "
+         "of the entire neighborhood, set this to 2.0 or larger.  "
+         "Problems with a large number of features (100 and above) often "
+         "evolve exemplars with a complexity of 100 or more, which in turn "
+         "may have instances with hundreds of thousands of nearest neighbors.  "
+         "Exploring one nearest neighbor requires one evaluation of the "
+         "scoring function, and so an exhaustive search can be prohibitive.  "
+         "A partial search can often work quite well, especially when "
+         "cross-over is enabled.\n") % hc).c_str())
+
         (opt_desc_str(hc_crossover_opt).c_str(),
-         value<bool>(&hc_crossover)->default_value(true),
-         str(format("Hillclimbing parameter (%s). If false, then only "
+         po::value<bool>(&hc_crossover)->default_value(true),
+         str(format("Hillclimbing crossover (%s). If false, then only "
                     "the local neighborhood of the current center "
                     "instance is explored. That is, the highest-scoring "
                     "instance is chosen as the new center "
@@ -285,194 +421,63 @@ void problem_params::options_init()
                     ) % hc).c_str())
 
         ("hc-crossover-pop-size",
-         value<unsigned>(&hc_crossover_pop_size)->default_value(120),
+         po::value<unsigned>(&hc_crossover_pop_size)->default_value(120),
          "Number of new candidates created by crossover during each iteration "
          "of hillclimbing.\n")
 
         ("hc-crossover-min-neighbors",
-         value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
+         po::value<unsigned>(&hc_crossover_min_neighbors)->default_value(400),
          "It also allows to control when crossover occurs instead of "         
          " exhaustive search. If the neighborhood to explore has more than "
          "the given number (and at least 2 iterations has passed) then "
          "crossover kicks in.\n")
 
         ("hc-allow-resize-deme",
-         value<bool>(&hc_allow_resize_deme)->default_value(true),
+         po::value<bool>(&hc_allow_resize_deme)->default_value(true),
          str(format("Hillclimbing parameter (%s). If true then the deme "
                     "is allowed to resized to fit in memory. Not that as it "
                     "uses the RAM of the machine therefore it possibly introduces "
                     "an indeterminism between instances run on machines with "
                     "different RAM.\n") % hc).c_str())
 
-        (opt_desc_str(opt_algo_opt).c_str(),
-         value<string>(&opt_algo)->default_value(hc),
-         str(format("Optimization algorithm, supported algorithms are"
-                    " univariate (%s), simulation annealing (%s),"
-                    " hillclimbing (%s).\n")
-             % un % sa % hc).c_str())
-
-        (opt_desc_str(max_score_opt).c_str(),
-         value<score_t>(&max_score)->default_value(very_best_score),
-         "The max score to reach, once reached MOSES halts. If the largest "
-         "floating point number is used and MOSES is able to calculate the "
-         "max score that can be reached for that particular problem, "
-         "it will overwrite it. "
-         "Otherwise, for any other value, the user's defined max-score will "
-         "be used.\n")
-
-        (opt_desc_str(max_evals_opt).c_str(),
-         value<unsigned long>(&max_evals)->default_value(10000),
-         "Maximum number of fitness function evaluations.\n")
-
-        ("max-time",
-         value<time_t>(&max_time)->default_value(INT_MAX),
-         "Longest allowed runtime, in seconds.\n")
-
-        (opt_desc_str(cache_size_opt).c_str(),
-         value<unsigned>(&cache_size)->default_value(100000),
-         "Cache size. Memoize, that is, cache evaluation results, "
-         "so that identical candidates are not re-evaluated.\n")
-         // adaptive_cache has been temporarly disabled because it is
-         // not thread safe, so the following comment doesn't apply
-         // " The cache size is determined by this option "
-         // "adjusted to fit in the RAM.\n")
-
-        (opt_desc_str(ignore_ops_str_opt).c_str(),
-         value<vector<string>>(&ignore_ops_str),
-         str(format("Ignore the following operator in the program solution.  "
-                    "This option may be used several times.  Currently, only div, "
-                    "sin, exp, log can be ignored. "
-                    "This option has the priority over --%s. "
-                    "That is, if an operator is both be included and ignored, "
-                    "then it is ignored.  This option does not work with ANN.\n")
-             % include_only_ops_str_opt.first).c_str())
-
-        ("linear-regression",
-         value<bool>(&linear_regression)->default_value(false),
-         "When attempting to fit continous-valued features, restrict "
-         "searches to linear expressions only; that is, do not use "
-         "polynomials in the fit.  Specifying this option also "
-         "automatically disables the use of div, sin, exp and log.\n")
-
-        ("logical-perm-ratio",
-         value<float>(&perm_ratio)->default_value(0.0),
-         "When decorating boolean exemplars with knobs, this option "
-         "controls how many pairs of literals of the form op(L1 L2) are "
-         "created.  That is, such pairs are used to decorate the exemplar "
-         "tree. By default, N such pairs are created, where N is the "
-         "arity of the problem. Valid values for this option are in the "
-         "range of -1.0 to +1.0.  For negative values, the number of pairs "
-         "created are (1.0+r)*N where r is the value given in this option.  "
-         "For positive values, the number of pairs created is "
-         "(N + r*N*(N-2)). A larger number of pairs can lead to faster "
-         "solutions but can also result in over-training.\n")
-
-        (opt_desc_str(rand_seed_opt).c_str(),
-         value<unsigned long>(&rand_seed)->default_value(1),
-         "Random seed.\n")
-
-        (opt_desc_str(complexity_temperature_opt).c_str(),
-         value<score_t>(&complexity_temperature)->default_value(6.0),
-         "Set the \"temperature\" (scritly positive floating number) "
-         "of the Boltzmann-like distribution "
-         "used to select the next exemplar out of the metapopulaton. "
-         "A temperature that is too high or too low will make it likely "
-         "that poor exemplars will be chosen for exploration, thus "
-         "resulting in excessively long search times.\n")
-
-        (opt_desc_str(complexity_ratio_opt).c_str(),
-         value<score_t>(&complexity_ratio)->default_value(3.5),
-         "Fix the ratio of the score to complexity, to be used as a "
-         "penalty, when ranking the metapopulation for fitness.  "
-         "The complexity penalty is "
-         "the inverse of the complexity ratio.  Setting this ratio "
-         "too low (complexity penalty too high) causes the complexity "
-         "to dominate ranking, probably trapping the algorithm in a "
-         "local maximum.  Setting this ratio too high (complexity "
-         "penalty too low) will waste time exploring unproductive "
-         "solutions, adversely lengthening solution times.  "
-         "Suggest setting this to a value that is 1x to 2x larger than "
-         "the ratio of change in complexity to score improvement (as "
-         "determined by earlier runs).\n")
-
-        ("cap-coef", value<double>(&cap_coef)->default_value(50.0),
-         "Set the leading coefficient of the formula defining the "
-         "metapop size cap = cap_coef*(x+250)*(1+2*exp(-x/500)), "
-         "where x is the number of generations so far. The default usually works "
-         "well but if you run out of memory you may decrease that value.\n")
-        
-        // Large problem parameters
-
-        ("hc-max-nn-evals",
-         value<unsigned>(&hc_max_nn)->default_value(20000),
-         str(format("Hillclimbing parameter (%s).  When exploring the "
-         "nearest neighborhood of an instance, this number specifies "
-         "the maximum number of nearest neighbors to explore.  An "
-         "exhaustive search of the nearest neighborhood is performed "
-         "when the number of nearest neighbors is less than this value.  "
-         "Problems with a large number of features (100 and above) often "
-         "evolve exemplars with a complexity of 100 or more, which in turn "
-         "may have instances with hundreds of thousands of nearest neighbors.  "
-         "Exploring one nearest neighbor requires one evaluation of the "
-         "scoring function, and so an exhaustive search can be prohibitive.  "
-         "A partial search can often work quite well, especially when "
-         "cross-over is enabled.\n") % hc).c_str())
-
-        ("hc-fraction-of-nn",
-         value<double>(&hc_frac_of_nn)->default_value(2.0),
-         str(format("Hillclimbing parameter (%s).  When exploring the "
-         "nearest neighborhood of an instance, this number specifies "
-         "the fraction of nearest neighborhood to explore.  As currently "
-         "implemented, only an estimate of the nearest-neighborhood size "
-         "is used, not the true size.  However, this estimate is accurate "
-         "to within a factor of 2.  Thus, to obtain an exhaustive search "
-         "of the entire neighborhood, set this to 2.0 or larger.  "
-         "Problems with a large number of features (100 and above) often "
-         "evolve exemplars with a complexity of 100 or more, which in turn "
-         "may have instances with hundreds of thousands of nearest neighbors.  "
-         "Exploring one nearest neighbor requires one evaluation of the "
-         "scoring function, and so an exhaustive search can be prohibitive.  "
-         "A partial search can often work quite well, especially when "
-         "cross-over is enabled.\n") % hc).c_str())
-
         // Algorithm tuning options
         
         (opt_desc_str(reduct_knob_building_effort_opt).c_str(),
-         value<int>(&reduct_knob_building_effort)->default_value(2),
+         po::value<int>(&reduct_knob_building_effort)->default_value(2),
          "Effort allocated for reduction during knob building, 0-3, "
          "0 means minimum effort, 3 means maximum effort. The bigger "
          "the effort the lower the dimension of the deme.\n")
 
         (opt_desc_str(max_dist_opt).c_str(),
-         value<size_t>(&max_dist)->default_value(4),
+         po::value<size_t>(&max_dist)->default_value(4),
          "The maximum radius of the neighborhood around the "
          "exemplar to explore.\n")
 
         (opt_desc_str(reduce_all_opt).c_str(),
-         value<bool>(&reduce_all)->default_value(true),
+         po::value<bool>(&reduce_all)->default_value(true),
          "Reduce all candidates before being evaluated.  Otherwise "
          "they are only reduced before being added to the "
          "metapopulation. This option can be valuable if memoization "
          "is enabled to avoid re-evaluate of duplicates.\n")
 
         (opt_desc_str(reduct_candidate_effort_opt).c_str(),
-         value<int>(&reduct_candidate_effort)->default_value(2),
+         po::value<int>(&reduct_candidate_effort)->default_value(2),
          "Effort allocated for reduction of candidates, in the range 0-3. "
          "0 means minimum effort, 3 means maximum effort.\n")
 
         (opt_desc_str(max_gens_opt).c_str(),
-         value<int>(&max_gens)->default_value(-1),
+         po::value<int>(&max_gens)->default_value(-1),
          "Maximum number of demes to generate and optimize, "
          "negative means no generation limit.\n")
 
         (opt_desc_str(include_dominated_opt).c_str(),
-         value<bool>(&include_dominated)->default_value(true),
+         po::value<bool>(&include_dominated)->default_value(true),
          "Include dominated candidates (according behavioral score) "
          "when merging candidates in the metapopulation. Disabling "
          "this may lead to poorer performance.\n")
 
         (opt_desc_str(hc_single_step_opt).c_str(),
-         value<bool>(&hc_single_step)->default_value(false),
+         po::value<bool>(&hc_single_step)->default_value(false),
          str(format("Hillclimbing parameter (%s). If false, then the normal "
                     "hillclimbing algorithm is used.  If true, then only one "
                     "step is taken towards the hilltop, and the results are "
@@ -481,7 +486,7 @@ void problem_params::options_init()
                     "as well, so as to make forward progress.\n") % hc).c_str())
 
         (opt_desc_str(include_only_ops_str_opt).c_str(),
-         value<vector<string>>(&include_only_ops_str),
+         po::value<vector<string>>(&include_only_ops_str),
          "Include this operator, but exclude others, in the solution.  "
          "This option may be used several times to specify multiple "
          "operators.  Currently, only these operators are "
@@ -489,11 +494,11 @@ void problem_params::options_init()
          "This option does not work with ANN.\n")
 
         (opt_desc_str(pop_size_ratio_opt).c_str(),
-         value<double>(&pop_size_ratio)->default_value(20),
+         po::value<double>(&pop_size_ratio)->default_value(20),
          "The higher the more effort is spent on a deme.\n")
 
         (opt_desc_str(noise_opt).c_str(),
-         value<float>(&noise)->default_value(-1),
+         po::value<float>(&noise)->default_value(-1),
          "Alternative way to set the ratio of raw score to complexity.  "
          "Setting this option over-rides the complexity ratio, above.  "
          "Assumes that the data is noisy.   The noisier the data, the "
@@ -509,14 +514,14 @@ void problem_params::options_init()
          "value cedes this setting to complexity-ratio flag, above.\n")
 
         (opt_desc_str(hc_widen_search_opt).c_str(),
-         value<bool>(&hc_widen_search)->default_value(false),
+         po::value<bool>(&hc_widen_search)->default_value(false),
          str(format("Hillclimbing parameter (%s). If false, then deme search "
                     "terminates when a local hilltop is found. If true, "
                     "then the search radius is progressively widened, "
                     "until another termination condition is met.\n") % hc).c_str())
 
         ("well-enough",
-         value<bool>(&use_well_enough)->default_value(false),
+         po::value<bool>(&use_well_enough)->default_value(false),
          "If 1, use the \"leave well-enough alone\" algorithm for "
          "classification problems. This algorithm, after finding a "
          "clause that has perfect accuracy, will stop mutating that "
@@ -524,7 +529,7 @@ void problem_params::options_init()
          "convergence.  In practice, not so much; it can hurt "
          "performance.\n")
 
-        ("revisit", value<unsigned>(&revisit)->default_value(0),
+        ("revisit", po::value<unsigned>(&revisit)->default_value(0),
          "Number of times the same exemplar can be revisited. "
          "This option is only worthwhile when there "
          "is a great deal of stochasticity in the search so that exploring "
@@ -534,33 +539,33 @@ void problem_params::options_init()
         // Output control options
         
         (opt_desc_str(result_count_opt).c_str(),
-         value<long>(&result_count)->default_value(10),
+         po::value<long>(&result_count)->default_value(10),
          "The number of results to return, ordered according to "
          "a linear combination of score and complexity. If negative, "
          "then return all results.\n")
 
         (opt_desc_str(output_score_opt).c_str(),
-         value<bool>(&output_score)->default_value(true),
+         po::value<bool>(&output_score)->default_value(true),
          "If 1, output the score before each candidate (at the left of the complexity).\n")
 
         (opt_desc_str(output_penalty_opt).c_str(),
-         value<bool>(&output_penalty)->default_value(false),
+         po::value<bool>(&output_penalty)->default_value(false),
          "If 1, output the penalized score and it's compenents (below each candidate).\n")
 
         (opt_desc_str(output_bscore_opt).c_str(),
-         value<bool>(&output_bscore)->default_value(false),
+         po::value<bool>(&output_bscore)->default_value(false),
          "If 1, output the bscore (below each candidate).\n")
 
         (opt_desc_str(output_only_best_opt).c_str(),
-         value<bool>(&output_only_best)->default_value(false),
+         po::value<bool>(&output_only_best)->default_value(false),
          "If 1, print only the best candidates.\n")
 
         (opt_desc_str(output_eval_number_opt).c_str(),
-         value<bool>(&output_eval_number)->default_value(false),
+         po::value<bool>(&output_eval_number)->default_value(false),
          "If 1, output the actual number of evaluations.\n")
 
         (opt_desc_str(output_with_labels_opt).c_str(),
-         value<bool>(&output_with_labels)->default_value(false),
+         po::value<bool>(&output_with_labels)->default_value(false),
          "If 1, output the candidates with using the argument labels "
          "instead of argument numbers. For instance "
          "*(\"$price\" \"$temprature\") instead of *($1 $2). This only "
@@ -568,25 +573,25 @@ void problem_params::options_init()
          "labels in its header.\n")
 
         ("python",
-         value<bool>(&output_python)->default_value(false),
+         po::value<bool>(&output_python)->default_value(false),
          "If 1, output the program(s) as python code instead of combo. "
          "Best with -c1 option to return a single python module. Only "
          "implemented for boolean programs currently.\n")
 
         (opt_desc_str(output_file_opt).c_str(),
-         value<string>(&output_file)->default_value(""),
+         po::value<string>(&output_file)->default_value(""),
          "File where to place the output. If empty, then output to stdout.\n")
 
         // Demo options
         
         (opt_desc_str(combo_str_opt).c_str(),
-         value<string>(&combo_str),
+         po::value<string>(&combo_str),
          str(format("Combo program to learn, used when the problem"
                     " cp is selected (option -%s).\n")
              % problem_opt.second).c_str())
 
         (opt_desc_str(problem_size_opt).c_str(),
-         value<unsigned int>(&problem_size)->default_value(5),
+         po::value<unsigned int>(&problem_size)->default_value(5),
          "For even parity (pa), disjunction (dj) and majority (maj) "
          "the problem size corresponds directly to the arity. "
          "For multiplex (mux) the arity is arg+2^arg. "
@@ -596,7 +601,7 @@ void problem_params::options_init()
         // The remaining options (TODO organize that)
         
         (opt_desc_str(min_rand_input_opt).c_str(),
-         value<float>(&min_rand_input)->default_value(0.0),
+         po::value<float>(&min_rand_input)->default_value(0.0),
          "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
@@ -606,7 +611,7 @@ void problem_params::options_init()
          "of the precision.\n")
 
         (opt_desc_str(max_rand_input_opt).c_str(),
-         value<float>(&max_rand_input)->default_value(1.0),
+         po::value<float>(&max_rand_input)->default_value(1.0),
          "Maximum value of a sampled coninuous input.  The cp, ip, pre, "
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
@@ -616,7 +621,7 @@ void problem_params::options_init()
          "of the precision.\n")
 
         (opt_desc_str(log_level_opt).c_str(),
-         value<string>(&log_level)->default_value("INFO"),
+         po::value<string>(&log_level)->default_value("INFO"),
          "Log level, possible levels are NONE, ERROR, WARN, INFO, "
          "DEBUG, FINE. Case does not matter.\n")
 
@@ -630,36 +635,36 @@ void problem_params::options_init()
              % max_filename_size).c_str())
 
         (opt_desc_str(log_file_opt).c_str(),
-         value<string>(&log_file)->default_value(default_log_file),
+         po::value<string>(&log_file)->default_value(default_log_file),
          str(format("File name where to write the log."
                     " This option is overwritten by %s.\n")
              % log_file_dep_opt_opt.first).c_str())
 
         (opt_desc_str(max_candidates_opt).c_str(),
-         value<int>(&max_candidates)->default_value(-1),
+         po::value<int>(&max_candidates)->default_value(-1),
          "Maximum number of considered candidates to be added to the "
          "metapopulation after optimizing deme.\n")
 
 #ifdef HAVE_MPI
         ("mpi",
-         value<bool>(&enable_mpi)->default_value(false),
+         po::value<bool>(&enable_mpi)->default_value(false),
          "Enable MPI-based distributed processing.\n")
 #endif
 
         (opt_desc_str(weighted_accuracy_opt).c_str(),
-         value<bool>(&weighted_accuracy)->default_value(false),
+         po::value<bool>(&weighted_accuracy)->default_value(false),
          "This option is useful in case of unbalanced data as it "
          "weights the score so that each class weights equally "
          "regardless of their proportion in terms of sample size.\n")
 
         ("diversity-pressure",
-         value<score_t>(&diversity_pressure)->default_value(0.0),
+         po::value<score_t>(&diversity_pressure)->default_value(0.0),
          "Set a diversity pressure on the metapopulation. "
          "Programs behaving similarily to others are more penalized. "
          "That value sets the importance of that penalty (from 0 to +inf).\n")
 
         ("diversity-exponent",
-         value<score_t>(&diversity_exponent)->default_value(-1.0),
+         po::value<score_t>(&diversity_exponent)->default_value(-1.0),
          "Set the exponent of the generalized mean (or sum, if "
          "--diversity-normalize is set to 0) aggregating "
          "the penalties between a candidate and the set of all candidates better "
@@ -668,7 +673,7 @@ void problem_params::options_init()
          "to the max function. If negative or null is it the max function.\n")
 
         ("diversity-normalize",
-         value<bool>(&diversity_normalize)->default_value(true),
+         po::value<bool>(&diversity_normalize)->default_value(true),
          "If set to 1 then the aggregating function is a generalized mean. "
          "Otherwize it is a generalized sum (generalize mean * number of "
          "elements). If --diversity-exponent is set to negatively then "
@@ -676,21 +681,21 @@ void problem_params::options_init()
          "the max anyway.\n")
 
         ("diversity-dst",
-         value<string>(&diversity_dst)->default_value(p_norm),
+         po::value<string>(&diversity_dst)->default_value(p_norm),
          str(format("Set the distance between behavioral scores, "
                     "then used to determin the diversity penalty."
                     "3 distances are available: %s, %s and %s.\n")
              % p_norm % tanimoto % angular).c_str())
 
         ("diversity-p-norm",
-         value<score_t>(&diversity_p_norm)->default_value(2.0),
+         po::value<score_t>(&diversity_p_norm)->default_value(2.0),
          "Set the parameter of the p_norm distance. A value of 1.0"
          "correspond to the Manhatan distance. A value of 2.0 corresponds to "
          "the Euclidean distance. A value of 0.0 or less correspond to the "
          "max component-wise. Any other value corresponds to the general case.\n")
 
         ("diversity-dst2dp",
-         value<string>(&diversity_dst2dp)->default_value(auto_str),
+         po::value<string>(&diversity_dst2dp)->default_value(auto_str),
          str(format("Set the type of function to convert distance into penalty. "
                     "4 options are available: %1%, %2%, %3% and %4%. "
                     "When %1% is selected the function is selected depending "
@@ -700,30 +705,30 @@ void problem_params::options_init()
              % power_str % p_norm).c_str())
 
         (opt_desc_str(discretize_threshold_opt).c_str(),
-         value<vector<contin_t>>(&discretize_thresholds),
+         po::value<vector<contin_t>>(&discretize_thresholds),
          "If the domain is continuous, discretize the target feature. "
          "A unique used of that option produces 2 classes, x < thresold "
          "and x >= threshold. The option can be used several times (n-1) "
          "to produce n classes and the thresholds are automatically sorted.\n")
 
         (opt_desc_str(ip_kld_weight_opt).c_str(),
-         value<double>(&ip_kld_weight)->default_value(1.0),
+         po::value<double>(&ip_kld_weight)->default_value(1.0),
          "Interesting patterns (ip). Weight of the KLD.\n")
 
         (opt_desc_str(ip_skewness_weight_opt).c_str(),
-         value<double>(&ip_skewness_weight)->default_value(1.0),
+         po::value<double>(&ip_skewness_weight)->default_value(1.0),
          "Interesting patterns (ip). Weight of skewness.\n")
 
         (opt_desc_str(ip_stdU_weight_opt).c_str(),
-         value<double>(&ip_stdU_weight)->default_value(1.0),
+         po::value<double>(&ip_stdU_weight)->default_value(1.0),
          "Interesting patterns (ip). Weight of stdU.\n")
 
         (opt_desc_str(ip_skew_U_weight_opt).c_str(),
-         value<double>(&ip_skew_U_weight)->default_value(1.0),
+         po::value<double>(&ip_skew_U_weight)->default_value(1.0),
          "Interesting patterns (ip). Weight of skew_U.\n")
 
         (opt_desc_str(alpha_opt).c_str(),
-         value<score_t>(&hardness)->default_value(0.0),
+         po::value<score_t>(&hardness)->default_value(0.0),
          "If problems pre, prerec, recall, f_one or bep are specified, "
          "this option is used to set the 'hardness' of the constraint, "
          "with larger values corresponding to a harder constraint "
@@ -734,20 +739,20 @@ void problem_params::options_init()
          "the precision).\n")
 
         ("pre-worst-norm",
-         value<bool>(&pre_worst_norm)->default_value(false),
+         po::value<bool>(&pre_worst_norm)->default_value(false),
          "Normalize the precision w.r.t. its worst decile [EXPERIMENTAL].\n")
 
         ("it-abs-err",
-         value<bool>(&it_abs_err)->default_value(false),
+         po::value<bool>(&it_abs_err)->default_value(false),
          "Use absolute error instead of squared error [EXPERIMENTAL, the occam's razor hasn't been calibrated for that fitness function yet].\n")
 
         ("gen-best-tree",
-         value<bool>(&gen_best_tree)->default_value(false),
+         po::value<bool>(&gen_best_tree)->default_value(false),
          "Attempts to generate the best candidate (possibly huge and overfit) head-on. Only works combined with -Hpre for now.\n")
 
         // ======= Feature-selection params =======
         ("enable-fs",
-         value<bool>(&enable_feature_selection)->default_value(false),
+         po::value<bool>(&enable_feature_selection)->default_value(false),
          "Enable integrated feature selection.  Feature selection is "
          "performed immediately before knob building (representation "
          "building), when creating a new deme.  Limiting the number "
@@ -755,13 +760,13 @@ void problem_params::options_init()
          "usage of large problems.\n")
 
         ("fs-target-size",
-         value<unsigned>(&fs_params.target_size)->default_value(20),
+         po::value<unsigned>(&fs_params.target_size)->default_value(20),
          "Feature count.  This option "
          "specifies the number of features to be selected out of "
          "the dataset.  A value of 0 disables feature selection.\n")
 
         ("fs-exp-distrib",
-         value<bool>(&fs_params.exp_distrib)->default_value(false),
+         po::value<bool>(&fs_params.exp_distrib)->default_value(false),
          "Use a smoth exponential distribution, instead of hard "
          "cuttoff, when selecting the highest-scoring features.  "
          "Without this option, the highest-scoring count=N features "
@@ -780,7 +785,7 @@ void problem_params::options_init()
 
 
         ("fs-focus",
-         value<string>(&fs_focus)->default_value(focus_incorrect),
+         po::value<string>(&fs_focus)->default_value(focus_incorrect),
          str(boost::format("Focus of feature selection (which data points "
                            "feature will focus on):\n\n"
                            "%s, all data points are considered\n\n"
@@ -791,7 +796,7 @@ void problem_params::options_init()
              % focus_all % focus_active % focus_incorrect % focus_ai).c_str())
 
         ("fs-seed",
-         value<string>(&fs_seed)->default_value(seed_add),
+         po::value<string>(&fs_seed)->default_value(seed_add),
          str(boost::format("Seed type (how to use the features of the "
                            "exemplar to seed feature selection):\n\n"
 
@@ -822,11 +827,11 @@ void problem_params::options_init()
              % seed_none % seed_add % seed_init % seed_xmplr).c_str())
 
         ("fs-prune-exemplar",
-         value<bool>(&festor_params.prune_xmplr)->default_value(0),
+         po::value<bool>(&festor_params.prune_xmplr)->default_value(0),
          "Remove from the exemplar the literals of non-selected features.\n")
 
         ("fs-subsampling-pbty",
-         value<float>(&festor_params.subsampling_pbty)->default_value(0),
+         po::value<float>(&festor_params.subsampling_pbty)->default_value(0),
          "Probability of discarding an observation before carrying feature "
          "selection. 0 means no observation is discard, 1 means all are discard. "
          "This is to force to introduce some randomness in "
@@ -834,12 +839,12 @@ void problem_params::options_init()
          "have some.\n")
 
         ("fs-demes",
-         value<unsigned>(&festor_params.n_demes)->default_value(1),
+         po::value<unsigned>(&festor_params.n_demes)->default_value(1),
          "Number of feature sets to select out of feature selection and the "
          "number of demes to accordingly spawn.\n")
 
         ("fs-algo",
-         value<string>(&fs_params.algorithm)->default_value(simple),
+         po::value<string>(&fs_params.algorithm)->default_value(simple),
          string("Feature selection algorithm. Supported algorithms are:\n")
          .append(simple).append(" for a simple, fast max-mutual-information algo.\n")
          .append(inc).append(" for incremental max-relevency, min-redundancy.\n")
@@ -847,7 +852,7 @@ void problem_params::options_init()
          .append(moses::hc).append(" for moses-hillclimbing.\n").c_str())
 
         ("fs-scorer",
-         value<string>(&fs_params.scorer)->default_value(mi),
+         po::value<string>(&fs_params.scorer)->default_value(mi),
          str(boost::format("Feature selection fitness function (scorer).\n"
                            " Supported scorers are:\n"
                            "%s, for mutual information\n"
@@ -855,7 +860,7 @@ void problem_params::options_init()
              % mi % pre).c_str())
 
         ("fs-threshold",
-         value<double>(&fs_params.threshold)->default_value(0),
+         po::value<double>(&fs_params.threshold)->default_value(0),
          "Improvement threshold. Floating point number. "
          "Specifies the threshold above which the mutual information "
          "of a feature is considered to be significantly correlated "
@@ -865,18 +870,18 @@ void problem_params::options_init()
 
         // ======= Feature-selection diveristy pressure =======
         ("fs-diversity-pressure",
-         value<float>(&festor_params.diversity_pressure)->default_value(0),
+         po::value<float>(&festor_params.diversity_pressure)->default_value(0),
          "Multiplicative coefficient of the diversity penalty "
          "(itself being in [0,1]).\n")
 
         ("fs-diversity-cap",
-         value<size_t>(&festor_params.diversity_cap)->default_value(100),
+         po::value<size_t>(&festor_params.diversity_cap)->default_value(100),
          "Place a cap on the maximum number of feature set to consider. "
          "If zero, no cap is used (Warning: could be very slow). "
          "Use this to speed up diversity computation on feature sets.\n")
 
         ("fs-diversity-interaction",
-         value<int>(&festor_params.diversity_interaction)->default_value(-1),
+         po::value<int>(&festor_params.diversity_interaction)->default_value(-1),
          "Maximum number of interactions to be considered when computing "
          "the mutual information between feature sets. "
          "This is used in case the number of selected features tends to "
@@ -885,19 +890,19 @@ void problem_params::options_init()
 
         // ======= Feature-selection incremental algo params =======
         ("fs-inc-redundant-intensity",
-         value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),
+         po::value<double>(&fs_params.inc_red_intensity)->default_value(-1.0),
          "Incremental Selection parameter. Floating-point value must "
          "lie between 0.0 and 1.0.  A value of 0.0 or less means that no "
          "redundant features will discarded, while 1.0 will cause a "
          "maximal number will be discarded.\n")
 
         ("fs-inc-target-size-epsilon",
-         value<double>(&fs_params.inc_target_size_epsilon)->default_value(1.0e-6),
+         po::value<double>(&fs_params.inc_target_size_epsilon)->default_value(1.0e-6),
          "Incremental Selection parameter. Tolerance applied when "
          "selecting for a fixed number of features (option -C).\n")
 
         ("fs-inc-interaction-terms",
-         value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
+         po::value<unsigned>(&fs_params.inc_interaction_terms)->default_value(1),
          "Incremental Selection parameter. Maximum number of "
          "interaction terms considered during incremental feature "
          "selection. Higher values make the feature selection more "
@@ -905,31 +910,31 @@ void problem_params::options_init()
 
         // ======= Feature-selection pre scorer only params =======
         ("fs-pre-penalty",
-         value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         po::value<float>(&fs_params.pre_penalty)->default_value(1.0f),
          "Activation penalty (see moses --help or man moses for more info).\n")
 
         ("fs-pre-min-activation",
-         value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         po::value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
          "Minimum activation (see moses --help or man moses for more info).\n")
 
         ("fs-pre-max-activation",
-         value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         po::value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
          "Maximum activation (see moses --help or man moses for more info).\n")
 
         ("fs-pre-positive",
-         value<bool>(&fs_params.pre_positive)->default_value(true),
+         po::value<bool>(&fs_params.pre_positive)->default_value(true),
          "If 1, then precision, otherwise negative predictive value "
          "(see moses --help or man moses for more info).\n")
 
         // ======= Feature-selection hill-climbing only params =======
         ("fs-hc-max-score",
-         value<double>(&fs_params.hc_max_score)->default_value(1),
+         po::value<double>(&fs_params.hc_max_score)->default_value(1),
          "Hillclimbing parameter.  The max score to reach, once "
          "reached feature selection halts.\n")
 
         // no need of that for now
         // (opt_desc_str(hc_initial_feature_opt).c_str(),
-        //  value<vector<string> >(&fs_params.hc_initial_features),
+        //  po::value<vector<string> >(&fs_params.hc_initial_features),
         //  "Hillclimbing parameter.  Initial feature to search from.  "
         //  "This option can be used as many times as there are features, "
         //  "to have them included in the initial feature set. If the "
@@ -937,34 +942,34 @@ void problem_params::options_init()
         //  "quality measure, the selection speed can be greatly increased.\n")
 
         ("fs-hc-max-evals",
-         value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
+         po::value<unsigned>(&fs_params.hc_max_evals)->default_value(10000),
          "Hillclimbing parameter.  Maximum number of fitness function "
          "evaluations.\n")
 
         ("fs-hc-fraction-of-remaining",
-         value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
+         po::value<double>(&fs_params.hc_fraction_of_remaining)->default_value(0.5),
          "Hillclimbing parameter.  Determine the fraction of the "
          "remaining number of eval to use for the current iteration.\n")
 
         ("fs-hc-crossover",
-         value<bool>(&fs_params.hc_crossover)->default_value(false),
+         po::value<bool>(&fs_params.hc_crossover)->default_value(false),
          "Hillclimber crossover (see --hc-crossover option)\n")
 
         ("fs-hc-crossover-pop-size",
-         value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(120),
+         po::value<unsigned>(&fs_params.hc_crossover_pop_size)->default_value(120),
          "Hillclimber crossover pop size (see --hc-crossover option)\n")
 
         ("fs-hc-crossover-min-neighbors",
-         value<unsigned>(&fs_params.hc_crossover_min_neighbors)->default_value(400),
+         po::value<unsigned>(&fs_params.hc_crossover_min_neighbors)->default_value(400),
          "Hillclimber crossover min neighbors (see --hc-crossover option)\n")
 
         ("fs-hc-widen-search",
-         value<bool>(&fs_params.hc_widen_search)->default_value(true),
+         po::value<bool>(&fs_params.hc_widen_search)->default_value(true),
          "Hillclimber widen_search (see --widen-search)\n")
 
         // ======= Feature-selection MI scorer params =======
         ("fs-mi-penalty",
-         value<double>(&fs_params.mi_confi)->default_value(100.0),
+         po::value<double>(&fs_params.mi_confi)->default_value(100.0),
          "Mutual-information scorer parameter.  Intensity of the confidence "
          "penalty, in the range (-Inf, +Inf).  100 means no confidence "
          "penalty. This parameter influences how much importance is "
@@ -974,7 +979,7 @@ void problem_params::options_init()
 
         // ======= Feature-selection SMD params =======
         ("fs-smd-top-size",
-         value<unsigned>(&fs_params.smd_top_size)->default_value(10),
+         po::value<unsigned>(&fs_params.smd_top_size)->default_value(10),
          "Stochastic max dependency parameter. Number of feature subset "
          "candidates to consider building the next superset.\n")
 
@@ -985,14 +990,15 @@ void problem_params::options_init()
 
 void problem_params::parse_options(int argc, char* argv[])
 {
-    variables_map vm;
+    namespace po = boost::program_options;
+    po::variables_map vm;
     try {
-        store(parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, desc), vm);
     }
-    catch (error& e) {
+    catch (po::error& e) {
         OC_ASSERT(0, "Fatal error: invalid or duplicated argument:\n\t%s\n", e.what());
     }
-    notify(vm);
+    po::notify(vm);
 
     // set flags
     log_file_dep_opt = vm.count(log_file_dep_opt_opt.first) > 0;
@@ -1034,7 +1040,7 @@ void problem_params::parse_options(int argc, char* argv[])
     // Remove old log_file before setting the new one.
     remove(log_file.c_str());
     logger().setFilename(log_file);
-    trim(log_level);
+    boost::trim(log_level);
     Logger::Level level = logger().getLevelFromString(log_level);
     if (level != Logger::BAD_LEVEL)
         logger().setLevel(level);
@@ -1249,7 +1255,7 @@ void problem_params::parse_options(int argc, char* argv[])
     moses_params.max_cnd_output = result_count;
 
     // Logical reduction rules used during search.
-    lr = logical_reduction(ignore_ops);
+    lr = reduct::logical_reduction(ignore_ops);
     bool_reduct = lr(reduct_candidate_effort).clone();
 
     // Logical reduction rules used during representation building.
@@ -1257,7 +1263,7 @@ void problem_params::parse_options(int argc, char* argv[])
 
     // Continuous reduction rules used during search and representation
     // building.
-    contin_reduct = contin_reduction(reduct_candidate_effort, ignore_ops).clone();
+    contin_reduct = reduct::contin_reduction(reduct_candidate_effort, ignore_ops).clone();
 
     // Set metapop printer parameters.
     mmr_pa = metapop_printer(result_count,

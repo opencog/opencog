@@ -63,6 +63,14 @@ TARGET_LINK_LIBRARIES(MOSESUTest
 	cogutil		
 )
 
+ADD_CXXTEST(weightedUTest)
+TARGET_LINK_LIBRARIES(weightedUTest
+	moses_exec
+	moses
+	comboreduct
+	cogutil		
+)
+
 ADD_CXXTEST(mixedUTest)
 TARGET_LINK_LIBRARIES(mixedUTest
 	moses_exec
