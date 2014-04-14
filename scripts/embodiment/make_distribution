@@ -59,6 +59,7 @@ $binDirH/opencog/persist/sql/libpersist.so \
 ./unity_action_schema.combo \
 $pdh/opencog/embodiment/psi_util.scm \
 $pdh/opencog/embodiment/rules_core.scm \
+$pdh/opencog/embodiment/pm_test_corpus.scm \
 $pdh/opencog/embodiment/multiverse_rules.scm \
 $pdh/opencog/embodiment/unity_rules.scm \
 $pdh/opencog/embodiment/dialog_system.scm \

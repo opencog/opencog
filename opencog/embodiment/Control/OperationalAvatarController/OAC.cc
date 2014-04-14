@@ -208,11 +208,16 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
         psiActionSelectionAgent = 0;
     }
-    else
+    else if (config().get_bool("PSI_ACTION_SELECTION_ENABLED"))
     {
         registerAgent(PsiActionSelectionAgent::info().id,
                              &psiActionSelectionAgentFactory);
         psiActionSelectionAgent = createAgent<PsiActionSelectionAgent>();
+        ocPlanningAgent = 0;
+    }
+    else
+    {
+        psiActionSelectionAgent = 0;
         ocPlanningAgent = 0;
     }
 
@@ -377,9 +382,23 @@ void OAC::init(const std::string & myId, const std::string & ip, int portNumber,
 
     if ( config().get_bool("ENABLE_PATTERN_MINER"))
     {
+        if ( load_scm_file( *(this->atomSpace), "pm_test_corpus.scm" ) == 0  )
+            logger().info( "OAC::%s - Loaded pattern miner test corpus file: '%s'",
+                            __FUNCTION__,
+                           "pm_test_corpus.scm"
+                         );
+        else
+            logger().error( "OAC::%s - Failed to load pattern miner test corpus file: '%s'",
+                             __FUNCTION__,
+                            "pm_test_corpus.scm"
+                          );
+
+
         this->patternMiningAgent = PatternMiningAgentPtr(new PatternMiningAgent(*this));
         this->startAgent(this->patternMiningAgent);
     }
+    else
+        this->patternMiningAgent = NULL;
 
     // TODO: This should be done only after NetworkElement is initialized
     // (i.e., handshake with router is done)
