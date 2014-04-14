@@ -26,6 +26,9 @@
 
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/table/table.h>
@@ -179,7 +182,7 @@ protected:
     const unsigned int max_filename_size;
 
     reduct::logical_reduction lr;
-    options_description desc;
+    boost::program_options::options_description desc;
     void options_init();
 
 private:
