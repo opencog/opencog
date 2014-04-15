@@ -353,6 +353,7 @@ class AtomSpaceBasedInferenceHistory:
             ])
         ])
 
+        print app
         if app not in self._all_applications:
             self._all_applications.add(app)
             return True
@@ -389,7 +390,7 @@ class AtomSpaceBasedInferenceHistory:
         outputs = L(types.ListLink, [output])
 
         template = L(types.ExecutionLink, [
-            rule
+            rule,
             L(types.ListLink, [
                 inputs,
                 outputs
@@ -398,10 +399,14 @@ class AtomSpaceBasedInferenceHistory:
         
         apps = self._chainer.lookup_atoms(template, {})
         apps = [a for a in apps if self._chainer.wanted_atom(a, template, ground=False, allow_zero_tv=True)]
+        # Reject old templates. They should be deleted really
+        apps = [app for app in apps if not self._get_rule(app).name.startswith('$')]
         # It will find the template as one of the matches
-        apps.remove(template)
-        self.atomspace.remove(template)
+        #apps.remove(template)
+        #self._history_atomspace.remove(template)
+        #self._history_atomspace.remove(inputs, recursive=True)
 
+        assert all(app in self._history_atomspace for app in apps)
         return apps
 
     def _get_inputs(self, application):
@@ -433,7 +438,7 @@ class AtomSpaceBasedInferenceHistory:
         history.
         """
         for output_atom in outputs:        
-            if atom in inputs:
+            if output_atom in inputs:
                 return True
             for input_atom in inputs:
                 history = self.lookup_history_for_atom(input_atom)
@@ -443,39 +448,47 @@ class AtomSpaceBasedInferenceHistory:
 
         return False
 
-    def lookup_history_for_atom(self, atom, history=[]):
+    def lookup_history_for_atom(self, atom, history=None):
         """
         Lookup the entire inference history for an Atom. It is returned as a list
         of Atoms representing the rule applications
         """
+        if history is None: history = []
+
         apps = self._lookup_applications_by_output_atom(atom)
-        history.append(apps)
+        history+=apps
+        assert all(app in self._history_atomspace for app in history)
+        if len(apps) == 2: assert apps[0] != apps[1]
 
         for app in apps:
             inputs = self._get_inputs(app)
             for input_atom in inputs:
-                self.lookup_history_for_atom(input_atom, trail)
+                self.lookup_history_for_atom(input_atom, history)
 
         # It goes through the tree of applications in top-down fashion (i.e.
         # from the last conclusion to the first. Reversing the list means it
         # goes from the premises to the conclusion.
-        return reversed(trail)
+        assert all(app in self._history_atomspace for app in history)
+        return reversed(history)
         
     def print_application(self, application):
+        assert application in self._history_atomspace
+
         self.log.debug("Using {0}\n".format(self._get_rule(application).name))
         for input_atom in self._get_inputs(application):
+            assert input_atom in self._history_atomspace
             self.log.debug("{0}\n".format(input_atom))
         self.log.debug("|=")
         for output_atom in self._get_outputs(application):
+            assert output_atom in self._history_atomspace
             self.log.debug("{0}\n".format(output_atom))
-        
-        return ret
 
     def print_history(self, atom):
         history = self.lookup_history_for_atom(atom)
+        assert all(app in self._history_atomspace for app in history)
 
         self.log.debug("Inference trail:")
-        for application in trail:
+        for application in history:
             self.print_application(application)
 
 class Chainer(AbstractChainer):
@@ -530,7 +543,7 @@ class Chainer(AbstractChainer):
 
         self.atomspace = atomspace
 
-        self.history = AtomSpaceBasedInferenceHistory()
+        self.history = AtomSpaceBasedInferenceHistory(chainer=self, main_atomspace=atomspace, history_atomspace=atomspace)
 
         # Record how often each Rule is used. To bias the Rule
         # frequencies. It will take longer to adapt if you set this
@@ -1015,8 +1028,7 @@ class Chainer(AbstractChainer):
                     self.log.debug(repr(instance))
 
                     self.log.debug("Inference steps")
-                    self.log.debug(
-                        self.inference_history.print_trail(instance))
+                    self.history.print_history(instance)
 
                     if instance.tv.confidence > required_confidence:
                         return True
