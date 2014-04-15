@@ -79,6 +79,8 @@ private:
     AtomSpace* atomSpace;
     AtomSpace* originalAtomSpace;
 
+    HandleSeq allLinks;// all links in the orginal atomspace
+
     // Every pattern is reprented as a unique string as the key in this map, mapping to its cooresponding HTreeNode
     map<string, HTreeNode*> keyStrToHTreeNodeMap;
 

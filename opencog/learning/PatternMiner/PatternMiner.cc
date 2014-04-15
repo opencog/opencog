@@ -557,12 +557,13 @@ void PatternMiner::findAllInstancesForGivenPattern(HTreeNode* HNode)
 
 void PatternMiner::growTheFirstGramPatternsTask()
 {
-    static HandleSeq allLinks;
-    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
-    while (allLinks.size() > 0)
+    while (true)
     {
         allAtomListLock.lock();
+        if (allLinks.size() <= 0)
+            break;
+
         Handle cur_link = allLinks[allLinks.size() - 1];
         // if this link is listlink, ignore it
         if (originalAtomSpace->getType(cur_link) == opencog::LIST_LINK)
@@ -732,6 +733,8 @@ void PatternMiner::OutPutPatternsToFile(unsigned int n_gram)
 void PatternMiner::ConstructTheFirstGramPatterns()
 {
     cur_gram = 1;
+
+    originalAtomSpace->getHandlesByType(back_inserter(allLinks), (Type) LINK, true );
 
     for (unsigned int i = 0; i < THREAD_NUM; ++ i)
     {
