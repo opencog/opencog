@@ -53,7 +53,7 @@ void PatternMiningAgent::init()
 
     // Get AtomSpace
 
-    this->patternMiner = new PatternMiner(&(oac->getAtomSpace()),config().get_bool("PATTERN_MAX_GRAM"));
+    this->patternMiner = new PatternMiner(&(oac->getAtomSpace()),config().get_int("PATTERN_MAX_GRAM"));
 
     // Avoid initialize during next cycle
     this->bInitialized = true;
