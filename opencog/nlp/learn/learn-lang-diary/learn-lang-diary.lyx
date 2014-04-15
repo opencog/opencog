@@ -2230,7 +2230,7 @@ A set
 
 \begin_layout Itemize
 A transition function 
-\begin_inset Formula $\delta\subset Q\times\{\Sigma\cup\epsilon\}\times\{\Gamma\cup\epsilon\}\times Q$
+\begin_inset Formula $\delta\subset Q\times(\Sigma\cup\{\epsilon\})\times(\Gamma\cup\{\epsilon\})\times Q$
 \end_inset
 
 
@@ -2426,6 +2426,52 @@ This suggests that there should be a pattern recognizer that converts the
  latter into the former.
  When would this be inappropriate? When would weighting schemes interfere?
  when would output interfere?
+\end_layout
+
+\begin_layout Section*
+15 April 2014
+\end_layout
+
+\begin_layout Subsection*
+Elegant Normal Form
+\end_layout
+
+\begin_layout Standard
+Or, more precisely, 
+\begin_inset Quotes eld
+\end_inset
+
+Minimal Normal Form
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Instead of writing out LG disjuncts in long strings of DNF or CNF, where
+ they blow up into the thousands or tens of thousands, we really need to
+ write then in Craig Holman's "Elegant Normal Form", ( http://www.patterncraft.com
+/Blog/Blog-080609.html#ElegantNormalForm ) format.
+ This is to be done by entropy minimization, in two different ways: first,
+ ENF reduces the total count of terms, for just one single expression.
+ Second, and maybe more important: different words will share significant
+ subsets of the ENF expression.
+ So, for example, the LG English dicts define:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+     <verb-rq>: Rw- or ({Ic-} & Q- & <verb-wall>) or [()];
+\end_layout
+
+\end_inset
+
+which is (1) in ENF, not DNF or CNF, and (2) shared by several dozen words.
+ There should be a strong push to discover such common sub-expressions across
+ many words.
 \end_layout
 
 \begin_layout Section*
