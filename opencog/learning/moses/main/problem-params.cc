@@ -24,6 +24,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <signal.h>
+
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
