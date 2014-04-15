@@ -353,7 +353,6 @@ class AtomSpaceBasedInferenceHistory:
             ])
         ])
 
-        print app
         if app not in self._all_applications:
             self._all_applications.add(app)
             return True
