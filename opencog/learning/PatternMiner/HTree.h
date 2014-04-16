@@ -67,9 +67,6 @@ namespace opencog
              rootNode = new HTreeNode(); // the rootNode with no parents
          }
 
-         // search in the HTree to find the corresponding pattern(HTreeNode) for an input instance
-         HTreeNode* findPatternInHTreeForAnInstance(vector<Handle> inputLinks);
-
      };
 
 
