@@ -40,7 +40,7 @@ class SCMPrimitiveUTest :  public CxxTest::TestSuite
 
 	public:
 
-	SCMPrimitiveUTest(void) 
+	SCMPrimitiveUTest(void)
 	{
 		try
 		{
@@ -63,8 +63,7 @@ class SCMPrimitiveUTest :  public CxxTest::TestSuite
 	}
 
 	void setUp(void);
-
-	void tearDown(void) { }
+	void tearDown(void);
 
 	void test_H_H(void);
 };
@@ -74,12 +73,12 @@ class MyExampleClass
 {
 	private:
 		int id;  // some value in the instance
-        AtomSpace *as;
+		AtomSpace *as;
 	public:
 
 		MyExampleClass(AtomSpace *_as, int _id) {as = _as; id = _id; }
 
-		// An example method -- accepts a handle, and wraps it 
+		// An example method -- accepts a handle, and wraps it
 		// with a ListLink.
 		Handle my_func(Handle h)
 		{
@@ -105,7 +104,13 @@ void SCMPrimitiveUTest::setUp(void)
 {
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
-	eval = &(SchemeEval::instance(as));
+	eval = new SchemeEval(as);
+}
+
+void SCMPrimitiveUTest::tearDown(void)
+{
+	delete eval;
+	eval = NULL;
 }
 
 // ============================================================
@@ -119,7 +124,7 @@ void SCMPrimitiveUTest::test_H_H(void)
 	MyExampleClass *mtc = new MyExampleClass(as,42);
 	define_scheme_primitive("bingo", &MyExampleClass::my_func, mtc);
 
-	// Now, call bingo, with a reasonable argument. Since 
+	// Now, call bingo, with a reasonable argument. Since
 	// MyExampleClass::my_func is expecting a handle, we better pass
 	// bingo a handle.
 	eval->eval("(define nnn (cog-new-node 'ConceptNode \"Hello World!\"))");

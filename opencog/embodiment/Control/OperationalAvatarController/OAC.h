@@ -200,7 +200,7 @@ private:
     void loadAtomSpace(const std::string & petId);
 
     /**
-     * Process messages from the spwaner componente. Usually a SAVE_AND_EXIT
+     * Process messages from the spawner component. Usually a SAVE_AND_EXIT
      * one.
      *
      * @param spawnerMessage The spawner message plain text format to be
@@ -239,7 +239,10 @@ public:
      *
      * For details about formats of Modulators, DemandGoals and Rules,
      * please refer to file "rules_core.scm", 
-     * and "pet_rules.scm" is a good example of using them.     
+     * and "pet_rules.scm" is a good example of using them.
+     *
+     * XXX What is this int return? It returns 0 no matter what...
+     *
      */ 
     int addRulesToAtomSpace();
 

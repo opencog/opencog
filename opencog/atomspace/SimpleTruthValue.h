@@ -38,7 +38,7 @@ namespace opencog
 class SimpleTruthValue;
 typedef std::shared_ptr<SimpleTruthValue> SimpleTruthValuePtr;
 
-//! a TruthValue that stores a mean and the number of observations (strength and confidance)
+//! a TruthValue that stores a mean and the number of observations (strength and confidence)
 class SimpleTruthValue : public TruthValue
 {
 protected:
@@ -77,6 +77,15 @@ public:
     strength_t getMean() const;
     count_t getCount() const;
     confidence_t getConfidence() const;
+
+    /**
+     * Truth value merge formula, as specified by PLN.
+     *
+     * Currently tv1.merge(tv2) works as follows:
+     * the resulting TV is either tv1 or tv2, the result being the one
+     * with the highest confidence.
+     */
+    TruthValuePtr merge(TruthValuePtr) const;
 
     static SimpleTruthValuePtr createSTV(strength_t mean, count_t count)
     {

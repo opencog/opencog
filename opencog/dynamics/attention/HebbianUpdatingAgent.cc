@@ -68,7 +68,7 @@ HebbianUpdatingAgent::HebbianUpdatingAgent(CogServer& cs) :
 
     // Provide a logger, but disable it initially
     log = NULL;
-    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::WARN, true));
+    setLogger(new opencog::Logger("HebbianUpdatingAgent.log", Logger::FINE, true));
 }
 
 HebbianUpdatingAgent::~HebbianUpdatingAgent()
@@ -256,9 +256,11 @@ float HebbianUpdatingAgent::targetConjunction(std::vector<Handle> handles)
 
         // if none in attention return 0 at end
         if (sti > a->getAttentionalFocusBoundary()) {
-			log->fine("HebbianUpdatingAgent: %d in attention, focus boundary = %d", sti,
-					a->getAttentionalFocusBoundary() );
-			inAttention = true;
+            log->fine("HebbianUpdatingAgent: handle %d STI value %d in attention, focus boundary = %d", 
+                      h.value(),
+                      sti,
+                      a->getAttentionalFocusBoundary());
+            inAttention = true;
 		}
 
         // normalise each sti and multiply each

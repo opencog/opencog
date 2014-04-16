@@ -14,7 +14,7 @@ import json
 # Define the API Endpoint - replace 127.0.0.1 with the server IP address if necessary
 IP_ADDRESS = '127.0.0.1'
 PORT = '5000'
-uri = 'http://' + IP_ADDRESS + ':' + PORT + '/api/v1.0/'
+uri = 'http://' + IP_ADDRESS + ':' + PORT + '/api/v1.1/'
 headers = {'content-type': 'application/json'}
 
 # Pretty print function for displaying JSON request/response information
@@ -32,7 +32,7 @@ post_response = post(uri + 'atoms', data=json.dumps(atom), headers=headers)
 post_result = post_response.json()['atoms']
 pprint(post_response, post_result)
 '''
-POST /api/v1.0/atoms:
+POST /api/v1.1/atoms:
 {
   "outgoing": [],
   "incoming": [],
@@ -58,10 +58,10 @@ POST /api/v1.0/atoms:
 # GET the newly created node
 handle_node_1 = post_result['handle']
 get_response = get(uri + 'atoms/' + str(handle_node_1))
-get_result = get_response.json()['atoms']
+get_result = get_response.json()['result']['atoms']
 pprint(get_response, get_result)
 '''
-GET /api/v1.0/atoms/57:
+GET /api/v1.1/atoms/57:
 {
   "outgoing": [],
   "incoming": [],
@@ -90,7 +90,7 @@ get_response = get(uri + 'atoms', params={'name': name})
 get_result = get_response.json()['result']['atoms'][0]
 pprint(get_response, get_result)
 '''
-GET /api/v1.0/atoms?name=giant_frog:
+GET /api/v1.1/atoms?name=giant_frog:
 {
   "outgoing": [],
   "incoming": [],
@@ -120,7 +120,7 @@ get_response = get(uri + 'atoms', params={'name': name, 'type': type})
 get_result = get_response.json()['result']['atoms'][0]
 pprint(get_response, get_result)
 '''
-GET /api/v1.0/atoms?name=giant_frog&type=ConceptNode:
+GET /api/v1.1/atoms?name=giant_frog&type=ConceptNode:
 {
   "outgoing": [],
   "incoming": [],
@@ -151,7 +151,7 @@ post_result = post_response.json()['atoms']
 handle_node_2 = post_result['handle']
 pprint(post_response, post_result)
 '''
-POST /api/v1.0/atoms:
+POST /api/v1.1/atoms:
 {
   "outgoing": [],
   "incoming": [],
@@ -181,7 +181,7 @@ post_response = post(uri + 'atoms', data=json.dumps(atom), headers=headers)
 post_result = post_response.json()['atoms']
 pprint(post_response, post_result)
 '''
-POST /api/v1.0/atoms:
+POST /api/v1.1/atoms:
 {
   "outgoing": [
     57,
@@ -218,7 +218,7 @@ put_response = put(uri + 'atoms/' + str(handle_node_1), data=json.dumps(atom_upd
 put_result = put_response.json()['atoms']
 pprint(put_response, put_result)
 '''
-PUT /api/v1.0/atoms/76:
+PUT /api/v1.1/atoms/76:
 {
   "outgoing": [],
   "incoming": [
@@ -251,7 +251,7 @@ delete_response = delete(uri + 'atoms/' + str(handle_node_1))
 delete_result = delete_response.json()['result']
 pprint(delete_response, delete_result)
 '''
-DELETE /api/v1.0/atoms/76:
+DELETE /api/v1.1/atoms/76:
 {
   "handle": 76,
   "success": true

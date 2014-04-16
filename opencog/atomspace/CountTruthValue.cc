@@ -98,6 +98,9 @@ TruthValueType CountTruthValue::getType() const
     return COUNT_TRUTH_VALUE;
 }
 
+// Note: this is NOT the merge formula used by PLN.  This is
+// because the CountTruthValue usally stores an integer count,
+// and a log-probability or entropy, instead of a confidence.
 TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
 {
     CountTruthValuePtr oc =
@@ -117,10 +120,16 @@ TruthValuePtr CountTruthValue::merge(TruthValuePtr other) const
     nc->count += oc->count;
     nc->mean = (this->mean * this->count +
                    oc->mean * oc->count) / nc->count;
-    if (oc->confidence > nc->confidence)
-    {
-        nc->confidence = oc->confidence;
-    }
+
+    // XXX This is not the correct way to handle confidence ... 
+    // The confidence will typically hold the log probability,
+    // where the probability is the normalized count.  Thus
+    // the right thing to do is probably to add the probabilities!?
+    // However, this is not correct when the confidence is actually
+    // holding the mutual information ... which is additive ... 
+    // Argh .. what to do?
+    //    nc->confidence = oc->confidence;
+    
     return std::static_pointer_cast<TruthValue>(nc);
 }
 

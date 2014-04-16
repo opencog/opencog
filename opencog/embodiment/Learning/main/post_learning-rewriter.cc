@@ -31,7 +31,7 @@
 
 using namespace std;
 using namespace opencog;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace reduct;
 
 int main()
@@ -41,7 +41,7 @@ int main()
 
     while (cin.good()) {
         // cin >> tr;
-        PetCombo::operator>>(cin, tr);
+        AvatarCombo::operator>>(cin, tr);
         if (!cin.good())
             break;
 

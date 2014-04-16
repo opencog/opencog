@@ -83,52 +83,22 @@ struct RunningComboProcedure {
 
     //terminate - prevent future plans from being evaluated,
     //sets result to null_vertex - note that this is not the same as failure
-    void stop() {
-        _tr = combo::combo_tree(combo::id::null_vertex);
-        _it = _tr.end();
-    }
+    void stop();
 
     //is the rp ready to run an action plan?
-    bool isReady() const {
-        return (_tr.is_valid(_it) && (!_hasBegun || _ww.isPlanFinished()));
-    }
+    bool isReady() const;
+
     //is the rp done running?
-    bool isFinished() {
-        if (!finished) {
-            finished = (!_tr.is_valid(_it) && (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
-        }
-        return finished;
+    bool isFinished() const;
 
-        /*      stringstream ss;
-              ss << _tr;
-              logger().debug(
-              "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'",
-              ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
-
-              return (!_tr.is_valid(_it) &&
-               (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
-          */
-    }
     //did the last action plan executed by the procedure fail?
-    bool isFailed() const {
-        return
-            (_failed ? true :
-             (!_failed ? false :
-              (_hasBegun && _ww.isPlanFailed())));
-    }
+    bool isFailed() const;
 
     // Get the result of the procedure
     // Can be called only if the following conditions are true:
     // - procedure execution is finished (checked by isFinished() method)
     // returns null_procedure if execution was stopped in the middle
-    combo::vertex getResult() {
-        OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
-        if (_hasBegun)
-            return isFailed() ? combo::id::action_failure : combo::id::action_success;
-        if (_tr.size() == 1)
-            return *_tr.begin();
-        return combo::id::action_success;
-    }
+    combo::vertex getResult();
 
 protected:
     typedef combo::combo_tree::sibling_iterator sib_it;
@@ -156,10 +126,8 @@ protected:
     std::stack<std::pair<combo::combo_tree::sibling_iterator, combo::vertex> > _stack;
     bool _inCompound; //used for handling builtin compound functions (e.g. follow)
 
-    //used for sending action plans
-    bool exec(sib_it x) {
-        return execSeq(x, ++sib_it(x));
-    }
+    // Used for sending action plans
+    bool exec(sib_it x);
     bool execSeq(sib_it, sib_it);
 
     /// @return true iff an action plan gets executed
@@ -191,7 +159,7 @@ private:
      */
     bool _doesSendDefinitePlan;
 
-    bool finished;
+    mutable bool finished;
 };
 
 }} // ~namespace opencog::Procedure

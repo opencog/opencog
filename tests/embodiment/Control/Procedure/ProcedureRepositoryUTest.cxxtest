@@ -37,7 +37,7 @@
 
 using namespace opencog::pai;
 using namespace Procedure;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog::control;
 using namespace opencog;
 using namespace std;
@@ -131,7 +131,7 @@ public:
         stringstream sst("and_seq(bark bark sit)");
         combo::combo_tree tr;
         // sst >> tr;
-        PetCombo::operator>>(sst, tr);
+        AvatarCombo::operator>>(sst, tr);
 
         ComboProcedure newCp(string("bbarkk"), 0, tr);
 

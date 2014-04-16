@@ -74,7 +74,7 @@ std::vector<std::string> TRICK_ARGS;
 #define REWARD_2 1.0
 
 using namespace opencog::oac;
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog;
 
 BaseServer* MockOpcHCTest::createInstance()

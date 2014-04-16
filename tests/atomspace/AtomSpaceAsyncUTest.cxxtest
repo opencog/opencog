@@ -54,6 +54,7 @@ private:
 
     // Counters must be atomic; we are incrementing them inside threads
     std::atomic_size_t __testSignalsCounter;
+    std::atomic_size_t __testAFSignalsCounter;
     std::atomic_size_t __totalAdded;
     std::atomic_size_t __totalChanged;
     RandGen *rng;
@@ -546,5 +547,54 @@ public:
 
         TS_ASSERT_EQUALS((int) __totalAdded, num_atoms);
         TS_ASSERT_EQUALS((int) __totalChanged, num_atoms * (n_threads-1)); // lots!
+    }
+
+    // =================================================================
+    // Test the AttentionalFocus signals, AddAFSignal and RemoveAFSignal,
+    // separately from the primary AtomSpace tests
+
+    void addAFSignal(const Handle& h,
+                     const AttentionValuePtr& av_old,
+                     const AttentionValuePtr& av_new)
+    {
+        logger().debug("addAFSignal: %s", h->toString().c_str());
+        __testAFSignalsCounter += 1;
+    }
+
+    void removeAFSignal(const Handle& h,
+                        const AttentionValuePtr& av_old,
+                        const AttentionValuePtr& av_new)
+    {
+        logger().debug("removeAFSignal: %s", h->toString().c_str());
+        __testAFSignalsCounter += 1;
+    }
+
+    void testAFSignals()
+    {
+        boost::signals2::connection addAFConnection =
+            atomSpace->AddAFSignal(
+                    boost::bind(&AtomSpaceAsyncUTest::addAFSignal,
+                                this, _1, _2, _3));
+        boost::signals2::connection removeAFConnection =
+            atomSpace->RemoveAFSignal(
+                    boost::bind(&AtomSpaceAsyncUTest::removeAFSignal,
+                                this, _1, _2, _3));
+
+        __testAFSignalsCounter = 0;
+        atomSpace->setAttentionalFocusBoundary(100);
+
+        // Add a node to the AttentionalFocus
+        Handle h = atomSpace->addNode(CONCEPT_NODE,
+                                      "test",
+                                      SimpleTruthValue::createTV(0.01,
+                                      SimpleTruthValue::confidenceToCount(1)));
+        atomSpace->setSTI(h, 200);
+        TS_ASSERT(__testAFSignalsCounter == 1);
+
+        // Remove the node from the AttentionalFocus
+        atomSpace->setSTI(h, 90);
+        TS_ASSERT(__testAFSignalsCounter == 2);
+
+        addAFConnection.disconnect();
     }
 };

@@ -36,7 +36,6 @@
 
 using namespace opencog;
 
-// If you change this, make sure to update atomspace_details.pyx!
 #define KKK 800.0f
 
 SimpleTruthValue::SimpleTruthValue(strength_t m, count_t c)
@@ -69,6 +68,15 @@ count_t SimpleTruthValue::getCount() const
 confidence_t SimpleTruthValue::getConfidence() const
 {
     return countToConfidence(count);
+}
+
+// This is the merge formula appropriate for PLN.
+TruthValuePtr SimpleTruthValue::merge(TruthValuePtr other) const
+{
+    if (other->getConfidence() > getConfidence()) {
+        return other->clone();
+    }
+    return clone();
 }
 
 std::string SimpleTruthValue::toString() const

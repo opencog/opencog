@@ -13,10 +13,12 @@ int main(int argc, char** argv)
      "Usage: atomspace_bm [-m <method>] [options]\n"
      "-t        \tPrint information on type sizes\n"
      "-A        \tBenchmark all methods\n"
-     "-x        \tTest the AtomSpaceImpl instead of the public AtomSpace API\n"
-     "-X        \tTest the AtomTable instead of the public AtomSpace API\n"
-     "-g        \tTest the Scheme API instead of the public AtomSpace API\n"
-     "-c        \tTest the Python API instead of the public AtomSpace API\n"
+     "-x        \tTest the AtomSpaceImpl API\n"
+     "-X        \tTest the AtomTable API\n"
+     "-g        \tTest the Scheme API\n"
+     "-M        \tMemoize Scheme expressions\n"
+     "-C        \tCompile Scheme expressions\n"
+     "-c        \tTest the Python API\n"
      "-m <methodname>\tMethod to benchmark\n" 
      "-l        \tList valid method names to benchmark\n"
      "-n <int>  \tHow many times to call the method in the measurement loop\n" 
@@ -47,7 +49,7 @@ int main(int argc, char** argv)
     opterr = 0;
     benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_AS;
 
-    while ((c = getopt (argc, argv, "tAXgcm:ln:r:S:p:s:d:kfi:")) != -1) {
+    while ((c = getopt (argc, argv, "tAXgMCcm:ln:r:S:p:s:d:kfi:")) != -1) {
        switch (c)
        {
            case 't':
@@ -79,6 +81,12 @@ int main(int argc, char** argv)
              exit(1);
 #endif
              break;
+           case 'C':
+             benchmarker.compile = true;
+             break;
+           case 'M':
+             benchmarker.memoize = true;
+             break;
            case 'c':
 #ifdef HAVE_CYTHON
              benchmarker.testKind = opencog::AtomSpaceBenchmark::BENCH_PYTHON;
@@ -96,10 +104,10 @@ int main(int argc, char** argv)
              exit(0);
              break;
            case 'n':
-             benchmarker.Nreps = atoi(optarg);
+             benchmarker.Nreps = (unsigned int) atoi(optarg);
              break;
            case 'r':
-             benchmarker.Nloops = atoi(optarg);
+             benchmarker.Nloops = (unsigned int) atoi(optarg);
              break;
            case 'S':
              benchmarker.sizeIncrease = atoi(optarg);
@@ -130,6 +138,33 @@ int main(int argc, char** argv)
              abort ();
        }
     }
+
+#ifdef HAVE_GUILE
+    if (opencog::AtomSpaceBenchmark::BENCH_SCM != benchmarker.testKind)
+#endif // HAVE_GUILE
+    {
+        if (1 != benchmarker.Nloops)
+        {
+            cerr << "Error: the python and atomspace tests currently do not support looping\n";
+            benchmarker.Nloops = 1;
+        }
+        if (true == benchmarker.memoize or true == benchmarker.compile)
+        {
+            cerr << "Fatal Error: Compiling and memoization supported only for the scheme tests\n";
+            exit(1);
+        }
+    }
+
+#ifdef HAVE_GUILE
+    if (opencog::AtomSpaceBenchmark::BENCH_SCM == benchmarker.testKind)
+    {
+        if (true == benchmarker.memoize and true == benchmarker.compile)
+        {
+            cerr << "Fatal Error: Can compile of memoize, but not both!\n";
+            exit(-1);
+        }
+    }
+#endif // HAVE_GUILE
 
     benchmarker.startBenchmark();
     return 0;

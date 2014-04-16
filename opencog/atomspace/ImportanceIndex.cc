@@ -175,7 +175,9 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 	// If recursive-flag is set, also extract all the links in the
 	// atom's incoming set.
 	if (recursive) {
-		HandleSeq iset = atomtable->getIncomingSet(handle);
+		HandleSeq iset;
+		handle->getIncomingSet(back_inserter(iset));
+
 		HandleSeq::iterator it = iset.begin();
 		HandleSeq::iterator is_end = iset.end();
 		for (; it != is_end; it++)
@@ -191,7 +193,8 @@ UnorderedHandleSet ImportanceIndex::extractOld(const AtomTable* atomtable,
 
 	// This handle can be extracted only if all links in its incoming
 	// set are also marked for removal by decay.
-	HandleSeq iset = atomtable->getIncomingSet(handle);
+	HandleSeq iset;
+	handle->getIncomingSet(back_inserter(iset));
 	HandleSeq::iterator it = iset.begin();
 	HandleSeq::iterator is_end = iset.end();
 	for (; it != is_end; it++)

@@ -1,5 +1,5 @@
 from scipy.stats.distributions import rv_frozen
-from spatiotemporal.temporal_events.relation_formulas import FormulaCreator, RelationFormulaGeometricMean, BaseRelationFormula
+from spatiotemporal.temporal_events.relation_formulas import FormulaCreator, RelationFormulaGeometricMean, BaseRelationFormula, RelationFormulaConvolution
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
@@ -38,10 +38,11 @@ class TemporalEvent(list, TimeInterval):
         self.interval_ending = TimeInterval(ending, b, bins_ending)
         list.__init__(self, self.interval_beginning + self.interval_ending)
         TimeInterval.__init__(self, a, b, bins)
-        if relation_formula is None:
-            relation_formula = RelationFormulaGeometricMean()
-        elif not isinstance(relation_formula, BaseRelationFormula):
-            raise TypeError("'relation_formula' should be of type 'BaseRelationFormula'")
+        # if relation_formula is None:
+        #     relation_formula = RelationFormulaGeometricMean()
+        # elif not isinstance(relation_formula, BaseRelationFormula):
+        #     raise TypeError("'relation_formula' should be of type 'BaseRelationFormula'")
+        relation_formula = RelationFormulaGeometricMean()
         relation_formula.bounds[distribution_beginning] = self.a, self.beginning
         relation_formula.bounds[distribution_ending] = self.ending, self.b
         self._formula_creator = FormulaCreator(relation_formula)
@@ -75,21 +76,39 @@ class TemporalEvent(list, TimeInterval):
                 self._dict[time_step] = self.membership_function(time_step)
         return self._dict
 
-    def plot(self, show_distributions=False):
-        import matplotlib.pyplot as plt
-        plt.plot(self.to_datetime_list(), self.membership_function())
+    # def plot(self, show_distributions=False):
+    #     import matplotlib.pyplot as plt
+    #     plt.plot(self.to_datetime_list(), self.membership_function())
+    #     if show_distributions:
+    #         if hasattr(self.distribution_beginning, 'plot'):
+    #             self.distribution_beginning.plot()
+    #         else:
+    #             plt.plot(self.interval_beginning.to_datetime_list(),
+    #                      self.distribution_beginning.pdf(self.interval_beginning))
+    #         if hasattr(self.distribution_ending, 'plot'):
+    #             self.distribution_ending.plot()
+    #         else:
+    #             plt.plot(self.interval_ending.to_datetime_list(),
+    #                      self.distribution_ending.pdf(self.interval_ending))
+    #     return plt
+
+    def plot(self, plt=None, show_distributions=False):
+        if plt is None:
+            import matplotlib.pyplot as plt
+        plt.plot(self.to_float_list(), self.membership_function())
         if show_distributions:
             if hasattr(self.distribution_beginning, 'plot'):
                 self.distribution_beginning.plot()
             else:
-                plt.plot(self.interval_beginning.to_datetime_list(),
+                plt.plot(self.interval_beginning.to_float_list(),
                          self.distribution_beginning.pdf(self.interval_beginning))
             if hasattr(self.distribution_ending, 'plot'):
                 self.distribution_ending.plot()
             else:
-                plt.plot(self.interval_ending.to_datetime_list(),
+                plt.plot(self.interval_ending.to_float_list(),
                          self.distribution_ending.pdf(self.interval_ending))
         return plt
+
 
     @property
     def distribution_beginning(self):
@@ -176,11 +195,11 @@ if __name__ == '__main__':
     #plt.show()
 
     events = [
-        TemporalEvent(norm(loc=10, scale=2), norm(loc=30, scale=2), 100),
-        TemporalEvent(norm(loc=5, scale=2), norm(loc=15, scale=4), 100),
+        # TemporalEvent(norm(loc=10, scale=2), norm(loc=30, scale=2), 100),
+        # TemporalEvent(norm(loc=5, scale=2), norm(loc=15, scale=4), 100),
 
-        #TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-        #TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
+        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {3.5: 1, 4.5: 0.9, 8: 0.6, 9: 0.1, 10: 0})
     ]
 
     print type(events[0])

@@ -41,9 +41,10 @@ class SchemeSmob
 
 		enum {
 			COG_UUID = 1, // unsigned long int
-			COG_HANDLE,   // msart pointer
+			COG_HANDLE,   // smart pointer
 			COG_TV,       // truth values
 			COG_AV,       // attention values
+			COG_AS,       // atom spaces
 			COG_EXTEND    // callbacks into C++ code.
 		};
 
@@ -83,7 +84,6 @@ class SchemeSmob
 		static SCM ss_atom(SCM);
 		static SCM ss_handle(SCM);
 
-
 		// return the int of Handle::UNDEFINED
 		static SCM ss_undefined_handle(void);
 
@@ -121,11 +121,23 @@ class SchemeSmob
 		static SCM take_tv(TruthValue *);
 		static SCM ss_tv_get_value(SCM);
 
+		// Atom Spaces
+		static SCM ss_new_as(void);
+		static SCM ss_as_p(SCM);
+		static SCM take_as(AtomSpace *);
+		static SCM make_as(AtomSpace *);
+		static AtomSpace* ss_to_atomspace(SCM);
+
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
 		static SCM ss_av_p(SCM);
 		static SCM take_av(AttentionValue *);
 		static SCM ss_av_get_value(SCM);
+
+		// AttentionalFocus and AttentionalFocus Boundary
+		static SCM ss_af_boundary(void);
+		static SCM ss_set_af_boundary(SCM);
+		static SCM ss_af(void);
 
 		// Callback into misc C++ code.
 		static SCM ss_ad_hoc(SCM, SCM);
@@ -152,20 +164,28 @@ class SchemeSmob
 		static int verify_int (SCM, const char *, int pos = 1,
 		                       const char *msg = "expecting integer");
 
-		static AtomSpace* atomspace;
+		static SCM atomspace_symbol;
+		static void ss_set_env_as(AtomSpace *);
 		static void init(AtomSpace *as);
 		SchemeSmob(AtomSpace *as);
 	public:
+		// This alows other users to get the atomspace that scheme is
+		// using.
+		static AtomSpace* ss_get_env_as(const char *);
+
 		// Helper functions XXX why are these public ??
-		// XXX Becuase the embodiment code uses them :-(
+		// XXX Because the embodiment code uses them :-(
 		// The embodiment code should be refactored to not use these.
 		static SCM handle_to_scm(Handle);
+		static Handle scm_to_handle(SCM);
+	private:
 		static SCM uuid_to_scm(UUID);
 		static Handle scm_uuid_to_handle(SCM);
-		static Handle scm_to_handle(SCM);
+	public:
 
 		// Utility printing functions
 		static std::string to_string(Handle);
+		static std::string as_to_string(const AtomSpace *);
 		static std::string av_to_string(const AttentionValue *);
 		static std::string tv_to_string(const TruthValue *);
 };

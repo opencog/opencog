@@ -57,7 +57,7 @@ public:
      * Indicates if this procedure is an Pet action schemata.
      * If so, its execute method always return the ActionPlanId for the action sent to Proxy
      */
-    virtual bool isPetAction() const {
+    virtual bool isAvatarAction() const {
         return false;
     }
 

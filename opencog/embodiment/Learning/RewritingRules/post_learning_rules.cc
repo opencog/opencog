@@ -26,7 +26,7 @@
 
 namespace opencog { namespace reduct {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 typedef combo_tree::sibling_iterator sib_it;
 typedef combo_tree::iterator pre_it;

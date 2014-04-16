@@ -43,8 +43,8 @@ namespace opencog {
 
 //! choose uniformly randomly an element of the set s
 /// \warning it is assumed that s is non-empty
-template<typename T>
-T randset(const std::set<T>& s, RandGen& rng = randGen())
+template<typename T, typename C>
+const T& randset(const std::set<T, C>& s, RandGen& rng = randGen())
 {
     OC_ASSERT(!s.empty());
     return *std::next(s.begin(), rng.randint(s.size()));

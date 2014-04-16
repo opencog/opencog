@@ -1,5 +1,5 @@
 /*
- * tests/query/EinstainUTest.cxxtest
+ * tests/query/EinsteinUTest.cxxtest
  *
  * Copyright (C) 2009, 2013 Linas Vepstas <linasvepstas@gmail.com>
  * All Rights Reserved
@@ -20,6 +20,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/guile/load-file.h>
 #include <opencog/guile/SchemeEval.h>
 #include <opencog/guile/SchemeSmob.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
@@ -34,7 +35,8 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 {
 	private:
 		PatternMatch pm;
-		AtomSpace *as;
+		AtomSpace* as;
+		SchemeEval* eval;
 		static const char* paths[];
 
 	public:
@@ -59,13 +61,13 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 			pm.set_atomspace(as);
+			eval = new SchemeEval();
 
 			// Load the required data
 			config().set("MODULES",
 				"opencog/nlp/types/libnlp-types.so, "
-				"opencog/spacetime/libspacetime.so, "
-				"opencog/dynamics/attention/libattention.so, "
-				"opencog/embodiment/AtomSpaceExtensions/libAtomSpaceExtensions.so");
+				"opencog/dynamics/attention/libattention-types.so, "
+				"opencog/embodiment/AtomSpaceExtensions/libembodiment-types.so");
 
 			cogserver().loadModules(paths);
 
@@ -74,6 +76,8 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 
 		~EinsteinPuzzle()
 		{
+			delete eval;
+
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
@@ -116,7 +120,7 @@ void EinsteinPuzzle::setUp(void)
 
 	// Blindly search a bunch of paths hoping to find the files
 	// in one of them ...
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 }
 
 #define getlink(hand,pos) as->getOutgoing(hand,pos)
@@ -132,10 +136,10 @@ void EinsteinPuzzle::test_trivial_deduct(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	Handle puzzle_rules = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
+	Handle puzzle_rules = eval->apply("is-same-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != puzzle_rules);
@@ -163,12 +167,12 @@ void EinsteinPuzzle::test_trivial_keep(void)
 		"tests/query/deduct-trivial.scm, "
 		"tests/query/deduct-rules.scm, "
 		"tests/query/deduct-keep.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
-	Handle print_rule = SchemeEval::instance().apply("print-ownership", Handle::UNDEFINED);
+	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
+	Handle print_rule = eval->apply("print-ownership", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);
@@ -210,15 +214,15 @@ void EinsteinPuzzle::test_full(void)
 	config().set("SCM_PRELOAD",
 		"tests/query/deduct-einstein.scm, "
 		"tests/query/deduct-rules.scm");
-	cogserver().loadSCMModules(paths);
+	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	Handle same_rule = SchemeEval::instance().apply("is-same-rule", Handle::UNDEFINED);
-	Handle trans_rule = SchemeEval::instance().apply("transitive-rule", Handle::UNDEFINED);
-	Handle faddr_rule = SchemeEval::instance().apply("first-addr-rule", Handle::UNDEFINED);
-	Handle neigh_rule = SchemeEval::instance().apply("neighbor-rule", Handle::UNDEFINED);
-	Handle nesym_rule = SchemeEval::instance().apply("neighbor-symmetry-rule", Handle::UNDEFINED);
-	Handle solun_rule = SchemeEval::instance().apply("found-solution-rule", Handle::UNDEFINED);
+	Handle same_rule = eval->apply("is-same-rule", Handle::UNDEFINED);
+	Handle trans_rule = eval->apply("transitive-rule", Handle::UNDEFINED);
+	Handle faddr_rule = eval->apply("first-addr-rule", Handle::UNDEFINED);
+	Handle neigh_rule = eval->apply("neighbor-rule", Handle::UNDEFINED);
+	Handle nesym_rule = eval->apply("neighbor-symmetry-rule", Handle::UNDEFINED);
+	Handle solun_rule = eval->apply("found-solution-rule", Handle::UNDEFINED);
 
 	// Make sure the scheme file actually loaded!
 	TSM_ASSERT("Failed to load test data", Handle::UNDEFINED != same_rule);

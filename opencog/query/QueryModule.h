@@ -8,16 +8,15 @@
 #ifndef _OPENCOG_QUERY_MODULE_H
 #define _OPENCOG_QUERY_MODULE_H
 
-#include <opencog/atomspace/Handle.h>
 #include <opencog/server/Module.h>
+#include <opencog/query/PatternSCM.h>
 
 namespace opencog {
 
 class QueryModule : public Module
 {
 	private:
-		Handle do_bindlink(Handle);
-		Handle do_crisp_bindlink(Handle);
+		PatternSCM* pat;
 	public:
 		QueryModule(CogServer&);
 		virtual ~QueryModule();

@@ -4,7 +4,9 @@ from scipy.stats.distributions import uniform_gen
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
-from utility.geometric import FunctionComposite, FunctionLinear, FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, FUNCTION_ONE
+from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, almost_equals
+from utility.numeric import EPSILON
+
 
 __author__ = 'keyvan'
 
@@ -57,11 +59,44 @@ class BaseRelationFormula(object):
         self.bounds[dist] = bounds
         return bounds
 
+    def before_point(self, point_1_value, point_2_value):
+        return 0
+
+    def same_point(self, point_1_value, point_2_value):
+        return 1 - fabs(self.before_point(point_1_value,
+                                          point_2_value) - self.after_point(point_1_value, point_2_value))
+
+    def after_point(self, point_1_value, point_2_value):
+        return self.before_point(point_2_value, point_1_value)
+
+    def before_integral_bounds(self, dist_1, dist_2):
+        return calculate_bounds_of_probability_distribution(dist_1)
+
+    def same_integral_bounds(self, dist_1, dist_2):
+        dist_1_a, dist_1_b = calculate_bounds_of_probability_distribution(dist_1)
+        dist_2_a, dist_2_b = calculate_bounds_of_probability_distribution(dist_2)
+        return max(dist_1_a, dist_2_a), min(dist_1_b, dist_2_b)
+
+    def after_integral_bounds(self, dist_1, dist_2):
+        return calculate_bounds_of_probability_distribution(dist_2)
+
+    def before(self, dist_1, dist_2):
+        return integral(lambda x: self.before_point(dist_1.pdf(x), dist_2.pdf(x)),
+                        *self.before_integral_bounds(dist_1, dist_2))
+
+    def same(self, dist_1, dist_2):
+        return integral(lambda x: self.same_point(dist_1.pdf(x), dist_2.pdf(x)),
+                        *self.same_integral_bounds(dist_1, dist_2))
+
+    def after(self, dist_1, dist_2):
+        return integral(lambda x: self.after_point(dist_1.pdf(x), dist_2.pdf(x)),
+                        *self.after_integral_bounds(dist_1, dist_2))
+
     def compare(self, dist_1, dist_2):
         """
         returns before, same and after
         """
-        return 0.0, 0.0, 0.0
+        return self.before(dist_1, dist_2), self.same(dist_1, dist_2), self.after(dist_1, dist_2)
 
 
 class FormulaCreator(object):
@@ -94,46 +129,111 @@ class FormulaCreator(object):
 
         result = TemporalRelation()
 
-        result['p'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      before[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['p'] = min(before[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      before[ending_a, beginning_b] , before[ending_a, ending_b])
 
-        result['m'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      same[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['m'] = min(before[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      same[ending_a, beginning_b] , before[ending_a, ending_b])
 
-        result['o'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['o'] = min(before[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , before[ending_a, ending_b])
 
-        result['F'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['F'] = min(before[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , same[ending_a, ending_b])
 
-        result['D'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['D'] = min(before[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , after[ending_a, ending_b])
 
-        result['s'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['s'] = min(same[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , before[ending_a, ending_b])
 
-        result['e'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['e'] = min(same[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , same[ending_a, ending_b])
 
-        result['S'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['S'] = min(same[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , after[ending_a, ending_b])
 
-        result['d'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['d'] = min(after[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , before[ending_a, ending_b])
 
-        result['f'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['f'] = min(after[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , same[ending_a, ending_b])
 
-        result['O'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['O'] = min(after[beginning_a, beginning_b] , before[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , after[ending_a, ending_b])
 
-        result['M'] = after[beginning_a, beginning_b] * same[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['M'] = min(after[beginning_a, beginning_b] , same[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , after[ending_a, ending_b])
 
-        result['P'] = after[beginning_a, beginning_b] * after[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['P'] = min(after[beginning_a, beginning_b] , after[beginning_a, ending_b] ,
+                      after[ending_a, beginning_b] , after[ending_a, ending_b])
+
+
 
         return result
+
+
+class RelationFormulaGM(BaseRelationFormula):
+    def before_point(self, point_1_value, point_2_value):
+        return point_1_value ** 2
+
+    def same_point(self, point_1_value, point_2_value):
+        return sqrt(point_1_value * point_2_value)
+
+    def before(self, dist_1, dist_2):
+        return integral(lambda x: self.before_point(dist_1.pdf(x), 0) - self.same_point(dist_1.pdf(x), dist_2.pdf(x)),
+                        *self.before_integral_bounds(dist_1, dist_2))
+
+    def after(self, dist_1, dist_2):
+        return self.before(dist_2, dist_1)
+
+
+class RelationFormulaSimple(BaseRelationFormula):
+    def before(self, dist_1, dist_2):
+        a, b = self.bounds_of(dist_1)
+        # Cancel pdf's error
+        a += EPSILON
+        b -= EPSILON
+        interval = TimeInterval(a, b)
+        dictionary_input_output = {}
+        for time_step in interval:
+            dictionary_input_output[time_step] = dist_1.pdf(time_step) * (1 - dist_2.cdf(time_step))
+        function = FunctionPiecewiseLinear(dictionary_input_output, FUNCTION_ZERO)
+        return integral(function, a, b)
+
+    def after(self, dist_1, dist_2):
+        return self.before(dist_2, dist_1)
+
+    # def before(self, dist_1, dist_2):
+    #     dist_1_a, dist_1_b = self.bounds_of(dist_1)
+    #     dist_2_a, dist_2_b = self.bounds_of(dist_2)
+    #     a, b = dist_1_a, dist_2_a
+    #     interval = TimeInterval(a, b, 200)
+    #     dictionary_input_output = {}
+    #     for time_step in interval:
+    #         dictionary_input_output[time_step] = dist_1.pdf(time_step) ** 2
+    #     function = FunctionPiecewiseLinear(dictionary_input_output, FUNCTION_ZERO)
+    #     return integral(function, a, b)
+
+    def same(self, dist_1, dist_2):
+        dist_1_a, dist_1_b = self.bounds_of(dist_1)
+        dist_2_a, dist_2_b = self.bounds_of(dist_2)
+        a, b = max(dist_1_a, dist_2_a), min(dist_1_b, dist_2_b)
+        interval = TimeInterval(a, b)
+        dictionary_input_output = {}
+        for time_step in interval:
+            dictionary_input_output[time_step] = dist_1.pdf(time_step) * dist_2.pdf(time_step)
+        function = FunctionPiecewiseLinear(dictionary_input_output, FUNCTION_ZERO)
+        return integral(function, a, b)
+
+    # def compare(self, dist_1, dist_2):
+    #     same = self.same(dist_1, dist_2)
+    #     non_same = 1 - same
+    #     before = self.before(dist_1, dist_2)
+    #     after = self.before(dist_2, dist_1)
+    #     before = before / (before + after) * non_same
+    #     after = after / (before + after) * non_same
+    #     return before, same, after
 
 
 class RelationFormulaConvolution(BaseRelationFormula):
@@ -151,7 +251,8 @@ class RelationFormulaConvolution(BaseRelationFormula):
 
         p = min(1 / length_1, 1 / length_2)
 
-        result = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0}, FUNCTION_ZERO)
+        result = FunctionPiecewiseLinear({trapezium_0: 0, trapezium_1: p, trapezium_2: p, trapezium_3: 0},
+                                         FUNCTION_ZERO)
         result.is_normalised = True
         return result
 
@@ -195,9 +296,10 @@ class RelationFormulaConvolution(BaseRelationFormula):
         a_1, b_1 = self.bounds[dist_1]
         a_2, b_2 = self.bounds[dist_2]
         same_bound = fabs(max(a_1, a_2) - min(b_1, b_2))
-        before = integral(convolution, NEGATIVE_INFINITY, -same_bound)
+        same_bound = 0
+        before = sqrt(integral(convolution, NEGATIVE_INFINITY, -same_bound))
         same = integral(convolution, -same_bound, same_bound)
-        after = integral(convolution, same_bound, POSITIVE_INFINITY)
+        after = sqrt(integral(convolution, same_bound, POSITIVE_INFINITY))
 
         return before, same, after
 
@@ -224,15 +326,16 @@ class RelationFormulaGeometricMean(BaseRelationFormula):
         non_same_portion = 1.0 - same
 
         portion_after, portion_before = 1.0, 0.0
-        if distance == 0:
+        if almost_equals(distance, 0):
             if delta < 0:
                 portion_after, portion_before = 0.0, 1.0
         else:
             dist_1_standardized_pdf = lambda x: dist_1.pdf(dist_1_standard_deviation * x + dist_1_mean)
             dist_2_standardized_pdf = lambda x: dist_2.pdf(dist_2_standard_deviation * x + dist_2_mean)
+
             geometric_mean = lambda t: sqrt(dist_1_standardized_pdf(t) * dist_2_standardized_pdf(t))
             geometric_mean_scaled = lambda p: geometric_mean(p / distance)
-            geometric_mean_scaled_length = min(self.duration_of(dist_1), self.duration_of(dist_2))
+            geometric_mean_scaled_length = max(self.duration_of(dist_1), self.duration_of(dist_2))
 
             dictionary_input_output = {}
             for time_step in TimeInterval(-geometric_mean_scaled_length / 2.0, geometric_mean_scaled_length / 2.0):
@@ -241,6 +344,9 @@ class RelationFormulaGeometricMean(BaseRelationFormula):
             geometric_mean_scaled = FunctionPiecewiseLinear(dictionary_input_output, function_undefined=FUNCTION_ZERO)
             portion_after = integral(geometric_mean_scaled, NEGATIVE_INFINITY, delta)
             portion_before = integral(geometric_mean_scaled, delta, POSITIVE_INFINITY)
+
+        if (portion_after + portion_before) == 0:
+            pass
 
         after = portion_after / (portion_after + portion_before) * non_same_portion
         return 1.0 - same - after, same, after
@@ -254,6 +360,11 @@ if __name__ == '__main__':
 
     figure_number = 1
     for event_1, event_2 in [
+        (
+            TemporalEvent(uniform(loc=3, scale=2), uniform(loc=7, scale=9)),
+            TemporalEvent(uniform(loc=0, scale=10), uniform(loc=13, scale=2))
+        ),
+        #
         # (
         #     TemporalEvent(uniform(loc=0, scale=2), uniform(loc=3, scale=2)),
         #     TemporalEvent(uniform(loc=3, scale=2), uniform(loc=6, scale=2))
@@ -278,57 +389,58 @@ if __name__ == '__main__':
         #     TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4)),
         #     TemporalEvent(uniform(loc=0, scale=11), uniform(loc=13, scale=4))
         # ),
-
+        #
         # (
         #     TemporalEvent(uniform(loc=1, scale=8), uniform(loc=6, scale=8)),
         #     TemporalEvent(uniform(loc=0, scale=22), uniform(loc=13, scale=8))
         # ),
-
+        #
         # (
         #     TemporalEvent(uniform(loc=2, scale=2), uniform(loc=7, scale=2)),
         #     TemporalEvent(uniform(loc=1, scale=4), uniform(loc=6, scale=4))
         # ),
         #
         # (
-        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=4, scale=2)),
-        #    TemporalEvent(uniform(loc=6, scale=2), uniform(loc=9, scale=2))
+        #     TemporalEvent(uniform(loc=1, scale=2), uniform(loc=4, scale=2)),
+        #     TemporalEvent(uniform(loc=6, scale=2), uniform(loc=9, scale=2))
         # ),
         #
         # (
-        #    TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
-        #    TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
+        #     TemporalEvent(uniform(loc=0, scale=3), uniform(loc=15, scale=2)),
+        #     TemporalEvent(uniform(loc=5, scale=2), uniform(loc=9, scale=3))
         # ),
         #
         # (
-        #    TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
-        #    TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
+        #     TemporalEvent(uniform(loc=5, scale=3), uniform(loc=9, scale=2)),
+        #     TemporalEvent(uniform(loc=1, scale=2), uniform(loc=15, scale=3))
         # ),
         #
         # (
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
+        #     TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2)),
+        #     TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2))
         # ),
         #
         # (
-        #    TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
-        #    TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
+        #     TemporalEvent(uniform(loc=15, scale=2), uniform(loc=25, scale=2)),
+        #     TemporalEvent(uniform(loc=0, scale=2), uniform(loc=10, scale=2))
         # ),
         #
-        (
-           TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
-           TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
-        ),
+        # (
+        #     TemporalEvent(norm(loc=1, scale=4.5), expon(loc=30, scale=2)),
+        #     TemporalEvent(norm(loc=25, scale=4.5), expon(loc=60, scale=2))
+        # ),
+        #
+        # (
+        #     TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
+        #     TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
+        # ),
+        #
+        # (
+        #     TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
+        #     TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
+        #                                  {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
+        # ),
 
-        (
-           TemporalEvent(expon(loc=1, scale=4.5), norm(loc=30, scale=2)),
-           TemporalEvent(expon(loc=25, scale=4.5), norm(loc=60, scale=2))
-        ),
-
-        (
-           TemporalEventPiecewiseLinear({1: 0, 2: 0.1, 3: 0.3, 4: 0.7, 5: 1}, {6: 1, 7: 0.9, 8: 0.6, 9: 0.1, 10: 0}),
-           TemporalEventPiecewiseLinear({7.5: 0, 8.5: 0.1, 9.5: 0.3, 10.5: 0.7, 11.5: 1},
-                                        {13: 1, 14.5: 0.9, 15.3: 0.6, 17: 0.1, 20: 0})
-        ),
     ]:
 
         temporal_relations = event_1 * event_2
@@ -341,7 +453,7 @@ if __name__ == '__main__':
 
         figure_number += 1
 
-        event_1.plot().ylim(ymin=-0.1, ymax=1.1)
-        event_2.plot().figure()
+        event_1.plot(show_distributions=True).ylim(ymin=-0.1, ymax=1.1)
+        event_2.plot(show_distributions=True).figure()
 
     plt.show()

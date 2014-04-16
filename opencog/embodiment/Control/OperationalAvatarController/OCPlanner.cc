@@ -25,7 +25,7 @@
 #include <opencog/util/oc_assert.h>
 #include <opencog/util/macros.h>
 #include "Inquery.h"
-#include <opencog/embodiment/Control/PerceptionActionInterface/PetAction.h>
+#include <opencog/embodiment/Control/PerceptionActionInterface/AvatarAction.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/ActionType.h>
 #include <opencog/embodiment/Control/PerceptionActionInterface/PVPXmlConstants.h>
 #include <iterator>
@@ -101,7 +101,7 @@ StateNode* RuleNode::getDeepestBackwardStateNode() const
     return lastedStateNode;
 }
 
-bool OCPlanner::isActionChangeSPaceMap(PetAction* action)
+bool OCPlanner::isActionChangeSPaceMap(AvatarAction* action)
 {
     ActionTypeCode type = action->getType().getCode();
 
@@ -1587,7 +1587,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         // generate the action series according to the planning network we have constructed in this planning process
-        PetAction* originalAction = r->originalRule->action;
+        AvatarAction* originalAction = r->originalRule->action;
         if (originalAction->getType().getCode() == DO_NOTHING_CODE)
             continue;
 
@@ -1599,7 +1599,7 @@ ActionPlanID OCPlanner::doPlanning(const vector<State*>& goal,const vector<State
         }
 
         // ground the parameter according to the current bindings
-        PetAction action(originalAction->getType());
+        AvatarAction action(originalAction->getType());
         list<ActionParameter>::const_iterator paraIt;
         const list<ActionParameter>& params = originalAction->getParameters();
 
@@ -3696,7 +3696,7 @@ void OCPlanner::outputRuleNodeStep(RuleNode* ruleNode, bool outputForwardStateNo
 void OCPlanner::loadTestRulesFromCodes()
 {
     // define a special action: do nothing
-    PetAction* doNothingAction = new PetAction(ActionType::DO_NOTHING());
+    AvatarAction* doNothingAction = new AvatarAction(ActionType::DO_NOTHING());
 
 
     //----------------------------Begin Rule: eat food to achieve energy demanding goal -------------------------------------------
@@ -3729,7 +3729,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* edibleState = new State("is_edible",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,SV_TRUE, edibleStateOwnerList);
 
     // action: eat
-    PetAction* eatAction = new PetAction(ActionType::EAT());
+    AvatarAction* eatAction = new AvatarAction(ActionType::EAT());
     eatAction->addParameter(ActionParameter("target",
                                         ActionParamType::ENTITY(),
                                         var_food));
@@ -3786,7 +3786,7 @@ void OCPlanner::loadTestRulesFromCodes()
     // todo: precondition 4: The object is not be held by other agent currently
 
     // action: pick up
-    PetAction* pickupAction = new PetAction(ActionType::GRAB());
+    AvatarAction* pickupAction = new AvatarAction(ActionType::GRAB());
     pickupAction->addParameter(ActionParameter("target",
                                         ActionParamType::ENTITY(),
                                         varFood));
@@ -3823,7 +3823,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* existPathState = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList, true, &Inquery::inqueryExistPath);
 
     // action: move to object
-    PetAction* moveToObjectAction = new PetAction(ActionType::MOVE_TO_OBJ());
+    AvatarAction* moveToObjectAction = new AvatarAction(ActionType::MOVE_TO_OBJ());
     moveToObjectAction->addParameter(ActionParameter("target",
                                         ActionParamType::ENTITY(),
                                         boost::get<Entity>(var_obj)));
@@ -3865,7 +3865,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* existPathState2 = new State("existPath",ActionParamType::BOOLEAN(),STATE_EQUAL_TO ,"true", existPathStateOwnerList2, true, &Inquery::inqueryExistPath);
 
     // action: walk to an position
-    PetAction* walkAction = new PetAction(ActionType::WALK());
+    AvatarAction* walkAction = new AvatarAction(ActionType::WALK());
     walkAction->addParameter(ActionParameter("target",
                                             ActionParamType::VECTOR(),
                                             var_pos));
@@ -3914,7 +3914,7 @@ void OCPlanner::loadTestRulesFromCodes()
     State* adjacentState0 = new State("is_adjacent",ActionParamType::BOOLEAN(),STATE_EQUAL_TO , "true", adjacentStateOwnerList0, true, &Inquery::inqueryIsAdjacent);
 
     // action: walk to the nearby_pos
-    PetAction* walkAction0 = new PetAction(ActionType::WALK());
+    AvatarAction* walkAction0 = new AvatarAction(ActionType::WALK());
     walkAction0->addParameter(ActionParameter("target",
                                             ActionParamType::VECTOR(),
                                             nearby_pos));
@@ -3995,7 +3995,7 @@ void OCPlanner::loadTestRulesFromCodes()
                                             IsTouchingStateOwnerList, true, &Inquery::inqueryIsTouching);
 
     // action: build an block at an desired position
-    PetAction* buildBlockAction = new PetAction(ActionType::BUILD_BLOCK());
+    AvatarAction* buildBlockAction = new AvatarAction(ActionType::BUILD_BLOCK());
     buildBlockAction->addParameter(ActionParameter("position",
                                             ActionParamType::VECTOR(),
                                             var_pos));

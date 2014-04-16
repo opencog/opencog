@@ -10,7 +10,7 @@ Source code overview:
 atomspace       -- Defines atoms, nodes, links, truth values, etc. 
                    Everything else depends on this.
 
-persist         -- Methods for communcation between servers, also,
+persist         -- Methods for communication between servers, also,
                    saving/restoring the atomspace to disk, database, etc.
 
 query           -- Pattern matching, evaluation for the atomspace.

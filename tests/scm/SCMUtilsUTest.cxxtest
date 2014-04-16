@@ -1,0 +1,162 @@
+/*
+ * tests/scm/SCMUtilsUTest.cxxtest
+ *
+ * Copyright (C) 2009, 2011, 2014 Linas Vepstas <linasvepstas@gmail.com>
+ * All Rights Reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <opencog/guile/SchemeEval.h>
+#include <opencog/guile/SchemeSmob.h>
+#include <opencog/server/CogServer.h>
+#include <opencog/util/Config.h>
+#include <opencog/util/Logger.h>
+
+using namespace opencog;
+
+class SCMUtilsUTest :  public CxxTest::TestSuite
+{
+	private:
+		SchemeEval* evaluator;
+		Handle disorder;
+		Handle disordered;
+		Handle disor_more;
+
+	public:
+
+		SCMUtilsUTest(void)
+		{
+			try
+			{
+				config().load("opencog-test.conf");
+			}
+			catch (RuntimeException &e)
+			{
+				std::cerr << e.getMessage() << std::endl;
+			}
+			logger().setFilename(config()["LOG_FILE"]);
+			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
+			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+
+			// logger().setLevel(Logger::DEBUG);
+			// logger().setPrintToStdoutFlag(true);
+		}
+
+		~SCMUtilsUTest()
+		{
+			// erase the log file if no assertions failed
+			if (!CxxTest::TestTracker::tracker().suiteFailed())
+				std::remove(logger().getFilename().c_str());
+		}
+
+		void setUp(void);
+		void tearDown(void);
+
+		void test_utils(void);
+};
+
+/*
+ * This function sets up an implication link, and some data.
+ */
+#define an as->addNode
+#define al as->addLink
+void SCMUtilsUTest::setUp(void)
+{
+	server(CogServer::createInstance);
+	evaluator = new SchemeEval();
+
+	// Load the required data
+	config().set("MODULES",
+		"opencog/nlp/types/libnlp-types.so");
+
+	config().set("SCM_PRELOAD",
+		"opencog/atomspace/core_types.scm, "
+		"opencog/nlp/types/nlp_types.scm, "
+		"opencog/scm/utilities.scm, "
+		"tests/scm/utils-test.scm");
+
+	// Blindly search a bunch of paths hoping to find the files
+	// in one of them ...
+	const char * paths[] =
+	{
+		"./",
+		"../",
+		"../../",
+		"../../../",
+		NULL
+	};
+	cogserver().loadModules(paths);
+	cogserver().loadSCMModules(paths);
+
+}
+
+void SCMUtilsUTest::tearDown(void)
+{
+	delete evaluator;
+	evaluator = NULL;
+}
+
+#define CHKERR \
+	TSM_ASSERT("Caught scm error during eval", \
+		(false == evaluator->eval_error()));
+/*
+ * Test assorted functions from opencog/scm/utilities.scm
+ */
+
+void SCMUtilsUTest::test_utils(void)
+{
+	logger().debug("BEGIN TEST: %s", __FUNCTION__);
+
+	// Test cog-atom-incr ---------------------------------
+	Handle counter = evaluator->eval_h("counter");
+	CHKERR;
+
+	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
+	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->getType());
+
+	evaluator->eval("(test-incr-cnt)");
+	CHKERR;
+	evaluator->eval("(test-incr-cnt)");
+	CHKERR;
+	evaluator->eval("(test-incr-cnt)");
+	CHKERR;
+	TruthValuePtr tv = counter->getTruthValue();
+
+	TSM_ASSERT_EQUALS("Wrong truth value type", COUNT_TRUTH_VALUE, tv->getType());
+	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
+
+	// Test cog-get-partner ------------------------------
+	Handle recount = evaluator->eval_h("recount");
+	CHKERR;
+	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
+
+	// Test cog-pred-get-partner ------------------------------
+	Handle rrcnt = evaluator->eval_h("rrcnt");
+	CHKERR;
+	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
+
+	// Test cog-get-link ------------------------------
+	Handle ref = evaluator->eval_h("ref");
+	CHKERR;
+	Handle wref = evaluator->eval_h("wref");
+	CHKERR;
+	TSM_ASSERT("Error setting up for cog-get-link", Handle::UNDEFINED != ref);
+	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);
+
+	logger().debug("END TEST: %s", __FUNCTION__);
+}
+

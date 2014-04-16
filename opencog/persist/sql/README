@@ -30,8 +30,24 @@ Missing features/ToDo items
 
 Performance status
 ------------------
-AtomTable load time is more than 3x faster than loading from NMXml;
-Also, loading from SQL reduces cogServer memory usage by 3x.
+In March 2014, 10.3M atoms were loaded in about 20 minutes wall-clock
+time, 10 minutes of opencog-server CPU time.  This works out to about
+500K atoms/minute, or 9K atoms/second.  The reuslting cogserver required
+about 10GBytes of RAM, which works out to about 1KByte/atom average.
+The loaded hypergraphs were all EvaluationLinks, viz:
+
+   EvaluationLink  (w/non-trivial TV)
+      SomeNode
+      ListLink
+         WordNode  (w/ non-triovial TV)
+         WordNode  (w/ non-trivial TV)
+
+
+The above measurements were made on a busy server that was doing many
+other CPU & RAM intensive things; there was no performance tuning of
+the postgress server.  A section below explains how to performance tune
+the postgres server for better results.
+
 
 
 Design Goals

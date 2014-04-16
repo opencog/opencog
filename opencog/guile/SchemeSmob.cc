@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) for opencog -- core functions.
  *
- * Copyright (c) 2008 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008, 2013, 2104 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -45,13 +45,12 @@ using namespace opencog;
  * XXX TODO:
  * The cog_misc_tag should be replaced by a tag-per-class (i.e. we
  * should have a separate tag for handles, tv's, etc.) This would
- * simplify that code, and probably improive performance just a bit.
+ * simplify that code, and probably improve performance just a bit.
  */
 
 scm_t_bits SchemeSmob::cog_uuid_tag;
 scm_t_bits SchemeSmob::cog_misc_tag;
 bool SchemeSmob::is_inited = false;
-AtomSpace* SchemeSmob::atomspace = NULL;
 
 void SchemeSmob::init(AtomSpace *as)
 {
@@ -62,7 +61,7 @@ void SchemeSmob::init(AtomSpace *as)
 		is_inited = true;
 		init_smob_type();
 		register_procs();
-		atomspace = as;
+		ss_set_env_as(as);
 	}
 }
 
@@ -131,14 +130,23 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 		default: // Should never happen.
 		case 0:  // Should never happen.
 			return SCM_BOOL_F;
-      case COG_AV:
+		case COG_AS:
+		{
+			AtomSpace* as = (AtomSpace *) SCM_SMOB_DATA(a);
+			AtomSpace* bs = (AtomSpace *) SCM_SMOB_DATA(b);
+			/* Just a simple pointer comparison */
+			if (as == bs) return SCM_BOOL_T;
+			return SCM_BOOL_F;
+		}
+		case COG_AV:
 		{
 			AttentionValue* av = (AttentionValue *) SCM_SMOB_DATA(a);
 			AttentionValue* bv = (AttentionValue *) SCM_SMOB_DATA(b);
+			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_EXTEND:
+		case COG_EXTEND:
 		{
 			// We compare pointers here, only.
 			PrimitiveEnviron* av = (PrimitiveEnviron *) SCM_SMOB_DATA(a);
@@ -153,10 +161,11 @@ SCM SchemeSmob::equalp_misc(SCM a, SCM b)
 			if (ha == hb) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
-      case COG_TV:
+		case COG_TV:
 		{
 			TruthValue* av = (TruthValue *) SCM_SMOB_DATA(a);
 			TruthValue* bv = (TruthValue *) SCM_SMOB_DATA(b);
+			if (av == bv) return SCM_BOOL_T;
 			if (*av == *bv) return SCM_BOOL_T;
 			return SCM_BOOL_F;
 		}
@@ -186,13 +195,13 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-node?",             1, 0, 1, C(ss_node_p));
 	scm_c_define_gsubr("cog-link?",             1, 0, 1, C(ss_link_p));
 
-	// property setters
+	// property setters on atoms
 	scm_c_define_gsubr("cog-set-av!",           2, 0, 0, C(ss_set_av));
 	scm_c_define_gsubr("cog-set-tv!",           2, 0, 0, C(ss_set_tv));
 	scm_c_define_gsubr("cog-inc-vlti!",         1, 0, 0, C(ss_inc_vlti));
 	scm_c_define_gsubr("cog-dec-vlti!",         1, 0, 0, C(ss_dec_vlti));
 
-	// property getters
+	// property getters on atoms
 	scm_c_define_gsubr("cog-name",              1, 0, 0, C(ss_name));
 	scm_c_define_gsubr("cog-type",              1, 0, 0, C(ss_type));
 	scm_c_define_gsubr("cog-arity",             1, 0, 0, C(ss_arity));
@@ -211,10 +220,19 @@ void SchemeSmob::register_procs(void)
 	scm_c_define_gsubr("cog-itv?",              1, 0, 0, C(ss_itv_p));
 	scm_c_define_gsubr("cog-tv->alist",         1, 0, 0, C(ss_tv_get_value));
 
+	// Atom Spaces
+	scm_c_define_gsubr("cog-new-atomspace",     0, 0, 0, C(ss_new_as));
+	scm_c_define_gsubr("cog-atomspace?",        1, 0, 1, C(ss_as_p));
+
 	// Attention values
 	scm_c_define_gsubr("cog-new-av",            3, 0, 0, C(ss_new_av));
 	scm_c_define_gsubr("cog-av?",               1, 0, 0, C(ss_av_p));
 	scm_c_define_gsubr("cog-av->alist",         1, 0, 0, C(ss_av_get_value));
+
+	// AttentionalFocus
+	scm_c_define_gsubr("cog-af-boundary",       0, 0, 0, C(ss_af_boundary));
+	scm_c_define_gsubr("cog-set-af-boundary!",  1, 0, 0, C(ss_set_af_boundary));
+	scm_c_define_gsubr("cog-af",                0, 0, 0, C(ss_af));
 
 	// Atom types
 	scm_c_define_gsubr("cog-get-types",         0, 0, 0, C(ss_get_types));

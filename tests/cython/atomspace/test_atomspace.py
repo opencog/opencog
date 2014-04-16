@@ -201,6 +201,20 @@ class AtomSpaceTest(TestCase):
         result = self.space.get_atoms_by_target_atom(types.Link, h3)
         self.assertTrue(l1 not in result)
 
+    def test_include_incoming_outgoing(self):
+        frog = self.space.add_node(types.ConceptNode, "Frog")
+        thing = self.space.add_node(types.ConceptNode, "Thing")
+        animal = self.space.add_node(types.ConceptNode, "Animal")
+        self.space.add_node(types.ConceptNode, "SeparateThing")
+        self.space.add_link(types.InheritanceLink, [frog, animal])
+        self.space.add_link(types.InheritanceLink, [animal, thing])
+
+        assert len(self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog"))) == 2
+        assert len(self.space.include_incoming(self.space.get_atoms_by_type(types.ConceptNode))) == 6
+        assert len(self.space.include_outgoing(self.space.get_atoms_by_type(types.InheritanceLink))) == 5
+        assert len(self.space.include_outgoing(
+            self.space.include_incoming(self.space.get_atoms_by_name(types.ConceptNode, "Frog")))) == 3
+
     def test_remove(self):
         h1 = self.space.add_node(types.Node, "test1")
         h2 = self.space.add_node(types.ConceptNode, "test2")
@@ -216,8 +230,6 @@ class AtomSpaceTest(TestCase):
         self.assertTrue(h3 in self.space)
 
         l = self.space.add_link(types.SimilarityLink, [h2, h3])
-        self.space.remove(h2, False) # won't remove it unless recursive is True
-        self.assertTrue(h2 in self.space)
         self.space.remove(h2, True) # won't remove it unless recursive is True
         self.assertTrue(h2 not in self.space)
         self.assertTrue(l not in self.space)
@@ -347,21 +359,34 @@ class AtomTest(TestCase):
         a1 = self.space.add_node(types.Node, "test1", tv)
 
         a2 = self.space.add_node(types.Node, "test2")
-        a2.av = { "sti": 10, "lti": 1, "vlti": True }
+        a2.av = {"sti": 10, "lti": 1, "vlti": True}
         a2.tv = TruthValue(0.1, 10)
 
         l = self.space.add_link(types.Link, [a1, a2])
 
         # test string representation
-        self.assertEqual(str(a2), "(Node \"test2\")\n")
-        self.assertEqual(a2.long_string(), 
-                "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346))\n")
-        self.assertEqual(str(l), 
-                "(Link (stv 1.000000 0.000000)\n  (Node \"test1\")\n  (Node \"test2\")\n)\n")
-        self.assertEqual(l.long_string(), 
-                "(Link (av 0 0 0) (stv 1.000000 0.000000)\n" +
-                "  (Node \"test1\" (av 0 0 0) (stv 0.500000 0.111111))\n" +
-                "  (Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346))\n)\n")
+        a1_expected = "(Node \"test1\") ; [{0}]\n".format(str(a1.h.value()))
+        a1_expected_long = \
+            "(Node \"test1\" (av 0 0 0) (stv 0.500000 0.111111)) ; [{0}]\n"\
+            .format(str(a1.h.value()))
+
+        a2_expected = "(Node \"test2\") ; [{0}]\n".format(str(a2.h.value()))
+        a2_expected_long = \
+            "(Node \"test2\" (av 10 1 1) (stv 0.100000 0.012346)) ; [{0}]\n"\
+            .format(str(a2.h.value()))
+
+        l_expected = \
+            "(Link (stv 1.000000 0.000000)\n  {0}  {1}) ; [{2}]\n"\
+            .format(a1_expected, a2_expected, str(l.h.value()))
+        l_expected_long = \
+            "(Link (av 0 0 0) (stv 1.000000 0.000000)\n  {0}  {1}) ; [{2}]\n"\
+            .format(a1_expected_long, a2_expected_long, str(l.h.value()))
+
+        self.assertEqual(str(a2), a2_expected)
+        self.assertEqual(a2.long_string(), a2_expected_long)
+        self.assertEqual(str(l), l_expected)
+        self.assertEqual(l.long_string(), l_expected_long)
+
 
 class TypeTest(TestCase):
 
@@ -383,6 +408,3 @@ class TypeTest(TestCase):
         self.assertEqual(get_type_name(types.Node), "Node")
         self.assertEqual(get_type_name(2231), "")
         self.assertEqual(get_type_name(types.NO_TYPE), "")
-
-
-

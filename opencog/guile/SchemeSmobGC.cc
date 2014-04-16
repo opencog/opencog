@@ -3,7 +3,7 @@
  *
  * Scheme small objects (SMOBS) garbage-collection methods
  *
- * Copyright (c) 2008,2009 Linas Vepstas <linas@linas.org>
+ * Copyright (c) 2008,2009,2014 Linas Vepstas <linas@linas.org>
  */
 
 #ifdef HAVE_GUILE
@@ -24,6 +24,7 @@ SCM SchemeSmob::mark_misc(SCM misc_smob)
 	{
 		case COG_HANDLE: // Nothing to do here ...
 		case COG_TV: // Nothing to do here ...
+		case COG_AS: // Nothing to do here ...
 		case COG_AV: // Nothing to do here ...
 		case COG_EXTEND: // Nothing to do here ...
 			return SCM_BOOL_F;
@@ -58,6 +59,14 @@ size_t SchemeSmob::free_misc(SCM node)
 
 	switch (misctype)
 	{
+		case COG_AS:
+			AtomSpace *as;
+			as = (AtomSpace *) SCM_SMOB_DATA(node);
+			scm_gc_unregister_collectable_memory (as,
+			                  sizeof(*as), "opencog atomspace");
+			delete as;
+			return 0;
+
 		case COG_AV:
 			AttentionValue *av;
 			av = (AttentionValue *) SCM_SMOB_DATA(node);
@@ -106,6 +115,9 @@ std::string SchemeSmob::misc_to_string(SCM node)
 	scm_t_bits misctype = SCM_SMOB_FLAGS(node);
 	switch (misctype)
 	{
+		case COG_AS:
+			return as_to_string((AtomSpace *) SCM_SMOB_DATA(node));
+
 		case COG_AV:
 			return av_to_string((AttentionValue *) SCM_SMOB_DATA(node));
 

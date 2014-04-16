@@ -577,6 +577,8 @@ void metapopulation::resize_metapop()
     // faster than above. I think this is because the erase() above
     // causes the std::set to try to sort the contents, and this
     // ends up costing a lot.  I think... not sure.
+
+    // Get the first score below worst_score (from begin() + min_pool_size)
     iterator it = std::next(begin(), min_pool_size);
     while (it != end()) {
         score_t sc = get_penalized_score(*it);
@@ -652,6 +654,23 @@ pbscored_combo_tree_set metapopulation::get_new_candidates(const metapop_candida
         if (fcnd == end())
             res.insert(cnd);
     }
+
+    // That version runs the insertion in parallel, I don't know what is faster
+    //
+    // mutex insert_cnd_mutex;
+    // typedef boost::unique_lock<mutex> unique_lock;
+
+    // auto insert_new_candidate = [&](metapop_candidates::value_type& cnd) {
+    //     const combo_tree& tr = get_tree(cnd);
+    //     const_iterator fcnd = std::find_if(begin(), end(),
+    //                                        [&](const pbscored_combo_tree& v) {
+    //                                            return tr == get_tree(v); });
+    //     if (fcnd == end()) {
+    //         unique_lock lock(insert_cnd_mutex);
+    //         res.insert(cnd);
+    //     }
+    // };
+
     return res;
 }
 

@@ -53,7 +53,7 @@ cdef class TruthValue:
 
     def __cinit__(self, strength=0.0, count=0.0):
         # By default create a SimpleTruthValue
-        self.cobj = new tv_ptr(new cSimpleTruthValue(strength,count))
+        self.cobj = new tv_ptr(new cSimpleTruthValue(strength, count))
 
     def __dealloc__(self):
         # This deletes the *smart pointer*, not the actual pointer
@@ -93,26 +93,12 @@ cdef class TruthValue:
     def __str__(self):
         return self._ptr().toString().c_str()
 
-# If you change the constant, make sure to replace it in SimpleTruthValue.cc
-def confidence_to_count(conf):
-    KKK = 800.0
-    conf = min(conf, 0.9999999)
-    return KKK * conf / (1.0 - conf)
+    def confidence_to_count(self, float conf):
+        return (<cSimpleTruthValue*>self._ptr()).confidenceToCount(conf)
 
-def count_to_confidence(count):
-    KKK = 800.0
-    return count / (count + KKK)
+    def count_to_confidence(self, float count):
+        return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
 
-cdef class TimeServer:
-    cdef cTimeServer *timeserver
-
-    def __cinit__(self):
-        #self.timeserver = &timeserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
-        pass
 
 # @todo this should be a generator using the yield statement
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
@@ -396,36 +382,34 @@ cdef class AtomSpace:
         self.atomspace.getHandleSet(back_inserter(o_vect),deref(target_h.h),t,subt)
         return convert_handle_seq_to_python_list(o_vect,self)
 
+    @classmethod
+    def include_incoming(cls, atoms):
+        """
+        Returns the conjunction of a set of atoms and their incoming sets.
+
+        Example:
+        self.atomspace.include_incoming(self.atomspace.get_atoms_by_type(types.ConceptNode))
+        """
+        return list(set(atoms +
+                [item for sublist in [atom.incoming for atom in atoms if len(atom.incoming) > 0] for item in sublist]))
+
+    @classmethod
+    def include_outgoing(cls, atoms):
+        """
+        Returns the conjunction of a set of atoms and their outgoing sets.
+        Useful when used in combination with include_incoming.
+
+        Example:
+        self.atomspace.include_outgoing(
+            self.atomspace.include_incoming(self.atomspace.get_atoms_by_type(types.ConceptNode)))
+        """
+        return list(set(atoms +
+                [item for sublist in [atom.out for atom in atoms if len(atom.out) > 0] for item in sublist]))
+
     def print_list(self):
         self.atomspace.print_list()
 
-    def next_new_atom(self):
-        '''Function to get atoms that have been added to the AtomSpace.
-        There's a list of newly added ones, and this method will pop the
-        first atom from the list. You should use it to update a separate
-        list for each Python MindAgent that wants to use it. It returns
-        either a Cython Atom or None (if there are none left).'''
-        cdef cHandle ch
-        cdef Handle h
-        cdef Atom atom
-        if deref(self.atomspace).addAtomSignalQueue.size() > 0:
-            ch = deref(self.atomspace).addAtomSignalQueue.front()
-            deref(self.atomspace).addAtomSignalQueue.pop_front()
-            h = Handle(ch.value())
-            atom = Atom(h,self)
-            return atom
-        else:
-            return None
-
-cdef class SpaceServer:
-    cdef cSpaceServer *spaceserver
-
-    def __init__(self):
-        #self.spaceserver = &spaceserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the CogServer takes care of cleaning up
-        pass
-
+cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+    return atomspace
 

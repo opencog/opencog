@@ -73,14 +73,6 @@ TruthValuePtr TruthValue::TRIVIAL_TV()
     return instance;
 }
 
-TruthValuePtr TruthValue::merge(TruthValuePtr other) const
-{
-    if (other->getConfidence() > getConfidence()) {
-        return other->clone();
-    }
-    return clone();
-}
-
 bool TruthValue::isNullTv() const
 {
     return false;

@@ -1,11 +1,12 @@
 from libcpp.vector cimport vector
 from libcpp.list cimport list as cpplist
 
-# Basic OpenCog types
-ctypedef long UUID
-ctypedef int Type
+# Tacky hack to pass atomspace pointer to AtomSpace ctor.
+cdef extern from "Python.h":
+    cdef void* PyLong_AsVoidPtr(object)
 
-# basic wrapping for std::string conversion
+
+# Basic wrapping for std::string conversion.
 cdef extern from "<string>" namespace "std":
     cdef cppclass string:
         string()
@@ -13,29 +14,15 @@ cdef extern from "<string>" namespace "std":
         char * c_str()
         int size()
 
-# Handle
-cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
-    cdef cppclass cHandle "opencog::Handle":
-        cHandle()
-        cHandle(UUID)
-        UUID value()
-        bint operator==(cHandle h)
-        bint operator!=(cHandle h)
-        bint operator<(cHandle h)
-        bint operator>(cHandle h)
-        bint operator<=(cHandle h)
-        bint operator>=(cHandle h)
-        cHandle UNDEFINED
-# HandleSeq
-    cdef cppclass cHandleSeq "opencog::HandleSeq"
 
-# basic wrapping for back_insert_iterator conversion
+# Basic wrapping for back_insert_iterator conversion.
 cdef extern from "<vector>" namespace "std":
     cdef cppclass output_iterator "back_insert_iterator<vector<opencog::Handle> >"
     cdef output_iterator back_inserter(vector[cHandle])
 
+
 ### TruthValue
-ctypedef float count_t
+ctypedef double count_t
 ctypedef float confidence_t
 ctypedef float strength_t
 
@@ -63,12 +50,18 @@ cdef extern from "opencog/atomspace/SimpleTruthValue.h" namespace "opencog":
         strength_t getMean()
         confidence_t getConfidence()
         count_t getCount()
+        count_t confidenceToCount(float)
+        confidence_t countToConfidence(float)
         tv_ptr DEFAULT_TV()
         string toString()
         bint operator==(cTruthValue h)
         bint operator!=(cTruthValue h)
 
+
+# Basic OpenCog types
 # ClassServer
+ctypedef int Type
+
 cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
     cdef cppclass cClassServer "opencog::ClassServer":
         bint isNode(Type t)
@@ -84,10 +77,33 @@ cdef extern from "opencog/atomspace/ClassServer.h" namespace "opencog":
 cdef extern from "opencog/atomspace/atom_types.h" namespace "opencog":
     cdef Type NOTYPE
 
-# TimeServer
-cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
-    cdef cppclass cTimeServer "opencog::TimeServer":
-        TimeServer()
+# Handle
+ctypedef long UUID
+
+cdef extern from "opencog/atomspace/Handle.h" namespace "opencog":
+    cdef cppclass cHandle "opencog::Handle":
+        cHandle()
+        cHandle(UUID)
+        UUID value()
+        bint operator==(cHandle h)
+        bint operator!=(cHandle h)
+        bint operator<(cHandle h)
+        bint operator>(cHandle h)
+        bint operator<=(cHandle h)
+        bint operator>=(cHandle h)
+        cHandle UNDEFINED
+# HandleSeq
+    cdef cppclass cHandleSeq "opencog::HandleSeq"
+
+cdef class Handle:
+    cdef cHandle *h
+
+cdef class Atom:
+    cdef Handle handle
+    cdef AtomSpace atomspace
+    cdef object _atom_type
+    cdef object _name
+    cdef object _outgoing
 
 
 # AtomSpace
@@ -153,30 +169,19 @@ cdef extern from "opencog/atomspace/AtomSpace.h" namespace "opencog":
 
         void print_list "print" ()
 
-        cpplist[cHandle] addAtomSignalQueue
-
 cdef AtomSpace_factory(cAtomSpace *to_wrap)
+
+cdef class AtomSpace:
+    cdef cAtomSpace *atomspace
+    cdef bint owns_atomspace
 
 # SpaceServer
 cdef extern from "opencog/spacetime/SpaceServer.h" namespace "opencog":
     cdef cppclass cSpaceServer "opencog::SpaceServer":
         SpaceServer()
 
-cdef class AtomSpace:
-    cdef cAtomSpace *atomspace
-    cdef bint owns_atomspace
+# TimeServer
+cdef extern from "opencog/spacetime/TimeServer.h" namespace "opencog":
+    cdef cppclass cTimeServer "opencog::TimeServer":
+        TimeServer()
 
-cdef class Handle:
-    cdef cHandle *h
-
-cdef class Atom:
-    cdef Handle handle
-    cdef AtomSpace atomspace
-    cdef object _atom_type
-    cdef object _name
-    cdef object _outgoing
-
-
-# Tacky hack to pass atomspace pointer to AtomSpace ctor
-cdef extern from "Python.h":
-    cdef void* PyLong_AsVoidPtr(object)

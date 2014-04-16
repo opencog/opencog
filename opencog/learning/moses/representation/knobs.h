@@ -128,28 +128,18 @@ struct contin_knob : public knob_base
 {
     contin_knob(combo_tree& tr, combo_tree::iterator tgt,
                 contin_t step_size, contin_t expansion,
-                field_set::width_t depth)
-        : knob_base(tr, tgt), _spec(combo::get_contin(*tgt),
-                                    step_size, expansion, depth) { }
+                field_set::width_t depth);
 
-    bool in_exemplar() const
-    {
-        return true;
-    }
+    bool in_exemplar() const;
 
     // @todo: it does not go back to the initiale state
-    void clear_exemplar() { }
+    void clear_exemplar();
 
-    void turn(contin_t x)
-    {
-        *_loc = x;
-    }
+    void turn(contin_t x);
 
     /**
-     * Append the right content (determined by idx) to parent_dst. If
-     * candidate is empty then it sets the content as head. If
-     * anything is appended then parent_dst will be overwritten with
-     * the iterator pointing to that new content.
+     * Append the content (a contin value) as child of parent_dst. If
+     * candidate is empty then it sets the content as head.
      *
      * @param candidate  candidate destination
      * @param parent_dst iterator pointing to the parent of the future
@@ -157,28 +147,14 @@ struct contin_knob : public knob_base
      * @param c          contin constant to be append
      */
     void append_to(combo_tree& candidate, combo_tree::iterator parent_dst,
-                   contin_t c) const
-    {
-        if (candidate.empty())
-            candidate.set_head(c);
-        else
-            candidate.append_child(parent_dst, c);
-    }
+                   contin_t c) const;
 
     // Return the spec describing the space spanned by the knob
     // Note that this spec is *not* a part of the field set that is
     // being used by the representation!
-    const field_set::contin_spec& spec() const
-    {
-        return _spec;
-    }
+    const field_set::contin_spec& spec() const;
 
-    std::string toStr() const
-    {
-        std::stringstream ss;
-        ss << "[" << *_loc << "]";
-        return ss.str();
-    }
+    std::string toStr() const;
 
 protected:
     field_set::contin_spec _spec;
@@ -254,7 +230,7 @@ protected:
 // or something like that, as it is a unary logical function ... err...
 // well, I guess all combo opers are unary, due to Currying.
 //
-// note - children aren't cannonized when parents are called (??? huh ???)
+// note - children aren't canonized when parents are called (??? huh ???)
 struct logical_subtree_knob : public discrete_knob<3>
 {
     static const int absent = 0;
@@ -264,126 +240,22 @@ struct logical_subtree_knob : public discrete_knob<3>
 
     // copy lsk on tr at position tgt
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                         const logical_subtree_knob& lsk)
-        : discrete_knob<3>(tr)
-    {
-        // logger().debug("lsk = %s", lsk.toStr().c_str());
-        // stringstream ss;
-        // ss << "*tgt = " << *tgt;
-        // logger().debug(ss.str());
-
-        if (lsk.in_exemplar())
-            _loc = _tr.child(tgt, lsk._tr.sibling_index(lsk._loc));
-        else
-            _loc = _tr.append_child(tgt, lsk._loc);
-        _disallowed = lsk._disallowed;
-        _default = lsk._default;
-        _current = lsk._current;
-    }
+                         const logical_subtree_knob& lsk);
 
     logical_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                         combo_tree::iterator subtree)
-        : discrete_knob<3>(tr)
-    {
-        typedef combo_tree::sibling_iterator sib_it;
-        typedef combo_tree::pre_order_iterator pre_it;
+                         combo_tree::iterator subtree);
 
-        // compute the negation of the subtree
-        combo_tree negated_subtree(subtree);
-        negated_subtree.insert_above(negated_subtree.begin(), id::logical_not);
+    complexity_t complexity_bound() const;
 
-        reduct::logical_reduction r;
-        r(1)(negated_subtree);
+    void clear_exemplar();
 
-        for (sib_it sib = tgt.begin(); sib != tgt.end(); ++sib) {
-            if (_tr.equal_subtree(pre_it(sib), subtree) ||
-                _tr.equal_subtree(pre_it(sib), negated_subtree.begin())) {
-                _loc = sib;
-                _current = present;
-                _default = present;
-                return;
-            }
-        }
-
-        _loc = _tr.append_child(tgt, id::null_vertex);
-        _tr.append_child(_loc, subtree);
-    }
-
-    complexity_t complexity_bound() const
-    {
-        return (_current == absent ? 0 : tree_complexity(_loc));
-    }
-
-    void clear_exemplar()
-    {
-        if (in_exemplar())
-            turn(0);
-        else
-            _tr.erase(_loc);
-    }
-
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
-
-        if (idx == _current) // already set, nothing to do
-            return;
-
-        switch (idx) {
-        case absent:
-            // flag subtree to be ignored with a null_vertex, replace
-            // negation if present
-            if (_current == negated)
-                *_loc = id::null_vertex;
-            else
-                _loc = _tr.insert_above(_loc, id::null_vertex);
-            break;
-        case present:
-            _loc = _tr.erase(_tr.flatten(_loc));
-            break;
-        case negated:
-            if (_current == present)
-                _loc = _tr.insert_above(_loc, id::logical_not);
-            else
-                *_loc = id::logical_not;
-            break;
-        }
-
-        _current = idx;
-    }
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        typedef combo_tree::iterator pre_it;
+                                   int idx) const;
 
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 3), "INVALID SETTING: Index greater than 2.");
-
-        // append v to parent_dst's children. If candidate is empty
-        // then set it as head. Return the iterator pointing to the
-        // new content.
-        auto append_child = [&candidate](pre_it parent_dst, const vertex& v)
-        {
-            return candidate.empty()? candidate.set_head(v)
-            : candidate.append_child(parent_dst, v);
-        };
-
-        pre_it new_src = parent_dst.end();
-        if (idx == negated)
-            parent_dst = append_child(parent_dst, id::logical_not);
-        if (idx != absent) {
-            new_src = _default == present ? _loc : (pre_it)_loc.begin();
-            parent_dst = append_child(parent_dst, *new_src);
-        }
-        return new_src;
-    }
-
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
     std::string toStr() const;
 private:
@@ -399,140 +271,57 @@ private:
 
 #define MAX_PERM_ACTIONS 128
 
-// Note - children aren't cannonized when parents are called.
+// Note - children aren't canonized when parents are called.
 // XXX what does the above comment mean ???
 struct action_subtree_knob : public discrete_knob<MAX_PERM_ACTIONS>
 {
     typedef combo_tree::pre_order_iterator pre_it;
 
     action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt,
-                        vector<combo_tree>& perms)
-        : discrete_knob<MAX_PERM_ACTIONS>(tr), _perms(perms) {
+                        const vector<combo_tree>& perms);
 
-        OC_ASSERT((int)_perms.size() < MAX_PERM_ACTIONS, "Too many perms.");
+    complexity_t complexity_bound() const;
 
-        for (int i = _perms.size() + 1;i < MAX_PERM_ACTIONS;++i)
-            disallow(i);
+    void clear_exemplar();
 
-        _default = 0;
-        _current = _default;
-        _loc = _tr.append_child(tgt, id::null_vertex);
-    }
-
-    complexity_t complexity_bound() const {
-        return tree_complexity(_loc);
-    }
-
-    void clear_exemplar() {
-        if (in_exemplar())
-            turn(0);
-        else
-            _tr.erase(_loc);
-    }
-
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT(idx <= (int)_perms.size(), "Index too big.");
-
-        if (idx == _current) //already set, nothing to
-            return;
-
-        if (idx == 0) {
-            if (_current != 0) {
-                combo_tree t(id::null_vertex);
-                _loc = _tr.replace(_loc, t.begin());
-            }
-        } else {
-            pre_it ite = (_perms[idx-1]).begin();
-            _loc = _tr.replace(_loc, ite);
-        }
-        _current = idx;
-    }
-
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        OC_ASSERT(false, "Not implemented yet");
-        return combo_tree::iterator();
-    }
+                                   int idx) const;
 
-        field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
-    std::string toStr() const {
-        std::stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
-        return ss.str();
-    }
+    std::string toStr() const;
 protected:
     const vector<combo_tree> _perms;
 };
 
-
+// Binary knob for action subtree, present or absent
 struct simple_action_subtree_knob : public discrete_knob<2>
 {
     static const int present = 0;
     static const int absent = 1;
 
-    simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt)
-        : discrete_knob<2>(tr, tgt)
-   {
-        _current = present;
-        _default = present;
-    }
+    simple_action_subtree_knob(combo_tree& tr, combo_tree::iterator tgt);
 
-    complexity_t complexity_bound() const {
-        return (_current == absent ? 0 : tree_complexity(_loc));
-    }
+    complexity_t complexity_bound() const;
 
-    void clear_exemplar() {
-//      if (in_exemplar())
-        turn(0);
-//      else
-// _tr.erase(_loc);
-    }
+    void clear_exemplar();
 
-    void turn(int idx)
-    {
-        idx = map_idx(idx);
-        OC_ASSERT((idx < 2), "Index greater than 1.");
-
-        if (idx == _current) //already set, nothing to
-            return;
-
-        switch (idx) {
-        case present:
-            _loc = _tr.erase(_tr.flatten(_loc));
-            break;
-        case absent:
-            _loc = _tr.insert_above(_loc, id::null_vertex);
-            break;
-        }
-
-        _current = idx;
-    }
+    void turn(int idx);
 
     combo_tree::iterator append_to(combo_tree& candidate,
                                    combo_tree::iterator& parent_dst,
-                                   int idx) const
-    {
-        OC_ASSERT(false, "Not implemented yet");
-        return combo_tree::iterator();
-    }
+                                   int idx) const;
 
-    field_set::disc_spec spec() const {
-        return field_set::disc_spec(multiplicity());
-    }
+    field_set::disc_spec spec() const;
 
-    std::string toStr() const {
-        std::stringstream ss;
-        ss << "[" << *_loc << " TODO ]";
-        return ss.str();
-    }
+    std::string toStr() const;
+
+private:
+    // return << *_loc or << *_loc.begin() if it is null_vertex
+    std::string locStr() const;
 };
 
 // The disc_knob may be any one of a number of different discrete

@@ -3,7 +3,7 @@ Utilities used in the REST API for OpenCog
 
 Defines mapping between object attributes and API requests and responses
 Validates input data, formats output data
-Used by the classes in: apiatom.py, apiatomcollection.py
+Used by the classes in: apiatomcollection.py
 """
 
 __author__ = 'Cosmo Harrigan'

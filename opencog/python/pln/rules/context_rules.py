@@ -1,12 +1,10 @@
 from opencog.atomspace import types, TruthValue
+import formulas
+from pln.rule import Rule
 
-import pln.formulas as formulas
-import pln.rules.rules as rules
-
-import math
-
-# It may be better to use SubsetLinks instead of ContextLinks, or at least implicitly convert them.
-CONTEXT_LINK = types.ContextLink
+# Todo:
+# It may be better to use SubsetLinks instead of ContextLinks, or at
+# least implicitly convert them.
 
 # (Context C x).tv = (Subset C x).tv
 # (Context C: Subset x y).tv = (Subset (x AND C) (y AND C))
@@ -31,9 +29,9 @@ CONTEXT_LINK = types.ContextLink
 
 # Or
 
-class ContextualRule(rules.Rule):
+class ContextualRule(Rule):
     def __init__(self, chainer, rule):
-        self._chainer =  chainer
+        self._chainer = chainer
         self.name = 'Contextual' + rule.name
         self.full_name = 'Contextual' + rule.full_name
         self._outputs = rule._outputs
@@ -42,45 +40,53 @@ class ContextualRule(rules.Rule):
         self.formula = rule.formula
 
         context = chainer.new_variable()
-        self._outputs = [self.contextlink(context, out) for out in self._outputs]
+        self._outputs = [self.contextlink(context, out)
+                         for out in self._outputs]
 
         is_evaluation_rule = 'EvaluationRule' in rule.name
         if is_evaluation_rule:
             raise "Direct evaluation in a context is not handled yet"
         else:
-            self._inputs = [self.contextlink(context, input) for input in self._inputs]
+            self._inputs = [self.contextlink(context, input)
+                            for input in self._inputs]
 
         print self.name
         print self._outputs
         print self._inputs
 
     def andlink(self, context, expression):
-        return self._chainer.link(AND_LINK, [context, expression])
+        return self._chainer.link(types.AndLink, [context, expression])
 
     def contextlink(self, context, expression):
-        return self._chainer.link(CONTEXT_LINK, [context, expression])
+        return self._chainer.link(types.ContextLink, [context, expression])
 
     def extract_context(self, contextlink):
+        # Todo: The variable 'context' is never used. Is it supposed to
+        # be returned instead of 'contextlink'?
         context = contextlink.out[0]
         expression = contextlink.out[1]
 
-        return (contextlink, expression)
+        return contextlink, expression
 
-class AndToContextRule(rules.Rule):
-    # (Context C: Subset x y).tv = (Subset (x AND C) (y AND C))
+
+class AndToContextRule(Rule):
+    """
+    (Context C: Subset x y).tv = (Subset (x AND C) (y AND C))
+    """
     def __init__(self, chainer, link_type):
         A = chainer.new_variable()
         B = chainer.new_variable()
         C = chainer.new_variable()
 
         link = chainer.link(link_type, [A, B])
-        contextlink = chainer.link(CONTEXT_LINK, [C, link])
+        contextlink = chainer.link(types.ContextLink, [C, link])
 
         andAC = chainer.link(types.AndLink, [A, C])
         andBC = chainer.link(types.AndLink, [B, C])
         input = chainer.link(link_type, [andAC, andBC])
 
-        rules.Rule.__init__(self, formula=formulas.identityFormula,
-            outputs= [contextlink],
-            inputs=  [input])
+        Rule.__init__(self,
+                      formula=formulas.identityFormula,
+                      outputs=[contextlink],
+                      inputs=[input])
 

@@ -3,5 +3,5 @@
 (define or_ab (OrLink a b))
 
 (EvaluationLink (PredicateNode "query") (ListLink or_ab))
-(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "OrCreationRule")))
+(EvaluationLink (PredicateNode "rules") (ListLink (ConceptNode "OrCreationRule<2>")))
 

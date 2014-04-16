@@ -125,6 +125,14 @@
 (neighbor "person15" "water_person")
 (fact "water_person" "Drinks" "water")
 
+;; ---------------------------------------------------------------
+;; Assorted supplemental facts.  These are somhow implicit in the
+;; problem statement. We'd mostly like to derive these, from more
+;; basic assumptions, but, for now, we'l just state them.
+;;
+;; A supplemental fact for fact 4: someone lives in the white house.
+(fact "person4" "LivesIn" "white house")
+
 ;; State some implicitly assumed facts about neighboring houses
 ;; This is the 'successor' function for ordinal numbers.
 (define (successor house1 house2)

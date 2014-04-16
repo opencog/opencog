@@ -30,7 +30,7 @@
 #include "AtomSpace.h"
 #include "Handle.h"
 #include "types.h"
-#include <zmq.hpp>
+#include <lib/zmq/zmq.hpp>
 #include <opencog/atomspace/ZMQMessages.pb.h>
 #include <string>
 

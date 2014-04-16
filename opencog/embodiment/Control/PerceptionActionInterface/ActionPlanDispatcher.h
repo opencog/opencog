@@ -39,12 +39,12 @@ class ActionPlanDispatcher
 {
 
     PAI& pai;
-    const std::list<PetAction>& actionPlan;
+    const std::list<AvatarAction>& actionPlan;
     ActionPlanID planId;
     bool badlyFailed;
 
 public:
-    ActionPlanDispatcher(PAI& _pai, const std::list<PetAction>&  _actionPlan);
+    ActionPlanDispatcher(PAI& _pai, const std::list<AvatarAction>&  _actionPlan);
     void dispatch();
     bool done();
     bool failed();

@@ -1,8 +1,10 @@
 ADD_SUBDIRECTORY (file)
 
-IF (HYPERTABLE_FOUND AND HAVE_EXPAT)
-   ADD_SUBDIRECTORY (hypertable)
-ENDIF (HYPERTABLE_FOUND AND HAVE_EXPAT)
+# The hypertable code never worked, and according to bug #567,
+# it doesn't compile either.
+# IF (HYPERTABLE_FOUND AND HAVE_EXPAT)
+#    ADD_SUBDIRECTORY (hypertable)
+# ENDIF (HYPERTABLE_FOUND AND HAVE_EXPAT)
 
 IF (ODBC_FOUND)
 	ADD_SUBDIRECTORY (sql)

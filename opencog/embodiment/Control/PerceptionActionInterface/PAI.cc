@@ -180,17 +180,18 @@ ActionPlanID PAI::createActionPlan()
     // Get the planning result
     std::string demandName; 
 
-    Handle hDemandEvaluationLink =
-        AtomSpaceUtil::getReference(atomSpace, 
-                                    atomSpace.getHandle(CONCEPT_NODE,
-                                                        "plan_selected_demand_goal"
-                                                       )
-                                   );
+    Handle hPlanSelDemGoal = atomSpace.getHandle(CONCEPT_NODE,
+                                                 "plan_selected_demand_goal");
+    if (hPlanSelDemGoal != Handle::UNDEFINED) {
+        Handle hDemandEvaluationLink =
+            AtomSpaceUtil::getReference(atomSpace, hPlanSelDemGoal);
 
-    if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
-        Handle hDemandPredicateNode = atomSpace.getOutgoing(hDemandEvaluationLink, 0);
-        demandName = atomSpace.getName(hDemandPredicateNode); 
-        demandName = demandName.substr(0, demandName.rfind("DemandGoal")); 
+        if ( hDemandEvaluationLink != Handle::UNDEFINED ) {
+            Handle hDemandPredicateNode =
+                atomSpace.getOutgoing(hDemandEvaluationLink, 0);
+            demandName = atomSpace.getName(hDemandPredicateNode);
+            demandName = demandName.substr(0, demandName.rfind("DemandGoal"));
+        }
     }
 
     ActionPlan plan(planId, demandName);
@@ -236,7 +237,7 @@ void PAI::sendExtractedActionFromPlan(ActionPlanID planId, unsigned int actionSe
             
             // must be added first. Otherwise the reference to the plan becomes invalid
             pendingActionPlans[planId] = plan;
-            inProgressActionPlans.erase(it->first);
+            inProgressActionPlans.erase(it);
 
         } else {
             throw opencog::RuntimeException(TRACE_INFO,
@@ -492,7 +493,7 @@ void PAI::sendSingleActionCommand(std::string& actionName, std::vector<ActionPar
     doc->release();
 }
 
-ActionID PAI::addAction(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+ActionID PAI::addAction(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
     ActionID result = Handle::UNDEFINED;
     ActionPlanMap::iterator it = inProgressActionPlans.find(planId);
@@ -1822,15 +1823,15 @@ void PAI::processInstruction(DOMElement * element)
     } // if
 
 #ifdef HAVE_GUILE
-    if(parsedSentenceText != NULL){
-        SchemeEval & evaluator = SchemeEval::instance(); 
+    if (parsedSentenceText != NULL){
+        SchemeEval* evaluator = new SchemeEval(); 
         std::string scheme_expression, scheme_return_value; 
 
         // Clean up all the information of previous sentence, such as detach 
         // the AnchorNode of previous sentence if it has not been processed. 
         scheme_expression = "( reset_dialog_system )";
-        scheme_return_value = evaluator.eval(scheme_expression); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(scheme_expression); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to execute '%s'", 
                             __FUNCTION__, 
                            scheme_expression.c_str()
@@ -1839,13 +1840,14 @@ void PAI::processInstruction(DOMElement * element)
 
         // Put the newly parsed sentence into AtomSpace, then PsiActionSelectionAgent 
         // and dialog_system.scm will continue processing it. 
-        scheme_return_value = evaluator.eval(parsedSentenceText); 
-        if ( evaluator.eval_error() ) {
+        scheme_return_value = evaluator->eval(parsedSentenceText); 
+        if ( evaluator->eval_error() ) {
             logger().error("PAI::%s - Failed to put the parsed result from RelexServer to AtomSpace", 
                            __FUNCTION__
                           ); 
         }
-    }    
+        delete evaluator;
+    }
 #endif
 
     // Add the perceptions into AtomSpace
@@ -2708,7 +2710,7 @@ Vector PAI::getVelocityData(DOMElement* velocityElement)
     return result;
 }
 
-Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
+Handle PAI::addActionToAtomSpace(ActionPlanID planId, const AvatarAction& action) throw (opencog::RuntimeException, opencog::InvalidParamException, std::bad_exception)
 {
 
     Handle schemaNode = AtomSpaceUtil::addNode(atomSpace, GROUNDED_SCHEMA_NODE, action.getName().c_str());
@@ -2784,7 +2786,7 @@ Handle PAI::addActionToAtomSpace(ActionPlanID planId, const PetAction& action) t
     return execLink;
 }
 
-Handle PAI::addActionPredicate(const char* predicateName, const PetAction& action, unsigned long timestamp, ActionID actionId)
+Handle PAI::addActionPredicate(const char* predicateName, const AvatarAction& action, unsigned long timestamp, ActionID actionId)
 {
     Handle execLink = actionId;
     logger().debug("PAI - execLink = %s \n", atomSpace.atomAsString(execLink).c_str());
@@ -2801,7 +2803,7 @@ Handle PAI::addActionPredicate(const char* predicateName, const PetAction& actio
     Handle evalLink = AtomSpaceUtil::addLink(atomSpace, EVALUATION_LINK, evalLinkOutgoing);
 
     Handle atTimeLink = timeServer().addTimeInfo(evalLink, timestamp, TruthValue::TRUE_TV());
-    AtomSpaceUtil::updateLatestPetActionPredicate(atomSpace, atTimeLink, predicateNode);
+    AtomSpaceUtil::updateLatestAvatarActionPredicate(atomSpace, atTimeLink, predicateNode);
 
     return atTimeLink;
 }
@@ -3373,7 +3375,7 @@ void PAI::setActionPlanStatus(ActionPlanID& planId, unsigned int sequence,
             switch (statusCode) {
             case opencog::pai::DONE:
                 {
-                    const PetAction& action = plan.getAction(seqNumber);
+                    const AvatarAction& action = plan.getAction(seqNumber);
 
                     // if a GRAB action, set grabbed object
                     if (action.getType() == ActionType::GRAB()) {

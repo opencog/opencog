@@ -9,7 +9,7 @@
   (PredicateNode "rules")
   (ListLink
     (ConceptNode "AndCreationRule")
-    (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)")
+    (ConceptNode "ModusPonensRule<ImplicationLink>")
   )
 )
 (EvaluationLink

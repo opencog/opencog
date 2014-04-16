@@ -18,13 +18,6 @@ class TruthValue(object):
         else:
             return cmp((self.mean, self.count), (other.mean, other.count))
 
-
-class AttentionValue(object):
-    def __init__(self, sti=0, lti=0):
-        # removed casts to int
-        self.sti = sti
-        self.lit = lti
-
 # If you change the constant, make sure to replace it in SimpleTruthValue.cc
 def confidence_to_count(conf):
     KKK = 800.0
@@ -38,7 +31,7 @@ def count_to_confidence(count):
 
 
 DEFAULT_TV = TruthValue()
-DEFAULT_AV = AttentionValue()
+DEFAULT_AV = {'sti': 0.0, 'lti':0.0, 'vlti':0.0}
 
 
 class Atom(object):
@@ -80,7 +73,6 @@ class Atom(object):
         return self._av
 
     def setav(self, av):
-        assert isinstance(av, AttentionValue)
         self._av = av
 
     tv = property(gettv, settv)
@@ -218,7 +210,7 @@ class AtomSpace(object):
     # legacy Cython-style interface
     def set_av(self, h, sti=0, lti=0, vlti=None, av_dict=None):
         atom = self[h]
-        atom.setav(AttentionValue(sti, lti))
+        atom.setav({'sti': sti, 'lti':lti})
 
     def get_av(self, h):
         atom = self[h]
@@ -226,7 +218,7 @@ class AtomSpace(object):
         return {'sti': av.sti}
 
     # legacy Cython-style interface
-    def add_node(self, type, name, tv=DEFAULT_TV):
+    def add_node(self, type, name, tv=DEFAULT_TV, **kwargs):
         atom = self.maybe_add(Node(type, name))
         atom.tv = tv
         return atom
@@ -305,7 +297,7 @@ class AtomSpace(object):
                 assert atom in o._in
                 o._in.remove(atom)
 
-    def get_atoms_by_type(self, type, subclass=True):
+    def get_atoms_by_type(self, t, subclass=True):
         return list(self._get_atoms_by_type_generator(type, subclass))
 
     def _get_atoms_by_type_generator(self, type, subclass=True):
@@ -323,6 +315,15 @@ class AtomSpace(object):
 
     def _atom_object_is_in_atomspace(self, atom):
         return atom in self.atoms_by_id
+
+    def get_atoms_in_attentional_focus(self, attention_bound=0.5):
+        attentional_focus = []
+        for signature in self.atoms_by_signature:
+            atom = self.atoms_by_signature[signature]
+            av = atom.getav()
+            if 'sti' in av and av['sti'] > attention_bound:
+                attentional_focus.append(atom)
+        return attentional_focus
 
     def __iter__(self):
         return iter(self.get_atoms_by_type(t.Atom, True))

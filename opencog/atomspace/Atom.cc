@@ -76,7 +76,7 @@ void Atom::setTruthValue(TruthValuePtr newTV)
 {
     if (newTV->isNullTv()) return;
 
-    // We need to gauranteee that the signal goes out with the
+    // We need to guarantee that the signal goes out with the
     // correct truth value.  That is, another setter could be changing
     // this, even as we are.  So make a copy, first. 
     TruthValuePtr oldTV(getTruthValue());
@@ -106,7 +106,7 @@ TruthValuePtr Atom::getTruthValue()
     // dereference can return a raw pointer to an object that has been
     // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
     // the multi-threaded async atom store in the SQL peristance backend.
-    // Furthermore, we must ake a copy while holding the lock! Got that?
+    // Furthermore, we must make a copy while holding the lock! Got that?
 
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
@@ -187,6 +187,16 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     avch(getHandle(), local, av);
 }
 
+void Atom::chgVLTI(int unit)
+{
+    AttentionValuePtr old_av = getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        old_av->getLTI(),
+        old_av->getVLTI() + unit);
+    setAttentionValue(new_av);
+}
+
 // ==============================================================
 // Flag stuff
 bool Atom::isMarkedForRemoval() const
@@ -224,21 +234,11 @@ void Atom::setAtomTable(AtomTable *tb)
 {
     if (tb == _atomTable) return;
 
-    // Notify any interested parties that the AV changed.
-    if (NULL == tb and NULL != _atomTable) {
-        // remove, as far as the old table is concerned
-        AVCHSigl& avch = _atomTable->AVChangedSignal();
-        avch(getHandle(), getAttentionValue(), AttentionValue::DEFAULT_AV());
-
+    if (NULL != _atomTable) {
         // UUID's belong to the atom table, not the atom. Reclaim it.
         _uuid = Handle::UNDEFINED.value();
     }
     _atomTable = tb;
-    if (NULL != tb) {
-        // add, as far as the old table is concerned
-        AVCHSigl& avch = tb->AVChangedSignal();
-        avch(getHandle(), AttentionValue::DEFAULT_AV(), getAttentionValue());
-    }
 }
 
 // ==============================================================

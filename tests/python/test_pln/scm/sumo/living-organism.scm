@@ -1,8 +1,3 @@
-(MemberLink (av 0 0 0) (stv 0.900000 0.111111)
-  (ConceptNode "Organism12-1" (av 0 0 0) (stv 0.010000 0.555556))
-  (ConceptNode "Object" (av 0 0 0) (stv 0.010000 0.555556))
-)
-
 (ImplicationLink (av 0 0 0) (stv 0.900000 0.111111)
   (EvaluationLink (av 0 0 0) (stv 0.000000 0.000000)
     (PredicateNode "attribute" (av 0 0 0) (stv 0.100000 0.111111))
@@ -25,27 +20,19 @@
   )
 )
 
-(EvaluationLink (av 0 0 0) (stv 0.900000 0.111111)
-  (PredicateNode "answer" (av 0 0 0) (stv 0.100000 0.111111))
-  (ListLink (av 0 0 0) (stv 0.000000 0.000000)
-    (ConceptNode "yes" (av 0 0 0) (stv 0.010000 0.555556))
-  )
-)
-
-(EvaluationLink (av 0 0 0) (stv 0.900000 0.111111)
-  (PredicateNode "note" (av 0 0 0) (stv 0.100000 0.111111))
-  (ListLink (av 0 0 0) (stv 0.000000 0.000000)
-    (ConceptNode "TQG12" (av 0 0 0) (stv 0.010000 0.555556))
-  )
-)
-
-(EvaluationLink (av 0 0 0) (stv 0.900000 0.111111)
+(EvaluationLink
   (PredicateNode "query" (av 0 0 0) (stv 0.100000 0.111111))
   (ListLink (av 0 0 0) (stv 0.000000 0.000000)
     (MemberLink (av 0 0 0) (stv 0.000000 0.000000)
       (ConceptNode "Organism12-1" (av 0 0 0) (stv 0.010000 0.555556))
       (ConceptNode "Organism" (av 0 0 0) (stv 0.010000 0.555556))
     )
+  )
+)
+
+(EvaluationLink
+  (PredicateNode "rules")
+  (ListLink (ConceptNode "ModusPonensRule<ImplicationLink>")
   )
 )
 

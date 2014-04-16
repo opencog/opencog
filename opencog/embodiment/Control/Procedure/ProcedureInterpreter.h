@@ -31,6 +31,10 @@
 
 namespace opencog { namespace Procedure {
 
+// BE CAREFUL!!!!!! this is RunningProcedureID ending with ID (all
+// upper case), different from what is below in the definition of
+// RunningProcedure that uses RunningProcedureId ending with Id
+// (capitalized)
 typedef unsigned long int RunningProcedureID;
 typedef boost::variant<RunningProcedureId, RunningBuiltInProcedure> RunningProcedure;
 
@@ -80,7 +84,8 @@ public:
     void stopProcedure(RunningProcedureID id);
 
     // return the combo interpreter object
-    ComboInterpreter& getComboInterpreter() const;
+    // XXX this method is not used anywhere
+    const ComboInterpreter& getComboInterpreter() const;
 
 protected:
     typedef std::map<RunningProcedureID, RunningProcedure> Map;
@@ -89,13 +94,12 @@ protected:
     typedef std::map<RunningProcedureID, combo::vertex> ResultMap;
     typedef std::map<RunningProcedureID, combo::variable_unifier> UnifierResultMap;
 
-    ComboInterpreter* comboInterpreter;
+    pai::PAI& _pai;
+    ComboInterpreter comboInterpreter;
     Map _map;
     Set _failed;
     ResultMap _resultMap;
     UnifierResultMap _unifierResultMap;
-
-    pai::PAI* _pai;
 
     RunningProcedureID _next;
 };

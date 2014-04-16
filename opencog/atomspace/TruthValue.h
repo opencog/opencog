@@ -155,12 +155,8 @@ public:
      * Merge this TV object with the given TV object argument.
      * It always returns a new TV object with the result of the merge,
      * even if it is equal to one of the merged TV objects.
-     *
-     * Currently tv1.merge(tv2) works as follows:
-     * the resulting TV is either tv1 or tv2, the result being the one
-     * with the highest confidence.
      */
-    virtual TruthValuePtr merge(TruthValuePtr) const;
+    virtual TruthValuePtr merge(TruthValuePtr) const = 0;
 
     /**
      * Check if this TV is a null TV.

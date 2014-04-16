@@ -311,7 +311,8 @@ HandleSeq AtomSpaceImpl::getNeighbors(Handle h, bool fanin,
     }
     HandleSeq answer;
 
-    HandleSeq iset = atomTable.getIncomingSet(h);
+    HandleSeq iset;
+    h->getIncomingSet(back_inserter(iset));
     for (HandleSeq::iterator it = iset.begin();
          it != iset.end(); it++)
     {
@@ -345,7 +346,9 @@ HandleSeq AtomSpaceImpl::getIncoming(Handle h)
     //
     // Anyway, the user can call fetch explicitly, if desired.
 
-    return atomTable.getIncomingSet(h);
+    HandleSeq hs;
+    h->getIncomingSet(back_inserter(hs));
+    return hs;
 }
 
 bool AtomSpaceImpl::deleteAtom(Handle h, bool recursive)

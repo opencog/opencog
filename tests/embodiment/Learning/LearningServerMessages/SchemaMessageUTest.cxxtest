@@ -29,7 +29,7 @@
 #include <opencog/embodiment/Learning/LearningServerMessages/SchemaMessage.h>
 #include <opencog/embodiment/AvatarComboVocabulary/AvatarComboVocabulary.h>
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 using namespace opencog::messaging;
 using namespace opencog::learningserver::messages;
 
@@ -54,7 +54,7 @@ public:
     SchemaMessageUTest() {
         std::stringstream ss(comboSchema);
         // ss >> schema;
-        PetCombo::operator>>(ss, schema);
+        AvatarCombo::operator>>(ss, schema);
     }
 
     ~SchemaMessageUTest() {

@@ -237,7 +237,8 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
     for (Arity i = 0; i < arity; i++) {
         if ((!handles.empty()) && TLB::isValidHandle(handles[i])) {
             Handle h(handles[i]);
-            HandleSeq hs = getIncomingSet(h);
+            HandleSeq hs;
+            h->getIncomingSet(back_inserter(hs));
 
             std::copy_if(hs.begin(), hs.end(), inserter(sets[i]),
                 // sets[i] = HandleEntry::filterSet(sets[i], handles[i], i, arity);
@@ -285,7 +286,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
             // sets[i] = HandleEntry::filterSet(sets[i], type, subclass);
             UnorderedHandleSet hs;
             std::copy_if(sets[i].begin(), sets[i].end(), inserter(hs),
-                [&](Handle h)->bool { return isType(h, type, subclass); });
+                [&](Handle h)->bool { return h->isType(type, subclass); });
         }
     }
 
@@ -308,7 +309,7 @@ UnorderedHandleSet AtomTable::getHandlesByOutgoing(const HandleSeq& handles,
                         if (NULL == l) return true;
                         if (l->getArity() != arity) return false;
                         Handle hosi(l->getOutgoingSet()[i]);
-                        return isType(hosi, types[i], sub);
+                        return hosi->isType(types[i], sub);
                     });
                 set = filt;
             }
@@ -337,7 +338,8 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
         bool sub = subclasses == NULL ? false : subclasses[i];
         if ((names != NULL) && (names[i] != NULL)) {
             if ((types != NULL) && (types[i] != NOTYPE)) {
-                getIncomingSetByName(inserter(sets[i]), names[i], types[i], type, subclass);
+                Handle targh(getHandle(types[i], names[i]));
+                targh->getIncomingSetByType(inserter(sets[i]), type, subclass);
                 if (sub) {
                     // If subclasses are accepted, the subclasses are
                     // returned in the array types.
@@ -350,8 +352,9 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     // to the answer set
                     for (unsigned int j = 0; j < subTypes.size(); j++) {
                         UnorderedHandleSet subSet;
-                        getIncomingSetByName(inserter(subSet), names[i],
-                                          subTypes[j], type, subclass);
+                        Handle targh(getHandle(subTypes[j], names[i]));
+                        targh->getIncomingSetByType(inserter(subSet), type, subclass);
+                        // XXX wait .. why are we copying, again?
                         sets[i].insert(subSet.begin(), subSet.end());
                     }
                 }
@@ -362,7 +365,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                         LinkPtr l(LinkCast(h));
                         if (l->getArity() != arity) return false;
                         Handle oh(l->getOutgoingSet()[i]);
-                        if (not isType(oh, types[i], sub)) return false;
+                        if (not oh->isType(types[i], sub)) return false;
                         AtomPtr oa = l->getOutgoingAtom(i);
                         if (LinkCast(oa))
                             return (NULL == names[i]) or (0 == names[i][0]);
@@ -384,7 +387,7 @@ UnorderedHandleSet AtomTable::getHandlesByNames(const char** names,
                     LinkPtr l(LinkCast(h));
                     if (l->getArity() != arity) return false;
                     Handle oh(l->getOutgoingSet()[i]);
-                    return isType(oh, types[i], sub);
+                    return oh->isType(types[i], sub);
                 });
         } else {
             countdown++;
@@ -495,9 +498,7 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
                            "AtomTable - Attempting to insert link with "
                            "invalid outgoing members");
             }
-#if not TABLE_INCOMING_INDEX
             h->insert_atom(lll);
-#endif
         }
     }
 
@@ -519,19 +520,11 @@ Handle AtomTable::add(AtomPtr atom) throw (RuntimeException)
     nodeIndex.insertAtom(atom);
     linkIndex.insertAtom(atom);
     typeIndex.insertAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.insertAtom(atom);
-#else
     atom->keep_incoming_set();
-#endif
     targetTypeIndex.insertAtom(atom);
     importanceIndex.insertAtom(atom);
     predicateIndex.insertAtom(atom);
 
-    // XXX Setting the atom table causes AVchagned signals to be sent.
-    // Ideally we should unlock, send the AVCH signal, lock, set the table,
-    // unlock and send the other AVCH signal.  But right now, I'm too lazy
-    // to fix this.  I'm figuring no one will notice.
     atom->setAtomTable(this);
 
     // We can now unlock, since we are done. In particular, the signals
@@ -616,7 +609,7 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     atom->markForRemoval();
     // lock before fetching the incoming set. Since getting the
     // incoming set also grabs a lock, we need this mutex to be
-    // recurisve. We need to lock here to avoid confusion if multiple
+    // recursive. We need to lock here to avoid confusion if multiple
     // threads are trying to delete the same atom.
     std::unique_lock<std::recursive_mutex> lck(_mtx);
 
@@ -626,7 +619,8 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         // We need to make a copy of the incoming set because the
         // recursive call will trash the incoming set when the atom
         // is removed.
-        HandleSeq is = getIncomingSet(handle);
+        HandleSeq is;
+        handle->getIncomingSet(back_inserter(is));
 
         HandleSeq::iterator is_it = is.begin();
         HandleSeq::iterator is_end = is.end();
@@ -645,38 +639,14 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
         }
     }
 
+    // Check for an invalid condition that should not occur. See:
+    // https://github.com/opencog/opencog/commit/a08534afb4ef7f7e188e677cb322b72956afbd8f#commitcomment-5842682
     if (0 < handle->getIncomingSetSize())
     {
-        // It is very tempting to just throw, here, but apparently,
-        // someone somewhere thinks that it is more appropriate to
-        // log a warning, instead.  Not clear to my why this is a
-        // wise decision .. perhaps there is some race condition
-        // removal due to attention value miscalculation? ???
-        // XXX TODO Review the policy here and rationalize it.
-        // throw RuntimeException(TRACE_INFO,
-        //   "Cannot extract an atom with a non-trivial incoming set!");
-
-        // XXX well, I guess we could/should check to see if any atoms
-        // in the incoming set belong to this atomspace. Because if
-        // none of them do, then it would be ok to extract...
-        Logger::Level save = logger().getBackTraceLevel();
-        logger().setBackTraceLevel(Logger::NONE);
-        logger().warn("AtomTable.extract(): "
-           "attempting to extract atom with non-empty incoming set: %s\n",
-           atom->toShortString().c_str());
-
-        HandleSeq is = getIncomingSet(handle);
-        HandleSeq::iterator it = is.begin();
-        HandleSeq::iterator is_end = is.end();
-        for (; it != is_end; it++)
-        {
-            logger().warn("\tincoming: %s\n", (*it)->toShortString().c_str());
-        }
-        logger().setBackTraceLevel(save);
-        logger().warn("AtomTable.extract(): stack trace for previous error follows");
-
         atom->unsetRemovalFlag();
-        return AtomPtrSet();
+
+        throw RuntimeException(TRACE_INFO,
+           "Cannot extract an atom with a non-empty incoming set!");
     }
 
     // Issue the atom removal signal *BEFORE* the atom is actually
@@ -694,16 +664,12 @@ AtomPtrSet AtomTable::extract(Handle& handle, bool recursive)
     nodeIndex.removeAtom(atom);
     linkIndex.removeAtom(atom);
     typeIndex.removeAtom(atom);
-#if TABLE_INCOMING_INDEX
-    incomingIndex.removeAtom(atom);
-#else
     LinkPtr lll(LinkCast(atom));
     if (lll) {
         foreach(AtomPtr a, lll->_outgoing) {
             a->remove_atom(lll);
         }
     }
-#endif
     targetTypeIndex.removeAtom(atom);
     importanceIndex.removeAtom(atom);
     predicateIndex.removeAtom(atom);

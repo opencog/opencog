@@ -20,5 +20,5 @@ This directory currently contains three subdirectories:
    up to 150-200 features; feature-selection should be used when datasets
    are larger than this).
 
--- dimensionalembedding -- code that makes use of moses.
-
+-- dimensionalembedding -- implements a method of dimensional embedding
+   of the atomspace using the Harel-Koren algorithm

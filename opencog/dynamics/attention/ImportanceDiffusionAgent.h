@@ -56,7 +56,7 @@ class SpreadDecider
 {
     //! This is the function that subclasses implement to determine
     //! the probility of whether an atom will spread importance based
-    //! on it's STI value.
+    //! on its STI value.
     //!
     //! @param s The STI to base the decision on.
     //! @return Probability of given STI value resulting in spread.
@@ -115,7 +115,7 @@ public:
     //! Used to determine the steepness of the hyperbolic decision function.
     float shape;
 
-    //! The decision focus boundary, or where the decision function is centred
+    //! The decision focus boundary, or where the decision function is centered
     //! around.
     double focusBoundary;
 
@@ -198,6 +198,17 @@ private:
 
     //! For checking that STI is conserved
     int totalSTI;
+
+    /** Set the agent's logger object
+     *
+     * Note, this will be deleted when this agent is.
+     *
+     * @param l The logger to associate with the agent.
+     */
+    void setLogger(Logger* l);
+
+    Logger *log; //!< Logger object for Agent
+
 public:
 
     virtual const ClassInfo& classinfo() const { return info(); }
@@ -212,6 +223,12 @@ public:
     ImportanceDiffusionAgent(CogServer&);
     virtual ~ImportanceDiffusionAgent();
     virtual void run();
+
+    /** Return the agent's logger object
+     *
+     * @return A logger object.
+     */
+    Logger* getLogger();
 
     /** Set the maximum percentage of importance that can be spread.
      * @param p the maximum percentage of importance that can be spread.

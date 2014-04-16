@@ -72,7 +72,12 @@
 	; is happy, these days.  Note: in the good-old bad days, we used
 	; ice-9 rw read-string!/partial for this, which went buggy, and
 	; started mangling at some point.
-	(eval-string (get-string-all port))
+	(let ((string-read (get-string-all port)))
+		(if (eof-object? string-read)
+			#f
+			(eval-string string-read)
+		)
+	)
 )
 
 ; ---------------------------------------------------------------------
