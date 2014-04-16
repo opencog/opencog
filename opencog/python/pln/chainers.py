@@ -543,6 +543,8 @@ class Chainer(AbstractChainer):
         self._delete_temporary_variables = delete_temporary_variables
         self._check_cycles = check_cycles
         self._check_repeats = check_repeats
+        # You have to record the inference history in order to check cycles
+        if not check_repeats: assert check_cycles
 
         self.atomspace = atomspace
 
