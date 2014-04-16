@@ -796,9 +796,11 @@ class Chainer(AbstractChainer):
         # the atoms, but not assign a TruthValue. Stimulating the inputs
         # makes it more likely to find them in future.
 
-        if len(specific_inputs) == 0:
-            self.log.debug("Error: specific_inputs == 0")
-            return None
+        # That is wrong because many rules have 0 inputs (and use
+        # custom_compute instead)
+        #if len(specific_inputs) == 0:
+        #    self.log.debug("Error: specific_inputs == 0")
+        #    return None
         if self._all_nonzero_tvs(specific_inputs):
             return self.apply_rule(rule, specific_inputs, final_outputs)
         else:
