@@ -10,7 +10,7 @@
     )
 )
 
-# AverageLink means you can use that as a variable instead. if you skolemize things the right way then you don't have to do this. probably better to just make special terms for variables.
+; AverageLink means you can use that as a variable instead. if you skolemize things the right way then you don't have to do this. probably better to just make special terms for variables.
 
 
 (InheritanceLink (stv 1 1)

@@ -28,7 +28,7 @@
 (EvaluationLink (av 0 0 0) (stv 0 0)
   (PredicateNode "rules" (av 0 0 0) (stv 0 0))
   (ListLink (av 0 0 0) (stv 1.000000 0.000000)
-    (ConceptNode "AndCreationRule" (av 0 0 0) (stv 0 0))
+    (ConceptNode "AndCreationRule<2>" (av 0 0 0) (stv 0 0))
     (ConceptNode "ModusPonensRule<ImplicationLink>" (av 0 0 0) (stv 0 0))
   )
 )
