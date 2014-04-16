@@ -45,7 +45,7 @@ $binDirH/opencog/embodiment/Control/OperationalAvatarController/opcHcTester \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell \
 $binDirH/opencog/embodiment/Control/Procedure/combo_shell_stdio \
 $binDirH/opencog/embodiment/Learning/LearningServer/learningServer \
-$binDirH/opencog/query/libquery.so \
+$binDirH/opencog/query/libQueryModule.so \
 $binDirH/opencog/server/libbuiltinreqs.so \
 $binDirH/opencog/shell/libscheme-shell.so \
 $binDirH/opencog/persist/sql/libpersist.so \
