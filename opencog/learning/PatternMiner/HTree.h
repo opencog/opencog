@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -33,43 +33,44 @@ using namespace std;
 
 namespace opencog
 {
- namespace PatternMiner
-{
-
- // HTree is an efficient data strusture to store all the patterns , for quick index / query
-
- class HTreeNode
- {
- public:
-    Skeleton* skeleton;
-    map<Pattern*, HandleSeqSeq> PatternsToInstances;
-    vector<HTreeNode*> parentLinks;
-    vector<HTreeNode*> childLinks;
-    HTreeNode(Skeleton* _skeleton):skeleton(_skeleton)
+     namespace PatternMining
     {
-        parentLinks.clear();
-        childLinks.clear();
-    }
 
- };
+     // HTree is an efficient data strusture to store all the patterns , for quick index / query
 
- class HTree
- {
-
- public:
-     HTree()
+     class HTreeNode
      {
-         rootNode = new HTreeNode(0); // the rootNode with an empty Skeleton
-     }
+     public:
+        HandleSeq pattern;
+        vector<HandleSeq> instances; // the corresponding instances of this pattern in the original AtomSpace
+        vector<HTreeNode*> parentLinks;
+        vector<HTreeNode*> childLinks;
+        map<Handle,Handle> patternVarMap;// variable handle in pattenmining Atomspace to the ground value node in the orginal Atomspace
 
- private:
-     HTreeNode* rootNode;
+        HTreeNode()
+        {
+            parentLinks.clear();
+            childLinks.clear();
+        }
+
+     };
+
+     class HTree
+     {
+
+     public:
+
+         HTreeNode* rootNode;
+
+         HTree()
+         {
+             rootNode = new HTreeNode(); // the rootNode with no parents
+         }
+
+     };
 
 
- };
-
-
-}
+    }
 }
 
 #endif //_OPENCOG_PATTERNMINER_HTREE_H

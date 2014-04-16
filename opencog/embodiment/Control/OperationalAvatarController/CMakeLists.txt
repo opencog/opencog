@@ -27,6 +27,7 @@ ADD_LIBRARY (oac SHARED
 	OCPlanner
 	Inquery
 	OCPlanningAgent
+	PatternMiningAgent
 )
 
 ADD_DEPENDENCIES(oac opencog_atom_types)
@@ -51,6 +52,7 @@ TARGET_LINK_LIBRARIES (oac
 	attention
 	SpaceMap
 	json_spirit
+	PatternMiner
 )
 
 IF (HAVE_CYTHON)

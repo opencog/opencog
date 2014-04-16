@@ -69,7 +69,7 @@
 #include "PsiFeelingUpdaterAgent.h"
 #include "StimulusUpdaterAgent.h"
 #include "OCPlanningAgent.h"
-
+#include "PatternMiningAgent.h"
 
 #ifdef HAVE_CYTHON
     #include <opencog/cython/PyMindAgent.h>
@@ -162,6 +162,7 @@ private:
     PsiFeelingUpdaterAgentPtr psiFeelingUpdaterAgent; 
 
     OCPlanningAgentPtr ocPlanningAgent;
+    PatternMiningAgentPtr patternMiningAgent;
 
 
 
