@@ -88,7 +88,8 @@ class PLNExamples(object):
                           agent=self,
                           learnRuleFrequencies=False,
                           allow_output_with_variables=True,
-                          allow_backchaining_with_variables=True)
+                          allow_backchaining_with_variables=True,
+                          check_cycles=True)
 
         try:
             queries = chainer.get_predicate_arguments('query')

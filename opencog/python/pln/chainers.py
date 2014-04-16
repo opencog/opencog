@@ -519,6 +519,7 @@ class Chainer(AbstractChainer):
                  allow_output_with_variables=False,
                  allow_backchaining_with_variables=False,
                  delete_temporary_variables=False,
+                 check_cycles=True,
                  log=None):
 
         if log is None:
@@ -539,6 +540,7 @@ class Chainer(AbstractChainer):
         self._allow_output_with_variables = allow_output_with_variables
         self._allow_backchaining_with_variables = allow_backchaining_with_variables
         self._delete_temporary_variables = delete_temporary_variables
+        self._check_cycles = check_cycles
 
         self.atomspace = atomspace
 
@@ -940,9 +942,10 @@ class Chainer(AbstractChainer):
                                       (rule, inputs, outputs))
             return False
 
-        if self.history.check_cycles(inputs, outputs):
-            self.log_failed_inference('cycle detected')
-            return False
+        if self._check_cycles:
+            if self.history.check_cycles(inputs, outputs):
+                self.log_failed_inference('cycle detected')
+                return False
 
         if self._is_repeated(rule, outputs, inputs):
             self.log_failed_inference('repeated inference')
