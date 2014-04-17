@@ -26,6 +26,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include <boost/program_options.hpp>
 #include <ext/stdio_filebuf.h>
 
 #include "distributed_moses.h"
@@ -53,13 +54,18 @@ unsigned get_num_jobs(const proc_map::value_type& pmv) {
     return pmv.second.get<3>();
 }
 
-const string& get_hostname(const host_proc_map::value_type& hp) {
+const string& get_hostname(const host_proc_map::value_type& hp)
+{
     return hp.first;
 }
-const proc_map& get_proc_map(const host_proc_map::value_type& hp) {
+
+const proc_map& get_proc_map(const host_proc_map::value_type& hp)
+{
     return hp.second;
 }
-const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
+
+const unsigned get_total_jobs(const host_proc_map::value_type& hp)
+{
     // return the number of jobs for all processes of hp's host
     unsigned acc = 0;
     for (const proc_map::value_type& p : get_proc_map(hp))
@@ -67,7 +73,8 @@ const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
     return acc;
 }
 
-unsigned running_proc_count(const host_proc_map& hpm) {
+unsigned running_proc_count(const host_proc_map& hpm)
+{
     unsigned acc = 0;
     for (const host_proc_map::value_type& hpmv : hpm)
         acc += hpmv.second.size();
@@ -83,7 +90,7 @@ string build_cmdline(const boost::program_options::variables_map& vm,
 {
     namespace po = boost::program_options;
     string res;
-    if(host_name == localhost)
+    if (host_name == localhost)
         res = "moses";
     else
         res = string("ssh ") + host_name + " 'moses";

@@ -36,7 +36,6 @@
 #include "../metapopulation/metapopulation.h"
 
 using namespace std;
-using namespace boost::program_options;
 using namespace opencog;
 using namespace moses;
 
@@ -67,7 +66,9 @@ void write_results(const eval_diversity_params& edp, const vector<float>& dsts) 
     }
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
+    namespace po = boost::program_options;
     eval_diversity_params edp;
     
     // Declare the supported options.
@@ -114,15 +115,15 @@ int main(int argc, char** argv) {
 
         ;
 
-    variables_map vm;
+    po::variables_map vm;
     try {
-        store(parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, desc), vm);
     }
-    catch (error& e) {
+    catch (po::error& e) {
         OC_ASSERT(false, "Fatal error: invalid or duplicated argument:\n\t%s\n",
                   e.what());
     }
-    notify(vm);
+    po::notify(vm);
 
     if (vm.count("help") || argc == 1) {
         cout << desc << endl;

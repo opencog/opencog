@@ -41,7 +41,6 @@
 #include "eval-candidate.h"
 
 using namespace std;
-using namespace boost::program_options;
 using namespace opencog;
 using namespace moses;
 using namespace combo;
@@ -57,7 +56,8 @@ using boost::math::binomial_coefficient;
  * @return                 the combo_tree
  */
 combo_tree str2combo_tree_label(const std::string& combo_prog_str,
-                                const std::vector<std::string>& labels) {
+                                const std::vector<std::string>& labels)
+{
     // combo pogram with place holders
     std::string combo_prog_ph_str = l2ph(combo_prog_str, labels);
     std::stringstream ss(combo_prog_ph_str);
@@ -184,7 +184,8 @@ vector<string> get_all_combo_tree_str(const eval_candidate_params& ecp)
  * allows to sum over only s that have recall above R.
  */
 double likelihood(const combo_tree& tr, const Table& table,
-                  eval_candidate_params ecp) {
+                  eval_candidate_params ecp)
+{
     OTable ot_tr(tr, table.itable);
     unsigned size = ot_tr.size();
     arity_t arit = table.get_arity();
@@ -276,7 +277,9 @@ double likelihood(const combo_tree& tr, const Table& table,
     return PDM * PM;
 }
 
-int main(int argc, char** argv) {
+int main(int argc, char** argv)
+{
+    namespace po = boost::program_options;
     eval_candidate_params ecp;
     unsigned long rand_seed;
     string log_level;
@@ -362,15 +365,15 @@ int main(int argc, char** argv) {
 
         ;
 
-    variables_map vm;
+    po::variables_map vm;
     try {
-        store(parse_command_line(argc, argv, desc), vm);
+        po::store(po::parse_command_line(argc, argv, desc), vm);
     }
-    catch (error& e) {
+    catch (po::error& e) {
         OC_ASSERT(false, "Fatal error: invalid or duplicated argument:\n\t%s\n",
                   e.what());
     }
-    notify(vm);
+    po::notify(vm);
 
     if (vm.count("help") || argc == 1) {
         cout << desc << endl;
