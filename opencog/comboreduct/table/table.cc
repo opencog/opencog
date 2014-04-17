@@ -21,7 +21,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "table.h"
 
 #include <iomanip>
 #include <ctype.h>
@@ -40,6 +39,9 @@
 #include "../combo/ann.h"
 #include "../combo/simple_nn.h"
 #include "../combo/convert_ann_combo.h"
+
+#include "table.h"
+#include "table_io.h"
 
 namespace opencog { namespace combo {
 
@@ -258,10 +260,12 @@ vertex_seq ITable::get_column_data(const std::string& name) const
 }
 
 string ITable::delete_column(const string& name)
+    throw(IndexErrorException)
 {
     int off = get_column_offset(name);
     if (-1 == off)
-        return string();
+        throw IndexErrorException(TRACE_INFO,
+            "Can't delete, unknown column name: %s", name.c_str());
 
     // Delete the column
     for (multi_type_seq& row : *this)
@@ -282,6 +286,7 @@ string ITable::delete_column(const string& name)
 
 
 void ITable::delete_columns(const vector<string>& ignore_features)
+    throw(IndexErrorException)
 {
     for (const string& feat : ignore_features)
         delete_column(feat);
@@ -436,18 +441,37 @@ vector<string> Table::get_labels() const
 
 // -------------------------------------------------------
 
-CTable Table::compressed() const
+CTable Table::compressed(const std::string weight_col) const
 {
-    // Logger
     logger().debug("Compress the dataset, current size is %d", itable.size());
-    // ~Logger
 
     CTable res(otable.get_label(), itable.get_labels(), get_signature());
 
-    ITable::const_iterator in_it = itable.begin();
-    OTable::const_iterator out_it = otable.begin();
-    for(; in_it != itable.end(); ++in_it, ++out_it)
-        res[*in_it][*out_it] += 1.0;
+    // If no weight column, then its straight-forward
+    if (weight_col.empty()) {
+        ITable::const_iterator in_it = itable.begin();
+        OTable::const_iterator out_it = otable.begin();
+        for (; in_it != itable.end(); ++in_it, ++out_it)
+        {
+            res[*in_it][*out_it] += 1.0;
+        }
+    }
+    else {
+        // Else, remove the weight column from the input;
+        // we don't want to use it as an independent feature.
+        ITable trimmed(itable);
+        trimmed.delete_column(weight_col);
+
+        size_t widx = itable.get_column_offset(weight_col);
+        ITable::const_iterator w_it = itable.begin();
+        ITable::const_iterator in_it = trimmed.begin();
+        OTable::const_iterator out_it = otable.begin();
+        for (; in_it != itable.end(); ++in_it, ++out_it, ++w_it)
+        {
+            contin_t weight = w_it->get_at<contin_t>(widx);
+            res[*in_it][*out_it] += weight;
+        }
+    }
 
     logger().debug("Size of the compressed dataset is %f", res.size());
 
@@ -455,11 +479,6 @@ CTable Table::compressed() const
 }
 
 // -------------------------------------------------------
-
-std::istream& istreamRawITable(std::istream& in, ITable& tab,
-                               const std::vector<unsigned>& ignored_indices)
-    throw(std::exception, AssertionException);
-std::vector<std::string> get_header(const std::string& input_file);
 
 /**
  * Get indices (aka positions or offsets) of a list of labels given a

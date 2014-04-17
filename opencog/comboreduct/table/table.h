@@ -37,6 +37,7 @@
 #include <opencog/util/algorithm.h>
 #include <opencog/util/Counter.h>
 #include <opencog/util/dorepeat.h>
+#include <opencog/util/exceptions.h>
 #include <opencog/util/KLD.h>
 
 #include "../interpreter/eval.h"   /* Needed for binding map, and then obsolete */
@@ -598,8 +599,8 @@ public:
      * If the feature is the empty string, then column zero is deleted.
      * The returned value is the name of the column.
      */
-    std::string delete_column(const std::string& feature);
-    void delete_columns(const string_seq& ignore_features);
+    std::string delete_column(const std::string& feature) throw(IndexErrorException);
+    void delete_columns(const string_seq& ignore_features) throw(IndexErrorException);
 
     /**
      * Get the column, given its offset or label
@@ -784,8 +785,10 @@ struct Table
         return res;
     }
 
-    /// return the corresponding compressed table
-    CTable compressed() const;
+    /// Return the corresponding compressed table.
+    /// The named column, if not empty, will be used to provide weights
+    /// for each row, during compresion.
+    CTable compressed(const std::string = "") const;
 
     /// add raw features given an input file and a list of
     /// features. It is assumed that the table has a subset of
