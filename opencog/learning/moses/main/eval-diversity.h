@@ -38,7 +38,8 @@ namespace opencog { namespace moses {
 using namespace boost::accumulators;
 
 // structure holding the options
-struct eval_diversity_params {
+struct eval_diversity_params
+{
     // IO
     std::vector<std::string> input_files,
         moses_files;
@@ -48,7 +49,7 @@ struct eval_diversity_params {
         display_values;
     // parameters
     std::string diversity_dst;
-    float diversity_p_norm;
+    double diversity_p_norm;
 };
 
 // diversity distance types
@@ -57,7 +58,7 @@ static const std::string tanimoto = "tanimoto";
 static const std::string angular = "angular";
         
 // define accumulator to gather stats
-typedef accumulator_set<float, stats<tag::count,
+typedef accumulator_set<double, stats<tag::count,
                                      tag::mean,
                                      tag::variance,
                                      tag::min,
@@ -65,14 +66,15 @@ typedef accumulator_set<float, stats<tag::count,
 
 template<typename Out>
 Out& ostream_results(Out& out, const eval_diversity_params& edp,
-                     const std::vector<float>& dsts) {
+                     const std::vector<score_t>& dsts)
+{
     if (edp.display_values)
         ostreamContainer(out, dsts, "\n") << std::endl;
 
     if (edp.display_stats) {
         // compute the statistics
         accumulator_t acc;
-        for (float f : dsts) acc(f);
+        for (score_t f : dsts) acc(f);
 
         // display the statistics
         out << "count: " << count(acc) << std::endl;

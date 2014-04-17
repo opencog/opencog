@@ -447,9 +447,9 @@ CTable Table::compressed() const
     ITable::const_iterator in_it = itable.begin();
     OTable::const_iterator out_it = otable.begin();
     for(; in_it != itable.end(); ++in_it, ++out_it)
-        ++res[*in_it][*out_it];
+        res[*in_it][*out_it] += 1.0;
 
-    logger().debug("Size of the compressed dataset is %d", res.size());
+    logger().debug("Size of the compressed dataset is %f", res.size());
 
     return res;
 }
@@ -575,9 +575,9 @@ vector<string> CTable::get_labels() const
     return labels;
 }
 
-unsigned CTable::uncompressed_size() const
+count_t CTable::uncompressed_size() const
 {
-    unsigned res = 0;
+    count_t res = 0.0;
     for (const value_type& v : *this) {
         res += v.second.total_count();
     }

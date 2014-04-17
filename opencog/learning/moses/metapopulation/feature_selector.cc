@@ -162,9 +162,7 @@ CTable feature_selector::build_fs_ctable(const combo_tree& xmplr) const
             // we use most_frequent() to determine wrongness, but this
             // could be relaxed.
             //
-            // But why bother? isn't it extremely rare that tables
-            // ever actually compress, anyway?
-            Counter<vertex, unsigned> cnt = vct.second;
+            Counter<vertex, count_t> cnt = vct.second;
             vertex actual_out = cnt.most_frequent();
             consider_row = predicted_out != actual_out;
         }

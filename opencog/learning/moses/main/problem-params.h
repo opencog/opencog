@@ -57,8 +57,8 @@ struct problem_params
     // default number of samples to describe a problem
     const unsigned int default_nsamples;
     int nsamples;
-    float min_rand_input;
-    float max_rand_input;
+    double min_rand_input;
+    double max_rand_input;
     unsigned long max_evals;
     time_t max_time;
     int max_gens;
@@ -91,13 +91,13 @@ struct problem_params
     int max_candidates;
     bool reduce_all;
     unsigned revisit;
-    float noise;
+    double noise;
     score_t complexity_temperature;
     score_t complexity_ratio;
     double cap_coef;
     unsigned cache_size;
     bool linear_regression;
-    float perm_ratio;
+    double perm_ratio;
     
     // diversity parameters
     bool include_dominated;
