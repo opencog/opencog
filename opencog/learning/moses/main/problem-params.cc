@@ -147,8 +147,8 @@ problem_params::problem_params() :
     enable_mpi(false),
     default_nsamples(20),
     output_python(false),
-    complexity_temperature(5.0f),
-    complexity_ratio(3.5f),
+    complexity_temperature(5.0),
+    complexity_ratio(3.5),
     use_well_enough(false),
     fs_params(festor_params.fs_params),
     max_filename_size(255),
@@ -319,7 +319,7 @@ void problem_params::options_init()
          "automatically disables the use of div, sin, exp and log.\n")
 
         ("logical-perm-ratio",
-         po::value<float>(&perm_ratio)->default_value(0.0),
+         po::value<double>(&perm_ratio)->default_value(0.0),
          "When decorating boolean exemplars with knobs, this option "
          "controls how many pairs of literals of the form op(L1 L2) are "
          "created.  That is, such pairs are used to decorate the exemplar "
@@ -500,7 +500,7 @@ void problem_params::options_init()
          "The higher the more effort is spent on a deme.\n")
 
         (opt_desc_str(noise_opt).c_str(),
-         po::value<float>(&noise)->default_value(-1),
+         po::value<double>(&noise)->default_value(-1),
          "Alternative way to set the ratio of raw score to complexity.  "
          "Setting this option over-rides the complexity ratio, above.  "
          "Assumes that the data is noisy.   The noisier the data, the "
@@ -603,7 +603,7 @@ void problem_params::options_init()
         // The remaining options (TODO organize that)
         
         (opt_desc_str(min_rand_input_opt).c_str(),
-         po::value<float>(&min_rand_input)->default_value(0.0),
+         po::value<double>(&min_rand_input)->default_value(0.0),
          "Minimum value of a sampled coninuous input.  The cp, ip, pre, "
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
@@ -613,7 +613,7 @@ void problem_params::options_init()
          "of the precision.\n")
 
         (opt_desc_str(max_rand_input_opt).c_str(),
-         po::value<float>(&max_rand_input)->default_value(1.0),
+         po::value<double>(&max_rand_input)->default_value(1.0),
          "Maximum value of a sampled coninuous input.  The cp, ip, pre, "
          "recall, prerec, bep and f_one "
          "problems all require a range of values to be sampled in "
@@ -833,7 +833,7 @@ void problem_params::options_init()
          "Remove from the exemplar the literals of non-selected features.\n")
 
         ("fs-subsampling-pbty",
-         po::value<float>(&festor_params.subsampling_pbty)->default_value(0),
+         po::value<double>(&festor_params.subsampling_pbty)->default_value(0),
          "Probability of discarding an observation before carrying feature "
          "selection. 0 means no observation is discard, 1 means all are discard. "
          "This is to force to introduce some randomness in "
@@ -872,7 +872,7 @@ void problem_params::options_init()
 
         // ======= Feature-selection diveristy pressure =======
         ("fs-diversity-pressure",
-         po::value<float>(&festor_params.diversity_pressure)->default_value(0),
+         po::value<double>(&festor_params.diversity_pressure)->default_value(0),
          "Multiplicative coefficient of the diversity penalty "
          "(itself being in [0,1]).\n")
 
@@ -912,15 +912,15 @@ void problem_params::options_init()
 
         // ======= Feature-selection pre scorer only params =======
         ("fs-pre-penalty",
-         po::value<float>(&fs_params.pre_penalty)->default_value(1.0f),
+         po::value<double>(&fs_params.pre_penalty)->default_value(1.0),
          "Activation penalty (see moses --help or man moses for more info).\n")
 
         ("fs-pre-min-activation",
-         po::value<float>(&fs_params.pre_min_activation)->default_value(0.5f),
+         po::value<double>(&fs_params.pre_min_activation)->default_value(0.5),
          "Minimum activation (see moses --help or man moses for more info).\n")
 
         ("fs-pre-max-activation",
-         po::value<float>(&fs_params.pre_max_activation)->default_value(1.0f),
+         po::value<double>(&fs_params.pre_max_activation)->default_value(1.0),
          "Maximum activation (see moses --help or man moses for more info).\n")
 
         ("fs-pre-positive",
