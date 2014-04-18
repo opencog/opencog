@@ -69,11 +69,15 @@ void table_problem_base::common_setup(problem_params& pms)
         logger().info("Read data file %s", idf.c_str());
         Table table = loadTable(idf, pms.target_feature, pms.ignore_features_str);
         num_rows += table.size();
-        // possible subsample the table
+        // Possibly subsample the table
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
-        tables.push_back(table);
+        // Compressed table
         ctables.push_back(table.compressed(pms.weighting_feature));
+        // The compressed table removess the weighting feature, too.
+        if (not pms.weighting_feature.empty())
+            table.itable.delete_column(pms.weighting_feature);
+        tables.push_back(table);
     }
     logger().info("Number of rows in tables = %d", num_rows);
 

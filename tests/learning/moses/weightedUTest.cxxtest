@@ -53,5 +53,16 @@ public:
                           },
                           -6.1);
     }
+    void test_weighted_score()
+    {
+        string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
+        moses_test_good_enough_score({"-Hit", 
+                          "-ur",
+                          "--score-weight wgt",
+                          "-m20000",
+                          data_file_path,
+                          },
+                          -6.1);
+    }
 
 };
