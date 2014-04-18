@@ -149,7 +149,7 @@ public:
         OTable ot(o, "troc");
         stringstream ss;
         ostreamTable(ss, fit_it, ot);
-        cout << "result:" << endl;
+        cout << "result: filterITable" << endl;
         cout << ss.str();
         cout << "fit_it:" << endl;
         cout << fit_it;
@@ -179,12 +179,32 @@ public:
         CTable filtered_ctable = ctable.filtered(args);
         stringstream ss;
         ostreamCTable(ss, filtered_ctable);
-        cout << "result:" << endl;
+        cout << "test_filterCTable result:" << endl;
         cout << ss.str();
         TS_ASSERT_EQUALS(ss.str(),
                          "troc,truc\n"
                          "{1:1},1\n"
                          "{0:1},0\n");
+    }
+    void test_weightCTable()
+    {
+        std::cout << "\n----------------------------" << std::endl;
+        string target_feature("r");
+        vector<string> ignore_features;
+        Table tt = loadTable(tableUTest_dir + "weighted.csv",
+                             target_feature, ignore_features);
+        CTable ctt = tt.compressed("wgt");
+
+        cout << "weighted result:\n" << ctt << endl;
+        stringstream ss;
+        ss << ctt;
+
+        TS_ASSERT_EQUALS(ss.str(),
+                   "r,a,b,c,d,e\n"
+                   "{1:3.5},1,1,1,1,1\n"
+                   "{1:2.66},1,1,1,0,0\n"
+                   "{0:2.5},0,1,1,1,1\n"
+                   "{1:0.4,0:0.8},0,0,0,0,0\n");
     }
 
     // Set target Price, and ignore column Temperature
