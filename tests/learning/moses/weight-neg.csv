@@ -1,0 +1,22 @@
+;
+; weight-neg.csv
+;
+; Boolean-xor, but with negative weights used to flip output.
+; That is, the -1.0 causes the answer for rows 2,3 to be exactly wrong.
+;
+; Linas Vepstas April 2014
+;
+out	a	b	wgt
+0	1	1	1.0
+0	0	1	-1.0
+0	1	0	-1.0
+0	0	0	1.0
+0	1	0	0.0
+0	1	0	0.0
+0	1	0	0.0
+0	0	1	0.0
+0	0	1	0.0
+0	0	1	0.0
+0	0	1	0.0
+0	0	1	0.0
+

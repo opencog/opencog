@@ -14,7 +14,9 @@
 ;
 ; The weighting used here is an inverse combinatoric. The different
 ; classes are from Pascal's triangle: 1 5 10 10 5 1  so the weights
-; are set up so that each class is equally represneted.
+; are set up so that each class is equally represented.
+;
+; Linas Vepstas April 2014
 ;
 ; Columns:
 wgt	a	b	c	d	e	r
