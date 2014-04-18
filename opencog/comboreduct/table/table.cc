@@ -445,22 +445,26 @@ CTable Table::compressed(const std::string weight_col) const
 {
     logger().debug("Compress the dataset, current size is %d", itable.size());
 
-    CTable res(otable.get_label(), itable.get_labels(), get_signature());
-
     // If no weight column, then its straight-forward
     if (weight_col.empty()) {
+        CTable res(otable.get_label(), itable.get_labels(), get_signature());
+
         ITable::const_iterator in_it = itable.begin();
         OTable::const_iterator out_it = otable.begin();
         for (; in_it != itable.end(); ++in_it, ++out_it)
         {
             res[*in_it][*out_it] += 1.0;
         }
+        logger().debug("Size of the compressed dataset is %f", res.size());
+        return res;
     }
     else {
         // Else, remove the weight column from the input;
         // we don't want to use it as an independent feature.
         ITable trimmed(itable);
         trimmed.delete_column(weight_col);
+
+        CTable res(otable.get_label(), trimmed.get_labels(), get_signature());
 
         size_t widx = itable.get_column_offset(weight_col);
         ITable::const_iterator w_it = itable.begin();
@@ -472,10 +476,9 @@ CTable Table::compressed(const std::string weight_col) const
             contin_t weight = get_contin(v);
             res[*in_it][*out_it] += weight;
         }
+        logger().debug("Size of the compressed dataset is %f", res.size());
+        return res;
     }
-    logger().debug("Size of the compressed dataset is %f", res.size());
-
-    return res;
 }
 
 // -------------------------------------------------------
