@@ -73,7 +73,7 @@ void table_problem_base::common_setup(problem_params& pms)
         if (pms.nsamples > 0)
             subsampleTable(table, pms.nsamples);
         tables.push_back(table);
-        ctables.push_back(table.compressed());
+        ctables.push_back(table.compressed(pms.weighting_feature));
     }
     logger().info("Number of rows in tables = %d", num_rows);
 

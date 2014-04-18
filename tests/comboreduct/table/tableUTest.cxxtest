@@ -200,11 +200,11 @@ public:
         ss << ctt;
 
         TS_ASSERT_EQUALS(ss.str(),
-            string("r,a,b,c,d,e\n"
-                   "{1:0.4,0:0.8},0,0,0,0,0\n"
+                   "r,a,b,c,d,e\n"
                    "{1:3.5},1,1,1,1,1\n"
                    "{1:2.66},1,1,1,0,0\n"
-                   "{0:2.5},0,1,1,1,1\n"));
+                   "{0:2.5},0,1,1,1,1\n"
+                   "{1:0.4,0:0.8},0,0,0,0,0\n");
     }
 
     // Set target Price, and ignore column Temperature

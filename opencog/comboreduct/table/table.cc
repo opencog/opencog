@@ -466,13 +466,13 @@ CTable Table::compressed(const std::string weight_col) const
         ITable::const_iterator w_it = itable.begin();
         ITable::const_iterator in_it = trimmed.begin();
         OTable::const_iterator out_it = otable.begin();
-        for (; in_it != itable.end(); ++in_it, ++out_it, ++w_it)
+        for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it)
         {
-            contin_t weight = w_it->get_at<contin_t>(widx);
+            vertex v = w_it->get_at<vertex>(widx);
+            contin_t weight = get_contin(v);
             res[*in_it][*out_it] += weight;
         }
     }
-
     logger().debug("Size of the compressed dataset is %f", res.size());
 
     return res;
