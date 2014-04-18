@@ -273,12 +273,12 @@ string ITable::delete_column(const string& name)
 
     // Delete the label as well.
     string rv;
-    if (!labels.empty()) {
+    if (not labels.empty()) {
         rv = *(labels.begin() + off);
         labels.erase(labels.begin() + off);
     }
 
-    if (!types.empty())
+    if (not types.empty())
         types.erase(types.begin() + off);
 
     return rv;
@@ -307,7 +307,7 @@ OTable::OTable(const super& ot, const string& ol)
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
     : label(ol)
 {
-    OC_ASSERT(!tr.empty());
+    OC_ASSERT(not tr.empty());
     if (is_ann_type(*tr.begin())) {
         // we treat ANN differently because they must be decoded
         // before being evaluated. Also note that if there are memory
@@ -512,7 +512,7 @@ void Table::add_features_from_file(const string& input_file,
     }
 
     // If no feature to force, there is nothing to do
-    if (!features.empty()) {
+    if (not features.empty()) {
         // header of the DSV file
         vector<string> full_header = get_header(input_file);
 

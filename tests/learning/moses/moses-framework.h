@@ -140,7 +140,7 @@ void moses_test_good_enough_score(vector<string> arguments, score_t expected_sc)
     std::cout << "Wallclock time: " << (t2 - t1) << std::endl;
 
     // Unlink only if test passed.
-    if (fabs(result.first - expected_sc) < 1.0e-8)
+    if (expected_sc < result.first)
          unlink(tempfile.c_str());
 }
 
