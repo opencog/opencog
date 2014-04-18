@@ -7,7 +7,7 @@
 .\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
 .\" other parameters are allowed: see man(7), man(1)
 .pc
-.TH MOSES 1 "Sept 7, 2013" "3.6.8" "OpenCog Learning"
+.TH MOSES 1 "April 18, 2014" "3.6.8" "OpenCog Learning"
 .LO 1
 .\" Please adjust this date whenever revising the manpage.
 .\"
@@ -99,6 +99,8 @@ moses \- meta-optimizing semantic evolutionary search solver
 .IR threshold ]
 .RB [ \-S0 ]
 .RB [ \-s1 ]
+.RB [ \-\-score\-weight
+.IR column ]
 .RB [ \-T1 ]
 .RB [ \-t1 ]
 .RB [ \-V1 ]
@@ -396,6 +398,19 @@ input file must contain column labels.
 The \fIcolumn\fR should be ignored, and not used as input.  Columns
 are specified as above.  This option may be used multiple times, to
 ignore multiple columns.
+.TP
+.BI \-\-score\-weight= column
+The \fIcolumn\fR is used to weight the score for each row. If this
+option is not used, then each row in the table contributes equally
+to the evaluation of the accuracy of the learned model. However, if
+some rows are more important than others to get right, this option
+can be used to indicate those rows. The accuracy of the model will
+be weighted by this number, when evaluating the score.  A weight of
+zero effectively causes the row to be ignored. A negative weight
+enourages the system to learn models that get the row incorrect.
+For boolean problems, this is the same as flipping the output
+value.  This option can only be used once, and, if used, it should
+specify a column containing an integer or floating-point value.  
 .TP
 .BI \-b\  num \fR,\ \fB\-\-nsamples= num
 The number of samples to be taken from the input file. Valid values
