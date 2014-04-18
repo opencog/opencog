@@ -58,11 +58,12 @@ public:
         string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
         moses_test_good_enough_score({"-Hit", 
                           "-ur",
-                          "--score-weight wgt",
+                          "--score-weight=wgt",
                           "-m20000",
                           data_file_path,
                           },
-                          -6.1);
+                          -8.017);    // one of the 5-folds wrong, and 6 of the 10-folds. 
+                          // -11.028); // two of the 5-folds, and 7 of the 10-folds.
     }
 
 };
