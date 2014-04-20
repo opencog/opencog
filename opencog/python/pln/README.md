@@ -5,7 +5,7 @@ Probabilistic Logic Networks (PLN)
 
 This is a [new PLN design][] that is currently under development. It is still in-progress.
 
-A detailed description of the architecture is available in [algorithms.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
+A detailed description of the architecture is available in [algorithm.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
 
 After reading the following high-level tutorial, follow that link to understand the algorithms in detail.
 
