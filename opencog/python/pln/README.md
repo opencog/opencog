@@ -101,23 +101,9 @@ The activity of the PLN and Attention Allocation systems can be monitored in rea
 
 Although the primary use case is to use PLN within a MindAgent loaded into the CogServer, coupled with the Attention Allocation system, for development and testing purposes it can be useful to interact directly with the PLN classes in a standalone Python environment.
 
-In the following section, the basic usage pattern is described to interact with PLN from a Python environment without running the CogServer.
+A complete example is available in: **opencog/python/pln/examples/deduction_example.py**, which utilizes an agent defined in **deduction_agent.py**.
 
-##### Prerequisites
-
-To access PLN from Python without running the CogServer, you will need to replace the contents of the opencog/atomspace/atom_types.script file with the following file:
-
-https://gist.github.com/cosmoharrigan/8453760
-
-This is due to the following outstanding issue, after which this would no longer be necessary:
-
-https://github.com/opencog/opencog/issues/484
-
-After replacing atom_types.script, you will need to run cmake and make again to rebuild the system.
-
-A complete example is available in: **opencog/python/pln/examples/deduction_example.py**
-
-Example:
+### PLN Agent example:
 Define an initial [atomspace][] object populated with Atoms.
 
 ```
@@ -169,10 +155,10 @@ node[ConceptNode:swan]
 You can also inspect the detailed history:
     print vars(chainer.history_index)
 
-### Example using the ForwardInferenceAgent
+### Example using the predefined ForwardInferenceAgent
 
 Now that you understand how the previous steps work, you can also
-implement them in a [MindAgent][].
+implement them using the predefined ForwardInferenceAgent [MindAgent][].
 
 The previous steps are already encapsulated inside the
 [ForwardInferenceAgent class][], which defines a **run** method.
@@ -185,6 +171,9 @@ This is also the pattern to use to activate PLN inside a running
 each cycle.
 
 ### Explanation of the PLN architecture
+
+A detailed description of the architecture is available in [algorithms.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
+After reading the following high-level description, follow that link to understand the algorithms in detail.
 
 #### Chainer
 
