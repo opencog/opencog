@@ -193,7 +193,7 @@ class Instantiator
 
 Handle Instantiator::execution_link()
 {
-	// This thorws if it can't figure out the schema ...
+	// This throws if it can't figure out the schema ...
 	// should we try and catch here ?
 	return ExecutionLink::do_execute(oset);
 
