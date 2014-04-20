@@ -10,7 +10,6 @@ functionality, see:
 Also refer to the list of .scm type definition files in opencog.conf
 """
 
-
 from cython.operator cimport dereference as deref
 from opencog.atomspace cimport cAtomSpace, AtomSpace, Handle, cHandle
 
