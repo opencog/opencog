@@ -15,7 +15,7 @@
 (EvaluationLink
   (PredicateNode "rules")
   (ListLink
-    (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)")
+    (ConceptNode "ModusPonensRule<ImplicationLink>")
   )
 )
 (EvaluationLink

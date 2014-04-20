@@ -25,23 +25,10 @@
 #include <opencog/server/Module.h>
 #include "opencog/learning/pln/atom_types.definitions"
 
-// using namespace std;
+#define INHERITANCE_FILE "opencog/learning/pln/atom_types.inheritance"
+#define INITNAME pln_types_init
 
-/*
- * PLNTypes is a trivial module that implements additional atom types for
- * Probabilistic Logic Networks. The actual PLN implementation is located
- * in the opencog/python/pln folder.  
- */
-__attribute__((constructor))
-static void init(void)
-{
-    #include "opencog/learning/pln/atom_types.inheritance"
-}
-
-// __attribute__((constructor))
-// void fini(void)
-// {
-// }
+#include <opencog/atomspace/atom_types.cc>
 
 using namespace opencog;
 TRIVIAL_MODULE(PLNTypesModule)

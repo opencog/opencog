@@ -4,10 +4,9 @@ import random
 from collections import defaultdict
 
 from pln.logic import Logic
-from pln.rules.formulas import revisionFormula
 from pln.rules import *
 from opencog.atomspace import types, Atom, AtomSpace, TruthValue
-
+from opencog import logger
 
 """
 Todo:
@@ -18,7 +17,8 @@ without having to be aware of the different sets of rules that require
 different argument sets.
 """
 
-_VERBOSE = False
+LOG_LEVEL = "FINE"
+LOG_DEFAULT_FILENAME = "/tmp/pln.log"
 
 '''
 There are lots of possible heuristics for choosing atoms. It also
@@ -84,14 +84,14 @@ class AbstractChainer(Logic):
     """
     Has important utility methods for chainers.
     """
-    def __init__(self, atomspace):
-        Logic.__init__(self, atomspace)
+    def __init__(self, atomspace, log):
+        self.log = log
+        Logic.__init__(self, atomspace, self.log)
         self.rules = []
         self.random = random.Random(0)
 
     def add_rule(self, rule):
         assert isinstance(rule, Rule)
-        assert type(rule) != Rule
 
         self.rules.append(rule)
 
@@ -100,8 +100,7 @@ class AbstractChainer(Logic):
 
     # Todo: Should this be a static method?
     def log_failed_inference(self, message):
-        if _VERBOSE:
-            print 'Attempted invalid inference:', message
+        self.log.debug("Attempted invalid inference: {0}".format(message))
 
     # Finds a list of candidate atoms and then matches all of them
     # against the template. Uses the Attentional Focus where possible
@@ -117,6 +116,7 @@ class AbstractChainer(Logic):
             return template
 
         atoms = self.atomspace.get_atoms_in_attentional_focus()
+        self.log.debug("Found in attentional focus: {0}.".format(len(atoms)))
         atom = self._select_atom(template,
                                  s,
                                  atoms,
@@ -124,17 +124,21 @@ class AbstractChainer(Logic):
                                  rule,
                                  other_inputs)
         if not atom:
+            self.log.debug("No atoms found in attentional focus")
             # if it can't find anything in the attentional focus, try
             # the whole atomspace. (it actually still uses indexes to
             # find a subset of the links, that is more likely to be
             # useful)
             atoms = self.lookup_atoms(template, s)
+            self.log.debug("Lookup atoms returned {0} results"
+                           .format(len(atoms)))
             atom = self._select_atom(template,
                                      s,
                                      atoms,
                                      allow_zero_tv,
                                      rule,
                                      other_inputs)
+            self.log.debug("Select atom returned:\n{0}".format(atom))
 
         return atom
 
@@ -170,21 +174,35 @@ class AbstractChainer(Logic):
         self.random.shuffle(atoms)
         #atoms = self.random.sample(atoms, len(atoms))
 
+        if len(atoms) is 0:
+            self.log.debug("Warning: _select_atom called with empty list")
+            return None
+
         # O(N*the percentage of atoms that are useful)
+        num_attempts = 0
         for atom in atoms:
+            num_attempts += 1
             if self.wanted_atom(atom,
                                 template,
                                 substitution,
                                 ground=False,
                                 allow_zero_tv=allow_zero_tv):
                 if rule is None:
+                    self.log.debug("Found atom after {0} attempts".
+                                   format(num_attempts))
                     return atom
                 if rule.valid_inputs(other_inputs+[atom]):
+                    self.log.debug("Found atom after {0} attempts".
+                                   format(num_attempts))
                     return atom
                 else:
                     self.log_failed_inference(
-                        'invalid input, trying another one ' +
+                        "Attempt #" + str(num_attempts) + "{0} produced " +
+                        "invalid input, trying another one " +
                         str(other_inputs + [atom]))
+
+        self.log.debug("Unable to find wanted atom after {0} attempts".
+                       format(num_attempts))
         return None
 
     def _selectOne(self, atoms):
@@ -267,9 +285,18 @@ class AbstractChainer(Logic):
     def find_members(self, conceptnode):
         var = self.new_variable()
         template = self.link(types.MemberLink, [var, conceptnode])
-        members = self.find(template)
+        members = self.lookup_atoms(template, {})
+        members = [m for m in members if self.wanted_atom(m, template, ground=True)]
         self.atomspace.remove(var)
         return members
+
+    def find_eval_links(self, predicatenode):
+        var = self.new_variable()
+        template = self.link(types.EvaluationLink, [predicatenode, var])
+        evals = self.lookup_atoms(template, {})
+        evals = [e for e in evals if self.wanted_atom(e, template, ground=True)]
+        self.atomspace.remove(var)
+        return evals
 
     def node_tv(self, conceptnode):
         """
@@ -285,38 +312,183 @@ class AbstractChainer(Logic):
         for node in self.atomspace.get_atoms_by_type(types.ConceptNode):
             node.tv = self.node_tv(node)
 
+class AtomSpaceBasedInferenceHistory:
+    """
+    Use the AtomSpace to record inference history. It has two main uses. The
+    chainer can lookup an inference to see whether it has already been performed.
+    And after a successful inference, it can look up the produced Atom to reconstruct
+    the tree of rules that were applied to find it.
+    """
+    def __init__(self, chainer, main_atomspace, history_atomspace):
+        """
+        Currently the history_atomspace is the same as the main atomspace (but
+        it could/should be a separate one).
+        """
+        self._chainer = chainer
+        self.log = chainer.log
+        self._main_atomspace = main_atomspace
+        self._history_atomspace = history_atomspace
+        self._all_applications = set()
 
-# Todo: Add a docstring to explain this complex class
-class InferenceHistoryIndex(object):
-    def __init__(self):
-        self.rule_to_io = {}
+    def rule_application_is_new(self, rule, inputs, outputs):
+        """
+        Record a rule application in the history/main atomspace and check if it is new.
+        Return true if it is a new rule application or false if it has been performed
+        before.
+        """
 
-    def record_new_application(self, rule, inputs, outputs):
-        outputs = tuple(outputs)
-        inputs = tuple(inputs)
+        TA = self._history_atomspace
+        L = TA.add_link
+        N = TA.add_node
 
-        try:
-            output_to_inputs = self.rule_to_io[rule]
-        except KeyError:
-            output_to_inputs = self.rule_to_io[rule] = defaultdict(set)
-            assert output_to_inputs is not None
+        # create new lists of inputs and outputs for the separate history atomspace
+        #inputs  = [self.transfer_atom(TA, a) for a in inputs]
+        #outputs = [self.transfer_atom(TA, a) for a in outputs]
 
-        input_tuple_set = output_to_inputs[outputs]
+        app = L(types.ExecutionLink, [
+            N(types.GroundedSchemaNode, rule.name),
+            L(types.ListLink, [
+                L(types.ListLink, inputs),
+                L(types.ListLink, outputs)
+            ])
+        ])
 
-        if inputs in input_tuple_set:
-            return False
-        else:
-            input_tuple_set.add(inputs)
+        if app not in self._all_applications:
+            self._all_applications.add(app)
             return True
+        else:
+            return False
 
-    def lookup_all_applications(self, rule, outputs):
-        try:
-            output_to_inputs = self.rule_to_io[rule]
-        except KeyError:
-            return []
-        input_tuple_set = output_to_inputs[outputs]
-        return input_tuple_set
+    def lookup_input_tuples_by_output_tuple_and_rule(self, rule, output):
+        """
+        Lookup every input tuple that the given Rule has used to create this output.
+        Used by temporal rules
+        """
+        # rule in the arguments is a Rule object, but _get_rule returns a Node
 
+        # Find all the apps for that output, and then select only the
+        # ones for this rule
+        apps = self._lookup_applications_by_output_atom(self, output)
+        relevant_apps = [app for app in apps if self._get_rule(app).name == rule.name]
+        input_tuples = [tuple(self._get_inputs(app)) for app in relevant_apps]
+        return input_tuples
+
+    # TODO only works for rules with one output. This is hard to fix
+    def _lookup_applications_by_output_atom(self, output):
+        # ExecutionLink
+        #   rule
+        #   ListLink
+        #       ListLink inputs
+        #       ListLink outputs
+        TA = self._history_atomspace
+        L = TA.add_link
+        N = TA.add_node
+
+        rule = self._chainer.new_variable()
+        inputs = self._chainer.new_variable()
+        outputs = L(types.ListLink, [output])
+
+        template = L(types.ExecutionLink, [
+            rule,
+            L(types.ListLink, [
+                inputs,
+                outputs
+            ])
+        ])
+        
+        apps = self._chainer.lookup_atoms(template, {})
+        apps = [a for a in apps if self._chainer.wanted_atom(a, template, ground=False, allow_zero_tv=True)]
+        # Reject old templates. They should be deleted really
+        apps = [app for app in apps if not self._get_rule(app).name.startswith('$')]
+        # It will find the template as one of the matches
+        #apps.remove(template)
+        #self._history_atomspace.remove(template)
+        #self._history_atomspace.remove(inputs, recursive=True)
+
+        assert all(app in self._history_atomspace for app in apps)
+        return apps
+
+    def _get_inputs(self, application):
+        """
+        Returns the inputs for a Rule application. application is the atom
+        representing the rule application.
+        """
+        inputs = application.out[1].out[0].out
+
+        return inputs
+
+    def _get_outputs(self, application):
+        outputs = application.out[1].out[1].out
+
+        return outputs
+
+    def _get_rule(self, application):
+        rule = application.out[0]
+
+        return rule
+
+    def check_cycles(self, inputs, outputs):
+        """
+        Recursively find the atoms used to produce output (the
+        inference trail). If there is a cycle, return True. Otherwise
+        return False. It has to be used before rule_application_is_new
+        because we don't want to add the application to perform the application
+        at all if there is a cycle (and hence don't want to add it to the
+        history.
+        """
+        for output_atom in outputs:        
+            if output_atom in inputs:
+                return True
+            for input_atom in inputs:
+                history = self.lookup_history_for_atom(input_atom)
+                for application in history:
+                    if output_atom in self._get_inputs(application):
+                        return True
+
+        return False
+
+    def lookup_history_for_atom(self, atom, history=None):
+        """
+        Lookup the entire inference history for an Atom. It is returned as a list
+        of Atoms representing the rule applications
+        """
+        if history is None: history = []
+
+        apps = self._lookup_applications_by_output_atom(atom)
+        history+=apps
+        assert all(app in self._history_atomspace for app in history)
+        if len(apps) == 2: assert apps[0] != apps[1]
+
+        for app in apps:
+            inputs = self._get_inputs(app)
+            for input_atom in inputs:
+                self.lookup_history_for_atom(input_atom, history)
+
+        # It goes through the tree of applications in top-down fashion (i.e.
+        # from the last conclusion to the first. Reversing the list means it
+        # goes from the premises to the conclusion.
+        assert all(app in self._history_atomspace for app in history)
+        return reversed(history)
+        
+    def print_application(self, application):
+        assert application in self._history_atomspace
+
+        self.log.debug("Using {0}\n".format(self._get_rule(application).name))
+        for input_atom in self._get_inputs(application):
+            assert input_atom in self._history_atomspace
+            self.log.debug("{0}\n".format(input_atom))
+        self.log.debug("|=")
+        for output_atom in self._get_outputs(application):
+            assert output_atom in self._history_atomspace
+            self.log.debug("{0}\n".format(output_atom))
+
+    def print_history(self, atom):
+        history = self.lookup_history_for_atom(atom)
+        assert all(app in self._history_atomspace for app in history)
+
+        self.log.debug("Inference trail:")
+        for application in history:
+            self.print_application(application)
 
 class Chainer(AbstractChainer):
     """
@@ -346,8 +518,19 @@ class Chainer(AbstractChainer):
                  preferAttentionalFocus=False,
                  allow_output_with_variables=False,
                  allow_backchaining_with_variables=False,
-                 delete_temporary_variables=False):
-        AbstractChainer.__init__(self, atomspace)
+                 delete_temporary_variables=False,
+                 check_cycles=True,
+                 check_repeats=True,
+                 log=None):
+
+        if log is None:
+            self.log = logger.create_logger(LOG_DEFAULT_FILENAME)
+        else:
+            self.log = logger
+        self.log.set_level(LOG_LEVEL)
+        self.log.fine("Initializing PLN MindAgent")
+
+        AbstractChainer.__init__(self, atomspace, self.log)
 
         # It stores a reference to the MindAgent object so it can
         # stimulate atoms.
@@ -358,23 +541,14 @@ class Chainer(AbstractChainer):
         self._allow_output_with_variables = allow_output_with_variables
         self._allow_backchaining_with_variables = allow_backchaining_with_variables
         self._delete_temporary_variables = delete_temporary_variables
+        self._check_cycles = check_cycles
+        self._check_repeats = check_repeats
+        # You have to record the inference history in order to check cycles
+        if not check_repeats: assert check_cycles
 
         self.atomspace = atomspace
 
-        # For every atom, store the atoms used to produce it (including
-        # the atoms used to produce them). This prevents cycles (very
-        # important) as well as repeating the same inference.
-        # Map from Atom -> set(Atom)
-        # Default value is the empty set
-        self.trails = defaultdict(set)
-        # Todo: What is the following line for?
-        #self.produced_from = defaultdict(set)
-        self.history_index = InferenceHistoryIndex()
-
-        # Todo:
-        #self.history_atomspace = AtomSpace()
-        # TODO actually load and save these. When loading it, rebuild
-        # the indexes above.
+        self.history = AtomSpaceBasedInferenceHistory(chainer=self, main_atomspace=atomspace, history_atomspace=atomspace)
 
         # Record how often each Rule is used. To bias the Rule
         # frequencies. It will take longer to adapt if you set this
@@ -388,18 +562,30 @@ class Chainer(AbstractChainer):
             self.rule_count = defaultdict(constant_factory)
 
     def forward_step(self, rule=None):
+        self.log.debug("=============================== Running forward step")
         if rule is None:
             rule = self._select_rule()
-
         results = self._apply_forward(rule)
+
+        if results is not None:
+            self.log.debug("Forward step results:\n{0}".format(results))
+        else:
+            self.log.debug("Forward step returned no results")
 
         return results
 
     def backward_step(self, rule=None, target_atoms=None):
+        self.log.debug("=============================== Running backward step")
+
         if rule is None:
             rule = self._select_rule()
 
         results = self._apply_backward(rule, target_outputs=target_atoms)
+
+        if results is not None:
+            self.log.debug("Backward step results:\n{0}".format(results))
+        else:
+            self.log.debug("Backward step returned no results")
 
         return results
 
@@ -420,8 +606,8 @@ class Chainer(AbstractChainer):
             * give it an STI boost
             * record this inference in the InferenceHistoryRepository
         """
-        if _VERBOSE:
-            print str(rule)
+        self.log.debug(str(rule))
+
         try:
             (generic_inputs, generic_outputs, created_vars) = \
                 rule.standardize_apart_input_output(self)
@@ -450,7 +636,7 @@ class Chainer(AbstractChainer):
             if self._delete_temporary_variables:
                 for var in created_vars:
                     if var in self.atomspace:
-                        self.atomspace.remove(var, recursive=False)
+                        self.atomspace.remove(var, recursive=True)
 
         return self.apply_rule(rule, specific_inputs, specific_outputs)
 
@@ -516,7 +702,7 @@ class Chainer(AbstractChainer):
                 return_inputs[i] = atom
             else:
                 if not allow_zero_tv:
-                    #print 'unable to match:',template
+                    #self.log.debug("Unable to match: {0}".format(template))
                     return None
                 # This means it won't be able to produce the output,
                 # but choosing some inputs is still essential for
@@ -616,6 +802,11 @@ class Chainer(AbstractChainer):
         # the atoms, but not assign a TruthValue. Stimulating the inputs
         # makes it more likely to find them in future.
 
+        # That is wrong because many rules have 0 inputs (and use
+        # custom_compute instead)
+        #if len(specific_inputs) == 0:
+        #    self.log.debug("Error: specific_inputs == 0")
+        #    return None
         if self._all_nonzero_tvs(specific_inputs):
             return self.apply_rule(rule, specific_inputs, final_outputs)
         else:
@@ -678,7 +869,7 @@ class Chainer(AbstractChainer):
             # Lookup all inputs ever found by the chainer, and then use
             # the special temporal computation instead of revision.
             past_input_tuples = \
-                self.history_index.lookup_all_applications(rule, outputs)
+                self.history.lookup_input_tuples_by_output_tuple_and_rule(rule, outputs)
             all_input_tuples = [inputs] + past_input_tuples
 
             (outputs, output_tvs) = rule.temporal_compute(all_input_tuples)
@@ -755,82 +946,20 @@ class Chainer(AbstractChainer):
                                       (rule, inputs, outputs))
             return False
 
-        if self._compute_trail_and_check_cycles(outputs[0], inputs):
-            self.log_failed_inference('cycle detected')
-            return False
+        if self._check_cycles:
+            if self.history.check_cycles(inputs, outputs):
+                self.log_failed_inference('cycle detected')
+                return False
 
-        if self._is_repeated(rule, outputs, inputs):
-            self.log_failed_inference('repeated inference')
-            return False
+        if self._check_repeats:
+            if self._is_repeated(rule, outputs, inputs):
+                self.log_failed_inference('repeated inference')
+                return False
 
         return True
 
     def _contains_variables(self, output):
         return len(self.variables(output)) > 0
-
-    def _compute_trail_and_check_cycles(self, output, inputs):
-        """
-        Recursively find the atoms used to produce output (the
-        inference trail). If there is a cycle, return True. Otherwise
-        return False
-        """
-        trail = self.trails[output]
-
-        # Check for cycles before adding anything into the trails
-        if output in inputs:
-            return True
-        for atom in inputs:
-            input_trail = self.trails[atom]
-
-            if output in input_trail:
-                return None
-
-        for atom in inputs:
-            # Reusing the same Atom more than once is bad
-            # (maybe? What if you're combining it with a different atom
-            # to produce a new TV for the same result?)
-            #if atom in trail:
-            #    return None
-            trail.add(atom)
-
-        for atom in inputs:
-            input_trail = self.trails[atom]
-            trail |= input_trail
-
-        return False
-
-    def find_trail(self, atom, trail=[]):
-        """
-        Compute the inference trail for atom. It's represented as a
-        list of tuples, tuples of the form (atom produced, set(atoms
-        used to produce it)).
-        """
-        inputs = self.trails[atom]
-        trail.append((atom, inputs))
-
-        for input in inputs:
-            self.find_trail(input, trail)
-
-        return trail
-
-    # Todo: Fix the root cause of the bug
-    def display_trail(self, trail):
-        for (number, line) in enumerate(reversed(trail)):
-            (output_atom, input_set) = line
-
-            if len(input_set):
-                if output_atom not in self.atomspace:
-                    print 'warning: trail contains nonexistent atom ' \
-                          '(caused by some bug)'
-                    continue
-
-                print '\nStep', number + 1
-                for input in input_set:
-                    print input.h, input
-                print '|='
-                print output_atom.h, output_atom
-            #else:
-            #    print 'Premise', output_atom.h, output_atom
 
     def _is_repeated(self, rule, outputs, inputs):
         # Record the exact list of atoms used to produce an output one
@@ -838,65 +967,19 @@ class Chainer(AbstractChainer):
         # Rules and inputs.)
         # Return True if this exact inference has been applied before
 
-        # In future this should record to the Inference History
-        # Repository atomspace
-        # convert the inputs to a tuple so they can be stored in a set.
-
         # About unordered links
         # Such as And(A B) or And(B A)
         # The AtomSpace will create only one representation of each
         # unordered link. So this algorithm should still work okay for
         # unordered links.
 
-        # TODO it should work for Rules where the input order doesn't
-        # matter (e.g. AndRule) currently it won't notice repetition
-        # for different input orders
-
-        new = self.history_index.record_new_application(rule,
+        new = self.history.rule_application_is_new(rule,
                                                         inputs=inputs,
                                                         outputs=outputs)
         if not new:
             return True
         else:
-            self._add_to_inference_repository(rule, outputs, inputs)
             return False
-
-    def _add_to_inference_repository(self, rule, outputs, inputs):
-        # Todo: Temporarily enabled storing the inference repository
-        # in the main atomspace. See:
-        #   https://github.com/opencog/opencog/issues/523
-
-        #TA = self.history_atomspace
-        TA = self.atomspace
-        L = TA.add_link
-        N = TA.add_node
-
-        # create new lists of inputs and outputs for the separate history atomspace
-        #inputs  = [self.transfer_atom(TA, a) for a in inputs]
-        #outputs = [self.transfer_atom(TA, a) for a in outputs]
-
-        L(types.ExecutionLink, [
-            N(types.GroundedSchemaNode, rule.name),
-            L(types.ListLink, [
-                L(types.ListLink, inputs),
-                L(types.ListLink, outputs)
-            ])
-        ])
-
-    def load_inference_repository(self):
-        # TODO fill the history atomspace
-        TA = self.history_atomspace
-
-        for link in TA.get_atoms_by_type(types.ExecutionLink):
-            rule_name = link.out[0]
-            list_link = link.out[1]
-            inputs= list_link.out[0]
-            outputs= list_link.out[1]
-
-            # Todo: The variables 'rule', 'inputs', outputs' are never used
-            rule = self.lookup_rule(rule_name)
-            inputs = [self.transfer_atom(self.atomspace, a) for a in inputs]
-            outputs = [self.transfer_atom(self.atomspace, a) for a in outputs]
 
     def lookup_rule(self, rule_name):
         for rule in self.rules:
@@ -912,27 +995,31 @@ class Chainer(AbstractChainer):
     def test_rule(self, rule, sample_count):
         # Do a series of samples; different atoms with the same rules.
         self.random.seed(0)
-        print 'Testing', rule, 'in forward chainer'
+        self.log.debug("Testing {0} in forward chainer".format(rule))
 
         for i in xrange(0, sample_count):
             results = self.forward_step(rule=rule)
             if results:
-                print results
+                self.log.debug(results)
 
-        print 'Testing', rule, 'in backward chainer'
+        self.log.debug("Testing {0} in backward chainer".format(rule))
 
         for i in xrange(0, sample_count):
             results = self.backward_step(rule=rule)
             if results:
-                print results
+                self.log.debug(results)
 
-    def find_atom(self, atom, time_allowed=300):
+    def find_atom(self, atom, time_allowed=300, required_confidence=0):
         """
-        Run inference until atom is proved with >0 count, or time
-        runs out (measured in seconds)
+        Run inference until atom is proved with >required_confidence confidence,
+        or time runs out (measured in seconds). With required_confidence=0, it
+        will stop after any inference produces the target atom. With
+        required_confidence=1 it will keep trying other inference paths until it
+        runs out of time. (With any other value it will stop if it reaches that
+        level of confidence)
         """
-        print 'Trying to produce truth values for atom:'
-        print repr(atom)
+        self.log.debug("Trying to produce truth values for atom:\n{0}".
+                       format(repr(atom)))
 
         import time
         start_time = time.time()
@@ -941,25 +1028,22 @@ class Chainer(AbstractChainer):
             if self._stimulateAtoms:
                 self._give_stimulus(atom)
 
-#            res = self.backward_step()
-#            if res: print res
-            res = self.forward_step()
-            if _VERBOSE and res:
-                print res
+            self.backward_step()
 
             target_instances = self.get_target_instances(atom)
             if target_instances:
-                # Todo: The variable 'instance' is never used
                 for instance in target_instances:
-                    print 'Target produced!'
-                    print repr(atom)
+                    self.log.debug("Target produced!")
+                    self.log.debug(repr(instance))
 
-                    print 'Inference steps'
-                    print self.display_trail(self.find_trail(atom))
+                    self.log.debug("Inference steps")
+                    self.history.print_history(instance)
 
-                return True
+                    if instance.tv.confidence > required_confidence:
+                        return True
 
-        print 'Failed to find target in', time_allowed, 'seconds'
+        self.log.debug(
+            "Failed to find target in {0} seconds".format(time_allowed))
         return False
 
     def get_target_instances(self, target):
@@ -971,7 +1055,8 @@ class Chainer(AbstractChainer):
         variables bound)
         """
         atoms = self.lookup_atoms(target, {})
-        atoms = [a for a in atoms if a.tv.count > 0]
+        atoms = [atom for atom in atoms if
+                 self.wanted_atom(atom, target, {}, allow_zero_tv=False, ground=False)]
         return atoms
 
     def get_query(self):

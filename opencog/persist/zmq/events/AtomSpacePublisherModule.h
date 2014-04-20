@@ -26,15 +26,16 @@
 #define _OPENCOG_ATOMSPACE_PUBLISHER_MODULE_H
 
 #include <string>
-
 #include <opencog/server/Agent.h>
 #include <opencog/server/Module.h>
 #include <opencog/server/CogServer.h>
+#include <lib/json_spirit/json_spirit.h>
+#include <tbb/task.h>
+#include <tbb/concurrent_queue.h>
+#include <opencog/util/tbb.h>
+#include <lib/zmq/zhelpers.hpp>
 
-#include <boost/property_tree/ptree.hpp>
-using boost::property_tree::ptree;
-
-#include "opencog/util/zhelpers.hpp"
+using namespace json_spirit;
 
 namespace opencog
 {
@@ -42,13 +43,15 @@ namespace opencog
 class CogServer;
 
 /**
- * The AtomSpacePublisherModule class publishes AtomSpace change events across the network using ZeroMQ
- * to allow for external clients to receive updates from the AtomSpace via a publish/subscribe pattern.
+ * The AtomSpacePublisherModule class publishes AtomSpace change events across
+ * the network using ZeroMQ to allow for external clients to receive updates
+ * from the AtomSpace via a publish/subscribe pattern.
  *
  * API documentation is in: README.md
  *
- * Clients can subscribe to the events by subscribing to the ZeroMQ socket defined in the
- * ZMQ_EVENT_PORT parameter set in the OpenCog configuration file.
+ * Clients can subscribe to the events by subscribing to the ZeroMQ socket
+ * defined in the ZMQ_EVENT_PORT parameter set in the OpenCog configuration
+ * file.
  *
  * Supported events are:
  *
@@ -59,9 +62,26 @@ class CogServer;
  *   addAF      (Atom AttentionValue changed and entered the AttentionalFocus)
  *   removeAF   (Atom AttentionValue changed and exited the AttentionalFocus)
  *
+ * Architecture:
+ *   - Uses Intel TBB (Threaded Building Blocks), Boost Signals2 and ZeroMQ
+ *   - The Boost Signals2 slots receive atomspace events and can be multithreaded
+ *   - Events are enqueued as a pending TBB task
+ *   - TBB scheduler schedules the tasks across available processor cores
+ *   - Tasks serialize the atomspace event into a standard JSON message format
+ *   - Serialized output is forwarded to a TBB concurrent queue
+ *   - Proxy accesses the concurrent queue using a blocking pop operation to 
+ *     demultiplex messages and forward them to the ZeroMQ publisher socket
  **/
 class AtomSpacePublisherModule;
 typedef std::shared_ptr<AtomSpacePublisherModule> AtomSpacePublisherModulePtr;
+
+struct message_t {
+    std::string type;
+    std::string payload;
+};
+
+// High water mark for publisher socket
+const int HWM = 10000000;
 
 class AtomSpacePublisherModule : public Module
 {
@@ -71,19 +91,38 @@ class AtomSpacePublisherModule : public Module
         boost::signals2::connection addAtomConnection;
         boost::signals2::connection TVChangedConnection;
         boost::signals2::connection AVChangedConnection;
+        boost::signals2::connection AddAFConnection;
+        boost::signals2::connection RemoveAFConnection;
+        void enableSignals();
+        void disableSignals();
 
+        // TBB
+        tbb::concurrent_bounded_queue<message_t> queue;
+        
+        // ZeroMQ
         zmq::context_t * context;
-        zmq::socket_t * publisher;
-
         void InitZeroMQ();
+        void proxy();
 
-        ptree atomToPtree(Handle h);
-        ptree tvToPtree(TruthValuePtr tv);
-        ptree avToPtree(AttentionValuePtr av);
-        std::string atomMessage(ptree ptAtom);
-        std::string avMessage(ptree ptAtom, ptree ptAVOld, ptree ptAVNew);
-        std::string tvMessage(ptree ptAtom, ptree ptTVOld, ptree ptTVNew);
-        std::string ptToJSON(ptree pt);
+        void sendMessage(std::string messageType, std::string payload);
+        std::string atomMessage(Object jsonAtom);
+        std::string avMessage(Object jsonAtom, Object jsonAVOld, Object jsonAVNew);
+        std::string tvMessage(Object jsonAtom, Object jsonTVOld, Object jsonTVNew);
+        Object atomToJSON(Handle h);
+        Object tvToJSON(TruthValuePtr tv);
+        Object avToJSON(AttentionValuePtr av);
+
+        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-enable-signals",
+           do_publisherEnableSignals,
+           "Enable AtomSpace event publishing",
+           "Usage: publisher-enable-signals",
+           false, false)
+
+        DECLARE_CMD_REQUEST(AtomSpacePublisherModule, "publisher-disable-signals",
+           do_publisherDisableSignals,
+           "Disable AtomSpace event publishing",
+           "Usage: publisher-disable-signals",
+           false, false)
 
     public:
         AtomSpacePublisherModule(CogServer&);
@@ -95,8 +134,18 @@ class AtomSpacePublisherModule : public Module
 
         void atomAddSignal(Handle h);
         void atomRemoveSignal(AtomPtr atom);
-        void AVChangedSignal(const Handle& h, const AttentionValuePtr& av_old, const AttentionValuePtr& av_new);
-        void TVChangedSignal(const Handle& h, const TruthValuePtr& tv_old, const TruthValuePtr& tv_new);
+        void AVChangedSignal(const Handle& h,
+                             const AttentionValuePtr& av_old,
+                             const AttentionValuePtr& av_new);
+        void TVChangedSignal(const Handle& h,
+                             const TruthValuePtr& tv_old,
+                             const TruthValuePtr& tv_new);
+        void addAFSignal(const Handle& h,
+                         const AttentionValuePtr& av_old,
+                         const AttentionValuePtr& av_new);
+        void removeAFSignal(const Handle& h,
+                         const AttentionValuePtr& av_old,
+                         const AttentionValuePtr& av_new);
 };
 
 }

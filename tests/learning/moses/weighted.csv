@@ -1,0 +1,54 @@
+;
+; weighted.csv
+;
+; Data for weighted scoring test case.  Rather than having a given
+; boolean-expression row being true/false, a floating-point wieght
+; is used instead.
+;
+; The input columns are a,b,c,d,e.   The result column is r.  In this
+; case, r=1 if the number of input columns equal to 1 is odd, else r=0.
+; The weight wgt is the importance of getting the score correct.
+;
+; Turns out that learning the correct function via straight boolean 
+; learning is fairly hard. 
+;
+; The weighting used here is an inverse combinatoric. The different
+; classes are from Pascal's triangle: 1 5 10 10 5 1  so the weights
+; are set up so that each class is equally represented.
+;
+; Linas Vepstas April 2014
+;
+; Columns:
+wgt	a	b	c	d	e	r
+10.1	1	1	1	1	1	1
+2.01	0	1	1	1	1	0
+2.01	1	0	1	1	1	0
+2.01	1	1	0	1	1	0
+2.01	1	1	1	0	1	0
+2.01	1	1	1	1	0	0
+1.001	1	1	1	0	0	1
+1.001	1	1	0	1	0	1
+1.001	1	1	0	0	1	1
+1.001	1	0	1	1	0	1
+1.001	1	0	1	0	1	1
+1.001	1	0	0	1	1	1
+1.001	0	1	1	1	0	1
+1.001	0	1	1	0	1	1
+1.001	0	1	0	1	1	1
+1.001	0	0	1	1	1	1
+1.001	1	1	0	0	0	0
+1.001	1	0	1	0	0	0
+1.001	1	0	0	1	0	0
+1.001	1	0	0	0	1	0
+1.001	0	1	1	0	0	0
+1.001	0	1	0	1	0	0
+1.001	0	1	0	0	1	0
+1.001	0	0	1	1	0	0
+1.001	0	0	1	0	1	0
+1.001	0	0	0	1	1	0
+2.01	0	0	0	0	1	1
+2.01	0	0	0	1	0	1
+2.01	0	0	1	0	0	1
+2.01	0	1	0	0	0	1
+2.01	1	0	0	0	0	1
+10.1	0	0	0	0	0	0

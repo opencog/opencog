@@ -24,9 +24,7 @@
 
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
-#include <opencog/util/platform.h>
 #include <opencog/guile/SchemeEval.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/server/ConsoleSocket.h>
 
 #include "SchemeShell.h"
@@ -49,8 +47,7 @@ SchemeShell::SchemeShell(void)
 
 SchemeShell::~SchemeShell()
 {
-	// Don't delete, its currently set to a singleton instance.
-	//	if (evaluator) delete evaluator;
+	if (evaluator) delete evaluator;
 }
 
 /**
@@ -61,11 +58,7 @@ void SchemeShell::set_socket(ConsoleSocket *s)
 	// Let the generic shell do the basic work.
 	GenericShell::set_socket(s);
 
-	//	if (!evaluator) evaluator = new SchemeEval();
-	//	Someone did this singleton instance crapola because
-	//	some scheme threading somehow doesn't work somewhere.
-	//	buncha crap. fix this shit.
-	if (!evaluator) evaluator = &SchemeEval::instance(&cogserver().getAtomSpace());
+	if (!evaluator) evaluator = new SchemeEval();
 	evaluator->eval("(setlocale LC_CTYPE \"\")");
 }
 

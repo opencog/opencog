@@ -1,4 +1,4 @@
-from opencog.atomspace import types, TruthValue
+from opencog.atomspace import types, TruthValue, get_type_name
 import formulas
 from pln.rule import Rule
 
@@ -38,6 +38,7 @@ class InversionRule(Rule):
         B = chainer.new_variable()
 
         Rule.__init__(self,
+                      name = "InversionRule<%s>"%(get_type_name(link_type),),
                       outputs=[chainer.link(link_type, [B, A])],
                       inputs=[chainer.link(link_type, [A, B]), A, B],
                       formula=formulas.inversionFormula)
@@ -53,6 +54,7 @@ class DeductionRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
+                      name = "DeductionRule<%s>"%(get_type_name(link_type),),
                       formula=formulas.deductionIndependenceBasedFormula,
                       outputs=[chainer.link(link_type, [A, C])],
                       inputs=[chainer.link(link_type, [A, B]),
@@ -72,6 +74,7 @@ class DeductionGeometryRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
+            name="DeductionGeometryRule<%s>"%(get_type_name(link_type),),
             formula=formulas.deductionGeometryFormula,
             outputs=[chainer.link(link_type, [A, C])],
             inputs=[chainer.link(link_type, [A, B]),
@@ -104,6 +107,7 @@ class InductionRule(Rule):
         L = chainer.new_variable()
 
         Rule.__init__(self,
+                      name="InductionRule<%s>"%(get_type_name(link_type),),
                       outputs=[chainer.link(link_type, [S, L])],
                       inputs=[chainer.link(link_type, [M, S]),
                               chainer.link(link_type, [M, L]), S, M, L],
@@ -120,6 +124,7 @@ class AbductionRule(Rule):
         L = chainer.new_variable()
 
         Rule.__init__(self,
+                      name="AbductionRule<%s>"%(get_type_name(link_type),),
                       outputs=[chainer.link(link_type, [S, L])],
                       inputs=[chainer.link(link_type, [S, M]),
                               chainer.link(link_type, [L, M]), S, M, L],
@@ -136,6 +141,7 @@ class TransitiveSimilarityRule(Rule):
         C = chainer.new_variable()
 
         Rule.__init__(self,
+                      name="TransitiveSimilarityRule<%s>"%(get_type_name(link_type),),
                       formula=formulas.transitiveSimilarityFormula,
                       outputs=[chainer.link(link_type, [A, C])],
                       inputs=[chainer.link(link_type, [A, B]),
@@ -154,6 +160,7 @@ class PreciseModusPonensRule(Rule):
         notA = chainer.link(types.NotLink, [A])
 
         Rule.__init__(self,
+                      name="PreciseModusPonensRule<%s>"%(get_type_name(link_type),),
                       outputs=[B],
                       inputs=[chainer.link(link_type, [A, B]),
                               chainer.link(link_type, [notA, B]),
@@ -170,6 +177,7 @@ class ModusPonensRule(Rule):
         B = chainer.new_variable()
 
         Rule.__init__(self,
+                      name="ModusPonensRule<%s>"%(get_type_name(link_type),),
                       outputs=[B],
                       inputs=[chainer.link(link_type, [A, B]),
                               A],
@@ -185,6 +193,7 @@ class SymmetricModusPonensRule(Rule):
         B = chainer.new_variable()
 
         Rule.__init__(self,
+                      name="SymmetricModusPonensRule<%s>"%(get_type_name(link_type),),
                       outputs=[B],
                       inputs=[chainer.link(link_type, [A, B]),
                               A],
@@ -200,6 +209,7 @@ class TermProbabilityRule(Rule):
         BA = chainer.link(link_type, [B, A])
 
         Rule.__init__(self,
+                      name="TermProbabilityRule<%s>"%(get_type_name(link_type),),
                       outputs=[B],
                       inputs=[AB, BA, A],
                       formula=formulas.termProbabilityFormula)
@@ -237,3 +247,57 @@ class SimilarityRule(Rule):
                       inputs=[chainer.link(types.AndLink, [A, B]),
                               chainer.link(types.OrLink, [A, B])],
                       formula=formulas.extensionalSimilarityFormula)
+
+class SubsetRule1(Rule):
+    """
+    SubsetLink A B
+    |A and B| / |A|
+    = P(B|A)
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+                      name="SubsetRule<%s>"%(get_type_name(link_type),),
+                      outputs=[chainer.link(link_type, [A, B])],
+                      inputs=[chainer.link(types.AndLink, [A, B]),
+                              A],
+                      formula=formulas.subsetFormula)
+
+class AndToSubsetRule1(Rule):
+    """
+    SubsetLink A B
+    |A and B| / |A|
+    = P(B|A)
+    """
+    def __init__(self, chainer, link_type):
+        A = chainer.new_variable()
+        B = chainer.new_variable()
+
+        Rule.__init__(self,
+                      name="AndToSubsetRule1<%s>"%(get_type_name(link_type),),
+                      outputs=[chainer.link(link_type, [A, B])],
+                      inputs=[chainer.link(types.AndLink, [A, B]),
+                              A],
+                      formula=formulas.subsetFormula)
+
+class AndToSubsetRuleN(Rule):
+    """
+    SubsetLink And(A B C) D
+    |And(A B C D)| / |And A B C|
+    = P(B|A)
+    """
+    def __init__(self, chainer, link_type, N):
+        vars = chainer.make_n_variables(N)
+        
+        lhs = chainer.link(types.AndLink, vars[:-1])
+        rhs = vars[-1]
+
+        Rule.__init__(self,
+                      name="AndToSubsetRuleN<%s,%s>"%(get_type_name(link_type),N),
+                      outputs=[chainer.link(link_type, [lhs, rhs])],
+                      inputs=[chainer.link(types.AndLink, vars),
+                              lhs],
+                      formula=formulas.subsetFormula)
+

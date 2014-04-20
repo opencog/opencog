@@ -37,8 +37,8 @@ best option is to get the latest CMake if possible).
   with version 4.
 
 ###### guile
-> Embedded scheme interperter (version 1.8.6 or newer is required)
-> http://www.gnu.org/software/guile/guile.html | guile-1.8-dev
+> Embedded scheme interpreter (version 2.0.0 or newer is required)
+> http://www.gnu.org/software/guile/guile.html | guile-2.0-dev
 
 ###### libgsl
 > The GNU Scientific Library
@@ -98,7 +98,7 @@ the build, will be more precise as to which parts will not be built.
 
 ###### xercesc
 > Apache Xerces-C++ XML Parser
-> Requied for embodiment
+> Required for embodiment
 > http://xerces.apache.org/xerces-c/ | libxerces-c2-dev
 
 ###### xmlrpc
@@ -106,6 +106,13 @@ the build, will be more precise as to which parts will not be built.
 > Required by opencog/ubigraph
 > http://www.xmlrpc.com | libxmlrpc-c-dev
 
+###### ZeroMQ (version 3.2.4 or higher)
+> Asynchronous messaging library
+> http://zeromq.org/intro:get-the-software | libzmq3-dev
+
+###### Threading Building Blocks
+> C++ template library for parallel programming
+> https://www.threadingbuildingblocks.org/download | libtbb-dev
 
 Building OpenCog
 ----------------

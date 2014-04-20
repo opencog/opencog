@@ -35,7 +35,7 @@
 namespace FitnessEstimator
 {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 bool DistortedComboSizeOrder::operator()(const combo_tree& tr1,
         const combo_tree& tr2) const

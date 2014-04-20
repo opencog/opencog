@@ -528,7 +528,7 @@ To force an atom to be saved, call:
 
    (store-atom atom)
 
-XXX TODO: there is currently no day to delete an atom fromthe database,
+XXX TODO: there is currently no way to delete an atom from the database,
 once its in there. This needs fixing ...
 
 
@@ -538,7 +538,7 @@ Sooner or later you will want to make a copy of your database, for
 backup purposes, or sharing. Here's the current 'best practices' for
 that:
 
-   $ pg_dump mycogdata filename.sql
+   $ pg_dump mycogdata -f filename.sql
 
 That's all!
 

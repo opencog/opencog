@@ -106,7 +106,7 @@ TruthValuePtr Atom::getTruthValue()
     // dereference can return a raw pointer to an object that has been
     // deconstructed.  The AtomSpaceAsyncUTest will hit this, as will
     // the multi-threaded async atom store in the SQL peristance backend.
-    // Furthermore, we must ake a copy while holding the lock! Got that?
+    // Furthermore, we must make a copy while holding the lock! Got that?
 
     std::lock_guard<std::mutex> lck(_mtx);
     TruthValuePtr local(_truthValue);
@@ -185,6 +185,16 @@ void Atom::setAttentionValue(AttentionValuePtr av) throw (RuntimeException)
     // Notify any interested parties that the AV changed.
     AVCHSigl& avch = _atomTable->AVChangedSignal();
     avch(getHandle(), local, av);
+}
+
+void Atom::chgVLTI(int unit)
+{
+    AttentionValuePtr old_av = getAttentionValue();
+    AttentionValuePtr new_av = createAV(
+        old_av->getSTI(),
+        old_av->getLTI(),
+        old_av->getVLTI() + unit);
+    setAttentionValue(new_av);
 }
 
 // ==============================================================

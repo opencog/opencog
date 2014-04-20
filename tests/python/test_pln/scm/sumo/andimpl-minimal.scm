@@ -8,8 +8,8 @@
 (EvaluationLink
   (PredicateNode "rules")
   (ListLink
-    (ConceptNode "AndCreationRule")
-    (ConceptNode "ModusPonensRule (ImplicationLink VariableNode -> VariableNode)")
+    (ConceptNode "AndCreationRule<2>")
+    (ConceptNode "ModusPonensRule<ImplicationLink>")
   )
 )
 (EvaluationLink

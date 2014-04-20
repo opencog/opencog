@@ -1,14 +1,16 @@
 """
 PLN representation of the "smokes" sample from Tuffy Markov Logic Networks
 
-A test diary is located here:
-https://github.com/opencog/test-datasets/tree/master/pln/tuffy/smokes/tests
-
 More details on this sample are available here:
+https://github.com/opencog/opencog/tree/master/opencog/python/pln/examples/tuffy/smokes
 https://github.com/cosmoharrigan/tuffy/tree/master/samples/smoke
 http://hazy.cs.wisc.edu/hazy/tuffy/doc/tuffy-manual.pdf
 
 Instructions:
+Method 1 -- Running the example in a standalone Python environment:
+- Run smokes_example.py
+
+Method 2 -- Running the example within the cogserver:
 - Add the module path to your PYTHON_EXTENSION_DIRS in opencog.conf:
   ../opencog/python/pln/examples/tuffy/smokes
 - Run the cogserver
@@ -37,21 +39,6 @@ class InferenceAgent(MindAgent):
     def create_chainer(self, atomspace):
         self.chainer = Chainer(atomspace, stimulateAtoms=False)
 
-        # EvaluationToMember, MemberToInheritance
-        self.chainer.add_rule(EvaluationToMemberRule(self.chainer))
-        self.chainer.add_rule(MemberToEvaluationRule(self.chainer))
-        self.chainer.add_rule(MemberToInheritanceRule(self.chainer))
-        self.chainer.add_rule(InheritanceToMemberRule(self.chainer))
-
-        # For predicates with 2 arguments,
-        # with the 0th argument made into a variable
-        self.chainer.add_rule(
-            GeneralEvaluationToMemberRule(self.chainer, 0, 2))
-
-        # ModusPonens:
-        # Implication smokes(x) cancer(X)
-        # smokes(Anna)
-        # |= cancer(Anna)
         self.chainer.add_rule(
             ModusPonensRule(self.chainer, types.ImplicationLink))
 

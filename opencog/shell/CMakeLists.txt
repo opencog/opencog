@@ -29,7 +29,6 @@ ADD_LIBRARY (scheme-shell SHARED
 
 TARGET_LINK_LIBRARIES(scheme-shell
 	smob
-	server
 	atomspace
 	cogutil
 	${Boost_SYSTEM_LIBRARY}

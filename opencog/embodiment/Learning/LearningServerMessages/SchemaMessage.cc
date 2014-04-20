@@ -32,7 +32,7 @@
 
 using namespace opencog::messaging;
 using namespace opencog::learningserver::messages;
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 int SchemaMessage::_schemaMsgType = -1;
 int SchemaMessage::_schemaCandMsgType = init();

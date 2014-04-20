@@ -345,7 +345,7 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
 #endif
             Handle::set_resolver(&asp->getAtomTable());
 #if HAVE_GUILE
-            scm = &SchemeEval::instance(asp);
+            scm = new SchemeEval(asp);
 #endif
         }
         numberOfTypes = classserver().getNumberOfClasses();
@@ -358,6 +358,9 @@ void AtomSpaceBenchmark::startBenchmark(int numThreads)
         if (testKind == BENCH_TABLE)
             delete atab;
         else {
+#if HAVE_GUILE
+            delete scm;
+#endif
 #if HAVE_CYTHON
             delete cogs;
 #else
@@ -1042,7 +1045,7 @@ timepair_t AtomSpaceBenchmark::bm_getIncomingSet()
 #endif /* HAVE_GUILE */
     case BENCH_TABLE: {
         t_begin = clock();
-        atab->getIncomingSet(h);
+        h->getIncomingSet();
         time_taken = clock() - t_begin;
         return timepair_t(time_taken,0);
     }

@@ -54,8 +54,7 @@ std::string SchemeSmob::av_to_string(const AttentionValue *av)
 	snprintf(buff, BUFLEN, "(av %d %d %u)",
 	         av->getSTI(), av->getLTI(), av->getVLTI());
 
-	std::string ret = buff;
-	return ret;
+	return buff;
 }
 
 /* ============================================================== */
@@ -80,17 +79,17 @@ SCM SchemeSmob::take_av (AttentionValue *av)
 SCM SchemeSmob::ss_new_av (SCM ssti, SCM slti, SCM svlti)
 {
 	if (!scm_is_integer(ssti)) {
-		scm_wrong_type_arg_msg("cog-new-av", 1, svlti, "unsigned short");
+		scm_wrong_type_arg_msg("cog-new-av", 1, ssti, "signed short");
 	}
 	if (!scm_is_integer(slti)) {
-		scm_wrong_type_arg_msg("cog-new-av", 2, svlti, "unsigned short");
+		scm_wrong_type_arg_msg("cog-new-av", 2, slti, "signed short");
 	}
 	if (!scm_is_integer(svlti)) {
 		scm_wrong_type_arg_msg("cog-new-av", 3, svlti, "unsigned short");
 	}
 	AttentionValue::sti_t sti = scm_to_short(ssti);
 	AttentionValue::lti_t lti = scm_to_short(slti);
-    AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
+	AttentionValue::vlti_t vlti = scm_to_ushort(svlti);
 	AttentionValue *av = new AttentionValue(sti, lti, vlti);
 	return take_av(av);
 }

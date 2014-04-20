@@ -352,7 +352,10 @@ typedef avatar_operator<avatar_builtin_action_enum, id::avatar_builtin_action_co
 //struct for decription of action properties
 struct action_property_description {
     avatar_builtin_action_enum action;
-    bool compound; //compound is not in the set of required action but is needed for PetBrain, loosing saying that the action requires possibly several cycles to be completed
+    bool compound; // Compound is not in the set of required action
+                   // but is needed for the Operational Avatar
+                   // Controller (OAC), loosely saying that the action
+                   // requires possibly several cycles to be completed
     bool idempotent;
     bool reversible;
     bool always_succeeds; //true iff the action_result is always action_succeed
@@ -412,8 +415,8 @@ static const action_basic_description abd[] = {
     { id::run_in_circle,     "run_in_circle",     "action_result" },
     { id::scratch_self,      "scratch_self",      "->(action_symbol action_result)" },
     { id::scratch_ground_back_legs,
-      "scratch_ground_back_legs",
-      "action_result" },
+                             "scratch_ground_back_legs",
+                                                  "action_result" },
     { id::scratch_other,     "scratch_other",     "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::lie_down,          "lie_down",          "action_result" },
     { id::trick_for_food,    "trick_for_food",    "action_result" },

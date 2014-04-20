@@ -53,6 +53,7 @@ class InferenceAgent(MindAgent):
             # Seems better than Modus Ponens - it doesn't make anything up
             self.chainer.add_rule(TermProbabilityRule(self.chainer, link_type))
             self.chainer.add_rule(ModusPonensRule(self.chainer, link_type))
+            self.chainer.add_rule(PreciseModusPonensRule(self.chainer, link_type))
 
         for link_type in similarity_types:
             # SimilarityLinks don't require an InversionRule obviously
@@ -68,12 +69,22 @@ class InferenceAgent(MindAgent):
         self.chainer.add_rule(InheritanceRule(self.chainer))
         self.chainer.add_rule(SimilarityRule(self.chainer))
 
+        for link_type in conditional_probability_types:
+            self.chainer.add_rule(AndToSubsetRule1(self.chainer, link_type))
+
+            for N in xrange(2, 8):
+                self.chainer.add_rule(AndToSubsetRuleN(self.chainer, link_type, N))
+
         # boolean links
         for rule in create_and_or_rules(self.chainer, 2, 8):
             self.chainer.add_rule(rule)
 
-        self.chainer.add_rule(
-            boolean_rules.AndBulkEvaluationRule(self.chainer))
+        for N in xrange(2, 8):
+            self.chainer.add_rule(
+                boolean_rules.AndBulkEvaluationRule(self.chainer, N))
+        for N in xrange(3, 8):
+            self.chainer.add_rule(
+                boolean_rules.NegatedAndBulkEvaluationRule(self.chainer, N))
 
         # create probabilistic logical links out of MemberLinks
 
@@ -107,6 +118,10 @@ class InferenceAgent(MindAgent):
         self.chainer.add_rule(AttractionRule(self.chainer))
 
         self.chainer.add_rule(ScholemRule(self.chainer))
+
+        boolean_transformation_rules = create_boolean_transformation_rules(self.chainer)
+        for rule in boolean_transformation_rules:
+            self.chainer.add_rule(rule)
 
         #self.chainer.add_rule(OntologicalInheritanceRule(self.chainer))
 

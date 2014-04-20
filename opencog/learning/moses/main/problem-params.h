@@ -26,6 +26,9 @@
 
 #include <string>
 #include <vector>
+
+#include <boost/program_options.hpp>
+
 #include <opencog/comboreduct/combo/vertex.h>
 #include <opencog/comboreduct/reduct/reduct.h>
 #include <opencog/comboreduct/table/table.h>
@@ -54,8 +57,8 @@ struct problem_params
     // default number of samples to describe a problem
     const unsigned int default_nsamples;
     int nsamples;
-    float min_rand_input;
-    float max_rand_input;
+    double min_rand_input;
+    double max_rand_input;
     unsigned long max_evals;
     time_t max_time;
     int max_gens;
@@ -88,13 +91,13 @@ struct problem_params
     int max_candidates;
     bool reduce_all;
     unsigned revisit;
-    float noise;
+    double noise;
     score_t complexity_temperature;
     score_t complexity_ratio;
     double cap_coef;
     unsigned cache_size;
     bool linear_regression;
-    float perm_ratio;
+    double perm_ratio;
     
     // diversity parameters
     bool include_dominated;
@@ -156,6 +159,7 @@ struct problem_params
     // XXX just like above, the table_base argv parser should grab these...
     std::vector<std::string> input_data_files;
     std::string target_feature;
+    std::string weighting_feature;
 
     /// Enable feature selection while selecting exemplar
     /// feature selection happens before each representation building
@@ -178,7 +182,7 @@ protected:
     const unsigned int max_filename_size;
 
     reduct::logical_reduction lr;
-    options_description desc;
+    boost::program_options::options_description desc;
     void options_init();
 
 private:

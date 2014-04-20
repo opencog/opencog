@@ -39,9 +39,9 @@ IF(WIN32)
     TARGET_LINK_LIBRARIES(ActionParamTypeTest winmm)
 ENDIF(WIN32)
 
-ADD_CXXTEST(PetActionUTest)
-TARGET_LINK_LIBRARIES(PetActionUTest PAI Control comboreduct cogutil)
+ADD_CXXTEST(AvatarActionUTest)
+TARGET_LINK_LIBRARIES(AvatarActionUTest PAI Control comboreduct cogutil)
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(PetActionUTest winmm)
+    TARGET_LINK_LIBRARIES(AvatarActionUTest winmm)
 ENDIF(WIN32)
 

@@ -31,6 +31,10 @@
 
 namespace opencog { namespace Procedure {
 
+// BE CAREFUL!!!!!! this is RunningProcedureID ending with ID (all
+// upper case), different from what is below in the definition of
+// RunningProcedure that uses RunningProcedureId ending with Id
+// (capitalized)
 typedef unsigned long int RunningProcedureID;
 typedef boost::variant<RunningProcedureId, RunningBuiltInProcedure> RunningProcedure;
 

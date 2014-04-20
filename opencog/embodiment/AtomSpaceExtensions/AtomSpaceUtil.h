@@ -96,7 +96,7 @@ private:
     static HandleToHandleMap latestPhysiologicalFeeling;
     static HandleToHandleMap latestAvatarSayActionDone;
     static HandleToHandleMap latestAvatarActionDone;
-    static HandleToHandleMap latestPetActionPredicate;
+    static HandleToHandleMap latestAvatarActionPredicate;
 
     static HandleToHandleMap latestModulators; 
     static HandleToHandleMap latestDemands; 
@@ -1094,7 +1094,7 @@ public:
                                              Handle atTimeLink,
                                              Handle avatarNode);
 
-    static void updateLatestPetActionPredicate(AtomSpace& as,
+    static void updateLatestAvatarActionPredicate(AtomSpace& as,
                                                Handle atTimeLink,
                                                Handle predicateNode);
 

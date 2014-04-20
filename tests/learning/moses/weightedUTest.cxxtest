@@ -1,0 +1,86 @@
+/**
+ * weightedUTest.cxxtest ---
+ *
+ * Copyright (C) 2012,2014 OpenCog Foundation
+ *
+ * Author: Linas Vepstas <linasveptas@gmail.com>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License v3 as
+ * published by the Free Software Foundation and including the exceptions
+ * at http://opencog.org/wiki/Licenses
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program; if not, write to:
+ * Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+
+#include <cxxtest/TestSuite.h>
+#include "moses-framework.h"
+
+using namespace opencog::moses;
+
+const string weightedUTest_dir = string(PROJECT_SOURCE_DIR) + "/tests/learning/moses/";
+
+/**
+ * Test learning of problems that require a weieghted score
+ */
+class weightedUTest : public CxxTest::TestSuite
+{
+public:
+    weightedUTest()
+    {
+        // logger().setPrintToStdoutFlag(true);
+        // to control the log level use option -l
+    }
+
+    // A predicate learning test case. The predicate is hard to learn,
+    // Seems that a score of -6 is the best one can do in a short time.
+    void test_predicate_score()
+    {
+        // Score must be -6 or better
+        string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
+        moses_test_good_enough_score({"-Hit", 
+                          "-ur",
+                          "-Ywgt",
+                          "-m20000",
+                          data_file_path,
+                          },
+                          -6.1);
+    }
+
+    void test_weighted_score()
+    {
+        // Score must be -8.016 or better
+        string data_file_path("-i" + weightedUTest_dir + "weighted.csv");
+        moses_test_good_enough_score({"-Hit", 
+                          "-ur",
+                          "--score-weight=wgt",
+                          "-m20000",
+                          data_file_path,
+                          },
+                          -8.017);    // one of the 5-folds wrong, and 6 of the 10-folds. 
+                          // -11.028); // two of the 5-folds, and 7 of the 10-folds.
+    }
+
+    void test_neg_weighted_score()
+    {
+        // Test weighting, where some of the weights are negative or zero.
+        // score must be exactly 2
+        string data_file_path("-i" + weightedUTest_dir + "weight-neg.csv");
+        moses_test_score({"-Hit", 
+                          "-uout",
+                          "--score-weight=wgt",
+                          "-m200",
+                          data_file_path,
+                          },
+                          2);
+    }
+
+};

@@ -24,18 +24,8 @@
 #ifndef _OPENCOG_DISTRIBUTED_MOSES_H
 #define _OPENCOG_DISTRIBUTED_MOSES_H
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-
-#include <sys/types.h>
-#include <unistd.h>
-
-#include <ext/stdio_filebuf.h>
-
 #include <boost/program_options.hpp>
 #include <boost/tuple/tuple.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <opencog/util/iostreamContainer.h>
 #include <opencog/util/log_prog_name.h>
@@ -44,11 +34,6 @@
 #include "moses_params.h"
 
 namespace opencog { namespace moses {
-
-using namespace boost::program_options;
-using boost::tuple;
-using boost::make_tuple;
-using boost::lexical_cast;
 
 // both sender and receiver must use exactly this string for n_evals.
 static const string number_of_evals_str = "n_evals";
@@ -63,7 +48,7 @@ pid_t get_parent_pid();
 // 2) the process output temporary file name (string)
 // 3) its corresponding FILE (FILE*)
 // 4) and the number of jobs it is running (unsigned)
-typedef tuple<string, string, FILE*, unsigned> proc_info;
+typedef boost::tuple<string, string, FILE*, unsigned> proc_info;
 typedef std::map<int, proc_info> proc_map;
 // proc_map's access functions
 int get_pid(const proc_map::value_type& pmv);
@@ -88,7 +73,7 @@ unsigned running_proc_count(const host_proc_map& hpm);
  * returning the adequate information to merge the result with the
  * metapopulation
  */
-string build_cmdline(const variables_map& vm, 
+string build_cmdline(const boost::program_options::variables_map& vm, 
                      const combo_tree& tr,
                      const string& host_name,
                      unsigned n_jobs,

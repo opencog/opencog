@@ -115,9 +115,9 @@ struct feature_selection_parameters
     double mi_confi; //  confidence intensity
 
     // precision scorer parameters
-    float pre_penalty;
-    float pre_min_activation;
-    float pre_max_activation;
+    double pre_penalty;
+    double pre_min_activation;
+    double pre_max_activation;
     bool pre_positive;
 };
 

@@ -78,15 +78,15 @@ std::string ActionPlan::getDemandName() const
 //       ...
 //   </action-plan>
 //
-unsigned int ActionPlan::addAction(const PetAction& action) throw (opencog::InvalidParamException, std::bad_exception)
+unsigned int ActionPlan::addAction(const AvatarAction& action) throw (opencog::InvalidParamException, std::bad_exception)
 {
 
     if (!action.containsValidParameters()) {
         throw opencog::InvalidParamException(TRACE_INFO,
-                                             "ActionPlan - PetAction with invalid parameters: '%s'", action.getName().c_str());
+                                             "ActionPlan - AvatarAction with invalid parameters: '%s'", action.getName().c_str());
     }
 
-    PetAction internalAction = action;
+    AvatarAction internalAction = action;
     internalAction.setSequence(actions.size() + 1);
     actions.push_back(internalAction);
     actionTried.push_back(false);
@@ -100,7 +100,7 @@ bool ActionPlan::isSeqNumberValid(unsigned int seqNumber) const
     return (seqNumber > 0 && seqNumber <= actions.size());
 }
 
-const PetAction& ActionPlan::getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception)
+const AvatarAction& ActionPlan::getAction(unsigned int seqNumber) const throw (opencog::IndexErrorException, std::bad_exception)
 {
     //assert(isSeqNumberValid(seqNumber));
     if (!isSeqNumberValid(seqNumber)) {
@@ -127,7 +127,7 @@ string ActionPlan::getPVPmessage(const std::string& petId) const
 
     DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
-    for (vector<PetAction>::const_iterator itr = actions.begin(); itr != actions.end(); itr++) {
+    for (vector<AvatarAction>::const_iterator itr = actions.begin(); itr != actions.end(); itr++) {
         itr->createPVPXmlElement(xmlDoc, actionPlanElem);
     }
     string result = PAIUtils::getSerializedXMLString(xmlDoc);
@@ -144,7 +144,7 @@ string ActionPlan::getPVPmessage(const std::string& petId, unsigned int actionSe
 
     DOMElement* actionPlanElem = createActionPlanElement(xmlDoc, xmlDoc->getDocumentElement(), petId);
 
-	const PetAction& action = getAction(actionSeqNum);
+	const AvatarAction& action = getAction(actionSeqNum);
 	action.createPVPXmlElement(xmlDoc, actionPlanElem);
 
 	string result = PAIUtils::getSerializedXMLString(xmlDoc);

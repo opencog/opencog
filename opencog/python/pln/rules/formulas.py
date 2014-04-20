@@ -1,4 +1,5 @@
 from opencog.atomspace import TruthValue
+from math import isinf, isnan
 
 # Todo: Could this file be broken up so that there would be a
 # one-to-one correspondence between 'formulas' and 'rules' files?
@@ -9,6 +10,7 @@ INDEPENDENCE_ASSUMPTION_DISCOUNT = 0.9
 EXTENSION_TO_INTENSION_DISCOUNT_FACTOR = 0.9
 INTENSION_TO_EXTENSION_DISCOUNT_FACTOR = 0.9
 MembershipToInheritanceCountDiscountFactor = 0.9
+REVISION_REDUNDANCY_FACTOR = 0.5
 
 
 def identityFormula(tvs):
@@ -44,6 +46,11 @@ def deductionIndependenceBasedFormula(tvs):
     sAC = sAB * sBC + (1 - sAB) * (sC - sB * sBC) / sNotB
 
     n = makeUpCount(tvs) * INDEPENDENCE_ASSUMPTION_DISCOUNT
+
+    assert not isinf(sAC)
+    assert not isnan(sAC)
+    assert not isinf(n)
+    assert not isnan(n)
 
     return [TruthValue(sAC, n)]
 
@@ -179,7 +186,7 @@ def andFormula(tvs):
     
     for tv in tvs:
         total_strength *= tv.mean
-    
+
     return [TruthValue(total_strength, makeUpCount(tvs))]
 
 
@@ -453,6 +460,13 @@ def extensionalSimilarityFormula(tvs):
 
     return [TruthValue(P, N)]
 
+def subsetFormula(tvs):
+    [and_tv, a_tv] = tvs
+
+    sAB = and_tv.mean / a_tv.mean
+    nAB = makeUpCount(tvs)
+
+    return [TruthValue(sAB, nAB)]
 
 def attractionFormula(tvs):
     [ab, b] = tvs
@@ -475,14 +489,30 @@ def ontoInhFormula(tvs):
 
 
 def revisionFormula(tvs):
+    """
+    From the PLN Book: We may also heuristically form a count rule
+    such as n = n1 + n2 - c min(n1, n2), where the parameter c indicates an 
+    assumption about the level of interdependency between the bases of 
+    information corresponding to the two premises. The value c=1 denotes 
+    the assumption that the two sets of evidence are completely redundant; 
+    the value c=0 denotes the assumption that the two sets of evidence are 
+    totally distinct. Intermediate values denote intermediate assumptions.
+    """
     x, y = tvs
     # revise two truth values
 
-    n = x.count+y.count
+    #n = x.count+y.count
+    n = x.count + y.count - REVISION_REDUNDANCY_FACTOR * min(x.count, y.count)
+    
     weight_1 = x.count * 1.0 / n
     weight_2 = y.count * 1.0 / n
     # TODO maybe check for overlap
-    s = (weight_1 * x.mean + weight_2 * y.mean)
+    #s = (weight_1 * x.mean + weight_2 * y.mean)
+
+    #TODO: formula temporarily changed, due to this issue:
+    #   https://github.com/opencog/opencog/issues/646
+    s = (x.count * x.mean + y.count * y.mean) / (x.count + y.count)
+
     return TruthValue(s, n)
 
 

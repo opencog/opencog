@@ -26,7 +26,8 @@
 namespace opencog { namespace moses {
 
 // structure holding the options
-struct eval_candidate_params {
+struct eval_candidate_params
+{
     // IO
     std::string input_file;
     std::vector<std::string> combo_program_files;
@@ -34,11 +35,11 @@ struct eval_candidate_params {
         target_feature_str;
     // parameters
     std::string problem;
-    float noise;
+    double noise;
     bool normalize;
-    float complexity_amplifier;
+    double complexity_amplifier;
     // prerec parameters
-    float prerec_min_recall;
+    double prerec_min_recall;
     bool prerec_simple_precision;
 };
 

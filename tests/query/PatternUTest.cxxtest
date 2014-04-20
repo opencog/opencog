@@ -20,10 +20,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/nlp/types/atom_types.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -75,18 +75,19 @@ class PatternUTest: public CxxTest::TestSuite
 			logger().setFilename(config()["LOG_FILE"]);
 			logger().setLevel(Logger::getLevelFromString(config()["LOG_LEVEL"]));
 			logger().setPrintToStdoutFlag(config().get_bool("LOG_TO_STDOUT"));
+			as = new AtomSpace();
 		}
 
 		~PatternUTest()
 		{
+			delete as;
 			// Erase the log file if no assertions failed.
 			if (!CxxTest::TestTracker::tracker().suiteFailed())
 				std::remove(logger().getFilename().c_str());
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_simple_link(void);
 		void test_two_links(void);
@@ -179,10 +180,11 @@ bool PMCB::solution(std::map<Handle, Handle> &pred_soln,
  *          ConceptNode "concept kanjiru 1"         ;; hitem_1
  *          ConceptNode "concept kangaeru 2"        ;; hitem_2
  */
+void PatternUTest::tearDown(void)
+{
+}
 void PatternUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
 	pme.set_atomspace(as);
 

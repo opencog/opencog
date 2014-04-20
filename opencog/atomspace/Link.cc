@@ -80,7 +80,7 @@ std::string Link::toShortString(std::string indent)
         AtomPtr a(_outgoing[i]);
         answer << a->toShortString(more_indent);
     }
-    answer << indent << ")\n";
+    answer << indent << ") ; [" << getHandle().value() << "]\n";
     return answer.str();
 }
 
@@ -104,7 +104,8 @@ std::string Link::toString(std::string indent)
         AtomPtr a(_outgoing[i]);
         answer += a->toString(more_indent);
     }
-    answer += indent + ")\n";
+    answer += indent + ") ; [" + 
+            std::to_string(getHandle().value()).c_str() + "]\n";
     return answer;
 }
 

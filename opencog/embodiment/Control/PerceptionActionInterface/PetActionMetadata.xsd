@@ -56,7 +56,7 @@
         <xsd:sequence>
             <xsd:element name="appliesTo" type="action:ApplicabilityType"
                          minOccurs="0" maxOccurs="1"/>            
-            <xsd:element name="actions" type="action:PetActionsType"
+            <xsd:element name="actions" type="action:AvatarActionsType"
                          minOccurs="1" maxOccurs="1"/>
 
             <xsd:element name="macros" type="action:PetMacrosType"
@@ -94,7 +94,7 @@
             date . . .
         </xsd:documentation>
     </xsd:annotation>
-    <xsd:complexType name="PetActionsType">
+    <xsd:complexType name="AvatarActionsType">
         <xsd:sequence>
             <xsd:choice minOccurs="1" maxOccurs="unbounded">
                 <xsd:element name="action" type="action:ActionTemplateType"
@@ -140,7 +140,7 @@
                          minOccurs="0" maxOccurs="unbounded"/>
         </xsd:sequence>
         <xsd:attribute name="name" type="xsd:string" use="optional"/>
-        <xsd:attribute name="type" type="common:PetActionEnumType"
+        <xsd:attribute name="type" type="common:AvatarActionEnumType"
                        use="optional"/>
     </xsd:complexType>
 

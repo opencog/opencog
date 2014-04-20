@@ -20,15 +20,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include <boost/program_options.hpp>
+#include <ext/stdio_filebuf.h>
+
 #include "distributed_moses.h"
 #include "../main/moses_exec_def.h"
 
 namespace opencog { namespace moses {
-
-using namespace boost::program_options;
-using boost::tuple;
-using boost::make_tuple;
-using boost::lexical_cast;
 
 pid_t get_parent_pid() {
     return getpid();
@@ -50,13 +54,18 @@ unsigned get_num_jobs(const proc_map::value_type& pmv) {
     return pmv.second.get<3>();
 }
 
-const string& get_hostname(const host_proc_map::value_type& hp) {
+const string& get_hostname(const host_proc_map::value_type& hp)
+{
     return hp.first;
 }
-const proc_map& get_proc_map(const host_proc_map::value_type& hp) {
+
+const proc_map& get_proc_map(const host_proc_map::value_type& hp)
+{
     return hp.second;
 }
-const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
+
+const unsigned get_total_jobs(const host_proc_map::value_type& hp)
+{
     // return the number of jobs for all processes of hp's host
     unsigned acc = 0;
     for (const proc_map::value_type& p : get_proc_map(hp))
@@ -64,21 +73,24 @@ const unsigned get_total_jobs(const host_proc_map::value_type& hp) {
     return acc;
 }
 
-unsigned running_proc_count(const host_proc_map& hpm) {
+unsigned running_proc_count(const host_proc_map& hpm)
+{
     unsigned acc = 0;
     for (const host_proc_map::value_type& hpmv : hpm)
         acc += hpmv.second.size();
     return acc;
 }
 
-string build_cmdline(const variables_map& vm, 
+string build_cmdline(const boost::program_options::variables_map& vm, 
                      const combo_tree& tr,
                      const string& host_name,
                      unsigned n_jobs,
                      unsigned max_evals,
-                     unsigned gen_idx) {
+                     unsigned gen_idx)
+{
+    namespace po = boost::program_options;
     string res;
-    if(host_name == localhost)
+    if (host_name == localhost)
         res = "moses";
     else
         res = string("ssh ") + host_name + " 'moses";
@@ -86,22 +98,23 @@ string build_cmdline(const variables_map& vm,
     // interfering with the command to be built, that is:
     // exemplar, output options, jobs, max_evals, max_gens and
     // log file name options.
-    for(variables_map::const_iterator it = vm.begin(); it != vm.end(); ++it) {
-        if(it->first != exemplars_str_opt.first
-           && it->first != exemplars_str_opt.first
-           && it->first != output_score_opt.first
-           && it->first != output_bscore_opt.first
-           && it->first != output_penalty_opt.first
-           && it->first != output_eval_number_opt.first
-           && it->first != output_with_labels_opt.first
-           && it->first != output_file_opt.first
-           && it->first != jobs_opt.first
-           && it->first != max_evals_opt.first
-           && it->first != max_gens_opt.first
-           && it->first != result_count_opt.first
-           && it->first != log_file_opt.first
-           && it->first != log_file_dep_opt_opt.first
-           && !it->second.defaulted()) {
+    for (po::variables_map::const_iterator it = vm.begin(); it != vm.end(); ++it) {
+        if (it->first != exemplars_str_opt.first
+            and it->first != exemplars_str_opt.first
+            and it->first != output_score_opt.first
+            and it->first != output_bscore_opt.first
+            and it->first != output_penalty_opt.first
+            and it->first != output_eval_number_opt.first
+            and it->first != output_with_labels_opt.first
+            and it->first != output_file_opt.first
+            and it->first != jobs_opt.first
+            and it->first != max_evals_opt.first
+            and it->first != max_gens_opt.first
+            and it->first != result_count_opt.first
+            and it->first != log_file_opt.first
+            and it->first != log_file_dep_opt_opt.first
+            and !it->second.defaulted())
+         {
             string opt_name(" --");
             opt_name += it->first + " \"";
             res += opt_name + to_string(it->second, string("\"") + opt_name) + "\"";
@@ -124,20 +137,20 @@ string build_cmdline(const variables_map& vm,
     res += string(" -") + output_penalty_opt.second + " 1";
     res += string(" -") + output_eval_number_opt.second + " 1";
     // add number of jobs option
-    res += string(" -") + jobs_opt.second + lexical_cast<string>(n_jobs);
+    res += string(" -") + jobs_opt.second + boost::lexical_cast<string>(n_jobs);
     // add number of evals option
     res += string(" -") + max_evals_opt.second + " " 
-        + lexical_cast<string>(max_evals);
+        + boost::lexical_cast<string>(max_evals);
     // add one generation option
     res += string(" -") + max_gens_opt.second + " 1";
     // add log option determined name option
     res += string(" -") + log_file_opt.second + "distributed_moses"
-        + "_from_parent_" + lexical_cast<string>(get_parent_pid())
-        + "_gen_" + lexical_cast<string>(gen_idx) + ".log";
+        + "_from_parent_" + boost::lexical_cast<string>(get_parent_pid())
+        + "_gen_" + boost::lexical_cast<string>(gen_idx) + ".log";
     // add option to return all results
     res += string(" -") + result_count_opt.second + " -1";
 
-    if(host_name != localhost) {
+    if (host_name != localhost) {
         res += "'";
     }
 
@@ -225,7 +238,7 @@ void parse_result(istream& in, metapop_candidates& candidates, int& evals)
             in >> evals;
         } else {
             // read score
-            score_t score = lexical_cast<score_t>(s);
+            score_t score = boost::lexical_cast<score_t>(s);
             // read complexity
             complexity_t complexity;
             in >> complexity;
@@ -349,7 +362,7 @@ void distributed_moses(metapopulation& mp,
 {
     logger().info("Distributed MOSES starts");
 
-    const variables_map& vm = pa.vm;
+    const boost::program_options::variables_map& vm = pa.vm;
     const jobs_t& jobs = pa.jobs;
 
     typedef pbscored_combo_tree_ptr_set_cit mp_cit;

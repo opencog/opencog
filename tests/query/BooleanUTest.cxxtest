@@ -20,9 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/query/DefaultPatternMatchCB.h>
 #include <opencog/query/PatternMatch.h>
-#include <opencog/server/CogServer.h>
 #include <opencog/util/Config.h>
 #include <opencog/util/Logger.h>
 
@@ -64,8 +64,7 @@ class BooleanUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_isa(void);
 };
@@ -80,10 +79,13 @@ class BooleanUTest :  public CxxTest::TestSuite
  */
 #define an as->addNode
 #define al as->addLink
+void BooleanUTest::tearDown(void)
+{
+	delete as;
+}
 void BooleanUTest::setUp(void)
 {
-	server(CogServer::createInstance);
-	as = &cogserver().getAtomSpace();
+	as = new AtomSpace();
 	pm.set_atomspace(as);
 
 	// Create an implication link that will be tested.

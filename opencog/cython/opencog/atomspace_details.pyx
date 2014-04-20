@@ -100,17 +100,6 @@ cdef class TruthValue:
         return (<cSimpleTruthValue*>self._ptr()).countToConfidence(count)
 
 
-cdef class TimeServer:
-    cdef cTimeServer *timeserver
-
-    def __cinit__(self):
-        #self.timeserver = &timeserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the AtomSpace takes care of cleaning up
-        pass
-
 # @todo this should be a generator using the yield statement
 cdef convert_handle_seq_to_python_list(vector[cHandle] handles, AtomSpace atomspace):
     cdef vector[cHandle].iterator iter
@@ -420,35 +409,7 @@ cdef class AtomSpace:
     def print_list(self):
         self.atomspace.print_list()
 
-    def next_new_atom(self):
-        """
-        Function to get atoms that have been added to the AtomSpace.
-        There's a list of newly added ones, and this method will pop the
-        first atom from the list. You should use it to update a separate
-        list for each Python MindAgent that wants to use it. It returns
-        either a Cython Atom or None (if there are none left).
-        """
-        cdef cHandle ch
-        cdef Handle h
-        cdef Atom atom
-        if deref(self.atomspace).addAtomSignalQueue.size() > 0:
-            ch = deref(self.atomspace).addAtomSignalQueue.front()
-            deref(self.atomspace).addAtomSignalQueue.pop_front()
-            h = Handle(ch.value())
-            atom = Atom(h,self)
-            return atom
-        else:
-            return None
-
-cdef class SpaceServer:
-    cdef cSpaceServer *spaceserver
-
-    def __init__(self):
-        #self.spaceserver = &spaceserver
-        pass
-
-    def __dealloc__(self):
-        # Don't do anything because the CogServer takes care of cleaning up
-        pass
-
+cdef api object py_atomspace(cAtomSpace *c_atomspace) with gil:
+    cdef AtomSpace atomspace = AtomSpace_factory(c_atomspace)
+    return atomspace
 

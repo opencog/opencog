@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -23,20 +23,22 @@
  */
 
 #include "Pattern.h"
+#include "HTree.h"
 
 
-using namespace opencog::PatternMiner;
+using namespace opencog::PatternMining;
+using namespace opencog;
 
-bool Pattern::addVariableBinding(Handle variableH, Handle valueH)
-{
-	if (bindings.find(variableH) == bindings.end())
-	{
-		bindings.insert(std::pair<Handle, Handle>(variableH,valueH));
-		return true;
-	}
-	else
-		return false;
+//bool Pattern::addVariableBinding(Handle variableH, Handle valueH)
+//{
+//	if (bindings.find(variableH) == bindings.end())
+//	{
+//		bindings.insert(std::pair<Handle, Handle>(variableH,valueH));
+//		return true;
+//	}
+//	else
+//		return false;
 
-}
+//}
 
 

@@ -410,7 +410,7 @@ SERVER_PORT           = 17001
 
 
 # modules that will be loaded at the cogserver start
-MODULES               = ./libquery.so,
+MODULES               = ./libQueryModule.so,
                         ./libbuiltinreqs.so,
                         ./libscheme-shell.so,
                         ./libpersist.so,
@@ -439,7 +439,8 @@ SCM_PRELOAD           = scm/core_types.scm,
                         feeling_updaters.scm,
                         demand_updaters.scm,
                         modulator_updaters.scm,
-                        stimulus_updaters.scm
+                        stimulus_updaters.scm,
+			pm_test_corpus.scm
 
 # Use a comma separated list for multiple dirs
 PYTHON_EXTENSION_DIRS  = ../../../opencog/python/web/api
@@ -498,5 +499,6 @@ UPDATE_SPATIAL_PREDICATES_FOR = only_non_block_entity
 # in 3D SpaceMap, if turn on BlockEntities segmentation, when percepting the block world. This is very consuming.
 ENABLE_BLOCKENTITY_SEGMENTATION = false
 
-
+ENABLE_PATTERN_MINER = false
+PATTERN_MAX_GRAM = 5
 

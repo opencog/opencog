@@ -67,7 +67,7 @@ AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAgentActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPhysiologicalFeeling;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarSayActionDone;
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarActionDone;
-AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestPetActionPredicate;
+AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestAvatarActionPredicate;
 
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestModulators; 
 AtomSpaceUtil::HandleToHandleMap AtomSpaceUtil::latestDemands; 
@@ -3116,11 +3116,11 @@ void AtomSpaceUtil::updateLatestAvatarActionDone(AtomSpace& as,
                                as, atTimeLink, avatarNode);
 }
 
-void AtomSpaceUtil::updateLatestPetActionPredicate(AtomSpace& as,
+void AtomSpaceUtil::updateLatestAvatarActionPredicate(AtomSpace& as,
                                                    Handle atTimeLink,
                                                    Handle predicateNode) 
 {
-    updateGenericLatestInfoMap(latestPetActionPredicate,
+    updateGenericLatestInfoMap(latestAvatarActionPredicate,
                                as, atTimeLink, predicateNode);
 }
 

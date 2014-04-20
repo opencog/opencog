@@ -36,7 +36,7 @@ namespace ImaginaryLife
 {
 
 using namespace opencog::world;
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 /**
  * public methods

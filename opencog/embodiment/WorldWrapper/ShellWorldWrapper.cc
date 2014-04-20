@@ -27,7 +27,7 @@
 
 namespace opencog { namespace world {
 
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 /**
  * Constructor, destructor
@@ -53,7 +53,7 @@ bool ShellWorldWrapper::isPlanFailed() const
 
 bool ShellWorldWrapper::sendSequential_and(sib_it from, sib_it to)
 {
-    using namespace PetCombo;
+    using namespace AvatarCombo;
     combo_tree tr(id::sequential_and);
     pre_it head = tr.begin();
     for (sib_it sib = from; sib != to; ++sib) {

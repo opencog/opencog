@@ -31,6 +31,7 @@ using namespace opencog;
 class SCMUtilsUTest :  public CxxTest::TestSuite
 {
 	private:
+		SchemeEval* evaluator;
 		Handle disorder;
 		Handle disordered;
 		Handle disor_more;
@@ -63,8 +64,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 		}
 
 		void setUp(void);
-
-		void tearDown(void) { }
+		void tearDown(void);
 
 		void test_utils(void);
 };
@@ -77,6 +77,7 @@ class SCMUtilsUTest :  public CxxTest::TestSuite
 void SCMUtilsUTest::setUp(void)
 {
 	server(CogServer::createInstance);
+	evaluator = new SchemeEval();
 
 	// Load the required data
 	config().set("MODULES",
@@ -103,9 +104,15 @@ void SCMUtilsUTest::setUp(void)
 
 }
 
+void SCMUtilsUTest::tearDown(void)
+{
+	delete evaluator;
+	evaluator = NULL;
+}
+
 #define CHKERR \
 	TSM_ASSERT("Caught scm error during eval", \
-		(false == SchemeEval::instance().eval_error()));
+		(false == evaluator->eval_error()));
 /*
  * Test assorted functions from opencog/scm/utilities.scm
  */
@@ -115,17 +122,17 @@ void SCMUtilsUTest::test_utils(void)
 	logger().debug("BEGIN TEST: %s", __FUNCTION__);
 
 	// Test cog-atom-incr ---------------------------------
-	Handle counter = SchemeEval::instance().eval_h("counter");
+	Handle counter = evaluator->eval_h("counter");
 	CHKERR;
 
 	TSM_ASSERT("Failed to find atom", Handle::UNDEFINED != counter);
 	TSM_ASSERT_EQUALS("Wrong atom type", CONCEPT_NODE, counter->getType());
 
-	SchemeEval::instance().eval("(test-incr-cnt)");
+	evaluator->eval("(test-incr-cnt)");
 	CHKERR;
-	SchemeEval::instance().eval("(test-incr-cnt)");
+	evaluator->eval("(test-incr-cnt)");
 	CHKERR;
-	SchemeEval::instance().eval("(test-incr-cnt)");
+	evaluator->eval("(test-incr-cnt)");
 	CHKERR;
 	TruthValuePtr tv = counter->getTruthValue();
 
@@ -133,19 +140,19 @@ void SCMUtilsUTest::test_utils(void)
 	TSM_ASSERT_EQUALS("wrong count found", 3, (int)(tv->getCount()));
 
 	// Test cog-get-partner ------------------------------
-	Handle recount = SchemeEval::instance().eval_h("recount");
+	Handle recount = evaluator->eval_h("recount");
 	CHKERR;
 	TSM_ASSERT_EQUALS("wrong pair cog-get-partner found ", counter, recount);
 
 	// Test cog-pred-get-partner ------------------------------
-	Handle rrcnt = SchemeEval::instance().eval_h("rrcnt");
+	Handle rrcnt = evaluator->eval_h("rrcnt");
 	CHKERR;
 	TSM_ASSERT_EQUALS("wrong cog-pred-get-partner found ", counter, rrcnt);
 
 	// Test cog-get-link ------------------------------
-	Handle ref = SchemeEval::instance().eval_h("ref");
+	Handle ref = evaluator->eval_h("ref");
 	CHKERR;
-	Handle wref = SchemeEval::instance().eval_h("wref");
+	Handle wref = evaluator->eval_h("wref");
 	CHKERR;
 	TSM_ASSERT("Error setting up for cog-get-link", Handle::UNDEFINED != ref);
 	TSM_ASSERT_EQUALS("wrong cog-get-link found ", ref, wref);

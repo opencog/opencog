@@ -25,7 +25,7 @@
                 schemaLocation="CommonMetadata.xsd"/>
 
     <xsd:import namespace="http://www.opencog.org/metadata/action"
-                schemaLocation="PetActionMetadata.xsd"/>    
+                schemaLocation="AvatarActionMetadata.xsd"/>    
 
     <xsd:element name="embodiment-msg" type="oc:EmbodimentMsgType"/>
 

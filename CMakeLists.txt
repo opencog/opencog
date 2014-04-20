@@ -222,18 +222,16 @@ ELSE (GTK3_FOUND)
 ENDIF (GTK3_FOUND)
 
 # Gnu Guile scheme interpreter
-# Versions prior to 1.8.6 have assorted serious problems with
-# multi-threading.  If you need guile, you need this version.
-FIND_PACKAGE(Guile 1.8.6)
+# Version 2.0.0 is needed for mrs io ports, compilation, etc.
+FIND_PACKAGE(Guile 2.0.0)
 IF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	ADD_DEFINITIONS(-DHAVE_GUILE)
 	SET(HAVE_GUILE 1)
 	INCLUDE_DIRECTORIES(${GUILE_INCLUDE_DIR})
-	SET(GUILE_DIR_MESSAGE "Guile was found.")
 ELSE (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
 	SET(GUILE_DIR_MESSAGE "Guile was not found; the scheme shell will not be built.\nTo over-ride, make sure GUILE_LIBRARIES and GUILE_INCLUDE_DIRS are set.")
+	MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 ENDIF (GUILE_FOUND AND GMP_LIBRARY AND GMP_INCLUDE_DIR)
-MESSAGE(STATUS "${GUILE_DIR_MESSAGE}")
 
 # Hypertable library, for atomspace persistence
 FIND_PACKAGE(HyperTable)
@@ -262,7 +260,6 @@ ENDIF (HYPERTABLE_FOUND)
 FIND_PACKAGE(LinkGrammar 4.7.12)
 IF (LINK_GRAMMAR_FOUND)
 	SET(HAVE_LINK_GRAMMAR 1)
-	MESSAGE(STATUS "Link Grammar was found.")
 	INCLUDE_DIRECTORIES(${LINK_GRAMMAR_INCLUDE_DIRS})
 ELSE (LINK_GRAMMAR_FOUND)
 	MESSAGE(STATUS "Link Grammar missing: needed for the Viterbi parser.")
@@ -329,7 +326,7 @@ MESSAGE(STATUS "${PROTOBUF_DIR_MESSAGE}")
 
 # Python needed for embodiment (!?) and for PLN
 FIND_PACKAGE(PythonInterp)
-FIND_PACKAGE(PythonLibs 2.7 REQUIRED)
+FIND_PACKAGE(PythonLibs 2.7)
 IF(PYTHONLIBS_FOUND)
 	MESSAGE(STATUS "Python libs found.")
 ELSE(PYTHONLIBS_FOUND)
@@ -338,8 +335,8 @@ ENDIF(PYTHONLIBS_FOUND)
 
 # Python bindings using Cython
 # Cython is used to generate bindings
-FIND_PROGRAM(CYTHON_EXECUTABLE cython)
-IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+FIND_PACKAGE(Cython 0.19.0)
+IF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
 	# find python destination dir for python bindings
 	ADD_DEFINITIONS(-DHAVE_CYTHON)
 	SET(HAVE_CYTHON 1)
@@ -355,17 +352,17 @@ IF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
 	ELSE ("${PYTHON_DEST}" STREQUAL "")
 		MESSAGE(STATUS "Python destination dir found: ${PYTHON_DEST}" )
 	ENDIF ("${PYTHON_DEST}" STREQUAL "")
-ELSE (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
-	IF(NOT CYTHON_EXECUTABLE)
+ELSE (CYTHON_FOUND AND PYTHONLIBS_FOUND)
+	IF(NOT CYTHON_FOUND)
 		MESSAGE(STATUS "Cython executable not found.")
-	ENDIF(NOT CYTHON_EXECUTABLE)
-ENDIF (CYTHON_EXECUTABLE AND PYTHONLIBS_FOUND)
+	ENDIF(NOT CYTHON_FOUND)
+ENDIF (CYTHON_FOUND AND PYTHONLIBS_FOUND)
 
 # Nosetests will find and automatically run python tests.
 FIND_PROGRAM(NOSETESTS_EXECUTABLE nosetests)
-IF (NOSETESTS_EXECUTABLE)
+IF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 	SET(HAVE_NOSETESTS 1)
-ENDIF (NOSETESTS_EXECUTABLE)
+ENDIF (NOSETESTS_EXECUTABLE AND CYTHON_FOUND AND PYTHONLIBS_FOUND)
 
 # SDL needed for the spatial tools
 FIND_PACKAGE(SDL)
@@ -457,16 +454,25 @@ IF (NOT XMLRPC_FOUND)
 	MESSAGE(STATUS "libxmlrpc missing: needed for ubigraph module.")
 ENDIF (NOT XMLRPC_FOUND)
 
-# ZeroMQ library 2.1.2
-FIND_PACKAGE(ZMQ)
-IF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+# ZeroMQ
+FIND_PACKAGE(ZMQ 3.2.4)
+IF (ZMQ_FOUND AND ZMQ_LIBRARY)
 	ADD_DEFINITIONS(-DHAVE_ZMQ)
 	SET(HAVE_ZMQ 1)
 	SET(ZMQ_DIR_MESSAGE "ZeroMQ was found.")
-ELSE (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
-	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure ZMQ_LIBRARIES and ZMQ_INCLUDE_DIRS are set.")
-ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY AND ZMQ_INCLUDE_DIR)
+ELSE (ZMQ_FOUND AND ZMQ_LIBRARY)
+	SET(ZMQ_DIR_MESSAGE "ZeroMQ was not found; the AtomSpace Publisher module, and the message system used by GUI monitor for OAC will not be built.\nTo over-ride, make sure that the environment variable ZMQ_LIBRARY is set.\nInstallation instructions: http://zeromq.org/intro:get-the-software")
+ENDIF (ZMQ_FOUND AND ZMQ_LIBRARY)
 MESSAGE(STATUS "${ZMQ_DIR_MESSAGE}")
+
+# Threaded Building Blocks (Intel TBB) library
+FIND_PACKAGE(TBB)
+IF (TBB_FOUND)
+        SET(HAVE_TBB 1)
+ELSE (TBB_FOUND)
+        SET(TBB_DIR_MESSAGE "Intel TBB (Threaded Building Blocks) was not found; the AtomSpace Publisher module will not be built. Installation instructions: https://www.threadingbuildingblocks.org/download")
+ENDIF (TBB_FOUND)
+MESSAGE(STATUS "${TBB_DIR_MESSAGE}")
 
 # ==========================================================
 # Decide what to build, based on the packages found.
@@ -724,7 +730,6 @@ SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
-SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports" HAVE_ZMQ)
+SUMMARY_ADD("ZMQ" "ZMQ-based OAC GUI reports, AtomSpace publisher module" HAVE_ZMQ)
+SUMMARY_ADD("TBB" "Intel TBB (Threaded Building Blocks) for multithreading" HAVE_TBB)
 SUMMARY_SHOW()
-
-

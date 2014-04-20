@@ -37,7 +37,7 @@ namespace Filter
 
 using namespace opencog::pai;
 using namespace opencog::world;
-using namespace PetCombo;
+using namespace AvatarCombo;
 
 //constructor, destructor
 
@@ -251,12 +251,12 @@ void ActionFilter::generatePossibleActions(combo_tree_ns_set& act_set,
     std::cout << "action_name = " << action_name << std::endl;
 
     // Determine whether the action is in the action_set.
-    // Be sure to use the PetCombo operator>> for this, as otherwise,
+    // Be sure to use the AvatarCombo operator>> for this, as otherwise,
     // the compiler will pick the wrong one, and/or get confused.
     vertex head_v;
     stringstream ss(action_name);
     // ss >> head_v;
-    PetCombo::operator>>(ss,head_v);
+    AvatarCombo::operator>>(ss,head_v);
 
 
     // print debug

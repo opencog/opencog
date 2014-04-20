@@ -1,7 +1,7 @@
 /*
  * PatternMatchEngine.cc
  *
- * Copyright (C) 2008,2009,2011 Linas Vepstas
+ * Copyright (C) 2008,2009,2011,2014 Linas Vepstas
  *
  * Author: Linas Vepstas <linasvepstas@gmail.com>  February 2008
  *
@@ -530,6 +530,12 @@ void PatternMatchEngine::get_next_untried_clause(void)
 				unsolved = true;
 			}
 		}
+
+		// XXX TODO ... Rather than settling for the first one that we find,
+		// we should instead look for the "thinnest" one, the one with the
+		// smallest incoming set.  That is because the very next thing that
+		// we do will be to iterate over the incoming set of "pursue" ... so
+		// it could be a huge pay-off to minimize this.
 		if (solved && unsolved) break;
 	}
 
@@ -695,38 +701,50 @@ void PatternMatchEngine::clear(void)
 
 
 /**
- * Find a grounding for a sequence of clauses in conjunctive normal form.
+ * Find groundings for a sequence of clauses in conjunctive normal form.
+ * That is, perform a variable unification across multiple clauses.
  *
  * The list of clauses, and the list of negations, are both OpenCog
- * hypergraphs.  Both should also be envisioned as a kind of predicate:
- * i.e. something which may or may not exist (may or may not be "true")
- * in that the subgraph defined by the predicate might not actually
- * be found in the universe of all atoms in the atomspace.
+ * hypergraphs.  Both can be (should be) envisioned as model-theoretic
+ * predicates: i.e. statements with are "true" only if they exist in
+ * the atomspace (which is the "universe" of all statements).  That is,
+ * the clauses define a subgraph which may or may not exist in the
+ * atomspace.
  *
  * The list of "bound vars" are to be solved for ("grounded", or
  * "evaluated") during pattern matching. That is, if the subgraph
  * defined by the clauses is located, then the vars are given the
- * corresponding values associated to that match.
+ * corresponding values associated to that match. Becuase these
+ * variables can be shared across multiple clauses, this can be
+ * understood to be a unification problem; the pattern matcher is thus
+ * a unifier.
  *
  * The negations are a set of clauses whose truth values are to be
  * inverted.  That is, while the clauses define a subgraph that
- * *must* be found, the negations define a subgraph that probably
- * should not be found, or, if found, should have a truth value of
- * 'false'.  The precise handing of the negated clauses is determined
- * by the callback, although the search engine itself will proclaim
- * a match whether or not it finds negated clauses. Thus, the neg
- * clauses can be understood as "optional" matches: they will be
- * matched, if possible, but are not required to be matched. The idea
- * that these are actually "negated" is governed by the callback.
+ * *must* be found, the negations define a subgraph that should
+ * not be found, or, if found, should have a truth value of 'false'.
+ * The precise meaning of 'false' in the sentence above is determined
+ * by the callback, which can use arbitrary criteria for this.
+ * In particular, the search engine itself will happily proclaim
+ * a match whether or not it finds any of the negated clauses. So,
+ * in this sense, the negated clauses can be understood to be
+ * "optional" matches: they will be matched, if possible, but are not
+ * required to be matched. It is up to the callback to explictly
+ * reject these clauses, if it so wishes to, thus implementing the
+ * concept of negation.
  *
  * The PatternMatchCallback is consulted to determine whether a
  * veritable match has been found, or not. The callback is given
  * individual nodes and links to compare for a match.
+ *
+ * The callback may alter the sequence of the clauses, in order to
+ * otpimze the search. It may also remove some clauses or variables,
+ * if it determines that these are irrelevant to the search.
  */
 void PatternMatchEngine::match(PatternMatchCallback *cb,
-                         const std::vector<Handle> &vars,
-                         const std::vector<Handle> &clauses,
-                         const std::vector<Handle> &negations)
+                         std::vector<Handle> &vars,
+                         std::vector<Handle> &clauses,
+                         std::vector<Handle> &negations)
 {
 	// Clear all state.
 	clear();

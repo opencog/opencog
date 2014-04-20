@@ -1,11 +1,19 @@
-Probabilistic Logic Networks (PLN) Documentation
-================================================
+Probabilistic Logic Networks (PLN)
+==================================
 
 ## Summary
 
-There is a [new PLN design][] that is currently under development.
+This is a [new PLN design][] that is currently under development. It is still in-progress.
 
-The code is located in the [opencog/python/pln directory][]. It is still in-progress.
+A detailed description of the architecture is available in [algorithm.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
+
+After reading the following high-level tutorial, follow that link to understand the algorithms in detail.
+
+For a detailed technical description of PLN, refer to the following books:
+
+- Goertzel, Ben, Matthew Iklé, Izabela Freire Goertzel, and Ari Heljakka. **Probabilistic logic networks: A comprehensive framework for uncertain inference.** Springer, 2008.
+
+- Goertzel, Ben, Cassio Pennachin, and Nil Geisweiller. **Engineering General Intelligence, Part 2: The CogPrime Architecture for Integrative, Embodied AGI.** Atlantis Press, 2014. (Refer to Section V)
 
 ## Tutorial
 
@@ -26,7 +34,7 @@ The code is located in the [opencog/python/pln directory][]. It is still in-prog
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
 
-5) Setting up restapi and specifying **deduction_agent.py* and restapi in the CogServer configuration
+5) Set up **restapi** and specify **deduction_agent.py** and **restapi** in the CogServer configuration as follows:
 
 Install the necessary dependencies for REST API
 ```cd opencog/python/web/api/```
@@ -36,13 +44,17 @@ For more information: http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
 Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path and the ***../opencog/python/web/api*** path and restapi as a preloaded module:
 
 ```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction```
+
 ```PYTHON_PRELOAD = restapi```
 
 6) Start the CogServer
 
 Make sure you're in your opencog's build directory. In its lib directory should be the opencog.conf file which is mandatory for the CogServer.
+
 Run cogserver now with ./opencog/server/cogserver from your build directory.
+
 Switch to a second terminal and type 'telnet localhost 17001'. The opencog shell should now open.
+
 For more information: http://wiki.opencog.org/w/Starting_the_Cogserver
 
 7) Load **deduction_agent.py** in the CogServer
@@ -51,8 +63,9 @@ For more information: http://wiki.opencog.org/w/Starting_the_Cogserver
 
 8) Start the REST API:
 
-When typing ```help``` ```restapi.Start``` should be listed as a preloaded command.
-Enter ```restapi.Start```
+Enter the ```help``` command in the CogServer. Confirm that ```restapi.Start``` is listed as a preloaded command.
+
+Enter the ```restapi.Start``` command.
 
 9) Populate the atomspace with some sample contents
 
@@ -101,23 +114,9 @@ The activity of the PLN and Attention Allocation systems can be monitored in rea
 
 Although the primary use case is to use PLN within a MindAgent loaded into the CogServer, coupled with the Attention Allocation system, for development and testing purposes it can be useful to interact directly with the PLN classes in a standalone Python environment.
 
-In the following section, the basic usage pattern is described to interact with PLN from a Python environment without running the CogServer.
+A complete example is available in: **opencog/python/pln/examples/deduction_example.py**, which utilizes an agent defined in **deduction_agent.py**.
 
-##### Prerequisites
-
-To access PLN from Python without running the CogServer, you will need to replace the contents of the opencog/atomspace/atom_types.script file with the following file:
-
-https://gist.github.com/cosmoharrigan/8453760
-
-This is due to the following outstanding issue, after which this would no longer be necessary:
-
-https://github.com/opencog/opencog/issues/484
-
-After replacing atom_types.script, you will need to run cmake and make again to rebuild the system.
-
-A complete example is available in: **opencog/python/pln/examples/deduction_example.py**
-
-Example:
+### PLN Agent example:
 Define an initial [atomspace][] object populated with Atoms.
 
 ```
@@ -169,10 +168,10 @@ node[ConceptNode:swan]
 You can also inspect the detailed history:
     print vars(chainer.history_index)
 
-### Example using the ForwardInferenceAgent
+### Example using the predefined ForwardInferenceAgent
 
 Now that you understand how the previous steps work, you can also
-implement them in a [MindAgent][].
+implement them using the predefined ForwardInferenceAgent [MindAgent][].
 
 The previous steps are already encapsulated inside the
 [ForwardInferenceAgent class][], which defines a **run** method.
@@ -184,7 +183,7 @@ This is also the pattern to use to activate PLN inside a running
 [CogServer][]. After loading the [MindAgent][], it will be called at
 each cycle.
 
-### Explanation of the PLN architecture
+### Overview of the PLN architecture
 
 #### Chainer
 

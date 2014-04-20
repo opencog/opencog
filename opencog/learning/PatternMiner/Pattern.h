@@ -4,7 +4,7 @@
  * Copyright (C) 2012 by OpenCog Foundation
  * All Rights Reserved
  *
- * Written by Shujing Ke <rainkekekeke@gmail.com> Scott Jones <troy.scott.j@gmail.com>
+ * Written by Shujing Ke <rainkekekeke@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License v3 as
@@ -28,42 +28,46 @@
 #include <vector>
 #include <opencog/atomspace/AtomSpace.h>
 
+
 using namespace std;
 
 namespace opencog 
 {
- namespace PatternMiner 
+ namespace PatternMining
 {
 
- class Skeleton
- {
-public:
-	vector<Handle> skeletonLinks;
-	Skeleton(){}
-    Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
+// class Skeleton
+// {
+//public:
+//	vector<Handle> skeletonLinks;
+//	Skeleton(){}
+//    Skeleton(vector<Handle>& _skeletonLinks){skeletonLinks = _skeletonLinks;}
 
- };
+//    // Make sure the input Links are connected before calling this function
+//    static Skeleton* extractSkeleton(vector<Handle> inputLinks);
 
- class Pattern
- {
-public:
-	Skeleton* skeleton;
-	map<Handle, Handle> bindings; // bindings of the variables map<varaibleName, varaibleValue>
+// };
 
-    Pattern(Skeleton* _skeleton, map<Handle, Handle>& _bindings)
-	{
-		skeleton = _skeleton;
-        bindings = _bindings;
-    }
+// class Pattern
+// {
+//public:
+//	Skeleton* skeleton;
+//	map<Handle, Handle> bindings; // bindings of the variables map<varaibleName, varaibleValue>
+
+//    Pattern(Skeleton* _skeleton, map<Handle, Handle>& _bindings)
+//	{
+//		skeleton = _skeleton;
+//        bindings = _bindings;
+//    }
         
-    Pattern(Skeleton* _skeleton)
-	{
-		skeleton = _skeleton;
-    }
+//    Pattern(Skeleton* _skeleton)
+//	{
+//		skeleton = _skeleton;
+//    }
 
-    bool addVariableBinding(Handle variableH, Handle valueH);
+//    bool addVariableBinding(Handle variableH, Handle valueH);
 
- };
+// };
 
 }
 }

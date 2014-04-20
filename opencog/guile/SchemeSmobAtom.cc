@@ -49,8 +49,10 @@ Handle SchemeSmob::verify_handle (SCM satom, const char * subrname, int pos)
  */
 SCM SchemeSmob::ss_name (SCM satom)
 {
+	std::string name;
 	Handle h = verify_handle(satom, "cog-name");
-	std::string name = atomspace->getName(h);
+	NodePtr nnn(NodeCast(h));
+	if (nnn) name = nnn->getName();
 	SCM str = scm_from_locale_string(name.c_str());
 	return str;
 }
@@ -58,7 +60,7 @@ SCM SchemeSmob::ss_name (SCM satom)
 SCM SchemeSmob::ss_type (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-type");
-	Type t = atomspace->getType(h);
+	Type t = h->getType();
 	const std::string &tname = classserver().getTypeName(t);
 	SCM str = scm_from_locale_string(tname.c_str());
 	SCM sym = scm_string_to_symbol(str);
@@ -69,7 +71,9 @@ SCM SchemeSmob::ss_type (SCM satom)
 SCM SchemeSmob::ss_arity (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-arity");
-	Arity ari = atomspace->getArity(h);
+	Arity ari = 0;
+	LinkPtr lll(LinkCast(h));
+	if (lll) ari = lll->getArity();
 
 	/* Arity is currently an unsigned short */
 	SCM sari = scm_from_ushort(ari);
@@ -111,18 +115,18 @@ SCM SchemeSmob::ss_set_av (SCM satom, SCM sav)
 
 SCM SchemeSmob::ss_inc_vlti (SCM satom)
 {
-    Handle h = verify_handle(satom, "cog-inc-vlti!");
+	Handle h = verify_handle(satom, "cog-inc-vlti!");
 
-    atomspace->incVLTI(h);
-    return satom;
+	h->incVLTI();
+	return satom;
 }
 
 SCM SchemeSmob::ss_dec_vlti (SCM satom)
 {
-    Handle h = verify_handle(satom, "cog-dec-vlti!");
+	Handle h = verify_handle(satom, "cog-dec-vlti!");
 
-    atomspace->decVLTI(h);
-    return satom;
+	h->decVLTI();
+	return satom;
 }
 
 /* ============================================================== */
@@ -132,7 +136,11 @@ SCM SchemeSmob::ss_dec_vlti (SCM satom)
 SCM SchemeSmob::ss_outgoing_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-outgoping-set");
-	const std::vector<Handle> &oset = atomspace->getOutgoing(h);
+
+	LinkPtr lll(LinkCast(h));
+	if (NULL == lll) return SCM_EOL;
+
+	const HandleSeq& oset = lll->getOutgoingSet();
 
 	SCM list = SCM_EOL;
 	for (int i = oset.size()-1; i >= 0; i--)
@@ -152,6 +160,7 @@ SCM SchemeSmob::ss_outgoing_set (SCM satom)
 SCM SchemeSmob::ss_incoming_set (SCM satom)
 {
 	Handle h = verify_handle(satom, "cog-incoming-set");
+	AtomSpace* atomspace = ss_get_env_as("cog-incoming-set");
 
 	std::vector<Handle> iset = atomspace->getIncoming(h);
 	size_t isz = iset.size();
@@ -178,6 +187,7 @@ SCM SchemeSmob::ss_incoming_set (SCM satom)
 SCM SchemeSmob::ss_map_type (SCM proc, SCM stype)
 {
 	Type t = verify_atom_type (stype, "cog-map-type");
+	AtomSpace* atomspace = ss_get_env_as("cog-map-type");
 
 	// Get all of the handles of the indicated type
 	std::list<Handle> handle_set;

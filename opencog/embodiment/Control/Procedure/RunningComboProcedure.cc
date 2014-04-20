@@ -116,8 +116,8 @@ vertex RunningComboProcedure::eval_anything(sib_it it)
 }
 
 void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
-        AssertionException,
-        std::bad_exception)
+                                          AssertionException,
+                                          std::bad_exception)
 {
     vertex_seq empty;
 
@@ -320,10 +320,20 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
                     }
                 }
             }
-            bool execed =
-                ( (_tr.is_valid(parent) && *parent == id::sequential_and) ?
-                  execSeq(_it, std::find_if(_it, parent.end(), !boost::bind(&WorldWrapperUtil::is_builtin_atomic_action, _1)) )
-                  : exec(_it) );
+            bool execed;
+            // Parent is a sequential_and, so we send a plan instead
+            // of individual action
+            if (_tr.is_valid(parent) && *parent == id::sequential_and) {
+                // Find the next non atomic action in the sequence
+                auto to =
+                    std::find_if(_it, parent.end(), [](const combo::vertex& v)
+                    {
+                        return !WorldWrapperUtil::is_builtin_atomic_action(v);
+                    });
+                execed = execSeq(_it, to);
+            } else // Parent is not a sequential_and so we send an action
+                execed = exec(_it);
+
             if (execed) {
                 moveOn();
                 return;
@@ -368,14 +378,62 @@ void RunningComboProcedure::cycle() throw(ActionPlanSendingFailure,
     //logger().error("popl");
 }
 
+void RunningComboProcedure::stop() {
+    _tr = combo::combo_tree(combo::id::null_vertex);
+    _it = _tr.end();
+}
+
+bool RunningComboProcedure::isReady() const {
+    return (_tr.is_valid(_it) && (!_hasBegun || _ww.isPlanFinished()));
+}
+
+bool RunningComboProcedure::isFinished() const {
+    if (!finished) {
+        finished = (!_tr.is_valid(_it) && (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
+    }
+    return finished;
+
+    /*      stringstream ss;
+            ss << _tr;
+            logger().debug(
+            "RunningComboProcedure - '%s' is_valid '%s', has begun '%s', plan sent '%s', plan finished '%s'",
+            ss.str().c_str(), _tr.is_valid(_it)?"true":"false", _hasBegun?"true":"false", _planSent?"true":"false", _ww.isPlanFinished()?"true":"false");
+
+            return (!_tr.is_valid(_it) &&
+            (!_hasBegun || (!_planSent || _ww.isPlanFinished())));
+    */
+}
+
+bool RunningComboProcedure::isFailed() const {
+    return
+        (_failed ? true :
+         (!_failed ? false :
+          (_hasBegun && _ww.isPlanFailed())));
+}
+
+combo::vertex RunningComboProcedure::getResult() {
+    OC_ASSERT(isFinished(), "RunningComboProcedure - Procedure isn't finished.");
+    if (_hasBegun)
+        return isFailed() ? combo::id::action_failure : combo::id::action_success;
+    if (_tr.size() == 1)
+        return *_tr.begin();
+    return combo::id::action_success;
+}
+
+bool RunningComboProcedure::exec(sib_it x) {
+    return execSeq(x, ++sib_it(x));
+}
+
 bool RunningComboProcedure::execSeq(sib_it from, sib_it to)
 {
-    //debug print
-    //std::cout << "EXECSEQ FROM : "
-    //  << (_tr.is_valid(from)? *from : "invalid")
-    //          << " TO : " << (_tr.is_valid(to)? *to : "invalid")
-    //   << std::endl;
-    //~debug print
+    if (logger().isDebugEnabled()) {
+        stringstream ss;
+        ss << "RunningComboProcedure::execSeq from : "
+           << (_tr.is_valid(from)? *from : "invalid")
+           << " to : " << (_tr.is_valid(to)? *to : "invalid");
+        logger().debug(ss.str());
+    }
+
     if (from == to) {
         _it = from; //FIXME : not sure it is necessary
         return false;

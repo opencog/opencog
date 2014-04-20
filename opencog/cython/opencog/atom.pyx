@@ -5,12 +5,14 @@ cdef class Atom(object):
 
     def __init__(self,Handle h,AtomSpace a):
         self.handle = h
-        self.atomspace = a
         # cache the results after first retrieval of
         # immutable properties
         self._atom_type = None
         self._name = None
         self._outgoing = None
+        # Not really a cache ... an atom could be moved from one
+        # atomspace to another (!)
+        self.atomspace = a
 
     def __nonzero__(self):
         """ Allows boolean comparison, return false is handle is

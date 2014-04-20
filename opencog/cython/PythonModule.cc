@@ -1,5 +1,5 @@
 /*
- * opencog/cython/PythonModule.h
+ * opencog/cython/PythonModule.cc
  *
  * Copyright (C) 2013 by OpenCog Foundation
  * All Rights Reserved
@@ -28,13 +28,14 @@
 #include <opencog/util/foreach.h>
 #include <opencog/atomspace/AtomSpace.h>
 
+
 #include "PyMindAgent.h"
 #include "PyRequest.h"
 #include "PythonEval.h"
 #include "PythonModule.h"
 
-#include "agent_finder_types.h"
-#include "agent_finder_api.h"
+#include "opencog/agent_finder_types.h"
+#include "opencog/agent_finder_api.h"
 
 using std::vector;
 using std::string;
@@ -162,10 +163,8 @@ void PythonModule::init()
         }
     }
 
-    // The eval instance should use the provided cogserver!
-    PythonEval::instance(&_cogserver.getAtomSpace());
-
-    if (import_agent_finder() == -1) {
+    // XXX FIXME this should get loaded from opencog.conf, right!?
+    if (import_opencog__agent_finder() == -1) {
         PyErr_Print();
         logger().error() << "[PythonModule] Failed to load helper python module";
         return;

@@ -21,6 +21,7 @@
  */
 
 #include <opencog/atomspace/atom_types.h>
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/cython/PythonEval.h>
 #include <opencog/guile/SchemeEval.h>
 #include "ExecutionLink.h"
@@ -116,8 +117,9 @@ Handle ExecutionLink::do_execute(Handle gsn, Handle args)
         size_t pos = 4;
         while (' ' == schema[pos]) pos++;
 
-        SchemeEval &applier = SchemeEval::instance();
-        Handle h = applier.apply(schema.substr(pos), args);
+        SchemeEval* applier = new SchemeEval();
+        Handle h = applier->apply(schema.substr(pos), args);
+        delete applier;
         return h;
 #else
         throw RuntimeException(TRACE_INFO, "Cannot evaluate scheme GroundedSchemaNode!");

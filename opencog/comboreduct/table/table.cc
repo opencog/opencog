@@ -21,7 +21,6 @@
  * Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-#include "table.h"
 
 #include <iomanip>
 #include <ctype.h>
@@ -40,6 +39,9 @@
 #include "../combo/ann.h"
 #include "../combo/simple_nn.h"
 #include "../combo/convert_ann_combo.h"
+
+#include "table.h"
+#include "table_io.h"
 
 namespace opencog { namespace combo {
 
@@ -258,10 +260,12 @@ vertex_seq ITable::get_column_data(const std::string& name) const
 }
 
 string ITable::delete_column(const string& name)
+    throw(IndexErrorException)
 {
     int off = get_column_offset(name);
     if (-1 == off)
-        return string();
+        throw IndexErrorException(TRACE_INFO,
+            "Can't delete, unknown column name: %s", name.c_str());
 
     // Delete the column
     for (multi_type_seq& row : *this)
@@ -269,12 +273,12 @@ string ITable::delete_column(const string& name)
 
     // Delete the label as well.
     string rv;
-    if (!labels.empty()) {
+    if (not labels.empty()) {
         rv = *(labels.begin() + off);
         labels.erase(labels.begin() + off);
     }
 
-    if (!types.empty())
+    if (not types.empty())
         types.erase(types.begin() + off);
 
     return rv;
@@ -282,6 +286,7 @@ string ITable::delete_column(const string& name)
 
 
 void ITable::delete_columns(const vector<string>& ignore_features)
+    throw(IndexErrorException)
 {
     for (const string& feat : ignore_features)
         delete_column(feat);
@@ -302,7 +307,7 @@ OTable::OTable(const super& ot, const string& ol)
 OTable::OTable(const combo_tree& tr, const ITable& itable, const string& ol)
     : label(ol)
 {
-    OC_ASSERT(!tr.empty());
+    OC_ASSERT(not tr.empty());
     if (is_ann_type(*tr.begin())) {
         // we treat ANN differently because they must be decoded
         // before being evaluated. Also note that if there are memory
@@ -436,30 +441,47 @@ vector<string> Table::get_labels() const
 
 // -------------------------------------------------------
 
-CTable Table::compressed() const
+CTable Table::compressed(const std::string weight_col) const
 {
-    // Logger
     logger().debug("Compress the dataset, current size is %d", itable.size());
-    // ~Logger
 
-    CTable res(otable.get_label(), itable.get_labels(), get_signature());
+    // If no weight column, then its straight-forward
+    if (weight_col.empty()) {
+        CTable res(otable.get_label(), itable.get_labels(), get_signature());
 
-    ITable::const_iterator in_it = itable.begin();
-    OTable::const_iterator out_it = otable.begin();
-    for(; in_it != itable.end(); ++in_it, ++out_it)
-        ++res[*in_it][*out_it];
+        ITable::const_iterator in_it = itable.begin();
+        OTable::const_iterator out_it = otable.begin();
+        for (; in_it != itable.end(); ++in_it, ++out_it)
+        {
+            res[*in_it][*out_it] += 1.0;
+        }
+        logger().debug("Size of the compressed dataset is %f", res.size());
+        return res;
+    }
+    else {
+        // Else, remove the weight column from the input;
+        // we don't want to use it as an independent feature.
+        ITable trimmed(itable);
+        trimmed.delete_column(weight_col);
 
-    logger().debug("Size of the compressed dataset is %d", res.size());
+        CTable res(otable.get_label(), trimmed.get_labels(), get_signature());
 
-    return res;
+        size_t widx = itable.get_column_offset(weight_col);
+        ITable::const_iterator w_it = itable.begin();
+        ITable::const_iterator in_it = trimmed.begin();
+        OTable::const_iterator out_it = otable.begin();
+        for (; in_it != trimmed.end(); ++in_it, ++out_it, ++w_it)
+        {
+            vertex v = w_it->get_at<vertex>(widx);
+            contin_t weight = get_contin(v);
+            res[*in_it][*out_it] += weight;
+        }
+        logger().debug("Size of the compressed dataset is %f", res.size());
+        return res;
+    }
 }
 
 // -------------------------------------------------------
-
-std::istream& istreamRawITable(std::istream& in, ITable& tab,
-                               const std::vector<unsigned>& ignored_indices)
-    throw(std::exception, AssertionException);
-std::vector<std::string> get_header(const std::string& input_file);
 
 /**
  * Get indices (aka positions or offsets) of a list of labels given a
@@ -490,7 +512,7 @@ void Table::add_features_from_file(const string& input_file,
     }
 
     // If no feature to force, there is nothing to do
-    if (!features.empty()) {
+    if (not features.empty()) {
         // header of the DSV file
         vector<string> full_header = get_header(input_file);
 
@@ -575,9 +597,9 @@ vector<string> CTable::get_labels() const
     return labels;
 }
 
-unsigned CTable::uncompressed_size() const
+count_t CTable::uncompressed_size() const
 {
-    unsigned res = 0;
+    count_t res = 0.0;
     for (const value_type& v : *this) {
         res += v.second.total_count();
     }
