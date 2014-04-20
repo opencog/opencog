@@ -44,11 +44,11 @@ class Logic(object):
 
     def get_incoming_recursive(self, atom):
         inc = atom.incoming
-        ret = []
-        ret += inc
+        ret = set()
+        ret.update(inc)
         for link in inc:
-            ret += self.get_incoming_recursive(link)
-        return ret
+            ret.update(self.get_incoming_recursive(link))
+        return list(ret)
 
     def new_variable(self, prefix='$pln_var_'):
         return self._atomspace.add_node(types.VariableNode,

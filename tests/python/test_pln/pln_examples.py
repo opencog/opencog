@@ -74,6 +74,7 @@ class PLNExamples(object):
 
     def run_pln_example(self, filename):
         self.atomspace.clear()
+        assert len(self.atomspace) == 0
             
         # Todo: The variable 'tmp' is not used
         tmp = open(filename, 'r')
@@ -87,7 +88,8 @@ class PLNExamples(object):
                           agent=self,
                           learnRuleFrequencies=False,
                           allow_output_with_variables=True,
-                          allow_backchaining_with_variables=True)
+                          allow_backchaining_with_variables=True,
+                          check_cycles=True)
 
         try:
             queries = chainer.get_predicate_arguments('query')
