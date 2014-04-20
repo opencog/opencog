@@ -1,7 +1,8 @@
-PLN implementation architecture
-===============================
+Architecture of PLN implementation
+==================================
 
 Author: Jade O'Neill
+
 April 2014
 
 There's more than one version of many rules (e.g. many rules can take
@@ -10,8 +11,10 @@ to have just one version of the rule, but that would require making
 either the rules or the chainer more complex, and i'm not sure if it's
 worthwhile.]
 
-The unify and subst algorithms are explained really well in the
-textbook AIMA (in chapters 8 and 9 on first order logic).
+The unify and subst algorithms are explained really well in the following
+textbook in chapters 8 and 9 on first order logic:
+
+- Russell, Stuart Jonathan, et al. **Artificial Intelligence: A Modern Approach.**
 
 Every rule has a list of input templates and a list of (usually 1)
 output templates. In every forward step (you can have more than one in
@@ -43,7 +46,7 @@ Say it picks (Inh animal breathe).
 The substitution is now s={A:cat, B:animal, C:breathe}. Substitute it
 into the input/output templates again.
 
-```inputs=[Inh cat animal, Inh animal breathe] outputs=[Inh cat breathe]```
+    ```inputs=[Inh cat animal, Inh animal breathe] outputs=[Inh cat breathe]```
 
 It now knows exactly the right atom to produce as output. After
 finding the output atom:
@@ -80,6 +83,8 @@ efficiency (it's a lot more efficient, because AndEvaluationRule would
 have to be run many times to find all of the relevant MemberLink
 pairs).
 
+### Terminology
+
 To explain some terminology: AndCreationRule uses a heuristic formula
 (i.e. P(A)*P(B)) to find the result from A.tv and B.tv. Many rules are
 creating logical links (i.e. links with probability TVs) from other
@@ -97,10 +102,12 @@ there are total).
 
 Also, after every inference, the chainer will use the revisionformula
 to update the TV. So rules like AndEvaluationRule are very simple and
-could be used in an online/streaming fashion if you wnated to (and
+could be used in an online/streaming fashion if you wanted to (and
 probably should be in the virtual world context). It also eliminates
 repeat inferences, which would screw up the revised TV (by double
 counting some of the inferences)
+
+### Search process
 
 A bit more on how the atom search process works. logic.lookup_atoms
 takes a template and finds a list of atoms. It uses one of 3 different
@@ -117,6 +124,8 @@ It's also possible to sample atoms with probability proportional to
 their STI (I think that's switched off by default because it makes
 automated testing easier)
 
+### Lookup atoms
+
 More about Logic.lookup_atoms. If the target is a specific atom (with
 no variablenodes) then it will return that atom. When the target is
 just a VariableNode, it returns all atoms of type Atom (including
@@ -132,6 +141,8 @@ only thing you can do is look up all links of that type.
 So the number of links returned is either 1, the whole atomspace, the
 incoming set of a node, or the number of links of some type.
 
+### Efficiency
+
 Some efficiency talk (there are other things more urgent than efficiency)
 
 I suspect that just copying all these lists of atoms (from the
@@ -145,7 +156,7 @@ And the algorithm for sampling from the attentional focus involves
 looking up the whole AF and then sampling, which is not ideal (it's
 fast compared to this though).
 
-A very painful way to make this much faster btw,, would be to cache
+A very painful way to make this much faster btw, would be to cache
 the results of lookup_atoms. It's painful because every time any
 process including PLN adds a suitable atom, you have to update the
 cache (actually maybe that's not so bad with the new signal system!)
