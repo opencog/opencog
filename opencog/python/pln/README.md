@@ -9,6 +9,12 @@ A detailed description of the architecture is available in [algorithm.md](https:
 
 After reading the following high-level tutorial, follow that link to understand the algorithms in detail.
 
+For a detailed technical description of PLN, refer to the following books:
+
+- Goertzel, Ben, Matthew Iklé, Izabela Freire Goertzel, and Ari Heljakka. **Probabilistic logic networks: A comprehensive framework for uncertain inference.** Springer, 2008.
+
+- Goertzel, Ben, Cassio Pennachin, and Nil Geisweiller. **Engineering General Intelligence, Part 2: The CogPrime Architecture for Integrative, Embodied AGI.** Atlantis Press, 2014.
+
 ## Tutorial
 
 ### Prerequisites:
@@ -28,7 +34,7 @@ After reading the following high-level tutorial, follow that link to understand 
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Elements_of_PLN
 http://wiki.opencog.org/w/New_PLN_Design,_2013#Forward_and_backward_chaining
 
-5) Setting up restapi and specifying **deduction_agent.py* and restapi in the CogServer configuration
+5) Set up **restapi** and specify **deduction_agent.py** and **restapi** in the CogServer configuration as follows:
 
 Install the necessary dependencies for REST API
 ```cd opencog/python/web/api/```
@@ -38,13 +44,17 @@ For more information: http://wiki.opencog.org/w/REST_API#Starting_the_REST_API
 Before starting the CogServer, the opencog.conf file needs to include the **../opencog/python/pln/examples/deduction** path and the ***../opencog/python/web/api*** path and restapi as a preloaded module:
 
 ```PYTHON_EXTENSION_DIRS  = ../opencog/python/web/api, ../opencog/python/pln/examples/deduction```
+
 ```PYTHON_PRELOAD = restapi```
 
 6) Start the CogServer
 
 Make sure you're in your opencog's build directory. In its lib directory should be the opencog.conf file which is mandatory for the CogServer.
+
 Run cogserver now with ./opencog/server/cogserver from your build directory.
+
 Switch to a second terminal and type 'telnet localhost 17001'. The opencog shell should now open.
+
 For more information: http://wiki.opencog.org/w/Starting_the_Cogserver
 
 7) Load **deduction_agent.py** in the CogServer
@@ -53,8 +63,9 @@ For more information: http://wiki.opencog.org/w/Starting_the_Cogserver
 
 8) Start the REST API:
 
-When typing ```help``` ```restapi.Start``` should be listed as a preloaded command.
-Enter ```restapi.Start```
+Enter the ```help``` command in the CogServer. Confirm that ```restapi.Start``` is listed as a preloaded command.
+
+Enter the ```restapi.Start``` command.
 
 9) Populate the atomspace with some sample contents
 
