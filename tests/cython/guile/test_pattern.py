@@ -19,13 +19,13 @@ class SchemeTest(TestCase):
     def tearDown(self):
         pass
 
-    # Load several different scheme files, containin atom type
-    # declarations, and utuilites. They should load just fine.
+    # Load several different scheme files, containing atom type
+    # declarations, and utilities. They should load just fine.
     # These don't actually put any tomes into the atomspace.
     def test_a_load_core_types(self):
 
         # These relative paths are horridly ugly.
-        # Ther must be a better way ...
+        # There must be a better way ...
         status = load_scm(self.space, "../../opencog/atomspace/core_types.scm")
         self.assertTrue(status)
 
