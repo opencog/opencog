@@ -5,7 +5,7 @@ from spatiotemporal.time_intervals import check_is_time_interval, TimeInterval
 from spatiotemporal.temporal_events.membership_function import MembershipFunction, ProbabilityDistributionPiecewiseLinear
 from spatiotemporal.unix_time import UnixTime
 from utility.generic import convert_dict_to_sorted_lists
-from utility.geometric import FunctionPiecewiseLinear, FUNCTION_ZERO
+from utility.functions import FunctionPiecewiseLinear, FUNCTION_ZERO
 
 __author__ = 'keyvan'
 
@@ -185,7 +185,7 @@ class TemporalInstance(TimeInterval):
 
 
 if __name__ == '__main__':
-    from utility.geometric import integral
+    from utility.functions import integral
     from scipy.stats import norm
     import matplotlib.pyplot as plt
 

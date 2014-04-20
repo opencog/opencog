@@ -44,4 +44,3 @@ if __name__ == '__main__':
     print relation
     for i in [(f.compare(s, UNIFORM_REFERENCE), s.args) for s in unpack_partial(relation)]:
         print i
-

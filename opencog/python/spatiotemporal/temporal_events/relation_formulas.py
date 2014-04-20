@@ -1,10 +1,11 @@
 from math import fabs, sqrt
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.stats.distributions import uniform_gen
+from spatiotemporal.temporal_events.composition.decomposition import Individual
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
-from utility.geometric import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, almost_equals
+from utility.functions import FunctionPiecewiseLinear, FunctionHorizontalLinear, integral, FUNCTION_ZERO, almost_equals
 from utility.numeric import EPSILON
 
 
@@ -101,8 +102,8 @@ class BaseRelationFormula(object):
 
 class FormulaCreator(object):
     def __init__(self, relation_formula):
-        if not isinstance(relation_formula, BaseRelationFormula):
-            raise TypeError("'relation_formula' should be an instance of BaseTemporalFormula")
+        if not isinstance(relation_formula, (BaseRelationFormula, Individual)):
+            raise TypeError("'relation_formula' should be an instance of BaseTemporalFormula or Individual")
         self.relation_formula = relation_formula
 
     def temporal_relations_between(self, temporal_event_1, temporal_event_2):
@@ -113,10 +114,6 @@ class FormulaCreator(object):
         self.relation_formula.bounds[beginning_b] = temporal_event_2.a, temporal_event_2.beginning
         self.relation_formula.bounds[ending_b] = temporal_event_2.ending, temporal_event_2.b
 
-        before = {}
-        same = {}
-        after = {}
-
         combinations = [
             (beginning_a, beginning_b),
             (beginning_a, ending_b),
@@ -124,6 +121,14 @@ class FormulaCreator(object):
             (ending_a, ending_b)
         ]
 
+        return self.calculate_relations(combinations)
+
+    def calculate_relations(self, combinations=None):
+        if combinations is None:
+            combinations = self.relation_formula.combinations
+        before = {}
+        same = {}
+        after = {}
         for key in combinations:
             before[key], same[key], after[key] = self.relation_formula.compare(*key)
 

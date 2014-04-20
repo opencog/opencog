@@ -3,7 +3,7 @@ from numpy import PINF as POSITIVE_INFINITY
 from scipy.stats import t, uniform
 from spatiotemporal.temporal_events import TemporalEvent, BaseRelationFormula
 from spatiotemporal.unix_time import UnixTime, random_time
-from utility.geometric import FUNCTION_ONE, FunctionLinear, FunctionComposite, FUNCTION_ZERO
+from utility.functions import FUNCTION_ONE, FunctionLinear, FunctionComposite, FUNCTION_ZERO
 
 __author__ = 'keyvan'
 
