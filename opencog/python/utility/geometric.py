@@ -82,9 +82,10 @@ class Function(object):
             raise TypeError("'{0}' object does not support {1}, 'domain' should be specified".format(
                 self.__class__.__name__, feature_name))
 
-    def plot(self):
+    def plot(self, plt=None):
         self._check_domain_for('plotting')
-        import matplotlib.pyplot as plt
+        if plt is None:
+            import matplotlib.pyplot as plt
         plt.plot(self.domain, self.range)
         return plt
 
@@ -130,33 +131,6 @@ class Function(object):
         return reversed(self.range)
 
 
-class FunctionHorizontalLinear(Function):
-    def __init__(self, y_intercept):
-        self.y_intercept = y_intercept
-        self.a = 0
-
-    def call_on_single_point(self, x):
-        return self.y_intercept
-
-    def integral(self, start, end):
-        if start >= end:
-            return 0
-        if almost_equals(self.y_intercept, 0):
-            return 0
-        return float(self.y_intercept) * (end - start)
-
-    def derivative(self, point):
-        return 0
-
-    @property
-    def b(self):
-        return self.y_intercept
-
-
-FUNCTION_ZERO = FunctionHorizontalLinear(0)
-FUNCTION_ONE = FunctionHorizontalLinear(1)
-
-
 class FunctionLinear(Function):
     def __init__(self, a=None, b=None, x_0=None, y_0=None, x_1=None, y_1=None):
         #(x_0, y_0), (x_1, y_1) = sorted([(x_0, y_0), (x_1, y_1)])
@@ -172,7 +146,9 @@ class FunctionLinear(Function):
         return float(self.a * x + self.b)
 
     def intersect(self, other):
-        x = float(other.b) - self.b / self.a - other.a
+        if almost_equals(self.a, other.a):
+            return None
+        x = (float(other.b) - self.b) / (self.a - other.a)
         return x, self(x)
 
     def integral(self, start, end):
@@ -200,6 +176,27 @@ class FunctionLinear(Function):
     @property
     def y_intercept(self):
         return self(0)
+
+
+class FunctionHorizontalLinear(FunctionLinear):
+    def __init__(self, y_intercept):
+        FunctionLinear.__init__(self, a=0, b=y_intercept)
+
+    def call_on_single_point(self, x):
+        return self.b
+
+    def integral(self, start, end):
+        if start >= end:
+            return 0
+        if almost_equals(self.b, 0):
+            return 0
+        return float(self.b) * (end - start)
+
+    def derivative(self, point):
+        return 0
+
+FUNCTION_ZERO = FunctionHorizontalLinear(0)
+FUNCTION_ONE = FunctionHorizontalLinear(1)
 
 
 class FunctionComposite(Function):
@@ -264,6 +261,21 @@ class FunctionComposite(Function):
     def derivative(self, point):
         return self.dictionary_bounds_function[self.find_bounds_for(point)].derivative(point)
 
+    def function_in_point(self, point):
+        for bounds in self.dictionary_bounds_function:
+            a, b = bounds
+            if a <= point <= b:
+                return self.dictionary_bounds_function[bounds]
+        return None
+
+    # def functions_in_interval(self, interval_start, interval_end):
+    #     dictionary_bounds_function = {}
+    #     for bounds in self.dictionary_bounds_function:
+    #         a, b = bounds
+    #         if (interval_start < a or almost_equals(interval_start, a)) and (
+    #
+    #         ):
+
     @property
     def dictionary_bounds_function(self):
         return self._dictionary_bounds_function
@@ -299,18 +311,14 @@ class FunctionPiecewiseLinear(FunctionComposite):
         result.is_normalised = True
         return result
 
-if __name__ == '__main__':
-    from spatiotemporal.temporal_events import TemporalEventTrapezium
-    e = TemporalEventTrapezium(1, 10, 3, 8)
-    print e
-    mf = e.membership_function()
-    print 'degree in [1 : 3]:', e.degree_in_interval(1, 3)
-    print 'degree in [3 : 4]:', e.degree_in_interval(3, 4)
-    print 'degree in [8 : 9]:', e.degree_in_interval(8, 9)
-    print 'degree in [2 : 9]:', e.degree_in_interval(2, 9)
-    print 'degree in [1 : 10]:', e.degree_in_interval()
-    print 'degree in [11 : 17]:', e.degree_in_interval(11, 17)
+    def __and__(self, other):
+        for bounds in self.dictionary_bounds_function:
+            a, b = bounds
+            linear_function = self.dictionary_bounds_function[bounds]
 
-    #a = FunctionLinear(None, None, 3, 0, -1, 1.0/9)
-    #print (a(-0.25) + a(0.25))/4
-    #print a(0.25) * 2.75 / 2
+
+
+if __name__ == '__main__':
+    a = FunctionLinear(1, 0)
+    b = FunctionLinear(-1, 1)
+    print a.intersect(b)

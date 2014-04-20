@@ -83,8 +83,7 @@ class TemporalEventTrapezium(TemporalEvent):
                     )
                 )
         TemporalEvent.__init__(self, uniform(loc=a, scale=UnixTime(beginning - a)),
-                               uniform(loc=ending, scale=UnixTime(b - ending)), bins=4,
-                               relation_formula=RelationFormulaTrapezium())
+                               uniform(loc=ending, scale=UnixTime(b - ending)), bins=4)
 
 
 def generate_random_events(size=20):
