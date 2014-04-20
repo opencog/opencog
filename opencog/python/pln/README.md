@@ -13,7 +13,7 @@ For a detailed technical description of PLN, refer to the following books:
 
 - Goertzel, Ben, Matthew Iklé, Izabela Freire Goertzel, and Ari Heljakka. **Probabilistic logic networks: A comprehensive framework for uncertain inference.** Springer, 2008.
 
-- Goertzel, Ben, Cassio Pennachin, and Nil Geisweiller. **Engineering General Intelligence, Part 2: The CogPrime Architecture for Integrative, Embodied AGI.** Atlantis Press, 2014.
+- Goertzel, Ben, Cassio Pennachin, and Nil Geisweiller. **Engineering General Intelligence, Part 2: The CogPrime Architecture for Integrative, Embodied AGI.** Atlantis Press, 2014. (Refer to Section V)
 
 ## Tutorial
 
