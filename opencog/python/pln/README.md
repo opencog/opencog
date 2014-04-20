@@ -1,11 +1,13 @@
-Probabilistic Logic Networks (PLN) Documentation
-================================================
+Probabilistic Logic Networks (PLN)
+==================================
 
 ## Summary
 
-There is a [new PLN design][] that is currently under development.
+This is a [new PLN design][] that is currently under development. It is still in-progress.
 
-The code is located in the [opencog/python/pln directory][]. It is still in-progress.
+A detailed description of the architecture is available in [algorithms.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
+
+After reading the following high-level tutorial, follow that link to understand the algorithms in detail.
 
 ## Tutorial
 
@@ -170,10 +172,7 @@ This is also the pattern to use to activate PLN inside a running
 [CogServer][]. After loading the [MindAgent][], it will be called at
 each cycle.
 
-### Explanation of the PLN architecture
-
-A detailed description of the architecture is available in [algorithms.md](https://github.com/opencog/opencog/blob/master/opencog/python/pln/algorithm.md).
-After reading the following high-level description, follow that link to understand the algorithms in detail.
+### Overview of the PLN architecture
 
 #### Chainer
 
