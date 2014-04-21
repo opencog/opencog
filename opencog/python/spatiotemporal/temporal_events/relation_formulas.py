@@ -1,7 +1,6 @@
 from math import fabs, sqrt
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
 from scipy.stats.distributions import uniform_gen
-from spatiotemporal.temporal_events.composition.decomposition import Individual
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
 from spatiotemporal.time_intervals import TimeInterval
@@ -53,8 +52,8 @@ class BaseRelationFormula(object):
         return fabs(a - b)
 
     def bounds_of(self, dist):
-        if dist in self.bounds:
-            return self.bounds[dist]
+        # if dist in self.bounds:
+        #     return self.bounds[dist]
 
         bounds = calculate_bounds_of_probability_distribution(dist)
         self.bounds[dist] = bounds
@@ -102,8 +101,8 @@ class BaseRelationFormula(object):
 
 class FormulaCreator(object):
     def __init__(self, relation_formula):
-        if not isinstance(relation_formula, (BaseRelationFormula, Individual)):
-            raise TypeError("'relation_formula' should be an instance of BaseTemporalFormula or Individual")
+        # if not isinstance(relation_formula, (BaseRelationFormula)):
+        #     raise TypeError("'relation_formula' should be an instance of BaseTemporalFormula or Individual")
         self.relation_formula = relation_formula
 
     def temporal_relations_between(self, temporal_event_1, temporal_event_2):
@@ -126,6 +125,10 @@ class FormulaCreator(object):
     def calculate_relations(self, combinations=None):
         if combinations is None:
             combinations = self.relation_formula.combinations
+
+        beginning_a, beginning_b = combinations[0]
+        ending_a, ending_b = combinations[3]
+
         before = {}
         same = {}
         after = {}
@@ -172,6 +175,8 @@ class FormulaCreator(object):
 
         result['P'] = after[beginning_a, beginning_b] * after[beginning_a, ending_b] * \
                       after[ending_a, beginning_b] * after[ending_a, ending_b]
+
+        print [(before[m, n], same[m, n], after[m, n]) for m in [beginning_a, ending_a] for n in [beginning_b, ending_b]]
 
         return result
 
