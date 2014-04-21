@@ -21,7 +21,7 @@ class SchemeTest(TestCase):
 
     # Load several different scheme files, containing atom type
     # declarations, and utilities. They should load just fine.
-    # These don't actually put any tomes into the atomspace.
+    # These don't actually put any atoms into the atomspace.
     def test_a_load_core_types(self):
 
         # These relative paths are horridly ugly.
