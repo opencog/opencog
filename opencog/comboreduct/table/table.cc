@@ -530,24 +530,21 @@ void Table::add_features_from_file(const string& input_file,
         boost::set_difference(full_header_pos, features_pos,
                               back_inserter(features_pos_comp));
 
-        // load the table with the features to insert with types
-        // string that way the content is unchanged (convenient when
-        // the data contains stuff that loadITable does not know how
-        // to interpret).
+        // Look up the corresponding feature names for each index.
+        vector<string> ignore_feats;
+        for (int i=0; i< features_pos_comp.size(); i++) {
+            ignore_feats.push_back(full_header[features_pos_comp[i]]);
+        }
+
+        // Load the table, removing the undesired features.
         ITable features_table;
         ifstream in(input_file.c_str());
-        istreamRawITable(in, features_table, features_pos_comp);
-
-        // set the first row as header
-        auto first_row_it = features_table.begin();
-        vector<string> features_labels = first_row_it->get_seq<string>();
-        features_table.set_labels(features_labels);
-        features_table.erase(first_row_it);
+        istreamITable(in, features_table, ignore_feats);
+        const vector<string>& features_labels = features_table.get_labels();
 
         // Insert the forced features in the right order. We want to keep
         // the features in order because that is likely what the user
         // expects.
-        // TODO UPDATE THE TYPE TREE
         
         // insert missing columns from features_itable to itable
         for (auto lit = features_pos.cbegin(), rit = header_pos.cbegin();
