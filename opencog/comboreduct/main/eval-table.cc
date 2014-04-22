@@ -126,7 +126,9 @@ void read_eval_output_results(evalTableParameters& pa)
 {
     ostreamContainer(logger().info() << "Ignore the following features: ",
                      pa.ignore_features_str);
-    OC_ASSERT(boost::find(pa.ignore_features_str, pa.target_feature_str)
+    OC_ASSERT(std::find(pa.ignore_features_str.begin(),
+              pa.ignore_features_str.end(),
+              pa.target_feature_str)
               == pa.ignore_features_str.end(),
               "You cannot ignore the target feature %s",
               pa.target_feature_str.c_str());
