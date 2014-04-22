@@ -67,18 +67,7 @@ static const avatar_builtin_action_enum _elementary_actions[] = {
     id::jump_up,
     id::grab,
     id::drop,
-    id::sniff,
-    id::bark,
-    id::look_up_turn_head,
-    id::bare_teeth,
-    id::back_flip,
-    id::wag,
-    id::stretch,
     id::sit,
-    id::beg,
-    id::heel,
-    id::tap_dance,
-    id::lean_rock_dance,
     id::kick_left,
     id::kick_right
 };
@@ -88,7 +77,6 @@ static const unsigned int _elementary_actions_size =
 
 static const avatar_perception_enum _elementary_perceptions[] = {
     id::exists_edible,
-    id::is_pet,
     id::is_avatar,
     // id::is_moving,
     id::near,

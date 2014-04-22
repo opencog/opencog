@@ -95,10 +95,6 @@ enum avatar_builtin_action_enum {
     // A generic rotate function that accepts an rotating angle
     rotate,
 
-    //==== heel ====
-    // not implemented on MV-Proxy
-    heel,
-
     //==== jump_up ====
     jump_up,
 
@@ -126,183 +122,24 @@ enum avatar_builtin_action_enum {
     //==== drop ====
     drop,
 
-    //==== sniff ====
-    sniff,
-
-    //==== sniff_at(object) ====
-    sniff_at,
-
-    //==== sniff_pet_part(pet pet_part)
-    // not tested
-    sniff_pet_part,
-
-    //==== sniff_avatar_part(avatar avatar_part)
-    // does like sniff
-    sniff_avatar_part,
-
     //==== eat(object) ====
     eat,
 
     //==== drink(object) ====
     drink,
 
-    //==== chew(object) ====
-    // not implemented on MV-Proxy
-    chew,
-
-    //==== beg ====
-    beg,
-
-    //==== hide_face ====
-    hide_face,
-
-    //==== look_up_turn_head ====
-    look_up_turn_head,
-
     //==== sit ====
     sit,
-
-    //==== stretch ====
-    stretch,
-
-    //==== run_in_circle ====
-    run_in_circle,
-
-    //==== scratch_self(part) ====
-    // part can be NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER
-    // apparently not implemented on MV-Proxy (only tried with NOSE)
-    scratch_self,
-
-    //==== scratch_ground_back_legs ====
-    // not implemented on MV-Proxy
-    scratch_ground_back_legs,
-
-    //==== scratch_other(agent) ====
-    // the pet turn instantly toward the thing to scratch
-    // (not tested properly since the pet is supposed to go to the agent first)
-    scratch_other,
-
-    //==== lie_down ====
-    // not implemented on MV-Proxy
-    lie_down,
-
-    //==== trick_for_food
-    trick_for_food,
-
-    //==== pee ====
-    pee,
-
-    //==== poo ====
-    poo,
-
-    //==== speak ====
-    // not implemented
-    speak,
-
-    //==== bark ====
-    bark,
-
-    //==== bark_at(object) ====
-    bark_at,
-
-    //==== lick ====
-    lick,
-
-    //==== lick_at(object) ====
-    lick_at,
-
-    //==== belch ====
-    // not implemented in MV-Proxy yet
-    belch,
 
     //==== move_head(contin contin contin)
     // not implemented in MV-Proxy yet
     move_head,
-
-    //==== growl ====
-    growl,
-
-    //==== growl_at(object) ====
-    growl_at,
-
-    //==== whine ====
-    whine,
-
-    //==== whine_at ====
-    whine_at,
-
-    //==== fearful_posture ====
-    fearful_posture,
-
-    //=== clean ====
-    // not implemented in MV-Proxy yet
-    clean,
-
-    //==== tap_dance ====
-    tap_dance,
-
-    //==== bare_teeth ====
-    // not implemented in MV-Proxy yet
-    bare_teeth,
-
-    //==== bare_teeth_at(object) ====
-    // not implemented in MV-Proxy yet
-    bare_teeth_at,
-
-    //==== play_dead ====
-    // not implemented in MV-Proxy yet
-    play_dead,
-
-    //==== vomit ====
-    // not implemented in MV-Proxy yet
-    vomit,
-
-    //==== lean_rock_dance ====
-    lean_rock_dance,
-
-    //==== anticipate_play ====
-    anticipate_play,
-
-    //==== back_flip ====
-    back_flip,
-
-    //==== move_left_ear(direction) ====
-    // direction in TWITCH|PERK|BACK
-    // not implemented in MV-Proxy yet
-    move_left_ear,
-
-    //==== move_right_ear(direction) ====
-    // direction in TWITCH|PERK|BACK
-    // not implemented in MV-Proxy yet
-    move_right_ear,
 
     //==== widen_eyes ====
     widen_eyes,
 
     //==== shake_head ====
     shake_head,
-
-    //==== sleep ====
-    // not implemented in MV-Proxy yet
-    sleep,
-
-    //==== dream(object) ====
-    // not implemented in MV-Proxy yet
-    dream,
-
-    //==== wag ====
-    wag,
-
-    //==== tail_flex(contin) ====
-    // not implemented in MV-Proxy yet
-    tail_flex,
-
-    //==== bite(object) ====
-    bite,
-
-    //==== pet(object) ====
-    // seems not to be implemented
-    pet,
 
     //==== kick(object) ====
     // not implemented in MV-Proxy yet
@@ -392,7 +229,6 @@ static const action_basic_description abd[] = {
     { id::rotate_left,       "rotate_left",       "action_result" },
     { id::rotate_right,      "rotate_right",      "action_result" },
     { id::rotate,            "rotate",            "->(contin action_result)" },
-    { id::heel,              "heel",              "action_result" },
     { id::jump_up,           "jump_up",           "action_result" },
     { id::jump_towards,      "jump_towards",      "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::jump_forward,      "jump_forward",      "->(contin action_result)" },
@@ -400,64 +236,12 @@ static const action_basic_description abd[] = {
     { id::grab,              "grab",              "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::nudge_to,          "nudge_to",          "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) action_result)" },
     { id::drop,              "drop",              "action_result" },
-    { id::sniff,             "sniff",             "action_result" },
-    { id::sniff_at,          "sniff_at",          "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::sniff_pet_part,    "sniff_pet_part",    "->(union(definite_object indefinite_object wild_card) action_symbol action_result)" },
-    { id::sniff_avatar_part, "sniff_avatar_part", "->(union(definite_object indefinite_object wild_card) action_symbol action_result)" },
     { id::eat,               "eat",               "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::drink,             "drink",             "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::chew,              "chew",              "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::beg,               "beg",               "action_result" },
-    { id::hide_face,         "hide_face",         "action_result" },
-    { id::look_up_turn_head, "look_up_turn_head", "action_result" },
     { id::sit,               "sit",               "action_result" },
-    { id::stretch,           "stretch",           "action_result" },
-    { id::run_in_circle,     "run_in_circle",     "action_result" },
-    { id::scratch_self,      "scratch_self",      "->(action_symbol action_result)" },
-    { id::scratch_ground_back_legs,
-                             "scratch_ground_back_legs",
-                                                  "action_result" },
-    { id::scratch_other,     "scratch_other",     "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::lie_down,          "lie_down",          "action_result" },
-    { id::trick_for_food,    "trick_for_food",    "action_result" },
-    { id::pee,               "pee",               "action_result" },
-    { id::poo,               "poo",               "action_result" },
-    { id::speak,             "speak",             "action_result" },
-    { id::bark,              "bark",              "action_result" },
-    { id::bark_at,           "bark_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::lick,              "lick",              "action_result" },
-    { id::lick_at,           "lick_at",           "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::belch,             "belch",             "action_result" },
     { id::move_head,         "move_head",         "->(contin contin contin action_result)" },
-    { id::growl,             "growl",             "action_result" },
-    { id::growl_at,          "growl_at",          "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::whine,             "whine",             "action_result" },
-    { id::whine_at,          "whine_at",          "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::fearful_posture,   "fearful_posture",   "action_result" },
-    { id::clean,             "clean",             "action_result" },
-    { id::tap_dance,         "tap_dance",         "action_result" },
-    { id::bare_teeth,        "bare_teeth",        "action_result" },
-    { id::bare_teeth_at,     "bare_teeth_at",     "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::play_dead,         "play_dead",         "action_result" },
-    { id::vomit,             "vomit",             "action_result" },
-    { id::lean_rock_dance,   "lean_rock_dance",  "action_result" },
-    { id::anticipate_play,   "anticipate_play",   "action_result" },
-    { id::back_flip,         "back_flip",         "action_result" },
-    { id::move_left_ear,     "move_left_ear",     "->(action_symbol action_result)" },
-    { id::move_right_ear,    "move_right_ear",    "->(action_symbol action_result)" },
     { id::widen_eyes,        "widen_eyes",        "action_result" },
     { id::shake_head,        "shake_head",        "action_result" },
-    { id::sleep,             "sleep",             "action_result" },
-    { id::dream,             "dream",             "->(union(definite_object indefinite_object wild_card) action_result)" },
-    { id::wag,               "wag",               "action_result" },
-    { id::tail_flex,         "tail_flex",         "->(contin action_result)" },
-    //{ id::dummy_modular_action,
-    //                       "dummy_modular_action",
-    //                                            "->(contin contin action_result)" },
-
-    { id::bite,              "bite",              "->(union(definite_object indefinite_object wild_card) action_result)" },
-
-    { id::pet,               "pet",               "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::kick,              "kick",              "->(union(definite_object indefinite_object wild_card) action_result)" },
     { id::kick_left,         "kick_left",         "action_result" },
     { id::kick_right,        "kick_right",        "action_result" },
@@ -488,7 +272,6 @@ static const action_property_description apd[] = {
     { id::rotate_left,    false,    false,     true,       true,           id::rotate_right },
     { id::rotate_right,   false,    false,     true,       true,           id::rotate_left },
     { id::rotate,         false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::heel,           true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::jump_up,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::jump_towards,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::jump_forward,   false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
@@ -496,61 +279,11 @@ static const action_property_description apd[] = {
     { id::grab,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::nudge_to,       true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::drop,           false,    true,      false,      true,           (avatar_builtin_action_enum)0 },
-    { id::sniff,          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::sniff_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::sniff_pet_part, false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::sniff_avatar_part,
-                          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::eat,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::drink,          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::chew,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::beg,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::hide_face,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::look_up_turn_head,
-                          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::sit,            false,    true,      false,      true,           (avatar_builtin_action_enum)0 },
-    { id::stretch,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::run_in_circle,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::scratch_self,   false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::scratch_ground_back_legs,
-                          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::scratch_other,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::lie_down,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::trick_for_food, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::pee,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::poo,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
-    { id::speak,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::bark,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::bark_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::lick,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::lick_at,        false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::belch,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::move_head,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::growl,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::growl_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::whine,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::whine_at,       false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::fearful_posture,false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::clean,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::tap_dance,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::bare_teeth,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::bare_teeth_at,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::play_dead,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::vomit,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::lean_rock_dance,false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::anticipate_play,false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::back_flip,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::move_left_ear,  false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::move_right_ear, false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::widen_eyes,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::shake_head,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::sleep,          false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::dream,          false,    false,     false,  /*n/a*/false,       (avatar_builtin_action_enum)0 },
-    { id::wag,            false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::tail_flex,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-    { id::bite,           false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
-
-    { id::pet,            true,     false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::kick,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::kick_left,      false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::kick_right,     false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
@@ -593,30 +326,11 @@ static const action_argument_property_description aapd[] = {
     { id::grab,                     0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 1,    false, false,  false,  0,  0 },
-    { id::sniff_at,                 0,    false, false,  false,  0,  0 },
-    { id::sniff_pet_part,           0,    false, false,  false,  0,  0 },
-    { id::sniff_pet_part,           1,    false, false,  false,  0,  0 },
-    { id::sniff_avatar_part,        0,    false, false,  false,  0,  0 },
-    { id::sniff_avatar_part,        1,    false, false,  false,  0,  0 },
     { id::eat,                      0,    false, false,  false,  0,  0 },
     { id::drink,                    0,    false, false,  false,  0,  0 },
-    { id::chew,                     0,    false, false,  false,  0,  0 },
-    { id::scratch_self,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::scratch_other,            0,    false, false,  false,  0,  0 },
-    { id::bark_at,                  0,    false, false,  false,  0,  0 },
-    { id::lick_at,                  0,    false, false,  false,  0,  0 },
     { id::move_head,                0,    true,  false,  true,  -PI,  PI },
     { id::move_head,                1,    true,  false,  true,  -PI,  PI },
     { id::move_head,                2,    true,  false,  true,  -PI,  PI },
-    { id::growl_at,                 0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::whine_at,                 0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::bare_teeth_at,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::move_left_ear,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::move_right_ear,           0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1 },
-    { id::dream,                    0,    false, false,  false,  0,  0 },
-    { id::tail_flex,                0,    true,  false,  true,  -PI,  PI },
-    { id::bite,                     0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::pet,                      0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::kick,                     0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::group_command,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
     { id::group_command,            1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1

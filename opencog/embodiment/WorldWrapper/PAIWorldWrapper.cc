@@ -831,37 +831,18 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     AtomSpace& as = pai.getAtomSpace();
     const SpaceServer::SpaceMap& sm = spaceServer().getLatestMap();
     static const std::map<avatar_builtin_action_enum, ActionType> actions2types =
-        { {id::bark, ActionType::BARK()},
-          {id::bare_teeth_at, ActionType::BARE_TEETH()},
-          {id::bark_at, ActionType::BARK()},
-          {id::chew, ActionType::CHEW()},
-          {id::dream, ActionType::DREAM()},
-          {id::drink, ActionType::DRINK()},
+        { {id::drink, ActionType::DRINK()},
           {id::eat, ActionType::EAT()},
           {id::grab, ActionType::GRAB()},
-          {id::growl_at, ActionType::GROWL()},
           {id::jump_up, ActionType::JUMP_UP()},
           {id::jump_towards, ActionType::JUMP_TOWARD()},
           {id::jump_forward, ActionType::JUMP_FORWARD()},
-          // {id::move_left_ear, ActionType::LEFT_EAR_?()} each ear movement has its own command
-          // {id::move_right_ear, ActionType::RIGHT_EAR_?()}
-          {id::lick_at, ActionType::LICK()},
           {id::move_head, ActionType::MOVE_HEAD()},
           {id::random_step, ActionType::WALK()},
           {id::rotate, ActionType::ROTATE()},
-        // {id::scratch_self, ActionType::SCRATCH_SELF_*()} // each body part has itw own  scratch command
-          {id::scratch_other, ActionType::SCRATCH_OTHER()},
-          {id::scratch_ground_back_legs, ActionType::SCRATCH_GROUND_BACK_LEGS()},
-          {id::sniff_at, ActionType::SNIFF_AT()},
-          {id::sniff_avatar_part, ActionType::SNIFF_AVATAR_PART()},
-          {id::sniff_pet_part, ActionType::SNIFF_PET_PART()},
           {id::step_backward, ActionType::WALK()},
           {id::step_towards, ActionType::WALK()},
-          {id::tail_flex, ActionType::TAIL_FLEX()},
           {id::turn_to_face, ActionType::TURN()},
-          {id::wag, ActionType::WAG()},
-          {id::bite, ActionType::BITE()},
-          {id::pet, ActionType::PET()},
           {id::kick, ActionType::KICK()},
           {id::sit, ActionType::SIT()},
           {id::look_at, ActionType::LOOK_AT()},
@@ -874,7 +855,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
           {id::rotate_right, ActionType::ROTATE_RIGHT()},
           {id::rotate_left, ActionType::ROTATE_LEFT()},
 
-          {id::whine_at, ActionType::WHINE()}
         };
 
     OC_ASSERT(WorldWrapperUtil::is_builtin_atomic_action(*from));
@@ -894,33 +874,17 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
 
          the full list of such schema is:
 
-         bare_teeth_at(obj)
-         bark_at(obj)
-         chew(obj)
-         dream(obj)
          drink(drinkable_obj)
          eat(edible_obj)
          grab(pickupable_obj)
-         growl_at(obj)
          jump_towards(obj)
          jump_forward(height)
-         move_left_ear(TWITCH|PERK|BACK)
-         lick_at(obj)
          move_head(angle, angle)
          random_step
-         move_right_ear(TWITCH|PERK|BACK)
          rotate(angle)
-         scratch_other(obj)
-         scratch_self(NOSE|RIGHT_EAR|LEFT_EAR|NECK|RIGHT_SHOULDER|LEFT_SHOULDER)
-         sniff_at(obj)
-         sniff_avatar_part(avatar,RIGHT_FOOT|LEFT_FOOT|RIGHT_HAND|LEFT_HAND|CROTCH|BUTT)
-         sniff_pet_part(pet,NOSE|NECK|BUTT)
          step_backward
          step_towards(obj,TOWARDS|AWAY)
-         tail_flex(position)
          turn_to_face(obj)
-         bite(obj)
-         whine_at(obj)
     ****/
     auto at_it = actions2types.find(bae);
     {
@@ -935,20 +899,9 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     double theta = 0;
     switch (bae) {
         //we're going to do all of the "do x to id y" commands together
-    case id::bare_teeth_at:     // bare_teeth_at(obj)
-    case id::bark_at:           // bark_at(obj)
-    case id::chew:              // chew(obj)
-    case id::dream:             // dream(obj)
     case id::drink:             // drink(drinkable_obj)
     case id::eat:               // eat(edible_obj)
     case id::grab:              // grab(pickupable_obj)
-    case id::growl_at:          // growl_at(obj)
-    case id::lick_at:           // lick_at(obj)
-    case id::scratch_other:     // scratch_other(obj)
-    case id::sniff_at:          // sniff_at(obj)
-    case id::whine_at:          // whine_at(obj)
-    case id::bite:              // bite(obj)
-    case id::pet:               // pet(obj)
     case id::kick:              // kick(obj)
         action.addParameter(ActionParameter("target",
                                             ActionParamType::ENTITY(),
@@ -1117,14 +1070,6 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
                                             ActionParamType::FLOAT(),
                                             "1.0"));
         break;
-  case id::tail_flex:         // tail_flex(position)
-        action.addParameter(ActionParameter("position",
-                                            ActionParamType::VECTOR(),
-                                            Vector(0.0, 0.0, 0.0)));
-        //action.addParameter(ActionParameter("rotation",
-        //ActionParamType::ROTATION(),
-        //Rotation(0.0,0.0,get_contin(*from.begin()))));
-        break;
 */
     case id::turn_to_face: {    // turn_to_face(obj)
 
@@ -1226,36 +1171,13 @@ AvatarAction PAIWorldWrapper::buildAvatarAction(sib_it from)
     default:
         //this will handle simple schema with no arguments - these are:
         /**
-           anticipate_play
-           bare_teeth
-           bark
-           beg
-           belch
            shake_head
-           clean
-           run_in_circle
            drop
-           back_flip
-           growl
            look_up_turn_head
            jump_up
-           lick
-           lieDown
-           tap_dance
-           pee
-           play_dead
-           poo
-           trick_for_food
-           lean_rock_dance
            sit
            sleep
-           fearful_posture
-           sniff
-           speak
            hide_face
-           stretch
-           vomit
-           whine
            widen_eyes
            step_forward
            rotate_left
