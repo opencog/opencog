@@ -73,40 +73,6 @@ action_boolean_if(exists_edible
 		  whine)
 
 ###
-# Sniff butt if available (preferably pet-butt, otherwise avatar-butt):
-###
-sniff_butt(0) := 
-action_boolean_if(exists_pet
-		  and_seq(goto_obj(random_pet 2)
-		          sniff_pet_part(nearest_pet 
-					 BUTT))
-		  action_boolean_if(exists_avatar
-			    	    and_seq(goto_obj(random_avatar 2)
- 				            sniff_avatar_part(nearest_avatar 
-							      BUTT))
-				    action_success))
-
-###
-# Chase pets or avatars (which one is chosen by a coin-flip):
-###
-randbool(0) := 0<(+(rand -0.5))
-#indefinite_object_if has not been implemented yet so that procedure is disactivated
-#rand_pet_or_avatar(0) := 
-#indefinite_object_if(exists_pet
-#           indefinite_object_if(exists_avatar
-#	              indefinite_object_if(randbool
-#				 random_avatar
-#		                 random_pet)
-#		      random_pet)
-#	   random_avatar)
-#chase_helper(1) :=
-#boolean_while(not(is_null($1))
-#	      and_seq(bark
-#		      goto_obj($1 2)
-#		      growl))
-#chase(0) := chase_helper(rand_pet_or_avatar)
-
-###
 # Pick up something, carry it a while, then put it down:
 ###
 random_step(0) := 
@@ -123,20 +89,6 @@ and_seq(goto_obj(random_pickupable 2)
 	random_step
 	random_step
         drop)
-
-###
-# Nudge something around (uses random_step defined above):
-###
-#nudge_forward does not exist anymore so that function disactiavated
-#nudge_around(0) :=
-#and_seq(goto_obj(random_movable 2)
-#	nudge_forward(nearest_movable)
-#	random_step
-#	goto_obj(nearest_movable 2)
-#	nudge_forward(nearest_movable)
-#	random_step
-#	goto_obj(nearest_movable 2)
-#	nudge_forward(nearest_movable))
 
 ### 
 # No functional language code sample is complete without a ridiculously
@@ -157,9 +109,6 @@ contin_if(0<($1)
 
 #function to test combo interpreter
 function1(0) := wander_searching_food
-    
-
-          	
 
 #Sit in a particular spot or on an object
 sit_small_object(0) :=
@@ -167,55 +116,11 @@ sit_small_object(0) :=
 			and_seq(goto_obj(nearest_small 2) sit)
 		    sit
 		)
-          
-#Lie down - lie_down crash, so I chaged to stay
-rotate_lie_down(0) :=
-		and_seq(random_step random_step 
-			rotate_left rotate_left rotate_left rotate_left 
-			lie_down )
-
-#Come with the owner
-come_with_owner(0) :=
-	action_boolean_if(is_null(owner)
-		wag
-		and_seq(goto_obj(owner 2) 
-			boolean_while(is_moving(owner) goto_obj(owner 2))
-		)
-	)
-
-#Heel (walk right next to the owner and sit when owner stops walking)
-heel_sit(0) :=
-	action_boolean_if(is_null(owner)
-		sit
-		and_seq(goto_obj(owner 2) 
-			boolean_while(not(is_null(owner))
-				action_boolean_if(is_moving(owner) goto_obj(owner 2) sit)
-			)
-		)
-	)
-
 
 #Find a specific object by name and either bring it to the owner, or
 # come back and lead the owner to it
 
 #Guard stuff
-
-
-#Looking for food. If does not exist, ramdom_step_searching until find food
-wander_searching_food(0) :=
-	and_seq(
-    	boolean_while(not(exists_edible) random_step_searching)
-        goto_obj(nearest_edible 2) wag eat(nearest_edible)
-    )
-
-
-#Looking for water. If does not exist, ramdom_step_searching until find water
-wander_searching_water(0) :=
-    and_seq(
-    	boolean_while(not(exists_drinkable) random_step_searching)
-        and_seq(goto_obj(nearest_drinkable 2) wag drink(nearest_drinkable))
-    )
-
 
 #walk random, but more forward 
 random_step_lib(0) := 
@@ -247,118 +152,12 @@ random_step_searching(0) :=
 	    )
 	)
 
-#pick  something, carry and drop after some number of random_step.
-#pick_grab is defined nowhere so that procedure is disactivated
-#pick_carry_drop_chew_grab(0) :=
-#	action_boolean_if(0<(+(rand -0.666))
-#    	pick_carry_drop
-#    	action_boolean_if(0<(+(rand -0.5))
-#	    	pick_chew
-#     		pick_grab
-#      	)
-#    )
-
-#pick  something, carry and drop after some number of random_step.
-pick_carry_drop(0) :=
-	and_seq(goto_obj(random_pickupable 2)
-    	grab(nearest_pickupable)
-    	wag
-    	random_step_lib
-    	random_step_lib
-    	random_step_lib
-    	boolean_while(0<(+(rand -0.5)) 
-        	random_step_lib
-        )
-    	drop
-    	wag
-    )
-
-#pick  something, carry and drop after some number of random_step.
-pick_chew(0) :=
-	and_seq(goto_obj(random_pickupable 2)
-    	lick_at(nearest_pickupable)
-    	lie_down
-    	chew(nearest_pickupable)
-    	wag
-    	chew(nearest_pickupable)
-    	wag
-    	chew(nearest_pickupable)
-    	wag
-    	boolean_while(0<(+(rand -0.5)) 
-      		and_seq(
-        		chew(nearest_pickupable)
-        		wag
-        	)
-        )
-    	drop
-    	wag
-    )
-
-#pick  something, carry and drop after some number of random_step.
-pick_grabs_scratch(0) :=
-	and_seq(goto_obj(random_pickupable 2)
-    	grab(nearest_pickupable)
-    	wag
-    	scratch_other(nearest_pickupable)
-    	wag
-    	grab(nearest_pickupable)
-    	lean_rock_dance
-    	wag
-    	boolean_while(0<(+(rand -0.5)) 
-      		and_seq(
-        		scratch_other(nearest_pickupable)
-        		wag
-        	)
-        )
-    	drop
-    	wag
-    )
-
-#chase animals or people. follow obj (the parameter) for 15s. The object initially would be
-#moving rapidly, but nowadays I can not know it.
-chase_animal_people(1) :=
-	action_boolean_if(
-		boolean_if(
-			is_avatar($1) true is_pet($1)
-		)
-		and_seq(growl_at($1) 
-			bark follow($1 10 2) 
-      		bark
-      	)
-      	sit
-	)
-
-
-
-#Seek food locally, and whines if no food is around:
-seek_food_whine(0) :=
-	action_boolean_if(exists_edible
-		and_seq(goto_obj(random_edible 2)
-			eat(nearest_edible)
-		)
-        whine
-	)
-
 #pay_attention and sit
 pay_attention(0) :=
 	action_boolean_if(is_null(owner)
 		and_seq(turn_to_face(owner) sit)
 		sit
 	)
-
-#Looking for pee place. If does not exist, ramdom_step_searching until find one
-wander_searching_pee_place(0) :=
-    and_seq(
-    	boolean_while(not(exists_pee_place) random_step_searching)
-        and_seq(goto_obj(nearest_pee_place 2) wag pee)
-    )
-
-#Looking for poo place. If does not exist, ramdom_step_searching until find one
-wander_searching_poo_place(0) :=
-    and_seq(
-    	boolean_while(not(exists_poo_place) random_step_searching)
-        and_seq(goto_obj(nearest_poo_place 2) wag poo)
-    )
 
 #not_hungry
 not_hungry(0) := not(0<(+(get_hunger(self) -0.4)))

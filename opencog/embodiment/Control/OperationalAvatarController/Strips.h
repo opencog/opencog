@@ -78,8 +78,9 @@ namespace opencog { namespace oac {
 
     extern const char* STATE_TYPE_NAME[5];
 
-    // some kind of state values cannot directly get from the Atomspace.see inquery.h
-    // so each of the state value need a coresponding funciton to inquery the state value in real time.
+    // some kind of state values cannot directly get from the
+    // Atomspace. See inquery.h so each of the state value needs a
+    // corresponding function to inquery the state value in real time.
     // the vector<string> is the stateOwnerList
     typedef ParamValue (*InqueryStateFun)(const vector<ParamValue>&);
 
@@ -125,7 +126,7 @@ namespace opencog { namespace oac {
         // e.g.: the height of Ben, this is a essential attribute, which is usuall apparent and not changed, so this is not need a real-time inquery
         bool need_inquery;
 
-        // if the need_inquery is true, then it needs a inquery funciton to get the value of the state in real-time
+        // if the need_inquery is true, then it needs a inquery function to get the value of the state in real-time
         InqueryStateFun inqueryStateFun;
 
         bool permanent; // if it's true, then the value of this state cannot be changed. Only can be changed from or ot UN_DEFINED value
@@ -142,10 +143,10 @@ namespace opencog { namespace oac {
 
         // for some unknowable states, not existing in Atomspace, nor able to calculate in real time, _need_inquery = true, but _inqueryStateFun = 0
         State(string _stateName, ActionParamType _valuetype,StateType _stateType, ParamValue  _ParamValue,
-              vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = false, bool _permanent = 0);
+              vector<ParamValue> _stateOwnerList, bool _need_inquery = false, InqueryStateFun _inqueryStateFun = nullptr, bool _permanent = 0);
 
         State(string _stateName, ActionParamType _valuetype ,StateType _stateType, ParamValue _ParamValue,
-               bool _need_inquery = false, InqueryStateFun _inqueryStateFun = 0, bool _permanent = false);
+              bool _need_inquery = false, InqueryStateFun _inqueryStateFun = nullptr, bool _permanent = false);
 
         State(){}
 

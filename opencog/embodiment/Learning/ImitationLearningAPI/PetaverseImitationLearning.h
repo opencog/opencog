@@ -107,7 +107,7 @@ public:
      *                     That set is determined by the EntropyFilter
      *
      * @param actions      corresponds to the set of atomic actions
-     *                     (like wag, goto_obj(stick), etc)
+     *                     (like goto_obj(stick), etc)
      *                     possibly involved in the trick to be learned.
      *                     That set is determined by the ActionFilter
      */
