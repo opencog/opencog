@@ -534,7 +534,7 @@ void Table::add_features_from_file(const string& input_file,
 
         // Look up the corresponding feature names for each index.
         vector<string> ignore_feats;
-        for (int i=0; i< features_pos_comp.size(); i++) {
+        for (size_t i=0; i< features_pos_comp.size(); i++) {
             ignore_feats.push_back(full_header[features_pos_comp[i]]);
         }
 
