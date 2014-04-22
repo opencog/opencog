@@ -74,8 +74,10 @@ public:
                                            target_feature, ignore_features);
 
         // load contin table
+        vector<string> ignore_date;
+        ignore_date.push_back("date");
         sparse_table = loadTable(sparse_table_path,
-                                 target_feature, ignore_features);
+                                 target_feature, ignore_date);
 
         // load ignore_enfore_target table
         ignore_features.push_back("timestamp");
