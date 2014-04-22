@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#ifdef HAVE_BFD
+#if defined(HAVE_BFD) && defined(HAVE_IBERTY)
 char **oc_backtrace_symbols(void *const *buffer, int size);
 void oc_backtrace_symbols_fd(void *const *buffer, int size, int fd);
 #else

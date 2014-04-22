@@ -254,6 +254,16 @@ ELSE (HYPERTABLE_FOUND)
 
 ENDIF (HYPERTABLE_FOUND)
 
+# Look for libiberty-dev. Needed for pretty stack printing.
+FIND_PACKAGE(Iberty)
+IF (IBERTY_FOUND)
+	MESSAGE(STATUS "Libiberty found.")
+	ADD_DEFINITIONS(-DHAVE_IBERTY)
+	SET(HAVE_IBERTY 1)
+ELSE (IBERTY_FOUND)
+	MESSAGE(STATUS "Libiberty-dev missing: No pretty stack-trace printing.")
+ENDIF (IBERTY_FOUND)
+
 
 # Link-Gramar is needed for the Viterbi parser
 # Only 4.7.12 or newer has the required read-dict API in it.
@@ -726,7 +736,7 @@ SUMMARY_ADD("Scheme bindings" "Scheme bindings and shell" HAVE_GUILE)
 SUMMARY_ADD("Server" "The CogServer" HAVE_SERVER)
 SUMMARY_ADD("Spatial" "Vizualisation of the 3D spacemap" HAVE_SPATIAL_TOOLS)
 SUMMARY_ADD("SQL persistance" "Save/Restore of AtomSpace to database" HAVE_PERSIST)
-SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD)
+SUMMARY_ADD("StackPrint" "Pretty printing of stack traces" HAVE_BFD AND HAVE_IBERTY)
 SUMMARY_ADD("Ubigraph" "Visualisation of the AtomSpace" HAVE_UBIGRAPH)
 SUMMARY_ADD("Util" "General utility library" HAVE_UTIL)
 SUMMARY_ADD("Viterbi" "Viterbi Parser for Link Grammar" HAVE_VITERBI)
