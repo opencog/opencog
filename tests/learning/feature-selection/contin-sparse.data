@@ -1,4 +1,13 @@
-change_percent,swoosh,date
+;
+; Sparse-table demo.
+;
+; This is mostly a bag-of-words test case.
+; Notice that there's whitespace surrounding the column names ... 
+; that should be OK, whitespace is supposed to be ignored.
+#
+# hash marks are also acceptable comment characters.
+#
+change_percent,  swoosh  ,   date    
 0.867568257, "string thing a", 2009-01-05T16:00:00-05:00
 2.106810387, "string thing b", 2009-01-06T16:00:00-05:00, NUMBER00 : 1.0, NUMBER09 : 1.0, NUMBER15 : 1.0, NUMBER1708366 : 1.0, NUMBER2008 : 1.0, NUMBER5603 : 1.0, ACCESSIBLE : 1.0, AND : 13.0, ARO : 1.0, ATK : 1.0, BA : 1.0, BBD : 2.0, BMRFIR : 1.0, BY : 8.0, CATEGORY : 8.0, CN : 12.0, CODES : 1.0, COMPANY : 44.0, COR : 1.0, COS : 1.0, CRA : 1.0, DEC : 1.0, END_COMPANY : 32.0, EQUITY : 12.0, FII : 20.0, FITCH : 1.0, FNC : 1.0, FOLLOWING : 1.0, GD : 1.0, GMT : 1.0, GO : 20.0, GR : 1.0, HON : 1.0, IM : 1.0, INDUSTRY : 9.0, IS : 1.0, LLL : 1.0, LMT : 1.0, NEWS : 20.0, NI : 8.0, NOC : 1.0, OR : 8.0, RATINGS : 1.0, REGION : 8.0, RESEARCH : 12.0, RTN : 1.0, START_COMPANY : 32.0, STORY : 1.0, THE : 1.0, TICKERS : 1.0, UNDER : 1.0, US : 1.0, 
 -0.662565073, "string thing c", 2009-01-07T16:00:00-05:00, NUMBER09 : 1.0, NUMBER2009 : 1.0, NUMBER21 : 1.0, NUMBER22 : 1.0, GMT : 1.0, JAN : 1.0, PATHIRANA : 1.0, SONALI : 1.0, 

@@ -26,7 +26,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
@@ -489,15 +488,18 @@ CTable Table::compressed(const std::string weight_col) const
  * return the order consistent with the header.
  */
 vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header) {
+                             const vector<string>& header)
+{
     vector<unsigned> res;
     for (unsigned i = 0; i < header.size(); ++i)
-        if (boost::find(labels, header[i]) != labels.end())
+        if (std::find(labels.begin(), labels.end(), header[i]) != labels.end())
             res.push_back(i);
     return res;
 }
-unsigned get_index(const string& label, const vector<string>& header) {
-    return distance(header.begin(), boost::find(header, label));
+
+unsigned get_index(const string& label, const vector<string>& header)
+{
+    return distance(header.begin(), std::find(header.begin(), header.end(), label));
 }
 
 void Table::add_features_from_file(const string& input_file,
@@ -506,7 +508,7 @@ void Table::add_features_from_file(const string& input_file,
     // consider only the features not already present
     const vector<string>& labels = itable.get_labels();
     for (const string& f : labels) {
-        auto it = boost::find(features, f);
+        auto it = std::find(features.begin(), features.end(), f);
         if (it != features.end())
             features.erase(it);
     }
