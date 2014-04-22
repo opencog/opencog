@@ -268,11 +268,11 @@ public:
         Table tt = loadTable(tableUTest_dir + "sparse.data",
                              target_feature, ignore_features);
 
-        testIStreamTable("target1,d,e,f,g,x,y,z\n"
-                         "thing,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "some,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "other,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "last,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+        testIStreamTable("target1,date,d,e,f,g,x,y,z\n"
+                         "thing,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
+                         "some,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
+                         "other,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
+                         "last,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
                          tt.itable, tt.otable, true);
     }
 
@@ -284,11 +284,11 @@ public:
         Table tt = loadTable(tableUTest_dir + "sparse.data",
                              target_feature, ignore_features);
 
-        testIStreamTable("target2,d,e,f,g,x,y,z\n"
-                         "3.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
-                         "4.4,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
-                         "5.5,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
-                         "6.6,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
+        testIStreamTable("target2,date,d,e,f,g,x,y,z\n"
+                         "3.0,12-04-2012,0.0,0.0,0.0,0.0,0.0,0.0,0.0\n"
+                         "4.4,12-05-2012,4.0,0.0,6.0,0.0,0.0,0.0,0.0\n"
+                         "5.5,12-06-2012T14:35:02-0500,0.0,5.0,0.0,7.0,0.0,0.0,0.0\n"
+                         "6.6,12-07-2012T16:00:00-0500,4.0,5.0,0.0,0.0,24.0,25.0,26.0\n",
                          tt.itable, tt.otable, true);
     }
 

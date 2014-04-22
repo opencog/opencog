@@ -26,7 +26,6 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/for_each.hpp>
 #include <boost/range/algorithm/transform.hpp>
 #include <boost/range/algorithm/adjacent_find.hpp>
@@ -489,15 +488,18 @@ CTable Table::compressed(const std::string weight_col) const
  * return the order consistent with the header.
  */
 vector<unsigned> get_indices(const vector<string>& labels,
-                             const vector<string>& header) {
+                             const vector<string>& header)
+{
     vector<unsigned> res;
     for (unsigned i = 0; i < header.size(); ++i)
-        if (boost::find(labels, header[i]) != labels.end())
+        if (std::find(labels.begin(), labels.end(), header[i]) != labels.end())
             res.push_back(i);
     return res;
 }
-unsigned get_index(const string& label, const vector<string>& header) {
-    return distance(header.begin(), boost::find(header, label));
+
+unsigned get_index(const string& label, const vector<string>& header)
+{
+    return distance(header.begin(), std::find(header.begin(), header.end(), label));
 }
 
 void Table::add_features_from_file(const string& input_file,
@@ -506,7 +508,7 @@ void Table::add_features_from_file(const string& input_file,
     // consider only the features not already present
     const vector<string>& labels = itable.get_labels();
     for (const string& f : labels) {
-        auto it = boost::find(features, f);
+        auto it = std::find(features.begin(), features.end(), f);
         if (it != features.end())
             features.erase(it);
     }
@@ -530,24 +532,21 @@ void Table::add_features_from_file(const string& input_file,
         boost::set_difference(full_header_pos, features_pos,
                               back_inserter(features_pos_comp));
 
-        // load the table with the features to insert with types
-        // string that way the content is unchanged (convenient when
-        // the data contains stuff that loadITable does not know how
-        // to interpret).
+        // Look up the corresponding feature names for each index.
+        vector<string> ignore_feats;
+        for (size_t i=0; i< features_pos_comp.size(); i++) {
+            ignore_feats.push_back(full_header[features_pos_comp[i]]);
+        }
+
+        // Load the table, removing the undesired features.
         ITable features_table;
         ifstream in(input_file.c_str());
-        istreamRawITable(in, features_table, features_pos_comp);
-
-        // set the first row as header
-        auto first_row_it = features_table.begin();
-        vector<string> features_labels = first_row_it->get_seq<string>();
-        features_table.set_labels(features_labels);
-        features_table.erase(first_row_it);
+        istreamITable(in, features_table, ignore_feats);
+        const vector<string>& features_labels = features_table.get_labels();
 
         // Insert the forced features in the right order. We want to keep
         // the features in order because that is likely what the user
         // expects.
-        // TODO UPDATE THE TYPE TREE
         
         // insert missing columns from features_itable to itable
         for (auto lit = features_pos.cbegin(), rit = header_pos.cbegin();
