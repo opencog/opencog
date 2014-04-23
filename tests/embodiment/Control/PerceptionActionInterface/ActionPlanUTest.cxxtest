@@ -82,7 +82,7 @@ public:
 
     void testGetPVPmessage() {
 
-#define NUM_ACTIONS 5
+#define NUM_ACTIONS 3
         const char* expectedPVPMessages[NUM_ACTIONS+1] = {
 
             "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>\n"
@@ -197,20 +197,18 @@ public:
         //printf("%s\n", expectedPVPMessages[2]);
 
         AvatarAction actions[NUM_ACTIONS] =  {
-            AvatarAction(ActionType::TRICK_FOR_FOOD()),
             AvatarAction(ActionType::WALK()),
-            AvatarAction(ActionType::BARK()),
             AvatarAction(ActionType::EAT()),
             AvatarAction(ActionType::FLY())
         };
 
         // Add valid parameters to the actions
+        actions[0].addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
+        actions[0].addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
+        actions[0].addParameter(ActionParameter("rotate", ActionParamType::ROTATION(), Rotation(1.2, 1.3, 1.4)));
+        actions[1].addParameter(ActionParameter("object", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("10"), "pet")));
         actions[1].addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
-        actions[1].addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
-        actions[1].addParameter(ActionParameter("rotate", ActionParamType::ROTATION(), Rotation(1.2, 1.3, 1.4)));
-        actions[3].addParameter(ActionParameter("object", ActionParamType::ENTITY(), Entity(PAIUtils::getInternalId("10"), "pet")));
-        actions[4].addParameter(ActionParameter("target", ActionParamType::VECTOR(), Vector(1.2, 1.3, 1.4)));
-        actions[4].addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
+        actions[2].addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
 
         ActionPlan plan("10", "Integrity");
 
@@ -232,17 +230,17 @@ public:
     void testSize() {
         ActionPlan plan;
         TS_ASSERT(plan.size() == 0);
-        plan.addAction(AvatarAction(ActionType::BARK()));
+        plan.addAction(AvatarAction(ActionType::STEP_FOWARD()));
         TS_ASSERT(plan.size() == 1);
-        plan.addAction(AvatarAction(ActionType::SIT()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
         TS_ASSERT(plan.size() == 2);
     }
 
     void testMarkAndCheckMarkMethods() {
         ActionPlan plan;
-        plan.addAction(AvatarAction(ActionType::BARK()));
-        plan.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan.addAction(AvatarAction(ActionType::SLEEP()));
+        plan.addAction(AvatarAction(ActionType::STEP_FORWARD()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
+        plan.addAction(AvatarAction(ActionType::ROTATE_RIGHT()));
 
         TS_ASSERT(!plan.isTried(1));
         TS_ASSERT(!plan.isTried(2));
@@ -323,9 +321,9 @@ public:
         TS_ASSERT(plan.hasFailed());
 
         ActionPlan plan2;
-        plan2.addAction(AvatarAction(ActionType::BARK()));
-        plan2.addAction(AvatarAction(ActionType::LOOK_UP_TURN_HEAD()));
-        plan2.addAction(AvatarAction(ActionType::SLEEP()));
+        plan2.addAction(AvatarAction(ActionType::STEP_FORWARD()));
+        plan2.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
+        plan2.addAction(AvatarAction(ActionType::ROTATE_RIGHT()));
         plan2.markAsDone(1);
         plan2.markAsDone(2);
         plan2.markAsDone(3);

@@ -42,14 +42,14 @@ public:
 
     void testActionType() {
         //cout << "testActionType" << endl;
-        int typeCode = BARK_CODE;
+        int typeCode = EAT_CODE;
         for (; typeCode < NUMBER_OF_ACTION_TYPES; typeCode++) {
             const ActionType& actionType = ActionType::getFromCode((ActionTypeCode)typeCode);
             const std::string& pName = actionType.getName();
             TS_ASSERT(strlen(pName.c_str()) > 0);
             const ActionType& actionTypeByName = ActionType::getFromName(pName);
             TS_ASSERT(&actionType == &actionTypeByName);
-            int otherTypeCode = BARK_CODE;
+            int otherTypeCode = EAT_CODE;
             for (; otherTypeCode < NUMBER_OF_ACTION_TYPES; otherTypeCode++) {
                 const ActionType& otherActionType = ActionType::getFromCode((ActionTypeCode) otherTypeCode);
                 if (typeCode != otherTypeCode) {
