@@ -38,42 +38,19 @@ BuiltInProcedureRepository::BuiltInProcedureRepository(PAI& pai)
     // TODO: The lines commented out bellow corresponds to the pet actions that have
     // Vector or Rotation as type of one of their arguments. These arg types has no corresponding
     // combo type for now. See TODO marks in AvatarActionSchema.cc file.
-    add(new AvatarActionSchema(pai, ActionType::BARK()));
-    add(new AvatarActionSchema(pai, ActionType::TRICK_FOR_FOOD()));
     add(new AvatarActionSchema(pai, ActionType::EAT()));
     //add(new AvatarActionSchema(pai, ActionType::WALK()));
     add(new AvatarActionSchema(pai, ActionType::GRAB()));
     add(new AvatarActionSchema(pai, ActionType::DROP()));
     add(new AvatarActionSchema(pai, ActionType::SIT()));
     //add(new AvatarActionSchema(pai, ActionType::JUMP()));
-    add(new AvatarActionSchema(pai, ActionType::LIE_DOWN()));
     //add(new AvatarActionSchema(pai, ActionType::FLY()));
-    add(new AvatarActionSchema(pai, ActionType::STRETCH()));
-    add(new AvatarActionSchema(pai, ActionType::SCRATCH_SELF_NOSE())); // TODO: Add other scratchSelf* actions
-    add(new AvatarActionSchema(pai, ActionType::RUN_IN_CIRCLE()));
-    add(new AvatarActionSchema(pai, ActionType::ANTICIPATE_PLAY()));
-    add(new AvatarActionSchema(pai, ActionType::BEG()));
-    add(new AvatarActionSchema(pai, ActionType::HEEL()));
-    add(new AvatarActionSchema(pai, ActionType::HIDE_FACE()));
-    add(new AvatarActionSchema(pai, ActionType::PLAY_DEAD()));
     add(new AvatarActionSchema(pai, ActionType::FOLLOW()));
-    add(new AvatarActionSchema(pai, ActionType::LICK()));
     //add(new AvatarActionSchema(pai, ActionType::NUDGE()));
-    add(new AvatarActionSchema(pai, ActionType::TAP_DANCE()));
-    add(new AvatarActionSchema(pai, ActionType::BARE_TEETH()));
-    add(new AvatarActionSchema(pai, ActionType::GROWL()));
-    add(new AvatarActionSchema(pai, ActionType::LOOK_UP_TURN_HEAD()));
-    add(new AvatarActionSchema(pai, ActionType::WHINE()));
-    add(new AvatarActionSchema(pai, ActionType::SNIFF()));
-    add(new AvatarActionSchema(pai, ActionType::SHAKE_HEAD()));
-    add(new AvatarActionSchema(pai, ActionType::EARS_BACK()));
-    add(new AvatarActionSchema(pai, ActionType::EARS_TWITCH()));
     //add(new AvatarActionSchema(pai, ActionType::MOVE_HEAD()));
     add(new AvatarActionSchema(pai, ActionType::WAKE()));
     add(new AvatarActionSchema(pai, ActionType::SLEEP()));
     add(new AvatarActionSchema(pai, ActionType::DRINK()));
-    add(new AvatarActionSchema(pai, ActionType::PEE()));
-    add(new AvatarActionSchema(pai, ActionType::POO()));
 
     add(new AvatarActionSchema(pai, ActionType::PAY_ATTENTION()));
     //add(new AvatarActionSchema(pai, ActionType::WAG_TAIL()));

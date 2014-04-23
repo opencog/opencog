@@ -39,12 +39,9 @@ enum avatar_perception_enum {
     exists_pickupable,
     exists_drinkable,
     exists_avatar,
-    exists_pet,
     exists_small,
     exists_moving,
     exists_noisy,
-    exists_poo_place,
-    exists_pee_place,
 
     is_edible,
     is_movable,
@@ -52,12 +49,9 @@ enum avatar_perception_enum {
     is_drinkable,
     is_avatar,
     is_object,
-    is_pet,
     is_small,
     is_moving,
     is_noisy,
-    is_poo_place,
-    is_pee_place,
     is_null,
 
     is_owner,
@@ -130,14 +124,12 @@ enum avatar_perception_enum {
     get_thirst,
     get_energy,
     get_fitness,
-    get_pee_urgency,
-    get_poo_urgency,
 
     get_current_action_repetition,
 
     avatar_asked_to_try,
 
-    inside_pet_fov,
+    inside_avatar_fov,
 
     // relation between two objects
     is_there_relation,
@@ -146,7 +138,7 @@ enum avatar_perception_enum {
     is_proportional_next,
 
     is_last_agent_action,
-    is_last_pet_schema,
+    is_last_avatar_schema,
     is_last_group_command,
 
     avatar_perception_count
@@ -184,12 +176,9 @@ static const perception_basic_description pbd[] = {
     { id::exists_pickupable, "exists_pickupable", "boolean" },
     { id::exists_drinkable,  "exists_drinkable",  "boolean" },
     { id::exists_avatar,     "exists_avatar",     "boolean" },
-    { id::exists_pet,        "exists_pet",        "boolean" },
     { id::exists_small,      "exists_small",      "boolean" },
     { id::exists_moving,     "exists_moving",     "boolean" },
     { id::exists_noisy,      "exists_noisy",      "boolean" },
-    { id::exists_poo_place,  "exists_poo_place",  "boolean" },
-    { id::exists_pee_place,  "exists_pee_place",  "boolean" },
 
     { id::is_edible,         "is_edible",         "->(union(indefinite_object wild_card) boolean)" },
     { id::is_movable,        "is_movable",        "->(union(indefinite_object wild_card) boolean)" },
@@ -197,12 +186,9 @@ static const perception_basic_description pbd[] = {
     { id::is_drinkable,      "is_drinkable",      "->(union(indefinite_object wild_card) boolean)" },
     { id::is_avatar,         "is_avatar",         "->(union(indefinite_object wild_card) boolean)" },
     { id::is_object,         "is_object",         "->(union(indefinite_object wild_card) boolean)" },
-    { id::is_pet,            "is_pet",            "->(union(indefinite_object wild_card) boolean)" },
     { id::is_small,          "is_small",          "->(union(indefinite_object wild_card) boolean)" },
     { id::is_moving,         "is_moving",         "->(union(definite_object indefinite_object wild_card) boolean)" },
     { id::is_noisy,          "is_noisy",          "->(union(indefinite_object wild_card) boolean)" },
-    { id::is_poo_place,      "is_poo_place",      "->(union(indefinite_object wild_card) boolean)" },
-    { id::is_pee_place,      "is_pee_place",      "->(union(indefinite_object wild_card) boolean)" },
     { id::is_null,           "is_null",           "->(union(definite_object indefinite_object) boolean)" },
 
     { id::is_owner,       "is_owner",    "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
@@ -268,20 +254,18 @@ static const perception_basic_description pbd[] = {
     { id::get_thirst,     "get_thirst",  "->(union(definite_object indefinite_object) contin)"},
     { id::get_energy,     "get_energy",  "->(union(definite_object indefinite_object) contin)"},
     { id::get_fitness,       "get_fitness",  "->(union(definite_object indefinite_object) contin)"},
-    { id::get_pee_urgency,   "get_pee_urgency", "->(union(definite_object indefinite_object) contin)"},
-    { id::get_poo_urgency,   "get_poo_urgency", "->(union(definite_object indefinite_object) contin)"},
 
     { id::get_current_action_repetition,   "get_current_action_repetition", "contin"},
     { id::is_agent_state,   "is_agent_state", "->(contin boolean)"},
 
     { id::avatar_asked_to_try,  "avatar_asked_to_try", "->(union(definite_object indefinite_object wild_card) boolean)" },
-    { id::inside_pet_fov,    "inside_pet_fov",    "->(definite_object union(definite_object indefinite_object wild_card) boolean)" },
+    { id::inside_avatar_fov,    "inside_avatar_fov",    "->(definite_object union(definite_object indefinite_object wild_card) boolean)" },
 
     { id::is_there_relation, "is_there_relation", "->(definite_object union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) boolean)" },
     { id::is_proportional_next, "is_proportional_next", "->(union(definite_object indefinite_object wild_card) union(definite_object indefinite_object wild_card) contin contin boolean)" },
 
     { id::is_last_agent_action, "is_last_agent_action", "->(union(definite_object indefinite_object wild_card) action_definite_object arg_list(union(definite_object indefinite_object)) boolean)" },
-    { id::is_last_pet_schema,   "is_last_pet_schema",   "->(action_definite_object action_result arg_list(union(definite_object indefinite_object wild_card)) boolean)" },
+    { id::is_last_avatar_schema,   "is_last_avatar_schema",   "->(action_definite_object action_result arg_list(union(definite_object indefinite_object wild_card)) boolean)" },
     { id::is_last_group_command, "is_last_group_command", "->(definite_object definite_object arg_list(union(definite_object contin)) boolean)" }
 };
 
@@ -293,12 +277,9 @@ static const perception_property_description ppd[] = {
     { id::exists_pickupable, false,      false,     false,      false,    false,    false },
     { id::exists_drinkable,  false,      false,     false,      false,    false,    false },
     { id::exists_avatar,     false,      false,     false,      false,    false,    false },
-    { id::exists_pet,        false,      false,     false,      false,    false,    false },
     { id::exists_small,      false,      false,     false,      false,    false,    false },
     { id::exists_moving,     false,      false,     false,      false,    false,    false },
     { id::exists_noisy,      false,      false,     false,      false,    false,    false },
-    { id::exists_poo_place,  false,      false,     false,      false,    false,    false },
-    { id::exists_pee_place,  false,      false,     false,      false,    false,    false },
 
     { id::is_edible,         false,      false,     false,      false,    false,    false },
     { id::is_movable,        false,      false,     false,      false,    false,    false },
@@ -306,12 +287,9 @@ static const perception_property_description ppd[] = {
     { id::is_drinkable,      false,      false,     false,      false,    false,    false },
     { id::is_avatar,         false,      false,     false,      false,    false,    false },
     { id::is_object,         false,      false,     false,      false,    false,    false },
-    { id::is_pet,            false,      false,     false,      false,    false,    false },
     { id::is_small,          false,      false,     false,      false,    false,    false },
     { id::is_moving,         false,      false,     false,      false,    false,    false },
     { id::is_noisy,          false,      false,     false,      false,    false,    false },
-    { id::is_poo_place,      false,      false,     false,      false,    false,    false },
-    { id::is_pee_place,      false,      false,     false,      false,    false,    false },
     { id::is_null,           false,      false,     false,      false,    false,    false },
 
     { id::is_owner,          false,      false,     false,      false,    false,    false },
@@ -377,19 +355,17 @@ static const perception_property_description ppd[] = {
     { id::get_thirst,        false,      false,     false,      false,    false,    false },
     { id::get_energy,        false,      false,     false,      false,    false,    false },
     { id::get_fitness,       false,      false,     false,      false,    false,    false },
-    { id::get_pee_urgency,   false,      false,     false,      false,    false,    false },
-    { id::get_poo_urgency,   false,      false,     false,      false,    false,    false },
 
     { id::get_current_action_repetition, false, false, false,   false,    false,    false },
     { id::is_agent_state, false, false, false,   false,    false,    false },
 
     { id::avatar_asked_to_try, false,    false,     false,      false,    false,    false },
-    { id::inside_pet_fov,    false,      false,     false,      false,    false,    false },
+    { id::inside_avatar_fov,    false,      false,     false,      false,    false,    false },
 
     { id::is_there_relation, false,      false,     false,      false,    false,    false },
     { id::is_proportional_next, false,   false,     false,      true,     true,     false },
     { id::is_last_agent_action, false,   false,     false,      false,    false,    false },
-    { id::is_last_pet_schema,   false,   false,     false,      false,    false,    false },
+    { id::is_last_avatar_schema,   false,   false,     false,      false,    false,    false },
     { id::is_last_group_command,   false,   false,     false,      false,    false,    false }
 };
 

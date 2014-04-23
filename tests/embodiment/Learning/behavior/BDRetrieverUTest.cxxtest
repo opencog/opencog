@@ -62,7 +62,7 @@ public:
         //fill atomSpace with pet atom
         string pet_str = "Fido";
         Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
-        //fill atomSpace with actions goto_obj grab drop and wag
+        //fill atomSpace with actions goto_obj grab and drop
         stringstream ss_goto_obj;
         ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
@@ -159,7 +159,7 @@ public:
         //fill atomSpace with pet atom
         string pet_str = "Fido";
         Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
-        //fill atomSpace with actions goto_obj grab drop and wag
+        //fill atomSpace with actions goto_obj grab and drop
         stringstream ss_goto_obj;
         ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
@@ -167,12 +167,6 @@ public:
         stringstream ss_grab;
         ss_grab << get_instance(id::grab);
         Handle grab_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_grab.str());
-        stringstream ss_wag;
-        ss_wag << get_instance(id::wag);
-        Handle wag_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_wag.str());
-        stringstream ss_back_flip;
-        ss_back_flip << get_instance(id::back_flip);
-        Handle back_flip_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE, ss_back_flip.str());
         //create the ListLink atoms
         //for goto_obj(dummy_object)
         HandleSeq a1_seq;
@@ -186,16 +180,6 @@ public:
         a2_seq.push_back(grab_h);
         a2_seq.push_back(obj_h);
         Handle a2_h = atomSpace.addLink(LIST_LINK, a2_seq);
-        //for wag
-        HandleSeq a3_seq;
-        a3_seq.push_back(pet_h);
-        a3_seq.push_back(wag_h);
-        Handle a3_h = atomSpace.addLink(LIST_LINK, a3_seq);
-        //for back_flip
-        HandleSeq a4_seq;
-        a4_seq.push_back(pet_h);
-        a4_seq.push_back(back_flip_h);
-        Handle a4_h = atomSpace.addLink(LIST_LINK, a4_seq);
         //create the BDs, that is atoms (EvalLink(behaved ....))
         //for goto_obj(dummy_object)
         HandleSeq b1_seq;
@@ -207,28 +191,12 @@ public:
         b2_seq.push_back(behaved_h);
         b2_seq.push_back(a2_h);
         Handle bd2_h = atomSpace.addLink(EVALUATION_LINK, b2_seq);
-        //for wag
-        HandleSeq b3_seq;
-        b3_seq.push_back(behaved_h);
-        b3_seq.push_back(a3_h);
-        Handle bd3_h = atomSpace.addLink(EVALUATION_LINK, b3_seq);
-        //for back_flip
-        HandleSeq b4_seq;
-        b4_seq.push_back(behaved_h);
-        b4_seq.push_back(a4_h);
-        Handle bd4_h = atomSpace.addLink(EVALUATION_LINK, b4_seq);
         //add AtTimeLink
         //for goto_obj(dummy_object)
         Handle t1_h = timeServer().addTimeInfo(bd1_h, Temporal(0, TIME_INTERVAL));
         //for grab(obj)
         Handle t2_h = timeServer().addTimeInfo(bd2_h, Temporal(TIME_INTERVAL,
                                             2 * TIME_INTERVAL));
-        //for wag
-        Handle t3_h = timeServer().addTimeInfo(bd3_h, Temporal(10 * TIME_INTERVAL,
-                                            11 * TIME_INTERVAL));
-        //for back_flip
-        Handle t4_h = timeServer().addTimeInfo(bd4_h, Temporal(11 * TIME_INTERVAL,
-                                            12 * TIME_INTERVAL));
 
         //add trick concept
         string trick_str = "snorf";

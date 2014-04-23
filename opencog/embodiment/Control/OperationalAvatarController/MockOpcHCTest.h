@@ -57,21 +57,18 @@ private:
     Handle speed_h;
     //add necessary nodes to represent BDs
     Handle behaved_h;
-    //fill atomSpace with actions goto_obj grab and wag
+    //fill atomSpace with actions goto_obj and grab
     Handle goto_obj_h;
     Handle grab_h;
-    Handle wag_h;
     //add the concept of the trick
     Handle trick_h;
     //add AtTimeLink to it
     Handle tt1_h;
-    //add first behavior, goto to stick and wag the taile (subject : owner)
-    //(yes the owner wag its taile)
+    //add first behavior, goto to stick
     //for goto_obj
     Handle argl1_h;
     Handle eval_goto_obj_h;
     Handle eval_grab_obj_h;
-    Handle eval_wag_h;
     //add atTimeLink to it
     Handle ebd1_h;
     //add atTimeLink to it

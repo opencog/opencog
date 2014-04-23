@@ -154,7 +154,7 @@ public:
         string pet_str = "Fido";
         Handle pet_h = atomSpace.addNode(PET_NODE, pet_str);
 
-        //fill atomSpace with actions goto_obj grab drop and wag
+        //fill atomSpace with actions goto_obj grab and drop
         stringstream ss_goto_obj;
         ss_goto_obj << get_instance(id::goto_obj);
         Handle goto_obj_h = atomSpace.addNode(GROUNDED_SCHEMA_NODE,
