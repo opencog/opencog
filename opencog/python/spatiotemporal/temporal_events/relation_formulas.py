@@ -1,5 +1,6 @@
 from math import fabs, sqrt
 from numpy import convolve, NINF as NEGATIVE_INFINITY, PINF as POSITIVE_INFINITY
+import numpy
 from scipy.stats.distributions import uniform_gen
 from spatiotemporal.temporal_events.util import calculate_bounds_of_probability_distribution
 from spatiotemporal.temporal_interval_handling import calculateCenterMass
@@ -29,15 +30,41 @@ TEMPORAL_RELATIONS = {
 
 class TemporalRelation(dict):
     all_relations = 'pmoFDseSdfOMP'
+    _type = None
+    _list = None
+    _vector = None
+
+    @staticmethod
+    def from_list(list_object):
+        relation = TemporalRelation()
+        for i, name in enumerate(TemporalRelation.all_relations):
+            value = list_object[i]
+            if not isinstance(value, (int, float)):
+                value = float(value)
+            relation[name] = value
+        return relation
 
     def to_list(self):
-        result = []
-        for name in self.all_relations:
-            result.append(self[name])
-        return result
+        if self._list is None:
+            self._list = []
+            for name in self.all_relations:
+                self._list.append(self[name])
+        return self._list
+
+    def to_vector(self):
+        if self._vector is None:
+            _list = self.to_list()
+            self._vector = numpy.array(_list)
+        return self._vector
+
+    @property
+    def type(self):
+        if self._type is None:
+            self._type = ''.join([name for name in TemporalRelation.all_relations if self[name] > 0])
+        return self._type
 
     def __repr__(self):
-        return 'TemporalRelation({0})'.format(''.join([name for name in self.all_relations if self[name] > 0]))
+        return 'TemporalRelation({0})'.format(self.type)
 
     def __str__(self):
         return repr(self)
@@ -176,7 +203,7 @@ class FormulaCreator(object):
         result['P'] = after[beginning_a, beginning_b] * after[beginning_a, ending_b] * \
                       after[ending_a, beginning_b] * after[ending_a, ending_b]
 
-        print [(before[m, n], same[m, n], after[m, n]) for m in [beginning_a, ending_a] for n in [beginning_b, ending_b]]
+        # print [(before[m, n], same[m, n], after[m, n]) for m in [beginning_a, ending_a] for n in [beginning_b, ending_b]]
 
         return result
 
