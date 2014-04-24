@@ -36,7 +36,7 @@ using namespace opencog;
 AvatarAction::AvatarAction()
 {
     PAIUtils::initializeXMLPlatform();
-    type = ActionType::EAT().getCode(); // default action. Just to be valid.
+    type = ActionType::DO_NOTHING().getCode(); // default action. Just to be valid.
     sequence = 0;
 }
 
