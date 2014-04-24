@@ -204,7 +204,7 @@ public:
         walkAction.addParameter(ActionParameter("speed", ActionParamType::FLOAT(), "10.5"));
         walkAction.addParameter(ActionParameter("rotate", ActionParamType::ROTATION(), Rotation(1.2, 1.3, 1.4)));
         pai.addAction(plan2, walkAction);
-        pai.addAction(plan2, AvatarAction(ActionType::BARK()));
+        pai.addAction(plan2, AvatarAction(ActionType::STEP_FORWARD()));
         AvatarAction eatAction(ActionType::EAT());
         eatAction.addParameter(ActionParameter("object", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("10"), "pet")));
         pai.addAction(plan2, eatAction);
@@ -216,7 +216,7 @@ public:
         pai.sendActionPlan(plan2);
         TS_ASSERT(sentActionPlans.size() == 2);
         TS_ASSERT(sentActionPlans.back().getAction(1).getType() == ActionType::WALK());
-        TS_ASSERT(sentActionPlans.back().getAction(2).getType() == ActionType::BARK());
+        TS_ASSERT(sentActionPlans.back().getAction(2).getType() == ActionType::STEP_FORWARD());
         TS_ASSERT(sentActionPlans.back().getAction(3).getType() == ActionType::EAT());
         TS_ASSERT(sentActionPlans.back().getAction(4).getType() == ActionType::FLY());
     }
@@ -249,7 +249,7 @@ public:
         ActionPlanID planId = pai.createActionPlan();
         TS_ASSERT(planId == "10");
 
-        AvatarAction action1(ActionType::BARK());
+        AvatarAction action1(ActionType::STEP_FORWARD());
         action1.addParameter(ActionParameter("target", ActionParamType::ENTITY(), opencog::pai::Entity(PAIUtils::getInternalId("Wynx"), "avatar")));
         action1.addParameter(ActionParameter("duration", ActionParamType::FLOAT(), "1.0"));
         ActionID actionId1 = pai.addAction(planId, action1);
@@ -265,7 +265,7 @@ public:
         planId = pai.createActionPlan();
         TS_ASSERT(planId == "11");
 
-        AvatarAction action3(ActionType::BARK());
+        AvatarAction action3(ActionType::STEP_FORWARD());
         ActionID actionId3 = pai.addAction(planId, action3);
 
         pai.sendActionPlan(planId);
@@ -528,7 +528,7 @@ public:
             cout << "checking pet signals: action status" << endl;
             Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
+            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::STEP_FORWARD().getName());
             TS_ASSERT(Handle::compare(schemaNode, Handle::UNDEFINED));
 
             HandleSeq schemaListLinkOutgoing;
@@ -569,7 +569,7 @@ public:
             cout << "checking pet signals: action status" << endl;
             Handle predNode = atomSpace->getHandle(PREDICATE_NODE, ACTION_DONE_PREDICATE_NAME);
             TS_ASSERT(Handle::compare(predNode, Handle::UNDEFINED));
-            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::BARK().getName());
+            Handle schemaNode = atomSpace->getHandle(GROUNDED_SCHEMA_NODE, ActionType::STEP_FORWARD().getName());
             TS_ASSERT(Handle::compare(schemaNode, Handle::UNDEFINED));
 
             HandleSeq schemaListLinkOutgoing;

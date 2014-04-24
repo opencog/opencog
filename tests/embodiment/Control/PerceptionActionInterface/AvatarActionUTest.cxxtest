@@ -126,45 +126,45 @@ public:
         TS_ASSERT_THROWS(walkAction.addParameter(vectorParam), opencog::InvalidParamException&);
         TS_ASSERT_THROWS(walkAction.addParameter(floatParam), opencog::InvalidParamException&);
 
-        AvatarAction barkAction(ActionType::BARK());
-        const list<ActionParameter>& barkParameters = barkAction.getParameters();
-        TS_ASSERT(barkParameters.empty());
-        TS_ASSERT(barkAction.containsValidParameters());
+        AvatarAction stepForwardAction(ActionType::STEP_FORWARD());
+        const list<ActionParameter>& stepForwardParameters = step_forwardAction.getParameters();
+        TS_ASSERT(stepForwardParameters.empty());
+        TS_ASSERT(stepForwardAction.containsValidParameters());
 
         // Check if addParamter throws RuntimeException when a parameters of wrong type is given
-        TS_ASSERT_THROWS(barkAction.addParameter(vectorParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(rotationParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(floatParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(vectorParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(rotationParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(floatParam), opencog::InvalidParamException&);
 
-        barkAction.addParameter(entityParam);
-        TS_ASSERT(barkParameters.size() == 1);
+        stepForwardAction.addParameter(entityParam);
+        TS_ASSERT(stepForwardParameters.size() == 1);
 
         // Check if addParamter throws RuntimeException when a parameters of wrong type is given
-        TS_ASSERT_THROWS(barkAction.addParameter(vectorParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(rotationParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(entityParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(vectorParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(rotationParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(entityParam), opencog::InvalidParamException&);
 
-        barkAction.addParameter(floatParam);
-        TS_ASSERT(barkParameters.size() == 2);
-        TS_ASSERT(barkAction.containsValidParameters());
+        stepForwardAction.addParameter(floatParam);
+        TS_ASSERT(stepForwardParameters.size() == 2);
+        TS_ASSERT(stepForwardAction.containsValidParameters());
 
         // Check if addParamter throws RuntimeException if number of parameters is exceeded
-        TS_ASSERT_THROWS(barkAction.addParameter(entityParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(rotationParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(vectorParam), opencog::InvalidParamException&);
-        TS_ASSERT_THROWS(barkAction.addParameter(floatParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(entityParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(rotationParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(vectorParam), opencog::InvalidParamException&);
+        TS_ASSERT_THROWS(stepForwardAction.addParameter(floatParam), opencog::InvalidParamException&);
 
-        TS_ASSERT(barkParameters.front().getName() == "object");
-        TS_ASSERT(barkParameters.front().getType() == ActionParamType::ENTITY());
-        TS_ASSERT(barkParameters.front().isEntityValue());
-        const Entity& e = barkParameters.front().getEntityValue();
+        TS_ASSERT(stepForwardParameters.front().getName() == "object");
+        TS_ASSERT(stepForwardParameters.front().getType() == ActionParamType::ENTITY());
+        TS_ASSERT(stepForwardParameters.front().isEntityValue());
+        const Entity& e = stepForwardParameters.front().getEntityValue();
         TS_ASSERT(e.id == "10");
         TS_ASSERT(e.type == "pet");
 
-        TS_ASSERT(barkParameters.back().getName() == "speed");
-        TS_ASSERT(barkParameters.back().getType() == ActionParamType::FLOAT());
-        TS_ASSERT(barkParameters.back().isStringValue());
-        TS_ASSERT(barkParameters.back().getStringValue() == "10.5");
+        TS_ASSERT(stepForwardParameters.back().getName() == "speed");
+        TS_ASSERT(stepForwardParameters.back().getType() == ActionParamType::FLOAT());
+        TS_ASSERT(stepForwardParameters.back().isStringValue());
+        TS_ASSERT(stepForwardParameters.back().getStringValue() == "10.5");
 
         // TODO: To really test every case, tests adding parameters for all the AtionTypes must be inserted here.
         //        But sincerely, we can just trust in AtomType configuration (see construction of all of them in AtomType.cc) ...

@@ -65,7 +65,7 @@ public:
      LastFoodPlaceSchema lastFoodPlace(pai);
      OwnerSchema  owner(pai);
 
-            TS_ASSERT(!strcmp(.getName().c_str(), ActionType::BARK().getName().c_str()));
+            TS_ASSERT(!strcmp(.getName().c_str(), ActionType::STEP_FORWARD().getName().c_str()));
         }*/
 
     void testExecute() {

@@ -73,8 +73,8 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        AvatarActionSchema bark(pai, ActionType::BARK());
-        TS_ASSERT(!strcmp(bark.getName().c_str(), "BARK"));
+        AvatarActionSchema stepForward(pai, ActionType::STEP_FORWARD());
+        TS_ASSERT(!strcmp(stepForward.getName().c_str(), "STEP_FORWARD"));
     }
 
     void testExecuteOk() {
@@ -84,14 +84,14 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        AvatarActionSchema bark(pai, ActionType::BARK());
+        AvatarActionSchema stepForward(pai, ActionType::STEP_FORWARD());
         std::vector<combo::vertex> args(1, "Wynx");
-        combo::vertex result = bark.execute(args);
+        combo::vertex result = stepForward.execute(args);
         ActionPlanID* planId = boost::get<ActionPlanID>(&result);
         TS_ASSERT(planId);
         TS_ASSERT(!pai.isPlanFinished(*planId));
         TS_ASSERT(!plans.empty());
-        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::BARK());
+        TS_ASSERT(plans.front().getAction(1).getType() == ActionType::STEP_FORWARD());
     }
 
     void testExecuteFailure() {
@@ -100,7 +100,7 @@ public:
         AvatarInterfaceMock pi;
         PAI pai(atomSpace, ap, pi);
         pi.setPAI(&pai);
-        AvatarActionSchema bark(pai, ActionType::BARK());
+        AvatarActionSchema stepForward(pai, ActionType::STEP_FORWARD());
         AvatarActionSchema eat(pai, ActionType::EAT());
 
         // param exception
@@ -109,7 +109,7 @@ public:
 
         // send exception
         std::vector<combo::vertex> args2(1, "Wynx");
-        TS_ASSERT_THROWS(bark.execute(args2), opencog::RuntimeException&);
+        TS_ASSERT_THROWS(stepForward.execute(args2), opencog::RuntimeException&);
     }
 
 };
