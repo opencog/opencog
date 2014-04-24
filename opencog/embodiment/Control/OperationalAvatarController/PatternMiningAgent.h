@@ -48,6 +48,8 @@ private:
 
     PatternMiner* patternMiner;
 
+    AtomSpace* corpusAtomSpace;
+
     void init();
 
 public:
