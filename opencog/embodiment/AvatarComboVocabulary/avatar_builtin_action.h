@@ -282,6 +282,7 @@ static const action_property_description apd[] = {
     { id::eat,            false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::drink,          false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
     { id::sit,            false,    true,      false,      true,           (avatar_builtin_action_enum)0 },
+    { id::move_head,      false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::widen_eyes,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::shake_head,     false,    false,     false,      true,           (avatar_builtin_action_enum)0 },
     { id::kick,           false,    false,     false,      false,          (avatar_builtin_action_enum)0 },
@@ -304,24 +305,24 @@ static const action_property_description apd[] = {
 //of the arg_list
 static const action_argument_property_description aapd[] = {
     // builtin action           arg index addit. z.neut. modular min max
-    { id::goto_obj,                 0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::goto_obj,                 1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::gonear_obj,               0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::gonear_obj,               1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::gobehind_obj,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::gobehind_obj,             1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::go_behind,                0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::go_behind,                1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::go_behind,                2,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::goto_obj,                 0,    false, false,  false,  0,  0 },
+    { id::goto_obj,                 1,    false, false,  false,  0,  0 },
+    { id::gonear_obj,               0,    false, false,  false,  0,  0 },
+    { id::gonear_obj,               1,    false, false,  false,  0,  0 },
+    { id::gobehind_obj,             0,    false, false,  false,  0,  0 },
+    { id::gobehind_obj,             1,    false, false,  false,  0,  0 },
+    { id::go_behind,                0,    false, false,  false,  0,  0 },
+    { id::go_behind,                1,    false, false,  false,  0,  0 },
+    { id::go_behind,                2,    false, false,  false,  0,  0 },
     { id::follow,                   0,    false, false,  false,  0,  0 },
     { id::follow,                   1,    false, false,  false,  0,  0 },
     { id::follow,                   2,    false, false,  false,  0,  0 },
 
-    { id::step_towards,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::step_towards,             1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::step_towards,             0,    false, false,  false,  0,  0 },
+    { id::step_towards,             1,    false, false,  false,  0,  0 },
     { id::jump_towards,             0,    false, false,  false,  0,  0 },
     { id::jump_forward,             0,    false, false,  false,  0,  0 },
-    { id::turn_to_face,             0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::turn_to_face,             0,    false, false,  false,  0,  0 },
     { id::rotate,                   0,    false, false,  false,  0,  0 },
     { id::grab,                     0,    false, false,  false,  0,  0 },
     { id::nudge_to,                 0,    false, false,  false,  0,  0 },
@@ -331,14 +332,14 @@ static const action_argument_property_description aapd[] = {
     { id::move_head,                0,    true,  false,  true,  -PI,  PI },
     { id::move_head,                1,    true,  false,  true,  -PI,  PI },
     { id::move_head,                2,    true,  false,  true,  -PI,  PI },
-    { id::kick,                     0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::group_command,            0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::group_command,            1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::group_command,            2,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::group_command,            3,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::look_at,                  0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::say,                      0,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
-    { id::say,                      1,    false, false,  false,  0,  0 }, // not specified in Pet_Action_Spec_1.1
+    { id::kick,                     0,    false, false,  false,  0,  0 },
+    { id::group_command,            0,    false, false,  false,  0,  0 },
+    { id::group_command,            1,    false, false,  false,  0,  0 },
+    { id::group_command,            2,    false, false,  false,  0,  0 },
+    { id::group_command,            3,    false, false,  false,  0,  0 },
+    { id::look_at,                  0,    false, false,  false,  0,  0 },
+    { id::say,                      0,    false, false,  false,  0,  0 },
+    { id::say,                      1,    false, false,  false,  0,  0 },
 
     { id::build_block,              0,    false, false,  false,  0,  0 }, 
     { id::build_block,              1,    false, false,  false,  0,  0 }, 
