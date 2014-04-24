@@ -232,7 +232,7 @@ public:
     void testSize() {
         ActionPlan plan;
         TS_ASSERT(plan.size() == 0);
-        plan.addAction(AvatarAction(ActionType::STEP_FOWARD()));
+        plan.addAction(AvatarAction(ActionType::STEP_FORWARD()));
         TS_ASSERT(plan.size() == 1);
         plan.addAction(AvatarAction(ActionType::ROTATE_LEFT()));
         TS_ASSERT(plan.size() == 2);

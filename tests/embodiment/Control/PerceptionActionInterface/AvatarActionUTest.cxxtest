@@ -127,7 +127,7 @@ public:
         TS_ASSERT_THROWS(walkAction.addParameter(floatParam), opencog::InvalidParamException&);
 
         AvatarAction stepForwardAction(ActionType::STEP_FORWARD());
-        const list<ActionParameter>& stepForwardParameters = step_forwardAction.getParameters();
+        const list<ActionParameter>& stepForwardParameters = stepForwardAction.getParameters();
         TS_ASSERT(stepForwardParameters.empty());
         TS_ASSERT(stepForwardAction.containsValidParameters());
 
