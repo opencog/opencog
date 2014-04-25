@@ -35,6 +35,9 @@ void SchemeEval::init(void)
 	SchemeSmob::init(atomspace);
 	PrimitiveEnviron::init();
 
+	the_environment = scm_interaction_environment();
+	the_environment = scm_gc_protect_object(the_environment);
+
 	saved_outport = scm_current_output_port();
 	saved_outport = scm_gc_protect_object(saved_outport);
 
@@ -72,6 +75,7 @@ void SchemeEval::finish(void)
 
 	scm_gc_unprotect_object(error_string);
 	scm_gc_unprotect_object(captured_stack);
+	scm_gc_unprotect_object(the_environment);
 }
 
 void * SchemeEval::c_wrap_finish(void *p)

@@ -73,6 +73,7 @@ class SchemeEval : public GenericEval
 		SCM saved_outport;
 		bool in_shell;
 		AtomSpace* atomspace;
+		SCM the_environment;
 
 	public:
 		SchemeEval(AtomSpace* = NULL);
