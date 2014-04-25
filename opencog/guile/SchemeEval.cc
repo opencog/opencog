@@ -253,6 +253,12 @@ SCM SchemeEval::eval_body_wrapper (void *data)
 	return ss->eval_body();
 }
 
+SCM SchemeEval::eval_string_body_wrapper (void *data)
+{
+	SchemeEval *ss = (SchemeEval *) data;
+	return ss->eval_string_body();
+}
+
 SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
 	SchemeEval *ss = (SchemeEval *) data;
@@ -422,7 +428,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                      SchemeEval::eval_body_wrapper, this,
+	                      SchemeEval::eval_string_body_wrapper, this,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
@@ -468,7 +474,7 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	return "#<Error: Unreachable statement reached>";
 }
 
-SCM SchemeEval::eval_body()
+SCM SchemeEval::eval_string_body()
 {
 	return scm_c_eval_string_in_module(_input_line.c_str(),
 	                                   the_environment);
@@ -477,13 +483,9 @@ SCM SchemeEval::eval_body()
 
 /* ============================================================== */
 
-SCM SchemeEval::wrap_scm_eval(void *expr)
+SCM SchemeEval::eval_body()
 {
-	SCM sexpr = (SCM)expr;
-	// return scm_local_eval (sexpr, SCM_EOL);
-	// return scm_local_eval (sexpr, scm_procedure_environment(scm_car(sexpr)));
-// XXX FIXME this should use the environment ... 
-	return scm_eval (sexpr, scm_interaction_environment());
+	return scm_eval(_sexpr, the_environment);
 }
 
 /**
@@ -499,10 +501,11 @@ SCM SchemeEval::wrap_scm_eval(void *expr)
  */
 SCM SchemeEval::do_scm_eval(SCM sexpr)
 {
+	_sexpr = sexpr;
 	_caught_error = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                 (scm_t_catch_body) wrap_scm_eval, (void *) sexpr,
+	                 SchemeEval::eval_body_wrapper, this,
 	                 SchemeEval::catch_handler_wrapper, this,
 	                 SchemeEval::preunwind_handler_wrapper, this);
 
