@@ -15,6 +15,8 @@
 
 using namespace opencog;
 
+std::set<AtomSpace*> SchemeSmob::deleteable_as;
+
 /* ============================================================== */
 
 std::string SchemeSmob::as_to_string(const AtomSpace *as)
@@ -45,6 +47,7 @@ SCM SchemeSmob::make_as (AtomSpace *as)
  */
 SCM SchemeSmob::take_as (AtomSpace *as)
 {
+	deleteable_as.insert(as);
 	scm_gc_register_collectable_memory (as,
 	                 sizeof(*as), "opencog atomspace");
 	return make_as(as);
