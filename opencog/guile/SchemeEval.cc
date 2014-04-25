@@ -247,16 +247,21 @@ std::string SchemeEval::prt(SCM node)
 
 /* ============================================================== */
 
+SCM SchemeEval::eval_body_wrapper (void *data)
+{
+	SchemeEval *ss = (SchemeEval *) data;
+	return ss->eval_body();
+}
+
 SCM SchemeEval::preunwind_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeEval *ss = (SchemeEval *)data;
+	SchemeEval *ss = (SchemeEval *) data;
 	return ss->preunwind_handler(tag, throw_args);
-	return SCM_EOL;
 }
 
 SCM SchemeEval::catch_handler_wrapper (void *data, SCM tag, SCM throw_args)
 {
-	SchemeEval *ss = (SchemeEval *)data;
+	SchemeEval *ss = (SchemeEval *) data;
 	return ss->catch_handler(tag, throw_args);
 }
 
@@ -265,7 +270,7 @@ SCM SchemeEval::preunwind_handler (SCM tag, SCM throw_args)
 	// We can only record the stack before it is unwound.
 	// The normal catch handler body runs only *after* the stack
 	// has been unwound.
-	captured_stack = scm_make_stack (SCM_BOOL_T, SCM_EOL);
+	captured_stack = scm_make_stack(SCM_BOOL_T, SCM_EOL);
 	return SCM_EOL;
 }
 
@@ -348,7 +353,6 @@ SCM SchemeEval::catch_handler (SCM tag, SCM throw_args)
 }
 
 /* ============================================================== */
-
 /**
  * Evaluate a scheme expression.
  *
@@ -410,28 +414,15 @@ void * SchemeEval::c_wrap_eval(void * p)
  */
 std::string SchemeEval::do_eval(const std::string &expr)
 {
-	bool newin = false;
 	per_thread_init();
 
-	/* Avoid a string buffer copy if there is no pending input */
-	const char *expr_str;
-	if (_pending_input)
-	{
-		_input_line += expr;
-		expr_str = _input_line.c_str();
-	}
-	else
-	{
-		expr_str = expr.c_str();
-		newin = true;
-	}
+	_input_line += expr;
 
 	_caught_error = false;
 	_pending_input = false;
 	captured_stack = SCM_BOOL_F;
 	SCM rc = scm_c_catch (SCM_BOOL_T,
-	                      (scm_t_catch_body) scm_c_eval_string,
-	                      (void *) expr_str,
+	                      SchemeEval::eval_body_wrapper, this,
 	                      SchemeEval::catch_handler_wrapper, this,
 	                      SchemeEval::preunwind_handler_wrapper, this);
 
@@ -440,8 +431,6 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	 * to true. */
 	if (_pending_input)
 	{
-		/* Save input for later */
-		if (newin) _input_line += expr;
 		return "";
 	}
 	_pending_input = false;
@@ -478,6 +467,12 @@ std::string SchemeEval::do_eval(const std::string &expr)
 	}
 	return "#<Error: Unreachable statement reached>";
 }
+
+SCM SchemeEval::eval_body()
+{
+	return scm_c_eval_string(_input_line.c_str());
+}
+
 
 /* ============================================================== */
 
