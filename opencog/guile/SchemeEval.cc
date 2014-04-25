@@ -470,7 +470,8 @@ std::string SchemeEval::do_eval(const std::string &expr)
 
 SCM SchemeEval::eval_body()
 {
-	return scm_c_eval_string(_input_line.c_str());
+	return scm_c_eval_string_in_module(_input_line.c_str(),
+	                                   the_environment);
 }
 
 
@@ -481,6 +482,7 @@ SCM SchemeEval::wrap_scm_eval(void *expr)
 	SCM sexpr = (SCM)expr;
 	// return scm_local_eval (sexpr, SCM_EOL);
 	// return scm_local_eval (sexpr, scm_procedure_environment(scm_car(sexpr)));
+// XXX FIXME this should use the environment ... 
 	return scm_eval (sexpr, scm_interaction_environment());
 }
 
