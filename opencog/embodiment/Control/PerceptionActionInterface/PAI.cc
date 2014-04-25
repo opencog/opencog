@@ -1824,7 +1824,7 @@ void PAI::processInstruction(DOMElement * element)
 
 #ifdef HAVE_GUILE
     if (parsedSentenceText != NULL){
-        SchemeEval* evaluator = new SchemeEval(); 
+        SchemeEval* evaluator = new SchemeEval(&atomSpace); 
         std::string scheme_expression, scheme_return_value; 
 
         // Clean up all the information of previous sentence, such as detach 

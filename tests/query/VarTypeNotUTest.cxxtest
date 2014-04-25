@@ -110,7 +110,7 @@ void VarTypeNot::setUp(void)
 	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* evaluator = new SchemeEval();
+	SchemeEval* evaluator = new SchemeEval(as);
 	vscope_good = evaluator->apply("rule-good", Handle::UNDEFINED);
 	vscope_bad = evaluator->apply("rule-bad", Handle::UNDEFINED);
 	delete evaluator;

@@ -77,7 +77,7 @@ class MultiAtomSpace :  public CxxTest::TestSuite
 void MultiAtomSpace::setUp(void)
 {
 	server(CogServer::createInstance);
-	evaluator = new SchemeEval();
+	evaluator = new SchemeEval(&cogserver().getAtomSpace());
 
 	config().set("SCM_PRELOAD",
 		"opencog/atomspace/core_types.scm, "

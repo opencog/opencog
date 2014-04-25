@@ -113,7 +113,7 @@ void BuggyStackUTest::setUp(void)
 
 #ifdef HAVE_GUILE
 	// Create an implication link that will be tested.
-	SchemeEval* ev = new SchemeEval();
+	SchemeEval* ev = new SchemeEval(as);
 	restrict = ev->apply("impy", Handle::UNDEFINED);
 	delete ev;
 #endif /* HAVE_GUILE */

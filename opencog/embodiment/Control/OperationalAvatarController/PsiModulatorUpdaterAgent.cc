@@ -40,7 +40,7 @@ bool PsiModulatorUpdaterAgent::Modulator::runUpdater (AtomSpace & atomSpace)
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( " + modulatorUpdater + " )";
@@ -93,7 +93,7 @@ bool PsiModulatorUpdaterAgent::Modulator::updateModulator (AtomSpace & atomSpace
 #if HAVE_GUILE    
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     // Store the updated Modulator levels to AtomSpace
@@ -270,7 +270,7 @@ void PsiModulatorUpdaterAgent::run()
 
 #if HAVE_GUILE    
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(&atomSpace);
     std::string scheme_expression, scheme_return_value;
 
     scheme_expression = "( get_pleasure_value )";

@@ -23,6 +23,7 @@
 #ifndef _OPENCOG_EXECUTION_LINK_H
 #define _OPENCOG_EXECUTION_LINK_H
 
+#include <opencog/atomspace/AtomSpace.h>
 #include <opencog/atomspace/Link.h>
 
 namespace opencog
@@ -42,11 +43,13 @@ public:
          TruthValuePtr tv = TruthValue::NULL_TV(),
          AttentionValuePtr av = AttentionValue::DEFAULT_AV());
 
-    Handle execute() { return do_execute(Handle(shared_from_this())); }
+    Handle execute(AtomSpace* as) {
+        return do_execute(as, Handle(shared_from_this()));
+    }
 
-    static Handle do_execute(Handle);
-    static Handle do_execute(const HandleSeq& schema_and_args);
-    static Handle do_execute(Handle schema, Handle args);
+    static Handle do_execute(AtomSpace*, Handle);
+    static Handle do_execute(AtomSpace*, const HandleSeq& schema_and_args);
+    static Handle do_execute(AtomSpace*, Handle schema, Handle args);
 };
 
 /** @}*/
