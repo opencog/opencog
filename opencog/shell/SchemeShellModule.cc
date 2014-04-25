@@ -35,7 +35,7 @@ DECLARE_MODULE(SchemeShellModule);
 
 SchemeShellModule::SchemeShellModule(CogServer& cs) : Module(cs)
 {
-	evaluator = new SchemeEval();
+	evaluator = new SchemeEval(&cs.getAtomSpace());
 }
 
 void SchemeShellModule::init(void)

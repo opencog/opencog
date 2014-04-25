@@ -228,7 +228,7 @@ void PsiFeelingUpdaterAgent::runUpdaters()
     OC_ASSERT(oac, "Did not get an OAC server");
 
     // Initialize scheme evaluator
-    SchemeEval* evaluator = new SchemeEval();
+    SchemeEval* evaluator = new SchemeEval(&oac->getAtomSpace());
     std::string scheme_expression, scheme_return_value;
 
     // Process feelings one by one

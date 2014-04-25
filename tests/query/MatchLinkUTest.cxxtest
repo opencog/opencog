@@ -112,7 +112,7 @@ void MatchLink::setUp(void)
 	load_scm_files_from_config(*as, paths);
 
 	// Create an implication link that will be tested.
-	SchemeEval* eval = new SchemeEval();
+	SchemeEval* eval = new SchemeEval(as);
 	untyped_link_match = eval->apply("untyped-link-match", Handle::UNDEFINED);
 	typed_link_match = eval->apply("typed-link-match", Handle::UNDEFINED);
 	untyped_any_match = eval->apply("untyped-any-match", Handle::UNDEFINED);

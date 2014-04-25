@@ -80,7 +80,7 @@ class SchemeEval : public GenericEval
 		SCM the_environment;
 
 	public:
-		SchemeEval(AtomSpace* = NULL);
+		SchemeEval(AtomSpace*);
 		~SchemeEval();
 
 		std::string eval(const std::string&);

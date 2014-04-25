@@ -35,9 +35,11 @@ void SchemeEval::init(void)
 	SchemeSmob::init(atomspace);
 	PrimitiveEnviron::init();
 
+	// The environment will hold the atomsapce.
 	the_environment = scm_interaction_environment();
 	the_environment = scm_gc_protect_object(the_environment);
 
+	// Output ports for side-effects.
 	saved_outport = scm_current_output_port();
 	saved_outport = scm_gc_protect_object(saved_outport);
 
@@ -48,13 +50,19 @@ void SchemeEval::init(void)
 
 	in_shell = false;
 
+	// User error and crash management
 	error_string = SCM_EOL;
 	error_string = scm_gc_protect_object(error_string);
 
 	captured_stack = SCM_BOOL_F;
 	captured_stack = scm_gc_protect_object(captured_stack);
 
+	// Place the atomspace into the environment!
+	// scm_c_module_define(the_environment, "*-atomspace-*",
+	//                    SchemeSmob::make_as(atomspace));
+
 	pexpr = NULL;
+	_sexpr = SCM_EOL;
 }
 
 void * SchemeEval::c_wrap_init(void *p)

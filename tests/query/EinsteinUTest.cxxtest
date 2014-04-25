@@ -61,7 +61,7 @@ class EinsteinPuzzle :  public CxxTest::TestSuite
 			server(CogServer::createInstance);
 			as = &cogserver().getAtomSpace();
 			pm.set_atomspace(as);
-			eval = new SchemeEval();
+			eval = new SchemeEval(as);
 
 			// Load the required data
 			config().set("MODULES",

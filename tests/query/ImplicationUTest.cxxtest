@@ -100,7 +100,7 @@ void ImplicationUTest::setUp(void)
 	server(CogServer::createInstance);
 	as = &cogserver().getAtomSpace();
 	pm.set_atomspace(as);
-	eval = new SchemeEval();
+	eval = new SchemeEval(as);
 
 	// Load the atom types
 	config().set("MODULES",
