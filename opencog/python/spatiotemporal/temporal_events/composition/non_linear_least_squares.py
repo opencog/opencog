@@ -35,8 +35,8 @@ class DecompositionFitter(object):
 
         minimize(self.fitness, self.params)
 
-        for param_key in self.params:
-            self.params[param_key].value = round(self.params[param_key].value, 6)
+        # for param_key in self.params:
+        #     self.params[param_key].value = round(self.params[param_key].value, 6)
 
     def fitness(self, params):
         model = numpy.zeros(13)
@@ -127,6 +127,11 @@ class DecompositionFitter(object):
             data.append(same)
         return data
 
+    def check(self):
+        from spatiotemporal.temporal_events import FormulaCreator
+        print self.data
+        print FormulaCreator(self).calculate_relations().to_vector()
+        print
 
 if __name__ == '__main__':
     from spatiotemporal.temporal_events import FormulaCreator
@@ -134,8 +139,9 @@ if __name__ == '__main__':
     for i in xrange(50):
         A, B = generate_random_events(2)
         relations = A * B
-        formula = FormulaCreator(DecompositionFitter(relations))
+        formula = FormulaCreator(Fitter(relations))
         print relations.to_list()
         relations_estimate = formula.calculate_relations()
         print relations_estimate.to_list()
+        print relations.to_vector() - relations_estimate.to_vector()
         print
