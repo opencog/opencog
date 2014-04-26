@@ -76,8 +76,9 @@ void * SchemeEval::c_wrap_init(void *p)
 
 void SchemeEval::finish(void)
 {
-	// Restore the previous outport.
-	scm_set_current_output_port(saved_outport);
+	// Restore the previous outport (if its still alive)
+	if (scm_is_false(scm_port_closed_p(saved_outport)))
+		scm_set_current_output_port(saved_outport);
 	scm_gc_unprotect_object(saved_outport);
 
 	scm_close_port(outport);
