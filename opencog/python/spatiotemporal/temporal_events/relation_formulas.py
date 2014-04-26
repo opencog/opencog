@@ -128,23 +128,21 @@ class BaseRelationFormula(object):
 
 class FormulaCreator(object):
     def __init__(self, relation_formula):
-        # if not isinstance(relation_formula, (BaseRelationFormula)):
-        #     raise TypeError("'relation_formula' should be an instance of BaseTemporalFormula or Individual")
         self.relation_formula = relation_formula
 
     def temporal_relations_between(self, temporal_event_1, temporal_event_2):
-        beginning_a, ending_a = temporal_event_1.distribution_beginning, temporal_event_1.distribution_ending
-        beginning_b, ending_b = temporal_event_2.distribution_beginning, temporal_event_2.distribution_ending
-        self.relation_formula.bounds[beginning_a] = temporal_event_1.a, temporal_event_1.beginning
-        self.relation_formula.bounds[ending_a] = temporal_event_1.ending, temporal_event_1.b
-        self.relation_formula.bounds[beginning_b] = temporal_event_2.a, temporal_event_2.beginning
-        self.relation_formula.bounds[ending_b] = temporal_event_2.ending, temporal_event_2.b
+        dist_1_beginning, dist_1_ending = temporal_event_1.distribution_beginning, temporal_event_1.distribution_ending
+        dist_2_beginning, dist_2_ending = temporal_event_2.distribution_beginning, temporal_event_2.distribution_ending
+        self.relation_formula.bounds[dist_1_beginning] = temporal_event_1.a, temporal_event_1.beginning
+        self.relation_formula.bounds[dist_1_ending] = temporal_event_1.ending, temporal_event_1.b
+        self.relation_formula.bounds[dist_2_beginning] = temporal_event_2.a, temporal_event_2.beginning
+        self.relation_formula.bounds[dist_2_ending] = temporal_event_2.ending, temporal_event_2.b
 
         combinations = [
-            (beginning_a, beginning_b),
-            (beginning_a, ending_b),
-            (ending_a, beginning_b),
-            (ending_a, ending_b)
+            (dist_1_beginning, dist_2_beginning),
+            (dist_1_beginning, dist_2_ending),
+            (dist_1_ending, dist_2_beginning),
+            (dist_1_ending, dist_2_ending)
         ]
 
         return self.calculate_relations(combinations)
@@ -153,8 +151,8 @@ class FormulaCreator(object):
         if combinations is None:
             combinations = self.relation_formula.combinations
 
-        beginning_a, beginning_b = combinations[0]
-        ending_a, ending_b = combinations[3]
+        dist_1_beginning, dist_2_beginning = combinations[0]
+        dist_1_ending, dist_2_ending = combinations[3]
 
         before = {}
         same = {}
@@ -164,46 +162,44 @@ class FormulaCreator(object):
 
         result = TemporalRelation()
 
-        result['p'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      before[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['p'] = before[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      before[dist_1_ending, dist_2_beginning] * before[dist_1_ending, dist_2_ending]
 
-        result['m'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      same[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['m'] = before[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      same[dist_1_ending, dist_2_beginning] * before[dist_1_ending, dist_2_ending]
 
-        result['o'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['o'] = before[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * before[dist_1_ending, dist_2_ending]
 
-        result['F'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['F'] = before[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * same[dist_1_ending, dist_2_ending]
 
-        result['D'] = before[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['D'] = before[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * after[dist_1_ending, dist_2_ending]
 
-        result['s'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['s'] = same[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * before[dist_1_ending, dist_2_ending]
 
-        result['e'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['e'] = same[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * same[dist_1_ending, dist_2_ending]
 
-        result['S'] = same[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['S'] = same[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * after[dist_1_ending, dist_2_ending]
 
-        result['d'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * before[ending_a, ending_b]
+        result['d'] = after[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * before[dist_1_ending, dist_2_ending]
 
-        result['f'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * same[ending_a, ending_b]
+        result['f'] = after[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * same[dist_1_ending, dist_2_ending]
 
-        result['O'] = after[beginning_a, beginning_b] * before[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['O'] = after[dist_1_beginning, dist_2_beginning] * before[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * after[dist_1_ending, dist_2_ending]
 
-        result['M'] = after[beginning_a, beginning_b] * same[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
+        result['M'] = after[dist_1_beginning, dist_2_beginning] * same[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * after[dist_1_ending, dist_2_ending]
 
-        result['P'] = after[beginning_a, beginning_b] * after[beginning_a, ending_b] * \
-                      after[ending_a, beginning_b] * after[ending_a, ending_b]
-
-        # print [(before[m, n], same[m, n], after[m, n]) for m in [beginning_a, ending_a] for n in [beginning_b, ending_b]]
+        result['P'] = after[dist_1_beginning, dist_2_beginning] * after[dist_1_beginning, dist_2_ending] * \
+                      after[dist_1_ending, dist_2_beginning] * after[dist_1_ending, dist_2_ending]
 
         return result
 
@@ -251,15 +247,16 @@ class RelationFormulaSimple(BaseRelationFormula):
     #     return integral(function, a, b)
 
     def same(self, dist_1, dist_2):
-        dist_1_a, dist_1_b = self.bounds_of(dist_1)
-        dist_2_a, dist_2_b = self.bounds_of(dist_2)
-        a, b = max(dist_1_a, dist_2_a), min(dist_1_b, dist_2_b)
-        interval = TimeInterval(a, b)
-        dictionary_input_output = {}
-        for time_step in interval:
-            dictionary_input_output[time_step] = dist_1.pdf(time_step) * dist_2.pdf(time_step)
-        function = FunctionPiecewiseLinear(dictionary_input_output, FUNCTION_ZERO)
-        return integral(function, a, b)
+        # dist_1_a, dist_1_b = self.bounds_of(dist_1)
+        # dist_2_a, dist_2_b = self.bounds_of(dist_2)
+        # a, b = max(dist_1_a, dist_2_a), min(dist_1_b, dist_2_b)
+        # interval = TimeInterval(a, b)
+        # dictionary_input_output = {}
+        # for time_step in interval:
+        #     dictionary_input_output[time_step] = dist_1.pdf(time_step) * dist_2.pdf(time_step)
+        # function = FunctionPiecewiseLinear(dictionary_input_output, FUNCTION_ZERO)
+        # return integral(function, a, b)
+        return 0
 
     # def compare(self, dist_1, dist_2):
     #     same = self.same(dist_1, dist_2)
@@ -334,7 +331,15 @@ class RelationFormulaConvolution(BaseRelationFormula):
             length_dist_1 = self.duration_of(dist_1)
             length_dist_2 = self.duration_of(dist_2)
             return min(length_dist_1, length_dist_2) / sqrt(length_dist_1 * length_dist_2)
-        raise NotImplementedError()
+        # raise NotImplementedError()
+
+        dist_1_mean, dist_2_mean = dist_1.mean(), dist_2.mean()
+
+        dist_1_transformed = lambda t: dist_1.pdf(t + dist_1_mean)
+        dist_2_transformed = lambda t: dist_2.pdf(t + dist_2_mean)
+
+        geometric_mean = lambda t: sqrt(dist_1_transformed(t) * dist_2_transformed(t))
+        return integral(geometric_mean, NEGATIVE_INFINITY, POSITIVE_INFINITY)
 
     def compare(self, dist_1, dist_2):
         convolution = self.function_convolution(dist_1, dist_2)
