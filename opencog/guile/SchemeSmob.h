@@ -13,6 +13,7 @@
 #ifndef _OPENCOG_SCHEME_SMOB_H
 #define _OPENCOG_SCHEME_SMOB_H
 
+#include <set>
 #include <string>
 #include <vector>
 #include <libguile.h>
@@ -127,6 +128,7 @@ class SchemeSmob
 		static SCM take_as(AtomSpace *);
 		static SCM make_as(AtomSpace *);
 		static AtomSpace* ss_to_atomspace(SCM);
+		static std::set<AtomSpace*> deleteable_as;
 
 		// Attention values
 		static SCM ss_new_av(SCM, SCM, SCM);
