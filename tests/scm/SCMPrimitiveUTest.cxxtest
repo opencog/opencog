@@ -89,7 +89,7 @@ class MyExampleClass
 			return hlist;
 		}
 
-		// Throw excpetion on purpose
+		// Throw exception on purpose
 		Handle my_other_func(Handle h)
 		{
 			throw (RuntimeException(TRACE_INFO, "Don't panic!! Threw exception %d on purpose.", id));

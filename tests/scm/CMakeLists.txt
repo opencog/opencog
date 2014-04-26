@@ -20,4 +20,4 @@ ADD_CXXTEST(BasicSCMUTest)
 ADD_CXXTEST(SCMPrimitiveUTest)
 ADD_CXXTEST(MultiAtomSpaceUTest)
 ADD_CXXTEST(SCMUtilsUTest)
-
+ADD_CXXTEST(SCMExecutionUTest)
